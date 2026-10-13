@@ -131,6 +131,21 @@ Opened at `ea7dd1c07e` **before** the edit; L1 = the deploy, L2 = AC1+AC2. The p
 `.open_deploys/` across all **24** live worktrees and found no entry owning the bloomberg auth surface (the 3 entries
 matching `bloomberg|bbg|BBGTML` are a 2026-07 completion-timestamp index and two unrelated projects' proofs).
 
+## Push state -- MEASURED, not defaulted
+
+`git ls-remote origin box/sitez` read `2d57c41ac0b01dc759ea3186777daa2181b8c134` at 21:28Z. Containment tested against
+that hash, not against the local `origin/box/sitez` tracking ref, with a positive control (the remote tip is its own
+ancestor: yes) and a negative control (local HEAD is not on origin: correct):
+
+| commit | what | push state |
+|---|---|---|
+| `f6cc68d6bf` | **the deploy** | **on origin @`2d57c41ac0`** |
+| `ee4040615e` | surprise rows Z-S15..S17 | **on origin @`2d57c41ac0`** |
+| `4bba8e8432` | ledger close + this report | **LOCAL @`4bba8e8432`** -- pending this box's scheduled `box-sync` |
+
+This seat does not push a shared branch (`org/XXX.md` SHARED-BRANCH LAW). The deploy itself is already on origin, and the
+file on disk is the deploy regardless.
+
 ## Not done, and why
 
 - **The `<status>` flip of TO-Z6-R2 is the issuer's**, per the order's report clause. Left alone.
