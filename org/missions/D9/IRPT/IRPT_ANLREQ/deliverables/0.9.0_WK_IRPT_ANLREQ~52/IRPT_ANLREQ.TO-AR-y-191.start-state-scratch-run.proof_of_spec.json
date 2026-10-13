@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-191",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-191.start-state-scratch-run.md",
+    "group": "OTHER",
+    "vintage_commit": "2da5c7b2c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R19_Y.md",
+    "vintage_commit": "2da5c7b2c2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-191.start-state-scratch-run.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~52",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r19/START_STATE_SCRATCH_RUN.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the start-state record committed on the worker branch wk-IRPT_ANLREQ-52 only; the door and re-open cases were RUN in process in a scratch tree outside the product tree; nothing uploaded, applied, invoked, sent or pushed",
+      "artifact_covered_by": [
+        "AR191-y-AC1",
+        "AR191-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r19/scratch_tools/start_state_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the in-process runner that produced the record, with build_tree.py and build_mirror.py (the git-show staging of the 88 pinned members) and compare_r18.py and door_unstaged.py (the round-18 comparison and the closure check); run under python 3.12.10 from the scratch tree at SCRATCH_ROOT; no network, no AWS, no deploy",
+      "artifact_covered_by": [
+        "AR191-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended on the worker branch; no existing row edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR191-y-AC1",
+      "criterion_verbatim": "the record names the pins, runs the door on the four sheets and a re-open case, and each case carries an outcome and its evidence.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r19/ar19_checks.py y191-scratch --root C:/dev/wk-irpt-anlreq-52",
+      "output_evidence": "door cases 16, re-open cases 36\nY191-SCRATCH-OK\n(rc=0)",
+      "denominator": "door cases 16 of 16 carry an outcome and evidence, and the four required sheets are all named (4 of 4); re-open cases 36 of 36 carry an outcome and evidence; 2 of 2 required pins present (uploads.py, template_reader.py); the record names 4 of 4 required members (scratch_tree, claim, not_read, what_a_person_sees)",
+      "expect": "Y191-SCRATCH-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR191-y-AC2J",
+      "criterion_verbatim": "the door was RUN on the pinned members rather than the head's, the scratch tree holds the map's pins for the members it imports, and any INFERRED case says why.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r19/START_STATE_SCRATCH_RUN.json (pins, door_closure, door_cases, reopen_cases, inferred, not_read); the scratch tools r19/scratch_tools/build_tree.py and build_mirror.py (the staging at the map's pins)",
+      "output_evidence": "88 of 88 staged members sha256-match lambda-source-map.json at their pins (controls: uploads_pinned_matches_map true, reader_pinned_matches_map true); the door ran on uploads.py f09b802cdc and template_reader.py 3f29017cfc (pinned file sha256 47f89e0b46... and 76795b7531...), with the HEAD files only in the moved-pair re-open; 27 of 27 door-closure members carry a pin; 0 door or re-open cases INFERRED; 1 inferred item (the deployed bytes, with its reason)",
+      "denominator": "27 of 27 door-closure members pinned; 88 of 88 staged members sha256-matched; 1 of 1 inferred item carries a reason; 0 of 52 door and re-open cases INFERRED",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO, never by the worker"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the pins entry for template_reader.py deleted from a copy of the record under the scratch mutant_root, with the same path shape; the y191-scratch check run against that root",
+      "expected": "Y191-SCRATCH-FAIL (rc=1) with a FAIL line naming template_reader.py",
+      "observed": "FAIL: pins lacks template_reader.py / Y191-SCRATCH-FAIL / mutant rc=1; the real worktree printed Y191-SCRATCH-OK (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the y191-scratch check against the real worktree, output redirected to two files and compared with cmp",
+      "observed": "run1 and run2 identical (cmp printed IDENTICAL); both rc=0; both print Y191-SCRATCH-OK",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W52-S36: the pinned door answers NORMALIZED with total 600 on total_row_sheet, the file's TOTAL row counted as a holding (RUN in the scratch tree); OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2",
+    "IRPT_ANLREQ-D2-W52-S37: the planned two-file release move leaves four door-closure members (ids, loaders, repository, served) differing between their pins and HEAD; OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the deployed Lambda's bytes and package",
+      "reason": "no host call and no live object read (the order makes no AWS call); the package zip was not built or hashed; the map's artifact_sha256 is taken as the map states it and is recorded as the one inferred item"
+    },
+    {
+      "item": "the HTTP route upload_entry.handle and the resident's installed copy, the queue between the runtimes, and the request_resolution path",
+      "reason": "not run or not read: the door was run as UploadService.create, as the round-18 harness did; the resident and the queue are outside the order's start-state run"
+    },
+    {
+      "item": "live provider, live AWS, any real upload or stored row",
+      "reason": "no network, no AWS call, no deploy, no upload; resolve_template is mocked with the offline receipt"
+    },
+    {
+      "item": "the judgment criterion AR191-y-AC2J",
+      "reason": "graded at L9 by 3.0.0_SA_CVO; the worker records the output and gives no verdict"
+    },
+    {
+      "item": "whether S36 and S37 are live client exposures or whether the four further members move with the pair",
+      "reason": "form only: the rows are filed with their grounding; significance is not judged by the worker, and the release census (AR-y-192) owns the move"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python 3.12.10 (the Lambda's runtime)",
+      "invocation": "C:/Users/Test/AppData/Local/Programs/Python/Python312/python.exe org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r19/scratch_tools/start_state_run.py SCRATCH_ROOT C:/dev/wk-irpt-anlreq-52 <record path>",
+      "result": "door cases 16, re-open cases 36; rc=0; the record written to r19/START_STATE_SCRATCH_RUN.json"
+    },
+    {
+      "tool": "python (default 3.14.7) -- the y191-scratch check",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r19/ar19_checks.py y191-scratch --root C:/dev/wk-irpt-anlreq-52",
+      "result": "door cases 16, re-open cases 36; Y191-SCRATCH-OK (rc=0)"
+    },
+    {
+      "tool": "python 3.12.10 -- compare_r18.py",
+      "invocation": "python compare_r18.py <record> <round-18 MIXED_VERSION_TRACE_THIRD_READER.json>",
+      "result": "44 of 44 comparable cases share the round-18 leading outcome; 4 cases not run (writer stored nothing)"
+    }
+  ]
+}
