@@ -1,0 +1,158 @@
+{
+  "graph": {
+    "provenance": "org/modules/graph/graph-call-manifest.yaml (QUERY only, never rebuilt). Served by org/modules/graph/pipeline_cli.py via .tools/comp-pipescript. Calls below; comp-platinum reverse for the TO's named control. The graph DB built vintage was not printed by these calls and is not established.",
+    "age": "manifest file mtime 2026-10-13T15:47:58 (checkout time of this worktree, HEAD 04b9a0bbed); DB built vintage not established",
+    "calls": [
+      {"call": "comp-pipescript io B_00 --pipeline cot", "output_rows": "13 READS, incl. S3_CANONICAL_PRICES_KEY silver/prices/canonical_prices.parquet <- (external/silver); 3 WRITES. The store has no writer edge shown (external/silver)."},
+      {"call": "comp-pipescript io B_01 --pipeline cot", "output_rows": "12 READS, incl. silver/prices/canonical_prices.parquet <- (external/silver); HOLDINGS_LOTS_PREFIX UNRESOLVED-PREFIX (the silver/prices/ listing is in the script, not resolved by the graph)"},
+      {"call": "comp-pipescript io A_03 --pipeline cot", "output_rows": "8 READS, incl. silver/prices/canonical_prices.parquet <- (external/silver); 3 WRITES"},
+      {"call": "comp-pipescript consumers B_00 --pipeline cot", "output_rows": "5 downstream scripts (A_05, B_02, B_03, C_01, D_04) via gold/canonical/holdings/{*}; the edge is the canonical holdings artifact, not the price store"},
+      {"call": "comp-pipescript consumers B_02 --pipeline cot", "output_rows": "1 downstream script (B_03) via gold/canonical/lots_realized and lots_unrealized"},
+      {"call": "comp-pipescript consumers B_01 --pipeline cot", "output_rows": "0 (no downstream pipeline consumers)"},
+      {"call": "comp-pipescript consumers A_03 --pipeline cot", "output_rows": "0 (no downstream pipeline consumers)"},
+      {"call": "comp-pipescript consumers build_canonical_prices_v2 --pipeline cot (and the .py form)", "output_rows": "rc=1 Unknown script; the .py suffix is refused too. Not answered."},
+      {"call": "comp-platinum reverse s3://opal-data-cot/silver/prices/canonical_prices.parquet --firm cot", "output_rows": "PRODUCER empty; SERVED VIA a platinum URL (reconstructed); CONSUMED BY none. The reverse lookup covers portal reads of platinum keys only (already recorded as ADVI_COTBKF-D2-W158-S1)."}
+    ]
+  },
+  "readers": [
+    {
+      "path": "data/cot/scripts/gold/build_canonical_prices_v2.py",
+      "line": 174,
+      "kind": "writer_only",
+      "what_it_does_with_two_rows": "n/a (writer). OUTPUT_KEY = _legacy_key('silver-canonical-prices') at :174; the write at :897-907. Its own reads are silver/historical_prices (:566-575) and config/ticker_lookup.json (:577-590), not this store. Its ticker-keyed join at :825 (spine.merge(yahoo_join, on=['ticker','date'])) is the positive control, not a store read.",
+      "scco_takes": "n/a",
+      "aph_takes": "n/a"
+    },
+    {
+      "path": "data/assets/scripts/analysis/commonwealth_price_census.py",
+      "line": 57,
+      "kind": "keyed_ticker_only",
+      "what_it_does_with_two_rows": "STORES[0] (:57-58) declares key_cols={'ticker': 'ticker'} and no asset_name. read_store (:450-489) builds kind 'ticker' rows (:463-472). _clean (:411-420) keeps positive prices, then returns only (kind, key, day, source) and drops_duplicates, so the price is discarded. build_views (:509) keeps presence per ticker-day per source label. Two rows for one ticker and day collapse to one presence record per source label; no first, last or mean of price is taken.",
+      "scco_takes": "neither row's price: SCCO on a day becomes one presence record per source label (the bond row and the equity row collapse on (ticker, day, source))",
+      "aph_takes": "neither row's price: APH on 2026-04-14 becomes presence records only (CL A and NEW CL A collapse on (ticker, day, source))"
+    },
+    {
+      "path": "data/assets/scripts/silver/commonwealth_price_basis_census.py",
+      "line": 364,
+      "kind": "keyed_ticker_only",
+      "what_it_does_with_two_rows": "read_store (:159-166) reads date, ticker, price, source. :364 sets nk = ticker; :365 store_norm is the ticker set with price > 0; :368 yf_rows = source == yahoo_finance; :384 ser = groupby(nk) then groupby(day) then median of price; :385 li_n counts linear_interpolation rows per ticker. Two yahoo-labelled rows for one ticker and day are MEDIANED (for two rows the median is their mean).",
+      "scco_takes": "the median of the SCCO yahoo rows per day; the bond row sits at the equity price on 1027 dates so the median equals that price on those dates, if both rows carry the yahoo label (the label of the bond row is not established)",
+      "aph_takes": "the mean of the two APH rows on 2026-04-14 (CL A and NEW CL A differ that day); equal on the other 69 dates, if both carry the yahoo label"
+    },
+    {
+      "path": "data/assets/scripts/silver/commonwealth_bond_custodian_price.py",
+      "line": 125,
+      "kind": "keyed_ticker_only",
+      "what_it_does_with_two_rows": "read_cot_stores (:115-160) reads the store (:120-123) and, for each of ticker, cusip, security_id present in the file (:125), selects rows whose value (uppercased, stripped) is one of three bond CUSIP strings (:126, CUSIPS at :48). No asset_name is read. Matching rows are appended as notes; no price join.",
+      "scco_takes": "neither: the SCCO ticker string is not a bond CUSIP, so no SCCO row is selected",
+      "aph_takes": "neither: the APH ticker string is not a bond CUSIP, so no APH row is selected"
+    },
+    {
+      "path": "data/assets/scripts/silver/commonwealth_bd_txn_provenance.py",
+      "line": 38,
+      "kind": "keyed_ticker_only",
+      "what_it_does_with_two_rows": "STORE (:38) is the store key. The body is read at :84-88 and parsed for source, cusip, ticker (COLS :46). Selection at :117-121: the source label equals the provenance LABEL, OR the ticker value is in the bond CUSIP list (cusip column test only if present; the store has no cusip column). No asset_name. Matching rows are counted for the provenance record; no price is taken.",
+      "scco_takes": "selected only through the source-label test, not by ticker (the ticker test selects CUSIP strings only); whether the SCCO rows carry the label is not established",
+      "aph_takes": "selected only through the source-label test; whether the APH rows carry the label is not established"
+    },
+    {
+      "path": "data/cot/scripts/gold/B_00.canonical_holdings.py",
+      "line": 445,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "load_canonical_prices (:445-454) reads the store (:447) and renames aliases on asset_name. price_holdings (:704-713) joins on asset_name: drop_duplicates('asset_name') keeps the first row per asset_name for the date (:710). Key is asset_name alone, not ticker. The hybrid carry-forward at :1381 also drops duplicates on asset_name.",
+      "scco_takes": "the first SCCO row under the holding's own asset_name (equity name gets the equity row; the bond name gets only the bond row); no ticker key",
+      "aph_takes": "the first row under each APH asset_name (CL A and NEW CL A are separate keys)"
+    },
+    {
+      "path": "data/cot/scripts/gold/B_01.holdings_lots.py",
+      "line": 338,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "load_latest_prices (:316) lists silver/prices/ (:331) and reads the canonical key (:338, read at :348-352). latest = sort by date desc, drop_duplicates(subset=['asset_name'], keep='first') (:357). The store's ticker is then read and mapped per asset_name, keep='last' (:366-369), to override the ticker. Key is asset_name alone.",
+      "scco_takes": "the most recent SCCO row under each asset_name (two asset_names kept apart); the store ticker is used for the override",
+      "aph_takes": "the most recent row under each APH asset_name (CL A and NEW CL A kept apart)"
+    },
+    {
+      "path": "data/cot/scripts/gold/B_02.canonical_lots.py",
+      "line": 681,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "prices_df read at :681 (aliases on asset_name at :683). Per date, prices_day = rows of that date (:577); build_unrealized_lots (:369-376, :391) builds price_lookup = prices_day.drop_duplicates('asset_name') indexed by asset_name. Key is asset_name alone.",
+      "scco_takes": "the first SCCO row of the date under each asset_name",
+      "aph_takes": "the first row of the date under each APH asset_name"
+    },
+    {
+      "path": "data/cot/scripts/gold/A_03.positions_cube.py",
+      "line": 677,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "prices read at :677; latest_price = sort_values('date').drop_duplicates('asset_name', keep='last') indexed by asset_name (:679-682). Mapped to positions by asset_name at :737 and :753. Key is asset_name alone.",
+      "scco_takes": "the latest-dated SCCO row under each asset_name",
+      "aph_takes": "the latest-dated row under each APH asset_name"
+    },
+    {
+      "path": "data/cot/scripts/gold/E_00.decompose_aua_gap.py",
+      "line": 109,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "prices_key (:109) read at :125; prices_day = rows of the target date (closest prior date if absent); join at :150-155: prices_day[['asset_name','price','source']].drop_duplicates(subset=['asset_name']) merged on asset_name. Key is asset_name alone.",
+      "scco_takes": "the first SCCO row under each asset_name on the target day",
+      "aph_takes": "the first row under each APH asset_name on the target day"
+    },
+    {
+      "path": "data/cot/scripts/gold/E_01.account_quality_tiers.py",
+      "line": 139,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "read at :139; prices_day = target-date rows, drop_duplicates('asset_name') keeps the first (:152); cube.merge(prices_day, on='asset_name') at :157. Key is asset_name alone.",
+      "scco_takes": "the first SCCO row under each asset_name on the target day",
+      "aph_takes": "the first row under each APH asset_name on the target day"
+    },
+    {
+      "path": "data/cot/scripts/gold/diag_gold_silver_recon.py",
+      "line": 89,
+      "kind": "keyed_other",
+      "what_it_does_with_two_rows": "check_canonical_prices (:87-100): silver_key :89; _count_and_sum :90 returns len(df) only (no column, no key). A row count, not a join.",
+      "scco_takes": "n/a (row count only)",
+      "aph_takes": "n/a (row count only)"
+    }
+  ],
+  "searches": [
+    {"term": "silver/prices/canonical_prices", "scope": "repo, corpus=all, --all (comp-find)", "files_scanned": 77422, "hits": 1204},
+    {"term": "canonical_prices", "scope": "repo, corpus=all, --files --all (comp-find)", "files_scanned": 77422, "hits": 9557},
+    {"term": "silver/prices/canonical_prices", "scope": "data/cot data/assets data/analysis data/mdpf lib (comp-find, pathspec)", "files_scanned": 1528, "hits": 34},
+    {"term": "cottonwood-silver-canonical-prices (the legacy alias of the cot store)", "scope": "repo, corpus=all, --all (comp-find)", "files_scanned": 77422, "hits": 268},
+    {"term": "cottonwood-silver-canonical-prices", "scope": "lib .tools portal infra data (comp-find, pathspec)", "files_scanned": 12889, "hits": 4},
+    {"term": "canonical_prices (.py files under data/, native Grep, files_with_matches)", "scope": "data/ *.py (61 files listed)", "files_scanned": null, "hits": 61},
+    {"term": "'ticker', 'date' (positive-control pattern)", "scope": "data/cot/scripts/gold (comp-find)", "files_scanned": 112, "hits": 2},
+    {"term": "'ticker' (quoted)", "scope": "data/assets/scripts/analysis data/assets/scripts/silver (comp-find)", "files_scanned": 168, "hits": 3},
+    {"term": "row-level greps of store-key constants and reads (S3_CANONICAL_PRICES_KEY, CANONICAL_PRICES_KEY, canonical_key, prices_key, silver_key)", "scope": "data/cot (native Grep, path-scoped); data/assets/scripts (native Grep)", "files_scanned": null, "hits": null}
+  ],
+  "positive_control": {
+    "reader": "data/cot/scripts/gold/build_canonical_prices_v2.py:825 spine.merge(yahoo_join, on=['ticker','date']) -- a ticker-keyed join, found by the same comp-find family (pattern \"'ticker', 'date'\" in data/cot/scripts/gold, 2 hits across 112 files)",
+    "found": true
+  },
+  "ticker_only_readers": 4,
+  "verdict_fact": "ticker_only_readers_found",
+  "keyed_fix_would_touch": [
+    "data/assets/scripts/analysis/commonwealth_price_census.py:57-58 (STORES[0] key_cols) and :411-420 (_clean keeps kind, key, day, source only), :450-472 (read_store kind 'ticker'), :509 (build_views)",
+    "data/assets/scripts/silver/commonwealth_price_basis_census.py:159-166 (read_store columns), :364-365 (nk = ticker), :368 (yahoo rows), :384-385 (ticker-day median and label counts)",
+    "data/assets/scripts/silver/commonwealth_bond_custodian_price.py:120-130 (ticker selection against the CUSIP list)",
+    "data/assets/scripts/silver/commonwealth_bd_txn_provenance.py:38, :84-88, :117-121 (ticker membership in the CUSIP list; source-label test)",
+    "Description only, not made: a keyed fix would key these four readers on (ticker, asset_name). The seven asset_name-keyed readers (B_00, B_01, B_02, A_03, E_00, E_01 and the diag count) do not key on ticker and are not changed by a pair key. The builder is a writer and is not changed."
+  ],
+  "header": {
+    "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+    "old_sentence": "NO S3 WRITE anywhere in this file; the mint is CB-al-2's, on the applier, through emit_day(upload=True).",
+    "new_sentence": "The default build writes locally only and uploads nothing; --apply is a guarded mint of those local days via emit_day(upload=True) (and, for a stamped manifest, the sidecar and method row), refused by check_pair_files (:854-861), require_pinned_split_store (:459-463) and the bond count in apply_days (:879).",
+    "lines_changed": 2,
+    "other_no_s3_write_lines": [
+      {"line": 702, "kind": "generated string: the build writes this text into account_return_daily_build.md (not a docstring); reported, not edited"},
+      {"line": 1553, "kind": "argparse description text of main(); reported, not edited"}
+    ]
+  },
+  "headline": "The cot price store (opal-data-cot silver/prices/canonical_prices.parquet) has FOUR production readers keyed by ticker alone (commonwealth_price_census.py:57, commonwealth_price_basis_census.py:364, commonwealth_bond_custodian_price.py:125, commonwealth_bd_txn_provenance.py:117-121); the ruling's expected zero is not met, so W158-S2 does not disarm on a zero read. The named readers (the builder, commonwealth_account_return_daily.py) do not read this key: the builder writes it and the ARD adapter reads the minted commonwealth/cottonwood tables only (:221-226). Six gold readers key by asset_name alone (not ticker) and one diag counts rows with no key (the record's keyed_other kind covers all seven non-ticker readers); the store also holds two asset_names under one ticker (ADVI_COTBKF-D2-W159-S1), which the asset_name readers keep apart. Header fixed: lines 9-10 of the adapter docstring.",
+  "not_established": [
+    "the source label of the SCCO bond row and the APH rows (no store read in this cell; the one optional get-object was not made)",
+    "whether any of the four ticker-keyed readers runs on a schedule in production (not established from code alone)",
+    "the run-time match count of the bond custodian and provenance CUSIP tests (established by string logic only, not run)",
+    "the graph DB built vintage (only the manifest checkout mtime was printed)",
+    "the bucket of the data/inf and data/black_diamond readers of the same key string (other firms' trees; read by path and file-level default only, not opened; no firm data was read)",
+    "whether any reader outside data/ and lib/ (infra lambda sources, portal) reads the cot store: infra/aws/lambda/bd-pipeline/bd-price-update names a silver/prices/canonical_prices.parquet of its own pipeline (line 10); its bucket was not verified and it is not counted as a cot-store reader"
+  ]
+}
