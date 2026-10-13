@@ -1,0 +1,167 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-21.inflection-fence-admit-apply",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-21.inflection-fence-admit-apply.md",
+  "group": "OTHER",
+  "vintage_commit": "d0d7d94641"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FBL",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "d0d7d94641",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-21.inflection-fence-admit-apply.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3:bucket-policy/opal-data-inflection",
+   "kind": "aws_resource",
+   "commit_or_etag": "4 statements, put 2026-10-13T01:18:05Z",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply of the saved plan 01:17:20Z-01:18:05Z rc=0, 0 added 1 changed 0 destroyed; live policy carries DenyForeignFirmPrincipals (one added exception entry, role/irpt-performance-adapter-role) plus the three DenyScopedExemption1 statements",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/logic/registry/exemptions.json",
+   "kind": "config_data",
+   "commit_or_etag": "61cc536c29",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the registry row (merged on box/dell1 by the issuer), an ancestor of the laptop HEAD at the act; lib/opal_naming.py validate rc=0",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence_f21/PRIOR_bucket_policy_opal-data-inflection.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the rollback document, read before the write",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence_f21/POST_bucket_policy_opal-data-inflection.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the live policy after the apply",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence_f21/step5_AC1_AC2_AC3.txt",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1 as written and corrected, AC2, AC3 outputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261013T0111Z_advi-firmbkts-fb-f-21-inflection-fence-admit-perf-adapter-laptop-20261013_deploy_completion.md",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "change-management entry opened before the write, closed 4 of 4 legs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd infra/aws/terraform/shared-infra && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target='aws_s3_bucket_policy.lgic_firm[\"opal-data-inflection\"]' 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "method": "command",
+   "invocation": "cd infra/aws/terraform/shared-infra && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target='aws_s3_bucket_policy.lgic_firm[\"opal-data-inflection\"]' 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "expect": "^No changes\\.",
+   "output_evidence": "AC1 as written (target key opal-data-inflection), printed after the apply:\nNo changes. Your infrastructure matches the configuration.\nVACUOUS AS WRITTEN: that key matches no state instance (the real key is inflection), so the same command also read 'No changes' BEFORE the apply (01:12:40Z). The corrected target aws_s3_bucket_policy.lgic_firm[\"inflection\"] read 'Plan: 0 to add, 1 to change, 0 to destroy' before the apply (01:14:43Z) and 'No changes. Your infrastructure matches the configuration.' after it (01:21Z). Row ADVI_FIRMBKTS-S22.",
+   "denominator": "1 scoped plan per form; 5 resource_changes in the pre-apply plan, 1 non-no-op",
+   "status": "PASS",
+   "status_reason": "output matches the literal expect; the literal invocation cannot discriminate (names no instance), so the corrected-key run carries the meaning: 1 to change before, No changes after"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "timeout 60 aws s3api get-bucket-policy --bucket opal-data-inflection --query Policy --output text | grep -o \"DenyScopedExemption[0-9]*[A-Za-z]*\" | sort -u | paste -sd\" \" -",
+   "method": "command",
+   "invocation": "timeout 60 aws s3api get-bucket-policy --bucket opal-data-inflection --query Policy --output text | grep -o \"DenyScopedExemption[0-9]*[A-Za-z]*\" | sort -u | paste -sd\" \" -",
+   "expect": "^DenyScopedExemption1AnyOtherAction DenyScopedExemption1ListingOutsidePrefix DenyScopedExemption1ObjectsOutsidePrefix$",
+   "output_evidence": "live bucket policy of opal-data-inflection after the apply, the DenyScopedExemption sids, printed:\nDenyScopedExemption1AnyOtherAction DenyScopedExemption1ListingOutsidePrefix DenyScopedExemption1ObjectsOutsidePrefix",
+   "denominator": "4 statements in the live policy, 3 DenyScopedExemption sids",
+   "status": "PASS",
+   "status_reason": "output matches the expected line"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "timeout 90 aws logs filter-log-events --log-group-name /aws/lambda/irpt-performance-adapter --region us-east-1 --start-time $(( ($(date +%s) - 600) * 1000 )) --filter-pattern '\"explicit deny\"' --query \"length(events)\" --output text",
+   "method": "command",
+   "invocation": "timeout 90 aws logs filter-log-events --log-group-name /aws/lambda/irpt-performance-adapter --region us-east-1 --start-time $(( ($(date +%s) - 600) * 1000 )) --filter-pattern '\"explicit deny\"' --query \"length(events)\" --output text",
+   "expect": "^0$",
+   "output_evidence": "count of explicit deny lines in /aws/lambda/irpt-performance-adapter in the last ten minutes at 01:21:24Z, printed:\n0\nNOT TRAFFIC-BACKED: the same filter finds 6 explicit-deny lines between 00:04:48Z and 00:27:00Z (before the apply), and the adapter had 0 invocations at all between the apply (01:18:05Z) and 01:23Z.",
+   "denominator": "0 invocations after the apply; 6 control denies before it",
+   "status": "PASS",
+   "status_reason": "output matches the expected line; as the order itself says, a zero is only as strong as the traffic, and step 5(c) did not run (no request reached the adapter)"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not measured: one apply",
+   "observed": "not measured",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "step 5(c) one Inflection holdings-performance request answering 2xx",
+   "reason": "NOT RUN: no request reached irpt-performance-adapter after the apply (0 invocations 01:18:05Z-01:23Z) and no seat was asked to issue one; the order allows 'say so'. Evidence in its place: the simulate WITH the live resource policy (adapter allowed on the prefix, explicitDeny elsewhere and for PutObject, a foreign principal explicitDeny). The real read is owed to the next Inflection performance request."
+  },
+  {
+   "item": "step 5(d) the explicit-deny lines stop",
+   "reason": "0 lines after the apply, but not traffic-backed (no invocation after the apply); 6 lines 00:04:48Z-00:27:00Z before it."
+  },
+  {
+   "item": "on-list control principal irpt-holdings-role ListBucket",
+   "reason": "reads implicitDeny with the live resource policy (admitted by the fence, not explicitly denied); its identity side was not checked, so it is not an 'allowed' control."
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-S22: the order's -target key lgic_firm[opal-data-inflection] matches no instance (real key inflection), so AC1 as written is vacuous; the plan diff also carries one exception-list entry on DenyForeignFirmPrincipals"
+ ],
+ "session_log": "org/critical_paths/change_management/20261013T0111Z_advi-firmbkts-fb-f-21-inflection-fence-admit-perf-adapter-laptop-20261013_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "lib/opal_naming.py validate",
+   "invocation": "python lib/opal_naming.py validate",
+   "result": "rc=0, 54 system rows, 14 scope rows, 0 warnings"
+  },
+  {
+   "tool": "aws iam simulate-principal-policy",
+   "invocation": "identity side without resource policy, then with --resource-policy file://<live policy>, one resource per call, s3:prefix context entries",
+   "result": "identity: ListBucket on the prefix and GetObject allowed; with the policy: allowed on the prefix, explicitDeny on another prefix, PutObject, outside-prefix GetObject and a foreign principal"
+  },
+  {
+   "tool": "terraform plan -out / .tools/safe-apply.sh",
+   "invocation": "shared-infra, -target=aws_s3_bucket_policy.lgic_firm[inflection]",
+   "result": "0 add 1 change 0 destroy; applied 01:17:20Z-01:18:05Z rc=0"
+  }
+ ]
+}
