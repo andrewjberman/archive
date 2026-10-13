@@ -57,9 +57,16 @@ to the one at `b2538131ea` (`20bc5f08d5`), so "theirs" carries those two changes
 `merge-file` returned rc=0 with **0** conflict markers on all three.
 
 **And the result was measured against A1's own test before being committed:** each package dir
-differs from `base_sha` by **exactly one file**, `mirror_conversion.py`, by **+73 / -9** lines, and
-every one of those lines is in the set OG-fd-1 and OG-fd-2 added or removed in the source --
-**stray lines 0**. The LGIC naming gate then read **PASS, 0 graded** on all three commits, which is
+differs from `base_sha` by **exactly one file**, `mirror_conversion.py`, by **+85 / -9** lines
+(`git diff --numstat`), and every added or removed line is in the set OG-fd-1 and OG-fd-2 moved in
+the source -- **stray lines 0**.
+
+**Two grains, reconciled, because the first version of this line printed the wrong one** (corrected
+on the CTO's record note in A2): the DIFF reads **+85 / -9**, while AC1's stray-line test works on
+**73** distinct added lines because its `lines()` helper strips each line and puts it in a set. The
+arithmetic closes exactly: 85 raw = 73 distinct non-empty + 6 blank + 6 duplicate. Both numbers are
+true of the same change; +85 / -9 is the one to quote for what the file does, and 73 is only the
+grader's internal denominator. The LGIC naming gate then read **PASS, 0 graded** on all three commits, which is
 the proposition route (a) rests on: the drain hunks carry no address line.
 
 **THE EXPECTED OUTCOME, READ FROM THE PRODUCER'S OWN RULE, BOTH BRANCHES.** AC2 grades on the
@@ -152,7 +159,7 @@ is in this build:
 | `opal_strategy_matcher.py` | 91 | **OUT** -- removed from the package dir again; never was in the deployed package |
 | `rebalancer_conversion.py` | 77 | **OUT** -- package copy left at `base_sha` |
 | `silver_registry.py` | 2 | **OUT** |
-| `mirror_conversion.py` | +73 / -9 | **IN** -- and only the OG-fd-1 + OG-fd-2 lines |
+| `mirror_conversion.py` | +85 / -9 | **IN** -- and only the OG-fd-1 + OG-fd-2 lines |
 
 The `lambda-source-map.json` `files[]` row that the full build required for
 `opal_strategy_matcher.py` is **reverted to its `base_sha` bytes**, so the source map and the

@@ -1,0 +1,23 @@
+# AC2's failing limb, localised: the 2 def=0 entries
+opal_describe  definition=app/integrations/opal_discover/integration.py:761  file_lines=825  window=[756..766]  tool_in_window=False
+                 actual lines containing the name: [103, 679, 819, 822, 825]
+                 shift from cited line to first actual: -658
+opal_discover  definition=app/integrations/opal_discover/integration.py:751  file_lines=825  window=[746..756]  tool_in_window=False
+                 actual lines containing the name: [1, 83, 96, 103, 809, 815, 825]
+                 shift from cited line to first actual: -750
+
+--- the shipped file's own delta (base -> cut):
+git diff --numstat 64b3e54658 ad2acc0a93 -- the discover integration:
+57	0	infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py
+
+--- would the BASE have passed this limb? (the base catalog has NO tool_index at all)
+Traceback (most recent call last):
+  File [35m"<stdin>"[0m, line [35m3[0m, in [35m<module>[0m
+[1;35mFileNotFoundError[0m: [35m[Errno 2] No such file or directory: '/tmp/mx-r11-basetree/infra/aws/ec2/opal-gateway\\app/refs/DATA_CATALOG.yaml'[0m
+# CLINCHING TEST: is each citation stale by exactly the +57 the same commit inserted?
+shipped integration.py: 825 lines (base: see below); the commit inserted +57, deleted 0
+opal_describe  cited=761 hit=False | cited+57=818 hit=True
+opal_discover  cited=751 hit=False | cited+57=808 hit=True
+Traceback (most recent call last):
+  File [35m"<stdin>"[0m, line [35m23[0m, in [35m<module>[0m
+[1;35mFileNotFoundError[0m: [35m[Errno 2] No such file or directory: '/tmp/mx-r11-basetree/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml'[0m
