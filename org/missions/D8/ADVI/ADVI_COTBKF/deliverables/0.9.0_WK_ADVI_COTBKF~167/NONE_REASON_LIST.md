@@ -5,7 +5,7 @@ Written and committed BEFORE any classification read. It is the closed list for 
 ## Population and columns
 
 - File: `org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/REVERSE_MATCH.csv` (header `account_key,predecessor_key,match_basis,reason`, 769 rows, sha256 20fb38333542b23beab5a61316cf9acdc0119dbf0be85b55fe150ec191c09a64).
-- Population to classify: the rows whose `reason` is exactly `none`. The record's 300 `none` rows are the rows with `predecessor_key` = `none`; of these, 273 carry reason `none` and 27 carry `AMBIGUOUS` (left unchanged).
+- Population to classify: the rows whose `predecessor_key` is `none` AND whose `reason` is `none`. That is 273 rows. CORRECTION (before any classification read; surprise row ADVI_COTBKF-D2-W167-S1): a `reason` = `none` filter alone matches 730 rows, 457 of them `crosswalk_matched` rows that stay untouched. The 300 `predecessor_key` = `none` rows hold 273 with reason `none` and 27 with reason `AMBIGUOUS` (the 27 stay unchanged).
 - Keys reused as they stand: `account_key`, `predecessor_key`, `match_basis`, `reason`. No re-derivation of the 769.
 - Commonwealth-side keys are the salted tokens the record uses. A candidate Commonwealth account (test 3) is counted in that same token space. If the salt is unavailable to this worker, the candidate counts are recorded `not_established`.
 
