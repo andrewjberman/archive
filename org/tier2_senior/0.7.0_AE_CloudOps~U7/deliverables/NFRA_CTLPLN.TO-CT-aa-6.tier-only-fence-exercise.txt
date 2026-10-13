@@ -1,0 +1,25 @@
+NFRA_CTLPLN TO-CT-aa-6 tier-only fence exercise, 2026-10-13. Seat 0.7.0_AE_CloudOps~U7. No token, cookie or identity value appears here: status codes, hash prefixes, counts and the four non-secret claim values the fence reads.
+Pin cc09499bd5. Function opal-portal-data-proxy. CodeSha256 before q4iLGld/nR2jOOaL2JJ6frlUSNNEgJnV2I8oyIQ6z/Y= after lpxgJxwrpdy7vsEbw5/dt4xtoclkUMe7F+ODnLa3Lok=. Apply time (function LastModified) 2026-10-13T21:08:19Z. Zip members (3): lambda_function.py aa82b86c..., session_tracker.py 00f8c6a3..., firm_page_access.py 7365de94..., each equal to the pair; the DEPLOYED package was downloaded after the apply and its 3 members equal the pin blobs both directions (missing [], extra []). Plan 0 add / 1 change / 0 destroy on aws_lambda_function.portal_data_proxy only; re-plan after the apply: No changes.
+
+PRE-1 (opal-users-v2, 56 PROFILE rows, counts only): (a) userType Dev 6; (b) of those tier internal 3; (c) tier other than internal or absent 3; (d) Dev rows on a firm other than the internal firm 0. PRE-1 passes. P0: the deployed package's 3 members equalled the fourth pair's pin (lambda_function.py 9cbf41a0..., session_tracker.py 00f8c6a3..., firm_page_access.py 7365de94...) and the live CodeSha256 was q4iLGld/... before any upload.
+
+CALLERS. Internal / Dev: the UI walker row AS IT IS (userType Dev, no row edited), armed and disarmed by ui_walker_account.py, real /auth/login; this is the order's "dell walker account" (the one walker mechanism of the earlier pairs), so R1 and R3 are ONE login and ONE read, reported on both lines. Partner: ONE synthetic row (firm 49financial, tier advisor), created and deleted inside this ledger entry, token signed in memory, 600 s, never printed. It is NOT the existing seed row the pair names: the walker tool takes no second account id, so the synthetic-row precedent of the earlier pairs (CT-w-10 pair line 44, CT-aa-4 option a) was used; the order's bound on editing an existing user row is therefore not exercised. Host https://opalinvest.dev. Route: GET /v1/health/data-availability (class ii).
+
+READS AFTER THE APPLY (UTC):
+2026-10-13T21:09:42Z R2 class-ii partner (synthetic row) GET /v1/health/data-availability code=403 body_bytes=50 body_sha256=b39d1c8c735c6beb apigw_requestid=present message='forbidden: Opal-internal readers only' keys=['error']
+2026-10-13T21:10:25Z WALKER-CLAIMS token claim values the fence reads: {"firmId": "opal-capital", "role": "admin", "tier": "internal", "userType": "Dev"}
+2026-10-13T21:10:26Z R1/R3 AFTER the apply class-ii walker row as it is GET /v1/health/data-availability code=200 body_bytes=529 body_sha256=e05e04fec167c189 apigw_requestid=present
+2026-10-13T21:10:32Z WALKER-DISARM row status=disabled, SSM present; login with the walk password after disarm: HTTP 401 REFUSED
+
+WHAT R1/R3 PROVE: the walker's login token carries tier=internal (the auth handler derives tier from firmId opal-capital), so under the tier-only code it is admitted by the tier test alone: 200 with the Dev clause gone. R2 is the gate that matters: the partner read is refused 403 with the proxy's own message.
+
+LOG LINES WRITTEN AFTER THE APPLY (only events after 2026-10-13T21:08:19Z; first read 21:10:34Z showed 11 events and 1 request, the second read at 21:11:13Z after ingestion lag showed all of this exercise):
+line-prefix census of those 21 events: {'[INFO]\t2026-10': 6, '[WARNING]\t2026': 4, 'START RequestI': 2, 'Request': 2, 'Routing': 2, 'END RequestId': 2, 'REPORT Request': 2, 'INIT_START Run': 1}
+lines with cookie/refresh_token/device_trust/authorization words: 0
+example line (every value other than method and path redacted): Request: method=GET, path=/health/data-availability, request_id=<redacted>
+Control: the same detector over the 14 day group before the CT-ab-10 purge read refresh_token 20, device_trust 14, JWT-shaped 31, Bearer 31, so a zero here is not a blind detector.
+
+internal=200
+partner=403
+walker=200
+POST-APPLY events=21 jwt_shaped=0 bearer=0
