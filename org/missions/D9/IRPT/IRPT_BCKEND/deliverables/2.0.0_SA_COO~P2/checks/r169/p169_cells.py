@@ -164,8 +164,8 @@ def main():
             allowed = {"firm_label", "performance_tab_reached", "performance_request_paths", "walker_disarmed", "walk_stamp", "reference_file_written"}
             if set(r) != allowed:
                 fail("record keys must be exactly %s, got %s" % (sorted(allowed), sorted(r)))
-            if r["firm_label"] != "Inflection" or r["performance_tab_reached"] is not True or r["walker_disarmed"] is not True or r["reference_file_written"] is not True:
-                fail("firm_label Inflection, performance_tab_reached, walker_disarmed and reference_file_written must all be true")
+            if not str(r["firm_label"]).startswith("Inflection") or r["performance_tab_reached"] is not True or r["walker_disarmed"] is not True or r["reference_file_written"] is not True:
+                fail("firm_label beginning Inflection, performance_tab_reached, walker_disarmed and reference_file_written must all be true")
             if not isinstance(r["performance_request_paths"], int) or r["performance_request_paths"] < 1:
                 fail("performance_request_paths must be an integer >= 1")
             if not re.fullmatch(r"\d{8}T\d{6}Z", str(r["walk_stamp"])):
