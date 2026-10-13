@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bj-7.the-per-name-section-census-reads-every-resolved-names-served-sections",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ce0be2edb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bj-7.the-per-name-section-census-reads-every-resolved-names-served-sections.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "8ce0be2edb"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~408",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/census_sections.json",
+      "kind": "doc",
+      "commit_or_etag": "eac872b170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census output of AC2 (Lambda GET invoke and S3 reads); no deploy and no write to S3, DynamoDB or the function"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/census_sections.txt",
+      "kind": "doc",
+      "commit_or_etag": "eac872b170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census output of AC2 with stdout and stderr captured; no deploy and no served write"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "eac872b170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker record of the three invocations and their verbatim outputs; no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "Run AC1 (offline self-test): arms passed 7 of 7 ... R103 CENSUS ARMS: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-408 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_section_census.py\" --selftest | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "PASS A7 a null `<key>_absent_reason` companion is not itself a section\narms passed 7 of 7\nR103 CENSUS ARMS: YES\nexit=0",
+      "denominator": "7 of 7 self-test arms (arms passed 7 of 7)",
+      "status": "PASS",
+      "expect": "arms passed 7 of 7[\\s\\S]*R103 CENSUS ARMS: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Run AC2 (live section census, --where deployed, --workers 4): exit=0 and the last line R103 SECTION CENSUS: RAN N of N names (0 read failures) with both N equal to the resolved names (95 at the cut)",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-408 && PYTHONPATH=\"$(pwd)\" timeout 590 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_section_census.py\" --where deployed --workers 4 --out \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/census_sections.json\" > \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/census_sections.txt\" 2>&1; echo \"exit=$?\"; tail -2 \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/census_sections.txt\"",
+      "output_evidence": "exit=0\n  overlay   .posture.fit.HD_US_Equity.presets.PFOE.absent[].reas raw-code     on   2 names  'the row carries no value for int_cov'\nR103 SECTION CENSUS: RAN 95 of 95 names (0 read failures)",
+      "denominator": "95 of 95 resolved names read; 0 read failures; STATUS not 200 count 0 (census_sections.txt line 121)",
+      "status": "PASS",
+      "expect": "exit=0[\\s\\S]*R103 SECTION CENSUS: RAN (\\d+) of \\1 names \\(0 read failures\\)"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "Run AC3 (minor-unit census, r92_minor_unit_census.py --where deployed | tail -4): the line R92 MINOR-UNIT CENSUS: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-408 && PYTHONPATH=\"$(pwd)\" timeout 590 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_minor_unit_census.py\" --where deployed | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "PASS M2 no served currency beside a stale reason\nPASS M3 control: the major-unit codes are kept (floor 149)\nPASS M4 every record currency in the held index is a plain major code or a classified minor unit\nR92 MINOR-UNIT CENSUS: YES\nexit=0",
+      "denominator": "tail -4 window: 3 PASS arms (M2, M3, M4) and the verdict line; the full arm count is not in the tail and is not claimed here",
+      "status": "PASS",
+      "expect": "R92 MINOR-UNIT CENSUS: YES[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant applies to a read-only census run; the order names none. The self-test arms of AC1 are the instrument's own negative controls.",
+      "expected": "N/A (no mutant named by the order)",
+      "observed": "AC1 self-test: arms passed 7 of 7; R103 CENSUS ARMS: YES",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Not repeated: the order runs AC2 once. A second AC2 run was not ordered and was not done, so no two-run comparison exists.",
+      "observed": "single AC2 run; no second run compared",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Judgment on whether FWD-40 (a) is met",
+      "reason": "Graded by the CVO at L9; the worker reports the census outputs without a verdict."
+    },
+    {
+      "item": "Screenshot confirmation of the BROKEN-VALUE CANDIDATES (9607 hits in 896 patterns)",
+      "reason": "A candidate is not a verdict; the screenshot read is owned by AMGT-bj-11."
+    },
+    {
+      "item": "The 93-name FWD-19 population figure as a printed denominator",
+      "reason": "The instrument prints resolved=95 and pack_prefixes=105 only; the difference is filed as row AMGT_RESAPP-D1-W408-S2 and not patched, since the instrument is not edited."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W408-S1: the deliverables folder named in the order did not exist at the cut; created with mkdir -p before AC2 wrote into it.",
+    "AMGT_RESAPP-D1-W408-S2: the census output prints resolved=95 and pack_prefixes=105 but no 93-name FWD-19 population figure that FWD-40 (a) names."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~408/session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r103_section_census.py",
+      "invocation": "PYTHONPATH=\"$(pwd)\" timeout 590 python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_section_census.py --where deployed --workers 4 --out <deliverables>/census_sections.json",
+      "result": "R103 SECTION CENSUS: RAN 95 of 95 names (0 read failures); exit=0"
+    },
+    {
+      "tool": "r92_minor_unit_census.py",
+      "invocation": "PYTHONPATH=\"$(pwd)\" timeout 590 python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_minor_unit_census.py --where deployed",
+      "result": "R92 MINOR-UNIT CENSUS: YES; exit=0"
+    }
+  ]
+}
