@@ -1,0 +1,52 @@
+{
+ "order": "FB-i-2",
+ "read_at": "2026-10-13T07:47:33Z",
+ "calls": [
+  "aws s3api list-objects-v2 --bucket opal-data-bd --prefix gold/logs/ (578 objects, 1 page)",
+  "aws s3api get-object --bucket opal-data-bd --key gold/logs/chain_full_*.log (the newest 10 of 575 .log objects)",
+  "aws s3api list-objects-v2 --bucket opal-data-bd --prefix logs/gold-layer/ (509 .log objects)",
+  "aws s3api get-object --bucket opal-data-bd --key logs/gold-layer/gold_incremental_2026-10-13_20261013_061809.log (whole file and a ranged tail)",
+  "aws s3api get-object --bucket opal-data-bd --key logs/gold-layer/gold_incremental_2026-10-13_20261013_011542.log (whole file)",
+  "aws s3api get-object --bucket opal-data-bd --key code/runner/run-gold-layer.sh",
+  "aws s3api get-object --bucket opal-data-bd --key code/gold/gold_dispatch.sh",
+  "aws cloudwatch list-metrics --namespace BD/GoldRunner (us-east-1, us-east-2, us-west-1, us-west-2, eu-west-1, eu-central-1)",
+  "aws cloudwatch list-metrics --namespace AWS/Lambda --metric-name Invocations (the same six regions)",
+  "aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=PutEvents (us-east-1, 7 days)",
+  "aws cloudtrail lookup-events --lookup-attributes AttributeKey=Username,AttributeValue=i-01003b035d2988dfb (us-east-1, 7 days)",
+  "aws ec2 describe-instances --instance-ids i-01003b035d2988dfb",
+  "aws ssm describe-instance-information --filters Key=InstanceIds,Values=i-01003b035d2988dfb",
+  "aws lambda get-function-configuration --function-name bd-gold-trigger",
+  "aws iam list-role-policies --role-name bd-exporter-ec2-role",
+  "aws iam get-role-policy --role-name bd-exporter-ec2-role (each inline policy, 18 policies read with the attached ones)",
+  "aws iam get-policy-version (each attached policy)"
+ ],
+ "warn_context": {
+  "chains_read": 4,
+  "warn_lines": 4,
+  "text": "WARN: EventBridge chain-complete put-events failed (non-fatal to chain close) | preceded in each chain by the three lines 'perf_report.json: 29 script(s) merged', 'perf_report.json uploaded to s3://opal-data-bd/gold/perf_report.json', 'perf_report archived to s3://opal-data-bd/gold/perf_history/perf_report_<date>_<ts>.json' and followed by an empty line, a rule line and 'CDNCOHT post-chain invalidation <ts>'. No exception text in any log: the script runs `aws events put-events ... 2>&1 | grep -q '\"FailedEntryCount\": 0'`, so the CLI's own output is discarded. The newest 10 of 575 uploaded chain_full_*.log files (gold/logs/) carry no emit line at all (0 WARN, 0 emitted); the WARN is in the runner's cumulative log logs/gold-layer/gold_incremental_*.log (325 WARN lines since 2026-04-22, 0 'EventBridge chain-complete emitted' lines on any date).",
+  "claim": "measured"
+ },
+ "emit_path": {
+  "client": "aws cli v1 (the Ubuntu apt package 'awscli', setup-instance.sh line 19; no log prints a version)",
+  "region_source": "none found: no --region, AWS_DEFAULT_REGION, AWS_REGION or aws configure in gold_dispatch.sh (repo and the deployed object), run-gold-layer.sh (the deployed object equals the repo), setup-instance.sh, user-data.sh or the systemd unit; bd-gold-trigger sets only GOLD_INSTANCE_ID and starts the instance. The runner's own python caller passes region_name='us-east-1' explicitly (A_00.accounts_dimension.py:596).",
+  "credential_source": "instance profile bd-exporter-profile / role bd-exporter-ec2-role (IMDS, HttpTokens required); the role holds events:PutEvents on the default bus (policy events-emit) and an Allow for cloudwatch:PutMetricData conditioned on namespace GLDINC/SS4c or BD/GoldRunner (policy GldRunnerMetrics).",
+  "launcher": "Lambda bd-gold-trigger (EventBridge bd-gold-nightly-fallback cron(0 23 ? * MON-SAT *) and the price-update S3 event) calls ec2 start-instances and writes gold/trigger-mode.json; the instance boots, systemd unit runs /home/ubuntu/gold-layer/run-gold-layer.sh, which execs the S3 copy of run-gold-layer.sh and then run_gold_layer.sh. No SSM document is used.",
+  "claim": "inferred"
+ },
+ "positive_control": {
+  "note": "BD/GoldRunner holds 0 metrics in us-east-1, us-east-2, us-west-1, us-west-2, eu-west-1 and eu-central-1 (read 2026-10-13T07:47:33Z) while AWS/Lambda Invocations holds 397, 17, 4, 12, 0, 5 metric series in the same regions respectively (control). The empty namespace is NOT explained by IAM: policy GldRunnerMetrics allows cloudwatch:PutMetricData for namespace BD/GoldRunner (the dtype-divergence AccessDenied in the same log is for namespace Opal/DataQuality, which that policy does not list). The same chain closes print SHUTDOWN_ARMED 4 of 4 (2026-10-12 02:30Z, 06:13Z, 2026-10-13 01:15Z, 06:18Z) and the same shell, seconds after the WARN, runs `aws cloudfront create-invalidation` (a global service, no region needed) whose output is printed: 'CDNCOHT invalidation OK: <time> <id> InProgress' 4 of 4 chains, and CloudTrail holds 14 CreateInvalidation events by the runner's session in 7 days. So the CLI binary, the instance-role credentials and the output handling work; the one failing call is the REGIONAL one. CloudTrail lookup-events for EventName=PutEvents in us-east-1 returned 0 events from ANY principal in 7 days, so its silence is not a discriminator by itself.",
+  "claim": "measured"
+ },
+ "verdict": "REGION_UNSET",
+ "verdict_reason": "The emit call is the only regional call in a sequence whose global call (CloudFront invalidation) succeeds with the same CLI and credentials, no region is set anywhere on the runner's boot path and the python caller passes one explicitly, and the BD/GoldRunner namespace that IAM permits is empty in every region. A request-parameter error is excluded for representative values by an offline botocore validation of the entries file, but no line on the runner names the exception, so this is inferred and not proved.",
+ "indeterminate_before_test": false,
+ "test_event": {
+  "sent": false,
+  "count": 0,
+  "detail_type": "",
+  "matches_any_rule": false,
+  "rc": null,
+  "text": ""
+ },
+ "fix_proposal": "Give the dispatcher's CLI a region: export AWS_DEFAULT_REGION=us-east-1 (or --region on the put-events and the other regional calls) at the top of data/black_diamond/scripts/gold/gold_dispatch.sh, the DS lane's file; the one-line change is NOT applied. Under its own never-widen pair: once the emit works every chain close fires exec-summary-generator, which writes up to 158 client-facing summary keys twice a day (round-3 ADDENDUM 12), and BD/GoldRunner metrics start (the same fix)."
+}
