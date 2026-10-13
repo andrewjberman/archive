@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ab-11",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-11.seat-boundary-underscore-and-codex.md",
+    "group": "OTHER",
+    "vintage_commit": "c396b76722"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "vintage_commit": "c396b76722",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-11.seat-boundary-underscore-and-codex.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~84",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/seat-boundary.ps1",
+      "kind": "script",
+      "commit_or_etag": "1255ff8240",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-84; SeatSerialRe third segment widened to [A-Za-z0-9_]+; SeatAgentNames = claude.exe, codex.exe; exercised only with fake process lists (no live process read or killed)",
+      "artifact_covered_by": ["CTab11-AC1"]
+    },
+    {
+      "path_or_key": ".tools/kill-agent.ps1",
+      "kind": "script",
+      "commit_or_etag": "1255ff8240",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-84; the two serial-token copies (:56 validation, :79 serialPat) widened; parsed and wired by the test; never run against a real process",
+      "artifact_covered_by": ["CTab11-AC1"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_seat_boundary.ps1",
+      "kind": "test",
+      "commit_or_etag": "1255ff8240",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-84; 39 cases under powershell 5.1 with fake processes only; fixture restored to 0.9.0_WK_NFRA_CTLPLN~78; 12 cases added",
+      "artifact_covered_by": ["CTab11-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTab11-AC1",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1 expect: wired=both ok=True -- every case passes, old and new (report the whole last line with its denominator).",
+      "method": "test_suite",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "output_evidence": "rc=0; 39 lines begin PASS, 0 begin FAIL; last line: SEAT-BOUNDARY-TEST cases=39/39 wired=both ok=True. Run twice: once before the tool commit 1255ff8240 and once after the row commit 3f114f9d11: identical last line.",
+      "denominator": "39 of 39 cases pass (27 old, 12 new)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "negative control: the new battery (this commit's test file) run against the BASE tool files (git show c396b76722 of seat-boundary.ps1, kill-agent.ps1, kill-maint.ps1) in a scratch tree; the new cases must fail there",
+      "expected": "the underscore, codex.exe and literal-widening cases fail on the base files",
+      "observed": "cases=29/39 wired=both ok=False; 10 FAIL lines: the underscore-serial cases (5), the codex.exe cases (2), the literal-widening AST case (1), the trailing-full-stop case on the restored fixture (1), and the spawn-agent.ps1 parse case (1, an artifact: spawn-agent.ps1 was not copied into the scratch tree)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the same invocation: once before the tool commit 1255ff8240 (same bytes) and once after the row commit 3f114f9d11",
+      "observed": "both runs 39/39 ok=True; last line identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any live run of kill-agent.ps1 or kill-maint.ps1 against a real process; any process stopped",
+      "reason": "order RULE: never run the kill tools against a real process and never stop a process; the battery uses fake process lists only"
+    },
+    {
+      "item": "aws, push, and any edit of spawn-agent.ps1",
+      "reason": "order RULE: no aws, no push; spawn-agent.ps1 is outside this order's <paths> grant (filed as NFRA_CTLPLN-W84-S1)"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "order RULE: the portal gitlink is never committed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W84-S1: .tools/spawn-agent.ps1:108 keeps the old third-segment serial pattern and refuses an underscore project serial; outside this order's paths, so not widened here (class OBSERVATION, hazard INERT)"
+  ],
+  "session_log": "powershell 5.1 battery at the tool commit: SEAT-BOUNDARY-TEST cases=39/39 wired=both ok=True. Negative control (base tool files c396b76722 in a scratch tree, new test file): SEAT-BOUNDARY-TEST cases=29/39 wired=both ok=False.",
+  "compiler_tools": [
+    {
+      "tool": "powershell 5.1 PowerShell Parser (Parser::ParseFile)",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "result": "errors=0 for seat-boundary.ps1, kill-agent.ps1, kill-maint.ps1, spawn-agent.ps1 (the battery's parse cases)"
+    }
+  ]
+}
