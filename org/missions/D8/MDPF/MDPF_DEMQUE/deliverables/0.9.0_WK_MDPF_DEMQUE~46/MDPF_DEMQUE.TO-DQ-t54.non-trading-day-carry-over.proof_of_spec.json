@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t54",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t54.non-trading-day-carry-over.md",
+    "group": "OTHER",
+    "vintage_commit": "1cd9c6f1ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "1cd9c6f1ab",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t54.non-trading-day-carry-over.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~46",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "35fb21e554",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "carry_over(day, budget_dir=None) with previous_fire_day, _day_spent and _history_ceiling; run() uses room = ceiling + carried_over - drawn_today on a non-trading fire (the quote is unchanged); the receipt gains carried_over, carry_claim and trading_days_read; --carry-over --day D [--budget-dir DIR] prints one JSON line. bbg_quote.py not edited. Folder run from the worktree: 190 passed (187 at base plus the three new tests), 0 failed.",
+      "artifact_covered_by": [
+        "DQ9-t54-AC1",
+        "DQ9-t54-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_carry_over.py",
+      "kind": "test",
+      "commit_or_etag": "35fb21e554",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three named tests PASS: '3 passed in 1.36s'. Under the spend-ignored mutant (control below) the three named tests FAIL: '3 failed in 1.35s'.",
+      "artifact_covered_by": [
+        "DQ9-t54-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t54-AC1",
+      "criterion_verbatim": "DQ9-t54-AC1 -- the three named tests. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t54_tests.py -> CARRY-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t54_tests.py",
+      "output_evidence": "test_demque_carry_over.py::test_a_non_trading_day_room_is_the_measured_ceiling_plus_the_trading_day_cells_production_left_unused PASSED; test_demque_carry_over.py::test_a_trading_day_production_overspent_carries_nothing_and_never_a_negative PASSED; test_demque_carry_over.py::test_an_absent_or_unreadable_budget_ledger_carries_zero_and_the_receipt_says_so PASSED; 3 passed in 1.36s; verbatim last line: CARRY-OK ; AC1 rc=0",
+      "denominator": "3 of 3 named tests PASSED by name (the check's TESTS list)",
+      "status": "PASS",
+      "expect": "CARRY-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t54-AC2",
+      "criterion_verbatim": "DQ9-t54-AC2 -- three arms against temp ledger directories and the real default directory: an empty directory carries 0 and says absent; a synthetic week (Monday 1,000, Wednesday ceiling + 500, the rest 0) carries (ceiling - 1000) + 0 + ceiling + ceiling; the real directory on this device (no site Z ledger) carries 0 and does not raise. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t54_real.py -> CARRY-REAL-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t54_real.py",
+      "output_evidence": "arm2 empty dir: carried_over=0 claim=absent room=5858 ceiling=5858 | arm1 synthetic ledger: carried_over=22432 expected=16574 room=28290 claim=measured | CARRY-REAL-BAD arm1 carried_over/room mismatch ; AC2 rc=1",
+      "denominator": "1 of 3 arms reached and FAILED (arm 1); arm 2 PASSED by output; arm 3 not reached (the check exits at arm 1)",
+      "status": "FAIL",
+      "status_reason": "The check's arm 1 expects 16574 = (ceiling - 1000) + 0 + ceiling + ceiling = 3 ceilings - 1000, but the order's formula (sum over the five trading days 10-12..10-16 of max(ceiling - spent[d], 0)) gives 22432 = 4 ceilings - 1000, because Tuesday, Thursday and Friday each carry a whole ceiling. The check is not edited and the figure is not bent to match it; surprise MDPF_DEMQUE-D1-W46-S1 (BLOCKING) awaits a CTO or COO ruling. A direct probe of the real default directory (absent on dell1) reads carried_over 0, claim absent, which is arm 3's expectation, but the check does not reach it.",
+      "expect": "CARRY-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "production's budget spend is ignored: _day_spent patched in-process to return (0, True) for every ledger (a pytest plugin in .scratch, no file edit), run against test_demque_carry_over.py",
+      "expected": "the three named tests fail (the carry must depend on the ledgers)",
+      "observed": "3 failed in 1.35s: test_a_non_trading_day_room_..., test_a_trading_day_production_overspent_..., test_an_absent_or_unreadable_... all FAILED (e.g. assert 29290 == 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of python data/mdpf/scripts/demque/standing_drawer.py --carry-over --day 2026-10-17 --budget-dir <empty scratch directory> from the worktree root, outputs compared byte for byte (cmp)",
+      "observed": "IDENTICAL: 422 bytes each run; rc 0 both runs; claim absent, carried_over 0, room 5858",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Bloomberg call, Yahoo call, S3 write, write to the real budget ledger, the actuals ledger, the queue or any pacer state; standing_drawer.py --apply",
+      "reason": "order BOUNDS: READ-ONLY; the carry is a read of the budget ledger directory and the tests use temp directories only"
+    },
+    {
+      "item": "data/mdpf/scripts/demque/bbg_quote.py",
+      "reason": "order item 3 and CTO msg 5134: the quote stays at zero carried over; the file is not edited"
+    },
+    {
+      "item": "the R9 checks dq_t54_tests.py and dq_t54_real.py, and the existing drawer tests test_demque_standing_drawer.py and test_demque_standing_drawer_close.py",
+      "reason": "outside this order's grant or not to be edited: the check's arm 1 arithmetic is a surprise row (MDPF_DEMQUE-D1-W46-S1), not an edit; the existing drawer tests pass unedited, so no room assertion needed the empty budget directory"
+    },
+    {
+      "item": "a partially readable week's missing-day reading (a missing or unreadable day carries a whole ceiling, literal reading)",
+      "reason": "decision taken on the order's wording and filed as MDPF_DEMQUE-D1-W46-S2 (OBSERVATION) for a CTO ruling; not changed here"
+    },
+    {
+      "item": "the merge of box/dell1 into this branch",
+      "reason": "the order says do NOT merge box/dell1 (a foreign row blocks it); the issuer unions the investigation file at the drain"
+    },
+    {
+      "item": "account ids and the real budget ledger contents",
+      "reason": "order BOUNDS: no account id enters a committed file; the real default directory does not exist on this device, so nothing is read from it"
+    },
+    {
+      "item": "the portal submodule pointer shown modified in the worktree before this order",
+      "reason": "not in <paths>, not touched and not committed; commits are made by explicit path"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W46-S1: the R9 check's arm 1 expects (ceiling - 1000) + 0 + ceiling + ceiling = 16574, but the order's formula over the five trading days gives 22432 = four ceilings - 1000; the criterion cannot be met as written and the check is not weakened (BLOCKING, INERT)",
+    "MDPF_DEMQUE-D1-W46-S2: a missing or unreadable trading-day ledger reads 0 spent and carries a whole ceiling under the literal reading; the conservative reading (an absent day carries 0) is for the CTO to rule (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W46-S3: bbg_budget.record keys each spend by UTC date, so an evening Eastern non-trading fire can write its draws into the next UTC date, which may be a trading day in the window; the error only lowers the carry (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~46/MDPF_DEMQUE.TO-DQ-t54.non-trading-day-carry-over.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t54_tests.py",
+      "invocation": "from the worktree root, timeout 120",
+      "result": "CARRY-OK; 3 passed in 1.36s; rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t54_real.py",
+      "invocation": "from the worktree root, timeout 120",
+      "result": "arm2 PASS; arm1 CARRY-REAL-BAD (carried_over 22432, expected 16574); rc=1"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "from the worktree root, timeout 900",
+      "result": "190 passed in 13.48s; rc=0 (baseline at the base commit: 187 passed in 20.17s)"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_carry_over.py",
+      "invocation": "from the worktree root, timeout 300",
+      "result": "pre-commit gate clean for 2 of 2 file(s); rc=0"
+    }
+  ]
+}
