@@ -27,7 +27,8 @@ D22 = D.replace("/r21/", "/r22/")
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
-          "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER"}
+          "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER",
+          "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -336,6 +337,44 @@ def main(argv):
         print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
         if rc != 0 or failed or passed < 365:
             problems.append("the intake folder must pass with at least 365 (the r19.3 count)")
+    elif check == "y246-qa":
+        rec = load(root, D22 % "79" + "KIMI_QA_HARNESS.json", problems)
+        if rec:
+            for member in ("gate", "harness", "tests", "live_qa", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            harness = rec.get("harness") or {}
+            if not re.fullmatch(r"[0-9a-f]{64}", str(harness.get("sha256", ""))) or len(harness.get("cases") or []) < 6:
+                problems.append("harness needs a 64-hex sha256 and at least 6 cases")
+            tests = rec.get("tests") or {}
+            if not tests.get("added") or tests.get("failed") not in (0, "0") or not tests.get("passed"):
+                problems.append("the harness tests must be added and all pass (%r)" % tests)
+        path = root / "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_search_qa.py"
+        if not path.is_file():
+            problems.append("no ycharts/generate/kimi_search_qa.py")
+        else:
+            rc, passed, failed = pytest(root, "tests/test_kimi_search_qa.py", IR + "/ycharts/generate")
+            print("qa tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+            if rc != 0 or failed or passed < 5:
+                problems.append("tests/test_kimi_search_qa.py must pass with at least 5 tests")
+    elif check == "y247-swap":
+        rec = load(root, D22 % "80" + "SWAP_SUGGESTIONS.json", problems)
+        if rec:
+            for member in ("where_wired", "how_the_capability_would_arrive", "behaviour", "wire_shape", "tests", "before_arm", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: case (b) must FAIL at HEAD without the change")
+        rc, passed, failed = pytest(root, "tests/test_swap_suggestions.py", IR + "/ycharts/generate")
+        print("swap tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 6:
+            problems.append("tests/test_swap_suggestions.py must pass with at least 6 tests")
+        rc, passed, failed = pytest(root, "tests", INTAKE)
+        print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 365:
+            problems.append("the intake folder must pass with at least 365")
+    elif check == "y248-portal":
+        portal_candidate(root, D22 % "81" + "PORTAL_SUGGESTED_SWAPS_CANDIDATE.json", problems)
     return finish(check, problems)
 
 
