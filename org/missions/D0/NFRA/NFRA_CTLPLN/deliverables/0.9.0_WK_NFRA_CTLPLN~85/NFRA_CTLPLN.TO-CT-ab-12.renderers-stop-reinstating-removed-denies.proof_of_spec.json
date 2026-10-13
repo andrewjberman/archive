@@ -1,0 +1,142 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-ab-12",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-12.renderers-stop-reinstating-removed-denies.md",
+  "group": "OTHER",
+  "vintage_commit": "35feed35c8"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~85",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+  "vintage_commit": "35feed35c8",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-12.renderers-stop-reinstating-removed-denies.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py",
+   "kind": "test",
+   "commit_or_etag": "9766694d48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "render_policy emits the Allow statements only; the two shell Denies, SHELL_DOCS and the named_deny list are gone; policy_shell_ok asserts no StartSession Deny names AWS-RunShellScript; --check prints file_matches_rendering=True and ok=True; read-only, no AWS call"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py",
+   "kind": "test",
+   "commit_or_etag": "9766694d48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "renders no DenyProtectedFunctions statement and no dell_protect_policy.json; --write refreshes the census files only and refuses to edit dell_deploy_policy.json, saying why; --check passes on the saved listing (--from-file) with deploy_has_statement=False"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+   "kind": "test",
+   "commit_or_etag": "9766694d48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "comment block at the top only; the decision tables are not rewritten (23 code lines still name a removed Deny)"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/render_routes_policy.py",
+   "kind": "test",
+   "commit_or_etag": "9766694d48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "comment block at the top only; one CROSSCHECK print label (line 109) still says DenyProtectedFunctions and is left as it was"
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "9766694d48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rows NFRA_CTLPLN-W85-S1 to S4 appended (respol reasons premise not borne out; bare protected-functions run made AWS read calls; saved census 233 vs live 238; StartSession shell-parity check inverted)"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTab12-AC1",
+   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check expect: ok=True -- the SSM renderer agrees with the committed document (report the whole last line)",
+   "method": "command",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check",
+   "output_evidence": "SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 send_docs=12 send_hosts=6 f1_confirmed=True send_render_same=True ok=True (rc=0; run under timeout 120; the POLICY-RENDER line reads file_matches_rendering=True; two runs compared with cmp, identical)",
+   "denominator": "16 of 16 declared aws_ssm_document blocks parsed (CENSUS-CROSSCHECK MATCH); 12 of 12 send-grant documents declared; the committed dell2_ssm_policy.json equals the rendering byte for byte",
+   "status": "PASS",
+   "expect": "ok=True",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CTab12-AC2",
+   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py expect: ok=True -- the admin-parity check still passes (a control that PASSES at the base)",
+   "method": "command",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py",
+   "output_evidence": "ADMIN-PARITY membership=both denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True (rc=0; run under timeout 120; two runs compared with cmp, identical)",
+   "denominator": "2 of 2 Dell users in membership=both; 4 of 4 kept Denies present, 0 extra",
+   "status": "PASS",
+   "expect": "ok=True",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the same derive_ssm_documents.py --check run on the BASE renderer (35feed35c8, before this cell's edit) against the same committed bytes; the base renderer still emits DenyShellDocuments and DenyStartSessionOnShellScriptDocument",
+   "expected": "ok=False: the renderer reads the removed Denies as drift from the committed policy",
+   "observed": "POLICY-RENDER file_matches_rendering=False ... SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 send_docs=12 send_hosts=6 f1_confirmed=True send_render_same=True ok=False (rc=1)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of derive_ssm_documents.py --check and check_admin_parity.py compared byte for byte (cmp)",
+   "observed": "identical output on both runs (rc=0 both)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "terraform init, plan and apply; any credentialed command; any git push",
+   "reason": "not run: nothing is applied by this cell; CTab12-AC1 and CTab12-AC2 are pure reads of the repository"
+  },
+  {
+   "item": "the --write form of derive_ssm_documents.py and derive_protected_functions.py",
+   "reason": "not run: the committed bytes already equal the rendering (file_matches_rendering=True), so a write would change nothing; the protected-functions --write is a census refresh and needs a live account read"
+  },
+  {
+   "item": "AWS calls",
+   "reason": "none by the two acceptance invocations. One bare derive_protected_functions.py --check at the base (before the edit) DID issue read-only lambda, apigateway and cloudfront list and get calls through .tools/aws, against the cell's rule; no file was written. Recorded as surprise NFRA_CTLPLN-W85-S2; every later run used --from-file"
+  },
+  {
+   "item": "the decision-table rewrite in simulate_policy.py and the CROSSCHECK label in render_routes_policy.py",
+   "reason": "out of the cell by the order (the tables are marked, not rewritten); 23 code lines and 1 label remain and are listed in the commit message"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W85-S1",
+  "NFRA_CTLPLN-W85-S2",
+  "NFRA_CTLPLN-W85-S3",
+  "NFRA_CTLPLN-W85-S4"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~85/NFRA_CTLPLN.TO-CT-ab-12.renderers-stop-reinstating-removed-denies.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~85, 2026-10-13; code commit 9766694d48 on wk-NFRA_CTLPLN-85)",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check",
+   "result": "SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 send_docs=12 send_hosts=6 f1_confirmed=True send_render_same=True ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py",
+   "result": "ADMIN-PARITY membership=both denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/protected_functions_listing.json --check",
+   "result": "PROTECTED-CENSUS functions=233 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 census_in_sync=True deploy_has_statement=False ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py --check",
+   "result": "RESPOL-ALLOW actions=75 in_allow=72 excluded=3 a_iam=1 b_routes=0 c_already_denied=0 d_secretsmanager=2 routes_intersection=0 chars_no_whitespace=2260 limit=6144 ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+   "result": "IDENTITY-STATIC validate=ok no_access_key=True allow_default_true=True shell_window_retired=True ssm_on_both_users=True group_policies=8/10 names_from_builder=14/14 policy_size_ok=True ok=True"
+  }
+ ]
+}
