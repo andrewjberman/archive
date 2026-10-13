@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-k-4",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-k-4.cottonwood-serving-crosswalk.md",
+    "group": "OTHER",
+    "vintage_commit": "eff1db9d7f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_PLANINV.md",
+    "vintage_commit": "eff1db9d7f",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-k-4.cottonwood-serving-crosswalk.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~79",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/PLANINV_COTTONWOOD_SERVING_CROSSWALK.json",
+      "kind": "config_data",
+      "commit_or_etag": "08fb76fede",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 08fb76fede on wk-ADVI_FIRMBKTS-79 (LOCAL); a read-only record of 56 rows, no AWS write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/PLANINV_COTTONWOOD_SERVING_CROSSWALK.md",
+      "kind": "doc",
+      "commit_or_etag": "08fb76fede",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 08fb76fede on wk-ADVI_FIRMBKTS-79 (LOCAL); one-page rendering of the JSON rows, the totals and the not_read list",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/planinv_fb_k4_lambda_summary.py",
+      "kind": "script",
+      "commit_or_etag": "08fb76fede",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 08fb76fede (LOCAL); reads saved JSON only, prints environment variable names and bucket, region, table or queue values only",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/planinv_fb_k4_iam_summary.py",
+      "kind": "script",
+      "commit_or_etag": "08fb76fede",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 08fb76fede (LOCAL); reads saved policy JSON only, prints statements only",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "household_crosswalk (the 49financial and advi_billing household crosswalk) and dim_identity_crosswalk (directory_runner.py:339)",
+      "reason": "a different firm's crosswalk, and an identity dimension rather than the Commonwealth-to-Cottonwood account crosswalk; named in the record's not_read list"
+    },
+    {
+      "item": "the comp-find DEFAULT-band enumeration of the crosswalk key (timed out at 120 s, rc 124)",
+      "reason": "retried zero times as the order allows; the repository was read with the native Grep tool over data/, infra/ and portal/src instead, and the timeout is recorded"
+    },
+    {
+      "item": "environment values of the other live functions, invocation triggers of the IRPT functions, SNS subscribers, SES sending statistics",
+      "reason": "bounded reads (timeout 100 each) and the read-only scope; each is listed in the record's not_read with the reason"
+    },
+    {
+      "item": "any write, producer run, deploy, Terraform command, or portal change",
+      "reason": "the order's bounds: read verbs only on AWS and the repository, and the write surface is the deliverables folder and the investigation file"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape and read-only discipline: the planinv checker with --firm cottonwood and --require-text crosswalk on PLANINV_COTTONWOOD_SERVING_CROSSWALK.json, expect ^PLANINV: OK firm=cottonwood rows=[0-9]+ legacy=[0-9]+$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-79 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py planinv --file C:/dev/wk-firmbkts-79/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/PLANINV_COTTONWOOD_SERVING_CROSSWALK.json --firm cottonwood --require-text crosswalk",
+      "expect": "^PLANINV: OK firm=cottonwood rows=[0-9]+ legacy=[0-9]+$",
+      "output_evidence": "PLANINV: OK firm=cottonwood rows=56 legacy=16",
+      "denominator": "56 rows checked; 16 legacy_touch true; 20 crosswalk rows; 25 calls listed, 0 carrying a write verb",
+      "status": "PASS",
+      "status_reason": "re-run at 08fb76fede: identical output, and the same output in two consecutive runs (md5 8394e970...)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound: the round-4 scope checker with the two allows (the deliverables folder and the investigation file), expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-79 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-79 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing",
+      "denominator": "7 changed, 0 outside, 0 required missing: the four committed record artifacts, the session log, this instance, and the investigation file",
+      "status": "PASS",
+      "status_reason": "read at the pre-commit state, which is the state the commit produces; the submodule gitlink portal shows as modified in this worktree but r4_scope ignores submodule gitlinks (--ignore-submodules=all)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a copy of the record with one added call: timeout 100 .tools/aws s3api put-object --bucket opal-data-cot --key mutant.txt (a write verb inside calls); the real record is untouched",
+      "expected": "the planinv checker FAILS on the write verb: 'a call carries a write verb'",
+      "observed": "PLANINV: FAIL a call carries a write verb (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the unchanged record; md5 of the output compared",
+      "observed": "8394e9708c7343ed285597337cd0c229 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W79-S1: the Cottonwood Black Diamond scope is not inside opal-data-bd: the live IAM grants and the repository place it in opal-data-assets under blackdiamond/cottonwood/ (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W79-S2: Cottonwood holdings have two live homes: the edge router resolves cottonwood to opal-data-cot, while the IRPT holdings reader reads opal-data-cottonwood (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W79-S3: bd-cot-freshness-probe is in the repository with a read of opal-data-cot, but no live Lambda of that name exists in the 237 live functions (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~79/ADVI_FIRMBKTS.TO-FB-k-4.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py planinv --file <record> --firm cottonwood --require-text crosswalk",
+      "result": "PLANINV: OK firm=cottonwood rows=56 legacy=16; rc=0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-79 --allow <deliverables folder> --allow <investigation file>",
+      "result": "ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing; rc=0"
+    },
+    {
+      "tool": "python -I",
+      "invocation": "python -I planinv_fb_k4_lambda_summary.py <saved configuration JSON files> ; python -I planinv_fb_k4_iam_summary.py <saved policy JSON files>",
+      "result": "rc=0 on every file; environment values printed only for bucket, region, table and queue names"
+    }
+  ]
+}
