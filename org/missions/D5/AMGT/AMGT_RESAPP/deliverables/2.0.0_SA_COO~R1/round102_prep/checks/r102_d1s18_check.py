@@ -10,10 +10,11 @@
   D2  each of the six has a line `CAUSE: <at least 20 characters>` and a line `CLASS: <STALE-CITATION|GENERATED-DRIFT|PIN-DRIFT|CONTRACT-ENUM|OTHER>` in its block (a block
       runs from its `### <file>` heading to the next heading)
   D3  one line `SUITE-BEFORE: files <n> | pass <p> | fail <f> | skip <s>` with fail 6, and one `SUITE-AFTER: ...` line with the same files count (the denominator did not move)
-      and fail 3 or fewer (the wire-drift tests wait on the contract decision; the cell does not touch them)
-`boundary` lists the files the nested portal worktree changed against `--base` and reads YES only when every one is one of the three repair files:
+      and fail 0 (AMENDMENT 1: the contract decision is ruled, CTO~DELL1 msg 4899; every one of the six is green)
+`boundary` lists the files the nested portal worktree changed against `--base` and reads YES only when every one is one of the five repair paths:
   src/pages/AdvisorIntelligence/__tests__/iv-e-46.class-readers.test.ts, src/pages/InvestorReporting/contracts/vendorSectionNames.ts,
-  src/pages/InvestorReporting/fixtures/wire/HoldingsSnapshot.valid.json (the wire folder and the three wire-drift tests are NOT in it).
+  src/pages/InvestorReporting/fixtures/wire/HoldingsSnapshot.valid.json, anything under src/pages/InvestorReporting/contracts/wire/ (the regenerated folder),
+  and src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-148.multi-asset-class-readers.test.ts (arm (d) relaxed).
 Verdict lines `R102 D1-S18 TABLE: YES|NO` and `R102 D1-S18 BOUNDARY: YES|NO`. Exit 0 on YES. Writes nothing.
 """
 import re
@@ -33,6 +34,9 @@ ALLOWED = (
     "src/pages/AdvisorIntelligence/__tests__/iv-e-46.class-readers.test.ts",
     "src/pages/InvestorReporting/contracts/vendorSectionNames.ts",
     "src/pages/InvestorReporting/fixtures/wire/HoldingsSnapshot.valid.json",
+    # AMENDMENT 1 (CTO~DELL1 msg 4899, regenerate and relax arm (d)): the regenerated wire folder and the one relaxed test
+    "src/pages/InvestorReporting/contracts/wire/",
+    "src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-148.multi-asset-class-readers.test.ts",
 )
 
 
@@ -56,7 +60,7 @@ def table(path):
                                                                   klass.group(1) if klass else "NO"))
     before = re.search(r"^SUITE-BEFORE:\s*files (\d+) \| pass (\d+) \| fail (\d+) \| skip (\d+)\s*$", text, flags=re.M)
     after = re.search(r"^SUITE-AFTER:\s*files (\d+) \| pass (\d+) \| fail (\d+) \| skip (\d+)\s*$", text, flags=re.M)
-    d3 = bool(before and after and int(before.group(3)) == 6 and before.group(1) == after.group(1) and int(after.group(3)) <= 3)
+    d3 = bool(before and after and int(before.group(3)) == 6 and before.group(1) == after.group(1) and int(after.group(3)) == 0)
     print("   %s D3 suite lines | before %s | after %s" % ("PASS" if d3 else "FAIL", before.group(0) if before else "ABSENT", after.group(0) if after else "ABSENT"))
     verdict = "YES" if ok_all and d3 else "NO"
     print("R102 D1-S18 TABLE: %s" % verdict)
