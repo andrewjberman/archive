@@ -1,0 +1,40 @@
+SESSION LOG -- 0.9.0_WK_ADVI_BDPRCE~7 on ADVI_BDPRCE.TO-BP-b-3 (round 2, read-only census)
+Worktree C:/dev/wk-bdprce-r2-7 (branch wk-ADVI_BDPRCE-7, cut from 6f20fe54c6). Clock: 2026-10-13, run closed 19:56Z (UTC).
+No object was written, no producer was run, no product file was edited. Client_name and account_name were never printed.
+
+STEP 1 -- identity and premises
+  git rev-parse --abbrev-ref HEAD -> wk-ADVI_BDPRCE-7 ; test -d org && test -d .tools -> TREE-OK
+  .tools/aws sts get-caller-identity -> Account 313476888478, user cloudops-dell1-agent-user (read identity)
+
+STEP 2 -- listing (the served home)
+  aws s3api list-objects-v2 --bucket opal-data-49financial --prefix advi/49financial/platinum/entities/clients/ --output json
+    -> 18,230 keys, not truncated (auto-paginated, counted client-side)
+  detail.json objects: 3,510 (zN 3,371; acct_z 138; catch-all 1). Client folders: 3,931 (421 without detail.json).
+  Note: --query length() on the auto-paginated listing returned one count per page; all counts above are client-side.
+
+STEP 3 -- sources downloaded to C:/dev/wk-bdprce-r2-7-data/ (outside the checkout)
+  canonical_prices.parquet 109,972,952 bytes, 12,649,131 rows, 11,143 assets, 6,100,222 rows with a ticker
+  ticker_lookup.json 1,331,805 bytes, 10,206 entries, 3,882 names with a non-UNKNOWN ticker
+  historical_prices.parquet 39,818,119 bytes, 5,885,915 rows, 3,628 distinct tickers, NO asset_name column
+
+STEP 4 -- full census
+  python -I scripts/census_bp_b3.py -> objects_read 3510 of 3510, failed 0, 35 s, 16 threads
+  lots 198,295 ; PRICED_FROM_CANONICAL 4,208 ; PRICED_OFF_NO_CANONICAL 1,859 ; NOT_UNTICKERED 192,228
+  extract sha256 e7e618d76516c8b7977179aefb3f77ce4fc13c17fbcf1dbeb92001a6e0a2b50b (198,295 rows)
+  CENSUS.json written; sample lot_extract_sample.csv 200 rows (seed 20261013; 100 off, 50 not-untickered, 50 from-canonical)
+  commit-gate: one unused variable removed (no logic change), then commit e7588a0117
+
+STEP 5 -- diagnostics and premise checks
+  python -I scripts/census_diagnostics.py -> census_diagnostics.txt (rc 0)
+  python -I scripts/open_lots_presence.py -> open_lots_presence.txt: non_empty_list 1,900, empty_list 1,610, total 3,510
+
+STEP 6 -- controls
+  AC1 grader run twice on CENSUS.json: rc 0 both; md5 of output 55fb57d6b0a539bd9e13b1cd74bae2e6 both runs
+  mutant A (classes sum +1): grader rc 1, "classes sum 198296 != lots_total 198295"
+  mutant B (write verb added to calls): grader rc 1, "write verb in calls"
+
+STEP 7 -- acceptance
+  AC1: r2_checks.py census -> "CENSUS record ok objects=3510 lots=198295 off_canonical=1859 listed_untickered=1" rc 0
+  AC2: r4_scope.py ... -> see the instance (run after this file and the instance were written)
+
+STEP 8 -- surprise rows ADVI_BDPRCE-D1-W7-S1..S4 appended to INVESTIGATION_v1.md (see the channel file)
