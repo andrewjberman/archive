@@ -1,0 +1,181 @@
+diff --git a/lib/research/api/scoped_amgt.py b/lib/research/api/scoped_amgt.py
+index 84002d3fd5..96642b5520 100644
+--- a/lib/research/api/scoped_amgt.py
++++ b/lib/research/api/scoped_amgt.py
+@@ -2402,7 +2402,11 @@ def read_peer_set(security_key: Optional[str]) -> Dict[str, Any]:
+             "vintage": None,
+             "peer_read": None,
+         }
+-    document, record = _foreign(*read_pool_object(PEERS_PREFIX, security_key), security_key=security_key)
++    sub_started = time.monotonic()
++    pool_read = read_pool_object(PEERS_PREFIX, security_key)
++    sub_started = _subphase_log("overlay", "peers.read", sub_started)
++    document, record = _foreign(*pool_read, security_key=security_key)
++    sub_started = _subphase_log("overlay", "peers.foreign", sub_started)
+     if document is None:
+         return {
+             "security_key": security_key,
+@@ -2418,8 +2422,22 @@ def read_peer_set(security_key: Optional[str]) -> Dict[str, Any]:
+         }
+     served = dict(document)
+     served["peer_read"] = record
+-    return _with_price_currency(_with_numeric_tickers(_with_listed_identity(_with_reason_classes(_with_member_display_names(
+-        _with_subject_cap(_with_subject_display_name(served, security_key), security_key))))))
++    # the same seven wrappers, innermost first, as the nested call read; each is timed (AMGT-bk-1)
++    served = _with_subject_display_name(served, security_key)
++    sub_started = _subphase_log("overlay", "peers.subject_name", sub_started)
++    served = _with_subject_cap(served, security_key)
++    sub_started = _subphase_log("overlay", "peers.subject_cap", sub_started)
++    served = _with_member_display_names(served)
++    sub_started = _subphase_log("overlay", "peers.member_names", sub_started)
++    served = _with_reason_classes(served)
++    sub_started = _subphase_log("overlay", "peers.reason_classes", sub_started)
++    served = _with_listed_identity(served)
++    sub_started = _subphase_log("overlay", "peers.listed_identity", sub_started)
++    served = _with_numeric_tickers(served)
++    sub_started = _subphase_log("overlay", "peers.numeric_tickers", sub_started)
++    served = _with_price_currency(served)
++    _subphase_log("overlay", "peers.price_currency", sub_started)
++    return served
+ 
+ 
+ def _held_name_index() -> Dict[str, List[str]]:
+@@ -3536,14 +3554,17 @@ def _overlay_provenance(
+ 
+ 
+ def _overlay_top_band(
+-    security_key: Optional[str], description: Optional[Dict[str, Any]], as_of_date: Optional[str]
++    security_key: Optional[str], description: Optional[Dict[str, Any]], as_of_date: Optional[str],
++    rows: Optional[List[Dict[str, Any]]] = None,
+ ) -> Dict[str, Any]:
+     """AMGT-az-2 (FWD-16, news half): the band's description line, the news items for the name and the social line.
+     AMGT-ba-8/ba-11: the items are those of the NEWEST day that holds news inside the 30 days ending on the last
+     settled trading day before `as_of_date` (today when none is asked for); a name with no news in that window shows
+     "No news in the last 30 days". The rows are the same gold mention rows the feed reads (the name's whole stored
+     history, which carry each article's link). A read that fails is a plain reason on `items_reason`, never a 500 and
+-    never an empty list that reads as "no news"."""
++    never an empty list that reads as "no news".
++    AMGT-bk-1: `rows`, when given, are the rows `read_feed` already read for this subject in this request (the same snapshot, the same columns, the same key filter); they are used
++    as-is instead of a second read. None reads the snapshot as before."""
+     from lib.research.api import top_band
+     import lib.trading_calendar as trading_calendar
+ 
+@@ -3559,9 +3580,10 @@ def _overlay_top_band(
+             "day": day.isoformat(), "items": [],
+             "items_reason": "no news was looked up because this name is not matched to a company we cover"})
+     try:
+-        rows = [row for row in _timeline_snapshot_rows(
+-                    "article_security_mention", columns=_OVERLAY_NEWS_COLUMNS, security_key=security_key)
+-                if row.get("security_key") == security_key]
++        if rows is None:
++            rows = [row for row in _timeline_snapshot_rows(
++                        "article_security_mention", columns=_OVERLAY_NEWS_COLUMNS, security_key=security_key)
++                    if row.get("security_key") == security_key]
+         news = top_band.news_items_newest(rows, day)
+     except Exception as err:  # noqa: BLE001 -- reported, never read as "no news"
+         news = {"day": day.isoformat(), "items": [],
+@@ -3720,7 +3742,8 @@ def read_security_overlay(
+         return carried or "no ranking row is stored for this name on the {0} ranking".format(label)
+ 
+     phase_started = time.monotonic()
+-    bundle_feed = read_feed(resolved_key, identity=identity, as_of_date=as_of_date)
++    feed_sink: Dict[str, Any] = {}
++    bundle_feed = read_feed(resolved_key, identity=identity, as_of_date=as_of_date, rows_sink=feed_sink)
+     phase_started = _phase_log("overlay", "feed", phase_started)
+     bundle_description = read_description(resolved_key, identity=identity, model_block=model_block)
+     _phase_log("overlay", "description", phase_started)
+@@ -3754,7 +3777,9 @@ def read_security_overlay(
+         # AMGT-an-4 (FWD-38 d): when each input class last landed for this name, or why it cannot be read.
+         "provenance": _phase_call("overlay", "provenance", lambda: _overlay_provenance(resolved_key, model_block, bundle_feed)),
+         # AMGT-az-2 (FWD-16 news half, FWD-12 provenance half): the top-of-page band and each input's last run.
+-        "top_band": _phase_call("overlay", "top_band", lambda: _overlay_top_band(resolved_key, bundle_description, as_of_date)),
++        "top_band": _phase_call("overlay", "top_band", lambda: _overlay_top_band(
++            resolved_key, bundle_description, as_of_date,
++            rows=[dict(row) for row in feed_sink["rows"]] if "rows" in feed_sink else None)),
+         "input_provenance": _phase_call("overlay", "input_provenance", lambda: _overlay_input_provenance(resolved_key)),
+     }
+     if breakout_miss:
+@@ -5619,6 +5644,7 @@ def read_feed(
+     security_key: Optional[str],
+     identity: Optional[Dict[str, Any]] = None,
+     as_of_date: Optional[str] = None,
++    rows_sink: Optional[Dict[str, Any]] = None,
+ ) -> Dict[str, Any]:
+     """THE HEADER FEED -- the newest HARVESTED articles that name this security, across every publisher.
+ 
+@@ -5631,7 +5657,8 @@ def read_feed(
+     AMGT-gg-4: each item also carries `mentions` (gold's `mention_count`, None where the row stores none); when any
+     item carries a count `most_discussed_basis` names that measured basis, else it stays the ABSENT text. Order is
+     unchanged. Social items have no measured source yet.
+-    A gold read that FAILS is `INCOMPLETE` with its reason, never an empty feed."""
++    A gold read that FAILS is `INCOMPLETE` with its reason, never an empty feed.
++    AMGT-bk-1: `rows_sink`, when a dict, receives `rows`: this subject's rows exactly as read (before the published_utc filter), for the overlay's top band to reuse; set only on a completed read."""
+     identity = identity or resolve_identity(security_key)
+     resolved_key = identity.get("security_key")
+     start_date, end_date = pool_reader.window_bounds(COVERAGE_WINDOW_DAYS, as_of_date)
+@@ -5651,13 +5678,19 @@ def read_feed(
+             "reason": "identity UNRESOLVED -- the harvested articles were not read, because there is no measured identifier to ask with",
+         })
+         return base
++    sub_started = time.monotonic()
+     from lib.research.api import top_band
+     from lib.research.harvest import publication_gold
+ 
++    sub_started = _subphase_log("overlay", "feed.imports", sub_started)
+     try:
+-        held = [row for row in _timeline_snapshot_rows(
+-                    "article_security_mention", columns=_OVERLAY_NEWS_COLUMNS, security_key=resolved_key)
+-                if row.get("security_key") == resolved_key and row.get("published_utc") is not None]
++        subject_rows = [row for row in _timeline_snapshot_rows(
++                            "article_security_mention", columns=_OVERLAY_NEWS_COLUMNS, security_key=resolved_key)
++                        if row.get("security_key") == resolved_key]
++        sub_started = _subphase_log("overlay", "feed.snapshot", sub_started)
++        if rows_sink is not None:
++            rows_sink["rows"] = subject_rows
++        held = [row for row in subject_rows if row.get("published_utc") is not None]
+         dated = [(publication_gold._day_of(row["published_utc"]).isoformat(), row) for row in held]
+     except Exception as err:  # noqa: BLE001 -- reported as INCOMPLETE, never as empty
+         base.update({
+@@ -5689,6 +5722,7 @@ def read_feed(
+             "mentions": None if row.get("mention_count") is None else top_band._count(row.get("mention_count")),
+         })
+     items.sort(key=lambda item: (item["published_at"] or "", item["article_key"] or ""), reverse=True)
++    sub_started = _subphase_log("overlay", "feed.items", sub_started)
+     if any(item["mentions"] is not None for item in items):
+         base["most_discussed_basis"] = (
+             "gold article_security_mention mention_count, served as `mentions` on each item; "
+@@ -5700,9 +5734,11 @@ def read_feed(
+         status = "NONE_IN_WINDOW"
+     else:
+         status = "NEVER_HELD"
++    named_items = source_names.with_publisher_names(items)
++    _subphase_log("overlay", "feed.names", sub_started)
+     base.update({
+         # AMGT-bb-17 (bb-11): each item also carries `publisher_name`, beside the raw `publisher` code.
+-        "items": source_names.with_publisher_names(items),
++        "items": named_items,
+         "item_count": len(items),
+         "coverage_status": status,
+         "store_item_count": len({row.get("article_key") for row in held}),
+@@ -6768,6 +6804,21 @@ def _phase_call(route: str, phase: str, call: Any) -> Any:
+         _phase_log(route, phase, started)
+ 
+ 
++# AMGT-bk-1: `AMGT_SUBPHASE route=<r> phase=<outer>.<step> ms=<n>` lines split the two overlay phases the round-103 apply left unexplained (feed: 1,776 ms of which 705 was its read; peers: 1,001 ms).
++# A different prefix from AMGT_PHASE on purpose: `r102_phase_table.py` counts AMGT_PHASE lines and expects exactly the fourteen. Logs only: no served field reads a timing.
++def _subphase_log(route: str, phase: str, started: float) -> float:
++    _segment_log("route={0} phase={1} ms".format(route, phase), started, prefix="AMGT_SUBPHASE")
++    return time.monotonic()
++
++
++def _subphase_call(route: str, phase: str, call: Any) -> Any:
++    started = time.monotonic()
++    try:
++        return call()
++    finally:
++        _subphase_log(route, phase, started)
++
++
+ # The columns each timeline route SERVES off gold (timeline_api's `_serve_*` readers plus the two keys the
+ # loaders match on). A column an older snapshot lacks is simply absent, read as None exactly as before.
+ _TIMELINE_DAY_DAILY_COLUMNS = ("security_key", "day", "data_status", "publishers_covered", "publishers_covered_codes")

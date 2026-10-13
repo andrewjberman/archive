@@ -1,0 +1,56 @@
+{
+  "slug": "nfra-mcpindex-r10-catalog-release",
+  "title": "NFRA_MCPINDEX MX-r-11 PHASE B: release MX-c-8's DATA_CATALOG.yaml tool_index + harvest_datasets and opal_discover onto the opal-gateway host -- deploy-only commit ad2acc0a93 on live 64b3e54658",
+  "author": "0.7.0_AE_CloudOps~MI",
+  "status": "OPEN",
+  "opened_at": "2026-10-13T22:34:48.710360+00:00",
+  "window_hours": 8.0,
+  "entry_path": "org/critical_paths/change_management/20261013T2234Z_nfra-mcpindex-r10-catalog-release_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "s3-prefix",
+      "target": "s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/ -- opal-gateway-ad2acc0a93.tar.gz + -latest.tar.gz",
+      "proof_required": "head-object on BOTH new keys showing git-ref = ad2acc0a9305456e5bac4d7fd2cc5cd42642b203, AND the rollback key opal-gateway-64b3e54658.tar.gz still 551109 B ETag 527cab0d7d0695c3c6f3c3df902c11df -- read BEFORE this leg closes",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "activation",
+      "target": "SSM pull + systemctl restart opal-gateway on i-07dccb1615503ac99",
+      "proof_required": "/health 200; running bytes of the 2 shipped files md5/sha-equal to the BUILD INPUT (the cut) with a negative control at the base; three censuses EQUAL: tools 67=67 names equal, .env KEY set 54=54, ENABLED_INTEGRATIONS 7=7",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verify",
+      "target": "r11.AC2 on the host -- FWD-20 partition + FWD-21 discover reads",
+      "proof_required": "bash .../round10/checks/r11.AC2.sh -- RESULT: PASS exit=0",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "r11.AC3 -- the (a) tool depth and freshness second-instrument read against the DEPLOYED catalog bytes",
+      "proof_required": "bash .../round10/checks/r11.AC3.sh -- RESULT: PASS exit=0",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "git",
+      "target": "infra/aws/ec2/EC2_MANIFEST.json services.opal-gateway on box/sitez",
+      "proof_required": "deployed_commit=ad2acc0a9305456e5bac4d7fd2cc5cd42642b203 and previous_deployed_commit=64b3e54658060859b81d6bcd48dc7000615f865d (the CTO half binds this; NEVER the stale 185dc04888, and NEVER the deploy tree's own 2c0f84966d/daa56d81ac vintage the wrapper writes), mcportal_commit 0e02a1f unmoved",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261013T223448Z OPENED by 0.7.0_AE_CloudOps~MI with 5 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "sitez"
+}

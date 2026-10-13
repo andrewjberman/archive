@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bk-1.the-overlay-prints-sub-phase-lines-and-its-top-band-reuses-the-feed-rows",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bk-1.the-overlay-prints-sub-phase-lines-and-its-top-band-reuses-the-feed-rows.md",
+    "group": "OTHER",
+    "vintage_commit": "5612739cbb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "5612739cbb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bk-1.the-overlay-prints-sub-phase-lines-and-its-top-band-reuses-the-feed-rows.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~414",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "2e56fe821c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-414 (LOCAL). No deploy in this cell: the order's bounds grant no deploy, no store write and no Bloomberg call. Post-patch blob 96642b55204d read by git hash-object."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `R104 CANDIDATE: YES (5 of 5 arms)` with PASS on S1, S2, E1, E2 and E3 (thirteen sub-phase lines once each; they sum to their phases; the overlay and peers bodies equal the live function's for six subjects; one LIST of the mention table per overlay); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-414 && PYTHONPATH=\"$(pwd)\" timeout 590 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round104_prep/checks/r104_candidate_check.py\"; echo \"exit=$?\"",
+      "output_evidence": "ASML_NA_Equity     S1 True S2 True E1 True lists=1 | feed subs 1328 of 1327 ms, peers subs 1541 of 1542 ms\nVLO_US_Equity      S1 True S2 True E1 True lists=1 | feed subs 165 of 165 ms, peers subs 394 of 395 ms\nKOFUBL_MM_Equity   S1 True S2 True E1 True lists=1 | feed subs 165 of 165 ms, peers subs 478 of 478 ms\n1299_HK_Equity     S1 True S2 True E1 True lists=1 | feed subs 164 of 164 ms, peers subs 871 of 872 ms\nBA_US_Equity       S1 True S2 True E1 True lists=1 | feed subs 220 of 221 ms, peers subs 663 of 663 ms\nSAN_FP_Equity      S1 True S2 True E1 True lists=1 | feed subs 193 of 193 ms, peers subs 481 of 482 ms\nE3 control: the top band handed SAN_FP_Equity's rows serves a different body for ASML_NA_Equity: True\n   PASS S1 thirteen sub-phase lines once each\n   PASS S2 sub-phases sum to their phase\n   PASS E1 overlay and peers bodies equal the live function's\n   PASS E2 one LIST of the mention table per overlay\n   PASS E3 the equality arm sees a wrong-subject top band\nR104 CANDIDATE: YES (5 of 5 arms)\nexit=0",
+      "denominator": "5 of 5 arms (S1, S2, E1, E2, E3); 6 of 6 subjects for E1 per-subject lines; 13 of 13 sub-phase lines (once each) per the S1 arm; exit=0",
+      "status": "PASS",
+      "expect": "PASS S1 thirteen sub-phase lines once each.*PASS S2 sub-phases sum to their phase.*PASS E1 overlay and peers bodies equal the live function's.*PASS E2 one LIST of the mention table per overlay.*PASS E3 the equality arm sees a wrong-subject top band.*R104 CANDIDATE: YES \\(5 of 5 arms\\).*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "exactly two lines: `lib/research/api/scoped_amgt.py` and then `96642b55204d`",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-414 && git diff --name-only \"$(git merge-base HEAD box/dell1)\" HEAD -- . \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~414\" \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel\" | sort; git hash-object lib/research/api/scoped_amgt.py | cut -c1-12",
+      "output_evidence": "lib/research/api/scoped_amgt.py\n96642b55204d",
+      "denominator": "2 of 2 expected lines (1 committed changed path against merge-base with box/dell1; 1 blob hash of 12 characters)",
+      "status": "PASS",
+      "expect": "lib/research/api/scoped_amgt\\.py\\s+96642b55204d"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A -- the order names no assertion this worker authored; the change is a prepared patch applied verbatim, and AC1's own arm E3 (a top band handed another subject's rows) is the fault-injection control for the equality arm.",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "AC1 E3 PASS: a top band handed SAN_FP_Equity's rows serves a different body for ASML_NA_Equity: True.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: AC1 was run once under its bound (timeout 590, exit 0). A second same-input run was not made; the order prescribes one run.",
+      "observed": "single run, exit=0, R104 CANDIDATE: YES (5 of 5 arms)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live deploy of lib/research/api/scoped_amgt.py (the bk-2 redeploy)",
+      "reason": "Out of this cell by the order's bounds (ONE file, read-only against the world); bk-2 owns the apply and redeploy."
+    },
+    {
+      "item": "Surprise rows in surprise-channel INVESTIGATION_v1.md",
+      "reason": "No row filed: no premise failed, the patch applied by git apply rc=0, and AC1 and AC2 matched their expectations."
+    },
+    {
+      "item": "Push of wk-AMGT_RESAPP-414 to any remote",
+      "reason": "Out of bounds: local commits only on the worktree branch."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~414/ac1_run.txt",
+  "compiler_tools": [
+    {
+      "tool": "git apply",
+      "invocation": "git apply --whitespace=nowarn org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round104_prep/r104_candidate_source.patch",
+      "result": "rc=0 after a clean --check dry run; git hash-object lib/research/api/scoped_amgt.py gives 96642b55204d (base 84002d3fd559 verified before apply)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~414 <0.9.0_WK_AMGT_RESAPP~414@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/api/scoped_amgt.py",
+      "result": "commit 2e56fe821c; commit-gate All checks passed; msg-verify MATCH len=1024"
+    }
+  ]
+}

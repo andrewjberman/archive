@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fa-2.the-model-seam-over-https-and-the-served-inputs-reader",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "0d02a44ab9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "0d02a44ab9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-2.the-model-seam-over-https-and-the-served-inputs-reader.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~421",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/model.py",
+      "kind": "script",
+      "commit_or_etag": "3018dac548",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "library module, no deploy: one HTTPS POST per model call, run later by the issuer; the module writes nothing to AWS and imports no AWS library.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/inputs.py",
+      "kind": "script",
+      "commit_or_etag": "fa46fd7b7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "library module, no deploy: invokes the scoped API Lambda with GET events only when the issuer runs it; the module types no function name (the name is the argument or the AIFILL_SERVED_FUNCTION environment variable).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_model_inputs.py",
+      "kind": "script",
+      "commit_or_etag": "fa46fd7b7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module: urlopen and the Lambda client are faked; no network, no AWS, no real model call.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FA-2 ARMS: YES (N of N)` with N equal to the count printed and N at least 21, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-421 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa2_model.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM served_inputs: the env var names the function, an argument wins over it PASS ({'fn-from-env'}, {'fn-from-arg'})\nARM inputs.py types no Lambda name literal (the LGIC naming gate, rule 30) PASS inputs.py types the function name\nARM the anthropic SDK was never imported (0.45 cannot parse server-tool blocks) PASS anthropic imported\nAIFILL FA-2 ARMS: YES (21 of 21)\nexit=0",
+      "denominator": "21 of 21 arms PASS on the committed bytes of HEAD fa46fd7b7e (model.py at 3018dac548, inputs.py and the test module at fa46fd7b7e); on the same run, grep -c ' PASS' = 21 and grep -c ' FAIL' = 0 (the check's full output, 21 ARM lines).",
+      "status": "PASS",
+      "expect": "AIFILL FA-2 ARMS: YES \\(21 of 21\\)[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-421 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_model_inputs.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "...............................                                  [100%]\n31 passed in 0.13s\nexit=0",
+      "denominator": "31 passed of 31 test functions defined in lib/research/aifill/tests/test_model_inputs.py on the committed bytes of HEAD fa46fd7b7e; 0 failed, 0 error.",
+      "status": "PASS",
+      "expect": "[0-9]+ passed in [0-9.]+s[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the face names no mutant for this cell; the prepared check is not mutated at this cut",
+      "expected": "N/A",
+      "observed": "N/A: the face names no mutant (proof of the cell is the two criteria only)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of check_fa2_model.py on the worktree at HEAD fa46fd7b7e, compared (run 1: AIFILL FA-2 ARMS: YES (21 of 21); run 2: grep -c ' PASS' = 21, grep -c ' FAIL' = 0)",
+      "observed": "21 of 21 in both runs; no FAIL arm line in either",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the one live model call and the live served-inputs read",
+      "reason": "out of bounds for this cell per the face: the issuer runs the one live call at the drain; every model call and Lambda read in the tests and the check is faked."
+    },
+    {
+      "item": "the order's status flip to complete",
+      "reason": "the flip is the issuer's (face section 5); this instance carries the worker's measured criteria only."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W421-S1: the LGIC naming gate (ENFORCE) refuses the literal default Lambda name opal-amgt-scoped-api in lib/research/aifill/inputs.py (NEW, out of pattern as API_GW; no infra/logic/registry row for the live function); the predecessor's row, ruled by the issuer's amendment eb79b89c6f (the function name is an argument or an environment variable, never typed in lib/); no new row filed by this worker; disarm owner 2.0.0_SA_COO~R2."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~421/AMGT_RESAPP.TO-AMGT-fa-2.the-model-seam-over-https-and-the-served-inputs-reader.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/model.py lib/research/aifill/inputs.py lib/research/aifill/tests/test_model_inputs.py",
+      "result": "All checks passed! and OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "naming-gate (inside safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~421 <0.9.0_WK_AMGT_RESAPP~421@opal.agent>\" -F <msgfile> -- lib/research/aifill/inputs.py lib/research/aifill/tests/test_model_inputs.py",
+      "result": "committed fa46fd7b7e with no refusal (the amended inputs.py types no resource-name literal); the commit's own message-verify MATCH"
+    },
+    {
+      "tool": "literal census (grep)",
+      "invocation": "grep -c \"opal-amgt-scoped-api\" lib/research/aifill/model.py lib/research/aifill/inputs.py lib/research/aifill/tests/test_model_inputs.py",
+      "result": "0 in each of the three owned files on the committed bytes; the check arm 'inputs.py types no Lambda name literal' is PASS"
+    }
+  ]
+}

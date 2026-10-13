@@ -1,0 +1,294 @@
+diff --git a/infra/aws/lambda/investor-reporting/intake/portfolio.py b/infra/aws/lambda/investor-reporting/intake/portfolio.py
+index 644cb3b251..e74e865ddb 100644
+--- a/infra/aws/lambda/investor-reporting/intake/portfolio.py
++++ b/infra/aws/lambda/investor-reporting/intake/portfolio.py
+@@ -10,6 +10,7 @@ from __future__ import annotations
+ import copy
+ import hashlib
+ import json
++import math
+ from pathlib import Path
+ import re
+ import sys
+@@ -361,7 +362,27 @@ def verify_frozen_portfolio(frozen):
+ # user-named proxy; an untracked ticker may take one too. The correction shape is the PRD's AnalysisRequest
+ # "findings/corrections" item: {finding_code, approved_by, from_value, to_value}.
+ CORRECTABLE_FINDINGS = frozenset({"TICKER_NOT_FOUND", "TICKER_DATA_NOT_ENTITLED", "TICKER_AMBIGUOUS",
+-                                  "TICKER_CHECK_UNAVAILABLE"})
++                                  "TICKER_CHECK_UNAVAILABLE", "TICKER_CHECK_FAILED", "TICKER_NOT_CHECKED"})
++# AR-y-293: the words the yfinance step's reason words become in a finding (plain words, ASCII).
++CHECK_FAILED_WORDS = {
++    "EXCEPTION": "the price history service returned an error",
++    "TIMEOUT": "the price history service did not answer in time",
++    "PUSHBACK": "the price history service refused the request for now",
++    "ERROR_FRAME": "the price history service returned no usable answer",
++}
++NOT_CHECKED_LIMIT = 10
++
++
++def _kept_by_history(check, symbol):
++    """AR-y-293: True when the resolver KEPT this symbol by its yfinance history (a state of its own, no provider
++    receipt), with the evidence a KEPT needs. Every other check is answered by the FOUND gate exactly as before."""
++    history = check.get("checker") if isinstance(check, dict) else None
++    return (isinstance(check, dict) and check.get("state") == "KEPT" and check.get("symbol") == symbol
++            and check.get("reason") == "YFINANCE_HISTORY" and check.get("price_source") == "yfinance"
++            and check.get("provider_receipt") is None and isinstance(history, dict)
++            and type(history.get("rows")) is int and history["rows"] > 0
++            and type(history.get("last_close")) in (int, float) and math.isfinite(history["last_close"])
++            and history["last_close"] > 0)
+ MAX_CORRECTIONS = 20
+ 
+ 
+@@ -416,8 +437,9 @@ def freeze_template_portfolio(template, owner, source, security_checks, *, price
+             continue
+         _required_text(owner, key, "OWNER_REQUIRED")
+     findings = copy.deepcopy(template["findings"])
+-    def emit(code, row=None, column=None, actions=None, value=None):
+-        findings.append(finding(code, row=row, column=column, sheet=template.get("sheet"), actions=actions, value=value))
++    def emit(code, row=None, column=None, actions=None, value=None, severity="ERROR", description=None):
++        findings.append(finding(code, row=row, column=column, sheet=template.get("sheet"), actions=actions, value=value,
++                                severity=severity, description=description))
+     # The user's corrections replace a row's symbol for the check, the price and the holdings; the template itself is
+     # never rewritten (uploads.py re-reads it from the original bytes) and each applied correction is disclosed.
+     corrected = template_corrections(corrections)
+@@ -461,7 +483,8 @@ def freeze_template_portfolio(template, owner, source, security_checks, *, price
+                     and isinstance(candidate, dict) and candidate.get("id") == "M:" + str(symbol)
+                     and candidate.get("display_security_id") == symbol):
+                 provider_id = candidate["id"]
+-            if (not isinstance(check, dict) or check.get("state") != "FOUND"
++            kept = _kept_by_history(check, symbol)
++            if not kept and (not isinstance(check, dict) or check.get("state") != "FOUND"
+                     or check.get("symbol") != symbol or not isinstance(check.get("provider_receipt"), dict)
+                     or check["provider_receipt"].get("complete") is not True
+                     or not re.fullmatch(r"[a-f0-9]{64}", str(check["provider_receipt"].get("sha256", "")))
+@@ -476,6 +499,15 @@ def freeze_template_portfolio(template, owner, source, security_checks, *, price
+                 named = original.get("symbol")
+                 if state == "NOT_FOUND":
+                     emit("TICKER_NOT_FOUND", coordinate, "A", actions=["REPLACE_FILE", "NAME_PROXY"], value=named)
++                elif reason == "YFINANCE_CHECK_FAILED":
++                    # AR-y-293: the checker could not answer. Unknown, never absent: the words say so and name the reason.
++                    emit("TICKER_CHECK_FAILED", coordinate, "A", actions=["REPLACE_FILE", "NAME_PROXY"], value=named,
++                         description="%s could not be checked just now (%s); name a proxy, or upload again in a few minutes."
++                         % (named, CHECK_FAILED_WORDS.get(check.get("check_failed"), CHECK_FAILED_WORDS["ERROR_FRAME"])))
++                elif reason == "YFINANCE_NOT_CHECKED":
++                    emit("TICKER_NOT_CHECKED", coordinate, "A", actions=["REPLACE_FILE", "NAME_PROXY"], value=named,
++                         description="%s was not checked in this upload (the limit is %d unknown tickers per upload); "
++                                     "name a proxy." % (named, NOT_CHECKED_LIMIT))
+                 elif reason == "PROVIDER_ENTITLEMENT_UNVERIFIED":
+                     # A real security the account is not entitled to price (row S287: mutualFundDataUSA). Andrew,
+                     # card 3: no data purchase; the user names a proxy.
+@@ -527,9 +559,19 @@ def freeze_template_portfolio(template, owner, source, security_checks, *, price
+                     continue
+             else:
+                 continue
+-            rows.append({"original": copy.deepcopy(original), "security_id": provider_id,
+-                         "analysis_dollars": _text(dollars), "price": copy.deepcopy(quote),
+-                         "provider_receipt_sha256": check["provider_receipt"]["sha256"]})
++            row = {"original": copy.deepcopy(original), "security_id": provider_id,
++                   "analysis_dollars": _text(dollars), "price": copy.deepcopy(quote),
++                   "provider_receipt_sha256": None if kept else check["provider_receipt"]["sha256"]}
++            if kept:
++                # AR-y-293: a KEPT holding keeps the client's own ticker (security_id above) and carries no provider
++                # receipt; its price evidence is the checker's own history, named as such.
++                row.update(method="KEPT_BY_HISTORY", price_source="yfinance",
++                           history={"rows": check["checker"]["rows"],
++                                    "last_close": _text(Decimal(str(check["checker"]["last_close"])))})
++                emit("TICKER_KEPT_BY_HISTORY", coordinate, "A", actions=["REVIEW"], value=original.get("symbol"),
++                     severity="NOTICE", description="%s is not in our data provider but has price history, so it is "
++                                                    "used as it is." % symbol)
++            rows.append(row)
+             totals[provider_id] = totals.get(provider_id, Decimal(0)) + dollars
+         if not template["rows"]:
+             emit("NO_HOLDINGS")
+diff --git a/infra/aws/lambda/investor-reporting/intake/security_resolution.py b/infra/aws/lambda/investor-reporting/intake/security_resolution.py
+index f5c77c87d9..3e16523adb 100644
+--- a/infra/aws/lambda/investor-reporting/intake/security_resolution.py
++++ b/infra/aws/lambda/investor-reporting/intake/security_resolution.py
+@@ -60,6 +60,34 @@ def _fund_row_cause(row, bare):
+ 
+ FUND_ROW_CAUSES = frozenset({"FUND_ROW_DISPLAY_MISMATCH", "FUND_ROW_SECURITY_ID_MISMATCH", "FUND_ROW_FIELD_SHAPE"})
+ 
++# AR-y-293 (C-SWAP step 2). A symbol the provider answered NOT_FOUND goes to the injected yfinance checker (a port;
++# absent = the resolver of today, exactly). The checker's answers: KEPT, NOT_KEPT, CHECK_FAILED (with one reason
++# word) and NOT_CHECKED (beyond its per-upload cap). Only a verified KEPT changes the symbol's state.
++CHECK_STATES = frozenset({"KEPT", "NOT_KEPT", "CHECK_FAILED", "NOT_CHECKED"})
++CHECK_FAILED_REASONS = frozenset({"EXCEPTION", "TIMEOUT", "PUSHBACK", "ERROR_FRAME"})
++# A KEPT answer is cached no longer than the NOT_FOUND it replaces (the 900 s written at the provider step).
++KEPT_TTL = 900
++
++
++def _valid_kept_checker(entry):
++    """True when a checker entry carries the evidence a KEPT needs: a row count above zero and a finite positive close."""
++    return (isinstance(entry, dict) and type(entry.get("rows")) is int and entry["rows"] > 0
++            and type(entry.get("last_close")) in (int, float) and math.isfinite(entry["last_close"])
++            and entry["last_close"] > 0)
++
++
++def _checker_verdict(entry):
++    """(state, reason) for one checker entry. Anything that is not a closed, verifiable answer is CHECK_FAILED, never
++    an absence: a malformed entry reads ERROR_FRAME."""
++    if not isinstance(entry, dict) or entry.get("state") not in CHECK_STATES:
++        return "CHECK_FAILED", "ERROR_FRAME"
++    if entry["state"] == "KEPT":
++        return ("KEPT", None) if _valid_kept_checker(entry) else ("CHECK_FAILED", "ERROR_FRAME")
++    if entry["state"] == "CHECK_FAILED":
++        reason = entry.get("reason")
++        return "CHECK_FAILED", reason if reason in CHECK_FAILED_REASONS else "ERROR_FRAME"
++    return entry["state"], None
++
+ 
+ def classify_batch(symbols, receipt, *, account_id, source_revision, causes=None, funds=None):
+     """Validate complete response before taking set difference.
+@@ -157,13 +185,17 @@ def classify_batch(symbols, receipt, *, account_id, source_revision, causes=None
+ 
+ class SecurityResolver:
+     def __init__(self, *, provider_check, identity, cache, clock, account_id,
+-                 source_revision, namespace="YCHARTS_SECURITY_ID"):
++                 source_revision, namespace="YCHARTS_SECURITY_ID", checker=None):
+         if (not callable(provider_check) or not callable(identity) or not callable(clock)
+                 or not account_id or not source_revision or namespace != "YCHARTS_SECURITY_ID"):
+             raise ResolutionRefused("RESOLUTION_PORT_REQUIRED")
+         if cache is not None and (not callable(getattr(cache, "get", None))
+                                   or not callable(getattr(cache, "put", None))):
+             raise ResolutionRefused("CACHE_PORT_INVALID")
++        if checker is not None and not callable(getattr(checker, "check", None)):
++            raise ResolutionRefused("CHECKER_PORT_INVALID")
++        # The yfinance checker (AR-y-293). None = no step 2: this resolver answers exactly as before.
++        self.checker = checker
+         self.provider_check, self.identity, self.cache, self.clock = provider_check, identity, cache, clock
+         self.account_id, self.source_revision, self.namespace = account_id, source_revision, namespace
+         # Why the last provider read was refused by classify_batch (a closed UNVERIFIED_CAUSES token), else None, and
+@@ -189,6 +221,18 @@ class SecurityResolver:
+                     cached = self.cache.get(self._key(symbol))
+                 except Exception:
+                     pass  # A cache outage never changes a provider result into a miss.
++            # A cached KEPT answers only when this resolver has the checker (a KEPT is never served without it).
++            if (self.checker is not None and isinstance(cached, dict) and cached.get("key") == self._key(symbol)
++                    and type(cached.get("expires_at")) in (int, float) and cached["expires_at"] > now
++                    and isinstance(cached.get("result"), dict) and cached["result"].get("symbol") == symbol
++                    and cached["result"].get("state") == "KEPT" and cached["result"].get("reason") == "YFINANCE_HISTORY"
++                    and cached["result"].get("provider_receipt") is None
++                    and _valid_kept_checker(cached["result"].get("checker"))):
++                results[symbol] = copy.deepcopy(cached["result"])
++                results[symbol]["cache_hit"] = True
++                continue
++            # A cached NOT_FOUND is still a provider answer and is served as one; it is NOT the last word when a
++            # checker is present: the unknown step below asks the checker about it, so it cannot hide a later KEPT.
+             if (isinstance(cached, dict) and cached.get("key") == self._key(symbol)
+                     and type(cached.get("expires_at")) in (int, float)
+                     and cached["expires_at"] > now
+@@ -232,11 +276,53 @@ class SecurityResolver:
+                             "expires_at": now + ttl, "result": copy.deepcopy(result)})
+                     except Exception:
+                         pass
++        # AR-y-293: every symbol still NOT_FOUND (fresh, or a cached provider NOT_FOUND) goes to the checker, ONE batch.
++        if self.checker is not None:
++            unknown = [symbol for symbol in unique if results[symbol]["state"] == "NOT_FOUND"]
++            if unknown:
++                self._check_unknown(results, unknown, now)
+         rows = [copy.deepcopy(results[symbol]) for symbol in symbols]
++        states = set(STATES) | ({"KEPT"} if any(r["state"] == "KEPT" for r in rows) else set())
+         return {"results": rows, "requested_count": len(symbols), "distinct_count": len(unique),
+                 "cache_count": sum(r["cache_hit"] for r in results.values()),
+                 "provider_requested_count": len(pending),
+-                "counts": {state: sum(r["state"] == state for r in rows) for state in sorted(STATES)}}
++                "counts": {state: sum(r["state"] == state for r in rows) for state in sorted(states)}}
++
++    def _check_unknown(self, results, unknown, now):
++        """Step 2 of C-SWAP for the symbols the provider could not find. A verified KEPT changes the symbol's state; a
++        NOT_KEPT leaves the NOT_FOUND as it was; CHECK_FAILED and NOT_CHECKED leave the symbol UNKNOWN (UNAVAILABLE),
++        never absent, and carry their reason word. A raised checker reads CHECK_FAILED EXCEPTION for every symbol."""
++        raised = None
++        try:
++            answer = self.checker.check(list(unknown))
++        except Exception:
++            answer, raised = None, "EXCEPTION"
++        for symbol in unknown:
++            base = results[symbol]
++            if raised is not None:
++                state, reason = "CHECK_FAILED", raised
++            else:
++                entry = answer.get(symbol) if isinstance(answer, dict) else None
++                state, reason = _checker_verdict(entry)
++            if state == "NOT_KEPT":
++                continue
++            if state == "KEPT":
++                result = dict(base, state="KEPT", reason="YFINANCE_HISTORY", candidates=[], provider_receipt=None,
++                              resolution_action="NONE", price_source="yfinance",
++                              checker={"rows": entry["rows"], "last_close": float(entry["last_close"])})
++                results[symbol] = result
++                if self.cache is not None:
++                    try:
++                        self.cache.put(self._key(symbol), {"key": self._key(symbol),
++                            "expires_at": now + KEPT_TTL, "result": copy.deepcopy(result)})
++                    except Exception:
++                        pass
++            elif state == "CHECK_FAILED":
++                results[symbol] = dict(base, state="UNAVAILABLE", reason="YFINANCE_CHECK_FAILED",
++                                       resolution_action="CHECK_THEN_SWAP", check_failed=reason)
++            else:
++                results[symbol] = dict(base, state="UNAVAILABLE", reason="YFINANCE_NOT_CHECKED",
++                                       resolution_action="CHECK_THEN_SWAP", not_checked="UPLOAD_LIMIT")
+ 
+ 
+ def verified_suggestions(candidates, resolver):
+diff --git a/infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py b/infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py
+index 8052704a5e..9668735ce7 100644
+--- a/infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py
++++ b/infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py
+@@ -129,7 +129,7 @@ def codes_without_words(codes):
+ 
+ def test_every_finding_code_the_reader_can_emit_has_words():
+     codes = finding_codes_in_the_code()
+-    assert len(codes) == 30, (len(codes), sorted(codes))  # 23 in template_reader.py, 11 in portfolio.py, 4 in both
++    assert len(codes) == 33, (len(codes), sorted(codes))  # 23 in template_reader.py, 14 in portfolio.py, 4 in both (AR-y-293: +3 KEPT/CHECK codes)
+     assert {"HEADER_ROW_REPEATED", "TOTAL_ROW_PRESENT", "TICKER_CHECK_UNAVAILABLE", "SHEETS_NOT_READ"} <= codes
+     assert codes_without_words(codes) == []
+     # the check can fail: a code with words in neither source is named
+diff --git a/infra/aws/lambda/investor-reporting/intake/uploads.py b/infra/aws/lambda/investor-reporting/intake/uploads.py
+index 681d86afce..3bd5b42d71 100644
+--- a/infra/aws/lambda/investor-reporting/intake/uploads.py
++++ b/infra/aws/lambda/investor-reporting/intake/uploads.py
+@@ -119,9 +119,17 @@ CORRECTION_WORDS = {
+     "TICKER_AMBIGUOUS": (
+         "This ticker could mean more than one security at our data provider. Replace it with a ticker that names "
+         "one security, or name a similar ticker to stand in for it, and submit the request again."),
++    "TICKER_CHECK_FAILED": (
++        "We could not check this ticker with our price history service just now. Name a similar ticker to stand in "
++        "for it (a proxy), or submit the request again in a few minutes."),
+     "TICKER_CHECK_UNAVAILABLE": (
+         "We could not check this ticker with our data provider just now. Submit the request again in a few "
+         "minutes; if it still cannot be checked, look for a typo in the ticker."),
++    "TICKER_KEPT_BY_HISTORY": (
++        "This ticker is not in our data provider but has price history, so it is used as it is."),
++    "TICKER_NOT_CHECKED": (
++        "This ticker was not checked in this upload, because only a limited number of unknown tickers are checked "
++        "at once. Name a similar ticker to stand in for it (a proxy), or submit the request again."),
+     "UNIT_MISSING": (
+         "Cell B1 is empty, so we cannot tell what the amounts are. Put the unit in cell B1 (Dollars, Shares, "
+         "Target Weight or Current Weight) and upload the file again."),
+@@ -147,14 +155,22 @@ PROXY_CODES = frozenset({"TICKER_DATA_NOT_ENTITLED", "TICKER_NOT_FOUND"})
+ RESUBMIT_CODES = frozenset({"RESOLVE_RETRY_EXHAUSTED", "RESOLVE_PROVIDER_BUSY"})
+ 
+ 
++# AR-y-293: these codes' words name the ticker (and, for a failed check, the reason), so the finding's OWN description,
++# made where the finding is made (portfolio.py), is the sentence the person reads; the table words are the fallback.
++SYMBOL_WORDS_CODES = frozenset({"TICKER_CHECK_FAILED", "TICKER_KEPT_BY_HISTORY", "TICKER_NOT_CHECKED"})
++
++
+ def _words_for(item):
+     """The ONE source of words for a finding: this table, or the finding's OWN `description` when its code is one
+     `template_reader.WORDS` words (the reader's four AR-y-142 codes carry their sentence on the finding itself, with
+-    the row or column filled in; those sentences are NOT copied into CORRECTION_WORDS). None when neither has words."""
++    the row or column filled in; those sentences are NOT copied into CORRECTION_WORDS), or, for SYMBOL_WORDS_CODES,
++    the own description the freeze wrote with the ticker in it. None when neither has words."""
+     code = item.get("code")
++    own = item.get("description")
++    if code in SYMBOL_WORDS_CODES and isinstance(own, str) and own.strip():
++        return own
+     if code in CORRECTION_WORDS:
+         return CORRECTION_WORDS[code]
+-    own = item.get("description")
+     if isinstance(own, str) and own.strip():
+         from template_reader import WORDS
+         if code in WORDS:
