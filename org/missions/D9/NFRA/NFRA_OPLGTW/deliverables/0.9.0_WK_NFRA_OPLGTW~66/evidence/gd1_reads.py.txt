@@ -1,0 +1,41 @@
+# GD1 read script (run by 0.9.0_WK_NFRA_OPLGTW~66, 2026-10-13). Read-only: S3 list/get on opal-mcp-audit, DynamoDB scan on
+# gateway-access-state-table. Prints counts, dates, tool names and outcomes only; callers as an ordinal of a salted hash.
+import boto3, json, hashlib, collections, re, sys
+from concurrent.futures import ThreadPoolExecutor
+S3 = boto3.client("s3", region_name="us-east-1")
+DAYS = ["2026-10-07","2026-10-08","2026-10-09","2026-10-10","2026-10-11","2026-10-12","2026-10-13"]
+def lake_day(day):
+    keys = []
+    for pg in S3.get_paginator("list_objects_v2").paginate(Bucket="opal-mcp-audit", Prefix="audit/dt=%s/" % day):
+        keys += [o["Key"] for o in pg.get("Contents", [])]
+    get = lambda k: S3.get_object(Bucket="opal-mcp-audit", Key=k)["Body"].read().decode("utf-8", "replace")
+    recs = []
+    with ThreadPoolExecutor(32) as ex:
+        for body in ex.map(get, keys):
+            recs += [json.loads(l) for l in body.splitlines() if l.strip()]
+    return len(keys), recs
+out = []
+callers = {}
+def ordinal(u):
+    h = hashlib.sha256(("gd1|" + str(u)).encode()).hexdigest()
+    return "caller-%d" % callers.setdefault(h, len(callers) + 1)
+out.append("READ 1: main audit lake, prefix s3://opal-mcp-audit/audit/dt=<day>/, 7 UTC days 2026-10-07..2026-10-13")
+tot_obj = tot_rec = 0
+schwab = []; logins = []; oc = collections.Counter(); needs_login = 0
+for d in DAYS:
+    n, recs = lake_day(d); tot_obj += n; tot_rec += len(recs)
+    out.append("  dt=%s objects=%d records=%d" % (d, n, len(recs)))
+    for x in recs:
+        t = x.get("tool")
+        if t: oc[(d, x.get("outcome"))] += 1
+        if x.get("outcome") == "needs_login": needs_login += 1
+        if x.get("event") == "gw_login": logins.append((d, x.get("outcome"), x.get("reason")))
+        if t and (t.startswith("schwab_") or t == "blackdiamond_list_fees" or "download" in t):
+            schwab.append((d, x["ts"][11:19], t, x.get("outcome"), x.get("tier"), ordinal(x.get("user"))))
+out.append("  TOTAL objects=%d records=%d" % (tot_obj, tot_rec))
+out.append("  tool-call outcomes by day: " + json.dumps(sorted(["%s %s %d" % (d, o, n) for (d, o), n in oc.items()])))
+out.append("  records with outcome needs_login: %d" % needs_login)
+out.append("  gw_login events: %s" % logins)
+out.append("  Schwab / Black Diamond / download-named tool calls (day, time, tool, outcome, tier, caller ordinal): %d" % len(schwab))
+for s in schwab: out.append("    %s" % (s,))
+print("\n".join(out))
