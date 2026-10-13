@@ -5,7 +5,15 @@
 **GO:** msg 33453. **NEVER-2 entry:** `iamroles-r9-narrow-schwab`, opened 04:27Z -- **STILL OPEN** by design.
 **Delete floor (recorded before the call):** `2026-10-12T04:29:20Z`; the call completed `04:29:22Z`.
 
-> **The `POST-APPLY: schwab: verified` line is deliberately NOT written yet.** The cell makes that token
+```
+POST-APPLY: schwab: verified
+```
+
+**GRADED 2026-10-13 03:0xZ on the 23:03:07Z chain -- see section 4e.** The note below records why the
+token was withheld for the preceding 22 hours; it is kept because the reasoning is the record, and the
+conditions it names are now met rather than waived.
+
+> **(HISTORICAL) The `POST-APPLY: schwab: verified` line was deliberately NOT written at first.** The cell makes that token
 > the grade, and both halves plus the GO make branch A conditional on *"ONE real bd run on this role that
 > STARTS AFTER the delete and completes successfully"*, with the GO adding: *"If none fires in your
 > window, keep the entry open and say so; never substitute a simulation."* Half of that condition is met
@@ -304,6 +312,56 @@ nothing raised `AccessDenied`, and `opal-data-schwab` is not on any path those s
 prices-triggered dispatch may legitimately run only the prices-dependent stages. But an incomplete run on
 the role I narrowed, on the day I narrowed it, is a fact the issuer should hold rather than one I should
 quietly file. Asked.
+
+## 4e. BRANCH A SATISFIED: one chain, 29 of 29 stages, entirely post-delete
+
+The ruling required *"the whole chain post-delete"*. Measured 2026-10-13 03:0xZ:
+
+```
+chain floor (this run's S_00) : 2026-10-12T23:03:07Z     delete floor : 2026-10-12T04:29:22Z
+stage keys in gold/.checkpoints/2026-10-12/ : 29
+  written by THIS chain (>= 23:03:07Z)      : 29
+  older than this chain (stale)             :  0
+ALL 29 POST-DELETE?        True
+ALL 29 IN THIS ONE CHAIN?  True
+first  23:03:07  S_00.done        last  01:12:07  D_00f.done        duration 2h09m00s
+```
+
+**Completion records, all newer than this chain's S_00:**
+
+| record | written |
+|---|---|
+| `gold/perf_report.json` | **2026-10-13T01:12:08Z** |
+| `gold/meta/fee_rate_history_watermark.json` | 2026-10-12T23:03:35Z |
+| `gold/meta/advisor_assignments_watermark.json` | 2026-10-12T23:15:01Z |
+| `gold/meta/canonical_lots_incr_watermark.json` | 2026-10-13T01:15:34Z |
+| `gold/meta/account_gains_incr_watermark.json` | 2026-10-13T01:15:37Z |
+| `gold/meta/positions_cube_incr_watermark.json` | 2026-10-13T01:15:40Z |
+| `gold/meta/holdings_lots_incr_watermark.json` | 2026-10-13T01:15:42Z |
+
+**Role state at the grade:** `schwab-bucket-access` **absent**, **16** inline policies -- unchanged since
+the 04:29:22Z delete, so the chain ran against the narrowed role for its entire length.
+
+**Why this is the real thing and the two earlier readings were not.** Section 4b offered 22 post-delete
+stages of a chain that *started* pre-delete; section 4d offered a union of two partial executions. Both
+were declined, correctly. This one needs no interpretation: the floor is this chain's own `S_00`, every
+one of the 29 keys is newer than it, **0** are stale, and the terminal `D_00f` plus a fresh
+`perf_report.json` follow it. The 7 early stages the ruling singled out as most likely to touch Schwab
+inputs -- `S_00`, `A_00`, `A_01`, `A_02`, `A_03`, `A_04`, `B_00` -- all ran post-delete inside this chain.
+
+It also used the grading rule from 4c rather than an existence check: every marker was compared against
+this run's `S_00`, never merely tested for presence. Had I checked presence, `D_00f` would have "passed"
+at any point in the last 22 hours on a predecessor's object.
+
+**Branch B did not occur:** the chain completed all 29 stages, so nothing was denied; no `AccessDenied`
+appears, and `opal-data-schwab` was not needed. Nothing is restored, and the rollback document
+(`ROLLBACK_schwab-bucket-access.json`, document shape) is retained unused.
+
+**One honest note on the wait:** the chain that graded this started at **23:03:07Z**, not the ~04:00Z I
+had been predicting. The start hour had already moved twice in the observed window (23:03Z on 10-09 and
+10-10, 04:0xZ on 10-11 and 10-12, back to 23:03Z on 10-12), which is exactly why section 4c said to read
+the first `S_00` rather than predict it. My own 04:00Z estimate in the earlier sections was a prediction
+and it was wrong by five hours; the probe that found this was the `S_00`-comparison one, not the clock.
 
 ## 5. STATE
 
