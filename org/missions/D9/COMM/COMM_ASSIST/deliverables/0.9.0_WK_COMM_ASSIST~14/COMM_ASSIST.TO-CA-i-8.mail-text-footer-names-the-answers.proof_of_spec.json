@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-8",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-8.mail-text-footer-names-the-answers.md",
+    "group": "OTHER",
+    "vintage_commit": "35a3560b52"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "35a3560b52",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-8.mail-text-footer-names-the-answers.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/mail_requests.py",
+      "kind": "script",
+      "commit_or_etag": "31fa72418c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit 31fa72418c on the worker branch wk-COMM_ASSIST-14; the closing line of _mail_text changed and nothing else; not deployed here (the TO is a code change with a test)",
+      "artifact_covered_by": ["CAi8-AC1", "CAi8-AC2"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_mail_reply.py",
+      "kind": "test",
+      "commit_or_etag": "31fa72418c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit 31fa72418c on the worker branch wk-COMM_ASSIST-14; one assertion added inside notes_redraft_as_a_new_version_texted_as_a_mail_item; the 15 cases and the last line are unchanged",
+      "artifact_covered_by": ["CAi8-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi8-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i8_footer.py\" expect: I8-FOOTER ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i8_footer.py\"",
+      "output_evidence": "(timeout 120, rc 0) I8-FOOTER ok=True has_one=True has_notes=True has_zero=True has_dev=True reason=none",
+      "denominator": "4 of 4 answer flags on the last line of the one texted mail item (1 with approve or paste, notes with redraft, 0, #dev); 1 mail item texted by the harness; run twice, identical",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi8-AC2",
+      "criterion_verbatim": "python \"data/transcripts/scripts/tests/test_inbound_mail_reply.py\" expect: INBOUND-MAIL-REPLY-TEST ok=True",
+      "method": "test_suite",
+      "invocation": "python \"data/transcripts/scripts/tests/test_inbound_mail_reply.py\"",
+      "output_evidence": "(timeout 120, rc 0) INBOUND-MAIL-REPLY-TEST ok=True cases=15/15",
+      "denominator": "15 of 15 cases PASS (15 PASS lines, one per case); the new assertion sits inside notes_redraft_as_a_new_version_texted_as_a_mail_item; run twice, identical PASS lines",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAi8-AC1 base arm: the footer check run against the base mail_requests.py (git show 35a3560b52, closing line Reply #dev [notes] to open a job / 0 drop). The base reading is the issuer's r17 measurement (has_one=False has_notes=False). This worker's scratch re-run could not reach the footer: its copy of the base tree stopped on ModuleNotFoundError: No module named 'ldo' (the import chain, see the surprise row), so the mutant status below rests on the issuer's reading, not on one re-measured here.",
+      "expected": "I8-FOOTER ok=False",
+      "observed": "issuer r17 base reading: CAi8-AC1 base FAIL as expected (has_one=False has_notes=False). Worker scratch re-run (.scratch/mut): I8-FOOTER ok=False has_one=False has_notes=False has_zero=False has_dev=False reason=ModuleNotFoundError: No module named 'ldo' -- ok=False from the import wall, not from the footer; no footer text was read",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: CAi8-AC1 check run twice on the same HEAD 31fa72418c; CAi8-AC2 test run twice on the same HEAD, the PASS lines and the last line compared",
+      "observed": "CAi8-AC1 both runs: I8-FOOTER ok=True has_one=True has_notes=True has_zero=True has_dev=True reason=none; CAi8-AC2 both runs: 15 PASS lines identical, INBOUND-MAIL-REPLY-TEST ok=True cases=15/15",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploying the footer to any live SMS path",
+      "reason": "the TO is a repository change with a test; RULES say not deployed here"
+    },
+    {
+      "item": "re-measuring the CAi8-AC1 base arm in a full base tree",
+      "reason": "the footer check's import chain (ldo runtime, lib, infra/logic/registry, org/standards) cannot be satisfied by a scratch copy of the data subtree; the issuer's r17 base reading is cited instead and the gap is filed as a surprise row"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W14-S1: the CA-i-8 base-footer control cannot be run from a scratch copy of the data subtree: the footer check imports the mail harness and its import chain reaches the ldo runtime, lib, infra/logic/registry and org/standards"
+  ],
+  "session_log": "Worker COMM_ASSIST~14, TO CA-i-8, worktree wk-COMM_ASSIST-14 at 35a3560b52. Premises checked against live state: tree paths present; _mail_text closing line was the old Reply #dev [notes] to open a job / 0 drop; no test case asserted the old line, so no case was updated. Edited the closing line to the four-answer footer and added one assertion inside notes_redraft_as_a_new_version_texted_as_a_mail_item (case count unchanged at 15). Committed the two .py files as 31fa72418c through safe-commit. Ran both criteria under timeout 120 and each twice. Filed COMM_ASSIST-W14-S1 for the base-control gap. Then this instance and the TO status flip, committed together.",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i8_footer.py\"",
+      "result": "I8-FOOTER ok=True has_one=True has_notes=True has_zero=True has_dev=True reason=none (rc 0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_reply.py",
+      "result": "INBOUND-MAIL-REPLY-TEST ok=True cases=15/15 (rc 0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CAi8-AC1,CAi8-AC2",
+      "result": "proof-of-spec-check structural=jsonschema acceptance rows=2 violations=0; surprises-frame 1 entry, 1 open with a row id, 1 resolves to a channel row; VALID (rc=0)"
+    }
+  ]
+}
