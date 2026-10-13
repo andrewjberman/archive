@@ -23,7 +23,7 @@ NOT moved: code, configuration, IAM, schedules, queues, the mapping, any other t
 
 The CTO's rulings (`CTO_DELL2_RELAUNCH_THREE_ASKS_READ_AND_RULED_20261012.md` section 7, AMENDED @cccdb9ed92; then `CTO_ROUND_ANALYSIS_IRPT_ANLREQ_Y_ROUND_17_20261012.md`
 section 1, msg 6641 ruling (A), CTO msg 6646): ONE synthetic request in tenant **49financial**, filed by ONE Opal staff member through the Analysis form on portal DEV with a
-synthetic holdings file, naming ONE test ticket `2.0.0_SA_COO~V2` files FIRST in 49financial. No synthetic 49financial advisor exists and none is minted (a users row
+synthetic holdings file, naming ONE test ticket `2.0.0_SA_COO~V2` files FIRST in 49financial: `TCK-20261012-c546fead` (open, 49financial, created by `svc-commentary`, no draft, no `report_ref`; V2 msg 6651, record `R14_TEST_TICKET_20261012.json` @1bd49086ab). No synthetic 49financial advisor exists and none is minted (a users row
 and partner profile for a fixture, and a constructed no-row filer, are both REFUSED). The filing is an act only a person can do: it is on Andrew's list. The earlier
 cottonwood ticket `TCK-20261012-13cd3a1d` is NOT used and stays open as a test ticket (its close is Andrew's act). The act is TR-dp-24's ONLY once all four hold:
 1. the request exists, an accepted record in 49financial whose id is `REQ-<24 hex>` and whose record carries `ticket_id` = the 49financial test ticket's id (Y2);
