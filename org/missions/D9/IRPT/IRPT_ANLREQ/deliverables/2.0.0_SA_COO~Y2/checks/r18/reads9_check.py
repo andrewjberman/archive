@@ -22,9 +22,10 @@ def main(argv):
     problems = []
     if not (root / ".tools").is_dir():
         problems.append("root %s is not the repository root" % root)
-    path = root / RESULT
+    result = argv[argv.index("--result") + 1] if "--result" in argv else RESULT
+    path = root / result
     if not path.is_file():
-        problems.append("no %s" % RESULT)
+        problems.append("no %s" % result)
     else:
         doc = json.loads(path.read_text(encoding="utf-8"))
         count = doc.get("count") or {}
