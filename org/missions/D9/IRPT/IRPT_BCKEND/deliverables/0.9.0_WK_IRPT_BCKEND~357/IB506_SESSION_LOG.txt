@@ -1,0 +1,21 @@
+IB-pr-506 session log -- 0.9.0_WK_IRPT_BCKEND~357 -- TO IRPT_BCKEND.TO-IB-pr-506 under AMENDMENT 2
+Workspace branch wk-IRPT_BCKEND-357; portal branch wk-IRPT_BCKEND-357-portal; portal commit 63b31b0c (LOCAL).
+
+1. Premises: branch wk-IRPT_BCKEND-357, TREE-OK (org and .tools present).
+2. Restore: git -C portal checkout -- . restored 28 wire files that carried the withdrawn direction (multi_asset in the union). Portal status empty afterwards.
+3. Typecheck before: bun x tsc --noEmit -p tsconfig.app.json, rc=0, 0 error TS lines. (bunx is not on PATH in this shell; bun x is the same command.)
+4. Generator: __tests__/fe-s-13/gen-wire.ts gains RETIRED_ENUM_MEMBERS = new Set(['multi_asset']) and renderType's enum branch subtracts it. CRLF kept.
+5. Regeneration: bun run src/pages/InvestorReporting/__tests__/fe-s-13/gen-all.ts, rc=0:
+   "gen-wire: 25 of 25 documents, 19 of 24 routes' responses; gen-consumed: 11 of 11 contracts, 24 operation(s), 24 route key(s), 6 envelope field(s)"
+   git diff --stat over contracts/wire/: HoldingsSnapshot.ts only. Diff ignoring CR: header 'Source sha256' line changed (7c221b13... to c7890367...) and one added line 'readonly account_id?: string' in the ACCOUNT node. multi_asset count in the generated file: 0.
+   The generator writes LF; the working copy was restored to the CRLF checkout form for the 24 unchanged wire files (git checkout) and for HoldingsSnapshot.ts (CRLF re-applied). The index is LF; no change in content.
+6. adapt.ts: RETIRED_ASSET_CLASS_TOKENS = ['multi_asset']; adaptHoldingsSnapshot logs one console.warn per snapshot that serves a retired token (token named, no figure). ASSET_CLASS_FOR_WIRE unchanged, so the token still folds to unclassified.
+7. iv-e-48.new-classes.test.tsx: ARM 1 only. RETIRED_MEMBERS = ['multi_asset'] filters the contract enum before the sort. Nothing else changed.
+8. New test: __tests__/dsgn-irptv1/ib-174-multi-asset-label.test.ts, 4 arms (served token unclassified and logged once with no digits; control with no log; generated file has no multi_asset and its union line is present; retired set exactly {multi_asset}).
+   spyOn is not in the installed bun:test typings, so the test records console.warn by replacement and restores it.
+9. Typecheck after: bun x tsc --noEmit -p tsconfig.app.json, rc=0, 0 error TS lines.
+10. Portal commit 63b31b0c with author and committer 0.9.0_WK_IRPT_BCKEND~357 <0.9.0_WK_IRPT_BCKEND~357@opal.agent>; five paths staged.
+11. Criteria (checks/r174/p174_cells.py, run from the workspace root under timeout 120):
+   AC1: "OK: IVE48-AC1 and iv-e-148 pass; iv-e-148 is unchanged" / "IB174-2-AC1 PASS" rc=0
+   AC2: "OK: the folder reads 1219 pass, 2 fail" / "IB174-2-AC2 PASS" rc=0 (run alone; then a second bun test run of the folder to name the failures: 1248 tests across 394 files; failing: producer fixtures, F14-AC3)
+   AC3: "OK: the new multi_asset test passes (4)" / "IB174-2-AC3 PASS" rc=0
