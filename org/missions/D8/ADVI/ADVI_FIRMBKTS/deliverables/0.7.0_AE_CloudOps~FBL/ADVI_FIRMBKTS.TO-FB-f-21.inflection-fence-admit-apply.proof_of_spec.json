@@ -113,7 +113,7 @@
    "output_evidence": "count of explicit deny lines in /aws/lambda/irpt-performance-adapter in the last ten minutes at 01:21:24Z, printed:\n0\nNOT TRAFFIC-BACKED: the same filter finds 6 explicit-deny lines between 00:04:48Z and 00:27:00Z (before the apply), and the adapter had 0 invocations at all between the apply (01:18:05Z) and 01:23Z.",
    "denominator": "0 invocations after the apply; 6 control denies before it",
    "status": "PASS",
-   "status_reason": "output matches the expected line; as the order itself says, a zero is only as strong as the traffic, and step 5(c) did not run (no request reached the adapter) | Issuer note 2026-10-13 01:34Z: the traffic is now behind the zero: COO~P2 (dell2 IB-pr-490) ran the adapter twice at 01:31:13Z and 01:32:37Z (HTTP 200, computed 191-point series, state PARTIAL); the explicit-deny count stays 6, last 00:27:00Z, none since the apply; the issuer's own log read agrees."
+   "status_reason": "output matches the expected line; the 01:21Z zero had no traffic behind it, the 01:35Z recheck does (2 invocations, 0 explicit-deny lines)"
   }
  ],
  "controls": {
@@ -132,11 +132,11 @@
  "declared_exclusions": [
   {
    "item": "step 5(c) one Inflection holdings-performance request answering 2xx",
-   "reason": "NOT RUN: no request reached irpt-performance-adapter after the apply (0 invocations 01:18:05Z-01:23Z) and no seat was asked to issue one; the order allows 'say so'. Evidence in its place: the simulate WITH the live resource policy (adapter allowed on the prefix, explicitDeny elsewhere and for PutObject, a foreign principal explicitDeny). The real read is owed to the next Inflection performance request."
+   "reason": "ANSWERED BY ANOTHER SEAT, second-hand for the status code: 2.0.0_SA_COO~P2 (dell2) invoked the adapter at 01:31:13Z and 01:32:37Z and reports handler StatusCode 200, no FunctionError, state PERFORMANCE_PARTIAL, a 191-point series computed fresh on both invokes (forwarded by 1.0.0_SA_CTO msg 108721, read here 01:3xZ; this seat did not issue the request and did not see the response). This seat read the adapter's log group at 01:35Z: 2 invocations after the apply (first 01:31:05Z), 0 explicit-deny lines, 0 other error lines, against 6 explicit-deny lines 00:04:48Z-00:27:00Z before it (evidence_f21/step5_cd_adapter_logs_recheck_0140Z.txt). Before that read-back, at 01:23Z, no request had reached the adapter."
   },
   {
    "item": "step 5(d) the explicit-deny lines stop",
-   "reason": "0 lines after the apply, but not traffic-backed (no invocation after the apply); 6 lines 00:04:48Z-00:27:00Z before it."
+   "reason": "Read at 01:35Z with traffic: 2 invocations after the apply and 0 explicit-deny lines, 6 before it. AC3's own zero at 01:21:24Z was taken before any invocation and was not traffic-backed; the 01:35Z read is."
   },
   {
    "item": "on-list control principal irpt-holdings-role ListBucket",
