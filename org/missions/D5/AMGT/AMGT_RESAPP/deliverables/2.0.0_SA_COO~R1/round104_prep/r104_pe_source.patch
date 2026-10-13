@@ -1,0 +1,84 @@
+--- a/lib/research/api/scoped_amgt.py
++++ b/lib/research/api/scoped_amgt.py
+@@ -2707,6 +2707,64 @@
+     return served
+ 
+ 
++def _derive_fiscal_pe(fiscal: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
++    """AMGT-bk-4 (CTO ruling, msg 5244 (iii)): the served historical P/E is PX_LAST / IS_EPS of the SAME fiscal year, so the page agrees with itself. Bloomberg's own PE_RATIO
++    (a different price and EPS) stays STORED in the model block and is not served on this row. For each fiscal year that has a PE_RATIO row: both inputs present, numeric and
++    positive AND stated in the SAME currency code -> the row is the quotient (rounded to 4 places, as Bloomberg's were), every other key unchanged, `basis` stating the derivation; otherwise the row is WITHHELD
++    (dropped from the figures) and returned as a `fiscal_unresolved` entry with its reason. Rows of every other mnemonic are returned untouched, in order.
++    A price in one currency over an EPS in another is not a ratio (no FX rate is chosen here): measured at the cut, 27 of 95 names quote in one currency and report in another.
++    A minor unit of the SAME currency (GBp over GBP, `case_rule.is_minor_unit_quote`) is an exact scale: the minor side is divided by `case_rule.MINOR_UNIT_FACTOR` (100) and the basis says so
++    (CTO msg 5262: the ruled minor-unit rule of qq-1 / CRPS-g-1, never a new table). The model cases read the stored block, never this list."""
++    by_year: Dict[Any, Dict[str, Any]] = {}
++    for fig in fiscal:
++        if fig.get("mnemonic") in ("PX_LAST", "IS_EPS"):
++            by_year.setdefault(fig.get("fiscal_year"), {})[fig.get("mnemonic")] = fig.get("value")
++            by_year[fig.get("fiscal_year")][fig.get("mnemonic") + "@ccy"] = fig.get("currency")
++
++    def _positive(value: Any) -> bool:
++        return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
++
++    out: List[Dict[str, Any]] = []
++    withheld: List[Dict[str, Any]] = []
++    for fig in fiscal:
++        if fig.get("mnemonic") != "PE_RATIO":
++            out.append(fig)
++            continue
++        year = fig.get("fiscal_year")
++        inputs = by_year.get(year, {})
++        price, eps = inputs.get("PX_LAST"), inputs.get("IS_EPS")
++        price_ccy, eps_ccy = inputs.get("PX_LAST@ccy"), inputs.get("IS_EPS@ccy")
++        scaled = bool(price_ccy and eps_ccy and price_ccy != eps_ccy and case_rule.is_minor_unit_quote(price_ccy, eps_ccy))
++        if _positive(price) and _positive(eps) and price_ccy and (price_ccy == eps_ccy or scaled):
++            price_minor = bool(scaled and price_ccy[2:].islower())
++            numerator = price / case_rule.MINOR_UNIT_FACTOR if price_minor else price
++            denominator = eps / case_rule.MINOR_UNIT_FACTOR if (scaled and not price_minor) else eps
++            definition = "price / reported EPS (IS_EPS), FY{0}".format(year)
++            if scaled:
++                definition += ", the {0} side brought from {1} to {2} (divided by {3:g})".format(
++                    "price" if price_minor else "EPS", price_ccy if price_minor else eps_ccy,
++                    eps_ccy if price_minor else price_ccy, case_rule.MINOR_UNIT_FACTOR)
++            out.append(dict(fig, value=round(numerator / denominator, 4), basis={
++                "mnemonic": "PE_RATIO",
++                "definition": definition,
++                "derived_from": ["PX_LAST", "IS_EPS"],
++            }))
++            continue
++        if price is None or eps is None or not isinstance(price, (int, float)) or not isinstance(eps, (int, float)):
++            why = "an input is absent (PX_LAST or IS_EPS)"
++        elif not _positive(eps):
++            why = "reported EPS (IS_EPS) is not positive"
++        elif not _positive(price):
++            why = "the fiscal-year price (PX_LAST) is not positive"
++        elif not price_ccy or not eps_ccy:
++            why = "the currency of the price or of reported EPS is not stated"
++        else:
++            why = "the price is in {0} and reported EPS in {1}, and a ratio of different currencies is not shown".format(price_ccy, eps_ccy)
++        withheld.append({"mnemonic": "PE_RATIO", "fiscal_year": year,
++                         "reason": "price / reported EPS (IS_EPS), FY{0}, is not shown: {1}".format(year, why)})
++    return out, withheld
++
++
+ def _figures(model_block: Optional[Dict[str, Any]], scope: str) -> List[Dict[str, Any]]:
+     if not model_block:
+         return []
+@@ -5424,6 +5482,7 @@
+     if model_block is None and key:
+         model_block = read_model_block(key)
+     fiscal = _figures(model_block, SCOPE_FISCAL_YEAR_LINE_ITEM)
++    fiscal, pe_withheld = _derive_fiscal_pe(fiscal)
+     # AMGT-rk-36, C-MODEL-FORECASTS. Built on the SAME unconditional literal as every other key
+     # here (never inside an `if model_block:` guard) so the ABSENT branch still carries these
+     # keys, shape-only -- the planted negative on a hollow key reads model_status ABSENT with
+@@ -5473,7 +5532,7 @@
+         {"mnemonic": u.get("mnemonic"), "fiscal_year": u.get("fiscal_year"), "reason": u.get("reason")}
+         for u in ((model_block or {}).get("unresolved") or [])
+         if u.get("scope") == SCOPE_FISCAL_YEAR_LINE_ITEM
+-    ]
++    ] + pe_withheld
+     return {
+         "security_key": key,
+         "identity": identity,
