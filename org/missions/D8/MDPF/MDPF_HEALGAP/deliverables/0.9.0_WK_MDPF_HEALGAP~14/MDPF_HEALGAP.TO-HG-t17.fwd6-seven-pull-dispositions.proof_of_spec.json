@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t17",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t17.fwd6-seven-pull-dispositions.md",
+    "group": "OTHER",
+    "vintage_commit": "011fd686a8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "011fd686a8",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t17.fwd6-seven-pull-dispositions.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~14/FWD6_SEVEN_DISPOSITIONS_R4.md",
+      "kind": "doc",
+      "commit_or_etag": "f2f49ced3d9e237b25e7022bb2620027840fbc72",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: a document; read-only AWS describes and gets only; no deploy. commit_or_etag is the git blob hash of the document as written (git hash-object), the same bytes as the commit that carries it.",
+      "artifact_covered_by": [
+        "HG4-t17-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG4-t17-AC1",
+      "criterion_verbatim": "the document carries exactly seven disposition rows, one per named pull, each with exactly one of the three tokens, a because-clause of at least 40 characters besides its citations, at least one path:line that resolves in the repository, no TBD, RE-ATTEMPT-BUILT only on the asset-dim row, and person and listed in every NAMED-REASON row.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_t17_dispositions.py",
+      "output_evidence": "DISP-OK 7 rows (rc=0, run from the worktree root). Base, document absent (argument .scratch/absent.md): DISP-BAD no document at .scratch/absent.md (rc=1). Mutant (scratch copy, one NAMED-REASON row relabelled RE-ATTEMPT-BUILT): DISP-BAD teams-global-transcripts-pull-hourly: RE-ATTEMPT-BUILT is allowed only for bd-asset-dim-pipeline-trigger (rc=1).",
+      "denominator": "7 of 7 pull keys: outlook-global-transcripts-pull-daily NAMED-REASON; teams-global-transcripts-pull-hourly NAMED-REASON; schwab-canonical-si2-08403355-pull-daily NAMED-REASON; canonical-schwab-si2-08242234-daily-pull NAMED-REASON; canonical-schwab-si2-08335338-daily-pull NAMED-REASON; astn-wsjft-3am-run RE-ATTEMPT-DESIGNED; bd-asset-dim-pipeline-trigger RE-ATTEMPT-BUILT. Census denominator for the seven EXPOSED-MANUAL pulls: 7 (FWD6_CENSUS_RESWEEP_R3.md section 4).",
+      "status": "PASS",
+      "expect": "DISP-OK 7 rows",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check was run on the committed document content from the worktree root",
+      "observed": "DISP-OK 7 rows (rc=0)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "scratch copy of the document with the outlook NAMED-REASON row's token relabelled to the asset-dim-only token (.scratch/mutant.md, uncommitted), checked via the DOC argument",
+      "expected": "DISP-BAD naming the mislabelled row",
+      "observed": "DISP-BAD teams-global-transcripts-pull-hourly: RE-ATTEMPT-BUILT is allowed only for bd-asset-dim-pipeline-trigger (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the design of the RE-ATTEMPT-DESIGNED row is a design written in a document, not a build",
+      "reason": "order BOUNDS: a RE-ATTEMPT-DESIGNED row is a design, and this order builds nothing; no rule, Lambda or document is armed"
+    },
+    {
+      "item": "AWS calls",
+      "reason": "order BOUNDS: read-only only. Calls made: aws events describe-rule (three rules), aws events list-targets-by-rule (two rules), aws scheduler get-schedule (one schedule). No secret read, no invoke, no write."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W14-S1: the census's Teams stub premise (GatewayToolsAbsent by design) does not hold at HEAD for the deployed Lambda, which passes a bearer and makes a live GET",
+    "MDPF_HEALGAP-D1-W14-S2: the census's named act (run-capture.ps1 task SchwabSddCapture) writes Secrets Manager schwab/sdd/session, not the Credential Manager SDDSecure the puller reads; no in-repo writer of SDDSecure",
+    "MDPF_HEALGAP-D1-W14-S3: the task order's example ASTN row asserts a refill of the missed day that the code does not provide; graded RE-ATTEMPT-DESIGNED",
+    "MDPF_HEALGAP-D1-W14-S4: pull.tf says DESIRED ONLY and never applied while the teams rule is live and ENABLED"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~14/MDPF_HEALGAP.TO-HG-t17.fwd6-seven-pull-dispositions.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "aws CLI read-only via .tools/aws",
+      "invocation": "aws events describe-rule --name blackdiamond-49f-asset-dim-reattempt-daily ; aws events describe-rule --name teams-global-transcripts-pull-hourly ; aws events describe-rule --name outlook-global-transcripts-pull-daily ; aws events list-targets-by-rule --rule blackdiamond-49f-asset-dim-reattempt-daily ; aws events list-targets-by-rule --rule bd-asset-dim-pipeline-trigger ; aws events describe-rule and list-targets-by-rule for the three SDD rules ; aws scheduler get-schedule --name astn-wsjft-3am-run (timeout 120 each)",
+      "result": "re-attempt rule ENABLED cron(40 22 ? * MON-FRI *) targeting bd-asset-dim-trigger; teams and outlook rules ENABLED; three SDD rules ENABLED with AWS-RunPowerShellScript targets; ASTN schedule ENABLED cron(0 3 * * ? *) America/New_York"
+    },
+    {
+      "tool": "disposition check",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_t17_dispositions.py",
+      "result": "DISP-OK 7 rows (rc=0)"
+    }
+  ]
+}
