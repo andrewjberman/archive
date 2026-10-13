@@ -1,0 +1,14 @@
+ADVI_BDPRCE.TO-BP-b-1 -- session log, worker 0.9.0_WK_ADVI_BDPRCE~5, branch wk-ADVI_BDPRCE-5, base 73a2b77c3c
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-ADVI_BDPRCE-5; test -d org && test -d .tools -> TREE-OK.
+2. Premises read: CTO_RULING_R1_THE_PRICE_RULE_20261013.md; bd_price_update.py SOURCE_RANK :65-71, MAX_UNIT_PRICE :59 (copied verbatim into the module).
+3. Reads (READ verbs only): aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet for 2026-09-22, 2026-10-08, 2026-10-09, 2026-10-12. rc=0 each. Local MD5 equals the S3 ETag for all four.
+4. Profiling (scratch only, no client or account value printed): 2026-10-09 has no Buy or Sale for EXXONMOBIL HOLDINGS CORP COM SHS (4 Transfer In rows). 2026-09-22 has no Buy or Sale for BLACKROCK INC COM (Dividend and Dividend Reinvestment only). 2026-10-12 has 0 rows. 5 Buy rows on 2026-09-22 have null asset_name.
+5. Module bd_price_rule.py written; py_compile and python run print 'R1 module ok'. Commit gate required from __future__ import annotations (ADHC_DSFLOW.004) in both files; added; line endings normalized to LF.
+6. Test: python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py -> 'BD PRICE RULE TEST: OK 15 arms', rc=0.
+7. Mutant control (scratch copy, dedup removed: median over all kept rows): test -> 'BD PRICE RULE TEST: FAIL arm_01_repeated_id_counted_once', rc=1. The real module passes.
+8. Probe: rule_probe.py run in two separate processes over the four local partitions (union, DEC-6 by trade_date). Both outputs MD5 9f139dfd1ec5936e899902472dda4069. Record RULE_PROBE.json written and summarized in RULE_PROBE.md.
+9. Record commit b8b710c884: module, test, RULE_PROBE.json, RULE_PROBE.md (safe-commit, author 0.9.0_WK_ADVI_BDPRCE~5).
+10. Surprise rows ADVI_BDPRCE-D1-W5-S1..S5 appended to INVESTIGATION_v1.md (5 rows).
+11. AC1, AC2, AC3 invocations run at the worktree path with their exit codes; recorded in the instance.
+12. No write verb issued to AWS. No product file other than the two named modules edited. No status flip (the order stays open for the issuer).
