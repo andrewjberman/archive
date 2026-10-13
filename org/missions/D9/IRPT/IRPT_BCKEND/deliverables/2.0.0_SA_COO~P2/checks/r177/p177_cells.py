@@ -103,8 +103,15 @@ def main():
             want = builders_firms()
             if sorted(p.get("firm_id") for p in pk) != want:
                 fail("the packages must be exactly the BUILDERS firms %s" % want)
+            plan = r.get("plan") or {}
             for p in pk:
                 rep = p.get("members_replaced") or []
+                if (plan.get(p.get("firm_id")) or {}).get("needs") == []:
+                    # the CTO's rule (RE 6859): a firm whose builder reaches neither change gets NOTHING: no replaced member, no new object
+                    diff0 = p.get("member_diff_vs_live") or {}
+                    if rep or diff0.get("changed") or diff0.get("unchanged_count") != 45 or p.get("candidate_package_sha256") != p.get("live_object_sha256"):
+                        fail("%s needs nothing: members_replaced and member_diff_vs_live.changed must be empty, unchanged_count 45, and candidate_package_sha256 equal to live_object_sha256" % p.get("firm_id"))
+                    continue
                 names = {m.get("repo_path") for m in rep}
                 if not rep or not names <= ALLOWED_MEMBERS:
                     fail("%s: replaced members %s must be a non-empty subset of the allowed set" % (p.get("firm_id"), sorted(names - ALLOWED_MEMBERS) or "none"))
