@@ -1,0 +1,64 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-272",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~93",
+  "read_at": "4b1e07dabc (worktree HEAD, branch wk-IRPT_ANLREQ-93); portal read at its pinned commit 53506d4903",
+  "trace": {
+    "who_calls_package_today": "NONE in the ticket route's own clients. The one caller in the repo is infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:321 (live_ticket_ports attach: call POST ticket_url + '/package'), reached from _attach at opal_packager.py:210 via handle_commentary_ready at :144. That handler is the commentary_ready consumer: infra/aws/lambda/investor-reporting/reports/resident_installed.py:341 (make_packager returns it) and :424-433 wires the live attach only when the bindings carry commentary_ready_queue_url. Portal: NONE at the pinned portal commit (src/api/endpoints/tickets.ts carries the TicketPackage type only; surprise IRPT_ANLREQ-D2-W93-S3). The drafter data/transcripts/scripts/commentary/ has no /package call (Grep of the folder: no match).",
+    "package_principal_value": "svc-irpt-packager (infra/aws/lambda/ticket_center/lambda_function.py:120; named by TO-AR-v12, infra/aws/terraform/ticket-center/CHANGELOG.json:368). NOT empty at HEAD: surprise IRPT_ANLREQ-D2-W93-S1.",
+    "package_route_checks": "lambda_function.py:1727-1728 dispatches POST .../package to package_ticket (:1462-1534). Principal: TYPE_DEFINITIONS package_principal, admitted only when userType == 'service' AND email == principal (:1468-1470); an empty value admits nobody. Body: any key outside PACKAGE_ALLOWED_FIELDS is a 400 (:1472-1475). report_ref, pdf_ref, original_ref (null allowed), commentary_ref and firm are required non-empty strings of at most 512 chars (:1476-1482). pdf_ref and commentary_ref must be canonical I7 JSON (:1483-1486). Body firm must be in PACKAGE_ALLOWED_FIRMS or 403 (:1491-1492). Ticket must exist, be analysis_request, not completed, and its requester firm must equal the body firm (:1495-1506). A stored package needs prior_attached_at equal to its attached_at (:1507-1511). Conditional update (:1514-1533). The PACKAGE matrix row is empty (:179), so no principal class is admitted by class.",
+    "package_allowed_firms": "lambda_function.py:84-87 builds the frozenset from env PACKAGE_ALLOWED_FIRMS (csv; ALL dropped; empty admits nothing). The ticket function's env sets it in infra/aws/terraform/ticket-center/main.tf:266 to 49financial,cottonwood,inflection. That file was read, not edited.",
+    "pointer_kinds_accepted": "report_ref, pdf_ref, original_ref (null allowed), commentary_ref (PACKAGE_REF_FIELDS, lambda_function.py:137), plus firm and prior_attached_at. There is no kind field; an unknown key is refused 400 (:1472-1475).",
+    "ready_event_path": "ycharts/generate/resident_worker.py:189-200 send_ready_if_ticketed (sends only when ticket_id is a non-empty string AND commentary_requested is True) -> resident_worker.py:163 send_ready (analysis_ready, I3) -> data/transcripts/scripts/commentary/lambda_handler.py analysis_ready queue path (persist_draft :341, commentary_ready send :344, ticket post :353) -> infra/aws/lambda/investor-reporting/reports/resident_installed.py:341 (commentary_ready consumer) -> ycharts/research/opal_packager.py:144 handle_commentary_ready -> :200-212 _attach -> :321 POST /api/scoped/tickets/{id}/package.",
+    "commentary_to_package_order": "Enforced by message sequence, not by a ticket-state check. The packager runs only on commentary_ready (I4), which the drafter sends at lambda_handler.py:344 after the DRAFT is persisted (:341) and before the draft is posted to the ticket (:353). The PACKAGE route reads no draft_commentary field. Surprise IRPT_ANLREQ-D2-W93-S5. No change proposed.",
+    "principals_available": {
+      "ticket_route_principal_classes": "svc-ticket-form, svc-analyst-intake, svc-commentary (lambda_function.py:79, :160-161, principal_class :317-324). None of them may package.",
+      "package_subject": "svc-irpt-packager (lambda_function.py:120; opal_packager.py:63 PACKAGER_SUBJECT)",
+      "other_service_names_in_repo": "svc-irpt-analysis, svc-custody-statement, svc-data-refresh (infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py:165-179). None is a packager.",
+      "profile_rows": "The packager carries NO users PROFILE row by design (R4-pk-1, lambda_function.py:84; test_package_principal.py:96). Searched infra/aws/terraform/nfra-ctlpln-identity: no svc-irpt-packager match. Not searched: other users-table seeds; the live table was not read."
+    }
+  },
+  "chosen_principal": {
+    "name": "svc-irpt-packager",
+    "is_existing_service_subject": true,
+    "reason": "Already the named package_principal (lambda_function.py:120) and the subject the packager client uses (opal_packager.py:63). Service-marked by name. No new identity, no ALL. Firm-bound by PACKAGE_ALLOWED_FIRMS, not by a PROFILE row (surprise S2).",
+    "files_that_would_change": [],
+    "files_changed_by_this_order": []
+  },
+  "order_rule": {
+    "rule": "The package step runs on the existing commentary_ready message (I4) and on nothing else. No new trigger, no ticket-state gate, no extension of the READY event.",
+    "reason": "The existing message is already sent after the DRAFT is stored (lambda_handler.py:341-344), so the smallest rule is the sequence that exists. A new gate would be a new mechanism.",
+    "enforced_by": ["data/transcripts/scripts/commentary/lambda_handler.py:341-344", "infra/aws/lambda/investor-reporting/reports/resident_installed.py:341", "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:144-212"],
+    "files_that_would_change": [],
+    "caveat": "The order is relative to the stored draft, not to the ticket post (surprise IRPT_ANLREQ-D2-W93-S5)."
+  },
+  "built": false,
+  "built_detail": "No product or test file changed. Every test the cell lists already exists and passes at HEAD (see tests). The before-arm the cell requires (package_principal empty at HEAD) is false (surprise IRPT_ANLREQ-D2-W93-S1), so no honest failing before-arm exists. No test was invented to fill the gap.",
+  "authorization_change": "Nothing widens and no file was changed. PACKAGE stays admitted for one subject, svc-irpt-packager, and only when its token is service-marked and its email equals the name; the class matrix row stays empty, so no class may package. The firm is bound by the env list PACKAGE_ALLOWED_FIRMS (49financial, cottonwood, inflection in the Terraform source) and never ALL. No user row is read for the packager. GET ticket stays internal-only, so the packager gets no read of tickets. A change that makes the packager read tickets, binds firms by a PROFILE row, or adds a second package subject would be a widening; none was made, and none is proposed here.",
+  "tests": {
+    "existing_suite_run": "infra/aws/lambda/ticket_center/tests: 206 passed, 43 subtests passed, rc 0 (unmodified tree). Repeat: see acceptance determinism note in the proof instance.",
+    "new_tests_added": 0,
+    "cell_clause_coverage": {
+      "a_named_principal_admitted_for_its_allowed_firm_only": "tests/test_package_principal.py::test_packager_admitted_for_firm_in_its_env_list and ::test_package_principal_named_in_type_definition (both pass at HEAD)",
+      "b_other_principals_empty_value_and_firm_outside_list_refused": "tests/test_package_principal.py::test_other_principals_still_refused, ::test_packager_refused_for_firm_outside_its_list, ::test_packager_refused_without_env_list; tests/test_package_route.py::test_package_principal_empty_refuses_everyone (pass at HEAD)",
+      "c_four_pointer_kinds_accepted_unknown_kind_refused": "tests/test_package_route.py REFS (report_ref, pdf_ref, original_ref, commentary_ref); tests/test_package_i5p_i7.py::test_package_admits_null_original_ref; tests/test_package_409_codes.py::test_the_200_and_the_400s_are_unchanged (an unknown key is a 400 'unexpected field') (pass at HEAD)",
+      "d_existing_ticket_service_tests_pass": "206 passed, 43 subtests passed, rc 0"
+    },
+    "positive_control": "tests/test_package_principal.py + tests/test_package_route.py on the unmodified tree: 16 passed, rc 0",
+    "mutant_fires": "Scratch copy .scratch/mut93/ticket_center (outside the product tree in the worktree's ignored .scratch; not deleted). In the copy, package_ticket's 'and actor[\"email\"] == principal' is removed. Result: 3 failed, 13 passed (test_other_principals_still_refused, test_package_refused_for_humans_and_svc_commentary, test_package_principal_read_from_type_definition). The principal gate is live."
+  },
+  "before_arm": {
+    "at_HEAD": "NOT FAILED. 0 of the cell's tests fail at HEAD, because the premise (package_principal empty at HEAD) is false.",
+    "failed": 0,
+    "why": "lambda_function.py:120 names svc-irpt-packager at HEAD. Surprise IRPT_ANLREQ-D2-W93-S1."
+  },
+  "claim": "A read-only trace at worktree HEAD 4b1e07dabc, the portal's pinned commit, and the one mutant control on a scratch copy. The chosen principal and the order rule are existing mechanisms; neither was changed. Nothing was released: no push, deploy, upload, apply, invoke or live call. Judgment about whether the cell is met is the CVO's at L9.",
+  "not_read": [
+    "Live DynamoDB tables (tickets, users) and live Terraform state or deployed function env. Only the .tf source was read.",
+    "The packager's token issuance and any live PROFILE row for svc-irpt-packager (the repo has none beyond the identity tests folder).",
+    "resident_main.py (the commentary_ready poller), the resident bindings, and whether commentary_ready_queue_url is bound live. infra/aws/terraform/ticket-center/main.tf:262-266 says nothing reaches the door until the resident is bound.",
+    "Resident and drafter Terraform (outside the grant).",
+    "ycharts/generate/resident_worker.py beyond :163-200.",
+    "Portal live DEV and PROD bundles. The portal worktree path (portal/) is unpopulated in this worktree (surprise S3).",
+    "opal_packager.py live_attach default (:216-220 raises PACKAGER_PRINCIPAL_UNSET when no ticket_ports are given). Stale docstring; not exercised here."
+  ]
+}
