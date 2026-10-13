@@ -89,3 +89,12 @@ dismissed by the amendment and the withdrawal), `S6` (port 5174, resolved: the C
    (Saturday 2026-10-17 from 12:35Z); `AMGT_RESAPP-S14-CRNCY-SCANNER-US-SLICE1` (queued at site Z; not a V1 gate); FWD-16 and the model API key (Andrew); the CSL AU sector vintage (CTO call); D1-W381-S1
    (MSTR~DELL1); the EXPIRED-rule criterion for the first `packs/<key>/status.json` reader; D1-S18's three reds (dell2); the nested portal worktree's missing committer identity (MSTR); the rankings' switch to
    total return (PRD addendum, CTO).
+
+## ADDENDUM 1 (2026-10-13 ~21:3xZ, after ADJUDICATION_v125): what the packet missed, and why
+
+The CVO CONFIRMED four `format:money` broken values (TSM US, MA US, CDNS US, UBER US Exec Management: the header prints `USD 453.31` and the team's text prints `$41bn`) and found FWD-40 (a) NOT MET
+on this draw. **The packet did not list them and its section 3 item 2 reads as though the draw's candidates were the whole set.** The cause is mine: the walker's per-class findings are in each walk's
+`findings.json` (`format:money` is there, one deduplicated row per walk), and I did not open those files. I read the worker's non-zero STEP lines (counts, no class), two Model shots (SAN FP, TSM US) and the worker's one
+line per name, then wrote "candidates for your read" as if complete. The worker's one line per name named neither the money format nor the class list, and I did not check what it left out. **Control:** before a packet
+lists a walk's candidates, the issuer prints the walk's findings by CLASS from `findings.json` (class, step, count) and states the classes read; a worker's per-name prose is evidence, never the inventory.
+Cost: the CVO found four items I should have found (the CVO read all 20 shots whole, which was the job). The CVO's `ADJUDICATION_v125` C-S127 is the record of what the page shows; this addendum changes nothing in it.
