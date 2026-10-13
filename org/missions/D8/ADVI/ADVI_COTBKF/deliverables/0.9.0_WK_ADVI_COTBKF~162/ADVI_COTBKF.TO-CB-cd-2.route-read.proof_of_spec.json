@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cd-2",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cd-2.route-read.md",
+    "group": "OTHER",
+    "vintage_commit": "04b9a0bbed"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round82.md",
+    "vintage_commit": "04b9a0bbed",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cd-2.route-read.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~162",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~162/ROUTE_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only record: three list-objects-v2 --max-items 5 of the minted prefixes and three get-object of the minted objects (scratch copies only, not committed); one head-object of the gold partition the adapter writes; get-function-configuration of irpt-49f-reporting-publish-lambda, irpt-49f-reporting-read-lambda, irpt-49f-reporting-gold-lambda and irpt-cot-reporting-publish-lambda (rc=254); get-api, get-routes and get-integration of API 7k3ed8px20; portal origin/DEV and origin/PROD source read with git show; no S3 write, no serve, no vendor call, no fetch",
+      "artifact_covered_by": ["CB82cd2-AC1", "CB82cd2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~162/ROUTE_READ_EVIDENCE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the measured detail behind ROUTE_READ.json: the served-versus-scratch comparison on all three objects, the chosen rows, the naming check (lib/opal_naming.py, read-only, no AWS call) and the list of every remote read with its rc",
+      "artifact_covered_by": ["CB82cd2-AC1", "CB82cd2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (ADVI_COTBKF-D2-W162-S1, ADVI_COTBKF-D2-W162-S2); git diff --numstat shows 49 added, 0 deleted",
+      "artifact_covered_by": ["CB82cd2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB82cd2-AC1",
+      "criterion_verbatim": "the three served objects are read, every hop of the route carries its evidence, and the verdict, the page answer and the positive control are in the record. The issuer reads whether the row disarms or the correction is the next cell.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~162/ROUTE_READ.json',encoding='utf-8'));print('ROUTE-READ objects=%d rows_read=%d hops=%d hops_with_deployment_evidence=%d verdict=%s person_can_see=%s control_found=%s'%(len(d['objects']),len(d['rows_read']),len(d['hops']),sum(1 for h in d['hops'] if h['evidence']),d['route_verdict'],d['a_person_can_see_these_prices'],d['positive_control']['found']))\"",
+      "expect": "ROUTE-READ objects=3",
+      "output_evidence": "ROUTE-READ objects=3 rows_read=3 hops=4 hops_with_deployment_evidence=4 verdict=route_not_live person_can_see=no control_found=True (rc 0)",
+      "denominator": "3 of 3 served objects read (list and get-object, rc 0 each); 3 of 3 chosen rows read; 4 of 4 hops carry an evidence string; positive control found (True)",
+      "status": "PASS",
+      "status_reason": "the invocation printed the expected prefix with rc 0; the verdict is route_not_live, so the issuer reads it against ruling 1"
+    },
+    {
+      "criterion_id": "CB82cd2-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the served objects, not the scratch copy, are the evidence; every hop is read in code AND in deployment; route_not_live is claimed only for a hop proven absent by a read that has a positive control; \"Planned, not applied\" is read in place with its neighbours, not taken as the answer; the page answer follows from the hops and not from the sentence; nothing was built, served or corrected.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~162/ROUTE_READ.json (objects, rows_read, hops, planned_not_applied_reading, positive_control, route_verdict, a_person_can_see_these_prices, not_established) against ROUTE_READ_EVIDENCE.json",
+      "expect": "judgment by 3.0.0_SA_CVO at L9",
+      "output_evidence": "route_verdict route_not_live; a_person_can_see_these_prices no; positive_control found True (irpt-49f-reporting-publish-lambda found, irpt-cot-reporting-publish-lambda ResourceNotFoundException rc=254); planned_not_applied_reading: stale against live deployment (lambda-source-map.json:6485 neighbours :6488-6492)",
+      "denominator": "3 of 3 served objects read; 4 of 4 hops read in code and carry deployment evidence; 1 positive control; 2 surprise rows filed; 0 account ids in the record",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded; output recorded, no verdict"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "the order names no determinism control"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the short .md the task order asks beside ROUTE_READ.json",
+      "reason": "not written: the worker writes no report .md under the operator rule; the headline, hops and not_established carry its content in ROUTE_READ.json"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W162-S1: the 'Planned, not applied' sentence at lambda-source-map.json:6485 is stale; the reporting-read Lambda, its route and its integration are deployed and registered",
+    "ADVI_COTBKF-D2-W162-S2: the second hop does not reach Cottonwood in code or deployment; the deployed publish reads 49financial gold only and no Cottonwood-scoped publish function exists"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~162/ROUTE_READ.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c (CB82cd2-AC1)",
+      "result": "ROUTE-READ objects=3 rows_read=3 hops=4 hops_with_deployment_evidence=4 verdict=route_not_live person_can_see=no control_found=True (rc 0)"
+    }
+  ]
+}
