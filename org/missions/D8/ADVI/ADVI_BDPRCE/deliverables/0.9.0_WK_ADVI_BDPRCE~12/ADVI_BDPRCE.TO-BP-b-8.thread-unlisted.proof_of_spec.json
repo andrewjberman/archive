@@ -1,0 +1,130 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_BDPRCE.TO-BP-b-8.thread-unlisted",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-8.thread-unlisted.md",
+  "group": "OTHER",
+  "vintage_commit": "f8e70bb099"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R2.md",
+  "vintage_commit": "f8e70bb099",
+  "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-8.thread-unlisted.md"
+ },
+ "assignee": "0.9.0_WK_ADVI_BDPRCE~12",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/THREAD2.json",
+   "kind": "doc",
+   "commit_or_etag": "fb3a9d34fd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the thread record for the one unlisted holding (read-only join, LOCAL on wk-ADVI_BDPRCE-12); nothing written to S3, nothing deployed",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/THREAD2.md",
+   "kind": "doc",
+   "commit_or_etag": "fb3a9d34fd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the one-page reading of the thread with its three reproduction commands; LOCAL on wk-ADVI_BDPRCE-12"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/TRACE_BP-b-8.json",
+   "kind": "doc",
+   "commit_or_etag": "fb3a9d34fd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "trace_price_v2.py output on the served lot object at its explicit VersionId; read-only; LOCAL on wk-ADVI_BDPRCE-12",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/recompute_R1_BP-b-8.py",
+   "kind": "script",
+   "commit_or_etag": "fb3a9d34fd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only reproduction of the R1 carry-forward; imports the merged bd_price_rule.py and reads silver/transactions by get_object; nothing scheduled or wired",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 grades the record's shape, PII discipline, the sources checked and that the recompute equals the served price: ^THREAD2 record ok rule=R1 distinct_trades=[1-9][0-9]* sources_checked=[0-9]+ equal=true$",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-bdprce-r2-12 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py thread2 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/THREAD2.json",
+   "expect": "^THREAD2 record ok rule=R1 distinct_trades=[1-9][0-9]* sources_checked=[0-9]+ equal=true$",
+   "output_evidence": "THREAD2 record ok rule=R1 distinct_trades=2 sources_checked=8 equal=true",
+   "denominator": "1 record; 2 distinct trade ids; 8 source entries (7 ticker checks, 1 n/a for historical, which has no name column); recompute 10.3525 equals served 10.3525",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 is the write-surface bound: the scope checker's printed label reads ROUND 4 because the checker is reused unchanged: ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-bdprce-r2-12 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r2-12 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "output_evidence": "ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing",
+   "denominator": "6 changed paths, all inside the two allowed paths; 0 outside; 0 required missing",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "planted mismatch: the R1 carry-forward 10.3525 is compared with a served value of 10.3530 in the same equality test used by recompute_R1_BP-b-8.py",
+   "expected": "equal False for 10.3530; equal True for 10.3525",
+   "observed": "served 10.3530 -> equal False; served 10.3525 -> equal True (output of a one-line run of bd_price_rule.carry_forward)",
+   "method": "command",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "description": "the same R1 figures reproduced by independent runs over the same transaction rows",
+   "expected": "price 10.3525 and trade ids 742108391, 742108404 in each run",
+   "observed": "three runs agree: the shape-b probe, the final-figures probe and recompute_R1_BP-b-8.py (committed) each give price 10.3525 with distinct ids 742108391 and 742108404",
+   "method": "command",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "shape-b history before 2026-01-01 was not scanned for the 338 unlisted groups with no 2026 Buy or Sale",
+   "reason": "the chosen holding's last observed trade (2026-10-02) lies inside the scanned window, so its carry does not need older history; the other groups' carries are reported as no-trade-in-window, not as proven unpriced"
+  },
+  {
+   "item": "the trace_price_v2 self-test was not re-run in this worktree",
+   "reason": "the trace was run unchanged on the served lot; its self-test belongs to its own task order (BP-b-4)"
+  },
+  {
+   "item": "the writer of the 2026-10-09 canonical row is not identified",
+   "reason": "the canonical object's writers are named in WRITERS.json, but the row-level writer is not read; THREAD2.json records writer unidentified"
+  },
+  {
+   "item": "account 38cc4c0aa5ee (one lot of the same asset in the same object) is not traced separately",
+   "reason": "it shares the object's single served price, which the trace covers; the record names the account holding 71 of 72 lots"
+  }
+ ],
+ "surprises": [
+  "ADVI_BDPRCE-D1-W12-S1: the served 2026-10-09 price of ALLSPRING CORE BOND CIT CLASS E2 is written by a linear_interpolation row, which R1 clause 5 bans as an output source; the value equals R1's carry-forward.",
+  "ADVI_BDPRCE-D1-W12-S2: no Buy or Sale row prices the private-pool names on 2026-10-09; their 2026 rows are Transfer In, Valuation, Interest and Dividend, so the natural private-fund exemplar falls away at R1.",
+  "ADVI_BDPRCE-D1-W12-S3: the no-ticker-in-any-source test also passes public funds and ETFs, and the dimension symbol column holds CUSIPs and BD identifiers rather than tickers.",
+  "ADVI_BDPRCE-D1-W12-S4: trace_price_v2 follows the interpolated canonical row and reports trade_ids empty for this holding, so R1's carry-forward trades come from recompute_R1_BP-b-8.py."
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "trace_price_v2.py",
+   "invocation": "cd /c/dev/wk-bdprce-r2-12 && timeout 900 python -I org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/trace_price_v2.py --asset \"ALLSPRING CORE BOND CIT CLASS E2\" --lot-object \"<served_object_key from THREAD2.json>\" --out org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/TRACE_BP-b-8.json",
+   "result": "TRACE2 WROTE ... followed=canonical follows_served=true trades=0 match=false (linear_interpolation row followed; no trade ids; recorded as the served-row trace)"
+  },
+  {
+   "tool": "recompute_R1_BP-b-8.py",
+   "invocation": "cd /c/dev/wk-bdprce-r2-12 && timeout 300 python -I org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~12/recompute_R1_BP-b-8.py",
+   "result": "R1 variant A on 2026-10-02 price 10.3525 distinct_trade_ids ['742108391', '742108404']; carry-forward for 2026-10-09 price 10.3525 observed_date 2026-10-02; served price equals carry: True"
+  }
+ ]
+}
