@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-RUN-R16-cw2.close-two-cottonwood-test-tickets-by-crawl-dell2",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RUN-R16-cw2.close-two-cottonwood-test-tickets-by-crawl-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "06bd872615"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R16.md",
+    "vintage_commit": "06bd872615",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RUN-R16-cw2.close-two-cottonwood-test-tickets-by-crawl-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal-tickets items TCK-20261009-a1052909 and TCK-20261012-13cd3a1d (DynamoDB, us-east-1)",
+      "kind": "aws_resource",
+      "commit_or_etag": "four page-made writes, all HTTP 200: claim and complete on each ticket",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ConsistentRead of both items after the sitting: status completed, assignee tckt-r2-crawler-20261013@opal.invalid. The board, reloaded, read both rows completed under the identity.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "opal-users-v2 row USER#tckt-r2-crawler-20261013@opal.invalid / PROFILE (DynamoDB, us-east-1)",
+      "kind": "aws_resource",
+      "commit_or_etag": "created 13:08:27Z, deleted 13:20:33Z, after token exp 13:20:28Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ConsistentRead ABSENT after the delete, and again at the check. Sitting 1's row (created and deleted 13:06:33Z after exp 13:06:28Z, no write made) read ABSENT too.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r16_cw2/R16_CRAWL_RESULT_20261013.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's keys, with mail_branch WE_CLIENT_SEND_FAILED for both tickets, token_printed false, and the corrected zero-call block (the first pass is kept beside it as VOID). No at-sign other than the identity's.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r16_cw2/r16_cw2_crawl.py",
+      "kind": "script",
+      "commit_or_etag": "e5f3e2707b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one process that held the key, the token and the browser context. It prints no token; the page's only API writes were the four allowed ones.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R16_CHECKS/r16_cw2_close.py expect: CW2-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R16_CHECKS/r16_cw2_close.py",
+      "expect": "CW2-OK",
+      "output_evidence": "AS WRITTEN: CW2-FAIL live read failed: Expecting value: line 1 column 1 (char 0). The check's get_item calls json.loads on the CLI output, and `aws dynamodb get-item` prints nothing (rc 0) for an absent item, which is exactly the state the check demands for the identity row. A scratch copy that differs by one line (empty output means no item) prints CW2-OK two tickets completed by the identity; row absent after exp; card-1 ticket still open.",
+      "status": "FAIL",
+      "status_reason": "The issuer's script cannot print CW2-OK in the success state, so AC1 is FAIL as written. The defect is in the check, not in the world; this seat did not edit the issuer's file. The scratch copy is not the criterion and is not offered as a PASS.",
+      "denominator": "2 of 2 tickets re-read live; 1 of 1 identity row; 1 of 1 card-1 status read, by the scratch copy"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A dry run of the same script against the live page bundle with a mocked ticket backend and a dummy token, before the second token existed: no AWS and no write. It exercised sign-in, the tab control, both claims, the prompt dialog, both completes and the reload.",
+      "expected": "both mocked tickets end completed under the identity; unrelated page reads aborted",
+      "observed": "DRY OK; sign-in wait 0.5 s; both tickets completed in the mock; 18 unrelated requests aborted",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Sitting 1 stopped at the board tab with no write. Sitting 2 ran once. The two mail tokens were read from the ticket log by ticket id and the ticket states by ConsistentRead, never typed.",
+      "observed": "one completion per ticket; the live ticket Lambda CodeSha256 was identical (4sDK8P5m...) at the member diff, at sitting 1 and at sitting 2",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A data-refresh probe at step 3",
+      "reason": "NOT RUN. CTO v2.2 AMENDMENT 1 dropped it because that gate admits any Opal-internal caller (row TCKT_VNEXT-D2-S17). The zero-call read replaces it, and it reads ZERO BY ABSENCE OF TRAFFIC: no stream in that log group has an event from any caller at or after iat, so the negative shows no invocation, not a refusal."
+    },
+    {
+      "item": "The pair's zero-call positive control over the ticket log",
+      "reason": "CANNOT RUN AS WRITTEN. The ticket log never carries the actor address. Substitutes: the same filter found 134 caller-address lines in the data-refresh group, and both claim lines were found in the ticket log."
+    },
+    {
+      "item": "Page reads the board makes beside the ticket list",
+      "reason": "ABORTED by the context's route handler and logged by method and path only: five advisor-intelligence platinum GETs, one portal-content GET, one analytics POST (fetch and ping). Only GET tickets, GET metrics and the four allowed POSTs reached the API."
+    },
+    {
+      "item": "TCK-20261012-c546fead",
+      "reason": "Not opened, claimed or completed. Its status was read by the check only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-13/tv2_r16_cw2_two_ticket_crawl.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open, close-leg L1 to L6, close",
+      "result": "CLOSED, all 6 legs proven"
+    },
+    {
+      "tool": "boto3 get_function / zip member diff",
+      "invocation": "opal-ticket-api",
+      "result": "one member, equal to the tree file and to the HEAD blob"
+    },
+    {
+      "tool": "r16_cw2_crawl.py",
+      "invocation": "sitting 1 (STOP), --dry, sitting 2",
+      "result": "sitting 2 completed both tickets; row absent after exp"
+    },
+    {
+      "tool": "r16_cw2_close.py (AC1)",
+      "invocation": "as written in the order",
+      "result": "CW2-FAIL from the check's own empty-output defect; a one-line scratch copy prints CW2-OK"
+    }
+  ]
+}
