@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t46",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t46.p1-coverage-yahoo-black-diamond-residual.md",
+    "group": "OTHER",
+    "vintage_commit": "6293183101"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6293183101",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t46.p1-coverage-yahoo-black-diamond-residual.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~37",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/p1_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "aa3b2100ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: a read-only measurement; no deploy, no timer, no vendor call, no S3 write; reads S3 (holdings, store index, crosswalk, transactions) and local request, queue and unresolved files",
+      "artifact_covered_by": [
+        "DQ9-t46-AC1",
+        "DQ9-t46-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_p1_coverage.py",
+      "kind": "test",
+      "commit_or_etag": "aa3b2100ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on stub frames; no network, no S3",
+      "artifact_covered_by": [
+        "DQ9-t46-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t46-AC1",
+      "criterion_verbatim": "the three named tests (test_a_held_day_with_units_and_market_value_prices_exactly_at_value_over_units, test_the_three_classes_partition_the_priced_names_and_the_residual_counts_only_uncovered_days, test_the_coverage_output_carries_cusips_and_counts_and_never_an_account_key).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t46_tests.py",
+      "output_evidence": "COVER-OK, rc=0 (.scratch/ac1.out at worktree): 3 passed in 1.11s; the three named tests each PASSED under pytest -v.",
+      "denominator": "3 of 3 required named tests passed",
+      "status": "PASS",
+      "expect": "COVER-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t46-AC2",
+      "criterion_verbatim": "on the REAL inputs: P1 609, priced 607, the four Yahoo classes sum to 607, the Black Diamond block names its sources, the residual sits inside the window cells, and the written file has no account key.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t46_real.py",
+      "output_evidence": "COVER-REAL-BAD arms=ints,bd,residual, rc=1, at aa3b2100ee. The check reads the key bd_units_value; the module prints blackdiamond_units_value (naming schema refused_tokens.bd), so the bd arm reads no block. The module's own stdout line at 9b43288850, rc=0: {\"blackdiamond_units_value\": {\"held_days\": 1944, \"names\": 179, \"sources\": [\"s3://opal-data-cot/gold/canonical/holdings/ (88 of 135 daily files carry a cusip column, 2026-06-08..2026-10-12, source bd_snapshot; all 135 listed files read)\"]}, \"p1_names\": 609, \"priced_names\": 607, \"residual\": {\"cells\": 880080, \"names\": 607}, \"window_cells\": 882024, \"yahoo\": {\"in_store\": 0, \"no_symbol\": 602, \"rejected\": 5, \"symbol_known_untried\": 0}}. Before the rename (uncommitted, key bd_units_value) the same check passed with rc=0 on the same numbers.",
+      "denominator": "measured counts present: p1 609 of 609, priced 607 of 607, yahoo classes 607 of 607, residual 880080 of 882024 window cells; the Black Diamond block read by the check 0 of 1 (key absent)",
+      "status": "FAIL",
+      "status_reason": "the check reads the key bd_units_value, which the naming schema refuses (refused_tokens.bd); the module prints blackdiamond_units_value, so the bd arm of the check cannot pass. The check was not edited; surprise MDPF_DEMQUE-D1-W37-S3 is BLOCKING for the owner (2.0.0_SA_COO~Q1).",
+      "expect": "COVER-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the module run three times on the same inputs: before the single calendar call, after it, and the final run at aa3b2100ee",
+      "observed": "identical summary each run: yahoo in_store 0, no_symbol 602, rejected 5, symbol_known_untried 0; blackdiamond 179 names and 1944 held days; residual 607 names and 880080 cells; window_cells 882024",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Yahoo or Bloomberg call; any S3 write; any write to the ledger, the queue or pacer state; any deploy or timer",
+      "reason": "order BOUNDS: read-only measurement"
+    },
+    {
+      "item": "card_a_slice main() and its --quote path (bbg_quote) not run; the P1 slice is taken from card_a_slice.build() in process",
+      "reason": "no quote is drawn; the order names the builder as the source"
+    },
+    {
+      "item": "forwardfill_v2/holdings (92 workbooks, about 109 MB), forwardfill_v2/unrealized (203 workbooks, about 573 MB) and silver/cot_holdings.parquet (one 2026-06-09 snapshot) not read",
+      "reason": "bound of the 118 s check: the gold daily snapshots cover every trading day from 2026-04-22, with a cusip column from 2026-06-08; the silver snapshot is the 2026-06-09 day that gold already holds"
+    },
+    {
+      "item": "the 47 early gold files without a cusip column are not attributed to a CUSIP by ticker",
+      "reason": "a ticker-to-CUSIP map would be an inference; see surprise MDPF_DEMQUE-D1-W37-S2"
+    },
+    {
+      "item": "the printed Black Diamond key is blackdiamond_units_value, not bd_units_value; the per-CUSIP key is blackdiamond_held_days",
+      "reason": "naming schema refused_tokens.bd refuses the bd token in every slot; see surprise MDPF_DEMQUE-D1-W37-S3; the check was not edited"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W37-S1: CFNCASH, a cash identifier, is priced as a P1 name (3,326 cells, inside the 882,024 window cells); the FDIC-only placeholder rule does not catch it (class BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1)",
+    "MDPF_DEMQUE-D1-W37-S2: 47 gold holdings daily files (2026-04-22..2026-06-05, source bd) carry no cusip column, so their Black Diamond rows cannot be priced per CUSIP and those days stay in the residual (class OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W37-S3: the output key bd_units_value, read by the AC2 check, is a refused naming token; the module prints blackdiamond_units_value and AC2 reads COVER-REAL-BAD (class BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~37/MDPF_DEMQUE.TO-DQ-t46.p1-coverage-yahoo-black-diamond-residual.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t46_tests.py",
+      "invocation": "AC1, from the worktree root",
+      "result": "COVER-OK, rc=0; 3 passed"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t46_real.py",
+      "invocation": "AC2, from the worktree root, bounded at 120 s",
+      "result": "COVER-REAL-BAD arms=ints,bd,residual, rc=1 at aa3b2100ee; the real run takes about 70 s"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "the whole folder once, from the worktree root",
+      "result": "154 passed, rc=0"
+    }
+  ]
+}
