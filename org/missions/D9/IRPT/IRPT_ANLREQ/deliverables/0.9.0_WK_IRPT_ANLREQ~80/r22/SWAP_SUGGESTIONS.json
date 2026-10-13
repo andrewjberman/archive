@@ -1,0 +1,82 @@
+{
+  "cell": "AR-y-247",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-247",
+  "worktree": "C:/dev/wk-irpt-anlreq-80",
+  "worktree_branch": "wk-IRPT_ANLREQ-80",
+  "worktree_head_at_read": "85f43d3456212a60c1ecbc1d9bb170bdd63fcbee",
+  "state": "BLOCKED-BY-GRANT. No code was edited: the cell's code paths are outside the TO <paths> grant. Filed as IRPT_ANLREQ-D2-W80-S1 (BLOCKING), with S2 and S3 as observations. The wiring and caller below are a read-only design, not built.",
+  "code_root": "infra/aws/lambda/investor-reporting (the order's shorthand paths resolve under this prefix; see IRPT_ANLREQ-D2-W80-S2)",
+  "where_wired": {
+    "advisory_built": "ycharts/session/resident_session.py:133-137 kimi_advisory(): returns KimiAdvisory(send=kimi_send(secret_reader(self.secrets_client)), telemetry=journal_telemetry). No search_capability argument today, so swap returns KIMI_WEB_SEARCH_UNVERIFIED.",
+    "advisory_class": "intake/resolution_kimi.py:140-145 class KimiAdvisory.__init__(*, send, telemetry, clock=time.monotonic, search_capability=None); deep-copies search_capability.",
+    "swap_gate": "intake/resolution_kimi.py:159-165: for kind swap the capability must be a dict with model == MODEL, verified is True, a truthy qa_receipt_sha256, a non-empty request_fields dict whose keys are a subset of {tools, tool_choice}; otherwise return {result None, failure KIMI_WEB_SEARCH_UNVERIFIED, attempts []} with no send.",
+    "caller_today": "ycharts/generate/resident_worker.py:753-772 _check_gate(session, resolver) builds suggest(); :760 imports suggest_for from upload_suggestions; :765 calls suggest_for(findings, template, advisory=advisory.call, clock=advisory.clock, verify=...). The advisory comes from make() = session.kimi_advisory.",
+    "caller_to_extend": "intake/upload_suggestions.py suggest_for (:26-88): the check lane. A new sibling function (for example suggest_swaps) is called from the same suggest() closure after suggest_for, sharing the same deadline (:30-31, TOTAL_SUGGEST_SECONDS = 240 at :23)."
+  },
+  "how_the_capability_would_arrive": {
+    "existing_mechanism": "NONE FOUND. The resident's read-at-start paths are the Secrets Manager read by name of the Kimi key (ycharts/generate/kimi_port.py:19 KIMI_SECRET_ID = astn/kimi/api-key; :65-69 secret_reader returns the SecretString) and the session secret (SESSION_SECRET_ID, resident_session.py). Neither carries a capability dict. The value a secret read returns is a string; the capability is a dict with verified, qa_receipt_sha256 and request_fields.",
+    "proposed": "NONE PROPOSED. The cell forbids an invented secret or environment variable, and no existing file or parameter is read by the resident for this. The CTO names the carrier. The value itself is the output of the AR-y-246 QA harness (its receipt is the qa_receipt_sha256).",
+    "default": "absent or invalid means None. No default capability is shipped in code."
+  },
+  "behaviour": {
+    "without_capability_today": "resolution_kimi.py:159-165 returns KIMI_WEB_SEARCH_UNVERIFIED with no attempt and no telemetry. suggest_for is unchanged. The finding is unchanged (byte-identical is the design target, not yet tested).",
+    "with_capability_proposed": "after suggest_for, for each TICKER_NOT_FOUND row with no verified suggestion (the check lane's proposals map, upload_suggestions.py:46-88), and only if the advisory's search_capability verifies: advisory('swap', symbol, context_symbols=..., deadline=deadline) under the same deadline; take answer.result.candidates (at most 3); verify them through the verify port that suggest_for already uses (verify(sorted(symbols)) -> {symbol: check}, :69), keeping only check.state FOUND, check.reason EXACT_PROVIDER_MATCH, candidate id equal to the symbol, no features_needed, and a provider_receipt dict (the exact test at :76-79). Attach the kept ones as the new member suggestions. No action is added and no symbol is written into the row.",
+    "with_failures_proposed": "an advisory exception (:59-60 pattern), a KimiFailure outcome (resolution_kimi.py:201-211 closed codes), an empty candidate list, an unverified candidate, or a verify exception (:70-71 pattern) leaves the finding as it was. A candidates list longer than 3 is refused (SUGGESTIONS_INVALID, the verified_suggestions rule at security_resolution.py:244-245) and the finding is untouched. A spent deadline (:52-54 pattern) counts the row as unasked and leaves it as the freeze wrote it."
+  },
+  "wire_shape": {
+    "member": "suggestions",
+    "present_when": "only when at least one candidate verified for that finding; absent otherwise (so a finding with no swap result is byte-identical to today)",
+    "type": "list, 1 to 2 items in practice (at most 3 by the candidate cap)",
+    "item": {
+      "symbol": "string, the provider-verified ticker (equal to the candidate id)",
+      "source": "the literal KIMI_SWAP_PROVIDER_VERIFIED",
+      "provider_receipt_sha256": "string, from the check's provider_receipt.sha256",
+      "reason": "string, the candidate's own reason, bounded to 200 characters, treated as text"
+    },
+    "constructed_example": {
+      "code": "TICKER_NOT_FOUND",
+      "row": "7",
+      "actions": ["<unchanged today's actions>"],
+      "suggestion": "<unchanged: the typo lane's single suggestion or absent>",
+      "suggestions": [
+        {"symbol": "EXAMPLE1", "source": "KIMI_SWAP_PROVIDER_VERIFIED", "provider_receipt_sha256": "<64 hex, illustrative>", "reason": "<the candidate's own reason, at most 200 characters>"},
+        {"symbol": "EXAMPLE2", "source": "KIMI_SWAP_PROVIDER_VERIFIED", "provider_receipt_sha256": "<64 hex, illustrative>", "reason": "<the candidate's own reason, at most 200 characters>"}
+      ]
+    },
+    "note": "The example symbols and receipts are illustrative only. No code at HEAD emits this member."
+  },
+  "verifier_fit": {
+    "verified_suggestions": "intake/security_resolution.py:242-250 calls resolver.check(symbols) and keeps state FOUND only; it does not require EXACT_PROVIDER_MATCH or a provider receipt, and it does not match the verify(symbols) -> {symbol: check} port that suggest_for uses. It does not fit the port as written.",
+    "chosen_test": "the exact-match test already in upload_suggestions.py:76-79 (FOUND, EXACT_PROVIDER_MATCH, id equal to the proposal, no features_needed, provider_receipt dict). The swap lane restates it rather than widening verified_suggestions."
+  },
+  "tests": {
+    "added": 0,
+    "passed": 0,
+    "failed": 0,
+    "folders": [
+      "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_swap_suggestions.py: NOT WRITTEN (outside the TO grant)",
+      "infra/aws/lambda/investor-reporting/intake/tests: run at HEAD by the check, unchanged"
+    ],
+    "intake_run_at_head": "ar21_checks.py y247-swap --root C:/dev/wk-irpt-anlreq-80 printed 'intake tests: 365 passed, 0 failed (rc=0)' on two runs (floor 365 met at HEAD)",
+    "swap_run_at_head": "'swap tests: 0 passed, 0 failed (rc=4)': the test file does not exist",
+    "neighbours_collect": "not run: nothing under ycharts/generate changed, and the grant does not cover it"
+  },
+  "before_arm": {
+    "case": "(b): capability verified and the provider verifies two of three candidates",
+    "ran": false,
+    "failed": null,
+    "reason": "the test file was not written, so case (b) could not be run against HEAD. The check's before_arm rule (record must show failed greater than 0) is not met."
+  },
+  "files_changed": [],
+  "claim": "Read-only record for AR-y-247. The wiring point, the capability's arrival, the behaviour with and without the capability, the wire shape and the verifier fit are stated with file:line from HEAD 85f43d3456. No code, test, or config was changed. The intake folder at HEAD passes 365 of 365 under the check. AC1 is not met: the test file and before_arm are absent, blocked by the grant (IRPT_ANLREQ-D2-W80-S1).",
+  "not_read": [
+    "ycharts/generate/tests/test_y4_check_gate.py (only its KimiAdvisory construction at :138 was seen, through a Grep)",
+    "intake/tests/test_resolution_kimi.py (not opened)",
+    "ycharts/generate/resident_worker.py outside :738-790 (not opened)",
+    "ycharts/session/resident_session.py outside :100-150 (not opened)",
+    "ycharts/generate/kimi_port.py beyond line 70 (the file is 70 lines; the whole file was read)",
+    "intake/resolution_kimi.py outside :130-240 (the parse and the swap prompt were not read)",
+    "the AR-y-246 QA harness record (r21 / r22 KIMI_QA_HARNESS.json): the qa_receipt_sha256 that the capability would carry was not read",
+    "the live AWS and provider plane (no call made, as the order requires)"
+  ]
+}
