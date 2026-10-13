@@ -6,7 +6,8 @@ like the face's one validation sentence, with no producer token.
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
   IV123-AC1  ~72/NODE_ID_READ.json: producer_reads (list, 1 or more, each {file, line int, rule}); denominator {paths_enumerated int >= 1, paths_read int equal to
-             it, basis}; ids_equal_on_all bool; product_change bool, true exactly when ids_equal_on_all is false; when product_change: page_maps_node_ref true,
+             it, basis}; ids_equal_on_all bool; product_change bool, true exactly when ids_equal_on_all is false, EXCEPT (amendment 1) a blocked map: ids_equal_on_all
+             false, page_maps_node_ref false, page_map_blocker and blocking_row non-empty, product_change false, product_files_changed []; when product_change: page_maps_node_ref true,
              test {file, mutant_failed true}, lint_errors 0, typecheck_errors 0, suite_base / suite_after (after fail no greater than base, new_failing_ids []),
              product_files_changed non-empty and each under src/pages/InvestorReporting/tabs/holdings/, portal_commit 40 hex; when not product_change:
              product_files_changed [].
@@ -67,9 +68,17 @@ def main():
         d = r.get("denominator") or {}
         if not is_int(d.get("paths_enumerated")) or d["paths_enumerated"] < 1 or d.get("paths_read") != d["paths_enumerated"] or not str(d.get("basis") or "").strip():
             fail("denominator %r" % d)
-        if not isinstance(r.get("ids_equal_on_all"), bool) or not isinstance(r.get("product_change"), bool) \
-                or r["product_change"] != (not r["ids_equal_on_all"]):
-            fail("ids_equal_on_all and product_change must be booleans, product_change true exactly when the ids differ")
+        if not isinstance(r.get("ids_equal_on_all"), bool) or not isinstance(r.get("product_change"), bool):
+            fail("ids_equal_on_all and product_change must be booleans")
+        # AMENDMENT 1 (issuer, 2026-10-13): where the ids differ and the wire carries no account id the page could map to, the cell answers with the read and the
+        # named blocker (page_map_blocker, blocking_row), no page change.
+        blocked = r["ids_equal_on_all"] is False and r.get("page_maps_node_ref") is False \
+            and str(r.get("page_map_blocker") or "").strip() != "" and str(r.get("blocking_row") or "").strip() != ""
+        if blocked:
+            if r["product_change"] is not False:
+                fail("blocked: no page change was made, so product_change must be false")
+        elif r["product_change"] != (not r["ids_equal_on_all"]):
+            fail("product_change true exactly when the ids differ, unless the map is blocked (page_maps_node_ref false with page_map_blocker and blocking_row)")
         if r["product_change"]:
             if r.get("page_maps_node_ref") is not True:
                 fail("product_change true needs page_maps_node_ref true")
