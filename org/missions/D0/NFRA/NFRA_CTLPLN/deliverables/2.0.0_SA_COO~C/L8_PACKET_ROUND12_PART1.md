@@ -25,7 +25,9 @@ Part 2 follows when `TO-CT-aa-6` is terminal. Graded states below are the issuer
 | `CT-ab-12` | complete | `5dba8cb256` | `SSM-DOCS ... ok=True`; `ADMIN-PARITY ... ok=True` |
 | `CT-ab-13` | complete | `1249b0d2d6` (on origin) | `MERGED-CHECKER-TEST cases=4/4 ok=True`; safe-merge self-test 30 of 30 |
 | `CT-aa-5` | complete | `cc09499bd5` | 1197 + 965 + 1012 passed; folder 3174 passed; control arm 312 of 312 |
-| `CT-aa-6` | pending, applier `~U7` working (ledger open `bfe1eaa75d`) | part 2 | part 2 |
+| `CT-aa-6` | complete (applier `~U7`, commits `dad8779d7d`, `8313f6d827`, tag `market-overview-v1.11.9`) | n/a (seat commit) | record `internal=200 partner=403 walker=200 POST-APPLY events=21 jwt_shaped=0 bearer=0`; CodeSha256 `q4iLGld/...` -> `lpxgJxwr...`; plan 0/1/0; DEVIATION: R2 used a synthetic partner row (deleted, ABSENT), not the seed row |
+
+PART 2 (added ~21:3xZ): all 33 round-12 orders are complete (`round-close-check.py --project NFRA_CTLPLN --round 12`: `proofs complete=30 proof_ok=30`, `judgment=3 graded=2 ungraded=1`, `verdict=REFUSED` on the one ungraded judgment criterion, `TO-CT-ab-3 CTab3-AC2`). The round is not counted finished until your row names it.
 
 ## 3. Round-wide checks run once at the last worker merge
 
