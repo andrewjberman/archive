@@ -1,0 +1,21 @@
+{
+  "call_sites": [
+    {"file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 3133, "quote": "valid, errors = validate_snapshot(snapshot)"},
+    {"file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 2881, "quote": "expected=expected, validate=lambda doc: validate_snapshot(payload)[0]"},
+    {"file": "infra/aws/lambda/investor-reporting/holdings/publication.py", "line": 232, "quote": "or validate(snapshot) is not True):"}
+  ],
+  "refuses_on_invalid": true,
+  "refusal": {"file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 3159, "quote": "raise RuntimeError(\"REFUSED: holdings validation/reconciliation failed before publication: %s\""},
+  "builders_covered": ["holdings_49f", "holdings_inf"],
+  "unvalidated_write_paths": [],
+  "functions_invoked": 0,
+  "aws_writes_made": 0,
+  "builder_returns": [
+    {"file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 2685, "quote": "nodes, extra = BUILDERS[firm_id](s3, as_of)"},
+    {"file": "data/assets/scripts/gold/investor_reporting/holdings_49f.py", "line": 652, "quote": "return nodes, out"},
+    {"file": "data/assets/scripts/gold/investor_reporting/holdings_inf.py", "line": 493, "quote": "return nodes, {\"coverage\": coverage, \"manifest\": manifest, \"source_completion_date\": valuation_date,"},
+    {"file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 3118, "quote": "snapshot = (build_snapshot(firm_id, inputs, business_date, account_ids=account_ids)"}
+  ],
+  "path_chain": "main (holdings_snapshot.py:3224 calls run_firm per firm; main itself does not call validate_snapshot) -> run_firm:3118 build_snapshot -> holdings_snapshot.py:2685 BUILDERS[firm_id] -> holdings_49f.py:652 or holdings_inf.py:493 returns (nodes, extra) -> run_firm:3133 validate_snapshot -> run_firm:3159 raise (stops the build) -> only then run_firm:3181 land -> publication.py:232 validate hook -> publication.py:267 first put",
+  "notes": "Neither builder reaches a write without validate_snapshot. Both return (nodes, extra) into build_snapshot, which returns the snapshot to run_firm, which validates at 3133 and raises at 3159 before land (3181) and before any put. Publish validates at publication.py:232 before its first _put_verified at :267. Not an S3 path: land writes local_out files at holdings_snapshot.py:2875 before its validate hook; its only production caller is run_firm:3181, after validation; a direct call with local_out set and upload False writes unvalidated local files. Recorded as IRPT_BCKEND-D2-W356-S2, not as an unvalidated write path. The order's 'validate_snapshot call in main' is run_firm:3133 (main reaches it through run_firm): IRPT_BCKEND-D2-W356-S1. Test evidence: test_build_refuses_planted_member.py, 5 of 5 arms pass; no AWS client is constructed (boto3.client stubbed)."
+}

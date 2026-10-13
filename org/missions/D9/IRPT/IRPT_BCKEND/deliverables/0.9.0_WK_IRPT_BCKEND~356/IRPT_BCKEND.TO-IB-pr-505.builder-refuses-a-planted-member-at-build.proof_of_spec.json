@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-505",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-505.builder-refuses-a-planted-member-at-build.md",
+    "group": "OTHER",
+    "vintage_commit": "6e3cbe050a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "6e3cbe050a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-505.builder-refuses-a-planted-member-at-build.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~356",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_build_refuses_planted_member.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five arms, synthetic data, stubbed S3 and publish client; run under python -m pytest: 5 passed; no AWS client constructed (boto3.client stubbed); no deploy",
+      "artifact_covered_by": ["IB174-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~356/IB174-1_build_validation_read.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the build-path read: three validation call sites (holdings_snapshot.py:3133, :2881; publication.py:232), the refusal at holdings_snapshot.py:3159, both builders traced to run_firm; functions_invoked 0, aws_writes_made 0; read by static inspection at base 6e3cbe050a",
+      "artifact_covered_by": ["IB174-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows appended (IRPT_BCKEND-D2-W356-S1, -S2, -S3), append-only; no existing row edited; no deploy",
+      "artifact_covered_by": ["IB174-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB174-1-AC1",
+      "criterion_verbatim": "AC1 your new test file passes (3 or more, none failed)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r174/p174_cells.py\" . IB174-1-AC1",
+      "output_evidence": "OK: 5 tests pass\nIB174-1-AC1 PASS\nrc=0",
+      "denominator": "5 of 5 tests in test_build_refuses_planted_member.py pass, none failed (3 required)",
+      "expect": "^IB174-1-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB174-1-AC2",
+      "criterion_verbatim": "AC2 the issuer's own probe: the valid fixture validates with and without account_id and a planted ACCOUNT-node member is refused with an error naming it",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r174/p174_cells.py\" . IB174-1-AC2",
+      "output_evidence": "OK: the valid fixture validates with and without account_id; a planted member is refused\nIB174-1-AC2 PASS\nrc=0",
+      "denominator": "3 of 3 probe readings (valid, without account_id, planted member refused and naming it); regression guard, already PASS at base",
+      "expect": "^IB174-1-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB174-1-AC3",
+      "criterion_verbatim": "AC3 your record: at least two validation call sites resolve (file exists, quote within 3 lines of the line), refuses_on_invalid true and the refusing line cited",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r174/p174_cells.py\" . IB174-1-AC3",
+      "output_evidence": "OK: 3 call site(s) and the refusal resolve\nIB174-1-AC3 PASS\nrc=0",
+      "denominator": "3 of 3 call sites resolve (2 required); refusal resolves at holdings_snapshot.py:3159; refuses_on_invalid true",
+      "expect": "^IB174-1-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A planted unknown member 'planted_member' on the acc1 ACCOUNT node of a contract-valid synthetic snapshot, driven through main (run_firm) and through land, with a stubbed S3 that records every put.",
+      "expected": "the build refuses with a RuntimeError naming planted_member; land refuses with PublicationRefused; zero puts on both paths",
+      "observed": "main raised 'REFUSED: holdings validation/reconciliation failed before publication' naming planted_member; land raised 'snapshot validation/firm/date refused'; zero puts and zero objects on both paths (test arms a and a2)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the test file compared: once under python -m pytest, once inside the AC1 check; both 5 passed",
+      "observed": "5 passed on each of the two runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live irpt-holdings function and the live builder were not run; no AWS client was constructed",
+      "reason": "the order forbids deploy, AWS calls and the live builder; the build path was driven with boto3.client, build_snapshot, VersionedInputs and publish_client stubbed"
+    },
+    {
+      "item": "the whole tests/ folder was not run",
+      "reason": "the order forbids it: one test in the folder makes live read-only AWS calls"
+    },
+    {
+      "item": "the order's combined pytest run (test_holdings_49f.py, test_holdings_inf.py, test_runner_jsonschema_tolerance.py) read rc=2 at collection, before any test ran",
+      "reason": "test_runner_jsonschema_tolerance.py removes .tools from sys.path before importing safe_deploy_core, which lives only in .tools; the file is not edited (the order forbids editing existing tests); recorded as IRPT_BCKEND-D2-W356-S3; the two builder files alone read 36 passed rc=0"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W356-S1: the order places the validate_snapshot call in main; it sits in run_firm (holdings_snapshot.py:3133), which main calls at :3224",
+    "IRPT_BCKEND-D2-W356-S2: land writes local_out files before its validate hook and validates nothing when upload is false; its only production caller is run_firm, after validation, so no live S3 path is unvalidated",
+    "IRPT_BCKEND-D2-W356-S3: test_runner_jsonschema_tolerance.py stops collection of the order's combined run (rc=2): its line 43-44 removes .tools from sys.path before its line 46 imports safe_deploy_core"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~356/IB174-1_build_validation_read.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_build_refuses_planted_member.py -q (from the worktree root, timeout 120)",
+      "result": "5 passed, rc=0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_49f.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_inf.py data/assets/scripts/gold/investor_reporting/tests/test_runner_jsonschema_tolerance.py -q (once, timeout 120)",
+      "result": "rc=2 at collection: ModuleNotFoundError safe_deploy_core (surprise IRPT_BCKEND-D2-W356-S3); the 49F and INF files alone: 36 passed, rc=0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~356/IRPT_BCKEND.TO-IB-pr-505.builder-refuses-a-planted-member-at-build.proof_of_spec.json IB174-1-AC1,IB174-1-AC2,IB174-1-AC3",
+      "result": "run before the status flip; the rc is in the worker report"
+    }
+  ]
+}
