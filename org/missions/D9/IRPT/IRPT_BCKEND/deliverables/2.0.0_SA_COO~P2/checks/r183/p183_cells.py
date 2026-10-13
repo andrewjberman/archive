@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
   IB183-1  IB-pr-517  the comparison catalogue serves Opal's five canonical models (UST, ST, INT, LT, ULT) in that order; Ultra Short-Term is added keyed by Opal's own model identity (namespace OPAL), with no YCharts mapping; the YCharts path refuses an entry that has no mapping and says so
     AC1  the served list: five model entries in the canonical order, named, no ticker, no vendor member; templates.json counts 5 and the new entry has no security_id
     AC2  admission: all five entries pass _admitted_comparison for every permitted firm; the four existing pins are unchanged; the new entry is OPAL/UST and an altered copy of it is refused (the negative arm)
-    AC3  the YCharts path: recipe.comparison_security_ids returns the ids of mapped entries and refuses an unmapped one with COMPARISON_NO_VENDOR_MAPPING naming the key; the catalogue test file and the new test file pass
+    AC3  the YCharts path: recipe.comparison_security_ids returns the ids of mapped entries and refuses an unmapped one on both the older and the live path (report_security_ids) with COMPARISON_NO_VENDOR_MAPPING naming the key; the catalogue, new and maintained-sources test files pass
 """
 import json
 import os
@@ -115,17 +115,39 @@ def main():
             fail("an unmapped entry must raise EnvelopeRefused, got %s" % type(x).__name__)
         else:
             fail("an unmapped entry was not refused")
+        tmpl = {"template_id": "t", "variant": "multicomp", "comparison_securities": {"min": 0, "max": 5}}
+        mapped = [{"key": "a", "namespace": "YCHARTS", "vendor_id": "P:2"}]
+        try:
+            got = recipe.report_security_ids(9, mapped, tmpl)
+        except Exception as x:
+            fail("report_security_ids must take a YCHARTS comparison: %s" % type(x).__name__)
+        if got != ["P:9", "P:2"]:
+            fail("report_security_ids(9, [YCHARTS P:2]) must read ['P:9', 'P:2'], read %r" % (got,))
+        try:
+            recipe.report_security_ids(9, mapped + [{"key": "opal_x", "namespace": "OPAL", "vendor_id": "UST"}], tmpl)
+        except recipe.RecipeRefused as x:
+            text = " ".join(str(a) for a in x.args)
+            if "COMPARISON_NO_VENDOR_MAPPING" not in text or "opal_x" not in text:
+                fail("the live-path refusal must carry COMPARISON_NO_VENDOR_MAPPING and name the key: %s" % text)
+        except Exception as x:
+            fail("an OPAL comparison on the live path must raise RecipeRefused, got %s" % type(x).__name__)
+        else:
+            fail("an OPAL comparison was sent to the YCharts body (report_security_ids did not refuse it)")
         gen = ROOT / R / "ycharts/generate"
         newtest = gen / "tests/test_comparison_opal_model.py"
-        if not newtest.is_file() or newtest.read_text(encoding="utf-8").count("def test_") < 3:
-            fail("tests/test_comparison_opal_model.py must exist with at least 3 tests")
+        if not newtest.is_file() or newtest.read_text(encoding="utf-8").count("def test_") < 4:
+            fail("tests/test_comparison_opal_model.py must exist with at least 4 tests")
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
-        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
-                            "tests/test_comparison_catalogue.py", "tests/test_comparison_opal_model.py"],
-                           cwd=str(gen), capture_output=True, text=True, env=env, timeout=110)
-        if r.returncode != 0:
-            fail("pytest rc %s: %s" % (r.returncode, (r.stdout + r.stderr)[-300:]))
-        print("OK: the YCharts path refuses an unmapped entry and says so; tests pass: %s" % r.stdout.strip().splitlines()[-1])
+        runs = [(gen, ["tests/test_comparison_catalogue.py", "tests/test_comparison_opal_model.py"]),
+                (ROOT / R / "_scope", ["tests/test_maintained_sources.py"])]
+        last = ""
+        for cwd, files in runs:
+            r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"] + files,
+                               cwd=str(cwd), capture_output=True, text=True, env=env, timeout=110)
+            if r.returncode != 0:
+                fail("pytest %s rc %s: %s" % (files, r.returncode, (r.stdout + r.stderr)[-300:]))
+            last = r.stdout.strip().splitlines()[-1]
+        print("OK: the YCharts path refuses an unmapped entry on both paths and says so; tests pass: %s" % last)
     print("%s PASS" % CID)
 
 
