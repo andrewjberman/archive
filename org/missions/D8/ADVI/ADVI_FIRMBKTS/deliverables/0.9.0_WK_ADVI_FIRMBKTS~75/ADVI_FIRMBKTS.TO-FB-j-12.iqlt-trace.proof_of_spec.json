@@ -1,0 +1,131 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-j-12",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-12.iqlt-trace.md",
+  "group": "OTHER",
+  "vintage_commit": "89f2099f0a"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~75",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-12.iqlt-trace.md",
+  "vintage_commit": "89f2099f0a"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/IQLT_TRACE.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the trace record (classification, prices, cost, scope)",
+   "artifact_covered_by": ["AC1", "AC2"],
+   "commit_or_etag": "c07c215810"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/IQLT_TRACE.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the one-page trace with the figures table, the prices, the mechanism and the open questions",
+   "artifact_covered_by": ["AC2"],
+   "commit_or_etag": "c07c215810"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/iqlt_lots_read.py",
+   "kind": "script",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only aggregate of IQLT lots from the served parquet (run with python -I)",
+   "artifact_covered_by": ["AC2"],
+   "commit_or_etag": "c07c215810"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/iqlt_advisor_map.py",
+   "kind": "script",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "advisor-to-account mapping from advisor_assignments_history and the IQLT lot aggregate",
+   "artifact_covered_by": ["AC2"],
+   "commit_or_etag": "c07c215810"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/iqlt_price_check.py",
+   "kind": "script",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "price sources for 2026-10-09 and the custodian cross-check (no account ids printed)",
+   "artifact_covered_by": ["AC2"],
+   "commit_or_etag": "c07c215810"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/iqlt_cost_check.py",
+   "kind": "script",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "per-lot cost check against canonical prices within five days of acquisition",
+   "artifact_covered_by": ["AC2"],
+   "commit_or_etag": "c07c215810"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "<expect>^IQLT record ok classification=(DATA_DEFECT|REAL_LOSS|NOT_DETERMINED) loss_pct=-?[0-9.]+$</expect> (AC1 grades the record's shape and discipline; the trace's truth is read by the issuer from the cited objects.)",
+   "method": "command",
+   "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py iqlt --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/IQLT_TRACE.json",
+   "output_evidence": "FAIL ABSENT or unreadable: FileNotFoundError (rc=1). The literal path is the base checkout, where the record is absent; the record is committed at c07c215810 on the worker branch only. The same checker on the worktree path printed: IQLT record ok classification=DATA_DEFECT loss_pct=-69.22 (rc=0, see compiler_tools).",
+   "denominator": "1 record expected at the literal path, 0 found; 10 read calls on the worker side, all read verbs (get-object, list-objects-v2); 2 independent price sources; 60 of 60 open lots cost-checked",
+   "status": "FAIL",
+   "status_reason": "the literal invocation reads the base checkout, where the record does not exist until the branch is integrated; surprise row S5 names it"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "<expect>^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$</expect> (AC2 is the write-surface bound.)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-75 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-75 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "output_evidence": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing",
+   "denominator": "7 changed paths (6 deliverable files, 1 investigation file); 0 outside the two allowed prefixes; 0 required missing",
+   "status": "PASS",
+   "status_reason": "the ROUND 4 SCOPE line printed by the invocation matches the expect pattern"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. The control for the classification is the price-and-cost arm: the price and cost sources were read independently of the published figure, and the uncapped recomputation (units x price) was read against the capped market value.",
+   "expected": "the uncapped value differs from the capped value by the B_01 cap factor",
+   "observed": "uncapped 587,547.40 vs capped 134,350.71 (factor 0.2287); price and cost consistent",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one read by the order; the figures were reconstructed once from the served 2026-10-09 object",
+   "observed": "not repeated",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "custodian price for the advisor's IQLT lots",
+   "reason": "silver/unrealized/2026-10-09.parquet holds no IQLT row for the 108 accounts mapped to the advisor, so no custodian price could be read for these lots"
+  },
+  {
+   "item": "published account and lot counts (31 and 61) and market value 134,377.61",
+   "reason": "the reconstruction gives 30 accounts and 60 open lots (MV 134,350.71); the difference is recorded in surprise row S4 and the trace's figures are the reconstruction's"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W75-S1: the order places the lots at gold/holdings_lots/ in opal-data-bd; the served object is gold/timeseries/holdings_lots/2026-10-09.parquet, last written after its date",
+  "ADVI_FIRMBKTS-D1-W75-S2: the -69.2 percent is a market-value defect of B_01's silver-noncash cap, not the price or cost defect the order presumes; ARMED, disarm owner 2.0.0_SA_COO~B1",
+  "ADVI_FIRMBKTS-D1-W75-S3: custody holds no IQLT for the advisor's 108 mapped accounts, which hold 60 open IQLT lots; whether the units are held is an open unit-count question",
+  "ADVI_FIRMBKTS-D1-W75-S4: the published IQLT counts and figures (31 accounts, 61 lots, MV 134,377.61) are not reproduced exactly by the advisor-to-account rule used (30, 60, 134,350.71)",
+  "ADVI_FIRMBKTS-D1-W75-S5: the AC1 invocation names the record under the base checkout, where it is absent; the literal run returns FAIL ABSENT, and the same checker on the worktree path returns the record ok line"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r7_checks.py iqlt (worktree path, supplementary to AC1)",
+   "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py iqlt --file C:/dev/wk-firmbkts-75/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/IQLT_TRACE.json",
+   "result": "IQLT record ok classification=DATA_DEFECT loss_pct=-69.22"
+  },
+  {
+   "tool": "r4_scope.py",
+   "invocation": "cd /c/dev/wk-firmbkts-75 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-75 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~75/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing"
+  }
+ ]
+}
