@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e100",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e100.holdings-schema-v1-restore-multi-asset.md",
+    "group": "OTHER",
+    "vintage_commit": "4bad1004831d3a4ecb16780b915beb11dab4a421"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R24.md",
+    "vintage_commit": "4bad1004831d3a4ecb16780b915beb11dab4a421",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e100.holdings-schema-v1-restore-multi-asset.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo edit only: the reverse patch of 01e843ce2e^..01e843ce2e inserted the 5 member lines \"multi_asset\", between commodities and cash. git diff 6b6c2c51bd55 -- this path shows 5 insertions and 0 deletions. Not served, not deployed.",
+      "artifact_covered_by": [
+        "SC24-e100-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/HoldingsSnapshot.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo edit only: the same 5 member lines inserted (reverse patch). git diff 6b6c2c51bd55 -- this path shows 5 insertions and 0 deletions. The lambda package is not built or deployed; IRPT_BCKEND owns that act.",
+      "artifact_covered_by": [
+        "SC24-e100-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/holdings/contracts/HoldingsSnapshot.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo edit only: the same 5 member lines inserted (reverse patch). git diff 6b6c2c51bd55 -- this path shows 5 insertions and 0 deletions. Not built or deployed.",
+      "artifact_covered_by": [
+        "SC24-e100-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_multi_asset_v1_enum.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, 8 tests, no AWS call. Run: 8 passed. Negative control: against the base schema (members removed) 3 failed, 5 passed.",
+      "artifact_covered_by": [
+        "SC24-e100-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC24-e100-AC1",
+      "criterion_verbatim": "all three copies carry multi_asset in 5 enums each, between commodities and cash, and the files minus those 15 lines equal trunk byte for byte.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_multi_asset_restore_check.py",
+      "output_evidence": "MULTI-ASSET-RESTORE ok=True copies=3 of 3 members=15 base_equal=True positions=True control=True (exit 0)",
+      "denominator": "3 of 3 copies; 15 member lines = 5 per copy; base compared at 6b6c2c51bd55",
+      "status": "PASS",
+      "expect": "MULTI-ASSET-RESTORE ok=True"
+    },
+    {
+      "criterion_id": "SC24-e100-AC2",
+      "criterion_verbatim": "the new test file passes (the contract admits multi_asset in all copies, the producer emits it on 0 rows, the copies agree) and reports no failed.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_multi_asset_v1_enum.py -q",
+      "output_evidence": "8 passed in 0.69s",
+      "denominator": "8 passed of 8 collected",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "SC24-e100-AC3",
+      "criterion_verbatim": "the four sibling holdings test files pass as at the base (or with only the helper change item 3 allows), and report no failed.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_publish_gate.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_narrowed.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_cusip_fallback.py -q",
+      "output_evidence": "FAILED data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list ... 1 failed, 69 passed in 2.91s",
+      "denominator": "69 passed of 70 collected; at the base 70 passed of 70 (measured before the edit)",
+      "status": "FAIL",
+      "status_reason": "BLOCKING: the restored contract makes one sibling assertion false (test_holdings_snapshot.py asserts each contract asset_class enum equals the producer's six-class list). That file is outside this order's write grant and item 3 names only the publish-gate helper, so the criterion cannot be met as written. Filed as MDPF_SECCLASS-D1-W90-S1; the order stays pending for the issuer.",
+      "expect": "passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base schema (the 15 member lines removed again) fed to the new test file: the enum arm and the copy-agreement arm must fire",
+      "expected": "failures on the three enum-admission arms",
+      "observed": "3 failed, 5 passed (the three test_each_copy_admits_multi_asset_in_all_five_asset_class_enums cases)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the arms read three JSON files and build an in-memory classifier fixture; no clock, randomness or network",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list (fails after the restore)",
+      "reason": "outside the <paths> grant; item 3 names only the publish-gate helper; filed as MDPF_SECCLASS-D1-W90-S1 (BLOCKING on AC3). Not edited by this worker."
+    },
+    {
+      "item": "_contract_admits_multi_asset helper docstring in test_holdings_publish_gate.py",
+      "reason": "item 3's change condition not met (no arm breaks); the docstring's premise is now stale; filed as MDPF_SECCLASS-D1-W90-S2. Not edited."
+    },
+    {
+      "item": "test_holdings_rearm_trigger.py",
+      "reason": "live AWS check that already fails at the base; out of the criteria and not run (order BOUNDS)."
+    },
+    {
+      "item": "producer holdings_snapshot.py, CHANGELOG.json, any lambda package, deploy, push",
+      "reason": "order item 4 and BOUNDS: not edited, built or deployed; IRPT_BCKEND's act."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W90-S1: the restored contract breaks test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list (1 failed, 69 passed); the file is outside the write grant, so AC3 is FAIL and the order stays pending.",
+    "MDPF_SECCLASS-D1-W90-S2: the publish-gate helper docstring says the v1 enum already rejects multi_asset, which the restore makes false; no arm breaks, so item 3 did not apply and the helper is unchanged."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e100.holdings-schema-v1-restore-multi-asset.md",
+  "compiler_tools": [
+    {
+      "tool": "git apply -R (reverse patch of 01e843ce2e^..01e843ce2e on the three schema paths)",
+      "invocation": "git apply -R .scratch/restore.patch",
+      "result": "Applied patch cleanly to all three copies (hunks 2-5 at offset -4 lines); each copy now carries 5 member lines; base-to-HEAD diff is 15 insertions"
+    },
+    {
+      "tool": "python -m pytest (four sibling files, base then after)",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_publish_gate.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_narrowed.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_cusip_fallback.py -q",
+      "result": "base 4bad100483: 70 passed; after the restore: 1 failed, 69 passed"
+    }
+  ]
+}
