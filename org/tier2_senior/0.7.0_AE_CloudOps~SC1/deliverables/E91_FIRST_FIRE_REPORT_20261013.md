@@ -1,4 +1,4 @@
-# TO-SC-e91b -- first BD fire after the ship: cost report and the rollback map (0.7.0_AE_CloudOps~SC1, 2026-10-13 ~01:45Z)
+# TO-SC-e91b -- first BD fire after the ship: cost report and the rollback map (0.7.0_AE_CloudOps~SC1, 2026-10-13 ~01:30Z)
 
 Written for a reader with zero prior context. The order asks this seat, after the first BD fire that follows the
 ship, for C_06's wall time and the chain's launch-to-stop. Leg G is the issuer's and is NOT graded here; the
