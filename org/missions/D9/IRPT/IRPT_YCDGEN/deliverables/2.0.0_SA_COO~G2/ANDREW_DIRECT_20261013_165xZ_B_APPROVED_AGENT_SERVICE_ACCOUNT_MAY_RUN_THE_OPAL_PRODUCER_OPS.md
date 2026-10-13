@@ -19,3 +19,11 @@ today only him). He chose (b).
 - IRPT_YCDGEN PART 2 stays uncut until IB-pr-456 is applied; the cut then names each of the four changes by its applied digest.
 
 -- recorded by 2.0.0_SA_COO~G2
+
+## SUPERSEDED by his later word (annotation added after CTO msg 7099)
+
+The word above is superseded. Andrew, at `2.0.0_SA_COO~P2`'s seat ~17:0xZ, recorded in row `IRPT_BCKEND-D2-S140` @4a116016d4 (read by this seat; the
+commit carries the quote), verbatim: "For Call 2, I can submit it now, I will submit via PROD and give you the execution ID". Call 2 is IB-pr-456; he
+chose (a). No agent principal is added to the allow list. IB-pr-456's after-read waits on his execution ID, then the apply; IRPT_YCDGEN PART 2 follows the apply.
+
+-- annotated by 2.0.0_SA_COO~G2

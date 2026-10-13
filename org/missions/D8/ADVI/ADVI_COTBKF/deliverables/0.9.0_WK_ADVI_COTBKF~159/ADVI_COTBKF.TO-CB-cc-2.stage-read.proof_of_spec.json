@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cc-2",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cc-2.stage-read.md",
+    "group": "OTHER",
+    "vintage_commit": "063bf7a3df"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round81.md",
+    "vintage_commit": "063bf7a3df",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cc-2.stage-read.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~159",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~159/STAGE_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only record: one get-object of the price store at its version into the worktree .scratch (bytes checked), 47 get-object reads of the served holdings partitions 2026-04-22 to 2026-06-07, three list-objects-v2 --max-items 5 of the served prefixes; no S3 write, no rebuild, no serve, no vendor call",
+      "artifact_covered_by": ["CB81cc2-AC1", "CB81cc2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (ADVI_COTBKF-D2-W159-S1, ADVI_COTBKF-D2-W159-S2); git diff --numstat shows 53 added, 0 deleted",
+      "artifact_covered_by": ["CB81cc2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB81cc2-AC1",
+      "criterion_verbatim": "the five securities each carry every stage (a number or `absent`) and a first stage off 1.0; the store object matched its byte length. The issuer reads where each leaves 1.0.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~159/STAGE_READ.json',encoding='utf-8'));s=d['securities'];print('STAGE-READ securities=%d with_six_stage_keys=%d with_a_first_stage=%d served_prefixes=%d store_bytes_match=%s'%(len(s),sum(1 for x in s if all(k in x['stages'] for k in ('vendor_close','store_row','build_price','minted_copy','served_row','price_paid'))),sum(1 for x in s if x['first_stage_off_1']),len(d['served_prefixes']),d['store_object']['bytes_match']))\"",
+      "expect": "STAGE-READ securities=5 with_six_stage_keys=5",
+      "output_evidence": "STAGE-READ securities=5 with_six_stage_keys=5 with_a_first_stage=5 served_prefixes=3 store_bytes_match=True",
+      "denominator": "5 of 5 securities carry the six stage keys; 5 of 5 carry a non-empty first_stage_off_1 (3 named store_row_vs_vendor, 2 not_established because KLAC and SCCO have no stage pair on their held day); 3 of 3 served prefixes listed; store bytes 97443387 of 97443387",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB81cc2-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: every stage is read from its own source (not copied from round 80's record); \"served\" is read from what is served (the prefixes and the early partitions), not from what is built; the first stage off 1.0 is named only where the ratio shows it and `not_established` otherwise; an absent stage is said to be absent, not filled; no account id or amount appears.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~159/STAGE_READ.json (securities[*].stages, ratios, first_stage_off_1, writer_to_read_next, drift, stages_found_absent, headline, not_established) against the sources cited in its not_established and drift entries",
+      "expect": "judgment by 3.0.0_SA_CVO at L9",
+      "output_evidence": "headline: \"Chosen-day store row differs from the vendor Close: store/vendor APH 1.9859, CTVA 6.65, HON 0.9488; first stage off 1.0 is store_row_vs_vendor for all three.\" KLAC and SCCO: first_stage_off_1 not_established. served_row absent on all five chosen days; HON supplementary served window: 9 days, 2 accounts (count), served/store 1.0 on all 9, served/minted 0.9535 on 7.",
+      "denominator": "5 securities; 5 chosen days; 47 of 47 pre-snapshot served partitions read (HON rows on 9 days, 17 rows, 2 accounts); 3 of 3 served prefixes listed; 0 account ids in the record",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded; output recorded, no verdict"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "the order names no determinism control"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the short .md the task order asks beside STAGE_READ.json",
+      "reason": "not written: the worker writes no report .md under the operator rule; the headline, stages_found_absent and not_established carry its content in STAGE_READ.json"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W159-S1: the price store holds two asset_names under one ticker (SCCO on 1027 dates, the 3.875% 04/23/2025 bond row at the equity price; APH on 70 dates, CL A and NEW CL A); the stage read matched by the equity name",
+    "ADVI_COTBKF-D2-W159-S2: no chosen day lies in the served window 2026-04-22 to 2026-06-07, so served_row is absent for all five; HON partitions on 9 window days were read as a supplementary"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~159/STAGE_READ.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c (CB81cc2-AC1)",
+      "result": "STAGE-READ securities=5 with_six_stage_keys=5 with_a_first_stage=5 served_prefixes=3 store_bytes_match=True (rc 0)"
+    }
+  ]
+}
