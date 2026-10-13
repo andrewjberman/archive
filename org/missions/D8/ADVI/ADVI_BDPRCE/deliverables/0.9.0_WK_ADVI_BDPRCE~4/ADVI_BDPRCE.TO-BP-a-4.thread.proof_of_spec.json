@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-a-4",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-a-4.thread.md",
+    "group": "OTHER",
+    "vintage_commit": "368aeb5029"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP.md",
+    "vintage_commit": "368aeb5029",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-a-4.thread.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/THREAD_TRACE.json",
+      "kind": "doc",
+      "commit_or_etag": "0f9fe341c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 0f9fe341c4 on wk-ADVI_BDPRCE-4 (LOCAL); the thread record for one untickered 49F holding, read-only",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/THREAD_TRACE.md",
+      "kind": "doc",
+      "commit_or_etag": "0f9fe341c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 0f9fe341c4 on wk-ADVI_BDPRCE-4 (LOCAL); one-page analyst companion with the three reproducing commands",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/TRACE_2026-10-09.json",
+      "kind": "doc",
+      "commit_or_etag": "0f9fe341c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 0f9fe341c4 on wk-ADVI_BDPRCE-4 (LOCAL); trace_price.py output for the asset and date, 123 trade ids",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "db1185b30f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four surprise rows ADVI_BDPRCE-D1-W4-S1..S4 appended in db1185b30f on wk-ADVI_BDPRCE-4 (LOCAL); append-only, no earlier row edited",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/ADVI_BDPRCE.TO-BP-a-4.session.log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "session log of the read-only run, committed with this instance",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape, PII discipline and that the recompute equals the served price",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r1-4 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round1/checks/r1_checks.py thread --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/THREAD_TRACE.json",
+      "output_evidence": "THREAD record ok rule=transaction_observed:_the_median_of_|mar trades=123 equal=true (rc=0)",
+      "denominator": "trade_ids 123 entries (23 distinct transaction_id values); 12 required keys present of 12; 0 raw account_id keys; 1 record",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r1-4 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r1-4 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing (rc=0)",
+      "denominator": "4 changed paths of 4 changed paths, 0 outside the allow list, 0 required paths missing",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two copies of THREAD_TRACE.json run through r1_checks.py thread: one with an account_id key added, one with trade_ids emptied",
+      "expected": "both FAIL with rc=1: 'a raw account id or a name is present' and 'trade_ids empty'",
+      "observed": "THREAD record FAIL a raw account id or a name is present rc=1 ; THREAD record FAIL trade_ids empty rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 grader run twice on the unchanged record at the worktree path; md5 of the full output compared",
+      "observed": "0e58279bfe27415e2d79fa26c355faf4 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a full census of untickered holdings across the 3,510 served client detail objects",
+      "reason": "each object is about 4 MB; 26 were read as a sample inside the bound; the counts in shape_counts are sample counts (ADVI_BDPRCE-D1-W4-S4)"
+    },
+    {
+      "item": "the IAM principal of canonical version V7JNX and of daily version LhM3NuODjCiM_VUkEQiojppZtVu4Jf7y",
+      "reason": "not read; the writer is named by time match and the BP-a-1 census (inferred), as the census itself declares"
+    },
+    {
+      "item": "the rule that produced the served lot price 83.78 for 61 sampled lots",
+      "reason": "not traced; the served lot carries no price source field (ADVI_BDPRCE-D1-W4-S2)"
+    },
+    {
+      "item": "the reason the daily 2026-10-09 row (92.216667) differs from the canonical row (91.983333) for the same asset",
+      "reason": "not resolved; the record cites the canonical row that the served lot carries (ADVI_BDPRCE-D1-W4-S3)"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W4-S1: the served client detail objects carry data_as_of 2026-10-09 in 24 of 26 sampled objects, one trading day behind the T-1 date 2026-10-12, so the chain shape at the served date did not arise and the holding is a direct candidate",
+    "ADVI_BDPRCE-D1-W4-S2: 61 of 586 sampled untickered lots carry a current_price that matches no canonical row on the as-of date (ARMED, disarm owner 2.0.0_SA_COO~K1); 83.78 matches no canonical row for VANGUARD MORNINGSTAR GROWTH ETF on any date",
+    "ADVI_BDPRCE-D1-W4-S3: on 2026-10-09 the daily file (92.216667) and canonical (91.983333) carry different transaction_observed prices for the asset; the served lot follows canonical, and trace_price.py's stable pick names the daily row so its match flag reads false",
+    "ADVI_BDPRCE-D1-W4-S4: the shape-counting census was a 26-object sample of 3,510 served client detail objects, not an enumeration; the 64 direct and 63 chain counts are sample counts"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/ADVI_BDPRCE.TO-BP-a-4.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/trace_price.py --asset \"VANGUARD MORNINGSTAR GROWTH ETF\" --date 2026-10-09 --out org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/TRACE_2026-10-09.json",
+      "result": "TRACE WROTE ... trades=123 match=false (rc=0); the record cites the canonical row, see S3"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round1/checks/r1_checks.py thread --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~4/THREAD_TRACE.json",
+      "result": "THREAD record ok rule=transaction_observed:_the_median_of_|mar trades=123 equal=true; rc=0"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+ADVI_BDPRCE.TO-BP-a-4 -- worker 0.9.0_WK_ADVI_BDPRCE~4 -- session log (read verbs only)
+worktree C:/dev/wk-bdprce-r1-4, branch wk-ADVI_BDPRCE-4, cut 368aeb5029
+
+1. Tree check: rev-parse --abbrev-ref HEAD = wk-ADVI_BDPRCE-4; org and .tools present (TREE-OK).
+2. Producer chain read (repo, named files): B_01.holdings_lots.py (lot price :1333, :2627), D_02.advisor_client_detail.py (open_lots :2578, client_detail_key :2971), lib/s3_layout.py:239-240, lib/platinum_dest_view.py (gold/entities/clients/ -> advi/49financial/platinum/entities/clients/), portal advisor-intelligence.ts:1156-1160.
+3. Served listing, opal-data-49financial, prefixes advi/49financial/platinum/entities/clients/ (18,230 objects; 3,510 detail.json), advi/49financial/platinum/accounts/ (7,586), gold/advi/ (26,454), advi/49financial/gold/ (2). Auto-paginated list-objects-v2, counted client-side. No raw listing was denied.
+4. Served object read: advi/49financial/platinum/entities/clients/0/detail.json (VersionId VzILgp.KR2G8UFNcDbZLo3GcSkNmFnPC), data_as_of 2026-10-09, tax.open_lots 3,052 lots.
+5. Range reads (bytes 0-300) of 26 detail objects sampled every 140th key: data_as_of 2026-10-09 in 24, 2026-07-13 in 1, 2026-06-24 in 1.
+6. Full read (26 objects, 4.45 MB max) into the data directory outside the checkout; untickered non-cash lots: 586 across 138 assets; lot prices matched against canonical_prices.parquet (V7JNX.GmPYQcEVMywtMRnjk.fSdQl1WA, 12,649,131 rows, filtered read) and the 10-09 daily file (LhM3NuODjCiM_VUkEQiojppZtVu4Jf7y).
+   Shape a (direct): 69 lots price-match a transaction_observed row on the as-of date; 64 EQUAL in GAP_ROWS.csv, 5 not EQUAL.
+   Shape b (chain): 448 lots price-match a carry-forward/linear row on the as-of date; anchor price equal in all 448; anchor EQUAL in GAP_ROWS.csv for 63.
+   Neither: 61 lots (row on as-of date, price mismatch); 8 lots (asset absent from canonical).
+7. Candidate chosen: first fitting lot in file order (client object 0, lot 1, account ref 3c0cf325f23f), VANGUARD MORNINGSTAR GROWTH ETF, ticker null in the object, not in config/ticker_lookup.json (opal-data-bd, 10,206 entries).
+8. trace_price.py --self-test: 7 arms OK. trace_price.py --asset "VANGUARD MORNINGSTAR GROWTH ETF" --date 2026-10-09 --out .../TRACE_2026-10-09.json: rc=0, trades=123 (23 distinct), match=false (stable pick is the daily row 92.216667; canonical 91.983333 is what the served lot carries and what the median reproduces).
+9. Writer: WRITERS.json rows 2 and 3 (S_00 build_canonical_prices_v2.py + inject_scoped_overrides.py, run b09cfe1b7fe6) for canonical version V7JNX; claim inferred per the BP-a-1 census.
+10. THREAD_TRACE.json assembled from the trace output by a python writer; account identity carried only as the 12-hex digest 3c0cf325f23f. No account id, client name or advisor name written.
+11. AC1: r1_checks.py thread --file THREAD_TRACE.json -> "THREAD record ok rule=... trades=123 equal=true", rc=0.
+12. AC2: r4_scope.py --root ... --allow <record folder>/ --allow <channel file> -> "ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing", rc=0 (run before commit 3; four changed paths).
+13. Controls: mutant with an account_id key -> FAIL "a raw account id or a name is present" rc=1; mutant with empty trade_ids -> FAIL "trade_ids empty" rc=1; determinism: two runs of AC1 md5 0e58279bfe27415e2d79fa26c355faf4 both.
+14. Surprise rows ADVI_BDPRCE-D1-W4-S1..S4 appended to INVESTIGATION_v1.md (commit db1185b30f).
