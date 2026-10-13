@@ -80,9 +80,12 @@ What the order carries beyond CN-d-1's shape (read these three lessons of `ADHOC
       `qa_return_bodies`, do not type any other key; use `--cli-read-timeout 0`. Read the response. Then read the same 16 objects as in (a), each
       store VersionId of the tax prelude, the control key's VersionId and the emitter's `CodeSha256`.
       The leg is met when: invoke 200 with no FunctionError; payload `status` green, `errors` empty, `a4_objects_built` 16; every one of the 16
-      baseline objects is byte-equal to its baseline (the dry run changed nothing served); every tax-prelude store and the control key read the SAME
-      VersionId as in (a) (the day's fire already wrote them, so a conditional create is a no-op; a CHANGED VersionId is a finding: STOP, report,
-      file a BLOCKING row naming the key); the emitter's `CodeSha256` is unchanged. If the response `errors` lists `global`: the fold refused Global on
+      baseline objects is byte-equal to its baseline (the dry run changed nothing served); the control key and every tax-prelude store's EXISTING object read the SAME
+      VersionId as in (a); a changed VersionId is a finding: STOP, report, file a BLOCKING row naming the key. (AMENDMENT 1, 2026-10-13: a NEW
+      workbook snapshot object under `gateway/global/{bronze,silver}/taxsma_workbook/date=<d>/` is EXPECTED from any acquisition, because the key
+      carries the response sha256 and every run acquires afresh; the day's fire and CN-d-1's on-demand run each wrote one. List them, with
+      VersionIds, and do not treat their appearance as a delta; the first draft's "a conditional create is a no-op" was the issuer's wrong premise,
+      row D1-S20.); the emitter's `CodeSha256` is unchanged. If the response `errors` lists `global`: the fold refused Global on
       today's real inputs (the ADDENDUM 6 branch): do NOT retry or loosen; file a BLOCKING row with the dates and the firm count the run names, and
       report. If it raises `GLOBAL SERVED IDENTITY REFUSED` or `GLOBAL MIN-FIRMS FOLD REFUSED`: the same.
       The first-fold acceptance (the global objects of a NEW as-of date carry no model line held by fewer than two firms; identity differential;
@@ -127,7 +130,7 @@ infra/aws/terraform/mdpf-pipeline/gold-lambda.tf
 </criterion>
 <criterion id="C4" judgment="false">
   <invocation>the one invocation of mdpf-gold-lambda with the schedule's recorded input plus the single key qa_local true, then the before and after reads of the 16 latest-date served objects, each tax-prelude store and the control key by VersionId, and the emitter's CodeSha256</invocation>
-  <expect>invoke 200 with no FunctionError, status green, errors empty, a4_objects_built 16; all 16 baseline objects byte-equal (objects compared, printed); every store and the control key read the same VersionId; the emitter CodeSha256 unchanged</expect>
+  <expect>invoke 200 with no FunctionError, status green, errors empty, a4_objects_built 16; all 16 baseline objects byte-equal (objects compared, printed); the control key and every store's existing object read the same VersionId (new workbook snapshot objects listed, AMENDMENT 1); the emitter CodeSha256 unchanged</expect>
 </criterion>
 <criterion id="C5" judgment="false">
   <invocation>the whole-tree print before and after, then python .tools/deploy_ledger.py check</invocation>
