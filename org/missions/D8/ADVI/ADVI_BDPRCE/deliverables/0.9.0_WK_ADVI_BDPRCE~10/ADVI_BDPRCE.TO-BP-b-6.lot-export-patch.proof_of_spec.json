@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-b-6.lot-export-patch",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-6.lot-export-patch.md",
+    "group": "OTHER",
+    "vintage_commit": "73a2b77c3c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R2.md",
+    "vintage_commit": "e48e036784",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-6.lot-export-patch.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/merge_daily_incremental.patched.py",
+      "kind": "script",
+      "commit_or_etag": "732cfb7b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a patched copy in the worker deliverables folder, committed LOCAL on wk-ADVI_BDPRCE-10; the repo silver step under data/ is not edited and nothing is deployed or scheduled",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/unrealized_lots.diff",
+      "kind": "script",
+      "commit_or_etag": "732cfb7b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unified diff against HEAD data/black_diamond/scripts/silver/merge-daily-incremental.py; reproduces the patched file byte-exact under patch -p1",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/unrealized.patched.json",
+      "kind": "script",
+      "commit_or_etag": "732cfb7b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the S3 template bytes (VersionId VgzqQbd.3F3sAlllb6SWsjKZ2XvXgAfE) with two isSelected flags changed; not uploaded to S3",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/test_lot_split.py",
+      "kind": "script",
+      "commit_or_etag": "732cfb7b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline fixture test; reads the recorded export from the data directory beside the worktree; no S3 call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/LOT_PROOF.json",
+      "kind": "script",
+      "commit_or_etag": "732cfb7b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the proof record graded by r2_checks.py lotproof; values written by test_lot_split.py --emit-proof",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the built behaviour (the split and the byte-unchanged legacy, five arms): ^LOT SPLIT TEST: OK [0-9]+ arms$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-10 && timeout 110 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/test_lot_split.py",
+      "expect": "^LOT SPLIT TEST: OK [0-9]+ arms$",
+      "output_evidence": "LOT SPLIT TEST: OK 7 arms",
+      "denominator": "7 of 7 arms PASS: 1 legacy bytes repo(orig)==patched(orig); 2 legacy bytes patched(with)==repo(orig); 3 lot rows 484447 > legacy rows 108439, key unique; 4 lot carries units+cost_basis and legacy carries neither; 5 lot address == builder address; 6 SKIP path on the original export; 7 negative control: repo(with) legacy carries the measures",
+      "status": "PASS",
+      "status_reason": "rc=0 and the expected line matches; the TO label says five arms, the test runs seven, which meets its 'at least these arms' list; rc=0; warm run 5.4 s, cold run with xlsx parse 84 s"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 grades the proof record's invariants: ^LOTPROOF record ok legacy_equal=true lots=[0-9]+ keyed_on_lot=true$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-10 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py lotproof --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/LOT_PROOF.json",
+      "expect": "^LOTPROOF record ok legacy_equal=true lots=[0-9]+ keyed_on_lot=true$",
+      "output_evidence": "LOTPROOF record ok legacy_equal=true lots=484447 keyed_on_lot=true",
+      "denominator": "1 record; 8 required keys present and checked (claim, legacy_bytes_equal, lot_rows, keyed_on_lot, lot_key, address, address_from_builder, new_columns_in_legacy)",
+      "status": "PASS",
+      "status_reason": "rc=0 and the expected line matches; the grader proves record invariants, not the live export (the apply cell reads the live export under its pair)"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged): ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-10 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r2-10 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 8 changed, 0 outside, 0 required missing",
+      "denominator": "8 changed paths on the committed tree (6 deliverable files, the instance and the investigation channel) against 2 allow entries; 0 outside; 0 required missing",
+      "status": "PASS",
+      "status_reason": "rc=0 on HEAD 3780a85238 (the instance itself was staged after an earlier run that printed 7 changed); the changed set is the deliverables folder and the investigation file only; no data/, infra/ or lib/ path changed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a scratch copy of the patched module with the legacy drop line replaced by pass (measures kept in the legacy table), run through the same test via BP_B6_PATCH_MOD",
+      "expected": "LOT SPLIT TEST: FAIL on arms 2 and 4, rc=1",
+      "observed": "ARM FAIL 2 legacy patched(with) bytes == repo(orig); ARM FAIL 4 lot carries units+cost_basis; legacy carries neither; LOT SPLIT TEST: FAIL ... rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the test run twice on the same recorded export; the LEGACY, ARM and LOT SPLIT lines compared with cmp",
+      "observed": "two runs identical (9 lines each), legacy sha256 d65ce03d4efb0ddd182f54ba0430a327c368eabf3fe3f5f00f896bbd689405ad",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the apply: the S3 template is not uploaded, the repo silver step under data/ is not edited, the runner is not synced and no export is produced",
+      "reason": "the apply is WORLD and waits on its CTO and COO pair; this cell produces the change and its proof, offline"
+    },
+    {
+      "item": "the live first export under the patched template is not read",
+      "reason": "it does not exist until the template is switched; the fixture is the recorded 2026-10-09 export; LOT_PROOF.md section 'What the live first export could change' names the gap"
+    },
+    {
+      "item": "the lot-key collapse of 15,553 rows is not resolved",
+      "reason": "the key is the one the task order mandates; the ARMED surprise row ADVI_BDPRCE-D1-W10-S2 hands the decision to its disarm owner before the switch"
+    },
+    {
+      "item": "no IAM or write check on opal-data-assets from the BD runner",
+      "reason": "comp-iam is DECLARED-NOT-APPLICABLE for this cell; reads only; no write was attempted"
+    },
+    {
+      "item": "the S3 template's line endings (CRLF) are not reproduced in the repo copy",
+      "reason": "the repo copy is LF; the patch is built from the S3 bytes so the rollback target is the live object; recorded as ADVI_BDPRCE-D1-W10-S1"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W10-S1: the S3 template is CRLF at 14,419 bytes and the repo blob is LF at 13,920 bytes; equal after CRLF normalisation and as parsed JSON, so the round-1 'equals repo copy' holds on content, not bytes",
+    "ADVI_BDPRCE-D1-W10-S2: the mandated lot key (account_id, asset_id, open_date, unit_cost) folds 15,553 export rows, mostly rows that differ on Relationship ID; ARMED, disarm owner 2.0.0_SA_COO~K1",
+    "ADVI_BDPRCE-D1-W10-S3: the recorded export holds exactly 500,000 rows, a round count; the fixture cannot show it is complete"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "test_lot_split.py",
+      "invocation": "cd /c/dev/wk-bdprce-r2-10 && timeout 110 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/test_lot_split.py",
+      "result": "LOT SPLIT TEST: OK 7 arms, rc=0"
+    },
+    {
+      "tool": "test_lot_split.py --emit-proof",
+      "invocation": "cd /c/dev/wk-bdprce-r2-10 && timeout 110 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~10/test_lot_split.py --emit-proof",
+      "result": "EMITTED LOT_PROOF.json; LOT SPLIT TEST: OK 7 arms, rc=0"
+    },
+    {
+      "tool": "aws s3api (read verbs only)",
+      "invocation": "head-object and get-object on opal-data-bd code/bronze/templates/unrealized.json (VersionId VgzqQbd.3F3sAlllb6SWsjKZ2XvXgAfE) and forwardfill_v2/unrealized/UNREALIZED_DAILY_2026-10-09.xlsx (VersionId Wf2Pct313A.w7y1GpuSf2f7FfiKUVats); list-objects-v2 on forwardfill_v2/unrealized/",
+      "result": "template 14419 bytes; export 38837440 bytes; listing 91 objects; no write verb issued"
+    }
+  ]
+}
