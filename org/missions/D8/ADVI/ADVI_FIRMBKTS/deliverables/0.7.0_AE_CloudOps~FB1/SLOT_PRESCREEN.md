@@ -30,3 +30,12 @@ No evaluator, threshold, prompt or code file was changed; no non-dry invocation;
 ## The one-line next step (not applied)
 Print the exception class and the first 200 characters of its text in `_build_slot`'s two `except` branches (the same form as FB-j-2), deploy under a pair, and
 run one dry run. The record's own AC1 reads FAIL on purpose: the positive control failed.
+
+## Update (2026-10-13T09:09:53Z, after the COO's msg 4735): the cause, reproduced offline
+`lambda_function.py:211` passes `betas=['prompt-caching-2024-07-31']` to `client.messages.create`; the deployed layer `anthropic-sdk-deps:1` is
+anthropic SDK 0.45.0 whose `Messages.create` takes (max_tokens, messages, model, metadata, stop_sequences, stream, system, temperature, tool_choice,
+tools, top_k, top_p, extra_headers, extra_query, extra_body, timeout) and NO `betas` (that parameter exists only on `client.beta.messages.create`).
+Calling a function of that signature with `betas=` reproduces `TypeError: Messages.create() got an unexpected keyword argument 'betas'`, raised before any
+network call (consistent with about 0.17 s per drop: the secret read and the client build). `_build_slot`'s `except (..., Exception)` swallows it and emits the drop
+metric. Measured: the source line, the SDK signature, the two drop-metric equalities. Not observed: the function's own log of the exception (there is none), so the
+runtime class is reproduced, not read.
