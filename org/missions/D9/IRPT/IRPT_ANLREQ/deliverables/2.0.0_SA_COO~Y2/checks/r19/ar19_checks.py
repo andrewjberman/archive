@@ -19,6 +19,9 @@ Usage:  python ar19_checks.py <check> --root <worker worktree root>
   y198-equal     AR-y-198: the five cross-box members each compared to the owner-released version                              -> Y198-EQUAL-OK
   y200-two       AR-y-200: the st32 build with ONLY the reader members (and what must move with them) swapped: the delta against the st32 rebuild is
                  exactly the allowed set, and the reader's named tests pass on that build                                  -> Y200-TWO-OK
+  y201-live      AR-y-201 (workstream YR): the Lambda release rebuilt against the LIVE package read now: the four native holds re-pinned to commits
+                 whose blobs equal the live members, and the release package differs from the live package in exactly the two reader members
+                                                                                                                              -> Y201-LIVE-OK
   y199-recipe    AR-y-199: st32's full assembly recipe recovered, rebuilt at st32's pin (326 members by name and content) before the
                  release pin is built with it, and the delta redone                                                           -> Y199-RECIPE-OK
 
@@ -36,7 +39,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r19/"
 ROUND18_VERSION = "irpt-template-reader.r18.1"
 TOKENS = {"y191-scratch": "Y191-SCRATCH", "y192-census": "Y192-CENSUS", "y193-build": "Y193-BUILD", "y194-rule": "Y194-RULE",
-          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO"}
+          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO", "y201-live": "Y201-LIVE"}
 SHEETS = ("two_value_account_sheet", "total_row_sheet", "one_account_sheet", "two_sheet_workbook")
 NATIVE_UNPINNED = ("acceptance.py", "submission.py", "submission_service.py", "durable_job.py")
 S31_FORMS = ("Account Numbers", "Subaccounts", "Accnt", "Account Nos", "Account Seqno", "Account Serial", "Roth IRA Account", "Trust Account")
@@ -285,6 +288,39 @@ def main(argv):
             if tests.get("failed") not in (0, "0"):
                 problems.append("the reader's tests must pass on the build (failed=%r)" % tests.get("failed"))
             print("differing %s; tests passed %s failed %s" % (names, tests.get("passed"), tests.get("failed")))
+    elif check == "y201-live":
+        rec = load(root, D % "56" + "LAMBDA_LEG_LIVE_REBASE.json", problems)
+        if rec:
+            for member in ("live_read", "hold_pins", "release_build", "differ_from_live", "patch", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            live = (rec.get("live_read") or {})
+            for member in ("code_sha256", "read_at", "member_manifest"):
+                if not live.get(member):
+                    problems.append("live_read lacks %r" % member)
+            lman = live.get("member_manifest") or {}
+            rman = (rec.get("release_build") or {}).get("member_manifest") or {}
+            if len(lman) < 20 or len(rman) < 20:
+                problems.append("both manifests must map at least 20 members to their sha256 (live %d, release %d)" % (len(lman), len(rman)))
+            else:
+                differ = sorted(k for k in set(lman) | set(rman) if lman.get(k) != rman.get(k))
+                if differ != ["template_reader.py", "uploads.py"]:
+                    problems.append("the release package must differ from the live package in exactly template_reader.py and uploads.py (differs in %s)" % differ)
+                if sorted(rec.get("differ_from_live") or []) != differ:
+                    problems.append("differ_from_live does not equal the manifests' difference")
+            pins = {h.get("member"): h for h in rec.get("hold_pins") or []}
+            for name in NATIVE_UNPINNED:
+                h = pins.get(name)
+                if not h:
+                    problems.append("hold_pins lacks %s" % name)
+                    continue
+                if not re.fullmatch(r"[0-9a-f]{40}", str(h.get("pin", ""))):
+                    problems.append("hold pin for %s is not a full commit sha" % name)
+                if h.get("blob_sha256") != lman.get(name):
+                    problems.append("hold pin for %s: blob sha256 is not the live member's" % name)
+            if rec.get("live_equivalent_differs_from_live") != []:
+                problems.append("the live-equivalent build (holds only, reader pins unmoved) must differ from the live package in no member (got %r)" % rec.get("live_equivalent_differs_from_live"))
+            print("live members %d, release members %d" % (len(lman), len(rman)))
     return finish(check, problems)
 
 
