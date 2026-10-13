@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-123",
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "516f3accf9",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-123.account-node-id-equals-account-id-read.md"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "516f3accf9"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~72",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~72/NODE_ID_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the criterion record: 31 paths enumerated and read, ids_equal_on_all false, product_change false, page_maps_node_ref false, blocking_row DSGN_IRPTV1-D2-W72-S1 (AMENDMENT 1 blocked-map answer)"
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "956211cd8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended as bytes: DSGN_IRPTV1-D2-W72-S1 (BLOCKING) to S4 (OBSERVATION)"
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~72/SESSION_LOG.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "session log of the reads, the verdict and the checker runs"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IV123-AC1",
+      "criterion_verbatim": "IV123-AC1 -- every enumerated producer path was read with its denominator printed and the ACCOUNT node-id rule cited by file and line; the record says whether the ids are equal on all of them; the page maps the node ref only where they are not, with a test and a mutant. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r32/p32_round32.py\" . IV123-AC1",
+      "output_evidence": "OK: 31 of 31 path(s) read; ids_equal_on_all False; product_change False\nIV123-AC1 PASS",
+      "denominator": "31 of 31 enumerated paths read (NODE_ID_READ.json denominator.paths_read = paths_enumerated = 31); 0 of 31 page edits; 1 of 2 equality verdicts established by rule (INF equal, 49F unequal, COT declared-equal)",
+      "status": "PASS",
+      "status_reason": "ids_equal_on_all is false: the live 49F builder (holdings_49f.py:339) keys ACCOUNT nodes on the Schwab custody key while the directory keys the same account on gold dim_account (directory_runner.py:592), and the valid contract fixture models N-1 against A-0001. The page map the criterion requires cannot be built in tabs/holdings/: the wire carries no producer-independent account id per ACCOUNT node (adapt.ts:1219; every producer sets ref_id to the node id). page_maps_node_ref is false, and the blocked map is named (page_map_blocker; blocking_row DSGN_IRPTV1-D2-W72-S1). Under AMENDMENT 1 the cell is answered by the read plus that named blocker, with no page change; the producer field needed sits outside this grant. The checker PASSES, so the order is flipped to complete.",
+      "expect": "IV123-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No page edit was made, so no temporary mutant was built; the order names a mutant only on the product branch.",
+      "expected": "N/A (no product branch taken)",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the criterion checker run twice on the same record under timeout 120; outputs compared",
+      "observed": "run 1 and run 2 (amended record): OK: 31 of 31 path(s) read; ids_equal_on_all False; product_change False / IV123-AC1 PASS, rc=0 both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "page edit under tabs/holdings/, its test __tests__/dsgn-irptv1/iv-e-123.account-node-map.test.tsx, its mutant, lint, typecheck and the whole-scope suite",
+      "reason": "page_maps_node_ref cannot be true: no producer-independent account id per ACCOUNT node is on the wire (surprise row DSGN_IRPTV1-D2-W72-S1). Repairing it would need a producer change outside the grant, which the refusal clause forbids."
+    },
+    {
+      "item": "live comparison of the 49F Schwab key with the gold dim_account key",
+      "reason": "no AWS call or live request in this order; the verdict rests on the code read only"
+    }
+  ],
+  "surprises": [
+    "DSGN_IRPTV1-D2-W72-S1: the wire carries no producer-independent account id per ACCOUNT node, so the step-3 page map has no source in tabs/holdings/ (BLOCKING)",
+    "DSGN_IRPTV1-D2-W72-S2: 49financial's live holdings builder keys ACCOUNT nodes on the Schwab dim_balance key while the directory keys the same account on gold dim_account; the declared raw key names the SmartX field (ARMED, disarm owner 2.0.0_SA_COO~D2)",
+    "DSGN_IRPTV1-D2-W72-S3: contract fixture HoldingsSnapshot.valid.json carries ACCOUNT node N-1 with drill ref A-0001 (OBSERVATION, INERT)",
+    "DSGN_IRPTV1-D2-W72-S4: raw_keys.json holdings citations do not match the mints at 516f3accf9 (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~72/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> IV123-AC1",
+      "result": "VALID (rc=0): structural=jsonschema, acceptance rows=1, violations=0; the one row is FAIL, so the order stays open"
+    },
+    {
+      "tool": "p32_round32.py (the criterion checker)",
+      "invocation": "python \"org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r32/p32_round32.py\" . IV123-AC1",
+      "result": "OK: 31 of 31 path(s) read; ids_equal_on_all False; product_change False; IV123-AC1 PASS; rc=0 (run twice)"
+    }
+  ]
+}
