@@ -7,10 +7,11 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
     AC2  the issuer's probe: the valid fixture validates, the same fixture with account_id removed validates, the same fixture with a planted member on the ACCOUNT node is refused
     AC3  the read record: the build path's validation call sites resolve (file, line, quote), and the build refuses on an invalid snapshot
   IB174-2  IB-pr-506  the portal wire union and type follow the contract's enum, multi_asset included (row D2-S127)
-    AC1  the IVE48-AC1 test passes
+    AC1  IVE48-AC1 (wire == the contract's enum minus its retired {multi_asset}) and iv-e-148 (six classes) both pass, iv-e-148 unchanged
     AC2  the whole InvestorReporting folder fails no more than its four pre-existing tests and passes at least 1214
     AC3  the worker's new test passes (2 or more, none failed) and names multi_asset
 """
+import hashlib
 import json
 import re
 import subprocess
@@ -23,6 +24,7 @@ GOLD = "data/assets/scripts/gold/investor_reporting/"
 FIXTURE = "infra/aws/lambda/investor-reporting/_contracts/fixtures/HoldingsSnapshot.valid.json"
 READ_REC = D + "0.9.0_WK_IRPT_BCKEND~356/IB174-1_build_validation_read.json"
 PIR = "src/pages/InvestorReporting/"
+IV148_SHA = "a61839fa6f97e6e245a4ac4d6d3eca6d862d20a616e261aed87ba4743e34fa1c"  # LF-normalised
 ROOT = Path(".")
 CID = ""
 
@@ -151,11 +153,19 @@ def main():
     elif cell == "IB174-2":
         T = PIR + "__tests__/"
         if arm == "AC1":
-            rc, out = run(["bun", "test", T + "dsgn-irptv1/iv-e-48.new-classes.test.tsx"], timeout=110, cwd=ROOT / "portal")
+            # Andrew-direct 2026-10-07 (six classes, no multi-asset class) stands: iv-e-148 is NOT to be edited (CTO amendment @cbcc4a88b8)
+            f148 = ROOT / "portal" / (T + "dsgn-irptv1/iv-e-148.multi-asset-class-readers.test.ts")
+            if not f148.is_file() or hashlib.sha256(f148.read_bytes().replace(b"\r\n", b"\n")).hexdigest() != IV148_SHA:
+                fail("iv-e-148 must be unchanged (it quotes Andrew's six-class word)")
+            f48 = ROOT / "portal" / (T + "dsgn-irptv1/iv-e-48.new-classes.test.tsx")
+            t48 = f48.read_text(encoding="utf-8") if f48.is_file() else ""
+            if "multi_asset" not in t48 or not re.search(r"(?i)retired", t48):
+                fail("IVE48 must name the retired set {multi_asset} (wire == contract enum minus its retired members)")
+            rc, out = run(["bun", "test", T + "dsgn-irptv1/iv-e-48.new-classes.test.tsx", T + "dsgn-irptv1/iv-e-148.multi-asset-class-readers.test.ts"], timeout=110, cwd=ROOT / "portal")
             p, f = bun_counts(out)
             if rc != 0 or not p or f:
-                fail("IVE48-AC1: rc %s, %s pass, %s fail" % (rc, p, f))
-            print("OK: IVE48-AC1 passes")
+                fail("IVE48-AC1 and iv-e-148: rc %s, %s pass, %s fail" % (rc, p, f))
+            print("OK: IVE48-AC1 and iv-e-148 pass; iv-e-148 is unchanged")
         elif arm == "AC2":
             rc, out = run(["bun", "test", PIR.rstrip("/")], timeout=115, cwd=ROOT / "portal")
             p, f = bun_counts(out)
