@@ -1,0 +1,3280 @@
+{
+ "order": "FB-k-2",
+ "read_at": "2026-10-13T22:13:25Z",
+ "firm": "inflection",
+ "scope": "Every Lambda, Lambda@Edge package, CloudFront origin, S3 notification, bucket policy, IAM grant, EventBridge rule, SNS topic, SES identity and repository reader that serves, generates or notifies for the Inflection firm and touches opal-data-inf or the Inflection scope of opal-data-bd, as read live at the commit below.",
+ "calls": [
+  "aws lambda list-functions --output json (auto-paginated; 237 functions; env names and buckets only)",
+  "aws lambda get-function-configuration --function-name exec-summary-generator",
+  "aws lambda get-function-configuration --function-name inf-gold-dispatch (ResourceNotFound: absent live)",
+  "aws lambda get-function --function-name shared-advisor-router --query Code.Location --output text, then GET of that package into the data folder (read; URL not printed)",
+  "aws lambda get-function --function-name shared-advisor-router-response --query Code.Location --output text, then GET of that package into the data folder (read; URL not printed)",
+  "aws iam get-account-authorization-details --filter Role LocalManagedPolicy (303 roles, 56 customer policies)",
+  "aws s3api get-bucket-notification-configuration --bucket opal-data-inf",
+  "aws s3api get-bucket-policy --bucket opal-data-inf",
+  "aws cloudfront list-distributions --output json",
+  "aws events describe-rule --name mdpf-feeder-accelerator",
+  "aws events describe-rule --name exec-summary-trigger",
+  "aws events describe-rule --name exec-summary-trigger-placeholder (ResourceNotFound)",
+  "aws events list-rules --name-prefix exec- (1 rule)",
+  "aws events describe-rule --name <each of 30 inflection-pattern rules> and aws events list-targets-by-rule --rule <each>",
+  "aws sns list-topics --output json (17 topics)",
+  "aws sns list-subscriptions-by-topic --topic-arn <inf-otp-alert and inf-gold-dispatch-release-alarm> (counts only)",
+  "aws ses list-identities --output json (26); aws ses list-templates --output json (0)",
+  "comp-find --corpus aws --limit 200 'opal-data-inf|inflection|inf-|irpt|exec-summary' <IAM_POLICY|IAM_ROLE|S3_BUCKET|S3_BUCKET_POLICY|EVENT_RULE|SCHEDULE|CLOUDFRONT_DISTRIBUTION|SQS_QUEUE|SECRET|LOG_GROUP>",
+  "comp-find --corpus aws --limit 200 '.' LAMBDA (238 nodes) and comp-find --corpus aws 'opal-data-inf' IAM_POLICY (1 node: the bucket policy)",
+  "comp-find --files 'exec-summary-generator' infra/aws --limit 20",
+  "git ls-files | wc -l; git grep -l -E 'opal-data-inf([^l]|$)' -- . ':!portal' | wc -l; git -C portal ls-files | wc -l; git -C portal grep -l -E 'opal-data-inf([^l]|$)' | wc -l",
+  "Grep (native) over portal/src/api/endpoints/advisor-intelligence.ts, infra/aws/lambda-edge/_shared/firm-config.mjs, infra/aws/lambda/exec-summary-generator/",
+  "python -I scripts/planinv_lambda_summary.py <saved list-functions json> --match REGEX (summariser, no AWS call)",
+  "python -I scripts/planinv_iam_grants.py <saved authz json> (summariser, no AWS call)",
+  "python -I scripts/planinv_build_record.py <data-dir> <out-json> <out-md> <head> <read-at> (writes this record; no AWS call)"
+ ],
+ "denominators": {
+  "lambda_functions_graph_LAMBDA_nodes": 238,
+  "lambda_functions_live_list_functions_auto_paginated": 237,
+  "lambda_functions_name_pattern_read_in_live_list": 63,
+  "lambda_functions_env_naming_inflection_or_legacy_inf_bucket": 23,
+  "lambda_functions_env_naming_any_legacy_bucket_opal_data_bd_inf_cot": 32,
+  "iam_roles_scanned_get_account_authorization_details": 303,
+  "iam_customer_managed_policies_scanned": 56,
+  "iam_roles_with_allow_on_opal-data-inf": 40,
+  "iam_roles_with_deny_only_on_opal-data-inf": 20,
+  "iam_roles_with_allow_on_opal-data-inflection": 8,
+  "iam_roles_with_allow_on_opal-data-bd_inflection_scope": 0,
+  "s3_bucket_notification_lambda_configurations_opal-data-inf": 2,
+  "s3_bucket_policy_statements_opal-data-inf": 2,
+  "cloudfront_distributions_listed": 2,
+  "cloudfront_distribution_EVTSA9VEHNZVH_origins": 7,
+  "cloudfront_distribution_EVTSA9VEHNZVH_behaviours": 30,
+  "cloudfront_behaviours_targeting_S3-opal-data-inf_origin": 0,
+  "cloudfront_lambda_edge_associations_on_EVTSA9VEHNZVH": 40,
+  "eventbridge_rules_inflection_pattern_graph": 30,
+  "eventbridge_rules_read_live_describe_and_targets": 30,
+  "sns_topics_listed_live": 17,
+  "sns_topics_inflection_pattern_matched": 3,
+  "sns_subscriptions_read_on_inflection_topics": 2,
+  "ses_identities_listed_live": 26,
+  "ses_identities_naming_inflection": 2,
+  "ses_templates_listed_live": 0,
+  "repo_tracked_files_worktree_outer": 80104,
+  "repo_tracked_files_portal_nested_repo": 2127,
+  "repo_tracked_files_naming_opal-data-inf_outer_repo": 2576,
+  "repo_portal_files_naming_opal-data-inf": 2,
+  "repo_edge_router_bundle_members_read": 2,
+  "mapping_v4_rows_opal-data-inf": 3127,
+  "mapping_v4_rows_opal-data-bd_with_inflection_scope_prefix": 0
+ },
+ "functions": [
+  {
+   "id": "INF-FN-01",
+   "kind": "lambda",
+   "name": "inf-portal-publisher",
+   "trigger": "s3 bucket notification on opal-data-inf (get-bucket-notification-configuration): ObjectCreated under gold/meta/ suffix pipeline-complete.json (the prohibited key); invoked by the chain as ADVISOR_PUBLISHER_FUNCTION",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/canonical/",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/timeseries/client_performance.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/views/account_team.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/accounts_dim/latest.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/aum_snapshot/",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household/",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/snapshots/aua_by_*.json",
+     "claim": "inferred"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "consumer of platinum/firm/snapshots not traced; the portal reads platinum/firm/* keys (INF-READER-01); invokes INF-FN-02; env CF_DISTRIBUTION_ID=EVTSA9VEHNZVH is invalidated after the write",
+   "evidence": "aws lambda list-functions env (FIRM_ID=inflection, INPUT_BUCKET=opal-data-inf, OUTPUT_BUCKET=opal-data-inf); lambda_function.py:60-66, :159, :877-882 | access evidence: infra/aws/lambda/inf-portal-publisher/lambda_function.py:60 ; lambda_function.py:62 ; lambda_function.py:64 ; lambda_function.py:63 ; lambda_function.py:65 ; lambda_function.py:66 ; put_object at lambda_function.py:159; snapshot key constants at :877-882",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-02",
+   "kind": "lambda",
+   "name": "inf-portal-advisor-publisher",
+   "trigger": "invocation by INF-FN-01 (env ADVISOR_PUBLISHER_FUNCTION on INF-FN-01, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/canonical/",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/dimensions/advisor_assignments.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/views/account_team.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/accounts_dim/latest.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/billing/",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/performance/",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/advisors/{advisor_key}/{book,composition,summary,timeseries,top_holdings}.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "per-advisor served files under platinum/advisors (the advisor-intelligence page through the router)",
+   "evidence": "lambda_function.py:179-206, :221-245, :1059-1060, :1198-1203; env FIRM_ID=inflection, INPUT_BUCKET=OUTPUT_BUCKET=opal-data-inf | access evidence: :162 ; :170 ; :206 ; :1060 ; put_object at lambda_function.py:105-106; key constants :221, :245, :1198-1203",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-03",
+   "kind": "lambda",
+   "name": "inf-silver-aggregator",
+   "trigger": "s3 bucket notification on opal-data-inf (get-bucket-notification-configuration): ObjectCreated under silver/_silver_complete/ suffix .json",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/_AGGREGATOR_FIRED.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "invokes INF-FN-04 (env GOLD_TRIGGER_FUNCTION=inf-gold-trigger, measured); no portal consumer read",
+   "evidence": "aws s3api get-bucket-notification-configuration (LambdaFunctionConfigurations); lambda_function.py:10, :32, :99 | access evidence: lambda_function.py:32 ; put_object at lambda_function.py:99; docstring :10",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-04",
+   "kind": "lambda",
+   "name": "inf-gold-trigger",
+   "trigger": "invocation by INF-FN-03; EventBridge rules inf-canonical-prices-daily, inf-gold-full-on-bronze-complete and inf-gold-incremental-daily all DISABLED (measured) with this target",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/trigger-mode.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/trigger-pending.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/trigger-pending.json",
+     "claim": "inferred"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/dispatch-lock.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "gold dispatch for the inflection chain; COMPLETE_KEY (gold/meta/pipeline-complete.json) is DEFINED at :24 and not used elsewhere in the file (grep)",
+   "evidence": "lambda_function.py:22-25 (bucket and key constants); aws events list-targets-by-rule for the three DISABLED rules | access evidence: lambda_function.py:25 ; :23 ; constant at :23; the write verb is not traced ; IAM grant inf-gold-trigger-lambda-role (read/write)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-05",
+   "kind": "lambda",
+   "name": "inf-silver-chain",
+   "trigger": "EventBridge rule inf-silver-chain-bronze-complete (ENABLED, one target, measured); reads bronze completion sentinel",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/YYYY-MM-DD/_BRONZE_COMPLETE.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/_chain_summary/",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/*",
+     "claim": "held"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "silver api_dims feed INF-FN-01 and INF-FN-02 inputs (silver/api_dims/household/, billing/, performance/)",
+   "evidence": "lambda_function.py:54, :122, :281-284; aws events list-targets-by-rule (inf-silver-chain-bronze-complete) | access evidence: put_object at lambda_function.py:282; key at :281 ; IAM grant inf-silver-chain-lambda-role read/write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-06",
+   "kind": "lambda",
+   "name": "inf-bronze-complete-emitter",
+   "trigger": "EventBridge rule inf-bronze-complete-emitter-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/{date}/_BRONZE_COMPLETE.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "its sentinel is the trigger for INF-FN-05 (rule inf-silver-chain-bronze-complete)",
+   "evidence": "infra/aws/lambda/inf-pipeline/inf-bronze-complete-emitter/lambda_function.py:11, :55, :76, :136; env INF_S3_BUCKET=opal-data-inf, INF_BRONZE_PREFIX=bronze/orion-api | access evidence: lambda_function.py:76 (list_objects_v2 paginator) ; put_object at lambda_function.py:136; docstring :11",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-07",
+   "kind": "lambda",
+   "name": "inf-nna-partition-checker",
+   "trigger": "EventBridge rule inf-nna-partition-check-trigger (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/advisor_nna_canonical.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "checks the served advisor NNA canonical file in the legacy bucket; writes CloudWatch metrics only (env METRIC_NAMESPACE)",
+   "evidence": "aws lambda list-functions env (FIRM=inflection, CANONICAL_BUCKET=opal-data-inf, CANONICAL_KEY); IAM inf-nna-partition-checker-scoped | access evidence: env CANONICAL_KEY; IAM grant read on the same key",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-08",
+   "kind": "lambda",
+   "name": "inf-client-detail",
+   "trigger": "API invocation per its docstring (on-demand per-client API); no route read",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "STUB: the code reads no object (status STUB, W4.6 not implemented); env INPUT_BUCKET=opal-data-inf is configured but unused",
+   "evidence": "infra/aws/lambda/inf-client-detail/lambda_function.py:1-20 (print and return only); env INPUT_BUCKET=opal-data-inf",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-09",
+   "kind": "lambda",
+   "name": "inf-otp-relay",
+   "trigger": "EventBridge rule inf-otp-state-change (ENABLED, target this function, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/state.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/current.txt",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/state.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "writes otp/current.txt (the current one-time code object; its consumer was not traced); the alarm topic inf-otp-alert has 2 subscriptions (lambda and sms; endpoints withheld)",
+   "evidence": "infra/aws/lambda/inf-otp-relay/lambda_function.py:230-300; env INF_S3_BUCKET=opal-data-inf (OTP_TOKEN_SECRET withheld) | access evidence: lambda_function.py:230, :288, :300 ; put_object at lambda_function.py:270-272 ; IAM grant read/write otp/*",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-10",
+   "kind": "lambda",
+   "name": "inf-api-eclipse",
+   "trigger": "EventBridge rule inf-api-eclipse-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/eclipse",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/eclipse_qa",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/eclipse_qa/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "bronze eclipse family feeds the eclipse gold path (see INF-FN-25 gold/eclipse read)",
+   "evidence": "infra/aws/lambda/inf-pipeline/inf-api-eclipse/lambda_function.py:12-60; env ECLIPSE_S3_BUCKET=opal-data-inf | access evidence: lambda_function.py:16 ; :60 (reference only; the credential object's contents were not read or printed) ; IAM grant inf-api-eclipse-scoped write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-11",
+   "kind": "lambda",
+   "name": "inf-api-positions",
+   "trigger": "EventBridge rule inf-api-positions-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/positions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/positions_daily.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "positions pull; the positions_mv key class is read by INF-FN-27 (value parity anchor)",
+   "evidence": "IAM inline s3-positions (get-account-authorization-details); env none; code lines in infra/aws/lambda/inf-pipeline/inf-api-positions/lambda_function.py not read line by line | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-12",
+   "kind": "lambda",
+   "name": "inf-api-reps",
+   "trigger": "EventBridge rule inf-api-reps-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api-v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/representatives/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/representatives.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "representatives and household mapping for the advisor pages",
+   "evidence": "IAM inline s3-reps; code not read line by line | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-13",
+   "kind": "lambda",
+   "name": "inf-api-txn",
+   "trigger": "EventBridge rule inf-api-txn-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/transactions.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/transactions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/transactions.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "transactions silver feed the inflection gold chain",
+   "evidence": "IAM inline s3-txn; env INF_PREFER_S3 (value not printed) | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-14",
+   "kind": "lambda",
+   "name": "inf-api-assets-v2",
+   "trigger": "EventBridge rule inf-api-assets-v2-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/assets_v2.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "assets v2 silver feeds INF-FN-04 gold chain via the silver aggregator",
+   "evidence": "IAM inline s3-assets-v2 | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-15",
+   "kind": "lambda",
+   "name": "inf-accounts-v2-daily",
+   "trigger": "EventBridge rule inf-accounts-v2-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/household_rep_mapping.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/accounts_roster.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/accounts_v2.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "accounts_v2 silver is read by INF-FN-02 (accounts_dim) and by the IRPT holdings reader",
+   "evidence": "IAM inline s3-accounts-v2 | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-16",
+   "kind": "lambda",
+   "name": "inf-billing-daily",
+   "trigger": "EventBridge rule inf-billing-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/billing.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/billing.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "billing silver is read by INF-FN-02 (silver/api_dims/billing/)",
+   "evidence": "IAM inline s3-billing | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-17",
+   "kind": "lambda",
+   "name": "inf-performance-daily",
+   "trigger": "EventBridge rule inf-performance-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/performance_dim.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/performance.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "performance silver is read by INF-FN-02 (silver/api_dims/performance/) and by the IRPT performance adapter",
+   "evidence": "IAM inline s3-performance; code inf-pipeline/inf-performance-daily/lambda_function.py not read line by line | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-18",
+   "kind": "lambda",
+   "name": "inf-tax-daily",
+   "trigger": "EventBridge rule inf-tax-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/tax_realized.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/tax.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "tax silver, no portal reader read in this inventory",
+   "evidence": "IAM inline s3-tax | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-19",
+   "kind": "lambda",
+   "name": "inf-unified-account-dim-daily",
+   "trigger": "EventBridge rule inf-unified-account-dim-daily (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/unified_account_dim.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/unified_account_dim.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "unified account dimension; code pull_unified_account_dim.py not read line by line",
+   "evidence": "IAM inline s3-unified-account-dim; infra/aws/lambda/inf-pipeline/inf-unified-account-dim-daily/ | access evidence: IAM grant read ; IAM grant read/write ; IAM grant write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-20",
+   "kind": "lambda",
+   "name": "inf-etf-ownership-daily",
+   "trigger": "EventBridge rule inf-etf-ownership-daily-schedule (ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/canonical/holdings_*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket list)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "writes outside the legacy home: opal-data-etfs daily/inflection/ (env OUTPUT_PREFIX on ETFS_BUCKET=opal-data-etfs); consumer not read",
+   "evidence": "aws lambda list-functions env INF_BUCKET=opal-data-inf, ETFS_BUCKET=opal-data-etfs, ASSETS_BUCKET=opal-data-assets, OUTPUT_PREFIX=daily/inflection/ | access evidence: env HOLDINGS_PREFIX; IAM grant read ; IAM grant read on opal-data-inf",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-21",
+   "kind": "lambda",
+   "name": "inf-assets-trigger",
+   "trigger": "EventBridge rule inf-assets-trigger-bronze-complete (ENABLED, measured)",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "its role inf-assets-trigger-lambda-role has no Allow statement on opal-data-inf (IAM read); it triggers the gold runner by instance id",
+   "evidence": "IAM get-account-authorization-details (no legacy Allow for the role); env GOLD_RUNNER_INSTANCE_ID (value withheld)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-22",
+   "kind": "lambda",
+   "name": "inf-jwt-trigger",
+   "trigger": "EventBridge rules opal-inf-jwt-fetch and opal-inf-export-schedule (both ENABLED, measured)",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/trigger-mode.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "its mode marker only; the credential object orion/jwt/current.json is not in this role's grant (not read)",
+   "evidence": "IAM inline inf-jwt-trigger-policy; aws events list-targets-by-rule | access evidence: IAM grant inf-jwt-trigger-lambda-role write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-23",
+   "kind": "lambda",
+   "name": "inf-bronze-trigger",
+   "trigger": "EventBridge rule opal-inf-bronze-runner-cron (ENABLED, measured)",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/bronze-trigger-mode.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "mode marker for the bronze runner EC2 instance",
+   "evidence": "IAM inline inf-bronze-trigger-policy; aws events list-targets-by-rule | access evidence: IAM grant inf-bronze-trigger-lambda-role write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-24",
+   "kind": "lambda",
+   "name": "mdpf-feeder-trigger",
+   "trigger": "EventBridge rule mdpf-feeder-accelerator (ENABLED): S3 Object Created on opal-data-inf key gold/meta/pipeline-complete.json (measured, describe-rule), one target",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/eclipse/{d}/_meta/gold_complete.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "MDPF feeder: reads the eclipse gold completion marker in the legacy bucket and feeds the MDPF bucket (env MDPF_BUCKET, not legacy); this is the prohibited-key watcher named by the PRD",
+   "evidence": "aws events describe-rule mdpf-feeder-accelerator (EventPattern detail.bucket.name=opal-data-inf, detail.object.key=gold/meta/pipeline-complete.json); lambda_function.py:26, :86, :93 | access evidence: infra/aws/lambda/mdpf-pipeline/mdpf-feeder-trigger/lambda_function.py:93; IAM read on the same",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-25",
+   "kind": "lambda",
+   "name": "opal-inf-served-guard",
+   "trigger": "EventBridge rule opal-inf-served-guard-on-write (ENABLED, measured) and SQS queue opal-inf-served-guard-recheck (graph node)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "_quarantine/served-guard/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "guards the served header_metrics file the frozen portal requests by name (PRD CONTRACTS); the served-file name is the byte-for-byte legacy name",
+   "evidence": "aws lambda list-functions env SERVED_BUCKET=opal-data-inf, SERVED_KEY=platinum/firm/header_metrics.json, QUARANTINE_PREFIX=_quarantine/served-guard/ | access evidence: env SERVED_KEY; IAM ServedKeyGuardS3 ; env QUARANTINE_PREFIX; IAM write",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-26",
+   "kind": "lambda",
+   "name": "opal-inf-value-parity",
+   "trigger": "EventBridge rule opal-inf-value-parity-hourly (ENABLED, measured); publishes to an SNS topic (name withheld as shape)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/snapshot_date={date}/data.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "parity check of the served header metrics against the positions anchor; SNS topic is its notifier",
+   "evidence": "aws lambda list-functions env VP_SERVED_BUCKET=opal-data-inf, VP_FIRM=inf, VP_ANCHOR_KEY_TPL; IAM InfServedAndSourceRead | access evidence: env VP_SERVED_KEY ; env VP_ANCHOR_KEY_TPL",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-27",
+   "kind": "lambda",
+   "name": "opal-assets-ingest-mirror",
+   "trigger": "EventBridge rules opal-assets-ingest-mirror-inf-daily and opal-inf-assets-ingest-mirror-late-daily (both ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/inflection (row; source bronze/{assets,eclipse,performance,positions,transactions}/)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "orion/inflection/bronze/",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "mirrors the legacy inflection bronze into the assets bucket: a LEGACY READER that moves with the bronze home",
+   "evidence": "lambda_function.py:96-123 (MAP row orion/inflection, src_bucket opal-data-inf); role opal-assets-ingest-router-role has Allow read on opal-data-inf/bronze/* (IAM) | access evidence: infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:100-101, :112-123 ; dst_prefix at lambda_function.py:118 (destination bucket is not legacy)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-28",
+   "kind": "lambda",
+   "name": "exec-summary-generator",
+   "trigger": "EventBridge rule exec-summary-trigger (ENABLED; detail-type chain-complete, source bd-pipeline.gold-chain; measured). The Terraform placeholder rule is absent live (see surprise row)",
+   "reads": [
+    {
+     "bucket": "opal-data-bd",
+     "prefix": "platinum advisors/leaderboards for the firm argument (default 49financial)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-bd",
+     "prefix": "advi/49financial/platinum/... (49financial destinations only)",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "its destination map covers opal-data-49financial only; no inflection destination or key class is present in the code, so the Inflection scope of opal-data-bd is not touched by this function",
+   "evidence": "infra/aws/lambda/exec-summary-generator/config.py:29 (S3_BUCKET=opal-data-bd); platinum_dest_view.py:5-15; lambda_function.py:565 (firm default 49financial) | access evidence: served_seam.py:28; platinum_reader.py:43-46; lambda_function.py:565",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-29",
+   "kind": "lambda",
+   "name": "irpt-directory-search",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-directory-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-30",
+   "kind": "lambda",
+   "name": "irpt-status",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-status-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-31",
+   "kind": "lambda",
+   "name": "irpt-holdings",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-holdings-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-32",
+   "kind": "lambda",
+   "name": "irpt-narrative",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-narrative-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-33",
+   "kind": "lambda",
+   "name": "irpt-export-render",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-export-render-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-34",
+   "kind": "lambda",
+   "name": "irpt-directory-refresh",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/_refresh/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-directory-refresh-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-35",
+   "kind": "lambda",
+   "name": "irpt-performance-adapter",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/snapshot_date=*/data.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-performance-adapter-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-36",
+   "kind": "lambda",
+   "name": "irpt-ycharts-generate",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(firm map: inflection -> opal-data-inf)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT reader for the inflection firm (directory and ownership map under the legacy bucket)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-ycharts-generate-role | access evidence: env IRPT_DIRECTORY_BUCKET_MAP read live (keys 49financial, cottonwood, inflection)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-37",
+   "kind": "lambda",
+   "name": "irpt-49f-reporting-read-lambda",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "IRPT function; no legacy grant or map entry (new bucket only)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-49f-reporting-read-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-38",
+   "kind": "lambda",
+   "name": "irpt-holdings-refresh-lambda",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "IRPT function; no legacy grant or map entry (new bucket only)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-holdings-refresh-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-FN-39",
+   "kind": "lambda",
+   "name": "irpt-inf-holdings-performance-lambda",
+   "trigger": "API route in the investor-reporting gateway (graph API_ROUTE nodes) or invocation; not traced per route",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "IRPT function; no legacy grant or map entry (new bucket only)",
+   "evidence": "aws lambda list-functions env (map) and IAM role irpt-inf-holdings-performance-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-EDGE-01",
+   "kind": "edge",
+   "name": "shared-advisor-router (Lambda@Edge, origin-request)",
+   "trigger": "origin-request on CloudFront EVTSA9VEHNZVH behaviours /api/scoped/advisor-intelligence/artifacts/*, artifacts/*/*, entities/*/*, *.json and /api/scoped/satellites/* (5 associations, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "firm map: inflection -> opal-data-inf (rewrites to the firm's platinum keys)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the portal's advisor-intelligence requests for inflection resolve to the legacy bucket through this map",
+   "evidence": "aws lambda get-function code package (member index.mjs, 7718 bytes, legacy token mentions 1); infra/aws/lambda-edge/shared-advisor-router/index.mjs | access evidence: live package index.mjs (member read by zipfile; inflection bucket token present=True); repo infra/aws/lambda-edge/_shared/firm-config.mjs:73",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-EDGE-02",
+   "kind": "edge",
+   "name": "shared-advisor-router-response (Lambda@Edge, origin-response)",
+   "trigger": "origin-response on the same five behaviours (measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "firm map (response guard bucket list): inflection -> opal-data-inf",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "firm-isolation response guard: a response is refused when its firm does not match the session firm (test firm-isolation-guard.spec.mjs)",
+   "evidence": "live package index.mjs (3767 bytes); infra/aws/lambda-edge/shared-advisor-router-response/index.mjs | access evidence: live package index.mjs; inflection:Object.freeze({bucket:\"opal-data-inf\"...}) present=True",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-EDGE-03",
+   "kind": "edge",
+   "name": "CloudFront distribution EVTSA9VEHNZVH (origin S3-opal-data-inf)",
+   "trigger": "distribution-level: origins 7, behaviours 30 (measured); no behaviour targets S3-opal-data-inf (0 of 30) (measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "origin S3-opal-data-inf defined; reached by no cache behaviour",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the origin is an orphan for routing; INF-FN-01 invalidates this distribution (env CF_DISTRIBUTION_ID=EVTSA9VEHNZVH); advisor-intelligence artifacts reach the legacy bucket only through the router map",
+   "evidence": "aws cloudfront list-distributions (Origins 7; behaviours 30; origin counts by target: S3-opal-data-bd 5, S3-opal-data-portal-v2-json 3)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-EDGE-04",
+   "kind": "other",
+   "name": "bucket policy of opal-data-inf",
+   "trigger": "bucket-level: applies to every principal named in the two statements",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "* (AllowScopedAdvisorOAI: GetObject on the whole bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/* (AllowCFDistributionGold: service principal GetObject)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the CloudFront origin-access grant on the legacy gold/* prefix; it retires with the bucket (PRD DEC-8)",
+   "evidence": "aws s3api get-bucket-policy --bucket opal-data-inf (2 statements)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-EDGE-05",
+   "kind": "other",
+   "name": "opal-data-inf bucket notification configuration (S3 to Lambda)",
+   "trigger": "S3 event: 2 Lambda configurations (measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/meta/pipeline-complete.json (event key)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*.json (event key)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "S3 event routes: gold/meta/ pipeline-complete.json to inf-portal-publisher (INF-FN-01) and silver/_silver_complete/ *.json to inf-silver-aggregator (INF-FN-03); the notification config is a singleton per bucket (PRD DEC-7)",
+   "evidence": "aws s3api get-bucket-notification-configuration --bucket opal-data-inf | access evidence: get-bucket-notification-configuration: prefix gold/meta/, suffix pipeline-complete.json ; get-bucket-notification-configuration: prefix silver/_silver_complete/, suffix .json",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-READER-01",
+   "kind": "reader",
+   "name": "portal/src/api/endpoints/advisor-intelligence.ts (nested portal worktree)",
+   "trigger": "invocation by the portal page; the page's requests reach the legacy bucket through EDGE-01",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/{timeseries_overview,partner_analytics_*,cumulative_chart,timeseries_chart,leaderboard,activity_scan_*,cash_drag_*}.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/advisors/{id}/{mix,timeseries,summary,nna_clients,exec_summary}.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/client_directory.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/clients/{hhId}/accounts/{acctId}/timeseries.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the only portal file in 2127 tracked portal files naming the legacy bucket; the key classes are its contract, read from comments and string constants",
+   "evidence": "git grep (nested portal worktree) for opal-data-inf: advisor-intelligence.ts:69-70, :574, :1048, :1415; key constants as cited | access evidence: advisor-intelligence.ts:300-302 ; :380-467, :1366, :1484-1504 ; :467, :919, :952, :983, :996 ; :1344, :1048",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-REPO-01",
+   "kind": "other",
+   "name": "infra/aws/lambda-edge/_shared/firm-config.mjs",
+   "trigger": "build-time import by both edge functions",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "the firm table with bucket opal-data-inf for inflection (line 73), the source for the two edge bundles; DEC-6 makes this table generated from the registry",
+   "evidence": "infra/aws/lambda-edge/_shared/firm-config.mjs:73 (bucket: 'opal-data-inf')",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-RULE-01",
+   "kind": "rule",
+   "name": "mdpf-feeder-accelerator",
+   "trigger": "S3 Object Created on opal-data-inf key gold/meta/pipeline-complete.json (measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/meta/pipeline-complete.json (event key)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "notifies INF-FN-24 (MdpfFeederTrigger); the prohibited key's named watcher",
+   "evidence": "aws events describe-rule --name mdpf-feeder-accelerator (State ENABLED); list-targets-by-rule (1 target)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-RULE-02",
+   "kind": "rule",
+   "name": "exec-summary-trigger",
+   "trigger": "EventBridge event pattern detail-type chain-complete from source bd-pipeline.gold-chain (measured, ENABLED)",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "notifies INF-FN-28 exec-summary-generator; live state differs from the Terraform placeholder (surprise W77-S2)",
+   "evidence": "aws events describe-rule --name exec-summary-trigger; list-targets-by-rule (target exec-summary-generator)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-RULE-03",
+   "kind": "rule",
+   "name": "inf-gold-dispatch-release-changed",
+   "trigger": "CloudTrail-style pattern on UpdateFunctionConfiguration for inf-gold-trigger (measured, ENABLED)",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "notifies SNS topic inf-gold-dispatch-release-alarm (0 subscriptions, measured) and a log group",
+   "evidence": "aws events describe-rule; list-targets-by-rule (2 targets); sns list-subscriptions-by-topic (0)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-RULE-04",
+   "kind": "rule",
+   "name": "inf-canonical-prices-daily, inf-gold-full-on-bronze-complete, inf-gold-incremental-daily",
+   "trigger": "all three DISABLED (measured), each targeting INF-FN-04 inf-gold-trigger",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "held off; inf-canonical-prices-daily stays DISABLED and HELD (PRD DEC-7); moving the target does not re-enable",
+   "evidence": "aws events describe-rule (State DISABLED x3); list-targets-by-rule (inf-gold-trigger)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-SNS-01",
+   "kind": "topic",
+   "name": "inf-otp-alert",
+   "trigger": "publish: publisher not identified in this read",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "2 subscriptions, protocols lambda and sms (endpoints withheld; personal contacts)",
+   "evidence": "aws sns list-subscriptions-by-topic (2)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-SNS-02",
+   "kind": "topic",
+   "name": "inf-gold-dispatch-release-alarm",
+   "trigger": "publish by INF-RULE-03",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "0 subscriptions; a notifier with no subscriber",
+   "evidence": "aws sns list-subscriptions-by-topic (0)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-EMAIL-01",
+   "kind": "email",
+   "name": "SES identities naming the Inflection firm domain (2 individual addresses; addresses withheld)",
+   "trigger": "SES sender identities; no template exists (list-templates 0, measured)",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "verified identities only; which sender uses them was not read",
+   "evidence": "aws ses list-identities (26 total; 2 name the firm domain); aws ses list-templates (0)",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-01",
+   "kind": "role",
+   "name": "bd-exporter-ec2-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:advi-49f-chain-access",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:advi-49f-chain-access) | access evidence: IAM allow on role bd-exporter-ec2-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-02",
+   "kind": "role",
+   "name": "inf-accounts-v2-daily-role",
+   "trigger": "assumed by functions: inf-accounts-v2-daily",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api-v2/*/household_rep_mapping.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/accounts_roster.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/accounts_roster_marker.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/new_portfolio_accounts.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/accounts_roster.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/accounts_roster_marker.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/new_portfolio_accounts.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/accounts_v2.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-accounts-v2",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-accounts-v2) | access evidence: IAM allow on role inf-accounts-v2-daily-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-03",
+   "kind": "role",
+   "name": "inf-api-assets-v2-lambda-role",
+   "trigger": "assumed by functions: inf-api-assets-v2",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_assets_v2.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_assets_v2.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/assets_v2.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-assets-v2",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-assets-v2) | access evidence: IAM allow on role inf-api-assets-v2-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-04",
+   "kind": "role",
+   "name": "inf-api-eclipse-role",
+   "trigger": "assumed by functions: inf-api-eclipse",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/eclipse_qa/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-api-eclipse-scoped",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-api-eclipse-scoped) | access evidence: IAM allow on role inf-api-eclipse-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-05",
+   "kind": "role",
+   "name": "inf-api-positions-role",
+   "trigger": "assumed by functions: inf-api-positions",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/positions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_positions_mv.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/positions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_positions_mv.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/positions_daily.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-positions",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-positions) | access evidence: IAM allow on role inf-api-positions-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-06",
+   "kind": "role",
+   "name": "inf-api-reps-role",
+   "trigger": "assumed by functions: inf-api-reps",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api-v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_reps.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/representatives/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api-v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_reps.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/representatives.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/representatives/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-reps",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-reps) | access evidence: IAM allow on role inf-api-reps-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-07",
+   "kind": "role",
+   "name": "inf-api-txn-role",
+   "trigger": "assumed by functions: inf-api-txn",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/transactions.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/transactions/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/transactions.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/transactions.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/transactions/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-txn",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-txn) | access evidence: IAM allow on role inf-api-txn-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-08",
+   "kind": "role",
+   "name": "inf-billing-daily-role",
+   "trigger": "assumed by functions: inf-billing-daily",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/billing.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/billing.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/billing.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-billing",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-billing) | access evidence: IAM allow on role inf-billing-daily-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-09",
+   "kind": "role",
+   "name": "inf-bronze-complete-emitter-role",
+   "trigger": "assumed by functions: inf-bronze-complete-emitter",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-bronze-complete-emitter-scoped",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-bronze-complete-emitter-scoped) | access evidence: IAM allow on role inf-bronze-complete-emitter-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-10",
+   "kind": "role",
+   "name": "inf-bronze-runner-ec2-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/logs/inf-bronze-runner/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api-v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/performance/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/positions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/transactions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/bronze-runner/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/bronze/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/backfill_progress_*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/bronze-trigger-mode.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/performance/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/transactions/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/logs/inf-bronze-runner/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api-v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/performance/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/positions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/transactions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/backfill_progress_*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/bronze-trigger-mode.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/rate_limit_state_*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/performance/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/transactions/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:bronze-modemarker-rw, inline:s3-rate-limit-state, inline:s3-scoped-inf",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:bronze-modemarker-rw, inline:s3-rate-limit-state, inline:s3-scoped-inf) | access evidence: IAM allow on role inf-bronze-runner-ec2-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-11",
+   "kind": "role",
+   "name": "inf-bronze-trigger-lambda-role",
+   "trigger": "assumed by functions: inf-bronze-trigger",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/bronze-trigger-mode.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-bronze-trigger-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-bronze-trigger-policy) | access evidence: IAM allow on role inf-bronze-trigger-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-12",
+   "kind": "role",
+   "name": "inf-etf-ownership-daily-role",
+   "trigger": "assumed by functions: inf-etf-ownership-daily",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/canonical/holdings_*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-etf-ownership",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-etf-ownership) | access evidence: IAM allow on role inf-etf-ownership-daily-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-13",
+   "kind": "role",
+   "name": "inf-exporter-ec2-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/exporter/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "eclipse/browser-profile/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/logs/inf-exporter/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/browser-profile/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/exporter/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "eclipse/browser-profile/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/logs/inf-exporter/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/browser-profile/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-scoped-inf-exporter",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-scoped-inf-exporter) | access evidence: IAM allow on role inf-exporter-ec2-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-14",
+   "kind": "role",
+   "name": "inf-gold-layer-ec2-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-scoped-inf",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-scoped-inf) | access evidence: IAM allow on role inf-gold-layer-ec2-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-15",
+   "kind": "role",
+   "name": "inf-gold-layer-lambda-role",
+   "trigger": "assumed by functions: inf-client-detail, inf-portal-advisor-publisher, inf-portal-publisher",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-s3-scoped",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-s3-scoped) | access evidence: IAM allow on role inf-gold-layer-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-16",
+   "kind": "role",
+   "name": "inf-gold-qa-runner-ec2-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/bronze/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/gold/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/manual_api/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "code/silver/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/canonical/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/dimensions/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/logs/inf-gold-qa-runner/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/timeseries/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/views/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/advisors/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "qa/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/logs/inf-gold-qa-runner/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "qa/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/assets/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/assets_v2/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-qa-scoped",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-qa-scoped) | access evidence: IAM allow on role inf-gold-qa-runner-ec2-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-17",
+   "kind": "role",
+   "name": "inf-gold-trigger-lambda-role",
+   "trigger": "assumed by functions: inf-gold-trigger",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/dispatch-lock.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/dispatch-lock.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-gold-trigger-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-gold-trigger-policy) | access evidence: IAM allow on role inf-gold-trigger-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-18",
+   "kind": "role",
+   "name": "inf-jwt-trigger-lambda-role",
+   "trigger": "assumed by functions: inf-jwt-trigger",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/trigger-mode.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-jwt-trigger-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-jwt-trigger-policy) | access evidence: IAM allow on role inf-jwt-trigger-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-19",
+   "kind": "role",
+   "name": "inf-nna-partition-checker-lambda-role",
+   "trigger": "assumed by functions: inf-nna-partition-checker",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/advisor_nna_canonical.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-nna-partition-checker-scoped",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-nna-partition-checker-scoped) | access evidence: IAM allow on role inf-nna-partition-checker-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-20",
+   "kind": "role",
+   "name": "inf-otp-relay-lambda-role",
+   "trigger": "assumed by functions: inf-otp-relay",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "otp/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-otp-rw",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-otp-rw) | access evidence: IAM allow on role inf-otp-relay-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-21",
+   "kind": "role",
+   "name": "inf-performance-daily-role",
+   "trigger": "assumed by functions: inf-performance-daily",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/performance_dim.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/performance_dim_SKIP.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/performance_dim.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/performance_dim_SKIP.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/performance.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-performance",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-performance) | access evidence: IAM allow on role inf-performance-daily-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-22",
+   "kind": "role",
+   "name": "inf-silver-aggregator-lambda-role",
+   "trigger": "assumed by functions: inf-silver-aggregator",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/_AGGREGATOR_FIRED.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-silver-aggregator-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-silver-aggregator-policy) | access evidence: IAM allow on role inf-silver-aggregator-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-23",
+   "kind": "role",
+   "name": "inf-silver-chain-lambda-role",
+   "trigger": "assumed by functions: inf-silver-chain",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:inf-silver-chain-s3",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:inf-silver-chain-s3) | access evidence: IAM allow on role inf-silver-chain-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-24",
+   "kind": "role",
+   "name": "inf-tax-daily-role",
+   "trigger": "assumed by functions: inf-tax-daily",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/tax_realized.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/tax_unrealized.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/tax_realized.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/tax_unrealized.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/tax.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-tax",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-tax) | access evidence: IAM allow on role inf-tax-daily-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-25",
+   "kind": "role",
+   "name": "inf-unified-account-dim-daily-role",
+   "trigger": "assumed by functions: inf-unified-account-dim-daily",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/unified_account_dim.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/current.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/orion-api/*/unified_account_dim.csv",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/_silver_complete/*/unified_account_dim.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:s3-unified-account-dim",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:s3-unified-account-dim) | access evidence: IAM allow on role inf-unified-account-dim-daily-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-26",
+   "kind": "role",
+   "name": "irpt-directory-refresh-role",
+   "trigger": "assumed by functions: irpt-directory-refresh",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/_refresh/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-directory-refresh-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-directory-refresh-policy) | access evidence: IAM allow on role irpt-directory-refresh-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-27",
+   "kind": "role",
+   "name": "irpt-directory-role",
+   "trigger": "assumed by functions: irpt-directory-search",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-directory-ownership-map-read-policy, inline:irpt-directory-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-directory-ownership-map-read-policy, inline:irpt-directory-policy) | access evidence: IAM allow on role irpt-directory-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-28",
+   "kind": "role",
+   "name": "irpt-export-render-role",
+   "trigger": "assumed by functions: irpt-export-render",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-export-render-directory-read-policy, inline:irpt-export-render-ownership-map-read-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-export-render-directory-read-policy, inline:irpt-export-render-ownership-map-read-policy) | access evidence: IAM allow on role irpt-export-render-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-29",
+   "kind": "role",
+   "name": "irpt-holdings-role",
+   "trigger": "assumed by functions: irpt-holdings",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings/current/manifest.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings/date=*/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-holdings-firm-read; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-holdings-firm-read) | access evidence: IAM allow on role irpt-holdings-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-30",
+   "kind": "role",
+   "name": "irpt-inf-holdings-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/eclipse/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/code/gold/investor-reporting-holdings.tar.gz",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings_qa/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings_qa/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings_qa/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings_qa/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-inf-holdings-policy; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-inf-holdings-policy) | access evidence: IAM allow on role irpt-inf-holdings-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-31",
+   "kind": "role",
+   "name": "irpt-narrative-role",
+   "trigger": "assumed by functions: irpt-narrative",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-narrative-directory-read-policy, inline:irpt-narrative-ownership-map-read-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-narrative-directory-read-policy, inline:irpt-narrative-ownership-map-read-policy) | access evidence: IAM allow on role irpt-narrative-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-32",
+   "kind": "role",
+   "name": "irpt-performance-adapter-role",
+   "trigger": "assumed by functions: irpt-performance-adapter",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/snapshot_date=*/data.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings_performance_daily/date=*/data.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-performance-adapter-directory-read-policy, inline:irpt-performance-adapter-ownership-map-read-policy, inline:irpt-performance-retained-policy; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-performance-adapter-directory-read-policy, inline:irpt-performance-adapter-ownership-map-read-policy, inline:irpt-performance-retained-policy) | access evidence: IAM allow on role irpt-performance-adapter-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-33",
+   "kind": "role",
+   "name": "irpt-status-role",
+   "trigger": "assumed by functions: irpt-status",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-status-ownership-map-read-policy, inline:irpt-status-policy",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-status-ownership-map-read-policy, inline:irpt-status-policy) | access evidence: IAM allow on role irpt-status-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-34",
+   "kind": "role",
+   "name": "irpt-ycharts-generate-role",
+   "trigger": "assumed by functions: irpt-ycharts-generate",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/inflection/ownership_map.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings/current/manifest.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/platinum/holdings/date=*/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:irpt-ycharts-generate-directory-read-policy, inline:irpt-ycharts-generate-ownership-map-read-policy; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:irpt-ycharts-generate-directory-read-policy, inline:irpt-ycharts-generate-ownership-map-read-policy) | access evidence: IAM allow on role irpt-ycharts-generate-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-35",
+   "kind": "role",
+   "name": "mdpf-daily-runner-ec2-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/eclipse/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/timeseries/client_performance.parquet",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "orion/jwt/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/accounts_v2/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/household_rep_mapping/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/representatives/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/eclipse/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:mdpf-runner-scoped",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:mdpf-runner-scoped) | access evidence: IAM allow on role mdpf-daily-runner-ec2-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-36",
+   "kind": "role",
+   "name": "mdpf-feeder-trigger-role",
+   "trigger": "assumed by functions: mdpf-feeder-trigger",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "gold/eclipse/*/_meta/gold_complete.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:mdpf-feeder-trigger",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:mdpf-feeder-trigger) | access evidence: IAM allow on role mdpf-feeder-trigger-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-37",
+   "kind": "role",
+   "name": "opal-assets-ingest-router-role",
+   "trigger": "assumed by functions: opal-assets-ingest-mirror",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "bronze/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:opal-assets-ingest-router-read-sources",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:opal-assets-ingest-router-read-sources) | access evidence: IAM allow on role opal-assets-ingest-router-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-38",
+   "kind": "role",
+   "name": "opal-inf-served-guard",
+   "trigger": "assumed by functions: opal-inf-served-guard",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "_quarantine/served-guard/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:ServedKeyGuardS3",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:ServedKeyGuardS3) | access evidence: IAM allow on role opal-inf-served-guard",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-39",
+   "kind": "role",
+   "name": "opal-inf-value-parity",
+   "trigger": "assumed by functions: opal-inf-value-parity",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "silver/api_dims/positions_mv/snapshot_date=*/data.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:InfServedAndSourceRead",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:InfServedAndSourceRead) | access evidence: IAM allow on role opal-inf-value-parity",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-40",
+   "kind": "role",
+   "name": "opal-portal-lambda-role",
+   "trigger": "assumed by functions: finbert-batch-processor, opal-infrastructure-monitor, opal-market-overview-tiered-generator, opal-market-regime-classifier, opal-news-ai-sentiment, opal-portal-authorizer, opal-portal-data-proxy, opal-portal-fear-greed-fetcher, opal-portal-rest-authorizer, opal-portal-volatility-fetcher, opal-session-analytics, opal-trending-topics-portal-publisher",
+   "reads": [
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inf",
+     "prefix": "*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "grant sources: inline:MonitorDataFreshnessRead",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; inline:MonitorDataFreshnessRead) | access evidence: IAM allow on role opal-portal-lambda-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-41",
+   "kind": "role",
+   "name": "firmsep-inf-bucket-recovery-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "grant sources: ; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; ) | access evidence: IAM allow on role firmsep-inf-bucket-recovery-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-42",
+   "kind": "role",
+   "name": "irpt-inf-holdings-performance-role",
+   "trigger": "assumed by functions: irpt-inf-holdings-performance-lambda",
+   "reads": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings_performance_daily/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/gold/holdings_performance_manifest/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "grant sources: ; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; ) | access evidence: IAM allow on role irpt-inf-holdings-performance-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-43",
+   "kind": "role",
+   "name": "irpt-inf-ycharts-research-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/state/ycharts_responses/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/state/ycharts_runs/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/state/ycharts_responses/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "irpt/inflection/state/ycharts_runs/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "grant sources: ; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; ) | access evidence: IAM allow on role irpt-inf-ycharts-research-role",
+   "claim": "measured"
+  },
+  {
+   "id": "INF-ROLE-44",
+   "kind": "role",
+   "name": "mdpf-inf-gold-writer-role",
+   "trigger": "assumed by an instance profile or an external principal (not resolved in this read)",
+   "reads": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "(bucket)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/account_distribution/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/account_units/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/aggregate_aua_timeseries/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/aum_metrics/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/account_distribution/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/account_units/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/aggregate_aua_timeseries/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-inflection",
+     "prefix": "mdpf/inflection/gold/aum_metrics/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "grant sources: ; also grants the new bucket",
+   "evidence": "aws iam get-account-authorization-details (RoleDetailList; ) | access evidence: IAM allow on role mdpf-inf-gold-writer-role",
+   "claim": "measured"
+  }
+ ],
+ "not_read": [
+  "IRPT Lambda source (infra/aws/lambda/investor-reporting/*): live env maps and IAM grants read; per-key use not traced line by line.",
+  "Inf pipeline pull Lambdas INF-FN-11 to INF-FN-19 (api pulls, accounts, billing, performance, tax, unified dim): legacy access stated from the IAM grant (measured), not from line-level code reads.",
+  "shared-advisor-router rewrite template (the target key shape after the firm lookup) not traced beyond the firm map; the live package was read by zipfile and regex only.",
+  "auth-validator-edge (viewer-request on 26 behaviours), cache-control-injector and public-data-router (origin-request, 2 behaviours) packages not read; no legacy env reference observed.",
+  "orion/jwt/current.json (credential object): referenced by readers; contents NOT read or printed by design.",
+  "opal-data-inf/gold/meta/pipeline-complete.json: existence not probed (no head on the key); its watchers are the rule and the notification.",
+  "SNS subscription endpoints of inf-otp-alert (email and sms): protocol counts only; endpoints withheld.",
+  "SES identities: the two individual addresses at the firm domain counted, not printed; SES templates 0.",
+  "EventBridge Scheduler schedules: not read (FB-k-1 scope); the graph holds one Scheduler node for the firm (irpt-inf-holdings-performance-daily).",
+  "Graph LAMBDA nodes 238 against live list-functions 237: the one-node difference is not identified.",
+  "EC2 instance-profile roles (inf-exporter, inf-gold-layer-ec2, inf-bronze-runner, inf-gold-qa-runner, mdpf-daily-runner): which instances assume them was not read.",
+  "Portal: only portal/src/api/endpoints/advisor-intelligence.ts names the legacy bucket among 2127 tracked portal files; other portal readers of inflection keys route through the router and were not enumerated.",
+  "Mapping table (mapping_v4.json, 3451 rows) used only as a denominator cross-check; no row of this record is sourced from it.",
+  "CloudFront distribution list: 2 distributions; the 30 behaviours of EVTSA9VEHNZVH enumerated; the second distribution (origin opalinvest.com) not inspected.",
+  "Lambda env values of functions with no env (inf-accounts-v2-daily and the other pull Lambdas): bucket literals in source not grepped line by line.",
+  "Deny-only roles (20 roles with a Deny on opal-data-inf and no Allow) are fences, not grants, and are counted, not listed."
+ ],
+ "claim": "measured",
+ "head_commit": "5760dbcc38db497aa878acf35ea4bf695b8c4f34",
+ "legacy_rows": 80,
+ "total_rows": 97
+}
