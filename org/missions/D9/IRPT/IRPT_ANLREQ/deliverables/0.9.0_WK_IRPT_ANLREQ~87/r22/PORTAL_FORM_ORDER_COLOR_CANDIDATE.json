@@ -1,0 +1,74 @@
+{
+  "cell": "AR-y-262",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-262",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~87",
+  "reuse": {
+    "color_function": "portal/src/lib/modelPortfolioColors.ts:209 getModelColor(modelName) -- the estate's resolver; it returns the canonical row's colour for a name (through the aliases) and a deterministic extended colour for an unknown name (:243-244), never null for a non-empty name",
+    "order_source": "portal/src/lib/modelPortfolioColors.ts:250-258 getAllModelColors() -- the one EXPORTED canonical order (Ultra-Short Term, Short Term, Intermediate Term, Long Term, Ultra-Long Term), each row carrying its canonical name and colour. The page-local MODEL_ORDER at portal/src/pages/ModelPortfolios.tsx:88 is not exported and was not imported (edit outside the grant). Recorded as surprise IRPT_ANLREQ-D2-W87-S3.",
+    "name_matching": "A catalogue entry is matched by getModelColor(entry.label).name; if that is not one of the five canonical names, by getModelColor(entry.key with underscores read as spaces).name. Only a name equal to one of the five getAllModelColors names counts (its rung). An entry with no such name is UNMATCHED: it lists after the matched ones in catalogue order and gets color null, so it carries no colour. Matching is on the returned name, not on the colour, because getModelColor returns an extended colour for every unknown name. Fixed Income is the live case (surprise IRPT_ANLREQ-D2-W87-S4)."
+  },
+  "dev_tip": "f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4",
+  "dev_tip_note": "origin/DEV as fetched at the start of the cell (git -C C:/dev/ajb_workspace/portal fetch origin DEV). At close, origin/DEV read 4d6010234ed2eb1d0a1c1782b4bf782b7e019993 (measured with git rev-parse); the candidate was not rebased onto it (surprise IRPT_ANLREQ-D2-W87-S6).",
+  "branch": "wk-IRPT_ANLREQ-87-portal",
+  "worktree": "C:/dev/wk-portal-87 (git worktree add from origin/DEV; node_modules linked by junction, surprise IRPT_ANLREQ-D2-W87-S1)",
+  "commit": "62d455f57525b9037a6bc7377a6f13e24ad86c05",
+  "commit_state": "LOCAL on wk-IRPT_ANLREQ-87-portal in the portal repository; not pushed, not landed on DEV, not deployed",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-form-order-color.test.tsx"
+  ],
+  "tests": {
+    "added": 5,
+    "passed": 5,
+    "failed": 0,
+    "folders": [
+      "src/pages/TicketCenter/__tests__/analysis-form-order-color.test.tsx (new): 5 pass, 0 fail, 22 expect() calls",
+      "src/pages/TicketCenter/__tests__ (whole folder, WITH the change): 77 pass, 0 fail, 77 tests across 16 files, 630 expect() calls",
+      "src/pages/InvestorReporting/__tests__/dsgn-irptv1 (WITH the change): 371 pass, 10 fail, 381 tests across 240 files; WITHOUT the change (origin f6ef1d25): 371 pass, 10 fail, the same 10 names. The 10 are the known pre-existing failures of that folder (ENOENT on workspace-relative paths); not this cell's"
+    ]
+  },
+  "before_arm": {
+    "failed": 4,
+    "of": 5,
+    "base": "f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4 (HEAD of the candidate before the commit; the component restored from git show HEAD, the new test file unchanged)",
+    "output_tail": [
+      "✗ ... (a) a scrambled catalogue lists in the canonical order; unmatched entries last, in catalogue order",
+      "✗ ... (b) a checked model carries its canonical colour; an unchecked one carries none",
+      "✗ ... (b2) each canonical row takes the canonical colour of its own rung, in the rung order",
+      "✗ ... (c) an entry naming no canonical model still lists, after the matched ones, uncoloured",
+      " 1 pass",
+      " 4 fail",
+      " 8 expect() calls",
+      "Ran 5 tests across 1 file. rc=1",
+      "(d) checking and unchecking still update comparison_keys, and the comparison limit is still said: PASS on the base, as the order does not change it"
+    ]
+  },
+  "after": {
+    "new_file": "5 pass, 0 fail, rc=0",
+    "typecheck": "bun run typecheck (tsc -b --noEmit) rc=0 with the change; a deliberate type error in the new test file returned rc=2 (TS2322 at line 157) and the file was restored byte-equal",
+    "mutant": "the sort in orderedModelBoxes replaced by a constant comparator: (a) and (c) FAIL, 3 pass, 2 fail, rc=1; restored byte-equal to HEAD"
+  },
+  "what_a_person_sees": {
+    "order_as_listed": "Under 'Compare against', the served Opal models in this order, left to right and top to bottom as the form wraps: Opal Ultra Short-Term, Opal Short-Term, Opal Intermediate-Term, Opal Long-Term Conservative, Opal Ultra Long-Term. Any model the rule does not place (the test case is 'Opal Fixed Income') follows them in the catalogue's own order, with no colour. The order is the DESIGN.md C4 duration ladder, UST ST INT LT ULT.",
+    "checked_colour": "A checked model's checkbox is filled in its canonical ladder colour, read from getAllModelColors()/getModelColor, not typed: Ultra Short-Term orange, Short Term amber, Intermediate green, Long Term blue, Ultra-Long Term red (the C4 hues). An unchecked box looks as it does today (the browser's default checkbox). The model's label text is unchanged, so it reads as it does today.",
+    "unmatched_checked": "An unmatched model that is checked keeps the form's default checkbox look: no colour.",
+    "unchanged": "The Advisory fee input, the Add commentary checkbox, the Other ETFs field, the MAX_COMPARISONS wording and limit, the comparison_keys list (add and remove still update it, test d), and the labels."
+  },
+  "design_clauses": {
+    "C4": "canonical order and colour of the five-model ladder: the order is taken from getAllModelColors (the DESIGN.md C4 table, UST ST INT LT ULT, left to right); the colour is the ladder colour from modelPortfolioColors.ts (C4 'Home in code'); nothing is re-hued and no hex is typed in the candidate.",
+    "C3": "the form sits on the page's one band (the comment at AnalysisRequestParts.tsx:4-5 says the create form sits in the band). The checked colour is a fill on a checkbox, which is not a panel, a container or a band; the white label idiom of the form is unchanged and legal on the band.",
+    "C9": "the label text is unchanged (text-white/80 on the band, as before); no new text pairing is introduced, so no new contrast figure is claimed.",
+    "C8": "no accent action is added: no new purple element, no primary action change. The check colour is a ladder colour, not an identity accent.",
+    "C11": "no radius, shadow or focus-ring change; the checkbox keeps its native shape.",
+    "not_applied": "C12 (no empty state changed), C13 (no text clipped or truncated), C14 (no disclosure changed), C6 (the ladder is a data-family colour; the C4 exemption from C7 applies, no status colour is used)."
+  },
+  "claim": "The Analysis Request model checkboxes list in the estate's canonical order (UST ST INT LT ULT) and each checked canonical model's checkbox takes its canonical colour, both read from modelPortfolioColors.ts; an unchanged box keeps the form's look; an unmatched entry lists last with no colour. Committed on the local candidate branch only; nothing landed, pushed or deployed.",
+  "not_read": [
+    "the rendered page: no browser run and no screenshot was taken (portal Verification law); the generated Tailwind CSS for [&>input]:accent-[var(--model-accent)] and the on-band look are not seen (surprise IRPT_ANLREQ-D2-W87-S5)",
+    "origin/DEV at its close tip 4d6010234e: the candidate is based on f6ef1d25 (surprise IRPT_ANLREQ-D2-W87-S6)",
+    "the served catalogue's real labels and keys: the test uses the fixture labels of the neighbour tests ('Opal Short-Term', 'Opal Ultra Long-Term' and so on); what the server serves for the Ultra Short-Term model is cell AR-y-261's read",
+    "portal/src/pages/ModelPortfolios.tsx MODEL_ORDER callers and the FactorTilts SummaryMetricsTable order (other pages; not touched)",
+    "the cause of the 10 dsgn-irptv1 failures (pre-existing, identical without the change)"
+  ],
+  "grant_note": "the portal files are under the portal repository and outside this order's workspace <paths>; the face's step 3 names them. The workspace grant was not widened."
+}
