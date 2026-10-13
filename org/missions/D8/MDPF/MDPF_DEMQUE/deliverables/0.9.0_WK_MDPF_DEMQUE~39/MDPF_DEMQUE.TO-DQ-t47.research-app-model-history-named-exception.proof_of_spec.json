@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t47",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t47.research-app-model-history-named-exception.md",
+    "group": "OTHER",
+    "vintage_commit": "17d1a0cc1f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "17d1a0cc1f",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t47.research-app-model-history-named-exception.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~39",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "257d43f3ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_named_exception admits window_exception 'research_app_model_history_2016' only for need_class non_client, channel model_block, window_start and every start on or after 2016-01-01; it waives the 365-day rule only (_check_window keeps the floor, start and need_date rules). Any other shape is refused naming the exception it did not qualify for. Not called by a new scheduled task; --quote and --check-declared are read-only.",
+      "artifact_covered_by": [
+        "DQ9-t47-AC1",
+        "DQ9-t47-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_window_exception.py",
+      "kind": "test",
+      "commit_or_etag": "257d43f3ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three named tests, stubs and tmp_path, no network, no S3 write: 3 passed at 257d43f3ac. Under two in-process mutants (exception never honored; waiver without qualification) all three fail.",
+      "artifact_covered_by": [
+        "DQ9-t47-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/requests/AMGT_RESAPP-107a-ABNB-MODEL-BLOCK.json",
+      "kind": "config_data",
+      "commit_or_etag": "257d43f3ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "declares window_exception 'research_app_model_history_2016' as its one added key; need_class non_client, window_start 2016-01-01, need_date 2026-10-09 unchanged. Read-only check arm1-arm3 accepted it and priced 989 model-block cells. Nothing drawn.",
+      "artifact_covered_by": [
+        "DQ9-t47-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t47-AC1",
+      "criterion_verbatim": "DQ9-t47-AC1: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t47_tests.py -> EXC-OK (the three named tests in test_demque_window_exception.py)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t47_tests.py",
+      "output_evidence": "collected 3 items; test_a_model_block_with_the_named_research_app_exception_is_admitted_from_2016_and_no_earlier PASSED; test_the_exception_is_refused_on_another_channel_another_class_or_an_unnamed_reason PASSED; test_the_rule_still_refuses_an_undeclared_exception_and_a_start_before_2012 PASSED; 3 passed in 0.10s; EXC-OK; rc=0",
+      "denominator": "3 of 3 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DQ9-t47-AC2",
+      "criterion_verbatim": "DQ9-t47-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t47_real.py -> EXC-REAL-OK (every Bloomberg request accepted, the ABNB file declares the named exception from 2016-01-01, its quote reads 989 model-block cells)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t47_real.py",
+      "output_evidence": "arm1 checked=8 accepted=8 refused=[]; arm2 window_exception=research_app_model_history_2016 window_start=2016-01-01 need_class=non_client; arm3 cells={'bloomberg_model_block': 989}; EXC-REAL-OK the ABNB model block is admitted under the named 2016 exception, 989 cells; rc=0",
+      "denominator": "8 of 8 Bloomberg requests accepted; 989 of 989 model-block cells",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two in-process mutants of bbg_quote._named_exception via scratch script .scratch/mutant_t47.py, no file edit: A_never_honored (returns False: the exception never waives) and B_waiver_without_qualification (returns True whenever window_exception is declared); the three named tests must fail under each",
+      "expected": "all three named tests FAIL under each mutant (the exception's checks fire)",
+      "observed": "A_never_honored: 3 failed (EXC-ADMIT refused by the 365-day rule; refusal-message regexes did not match); B_waiver_without_qualification: 3 failed (DID NOT RAISE ValueError on the channel, class and start shapes; floor-with-exception regex did not match); MUTANT PYTEST_RC 1 for both",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of dq_t47_tests.py compared (the named-test output line and the EXC token)",
+      "observed": "run 1: 3 passed in 0.30s, EXC-OK; run 2: 3 passed in 0.09s, EXC-OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_demque_need_class.py",
+      "reason": "no change: its ABNB-SHAPE assertion pins the request WITHOUT window_exception, which stays refused by the 365-day rule (the 2026-10-09 undeclared shape). The order's permitted edit was not needed."
+    },
+    {
+      "item": "standing_drawer.py --apply, bbg_backfill.py --apply, any Bloomberg or Yahoo call, any S3, ledger, queue or pacer write",
+      "reason": "order BOUNDS: READ-ONLY. The checks run --check-declared and --quote only; nothing is drawn and no exception is added beyond the named one."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~39/MDPF_DEMQUE.TO-DQ-t47.research-app-model-history-named-exception.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "the whole folder, from the worktree root, at 257d43f3ac",
+      "result": "167 passed, rc=0, 0 failed (164 before plus the 3 named tests)"
+    },
+    {
+      "tool": "python .scratch/dq_t47_refusals.py",
+      "invocation": "_validate on the three refused shapes (history channel; client class; window_exception 'research_app_model_history_2015'), from the worktree root",
+      "result": "each refused with a message naming 'research_app_model_history_2016' and the reason: channel 'history' is not model_block; need_class 'client' is not non_client; the rule names no other exception"
+    }
+  ]
+}
