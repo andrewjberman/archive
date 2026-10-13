@@ -1,0 +1,123 @@
+{
+  "record": "AR-y-197 -- the issuer's four members of the resident package delta, read for the pair (round 2, workstream YR)",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~54",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-197",
+  "pins": {
+    "old_live_pin": "0485393f3a (commit 0485393f3ad0a7e564f4867f5e70003e2e62195b)",
+    "new_release_pin": "069b8f797e (commit 069b8f797e665b697332c7283c9c6464d58b9114)",
+    "read_from": "git -C C:/dev/ajb_workspace show <pin>:<path> and git log 0485393f3a..069b8f797e -- <path> (read only)"
+  },
+  "delta_source": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~55/r19/RESIDENT_PACKAGE_DELTA.json (shared tree, read only; not in this worktree)",
+  "resident_entry_points_read": [
+    "infra/aws/lambda/investor-reporting/ycharts/generate/resident_main.py (entry; sys.path setup lines 18-23; imports resident_worker at line 25; loop calls poll_once at line 65; factory call at line 46)",
+    "infra/aws/lambda/investor-reporting/reports/resident_installed.py (factory build_resident_runtime at line 344; lazy imports at lines 375-382; path setup lines 4-8)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py (imports at lines 17-29; poll_once at 859 calls assembly.execute at 880)"
+  ],
+  "trace_method": "Static import closure from resident_main.py and resident_installed.py at 069b8f797e, ast over every Import and ImportFrom (module level and lazy), module search order as sys.path after both setups (lib, _contracts, _ids, _scope, ycharts/extract, ycharts/session, _gate, _authz, _keys, reports, ops, intake, ycharts/generate). Script: .scratch/ar197_trace.py; output: .scratch/ar197_trace_release.txt (closure 66 modules). Lazy edges were then checked for a call site inside the closure with git grep at the pin. Blob sha256 of all eight blobs (old and new for the four members) equal the sha256 values in RESIDENT_PACKAGE_DELTA.json.",
+  "members": [
+    {
+      "member": "_authz/served.py",
+      "source": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "old_blob": "1d55a27aaefccdb2051c9e5973febdb08d253797",
+      "new_blob": "d1bf60c9f907e5bbbbda6c4de5f22f4ad224ee64",
+      "old_sha256": "713188d43779ad0ef1680dad4eee17b1a1f780d76bfd310fc22170eb6b369657 (equals delta)",
+      "new_sha256": "30c0eb88ec38a7ddfc410e4ae1c06ee7a9e77661812ba666a45ffcf5552c2475 (equals delta)",
+      "commits": [
+        {
+          "hash": "9b9c573ce7",
+          "subject": "build(IRPT_ANLREQ AR-y-172, 0.9.0_WK_IRPT_ANLREQ~54): the internal firm reader admits a selected other firm only on a users row whose status is exactly 'active' (CTO ruling W53-S10)",
+          "project_order": "IRPT_ANLREQ / 0.9.0_WK_IRPT_ANLREQ~54 (AR-y-172)"
+        },
+        {
+          "hash": "564e604838",
+          "subject": "build(IRPT_ANLREQ AR-y-184, 0.9.0_WK_IRPT_ANLREQ~55): one INTERNAL-CALLER-CLASS line for an internal caller that selects another firm",
+          "project_order": "IRPT_ANLREQ / 0.9.0_WK_IRPT_ANLREQ~55 (AR-y-184)"
+        }
+      ],
+      "resident_use": "PARTIAL, LAZY, NOT CALLED ON THE STATIC RESIDENT PATH. The resident never imports served at module load. The static chain to served is: reports/resident_installed.py:376 (lazy, inside build_resident_runtime) imports _scope/canonical_profile_reads.py, which imports _scope/maintained_sources.py at module level (canonical_profile_reads.py:15); maintained_sources.py:332 imports custody.current_custody_principal lazily inside snapshot_custody_profile_sources (def at maintained_sources.py:313); custody.py:25 imports served.verified_internal_subject lazily inside current_custody_principal (def at custody.py:24). Call sites of those functions inside the closure: snapshot_custody_profile_sources is called only at maintained_sources.py:386, inside resolve_custody_profile_fields (def at maintained_sources.py:380), which has NO caller in the closure; current_custody_principal is called only from custody.py:61 and custody.py:64 (methods of class CustodyAccess, def at custody.py:45), and CustodyAccess is NEVER INSTANTIATED in the closure (the only textual mention is a comment at ycharts/generate/submission.py:148). So the resident's static path never executes verified_internal_subject (served.py:323-336, body unchanged by the delta; it calls only resolve.trusted_only and verified_svc_custody_statement). Import-time effect if served were loaded: served.py:1384 GUARD_WIRING_PROVEN = _earn_the_mark() builds an Enforcer probe (unchanged code). The resident does NOT call Entry.handle (served.py:1195): its only call sites are served.py:1354 (__call__ alias) and served.py:1459 (inside lambda_handler, served.py:1435, inside lambda_entry, served.py:1423), and lambda_entry is called only from installed_entry (served.py:1491), whose callers exist only outside the closure (directory/, export/, holdings/ entry modules). The resident does NOT call Entry._internal_allowed_firms (served.py:1154): its one caller is Entry.handle at served.py:1253.",
+      "behaviour_change": "NONE REACHED. The status rule (AR-y-172: served.py:1175-1178, the no-row and non-'active' refusals inside _internal_allowed_firms, tested before allowedFirmIds) and the caller-class log line (AR-y-184: _caller_class at served.py:93, _caller_class_line at served.py:99-102, called from Entry.handle at served.py:1255 and 1258) are both reached only through Entry.handle, which the resident does not reach. The status rule and the log line do NOT reach the resident. Plain words for the bytes as they will serve the HTTP entries (not the resident): an internal caller who selects a firm other than their verified firm is now REFUSED (FIRM_BINDING) when there is no users row or the row status is not exactly 'active'; before this delta such a caller was admitted to any firm. Each such selection now prints one line 'INTERNAL-CALLER-CLASS class=<row_present|row_non_active|row_absent> outcome=<refused|admitted>' to the function's stream, carrying no identity.",
+      "risk_note": "No new import, no new environment read, no new AWS call and no changed default in the diff (the hunks add two helper functions, one optional parameter 'seen' on _internal_allowed_firms, and two call sites of the log helper; _internal_allowed_firms still uses the same profile reader). The change is outside the resident's reach per the trace above. The pair should name it as NOT on the resident, and should not cite it as a resident change. The pair should note that served.py as a whole ships in the package (member differing), so the package carries the new bytes even though the resident does not execute the changed functions."
+    },
+    {
+      "member": "infra/logic/registry/name_rulings.json",
+      "source": "infra/logic/registry/name_rulings.json (repo-level registry, NOT under infra/aws/lambda/investor-reporting; see surprise row IRPT_ANLREQ-D2-W54-S13)",
+      "old_blob": "4cef897c32a243034a0359a9d9b35d40f691dfca",
+      "new_blob": "d0752edf6ee15355a1c782675f800bd00b667a04",
+      "old_sha256": "006bc517b26c1b3bd34997d82986797408627bbc958d6f98719029078c4afff4 (equals delta)",
+      "new_sha256": "2f3337d3d3932716008cd649027282c13801a1e2e9e458707e434262e67b507e (equals delta)",
+      "commits": [
+        {
+          "hash": "50c26c4210",
+          "subject": "registry(IRPT_ANLREQ packager mint, 4.0.0_SA_CRO~DELL1): one SECRET row, opal/ticketing/svc-irpt-packager, canonical equal to the name",
+          "project_order": "IRPT_ANLREQ / 4.0.0_SA_CRO~DELL1 (packager mint)"
+        }
+      ],
+      "resident_use": "The package carries the file (the builder lists it as a member), but NO RESIDENT-PATH CODE READS IT. Every reader of name_rulings.json at the pin is either the dev-side gate (.tools/naming-apply-gate.py, not in the package) or lib/opal_naming_rootcheck.py (load_name_rulings at line 109, reading NAME_RULINGS_FILE at line 106). lib/opal_naming_rootcheck.py is reached in the closure only by the lazy import at lib/opal_naming.py:3489, inside _census_rulings (def at lib/opal_naming.py:3482). _census_rulings has two callers, census_judge (lib/opal_naming.py:3495) and census (lib/opal_naming.py:3599), and both are reached only from the command-line main (lib/opal_naming.py:3729, guard at 3807); no closure module calls census, census_judge or main. The resident DOES load lib/opal_naming.py (resident_installed.py:379, lazy in the factory, imports reporting_destination and reporting_policy); those two functions (lib/opal_naming.py:2616 and 2652), lookup (364) and grade (2428) contain no reference to name_rulings (the file's only references are at lines 3483 to 3733). Trace result: NOT READ on the resident path.",
+      "behaviour_change": "NONE REACHED. The delta adds one SECRET row (name opal/ticketing/svc-irpt-packager, canonical equal to the name). Its only effect is on the naming census verdict for that name, which runs from the command line, not in the resident.",
+      "risk_note": "The row names a secret that does not exist yet (the row's own evidence says so); the row grants no read and its owner says the mint and its grant are a separate act. Packaging the registry file into the resident tar changes no resident behaviour per the trace. No new import, environment read or AWS call is added by the file."
+    },
+    {
+      "member": "ops/status.py",
+      "source": "infra/aws/lambda/investor-reporting/ops/status.py",
+      "old_blob": "836e83e5fd7a8a3ce94368815f8a76c0f57d037a",
+      "new_blob": "c98ed7532734a549481ae46256c82561a9aabe42",
+      "old_sha256": "cb3b2ea620f83090343e98e2139a177f1fab1b0170d5bd882a5e8a4f7308658a (equals delta)",
+      "new_sha256": "8df461a0d3957949713e5900581ff4108f606c1828a09672f068ddadd1066f77 (equals delta)",
+      "commits": [
+        {
+          "hash": "e93258c650",
+          "subject": "build(IRPT_ANLREQ AR-y-162, 0.9.0_WK_IRPT_ANLREQ~52): the upload reader re-landed on CONTRACT C-STOREDINPUT",
+          "project_order": "IRPT_ANLREQ / 0.9.0_WK_IRPT_ANLREQ~52 (AR-y-162)"
+        },
+        {
+          "hash": "114c77fb01",
+          "subject": "revert(IRPT_ANLREQ round 14 build, 2.0.0_SA_COO~Y2): the upload reader's account/totals findings, the finding words and the POST's first answer are taken OFF the trunk -- CTO ruling msg 6054; disarms rows IRPT_ANLREQ-D2-W53-S5 and -S6",
+          "project_order": "IRPT_ANLREQ / 2.0.0_SA_COO~Y2 (round 14 revert)"
+        },
+        {
+          "hash": "4215d98f26",
+          "subject": "feat(IRPT_ANLREQ TO-AR-y-143, 0.9.0_WK_IRPT_ANLREQ~52): words for every finding code the reader can show; the reader's ERROR findings are the door's first answer",
+          "project_order": "IRPT_ANLREQ / 0.9.0_WK_IRPT_ANLREQ~52 (TO-AR-y-143)"
+        }
+      ],
+      "resident_use": "NOT REACHED. No module in the closure imports the name 'status' or 'ops.status': the closure (66 modules) contains no 'import status' and no 'from status import'. grep at the pin for 'public_view', 'status_envelope' and 'CORRECTION_WORDS' finds no closure caller of ops/status.py (the one textual mention, served.py:486, is a comment). The resident's ops imports are ops/owned_requests.py only: resident_worker.py:23 (from owned_requests import _storage_kwargs) and resident_installed.py:380 (from owned_requests import OwnedRequestReader). Functions in ops/status.py changed by the delta: none. The delta changes only the literal dictionary CORRECTION_WORDS (24 new keys between AMOUNT_MISSING and WEIGHT_RESIDUAL_NORMALIZED, counted from the diff). No function body and no import line changed.",
+      "behaviour_change": "NONE REACHED. The resident never loads ops/status.py. Plain words for the module itself (not the resident): the correction-wording table gains sentences for 24 finding codes (for example AMOUNT_MISSING, UNIT_MISSING, TICKER_AMBIGUOUS, WEIGHTS_DO_NOT_SUM_TO_ONE). No function's logic changes.",
+      "risk_note": "No new import, environment read, AWS call or changed default. The table is a constant. Nothing the pair needs to name for the resident."
+    },
+    {
+      "member": "ycharts/generate/resident_worker.py",
+      "source": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "old_blob": "089cf64b16fe42fe3095d81d1d554d97951896ad",
+      "new_blob": "ed6234a1319ffe4cfb153ad9d2c0ca48f83b5e55",
+      "old_sha256": "a643b0074258f3732abbb28e2712e60ee5433f6fc633d2c7ecc887ac5829113d (equals delta)",
+      "new_sha256": "755e40b4954d3e528cc074ad28cf315c31145a520a3d414803a0970d6ae82ea4 (equals delta)",
+      "commits": [
+        {
+          "hash": "4c4dbeda86",
+          "subject": "feat(IRPT_YCDGEN YCD-a-16): analysis_ready needs a ticket AND commentary_requested exactly True",
+          "project_order": "IRPT_YCDGEN / YCD-a-16"
+        },
+        {
+          "hash": "8af5a63bae",
+          "subject": "code(IRPT_YCDGEN YCD-d-15, 0.9.0_WK_IRPT_YCDGEN~17): analysis_ready is sent only for a request filed under a ticket",
+          "project_order": "IRPT_YCDGEN / 0.9.0_WK_IRPT_YCDGEN~17 (YCD-d-15)"
+        }
+      ],
+      "resident_use": "REACHED, DIRECTLY. resident_main.py:25 imports ResidentAssembly, poll_once and poll_package_once from resident_worker. The resident loop calls poll_once at resident_main.py:65. poll_once (resident_worker.py:859) calls assembly.execute at resident_worker.py:880. ResidentAssembly.execute (def at 639): its already-READY branch calls send_ready_if_ticketed at resident_worker.py:686-687; its fresh-job branch calls worker.run() at resident_worker.py:705, which reaches ResidentGenerationWorker.mark_ready (def at 333; calls at 448 and 504) and then put_state at 341 and self.signal_ready(request_id, record) at 342, whose body (resident_worker.py:345-346) calls send_ready_if_ticketed. reports/resident_installed.py:382 also imports ResidentAssembly from this module. The new function send_ready_if_ticketed is at resident_worker.py:189; it calls send_ready (def at 163) only on the success path (line 200).",
+      "behaviour_change": "REACHED. The I3 signal (analysis_ready, sent through send_ready at lines 163-186) is no longer sent for every READY job. send_ready_if_ticketed (lines 189-200) sends only when BOTH hold: (1) the accepted record carries a non-empty string ticket_id (checked first; otherwise it prints 'IRPT_RESIDENT_READY_SIGNAL skipped=NO_TICKET <request_id>', sends nothing and does not mark i3_sent_at), and (2) record['commentary_requested'] is exactly True (otherwise it prints 'skipped=COMMENTARY_NOT_REQUESTED' and does the same). The READY state write (put_state at line 341) still happens before the signal, so the job state is unchanged. On the re-presented path (lines 686-687) the same gate applies; a skipped send leaves i3_sent_at unset. In plain words: a request with no ticket, or without commentary_requested exactly True, produces no analysis_ready message from this resident.",
+      "risk_note": "A consumer that expects analysis_ready for every READY request (the commentary packager) receives none for un-ticketed requests or requests without commentary_requested exactly True; the pair should name that as the observable change. The signal_ready signature changed (new 'record' parameter); its only closure caller is mark_ready (line 342), and reports/resident_installed.py mentions signal_ready only in comments (lines 48 and 414). No new import, no new environment read, no new AWS call (send_ready's SQS path is unchanged), and no changed default. record is a dict at both call sites (guard() at resident_worker.py:222 and execute at 649); a non-dict record takes the NO_TICKET branch (isinstance check)."
+    }
+  ],
+  "claim": {
+    "class": "measured-static",
+    "statement": "Of the four members, the resident runtime reaches exactly one changed module by a direct path: ycharts/generate/resident_worker.py (the I3 analysis_ready gate, behaviour change). The status rule (AR-y-172, served.py:1175-1178) and the caller-class log line (AR-y-184, served.py:93-102 and 1255-1258) do NOT reach the resident: they sit inside Entry.handle and Entry._internal_allowed_firms, neither of which has a call site in the resident's static closure. served.py is loaded in the static closure only through lazy edges whose call sites are not reached, and its verified_internal_subject is unchanged. ops/status.py is not imported by the resident (changed content is a constant dictionary only). name_rulings.json is packaged but not read on the resident path (its only reader is the naming census CLI). Blob sha256 values for all eight blobs equal RESIDENT_PACKAGE_DELTA.json."
+  },
+  "not_read": [
+    "The resident host, its installed copy (/opt/irpt-resident/0485393f3a-st32 or any other install) and its systemd ExecStart: no host read, no SSM, no sign-in, no call.",
+    "The resident's real runtime path: dynamic dispatch (getattr, callbacks, queues) was not traced; the trace is a static import closure plus a git-grep of call sites at the pin.",
+    "The installed package's sys.path order: the order used is the one the source files set (resident_main.py:18-23, resident_installed.py:4-8, resident_worker.py:139-140, resident_installed.py:327-328 and 426-427 for research), read from source, not from an installed copy.",
+    "The W328 host library (infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js) and its test; the 1,000-line library diff was not read here.",
+    "The shared head beyond the two pins (069b8f797e is 4707 commits after 0485393f3a) except the commits that touch the four members in the range.",
+    "Test suites: none run. No offline suite, no pytest, no build, no install, no upload, no push, no deploy, no apply, no invoke, no live AWS call, no network."
+  ]
+}
