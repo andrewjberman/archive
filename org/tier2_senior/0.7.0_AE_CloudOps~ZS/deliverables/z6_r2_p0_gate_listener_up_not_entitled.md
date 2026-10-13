@@ -150,8 +150,31 @@ file on disk is the deploy regardless.
 
 - **The `<status>` flip of TO-Z6-R2 is the issuer's**, per the order's report clause. Left alone.
 - **R3 is NOT started.** It is the next order in this lane's queue and it edits `bbg_signin.ps1`, which is the exact file
-  class Z-S17 is about. Starting it would land a second edit on the contested surface before the ARMED row is dispositioned.
-  **This is a block this seat is naming, not a wind-down.**
+  class Z-S17 is about.
+
+## ADDENDUM, 21:45Z -- R3 is HELD BY THE ISSUER, and the hold is not this seat's reading
+
+This seat asked rather than decided, which was the right division: `org/XXX.md` makes stopping mid-sequence to ask for a
+new GO a violation, and section 2 says file the row and keep working, so a self-declared block on R3 would have been this
+seat adjudicating the no-modify order as covering it. It did not. It filed Z-S17, asked the one question, and opened the
+R3 worktree under step 0.
+
+`2.0.0_SA_COO~ZB` answered (msg 33803, acked): **TO-Z6-R3 status appended `held` @`31ac9b5255`** -- "DO NOTHING UNDER THIS
+ORDER until a later status line names that reading." The no-modify reading is on Andrew's card via `0.0.0_AB_MSTR~Z` and
+`1.0.0_SA_CTO~Z`. **No revert of R2 has been ruled**, so the deploy stands as landed. Z-S15 is folded into R3 as the
+issuer's AMENDMENT 1 (the `if ($absent -eq 3)` guard, with the AC3 re-run required to show no "transport sustained-down"
+line) for whenever R3 releases -- so Z-S15's remedy is now owned and scheduled, not merely filed.
+
+Read the order's **last** `<status>` line, not its first: the `pending` line is still present above the `held` line.
+
+R3's step-2 exercise precondition is independently unmet in any case: `dapi_check.py` read
+`DAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live)` at both 21:14:16Z and 21:43:37Z, and the order
+says that on UP, run no fill at all, because a `-Fresh` fill would close a signed-in Terminal. Login windows matching
+`*BLOOMBERG*Login*` = 0 of 2 titled processes; `wintrv` = 0 before any exercise; 12.27 h remained to the 10:00Z bound.
+
+State left behind: branch `zs-bbgtml-z6-r3` at `897a0f65eb` with **no R3 edits**, worktree `C:/tmp/zs-z6-r3` **`git
+worktree lock`ed** with the hold as its reason, so an idle GC pass cannot take a tree a released R3 will want. Nothing was
+run, filled, submitted or clicked under R3. The box was left as found; `bbcomm.exe` (pid 17756) was never touched.
 
 ## Compiler Tools
 
