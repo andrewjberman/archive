@@ -7,7 +7,7 @@ Cell: DB-b-167 (LOCAL, read-only on the stored tie-out set of worker ~108, zero 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
   DB89-1-AC1  <worker folder>/NEITHER_12_REASONS.json: tolerance_pp 0.35; rule {file in the worker's folder, sha256 equal to its bytes, commit 7-40 hex,
               written_before_count true}; reasons_list equal to the closed list below, in order; code {file under org/missions/D9/IRPT/IRPT_DASHBD/, sha256
-              equal to its bytes, tracked true}; population {flow_segments 88, neither_segments 12, accounts int 1..12}; by_reason six ints summing to 12;
+              equal to its bytes, tracked true}; population {flow_segments 88, neither_segments 12, accounts int 1..88 -- the distinct accounts behind the 88, the worker's rule defines it}; by_reason six ints summing to 12;
               evidence for every reason above 0 except UNEXPLAINED: {kind "count" or "day_offsets", values non-empty ints}; corrected {reasoned, closed_within_tolerance,
               demoted_to_unexplained, combined_only}: reasoned = 12 - UNEXPLAINED = closed_within_tolerance (a reason whose correction does not close the segment
               is not a reason); uncorrected_closes_among_12 0 (control); unexplained_per_account ints >= 1 summing to UNEXPLAINED, one per account; fwd8_unmet_accounts equal to
@@ -79,7 +79,7 @@ def main():
     if not (root / f).is_file() or hashlib.sha256((root / f).read_bytes()).hexdigest() != code["sha256"]:
         fail("code file missing or its sha256 differs from the record")
     pop = r.get("population") or {}
-    if pop.get("flow_segments") != 88 or pop.get("neither_segments") != 12 or not is_int(pop.get("accounts")) or not 1 <= pop["accounts"] <= 12:
+    if pop.get("flow_segments") != 88 or pop.get("neither_segments") != 12 or not is_int(pop.get("accounts")) or not 1 <= pop["accounts"] <= 88:
         fail("population %r (must reproduce 88 flow segments and 12 neither-closes segments)" % pop)
     br = r.get("by_reason") or {}
     if any(not is_int(br.get(k)) for k in REASONS) or sum(br[k] for k in REASONS) != 12:
@@ -102,7 +102,7 @@ def main():
     if r.get("uncorrected_closes_among_12") != 0:
         fail("uncorrected_closes_among_12 %r: the 12 must reproduce as not closing" % r.get("uncorrected_closes_among_12"))
     upa = r.get("unexplained_per_account")
-    if not isinstance(upa, list) or any(not isinstance(x, int) or isinstance(x, bool) or x < 1 for x in upa) or sum(upa) != un or len(upa) > pop["accounts"]:
+    if not isinstance(upa, list) or any(not isinstance(x, int) or isinstance(x, bool) or x < 1 for x in upa) or sum(upa) != un or len(upa) > 12 or len(upa) > pop["accounts"]:
         fail("unexplained_per_account %r must be ints >= 1 summing to UNEXPLAINED %d, one per account" % (upa, un))
     if r.get("fwd8_unmet_accounts") != len(upa):
         fail("fwd8_unmet_accounts %r, expected %d" % (r.get("fwd8_unmet_accounts"), len(upa)))
