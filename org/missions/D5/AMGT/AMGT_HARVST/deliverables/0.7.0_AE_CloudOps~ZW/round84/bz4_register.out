@@ -1,0 +1,32 @@
+# HVST-bz-4 steps 5b/5c -- registered WINDOWLESS once, started once; AC1 and AC2 graded
+# 0.7.0_AE_CloudOps~ZW, site Z box.
+
+## step 5b -- the SAME command without -Plan, run ONCE
+run_at_utc: 2026-10-13T08:09:06Z   exit code 0
+  TaskName                             State
+  Opal Data Harvest - Continuous Cycle Ready
+
+## step 5c -- Start-ScheduledTask, ONCE
+STARTED_AT_UTC: 2026-10-13T08:09:08Z
+(the +3 and +15 reads are timed from this, and the elapsed figures in bz4_reads.out are computed on
+EPOCHS, not on a PowerShell datetime subtraction -- see the clock note in that file)
+
+## AC1 -- literal invocation
+$ powershell -NoProfile -Command "(Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle').Actions.WorkingDirectory"
+C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa
+  expect wk-harvest-runner-pin-995adcaeaa  ->  AC1: PASS
+
+## AC2 -- literal invocation
+$ powershell -NoProfile -Command "(Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle').Actions.Execute"
+C:\Program Files\Python314\pythonw.exe
+  expect (?m)pythonw\.exe\s*$  ->  AC2: PASS
+  NEGATIVE CONTROL: the same regex against the OLD interpreter string
+  'C:\Program Files\Python314\python.exe' does NOT match, so AC2 genuinely separates pythonw from
+  python rather than matching the common substring.
+
+## the live runner
+  cycle_runner processes over ALL exes: 1
+  PID 50360, pythonw.exe, created 2026-10-13T08:09:09Z, command line carries 995adcaeaa
+  MainWindowHandle 0, MainWindowTitle empty, 0 conhost children (see bz4_console.out)
+  No second runner. Step 8 rollback target: <old> = 1c69fa35a3, locked, re-registered WITHOUT
+  -Windowless if R1 or R4 reads FALSE at +15.

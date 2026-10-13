@@ -1,0 +1,33 @@
+# HVST-bz-4 R3 -- the windowless runner has NO console. AC3's file.
+# 0.7.0_AE_CloudOps~ZW, site Z box. Runner PID 50360, pythonw.exe, created 2026-10-13T08:09:09Z.
+
+MainWindowHandle=0
+MainWindowTitle=
+CONHOST_CHILD=NONE
+
+## The reads
+  Get-Process -Id 50360 : MainWindowHandle = 0, MainWindowTitle = '' (empty)
+  Get-CimInstance Win32_Process -Filter "ParentProcessId=50360":
+      1 child, PID 4164, pythonw.exe, created 08:12:20Z
+      conhost.exe children: 0        <- CONHOST_CHILD=NONE
+  The one child is NOT a console host. It is the COLLECTOR SPAWN:
+      "C:\Program Files\Python314\pythonw.exe" -m lib.opal_data_harvest --runtime-root "...\harvest-cycle\runtime" run --harve[st...]
+  It too reads MainWindowHandle=0, title empty, and has 0 children of its own. Its existence is R4's
+  evidence that the real collector spawn works with no console, which bz-3's fake-driver test could not show.
+
+## CONTROL, AND IT CORRECTS A CLAIM THIS SEAT ALMOST LET STAND
+
+The control is the same two reads against a CONSOLE python.exe: PID 7068.
+  PID 7068 python.exe -> conhost.exe children: 1       <- the conhost test DISCRIMINATES (1 vs 0)
+  PID 7068 python.exe -> MainWindowHandle: 0           <- the handle test DOES NOT
+
+**So only ONE of R3's two signals is shown to discriminate.** A console-bearing python.exe reads
+MainWindowHandle=0 as well, because an owned console window is not necessarily this process's
+"main window" in the .NET sense. The runner's handle=0 is TRUE and the order requires it printed,
+but it is NOT by itself evidence of windowlessness: a console process can read 0 too. The
+conhost-child count is the signal that actually separates the two cases, and it reads 1 for the
+control and 0 for the runner.
+
+The wedged predecessor is the third data point and it agrees: PID 21512 ran python.exe, owned a
+conhost child, AND carried a non-empty MainWindowTitle ('Select ...'). So the pair that
+discriminates in practice is CONHOST_CHILD plus a non-empty title, not the handle alone.
