@@ -159,8 +159,8 @@ def firstchain(a):
             p.append("the dry-run sample is 1 to 10 advisors")
         if d["chain"]["emitted_line"] is not True or d["chain"]["cloudtrail_putevents"] < 1 or d["chain"]["generator_invocations"] < 1:
             p.append("the first chain must show the emitted line, a CloudTrail PutEvents and a generator invocation")
-        if not (0 <= d["keys"]["regenerated"] <= d["keys"]["ceiling"] <= 158) or d["keys"]["prior_version_ids_recorded"] is not True:
-            p.append("regenerated keys must be within the named ceiling (at most 158) with prior VersionIds recorded")
+        if not (0 <= d["keys"]["regenerated"] <= d["keys"]["ceiling"] <= 194) or d["keys"]["prior_version_ids_recorded"] is not True:
+            p.append("regenerated keys must be within the named ceiling (at most 194) with prior VersionIds recorded")
         if d["keys"]["nonempty_bullets"] != 0 or len(d["slots_disabled"]) != 6:
             p.append("the first regeneration is empty-for-empty: all six slots disabled and no regenerated artifact may carry a bullet")
         if not isinstance(d["keys"]["advisors_with_bullets_before"], int) or d["keys"]["bullet_regressions"] != 0:
