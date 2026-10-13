@@ -7,6 +7,10 @@ Claim: measured. No object was written, no producer ran, no product file was edi
 ## Denominator
 
 Window 2026-09-16..2026-10-13 (20 weekday dates; newest `silver/prices/<date>.parquet` is 2026-10-13).
+Column note: `recomputed_price` in GAP_ROWS.csv is always the own-day T1 value (raw rule); the rule that actually
+explained a row is named in `evidence_ref` (for c2 the JOB 2 median and for c3 the price-column median are not
+printed in the CSV).
+
 Served `transaction_observed` rows in the current `canonical_prices.parquet` (V7JNX.Gm..., 12:48:05 UTC): **1,657**, not
 1,610. The count is 1,657 on every canonical version checked (2026-10-12 23:03, 2026-10-13 00:15, 04:03, 09:49,
 12:47, 12:48). The 1,610 of the task framing is not reproduced; not forced.
