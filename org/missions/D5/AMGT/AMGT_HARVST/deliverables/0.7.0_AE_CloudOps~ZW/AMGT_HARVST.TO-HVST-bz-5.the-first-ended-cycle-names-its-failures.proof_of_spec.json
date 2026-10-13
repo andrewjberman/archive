@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bz-5.the-first-ended-cycle-names-its-failures",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-5.the-first-ended-cycle-names-its-failures.md",
+    "group": "OTHER",
+    "vintage_commit": "cea877dfc94779fd8dee0fca340a82d811da726b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "154e2ff047879e7c2b386fe91bed3d846835a3a2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-5.the-first-ended-cycle-names-its-failures.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ZW",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round84/bz5_read.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three dated reads, APPEND-ONLY: the 09:0xZ read (FAILED=0 on the truncated 055243Z record, AC1 FAIL), the 18:1xZ re-read (unchanged), and the 18:1xZ third read where the windowless cycle had ENDED and AC1 MATCHES. The three sections together show the cell was read repeatedly and nothing was driven to move the line between them.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round84/bz5_cycle_record.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record the close rests on, copied BYTE FOR BYTE from the runner's own state dir: 20261013T080909Z.cycle.json, len=514, sha256 5e652eaf659452452bb49db3008f1695efe63e4eb2e76bb211681f6c1bf2af31 on both source and copy. Superseded IN PLACE (a state artifact) from the earlier truncated record; the order names exactly one filename and it must hold the closing record.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round84/bz5_cycle_record_prior_20261013T055243Z.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The EARLIER truncated record (055243Z, len=320, sha256 52e0451bad833db2dc687fb961d0f30492e3a377e002bdd9982ec9d73fc6e6bf), preserved beside the closing one so that superseding the order's single named file destroys no evidence. It is what the 09:0xZ section of bz5_read.out cites, and it is also in git at c4ec6c221e.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?m)^CYCLE=\\S+ STOPPED=\\S+ FAILED=([1-9]\\d*) NAMED=\\1$",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_W1/round84/bz5_cycle_read.py --state-dir \"C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state\" --since 2026-10-13T05:52:43Z",
+      "output_evidence": "CYCLE=20261013T080909Z STOPPED=bot_check FAILED=1 NAMED=1\n",
+      "denominator": "The bbg cycle records in the runner task's own --state-dir: 9 .cycle.json files, of which TWO have started_at at or after the 2026-10-13T05:52:43Z cut (20261013T055243Z and 20261013T080909Z) and both have ended. The script takes the FIRST ended record that HOLDS a failure, which is 20261013T080909Z: started_at 08:09:09Z, ended_at 17:37:08Z, completed False, stopped bot_check, failures 1. THE ONE FAILURE NAMES ITS REASON IN THE bx-3 FORM: key security-0f3eb2ded85ad44b, status bot_check, detail 'ChallengeFailed: bot_check challenge_failed (bloomberg_press_and_hold)' -- that is '<ExceptionClassName>: <message>' at 70 characters, inside the 303-character cap, and NOT the bare word 'error' that every record before this pin carried. Measured rather than eyeballed: the detail contains ':', DIFFERS from status, and is non-empty, which are the three things the script counts as NAMED. So NAMED=1 of FAILED=1. A TRUNCATED RECORD IS ALLOWED TO SERVE THIS READ by the order's own words ('a truncated record that DOES hold a failure still serves the read'); nothing here claims the cycle was completed or failure-free -- completed is False and is recorded as False. REGEX CONTROLS, so the PASS is the record's and not the pattern's: the live line MATCHES; this cell's OWN previous reading 'CYCLE=20261013T055243Z STOPPED=stopped_by_operator FAILED=0 NAMED=0' does NOT match; 'FAILED=1 NAMED=0' does NOT match (it really tests NAMED == FAILED); 'FAILED=8 NAMED=8' does match. NOTHING WAS DRIVEN: no pair planted or re-queued, no sign-in, the task not stopped, started or re-registered, and the state dir never written -- the failure is the runner's own, from its own cycle, read after the fact.",
+      "expect": "(?m)^CYCLE=\\S+ STOPPED=\\S+ FAILED=([1-9]\\d*) NAMED=\\1$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted mutant and FORBIDS one by name ('do NOT plant a failure, re-queue a pair or touch the state dir to make the read pass'). The discriminating negative arm is this cell's own earlier reading, taken twice before the close and left in the record: the truncated 055243Z record printed FAILED=0 NAMED=0, which AC1 rejects.",
+      "expected": "A record with no failure, or a failure whose detail does not name a reason, must FAIL AC1; only an ended record holding at least one failure whose detail names its reason may pass.",
+      "observed": "Read at 09:0xZ and again at 18:1xZ: FAILED=0 NAMED=0 on the truncated record, AC1 FAIL, recorded as FAIL and left to stand. Read a third time at 18:1xZ after the windowless cycle ended: FAILED=1 NAMED=1, AC1 MATCH. The transition came from the runner finishing its own cycle, not from any act of this seat. The round-79 record (8 failures, all bare 'error') is the issuer's own recorded negative arm for the same regex and prints FAILED=8 NAMED=0.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Read-only, and run three times across about nine hours against the live state dir. The script globs the state dir and writes nothing; the two earlier runs and this one used the identical literal invocation.",
+      "observed": "STABLE at each point in time and the change between them is the world's, not the instrument's: the same command returned the same truncated record twice while no cycle had ended, then returned the newly ended 080909Z record once it had. The record copied for this close is byte-identical to its source (len=514, sha256 5e652eaf...), so what was graded is what the runner wrote.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any plant, re-queue or write to the state dir",
+      "reason": "Forbidden by the order by name, and never needed: the close came from an organic failure in the runner's own cycle. A planted pair remains a separate order under its own pair (CTO half ADDENDUM 1 @469a566fa1)."
+    },
+    {
+      "item": "The two-consecutive-failure-free-records arm",
+      "reason": "Never reached and now moot for this reading. Under amendment @cea877dfc9 only COMPLETED cycles count toward failure-free, and consecutive completed failure-free records stands at 0. Row Z-S117's remaining half -- the two halves reading opposite on whether a plant is authorised -- is still the issuer's and is untouched here."
+    },
+    {
+      "item": "A judgment about whether bot_check is an acceptable failure MODE",
+      "reason": "Out of this cell. HVST-bz-5 reads whether a failed pair NAMES its reason, not whether the reason is good news. The named reason is a Bloomberg press-and-hold challenge failure, which is recorded verbatim and routed by the record itself, not graded here."
+    },
+    {
+      "item": "The <status> flip of this order file",
+      "reason": "The order states the issuer flips it and that the assignee does not edit the order file."
+    },
+    {
+      "item": "The wsj and barrons cycle read",
+      "reason": "That is HVST-bz-7, read-only and still OPEN: at this same read both publishers print NONE, so neither has an ended cycle since the 08:09:08Z cut."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-13/zw_harvst_bz6_dowjones_sessions.md",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1 --governing-order <TO>",
+      "result": "see the run recorded in the commit message for this instance."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run this session",
+      "result": "NOT RUN. The order's preflight assigns it to L5 (the issuer) and this cell is READ ONLY: no schedule was touched, and the order forbids stopping, starting or re-registering the task."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run this session",
+      "result": "NOT RUN, per the preflight (L5). The cell reads JSON files in the box's own state dir; there is no AWS surface and no new (action, resource) pair to model."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "not run as a tool",
+      "result": "NOT RUN as a tool (L5). Its adversaries for this cell are answered in the record: a record from BEFORE the pin (excluded by --since and the denominator of qualifying records is printed); a STOPPED record counted as completed (completed=False is recorded as False and no failure-free claim is made); and a record produced AFTER an operator stop (the closing record was ended by bot_check, not by an operator, and the two operator-stopped records are identified as such)."
+    }
+  ]
+}
