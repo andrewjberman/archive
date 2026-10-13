@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t19",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t19.sdd-session-restore-determination.md",
+    "group": "OTHER",
+    "vintage_commit": "fe216d8d06"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "fe216d8d06",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t19.sdd-session-restore-determination.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~16/SDD_SESSION_RESTORE_DETERMINATION_R5.md",
+      "kind": "doc",
+      "commit_or_etag": "51311e782602784c577660da252fb1bb1752c89f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: a document; read-only repository reads only, no AWS write, no SSM, no box access, no secret read, no code or Terraform edit. commit_or_etag is the git blob hash of the document as written (git hash-object), the same bytes as the commit that carries it. The document's DECISION is BOX-READ-OWED; the box read it names is not run here.",
+      "artifact_covered_by": [
+        "HG5-t19-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG5-t19-AC1",
+      "criterion_verbatim": "the document carries the five headings in order, a SEARCHED: n files denominator with either writer citations or WRITERS FOUND: 0, exactly one COMPARISON and one DECISION line with the lines that decision requires, every path:line resolving in the repository, and no TBD.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_CHECKS/hg_t19_sdd.py",
+      "output_evidence": "SDD-OK BOX-READ-OWED (rc=0, run from the worktree root). Base, document absent: SDD-BAD no document at ... (rc=1). Mutant (scratch copy with the line WRITERS FOUND: 0 changed to WRITERS FOUND: maybe, .scratch/mutant_no_writer_line.md): SDD-BAD section 2 must carry either the line 'WRITERS FOUND: 0' or at least one resolving writer citation, not both or neither (rc=1). Absent-path control (.scratch/absent.md): SDD-BAD no document at .scratch/absent.md (rc=1).",
+      "denominator": "5 of 5 headings in order; 1 of 1 COMPARISON line (UNDETERMINABLE FROM CODE); 1 of 1 DECISION line (BOX-READ-OWED) with READ-COMMAND and RUNS-AS; SEARCHED: 79389 files (every tracked file at HEAD, git ls-files count); WRITERS FOUND: 0.",
+      "status": "PASS",
+      "expect": "SDD-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check was run on the committed document content from the worktree root",
+      "observed": "SDD-OK BOX-READ-OWED (rc=0)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "scratch copy of the document with WRITERS FOUND: 0 changed (.scratch/mutant_no_writer_line.md, uncommitted), checked via the DOC argument",
+      "expected": "SDD-BAD naming section 2",
+      "observed": "SDD-BAD section 2 must carry either the line 'WRITERS FOUND: 0' or at least one resolving writer citation, not both or neither (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the box read that would settle whether Administrator's SDDSecure exists",
+      "reason": "order BOUNDS: read-only, no access to the SI2 box. The document names the read (cmdkey /list:SDDSecure as Administrator) as the owed act; this order does not run it."
+    },
+    {
+      "item": "AWS calls",
+      "reason": "order BOUNDS: no AWS call. None made; the Secrets Manager secret schwab/sdd/session is named from code only, never read."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W16-S1: the 07-07 recon that Windows Credential Manager is not the session location ran by SSM, which runs as SYSTEM, so it did not read the Administrator vault the puller reads; the 07-13 design note records a CredRead OK as Administrator. The two notes conflict and the code cannot settle it."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~16/MDPF_HEALGAP.TO-HG-t19.sdd-session-restore-determination.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python HG-t-19 check (criterion invocation)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_CHECKS/hg_t19_sdd.py",
+      "result": "SDD-OK BOX-READ-OWED (rc=0)"
+    },
+    {
+      "tool": "git grep and git ls-files (tracked-tree search and denominator)",
+      "invocation": "git ls-files | wc -l ; git grep -l -i -E 'CredWrite|cmdkey|StoredCredential|vaultcmd|CredentialManager|SDDSecure' -- .",
+      "result": "79389 tracked files; 27 files matched the credential pattern set"
+    },
+    {
+      "tool": "native Grep over the SI2 folder",
+      "invocation": "Grep pattern CredWrite|cmdkey|CredentialManager|SDDSecure over infra/aws/ec2/canonical-schwab-si2",
+      "result": "reads of SDDSecure only (sdd-daily-pull.ps1:229, :247-272, sdd-backfill-08335338.ps1:51); no writer"
+    }
+  ]
+}
