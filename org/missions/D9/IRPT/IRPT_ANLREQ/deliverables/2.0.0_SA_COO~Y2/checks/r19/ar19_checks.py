@@ -22,6 +22,8 @@ Usage:  python ar19_checks.py <check> --root <worker worktree root>
   y201-live      AR-y-201 (workstream YR): the Lambda release rebuilt against the LIVE package read now: the four native holds re-pinned to commits
                  whose blobs equal the live members, and the release package differs from the live package in exactly the two reader members
                                                                                                                               -> Y201-LIVE-OK
+  y202-portal    AR-y-202 (workstream YR): the portal's readers of the upload door's answer at the PROD and DEV commits, each with its key policy, and
+                 the door answers of the pinned and the moved pair passed through them, the four new finding codes among the cases    -> Y202-PORTAL-OK
   y199-recipe    AR-y-199: st32's full assembly recipe recovered, rebuilt at st32's pin (326 members by name and content) before the
                  release pin is built with it, and the delta redone                                                           -> Y199-RECIPE-OK
 
@@ -39,7 +41,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r19/"
 ROUND18_VERSION = "irpt-template-reader.r18.1"
 TOKENS = {"y191-scratch": "Y191-SCRATCH", "y192-census": "Y192-CENSUS", "y193-build": "Y193-BUILD", "y194-rule": "Y194-RULE",
-          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO", "y201-live": "Y201-LIVE"}
+          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO", "y201-live": "Y201-LIVE", "y202-portal": "Y202-PORTAL"}
 SHEETS = ("two_value_account_sheet", "total_row_sheet", "one_account_sheet", "two_sheet_workbook")
 NATIVE_UNPINNED = ("acceptance.py", "submission.py", "submission_service.py", "durable_job.py")
 S31_FORMS = ("Account Numbers", "Subaccounts", "Accnt", "Account Nos", "Account Seqno", "Account Serial", "Roth IRA Account", "Trust Account")
@@ -321,6 +323,35 @@ def main(argv):
             if rec.get("live_equivalent_differs_from_live") != []:
                 problems.append("the live-equivalent build (holds only, reader pins unmoved) must differ from the live package in no member (got %r)" % rec.get("live_equivalent_differs_from_live"))
             print("live members %d, release members %d" % (len(lman), len(rman)))
+    elif check == "y202-portal":
+        rec = load(root, D % "57" + "PORTAL_UPLOAD_ANSWER_READERS.json", problems)
+        if rec:
+            for member in ("prod_commit", "dev_commit", "readers", "cases", "new_codes", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            for key in ("prod_commit", "dev_commit"):
+                if not re.fullmatch(r"[0-9a-f]{40}", str(rec.get(key, ""))):
+                    problems.append("%s is not a full commit sha" % key)
+            readers = rec.get("readers") or []
+            if not readers:
+                problems.append("no portal reader of the upload door's answer is named")
+            for r in readers:
+                for member in ("file", "line", "key_policy", "at_prod", "at_dev"):
+                    if member not in r:
+                        problems.append("a reader lacks %r: %r" % (member, r.get("file")))
+            cases = rec.get("cases") or []
+            seen = set()
+            for c in cases:
+                if c.get("outcome") not in ("RETURNED", "THREW"):
+                    problems.append("a case outcome must be RETURNED or THREW: %r" % c.get("case"))
+                if c.get("arm") not in ("BEFORE", "AFTER") or c.get("commit") not in ("PROD", "DEV"):
+                    problems.append("a case names no arm (BEFORE/AFTER) or commit (PROD/DEV): %r" % c.get("case"))
+                if c.get("arm") == "AFTER":
+                    seen.update(c.get("codes") or [])
+            for code in ("ACCOUNT_COLUMN_SEVERAL_VALUES", "HEADER_ROW_REPEATED", "SHEETS_NOT_READ", "TOTAL_ROW_PRESENT"):
+                if code not in seen:
+                    problems.append("no AFTER case carries the new finding code %s" % code)
+            print("readers %d, cases %d, new codes covered %d of 4" % (len(readers), len(cases), len(seen & {"ACCOUNT_COLUMN_SEVERAL_VALUES", "HEADER_ROW_REPEATED", "SHEETS_NOT_READ", "TOTAL_ROW_PRESENT"})))
     return finish(check, problems)
 
 
