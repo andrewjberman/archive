@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-e-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-e-2.cluster-first-read.md",
+  "group": "OTHER",
+  "vintage_commit": "7dbc992996"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round4.md",
+  "vintage_commit": "7dbc992996",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-e-2.cluster-first-read.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "cd2efb9c59",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs. approval_read gains the freshest-source rule for a foreign box; the one live read in AC2 is the read-only get_object of dell2's list through the tool's own reader."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_cloudread.py",
+   "kind": "test",
+   "commit_or_etag": "cd2efb9c59",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on a temporary OPAL_STATE_ROOT, a temporary OPAL_CLOUD_READ_LOCAL directory and a temporary OPAL_GIT_READ_ROOT repository; no S3, no real ref, no live list is touched."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPe2-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_cloudread.py expect: ok=True (the test above, every case passing)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_cloudread.py",
+   "output_evidence": "timeout 120 rc=0. LAST line: OPEN-CALLS-CLOUDREAD-TEST cases=7/7 ok=True. Cases: a cluster copy newer than a stale working-tree copy reads the cluster row (state=OPEN row=cl-new), NOTE cluster; a git copy newer than a stale cluster copy reads git (row=git-new), NOTE git; equal written_at in cluster, git and working tree takes the cluster copy (row=cl-eq); no readable source with the cluster read skipped under the test switch is UNREADABLE rc 2, never ABSENT; no readable source with no cluster object for the box is UNREADABLE rc 2; this box reads only its working tree even with a newer cluster copy and a newer git copy (row=wt-own, state=OPEN), NOTE working-tree; a cluster copy failing validation is skipped and the working-tree row is read (row=wt-ok).",
+   "denominator": "7 of 7 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPe2-AC2",
+   "criterion_verbatim": "python .tools/open-calls.py approval-status --branch cand/dell2/irpt-ytd-from-first-day-and-wider-export-modal expect: APPROVAL branch=cand/dell2/irpt-ytd-from-first-day-and-wider-export-modal state=OPEN",
+   "method": "live_read",
+   "invocation": "python .tools/open-calls.py approval-status --branch cand/dell2/irpt-ytd-from-first-day-and-wider-export-modal",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: NOTE: dell2 list read from cluster written_at=2026-10-13T23:02:26Z (stderr); APPROVAL branch=cand/dell2/irpt-ytd-from-first-day-and-wider-export-modal state=OPEN valid=- row=dell2-20261013T221411Z-3635 by=- head_sha=0307376564314a7a293f4e123e9f99656608ad2e commits=4 class=client-facing box=dell2 pages=Investor Reporting performance picker and body,Investor Reporting export modal. The row id is one of the two OPEN duplicate rows on dell2's list; the criterion matches the state. A read: one get_object of dell2's list through the tool's reader; nothing written.",
+   "denominator": "1 of 1 approval-status line; the line reads state=OPEN, the cluster copy was the source (it is newer than the laptop's stale working-tree copy)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPe2-AC3",
+   "criterion_verbatim": "python .tools/open-calls.py approval-status --branch cand/laptop/contributing-boxes expect: state=APPROVED valid=yes",
+   "method": "live_read",
+   "invocation": "python .tools/open-calls.py approval-status --branch cand/laptop/contributing-boxes",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: NOTE: laptop list read from working-tree written_at=2026-10-13T22:30:03Z (stderr); APPROVAL branch=cand/laptop/contributing-boxes state=APPROVED valid=yes row=laptop-20261013T200117Z-9e8a by=1.0.0_SA_CTO head_sha=07f065e69f54b6821d1197cd7b947ec1131c8026 commits=1 class=opal-internal box=laptop pages=portal/CONTRIBUTING-BOXES.md (a docs file). This box read only its own working tree. A read; nothing written.",
+   "denominator": "1 of 1 approval-status line; the working-tree laptop list is the only source read",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the freshest-source rule: a foreign box whose cluster copy is newer than its stale working-tree copy must not read the working-tree row; this box with the same newer cluster copy must still read only its working tree; a foreign box with no readable source must not read ABSENT.",
+   "expected": "the cluster row for the foreign box; the working-tree row for this box; UNREADABLE rc 2 for no source",
+   "observed": "test cases 'cluster newer than a stale working-tree copy' (row=cl-new), 'this box reads only its working tree' (row=wt-own, row=cl-own absent) and 'no readable source' (state=UNREADABLE rc 2, state=ABSENT absent) all PASS in the AC1 run",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 was run on the committed code (cd2efb9c59) and the four existing open-calls suites plus the withdraw suite were run on the same commit.",
+   "observed": "OPEN-CALLS-CLOUDREAD-TEST cases=7/7 ok=True; OPEN-CALLS-TEST 19/19, OPEN-CALLS-APPROVAL-TEST 13/13, OPEN-CALLS-REGISTER-TEST 10/10, OPEN-CALLS-WAIVER-TEST 11/11, OPEN-CALLS-WITHDRAW-TEST 7/7, all ok=True, identical before and after the edit",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the rule for a box with no AGENTBUS_DEVICE (unresolved identity)",
+   "reason": "an unresolved identity is not this box, so every source is read (the freshest wins); no criterion exercises an unresolved identity and it is not in the order's build list"
+  },
+  {
+   "item": "the git fallback for this box when its working-tree copy is absent",
+   "reason": "kept as before (the first readable of working tree, then git); the order says the working tree is this box's only source, and the fallback is the pre-existing behaviour for an absent file, reported as a judgment"
+  },
+  {
+   "item": "the real org/devices/state lists and the real origin/box refs",
+   "reason": "never written by this order; AC2 and AC3 are reads, and AC1 runs only on temporary state, cluster and git"
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S14 -- the DP-e-2 build step 6 needs a git-source test seam the order does not name; the cell adds OPAL_GIT_READ_ROOT (tests only) beside OPAL_CLOUD_READ_LOCAL (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-e-2.cluster-first-read.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/open-calls.py .tools/tests/test_open_calls_cloudread.py",
+   "result": "All checks passed! (rc 0)"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/open-calls.py .tools/tests/test_open_calls_cloudread.py",
+   "result": "COMPILE-OK (no output, rc 0)"
+  },
+  {
+   "tool": "commit-gate",
+   "invocation": "bash .tools/safe-commit.sh (runs .tools/commit-gate.sh on the staged .py files)",
+   "result": "[commit-gate] All checks passed! on both .py files; WARN naming-gate 1 graded on the s3:// string literal (pre-existing pattern in cloud_put); commit cd2efb9c59 MATCH"
+  }
+ ]
+}
