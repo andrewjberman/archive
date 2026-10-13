@@ -1,0 +1,91 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-222",
+  "cell": "AR-y-222",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~68",
+  "base_commit": "b4943b79ce",
+  "repro": {
+    "cli_error_text": "aws: [ERROR]: 'int' object has no attribute 'items'  (the error reported by IRPT_ANLREQ-D2-S71 for the single list-valued --query on the R20 applier's CLI; NOT reproduced in this worker's shell, see reproduced_here)",
+    "reproduced_here": false,
+    "shell_aws_resolution": "type -a aws in the worker's Git Bash: /c/Users/Test/bin/aws (bash shim, twice on PATH), then /c/Program Files/Amazon/AWSCLIV2/aws. CLI: aws-cli/2.37.9 Python/3.14.6 Windows/11.",
+    "call_1": "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key investor-reporting/irpt-narrative.zip --region us-east-1 --query '[ContentLength, Metadata.\"content-sha256\"]' --output text",
+    "call_1_result": "rc=0; output 221061<TAB>vBzPCvn9lUEZzmDFGK+9g9ICnF8h7N8Z/hccjw2qoBg=",
+    "call_1_captured_as_script_does": "HEAD_OUT=$(... 2>&1) || ... with the script's exact arguments: rc=0; same two values; no error text",
+    "call_1_via_repo_shim": "bash .tools/aws s3api head-object ... (same query): rc=0; same two values",
+    "call_1_via_real_cli_path": "\"/c/Program Files/Amazon/AWSCLIV2/aws\" s3api head-object ... (same query): rc=0; same two values",
+    "call_2": "aws s3api head-object ... (same args, no --query, --output json): rc=0; ContentLength 221061; Metadata content-sha256 vBzPCvn9lUEZzmDFGK+9g9ICnF8h7N8Z/hccjw2qoBg=",
+    "call_3_scalar_ContentLength": "--query 'ContentLength' --output text: rc=0; 221061",
+    "call_4_scalar_sha": "--query 'Metadata.\"content-sha256\"' --output text: rc=0; vBzPCvn9lUEZzmDFGK+9g9ICnF8h7N8Z/hccjw2qoBg=",
+    "cause": "NOT DETERMINED. The defect did not occur in this shell under CLI 2.37.9, so no cause is established here. The reported error names no cause on its own, and the applier's CLI build is not visible from this worker. The fix below removes the one list-valued query, which the S71 evidence points at, but its live effect is unproven until the scratch arm (scratch_arm_design) runs.",
+    "row": "IRPT_ANLREQ-D2-W68-S1 in org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (the non-reproduction, filed as a row, not as a claim)"
+  },
+  "fix": {
+    "words": "The verify step's single list-valued head-object --query is replaced by two scalar head-object reads (ContentLength, and Metadata content-sha256), each with --output text. A read that exits non-zero is recorded in HEAD_SIZE_RC / HEAD_SHA_RC. Values are whitespace-stripped with tr. The unchanged fail-closed test is extended: the upload is refused when either rc is non-zero, or when the size differs from the local zip or the sha differs from this build. The error echo now prints each head-object's rc and its CLI output to stderr, and the map is not updated on refusal (the existing continue path). The old HEAD_OUT/awk parse is removed. Nothing else in the script changed: the powershell upload, the BUILD_ONLY branch, the source-map writer and the summary are byte-identical.",
+    "changed_lines": "new file numbering: 723-736 (comment, the two scalar reads, the stripped values, the widened if) and 738-739 (the two rc-bearing echo lines, replacing the old single head-object returned line). Old lines 723-727 and 730 replaced. 23 diff lines in total, 16 insertions, 7 deletions.",
+    "non_ascii_added": 0
+  },
+  "arms": [
+    {
+      "arm": "landed_upload_verifies",
+      "invocation": "bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh (arm 1)",
+      "stub": "aws: head-object answers ContentLength and content-sha256 of the local zip (the landed object). powershell.exe: the upload command is a logged success.",
+      "exit_code": 0,
+      "map_updated": true,
+      "cli_error_printed": false,
+      "evidence": "PASS landed_upload_verifies (rc=0, s3-cp=1, head-object=2); the output carries 'write VERIFIED'; the temp map copy carries the build's SHA256; real lambda-source-map.json byte-identical"
+    },
+    {
+      "arm": "head_object_fails",
+      "invocation": "bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh (arm 2)",
+      "stub": "aws: head-object exits 255 with 'aws: [ERROR]: An error occurred (403) when calling the HeadObject operation: Forbidden (stub)' on stderr",
+      "exit_code": 1,
+      "map_updated": false,
+      "cli_error_printed": true,
+      "evidence": "PASS head_object_fails (rc=1, map unchanged, cli error printed); output carries 'UPLOAD NOT VERIFIED' and the stub's 403 text; zip kept at the temp path"
+    },
+    {
+      "arm": "mutant_size_off_by_one",
+      "invocation": "bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh (mutant arm)",
+      "stub": "aws: head-object returns a ContentLength one byte larger than the local zip, with the correct sha",
+      "exit_code": 1,
+      "map_updated": false,
+      "cli_error_printed": false,
+      "evidence": "PASS mutant-size-off-by-one-FIRED (rc=1, refused, map unchanged)"
+    }
+  ],
+  "shell_syntax_ok": true,
+  "tests": {
+    "passed": 8,
+    "failed": 0,
+    "file": "infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+    "runner": "bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+    "output": "PASS bash-n-build-and-upload; PASS stub-aws-control-answers-head-object; PASS stub-aws-control-refuses-non-head; PASS landed_upload_verifies (rc=0, s3-cp=1, head-object=2); PASS real-map-untouched-by-landed-arm; PASS head_object_fails (rc=1, map unchanged, cli error printed); PASS real-map-untouched-by-failing-arm; PASS mutant-size-off-by-one-FIRED (rc=1, refused, map unchanged); ALL PASS (exit 0)"
+  },
+  "arm_method": "The script runs END TO END (no function extraction) without BUILD_ONLY, from a fixture pipeline in a temp source-map copy (BAU_SOURCE_MAP_OVERRIDE). The zip is built by the script with the real PowerShell. The upload command is answered by a stub powershell.exe (logged, nothing sent); head-object is answered by a stub aws. The real lambda-source-map.json is checked byte-identical after each arm. Limit: the stubs answer the scalar queries only, so the arms prove the new verify logic against the stub, not the live CLI.",
+  "scratch_arm_design": {
+    "status": "DESIGNED, NOT RUN. This worker runs no upload and no live write (AR-y-222 step 4 is the applier's).",
+    "scratch_key": "investor-reporting/_ar222_scratch/ar222-<UTC stamp>.zip (a prefix that is no function's key: the live keys are investor-reporting/<name>.zip)",
+    "command_lines": [
+      "STAMP=$(date -u +%Y%m%dT%H%M%S); KEY=investor-reporting/_ar222_scratch/ar222-$STAMP.zip",
+      "TMP_MAP=$(mktemp); cp infra/aws/lambda/ci/lambda-source-map.json \"$TMP_MAP\"",
+      "node -e \"const fs=require('fs');const p=process.argv[1];const m=JSON.parse(fs.readFileSync(p,'utf8'));m.functions[process.argv[2]].artifact_s3_key=process.argv[3];fs.writeFileSync(p,JSON.stringify(m,null,2));\" \"$TMP_MAP\" <FUNCTION_NAME> \"$KEY\"",
+      "BAU_SOURCE_MAP_OVERRIDE=\"$(cygpath -m \"$TMP_MAP\")\" bash infra/aws/lambda/ci/build-and-upload.sh <PIPELINE> <FUNCTION_NAME>   (NO BUILD_ONLY: this is the upload, to the scratch key only)"
+    ],
+    "why_the_real_map_is_safe": "BAU_SOURCE_MAP_OVERRIDE points the script's source-map writer at the temp copy; the real lambda-source-map.json is never opened for write. The script's S3_KEY comes from artifact_s3_key in that copy, so the upload lands under the scratch key and no function's key moves.",
+    "read_back": [
+      "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key \"$KEY\" --region us-east-1 --query ContentLength --output text   (must equal the script's zip size)",
+      "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key \"$KEY\" --region us-east-1 --query 'Metadata.\"content-sha256\"' --output text   (must equal the script's SHA256 line)",
+      "aws s3api list-object-versions --bucket opal-313476888478-lambda-artifacts --prefix investor-reporting/_ar222_scratch/ --query 'Versions[].[Key,VersionId]' --output text   (the object's VersionId and the count of versions printed as the denominator)"
+    ],
+    "expected_if_the_fix_works": "rc 0; 'write VERIFIED' printed; the temp map carries artifact_s3_key and artifact_sha256; the scratch object read back with both values equal",
+    "expected_if_the_defect_persists": "the script prints UPLOAD NOT VERIFIED with the CLI text on stderr and rc 1, while the read-back shows the object landed: the defect is then live on the applier's CLI and the fix is not proven there",
+    "how_the_object_is_left": "NOT DELETED. The bucket is versioned; the scratch object and its version stay as evidence under investor-reporting/_ar222_scratch/. The temp map copy is removed. Nothing is written to any function key or to the repository's source map."
+  },
+  "claim": "The verify step no longer issues the single list-valued head-object query. It issues two scalar reads and fails closed on a non-zero read, a size mismatch or a sha mismatch, printing the CLI text to stderr and leaving the map untouched. The script's own code is exercised end to end by 8 offline PASS lines, with stub aws and stub powershell.exe first on PATH; a mutant with a one-byte size error is refused. bash -n passes. The cause of the reported error is NOT established: it did not reproduce in this worker's shell. The live effect of the fix on the applier's CLI is not verified.",
+  "not_read": [
+    "the R20 applier's units logs in full (only one upload log was read, and its head-object text was not in the excerpt)",
+    "the applier's CLI build and its PATH on the applier box (only this worker's shell was measured)",
+    "the infra/aws/lambda/ci scripts other than build-and-upload.sh",
+    "the D2-S69 workers' runs of the same script",
+    "no live upload, no live write, no scratch-key upload was run (step 4 is designed only)"
+  ]
+}
