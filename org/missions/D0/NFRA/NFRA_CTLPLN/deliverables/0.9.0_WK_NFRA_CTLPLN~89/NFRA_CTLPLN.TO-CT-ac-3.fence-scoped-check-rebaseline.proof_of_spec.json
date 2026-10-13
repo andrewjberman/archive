@@ -19,14 +19,14 @@
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "check only: reads the registry and the module, makes sts get-caller-identity and iam simulate-custom-policy calls; no terraform apply, no object read, no write to AWS"
+      "deploy_evidence": "check only: reads the registry, the module and git history, makes sts get-caller-identity and iam simulate-custom-policy calls; no terraform apply, no object read, no write to AWS"
     },
     {
       "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "config_data",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows NFRA_CTLPLN-W89-S1, S2, S3 appended; append-only, HEAD bytes preserved with CRLF line endings"
+      "deploy_evidence": "rows NFRA_CTLPLN-W89-S1, S2, S3 appended earlier; append-only, HEAD bytes preserved with CRLF line endings"
     }
   ],
   "acceptance": [
@@ -35,20 +35,18 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py expect: unchanged_today=True",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
-      "output_evidence": "FENCE-SCOPED rows_today=42 unchanged_today=False scoped_rendered=32/32 sim_ok=31/31 refusals_ok=5/5 unknown_key_refused_by=validator+module ok=False (rc=1). Deciding lines: UNATTRIBUTED residual in opal_data_49financial (admitted only before [stub-adapter-role]; statements only before DenyPerformanceAdapter x3 and DenyForeignFirmPrincipals by its admitted list); aws_s3_bucket_policy.lgic_firm[cottonwood] EQUAL; lgic_firm[inflection] EQUAL; opal_data_49financial DIFFERENT (after-minus-those-ARNs=8493e1a1628eb77d vs before=974c4a0734e77cdf).",
-      "denominator": "2 of 3 bucket policies equal after the two named attributions (the principals admitted unscoped since d5516cb074^, and the grants change: 2 of 2 grants rows, 2 of 2 Allow statements removed)",
-      "status": "FAIL",
-      "status_reason": "unchanged_today reads False: the 49financial render carries a residual from 057cfa8a1c (the adapter block removed when the adapter became a scoped row), which neither ruled attribution covers; filed as NFRA_CTLPLN-W89-S1 (BLOCKING)"
+      "output_evidence": "FENCE-SCOPED rows_today=42 unchanged_today=True scoped_rendered=32/32 sim_ok=31/31 refusals_ok=5/5 unknown_key_refused_by=validator+module ok=True (rc=0). Deciding lines: ATTRIBUTED relocation irpt-performance-adapter-role: 057cfa8a1c (the residual on opal_data_49financial is exactly the admission of the adapter principal and the three DenyPerformanceAdapter statements removed by that commit, and today's registry carries one scoped row for the principal); attributions: unscoped principals admitted since d5516cb074^ 3; grants row(s) 2; relocation 1; UNATTRIBUTED buckets 0.",
+      "denominator": "3 of 3 bucket policies accounted for: lgic_firm[cottonwood] EQUAL, lgic_firm[inflection] EQUAL, opal_data_49financial DIFFERENT and ATTRIBUTED relocation (4 of 4 relocation checks pass); grants 2 of 2 Allow statements removed as an exact set; unscoped principals 3 of 3 declared pairs",
+      "status": "PASS"
     },
     {
       "criterion_id": "CTac3-AC2",
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py expect: ok=True",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
-      "output_evidence": "FENCE-SCOPED rows_today=42 unchanged_today=False scoped_rendered=32/32 sim_ok=31/31 refusals_ok=5/5 unknown_key_refused_by=validator+module ok=False. Base (issuer measurement): rows_today=42 unchanged_today=False scoped_rendered=0/0 sim_ok=0/0 refusals_ok=0/7 ok=False.",
-      "denominator": "ok=False; sub-denominators: scoped_rendered 32 of 32, sim_ok 31 of 31, refusals_ok 5 of 5, unchanged_today False (the one residual of AC1)",
-      "status": "FAIL",
-      "status_reason": "the whole check reads ok=False because unchanged_today is False (the residual of CTac3-AC1); every other arm reads its full denominator"
+      "output_evidence": "FENCE-SCOPED rows_today=42 unchanged_today=True scoped_rendered=32/32 sim_ok=31/31 refusals_ok=5/5 unknown_key_refused_by=validator+module ok=True (rc=0, no environment override). Base (issuer measurement): rows_today=42 unchanged_today=False scoped_rendered=0/0 sim_ok=0/0 refusals_ok=0/7 ok=False.",
+      "denominator": "ok=True; scoped_rendered 32 of 32 (computed from the registry); sim_ok 31 of 31 (no AccessDenied); refusals_ok 5 of 5 (arms 3 and 4 retired by c64a667818 and 8114bac9cf); unchanged_today True; rows_today 42 of 42 accepted by the validator",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -60,22 +58,22 @@
     },
     "determinism": {
       "method": "the simulator results are cached in a temporary directory outside the repository; the first real run made 31 calls (0 cached), later runs answered from the cache",
-      "observed": "run2 made 31 calls and printed sim_ok=31/31; the final run answered 31 from the cache and printed the same decision line for sim_ok, scoped_rendered, refusals_ok and unchanged_today",
+      "observed": "the decision lines of the runs before and after ruling (f) agree on sim_ok, scoped_rendered and refusals_ok; the final run answered 31 from the cache",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "the status flip of the task order",
-      "reason": "the order file is outside the write paths; the issuer flips the status, and the order stays open with FAIL rows"
+      "reason": "the order file is outside the write paths; the issuer flips the status"
     },
     {
       "item": "the portal gitlink",
       "reason": "not committed, per the cell rules"
     },
     {
-      "item": "the residual of ADVI_FIRMBKTS-D1-S43 reason (d) for the adapter block",
-      "reason": "neither the unscoped-principal attribution nor the grants attribution covers it; the ruling needed is filed as NFRA_CTLPLN-W89-S1 and is not decided by this worker"
+      "item": "the stub name of the adapter principal in the scratch render",
+      "reason": "the scratch root now names the pinned data block's role (read from git, irpt-performance-adapter-role) instead of a stub name; the render is scratch only and no AWS call uses it"
     }
   ],
   "surprises": ["NFRA_CTLPLN-W89-S1", "NFRA_CTLPLN-W89-S2", "NFRA_CTLPLN-W89-S3"],
@@ -83,8 +81,8 @@
   "compiler_tools": [
     {
       "tool": "python",
-      "invocation": "timeout 300 python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
-      "result": "rc=1; last line FENCE-SCOPED rows_today=42 unchanged_today=False scoped_rendered=32/32 sim_ok=31/31 refusals_ok=5/5 unknown_key_refused_by=validator+module ok=False"
+      "invocation": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
+      "result": "rc=0; last line FENCE-SCOPED rows_today=42 unchanged_today=True scoped_rendered=32/32 sim_ok=31/31 refusals_ok=5/5 unknown_key_refused_by=validator+module ok=True"
     }
   ]
 }
