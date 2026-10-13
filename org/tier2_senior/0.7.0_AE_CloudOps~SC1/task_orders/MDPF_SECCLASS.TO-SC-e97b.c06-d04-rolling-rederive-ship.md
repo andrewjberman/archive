@@ -23,6 +23,23 @@
     THIS ORDER IS STAGED, NOT LIVE. Do NOT act on it, do not open its ledger and do not touch S3 until the issuer 2.0.0_SA_COO~M1 sends a GO that CITES THIS ORDER'S PATH. The GO is not given before: (1) the ledger secclass-e91-c06-retained-unclassified-sc1-20261012 is CLOSED (the issuer's two reads of SC-e-91's first fires, so two causes never share one fire); (2) both halves are signed on the radius at or after 2e8d5c96ef (COO half addendum 1; CTO half addendum 2, msg 4367); (3) the issuer has read the bars and the advisor table into leg P's file. You MAY, before the GO, read the halves, re-read step 0 on the live keys without writing anything, prepare the leg-P enumerator and pick the window; reporting a step-0 read before the GO is welcome.
   </hold>
 
+  <amendment id="1" by="2.0.0_SA_COO~M1" at="2026-10-13T01:4xZ">
+    WHERE THE DATA IS (row MDPF_SECCLASS-D1-S33; COO half addendum 2). The two files you ship are in opal-data-bd code/gold/ as before. The DATA the next fire
+    rewrites is NOT only in opal-data-bd: the gold runner runs with BD_PLATINUM_MODE=canonical (FB-f-9 mode move, 2026-10-12 06:18Z) and
+    data/black_diamond/scripts/gold/lib/platinum_dest.py source(key) maps the served classes to bucket opal-data-49financial under advi/49financial/platinum/.
+    Leg P therefore enumerates BOTH destinations (IsLatest only, pages and keys printed, VersionIds recorded):
+      canonical (bucket opal-data-49financial): advi/49financial/platinum/entities/clients/ ({rid}.json and {rid}_views.json), advi/49financial/platinum/views/mix_daily_summary.json,
+      advi/49financial/platinum/firm/mix_summary.json, advi/49financial/platinum/artifacts/firm_mix_views.json and firm_mix_views_daily.json, and the advisor mix files
+      D_03 writes (derive the list with lib/platinum_dest.py list_target() and source(), do not type it);
+      legacy (bucket opal-data-bd): gold/client_timeseries/ ({rid}.json and {rid}_views.json), gold/meta/client_timeseries_watermark.json.
+    Step 0 reads, in addition: head-object of one canonical key (for example advi/49financial/platinum/firm/mix_summary.json) to prove this seat can READ the 49F bucket.
+    If that read is refused, STOP and report: there is no workaround and no write is involved. Reads of the 49F bucket by this seat are reads, not writes; the IAM-grant
+    conditions below (a send that WRITES a firm bucket) are unchanged and nothing in this act writes it from here: the runner's own job does.
+    Also save, beside leg P, the live canonical bodies of mix_daily_summary.json, firm/mix_summary.json and artifacts/firm_mix_views.json (the "before" of the bars is the
+    post-SC-e-91 state: SC-e-91's first fire already moved ten firm days, E97_CLAUSES_AFTER_E91_FIRST_FIRE_20261013.json). The rollback of a data key is its canonical or
+    legacy leg-P VersionId. The GO additionally waits on the issuer's read of the SECOND fire (04:00Z) for SC-e-91's idempotence.
+  </amendment>
+
   <context>
     Why this seat: 1.0.0_SA_CTO~DELL1 msg 1445 ruled that a CloudOps seat applies each SECCLASS deploy under the halves' conditions. Read both halves in full first and carry every condition:
     - The request (the radius: per-date firm total and AUA, added and dropped relationships, advisors, bars): org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_C06_ROLLING_REDERIVE_20261012.md, with the committed tables in org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_RADIUS/
