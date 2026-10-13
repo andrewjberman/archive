@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-3",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-3.dell2-forwarder-for-muse-answers.md",
+    "group": "OTHER",
+    "vintage_commit": "8bf64bac36"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "8bf64bac36",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-3.dell2-forwarder-for-muse-answers.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/muse_reader/forwarder.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch; nothing installed, scheduled or run on dell2 (cell CA-i-5 runs it on dell2)",
+      "artifact_covered_by": ["CAi3-AC1", "CAi3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi3-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_forward.py\" expect: I3-FORWARD ok=True arms=6 of 6",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_forward.py\"",
+      "output_evidence": "I3-FORWARD ok=True arms=6 of 6 failed=none reason=none (timeout 120, rc 0; run twice, identical line)",
+      "denominator": "6 of 6 arms: valid-once, same-file-twice, same-bytes-new-name, malformed-rejected, unknown-tag-rejected, failed-send-retries",
+      "status": "PASS",
+      "expect": "I3-FORWARD ok=True arms=6 of 6"
+    },
+    {
+      "criterion_id": "CAi3-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_cli.py\" expect: I3-CLI ok=True calls=1",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_cli.py\"",
+      "output_evidence": "I3-CLI ok=True calls=1 reason=none (timeout 120, rc 0; run twice, identical line)",
+      "denominator": "1 of 1 expected sqs send-message call recorded by the AWS CLI stub; 2 forwarder runs (MUSE_MAILBOX_URL set, then unset: the unset run made 0 calls and exited non-zero naming the variable)",
+      "status": "PASS",
+      "expect": "I3-CLI ok=True calls=1"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAi3-AC1 and CAi3-AC2 base arm: both checks run from a directory with no data package, so no forwarder module exists to import or run",
+      "expected": "I3-FORWARD ok=False and I3-CLI ok=False",
+      "observed": "I3-FORWARD ok=False arms=0 of 6 failed=import reason=ModuleNotFoundError: No module named 'data'; I3-CLI ok=False calls=0 reason=rc=2 calls=0 (the forwarder script cannot be opened)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "CAi3-AC1 and CAi3-AC2 each run twice from the worktree root; both runs compared line by line",
+      "observed": "AC1 run 1 and run 2: I3-FORWARD ok=True arms=6 of 6 failed=none reason=none; AC2 run 1 and run 2: I3-CLI ok=True calls=1 reason=none",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "installing, scheduling or running forwarder.py on dell2, and any real send to the real mailbox queue",
+      "reason": "outside this cell; cell CA-i-5 runs it on dell2 and reads the queue back. Both acceptance checks use a synthetic folder and an AWS CLI stub"
+    },
+    {
+      "item": "signature verification of an answer file",
+      "reason": "THE CELL assigns it to the receiver: anything that can write to the queue can skip an upstream check"
+    },
+    {
+      "item": "action and version shape check of the answer payload",
+      "reason": "BUILD step 1 lists the malformed triggers as: not JSON, no string payload, no string signature, payload not JSON with a string tag. The payload's action and version are the receiver's to check; the forwarder does not reject on them"
+    },
+    {
+      "item": "a refresh that writes object_id to drafts.json rows",
+      "reason": "owned by cell CA-i-1 and outside this order's <paths>; at this base the rows carry no object_id, recorded as COMM_ASSIST-W11-S2"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W11-S1: an unreadable drafts.json would make the once-only tag-not-waiting rejection permanent, so the forwarder defers those files (no marker, no send)",
+    "COMM_ASSIST-W11-S2: the forwarder routes on object_id, which refresh.py does not write at this base; installing before the CA-i-1 change would reject every answer permanently",
+    "COMM_ASSIST-W11-S3: a permanent tag-not-waiting rejection can fire on a lagging drafts.json snapshot, and the marker does not record which snapshot judged it"
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~11/COMM_ASSIST.TO-CA-i-3.dell2-forwarder-for-muse-answers.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile data/transcripts/scripts/muse_reader/forwarder.py",
+      "result": "rc 0 (compiles)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .scratch/edge_ca_i3.py (scratch script in the worktree, not committed)",
+      "result": "EDGE ALL-OK=True: T1 drafts unreadable -> failed 1, no marker; T2 aws stub rc 1 -> failed 1, no done marker, CLI rc 0; T3 MUSE_LDO_ID unset -> rc 2 untouched; T4 reader folder missing -> rc 2 created nothing; T5 malformed with no drafts.json -> rejected 1"
+    },
+    {
+      "tool": "aws",
+      "invocation": "not run: the AWS CLI is a stub in both acceptance checks; no sqs call was made against any queue",
+      "result": "no AWS call made by this cell"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "genre": "BUILD",
+  "to_id": "NFRA_CTLPLN.TO-CT-ac-4.protected-functions-census-resave",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~U7",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/NFRA_CTLPLN.TO-CT-ac-4.protected-functions-census-resave.md",
+    "group": "OTHER",
+    "vintage_commit": "2121b46c96"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round13.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/NFRA_CTLPLN.TO-CT-ac-4.protected-functions-census-resave.md",
+    "vintage_commit": "2a35c170b7"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/protected_functions_listing.json",
+      "kind": "config_data",
+      "commit_or_etag": "76bd3d4dcf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "re-saved by derive_protected_functions.py --live --write from a read-only listing of 17 of 17 regions: 233 functions to 238 (5 added, 0 removed); the only file changed in the tree; dell_deploy_policy.json byte-identical; committed by the issuer 2.0.0_SA_COO~C at 76bd3d4dcf (this seat's lane cannot commit that path; ORDER AMENDMENT 1): +26 -1 on that one file, equal to the diff this seat produced",
+      "artifact_covered_by": [
+        "CTac4-AC1",
+        "CTac4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ac-4.census-record.txt",
+      "kind": "doc",
+      "commit_or_etag": "825be1dbd4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "regions walked, before and after counts, the added names, the reads, and the two exact final lines",
+      "artifact_covered_by": [
+        "CTac4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTac4-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --live --check expects census_in_sync=True",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --live --check",
+      "expect": "census_in_sync=True",
+      "output_evidence": "PROTECTED-CENSUS functions=238 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 census_in_sync=True deploy_has_statement=False ok=True",
+      "denominator": "17 of 17 regions walked, 0 refused, 238 live functions of which 10 protected; the live listing was re-saved first (saved 233, now 238) and the live check was run again after the write and read functions=238 both times. The base check read census_in_sync=True too (the check compares the protected set, which did not move), so this criterion does not discriminate the stale listing; the discriminating read is the 233 to 238 diff in the record",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTac4-AC2",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ac-4.census-record.txt expects PROTECTED-CHECK",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ac-4.census-record.txt",
+      "expect": "PROTECTED-CHECK",
+      "output_evidence": "PROTECTED-CHECK PROTECTED-CENSUS functions=238 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 census_in_sync=True deploy_has_statement=False ok=True",
+      "denominator": "the last line of derive_protected_functions.py --from-file tests/protected_functions_listing.json --check, run on the re-saved file from the root directory (the order's relative path resolves there); the record also prints CENSUS saved_before=233 live=238 added=5 removed=0",
+      "status": "PASS"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam --help read; no run",
+      "result": "DECLARED-NOT-APPLICABLE as a lens: no Lambda or IAM object is changed; the list/get grant is proven by the live listing in 17 of 17 regions"
+    },
+    {
+      "tool": "derive_protected_functions.py",
+      "invocation": "--live --check, --live --write, --live --check, --from-file tests/protected_functions_listing.json --check",
+      "result": "rc 0 each; 233 to 238; census_in_sync=True before and after"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "two same-input runs compared: derive_protected_functions.py --from-file tests/protected_functions_listing.json --check run twice on the re-saved file, last line hashed; and the live --check before and after the write",
+      "observed": "the two offline runs hash equal (d51cf7478e0a both); the live check before and after the write printed the same line (functions=238 protected=10 census_in_sync=True)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "a planted mutant of the saved listing that the check must refuse: one ARN removed from edge_targets (the field the protected set is derived from)",
+      "expected": "census_in_sync=False, ok=False, rc 1, protected 9 instead of 10",
+      "observed": "FIRED: rc=1, protected=9 by_edge=4 unruled=1 census_in_sync=False ok=False. A FIRST mutant, one row removed from the functions array only, did NOT fire (rc 0, census_in_sync=True, functions=237): the check derives the protected set from authorizer_targets and edge_targets, not from the functions array, so it cannot see a stale or shortened functions list; stated in the record and the session log",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "derive_reached_roles.py freshness was not read and the reached-roles census was not regenerated",
+      "reason": "the script has no --check; --check-fresh is an 8-minute live IAM re-read outside the order's read-only bound (Lambda list/get and sts); whether the five new functions change a reached role is open for the issuer"
+    },
+    {
+      "item": "functions created or deleted while the listing ran, and regions the script does not walk",
+      "reason": "named blind in the order; the record prints the 17 regions walked as the denominator"
+    },
+    {
+      "item": "the order expected the base check to read census_in_sync=False; it read True",
+      "reason": "the check compares the protected set, which did not change; stated in the record rather than treated as a failed base"
+    },
+    {
+      "item": "CTac4-AC1 does not discriminate a stale functions listing (233 vs 238)",
+      "reason": "census_in_sync compares the derived protected set with protected_functions.json; the base read True and the only discriminating read of this order is the 233 to 238 name diff in the record; the write touched exactly one file and dell_deploy_policy.json was byte-identical (sha256 9bdfcfa26299 before and after); the live count read 238 at the first check, the write and the re-check"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~U7/logs/2026-10-13/ctac4_protected_functions_census_resaved.md"
+}

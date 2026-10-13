@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ce-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ce-1.missing-securities-of-matched-active-accounts.md",
+    "group": "OTHER",
+    "vintage_commit": "a71af0a8d5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round83.md",
+    "vintage_commit": "a71af0a8d5",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ce-1.missing-securities-of-matched-active-accounts.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~164",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/FOUR_CUSIPS.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis; no deploy, serve or S3 write; record: four causes, held-by, traded, in-set, generalization, derivation status, sources, not_established",
+      "artifact_covered_by": [
+        "CB83ce1-AC1",
+        "CB83ce1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/FOUR_CUSIPS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis; no deploy, serve or S3 write; short record, counts only",
+      "artifact_covered_by": [
+        "CB83ce1-AC1",
+        "CB83ce1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/MISSING_BY_CAUSE.csv",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis; no deploy, serve or S3 write; seven missing identifiers of active matched accounts with cause",
+      "artifact_covered_by": [
+        "CB83ce1-AC1",
+        "CB83ce1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/ACTIVE_SET_ADDITIONS.csv",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis; no deploy, serve or S3 write; additions file: header only (no active holder of the four)",
+      "artifact_covered_by": [
+        "CB83ce1-AC1",
+        "CB83ce1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB83ce1-AC1",
+      "criterion_verbatim": "each of the four has a cause; the additions file has a recorded row count; the generalization is counted and the derivation was checked against the set. The issuer reads whether the set is complete.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/FOUR_CUSIPS.json',encoding='utf-8'));g=d['generalization'];print('FOUR-CUSIPS cusips=%d with_cause=%d additions_rows=%d traded_by_active=%d in_set=%d missing=%d missing_fixed_income=%s derivation=%s/%s'%(len(d['cause']),sum(1 for x in d['cause'] if x['cause']),d['additions']['rows'],g['distinct_traded_by_active'],g['distinct_in_set'],g['missing'],g['missing_fixed_income'],d['derivation_check']['rows_reproduced'],d['derivation_check']['rows_in_set']))\"",
+      "expect": "FOUR-CUSIPS cusips=4 with_cause=4",
+      "output_evidence": "FOUR-CUSIPS cusips=4 with_cause=4 additions_rows=0 traded_by_active=2760 in_set=2753 missing=7 missing_fixed_income=0 derivation=0/0 (rc 0). The derivation was NOT checked: the salt is absent from this tree (ADVI_COTBKF-D2-W164-S1), so 0 of 0 rows reproduced; no written row depends on a derived key.",
+      "denominator": "4 of 4 identifiers with a cause; 2753 of 2760 traded-by-active identifiers carried by the set; 0 of 0 derivation rows reproduced",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB83ce1-AC2",
+      "criterion_verbatim": "the additions file exists with the recorded checksum and size and the set's header.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/FOUR_CUSIPS.json',encoding='utf-8'));a=d['additions'];b=open(a['file'],'rb').read();print('ADDITIONS-FILE rows=%d sha256_match=%s bytes_match=%s header_ok=%s'%(sum(1 for _ in open(a['file'],encoding='utf-8'))-1,hashlib.sha256(b).hexdigest()==a['sha256'],len(b)==a['bytes'],open(a['file'],encoding='utf-8').readline().strip()=='account_key,source_side,cusip,ticker,held_from,held_to,window_basis'))\"",
+      "expect": "ADDITIONS-FILE rows=",
+      "output_evidence": "ADDITIONS-FILE rows=0 sha256_match=True bytes_match=True header_ok=True (rc 0)",
+      "denominator": "0 data rows of 0 written (header only: no active account held any of the four)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB83ce1-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: each cause is a measured class with its evidence, not an inference; \"active\" and the keys are the set's own; the derivation was checked before use; no window starts before 2012-01-01 or an account's earliest record; the generalization counts securities of ALL matched active accounts, not only the four; no account number, name or value appears in the record, the report or any message.",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment criterion; output recorded for L9, no verdict by this worker)",
+      "expect": "RECORDED (judgment)",
+      "output_evidence": "RECORDED for L9. Measured: four causes by counts (FOUR_CUSIPS.json cause; held_by active 0 of 1 trader each); active = the set's definition reproduced as 769 non-cash accounts by count, with membership of 312 keys not joinable (ADVI_COTBKF-D2-W164-S3); derivation NOT checked (ADVI_COTBKF-D2-W164-S1); no window written, so no window start is set; generalization counts all 547 Commonwealth accounts of matched and linked active accounts (2760 CUSIPs; set-wide membership); no account number, name or value is in the record files, the channel rows or the commit message.",
+      "denominator": "4 of 4 causes measured; 7 of 7 missing identifiers classed",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9; this worker records evidence and does not grade it."
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "driver run three times; additions file sha256 and length compared",
+      "observed": "ADDITIONS sha256 192ececa75d6ad6e710c814ff4382b1d4ee059471101abcc31d8a31c478068dc identical on all three runs; 68 bytes",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "positive control of the active filter: the same active-account filter finds 546 active Commonwealth accounts that traded the cash-sweep identifier, so the empty intersection for the four is not an artifact of the filter",
+      "observed": "CFNCASH: accounts_active_cw 546 of 1514 traders (count-only read)",
+      "expected": "a non-zero active-account intersection for a traded sweep identifier",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "account-key derivation and the 20-account row-count check",
+      "reason": "salt absent from this tree (ADVI_COTBKF-D2-W164-S1); no written row depends on a derived key"
+    },
+    {
+      "item": "per-account membership of set rows",
+      "reason": "set keys are salted tokens; membership is set-wide (2753 of 2760), not per account"
+    },
+    {
+      "item": "BD holdings held-check for the gold canonical files without a cusip column",
+      "reason": "47 of 135 gold files carry no cusip column; 88 of 135 checked by CUSIP; silver 88 of 88"
+    },
+    {
+      "item": "window rule builder of ACTIVE_COTTONWOOD_SET.csv",
+      "reason": "not located in the repository; cash-sweep causes cite asset type, not a rule line"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W164-S1: the set's salted account tokens cannot be re-derived in this tree; the round-161 record's salt is in no committed file and its .scratch is absent",
+    "ADVI_COTBKF-D2-W164-S2: no traded identifier's trader is in the 769-account active set; one holder held its identifier non-zero in 74 of 88 snapshots and is not active at 2026-10-12",
+    "ADVI_COTBKF-D2-W164-S3: REVERSE_MATCH.csv mixes raw Black Diamond ids (457) and 71-character tokens (312) in one account_key column",
+    "ADVI_COTBKF-D2-W164-S4: the two sides classify the same identifiers differently (Commonwealth Cash Equivalent; holdings cash_equivalent false)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~164/ADVI_COTBKF.TO-CB-ce-1.four-cusips-missing-from-the-set.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (driver, scratch, count-only)",
+      "invocation": "python -I .scratch/cotbkf_ce1_final.py",
+      "result": "DEN tx rows 1416497 parts 14 set rows 42319 RM 769; GEN traded_by_active 2760 in_set 2753 missing 7 by_cause window_rule_dropped_it 4 other 3 fixed_income 0"
+    },
+    {
+      "tool": "aws s3api (read-only, .tools/aws shim)",
+      "invocation": "get-object of 14 transaction parts, crosswalk.csv, account_links.csv; 88 silver and 135 gold holdings keys",
+      "result": "all reads rc 0; 88 of 88 silver; 135 of 135 gold; 14 of 14 transaction parts"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CB83ce1-AC1,CB83ce1-AC2,CB83ce1-AC3",
+      "result": "see the PROOF line of the worker report"
+    }
+  ]
+}

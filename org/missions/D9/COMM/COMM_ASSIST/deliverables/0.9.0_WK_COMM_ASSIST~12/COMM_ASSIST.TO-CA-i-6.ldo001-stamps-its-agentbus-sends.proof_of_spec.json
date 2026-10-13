@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-6.ldo001-stamps-its-agentbus-sends.md",
+    "group": "OTHER",
+    "vintage_commit": "90adf8a007"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "90adf8a007",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-6.ldo001-stamps-its-agentbus-sends.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~12",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/assist.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bus_send adds MessageAttributes from_tailnet = BUS_FROM.lower() (ldo-001), beside from and sent_at; body, group id and existing attributes unchanged; nothing deployed (the rebuild and deploy of the assistant is a later cell)",
+      "artifact_covered_by": ["CAi6-AC1", "CAi6-AC2"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_bus_stamp.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 new pytest tests, recording SQS stand-in, no network: one send with from_tailnet ldo-001; ldo-001 held by lib/devices.py held_tailnet_names",
+      "artifact_covered_by": ["CAi6-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi6-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i6_stamp.py\" expect: I6-STAMP ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i6_stamp.py\"",
+      "output_evidence": "(timeout 120, rc 0, run twice after the edit) I6-STAMP ok=True stamp=ldo-001 verdict=deliver control=refused reason=none. Base before the edit: I6-STAMP ok=False stamp=none verdict=unstamped control=refused reason=the consumer classifies the assistant's message as 'unstamped' (stamp 'none'; register holds True)",
+      "denominator": "1 of 1 classification (the assistant's send classified deliver; the unheld-name control refused); the register read from this checkout holds ldo-001 among 6 names: cloud-local, sitez, dell1, dell2, ms, ldo-001",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi6-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+      "output_evidence": "(timeout 120, rc 0) I2-REGRESSION ok=True passed=32 failed=0 reason=none; the same at base before the edit: I2-REGRESSION ok=True passed=32 failed=0 reason=none",
+      "denominator": "32 passed of 32 collected in data/transcripts/scripts/tests/test_teams_chat_tenant.py; 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAi6-AC1 and CAi6-AC2 run on the worktree at base 90adf8a007 before this cell's edit",
+      "expected": "CAi6-AC1 ok=False verdict=unstamped; CAi6-AC2 passes",
+      "observed": "CAi6-AC1 at base: I6-STAMP ok=False stamp=none verdict=unstamped control=refused. CAi6-AC2 at base: I2-REGRESSION ok=True passed=32 failed=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "CAi6-AC1 run twice after the final edit; the deciding line is identical on both runs",
+      "observed": "I6-STAMP ok=True stamp=ldo-001 verdict=deliver control=refused reason=none on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "rebuild and deploy of the assistant",
+      "reason": "the order says this cell is code only; a later cell rebuilds and deploys the assistant"
+    },
+    {
+      "item": "AWS calls and network calls",
+      "reason": "none made; the test uses a recording stand-in for the SQS client and the checks are offline"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~12/COMM_ASSIST.TO-CA-i-6.ldo001-stamps-its-agentbus-sends.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_bus_stamp.py -q -p no:cacheprovider",
+      "result": "2 passed"
+    },
+    {
+      "tool": "commit gate",
+      "invocation": "bash .tools/commit-gate.sh data/transcripts/scripts/teams_chat/assist.py data/transcripts/scripts/tests/test_bus_stamp.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc 0"
+    }
+  ]
+}
