@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-245",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-245.server-defaults-the-price-date.md",
+    "group": "OTHER",
+    "vintage_commit": "bddbded002"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R22S_Y.md",
+    "vintage_commit": "bddbded002",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-245.server-defaults-the-price-date.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~77",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+      "kind": "script",
+      "commit_or_etag": "d9d34f0b77",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "default_price_date, _trading_calendar and _new_york_today added (portfolio.py:36-68); not released, not uploaded, not applied; the Lambda and resident packages do not yet carry lib/trading_calendar.py (see r22 packaging)",
+      "artifact_covered_by": ["AR245-y-AC1", "AR245-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "d9d34f0b77",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the CSV lane (uploads.py:421-424) and the template lane (uploads.py:589-592) take the default before resolve_prices; not released",
+      "artifact_covered_by": ["AR245-y-AC1", "AR245-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_price_date_default.py",
+      "kind": "test",
+      "commit_or_etag": "d9d34f0b77",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new file, 5 tests, 5 passed in the worktree; 2 of 5 fail on the HEAD copy (before-arm)",
+      "artifact_covered_by": ["AR245-y-AC1", "AR245-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~77/r22/PRICE_DATE_DEFAULT.json",
+      "kind": "doc",
+      "commit_or_etag": "0ff804c59d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: trading_day_source, packaging for ycharts_generate and resident, behaviour, tests, before_arm, claim, not_read",
+      "artifact_covered_by": ["AR245-y-AC1", "AR245-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0ff804c59d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows appended: IRPT_ANLREQ-D2-W77-S1 (OBSERVATION, INERT), S2 (OBSERVATION, INERT), S3 (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~Y2)",
+      "artifact_covered_by": ["AR245-y-AC1", "AR245-y-AC2J"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR245-y-AC1",
+      "criterion_verbatim": "the record names the trading-day source and the packaging of each place, the new test file passes with at least 3 tests, and the whole intake folder passes at 365 or more.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-77/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y245-server --root C:/dev/wk-irpt-anlreq-77",
+      "output_evidence": "new test file: 5 passed, 0 failed (rc=0)\nintake tests: 370 passed, 0 failed (rc=0)\nY245-SERVER-OK   (run twice, identical output, rc=0 both times)",
+      "denominator": "5 of 5 new tests pass (floor 3); 370 of 370 intake tests that ran pass (1 skipped of 371 collected; floor 365)",
+      "status": "PASS",
+      "expect": "Y245-SERVER-OK"
+    },
+    {
+      "criterion_id": "AR245-y-AC2J",
+      "criterion_verbatim": "the prior trading day comes from the estate's one calendar source and no weekday or holiday rule was written in intake/; a date sent behaves exactly as before; the new test fails without the change; the packaging answer is read from the map and the recipe, not assumed; nothing was released or applied.",
+      "method": "manual_read_with_citation",
+      "invocation": "read: intake/portfolio.py:36-68; intake/uploads.py:421-424 and :589-592 (at d9d34f0b77); lib/trading_calendar.py:164-197; infra/aws/lambda/ci/lambda-source-map.json (irpt-ycharts-generate, staged_from and files); infra/aws/lambda/investor-reporting/PATH_MANIFEST.json:478-483; reports/build_resident_package.py:37-38, :59-61, :75; org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/build_resident_package.py:62 (read only); r19 RESIDENT_RECIPE_AND_DELTA.json recipe_source. grep of intake *.py for weekday, holiday, isoweekday, NYSE, timedelta; before-arm: pytest of tests/test_price_date_default.py against the HEAD copy",
+      "output_evidence": "grep of intake *.py: 2 hits, both docstrings (portfolio.py:62, tests/test_price_date_default.py:1), 0 code hits for a weekday or holiday rule. Before-arm at HEAD: '4 failed, 4 passed in 2.05s' (the Shares test fails 3 of 3 subtests with NEEDS_CORRECTION != NORMALIZED; the calendar test fails with AttributeError). A date sent: test_a_date_that_is_sent_is_used_exactly_as_sent passes with and without the change. Packaging read from the map (ycharts_generate: no calendar member, intake modules present) and the recipe (resident: intake shipped, calendar not; one EXTRA_FILES entry in the recipe builder). Nothing released, uploaded, deployed, applied, invoked or pushed.",
+      "denominator": "2 of 2 serving-path branches changed (CSV, template); 0 code hits of weekday or holiday rules in intake *.py (a grep, not a census); 2 of 5 new tests fail at HEAD; 2 of 2 packaging legs answered (1 member each)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO; the worker records the output and carries no verdict"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the HEAD copy of intake (no default in portfolio.py or uploads.py) with the new test file copied in: pytest of tests/test_price_date_default.py must FAIL on the Shares-with-no-date test, because the default is what the test proves",
+      "expected": "rc=1 and at least one failure in test_a_shares_file_with_no_date_is_priced_at_the_prior_trading_day",
+      "observed": "4 failed, 4 passed in 2.05s (rc=1); the Shares test fails 3 of 3 subtests with NEEDS_CORRECTION != NORMALIZED; the calendar test fails with AttributeError",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the y245-server check run twice on the worktree, output lines compared",
+      "observed": "run 1 and run 2 both printed 'new test file: 5 passed, 0 failed (rc=0)', 'intake tests: 370 passed, 0 failed (rc=0)', 'Y245-SERVER-OK', rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "release, upload, deploy, apply, invoke or push of any artifact",
+      "reason": "the order bounds the cell to code and tests; nothing is released (the cell says so)"
+    },
+    {
+      "item": "adding lib/trading_calendar.py as a member of irpt-ycharts-generate (source map) or of the resident builders",
+      "reason": "outside the grant (infra/aws/lambda/ci and the recipe builder are not in <paths>); recorded as members to add in the r22 record"
+    },
+    {
+      "item": "moving intake/tests/test_portfolio.py :144",
+      "reason": "the grant allowed the move only if the assertion removed the refusal; it does not, because the freeze-level guard stays and the serving path defaults before pricing, so the file is untouched"
+    },
+    {
+      "item": "AR245-y-AC2J judgment verdict",
+      "reason": "judgment criterion graded at L9 by 3.0.0_SA_CVO, never by the worker"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W77-S1",
+    "IRPT_ANLREQ-D2-W77-S2",
+    "IRPT_ANLREQ-D2-W77-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~77/r22/PRICE_DATE_DEFAULT.json",
+  "compiler_tools": [
+    {
+      "tool": "ar21_checks.py",
+      "invocation": "python C:/dev/wk-irpt-anlreq-77/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y245-server --root C:/dev/wk-irpt-anlreq-77",
+      "result": "Y245-SERVER-OK rc=0 (twice)"
+    },
+    {
+      "tool": "pytest (intake folder)",
+      "invocation": "cd intake && python -m pytest tests -q -p no:cacheprovider --color=no",
+      "result": "370 passed, 1 skipped, 28 subtests passed, rc=0"
+    }
+  ]
+}
