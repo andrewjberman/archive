@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aa-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aa-5.data-proxy-fence-tier-only.md",
+    "group": "OTHER",
+    "vintage_commit": "5dba8cb256"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~76",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "vintage_commit": "5dba8cb256",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aa-5.data-proxy-fence-tier-only.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "b679148355",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_CTLPLN-76 only (b679148355). Nothing deployed: no terraform, no aws call, no push. The Lambda is unchanged in AWS until the separate signed apply order.",
+      "introduces": [
+        "if tier == 'internal':"
+      ],
+      "artifact_covered_by": [
+        "CTaa5-AC1",
+        "CTaa5-AC2",
+        "CTaa5-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/tests/test_route_tier_only_fence.py",
+      "kind": "test",
+      "commit_or_etag": "b679148355",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test file runs locally only. It is not deployed and is not part of any Lambda package.",
+      "artifact_covered_by": [
+        "CTaa5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaa5-AC1",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_tier_only_fence.py -- the tier-only tests pass over all 41 routes (report the whole last line: it must read `N passed` with no `failed` and no `error`).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_tier_only_fence.py",
+      "output_evidence": "run from the worktree root under timeout 120 on commit b679148355, rc=0; ANSI colour codes stripped; last line: 1197 passed in 1.82s",
+      "denominator": "1197 of 1197 collected tests pass; 0 failed, 0 error, 0 skipped. Cases: census (3), (a) 78, (b) 78, (c) 234 + class-i 12, (d) 390, (e) 246, (f) 156 over the 41 census routes (39 class-ii, 2 class-i), flat and nested authorizer context",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CTaa5-AC2",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py -- the firm fence still holds exactly as built (965 tests, unchanged; a control that PASSES at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "output_evidence": "run from the worktree root under timeout 120 on commit b679148355, rc=0; ANSI colour codes stripped; last line: 965 passed in 1.89s",
+      "denominator": "965 of 965 collected tests pass; 0 failed, 0 error, 0 skipped; count equal to the base-count 965 in the criterion",
+      "status": "PASS",
+      "expect": "965 passed"
+    },
+    {
+      "criterion_id": "CTaa5-AC3",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py -- the log-capture tests still pass (1012; a control that PASSES at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "output_evidence": "run from the worktree root under timeout 120 on commit b679148355, rc=0; ANSI colour codes stripped; last line: 1012 passed in 2.66s",
+      "denominator": "1012 of 1012 collected tests pass; 0 failed, 0 error, 0 skipped; count equal to the base-count 1012 in the criterion",
+      "status": "PASS",
+      "expect": "1012 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Pre-CT-aa-3 lambda_function.py (git show 96c4f5f063:infra/aws/lambda/portal_data_proxy/lambda_function.py, copied to a scratch folder beside session_tracker.py and firm_page_access.py) run via PORTAL_PROXY_UNDER_TEST against the new tier-only suite. Cases (a), (b) and (f) must FAIL.",
+      "expected": "(a)+(b)+(f) = 312 of 312 cases FAIL on the pre-CT-aa-3 handler",
+      "observed": "390 failed, 807 passed in 4.27s on the control copy. FAILED lines: (a) test_a_dev_userType_on_advisor_tier_with_a_made_up_firm_is_403_on_class_ii 78; (b) test_b_dev_userType_with_tier_absent_is_403_on_class_ii 78; (d) test_d_non_internal_tier_with_a_dev_spelling_is_403_on_class_ii 78 (the padded ' Dev ' spelling only; the old clause admits it); (f) test_f_dev_userType_with_a_partner_firm_is_403_on_class_ii 156. (a)+(b)+(f) = 312 of 312 FAILED; 390 = 312 + 78 of the padded-Dev spelling. The edited handler on the same suite gave 0 failed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: python -m pytest -q on test_route_tier_only_fence.py run twice on the edited handler; counts compared",
+      "observed": "run1 (first run after the git rm) 1197 passed in 2.81s; run2 (the AC1 invocation) 1197 passed in 1.82s; the counts are identical and the times differ",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Terraform, any aws call, any deploy, any push, and the portal gitlink",
+      "reason": "order RULES: no terraform, no aws, no deploy, no push; nothing is deployed by this cell. A separate order applies the change under a signed pair."
+    },
+    {
+      "item": "Python 3.11 runtime (the worker ran Python 3.12.10)",
+      "reason": "The added code uses no 3.12-only syntax; ruff check --target-version py311 passed on both files. The 3.11 interpreter was not run."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest (test_route_tier_only_fence.py, the tier-only fence suite)",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_tier_only_fence.py",
+      "result": "1197 passed in 1.82s"
+    },
+    {
+      "tool": "ruff check --target-version py311 on the edited handler and the new test file",
+      "invocation": "python -m ruff check --target-version py311 infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_route_tier_only_fence.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit.sh commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_CTLPLN~76 <0.9.0_WK_NFRA_CTLPLN~76@opal.agent>\" -F .scratch/msg_build.txt -- <3 paths>",
+      "result": "pre-commit gate clean for 2 of 2 file(s); committed b679148355"
+    }
+  ],
+  "session_log": "first act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_CTLPLN-76; TREE-OK (org/ and .tools/ present) | baseline before edit: python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/ -> 2940 passed (rc=0) at 5dba8cb256; lambda_function.py identical to 96c4f5f063 (git diff empty) | build: lambda_function.py: user_type line deleted, test restored to tier == 'internal', docstring restored plus one sentence; test_route_dev_fence.py git rm; test_route_tier_only_fence.py added; committed b679148355 via safe-commit.sh (commit-gate PASS; 18 pre-existing non-ASCII WARN lines unchanged from HEAD) | criteria: AC1 1197 passed rc=0; AC2 965 passed rc=0; AC3 1012 passed rc=0; whole folder 3174 passed rc=0 (= 1197 + 965 + 1012) | control: PORTAL_PROXY_UNDER_TEST=<scratch copy of 96c4f5f063 lambda_function.py> -> 390 failed, 807 passed; (a) 78, (b) 78, (d padded ' Dev ') 78, (f) 156 | deletion: test_route_dev_fence.py removed by git rm in b679148355 (it asserted the removed clause; no artifact row because the path no longer exists at the pin)."
+}
