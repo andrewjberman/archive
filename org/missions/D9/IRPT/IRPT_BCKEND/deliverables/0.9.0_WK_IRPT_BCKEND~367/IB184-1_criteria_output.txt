@@ -1,0 +1,18 @@
+Criteria run from the worktree root C:/dev/wk-IRPT_BCKEND-367 at base 0c0ae5a8f5cee99e9c7fa49b8043c146fed1d05e, source map restored (git status clean on infra/aws/lambda/ci/lambda-source-map.json), each under timeout 120.
+
+$ timeout 120 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r184/p184_cells.py" . IB184-1-AC1
+OK: irpt-ycharts-generate built twice identical against the CURRENT live; changed members ['maintained_sources.py', 'templates.json']; source map restored
+IB184-1-AC1 PASS
+rc=0
+
+$ timeout 120 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r184/p184_cells.py" . IB184-1-AC2
+OK: the packet is complete and names the current live CodeSha256
+IB184-1-AC2 PASS
+rc=0
+
+$ timeout 120 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r184/p184_cells.py" . IB184-1-AC3
+FAIL: arms must read {'five_models_canonical_order': 'five_in_order', 'existing_four_entries': 'unchanged', 'admitted_three_firms': 'admitted', 'altered_copy': 'refused'}, read {'five_models_canonical_order': 'five_in_order', 'existing_four_entries': 'changed', 'admitted_three_firms': 'admitted', 'altered_copy': 'refused'}
+IB184-1-AC3 FAIL
+rc=1
+
+Why AC3 FAILS (recorded, not forced): the arm existing_four_entries reads changed because its condition "in the same relative order" is not met. Key and label of the four existing entries are equal to live (measured true). The relative order is not: built opal_short_term, opal_intermediate_term, opal_long_term, opal_ultra_long_term; live opal_long_term, opal_short_term, opal_intermediate_term, opal_ultra_long_term. The canonical order required by arm five_models_canonical_order places Opal Long-Term after Opal Intermediate-Term. Surprise row IRPT_BCKEND-D2-W367-S1.
