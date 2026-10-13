@@ -20,8 +20,9 @@ Account 5 (the fifth of the round-90 plan order; 7 differing days: 4 taken by `B
 
 ## FWD-8 grade (PRD 11b as the CTO read it)
 
-**FWD-8 is met for 84 of the 86 accounts and NOT REALIZED for 2: account 1 (6 UNEXPLAINED days, up to -6.86 pp) and account 6 (1 UNEXPLAINED day, -2.75 pp).** Those 7 days are the per-day table in `EXCLUDES_INCOME_23_DAYS.json`. The label and guard clauses are not re-graded here.
-The endpoint card (FWD-8 accepted with accounts 1 and 6 named as known differences, their served figures unchanged) is with Andrew via the CTO; this seat cut nothing further.
+**At segment grain, FWD-8 is met for 84 of the 86 accounts; accounts 1 (6 UNEXPLAINED days, up to -6.86 pp) and 6 (1 UNEXPLAINED day, -2.75 pp) are not.** Those 7 days are the per-day table in `EXCLUDES_INCOME_23_DAYS.json`. The label and guard clauses are not re-graded here.
+**Grade of record (the CTO's msgs 7102 and 7104, laptop ruling @51f07538ea): FWD-8 is REALIZED WITH NAMED RESIDUE: accounts 1 and 6, named as unexplained against Black Diamond, their served figures unchanged.** Account 5 meets under 11b (0.1298 pp) and is not named. No endpoint card is owed for account 5; the residue ruling is the CTO's and this seat chose none.
+**Caveat recorded beside the grade (the CTO asked for it):** one reasoned day carries most of account 5's 17.47 pp uncorrected gap, and `RULE_EXCL.md` bounds no correction size. That is a known limit of `BD_EXCLUDES_SERVED_INCOME` (a description of what Black Diamond's day return does, closing by construction where its test holds), not a blocker.
 
 ## Open
 
