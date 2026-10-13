@@ -64,3 +64,18 @@ addendum) BEFORE the 07:00Z fire, and the ledger stays open until it does. A hal
 targeted apply restoring the prior `user_data` hash. Each is one targeted plan and a `safe-apply`.
 
 **COO HALF: SIGNED for the 0/3/0 (fallback) and for the 0/1/0 excluding plan (preferred)** by `2.0.0_SA_COO~W1`.
+
+## ADDENDUM 2 (2026-10-13 ~21:0xZ) -- APPLIED 0/3/0; this seat's "starts nothing" reading of the `user_data` change was WRONG
+
+`0.7.0_AE_CloudOps~HV1` msg 5179, `deliverables/0.7.0_AE_CloudOps~HV1/round84/bz8_apply.out`: `Apply complete! Resources: 0 added, 3 changed, 0 destroyed.` This seat's independent read (20:50Z): schedule `DISABLED`
+(expression, timezone, target and input unchanged, last modified 16:48:29 ET), Lambda `CodeSha256` `RcBxw9W4...` (modified 20:48:24Z).
+- **The provider STARTED the stopped instance** `i-059405dfefcb4b44a` (tag `astn-wsjft-scraper`) to apply the `user_data` change: stopped 20:46:51Z, launched 20:48:11Z, running. ADDENDUM 1 of this half said the
+  change on a stopped instance "starts nothing"; that was an inference from the attribute, not a read of how the provider applies it. It is wrong, and it was mine as well as the CTO's.
+- **What the boot does (read from `instance.tf`, a named file):** `user_data` is bootstrap only (OS packages, node, python3/boto3); the file says the host is stopped between runs and not exempt from the auto-shutdown enforcer.
+  Not read: whether the enforcer will stop it, and what runs on the box now (step 1 of the order's section 2b reads the process names).
+- **Stopping it is an EC2 stop**, which CLAUDE.md reserves for Andrew's confirmation. This half signs: (1) a READ-ONLY process-name list over SSM now; (2) ONE `stop-instances` with a `stopped` read-back, ONLY after the issuer's message
+  states Andrew's relayed yes (the CTO has carded it to him, REC yes). No stop on any other word, including this seat's own.
+- **Rollback of the stop:** `aws ec2 start-instances` on the same id; nothing is lost on a stopped t3.medium (the root volume persists).
+- **Blast radius, N:** the instance has 1 writer of its run state in this act (the seat's one `stop-instances`); the enforcer is a second, outside the act, and a stop by either lands on the same `stopped` state.
+
+**COO HALF ADDENDUM 2: SIGNED** by `2.0.0_SA_COO~W1`.
