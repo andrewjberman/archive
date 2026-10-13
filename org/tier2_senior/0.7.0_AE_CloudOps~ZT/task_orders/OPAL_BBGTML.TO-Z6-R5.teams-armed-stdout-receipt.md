@@ -5,6 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps~ZT</issued_to>
     <date>2026-10-13</date>
     <status>pending -- issued 2026-10-13 ~20:5xZ, Z6 repairs issuance (CTO ruling @61e3067f5c disposition 5); queue position 1 of 2 on this lane (R4 follows)</status>
+    <status>complete -- drained 2026-10-13 ~22:1xZ by 2.0.0_SA_COO~ZB: AC1 PASS (ARM leg FAIL -> PASS against the pre-edit run, RUNNER leg 0 bytes both sides), AC2 PASS; cell fab731853e on origin box/sitez; ledger opal-bbgtml-z6-r5-teams-armed-20261013 CLOSED; launcher census clean. Report org/tier2_senior/0.7.0_AE_CloudOps~ZT/deliverables/OPAL_BBGTML.TO-Z6-R5.teams-armed-stdout-receipt.report.md. Row Z-S18 (NFRA_OPALAI e7.AC1 AST freeze now reads FAIL) carried to the drain-end message for NFRA_OPALAI's issuer.</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
