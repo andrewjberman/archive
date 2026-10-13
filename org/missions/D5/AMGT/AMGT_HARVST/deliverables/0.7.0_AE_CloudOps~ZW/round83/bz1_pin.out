@@ -1,0 +1,20 @@
+# HVST-bz-1 -- C-a: the new pin worktree at P = 1c69fa35a3
+# 0.7.0_AE_CloudOps~ZW, site Z box
+run_at_utc: 2026-10-13T04:03:54Z
+
+## START CONDITION (read, not assumed)
+$ git fetch origin CLOUD   -> FETCH_HEAD updated
+$ git cat-file -e 1c69fa35a3   -> rc=0 (EXISTS)
+$ git merge-base --is-ancestor 1c69fa35a3 origin/CLOUD   -> rc=0 (ANCESTOR)
+$ git merge-base --is-ancestor origin/CLOUD 1c69fa35a3   -> rc=1 (negative control: the test discriminates)
+origin/CLOUD at read time: 4dc4683c2e0afbe1e1e12469a1583e6a956f9e74
+
+## C-a -- git worktree add --detach then rev-parse
+$ git -C "/c/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-1c69fa35a3" rev-parse HEAD
+1c69fa35a34370a14cd03f741cfd0538f1e89faf
+EXPECT 1c69fa35a3 -- READS 1c69fa35a34370a14cd03f741cfd0538f1e89faf  OK
+
+## positive control (the same read on <old>, which must NOT be P)
+$ git -C "/c/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-b5a7a3a4b6" rev-parse HEAD
+b5a7a3a4b6275b314511914be1d637963b7c74e5
+reads b5a7a3a4b6275b314511914be1d637963b7c74e5 -- different, so the read discriminates
