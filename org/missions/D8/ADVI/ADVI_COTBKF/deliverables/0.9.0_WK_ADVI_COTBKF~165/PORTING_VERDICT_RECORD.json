@@ -1,0 +1,71 @@
+{
+  "price_path": [
+    {"hop": "store source label read per row (pc.read_store; a store with no source column reads '(none)')",
+     "file_line": "data/assets/scripts/analysis/commonwealth_price_census.py:450-478; data/assets/scripts/silver/commonwealth_daily_valuation.py:101-108 (_clean_priced keeps PRICE_COLS incl. source)",
+     "columns": ["kind", "key", "day", "price", "source"]},
+    {"hop": "as-traded basis: canonical store points replaced by the Yahoo close; source labels kept; basis column added",
+     "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:246-335 (as_traded_store, apply_price_basis, price_input_frame)",
+     "columns": ["ticker", "date", "price", "source", "basis"]},
+    {"hop": "per security-day price: min and max per security-day; HEAD dropped source here, the worktree carries it as the sorted '|'-joined label(s)",
+     "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:388-421 (security_day_prices; HEAD lines 403-406), _source_labels",
+     "columns": ["cusip", "day", "price", "store", "source (new)"]},
+    {"hop": "holding priced by its own day's row; cash at 1.0 with source cash-at-par; yahoo flag per holding",
+     "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:425-450 (value_days)",
+     "columns": ["price", "store", "source", "priced", "yahoo"]},
+    {"hop": "the per-day file written by the valuation (source appended)",
+     "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:893-905 (write_prices; HEAD had four columns)",
+     "columns": ["cusip", "date", "price", "store", "source (appended)"]},
+    {"hop": "the valuation's account-day file (yahoo_holdings appended)",
+     "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:826-842 (write_out)",
+     "columns": ["account", "date", "value", "holdings", "priced_holdings", "complete", "yahoo_holdings (appended)"]},
+    {"hop": "minted tables: holdings re-derived from the per-day file; porting_verdict appended LAST to each table; price_source stays the store id",
+     "file_line": "data/assets/scripts/silver/commonwealth_fwd3_serve.py: rederive (449-483), porting_labels, day_porting, month_porting, value_table, daily_table, grade_table, build (tables dict)",
+     "columns": {
+       "account_day_value": ["account", "date", "cusip", "quantity", "close", "value", "price_source", "blank_reason", "cash_leg", "run_commit", "porting_verdict"],
+       "daily_returns": ["account", "date", "value", "flow", "return", "blank_reason", "cash_leg", "run_commit", "porting_verdict"],
+       "month_grades": ["account", "month", "computed_pct", "reported_month_pct", "diff_pct", "verdict", "reason", "reported_year_pct", "reported_year_start", "reported_year_end", "reported_itd_pct", "reported_itd_start", "reported_itd_end", "benchmark_month_pct", "benchmark_year_pct", "benchmark_itd_pct", "benchmark_description", "reported_note", "list_version", "cash_leg", "run_commit", "porting_verdict"]}},
+    {"hop": "the price-need list: demque_claim read from the index; porting_verdict written beside it (the index's own column when present, else UNVERIFIED)",
+     "file_line": "data/assets/scripts/silver/commonwealth_price_need.py: porting_verdicts, load_porting, porting_of (new), need_rows, COLUMNS, run",
+     "columns": ["cusip", "in_demque_index", "demque_valid_from", "demque_valid_to", "demque_claim", "porting_verdict"]}
+  ],
+  "figure_tables": [
+    {"table": "daily_returns", "rows": 1691729, "rows_on_a_price": 669262},
+    {"table": "account_day_value", "rows": 21102041, "rows_on_a_price": 3709042},
+    {"table": "month_grades", "rows": 82593, "rows_on_a_price": 33217}
+  ],
+  "rule": {"wide": ["yahoo_finance", "linear_interpolation"], "narrow": ["yahoo_finance"]},
+  "tests": {"passed": 61, "failed": 0, "files": [
+    "data/assets/scripts/silver/tests/test_commonwealth_porting_verdict.py",
+    "data/assets/scripts/silver/tests/test_commonwealth_price_need.py",
+    "data/assets/scripts/silver/tests/test_commonwealth_daily_valuation.py",
+    "data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve.py"]},
+  "dry_run": {
+    "wide": {
+      "unverified": {"account_day_value": 3709042, "daily_returns": 669262, "month_grades": 33217},
+      "not_yahoo": {"account_day_value": 17392999, "daily_returns": 1022467, "month_grades": 49376},
+      "existing_values_changed": {"account_day_value": 0, "daily_returns": 0, "month_grades": "NOT_MEASURED"}},
+    "narrow": {
+      "unverified": {"account_day_value": 3648401, "daily_returns": 658642, "month_grades": 32232},
+      "not_yahoo": {"account_day_value": 17453640, "daily_returns": 1033087, "month_grades": 50361},
+      "existing_values_changed": {"account_day_value": 0, "daily_returns": 0, "month_grades": "NOT_MEASURED"}}
+  },
+  "consumers_checked": [
+    {"consumer": "commonwealth_account_return_daily.read_source (ARD adapter): daily_returns by 8 names, account_day_value by 4, month_grades by 3", "appended_column_breaks_it": false},
+    {"consumer": "commonwealth_price_basis_census (account_day_value by account, date, cusip, close, price_source)", "appended_column_breaks_it": false}
+  ],
+  "pair_half": {"file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~165/NEVER_WIDEN_R83_PORTING_VERDICT_COO_HALF.md", "state": "DRAFT-UNSIGNED"},
+  "index_column_present": false,
+  "headline": "PORTING-VERDICT: the live Yahoo index (326 rows, s3://opal-data-assets/yahoo/global/silver/price_history/index/index.parquet, VersionId LX3q_QpJKstC.rlcnSzs29JCuYwXTzqN) has NO porting_verdict column, so every Yahoo-sourced figure row reads UNVERIFIED and every other row reads NOT_YAHOO. Wide rule: account_day_value 3709042 UNVERIFIED of 21102041 holding-days, daily_returns 669262 of 1691729 account-days, month_grades 33217 of 82593 account-months. Narrow rule: 3648401 / 658642 / 32232. Existing values changed: 0 on account_day_value and daily_returns; month_grades not re-derived. The origin of a price was not carried in the per-day file at HEAD (store id only; source dropped in security_day_prices); the worktree change carries it. Nothing applied, minted, served, uploaded or sent; the COO half is a DRAFT.",
+  "not_established": [
+    "month_grades existing values were not re-derived: the performance input is an s3 prefix outside this worker's grant (surprise ADVI_COTBKF-D2-W165-S2).",
+    "The narrow rule's existing-values comparison is not separately run: the rule changes only the porting label, and the wide comparison covers the same tables.",
+    "rows_on_a_price is the wide-rule Yahoo count. All priced holding-days in the served account_day_value (close not null) number 5114290; account-days with at least one priced holding in the r34 grid number 1398013.",
+    "The per-day price values differ from the r34 file on 37077 security-days over 34 CUSIPs (split factors; apply_splits not replayed because its split history is an S3 read; surprise ADVI_COTBKF-D2-W165-S3). Store, presence and source are exact.",
+    "The per-day source labels were rebuilt from the local price caches (fwd3/price_cache, uhash 16278a1c4f6b) and the as-traded input r34_price_input.parquet, because the local r34 per-day file carries no source (surprise ADVI_COTBKF-D2-W165-S1).",
+    "The verdict branch counts with a porting_verdict column present are not measured: no verdicts file exists.",
+    "The live index was read once by get-object (LastModified 2026-10-13T03:45:15Z, ETag 656d332726fa82b9cad56fa187105db3). The canonical_prices.parquet read was not needed and was not made.",
+    "The existing test test_outputs_and_last_line pinned the exact six-column list; it now pins the six columns and the appended yahoo_holdings. No assertion was removed.",
+    "The safe-commit client-data-check printed WARN: the hashed account-id list is absent on this device, so the commit was not checked by that gate; the account-id scan test was run instead (DENOMINATOR: 846 tracked files, 0 files with hits, 0 shape hits, 0 account-set hits).",
+    "No consumer page reads these tables; the route to a page is not live."
+  ]
+}
