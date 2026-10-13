@@ -1,0 +1,130 @@
+{
+  "tables": ["daily_returns", "account_day_value", "month_grades"],
+  "prefixes": [
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/daily_returns/date=2026-06-23/",
+      "objects_seen": 1,
+      "listing_limit": 5,
+      "keys": [
+        {"key": "commonwealth/cottonwood/silver/daily_returns/date=2026-06-23/part-00000.parquet", "size": 1651055, "last_modified": "2026-10-09T12:41:01Z"}
+      ],
+      "listing_note": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix <prefix> --max-items 5 --output json, rc=0; no NextToken returned, so the listing is complete for this prefix (1 object)"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/account_day_value/date=2026-06-23/",
+      "objects_seen": 1,
+      "listing_limit": 5,
+      "keys": [
+        {"key": "commonwealth/cottonwood/silver/account_day_value/date=2026-06-23/part-00000.parquet", "size": 54246028, "last_modified": "2026-10-09T12:41:02Z"}
+      ],
+      "listing_note": "same call, rc=0; no NextToken, complete for this prefix (1 object)"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/month_grades/date=2026-06-23/",
+      "objects_seen": 1,
+      "listing_limit": 5,
+      "keys": [
+        {"key": "commonwealth/cottonwood/silver/month_grades/date=2026-06-23/part-00000.parquet", "size": 421751, "last_modified": "2026-10-09T12:41:03Z"}
+      ],
+      "listing_note": "same call, rc=0; no NextToken, complete for this prefix (1 object)"
+    }
+  ],
+  "graph": {
+    "provenance": "comp-platinum reverse (org/modules/graph/graph-call-manifest.yaml trace.platinum.reverse, line 809), --firm cot; the tool prints no provenance header. Per-firm cache files .comp-graph/platinum.dag.cot.cache, platinum.dataflows.cache and platinum.routing.cache in the worktree, mtime 2026-10-13T16:51Z (the ls clock is local, UTC-4). Manifest TTL 5 min.",
+    "age": "cache files written 2026-10-13T16:51Z; about 20 minutes old when this record was written (clock 17:1xZ). Per-call read times were not logged. The calls ran with the default flags (no --force, no --fresh).",
+    "calls": [
+      {"call": "comp-platinum reverse commonwealth/cottonwood/silver/daily_returns/date=2026-06-23/ --firm cot", "output_rows": 10},
+      {"call": "comp-platinum reverse commonwealth/cottonwood/silver/account_day_value/date=2026-06-23/ --firm cot", "output_rows": 10},
+      {"call": "comp-platinum reverse commonwealth/cottonwood/silver/month_grades/date=2026-06-23/ --firm cot", "output_rows": 10},
+      {"call": "comp-platinum reverse daily_returns --firm cot", "output_rows": 19},
+      {"call": "comp-platinum reverse account_day_value --firm cot", "output_rows": 19},
+      {"call": "comp-platinum reverse month_grades --firm cot", "output_rows": 19},
+      {"call": "comp-platinum reverse s3://opal-data-cot/silver/prices/canonical_prices.parquet --firm cot (the named control in the TO)", "output_rows": 10},
+      {"call": "comp-platinum reverse silver/prices/canonical_prices.parquet --firm cot (named control, bucket-less key)", "output_rows": 10},
+      {"call": "comp-platinum reverse platinum/commonwealth/cottonwood/silver/daily_returns/date=2026-06-23/ --firm cot (served-form key)", "output_rows": 10},
+      {"call": "comp-platinum reverse platinum/commonwealth/cottonwood/silver/account_day_value/date=2026-06-23/ --firm cot (served-form key)", "output_rows": 10},
+      {"call": "comp-platinum reverse platinum/commonwealth/cottonwood/silver/month_grades/date=2026-06-23/ --firm cot (served-form key)", "output_rows": 10},
+      {"call": "comp-platinum reverse platinum/firm/client_directory.json --firm cot (positive control, known consumers)", "output_rows": 14},
+      {"call": "comp-platinum reverse firm/client_directory.json --firm cot (positive control, bucket-less form)", "output_rows": 11}
+    ]
+  },
+  "positive_control": {
+    "sibling": "platinum/firm/client_directory.json (cottonwood tree, --firm cot). Known consumer by its page trace: comp-platinum page CottonwoodClientsSection --firm cot reads it through getClientDirectory (portal/src/pages/AdvisorIntelligence/_partners/cottonwood/CottonwoodClientsSection.tsx). The TO's named control (s3://opal-data-cot/silver/prices/canonical_prices.parquet) returned no consumer and was not usable as the control.",
+    "found": true,
+    "consumers_found": ["CottonwoodClientsSection", "ClientsTab"]
+  },
+  "consumers": [
+    {
+      "name": "commonwealth_account_return_daily.py (the account_return_daily ADAPTER)",
+      "path": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "line": 221,
+      "reads": "all three minted tables: read_source(s3, table, columns) calls s3.get_object on the minted object (lines 221-226); called for daily_returns, account_day_value and month_grades at lines 479, 482 and 486. Partition address is date=2026-06-23 (PARTITION, line 136).",
+      "serves_page": false,
+      "dates_read": "partition date=2026-06-23 (address); the rows inside it span 2013-04-03 to 2026-06-22 on the local copy of the minted tables (.scratch/advi_cotbkf/fwd3_serve_r34/)",
+      "evidence": "data/assets/scripts/silver/commonwealth_account_return_daily.py:221-226, :479, :482, :486 @873fe28f00; docstring lines 1-10 say it reads the served as-traded FWD-3 tables and writes day files locally. It has no route. Its day frames feed the gold account_return_daily through the producer emit_day (lines 603, 910): see not_established for the second hop."
+    },
+    {
+      "name": "commonwealth_price_basis_census.py",
+      "path": "data/assets/scripts/silver/commonwealth_price_basis_census.py",
+      "line": 292,
+      "reads": "account_day_value minted object: address('commonwealth','cottonwood','silver','account_day_value','date=2026-06-23','part-00000.parquet') then head_object and get (lines 292-295), columns account, date, cusip, close, price_source",
+      "serves_page": false,
+      "dates_read": "partition date=2026-06-23 (address); rows span 2013-04-03 to 2026-06-22 on the local copy",
+      "evidence": "data/assets/scripts/silver/commonwealth_price_basis_census.py:292-295 @873fe28f00. A census script (writes a census, no route, no portal reader found)."
+    }
+  ],
+  "writers": [
+    {
+      "name": "commonwealth_fwd3_serve.py --apply",
+      "path": "data/assets/scripts/silver/commonwealth_fwd3_serve.py",
+      "line": 803,
+      "writes": "the three minted tables at their builder addresses (_upload at lines 708-711 via boto3 upload_file; the call at line 803). Not run by this worker; the apply is gated by the never-widen record."
+    },
+    {
+      "name": "commonwealth_account_return_daily.py --apply (guarded mint)",
+      "path": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "line": 910,
+      "writes": "gold account_return_daily day files through the producer emit_day(upload=True) (lines 865-921 and 1500), plus the sidecar and method row for a stamped manifest. It does NOT write the three minted tables. Listed apart as a writer, not counted as a consumer."
+    }
+  ],
+  "consumer_count": 2,
+  "consumers_with_a_page": 0,
+  "searches": [
+    {"term": "commonwealth/cottonwood/silver", "scope": "whole repo, corpus=all (tracked, untracked, gitignored minus the ephemeral floor), --all --files", "files_scanned": 77065, "hits": 228},
+    {"term": "commonwealth/cottonwood/silver", "scope": "code and infra pathspecs: portal infra lib integrations opal_ai mcportal .tools data tests tools models timeseries workflows projects", "files_scanned": 14422, "hits": 5},
+    {"term": "commonwealth/cottonwood/silver", "scope": "portal opal_ai mcportal", "files_scanned": 2039, "hits": 0},
+    {"term": "account_day_value", "scope": "whole repo, corpus=all, --all --files", "files_scanned": 77066, "hits": 296},
+    {"term": "account_day_value", "scope": "code and infra pathspecs (as above)", "files_scanned": 14422, "hits": 58},
+    {"term": "account_day_value", "scope": "portal opal_ai mcportal", "files_scanned": 2039, "hits": 0},
+    {"term": "month_grades", "scope": "whole repo, corpus=all, --all --files", "files_scanned": 77067, "hits": 349},
+    {"term": "month_grades", "scope": "code and infra pathspecs (as above)", "files_scanned": 14422, "hits": 55},
+    {"term": "month_grades", "scope": "portal opal_ai mcportal", "files_scanned": 2039, "hits": 0},
+    {"term": "daily_returns", "scope": "whole repo, corpus=all, --all --files", "files_scanned": 77068, "hits": 602},
+    {"term": "daily_returns", "scope": "code and infra pathspecs (as above)", "files_scanned": 14422, "hits": 190},
+    {"term": "daily_returns", "scope": "portal opal_ai mcportal", "files_scanned": 2039, "hits": 0},
+    {"term": "commonwealth_fwd3_serve", "scope": "whole repo, corpus=all, --all --files", "files_scanned": 77069, "hits": 208},
+    {"term": "commonwealth_fwd3_serve", "scope": "code and infra pathspecs (as above)", "files_scanned": 14422, "hits": 5},
+    {"term": "opal-data-assets", "scope": "code and infra pathspecs (no data/): portal infra lib integrations opal_ai mcportal .tools tests tools models workflows projects", "files_scanned": 12641, "hits": 1481},
+    {"term": "opal-data-assets", "scope": "portal opal_ai mcportal", "files_scanned": 2039, "hits": 8},
+    {"term": "opal-data-cot/silver/prices", "scope": "whole repo, corpus=all, --all --files", "files_scanned": 77070, "hits": 36},
+    {"term": "account_return_daily|ARD_TABLE|TABLE_RETURNS", "scope": "whole repo, corpus=all, --all --files (second-hop search)", "files_scanned": 77071, "hits": 5418},
+    {"term": "platinum/reporting|series.json|reporting/account=", "scope": "portal opal_ai mcportal infra/aws/lambda (second-hop search)", "files_scanned": 7764, "hits": 263},
+    {"term": "platinum/reporting|series.json|reporting/account=", "scope": "portal opal_ai mcportal (second-hop search)", "files_scanned": 2039, "hits": 185}
+  ],
+  "build_after_2026_06_05_feeds_served": true,
+  "build_after_2026_06_05_reading": "MEASURED (counts, dates and store labels only; no account value; the build file is r34/after/security_day_price.parquet, 2,124,908 rows, dates 2013-04-03 to 2026-10-06). (1) The build series has 71,374 rows dated after 2026-06-05, on 86 dates to 2026-10-06, across 1,319 CUSIP-keyed securities. (2) The minted tables hold account-days dated 2026-06-08 to 2026-06-22: minted account_day_value 4,836 rows dated after 2026-06-05 (of 21,102,041), and minted daily_returns 1,667 rows (of 1,691,729). Their price_source labels are the same store families the build carries for those dates (cottonwood-gold-canonical-holdings, cottonwood-silver-canonical-prices, cash-at-par, etfs-bbg-testpull-ticker-history). So the range 2026-06-06 to 2026-06-22 is in the served minted copy: true. (3) The minted tables end at 2026-06-22 (max date of both tables; month_grades reported_year_end max 2026-06-23). The build rows on 2026-09-04 (822 rows) and on 2026-10-02 (911 rows), where the one-day steps sit, lie after every minted date: no minted table reads them, so those steps are HELD (in the words of the CTO ruling 5). INFERRED, not measured: that the minted close equals the build price on the 2026-06-08 to 2026-06-22 rows; the link rests on the builder's inputs (commonwealth_fwd3_serve.py lines 7-9: after/account_day_value and after/security_day_price). Served paths beyond the minted tables were not traced for the build series (outside item 4).",
+  "disarm_fact_a": "consumers_found",
+  "headline": "The minted tables are one S3 object per prefix (2026-10-09T12:41Z). In code, 2 consumers read them directly (the ARD adapter reads all three; the price-basis census reads account_day_value); 0 of 2 serve a page. The graph shows no portal-page reader of the minted prefixes, with a positive control that finds known consumers. A second hop exists in code: the ARD adapter output feeds gold account_return_daily, then the publish path, then the InvestorReporting dashboard page; that read route is recorded as planned, not applied, so liveness is not established. disarm_fact_a = consumers_found, so per CTO ruling 1 the correction is the next cell, not a disarm. Build rows dated 2026-06-06 to 2026-06-22 are in the served copy; the 2026-09-04 and 2026-10-02 steps feed no minted table (HELD). Nothing was built, served, written or corrected.",
+  "not_established": [
+    "Whether any live route serves the minted prefixes: the portal search (portal, opal_ai, mcportal, 2,039 files) found no reader and the route config was not traced beyond that search.",
+    "Whether the ARD mint (CB-al-2) has written any Cottonwood gold account_return_daily partition: the S3 listing was limited to the three minted prefixes by the TO, so the gold prefix was not listed.",
+    "The second hop: commonwealth_account_return_daily.py emits gold account_return_daily; infra/aws/lambda/investor-reporting/reporting-publish/handler.py reads every gold partition and writes platinum/reporting/account=<id>/ series.json.gz and manifest.json; portal/src/pages/InvestorReporting/dashboard/seriesContract.ts reads those two documents. The lambda-source-map entry (infra/aws/lambda/ci/lambda-source-map.json:6485) records the read route as Planned, not applied. Whether the publish Lambda and the dashboard read are deployed was not measured.",
+    "data/assets/scripts/gold/irpt_custody/client_report_figures.py (IRPT_CUSTDY CU-a-2) reads gold account_return_daily for one client's quarter-end report; its liveness and any delivery to a person were not measured.",
+    "The graph (comp-platinum) has no producer or consumer edge for the minted keys (PRODUCER empty for all three prefixes, both the commonwealth/... and platinum/commonwealth/... forms). The builder addresses the tables through lib/opal_naming (address(), not a literal), so literal-key queries cannot see it. A zero from the graph is therefore a zero of the portal-platinum domain only.",
+    "The TO's named control (the cot price store key) returned no consumer; the record uses platinum/firm/client_directory.json instead, a sibling the graph does resolve.",
+    "The value-level link between the build price series and the minted close on 2026-06-08 to 2026-06-22 is INFERRED from builder inputs (see build_after_2026_06_05_reading); it is not measured here.",
+    "Other served paths that read the build series after 2026-06-05 (for example a cot canonical price store writer) were not traced: item 4 scope is the minted tables and their consumers.",
+    "data/assets/scripts/silver/commonwealth_account_return_daily.py header lines 8-10 say it has NO S3 WRITE, but the file carries a guarded --apply mint (lines 865-921, emit_day upload=True). The mint writes gold, not the minted tables, so the consumer count is unaffected; recorded as a surprise row.",
+    "Remote reads made by this worker: three aws s3api list-objects-v2 calls (--max-items 5, one per minted prefix). No get, no write, no delete, no other listing."
+  ]
+}

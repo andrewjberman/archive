@@ -25,7 +25,8 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
-          "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR"}
+          "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
+          "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -81,6 +82,33 @@ def reader_module(root):
     finally:
         sys.path.pop(0)
     return module
+
+
+def portal_candidate(root, rel, problems):
+    """A portal candidate record: a full portal commit under src/ only, added tests that fail on the DEV tip without the change and pass with it."""
+    rec = load(root, rel, problems)
+    if not rec:
+        return None
+    for member in ("dev_tip", "branch", "commit", "files_changed", "tests", "before_arm", "what_a_person_sees", "claim", "not_read"):
+        if member not in rec:
+            problems.append("the record lacks %r" % member)
+    for key in ("dev_tip", "commit"):
+        if not re.fullmatch(r"[0-9a-f]{40}", str(rec.get(key, ""))):
+            problems.append("%s is not a full commit sha" % key)
+    if rec.get("commit"):
+        got = subprocess.run(["git", "-C", "C:/dev/ajb_workspace/portal", "cat-file", "-t", str(rec["commit"])], capture_output=True, text=True)
+        if got.stdout.strip() != "commit":
+            problems.append("the portal commit %s is not in the portal repository" % rec.get("commit"))
+    files = rec.get("files_changed") or []
+    if not files or any(not str(x).startswith("src/") for x in files):
+        problems.append("files_changed must be non-empty and under src/ only (got %r)" % files)
+    tests = rec.get("tests") or {}
+    if not tests.get("added") or tests.get("failed") not in (0, "0") or not tests.get("passed"):
+        problems.append("the portal tests must add at least one test and all pass (%r)" % tests)
+    if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+        problems.append("before_arm: the new test must FAIL on the DEV tip without the change")
+    print("files %d, tests %s" % (len(files), tests))
+    return rec
 
 
 def wide_of(header, values):
@@ -269,6 +297,22 @@ def main(argv):
                 problems.append("the test arm %s did not print PASS" % arm)
         if got.returncode != 0 or "ALL PASS" not in out:
             problems.append("the verify tests must exit 0 and print ALL PASS")
+    elif check == "y242-portal":
+        portal_candidate(root, D % "74" + "PORTAL_FILE_NAME_CANDIDATE.json", problems)
+    elif check == "y243-portal":
+        rec = portal_candidate(root, D % "75" + "PORTAL_PRICE_DATE_CANDIDATE.json", problems)
+        if rec and not (rec.get("server_reads") or {}).get("what_the_server_does_without_a_price_date"):
+            problems.append("server_reads.what_the_server_does_without_a_price_date must say what the serving path does when no date is sent")
+    elif check == "y244-read":
+        rec = load(root, D % "76" + "PROXY_SUGGESTION_READ.json", problems)
+        if rec:
+            for member in ("where_suggestion_comes_from", "why_timxx_got_none", "options", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            opts = rec.get("options") or []
+            if len(opts) < 2 or any(not o.get("source") or not o.get("cost") for o in opts):
+                problems.append("options needs at least two sources of a similar security, each with its source and cost")
+            print("options %d" % len(opts))
     return finish(check, problems)
 
 

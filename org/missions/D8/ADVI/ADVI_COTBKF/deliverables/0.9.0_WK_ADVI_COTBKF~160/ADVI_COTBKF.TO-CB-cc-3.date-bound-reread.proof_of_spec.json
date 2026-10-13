@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cc-3",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cc-3.date-bound-reread.md",
+    "group": "OTHER",
+    "vintage_commit": "873fe28f00"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~160",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round81.md",
+    "vintage_commit": "873fe28f00",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cc-3.date-bound-reread.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~160/DATE_BOUNDS.json",
+      "kind": "config_data",
+      "commit_or_etag": "a8bf93ef4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis; local parquet reads of the tx_cache copy and the worktree's decomposition, PRD and deliverable files; no S3 call, no vendor call, no write to any store"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~160/DATE_BOUNDS.md",
+      "kind": "doc",
+      "commit_or_etag": "a8bf93ef4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis; no store touched"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a8bf93ef4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two appended rows ADVI_COTBKF-D2-W160-S1 and ADVI_COTBKF-D2-W160-S2; numstat 46 added, 0 deleted"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB81cc3-AC1",
+      "criterion_verbatim": "every window is listed with its start, end and whether the law moves it; the earliest client record and the account counts are in the record",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~160/DATE_BOUNDS.json',encoding='utf-8'));w=d['windows'];print('DATE-BOUNDS windows=%d total=%s moving=%s with_a_rule=%d built_before_bound=%d earliest=%s floor=%s'%(len(w),d['windows_total'],d['windows_moving'],sum(1 for x in w if x['rule']),len(d['built_before_bound']),d['earliest_client_record']['date'],d['law']['floor']))\"",
+      "output_evidence": "DATE-BOUNDS windows=4 total=4 moving=1 with_a_rule=1 built_before_bound=1 earliest=2013-04-03 floor=2012-01-01 (rc=0, run under timeout 120 after the record was written)",
+      "denominator": "4 of 4 determined windows listed with start, end, moves and new_start; 8 not_established windows listed with reason; 1 of 4 moves",
+      "status": "PASS",
+      "expect": "DATE-BOUNDS windows="
+    },
+    {
+      "criterion_id": "CB81cc3-AC2",
+      "criterion_verbatim": "JUDGMENT: the inventory is complete against its denominator; the law is quoted from its record or marked unresolved; a bound is marked moving only by the law's rule; a bound the disk cannot set is not_established; nothing was deleted, narrowed, rebuilt or re-run; no account id or amount appears",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment criterion, no instrument: the record DATE_BOUNDS.json and DATE_BOUNDS.md, the searches block, and the channel rows, for the grader to read at L9",
+      "output_evidence": "law resolved via git show origin/box/dell1 of ANDREW_DIRECT_20261013_141xZ_BACKFILL_FLOOR_2012_AND_EARLIEST_CLIENT_RECORD.md @82c7c92449 (quoted in the .md); searches: 81 decomposition files, 1 PRD, 6224 faces via to-check, 14 tx_cache files; windows 4 determined, 8 not_established; no account id printed (the account-id scan run is in compiler_tools)",
+      "denominator": "not computed (judgment)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion graded by 3.0.0_SA_CVO at L9 and never self-graded by the worker",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the per-window rule is re-derivable from the printed rows and the earliest-record counts in the record",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: one read of the custodian cache; the firm minimum 2013-04-03 is cross-checked by two independent printed values (the Settle_Date minimum and the PRICE_NEED span_first), not by a second run",
+      "observed": "Trade_Date minimum 2013-04-03; Settle_Date minimum 2013-04-03; PRICE_NEED span_first 2013-04-03",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "request file TIER2-15 window 2020-07-06 to 2026-06-22: per-security bound",
+      "reason": "the order limits the read of this file to non-security fields; the window is recorded not_established"
+    },
+    {
+      "item": "account_return_daily one-time backfill start",
+      "reason": "not stated in the decompositions read; recorded not_established"
+    },
+    {
+      "item": "47 early holdings partitions 2026-04-22 to 2026-06-07: account-level contents",
+      "reason": "no S3 read is permitted; the count of 3 accounts with a first record after 2026-04-22 is printed, the partitions are not read"
+    },
+    {
+      "item": "custodian mark store 2026-06-08 to 2026-10-06 and the minted table range",
+      "reason": "the store is not read by the issuer and the minted table range is not located on disk; both recorded not_established"
+    },
+    {
+      "item": "single-day fetch 2022-10-12, the APH and CTVA served account-days, and the build series after 2026-06-05",
+      "reason": "per-security or per-account bounds not computed in this pass; recorded not_established; the consumer read is cell CB-cc-1"
+    },
+    {
+      "item": "flip of the order's status to complete",
+      "reason": "the task-orders file is outside this order's <paths> grant; surprise row ADVI_COTBKF-D2-W160-S2 records the blocker; the order stays at status issued in the tree"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W160-S1: the custodian transactions carry placeholder Cost_Date values (2 rows at 1901-01-01, 389 before 2000-01-01); the record bound uses Trade_Date, which has none",
+    "ADVI_COTBKF-D2-W160-S2: the proof block asks for the order's status to be flipped to complete, but the task-orders file is outside this order's <paths>; the flip is not made by this worker"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~160/ADVI_COTBKF.TO-CB-cc-3.date-bound-reread.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pyarrow (read-only parquet reads of the tx_cache copy)",
+      "invocation": "python -I .scratch/earliest_client.py; python -I .scratch/per_security.py; python -I .scratch/acct_first.py (worktree scratch, not committed)",
+      "result": "rows 1,416,497; accounts 1533 (0 / 1026 / 97 / 410 by period); CUSIPs 4634 (4633 later than the firm minimum); accounts with first record after 2026-04-22 = 3; Cost_Date 1901-01-01 = 2 rows, before 2000 = 389 rows"
+    },
+    {
+      "tool": "to-check",
+      "invocation": "python .tools/to-check.py --all --project ADVI_COTBKF",
+      "result": "3 active TOs (cc-1, cc-2, cc-3); scanned=6224 faces; unresolved_serials=0; parse_errors=0"
+    },
+    {
+      "tool": "DATE-BOUNDS record check",
+      "invocation": "CB81cc3-AC1 invocation (above)",
+      "result": "DATE-BOUNDS windows=4 total=4 moving=1 with_a_rule=1 built_before_bound=1 earliest=2013-04-03 floor=2012-01-01"
+    }
+  ]
+}
