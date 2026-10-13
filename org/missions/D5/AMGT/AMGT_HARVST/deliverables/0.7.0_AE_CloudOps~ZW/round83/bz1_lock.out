@@ -1,0 +1,25 @@
+# HVST-bz-1 -- C-e: the new pin and the rollback pin are git worktree lock-ed
+# 0.7.0_AE_CloudOps~ZW, site Z box
+run_at_utc: 2026-10-13T04:03:55Z
+
+## acts
+$ git worktree lock --reason 'AMGT_HARVST live cycle runner pin (HVST-bz-1); govern GC must not remove' <new>   -> rc=0
+$ git worktree lock --reason '...' <old>   -> fatal: already locked by 0.0.0_AB_MSTR~Z 2026-10-10 (ALREADY SATISFIED, not re-locked)
+
+## git worktree list --porcelain -- the harvest pins, FULL rows (never a positional slice)
+worktree C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-1c69fa35a3
+HEAD 1c69fa35a34370a14cd03f741cfd0538f1e89faf
+detached
+locked AMGT_HARVST live cycle runner pin (HVST-bz-1); govern GC must not remove
+
+worktree C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-b5a7a3a4b6
+HEAD b5a7a3a4b6275b314511914be1d637963b7c74e5
+detached
+locked live harvest runner pin (AMGT_HARVST scheduled task); never GC -- 0.0.0_AB_MSTR~Z 2026-10-10
+
+worktree C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c
+HEAD c1be67f53c885509ee73f2ad66e0f1f6f3f92549
+detached
+locked live harvest runner pin (AMGT_HARVST scheduled task); never GC -- 0.0.0_AB_MSTR~Z 2026-10-10
+
+## VERDICT: all three harvest pins read a 'locked' line. C-e SATISFIED (row Z-S111 GC hazard closed for this runner).
