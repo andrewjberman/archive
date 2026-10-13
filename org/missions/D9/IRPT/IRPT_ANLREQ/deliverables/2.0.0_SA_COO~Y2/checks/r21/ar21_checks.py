@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -719,6 +719,35 @@ def main(argv):
                     break
             if ae and str(ae[-1].get("failed", "x")) not in ("0",):
                 problems.append("the last after_each row (after the reconciliation) must have failed 0: %r" % ae[-1])
+    elif check == "y295-census":
+        rec = load(root, D.replace("/r21/", "/r28/") % "113" + "FWD1_RELEASE_CENSUS.json", problems)
+        if rec:
+            for member in ("cells", "packages", "member_writers", "order_constraints", "status_words_leg", "calendar_member",
+                           "checker_wiring", "legs", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            cells = rec.get("cells") or []
+            want = ["AR-y-245", "AR-y-280", "AR-y-281", "AR-y-284", "AR-y-285", "AR-y-291", "AR-y-292", "AR-y-293"]
+            got = [str(c.get("cell", c) if isinstance(c, dict) else c) for c in cells]
+            for w in want:
+                if not any(w in g for g in got):
+                    problems.append("cells lacks %s" % w)
+            pkgs = rec.get("packages") or []
+            if len(pkgs) < 3:
+                problems.append("packages must name at least the ticket service, irpt-ycharts-generate and the resident (got %d)" % len(pkgs))
+            for pk in pkgs:
+                for member in ("name", "kind", "diff_command", "diff_path_count", "members_in_release", "live"):
+                    if member not in pk:
+                        problems.append("package %r lacks %r" % (pk.get("name"), member))
+                if not isinstance(pk.get("diff_path_count"), int):
+                    problems.append("package %r: diff_path_count must be an integer (a zero is a count)" % pk.get("name"))
+            if not (rec.get("legs") or []):
+                problems.append("legs must be non-empty")
+            if not (rec.get("order_constraints") or []):
+                problems.append("order_constraints must be non-empty (the packager follows the ticket service)")
+            ws = rec.get("member_writers") or {}
+            if not ws or any(not isinstance(v, (list, dict)) for v in ws.values()):
+                problems.append("member_writers must map each member to its writers")
     return finish(check, problems)
 
 
