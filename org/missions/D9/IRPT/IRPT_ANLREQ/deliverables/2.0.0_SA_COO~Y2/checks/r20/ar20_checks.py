@@ -27,7 +27,7 @@ D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r20/"
 ROUND19_VERSION = "irpt-template-reader.r19.1"
 TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL"}
 GROUPS = {"y212-rebase": ("61", "STATUS_RULE_REBASE_GROUP_A.json", ("irpt-performance-adapter", "irpt-narrative", "irpt-status")),
-          "y213-rebase": ("62", "STATUS_RULE_REBASE_GROUP_B.json",
+          "y213-rebase": ("64", "STATUS_RULE_REBASE_GROUP_B.json",
                           ("irpt-directory-search", "irpt-ycharts-generate", "irpt-export-render", "irpt-holdings", "irpt-49f-reporting-read-lambda"))}
 NEGATIVES = (
     ("Acct Market Value", ("25000000", "31000000")),
@@ -161,8 +161,14 @@ def main(argv):
                 if f.get("carries_status_rule") is not True:
                     problems.append("%s: the release's served.py must carry the status rule" % fn)
                 tests = f.get("tests") or {}
-                if tests.get("failed") not in (0, "0") or not tests.get("passed"):
-                    problems.append("%s: the function's own tests must pass against the release (passed %r failed %r)" % (fn, tests.get("passed"), tests.get("failed")))
+                if tests.get("failed") not in (0, "0"):
+                    # AMENDMENT 1 (issuer): a failure that ALSO fails with the original bytes is pre-existing and does not count against the release;
+                    # it must be named (failed_names) and shown failing in the control run (control_failed_names).
+                    names, control = set(tests.get("failed_names") or []), set(tests.get("control_failed_names") or [])
+                    if not names or not names <= control or tests.get("failed") != len(names):
+                        problems.append("%s: the function's own tests must pass against the release except failures that also fail with the original bytes (passed %r failed %r)" % (fn, tests.get("passed"), tests.get("failed")))
+                elif not tests.get("passed"):
+                    problems.append("%s: the function's own tests ran no passing test (%r)" % (fn, tests))
             print("functions in the record %d of %d" % (len([fn for fn in functions if fn in rows]), len(functions)))
     elif check == "y214-portal":
         rec = load(root, D % "63" + "PORTAL_NOTICE_CANDIDATE.json", problems)
