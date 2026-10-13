@@ -204,9 +204,15 @@ def main():
             computed = [m for m in msgs if "refused:" not in m]
             if not computed:
                 fail("no irpt_retained_phases line since the apply names a computed path (denominator: %d line(s))" % len(msgs))
-            te = aws("logs", "filter-log-events", "--log-group-name", FN_LOG, "--start-time", str(APPLY_UTC_MS), "--filter-pattern", "TypeError", "--query", "length(events)", "--output", "text")
-            if te[0] != 0 or te[1].strip() != "0":
-                fail("TypeError lines since the apply: %r" % te[1].strip()[:40])
+            te = aws("logs", "filter-log-events", "--log-group-name", FN_LOG, "--start-time", str(APPLY_UTC_MS), "--filter-pattern", "TypeError", "--output", "json")
+            if te[0] != 0:
+                fail("TypeError log read failed (rc %s): %s" % (te[0], te[1][:120]))
+            try:
+                n_te = len(json.loads(te[1]).get("events", []))
+            except ValueError:
+                fail("TypeError log read not JSON")
+            if n_te:
+                fail("TypeError lines since the apply: %d" % n_te)
             print("OK: %d computed line(s) of %d since the apply, 0 TypeError" % (len(computed), len(msgs)))
         elif arm == "AC3":
             r = load(LIVE_REC)
