@@ -1,0 +1,133 @@
+{
+  "cell": "AR-y-281",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-281",
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~112",
+  "continues": "0.9.0_WK_IRPT_ANLREQ~102 (stopped at the build gate) and 0.9.0_WK_IRPT_ANLREQ~108 (stopped at the lane gate and at the row-id merge gate). Their built diff was re-applied by the issuer (AMENDMENT 3) onto a new branch cut from the trunk; this worker re-verified it and committed it.",
+  "worktree": "C:/dev/wk-irpt-anlreq-112",
+  "branch": "wk-IRPT_ANLREQ-112",
+  "amendment_applied": "AMENDMENT 1 (2.0.0_SA_COO~Y2, 2026-10-13): filter-on-scan licensed at the measured 29 items; a fully paginated scan with a hard bound of 20 pages refusing with 'list incomplete'; the three extra pinning test files are in the grant. AMENDMENT 2: serial and record folder moved to ~108 (superseded). AMENDMENT 3: serial ~112, record folder deliverables/0.9.0_WK_IRPT_ANLREQ~112/, rows IRPT_ANLREQ-D2-W112-S<k>.",
+  "trunk_merged": {
+    "trunk_commit": "df215447fa",
+    "method": "git merge --no-edit df215447fa on wk-IRPT_ANLREQ-112 (fast-forward from a71af0a8d5; the six code and test paths were dirty and not touched by the merge, so no copy-out was needed)",
+    "head_before_commit": "df215447fa"
+  },
+  "committed": {
+    "commit": "cbdfe204a0",
+    "subject": "feat(IRPT_ANLREQ AR-y-281, 0.9.0_WK_IRPT_ANLREQ~112): firm-scoped LIST for a client-human, built and NOT released",
+    "author": "0.9.0_WK_IRPT_ANLREQ~112 <0.9.0_WK_IRPT_ANLREQ~112@opal.agent>",
+    "paths": ["infra/aws/lambda/ticket_center/lambda_function.py", "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py", "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "infra/aws/lambda/ticket_center/tests/test_fence_other_firm.py", "infra/aws/lambda/ticket_center/tests/test_no_row_refuses.py", "infra/aws/lambda/ticket_center/tests/test_status_active.py"],
+    "method": "bash .tools/safe-commit.sh --author '0.9.0_WK_IRPT_ANLREQ~112 <...>' -F .scratch/msg_112_code.txt -- six paths; rc 0; commit-gate.sh rc 0 on each of the six .py files first; GIT_COMMIT_AUTHOR_OVERRIDE not used",
+    "push_state": "LOCAL on wk-IRPT_ANLREQ-112 (not pushed)"
+  },
+  "built": true,
+  "released": false,
+  "scoping_rule_built": "A client-human (principal_class CLIENT: authorizer email non-empty, userType not service, firmId not 'null' and not the internal firm 'opal-capital') reaching LIST gets only the tickets with ticket_type == 'analysis_request' AND requester.firm == the caller's authorizer firmId. The firm is taken from the authorizer context ONLY (actor['firmId'] from _actor at lambda_function.py:308-317, read in client_list_tickets at :1328-1355). Any query member other than status and limit (so firm, selected_tenant, ticket_type, assignee, email) is refused 400 and reads nothing. A firm id that fails _FIRM_ID_RE (lambda_function.py:133) returns an EMPTY list with 200, never all. A client-human with no firm is UNRESOLVABLE and is refused 403 by the matrix before any scan.",
+  "projection_built": {
+    "members": ["ticket_id", "title", "status", "created_at", "ticket_type", "answers.report_type", "answers.household", "package_state"],
+    "excluded": "events, description, client_updates, assignee, requester (email and name), created_by, source, routing, attachment, linked_submission_id, every package pointer value, and every other firm's row",
+    "package_state": "NONE when no package is stored or none of the four pointer kinds (report_ref, pdf_ref, original_ref, commentary_ref; PACKAGE_REF_FIELDS at lambda_function.py:137) is a non-empty string; COMPLETE when every applicable pointer is a non-empty string, where original_ref stored as null is not applicable (the custody-lane case); PARTIAL otherwise. Only the word is returned, never the pointer values. Code: _package_state at :1283-1298, _client_projection at :1306-1313."
+  },
+  "bound_built": {
+    "constant": "CLIENT_LIST_MAX_SCAN_PAGES = 20 (lambda_function.py:1279, with the 29-item measurement and the firm-index trigger in the comment block above it at :1268-1277)",
+    "rule": "the client scan is _table.scan() with no Limit (_scan_all_pages at :1314-1326), following LastEvaluatedKey; at most 20 pages are read; if the 20th page still carries a LastEvaluatedKey the answer is 503 with 'list incomplete: ... no partial list is returned' and no tickets, count or cutoff.",
+    "why_20_pages_at_29_items": "29 items fit in one page of the 1 MB scan limit by a wide margin; the bound is a runaway guard, not a sizing. It refuses before it could return a partial list that reads as complete.",
+    "tested": "test_a_scan_that_never_ends_refuses_with_list_incomplete (scan called exactly 20 times, 503, no tickets key); test_the_bound_is_exact_twenty_pages_complete_at_twenty_refused_at_twenty_one (20 pages of one item each: 200 with 20; 21 items: 503 and the scan stops at 20 calls); test_the_client_scan_is_full_paginated_and_never_limited (no Limit in any scan call)."
+  },
+  "read": {
+    "list_today": {
+      "who": "MATRIX['LIST'] at lambda_function.py:171 (INTERNAL and SVC_ANALYST_INTAKE, plus CLIENT as built here; before the build it was INTERNAL and SVC_ANALYST_INTAKE). principal_class at :320-338; authorize follows MATRIX.",
+      "how_it_queries_internal_and_service": "list_tickets at :1232-1265: with a status member, _table.query on status-index (:1248-1250, Limit=limit, ScanIndexForward=False); otherwise _table.scan(Limit=limit) at :1252. The Limit is applied at the table read, then the optional assignee and ticket_type filters (:1254-1257), then the in-profile scope filter _in_profile_scope (:1258), then a sort by created_at descending. UNCHANGED by this build (re-read this turn at cbdfe204a0).",
+      "what_it_returns_internal": "the stored row, whole (events, requester with email, assignee, client_updates, answers, attachment, package). No projection. UNCHANGED.",
+      "file_line_index": "lambda_function.py:171 (matrix row), :1237-1238 (the CLIENT dispatch added by this build), :1239-1265 (internal and service list, unchanged), :1279-1355 (the client path, built)"
+    },
+    "why_the_board_was_unscoped": "A client-human was not in MATRIX['LIST'], so the handler refused it before any firm logic ran (_deny at :1235-1236). The only firm scope in the handler was the internal caller's own PROFILE allowedFirmIds (_resolve_scope and _in_profile_scope), so no client path ever reached a firm-keyed filter. This build adds that path.",
+    "how_a_firm_scoped_query_runs": {
+      "index_on_requester_firm": "NO. infra/aws/terraform/ticket-center/main.tf defines opal-tickets (name at :48) with hash key ticket_id and ONE global secondary index, status-index (at :66; hash status, range created_at). Read by name and line grep this turn; no Terraform file was edited.",
+      "chosen": "a FULL PAGINATED SCAN, filtered in-process, bounded to 20 pages. No Terraform change and no new index in this build.",
+      "why_licensed": "the item count is MEASURED by the issuer's single describe-table read on 2026-10-13: ItemCount 29, TableSizeBytes 37652, status ACTIVE, one index. DynamoDB refreshes ItemCount about every six hours, so the figure is approximate; the order of magnitude is the point. This worker did not re-measure it (no live call).",
+      "cost_at_today_size": "one scan of 29 items (37652 bytes) is one page; the filter is in-process over 29 rows.",
+      "why_not_the_internal_pattern": "the internal path reads Limit then filters (:1252 then :1258), which cuts the page before the firm filter. The client path never applies Limit to the scan."
+    }
+  },
+  "authorization_change": "CHANGED, BUILT AND COMMITTED LOCALLY, NOT RELEASED. A client-human may now call GET /api/scoped/tickets and read ONLY the analysis_request tickets whose requester.firm equals its own authorizer firmId, as the fixed projection above (ticket_id, title, status, created_at, ticket_type, answers.report_type, answers.household, package_state). The firm comes from the authorizer context only; any query member other than status and limit (a firm or selected_tenant member included) is refused 400; an unresolvable firm id gets an empty list with 200; a client-human with no firm is refused 403. NOT CHANGED: GET of a single ticket stays INTERNAL-only (MATRIX['GET'] at :172 is unchanged, and test_fence_other_firm.py still pins 403 for a client-human's single-ticket GET, with test_list_scoped_firm.py case (j) pinning it again); SUBMIT-FORM, CREATE, CLAIM, COMPLETE, REPORT, PACKAGE, COMMENTARY and METRICS are untouched (METRICS still refuses a client, test_read_matrix :248); the internal and svc-analyst-intake LIST paths keep their logic (only the CLIENT dispatch at :1237-1238 is added ahead of them). KEYS READ by the change: the authorizer context email (principal_class), userType (principal_class: client versus service), and firmId (principal_class and the scope); and the stored fields ticket_type, requester.firm, status, answers.report_type, answers.household, title, created_at and the package pointers (read only to compute the state word). name and allowedFirmIds are parsed by _actor but the client path does not read them. BOUND: at most 20 scan pages; a bound hit refuses 503 'list incomplete' with no list. ROLLBACK: revert commit cbdfe204a0, or remove CLIENT from MATRIX['LIST'] (lambda_function.py:171), which returns 403 to every client-human and leaves client_list_tickets unreachable. ROUTE AND AUTHORIZER: GET /api/scoped/tickets is the list route (main.tf:377) attached at infra/aws/terraform/ticket-center/main.tf:396-402 (aws_apigatewayv2_route.tickets: authorization_type CUSTOM, authorizer_id local.portal_authorizer_id, the shared portal authorizer at :40). The route and authorizer were read by name and line this turn and are unchanged by this build; so a client-tier token already reaches the route and the matrix is the gate. No API Gateway or authorizer edit is needed. The portal's requireInternal wrap of the /ticket-center page (portal/src/App.tsx, cited by the cell) was NOT re-read by this worker; it is a portal change outside this order and outside the grant.",
+  "tests": {
+    "new_file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py: 25 test items (pytest; 6 of them parametrized over the query members, 6 over the package-state cases; 4 plain tests are the must-hold-at-HEAD set and 21 are the change's)",
+    "new_file_run": "cd infra/aws/lambda/ticket_center && python -m pytest tests/test_list_scoped_firm.py -q: 25 passed in 0.73s, rc 0 (run this turn at cbdfe204a0)",
+    "folder_run_before_build": "trunk df215447fa, before the build: 254 passed in the ticket service folder (the figure the issuer carried; not re-run here: the trunk lambda was not the one under test)",
+    "folder_run_after_build": "python -m pytest tests -q in infra/aws/lambda/ticket_center at cbdfe204a0: 279 passed, 42 subtests passed, rc 0 (254 trunk + 25 new; the subtest count is unchanged from the ~108 run)",
+    "cases_for_the_cell": {
+      "a_own_firm_only": "test_a_client_sees_only_its_own_firms_analysis_requests",
+      "b_other_firm_types_absent": "test_other_firm_other_types_and_trade_requests_are_absent",
+      "c_projection_exact": "test_projection_holds_exactly_the_listed_members_and_no_internal_field",
+      "d_no_widening_query": "test_a_firm_or_tenant_or_other_query_member_is_refused_and_widens_nothing (6 parameters: firm, selected_tenant, ticket_type, assignee, email, firm plus status)",
+      "e_unresolvable_firm_empty": "test_an_unresolvable_firm_returns_an_empty_list_never_all",
+      "f_internal_unchanged": "test_an_internal_list_is_unchanged_full_rows_every_firm_and_type",
+      "g_service_unchanged": "test_the_service_analyst_intake_list_is_unchanged_full_rows",
+      "h_no_firm_refused": "test_a_client_without_a_firm_is_refused_and_reads_nothing",
+      "i_package_state": "test_package_state_is_derived_from_the_four_pointers (6 parameters: none, empty and blank, one pointer, partial, complete, complete with original_ref null)",
+      "j_get_single_refused": "test_get_of_a_single_ticket_is_still_refused_to_a_client",
+      "bound": "test_a_scan_that_never_ends_refuses_with_list_incomplete; test_the_bound_is_exact_twenty_pages_complete_at_twenty_refused_at_twenty_one",
+      "full_paginated_no_limit": "test_the_client_scan_is_full_paginated_and_never_limited",
+      "status_limit": "test_status_filters_and_limit_bounds_the_client_list",
+      "mutant_firm_filter": "test_mutant_dropping_the_firm_filter_leaks_another_firm (monkeypatches _client_visible to the type test only; firm B's ticket reaches firm A under the mutant and the undo restores the firm filter)"
+    },
+    "pinning_test_edits": [
+      {"file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py", "where": "test_list_deny_carries_no_config_echo (:182-191)", "before": "for who, label in ((CLIENT, \"client\"), (SVC_FORM, \"create-only service subject\")):", "after": "for who, label in ((SVC_FORM, \"create-only service subject\"),):   (comment added: a client is admitted to the firm-scoped LIST; SVC_FORM still denied, D7F-10)"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py", "where": "test_read_matrix (:246)", "before": "self.assertEqual(call(\"GET\", \"/api/scoped/tickets\", CLIENT)[0], 403)            # D7F-6", "after": "self.assertEqual(call(\"GET\", \"/api/scoped/tickets\", CLIENT)[0], 200)            # AR-y-281: the client LIST is firm-scoped (test_list_scoped_firm.py)"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py", "where": "test_read_matrix (:256, DEV_PARTNER; in the ~102 census? NO: found by the ~108 build, not by the ~102 census)", "before": "self.assertEqual(call(\"GET\", \"/api/scoped/tickets\", DEV_PARTNER)[0], 403, \"allowedFirmIds=ALL at a partner firm is NOT internal (D8 predicate)\")", "after": "self.assertEqual(call(\"GET\", \"/api/scoped/tickets\", DEV_PARTNER)[0], 200, \"allowedFirmIds=ALL at a partner firm is NOT internal (D8 predicate): a client-human, so its LIST is the firm-scoped one (AR-y-281)\")"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py", "where": "test_mutant_disable_one_rule_flips_the_deny (:291-301)", "before": "mutated[\"LIST\"] = original[\"LIST\"] | {mod.CLIENT} ... call(\"GET\", ..., CLIENT)[0] == 200 (mutant) ... == 403 (restored)", "after": "mutated[\"LIST\"] = original[\"LIST\"] | {mod.SVC_TICKET_FORM} ... call(\"GET\", ..., SVC_FORM)[0] == 200 (mutant) ... == 403 (restored); the mutant moves to the create-only service subject because the client is admitted for real"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_fence_other_firm.py", "where": "test_client_of_another_firm_does_not_see_it_in_the_list (:95-102)", "before": "assert code == 403 and b[\"principal_class\"] == mod.CLIENT and b[\"action\"] == \"LIST\", (code, b)  /  assert \"tickets\" not in b and \"count\" not in b, b", "after": "assert code == 200 and b[\"tickets\"] == [] and b[\"count\"] == 0, (code, b)  (AR-y-281 comment); the TID-absent assertion and the internal positive control are kept"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_fence_other_firm.py", "where": "test_refusals_return_no_field_of_the_other_firms_ticket (:129-134)", "before": "assert code == 403, (code, b)  then _assert_no_leak(b, \"client list\")", "after": "assert code == 200 and b[\"tickets\"] == [], (code, b)  then _assert_no_leak(b, \"client list\") (kept)"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_no_row_refuses.py", "where": "test_clients_and_service_subjects_are_not_touched_by_the_rule (:139-143)", "before": "client = H.call(...CLIENT); assert client[0] == 403 and client[1][\"principal_class\"] == \"client-human\" and client[1] != REFUSED, client  /  P.setup()  /  assert H.call(...) == client", "after": "client = H.call(...CLIENT); assert client[0] == 200 and client[1] != REFUSED, client  /  t, _ = P.setup()  /  _analysis_ticket(t)  /  assert H.call(...) == client (the equality assertion is unchanged; the setup and one re-seed line changed so the two answers compare like with like; see IRPT_ANLREQ-D2-W112-S2)"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_status_active.py", "where": "test_clients_and_service_subjects_are_not_touched_by_the_status_rule (:170-177)", "before": "client = H.call(...CLIENT); assert client[0] == 403 and principal_class == client-human and client[1] != REFUSED, client  /  P.setup(P.profile(H.CLIENT[\"email\"], status=\"disabled\"))  /  assert H.call(...) == client", "after": "client = H.call(...CLIENT); assert client[0] == 200 and client[1] != REFUSED, client  /  t, _ = P.setup(P.profile(H.CLIENT[\"email\"], status=\"disabled\"))  /  _analysis_ticket(t)  /  assert H.call(...) == client (equality kept; see IRPT_ANLREQ-D2-W112-S2)"}
+    ],
+    "pins_left_unedited": "every other assertion in the five pinning files (test_authz_matrix.py, test_fence_other_firm.py, test_no_row_refuses.py, test_status_active.py; test_profile_firm_scope.py was not edited); no test on another principal or action was edited. The METRICS, GET-single and SVC_FORM LIST pins are unchanged."
+  },
+  "before_arm": {
+    "failed": 21,
+    "of": 25,
+    "what_it_measured": "the new test file run against the TRUNK lambda (git show df215447fa:infra/aws/lambda/ticket_center/lambda_function.py, which equals the pre-build HEAD) in a scratch copy OUTSIDE the repo: C:/Users/Test/AppData/Local/Temp/claude/C--dev-ajb-workspace/83c6a4d6-d1bc-4b73-8948-5bc513130982/scratchpad/wk112_anlreq_beforearm/ticket_center (lambda_function.py = the trunk file; tests/test_list_scoped_firm.py = the new file, unmodified).",
+    "command": "cd <scratch>/ticket_center && python -m pytest tests/test_list_scoped_firm.py -q -p no:cacheprovider --color=no",
+    "output_verbatim": [
+      "FAILED tests/test_list_scoped_firm.py::test_a_client_sees_only_its_own_firms_analysis_requests",
+      "E       AssertionError: ... 'error': \"forbidden: LIST is not permitted to principal class 'client-human'\" ... 'principal_class': 'client-human'  (case (a) asserts 200 and gets 403; tests/test_list_scoped_firm.py:160)",
+      "21 failed, 4 passed in 1.21s",
+      "PASSING at the trunk: test_an_internal_list_is_unchanged_full_rows_every_firm_and_type, test_the_service_analyst_intake_list_is_unchanged_full_rows, test_a_client_without_a_firm_is_refused_and_reads_nothing, test_get_of_a_single_ticket_is_still_refused_to_a_client (the four that must hold at HEAD)"
+    ],
+    "reading": "(a) FAILS at the trunk: a firm-A client-human's LIST is refused 403 (test_list_scoped_firm.py:160). The 21 failures are the change's cases; the 4 passes are the unchanged-behaviour cases that the trunk already satisfies, as they should be."
+  },
+  "controls": {
+    "mutant_firm_filter": {
+      "description": "the firm filter disabled IN A SCRATCH COPY of the built lambda_function.py (outside the repo, C:/Users/Test/AppData/Local/Temp/claude/C--dev-ajb-workspace/83c6a4d6-d1bc-4b73-8948-5bc513130982/scratchpad/wk112_anlreq_mutant/ticket_center): the line 'return item.get(\"ticket_type\") == \"analysis_request\" and req.get(\"firm\") == firm' replaced by 'return item.get(\"ticket_type\") == \"analysis_request\"' (one occurrence, asserted before the write)",
+      "command": "python -m pytest tests/test_list_scoped_firm.py -q -p no:cacheprovider --color=no in that scratch copy",
+      "observed": "4 failed, 21 passed: test_a_client_sees_only_its_own_firms_analysis_requests, test_other_firm_other_types_and_trade_requests_are_absent, test_the_client_scan_is_full_paginated_and_never_limited, and test_mutant_dropping_the_firm_filter_leaks_another_firm (its 'restored' assertion fails because the mutant lambda never restores the firm filter, as expected).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "mutant_matrix": "test_mutant_disable_one_rule_flips_the_deny (test_authz_matrix.py:291-301) passes on the built tree: with SVC_TICKET_FORM admitted to LIST the mutant returns 200 and the restored matrix returns 403 (the ticket service folder run, 279 passed).",
+    "determinism": {
+      "method": "the new file and the ticket service folder run in the worktree at cbdfe204a0 (the new file run, the folder run, and the checker run)",
+      "observed": "the folder run 279 passed rc 0 (run 1); the new file 25 passed rc 0; the checker run is recorded in checks.checker below",
+      "status": "STABLE at the runs made"
+    }
+  },
+  "checks": {
+    "checker": "python C:/dev/wk-irpt-anlreq-112/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y281-list --root C:/dev/wk-irpt-anlreq-112 (run after this record and the rows were written; output recorded in the proof instance)"
+  },
+  "claim": "BUILT AND COMMITTED LOCALLY at cbdfe204a0 on wk-IRPT_ANLREQ-112 (not pushed, not deployed, not uploaded, not applied, not invoked, no live call). The build: the server-scoped client LIST with the 20-page bound and the 503 'list incomplete' refusal; the new 25-test file; and the eight pinning-test edits listed above. The status of the order is NOT flipped by this worker. The judgment criterion AR281-y-AC2J is NOT graded here (L9, 3.0.0_SA_CVO); its six clauses are read and recorded with no verdict in the proof instance.",
+  "release_needs": {
+    "lambda": "lambda_function.py must be deployed through Terraform (safe-apply) before the client path is live; not done here.",
+    "route_and_authorizer": "none: GET /api/scoped/tickets already attaches the shared portal authorizer (main.tf:377, :396-402, read this turn).",
+    "index": "none at 29 items. If the table grows past a few thousand items, the right shape is a firm-keyed global secondary index in infra/aws/terraform/ticket-center/main.tf: hash key requester_firm (a new top-level attribute written at CREATE and SUBMIT, backfilled for existing rows), range key created_at, projection the listed members; the scoped LIST then queries that index instead of scanning, and the 20-page bound and the 503 remain as the guard.",
+    "portal": "the requireInternal wrap of /ticket-center (portal/src/App.tsx, per the cell, not re-read here) and the partner-firm DEV-only reach are portal candidates for the issuer's review lane; PROD stays internal-only per the cell.",
+    "submit_wire": "the analysis_request SUBMIT body (answers and attachment) belongs to cell AR-y-280 and is not part of this change."
+  },
+  "not_read": [
+    "the decomposition IRPT_ANLREQ_DECOMP_R23B_Y.md and the PRD (the cell text was taken from the amended order)",
+    "the live opal-tickets table: no describe-table, scan or item count was read by this worker (the 29-item figure is the issuer's measurement, carried as written)",
+    "infra/aws/terraform/ticket-center/main.tf full table definition (only the name at :48 and the GSI at :66 were read, by grep)",
+    "portal/src/App.tsx requireInternal and firmAccess.ts (cited by the cell; the portal is outside this order)",
+    "the CloudFront behaviour for the bare /api/scoped/tickets path (the comment at main.tf:371-374 was not re-verified)",
+    "the CTO ruling record cited by the cell (deliverables/0.9.0_WK_IRPT_ANLREQ~92/r23/J2_REQUEST_ID.json): the cell's premise was taken as stated",
+    "the portal and the Analysis Request form (AR-y-280 and the portal cells are not in this grant)"
+  ]
+}
