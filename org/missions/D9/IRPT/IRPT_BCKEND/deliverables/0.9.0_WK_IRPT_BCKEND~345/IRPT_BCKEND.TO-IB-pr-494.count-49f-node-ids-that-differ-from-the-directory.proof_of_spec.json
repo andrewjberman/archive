@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-494",
+  "phase": "INVESTIGATION",
+  "firm": "49F",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~345",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-494.count-49f-node-ids-that-differ-from-the-directory.md",
+    "group": "OTHER",
+    "vintage_commit": "5743c86349"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5743c86349",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-494.count-49f-node-ids-that-differ-from-the-directory.md"
+  },
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~345/IB170-3_node_id_mismatch_count.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~345/mismatch_count.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only analysis script in the deliverables folder. It makes S3 GET, HEAD and LIST calls only, has no write verb, and is not deployed.",
+      "artifact_covered_by": ["IB170-3-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~345/IB170-3_node_id_mismatch_count.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only record written by mismatch_count.py. It holds no account id, name or key. Not deployed.",
+      "artifact_covered_by": ["IB170-3-AC1", "IB170-3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB170-3-AC1",
+      "criterion_verbatim": "IB170-3-AC1: the record's arithmetic closes (each state's n equals its three parts; the three states sum to denominator; as_of and directory_present present). Expect last line IB170-3-AC1 PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r170/p170_cells.py\" . IB170-3-AC1",
+      "output_evidence": "OK: 7634 accounts, the three states sum to the denominator and each closes\nIB170-3-AC1 PASS\n(rc=0)",
+      "denominator": "1 of 1 check arm (rc 0); the record denominator is 7634 accounts",
+      "status": "PASS",
+      "expect": "IB170-3-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "IB170-3-AC2",
+      "criterion_verbatim": "IB170-3-AC2: the record carries no id, no long digit run and no identifying key. Expect last line IB170-3-AC2 PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r170/p170_cells.py\" . IB170-3-AC2",
+      "output_evidence": "OK: no id, no long digit run, no identifying key\nIB170-3-AC2 PASS\n(rc=0)",
+      "denominator": "1 of 1 check arm (rc 0)",
+      "status": "PASS",
+      "expect": "IB170-3-AC2 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "IB170-3-AC3",
+      "criterion_verbatim": "IB170-3-AC3: the script file holds no write verb (no write verb anywhere in the file). Expect last line IB170-3-AC3 PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r170/p170_cells.py\" . IB170-3-AC3",
+      "output_evidence": "OK: the script holds no write verb\nIB170-3-AC3 PASS\n(rc=0)",
+      "denominator": "1 of 1 check arm (rc 0); the write-verb list has 12 tokens",
+      "status": "PASS",
+      "expect": "IB170-3-AC3 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control for this count, so none is fabricated.",
+      "expected": "N/A: the order names no mutant arm",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Not run: a second run would re-read the same partitions for one count and was not in the order.",
+      "observed": "one run; the record is that run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A cross-direction check (directory account ids with no custody node)",
+      "reason": "The order asks for the custody population against the directory, not the reverse, so the directory-only ids were not counted."
+    },
+    {
+      "item": "The live builder's retained_capture path for the Tax membership snapshot",
+      "reason": "It writes account-bearing bytes to a local temp file and never removes them, so the worker fetched the same object in memory with the same address resolution. Filed as row IRPT_BCKEND-D2-W345-S3."
+    },
+    {
+      "item": "A separate session log file",
+      "reason": "No report or summary file is written by rule. The record file is the run's committed output and is named as session_log."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W345-S1: The count the cell asserts as 49 measures 1 at the latest custody date: of 7634 custody accounts, 7633 have a node id in the landed directory, 0 differ resolvably and 1 has neither form in it. OBSERVATION, INERT.",
+    "IRPT_BCKEND-D2-W345-S2: The builder's three state lists do not partition accounts the way the TO defines them: a withheld account keeps a built ACCOUNT node, and the refused list mixes raw keys with node ids. The partition used is stated in the record. OBSERVATION, INERT.",
+    "IRPT_BCKEND-D2-W345-S3: The live 49 Financial entry point copies the Tax membership snapshot, which carries client account numbers, to a local system temp file on every build and never removes it. OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~P2."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "mismatch_count.py (read-only count, run at its own path in the worktree)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~345/mismatch_count.py\"",
+      "result": "rc=0; record written: as_of 2026-10-09, directory_present true, denominator 7634; served 7625 (equal 7624, differs_unresolvable 1); withheld 9 (equal 9); refused 0."
+    }
+  ]
+}
