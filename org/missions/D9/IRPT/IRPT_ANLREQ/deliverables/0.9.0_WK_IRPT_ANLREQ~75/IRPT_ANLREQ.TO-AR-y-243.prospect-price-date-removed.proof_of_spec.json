@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-243",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-243.prospect-price-date-removed.md",
+    "group": "OTHER",
+    "vintage_commit": "2d244d2ff0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R22P_Y.md",
+    "vintage_commit": "2d244d2ff0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-243.prospect-price-date-removed.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~75",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~75/r22/PORTAL_PRICE_DATE_CANDIDATE.json",
+      "kind": "doc",
+      "commit_or_etag": "the commit that carries this instance (git log -1 -- this path on wk-IRPT_ANLREQ-75)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the read record of the serving path: the server refuses a SHARES upload without a price date (intake/portfolio.py:208-212); status BLOCKED; no portal candidate was made, so no portal commit exists for this cell",
+      "artifact_covered_by": [
+        "AR243-y-AC1",
+        "AR243-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "the commit that carries this instance (git log -1 -- this path on wk-IRPT_ANLREQ-75)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended: IRPT_ANLREQ-D2-W75-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Y2), S2, S3, S4 (OBSERVATION, INERT)",
+      "artifact_covered_by": [
+        "AR243-y-AC1",
+        "AR243-y-AC2J"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR243-y-AC1",
+      "criterion_verbatim": "the record states what the serving path does when no price date is sent, names a portal commit under src/ only with added tests that fail on the DEV tip without the change and pass with it, and no failing test beyond the known pre-existing ones.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-75/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y243-portal --root C:/dev/wk-irpt-anlreq-75",
+      "output_evidence": "FAIL: no org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~75/r21/PORTAL_PRICE_DATE_CANDIDATE.json / Y243-PORTAL-FAIL rc=1 (run twice, identical). The check reads r21; the record is at r22 (surprise IRPT_ANLREQ-D2-W75-S2). The part of the criterion that the record states what the server does with no price date is met in the r22 record: the server refuses (intake/portfolio.py:208-212). The portal commit clause is NOT met: step 2 found the refusal, so step 3 was not run and no portal commit exists (blocking row IRPT_ANLREQ-D2-W75-S1).",
+      "denominator": "0 of 1 mechanical arm PASS (the y243-portal check, rc=1); 0 of 1 portal commit under src/ with fail-then-pass tests",
+      "status": "FAIL",
+      "status_reason": "step 2 of the cell found the serving path REQUIRES a price date for share quantities (intake/portfolio.py:208-212, test_portfolio.py:144), so the candidate was not made. The check also reads the r21 folder while the face names r22. Both are recorded as rows; the order stays open.",
+      "expect": "Y243-PORTAL-OK"
+    },
+    {
+      "criterion_id": "AR243-y-AC2J",
+      "criterion_verbatim": "the serving path was READ (not assumed) and the field was removed only because it prices without one, the request carries no price date, no trading day is computed in the portal, and nothing was landed or pushed.",
+      "method": "manual_read_with_citation",
+      "invocation": "read: infra/aws/lambda/investor-reporting/intake/portfolio.py:208-212, uploads.py:419-425 and 586-587, tests/test_portfolio.py:144 (at 2d244d2ff0); portal prospect.ts:136 and ProspectComposer.tsx:146, 281, 441-443 (at f6ef1d25); no portal change, no push, no landing",
+      "output_evidence": "the serving path was read: a SHARES unit with no price date is refused (PRICE_DATE_REQUIRED on the CSV lane; SHARES_PRICE_UNAVAILABLE per row on the template lane); no trading-day rule exists in the intake folder; the field was NOT removed (the premise 'prices without one' is false); nothing was committed on the portal, pushed or deployed; the portal worktree C:/dev/wk-portal-75 holds origin/DEV with no commit",
+      "denominator": "2 of 2 serving-path branches read with file and line (CSV lane, template lane); 0 trading-day rules in the intake folder of 1 folder read; 0 portal commits of 0 made",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO; the worker records the output and carries no verdict"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the absent-candidate arm: the y243-portal check run with no PORTAL_PRICE_DATE_CANDIDATE.json at the path it reads must FAIL, so the check cannot pass on the r22 record it does not read",
+      "expected": "rc=1 and Y243-PORTAL-FAIL, no Y243-PORTAL-OK",
+      "observed": "FAIL: no .../0.9.0_WK_IRPT_ANLREQ~75/r21/PORTAL_PRICE_DATE_CANDIDATE.json / Y243-PORTAL-FAIL rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the y243-portal check, output lines compared",
+      "observed": "run 1 and run 2 both printed FAIL line and Y243-PORTAL-FAIL, rc=1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal candidate commit under src/, its before-and-after tests, bun install, bun test and bun run typecheck",
+      "reason": "step 2 found the server REQUIRES a price date for share quantities, so the face's step 3 is not run (the face: STOP before step 3, file a BLOCKING row, write the record with candidate absent)"
+    },
+    {
+      "item": "no live call, upload, deploy, push, apply or invoke was made",
+      "reason": "the order bounds the cell to read-only work; the portal worktree C:/dev/wk-portal-75 was created at origin/DEV with no commit and is left in place"
+    },
+    {
+      "item": "AR243-y-AC2J judgment verdict",
+      "reason": "judgment criterion graded at L9 by 3.0.0_SA_CVO, never by the worker"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W75-S1",
+    "IRPT_ANLREQ-D2-W75-S2",
+    "IRPT_ANLREQ-D2-W75-S3",
+    "IRPT_ANLREQ-D2-W75-S4"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~75/r22/PORTAL_PRICE_DATE_CANDIDATE.json",
+  "compiler_tools": [
+    {
+      "tool": "ar21_checks.py",
+      "invocation": "python C:/dev/wk-irpt-anlreq-75/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y243-portal --root C:/dev/wk-irpt-anlreq-75",
+      "result": "FAIL (no candidate at the path the check reads), Y243-PORTAL-FAIL rc=1, twice"
+    },
+    {
+      "tool": "git fetch origin DEV (portal)",
+      "invocation": "git -C C:/dev/ajb_workspace/portal fetch origin DEV",
+      "result": "rc=0; origin/DEV = f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4"
+    }
+  ]
+}
