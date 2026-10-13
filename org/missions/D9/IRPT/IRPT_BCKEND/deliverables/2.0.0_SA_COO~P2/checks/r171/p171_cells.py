@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IB171-1  IB-pr-496  the 49F builder no longer leaves the Tax membership snapshot in a temp file; raw_keys.json cites the live mint (rows W345-S3, W344-S2)
-    AC1  the worker's new test file passes (3 or more, none failed)
+    AC1  the worker's new test file passes (5 or more, none failed) and exercises the Inflection builder too
     AC2  the issuer's seam probe: a build that raises, a build that returns, and an operator's own env-var file (kept)
     AC3  raw_keys.json: the 49financial account holdings_source cites the live mint (dim_balance, holdings_49f) and no longer names the smartx allocation map; the file is valid JSON
   IB171-2  IB-pr-497  ONE read-only count of leftover Tax-snapshot temp files on the host(s) that run the builder (counts and ages only)
@@ -11,7 +11,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
     AC2  the record carries no path, no name, no id, no long digit run
     AC3  the recorded command is read-only (a find or ls; no rm, cat, tee, redirect, shred, mv, cp)
   IB171-3  IB-pr-498  irpt-holdings rebuilt from one pin (the staged HoldingsSnapshot schema copy re-pinned) and its never-widen packet
-    AC1  the census: built twice identical, 0 signature and 0 attribute mismatches, the changed members equal the repo blobs at the pin, the schema copy among them, uploaded false
+    AC1  the census: built twice identical, 0 signature mismatches, attribute mismatches no more than the live zip's and a subset of its lines, the changed members equal the repo blobs at the pin, the schema copy among them, uploaded false
     AC2  the packet carries Branch A and B, the red list, the live and built sha256, the pair's halves and the rollback
     AC3  the replay arms: a node with account_id validates, a node without validates, an unknown node member is refused; served figures changed 0; the bound counters 0
   IB171-4  IB-pr-499  irpt-directory-search rebuilt from one pin (handler.py) and its never-widen packet
@@ -161,8 +161,17 @@ def release_census(cell_tag, slot, function, must_member):
             fail("%s must be 64-hex" % k)
     if f.get("built_twice_identical") is not True:
         fail("built_twice_identical must be true")
-    if f.get("built_signature_mismatched") != 0 or f.get("built_attribute_mismatched") != 0:
-        fail("the built zip must read 0 signature and 0 attribute mismatches")
+    if f.get("built_signature_mismatched") != 0 or f.get("live_signature_mismatched", 0) != 0:
+        fail("the built zip (and the live zip) must read 0 signature mismatches")
+    # ATTRIBUTE mismatches: the staged _authz pins (served.py @74a62fb passes load_report_owner to enforce.Enforcer, whose staged pin lacks it) are a
+    # PRE-EXISTING pair mismatch identical in the live zip, on a path neither entry reaches (render_ports is never passed). The built zip may
+    # carry NO attribute mismatch the live zip does not carry: built <= live, and every built line is a live line.
+    bm, lm = f.get("built_attribute_mismatched"), f.get("live_attribute_mismatched")
+    if not is_int(bm) or not is_int(lm) or bm > lm:
+        fail("built_attribute_mismatched (%r) must be an integer not above live_attribute_mismatched (%r)" % (bm, lm))
+    bl, ll = f.get("attribute_mismatch_lines_built"), f.get("attribute_mismatch_lines_live")
+    if not isinstance(bl, list) or not isinstance(ll, list) or len(bl) != bm or len(ll) != lm or not set(bl) <= set(ll):
+        fail("attribute_mismatch_lines_built must be a list of bm lines, all present in attribute_mismatch_lines_live (a list of lm lines)")
     cm = f.get("changed_members") or []
     if not cm:
         fail("changed_members is empty")
@@ -202,8 +211,10 @@ def main():
             if not (ROOT / tf).is_file():
                 fail("no %s" % tf)
             rc, p, f, e, out = pytest_counts(tf)
-            if p < 3 or f or e:
-                fail("%s: %d passed, %d failed, %d errors (3 passed and none failed are required)" % (tf, p, f, e))
+            if p < 5 or f or e:
+                fail("%s: %d passed, %d failed, %d errors (5 passed and none failed are required: three for the 49F builder, two for the Inflection builder)" % (tf, p, f, e))
+            if "holdings_inf" not in (ROOT / tf).read_text(encoding="utf-8"):
+                fail("the test file must exercise the Inflection builder (holdings_inf)")
             print("OK: %d tests pass" % p)
         elif arm == "AC2":
             probe_builder()
