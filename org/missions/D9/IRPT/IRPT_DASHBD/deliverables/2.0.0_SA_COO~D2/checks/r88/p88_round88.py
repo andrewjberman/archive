@@ -59,7 +59,8 @@ def main():
         fail("no %s" % REC)
     raw = p.read_bytes().decode("utf-8")
     r = json.loads(raw)
-    if re.search(r"\d{8,}", raw):
+    # a sha256 (64 hex characters) is a hash, not an identifier, and can hold a long digit run by chance: drop 64-hex tokens, then scan
+    if re.search(r"\d{8,}", re.sub(r"\b[0-9a-f]{64}\b", "", raw)):
         fail("the record holds a run of 8 or more digits (counts only; no account id)")
     if r.get("tolerance_pp") != 0.35:
         fail("tolerance_pp %r" % r.get("tolerance_pp"))
