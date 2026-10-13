@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-249",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-249.swap-from-search-results.md",
+    "group": "OTHER",
+    "vintage_commit": "c53686ba6d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R22C_Y.md",
+    "vintage_commit": "c53686ba6d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-249.swap-from-search-results.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~82",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py",
+      "kind": "script",
+      "commit_or_etag": "cbf27530bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code on the worker branch only; not built, uploaded, applied, invoked or released",
+      "artifact_covered_by": ["AR249-y-AC1", "AR249-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/resolution_kimi.py",
+      "kind": "script",
+      "commit_or_etag": "cbf27530bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code on the worker branch only; not built, uploaded, applied, invoked or released",
+      "artifact_covered_by": ["AR249-y-AC1", "AR249-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_resolution_kimi.py",
+      "kind": "test",
+      "commit_or_etag": "cbf27530bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file on the worker branch only; the two swap fixtures moved to the search capability shape",
+      "artifact_covered_by": ["AR249-y-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_swap_from_search.py",
+      "kind": "test",
+      "commit_or_etag": "cbf27530bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "18 offline tests on the worker branch only; 18 passed",
+      "artifact_covered_by": ["AR249-y-AC1", "AR249-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_kimi_search_port.py",
+      "kind": "test",
+      "commit_or_etag": "cbf27530bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 offline tests on the worker branch only; 17 passed",
+      "artifact_covered_by": ["AR249-y-AC1", "AR249-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~82/r22/SWAP_FROM_SEARCH.json",
+      "kind": "doc",
+      "commit_or_etag": "cbf27530bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read record of the transport and advisory change, with before_arm, not_read and the file list",
+      "artifact_covered_by": ["AR249-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR249-y-AC1",
+      "criterion_verbatim": "the record names the transport and the advisory change, the new test files pass (at least 10 and 5 tests), the intake folder passes at 365 or more, and the old `request_fields` capability shape is refused.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-82/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y249-swap --root C:/dev/wk-irpt-anlreq-82",
+      "output_evidence": "tests/test_swap_from_search.py: 18 passed, 0 failed (rc=0)\ntests/test_kimi_search_port.py: 17 passed, 0 failed (rc=0)\nintake tests: 388 passed, 0 failed (rc=0)\nY249-SWAP-OK",
+      "denominator": "test_swap_from_search.py 18 passed of 18 against a floor of 10 (includes 6 refused-capability cases, one holding request_fields); test_kimi_search_port.py 17 passed of 17 against a floor of 5; intake folder 388 passed, 0 failed, 1 skipped, of 389 collected, against a floor of 365 (HEAD baseline 370 passed, 1 skipped)",
+      "expect": "Y249-SWAP-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR249-y-AC2J",
+      "criterion_verbatim": "the chat call carries no `tools` or `tool_choice`, only a ticker that appears in a given search result and cites a given url survives, the unsupported are dropped before any provider verification, the key is never printed or logged, and no live call was made.",
+      "method": "manual_read_with_citation",
+      "invocation": "no worker execution: judgment graded at L9 by 3.0.0_SA_CVO. Worker's cited evidence: intake/resolution_kimi.py _search_ready (lines 81-88), _ground (lines 110-130), the chat payload (lines 270-271); ycharts/generate/kimi_port.py kimi_search (lines 62-102); the test files named in artifacts_produced",
+      "output_evidence": "payload keys are exactly model, temperature, max_tokens, messages: no tools or tool_choice (test_the_chat_payload_has_no_tools_and_carries_the_numbered_results, passed); a candidate named in no result is dropped (test_a_candidate_named_in_no_result_is_dropped, passed); an injection in a snippet leaves the shape and drops the unsupported candidate (test_an_injection_in_a_snippet_does_not_change_the_output_shape, passed); the key is absent from exception text (test_an_http_error_names_the_status_and_never_the_body_or_the_key, 8 cases, passed); no live call was made (SWAP_FROM_SEARCH.json not_read)",
+      "denominator": "N/A -- judgment criterion graded at L9, not by the worker; 4 properties cited, 0 graded by the worker; substitute oracle is 3 named tests of 35 added, plus 8 key-leak cases",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO, never by the worker. Substitute oracle: the offline tests named above and the control mutant in controls.mutant; no behaviour is claimed as met by the worker."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Replaced the swap capability key-set equality in _search_ready (intake/resolution_kimi.py) with a superset test, so a capability carrying extra keys such as request_fields would pass the gate. Applied in place on the worktree, backed up byte-for-byte to .scratch/resolution_kimi.backup.py, run through y249-swap, then restored and compared with cmp (identical).",
+      "expected": "y249-swap prints FAIL on tests/test_swap_from_search.py and on the intake floor, then Y249-SWAP-FAIL, rc=1",
+      "observed": "tests/test_swap_from_search.py: 17 passed, 1 failed (rc=1); intake tests: 387 passed, 1 failed (rc=1); FAIL: tests/test_swap_from_search.py must pass with at least 10 tests; FAIL: the intake folder must pass with at least 365; Y249-SWAP-FAIL; check rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of y249-swap at the worktree root, unmutated, output compared line by line",
+      "observed": "run 1 and run 2 identical: 'tests/test_swap_from_search.py: 18 passed, 0 failed (rc=0)' / 'tests/test_kimi_search_port.py: 17 passed, 0 failed (rc=0)' / 'intake tests: 388 passed, 0 failed (rc=0)' / 'Y249-SWAP-OK', check rc=0 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live Kimi search endpoint and the live chat model",
+      "reason": "no live call permitted by this TO; the QA proof set (TIMXX and four known funds) belongs to AR-y-250 and was not run here"
+    },
+    {
+      "item": "a QA receipt: qa_receipt_sha256 is not supplied by this worker",
+      "reason": "the receipt comes from the AR-y-250 live QA run; the gate checks only its 64-hex shape"
+    },
+    {
+      "item": "the whole ycharts/generate test folder run and its custody and fitz baseline comparison",
+      "reason": "a bounded run did not finish on either tree (rc 124); collect-only is identical (592 collected, rc 0); recorded as IRPT_ANLREQ-D2-W82-S2"
+    },
+    {
+      "item": "the resident wiring, the signed release pair and the caller",
+      "reason": "AR-y-251 scope, outside this grant"
+    },
+    {
+      "item": "the Secrets Manager secret astn/kimi/api-key",
+      "reason": "named only; never read; no value handled"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W82-S1: the before-arm premise: the new AR-y-249 test files import at HEAD and fail at construction, they do not fail to import",
+    "IRPT_ANLREQ-D2-W82-S2: the ycharts/generate baseline cannot be re-measured inside the 120 second bound on either tree",
+    "IRPT_ANLREQ-D2-W82-S3: the cell is silent on search egress telemetry and the swap drop counts; the worker added both"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~82/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "ar21_checks.py y249-swap",
+      "invocation": "python C:/dev/wk-irpt-anlreq-82/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y249-swap --root C:/dev/wk-irpt-anlreq-82",
+      "result": "Y249-SWAP-OK, rc 0 (18 + 17 + 388 passed)"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <file> for each of the five .py files changed or added",
+      "result": "rc 0 on all five; py_compile, ds-precommit and ruff clean"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0; file OK, all new rows carry their fields"
+    },
+    {
+      "tool": "pytest (intake and ycharts/generate, per file)",
+      "invocation": "timeout 120 python -m pytest <file> -q -p no:cacheprovider",
+      "result": "test_resolution_kimi.py 48 passed; test_y4_check_gate.py 16 passed; test_swap_from_search.py 18 passed; test_kimi_search_port.py 17 passed"
+    }
+  ]
+}
