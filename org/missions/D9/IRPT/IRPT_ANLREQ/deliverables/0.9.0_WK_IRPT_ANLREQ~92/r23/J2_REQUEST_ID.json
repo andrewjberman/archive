@@ -1,0 +1,189 @@
+{
+  "cell": "AR-y-271",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-271",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~92",
+  "worktree_head": "4b1e07dabc",
+  "portal_read": {
+    "repo": "C:/dev/ajb_workspace/portal",
+    "ref": "origin/DEV 4d601023 (read by git show only; the worktree's portal submodule is an empty gitlink, see row IRPT_ANLREQ-D2-W92-S1)",
+    "file": "src/pages/TicketCenter/analysisRequest.ts"
+  },
+  "trace": {
+    "hops": [
+      {
+        "hop": 1,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:304-324 (portal, DEV)",
+        "what": "fileAndRequestAnalysis: upload, then createTicket, then the analysis POST with ticket_id, then recordTicketReport",
+        "who_calls": "src/pages/TicketCenter/TicketCenter.tsx:307-310 (the page's file button; deps tickets = createTicket, recordTicketReport)",
+        "principal": "the browser session of the signed-in user (a firm user for a partner-firm advisor; no service token)",
+        "writes": "none itself; it sequences the four calls and returns each step's outcome"
+      },
+      {
+        "hop": 2,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:156 (uploadAnalysisInput, RESOLVING re-post at :159-163)",
+        "what": "the IRPT upload door receives the file before any ticket exists",
+        "who_calls": "fileAnalysisRequest, via deps.ir",
+        "principal": "the browser session (the door's own gate was not read)",
+        "writes": "an upload with an input_id (the door's store; retention after a later refusal NOT read)"
+      },
+      {
+        "hop": 3,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:183-189 and src/api/endpoints/tickets.ts:142-143",
+        "what": "createTicket posts ticket_type analysis_request, answers, attachment {upload_id, input_id} to POST /api/scoped/tickets (CREATE)",
+        "who_calls": "fileAnalysisRequest, for every filer (no route choice by firm)",
+        "principal": "the browser session",
+        "writes": "nothing if refused"
+      },
+      {
+        "hop": 4,
+        "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:1725-1726 (router) then :1145-1150 (create_ticket)",
+        "what": "authorize CREATE against MATRIX :168 (SVC_TICKET_FORM, SVC_ANALYST_INTAKE, SVC_COMMENTARY, INTERNAL); a client-human is refused 403 with 'forbidden: CREATE is not permitted to principal class client-human'",
+        "who_calls": "the router, for POST /api/scoped/tickets",
+        "principal": "client-human (principal_class :312-330: a firmId that is not INTERNAL_FIRM_ID)",
+        "writes": "NOTHING: the ticket is never created for a partner-firm advisor. FIRST HOP WHERE THE ID CANNOT REACH A PARTNER-FIRM TICKET."
+      },
+      {
+        "hop": 5,
+        "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:1193-1201 (for contrast: an INTERNAL CREATE)",
+        "what": "_new_item then put_item with created_by = the actor's email and the answers and attachment stored",
+        "who_calls": "the internal filer's session",
+        "principal": "internal-human",
+        "writes": "the ticket row (events[0] created; attachment reference only)"
+      },
+      {
+        "hop": 6,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:255-271 (analysisBody, ticket_id at :269) and :321-334 (sendAnalysisStep)",
+        "what": "POST of the analysis body carrying ticket_id to the investor-reporting client (path /api/scoped/investor-reporting/analysis per the order; the route's own authorizer was NOT read)",
+        "who_calls": "fileAnalysisRequest's caller, fileAndRequestAnalysis at :308 and :315",
+        "principal": "the browser session",
+        "writes": "an accepted analysis record in the investor-reporting store, with the issued request_id returned to the page"
+      },
+      {
+        "hop": 7,
+        "file_line": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py:16-18 and :78-80; acceptance.py:136-137; resident_worker.py:164-171 and :191-200; test_ready_signal.py:89",
+        "what": "the receiver validates ticket_id as a TCK-shaped string and stores it on the accepted record; it never calls the ticket API (submission.py:17 is a comment only). The READY message analysis_ready carries tenant and request_id only (the test asserts ticket_id is not in the body at :89)",
+        "who_calls": "the investor-reporting request path and the resident worker",
+        "principal": "the investor-reporting service principals (not read in depth)",
+        "writes": "the accepted record's ticket_id; no write to the ticket service"
+      },
+      {
+        "hop": 8,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:340-350 (recordStep) and src/api/endpoints/tickets.ts:165-169",
+        "what": "recordTicketReport posts {request_id, revision} to POST /api/scoped/tickets/{ticketId}/report",
+        "who_calls": "fileAndRequestAnalysis at :316, only when the analysis step answered ok",
+        "principal": "the browser session",
+        "writes": "nothing if refused; the page shows 'Record: FAILED' and the ticket stays filed (only if the ticket existed)"
+      },
+      {
+        "hop": 9,
+        "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:1725-1726 (router), :1381-1392 (report_ticket authorize REPORT; MATRIX :174 INTERNAL only; CLIENT refused 403 at :1391-1392)",
+        "what": "the request id write is refused for a client-human even if the ticket existed",
+        "who_calls": "the router, for POST .../report",
+        "principal": "client-human",
+        "writes": "NOTHING"
+      },
+      {
+        "hop": 10,
+        "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:1399-1417 and :1434-1449 (for the internal path)",
+        "what": "assignee (in_progress, attachment) or creator (non-completed analysis_request, attachment, no report_ref) may write report_ref = {request_id, revision, recorded_by, recorded_at}, write-once for the creator",
+        "who_calls": "the internal assignee or creator",
+        "principal": "internal-human",
+        "writes": "top-level report_ref on the ticket, with an events row report_recorded"
+      },
+      {
+        "hop": 11,
+        "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:1462-1534 (package_ticket) and :1468-1470 (principal check)",
+        "what": "PACKAGE admits only the service subject svc-irpt-packager (package_principal at :120); it writes package = {report_ref, pdf_ref, original_ref, commentary_ref, attached_at, attached_by}, not the top-level report_ref",
+        "who_calls": "the packager (AR-y-272 lane, outside this grant)",
+        "principal": "svc-irpt-packager (service subject, userType service)",
+        "writes": "package.* on the ticket (:1512, :1521-1523)"
+      },
+      {
+        "hop": 12,
+        "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:1537-1595 (commentary_draft_ticket; read at :1565-1569 and :1587 only, the whole body was not read)",
+        "what": "the drafter's gate: the ticket's top-level report_ref.request_id must equal the body's request_id",
+        "who_calls": "the commentary drafter",
+        "principal": "svc-commentary (service subject)",
+        "writes": "draft_commentary on the ticket"
+      }
+    ],
+    "where_the_id_is_lost": {
+      "partner_firm_human": {
+        "first_hop": "lambda_function.py:1148-1150 (create_ticket: authorize CREATE, MATRIX :168 excludes client-human). The ticket does not exist, so no request id can be recorded on it. Hop 4 of the trace.",
+        "second_hop_if_create_were_admitted": "lambda_function.py:1391-1392 (report_ticket: authorize REPORT, MATRIX :174 INTERNAL only). The id is refused at the write, after the analysis POST has already issued it.",
+        "read_or_run": "READ from the code at HEAD 4b1e07dabc and at origin/DEV 4d601023; the refusal is pinned by test_authz_matrix.py:218-220 and test_analysis_request.py:170-171. Not RUN against a live stage; no live call was made.",
+        "order_premise_compared": "The order places the loss at REPORT for a partner-firm human (premise, route table :17). The read shows the earlier loss at CREATE. See row IRPT_ANLREQ-D2-W92-S2."
+      },
+      "internal_human_for_contrast": "The internal path writes the id at hop 10 (lambda_function.py:1434-1449) when the creator or assignee calls REPORT; the id reaches the ticket there."
+    },
+    "principals": {
+      "browser_session_user": "the authorizer context of the signed-in portal user (_actor :300-309): email, firmId, userType, allowedFirmIds. firmId INTERNAL_FIRM_ID gives internal-human; another firmId gives client-human (principal_class :312-330).",
+      "service_subjects": "svc-ticket-form (CREATE only), svc-analyst-intake (CREATE and LIST), svc-commentary (CREATE of analysis_request, COMMENTARY_DRAFT), svc-irpt-packager (PACKAGE only). Each is matched by sub and userType service (:317-324).",
+      "investor_reporting_receiver": "the browser session at the analysis POST (hop 6); the receiver holds ticket_id as a string and calls no ticket route (hop 7)."
+    }
+  },
+  "options": [
+    {
+      "id": "i",
+      "path": "The SUBMIT-FORM path accepts and stores the request id from the same filer.",
+      "files_to_change": "infra/aws/lambda/ticket_center/lambda_function.py (submit_form :1102-1142, SUBMIT_ALLOWED_FIELDS :182); portal client",
+      "who_is_newly_admitted": "a client-human (the filer) to write report_ref on a ticket they filed, after the filing",
+      "judgment": "REJECTED. A single SUBMIT-FORM call cannot carry it: the id is issued by the analysis POST, which needs the ticket_id, so the id arrives after the filing write. A second filer write is a new client write on the ticket (a widening). SUBMIT_ALLOWED_FIELDS and test_analysis_request.py:131-133 refuse answers and attachment on this path today.",
+      "test_that_would_pin_it": "a write-once test for report_ref by the ticket's own filer; not written"
+    },
+    {
+      "id": "ii",
+      "path": "A NAMED service records the request id after the analysis is accepted. Candidate service subjects: svc-irpt-packager (PACKAGE, runs after the report is finished) or svc-commentary (CREATE with report_request_id at :644-649; COMMENTARY_DRAFT).",
+      "files_to_change": "infra/aws/lambda/ticket_center/lambda_function.py (in grant: a write-once top-level report_ref.request_id by the named subject, firm-bound, on an analysis_request with an attachment); the CALLER in the packager or the investor-reporting receiver (OUTSIDE this grant)",
+      "who_is_newly_admitted": "no human class. The named service subject (svc-irpt-packager, or a new write by it) gains one write: report_ref",
+      "judgment": "CHOSEN, CONDITIONALLY. It is the only candidate that admits no human newly. Its in-grant part is the ticket-service write; its caller is outside the grant, so the cell stops here (built absent). It also depends on (a) the field split in row IRPT_ANLREQ-D2-W92-S4 and (b) a CTO ruling on CREATE (row IRPT_ANLREQ-D2-W92-S2), without which no partner-firm ticket exists to receive the write. Timing note: via PACKAGE the id reaches the ticket only at packaging, not at acceptance.",
+      "test_that_would_pin_it": "(a) the named principal records the id once; (b) a second write is refused (write-once condition, as :1441); (c) a different filer or ticket is refused (the write is bound to the ticket's requester firm :1504 and the ticket_id); (d) a partner-firm advisor's filing ends with the id on its ticket, read back; (e) the existing ticket folder passes (206 passed, 43 subtests at HEAD)"
+    },
+    {
+      "id": "iii",
+      "path": "REPORT is opened to the ticket's requester.",
+      "files_to_change": "infra/aws/lambda/ticket_center/lambda_function.py (MATRIX :174 and report_ticket :1381-1417)",
+      "who_is_newly_admitted": "the client-human requester, to write report_ref on their own analysis_request",
+      "judgment": "REJECTED. It widens a human's reach to a write the service withholds (the rule in the order: REJECT unless it is the only way). Other paths exist that admit no human."
+    },
+    {
+      "id": "iv",
+      "path": "CREATE admits the client-human (the only route by which a partner-firm analysis ticket with answers and attachment can exist under the current design).",
+      "files_to_change": "infra/aws/lambda/ticket_center/lambda_function.py (MATRIX :168, create_ticket :1148-1150); the matrix tests test_authz_matrix.py:218-220 and test_analysis_request.py:170-171 would have to change",
+      "who_is_newly_admitted": "the client-human, to create an analysis_request for their own firm (_create_firm_allowed :352-357 bounds the firm)",
+      "judgment": "NOT BUILT. It is an authorization change pinned by D7F-5 and the test file, and it is a CTO ruling, not a worker's choice. Filed as row IRPT_ANLREQ-D2-W92-S2 (ARMED, disarm_owner 1.0.0_SA_CTO)."
+    }
+  ],
+  "chosen": {
+    "path": "ii",
+    "reason": "Option ii is the only candidate that admits no human newly, as the order requires. Option i needs a second client write. Option iii widens a human directly. Option iv is a CTO ruling. Option ii's in-grant part would be a service-subject write in the ticket service, but its caller sits in the packager or the receiver, outside this grant; the cell therefore stops with built absent, per the order.",
+    "blocked_by": [
+      "IRPT_ANLREQ-D2-W92-S2: no partner-firm analysis ticket can be created while CREATE refuses client-human (CTO ruling)",
+      "IRPT_ANLREQ-D2-W92-S4: the packager writes package.report_ref; the drafter reads report_ref.request_id (field split)",
+      "the caller of the named service is outside the grant: infra/aws/lambda/investor-reporting packager or receiver (lane AR-y-272, 0.9.0_WK_IRPT_ANLREQ~93)"
+    ]
+  },
+  "authorization_change": "No authorization is changed by this record. Built is absent: no route, matrix row, permission or test in the worktree changed. The chosen path, if built later, would newly admit NO HUMAN. It would let the existing service subject svc-irpt-packager (matched by email and userType service, the package_principal check at lambda_function.py:1468-1470) set the top-level report_ref to {request_id, revision, recorded_by, recorded_at} on an analysis_request ticket that carries an attachment and has no report_ref yet, once (a write-once condition), with the body firm bound to the ticket's requester firm (:1504) and to PACKAGE_ALLOWED_FIRMS (:1491). The only key written is report_ref. Nothing else is newly admitted: CREATE, SUBMIT-FORM, REPORT and every other matrix row stay as they are. Rollback: revert the ticket-service commit and remove the caller; a report_ref already written has no clearing route in the current code, so its removal would be a ruled corrective write. This paragraph does NOT cover the CREATE refusal of client-human (lambda_function.py:168, :1148-1150): changing that is option iv, a CTO ruling (row IRPT_ANLREQ-D2-W92-S2).",
+  "tests": {
+    "added": 0,
+    "passed": 206,
+    "failed": 0,
+    "subtests_passed": 43,
+    "folders": "infra/aws/lambda/ticket_center/tests (whole folder at HEAD 4b1e07dabc, python -m pytest tests -q -p no:cacheprovider, rc 0). Baseline only: no test was added or edited. The new tests (a) to (d) of option ii were NOT written because nothing was built."
+  },
+  "before_arm": {
+    "status": "NOT-APPLICABLE: nothing built",
+    "failed": 0
+  },
+  "claim": "Read-only trace of the J2 hop at HEAD 4b1e07dabc (worktree) and origin/DEV 4d601023 (portal, by git show). The partner-firm request id is first lost at CREATE (lambda_function.py:1148-1150), not at REPORT as the order's premise states; a REPORT refusal is also present at :1391-1392. Of the four options, option ii is chosen conditionally; no code was changed; the cell stops with built absent and two BLOCKING rows (S1 portal path absent; S2 CREATE refusal, CTO ruling). Nothing was released, deployed, pushed or called.",
+  "not_read": [
+    "the portal worktree's pinned submodule (53506d49...) and the DEV tip's other files; analysisRequest.ts at origin/DEV was read at lines 1-400 only (lines 401-514 not read), and tickets.ts at lines 142-143 and 165-169 only",
+    "the investor-reporting /analysis route's own authorizer and principal (the receiver's admission gate)",
+    "the upload door's retention of an input after a later refusal (hop 2)",
+    "the deployed (live) ticket Lambda bytes at DEV or PROD; only the worktree file at HEAD 4b1e07dabc",
+    "lambda_function.py :1270-1378 (claim and complete bodies) and :1597-1640 (commentary_sent); commentary_draft_ticket :1537-1595 read by its gate lines only",
+    "the packager Lambda and resident_worker.py beyond :164-200 (outside the grant)",
+    "the portal TicketCenter page gating for firm users beyond TicketCenter.tsx :81-105 and :183-185",
+    "the 1.0.0_SA_CTO ruling on who may create a partner-firm analysis request (not in the repository as read)"
+  ]
+}
