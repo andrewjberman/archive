@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-490",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-490.inflection-live-read-claim-and-counts.md",
+    "group": "OTHER",
+    "vintage_commit": "2c9c3afcf1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2c9c3afcf1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-490.inflection-live-read-claim-and-counts.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~IB2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB169-3_inflection_live_read.json",
+      "kind": "doc",
+      "commit_or_etag": "84f7bce350",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The live-read record: 2 references, 4 invokes (2 refused before the bucket-policy fix, 2 ok after it), path_class computed, 2 retained revisions persisted, two windows (YTD and 1Y) each with the observed claim, the predicted claim, both counts as integers and the figure sha256, plus the log counts and not_established. Counts, hashes and class words only; no account id, reference, figure or client name.",
+      "artifact_covered_by": ["IB169-3-AC1", "IB169-3-AC3"]
+    },
+    {
+      "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:irpt-performance-adapter",
+      "kind": "aws_resource",
+      "commit_or_etag": "abep4h7RngMS9JomQUdkcOT3EZ+W953OdxeK0HkdzFo=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "READ ONLY in this order, no change: the live CodeSha256 read abep4h7R... before the first invoke after the GO (2026-10-13T01:31:00Z), the same digest the IB-pr-487 release promoted at 2026-10-12T22:35:06Z. Two direct invokes after the bucket-policy fix answered StatusCode 200 with no FunctionError and state PARTIAL / PERFORMANCE_PARTIAL; the log carries two irpt_retained_phases lines with path fresh at 01:31:13Z and 01:32:37Z.",
+      "artifact_covered_by": ["IB169-3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB169-3-AC1",
+      "criterion_verbatim": "IB169-3-AC1: the record: 1 to 4 invokes on one or two references, every window's observed claim equals its predicted claim, both counts present as integers, a figure sha256, path_class computed.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-3-AC1",
+      "expect": "IB169-3-AC1 PASS",
+      "output_evidence": "OK: 2 window(s), claim equals the prediction, both counts present, figure hashes recorded | IB169-3-AC1 PASS | rc=0",
+      "denominator": "2 of 2 windows: observed claim measured equals predicted measured in 2 of 2; days_without_base and days_with_return_left_out present as integers in 2 of 2 (0 and 0); the predicted figure hash equals the observed hash in 2 of 2. 4 invokes on 2 references, 2 of them ok.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB169-3-AC2",
+      "criterion_verbatim": "IB169-3-AC2: a live AWS read of the function's log since the apply: at least one irpt_retained_phases line that is not refused:*, and 0 TypeError.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-3-AC2",
+      "expect": "IB169-3-AC2 PASS",
+      "output_evidence": "OK: 2 computed line(s) of 27 since the apply, 0 TypeError | IB169-3-AC2 PASS | rc=0",
+      "denominator": "2 computed irpt_retained_phases lines of 27 since 2026-10-12T22:35:06Z, 0 TypeError lines. The check counts events from the JSON.",
+      "status_reason": "Graded by the AMENDED AC2 check (issuer commit 569e06a9f3 on box/dell2). My first run, before that commit, read FAIL: 'TypeError lines since the apply: 0 0 0 0', because the check compared a paginated --query length(events) (one count per page) with a literal 0. I measured the true count client-side as 0 TypeError of 202 log events, filed it as row IRPT_BCKEND-D2-S120, and left the check, the record and the status untouched; the issuer ruled it their defect and fixed the check. No threshold or record number was edited.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB169-3-AC3",
+      "criterion_verbatim": "IB169-3-AC3: persisted_retained_revisions an integer 0 to 2, no long digit run, no reference, no client key.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-3-AC3",
+      "expect": "IB169-3-AC3 PASS",
+      "output_evidence": "OK: bounded persists, no id, no reference, no client key | IB169-3-AC3 PASS | rc=0",
+      "denominator": "persisted_retained_revisions = 2 of a ceiling of 2, equal to the 2 irpt_retained_phases lines with path fresh and persist_ms in the log; 0 of the record's strings carry a ten-digit run, a sel_ reference or a client key.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A mutant root outside every worktree holding a copy of the record only, which is all AC1 and AC3 read. The BASELINE was run in that root FIRST and read PASS on both. Four mutants: (1) window YTD claim_observed measured -> inferred; (2) window 1Y days_without_base -> null; (3) persisted_retained_revisions 2 -> 3; (4) a sel_ reference string planted in a window row.",
+      "expected": "AC1 FAIL on (1) and (2); AC3 FAIL on (3) and (4); both PASS again once restored",
+      "observed": "(1) FAIL: window YTD observed 'inferred' != predicted 'measured' | IB169-3-AC1 FAIL. (2) FAIL: window 1Y days_without_base must be an integer | IB169-3-AC1 FAIL. (3) FAIL: persisted_retained_revisions must be an integer 0..2 | IB169-3-AC3 FAIL. (4) FAIL: the reference must not be copied into the record | IB169-3-AC3 FAIL. The record was then restored and both read PASS again. Not run: a mutant for AC2, which reads the live log and cannot be mutated without altering the function's log.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The prediction was produced by the reader at the build's pin (holdings_gold.py blob equal at HEAD and at 05219b8444) run over the same S3 holdings gold as the deployed function read, for the account and window of each answer, and compared with the answer field by field: claim, both counts and the figure hash.",
+      "observed": "YTD (191 days observed, 191 linked, 0 excluded) and 1Y (249 observed, 249 linked, 0 excluded): predicted equals observed on claim, counts and figure hash in 2 of 2.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The left-out branch of the changed rule on a live answer (claim inferred, days_with_return_left_out above 0)",
+      "reason": "The one account the answer computed for had 0 excluded days in both windows, so the rule predicts measured and the branch that moves the claim was not reached; recorded in not_established. The order asks for the observed claim to equal its prediction, and a measured prediction is valid by the order's step 4."
+    },
+    {
+      "item": "The second reference after the fix",
+      "reason": "The order allows at most 4 invokes and stops at the first ok answer plus one more window; the second reference was refused with AccessDenied before the bucket-policy fix and was not re-invoked."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-S116",
+    "IRPT_BCKEND-D2-S118",
+    "IRPT_BCKEND-D2-S120"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p169_cells.py",
+      "invocation": "the three criteria at the repo root, and AC1 and AC3 in the mutant root (baseline and four mutants)",
+      "result": "PASS -- 3 of 3 at the root under the amended check; baseline PASS then 4 of 4 mutants FAIL as expected"
+    },
+    {
+      "tool": "aws lambda invoke",
+      "invocation": "direct invokes of the deployed function, Opal internal principal, the function's own role, at most 4",
+      "result": "PASS -- 4 invokes (2 refused, 2 ok), 2 retained revisions persisted, no deploy, grant or write other than the named persists"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author ... -F <msgfile>, message files written by the Write tool outside the worktree",
+      "result": "PASS"
+    },
+    {
+      "tool": "comp rail",
+      "invocation": "one raw S3 prefix listing attempted and one raw AWS read",
+      "result": "DENIED -- the listing was dropped as outside the amendment's scope and the address was resolved offline with the naming builder instead"
+    }
+  ]
+}
