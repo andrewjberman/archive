@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-201",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a1d871ec33"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "a1d871ec33",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-201.cottonwood-return-gold-manifest-rewrite-and-resume-packet.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~166",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~166",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~166/COTTONWOOD_RESUME_PACKET.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Packet only. Nothing written to AWS, deployed, pushed or scheduled. sha256 07c04344643b7b29946e91c350cb5d3c79b7d686d20613379e44e18cc1cb6c61 (the record's packet_sha256, checked by the round-104 checker)."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~166/COTTONWOOD_RESUME_PACKET.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record: manifest_rewrite_2026_10_11, resume_packet, writes_in_this_cell false, reads with zero writes and zero secret reads. Nothing deployed."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended as bytes: IRPT_DASHBD-D2-W166-S1 to S4. The prior content is unchanged (prefix byte-equal)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB104-5-AC1",
+      "criterion_verbatim": "DB104-5-AC1 -- the manifest rewrite states whether the writer is established, the evidence in words, the object versions counted, and the writer or exactly NOT_ESTABLISHED; the resume packet's backfill runs from 2026-06-23 to a date on or after 2026-10-12 with a trading-day count the checker recomputes from lib/trading_calendar.py; the input's availability is an ISO date and input_covers_backfill agrees with it, with the gap and the block named when it does not cover; the schedule is an EventBridge rule with its name source, owner and cron; the keys written lie under irpt/cottonwood/gold/account_return_daily/ in opal-data-cottonwood; the rollback is stated, no other key moves, nothing is written in this cell; the packet file exists, is hashed, says never-widen and carries the eight numbered sections; no write, push or deploy.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r104/p104_round104.py\" . DB104-5-AC1",
+      "output_evidence": "OK: manifest rewrite writer 0.7.0_AE_CloudOps~CB2 (ADVI_COTBKF TO-CB-al-2; resume packet 2026-06-23 to 2026-10-12 (78 trading days), input covers it: false, schedule irpt-cot-reporting-gold-daily / DB104-5-AC1 PASS (rc=0)",
+      "denominator": "1 of 1 criterion PASS (rc 0); 3 of 3 identical runs; 78 trading days recomputed; 8 of 8 packet sections present",
+      "status": "PASS",
+      "status_reason": "PASS as written by the official checker on the record and packet in this folder. The first run FAILED on the digit rule (an 8-digit run in two fields carrying ledger ids); the two fields were corrected in words and the checker then passed. The checker verifies the record and the packet's hash, not the live state of AWS, which this order read and did not write.",
+      "expect": "DB104-5-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The first record, before correction, carried ledger identifiers with an 8-digit run in its writer and evidence fields; the checker's digit rule was run on it",
+      "expected": "DB104-5-AC1 FAIL on the digit rule",
+      "observed": "FAIL: the record holds a run of 8 or more digits at /manifest_rewrite_2026_10_11/writer and /manifest_rewrite_2026_10_11/evidence",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run three times from the worktree root with the same arguments, after the correction",
+      "observed": "three identical outputs, rc 0 each; last line DB104-5-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, copy, delete or lifecycle change; any DynamoDB, Lambda, EventBridge, Terraform or IAM act; any invoke; any run of the producer or the adapter",
+      "reason": "The order is a read and a packet. Nothing was run or written, and the schedule was not created."
+    },
+    {
+      "item": "The package equality test of the fallback calendar (lib/tests/test_nyse_fallback_equals_package.py)",
+      "reason": "Not run in this cell. The packet records the fallback's use for the range as a condition (packet section 7, condition 4) for the CTO."
+    },
+    {
+      "item": "The reader set of the table",
+      "reason": "comp-pipescript refused the producer's script id in all four trees, so the reader set is not established by that tool; the ledger's no-reader statement is recorded, not graded here (packet section 8)."
+    },
+    {
+      "item": "The caller of the 2026-10-11 PutObject calls",
+      "reason": "No CloudTrail trail records S3 data events for opal-data-cottonwood; attribution rests on the ledger and the S3 instants, and the packet says so (section 4b)."
+    },
+    {
+      "item": "A mutant control on the checker",
+      "reason": "The checker resolves its record and packet relative to the root, so a mutant needs a second tree; the digit-rule fire and the three determinism runs stand as the controls."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W166-S1: OBSERVATION, INERT: the Cottonwood manifests were created by the TO-CB-al-2 mint (07:01:01Z to 07:17:06Z on 2026-10-11), not rewritten; the writer is 0.7.0_AE_CloudOps~CB2, established on the ledger and the S3 instants.",
+    "IRPT_DASHBD-D2-W166-S2: OBSERVATION, INERT: the face's rollback (deletion of new partitions) conflicts with the CB-al-2 ledger, which says rollback is not a delete and a delete is Andrew's act; the packet names the deletion and performs none.",
+    "IRPT_DASHBD-D2-W166-S3: OBSERVATION, INERT: the face labels the manifest times 07:03 to 07:17 local; the S3 LastModified values are UTC.",
+    "IRPT_DASHBD-D2-W166-S4: OBSERVATION, INERT: the mint's apply path also lands the blank-reasons sidecar and the method row, which the resume packet's keys_written does not name; the packet makes their exclusion a condition."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p104_round104.py (DB104-5-AC1)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r104/p104_round104.py\" . DB104-5-AC1",
+      "result": "DB104-5-AC1 PASS, rc 0, on COTTONWOOD_RESUME_PACKET.json and its .md (sha256 matched)"
+    },
+    {
+      "tool": "lib/trading_calendar.py (trading_days_between, calendar_source)",
+      "invocation": "python -c with sys.path lib: trading_days_between('2026-06-23','2026-10-12')",
+      "result": "78 trading days inclusive; source NYSE/hardcoded-fallback-2010-2027 (package absent, announced)"
+    },
+    {
+      "tool": "lib/opal_naming.py (address, name, lookup)",
+      "invocation": "python -c with sys.path lib: address() for the silver inputs and the gold partitions; name('irpt','cottonwood','reporting-gold','daily')",
+      "result": "silver s3://opal-data-assets/commonwealth/cottonwood/silver/*/date=2026-06-23/part-00000.parquet; gold s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=<D>/; rule irpt-cot-reporting-gold-daily"
+    },
+    {
+      "tool": "aws (.tools/aws), read-only",
+      "invocation": "s3api list-objects-v2 (delimiter /), list-object-versions, get-bucket-versioning, get-bucket-lifecycle-configuration, s3 cp to stdout of two manifests (counts and key names only); cloudtrail describe-trails, get-event-selectors, lookup-events; logs filter-log-events; lambda get-function-configuration; scheduler get-schedule",
+      "result": "3,325 gold partitions (2013-04-03 to 2026-06-22); 1 version per manifest key; versioning Enabled; no lifecycle; input 2026-06-23 only; no Cottonwood schedule; 49F schedule ENABLED; zero log events 2026-10-10/11; no CloudTrail data events on the bucket. Positive control: the same log query over the last 30 days returned events on 2026-10-02, 10-03, 10-05 to 10-09, 10-12 and 10-13, so the zero on 10-10 and 10-11 is an absence"
+    },
+    {
+      "tool": "comp-find and comp-pipescript (read)",
+      "invocation": "comp-find for the run records and for the table path; comp-pipescript postdeps for the producer and the adapter",
+      "result": "the 2026-10-11 deploy-completion ledger and the CB2 session log named the mint; comp-pipescript refused the script id in all four trees"
+    }
+  ]
+}
