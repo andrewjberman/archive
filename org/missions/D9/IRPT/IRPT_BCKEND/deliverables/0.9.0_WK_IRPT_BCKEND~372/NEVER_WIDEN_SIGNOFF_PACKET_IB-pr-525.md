@@ -44,6 +44,7 @@ backfill object is refused by name. The scheduled path is unchanged. The change 
 - listing_digest 8c0afcb7058034cef427148c9354931004ea2f17fd29f9e55fcf9354af13b9d9: SHA-256 of the sorted key TAB ETag lines under
   s3://opal-data-49financial/irpt/49financial/gold/account_return_daily/ (defined in IB188-1_arms_baseline_ledgers.json).
 - The pair re-takes this digest after EVERY chunk. The returns digest must be byte-equal before and after each run: 0 returns partitions changed.
+  The returns partitions are untouched by the lots-only run (the proof is the hash before and after each chunk, not an assertion).
 
 ## Open ledgers and sequencing
 
