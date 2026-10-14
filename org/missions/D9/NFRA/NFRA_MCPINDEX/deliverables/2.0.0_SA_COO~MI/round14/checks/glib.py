@@ -19,6 +19,26 @@ CATALOG_DIR = "workflows/atom_decomposition/catalog_entries"
 EXPECT_ROWS = 174         # 131 + 36 + 12 + 7 = 186 contracts, less the 12 that an existing silver_datasets row already catalogues (see in_scope)
 # PRD v0.13: the two G4 feeds marked do-not-serve (a row flagged retired: never a tool target), with G4 routing as the reason.
 DO_NOT_SERVE = ("opal-data-mdpf/feeds/partner_held_etf_49financial", "opal-data-mdpf/feeds/non_model_aua")
+# PRD v0.14 (Andrew-direct ~15:0xZ, client data ONLY from the opal-data-assets vendor silver folders): the account-grain MDPF feeds are
+# NOT_SERVED, a retired row whose reason cites the record.
+NOT_SERVED = ("opal-data-mdpf/feeds/model_aua_positions_49financial", "opal-data-mdpf/feeds/model_aua_positions_inflection")
+NOT_SERVED_RECORD = "ANDREW_DIRECT_20261014_150xZ_CLIENT_DATA_ONLY_OPAL_DATA_ASSETS_VENDOR_SILVER.md @9a314c1e98"
+
+
+def enc(contract_id):
+    """The row's contract.id: the contract_id with every `/` replaced by `:`. An IDENTIFIER, not an S3 address: the commit-time
+    naming gate grades any slash-bearing string as an S3 key and refuses it as out-of-pattern."""
+    return str(contract_id).replace("/", ":")
+
+
+def retired_reason(c):
+    """The reason a row is retired (never a tool target), or None."""
+    cid = c["contract_id"]
+    if cid in DO_NOT_SERVE:
+        return "do-not-serve: " + str(c.get("routing") or "")
+    if cid in NOT_SERVED:
+        return "not_served: %s -- client data only from the opal-data-assets vendor silver folders" % NOT_SERVED_RECORD
+    return None
 
 # The issuer's vendor-tool -> client_* map (OPLGTW PRD v3.1 ruling 1). A name that is not a key passes through unchanged.
 # A G2 tool with no client_* tool (balances, find_holders, flows, documents, delivery, eclipse, prices, workbook rows, platform
@@ -40,7 +60,7 @@ CLIENT_MAP = {
     "orion_get_household_performance": "client_get_performance", "orion_get_account_performance": "client_get_performance",
     "commonwealth_get_performance": "client_get_performance",
     "blackdiamond_get_account_fee_roles": "client_get_fees", "blackdiamond_list_fees": "client_get_fees",
-    "blackdiamond_get_account_profile": "client_get_profile", "smartx_account_lookup": "client_get_profile",
+    "smartx_account_lookup": "client_get_profile",
     "blackdiamond_list_insurance": "client_get_insurance",
 }
 
@@ -89,6 +109,50 @@ def in_scope(c):
     row) is NOT catalogued at table grain, so it is in scope: the channel keeps its text, the table gets its row."""
     key = str((c.get("catalog_entry") or {}).get("data_catalog_key") or "")
     return not (bool((c.get("catalog_entry") or {}).get("present")) and key.startswith("silver_datasets."))
+
+
+NO_REGISTRY_BUCKETS = ("opal-data-news-v2", "opal-data-news-av")   # not buckets scopes.json knows: a legacy row for them is refused by the registry validator
+
+
+def registry_key(cid):
+    """The legacy_addresses.json key for a contract's prefix: `catalog-` + the entity slug with `_` -> `-` (lowercase kebab-case)."""
+    return "catalog-" + entity(cid).replace("_", "-")
+
+
+def needs_registry(c):
+    """True when the row's prefix is a plain S3 key prefix or object (no `{param}` template, a bucket the registry knows) so a
+    legacy_addresses.json row (reader NFRA_MCPINDEX) can make the literal CONFORMANT in the commit-time naming gate. The gate honours
+    a row only if it is COMMITTED at HEAD and has no params, so the registry commit lands BEFORE the rows."""
+    p = str(c.get("s3_prefix") or "")
+    b = str(c.get("bucket") or "")
+    return bool(p) and not p.startswith("none") and "{" not in p and b.startswith("opal-data-") and b not in NO_REGISTRY_BUCKETS
+
+
+def registry_row(c, group):
+    pin = PINS[group][0]
+    return {"key": registry_key(c["contract_id"]), "bucket": c["bucket"], "template": c["s3_prefix"],
+            "shape": "prefix" if str(c["s3_prefix"]).endswith("/") else "object", "params": [], "reader": "NFRA_MCPINDEX",
+            "evidence": "measured by 4.0.0_SA_CRO~Z in the census %s @%s: %s objects (the contract's size.objects, a count; no object content read)"
+                        % (PINS[group][1].rsplit("/", 1)[-1], pin, (c.get("size") or {}).get("objects")),
+            "note": "Catalog source-row address; the owner of the data renames it (R19)."}
+
+
+def registry_dir():
+    return os.environ.get("PLANT_REGISTRY_DIR") or os.path.join("infra", "logic", "registry")
+
+
+def plant_registry_dir14(allc):
+    """A temp copy of the registry holding every `catalog-*` row (planted arms only). Returns its path."""
+    import shutil
+    d = tempfile.mkdtemp(prefix="c14reg_")
+    shutil.copytree(os.path.join("infra", "logic", "registry"), d, dirs_exist_ok=True)
+    p = os.path.join(d, "legacy_addresses.json")
+    doc = json.load(open(p, encoding="utf-8"))
+    for cid, (g, c) in allc.items():
+        if in_scope(c) and needs_registry(c):
+            doc["legacy_addresses"].append(registry_row(c, g))
+    json.dump(doc, open(p, "w", encoding="utf-8"), indent=1)
+    return d
 
 
 def entity(cid):

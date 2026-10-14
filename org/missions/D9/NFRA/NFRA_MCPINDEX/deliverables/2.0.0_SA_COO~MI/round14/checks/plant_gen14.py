@@ -57,15 +57,15 @@ def main():
                 "read_tool": rt,
                 "gap_owner": None if rt else "NFRA_OPLGTW",
                 "table": c["table"], "layer": c["layer"], "format": c["format"],
-                "contract": {"id": c["contract_id"], "size": c["size"], "freshness": c["freshness"],
+                "contract": {"id": glib.enc(c["contract_id"]), "size": c["size"], "freshness": c["freshness"],
                              "partition": c["partition"], "producer": c["producer"]},
                 "fork_keys": c["fork_keys"],
                 "nl_tags": c["nl_tags"],
-                "retired": c["contract_id"] in glib.DO_NOT_SERVE,
+                "retired": bool(glib.retired_reason(c)),
                 "open_items": c["open_items"],
             }
             if row["retired"]:
-                row["retired_reason"] = "do-not-serve: " + str(c.get("routing") or "")
+                row["retired_reason"] = glib.retired_reason(c)
             with open(os.path.join(a.out, glib.entity(c["contract_id"]) + ".yaml"), "w", encoding="utf-8", newline="\n") as f:
                 yaml.safe_dump(row, f, sort_keys=False, allow_unicode=True)
             n += 1
