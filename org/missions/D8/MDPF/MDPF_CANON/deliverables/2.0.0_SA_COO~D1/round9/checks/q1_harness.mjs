@@ -69,7 +69,9 @@ const out = (s) => process.stdout.write(s + "\n");
 let gated;
 let nogate;
 let pdr;
+let FC = {};
 try {
+  FC = await import(pathToFileURL(path.join(ROOT, "infra", "aws", "lambda-edge", "_shared", "firm-config.mjs")).href);
   gated = (await import(INDEX_URL)).handler;
   nogate = (await import(INDEX_URL + "?nogate")).handler;
   pdr = (await import(pathToFileURL(PDR).href)).handler;
@@ -106,7 +108,7 @@ const INTERNAL = new Set(["internal", "dev", "devPartner"]);
 const OWN = {
   p49: ["49financial"], p49admin: ["49financial"], inf: ["inflection"], infadmin: ["inflection"], cot: ["cottonwood"],
   demo: ["global"], nofirm: ["global"], emptyfirm: ["global"], nullfirm: ["global"],
-  mockadv: [], proto: [], ctor: [], bd: [], numfirm: [], objfirm: [], spacefirm: [], upperfirm: [],
+  mockadv: ["mockadv"], proto: [], ctor: [], bd: [], numfirm: [], objfirm: [], spacefirm: [], upperfirm: [],
 };
 const FOLDERS = ["49financial", "inflection", "cottonwood", "global"];
 const ODD_FOLDERS = ["_manifests", "archive", "mockadv", "demo", "49financial-old", "inflectionx", "globalx"];
@@ -172,7 +174,9 @@ async function handlerMode() {
     for (const c of ["demo", "nofirm", "emptyfirm", "nullfirm"]) {
       for (const f of FILES) rows.push(await rowOf(gated, c, `${P}global/${f}`, "pass"));
     }
-    arm("A2", "own-folder leaf passes: three partners on their folder, demo and no-firm on global (control)", rows);
+    // mockadv is a key of the generated firm map, so it reads the folder of its own name (none exists in the bucket; harmless) and not global
+    rows.push(await rowOf(gated, "mockadv", `${P}mockadv/aum-metrics.json`, "pass"));
+    arm("A2", "own-folder leaf passes: three partners on their folder, demo and no-firm on global, mockadv on its own name (control)", rows);
   }
   // A3 foreign leaf 403 (build)
   {
@@ -212,10 +216,12 @@ async function handlerMode() {
   // A7 unknown firm: nothing (build)
   {
     const rows = [];
-    for (const c of ["mockadv", "proto", "ctor", "bd", "numfirm", "objfirm", "spacefirm", "upperfirm"]) {
+    for (const c of ["proto", "ctor", "bd", "numfirm", "objfirm", "spacefirm", "upperfirm"]) {
       for (const t of ["global", "49financial", "inflection", "mockadv", "__proto__", "constructor"]) rows.push(await rowOf(gated, c, `${P}${t}/aum-metrics.json`, "403"));
     }
-    arm("A7", "an unknown, prototype-key, non-string or case-variant firmId is refused every folder, global included", rows);
+    // mockadv is a map key, so it reads its own name only: not global, not a partner folder
+    for (const t of ["global", "49financial", "inflection", "cottonwood", "demo", "_manifests"]) rows.push(await rowOf(gated, "mockadv", `${P}${t}/aum-metrics.json`, "403"));
+    arm("A7", "an unknown, prototype-key, non-string or case-variant firmId is refused every folder, global included; mockadv reads its own name only", rows);
   }
   // A8 role/tier admin does not bypass (build)
   {
@@ -393,7 +399,7 @@ function corpus(own) {
   return [...new Set(out)];
 }
 async function seamMode() {
-  const claimsForSeam = [["p49", "49financial"], ["inf", "inflection"], ["cot", "cottonwood"], ["demo", "global"], ["nofirm", "global"]];
+  const claimsForSeam = [["p49", "49financial"], ["inf", "inflection"], ["cot", "cottonwood"], ["demo", "global"], ["nofirm", "global"], ["mockadv", "mockadv"]];
   // S1 the property: nothing a non-internal claim is admitted on resolves outside its folders
   {
     const rows = [];
@@ -484,18 +490,52 @@ async function controlMode() {
       const has = (n) => typeof mod[n] !== "undefined";
       rows.push({ name: "exports MDPF_PASS, MDPF_DENY, mdpfGate", expect: "present", got: has("MDPF_PASS") && has("MDPF_DENY") && typeof mod.mdpfGate === "function" ? "present" : "missing", ok: has("MDPF_PASS") && has("MDPF_DENY") && typeof mod.mdpfGate === "function" });
       rows.push({ name: "MDPF_PASS !== MDPF_DENY", expect: "distinct", got: mod.MDPF_PASS === mod.MDPF_DENY ? "same" : "distinct", ok: mod.MDPF_PASS !== mod.MDPF_DENY });
-      const inputs = [[undefined, {}], [null, null], [123, {}], [{}, {}], ["", {}], ["/api/general/mdpf/global/x.json", undefined], ["/api/general/mdpf/global/x.json", null],
-        ["/api/general/mdpf/global/x.json", "str"], ["/api/general/mdpf/global/x.json", []], ["/api/general/mdpf/global/x.json", 7], ["%", {}], ["/api/general/mdpf/%", { firmId: "demo" }]];
+      const MAP = FC.FIRM_BUCKET_MAP;
+      const GV = FC.MDPF_GLOBAL_VIEW_FIRMS;
+      rows.push({ name: "firm-config.mjs exports FIRM_BUCKET_MAP and MDPF_GLOBAL_VIEW_FIRMS (the generated carriers)", expect: "present", got: MAP && GV ? "present" : "missing", ok: !!MAP && !!GV });
+      const U = "/api/general/mdpf/";
+      // every caller states BOTH carriers (a JS default parameter would turn an explicit undefined back into the real one)
+      const call = (u, pl, m, g) => { try { return mod.mdpfGate(u, pl, m, g); } catch (e) { return "THROW"; } };
+      const bad = [undefined, null, "str", 7, [], true];
+      const inputs = [[undefined, {}], [null, null], [123, {}], [{}, {}], ["", {}], [U + "global/x.json", undefined], [U + "global/x.json", null],
+        [U + "global/x.json", "str"], [U + "global/x.json", []], [U + "global/x.json", 7], ["%", {}], [U + "%", { firmId: "demo" }]];
       for (const [u, pl] of inputs) {
-        let got;
-        try { got = mod.mdpfGate(u, pl); } catch (e) { got = "THROW"; }
+        const got = call(u, pl, MAP, GV);
         rows.push({ name: `mdpfGate(${JSON.stringify(u)}, ${JSON.stringify(pl)}) returns pass|deny`, expect: "pass|deny", got: String(got), ok: got === mod.MDPF_PASS || got === mod.MDPF_DENY });
       }
-      const dn = (u, pl) => { try { return mod.mdpfGate(u, pl); } catch { return "THROW"; } };
-      rows.push({ name: "a MDPF uri with a non-object payload is denied", expect: "deny", got: dn("/api/general/mdpf/global/x.json", "str"), ok: dn("/api/general/mdpf/global/x.json", "str") === mod.MDPF_DENY });
-      rows.push({ name: "a non-MDPF uri passes whatever the payload", expect: "pass", got: dn("/api/general/etfs/x.json", null), ok: dn("/api/general/etfs/x.json", null) === mod.MDPF_PASS });
+      rows.push({ name: "a MDPF uri with a non-object payload is denied", expect: "deny", got: call(U + "global/x.json", "str", MAP, GV), ok: call(U + "global/x.json", "str", MAP, GV) === mod.MDPF_DENY });
+      rows.push({ name: "a non-MDPF uri passes whatever the payload", expect: "pass", got: call("/api/general/etfs/x.json", null, MAP, GV), ok: call("/api/general/etfs/x.json", null, MAP, GV) === mod.MDPF_PASS });
+      // the firm map is consulted, not remembered: a missing, non-object or array map FAILS CLOSED for every non-internal claim
+      for (const m of bad) {
+        for (const [c, f] of [["p49", "49financial"], ["demo", "global"], ["nofirm", "global"], ["mockadv", "mockadv"]]) {
+          const got = call(U + f + "/x.json", CLAIMS[c], m, GV);
+          rows.push({ name: `map=${JSON.stringify(m)}: ${c} on ${f} is denied (fail closed)`, expect: "deny", got: String(got), ok: got === mod.MDPF_DENY });
+        }
+        const gi = call(U + "inflection/x.json", CLAIMS.internal, m, GV);
+        rows.push({ name: `map=${JSON.stringify(m)}: the internal claim still passes`, expect: "pass", got: String(gi), ok: gi === mod.MDPF_PASS });
+        const gn = call("/api/general/etfs/x.json", CLAIMS.p49, m, GV);
+        rows.push({ name: `map=${JSON.stringify(m)}: a non-MDPF path still passes`, expect: "pass", got: String(gn), ok: gn === mod.MDPF_PASS });
+      }
+      // a missing or unusable global-view list means no firm views global (the demo tenant reads nothing), never a throw
+      for (const g of [undefined, null, "demo", 7, {}]) {
+        const got = call(U + "global/x.json", CLAIMS.demo, MAP, g);
+        rows.push({ name: `globalViewFirms=${JSON.stringify(g)}: demo on global is denied`, expect: "deny", got: String(got), ok: got === mod.MDPF_DENY });
+      }
+      rows.push({ name: "globalViewFirms as a Set of the same ids behaves as the array", expect: "pass", got: call(U + "global/x.json", CLAIMS.demo, MAP, new Set(GV || [])), ok: call(U + "global/x.json", CLAIMS.demo, MAP, new Set(GV || [])) === mod.MDPF_PASS });
+      // the map is the source of the partner folders: a synthetic map admits ITS keys and no other (no slug is remembered)
+      const syn = Object.freeze({ acme: 1 });
+      const sy = (id, f) => call(U + f + "/x.json", { sub: "u", firmId: id }, syn, []);
+      rows.push({ name: "synthetic map: acme reads acme", expect: "pass", got: sy("acme", "acme"), ok: sy("acme", "acme") === mod.MDPF_PASS });
+      rows.push({ name: "synthetic map: a real partner id that is not a key reads nothing", expect: "deny", got: sy("49financial", "49financial"), ok: sy("49financial", "49financial") === mod.MDPF_DENY });
+      const np = Object.create(null); np.acme = 1;
+      const npa = call(U + "acme/x.json", { sub: "u", firmId: "acme" }, np, []);
+      const npc = call(U + "constructor/x.json", { sub: "u", firmId: "constructor" }, np, []);
+      rows.push({ name: "null-prototype map: acme reads acme, constructor reads nothing", expect: "pass,deny", got: npa + "," + npc, ok: npa === mod.MDPF_PASS && npc === mod.MDPF_DENY });
+      const g1 = call(U + "49financial/x.json", CLAIMS.p49, MAP, GV);
+      const g2 = call(U + "inflection/x.json", CLAIMS.p49, MAP, GV);
+      rows.push({ name: "the generated map and a real partner: 49financial reads 49financial, not inflection", expect: "pass,deny", got: g1 + "," + g2, ok: g1 === mod.MDPF_PASS && g2 === mod.MDPF_DENY });
     }
-    arm("K2", "mdpf_gate.mjs exports the three names the order fixes, never throws, denies a MDPF uri on a malformed payload", rows);
+    arm("K2", "mdpf_gate.mjs: the three exports, never throws, denies a MDPF uri on a malformed payload, FAILS CLOSED on a missing or unusable firm map, reads the partner folders from the map it is given", rows);
   }
 }
 

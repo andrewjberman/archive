@@ -3,7 +3,7 @@
 
   python r9_cn_q_1.py handler   [--root R]   CN-Q-1 HANDLER: n of 14 arms   (the REAL edge handler, synthetic claims)
   python r9_cn_q_1.py seam      [--root R]   CN-Q-1 SEAM:    n of 5 arms    (admitted requests through the REAL router)
-  python r9_cn_q_1.py control   [--root R]   CN-Q-1 CONTROL: n of 5 arms    (unmoved behaviour, bounds, the worker's spec)
+  python r9_cn_q_1.py control   [--root R]   CN-Q-1 CONTROL: n of 6 arms    (unmoved behaviour, bounds, the worker's spec, the naming gate)
   python r9_cn_q_1.py selftest               OK line when the pure helpers behave
 
 Each mode prints one line per arm, then 'CN-Q-1 <MODE>: <passed> of <arms> arms'. Exit 0 only when every arm passes.
@@ -31,13 +31,14 @@ PINS = {
     "infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs": "90597af77ac9cd558d788283f7e61327f919c76befe9cdb39b6c09fcc8bb8f23",
     "infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs": "2f4bdaece6a2d44202d9682e8720f39fabba9fea055dd767e514da601c29a428",
     "infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs": "7743225d9c5d3acd99c153143b528055dead66bd0aba1b5b430bf5e6a352c94f",
-    "infra/aws/lambda-edge/_shared/firm-config.mjs": "7a1b34ac6376c0c71bae371e6d6a57959a2defbada1a9d326a117604c5f0c8c3",
     "infra/aws/lambda-edge/public-data-router/index.mjs": "aff51ca11181d9067ab5ff987402d29555d29745e073b1f24e52176955cb6e1c",
 }
 BASE_INDEX_SHA = "36dd40b7325de4824557b74fc018938d914517ccec751707b9391afe8a494b68"
 BASE_EDGE_FILES = {"aggregate_gate.mjs", "bun.lock", "index.mjs", "ownership_key.mjs", "package-lock.json", "package.json",
                    "render_auth.mjs", "tier_policy.mjs", "tests/ownership_key.spec.mjs"}
-IMPORT_LINE = 'import { mdpfGate, MDPF_DENY } from "./mdpf_gate.mjs";'
+IMPORT_LINES = ('import { mdpfGate, MDPF_DENY } from "./mdpf_gate.mjs";',
+                'import { MDPF_GLOBAL_VIEW_FIRMS } from "../_shared/firm-config.mjs";')
+IMPORT_LINE = IMPORT_LINES[0]
 MARK_START = "// --- MDPF_CANON CN-q-1:"
 MARK_END = "// --- end MDPF_CANON CN-q-1 ---"
 MIN_SPEC_TESTS = 12
@@ -107,11 +108,12 @@ def strip_added(index_text: str) -> str | None:
     lines = lf(index_text.encode()).decode().split("\n")
     starts = [i for i, ln in enumerate(lines) if ln.strip().startswith(MARK_START)]
     ends = [i for i, ln in enumerate(lines) if ln.strip() == MARK_END]
-    if lines.count(IMPORT_LINE) == 0 and not starts and not ends:
+    if all(lines.count(x) == 0 for x in IMPORT_LINES) and not starts and not ends:
         return "\n".join(lines)  # nothing inserted yet (the base): the whole file is the base text
-    if lines.count(IMPORT_LINE) != 1:
+    if any(lines.count(x) != 1 for x in IMPORT_LINES):
         return None
-    lines.remove(IMPORT_LINE)
+    for x in IMPORT_LINES:
+        lines.remove(x)
     starts = [i for i, ln in enumerate(lines) if ln.strip().startswith(MARK_START)]
     ends = [i for i, ln in enumerate(lines) if ln.strip() == MARK_END]
     if len(starts) != 1 or len(ends) != 1 or ends[0] <= starts[0] or starts[0] < 1 or lines[starts[0] - 1].strip() != "":
@@ -145,7 +147,7 @@ def bounds(root: Path) -> tuple[bool, str]:
             problems.append("index.mjs line endings changed (the file is LF; a CR was introduced)")
         base = strip_added(raw.decode("utf-8"))
         if base is None:
-            problems.append("index.mjs insertions are not exactly the import line and one marked block")
+            problems.append("index.mjs insertions are not exactly the two import lines and one marked block")
         elif hashlib.sha256(base.encode()).hexdigest() != BASE_INDEX_SHA:
             problems.append("index.mjs differs from the base outside the two insertions")
     gate = edge / "mdpf_gate.mjs"
@@ -155,7 +157,7 @@ def bounds(root: Path) -> tuple[bool, str]:
             problems.append("mdpf_gate.mjs has a CR (the new file is LF, as index.mjs)")
         if any(b > 127 for b in raw):
             problems.append("mdpf_gate.mjs is not ASCII")
-    return (not problems, "; ".join(problems) if problems else "protected files byte-equal, index.mjs = base + the two insertions, no file outside the grant")
+    return (not problems, "; ".join(problems) if problems else "protected files byte-equal, index.mjs = base + the two import lines and the one block, no file outside the grant")
 
 
 # ---- K4 / K5 the worker's spec -----------------------------------------------------------------------------------------
@@ -171,19 +173,26 @@ def bun_test(bun: str, cwd: Path, spec_rel: str) -> tuple[int, int, int, str]:
 def mutants(ref_gate: str) -> list[tuple[str, str]]:
     """(id, mutated module text): one behaviour broken each. Each replacement must hit the reference exactly once."""
     table = [
-        ("M1-always-pass", "export function mdpfGate(uri, payload) {\n", "export function mdpfGate(uri, payload) {\n  return MDPF_PASS;\n"),
-        ("M2-internal-not-admitted", 'return payload.firmId === "opal-capital" || payload.userType === "Dev";', "return false;"),
+        ("M1-always-pass", "export function mdpfGate(uri, payload, firmMap, globalViewFirms) {\n", "export function mdpfGate(uri, payload, firmMap, globalViewFirms) {\n  return MDPF_PASS;\n"),
+        ("M2-internal-not-admitted", 'return payload.firmId === INTERNAL_FIRM || payload.userType === "Dev";', "return false;"),
         ("M3-folder-prefix-match", ".includes(route.folder)", ".some((f) => route.folder.startsWith(f))"),
         ("M4-folder-case-insensitive", ".includes(route.folder)", ".map((x) => x.toLowerCase()).includes(String(route.folder).toLowerCase())"),
         ("M5-no-traversal-check", ' && s !== "." && s !== ".."', ""),
-        ("M6-no-firm-reads-all", "return MDPF_NO_FIRM_FOLDERS;", 'return ["global", "49financial", "inflection", "cottonwood"];'),
-        ("M7-demo-reads-49financial", 'demo: Object.freeze(["global"])', 'demo: Object.freeze(["global", "49financial"])'),
-        ("M8-prototype-key", "Object.prototype.hasOwnProperty.call(MDPF_FIRM_FOLDERS, firm) ? MDPF_FIRM_FOLDERS[firm] : []", "MDPF_FIRM_FOLDERS[firm] || []"),
+        ("M6-no-firm-reads-every-map-key", '  if (firm === undefined || firm === null || firm === "") return [GLOBAL_FOLDER];',
+         '  if (firm === undefined || firm === null || firm === "") return usableMap(firmMap) ? Object.keys(firmMap).concat([GLOBAL_FOLDER]) : [GLOBAL_FOLDER];'),
+        ("M7-global-view-firm-reads-every-map-key", "if (viewsGlobal(globalViewFirms, firm)) return [GLOBAL_FOLDER];",
+         "if (viewsGlobal(globalViewFirms, firm)) return usableMap(firmMap) ? Object.keys(firmMap).concat([GLOBAL_FOLDER]) : [GLOBAL_FOLDER];"),
+        ("M8-prototype-key", "Object.prototype.hasOwnProperty.call(firmMap, firm) ? [firm] : []", "firmMap[firm] ? [firm] : []"),
         ("M9-dev-not-admitted", ' || payload.userType === "Dev"', ""),
         ("M10-bare-prefix-passes", "if (segs.length === 0) return { folder: null, clean: false };", "if (segs.length === 0) return null;"),
         ("M11-legacy-prefix-ungated", ', "/api/general/json/mdpf"', ""),
         ("M12-prefix-case-variant-passes", "const exact = p.startsWith(prefix) && uri.startsWith(prefix);", "const exact = true;"),
         ("M13-trailing-empty-segment-anywhere", '(s === "" && i === last && i > 0)', '(s === "")'),
+        ("M14-hardcoded-partner-slug-literals", "return Object.prototype.hasOwnProperty.call(firmMap, firm) ? [firm] : [];",
+         'return ["49financial", "inflection", "cottonwood"].includes(firm) ? [firm] : [];'),
+        ("M15-bad-map-does-not-fail-closed", "  if (!usableMap(firmMap)) return MDPF_DENY;\n", ""),
+        ("M16-bad-map-throws", "  if (!usableMap(firmMap)) return MDPF_DENY;\n", '  if (!usableMap(firmMap)) throw new Error("bad firm map");\n'),
+        ("M17-global-view-list-ignored-demo-hardcoded", "if (viewsGlobal(globalViewFirms, firm)) return [GLOBAL_FOLDER];", 'if (firm === "demo") return [GLOBAL_FOLDER];'),
     ]
     out = []
     for mid, a, b in table:
@@ -235,6 +244,49 @@ def spec_arms(root: Path) -> tuple[bool, str, bool, str]:
     return k4, k4msg, k5, ("every one of %d mutants fails the spec" % len(mutants(ref)) if k5 else "survivors: " + ", ".join(survivors))
 
 
+SLUG_WORDS = ("49financial", "inflection", "cottonwood", "mockadv", "demo")
+GATE_PATH_REL = "infra/aws/lambda-edge/auth-validator-edge/mdpf_gate.mjs"
+
+
+def code_only(text: str) -> str:
+    """the module with block and line comments removed (comments are prose to the naming gate)"""
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    return re.sub(r"(?m)^\s*//.*$|(?<=[;{}),])\s*//.*$", "", text)
+
+
+def newfile_diff(rel: str, text: str) -> str:
+    lines = text.replace("\r\n", "\n").split("\n")
+    if lines and lines[-1] == "":
+        lines = lines[:-1]
+    head = ["diff --git a/%s b/%s" % (rel, rel), "new file mode 100644", "--- /dev/null", "+++ b/%s" % rel, "@@ -0,0 +1,%d @@" % len(lines)]
+    return "\n".join(head + ["+" + ln for ln in lines]) + "\n"
+
+
+def naming_arm(root: Path) -> tuple[bool, str]:
+    """K6: mdpf_gate.mjs keeps no firm slug as a literal, and the REAL LGIC naming gate in ENFORCE passes it as a new file."""
+    gate = root / EDGE_REL / "mdpf_gate.mjs"
+    if not gate.exists():
+        return False, "mdpf_gate.mjs does not exist"
+    text = gate.read_text(encoding="utf-8")
+    hits = sorted({w for w in SLUG_WORDS if re.search(r"""["'`][^"'`\n]*\b%s\b""" % re.escape(w), code_only(text))})
+    if hits:
+        return False, "a firm slug is kept as a string literal in code: %s (read the partner folders from the firmMap parameter)" % ", ".join(hits)
+    tools = toplevel()
+    ng = tools / ".tools" / "naming-gate.py"
+    if not ng.exists():
+        return False, "no .tools/naming-gate.py under %s" % tools
+    tmp = Path(tempfile.mkdtemp(prefix="q1_ng_"))
+    try:
+        d = tmp / "gate.diff"
+        d.write_text(newfile_diff(GATE_PATH_REL, text), encoding="utf-8", newline="\n")
+        p = subprocess.run([sys.executable, str(ng), "--diff", str(d), "--enforce"], cwd=str(tools), capture_output=True, text=True, timeout=90)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    last = [ln for ln in (p.stdout + p.stderr).splitlines() if ln.startswith("NAMING-GATE:") or ln.startswith("NAMING REFUSE") or ln.startswith("NAMING ERROR")]
+    ok = p.returncode == 0 and any(ln.startswith("NAMING-GATE: PASS") for ln in last)
+    return ok, ("no slug literal in code; naming-gate --enforce on the new file: " if ok else "naming-gate --enforce on the new file REFUSED: ") + " | ".join(last)[:300]
+
+
 def main(argv: list[str]) -> int:
     if not argv or argv[0] not in ("handler", "seam", "control", "selftest"):
         print(__doc__)
@@ -245,13 +297,17 @@ def main(argv: list[str]) -> int:
         muts = mutants(ref)
         assert len({m for m, _ in muts}) == len(muts)
         sample = "a\nb\n\n" + MARK_START + " x ---\nblock\n" + MARK_END + "\nc"
-        t = strip_added(IMPORT_LINE + "\n" + sample)
+        two = "\n".join(IMPORT_LINES)
+        t = strip_added(two + "\n" + sample)
         assert t == "a\nb\nc", t
         assert strip_added(sample) is None  # a block with no import line
         assert strip_added("a\nb") == "a\nb"  # nothing inserted: the base text itself
-        assert strip_added(IMPORT_LINE + "\nb") is None  # an import with no block
-        assert strip_added(IMPORT_LINE + "\nx\n" + MARK_START + "\n" + MARK_END) is None  # marker not preceded by a blank line
-        print("CN-Q-1 SELFTEST: OK (%d mutants anchor once; strip_added pairs the markers)" % len(muts))
+        assert strip_added(two + "\nb") is None  # imports with no block
+        assert strip_added(IMPORT_LINE + "\nb\n\n" + MARK_START + "\n" + MARK_END) is None  # one import line only
+        assert strip_added(two + "\nx\n" + MARK_START + "\n" + MARK_END) is None  # marker not preceded by a blank line
+        assert "49financial" not in code_only('// 49financial\nconst a = 1; // inflection\n/* cottonwood */')
+        assert re.search(r"""["'`][^"'`\n]*\b49financial\b""", code_only('const x = ["49financial"];'))
+        print("CN-Q-1 SELFTEST: OK (%d mutants anchor once; strip_added pairs the markers; code_only drops comments)" % len(muts))
         return 0
     root = Path(os.environ.get("Q1_ROOT") or "") if os.environ.get("Q1_ROOT") else toplevel()
     if "--root" in argv:
@@ -266,12 +322,15 @@ def main(argv: list[str]) -> int:
     ok3, msg3 = bounds(root)
     arms["K3"] = ok3
     lines.append("ARM K3 %s :: bounds: %s" % ("PASS" if ok3 else "FAIL", msg3))
+    k6, m6 = naming_arm(root)
+    arms["K6"] = k6
+    lines.append("ARM K6 %s :: naming: %s" % ("PASS" if k6 else "FAIL", m6))
     k4, m4, k5, m5 = spec_arms(root)
     arms["K4"] = k4
     arms["K5"] = k5
     lines.append("ARM K4 %s :: the worker's own tests: %s" % ("PASS" if k4 else "FAIL", m4))
     lines.append("ARM K5 %s :: the worker's tests catch %s" % ("PASS" if k5 else "FAIL", m5))
-    return report("CONTROL", lines, arms, 5)
+    return report("CONTROL", lines, arms, 6)
 
 
 if __name__ == "__main__":
