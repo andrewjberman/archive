@@ -47,6 +47,7 @@ DIM_DRY = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~171/ACCOUNT_DIM_DRY_RUN.parqu
 ALIEN_REC = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/ALIEN_READ_R109.json"
 ACCT_WORDS = "Account-level returns are not available for this firm yet."
 LOTS_WORDS = "Lot-level detail is not available for this account yet."
+V043_SHA = "90a5c8ef6d53244195bea78f32b3cfb5baa23c85cea667490cb887037ab84953"
 BINS = ("lt_5bp", "5_25bp", "25_100bp", "ge_100bp")
 TIE_WINDOWS = ("qtd", "ytd", "last_12_months", "since_inception")
 TWR_MODULE = "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py"
@@ -115,7 +116,7 @@ def check_sample(root):
     sp = str(s.get("path") or "").replace("\\", "/")
     need(sp.startswith(SAMPLE_DIR9) and sp.endswith("HOUSEHOLD_SAMPLE.json") and Path(sp).is_file(), "sample.path must be the private HOUSEHOLD_SAMPLE.json under %s" % SAMPLE_DIR9)
     need(not sp.startswith(str(root.resolve()).replace("\\", "/").rstrip("/") + "/"), "the sample is inside the repo: client data never goes there")
-    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") == sha(root / P5.CONTRACT_REL), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes")
+    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") in (sha(root / P5.CONTRACT_REL), V043_SHA), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes (current, or the 0.4.3 bytes round 109 built against)")
     sm = P.sample_json(sp)
     P5.check_sample_shape_k(sm, c)
     prob = P5.kind_problems(sm["values"], c)
