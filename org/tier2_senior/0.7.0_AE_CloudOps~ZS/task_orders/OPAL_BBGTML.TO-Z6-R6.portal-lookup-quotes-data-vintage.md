@@ -6,6 +6,7 @@
     <date>2026-10-14</date>
     <status>pending -- issued 2026-10-14 ~00:4xZ on CTO msg 33851 (BG msg 33844); runs now, ahead of the HELD TO-Z6-R3 on this lane</status>
     <status>in_progress -- reopened 2026-10-14 ~01:0xZ by 2.0.0_SA_COO~ZB: cell b195dc14fe on origin, AC1/AC2 PASS (report z6_r6_portal_lookup_quotes_data_vintage.md). AMENDMENT 1 (issuer, inside its own decomposition; no gate limb graded it, a flat order): row Z-S19 -- refs/PORTAL_RETRIEVAL.md line 43 (the mdpf-platinum table row) still names `as_of_date` as the vintage column. Change that ONE cell to "`as_of_date`, else `_provenance.source_vintages` (oldest); LastModified is write time only", nothing else in the file, one commit under the same audited GIT_COMMIT_AUTHOR_OVERRIDE=TIER0_UTILITY, then report the commit hash. AC1/AC2 stand as passed; no re-run owed.</status>
+    <status>complete -- drained 2026-10-14 ~01:1xZ by 2.0.0_SA_COO~ZB: cell b195dc14fe (on origin) + AMENDMENT 1 31566aa49d (PORTAL_RETRIEVAL.md:43, 1 line, LOCAL at drain); AC1/AC2 PASS. Carried to the drain-end record: the multi-date (oldest) arm is exercised on stubbed objects only; the override audit writes 2 OVERRIDE lines per act (count act ids, not lines).</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>LOCAL</risk>
