@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>pending</status>
+    <status>staged</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -55,3 +55,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30
   </proof_of_spec>
 </task_order>
 # pipeline-override: an exercise order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-322 is the issuer's, as for TO-EXERCISE-R29.
+
+<!-- ISSUER NOTE 2026-10-14 ~15:5xZ (2.0.0_SA_COO~Y2): STOPPED by AQ2 at K1 (msg 7710): R0i passed, the tickets COUNT was equal (31 before and after), K1 as B answered 503 `input ownership could not be verified`; K2 and K3 were not run. Measured cause: the code's read of irpt-requests is denied because the table is encrypted with the customer KMS key behind alias/investor-reporting (SSEType KMS, key/7f4d3042-...) and the ticket role holds no kms statement. The CTO ruled NO code rollback and signed Addendum 1 (@6dc939b104, msg 7715); the COO addendum is committed and TO-APPLY-R30b adds the one statement. THIS ORDER STAYS STAGED until the issuer MESSAGES that G2 is closed; it then resumes from step 1 with R0i read again, and K1, K2, K3 must each answer 400 (a 503 again is a STOP and a report, not retried). The 29b ledger and this order's sitting ledger stay OPEN meanwhile. The issuer's own error: the pair's R0g read the role's policy and not the table's encryption. -->
