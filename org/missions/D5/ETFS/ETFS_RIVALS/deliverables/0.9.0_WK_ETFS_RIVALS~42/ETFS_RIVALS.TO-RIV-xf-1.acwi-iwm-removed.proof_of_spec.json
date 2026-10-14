@@ -10,7 +10,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xf-1.acwi-iwm-removed.md",
     "group": "OTHER",
-    "vintage_commit": "9a1ce314dcff23a91496eaf67518984124752527"
+    "vintage_commit": "072910b11e32ca9e74be979eb436ee566bb0b49e"
   },
   "assignee": "0.9.0_WK_ETFS_RIVALS~42",
   "artifacts_produced": [
@@ -56,7 +56,7 @@
       "criterion_verbatim": "no gate state brings ACWI or IWM back, and the 13 funds are unchanged.",
       "method": "test_suite",
       "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xf1_acwi_iwm_removed_check.py -k ac1",
-      "output_evidence": "4 passed, 2 deselected in 1.24s (rc=0)",
+      "output_evidence": "4 passed, 2 deselected in 0.82s (rc=0)",
       "denominator": "4 of 4 AC1 parametrized gate states (none, D13, ENABLE, D12+D13)",
       "status": "PASS",
       "expect": "4 passed",
@@ -64,13 +64,12 @@
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "the holdings plan with every gate on is the 13 funds in one unit.",
+      "criterion_verbatim": "the holdings plan with every gate on is the 7 bloomberg_primary funds in one unit.",
       "method": "test_suite",
       "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xf1_acwi_iwm_removed_check.py -k ac2",
-      "output_evidence": "1 failed, 5 deselected in 1.18s (rc=1); E assert (['BIDD', 'CGI..., 'SCHY', ...] == ['BASG', 'BID..., 'IDVZ', ...]; E Right contains 6 more items, first extra item: 'PCLG'",
-      "denominator": "1 of 1 AC2 test; the plan assertion fails first, so the units assertion was not reached by pytest (probed separately: split_units(universe.funds()) is one unit at RIVAL_ROW_CAP, True)",
-      "status": "FAIL",
-      "status_reason": "premise fails: request_plan(date) with no sink plans only the bloomberg_primary funds (7 of 13) with every gate on; surprise ETFS_RIVALS-D1-W42-S1 (BLOCKING). Not worked around: the check and request_plan are outside this order's paths. The order stays open on AC2.",
+      "output_evidence": "1 passed, 5 deselected in 0.66s (rc=0)",
+      "denominator": "1 of 1 AC2 test; the amended plan is IDVZ, TXUE, BIDD, CGIC, INEQ, SCHY, PFOE (names 7) in one unit at RIVAL_ROW_CAP",
+      "status": "PASS",
       "expect": "1 passed",
       "judgment": false
     },
@@ -79,7 +78,7 @@
       "criterion_verbatim": "the budget config no longer sizes the two funds.",
       "method": "test_suite",
       "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xf1_acwi_iwm_removed_check.py -k ac3",
-      "output_evidence": "1 passed, 5 deselected in 0.74s (rc=0)",
+      "output_evidence": "1 passed, 5 deselected in 0.76s (rc=0)",
       "denominator": "1 of 1 AC3 test (bbg_budget.json est_rows_per_fund_date keys: IDVZ, PFOE, default)",
       "status": "PASS",
       "expect": "1 passed",
@@ -90,7 +89,7 @@
       "criterion_verbatim": "the three rewritten test files are green (a fourth criterion: this cell rewrites existing tests).",
       "method": "test_suite",
       "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_r5l1_leg_inert.py rivalfunds/tests/test_r8lg1_leg.py rivalfunds/tests/test_r9cb1_bbg_budget.py",
-      "output_evidence": "20 passed in 3.43s (rc=0); full suite python -m pytest -q rivalfunds/tests: 1032 passed, 6 skipped in 113.73s (rc=0)",
+      "output_evidence": "20 passed in 1.38s (rc=0); full suite python -m pytest -q rivalfunds/tests on the same code: 1032 passed, 6 skipped in 113.73s (rc=0)",
       "denominator": "20 of 20 in the three files (20 before the edit, none removed); suite 1032 passed + 6 skipped of 1038",
       "status": "PASS",
       "expect": "[0-9]+ passed",
@@ -99,22 +98,18 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The unmodified base map (ACWI and IWM present as index_control, leg pending) and the base budget keys run against the same check before the edit: the check must fire.",
-      "expected": "the check fails AC1 to AC3 while the benchmarks are present",
-      "observed": "base run before the edit: 5 failed, 1 passed (ACWI and IWM present in universe.funds() under gate states D13 and D12+D13, and in the ENABLE plan)",
+      "description": "The pre-cut base peer_groups.json and bbg_budget.json (from d6c767ffe9^, in a scratch copy of the package) run against the amended check: the check must fire.",
+      "expected": "the check fails AC1 (the gate states with a benchmark), AC2 and AC3 while ACWI and IWM are present",
+      "observed": "base run: 5 failed, 1 passed (ACWI present in the base map; AC1 gate states 1 to 3, AC2 and AC3 fail)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs of the check with -k 'ac1 or ac3' compared",
-      "observed": "run 1: 5 passed, 1 deselected in 0.70s; run 2: 5 passed, 1 deselected in 0.75s",
+      "method": "two same-input runs of the amended check (all six tests) compared",
+      "observed": "run 1: 6 passed in 0.89s; run 2: 6 passed in 0.76s",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
-    {
-      "item": "AC2 plan assertion (the holdings plan with every gate on is 13 funds)",
-      "reason": "premise fails: the sinkless request_plan returns the 7 bloomberg_primary funds; surprise ETFS_RIVALS-D1-W42-S1 (BLOCKING); the order stays open on AC2"
-    },
     {
       "item": "universe.py, collector_bloomberg.py (code), leg_gates.json, every other map entry and every gate value",
       "reason": "out of bounds for this order; the generic index_control role, leg pending mechanism, gates, CONTROL_ROW_CAP and split_units are unchanged"
@@ -129,23 +124,28 @@
     },
     {
       "item": "the <status> flip to complete",
-      "reason": "left to the issuer; AC2 is FAIL, so the order is not met"
+      "reason": "left to the issuer, per the coordinator's instruction; all four criteria PASS at HEAD"
     }
   ],
   "surprises": [
-    "ETFS_RIVALS-D1-W42-S1: RIV-xf-1 AC2 cannot pass as worded: request_plan(date) with no sink plans only the bloomberg_primary funds (7 of 13) with every gate on, so the check's 13-fund plan assertion fails once the two entries are gone"
+    "ETFS_RIVALS-D1-W42-S1: RIV-xf-1 AC2 premise (13 funds in the holdings plan) was wrong: request_plan with no sink plans only the bloomberg_primary funds (7 with every gate on); ruled by the coordinator and amended at 072910b11e, so AC2 now reads the 7 funds"
   ],
-  "session_log": "none: this worker writes no separate session log; commit d6c767ffe9 and surprise row ETFS_RIVALS-D1-W42-S1 are the record",
+  "session_log": "none: this worker writes no separate session log; commit d6c767ffe9, amendment 072910b11e (issuer) and surprise row ETFS_RIVALS-D1-W42-S1 are the record",
   "compiler_tools": [
     {
-      "tool": "pytest (xf1 check)",
+      "tool": "pytest (xf1 check, amended)",
       "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xf1_acwi_iwm_removed_check.py",
-      "result": "1 failed, 5 passed in 1.53s (base before the edit: 5 failed, 1 passed)"
+      "result": "6 passed in 0.89s (the AC1 to AC3 selections: 4, 1 and 1 passed)"
+    },
+    {
+      "tool": "pytest (base mutant control, scratch copy)",
+      "invocation": "python -m pytest -q -p no:cacheprovider <amended check> run from a scratch copy of rivalfunds with the d6c767ffe9^ JSON",
+      "result": "5 failed, 1 passed"
     },
     {
       "tool": "pytest (rivalfunds suite)",
       "invocation": "cd data/etfs/scripts; python -m pytest -q rivalfunds/tests",
-      "result": "1032 passed, 6 skipped in 113.73s"
+      "result": "1032 passed, 6 skipped in 113.73s (run on d6c767ffe9; no rivalfunds code changed since)"
     },
     {
       "tool": "json parse and universe.load()",
