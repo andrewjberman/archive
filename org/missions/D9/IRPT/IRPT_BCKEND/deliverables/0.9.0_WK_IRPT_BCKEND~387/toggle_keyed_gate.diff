@@ -1,0 +1,76 @@
+diff --git a/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py b/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+index 3a19dcf591..5eeefaf7f8 100644
+--- a/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
++++ b/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+@@ -2923,40 +2923,10 @@ def _gate_account_ids(nodes) -> "set[str]":
+     return {n["node_id"] for n in nodes if n.get("node_kind") == "ACCOUNT" and n.get("parent_node_id") is None}
+ 
+ 
+-# IB-pr-414 (row D2-S56): the gate compares the candidate with the served publication by KEY, so the served side is folded
+-# into three keyed sets, one node at a time, and never held as a list of node dicts. For the largest firm (about 155k nodes)
+-# that list was ~1 GB held across land() -- the producer's own peak -- and was what the gate added to the pre-gate run.
+-PUBLISH_GATE_SERVED_BATCH = 4096                  # parquet rows decoded per batch while the served side is folded
+-
+-
+-def _gate_fold_served_node(node, placed, unplaced, accounts) -> None:
+-    """Fold ONE served node into the keyed sets the gate compares: the security keys the served publication holds classified
+-    (`placed`) and unclassified (`unplaced`), and its top-level account ids."""
+-    kind = node.get("node_kind")
+-    if kind == "ACCOUNT" and node.get("parent_node_id") is None:
+-        accounts.add(node["node_id"])
+-    elif kind == "SECURITY":
+-        key = _gate_security_key(node)
+-        if key is not None:
+-            (unplaced if node.get("asset_class") in (None, "unclassified") else placed).add(key)
+-
+-
+-def _gate_served_keys(served) -> "tuple[set, set]":
+-    """(placed, unplaced) security keys of the served publication: the summary `served_publication` returns, or -- for a
+-    caller that hands the gate a served dict carrying full `nodes` -- folded from those nodes by the same rule."""
+-    if "placed_keys" in served:
+-        return served["placed_keys"], served["unplaced_keys"]
+-    placed, unplaced = set(), set()
+-    for n in served["nodes"]:
+-        _gate_fold_served_node(n, placed, unplaced, set())
+-    return placed, unplaced
+-
+-
+ def served_publication(publisher, expected) -> "dict | None":
+     """The publication the firm serves NOW, read by exact version from the index `begin()` captured -- or None when the
+     firm has none. Read from the Gold parquet (bounded 64 MB) and the manifest, never through the 4 MB whole-document
+-    load, so a multi-part publication of a large firm is still comparable. Returned as a KEYED SUMMARY (account ids and the
+-    classified / unclassified security keys), decoded batch by batch: the served node list is never materialised."""
++    load, so a multi-part publication of a large firm is still comparable."""
+     doc = (expected or {}).get("document")
+     if doc is None:
+         return None
+@@ -2969,16 +2939,9 @@ def served_publication(publisher, expected) -> "dict | None":
+         "platinum", partition, revision + ".manifest.json"), max_bytes=pub.MAX_JSON_BYTES))
+     data = publisher.read_exact(manifest["gold"], expected_location=publisher.location(
+         "gold", partition, revision + ".parquet"), max_bytes=pub.MAX_GOLD_BYTES)
+-    placed, unplaced, accounts, count = set(), set(), set(), 0
+-    parquet = pq.ParquetFile(io.BytesIO(data))
+-    del data
+-    for batch in parquet.iter_batches(batch_size=PUBLISH_GATE_SERVED_BATCH, columns=["node_json"]):
+-        for s in batch.column(0).to_pylist():
+-            _gate_fold_served_node(json.loads(s), placed, unplaced, accounts)
+-            count += 1
++    nodes = [json.loads(s) for s in pq.read_table(io.BytesIO(data), columns=["node_json"]).column("node_json").to_pylist()]
+     return {"business_date": (manifest.get("clocks") or {}).get("business_date") or date, "index_date": date,
+-            "revision": revision, "node_count": count, "account_ids": accounts,
+-            "placed_keys": placed, "unplaced_keys": unplaced,
++            "revision": revision, "nodes": nodes, "account_ids": _gate_account_ids(nodes),
+             "index_version": ((expected.get("reference") or {}).get("version_id"))}
+ 
+ 
+@@ -3057,7 +3020,9 @@ def evaluate_publish_gate(candidate: dict, served: "dict | None", closed_account
+             classes=sorted(str(c) for c in outside))
+     now_unclassified = {_gate_security_key(n) for n in secs if n.get("asset_class") == "unclassified"} - {None}
+     if served is not None:
+-        placed, unplaced = _gate_served_keys(served)
++        ps = [n for n in served["nodes"] if n.get("node_kind") == "SECURITY"]
++        placed = {_gate_security_key(n) for n in ps if n.get("asset_class") not in (None, "unclassified")} - {None}
++        unplaced = {_gate_security_key(n) for n in ps if n.get("asset_class") in (None, "unclassified")} - {None}
+         lost_class = now_unclassified & (placed - unplaced)
+         if lost_class:
+             add("classified_security_lost", lost_class)
