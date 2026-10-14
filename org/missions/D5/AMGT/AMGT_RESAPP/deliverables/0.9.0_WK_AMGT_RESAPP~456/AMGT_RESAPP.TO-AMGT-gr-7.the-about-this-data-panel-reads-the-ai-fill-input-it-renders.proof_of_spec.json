@@ -1,0 +1,137 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-gr-7.the-about-this-data-panel-reads-the-ai-fill-input-it-renders",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+  "vintage_commit": "d88fca1f84",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-7.the-about-this-data-panel-reads-the-ai-fill-input-it-renders.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-7.the-about-this-data-panel-reads-the-ai-fill-input-it-renders.md",
+  "group": "OTHER",
+  "vintage_commit": "d88fca1f84"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~456",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/components/InputProvenance.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "31337460",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on the nested portal branch cand/dell1/aifill-provenance (LOCAL, not pushed, not registered, not merged or promoted); read by AC1 and AC2 at that head"
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/SecurityAnalysis.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "31337460",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on the nested portal branch cand/dell1/aifill-provenance (LOCAL, not pushed); the one mount now passes aiFill; read by AC1 and AC3 at that head"
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~456/FEATURE_RECEIPT.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "feature receipt: branch, head, base, the two paths, pages changed, shared files none, not-carried counts 0; read by AC3"
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~456/SESSION_LOG.txt",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "session log of the commands run and their deciding outputs"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the line `AIFILL PROVENANCE: YES (N of N)` with N equal to 11, no `FAIL` arm line above it; and exit=0",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-resapp-456 && timeout 300 node \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr7_provenance.cjs\" \"C:/dev/wk-resapp-456/portal\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+   "output_evidence": "ARM the web-search collection row still says what it said (it describes the SERP input, not the AI fill) PASS Web search results stored for this name -- nothing has been read from this input for this name yet\nARM SecurityAnalysis.tsx hands the served fill to the panel PASS <InputProvenance entries={thesisQuery.data?.input_provenance} aiFill={thesisQuery.data?.ai_fill} />\nARM the component and the page file stay ASCII PASS \nAIFILL PROVENANCE: YES (11 of 11)\nexit=0",
+   "denominator": "11 of 11 arms PASS",
+   "status": "PASS",
+   "status_reason": "the tail shows the verdict line AIFILL PROVENANCE: YES (11 of 11) and exit=0; the full run printed 11 ARM lines, all PASS, none FAIL.",
+   "expect": "AIFILL PROVENANCE: YES \\(11 of 11\\)[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the line `R103 FEATURE GREEN: YES (typecheck rc 0, lint rc 0, harness P of T pass, base Q of U, regressions 0, pre-existing: <names>)` with T equal to U; and exit=0",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-resapp-456 && timeout 590 bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_green_v2.sh\" \"C:/dev/wk-resapp-456/portal\" 7db035e4 | tail -2; echo \"exit=${PIPESTATUS[0]}\"",
+   "output_evidence": "typecheck rc 0 | lint rc 0 | harness 21 of 24 pass | base 18 of 24 | regressions 0: none | pre-existing: assembled.harness.cjs exportCompare.harness.cjs timelineFourStates.harness.cjs\nR103 FEATURE GREEN: YES (typecheck rc 0, lint rc 0, harness 21 of 24 pass, base 18 of 24, regressions 0, pre-existing: assembled.harness.cjs exportCompare.harness.cjs timelineFourStates.harness.cjs)\nexit=0",
+   "denominator": "harness 21 of 24 pass; base 18 of 24 (T = U = 24); regressions 0",
+   "status": "PASS",
+   "status_reason": "the R103 line reads YES with typecheck rc 0 and lint rc 0, the harness denominator 24 equals the base denominator 24, regressions 0, and exit=0.",
+   "expect": "R103 FEATURE GREEN: YES \\(typecheck rc 0, lint rc 0, harness \\d+ of (\\d+) pass, base \\d+ of \\1, regressions 0, pre-existing: [^\\n]*\\)[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "every changed file listed as page, none forbidden or unnamed, and the line `R103 FEATURE SURFACE: YES (2 files: 2 page, 0 shared named, 0 forbidden, 0 unnamed)`; and exit=0",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-resapp-456/portal && python \"C:/dev/wk-resapp-456/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_surface_check.py\" --portal . --base 7db035e4 --head HEAD --receipt \"C:/dev/wk-resapp-456/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~456/FEATURE_RECEIPT.md\"; echo \"exit=$?\"",
+   "output_evidence": "  page      src/pages/SecurityAnalysis/SecurityAnalysis.tsx\n  page      src/pages/SecurityAnalysis/components/InputProvenance.tsx\nR103 FEATURE SURFACE: YES (2 files: 2 page, 0 shared named, 0 forbidden, 0 unnamed)\nexit=0",
+   "denominator": "2 of 2 changed files classed page; 0 forbidden; 0 unnamed",
+   "status": "PASS",
+   "status_reason": "both changed files are under src/pages/SecurityAnalysis/, the receipt's Pages changed section names Security Analysis as Opal-internal, and the line reads YES with exit=0.",
+   "expect": "R103 FEATURE SURFACE: YES \\(2 files: 2 page, 0 shared named, 0 forbidden, 0 unnamed\\)[\\s\\S]*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "N/A: the order names no mutant; the 11 arms of check_gr7_provenance.cjs are the discriminators, and the preflight records the base reads 6 of 11",
+   "expected": "N/A",
+   "observed": "no mutant named by the order",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "N/A-WITH-REASON: each criterion is one read of the committed bytes by a prepared check; no same-input rerun was run",
+   "observed": "AC1 and AC2 were each run once before the receipt and once verbatim for this instance; the outputs matched in both runs",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "git push of cand/dell1/aifill-provenance",
+   "reason": "bound by the order: never push; the issuer pushes after the CVO re-read is MET and the CTO releases the API hold"
+  },
+  {
+   "item": "approval registration (open-calls.py add --kind approval)",
+   "reason": "bound by the order: the issuer registers the approval row; a box does not"
+  },
+  {
+   "item": "merge or promote to DEV or PROD (portal-merge-forward, portal-release-build)",
+   "reason": "outside this order; no DEV or PROD touched"
+  },
+  {
+   "item": "bun install and a browser run of bun run dev:live",
+   "reason": "bound by the order (no bun install; node_modules is a link to the main checkout); the render is proven by the prepared check's react-dom/server arms and the typecheck and lint of AC2"
+  },
+  {
+   "item": "the TO <status> flip to complete",
+   "reason": "the order states the flip is the issuer's, and the TO file is outside this worker's write grant"
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-D1-W456-S1: the pre-commit gate on the nested portal checked 0 of 2 frontend files (commit-gate) and the risk reflex answered PARTIAL_OR_BLIND on a stale danger map; the commit landed on cand/dell1/aifill-provenance at 31337460."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~456/SESSION_LOG.txt",
+ "compiler_tools": [
+  {
+   "tool": "check_gr7_provenance.cjs",
+   "invocation": "node org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr7_provenance.cjs C:/dev/wk-resapp-456/portal",
+   "result": "ARM 11 of 11 PASS; AIFILL PROVENANCE: YES (11 of 11); exit=0"
+  },
+  {
+   "tool": "r103_feature_green_v2.sh",
+   "invocation": "bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_green_v2.sh C:/dev/wk-resapp-456/portal 7db035e4",
+   "result": "typecheck rc 0 | lint rc 0 | harness 21 of 24 pass | base 18 of 24 | regressions 0; R103 FEATURE GREEN: YES; exit=0"
+  },
+  {
+   "tool": "r103_feature_surface_check.py",
+   "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_surface_check.py --portal . --base 7db035e4 --head HEAD --receipt FEATURE_RECEIPT.md",
+   "result": "2 files: 2 page, 0 shared named, 0 forbidden, 0 unnamed; R103 FEATURE SURFACE: YES; exit=0"
+  }
+ ]
+}

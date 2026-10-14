@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gr-1.whole-text-real-sentence-ends-and-joined-answer-segments",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-1.whole-text-real-sentence-ends-and-joined-answer-segments.md",
+    "group": "OTHER",
+    "vintage_commit": "d88fca1f84"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "d88fca1f84",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-1.whole-text-real-sentence-ends-and-joined-answer-segments.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~450",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/sentences.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build cell on the worker branch; no served path reads it until the builders adopt it in cell AMGT-gr-6"
+    },
+    {
+      "path_or_key": "lib/research/aifill/model.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build cell on the worker branch; parse_response change only, no deploy"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_sentences.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test module for sentences.py; offline pure functions"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_model_final_answer.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one new test added; the pinned old join assertion is unchanged and fails (row AMGT_RESAPP-D1-W450-S1)"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~450/SESSION_LOG.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker session record; not deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL GR-1 ARMS: YES (N of N)` with N equal to 28, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-450 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr1_text.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM seam: parse_response joins the final segments with a space PASS She joined the board in February 2022. She has served as chair since.\nARM seam: the recorded real response still parses, no joined sentence PASS ASML Holding's President and CEO is **Christophe Fouquet**, a French national an\nARM the module is ASCII, stdlib only, no network PASS non-ASCII or network import\nAIFILL GR-1 ARMS: YES (28 of 28)\nexit=0",
+      "denominator": "28 arms of 28 (check_gr1_text.py); the four lines shown are the tail of the run",
+      "status": "PASS",
+      "expect": "AIFILL GR-1 ARMS: YES \\(28 of 28\\)[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-450 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_sentences.py lib/research/aifill/tests/test_model_final_answer.py lib/research/aifill/tests/test_model_inputs.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "FAILED lib/research/aifill/tests/test_model_final_answer.py::test_final_segment_text_is_joined_with_no_separator\n1 failed, 97 passed in 0.30s\nexit=1",
+      "denominator": "98 tests across 3 modules: 97 passed, 1 failed",
+      "status": "FAIL",
+      "status_reason": "1 of 98 fails: test_final_segment_text_is_joined_with_no_separator pins the pre-cell join ('now.MUFG announced.'); the cell's join rule gives 'now. MUFG announced.' and the order bounds the worker to one new test in that file. Filed AMGT_RESAPP-D1-W450-S1 for the issuer (disarm_owner 2.0.0_SA_COO~R2). Order stays open.",
+      "expect": "(?<![0-9])(?<!, )\\d+ passed in \\d"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the line `AIFILL FC-1 ARMS: YES (12 of 12)`: the round-105 seam check keeps passing (a control, not a hygiene check); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-450 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round105_aifill_prep/checks/check_fc1_seam.py\" | tail -1; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "AIFILL FC-1 ARMS: YES (12 of 12)\nexit=0",
+      "denominator": "12 arms of 12 (check_fc1_seam.py)",
+      "status": "PASS",
+      "expect": "AIFILL FC-1 ARMS: YES \\(12 of 12\\)[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "replace sentences.join_segments with a plain concatenation of the parts and run the new joined-segment test",
+      "expected": "FAILED test_final_segments_ending_a_sentence_are_joined_with_one_space",
+      "observed": "FAILED lib/research/aifill/tests/test_model_final_answer.py::test_final_segments_ending_a_sentence_are_joined_with_one_space; 1 failed, 23 deselected",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of lib/research/aifill/tests/test_sentences.py compared",
+      "observed": "run 1: 43 passed; run 2: 43 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "adoption of sentences.py by the five block builders",
+      "reason": "cell AMGT-gr-6, not this cell (the order's bound 1)"
+    },
+    {
+      "item": "update of the pinned old join assertion in test_model_final_answer.py",
+      "reason": "the order's bound 1 says touch no other test; surprise row AMGT_RESAPP-D1-W450-S1 is filed for the issuer"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W450-S1: AMGT-gr-1 AC2 cannot read PASS: the cell's join rule makes the existing test test_final_segment_text_is_joined_with_no_separator fail, and the order says touch no other test"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~450/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/sentences.py lib/research/aifill/model.py lib/research/aifill/tests/test_sentences.py lib/research/aifill/tests/test_model_final_answer.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s); exit 0"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "recorded in the worker report on the committed bytes"
+    }
+  ]
+}
