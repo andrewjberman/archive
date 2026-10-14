@@ -1,0 +1,165 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ar-1.the-adapter-role-reads-the-ai-fill-prefix",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "289e6b1a4f",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ar-1.the-adapter-role-reads-the-ai-fill-prefix.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ar-1.the-adapter-role-reads-the-ai-fill-prefix.md",
+    "group": "OTHER",
+    "vintage_commit": "289e6b1a4f"
+  },
+  "assignee": "0.7.0_AE_CloudOps~RA1",
+  "risk_class": "WORLD",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND104_AIFILL_STORE_GRANT_REDEPLOY_COO_HALF.md@562d789201 (sha256 0bbe6a16c65580883e2b3c743486b9622b2beb7c5831f9a597e1ab0d050bf7e2)",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND104_AIFILL_STORE_GRANT_REDEPLOY_CTO_HALF.md@a4e73809b5 (sha256 559504055060209bae6d3726184f8ea3bfb67eaa963e3d171c27756d3e9f99ac)",
+    "read_before_first_live_act": "The order was read whole before the ledger opened (2026-10-14T00:37Z); the CTO half is named by the order and read by the issuer (CTO msg 5304 names this seat as the applier of steps 1 and 3); the first live act, the apply, at 00:38:18Z.",
+    "conditions_disposition": "GO 1 (the constant prints amgt/harvest/gold/ai_fill/): MET, leg L1. GO 2 (the live policy reads 7 statements, 34 resources, sha16 77c69f8359764942 before the act): MET, leg L1. GO 3 (ledger and sentinel opened before the edit): MET. GO 4 (the targeted plan shows exactly one resource changing, one resource and one prefix added, no other difference): MET, leg L3. GO 5 (the targeted safe-apply of the saved plan): MET, leg L4. GO 6 (the check reads YES, pre and post sha16 printed): MET, leg L5. GO 7 (AC2): MET, leg L6.",
+    "instrument_note": "check_ar1_grant.py reads the live inline policy (iam:GetRolePolicy) and re-derives the pre-act sha16 by stripping the one entry from each limb; the post sha16 b50b9248dbcc7d02 was computed by this seat with the check's own canon_sha16 form (sort_keys, compact separators)."
+  },
+  "rollback": "NAMED, NOT NEEDED. Remove the one list entry (and its comment) from local.scoped_amgt_pool_prefixes, run the same targeted plan and safe-apply of aws_iam_role_policy.scoped_amgt_api_grants, then re-read the live policy: the entry absent from both limbs and the canonical sha16 back at 77c69f8359764942 (check_ar1_grant.py reads NO 4 of 7 again, which is the base). It is additive on an empty prefix (KeyCount 0 at ~00:05Z), so it may also stay.",
+  "scope": "ONE list entry in ONE file (infra/aws/terraform/harvest/scoped-amgt-api.tf), ONE targeted apply of ONE resource (aws_iam_role_policy.scoped_amgt_api_grants): an additive s3:GetObject resource and s3:ListBucket prefix condition for amgt/harvest/gold/ai_fill/. No S3 write, no model call, no code change to the function, no other statement, role, route or schedule.",
+  "status": "APPLIED AND VERIFIED. check_ar1_grant.py reads YES (7 of 7) (was NO 4 of 7); sha16 77c69f8359764942 -> b50b9248dbcc7d02; AC2 captured 2 names, non-200 none; ledger legs L1-L7 closed.",
+  "go_message": "2.0.0_SA_COO~R2 msg 5310 (GO AMGT-ar-1); CTO msg 5304 (names this seat as applier).",
+  "controls": {
+    "pre_act_policy_equals_the_halfs_values": {
+      "description": "Step 1: the live policy is read BEFORE the act and must be the half's table: 7 statements, 34 pool resources, canonical sha16 77c69f8359764942; anything else is a STOP (the half is stale).",
+      "expected_landed": "7 statements, GetObject resources 34, sha16 77c69f8359764942 (control 77c69f8359764942 vs 77c69f8359764942), check reads NO 4 of 7",
+      "expected_not_landed": "another statement count or sha16, which would mean someone changed the policy",
+      "observed": "(ledger leg L1) PASS. Constant printed: AI_FILL_GOLD_PREFIX = amgt/harvest/gold/ai_fill/ (trailing slash present). Pre-act check_ar1_grant.py run 2026-10-14T00:36:23Z: arms PASS 7 statements, PASS the two named statements exist once each (1, 1), FAIL GetObject limb new prefix (absent), FAIL GetObject one resource more (34), FAIL ListBucket condition (absent), PASS object-scoped, PASS byte-equality control 77c69f8359764942 vs 77c69f8359764942; AIFILL AR-1 GRANT: NO (4 of 7), exit=1: the pre-act values the half names (7 statements, 34 resources, sha16 77c69f8359764942).",
+      "status": "PASS"
+    },
+    "named_rollback_is_the_check_base": {
+      "description": "The discriminating control section 5 names: the rollback state (the one entry removed from each limb) is the check's own base; the check reads NO at the base and YES after, and its byte-equality arm strips the one entry from each limb and compares the canonical sha16 to the pre-act policy.",
+      "expected_landed": "base NO (4 of 7): the three arms naming the new entry FAIL; after the apply YES (7 of 7); with the entry stripped the policy is byte-equal (77c69f8359764942 vs 77c69f8359764942); live sha16 77c69f8359764942 -> b50b9248dbcc7d02",
+      "expected_not_landed": "a policy where any other statement or resource moved (the stripped sha16 would differ from 77c69f8359764942)",
+      "observed": "(ledger leg L5) PASS. Live re-read after the apply (check_ar1_grant.py): all seven arms PASS (statements 7; named statements (1, 1); GetObject limb grants arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/* exactly once; GetObject resources 35; ListBucket condition amgt/harvest/gold/ai_fill/* exactly once; object-scoped; byte-equality control 77c69f8359764942 vs 77c69f8359764942); 'AIFILL AR-1 GRANT: YES (7 of 7)', exit=0. SHA16 (canonical, sort_keys, compact): PRE-ACT 77c69f8359764942 (34 pool resources); POST-ACT b50b9248dbcc7d02 (35 pool resources, 7 statements), the live inline policy opal-amgt-scoped-api-grants read by iam get-role-policy.",
+      "status": "PASS"
+    },
+    "exactly_one_resource_changing_read_from_the_plan_json": {
+      "description": "The targeted plan is graded from its JSON before the apply: exactly one resource changes in place, one resource added to GetObject, one prefix to the ListBucket condition, no other difference.",
+      "expected_landed": "resource_changes 4 (3 no-op, 1 update: aws_iam_role_policy.scoped_amgt_api_grants); statements 7 -> 7; Resource 34 -> 35 (added the ai_fill/* ARN only); Condition 34 -> 35 (added ai_fill/* only)",
+      "expected_not_landed": "a second changing resource or any removed or reshaped statement",
+      "observed": "(ledger leg L3) PASS. Targeted plan (terraform plan -target=aws_iam_role_policy.scoped_amgt_api_grants, saved ar1.tfplan, PLAN_RC=0), graded from terraform show -json BEFORE the apply: resource_changes denominator 4 (3 no-op targeted dependencies, 1 update); the one update is aws_iam_role_policy.scoped_amgt_api_grants in place; statements 7 -> 7; ReadThePoolPrefixesTheAdapterReads Resource 34 -> 35, added exactly arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/*, removed none; ListOnlyThePoolPrefixesTheAdapterReads Condition StringLike s3:prefix 34 -> 35, added exactly amgt/harvest/gold/ai_fill/*, removed none; every other key of both statements equal; no other statement changed.",
+      "status": "PASS"
+    },
+    "the_edit_is_one_list_entry": {
+      "description": "Step 3 and bound 1: one list entry as the LAST element of local.scoped_amgt_pool_prefixes, nothing else touched in the file.",
+      "expected_landed": "git diff: 1 file changed, 6 insertions (a 5-line comment and the entry amgt/harvest/gold/ai_fill/,) and no deletion",
+      "expected_not_landed": "any other line of scoped-amgt-api.tf moving",
+      "observed": "(ledger leg L2) PASS. infra/aws/terraform/harvest/scoped-amgt-api.tf: +6 -0 lines, all inside local.scoped_amgt_pool_prefixes: a 5-line comment naming both halves of the pair and the generated constant, then the entry amgt/harvest/gold/ai_fill/ as the LAST element after seeking-alpha/harvest/state/job_record/. Nothing else in the file touched (git diff --stat: 1 file changed, 6 insertions).",
+      "status": "PASS"
+    },
+    "targeted_safe_apply_only": {
+      "description": "Step 5: the SAVED targeted plan through safe-apply, never a bare terraform apply and never wider than one resource.",
+      "expected_landed": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed; comp-tagauthz PASSED; tombstone-gate CLEAN",
+      "expected_not_landed": "a changed count other than 1, or a bare apply",
+      "observed": "(ledger leg L4) PASS. The SAVED targeted plan ar1.tfplan applied through .tools/safe-apply.sh (Rule 18) 2026-10-14T00:38:18Z-00:39:53Z: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed', APPLY_RC=0; comp-tagauthz gate PASSED, tombstone-gate CLEAN (0 creates against 7 tombstones). Pre-apply inbox check (Rule 18a, broker limb): get_delivery_state since 00:20Z read 2 rows, the GO (READ) and the bk-2 amendment msg 5311 (opened and acked; not a STOP).",
+      "status": "PASS"
+    },
+    "the_function_still_answers": {
+      "description": "Step 7 / AC2: the function answers /thesis for two names after the grant (the function's code is untouched by this order).",
+      "expected_landed": "CAPTURED 2 name(s); non-200: none; exit=0",
+      "expected_not_landed": "a non-200 for either name",
+      "observed": "(ledger leg L6) PASS. AC2: the function still answers: 'CAPTURED 2 name(s) to .scratch_ar1/thesis_post.json; non-200: none', exit=0 (ASML_NA_Equity and AMD_US_Equity, /thesis on opal-amgt-scoped-api; the function's code untouched by this order). Capture stays LOCAL, uncommitted.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "(ledger leg L5) PASS. Live re-read after the apply (check_ar1_grant.py): all seven arms PASS (statements 7; named statements (1, 1); GetObject limb grants arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/* exactly once; GetObject resources 35; ListBucket condition amgt/harvest/gold/ai_fill/* exactly once; object-scoped; byte-equality control 77c69f8359764942 vs 77c69f8359764942); 'AIFILL AR-1 GRANT: YES (7 of 7)', exit=0. SHA16 (canonical, sort_keys, compact): PRE-ACT 77c69f8359764942 (34 pool resources); POST-ACT b50b9248dbcc7d02 (35 pool resources, 7 statements), the live inline policy opal-amgt-scoped-api-grants read by iam get-role-policy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261014T0037Z_amgt-resapp-r104-ar1-aifill-grant-dell1_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "497d210ed3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 entry: opened 2026-10-14T00:37Z with 7 legs before the edit, CLOSED after L7; the closed bytes ride the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "no `FAIL` arm line and the line `AIFILL AR-1 GRANT: YES (7 of 7)`; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" timeout 120 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_ar1_grant.py\"; echo \"exit=$?\"",
+      "output_evidence": "ARM the policy still has the pre-act statement count                       PASS 7\nARM the two named statements exist once each                               PASS (1, 1)\nARM GetObject limb: the AI-fill prefix is granted exactly once             PASS arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/*\nARM GetObject limb: one resource more than before                          PASS 35\nARM ListBucket limb: the AI-fill prefix condition is present exactly once  PASS amgt/harvest/gold/ai_fill/*\nARM the new entry is object-scoped: it ends with the prefix and a star, never a bare bucket PASS arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/*\nARM with the one entry removed from each limb the policy is byte-equal to the pre-act policy PASS 77c69f8359764942 vs 77c69f8359764942\nAIFILL AR-1 GRANT: YES (7 of 7)\nexit=0\n--- the same check BEFORE the act (the base, 2026-10-14T00:36:23Z) ---\nARM the policy still has the pre-act statement count                       PASS 7\nARM the two named statements exist once each                               PASS (1, 1)\nARM GetObject limb: the AI-fill prefix is granted exactly once             FAIL arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/*\nARM GetObject limb: one resource more than before                          FAIL 34\nARM ListBucket limb: the AI-fill prefix condition is present exactly once  FAIL amgt/harvest/gold/ai_fill/*\nARM the new entry is object-scoped: it ends with the prefix and a star, never a bare bucket PASS arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/ai_fill/*\nARM with the one entry removed from each limb the policy is byte-equal to the pre-act policy PASS 77c69f8359764942 vs 77c69f8359764942\nAIFILL AR-1 GRANT: NO (4 of 7)\nexit=1",
+      "denominator": "7 arms; the live inline policy opal-amgt-scoped-api-grants read by iam get-role-policy after the apply (sha16 b50b9248dbcc7d02, 7 statements, 35 pool resources)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the line `CAPTURED 2 name(s) to .scratch_ar1/thesis_post.json; non-200: none`; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && AIFILL_SERVED_FUNCTION=opal-amgt-scoped-api PYTHONPATH=\"$(pwd)\" timeout 120 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_ar3_aifill_served.py\" capture --names ASML_NA_Equity,AMD_US_Equity --out \".scratch_ar1/thesis_post.json\"; echo \"exit=$?\"",
+      "output_evidence": "CAPTURED 2 name(s) to .scratch_ar1/thesis_post.json; non-200: none\nexit=0",
+      "denominator": "2 names (ASML_NA_Equity, AMD_US_Equity), one /thesis read each on the live function after the apply; the capture stays LOCAL and uncommitted",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The function redeploy that reads the prefix (AMGT-ar-3)",
+      "reason": "The order's bound 1: the function's code is untouched; ar-3 is staged behind bk-2, ar-1 and the issuer's AMD store."
+    },
+    {
+      "item": "The AC2 capture file .scratch_ar1/thesis_post.json",
+      "reason": "Client research content: it stays LOCAL and uncommitted."
+    },
+    {
+      "item": "record-terraform-deploy.sh",
+      "reason": "No Lambda code or source-map entry moved; the change is one IAM inline policy, recorded by the ledger entry."
+    }
+  ],
+  "surprises": [],
+  "regression_reads": {
+    "sizing_unmoved": "No function, route, schedule or other policy statement moved; the plan graded 1 change of 4 targeted resources.",
+    "not_moved_set": "The other six statements and every other key of the two changed statements are equal pre to post (plan JSON and the stripped-entry sha16)."
+  },
+  "cold_reads": {
+    "function_state_now": "The function's code is unchanged by this order (bk-2's CodeSha256 Wkt48Y6vf4o4Dhyb9gVkfaf9IIJ75ThoI+hiMUoGrS4= stands); AC2 answered for 2 names.",
+    "push_state": "Committed LOCAL on box/dell1; no push by this seat.",
+    "open_deploys_sweep": "The ledger sentinel for this order opened before the edit and removed at close; no other entry names this role policy."
+  },
+  "forward_notes": [
+    "AMGT-ar-3 (the redeploy that reads amgt/harvest/gold/ai_fill/) is the issuer's GO; until then the serve reads ABSENT with read_completed false.",
+    "Post-apply sha16 b50b9248dbcc7d02 is the baseline for any later change to opal-amgt-scoped-api-grants."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~RA1/logs/2026-10-13/ar1_aifill_grant.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open; close-leg L1-L7; close --slug amgt-resapp-r104-ar1-aifill-grant-dell1",
+      "result": "PASS. 7 legs proven; entry CLOSED."
+    },
+    {
+      "tool": "check_ar1_grant.py",
+      "invocation": "AC1, before and after the apply",
+      "result": "NO (4 of 7) -> YES (7 of 7)."
+    },
+    {
+      "tool": "terraform plan -target / show -json / safe-apply.sh",
+      "invocation": "the one resource; graded from the plan JSON; saved plan applied",
+      "result": "PASS. 1 change; Apply complete 0 added, 1 changed, 0 destroyed."
+    },
+    {
+      "tool": "check_ar3_aifill_served.py capture",
+      "invocation": "AC2, 2 names",
+      "result": "PASS. non-200: none."
+    }
+  ]
+}

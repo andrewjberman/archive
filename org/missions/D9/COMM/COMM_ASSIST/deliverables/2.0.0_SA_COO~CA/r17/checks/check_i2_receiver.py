@@ -69,7 +69,8 @@ def main():
             def body(state, action="send", notes="", version=None):
                 p = state["pending"]
                 return json.dumps({"tag": p["tag"], "action": action, "notes": notes,
-                                   "version": p["version"] if version is None else version, "signed_at": "2026-10-13T22:00:00Z"}, sort_keys=True)
+                                   "version": p["version"] if version is None else version, "seq": p.get("seq"),
+                                   "signed_at": "2026-10-13T22:00:00Z"}, sort_keys=True)
 
             def run(name, build, expect, check):
                 try:
