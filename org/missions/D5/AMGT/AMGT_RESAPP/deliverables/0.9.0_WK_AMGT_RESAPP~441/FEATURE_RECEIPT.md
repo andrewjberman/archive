@@ -5,7 +5,7 @@ Feature: the Security Analysis Model tab prints the price behind a historical P/
 ## What the branch carries
 
 - Branch: `cand/dell1/amgt-sa-pe-basis-and-reasons` (portal repository, nested worktree `C:/dev/wk-resapp-441/portal`)
-- Head commit: `9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36` (LOCAL, not pushed)
+- Head commit: `4eb56d57d2683a55f5009d9f777015f975e7d414` (LOCAL, not pushed; the re-seat commit on top of the first pass `9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36`)
 - Base: PROD `7db035e4`
 - Changed paths (`git diff --name-status 7db035e4 HEAD`):
   - `A src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs`
