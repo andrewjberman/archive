@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gt-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~74",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "852954f8b8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "217282fadd",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-3.figures-tools.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_figures.py",
+      "kind": "script",
+      "commit_or_etag": "d79e6dda9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only; no release, no deploy, no IAM or Terraform change, no write to any bucket. Both tools admit through harvest_typed.admit_typed before any S3 call and read only; no tool is registered in app/tools.py (the issuer registers at the merge). The release rides NFRA_OPLGTW.TO-OG-ap-18.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt3.py",
+      "kind": "test",
+      "commit_or_etag": "d79e6dda9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline tests test_oggt3_ac01..ac05 with a paginating recording fake on harvest_read._client and a principal stand-in on harvest_read.get_current_principal; no AWS call.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests (test_oggt3_ac01..ac05); failed/error lines 0",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)query top-20 on \\d{4}-\\d{2}-\\d{2}: tool True vs independent equal; unknown column refused True; limit 500 clamped to \\d+; consensus rows for ASML [1-9]\\d*; source key is the newest part True.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "query top-20 on 2026-10-08: tool True vs independent equal; unknown column refused True; limit 500 clamped to 200; consensus rows for ASML 3; source key is the newest part True\nRESULT: PASS\nexit=0",
+      "denominator": "1 live probe against s3://opal-data-harvest with the box credentials and INTERNAL_READER_ROLE_ARN unset: 20 of 20 top rows equal the independent read of the newest chatter_daily part (2026-10-08 partition); 3 BEST_* consensus rows for ASML_NA_Equity",
+      "status": "PASS",
+      "expect": "(?s)query top-20 on \\d{4}-\\d{2}-\\d{2}: tool True vs independent equal; unknown column refused True; limit 500 clamped to \\d+; consensus rows for ASML [1-9]\\d*; source key is the newest part True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch pytest plugin (not committed, .scratch/mutant_plugin.py) replaces harvest_typed.newest_part with the OLDEST-part rule, so chatter_daily would be read from the older part of the partition.",
+      "expected": "test_oggt3_ac04 FAILS (the newest-part guard is discriminated by the fake holding an older part with different values)",
+      "observed": "PYTHONPATH=.scratch pytest tests/test_og_gt3.py::test_oggt3_ac04 -p mutant_plugin -> 1 failed, FAILED test_oggt3_ac04 - AssertionError on the rows assertion (rc=1). The unmutated test passes under gt3.AC1.sh (5 of 5).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: gt3.AC1.sh run twice on the committed bytes and gt3.AC2.sh run twice on the committed bytes, each pair compared on its deciding output line.",
+      "observed": "AC1 both runs: pytest rc=0; named tests passed 5 of 5; failed/error lines 0; RESULT: PASS. AC2 both runs: query top-20 on 2026-10-08: tool True vs independent equal; unknown column refused True; limit 500 clamped to 200; consensus rows for ASML 3; source key is the newest part True; RESULT: PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of harvest_get_fundamentals and harvest_query_columns in app/tools.py, the entitlement and destructive-ops tables, and the pinned-count tests",
+      "reason": "Outside this cell's <paths>; the issuer registers every tool and re-pins the counts at the merge in one commit (task order section 2)."
+    },
+    {
+      "item": "Catalog rows for the two tools in app/refs/DATA_CATALOG.yaml and harvest_describe_dataset",
+      "reason": "NFRA_MCPINDEX's alone (task order section 2)."
+    },
+    {
+      "item": "Release and deploy of the two tools",
+      "reason": "NFRA_OPLGTW.TO-OG-ap-18 is the release order this cell rides (task order preflight)."
+    },
+    {
+      "item": "An audit row for a call refused on its arguments",
+      "reason": "The OG-gt-0 base audits admission refusals and served calls only; a tool module cannot reach the principal to audit a denied argument. Filed as surprise NFRA_OPLGTW-Z-W74-S5."
+    },
+    {
+      "item": "The sub-field lists of bestdata, model_block and candidate_universe as contract columns",
+      "reason": "The contract declares no sub-fields of these JSON objects; the tuples are derived from one sample object each and filed as surprise NFRA_OPLGTW-Z-W74-S3."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W74-S1: candidate_universe security_key is non-null on 3 of 2,856 rows, so security_keys is refused for that dataset with the measured count in the message (INERT; disarmed in this cell).",
+    "NFRA_OPLGTW-Z-W74-S2: article_sentiment is an append-batch table (5 parts, 13,235 rows); the face's newest-part rule returns one batch of 2,674 rows; body dataset_note and source_keys name it (ARMED; disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W74-S3: bestdata, model_block and candidate_universe sub-fields are not declared in the contract; the tools declare them from one measured sample object each (INERT).",
+    "NFRA_OPLGTW-Z-W74-S4: the figures grain is (scope, fiscal_year, mnemonic) and the face's field list omits scope; harvest_get_fundamentals model returns scope as well (INERT; no duplicate measured).",
+    "NFRA_OPLGTW-Z-W74-S5: a call refused on its arguments writes no audit row; the typed base has no denied-argument audit helper and reads no data on those calls (INERT)."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
+  "compiler_tools": [
+    {
+      "tool": "pytest (named tests) through gt3.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt3.AC1.sh",
+      "result": "rc=0; named tests passed 5 of 5; failed/error lines 0; RESULT: PASS"
+    },
+    {
+      "tool": "live probe, read only, box credentials, via gt3.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt3.AC2.sh",
+      "result": "tool top-20 equal to the independent read of the newest chatter_daily part; unknown column refused; limit 500 -> 200; ASML consensus rows 3; source key the newest part; RESULT: PASS"
+    },
+    {
+      "tool": "live smoke, read only, scratch script (every fundamentals kind and query dataset)",
+      "invocation": "python .scratch/smoke_live.py (scratch, not committed)",
+      "result": "every kind returned rc 0: model 180 figures (fye absent for ASML, present for BABA), consensus 3, reference 3 fields, valuation_history 14, segments 12, price ASML NA 22 points; query bestdata, model_block, chatter_window, article_sentiment, candidate_universe returned; candidate_universe security_key filter measured as a silent zero before the refusal was added"
+    },
+    {
+      "tool": "mutant plugin (scratch, not committed)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && PYTHONPATH=<worktree>/.scratch python -m pytest tests/test_og_gt3.py::test_oggt3_ac04 -p mutant_plugin -q",
+      "result": "1 failed (test_oggt3_ac04 AssertionError); the mutant fires"
+    },
+    {
+      "tool": "ruff (py39 target, E F W, E501 ignored) and py_compile",
+      "invocation": "ruff check --target-version py39 --select E,F,W --ignore E501 on the two new files; python -m py_compile on both",
+      "result": "one F401 (unused import in the test file) fixed before the commit; compile OK; non-ASCII scan of both files clean"
+    }
+  ]
+}
