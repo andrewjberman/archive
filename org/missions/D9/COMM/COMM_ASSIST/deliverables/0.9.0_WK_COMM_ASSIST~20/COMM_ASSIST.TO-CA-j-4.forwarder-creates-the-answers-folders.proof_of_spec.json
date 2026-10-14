@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-j-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-4.forwarder-creates-the-answers-folders.md",
+    "group": "OTHER",
+    "vintage_commit": "063dff2307"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+    "vintage_commit": "063dff2307",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-4.forwarder-creates-the-answers-folders.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~20",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/muse_reader/forwarder.py",
+      "kind": "script",
+      "commit_or_etag": "5b9139d7cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "forward() no longer returns at once when answers/ is missing. Lines 117-119 at the code commit: done_dir and rej_dir are set, then for folder in (answers, done_dir, rej_dir) folder.mkdir(parents=True, exist_ok=True). The two old per-run done/rejected mkdir lines are removed as redundant. The rest of forward() is unchanged. No deploy, no AWS call; the dell2 checkout picks the change up at its box pass.",
+      "artifact_covered_by": [
+        "CAj4-AC1",
+        "CAj4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAj4-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j4_dirs.py\" expect: J4-DIRS ok=True arms=3 of 3",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j4_dirs.py\"",
+      "output_evidence": "(run from the worktree root under timeout 120 at code commit 5b9139d7cf; the script exits 0 whatever the verdict, so the printed line is the verdict) J4-DIRS ok=True arms=3 of 3 failed=none reason=none  [rc=0]",
+      "denominator": "3 of 3 arms pass: creates-all-three-when-absent, answer-file-and-markers-untouched, second-run-on-a-fresh-folder-ok",
+      "expect": "J4-DIRS ok=True arms=3 of 3",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CAj4-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_forward.py\" expect: I3-FORWARD ok=True arms=6 of 6",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_forward.py\"",
+      "output_evidence": "(run from the worktree root under timeout 120 at code commit 5b9139d7cf; the WARN line is the check's own stderr from a deliberate failing send) I3-FORWARD ok=True arms=6 of 6 failed=none reason=none  [rc=0]",
+      "denominator": "6 of 6 arms pass (the round-17 forwarder control, unchanged by this edit)",
+      "expect": "I3-FORWARD ok=True arms=6 of 6",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAj4-AC1 run against the base forwarder at 063dff2307 (the early return on a missing answers/), taken by git show into a scratch copy, before this order's edit",
+      "expected": "J4-DIRS ok=False arms=1 of 3 (the answer-file-untouched arm passes; the two creation arms fail)",
+      "observed": "J4-DIRS ok=False arms=1 of 3 failed=creates-all-three-when-absent;second-run-on-a-fresh-folder-ok reason=none (rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "CAj4-AC1 and CAj4-AC2 each run twice on the edited tree at code commit 5b9139d7cf; the printed lines compared",
+      "observed": "J4-DIRS two runs identical: J4-DIRS ok=True arms=3 of 3 failed=none reason=none. I3-FORWARD two runs identical: I3-FORWARD ok=True arms=6 of 6 failed=none reason=none.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, AWS calls, network",
+      "reason": "the order says the change is not deployed here; the dell2 checkout picks it up at its box pass"
+    },
+    {
+      "item": "the issuer's two checks",
+      "reason": "the order says read them and do not edit them; neither was edited"
+    },
+    {
+      "item": "reader-folder root creation",
+      "reason": "parents=True on answers/ also creates an absent root when forward() is called directly; the order says parents=True, so the edit is kept as written and the point is filed as COMM_ASSIST-W20-S1, not repaired"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W20-S1: parents=True on answers/ also creates an absent reader folder (the root) when forward() is called directly, where the old early return created nothing; main() refuses a missing --root first, so the CLI does not reach it. Kept as the order states it."
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~20/COMM_ASSIST.TO-CA-j-4.forwarder-creates-the-answers-folders.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "issuer check",
+      "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j4_dirs.py\"",
+      "result": "J4-DIRS ok=True arms=3 of 3 failed=none reason=none (rc 0)"
+    },
+    {
+      "tool": "issuer check",
+      "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i3_forward.py\"",
+      "result": "I3-FORWARD ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/transcripts/scripts/muse_reader/forwarder.py",
+      "result": "COMPILE-OK (rc 0)"
+    }
+  ]
+}
