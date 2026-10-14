@@ -1,0 +1,93 @@
+{
+  "producer": {
+    "file": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+    "entry": "main(argv) in holdings_performance.py, run as its CLI with --source blackdiamond_z09 and --date or --start/--end; the scheduled Lambda wrapper is infra/aws/lambda/investor-reporting/holdings-performance/handler.py lambda_handler, which passes the event's source to main",
+    "channel": "blackdiamond_z09",
+    "table": "holdings_performance_daily",
+    "claim": "inferred"
+  },
+  "schedule": {
+    "why_none": "never declared: infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf declares a trigger only for the 49 Financial channel (the Schwab custody source, cron 07:30 America/New_York Monday to Friday) and the Inflection channel (source orion, cron 14:00 UTC Monday to Friday); no entry names blackdiamond_z09, and the served graph holds no schedule for this channel. The newest Cottonwood gold partition has no attributed run in this read (NOT_ESTABLISHED).",
+    "desired": {
+      "exists": false,
+      "where": "infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf declares two triggers, neither for blackdiamond_z09; data/assets/scripts/gold/irpt_holdings_performance/sources.json declares no schedule for any channel",
+      "claim": "measured"
+    },
+    "applied": {
+      "exists": false,
+      "where": "served graph SCHEDULE read: 40 nodes, none names cottonwood or blackdiamond_z09. Live get-schedule was run on the two named sibling schedules only: irpt-holdings-performance-daily (the 49 Financial trigger, State ENABLED). No Cottonwood schedule name was guessed.",
+      "plane": "served_graph",
+      "claim": "absent"
+    },
+    "claim": "measured"
+  },
+  "frontier": {
+    "measured_on": "2026-10-14",
+    "newest_gold_date": "2026-09-25",
+    "newest_input_date": "2026-10-13",
+    "t_minus_1": "2026-10-13",
+    "trading_days_behind": 12,
+    "calendar_source": "lib/trading_calendar.py imported read-only on this box: NYSE/hardcoded-fallback-2010-2027 (pandas_market_calendars absent, WARN printed); the newest gold manifest records NYSE/pandas_market_calendars; the fallback holiday list has no NYSE holiday between 2026-09-25 and 2026-10-13; the pandas count was not run",
+    "claim": "measured"
+  },
+  "scheduled_fire_needs": [
+    {
+      "need": "TRIGGER AND TIME: a trigger on trading weekdays, timed after the input's landing. One landing was measured: the Black Diamond silver partition dated 2026-10-13 was written 2026-10-14 at 11:46 UTC (one object read, LastModified). The 49 Financial trigger fires at 07:30 New York, which says nothing about this channel's landing; a Cottonwood time needs more than one landing measurement. The trigger input must name source blackdiamond_z09, because the handler passes the event's source to main.",
+      "claim": "measured"
+    },
+    {
+      "need": "IDENTITY AND GRANTS: the scheduled function's role (the 49 Financial holdings-performance role in holdings-performance/iam.tf) reads only the 49 Financial Schwab silver and writes only the 49 Financial gold prefixes. A blackdiamond_z09 fire therefore needs a Cottonwood principal that reads the Black Diamond silver prefix blackdiamond/cottonwood/silver/fact_holdings/ in opal-data-assets and writes the two Cottonwood gold prefixes, the per-firm principal pattern of the holdings refresh (directory/holdings_refresh.tf header item 1). No such principal appears in the served IAM list.",
+      "claim": "measured"
+    },
+    {
+      "need": "INPUTS CURRENT AT FIRE TIME: the Black Diamond silver prefix holds 93 date partitions from 2026-06-09, the newest 2026-10-13, which is T-1, so the input is 0 trading days behind T-1 (current, not stale). A fire on 2026-10-14 would find its input present.",
+      "claim": "measured"
+    },
+    {
+      "need": "CLOSE BASIS: the declaration holds partition_close OWN_DATE for this channel, inferred over the whole history (10 of 81 partitions were read at the cut). A fire that computes day t from partition t relies on that inference. The producer refuses a declaration that lacks partition_close.",
+      "claim": "inferred"
+    },
+    {
+      "need": "METHOD AND DECLARATION VERSION: sources.json schema_version 1.2, which the producer requires (it refuses any other). The newest gold manifest (2026-09-25) carries schema_version 1.1 and the holdings-basis method with no inflow or outflow term. A fire writes at that method version.",
+      "claim": "measured"
+    },
+    {
+      "need": "PAIR OR HOLD: the fire writes served gold that the portal path reads (infra/aws/lambda/investor-reporting/performance/holdings_gold.py), so creating the schedule is a LATER act under a never-widen pair (CLAUDE.md section 5). No pair for this channel is cited in this read, and this read changes nothing.",
+      "claim": "held"
+    },
+    {
+      "need": "WHAT A FIRE WRITES: per trading date, two objects under the Cottonwood gold prefixes at opal_naming.address() output: holdings_performance_daily/date=D/data.parquet and holdings_performance_manifest/date=D/ (data.parquet and manifest.json), and only when run with --upload. The fire is served output, so it needs the later never-widen pair.",
+      "claim": "measured"
+    }
+  ],
+  "irpt_holdings_writer": {
+    "who_writes": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py writes irpt/<firm>/gold/holdings/date=D/<revision>.parquet. It runs per firm as holdings_snapshot.py --firms <firm> --upload on the daily-runner host, dispatched by infra/aws/lambda/investor-reporting/holdings_refresh/refresh_dispatch.py (one SSM command per firm) from the Lambda irpt-holdings-refresh-lambda. That Lambda is the target of the schedule irpt-holdings-snapshot (cron(15 10 ? * MON-FRI *), America/New_York), which reads State ENABLED on live describe. The Cottonwood holdings table is 3 trading days behind T-1: the ENABLED schedule has no partition for 2026-10-09, 2026-10-12 or 2026-10-13, and the cause is NOT_ESTABLISHED in this read (no run or SSM log read). The performance table has no trigger at all, so the contrast holds.",
+    "newest_date": "2026-10-08",
+    "claim": "measured"
+  },
+  "denominator": {
+    "nodes_scanned": 40,
+    "vintage": "served graph built 2026-10-14 18:59:23 UTC; stitch source stitch-codebuild built 2026-10-11T03:01:08Z; manifest c9d8aff195d4",
+    "scope_words": "every SCHEDULE node of the served graph (40 nodes: 32 DECLARED, 7 LIVE-no-DECLARED, 1 MULTI_STATE_MANAGED), read with comp-find --corpus aws over node type SCHEDULE, plus the repo schedule files named above"
+  },
+  "positive_control": {
+    "description": "the same SCHEDULE read must FIND a producer known to be scheduled: irpt-holdings-performance-daily, the 49 Financial performance trigger declared in holdings-performance/schedule.tf and read ENABLED by live describe",
+    "expected": "found in the 40-node read, and live State ENABLED",
+    "observed": "found in the 40-node read (DECLARED); live get-schedule State ENABLED, cron(30 7 ? * MON-FRI *), target the 49 Financial performance function",
+    "passed": true
+  },
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "s3_reads": 12,
+    "aws_reads": 2,
+    "aws_writes": 0,
+    "terraform_apply": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
