@@ -194,11 +194,11 @@ def ticket_arms(env, opts, out):
     st, b, raw = env.call("PK", "POST", "/api/scoped/tickets/%s/package" % tid, package_body(REQ1), arm="PKG-2")
     code = (b or {}).get("code") if isinstance(b, dict) else None
     unchanged = env.item_hash(tid) == sha1
-    ok = unchanged and st in (200, 409)
-    note("PKG-2", ok, "PKG-2 OK unchanged" if ok else "PKG-2 FAIL status=%s" % st,
+    ok = unchanged and st == 409 and code == "PACKAGE_ALREADY_ATTACHED"
+    note("PKG-2", ok, "PKG-2 OK unchanged status=409 code=PACKAGE_ALREADY_ATTACHED" if ok else "PKG-2 FAIL status=%s code=%s" % (st, code),
          "status=%s code=%s item_unchanged=%s" % (st, code, unchanged))
     # h. PKG-3 (a different request id)
-    extra = {"prior_attached_at": attached} if opts.get("pkg3_prior") else {}
+    extra = {"prior_attached_at": attached} if opts.get("pkg3_prior", True) else {}
     st, b, raw = env.call("PK", "POST", "/api/scoped/tickets/%s/package" % tid, package_body(REQ2, **extra), arm="PKG-3")
     code = (b or {}).get("code") if isinstance(b, dict) else None
     unchanged = env.item_hash(tid) == sha1
@@ -696,7 +696,7 @@ def main(argv):
     ap.add_argument("--live", action="store_true")
     ap.add_argument("--go", action="store_true")
     ap.add_argument("--doors", action="store_true", help="run D1 to D4 and C1 (only after the YCharts hold is lifted)")
-    ap.add_argument("--pkg3-prior", dest="pkg3_prior", action="store_true", help="PKG-3 sends prior_attached_at (the service's replace protocol)")
+    ap.add_argument("--pkg3-literal", dest="pkg3_prior", action="store_false", help="PKG-3 without prior_attached_at (AMENDMENT 2 sends it by default)")
     ap.add_argument("--date", default=dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d"))
     ap.add_argument("--out", default=str(HERE))
     args = ap.parse_args(argv)
