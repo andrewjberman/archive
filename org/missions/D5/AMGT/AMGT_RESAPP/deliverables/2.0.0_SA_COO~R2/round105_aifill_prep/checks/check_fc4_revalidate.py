@@ -75,13 +75,13 @@ def main():
 
         def inputs(key, **kw):
             return {"overlay": {"display_name": "Nestlé SA", "name": "Nestlé SA"}, "thesis": {"management": {"officers": [{"name": "Mark Schneider"}]}}, "errors": {}}
-        rc, out, _ = run(revalidate, ["--names", "NESN_SW_Equity,OK_US_Equity", "--with-inputs"], docs, inputs)
+        rc, out, _ = run(revalidate, ["--names", "NESN_SW_Equity,OK_US_Equity", "--with-inputs", "--function", "stub-fn"], docs, inputs)
         return rc == 1 and "REFUSED NESN_SW_Equity" in out and "REFUSED OK_US_Equity" not in out and "refused 1" in out and "name-checked 2" in out, out[-260:]
     arms.run("--with-inputs: 'Nestl' for 'Nestl\\u00e9 SA' is REFUSED; 'Nestle' passes", mangled_with_inputs)
 
     def inputs_unreadable():
         docs = {"A_US_Equity": good["A_US_Equity"]}
-        rc, out, _ = run(revalidate, ["--names", "A_US_Equity", "--with-inputs"], docs, lambda key, **kw: {"overlay": None, "thesis": None, "errors": {"overlay": "status 500"}})
+        rc, out, _ = run(revalidate, ["--names", "A_US_Equity", "--with-inputs", "--function", "stub-fn"], docs, lambda key, **kw: {"overlay": None, "thesis": None, "errors": {"overlay": "status 500"}})
         return rc == 0 and "name-checked 0" in out and "passed 1" in out, out[-160:]
     arms.run("--with-inputs: unreadable served inputs leave the name unchecked (counted), not refused", inputs_unreadable)
 
