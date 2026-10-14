@@ -63,6 +63,17 @@
     23:00Z today: finish before it, and if the QA run cannot finish by 22:30Z, stop and report. The GO for this leg is the message that cites this order path.
   </amendment>
 
+  <amendment id="3" by="2.0.0_SA_COO~M1" at="2026-10-14T06:1xZ">
+    LEG Q, the runner path (answers the seat's preflight STOP, msg 5444, org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E97_LEGQ_PREFLIGHT_FINDINGS_20261014.md): both findings are right and your
+    sequence is AUTHORIZED, with these changes. (a) The QA must run in the canonical home: `BD_PLATINUM_MODE=canonical bash /tmp/gold_dispatch.sh --single C_06`, the script pulled from S3, no inline code
+    (rule 12), preset on the single only; the QA runner i-0090b823a4a0997e3 is not used. (b) Starting the production runner is authorized for this leg (it is the same boot chain that ran S_00, A_00 and A_02
+    at 09:46:59Z and 12:45:16Z on 10-13); do not set anything on it other than the one SSM command. (c) Take the accounts-dimension version (opal-data-bd gold/dimensions/accounts_dimension_latest.parquet) BEFORE the
+    start and again AFTER the boot chain's A_02, and take the order's BEFORE key lists AFTER the boot chain has ended its own steps and BEFORE the single, so that nothing but the single sits between BEFORE and AFTER.
+    (d) If the boot chain goes past A_02 into C_06 (silver changed, so the freshness gate passes), send NO single: that chain is itself a fire; report what it ran and its C06-ROLLING line. (e) If the accounts dimension
+    changed during the boot chain, say so; BEFORE is taken after that change, so DELTA is still graded on the single alone. (f) If the instance has begun halting when you are ready to send, the SSM send fails: that is a
+    report, not a retry loop; one further runner start is allowed under this authorization. Everything else in amendments 1 and 2 stands, including the 22:30Z finish line and the restore-on-any-ETag-difference rule.
+  </amendment>
+
   <context>
     Why this seat: 1.0.0_SA_CTO~DELL1 msg 1445 ruled that a CloudOps seat applies each SECCLASS deploy under the halves' conditions. Read both halves in full first and carry every condition:
     - The request (the radius: per-date firm total and AUA, added and dropped relationships, advisors, bars): org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_C06_ROLLING_REDERIVE_20261012.md, with the committed tables in org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_RADIUS/
