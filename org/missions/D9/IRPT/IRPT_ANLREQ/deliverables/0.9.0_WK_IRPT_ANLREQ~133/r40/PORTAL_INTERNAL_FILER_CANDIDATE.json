@@ -1,0 +1,145 @@
+{
+  "record": "PORTAL_INTERNAL_FILER_CANDIDATE",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-325",
+  "cell": "AR-y-325",
+  "round": 40,
+  "workstream": "ZK",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~133",
+  "issuer": "2.0.0_SA_COO~Y2",
+  "prod_tip": "6a5926fc1194e1ce37e35ff267e5cf4914d9c172",
+  "prod_tip_read": "git -C portal fetch origin, then git -C portal rev-parse origin/PROD (the full sha)",
+  "branch": "wk-IRPT_ANLREQ-133-portal",
+  "candidate_branch": "cand/dell2/anlreq-internal-filer-chooses-firm",
+  "commit": "6f4e5f671f098ac157a6fa1fcabea10bcf80ad47",
+  "commit_subject": "feat(TicketCenter AR-y-325): an Opal staff filer chooses the firm from the served list (PRD ADDENDUM v0.6 J7)",
+  "push_state": "LOCAL only. The candidate branch exists only in the portal worktree; git ls-remote --heads origin for the candidate name returned no head at the time of this record. Nothing was pushed, landed on DEV or PROD, or deployed.",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-firm-c-firm.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-firm-choice.test.tsx",
+    "src/pages/TicketCenter/__tests__/internal-filer-chooses-firm.test.ts"
+  ],
+  "diff_stat_vs_prod": "git -C portal diff --stat origin/PROD 6f4e5f67: 5 files changed, 193 insertions(+), 40 deletions(-); analysisRequest.ts is NOT changed (submitHeldReason already holds an empty firm with 'Choose the firm this request is filed under.', analysisRequest.ts:227)",
+  "scope": "git -C portal diff --name-only origin/PROD cand/dell2/anlreq-internal-filer-chooses-firm lists only src/pages/TicketCenter/ paths; git -C portal diff origin/PROD cand/dell2/anlreq-internal-filer-chooses-firm -- src/pages/InvestorReporting src/api is empty (scope_check.py SCOPE-OK).",
+
+  "internal_firms_source": {
+    "a_what_firms_holds_for_an_internal_user": {
+      "at_prod_6a5926fc": "null, for good. TicketCenter.tsx:237 declares the state as null. The load effect returned early for an internal caller (TicketCenter.tsx:305-306 at 6a5926fc: 'if (!formShown || internal) { ... return }'), so loadAllowedFirms was never called for staff and firms stayed null. The form then reads 'Your firms are still loading' (analysisRequest.ts:223-224), not the choice sentence. Recorded as IRPT_ANLREQ-D2-W133-S2.",
+      "in_candidate": "TicketCenter.tsx:304-316: the early return is now only 'if (!formShown)' (line 306); loadAllowedFirms(ir, internal) runs for staff too (line 313). firms is null until the Global list resolves, a list of READY firms on success, and null with firmsFailed on failure. An empty list is never a success: loadAllowedFirms throws when the Global context holds no READY firm (TicketCenter.tsx:109-110)."
+    },
+    "b_served_list": {
+      "call": "loadAllowedFirms(client, true), TicketCenter.tsx:97-114. The internal request is { tenant: 'bootstrap', selectedTenant: 'global', requested } (TicketCenter.tsx:104); the READY firms are kept in served order and labelled by their display name (TicketCenter.tsx:107-108); a non-Global answer throws (:106).",
+      "same_call_as": "src/pages/InvestorReporting/index.tsx:111-112 (queryFn: resolveDirectoryContext with selectedTenant 'global', the Global READY firms) and the firm catalogue built from it (index.tsx:114-115). The client method is src/api/endpoints/investor-reporting.ts:865 (interface) and :1257 (resolveDirectoryContext).",
+      "hard_coded_list": "none. No firm name or id is written in the form or the test fixtures except the synthetic fir_alpha / fir_beta / fir_gone of the tests.",
+      "new_endpoint": "none needed; the chooser's list is the served list the Ticket Center form already reads for a partner (loadAllowedFirms with internal false reads permittedFirms)."
+    }
+  },
+
+  "staff_submit_route": {
+    "form_path": "analysisRequest.ts:238-287 (fileAnalysisRequest). The upload door is called with the chosen firm as selectedTenant at :245 and :251 (deps.ir.uploadAnalysisInput(input.upload, input.answers.firm)). A staff filing (no submitPartner) then calls deps.tickets.createTicket at :279, which is POST /api/scoped/tickets (src/api/endpoints/tickets.ts:142-143). The analysis submit is sendAnalysisStep at :437-450, with selectedTenant: answers.firm (:444). All three hops read answers.firm, which is the chosen firm (TicketCenter.tsx:365 builds answers from filingForm).",
+    "partner_submit_not_used": "submitAnalysisTicket (tickets.ts:180-181, POST /api/scoped/tickets/submit) is the partner route; a staff filing does not take it. Its server check (infra/aws/lambda/ticket_center/lambda_function.py:1181-1182) refuses an answers.firm that is not the caller's own firm, which is why the staff form does not use it.",
+    "service_answer_to_a_staff_filing_for_a_partner_firm": "The CREATE route (infra/aws/lambda/ticket_center/lambda_function.py:1218-1262, create_ticket) sets req_firm = answers firm (:1257) and refuses with 400 'requester_firm ... is outside the principal's allowed firms (server-checked)' when not _create_firm_allowed(pc, actor, req_firm) (:1261-1262). _create_firm_allowed (:367-372) is _firm_allowed (:359-364: the principal's allowedFirmIds is ALL or a csv covering the firm) AND _in_profile_scope (:424-426: the INTERNAL profile scope from _resolve_scope, :413-421, is None or contains the firm). So: a staff filing for a firm the principal's allowedFirmIds and profile scope cover is ACCEPTED; otherwise it is refused 400 at CREATE, after the upload door has been called. No Lambda change is needed for J7; the check is the service's own and is not changed.",
+    "user_property": "The synthetic staff user of the FWD-1 run needs the chosen firm in its allowedFirmIds (and in its profile scope, if the profile carries one). That is a property of that user, not of this cell. An ALL principal passes both checks.",
+    "blocking": "none filed. The refusal is conditional on the principal's list, not on the internal class, and the order assigns the user property to the run. Recorded as IRPT_ANLREQ-D2-W133-S4 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2), with the upload-door check not read.",
+    "lambda_path": "The order named the line without its file: infra/aws/lambda/ticket_center/lambda_function.py in the workspace repo (located with comp-find on _create_firm_allowed). Recorded as IRPT_ANLREQ-D2-W133-S3."
+  },
+
+  "tests": {
+    "added": 6,
+    "passed": 6,
+    "failed": 0,
+    "file": "src/pages/TicketCenter/__tests__/internal-filer-chooses-firm.test.ts",
+    "cases": [
+      "(a) an Opal staff filer chooses the firm: a chosen firm on the served list files; a firm off the list or no choice files nothing",
+      "(b) a partner user files under exactly the firm it did before: its one allowed firm, its own firm when listed, else nothing",
+      "(c) the submit of an Opal staff filer is held until a firm is chosen from the served list and a file is chosen",
+      "(d) a staff filing posts the chosen firm to the ticket answers, the upload door and the analysis submit, and no other firm",
+      "(e) the Firm line is a control of the served firms for an Opal staff filer, and read-only text for a partner user",
+      "an Opal staff filer chooses the firm; a partner user's firm is never a choice (the scope-naming case)"
+    ],
+    "folders": {
+      "command": "bun test src/pages/TicketCenter (portal worktree)",
+      "result": "121 pass, 0 fail, 121 tests across 23 files, 897 expect() calls (folder_repinned run)"
+    }
+  },
+
+  "reauthored_cases": {
+    "rule": "Three existing cases pinned the staff behaviour AR-y-325 reverses. Re-pinned under AMENDMENT 1. No case was deleted, no partner case was weakened, and every other case in the two files is unchanged.",
+    "analysis-firm-c-firm.test.tsx": [
+      {
+        "case": "(d) an Opal-internal caller sees the filing-not-for-staff sentence, no firm picker, and a submit that cannot file",
+        "pinned_before": "the staff sentence is shown; exactly one select (no firm control); exactly one 'Opal staff' string; filingFirm(TWO, 'fir_alpha', true) and filingFormOf(...) return '' for staff.",
+        "pins_now": "renamed: '(d) an Opal-internal caller is offered the served firms in a control and files under the one it chooses; no sentence says it cannot file'. The staff Firm line is a control with the choice label and the served options fir_alpha and fir_beta; two selects (the firm control and the report type); the staff sentence and any 'Opal staff' string are absent; no choice files '' and a chosen firm on the list files it; a partner caller has no staff sentence and no choice control."
+      },
+      {
+        "case": "the page derives the filing firm from the signed-in caller and disables the submit while it is empty",
+        "pinned_before": "AnalysisRequestParts.tsx contains the staff sentence 'Opal staff open requests from the queue rather than file them' (old line 93).",
+        "pins_now": "the TicketCenter.tsx pins are unchanged (filingFormOf(analysisForm, firms, ownFirm, internal); auth.claims?.firmId; the submitHeldReason call; the disabled attribute). AnalysisRequestParts.tsx must NOT contain the staff sentence and MUST contain '<select aria-label={FIRM_CHOICE_LABEL}' (the staff filer's control); the '<select aria-label=\"Firm\"' check is kept."
+      }
+    ],
+    "analysis-firm-choice.test.tsx": [
+      {
+        "case": "an internal caller is offered the READY firms of the Global context and never an UNAVAILABLE one",
+        "pinned_before": "the staff render has exactly one select; does not contain 'Alpha Advisors' or 'Beta Partners'; contains the staff sentence.",
+        "pins_now": "the staff render has two selects; contains the choice label aria-label and the options value=\"fir_alpha\">Alpha Advisors and value=\"fir_beta\">Beta Partners in served order; does not contain 'fir_gone' (the UNAVAILABLE firm); does not contain the staff sentence. The loader pins (the Global request, the READY filter, the refused non-Global and no-READY answers) are unchanged."
+      }
+    ],
+    "header_comments": "The file-header doc comments of analysis-firm-c-firm.test.tsx and analysis-firm-choice.test.tsx described staff as filing nothing; they now say the staff filer chooses the firm (not a case; no assertion changed)."
+  },
+
+  "before_arm": {
+    "what": "the new test file run against origin/PROD 6a5926fc1194e1ce37e35ff267e5cf4914d9c172 (the PROD source, without the change), in a scratch copy built from git archive; the new test file copied in.",
+    "result": "1 pass, 5 fail, 21 expect() calls (6 tests)",
+    "failing": [
+      "(a) an Opal staff filer chooses the firm: a chosen firm on the served list files; ...",
+      "(c) the submit of an Opal staff filer is held until a firm is chosen ...",
+      "(d) a staff filing posts the chosen firm to the ticket answers, the upload door and the analysis submit ...",
+      "(e) the Firm line is a control of the served firms for an Opal staff filer ...",
+      "an Opal staff filer chooses the firm; a partner user's firm is never a choice"
+    ],
+    "passing": "(b) a partner user files under exactly the firm it did before (the partner arm is unchanged at PROD, as the order requires)",
+    "note": "The order listed (a), (c), (d), (e) as failing on PROD; the scope-naming case also fails on PROD because it asserts the staff filer's choice files. Output kept in the worker's .scratch (before_arm_run.txt), not committed."
+  },
+
+  "mutant": {
+    "what": "mutant_check.py: a scratch copy of the candidate's src (git archive of the candidate branch) with filingFirm made to return '' for an internal caller (the PROD shape). The unmutated copy is run first as a control.",
+    "result": "MUTANT-FIRES: 4 of 6 cases of the new file fail under the mutant; the control passes 6 of 6."
+  },
+
+  "what_a_person_sees": {
+    "staff_with_the_list_loaded": "The Firm line is a select. Its first option reads 'Choose the firm this request is filed under' and nothing is preselected. The options are the Global READY firms in served order, by display name. The submit is held and says 'Choose the firm this request is filed under.' until a firm is chosen; then 'Choose the holdings file to upload.' until a file is chosen; then it is released. The staff-not-filing sentence does not appear anywhere.",
+    "staff_while_the_list_loads_or_fails": "The Firm line reads 'Loading firms...' while the Global list is in flight. On a failed read it reads 'Firms not loaded', and the form's error line reads 'The firms you can file for could not be loaded.' The submit stays held with the words of submitHeldReason.",
+    "partner": "unchanged from PROD: the Firm line is read-only text 'Firm: <the partner's own firm label>' (or the words the partner's list state needs); there is no select of firms; the staff sentence does not appear. A partner whose own firm is not on its allowed list still reads 'Your profile names no firm you may file for'."
+  },
+
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit), portal worktree",
+    "rc": 0,
+    "note": "a drain check, not a criterion; no TicketCenter error in its output"
+  },
+
+  "checks": {
+    "AR325-y-AC1": "portal_check.py -> PORTAL-TESTS-OK 6 new, 121 folder, 0 failed (rc 0)",
+    "AR325-y-AC2": "mutant_check.py -> MUTANT-FIRES (rc 0)",
+    "AR325-y-AC3": "scope_check.py -> SCOPE-OK 5 paths, all under src/pages/TicketCenter/ (rc 0)"
+  },
+
+  "claim": "The candidate cand/dell2/anlreq-internal-filer-chooses-firm (6f4e5f67, LOCAL) lets an Opal staff filer choose the firm an Analysis Request is filed under, from the served Global READY firms, and files that same firm on all three hops (the ticket answers, the upload door and the analysis submit). A partner's firm is never a choice, and its cases are pinned unchanged. No default firm is applied, no firm list is hard-coded, the staff-not-filing sentence is off the render path, and nothing was pushed, landed or deployed. The Lambda is unchanged.",
+
+  "not_read": [
+    "the live served list (the Global READY firms of the live tenant, through a live resolveDirectoryContext call): not called, the order forbids a live call",
+    "the rendered page (the screenshot is taken by the issuer at close): no headless render was run",
+    "the live CREATE answer to a staff filing for a firm the synthetic user may or may not hold: not called",
+    "the upload door's own firm check for a staff firm outside the principal's list: not read",
+    "the live allowedFirmIds and profile scope of any user: not read",
+    "the approval row (open-calls add, class read from the pages touched): the issuer's to register"
+  ],
+
+  "surprise_rows": [
+    "IRPT_ANLREQ-D2-W133-S1 (BLOCKING, ARMED, answered by the AMENDMENT 1 grant; disarm owner 2.0.0_SA_COO~Y2): the grant excluded the two test files that pinned the reversed staff behaviour; the amendment grants them and this record re-pins them.",
+    "IRPT_ANLREQ-D2-W133-S2 (OBSERVATION, INERT): at PROD an internal caller's firm list is never loaded (TicketCenter.tsx:305-306 at 6a5926fc), so the hold reads 'Your firms are still loading'; the candidate loads it.",
+    "IRPT_ANLREQ-D2-W133-S3 (OBSERVATION, INERT): the ticket service is named 'lambda_function.py line 1182' with no path; the file is infra/aws/lambda/ticket_center/lambda_function.py in the workspace repo.",
+    "IRPT_ANLREQ-D2-W133-S4 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2): CREATE refuses a staff filing for a firm outside the principal's allowedFirmIds or profile scope with a 400, after the upload door has been called; the upload door's firm check was not read."
+  ]
+}
