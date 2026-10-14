@@ -280,20 +280,27 @@ def check_sample(root):
         need(all(P5.is_absent_k(x) and x["kind"] == "NO_SOURCE_YET" and x["absent"] == P9.ACCT_WORDS for x in leaves), "avs.%s.return_cumulative: account returns stay NO_SOURCE_YET with the words %r" % (w, P9.ACCT_WORDS))
     members = {m["id"]: m for m in c["members"]}
     sourced = [w for w in WINDOWS if "inflection" in (members["pvs.%s.return_cumulative" % w].get("firm_sources") or {})]
-    filled = []
+    filled, nohist = [], []
     for w in WINDOWS:
         x = vals["pvs.%s.return_cumulative" % w]
         if w in sourced:
-            need(state_of(x) == "num" and abs(x) < 500, "pvs.%s.return_cumulative: Orion's client-grain figure fills it as percent points" % w)
-            filled.append(w)
+            if state_of(x) == "num":
+                need(abs(x) < 500, "pvs.%s.return_cumulative: Orion's client-grain figure fills it as percent points" % w)
+                filled.append(w)
+            else:
+                need(P5.is_absent_k(x) and x["kind"] == "INSUFFICIENT_HISTORY", "pvs.%s.return_cumulative: a sourced window whose opening day has no factor row is absent with kind INSUFFICIENT_HISTORY" % w)
+                nohist.append(w)
         else:
             need(P5.is_absent_k(x) and x["kind"] == "NO_SOURCE_YET", "pvs.%s.return_cumulative: a window Orion does not carry stays NO_SOURCE_YET" % w)
+    need(len(filled) >= 1, "at least one household return window must be filled from Orion's client grain")
     hs = r.get("household_return_source") or {}
-    need(hs.get("windows") == filled and nes(hs.get("claim")) and "client" in hs.get("claim", "").lower() and hs.get("newest_partition_only") is True and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(hs.get("partition_date") or "")),
-         "household_return_source must be {windows %s, claim (client grain), newest_partition_only true, partition_date ISO}" % filled)
+    need(hs.get("windows") == filled and hs.get("windows_without_history") == nohist and nes(hs.get("claim")) and "client" in hs.get("claim", "").lower() and hs.get("newest_partition_only") is True and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(hs.get("partition_date") or "")),
+         "household_return_source must be {windows %s, windows_without_history %s, claim (client grain), newest_partition_only true, partition_date ISO}" % (filled, nohist))
     # the label: the custodian number's real last four characters, never an ordinal
     l4 = [str(a["last4"]) for a in sm["household"]["accounts"]]
-    need(all(re.fullmatch(r"[0-9A-Za-z]{4}", x) for x in l4) and len(set(l4)) == len(l4), "each account's last4 is four letters or digits and the labels are distinct (%d accounts, %d distinct)" % (len(l4), len(set(l4))))
+    need(all(re.fullmatch(r"[0-9A-Za-z]{4}", x) for x in l4), "each account's last4 is four letters or digits (the last four alphanumeric characters of the custodian number)")
+    coll = sum(1 for x in l4 if l4.count(x) > 1)
+    need(r.get("last4_collisions") == coll, "last4_collisions must equal the number of accounts that share a last4 with another account of the household (the checker counts %d)" % coll)
     need(all(x != "%04d" % (i + 1) for i, x in enumerate(l4)), "last4 must be the custodian number's real last four characters, never the ordinal 0001, 0002, ...")
     need(nes(r.get("last4_source")) and "custodian" in r["last4_source"].lower(), "last4_source must say in words that the label is the custodian number's last four characters as stored")
     need(r.get("as_of") == sm["household"]["as_of"] and iso(r["as_of"]) <= iso(r.get("benchmark_data_as_of") or "1900-01-01"), "as_of must equal the sample's and not be later than benchmark_data_as_of")
@@ -353,6 +360,10 @@ def render_extras(html, sm, is_export):
     printed = set(re.findall(r"\bending\s+([0-9A-Za-z]{4})\b", P3.visible_text(html)))
     if not printed or not printed <= last4:
         fails.append("an 'ending XXXX' label is not an account's last four (%d printed, %d not an account's)" % (len(printed), len(printed - last4)))
+    l4s = [a["last4"] for a in acc.values()]
+    for dup in sorted({x for x in l4s if l4s.count(x) > 1}):
+        if not re.search(r"ending\s+%s\s*\(\d+ of \d+\)" % re.escape(dup), P3.visible_text(html)):
+            fails.append("two accounts of the household share a last four and the label carries no '(k of n)' to tell them apart")
     return fails
 
 
@@ -413,6 +424,10 @@ def selftest(root):
     html_ok = ('<p data-note="absent" data-note-keys="avs.ytd.benchmark_long_term|1111">Not held for the whole period.</p>'
                '<td data-member="glr.ending_value" data-entity="1111">$1,000</td><h2>Account ending AB12</h2>')
     arm("render extras are quiet on a clean render", render_extras(html_ok, sm, True) == [])
+    sm2 = json.loads(json.dumps(sm))
+    sm2["household"]["accounts"].append(dict(sm["household"]["accounts"][0], account_id="2222"))
+    html_dup = html_ok + '<td data-member="glr.ending_value" data-entity="2222">$5</td>'
+    arm("a shared last four needs a (k of n) label", len(render_extras(html_dup, sm2, True)) == 1 and render_extras(html_dup.replace("Account ending AB12", "Account ending AB12 (1 of 2)"), sm2, True) == [])
     # round 109's own render carries the CVO's counts 2 to 4: the extras must find them
     rj = root / (D + "0.9.0_WK_IRPT_DASHBD~173/RENDER_R109.json")
     if rj.is_file():
