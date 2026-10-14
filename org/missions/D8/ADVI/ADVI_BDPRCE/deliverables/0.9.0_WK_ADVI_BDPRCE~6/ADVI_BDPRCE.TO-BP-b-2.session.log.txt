@@ -1,0 +1,16 @@
+SESSION LOG -- 0.9.0_WK_ADVI_BDPRCE~6, cell BP-b-2 (round 2, read-only replay)
+Worktree C:/dev/wk-bdprce-r2-6 (branch wk-ADVI_BDPRCE-6, cut from 8956787a11). Downloads outside the checkout in C:/dev/wk-bdprce-r2-6-data/.
+
+1. Premise check: HEAD wk-ADVI_BDPRCE-6, TREE-OK. bd_price_rule.py, RULE_PROBE.md, GAP_ROWS.csv (1,657 lines) and r2_checks.py read.
+2. Denominator: aws s3api get-object canonical_prices.parquet (ETag 0ba9bd51fa175917b8d2813b41d78f5d, 109,972,952 bytes). Window 2026-09-16..2026-10-13: transaction_observed rows = 1,657 (same as round 1). Unique asset-date: yes.
+3. Partitions: aws s3api list-objects-v2 --prefix silver/transactions/ (1,928 keys). get-object for 2026-01-01..2026-10-13 (286 keys; 50 NoSuchKey, see surprise row S5) and for 2020-03-06..2025-12-31 through lookback_scan.py (2,127 unique dates; 436 no partition).
+4. Replay: replay_r1.py (imports bd_price_rule.py, unchanged) run as separate processes: run4/run5/run6 (before the scale flag), run7/run8 and the final run (after it). BEFORE_AFTER.csv md5 76d58c1e409f1072833fb547d7fbfa69 in run7, run8 and the final run. ESTIMATED_ROWS.csv md5 bb586828a92352625f4a2321d36872d0 in all of them.
+5. Lookback: lookback_scan.py with residual_assets.csv (242 assets). Resolved A 52, B 59 at floor 2020-03-06 (days scanned 2127). A first attempt stopped at 2022-01-26 on a transient aws error; the resumed run retried and completed; the log holds 2,309 lines for 2,127 unique dates.
+6. Determinism: three separate processes, identical BEFORE_AFTER.csv md5 (see 4).
+7. Grader: r2_checks.py replay --file REPLAY.json -> "REPLAY record ok served=1657 changed=824 unchanged=621 deterministic=true" rc=0.
+8. Mutant: REPLAY.json with CHANGED +1 (.scratch/REPLAY_mutant.json) -> "REPLAY record FAIL classes sum 1658 != served_rows 1657" rc=1 (FIRED-AS-EXPECTED).
+9. Scope: r4_scope.py --root <worktree> --allow <deliverable folder> --allow <investigation file> -> "ROUND 4 SCOPE: OK 10 changed, 0 outside, 0 required missing".
+10. Past-date arm: 20 of 20 changed rows: the result from trades on or before the date equals the full result, and all trade ids are on the date.
+11. Lint: ruff check --select F,E9 passed on replay_r1.py and lookback_scan.py; py_compile passed.
+12. Commits (LOCAL on wk-ADVI_BDPRCE-6): 1b006c9f22 (scripts, record, list, estimated rows, lookback files); 8c84055e27 (REPLAY.md late-landed limit); b11d7534d0 (corrected lookback counts in REPLAY.json and REPLAY.md, final script); 4cd71c82b7 (surprise rows S1..S5).
+13. Not done: no write to S3, no producer run, no served object or product file changed. Dollar effect and downstream readers are BP-b-7's.
