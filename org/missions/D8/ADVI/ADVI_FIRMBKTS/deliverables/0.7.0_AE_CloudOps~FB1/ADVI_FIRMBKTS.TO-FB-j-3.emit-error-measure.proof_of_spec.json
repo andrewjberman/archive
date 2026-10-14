@@ -1,0 +1,90 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-j-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-3.emit-error-measure.md",
+  "group": "OTHER",
+  "vintage_commit": "71b706df6e"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-3.emit-error-measure.md",
+  "vintage_commit": "86dd84d6e4"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-bd/code/gold/gold_dispatch.sh (VersionId l53CmF0sCt.tgKYlr.JPiAl0_tqH._yB, sha256 7acefe6dcf6dcb05c25b709db047ca5fb5c184539621b22ccd0b844c31f7b167)",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "aws s3 cp --sse AES256 at 2026-10-13T08:37:32Z; read back equal to the repo blob; the 01:20Z chain ran it (new-form WARN in its log)",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "c5e6e57b7a3d6c765c80d376c530578d"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/EMIT_ERROR_TEXT.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "33b647a50f"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/j3_chain/warn_context.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the WARN with its context lines",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "33b647a50f"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py emiterr --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/EMIT_ERROR_TEXT.json",
+   "expect": "^EMITERR record ok cause_class=(NO_REGION|CREDENTIALS|OTHER_NAMED|NOT_OBSERVED)$",
+   "output_evidence": "run 2026-10-14T01:27:47Z, printed:\nEMITERR record ok cause_class=NO_REGION",
+   "denominator": "one chain (chain:full, 2026-10-13T23:00:43Z to 2026-10-14T01:20:24Z); 8 WARN lines in the cumulative log's read window, 1 carries text (this chain's), 7 older ones carry none",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py emiterr --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/EMIT_ERROR_TEXT.json",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. The control: the same log's 7 older WARN lines (written by the pre-deploy dispatcher) carry no text; only this chain's carries the CLI text.",
+   "expected": "text only on the post-deploy chain",
+   "observed": "7 of 7 older lines without text, 1 of 1 new line with text",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one chain; the COO read the same line independently (msg 5335)",
+   "observed": "same text, same class",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a second chain",
+   "reason": "one WARN is the order's whole measurement; whether the text recurs belongs to FB-j-4's verification"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-S54: the earlier runner runs were the 49f chain; ADVI_FIRMBKTS-D1-S55: the emit text is measured and lives only in the cumulative log"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r7_checks.py prescreen",
+   "invocation": "as quoted",
+   "result": "FAIL a targeted dry run on firing advisors returned no bullets: the positive control failed\nPRESCREEN: 1 problem(s)"
+  }
+ ]
+}

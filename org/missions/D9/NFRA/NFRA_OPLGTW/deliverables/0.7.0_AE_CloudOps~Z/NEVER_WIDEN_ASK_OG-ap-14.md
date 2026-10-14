@@ -64,7 +64,7 @@ partitions -- `operator_audit` 8, `principal_profile` 4, `data_entitlement` 4, `
 (pending or revoked, `sk` `PROFILE`). That single number is what bounds every "who is touched"
 claim below, and it is why this release's blast radius is far narrower than its line count suggests.
 
-- **OG-pf-1 -- WIDENS, and it is the only widening here.** A restricted profile now confines ONLY
+- **OG-pf-1 -- WIDENS.** A restricted profile now confines ONLY
   the data-grant family (`DATA_GRANT_TOOLS`: the five `schwab_*` tools plus `blackdiamond_list_fees`),
   so a profiled principal regains reach to every non-data tool. **Touches: the 1 active profile
   (`2c61471b14`), and no one else** -- an unprofiled principal has no profile to confine, so nothing
@@ -75,11 +75,24 @@ claim below, and it is why this release's blast radius is far narrower than its 
   its tier is `master_admin`. **Touches: every caller that holds no profile and is not
   `master_admin`.** Against the store above, that is every principal except `2c61471b14`, whose
   reach to that tool is governed by its profile instead. Nobody gains.
-- **OG-tg-1 -- NARROWS, twice over.** Teams reads now carry the sender's identity (UPN, tenant) for
-  every caller, and the Bloomberg concierge is gated to **Opal senders only**; the concierge itself
-  is unscoped. **Touches: every Teams-read caller (identity now recorded) and every non-Opal sender
-  to the concierge (now refused).** Nobody gains reach; the identity fields are added to records the
-  routes already fetch, so no new Graph scope and no new call.
+- **OG-tg-1 -- NARROWS in one direction and WIDENS in another. CORRECTED on the COO half's
+  condition C1 @`d8119a4d7a`; the first version of this ask called tg-1 narrowing-only and claimed
+  pf-1 was the sole widening. That was wrong, and the widening is the half that matters more.**
+  - **NARROWS:** Teams reads now carry the sender's identity (UPN, tenant) for every caller, and the
+    Bloomberg concierge is gated to **Opal senders only** (`OPAL_USERS_ONLY`). Touches every
+    Teams-read caller (identity now recorded) and every non-Opal sender to the concierge (refused).
+    The identity fields are added to records the routes already fetch, so no new Graph scope and no
+    new call.
+  - **WIDENS -- `opalbloomberg`'s tool set becomes Andrew's** (PRD v2.3 item 2). Measured in the
+    release diff, not taken from the summary: `app/identity_scope.py` DELETES that principal's
+    `_SEED` frozenset entry, and `identity_tool_allowlist.txt` DELETES both of its overlay rows --
+    the client-qualified `opal_data_refresh_upload client=...` row (OA-f-1) and the
+    `opal_data_refresh_status` row (OG-al-2). Before r30 that identity was SCOPED to exactly those
+    two tools; after it, it is UNSCOPED and inherits the general set, i.e. Andrew's. **Touches: the
+    `opalbloomberg` principal, whose reach goes from 2 allowlisted tools to the full set.** This is
+    the widening A2's `bbg_identity_admitted_8` grades, and it is the reason v2.3 item 4 couples
+    item 2 to item 1: the Opal-users-only gate above is what bounds who can drive that now-unscoped
+    identity. Sign the two together or neither.
 - **OG-sh-1 -- ADDS one READ tool.** `list_shared_folder(url)` resolves a sharing URL via
   `/shares/{id}/driveItem` and lists `/children`, **under the signed-in user's own delegated token**,
   so it can reach only what is already shared to that user. **Touches: every principal that can call
