@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-pt-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~80",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "693c78155e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "835f9452c3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pt-2.portal-macro-tools.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_macro.py",
+      "kind": "script",
+      "commit_or_etag": "cd8ae71c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only, no deploy: the release is NFRA_OPLGTW.TO-OG-ap-18 (the order's preflight). The four tools are registered by the issuer at the merge (app/tools.py is not this cell's path). Committed @cd8ae71c52 on wk-NFRA_OPLGTW-80, LOCAL.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pt2.py",
+      "kind": "test",
+      "commit_or_etag": "cd8ae71c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five offline tests test_ogpt2_ac01..ac05 (recording fake bucket, stand-in principal, pinned clock). Committed @cd8ae71c52.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~80/portal_macro_gate.diff",
+      "kind": "doc",
+      "commit_or_etag": "cd8ae71c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Naming-gate verdict on the real module diff (PASS, 1 graded, exit 0) and the naming probe diffs beside it, committed @cd8ae71c52. The FIRST ACT probe: no literal REFUSED.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cd8ae71c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three new rows NFRA_OPLGTW-Z-W80-S1..S3 appended in the fenced json blocks; surprise-row-gate OK on the commit (3 new rows of 577 checked).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the four tools are built, read exactly their objects, clamp and refuse before any S3 call, and report freshness in trading days.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests (test_ogpt2_ac01 .. test_ogpt2_ac05) passed at cd8ae71c52; the offline pytest run also reported 5 passed",
+      "status": "PASS",
+      "status_reason": "The issuer's AC1 check at HEAD cd8ae71c52: pytest rc=0, 5 of 5 named tests passed, 0 failed or error lines, RESULT: PASS, exit=0.",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the real portal bucket all four answer from their keys with an as-of that sits inside the object, and a non-Opal principal is refused.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nportal tools: 5 of 5 answered from their keys with the object's own as-of (macro ok; series ok; valuation ok; scan ok; freshness ok); non-Opal principal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 portal tools answered from their keys (macro, series, valuation, scan, freshness) against opal-data-portal-v2 with the box's own credentials and INTERNAL_READER_ROLE_ARN unset; non-Opal principal refused True",
+      "status": "PASS",
+      "status_reason": "The issuer's AC2 live probe at HEAD cd8ae71c52: 5 of 5 answered with the object's own as-of inside the object; non-Opal principal refused; RESULT: PASS, exit=0. The pandas_market_calendars WARN is the calendar's fallback notice, recorded as surprise NFRA_OPLGTW-Z-W80-S3.",
+      "expect": "(?s)portal tools: 5 of 5 answered from their keys with the object's own as-of \\(.*\\); non-Opal principal refused True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The top clamp of portal_get_security_scan (applied = min(max(top, 1), TOP_CAP)) replaced by min(max(top, 1), 10 ** 9) in app/portal_macro.py, run as a one-test selection (-k ac03) against the mutant file, then the file restored from a saved copy (sha256 prefix 076b27e0019eb818 before and after, cmp identical).",
+      "expected": "test_ogpt2_ac03 FAILS on the mutant (the clamp to 100 and limit_applied are asserted); it passed on the good module.",
+      "observed": "On the mutant: 1 failed, 4 deselected, rc=1, FAILED test_ogpt2_ac03 (AssertionError). Restored: cmp identical, the five-test run passes again (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The five-test file run twice on the same HEAD, run time stripped, outputs compared with cmp.",
+      "observed": "Run 1 rc=0 and run 2 rc=0, both '5 passed'; the outputs are byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of the four tools in app/tools.py, the data_entitlement and destructive_ops maps and the pinned-count tests",
+      "reason": "Not this cell's <paths>; the issuer registers every tool and re-pins the counts at the merge (face section 2)."
+    },
+    {
+      "item": "A live write to any bucket, a grant, IAM or Terraform",
+      "reason": "Code, tests and a read-only probe only (face section 2); the probe used GET and HEAD calls alone."
+    },
+    {
+      "item": "app/refs/DATA_CATALOG.yaml",
+      "reason": "NFRA_MCPINDEX's file (face section 2); not written."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W80-S1: the commit-time naming gate grades the bucket literal of an S3 key but no bare S3 key literal; a bare out-of-pattern key draws no verdict (ARMED, disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W80-S2: typed_scope.read_json picks the gzip decoder by key suffix, but json/macro/timeseries objects are gzip under a plain .json key; portal_macro decodes by magic over the seam's capped loader (ARMED, disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W80-S3: lib/trading_calendar.py answers from its hardcoded NYSE fallback on this box (pandas_market_calendars absent); covers 2010-2027 (INERT)."
+  ],
+  "session_log": "L7 worker 0.9.0_WK_NFRA_OPLGTW~80 on wk-NFRA_OPLGTW-80 from base 835f9452c3. First act: the naming-gate probe (PASS, 1 graded; bare keys ungraded). Built app/portal_macro.py and tests/test_og_pt2.py; the first live AC2 run exposed the gzip-under-.json case, fixed in portal_macro._read, re-run PASS. Mutant and determinism controls run as recorded. Commits: cd8ae71c52 (code, tests, rows, probe evidence). AWS calls this run: GET and HEAD of the nine served keys listed in the surprise rows, plus the AC2 live probe (read only, box credentials).",
+  "compiler_tools": [
+    {
+      "tool": ".tools/naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff <staged module diff> --enforce (probe and real diff)",
+      "result": "NAMING-GATE: PASS 1 graded (bucket CONFORMANT); bare key literals not graded (surprise NFRA_OPLGTW-Z-W80-S1); exit 0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~80 <...>\" -F <msgfile> -- <paths>",
+      "result": "rc=0; commit cd8ae71c52 (LOCAL on wk-NFRA_OPLGTW-80); surprise-row-gate OK (3 new rows); msg-verify MATCH"
+    }
+  ]
+}
