@@ -108,16 +108,18 @@ def check_bd(r):
     need(nes(ev.get("offset_definition")), "evidence.offset_definition must say in words what an offset of 0 and of 1 mean")
     dist = ev.get("offset_distribution_days")
     need(isinstance(dist, dict) and dist and all(re.fullmatch(r"-?\d+", str(k)) and is_int(v) and v >= 0 for k, v in dist.items()), "evidence.offset_distribution_days must map an integer offset (as text) to a count")
-    need(sum(dist.values()) == fc, "the offset counts sum to %d, not files_compared %d" % (sum(dist.values()), fc))
+    es = ev.get("offset_estimates")
+    need(is_int(es) and es >= 4, "evidence.offset_estimates must be an integer of at least 4 (one offset estimate per security series compared with the independent series)")
+    need(sum(dist.values()) == es, "the offset counts sum to %d, not offset_estimates %d" % (sum(dist.values()), es))
     claim_ok(ev, "evidence")
-    z = dist.get("0", 0) / float(fc)
+    z = dist.get("0", 0) / float(es)
     m = a["holdings_date_means"]
     if m == "CLOSE_DATE":
-        need(z >= 0.8, "the answer says CLOSE_DATE but only %.0f%% of the compared files sit at offset 0 (80%% needed)" % (100 * z))
+        need(z >= 0.8, "the answer says CLOSE_DATE but only %.0f%% of the offset estimates sit at offset 0 (80%% needed)" % (100 * z))
     elif m == "PULL_DATE":
-        need(z <= 0.2, "the answer says PULL_DATE but %.0f%% of the compared files sit at offset 0 (20%% at most)" % (100 * z))
+        need(z <= 0.2, "the answer says PULL_DATE but %.0f%% of the offset estimates sit at offset 0 (20%% at most)" % (100 * z))
     elif m == "MIXED":
-        need(0.2 < z < 0.8, "the answer says MIXED but %.0f%% of the compared files sit at offset 0 (between 20%% and 80%% needed)" % (100 * z))
+        need(0.2 < z < 0.8, "the answer says MIXED but %.0f%% of the offset estimates sit at offset 0 (between 20%% and 80%% needed)" % (100 * z))
     else:
         need(a["claim"] in ("held", "absent"), "UNDETERMINED must carry the claim held or absent")
     positive_control(r)
@@ -215,7 +217,7 @@ def run_cot(root):
 def good_bd():
     c = {"claim": "measured"}
     return {"answer": dict(c, holdings_date_means="CLOSE_DATE", words="the partition date is the close the prices reflect"),
-            "evidence": dict(c, date_carriers=[dict(c, surface="a", carries="the partition key date"), dict(c, surface="b", carries="the pull time")], files_compared=10,
+            "evidence": dict(c, date_carriers=[dict(c, surface="a", carries="the partition key date"), dict(c, surface="b", carries="the pull time")], files_compared=10, offset_estimates=10,
                              denominator={"dated_files": 20, "scope_words": "the newest 20 partitions"}, offset_definition="0 means the prices equal the partition date's close; 1 means the prior trading day's",
                              offset_distribution_days={"0": 9, "1": 1}),
             "positive_control": {"description": "an anchor known to be a prior-day close", "expected": "offset 1", "observed": "offset 1", "passed": True},
