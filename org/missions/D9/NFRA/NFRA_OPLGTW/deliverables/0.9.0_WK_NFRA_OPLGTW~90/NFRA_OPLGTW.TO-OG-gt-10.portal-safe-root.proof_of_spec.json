@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-gt-10",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~90",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "5ded7131ea"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "5ded7131ea",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-10.portal-safe-root.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_models.py",
+   "kind": "script",
+   "commit_or_etag": "4cbbf2f64a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_REPO_ROOT = parents[5] line deleted. _calendar() now tries the artifact root (parent of app/), then every ancestor from Path.parents in turn, appends the first directory holding lib/trading_calendar.py to sys.path, and returns None when none holds it or on ImportError. Nothing else changed. Not deployed: the release is NFRA_OPLGTW.TO-OG-ap-19.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_macro.py",
+   "kind": "script",
+   "commit_or_etag": "4cbbf2f64a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Same change as portal_models.py: parents[5] line deleted, _calendar() searches the artifact root then every ancestor, returns None when none holds lib/trading_calendar.py. Nothing else changed. Not deployed: the release is NFRA_OPLGTW.TO-OG-ap-19.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt10.py",
+   "kind": "test",
+   "commit_or_etag": "4cbbf2f64a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Offline module, two tests: test_oggt10_ac01 (host-shaped copy under C:/tmp with lib/ staged: both modules import, calendar found, T-1 is a date) and test_oggt10_ac02 (no lib/: both import, _calendar() is None in each). Copies are removed by the fixture.",
+   "artifact_covered_by": ["AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "001bfbee52",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Two surprise rows appended: NFRA_OPLGTW-Z-W90-S1 (the cell cites row Z-W90-S1 as the finding; no such row exists, the finding row is Z-W87-S1) and NFRA_OPLGTW-Z-W90-S2 (the staged calendar answers from its hardcoded fallback on this interpreter, pandas_market_calendars absent).",
+   "artifact_covered_by": ["AC1", "AC3"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: both portal modules import from a host-shaped path and find the staged calendar.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt10.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nhost-shaped import: portal_models OK, portal_macro OK; calendar importable yes; T-1 computable yes\nRESULT: PASS\nexit=0",
+   "denominator": "modules importing from the host-shaped copy 2 of 2 (portal_models, portal_macro); calendar found by _calendar() 2 of 2; T-1 computed 1 of 1 (portal_models._t1_date)",
+   "expect": "(?s)host-shaped import: portal_models OK, portal_macro OK; calendar importable yes; T-1 computable yes.*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: no shipped app module indexes parents at a depth the host lacks.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt10.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "parents[N>=3] in shipped app modules: 0 of 69 file(s) scanned (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "app/*.py files scanned 69 (app/gen_rivalfunds_location.py exempt by the check, as the by-hand generator); parents[N>=3] hits 0 of 69",
+   "expect": "(?s)parents\\[N.=3\\] in shipped app modules: 0 of \\d+ file\\(s\\) scanned \\(want 0\\).*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: your tests and the suites of the two modules pass.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt10.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "11 passed in 2.83s\npytest rc=0; tests defined in test_og_gt10.py 2 (want 2+); failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "pytest collected 11 items (test_og_gt10.py 2, test_og_pt1.py, test_og_pt2.py), 11 passed; failed/error lines 0 of 11; tests defined in test_og_gt10.py 2 (want 2+)",
+   "expect": "(?s)pytest rc=0; tests defined in test_og_gt10.py [2-9]\\d* \\(want 2\\+\\); failed/error lines 0.*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The pre-fix tree: the same AC1 and AC2 invocations run at the cut HEAD 5ded7131ea, where the parents[5] lines are still present, before any edit in this worktree.",
+   "expected": "AC1 FAIL with IndexError on both modules; AC2 2 of 69 files.",
+   "observed": "AC1: host-shaped import: portal_models FAIL(IndexError), portal_macro FAIL(IndexError); calendar importable no; T-1 computable no; RESULT: FAIL. AC2: parents[N>=3] in shipped app modules: 2 of 69 file(s) scanned (want 0) -- app\\portal_macro.py:55 [5], app\\portal_models.py:39 [5]; RESULT: FAIL.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each of AC1, AC2 and AC3 run twice: once at the code commit 4cbbf2f64a and again at the final HEAD 001bfbee52 (the surprise-row commit, no code change between them).",
+   "observed": "Same RESULT: PASS and the same denominators on both runs (AC1 2 of 2, AC2 0 of 69, AC3 11 of 11 passed); the AC3 pytest wall time differed (3.46s, 2.83s) and is not a verdict.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The gateway release (NFRA_OPLGTW.TO-OG-ap-19) and any deploy, upload, S3 write, SSM, IAM or Terraform.",
+   "reason": "Code and tests only; the order's bounds (section 2) and its preflight declare no release or deploy."
+  },
+  {
+   "item": "The parents[N>=3] lines in ops/schwab_status.py:53 and ops/schwab_entitlement_admin.py:55, and app/gen_rivalfunds_location.py:18.",
+   "reason": "Step 3 of the order says to report, not edit. ops/ and the generator are outside this order's paths; the generator is exempt by the check. Reported in the worker report."
+  },
+  {
+   "item": "The ARMED row NFRA_OPLGTW-Z-W87-S1 (the same two lines).",
+   "reason": "The defect is removed by commit 4cbbf2f64a in this worktree, but the row is not edited: rows are append-only and its disarm record stays with disarm_owner 2.0.0_SA_COO~O."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W90-S1: the cell cites row NFRA_OPLGTW-Z-W90-S1 as the finding of the parents[5] defect; no such row existed in the channel, and the finding row is NFRA_OPLGTW-Z-W87-S1.",
+  "NFRA_OPLGTW-Z-W90-S2: on this worker's interpreter the staged lib/trading_calendar.py answers from its hardcoded NYSE fallback (pandas_market_calendars absent); the module flags the table for regeneration before 2028."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the code commit 4cbbf2f64a, the surprise-row commit 001bfbee52 (rows NFRA_OPLGTW-Z-W90-S1 and -S2 in INVESTIGATION_v1.md), and the baseline run under controls.",
+ "compiler_tools": [
+  {
+   "tool": "pytest (opal-gateway, the new module plus the two module suites)",
+   "invocation": "cd infra/aws/ec2/opal-gateway && timeout 120 python -m pytest tests/test_og_gt10.py tests/test_og_pt1.py tests/test_og_pt2.py -q -p no:cacheprovider --color=no",
+   "result": "11 passed (run by gt10.AC3.sh at 4cbbf2f64a and at 001bfbee52)"
+  },
+  {
+   "tool": "the commit gate (safe-commit: py_compile, ruff py39, ds-precommit, surprise-row gate, missions-tree-check)",
+   "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~90 <0.9.0_WK_NFRA_OPLGTW~90@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "passed at 4cbbf2f64a (3 files) and at 001bfbee52 (surprise-row gate OK: 1 file, all new rows carry their step-7/step-10 fields)"
+  }
+ ]
+}
