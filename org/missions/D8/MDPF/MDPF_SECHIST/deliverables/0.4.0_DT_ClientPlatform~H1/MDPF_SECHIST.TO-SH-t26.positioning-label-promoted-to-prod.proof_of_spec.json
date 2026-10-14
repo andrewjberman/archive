@@ -1,10 +1,9 @@
 {
-  "genre": "DEPLOY",
   "schema_version": "1.0",
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform~H1/logs/2026-10-14/sh_t26_positioning_label_prod_promote.md",
   "to_id": "MDPF_SECHIST.TO-SH-t26",
   "firm": "MDPF",
   "phase": "BUILD-GENERAL",
-  "risk_class": "SERVED",
   "assignee": "0.4.0_DT_ClientPlatform~H1",
   "spec_ref": {
     "doc": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t26.positioning-label-promoted-to-prod.md",
@@ -16,74 +15,79 @@
     "vintage_commit": "aff3185498",
     "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t26.positioning-label-promoted-to-prod.md"
   },
-  "rollback": "NAMED, AND NOT TAKEN. In an ephemeral worktree on PROD: git revert -m 1 <merge-sha> --no-edit, then a plain push of PROD (never a force push, never a reset); cancel the deploy run the revert queues if the site still serves the old head. PROD base to return to: 6a5926fc1194e1ce37e35ff267e5cf4914d9c172 (tag portal-v2.1.219). The change is display-only and renders as before when neither returns_frontier key is served, so no data rollback exists.",
   "artifacts_produced": [
     {
       "path_or_key": "Opal-Capital/portal refs/heads/PROD",
-      "kind": "git_ref",
+      "kind": "frontend_component",
       "commit_or_etag": "fa10e75861abd352ab033f5c7ab4b9e1f0f297e9",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "artifact_covered_by": ["AC1", "AC2"],
+      "artifact_covered_by": [
+        "SH6-t26-AC1",
+        "SH6-t26-AC2"
+      ],
       "deploy_evidence": "git push origin PROD printed 6a5926fc..fa10e758; git ls-remote origin refs/heads/PROD read after the push returned fa10e75861abd352ab033f5c7ab4b9e1f0f297e9. gh -R Opal-Capital/portal run 38619242657 (Deploy to Production) read status completed, conclusion success on that headSha. Annotated tag portal-v2.1.220 peeled with rev-parse ^{commit} to the same commit."
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.4.0_DT_ClientPlatform~H1/PROMOTE_RECEIPT_SH_T26.md",
       "kind": "doc",
-      "commit_or_etag": "committed with this instance",
+      "commit_or_etag": "c8b440ce01",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "artifact_covered_by": ["AC3"],
+      "artifact_covered_by": [
+        "SH6-t26-AC3"
+      ],
       "deploy_evidence": "The receipt the order requires: sections Release, Pages changed, CI. Evidence, not a deployed artifact."
     }
   ],
   "acceptance": [
     {
-      "criterion_id": "AC1",
+      "criterion_id": "SH6-t26-AC1",
       "criterion_verbatim": "seven lines `EQUAL <path>` (one per path, none `DIFFERS`)",
       "method": "command",
-      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in <the seven paths>; do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse c77f23624d:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in src/api/portal-proxy.ts src/pages/Positioning/shared/etfAdapter.ts src/pages/Positioning/tabs/HoldingsTab.tsx src/pages/Positioning/tabs/ReturnsFrontier.tsx src/pages/Positioning/__harness__/frontierLabel.harness.cjs src/pages/Positioning/__harness__/frontierFixture.json src/pages/Positioning/__harness__/frontierNoCarry.golden.json; do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse c77f23624d:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done",
       "output_evidence": "EQUAL src/api/portal-proxy.ts\nEQUAL src/pages/Positioning/shared/etfAdapter.ts\nEQUAL src/pages/Positioning/tabs/HoldingsTab.tsx\nEQUAL src/pages/Positioning/tabs/ReturnsFrontier.tsx\nEQUAL src/pages/Positioning/__harness__/frontierLabel.harness.cjs\nEQUAL src/pages/Positioning/__harness__/frontierFixture.json\nEQUAL src/pages/Positioning/__harness__/frontierNoCarry.golden.json",
       "denominator": "7 of 7 paths in the order's list; 0 DIFFERS. The fast-forward diff printed the same seven files, 392 insertions, and git diff release HEAD was empty.",
-      "expect": "seven lines EQUAL, none DIFFERS",
+      "expect": "\\A(?:EQUAL \\S+\\s*){7}\\Z",
       "status": "PASS"
     },
     {
-      "criterion_id": "AC2",
+      "criterion_id": "SH6-t26-AC2",
       "criterion_verbatim": "one JSON row whose status is completed and conclusion is success, with headSha equal to git rev-parse origin/PROD after a fetch, and headSha NOT beginning 6a5926fc",
       "method": "command",
       "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
       "output_evidence": "[{\"conclusion\":\"success\",\"headSha\":\"fa10e75861abd352ab033f5c7ab4b9e1f0f297e9\",\"status\":\"completed\"}]\ngit -C portal rev-parse origin/PROD (after a fetch) printed fa10e75861abd352ab033f5c7ab4b9e1f0f297e9. The repo was named with --repo, and the same list returned prior runs, so this is not the empty wrong-repo read. Run 38619242657 was in progress at first read and was polled to completed.",
       "denominator": "1 row; listed by headSha over the last 40 runs, one workflow (Deploy to Production) ran on that sha",
-      "expect": "status completed, conclusion success, headSha equal to origin/PROD and not 6a5926fc",
+      "expect": "\"conclusion\":\"success\",\"headSha\":\"fa10e75861abd352ab033f5c7ab4b9e1f0f297e9\",\"status\":\"completed\"",
       "status": "PASS"
     },
     {
-      "criterion_id": "AC3",
+      "criterion_id": "SH6-t26-AC3",
       "criterion_verbatim": "a count of at least 4 (the route, the class and the CI words each present)",
       "method": "command",
       "invocation": "grep -c -E \"positioning|client-facing|completed|success\" \"C:/dev/ajb_workspace/org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.4.0_DT_ClientPlatform~H1/PROMOTE_RECEIPT_SH_T26.md\"",
-      "output_evidence": "5",
+      "output_evidence": "5\n(grep -c prints a count of matching LINES in the one receipt file; the route, the class and the CI words are each present in it)",
       "denominator": "5 matching lines in the 1-file receipt; the count is of lines, and the route, the class and the CI words are each present",
-      "expect": "at least 4",
+      "expect": "\\A(?:[4-9]|[1-9]\\d+)\\s",
       "status": "PASS"
     }
   ],
   "controls": {
-    "ci_was_read_from_the_run_not_from_the_push": {
-      "description": "A PROD push that printed success says nothing about the deploy. The conclusion was read from the run, and gh was pointed at the portal repo by name because bare gh at the workspace root queries a repo with no PROD branch and returns an empty list.",
-      "expected_landed": "a run row with headSha fa10e75861ab, status completed, conclusion success",
-      "expected_not_landed": "an empty list, or the newest row still headed 6a5926fc",
-      "observed": "The first list showed run 38619242657 in_progress on fa10e758 beside the prior completed run on 6a5926fc, so the not-landed arm was a real alternative. Polled to completed/success.",
-      "status": "PASS"
+    "mutant": {
+      "description": "AC1's own loop re-run against the pre-promote PROD head 6a5926fc1194 instead of origin/PROD: a comparison that cannot say DIFFERS proves nothing when it says EQUAL.",
+      "expected": "seven DIFFERS lines (the feature is absent from the old PROD head, and a path missing there fails the rev-parse and reads DIFFERS)",
+      "observed": "7 of 7 lines read DIFFERS at 6a5926fc1194 (uniq -c: 7 DIFFERS, 0 EQUAL), against 7 of 7 EQUAL at origin/PROD fa10e75861ab. The probe discriminates the promoted tree from the base.",
+      "status": "FIRED-AS-EXPECTED"
     },
-    "the_tag_was_peeled_not_read_off_ls_remote": {
-      "description": "ls-remote shows the tag object sha, not the commit.",
-      "expected_landed": "rev-parse portal-v2.1.220^{commit} equals the PROD head",
-      "expected_not_landed": "it equals 6a5926fc (portal-v2.1.219) or no new tag exists",
-      "observed": "portal-v2.1.220 peeled to fa10e75861abd352ab033f5c7ab4b9e1f0f297e9; portal-v2.1.219 peeled to 6a5926fc1194, so the probe discriminates.",
-      "status": "PASS"
+    "determinism": {
+      "method": "AC1's loop run twice against origin/PROD and the two outputs compared with cmp and sha256sum",
+      "observed": "cmp reported the files identical; sha256 prefix 6b933a6848d5a7fe for both runs.",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
+    {
+      "item": "Rollback (not taken)",
+      "reason": "NAMED, AND NOT TAKEN. In an ephemeral worktree on PROD: git revert -m 1 <merge-sha> --no-edit, then a plain push of PROD (never a force push, never a reset); cancel the deploy run the revert queues if the site still serves the old head. PROD base to return to: 6a5926fc1194e1ce37e35ff267e5cf4914d9c172 (tag portal-v2.1.219). The change is display-only and renders as before when neither returns_frontier key is served, so no data rollback exists."
+    },
     {
       "item": "The workspace submodule pointer bump (prod-deploy Step 6)",
       "reason": "It writes the portal path, which is outside this order's <paths>, and the order's bound 3 limits writes to the receipt and the ledger entry. The issuer or the integrator carries it."
@@ -99,6 +103,10 @@
     {
       "item": "A typecheck of the dirty main portal tree",
       "reason": "Typecheck ran on the merged release tree in the ephemeral worktree, the tree that was pushed. The main tree carries three other seats' modified files and was not touched."
+    },
+    {
+      "item": "AC2 and the tag: two reads that carry their own negative arm",
+      "reason": "The first gh list showed run 38619242657 in_progress on fa10e758 beside the prior completed run on 6a5926fc, and the tag peel gave portal-v2.1.219 -> 6a5926fc1194 beside portal-v2.1.220 -> fa10e75861ab, so neither read was a one-armed probe. The tag peel is evidence for the ledger leg L3 and is not a criterion of this order."
     }
   ],
   "surprises": [],
