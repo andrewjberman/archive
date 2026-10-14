@@ -19,7 +19,8 @@ Arms (a line `  <ARM> PASS|FAIL <detail>` each, then `ROUND 6 READBACK: k of n a
   R4 headline arrays equal the prior object's on every common date
   R5 differential identity from served bytes: (after residual - before residual) == suppressed dollars, to the cent, every valued date
   R6 the three firm scopes' aggregate-aua-timeseries are value-equal to the prior date's on the common dates
-  R7 account-distribution: total equals the staged unfolded object; folded keys gone; other_models count == sum of removed counts
+  R7 account-distribution: against the PRIOR dated A4 object (the staged runner object is frozen at 2026-08-18, row S5): total within roster drift;
+     folded keys gone; other_models count within tolerance of the sum of the prior day's removed counts
   R8 category-views: Models > Custom node aum at the as-of equals the sum of the custom-class by_model values at the as-of
   R9 manifest: run.code.commit == deployed package BUILD_MANIFEST commit == function env MDPF_GOLD_COMMIT; errors empty; 16 A4 objects
 """
@@ -288,23 +289,40 @@ def r6(firms_new: dict, firms_prior: dict) -> tuple:
 
 # ------------------------------------------------------------------------------------------------ live arms R7-R9
 def r7(dist: dict, staged: dict) -> tuple:
+    """AMENDED 2026-10-14 ~00:4xZ (issuer): the reference is the PRIOR dated A4 global account-distribution, NOT the staged runner object.
+    The staged gold/mdpf_revamp/global/account_distribution.json has been frozen since 2026-08-18 (period 2026-08-17, row S5), so no served total
+    can equal it. The fold leaves `total` unchanged by design, but the roster drifts a few accounts a day, so the counts are compared with a
+    stated tolerance and both numbers are printed. When the prior object is itself already folded (second folded day onward) only the structure is
+    checked: the fold key set is stable and no unfolded key reappears."""
+    if not staged:
+        return False, "no prior dated global account-distribution to compare against"
     nb, sb = dist.get("by_model") or {}, staged.get("by_model") or {}
-    if dist.get("total") != staged.get("total"):
-        return False, "total differs from the staged unfolded object"
     nm = (dist.get("meta") or {}).get("account_count_by_model_key") or {}
     sm = (staged.get("meta") or {}).get("account_count_by_model_key") or {}
+    nt = int((dist.get("total") or {}).get("account_count") or 0)
+    st = int((staged.get("total") or {}).get("account_count") or 0)
+    drift_ok = abs(nt - st) <= max(10, int(0.01 * st))
+    prior_folded = FOLD_KEY in sm
     removed_keys = sorted(set(sm) - set(nm))
     added = sorted(set(nm) - set(sm))
     removed_names = sorted(set(sb) - set(nb))
     other_names = sorted(set(nb) - set(sb))
+    if prior_folded:
+        reappeared = sorted(set(nm) - set(sm))
+        ok = drift_ok and not reappeared
+        return ok, ("prior object already folded: unfolded keys that reappeared=%s; total new=%d prior=%d (drift ok=%s)"
+                    % (reappeared, nt, st, drift_ok))
     rm_count = sum(int((sb[n] or {}).get("account_count") or 0) for n in removed_names)
     got = None
     for n in other_names:
         got = int((nb[n] or {}).get("account_count") or 0)
-    ok = (FOLD_KEY in added and len(other_names) == 1 and got == rm_count and bool(removed_keys)
-          and FOLD_KEY not in removed_keys)
-    return ok, ("removed model keys=%d removed entries=%d added keys=%s; other_models account_count=%s vs sum of removed=%d"
-                % (len(removed_keys), len(removed_names), added, got, rm_count))
+    tol = max(3, int(0.03 * rm_count))
+    count_ok = got is not None and abs(got - rm_count) <= tol
+    ok = (FOLD_KEY in added and len(other_names) == 1 and count_ok and bool(removed_keys)
+          and FOLD_KEY not in removed_keys and drift_ok)
+    return ok, ("removed model keys=%d removed entries=%d added keys=%s; other_models account_count=%s vs sum of the prior day's removed=%d "
+                "(tolerance %d, roster drift between days); total new=%d prior=%d (drift ok=%s)"
+                % (len(removed_keys), len(removed_names), added, got, rm_count, tol, nt, st, drift_ok))
 
 
 def r8(cv: dict, new_g: dict) -> tuple:
@@ -400,8 +418,7 @@ def cmd_read(argv: list) -> int:
     arm("R4", r4(new_g, prior_g))
     arm("R5", r5(new_g, prior_g))
     arm("R6", r6(firms_new, firms_prior))
-    staged = _json(s3, "gold/mdpf_revamp/global/account_distribution.json")
-    arm("R7", r7(other["account-distribution"][0], staged))
+    arm("R7", r7(other["account-distribution"][0], other["account-distribution"][1]))
     arm("R8", r8(other["category-views"][0], new_g))
     arm("R9", r9(s3, new_g.get("as_of_last") or date))
     return _report(arms)
