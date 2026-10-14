@@ -157,8 +157,11 @@ def firstchain(a):
             p.append("the dry-run sample must write 0 objects and be read before the deploy")
         if not (1 <= d["dry_run_sample"]["advisors"] <= 10):
             p.append("the dry-run sample is 1 to 10 advisors")
-        if d["chain"]["emitted_line"] is not True or d["chain"]["cloudtrail_putevents"] < 1 or d["chain"]["generator_invocations"] < 1:
-            p.append("the first chain must show the emitted line, a CloudTrail PutEvents and a generator invocation")
+        # CloudTrail lookup-events never returns PutEvents (FB-i-2 sweep, FB1's positive control), so the put is
+        # evidenced by cloudtrail_putevents >= 1 OR by the rule firing: chain.triggered_rules_sum >= 1 (AWS/Events).
+        put_seen = d["chain"]["cloudtrail_putevents"] >= 1 or d["chain"].get("triggered_rules_sum", 0) >= 1
+        if d["chain"]["emitted_line"] is not True or not put_seen or d["chain"]["generator_invocations"] < 1:
+            p.append("the first chain must show the emitted line, a PutEvents (CloudTrail, or the rule's TriggeredRules >= 1) and a generator invocation")
         if not (0 <= d["keys"]["regenerated"] <= d["keys"]["ceiling"] <= 194) or d["keys"]["prior_version_ids_recorded"] is not True:
             p.append("regenerated keys must be within the named ceiling (at most 194) with prior VersionIds recorded")
         if d["keys"]["nonempty_bullets"] != 0 or len(d["slots_disabled"]) != 6:
