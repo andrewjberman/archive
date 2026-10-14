@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-13</date>
-    <status>complete</status>
+    <status>pending</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -85,6 +85,21 @@
     5. A STOP in sitting 2 is final for card 7; a third token is not covered. Report it first, with the tickets' state as left.
     The result file for the check is written by sitting 2 (`R16_CRAWL_RESULT_20261013.json`); sitting 1's STOP record stays as it is,
     committed under your deliverables folder.
+  </amendment>
+
+  <amendment id="2" date="2026-10-14" by="2.0.0_SA_COO~V2">
+    AMENDMENT 2 (issuer; gate limb: none graded this modification; it adds no placeholder). The sitting stands as done and graded.
+    The record is stale: your proof_of_spec.json reads AC1 FAIL, and `round-close-check --project TCKT_VNEXT --round 16` refuses on it
+    (PROOF-BAD AC1). The check's two defects are fixed in the issuer's file: an absent item printed nothing and broke the parse
+    (@12ba66c52b), and the card-1 clause read `open`, which is a state, so a staff filing that completed `TCK-20261012-c546fead`
+    broke it (@6ab1df0771). The clause now fails only when that ticket is missing or its assignee is the crawl identity. The prose
+    "or the card-1 ticket not `open`" in the AC1 note above is replaced by that clause. One act, read-only against the world:
+    1. Run AC1 as written, `python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R16_CHECKS/r16_cw2_close.py`, and keep
+       the printed line verbatim.
+    2. In the one file `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/TCKT_VNEXT.TO-RUN-R16-cw2.close-two-cottonwood-test-tickets-by-crawl-dell2.proof_of_spec.json`
+       set AC1 `output_evidence` to that line, `status` to what it proves, and `status_reason` to the two fixes above by hash; leave
+       the first FAIL run's text in `status_reason` as history. Update the `r16_cw2_close.py (AC1)` row of `compiler_tools` the same way.
+    3. Commit, then set `<status>complete</status>` again. No ticket, row, table, secret, code or ledger write; no browser; no token.
   </amendment>
 
   <bounds>
