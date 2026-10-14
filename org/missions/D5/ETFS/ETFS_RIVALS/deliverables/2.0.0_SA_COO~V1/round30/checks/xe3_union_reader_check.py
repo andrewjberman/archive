@@ -100,3 +100,24 @@ def test_ac3_status_rows_follow_the_old_rule_and_full_snapshots_read_as_before(t
 
 def test_ac3_an_empty_store_returns_the_old_triple(tmp_path):
     assert g.load_actions(sinks.get_sink(f"local:{tmp_path}")) == (None, None, [])
+
+
+def test_ac4_a_void_object_is_not_an_action_row_and_a_voided_action_does_not_come_back(tmp_path):
+    """AMENDMENT 1 (row ETFS_RIVALS-D1-W40-S1): the union must honour `actions-void-*` objects as `price_series._voids` does: the
+    (void_revision, normalised security_id) pairs they name drop the event rows of that pull, whatever the pull's age."""
+    s = sinks.get_sink(f"local:{tmp_path}")
+    full = [_row("A US Equity", "split", "2026-03-02", 2.0, "full", dt.date(2026, 9, 1), raw="Stock Split"),
+            _row("A US Equity", "cash_div", "2026-06-01", 0.5, "full", dt.date(2026, 9, 1), raw="Regular Cash")]
+    short = [_row("A US Equity", "cash_div", "2026-09-25", 0.6, "short", dt.date(2026, 9, 30), raw="Regular Cash")]
+    other = [_row("B US Equity", "cash_div", "2026-05-01", 1.0, "full", dt.date(2026, 9, 1), raw="Regular Cash")]
+    _put(s, "actions-full", full + other)
+    _put(s, "actions-short", short)
+    void = pd.DataFrame([{"void_revision": "full", "security_id": "a us equity", "reason": "a wrong inferred split", "as_of": dt.date(2026, 10, 2)}])
+    buf = io.BytesIO()
+    pq.write_table(pa.Table.from_pandas(void, preserve_index=False), buf)
+    s.put(homes.address("rivalfunds", "etfs", "gold", "corporate_actions", f"date={D}", "actions-void-v1.parquet"), buf.getvalue())
+    df, label, uris = g.load_actions(s)
+    got = sorted((r.security_id, r.event_type, _s(r.ex_date)) for r in df.itertuples())
+    # A's two rows of pull "full" are voided; A's short-pull row and B's row stay; the void object contributes no row
+    assert got == [("A US Equity", "cash_div", "2026-09-25"), ("B US Equity", "cash_div", "2026-05-01")]
+    assert "void_revision" not in df.columns and len(uris) == 3        # the void object is still listed in the lineage
