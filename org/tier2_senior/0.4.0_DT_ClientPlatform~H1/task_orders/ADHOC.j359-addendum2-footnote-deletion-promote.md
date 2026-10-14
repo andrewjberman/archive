@@ -24,9 +24,9 @@ THE DATA IT ASSUMES IS LIVE: `s3://opal-data-cot/platinum/satellites/characteris
 
 <scope>
 1. **PRECONDITIONS, read first; any false means do nothing and report which:**
-   a. The issuer's GO message citing this order (the un-parking condition above) is in hand, sent after the re-seat.
+   a. The issuer's GO message citing this order is in hand. AMENDED 2026-10-14 ~20:55Z by the issuer, on the CTO's ruling (`1.0.0_SA_CTO~DELL1` msg 5895): Andrew held tonight's dell1 restart ("Dell1 Restart is being held til later", record `org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20261014_204xZ_DELL1_RESTART_HELD.md` @11a1d08ef0), so there is no 21:00Z restart to straddle, the first pair's condition 3 does not bind, and the GO is sent NOW rather than after a re-seat. Read the restart state yourself before starting (c below): a restart notice that has come back is a STOP.
    b. `approval-status --branch cand/dell1/satellite-returns-method` reads `state=APPROVED valid=yes` with `head_sha` equal to the branch tip (`git ls-remote origin refs/heads/cand/dell1/satellite-returns-method`). A tip that differs from `714f8e48c8` is a stale head: STOP and report.
-   c. The clock: no leg is left open across a restart or re-seat; read any restart notice and the time before starting.
+   c. The clock: no leg is left open across a restart. Read the time and any restart notice before starting; if the hold has been lifted and a restart is due inside the leg (about 15 minutes), STOP and report.
    d. No other promote or deploy is in flight: read `org/critical_paths/.open_deploys/` in EVERY live worktree (`git worktree list --porcelain`, then `git -C <wt> ls-tree -r --name-only HEAD org/critical_paths/.open_deploys/`), union them, print the per-tree denominator; read the portal's last CI run (`gh run list`) for one in progress.
    e. The served key's VersionId is as the context states.
 2. **ORDER OF ACTS:**
