@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS", "y309-build": "Y309-BUILD", "y310-build": "Y310-BUILD", "y311-build": "Y311-BUILD"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS", "y309-build": "Y309-BUILD", "y310-build": "Y310-BUILD", "y311-build": "Y311-BUILD", "y320-build": "Y320-BUILD"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -971,7 +971,7 @@ def main(argv):
             print("%s: %d passed, %d failed (rc=%d)" % (relpath, passed, failed, rc))
             if rc != 0 or failed or passed < floor:
                 problems.append("%s must pass with at least %d tests" % (relpath, floor))
-    elif check in ("y309-build", "y310-build", "y311-build"):
+    elif check in ("y309-build", "y310-build", "y311-build", "y320-build"):
         # release 29 BUILD records: the staged artifact is RE-HASHED here; the delta against the live package (or the release-28
         # tarball) is compared with the expected members; the resident record also carries three scripts and the staged sums.
         import hashlib
@@ -979,9 +979,12 @@ def main(argv):
                 "y310-build": ("124", "IRPT_YCHARTS_GENERATE_BUILD.json", {"uploads.py", "generate_installed.py"},
                                {"uploads.py", "generate_installed.py"}, {"ordinary_viewer.py"}, "C:/dev/irpt-release-r29/"),
                 "y311-build": ("125", "RESIDENT_BUILD.json", {"uploads.py", "status.py"},
-                               {"uploads.py", "status.py", "resident_bindings.json", "SHA256SUMS"}, set(), "C:/dev/irpt-release-r29/")}[check]
+                               {"uploads.py", "status.py", "resident_bindings.json", "SHA256SUMS"}, set(), "C:/dev/irpt-release-r29/"),
+                # release 29b (the ticket service, round 40): the record lives under r40/ of the worker's folder
+                "y320-build": ("130", "OPAL_TICKET_API_BUILD.json", {"lambda_function.py"}, {"lambda_function.py"}, set(),
+                               "C:/dev/irpt-release-r29b/")}[check]
         worker, name, need, allowed, add_need, stage = spec
-        rec = load(root, D.replace("/r21/", "/r39/") % worker + name, problems)
+        rec = load(root, D.replace("/r21/", "/r40/" if check == "y320-build" else "/r39/") % worker + name, problems)
         if rec:
             for member in ("artifact", "delta_vs_live", "only_in_live", "only_in_release", "rollback", "tests", "claim", "not_read"):
                 if member not in rec:
