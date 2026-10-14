@@ -1,0 +1,97 @@
+{
+  "base_commit": "f9138c4f06184149082ab08988e9a8a2f6d2b9c6",
+  "chunk_bound_days": 25,
+  "observed_seconds_per_day": 216.7,
+  "writers": {
+    "count": 2,
+    "list": [
+      {"file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py", "how": "scheduled_and_backfill"},
+      {"file": "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py", "how": "other"}
+    ]
+  },
+  "firms": {
+    "49financial": {
+      "activity_table": {"partitions": 4, "earliest": "2026-10-07", "latest": "2026-10-12"},
+      "returns_table": {"partitions": 569, "earliest": "2024-07-08", "latest": "2026-10-12"},
+      "demand": {
+        "floor_applied": "2012-01-01",
+        "earliest_record": "2024-07-08",
+        "start_day": "2024-07-08",
+        "trading_days_to_fill": 565,
+        "invocations_needed": 23
+      }
+    },
+    "cottonwood": {
+      "activity_table": {"partitions": 0},
+      "returns_table": {"partitions": 3325, "earliest": "2013-04-03", "latest": "2026-06-22"},
+      "demand": {
+        "floor_applied": "2012-01-01",
+        "earliest_record": null,
+        "start_day": null,
+        "trading_days_to_fill": null,
+        "invocations_needed": null
+      }
+    },
+    "inflection": {
+      "activity_table": {"partitions": 0},
+      "returns_table": {"partitions": 0},
+      "demand": {
+        "floor_applied": "2012-01-01",
+        "earliest_record": null,
+        "start_day": null,
+        "trading_days_to_fill": null,
+        "invocations_needed": null
+      }
+    }
+  },
+  "plan": {
+    "mechanism": "The reporting-gold function's explicit backfill event for the one custody source the function declares: trading days oldest-first from the source's first partition day, in invocations of at most chunk_bound_days trading days each, accounts population, a dry_run invocation before each real chunk. Not planned for cottonwood or inflection: no custody source is declared for them and no function exists for them.",
+    "event_keys": ["backfill", "backfill.start", "backfill.end", "accounts", "dry_run"],
+    "idempotent": false,
+    "overwrites_existing_partitions": true,
+    "rollback_possible": true,
+    "batches": 23,
+    "write_set": [
+      "irpt/<firm>/gold/account_return_daily/date=<day>/data.parquet and manifest.json",
+      "irpt/<firm>/gold/account_class_daily/date=<day>/data.parquet and manifest.json",
+      "irpt/<firm>/gold/account_lot_realized/date=<day>/data.parquet and manifest.json",
+      "irpt/<firm>/gold/account_lot_unrealized_daily/date=<day>/data.parquet and manifest.json",
+      "irpt/<firm>/gold/account_activity_daily/date=<day>/data.parquet and manifest.json",
+      "irpt/<firm>/gold/account_activity_daily/_status/lots_not_computed.json"
+    ]
+  },
+  "notes": [
+    "base_commit: HEAD of the worker worktree before the first commit (git rev-parse HEAD).",
+    "Function name: the order names irpt-reporting-gold. No function or log group of that name exists (get-function-configuration ResourceNotFound; describe-log-streams: log group does not exist). The live writer is irpt-49f-reporting-gold-lambda (lambda.tf builds the name with opal_name from the firm scope). All reads used the live name.",
+    "Writers: the activity table name was searched with the Grep tool over infra/, data/ and lib/. infra/ matches: handler.py, reporting-gold locals.tf and iam.tf, and two test files. data/ matches: account_activity_lots.py and its test file. lib/ matches: none. Test files are excluded (fake S3, no production write). The live role policy (get-role-policy) grants PutObject on five gold prefixes including the activity prefix. Principals outside that role were not enumerated.",
+    "Three firms: sources.json declares one custody source (the 49financial master). handler.py refuses any source count other than 1 (lines 222-224). locals.tf one() refuses a second firm or bucket. The live function list (lambda list-functions, read) has no reporting-gold function for cottonwood or inflection.",
+    "49financial activity_table: 4 partitions, listed with the list-objects-v2 delimiter read on the activity prefix (counts and dates only). The four days are 2026-10-07, 2026-10-08, 2026-10-09 and 2026-10-12, which matches the CTO relay.",
+    "49financial returns_table: 569 partitions, listed the same way. 569 equals the count of trading days 2024-07-08..2026-10-12 from lib/trading_calendar.py, so there is no gap.",
+    "cottonwood returns_table: 3325 partitions listed on its returns prefix (a table written by another producer; not this function). cottonwood activity_table: 0 partitions. inflection activity_table and returns_table: 0 partitions each.",
+    "cottonwood and inflection demand: null. No activity source is declared for either firm, and reading their source prefixes is outside the bounded read allowance. The figure is not sourced and is not estimated.",
+    "49financial earliest_record 2024-07-08 is the earliest date= partition of the source prefixes the producer reads (dim_balance and fact_trn, listed; the same first day in both, and the returns table starts that day too). The per-account earliest positive-value day is read by the producer from object bodies and was not measured; the source's first partition is a bound.",
+    "49financial start_day 2024-07-08 = the later of earliest_record and 2012-01-01 (the floor is applied and is not binding here).",
+    "trading_days_to_fill 565 = trading days 2024-07-08..2026-10-06 (the day before the activity table's earliest partition 2026-10-07), counted with lib/trading_calendar.py trading_days_between. The calendar answered from its hardcoded NYSE fallback (calendar_source NYSE/hardcoded-fallback-2010-2027); pandas_market_calendars is absent and the module printed a WARN.",
+    "invocations_needed 23 = ceil(565 / 25).",
+    "chunk_bound_days 25 = MAX_BACKFILL_DAYS in handler.py line 119.",
+    "observed_seconds_per_day 216.7 = the REPORT Duration of the scheduled 1-day run that computed 2026-10-12 for 7634 accounts with upload True (filter-log-events on the live log group, from 2026-09-20). Current-stage 1-day upload runs since 2026-10-09 measured 96.4, 318.1, 343.5, 389.1 and 216.7 seconds (five runs). Those runs include the lots stage. The 22 chunks of 25 days logged on 2026-10-03 ran 21 to 63 seconds each (median 37.8, 1.51 seconds a day), but no account_activity_daily line appears in their logs, so they predate the lots stage and are not the current rate.",
+    "Time estimate (derived, not measured): 565 days at 216.7 seconds a day extrapolates linearly to about 122,400 seconds, or about 34 hours serial over 23 invocations. A 25-day chunk at that linear rate is about 5,400 seconds, which is past the function timeout of 900 seconds (get-function-configuration). The lots stage is one producer call per invocation, so the linear figure may overstate; no 25-day chunk with the lots stage has run, so the true chunk wall time is not measured.",
+    "Rewrite scope: run_backfill calls the returns emit for every day of the range, then the class and lots stages. The 565-day range lies inside 569 landed returns days, so returns partitions would be overwritten, not only activity partitions.",
+    "Earlier passes: 23 backfill invocations with upload True ran on 2026-10-03 (22 chunks of 25 trading days and one of 12) over 2024-07-08..2026-10-01, which is 562 trading days. They rewrote returns; no activity line appears in them. The activity table's first log line is 2026-10-09.",
+    "Lots refusals: the lots stage refused 2026-10-07 (run logged 2026-10-09 04:16) and 2026-10-08 (run logged 2026-10-09 11:43) on the realized-lot key check (LOTS_SKIPPED). Both later landed on other runs. The refusal messages carry lot identifiers that embed account numbers; none is copied here.",
+    "Idempotence: 2026-10-08 landed 6901 activity rows (logged 2026-10-09 13:05). Dry runs of the same day logged 6904 rows on 2026-10-12 and 2026-10-13. A re-run does not reproduce the same content, so idempotent is false.",
+    "Overwrite: emit_day puts the same keys again on a re-run (account_activity_lots.py emit_day, lines 1318-1353). A backfill over landed days overwrites them. The four existing activity partitions (2026-10-07..2026-10-12) lie after the range end 2026-10-06 and are inside no chunk.",
+    "Rollback: get-bucket-versioning on the 49financial gold bucket reads Status Enabled, so prior versions of rewritten objects are kept. New objects can only be removed by a delete from an operator identity; the function role has PutObject and no delete.",
+    "Permissions (live get-role-policy of the function role): PutObject on the five gold prefixes, GetObject on six gold prefixes, ListBucket on the declared silver and gold prefixes, dynamodb:GetItem on the class table, and logs. No delete. The identity of a manual invoker was not read. The scheduler role grants lambda:InvokeFunction only (schedule.tf).",
+    "Schedule: events list-rules with prefix irpt returns one rule and none naming reporting-gold. The reporting-gold schedule is an EventBridge Scheduler schedule (schedule.tf). The comment there declares cron(41 7 ? * MON-FRI *) in America/New_York. The Scheduler read was not in the bounded allowance and was not made.",
+    "Reads outside the listed allowance, disclosed: sts get-caller-identity (identity check), lambda list-functions (to resolve the function name, names only), iam list-role-policies (policy name only). No function code, configuration beyond name, timeout and memory, or object body was read.",
+    "Client data: no account id, client id or bucket name is in this record. Counts, dates and durations only.",
+    "functions_invoked, sign_ins_made, aws_writes_made, rows_written, figures_written and vendor_requests_sent are all 0. Every AWS call was a list, a get, a describe, a filter-log-events or an identity read."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
