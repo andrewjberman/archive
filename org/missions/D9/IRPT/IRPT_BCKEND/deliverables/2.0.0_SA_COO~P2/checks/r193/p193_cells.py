@@ -121,6 +121,21 @@ def apply_ac1():
         v = bb.get(firm) or fail("no branch_b_reread for %s" % firm)
         if v.get("bundle_version_id") != BRANCH_B_BUNDLE[firm] or v.get("manifest_version_id") != BRANCH_B_MANIFEST[firm]:
             fail("%s Branch B versions differ from the packet's: the release stops" % firm)
+        # AMENDMENT 1 (CTO ruling msg 7650): the manifest version at mint is the recorded page anchor. A version newer than
+        # the packet's is admitted only if it is the only newer one, was written by that firm's scheduled fire, and its
+        # published date is T-1 of that fire by the trading calendar.
+        a = v.get("manifest_anchor_at_mint") or fail("%s: no manifest_anchor_at_mint" % firm)
+        if not a.get("version_id"):
+            fail("%s: the anchor needs a version id" % firm)
+        if a["version_id"] == BRANCH_B_MANIFEST[firm]:
+            if a.get("newer_versions") != 0:
+                fail("%s: the anchor equals the packet's but newer versions are claimed" % firm)
+        else:
+            if a.get("newer_versions") != 1 or a.get("written_by_scheduled_fire") is not True:
+                fail("%s: a newer manifest version must be the only one and written by the scheduled fire: a STOP" % firm)
+            fd = a.get("fire_date")
+            if not is_date(fd) or a.get("published_date") != prev_trading_day(fd):
+                fail("%s: the newer manifest's published date must be T-1 of its fire by the calendar: a STOP" % firm)
     dg = r.get("digest_gate") or {}
     for firm in FIRMS:
         ch = (dg.get(firm) or fail("no digest_gate for %s" % firm)).get("changed_members")
