@@ -42,6 +42,7 @@ OUT_R = PRIV + "fwd21_sample_r106/"
 SAMPLE_DIR = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~169/"
 R105_SAMPLE = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~167/HOUSEHOLD_SAMPLE.json"
 V042_SHA = "e9c389b75c1981bfe8a2aee9ebb8b0b21f45c686071b75950bb5db2e806e151d"
+V043_SHA = "90a5c8ef6d53244195bea78f32b3cfb5baa23c85cea667490cb887037ab84953"
 CONTRACT_REL = P5.CONTRACT_REL
 KINDS = P5.KINDS
 STEMS = P5.STEMS
@@ -191,17 +192,17 @@ def check_build(root):
     r = P.load(root, D + "0.9.0_WK_IRPT_DASHBD~169/BUILD_R106.json")
     c = P.contract(root)
     doc = c["document"]
-    need(c["contract_version"] == "0.4.3" and any(x.get("sha256") == V042_SHA for x in c.get("lineage") or []), "the contract must be 0.4.3 with the 0.4.2 bytes (sha256 %s...) in its lineage" % V042_SHA[:12])
+    need(tuple(int(x) for x in str(c["contract_version"]).split(".")) >= (0, 4, 3) and any(x.get("sha256") == V042_SHA for x in c.get("lineage") or []), "the contract must be 0.4.3 or later with the 0.4.2 bytes (sha256 %s...) in its lineage" % V042_SHA[:12])
     ar = str(doc.get("absent_rule") or "")
     need("not-held dash" not in ar and "did not span" in ar and "words" in ar, "document.absent_rule must say a window the account did not span prints words, never the not-held dash")
     need(doc.get("absent_kinds") == list(KINDS) and P5.UNHELD in str(doc.get("unheld_rule") or ""), "absent_kinds and unheld_rule stay as in 0.4.2")
     prior = P5.prior_contract(root, CONTRACT_REL, V042_SHA)
-    need(prior is not None and c["members"] == prior["members"], "no member may change in 0.4.3 (the 0.4.2 bytes must be in the file's git history and the members byte-for-byte equal)")
+    need(prior is not None and P5.strip_firm(c["members"]) == P5.strip_firm(prior["members"]), "no member may change in 0.4.3 (the 0.4.2 bytes must be in the file's git history and the members byte-for-byte equal, apart from the per-firm source keys of contract 0.5.0)")
     s = r.get("sample") or {}
     sp = str(s.get("path") or "").replace("\\", "/")
     need(sp.startswith(SAMPLE_DIR) and sp.endswith("HOUSEHOLD_SAMPLE.json") and Path(sp).is_file(), "sample.path must be the private HOUSEHOLD_SAMPLE.json under %s" % SAMPLE_DIR)
     need(not sp.startswith(str(root.resolve()).replace("\\", "/").rstrip("/") + "/"), "the sample is inside the repo: client data never goes there")
-    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") == sha(root / CONTRACT_REL), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes")
+    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") in (sha(root / CONTRACT_REL), V043_SHA), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes (current, or the 0.4.3 bytes round 106 built against)")
     sm = P.sample_json(sp)
     P5.check_sample_shape_k(sm, c)
     prob = P5.kind_problems(sm["values"], c)
