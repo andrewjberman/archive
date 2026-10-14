@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-195",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e03a4991a4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "e03a4991a4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-195.why-cottonwood-account-return-daily-stops-at-2026-06-22.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~160",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~160/session_log.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~160/COTTONWOOD_RETURN_STALE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record. Nothing deployed, pushed or written to AWS; the record changes no served value. Its reads block: 0 vendor calls, 0 S3 writes, 0 DynamoDB writes, 0 secret reads."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~160/session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Command log of the read: command, exit code and deciding line per step. No row values, no account identifiers."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended as bytes (IRPT_DASHBD-D2-W160-S1 to S5); no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB103-3-AC1",
+      "criterion_verbatim": "`DB103-3-AC1` -- the record names the producer with an existing entry file; states the schedule as a trigger kind with the DESIRED and APPLIED states and the evidence in words; states the newest partition (2026-06-22), its address, the read date (2026-10-14 or later) and the trading days since, which the checker recomputes from `lib/trading_calendar.py`; says why it stops and what a resume needs and whether a resume writes gold; a recommendation; no write, push or deploy; no run of 8 or more digits. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r103/p103_round103.py\" . DB103-3-AC1",
+      "output_evidence": "OK: Cottonwood account_return_daily stops at 2026-06-22, 80 trading days before 2026-10-14; producer commonwealth_account_return_daily (ADVI_COTBKF adapter), which imports the gold writer account_return_daily.py and calls its emit_day, trigger MANUAL / DB103-3-AC1 PASS (rc 0)",
+      "denominator": "1 of 1 criterion PASS; 80 trading days after 2026-06-22 through 2026-10-14 (from the fallback calendar, row S4); 3325 date partitions in the Cottonwood gold prefix (named prefix list); 1 partition in the Commonwealth silver input prefix; 2 manifest.json objects read; reads block 0 vendor calls, 0 S3 writes, 0 DynamoDB writes, 0 secret reads; 5 surprise rows filed (S1 to S5)",
+      "status": "PASS",
+      "status_reason": "PASS as written: the checker returns DB103-3-AC1 PASS rc 0 on COTTONWOOD_RETURN_STALE.json. The entry file exists; trigger_kind MANUAL with desired and applied in words; newest_partition 2026-06-22 with its address; read_on 2026-10-14; trading_days_since_newest 80 equal to the checker's recount; why_it_stops, resume_needs and resume_writes_gold (true) are stated; a recommendation is stated; no write, push or deploy; no 8-digit run.",
+      "expect": "DB103-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The record copied to the worktree scratch folder with trading_days_since_newest set to 79, the entry file copied beside it so the producer check passes, and the checker run on that root; the worktree record was not changed",
+      "expected": "DB103-3-AC1 FAIL",
+      "observed": "FAIL: trading_days_since_newest must equal 80 (lib/trading_calendar.py, counted after the newest partition up to 2026-10-14) / DB103-3-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run three times from the worktree root with the same arguments, outputs compared byte for byte",
+      "observed": "three identical outputs, rc 0 each; last line DB103-3-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The adapter's default build and its --apply mint, and any remint of the series",
+      "reason": "A write. The order is a READ; nothing was run and nothing was written."
+    },
+    {
+      "item": "The currency of the holdings neighbour holdings_performance_daily that the producer reads for its days",
+      "reason": "Not read in this order. Named NOT_ESTABLISHED in the record's resume_needs."
+    },
+    {
+      "item": "Why the adapter's last mapped day is 2026-06-22 and not 2026-06-23",
+      "reason": "Not traced in this read. Named NOT_ESTABLISHED in the record's why_it_stops."
+    },
+    {
+      "item": "Which run wrote the 2026-10-11 partitions, and whether it was a whole-history re-mint",
+      "reason": "No writer log is in the worktree and two partitions were read, not all 3325. Named NOT_ESTABLISHED; row S5."
+    },
+    {
+      "item": "The 49 Financial scope's partitions and their currency",
+      "reason": "A different firm's scope, outside the order. Its schedule and Lambda were read only to state what the scheduled trigger covers; row S2."
+    },
+    {
+      "item": "The Cottonwood-scope schedule and Lambda names",
+      "reason": "Derived by the naming builder with the wrong scope and found absent; that check is not evidence about the Cottonwood series and is not relied on. Recorded in the session log, step 11 to 14."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W160-S1: OBSERVATION, INERT: the contract names the gold file as Cottonwood's producer, but the partitions are minted by the ADVI_COTBKF silver adapter that imports it (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W160-S2: OBSERVATION, INERT: the one enabled reporting-gold schedule writes the 49 Financial scope, so it does not keep Cottonwood current (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W160-S3: OBSERVATION, INERT: Cottonwood's Commonwealth silver input is one snapshot dated 2026-06-23 with no newer partition, and the adapter pins that date (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W160-S4: OBSERVATION, INERT: the trading-calendar frontier answered from its hardcoded NYSE fallback because pandas_market_calendars is absent (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W160-S5: OBSERVATION, INERT: the newest and the 2013 manifests were both rewritten on 2026-10-11 and the series still ends at 2026-06-22; the writer is not established (UNDER_INVESTIGATION)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p103_round103.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r103/p103_round103.py\" . DB103-3-AC1",
+      "result": "DB103-3-AC1 PASS (rc 0) on COTTONWOOD_RETURN_STALE.json; three identical runs; mutant FAIL (rc 1) as expected"
+    }
+  ]
+}
