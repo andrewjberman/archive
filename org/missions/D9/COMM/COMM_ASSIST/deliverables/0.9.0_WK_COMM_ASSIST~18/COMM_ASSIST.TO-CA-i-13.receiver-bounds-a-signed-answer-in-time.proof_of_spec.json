@@ -1,0 +1,140 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-i-13",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-13.receiver-bounds-a-signed-answer-in-time.md",
+  "group": "OTHER",
+  "vintage_commit": "c34826c3eb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+  "vintage_commit": "c34826c3eb",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-13.receiver-bounds-a-signed-answer-in-time.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~18",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+   "kind": "script",
+   "commit_or_etag": "eb0400dd93",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MUSE_MAX_AGE (24 h) and MUSE_SKEW (5 min) added beside MUSE_ACTED; _muse_signed_at accepts only a str that assist.parse_ts reads as an aware UTC time (offset zero); _muse_fields requires signed_at and returns it parsed; on_muse_reply computes age = ctx.now() - signed_at and refuses stale-signature when age > MUSE_MAX_AGE or -age > MUSE_SKEW, after the payload parses and before the replay and seq checks. The refusal goes through _muse_refuse (state muse_refusals), sends nothing and changes no draft. No AWS call, no deploy; the change is a code commit on wk-COMM_ASSIST-18 only.",
+   "artifact_covered_by": [
+    "CAi13-AC1",
+    "CAi13-AC2",
+    "CAi13-AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_teams_chat_tenant.py",
+   "kind": "test",
+   "commit_or_etag": "eb0400dd93",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_signed now carries signed_at one minute before the harness clock (the base value 2026-10-02T20:30:00Z was 30 minutes AFTER the clock and would be refused); the tamper and namespace test and three contract cases hand-sign payloads that now carry a valid signed_at. New tests: _muse_fields returns the parsed signed_at; a signed_at at -24 h, -23 h 59 m and +5 min acts; one second past -24 h, -25 h, -365 days, +5 min 1 s and +10 min is refused stale-signature; a year-old signed send on a draft with no seq is refused stale-signature and a fresh answer acts (control); a missing signed_at is bad-payload; six unparsable or non-UTC values are bad-payload; the bound reads the receiver clock, not the envelope, in both directions. Two files: 78 passed (59 at base).",
+   "artifact_covered_by": [
+    "CAi13-AC1",
+    "CAi13-AC2",
+    "CAi13-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAi13-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\" expect: I13-FRESH ok=True arms=6 of 6",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\"",
+   "output_evidence": "(run from the worktree root under timeout 120 on commit eb0400dd93; the script exits 0 whatever the verdict, so the printed line is the verdict) I13-FRESH ok=True arms=6 of 6 failed=none reason=none",
+   "denominator": "6 of 6 arms pass: one-hour-old-acts, just-inside-24h-acts, 25h-old-refused, ten-minutes-future-refused, missing-signed-at-refused, unparsable-signed-at-refused",
+   "expect": "I13-FRESH ok=True arms=6 of 6",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAi13-AC2",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i10_replay.py\" expect: I10-REPLAY ok=True arms=6 of 6",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i10_replay.py\"",
+   "output_evidence": "(run from the worktree root under timeout 120 on commit eb0400dd93, rc 0) I10-REPLAY ok=True arms=6 of 6 failed=none reason=none",
+   "denominator": "6 of 6 arms pass: good-acts-once, same-bytes-replay-refused, old-signature-vs-new-draft, missing-version-refused, missing-seq-refused, seqless-draft-control",
+   "expect": "I10-REPLAY ok=True arms=6 of 6",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAi13-AC3",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_receiver.py\" expect: I2-RECEIVER ok=True arms=7 of 7",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_receiver.py\"",
+   "output_evidence": "(run from the worktree root under timeout 120 on commit eb0400dd93, rc 0) I2-RECEIVER ok=True arms=7 of 7 failed=none reason=none",
+   "denominator": "7 of 7 arms pass: valid-send, forged-key, unsigned, direct-send, tampered, wrong-namespace, stale-edit",
+   "expect": "I2-RECEIVER ok=True arms=7 of 7",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "CAi13-AC1 run against the base receiver: the same check on tenant.py at c34826c3eb, before this order's edit (the baseline run in the worktree)",
+   "expected": "I13-FRESH ok=False arms=2 of 6: the two controls pass, the four build arms fail",
+   "observed": "I13-FRESH ok=False arms=2 of 6 failed=25h-old-refused;ten-minutes-future-refused;missing-signed-at-refused;unparsable-signed-at-refused reason=none",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "CAi13-AC1 run twice on the edited tree: once before the code commit and once on eb0400dd93, outputs compared on the I13-FRESH line",
+   "observed": "two runs identical: I13-FRESH ok=True arms=6 of 6 failed=none reason=none",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "data/transcripts/scripts/tests/test_muse_verify.py",
+   "reason": "the order names it for a signed_at update; the file tests muse_verify.verify on raw bytes and never reaches on_muse_reply, so no test in it changes (channel row COMM_ASSIST-W18-S1, the same premise as COMM_ASSIST-W16-S3)"
+  },
+  {
+   "item": "deploy, AWS calls, network",
+   "reason": "the order says the change is not deployed here; a later cell deploys it under change management"
+  },
+  {
+   "item": "the issuer's three checks",
+   "reason": "the order says read them and do not edit them; none was edited"
+  },
+  {
+   "item": "the muse signer's emission of signed_at",
+   "reason": "no emitter is in this worktree's .tools or data/transcripts/scripts; the design document says the payload carries it (channel row COMM_ASSIST-W18-S2); not measured against a live muse answer"
+  }
+ ],
+ "surprises": [
+  "COMM_ASSIST-W18-S1: CA-i-13 step 4 names test_muse_verify.py for a signed_at update, but that file holds no receiver test and was not edited (the same premise as COMM_ASSIST-W16-S3)",
+  "COMM_ASSIST-W18-S2: the receiver now requires signed_at, but no emitter in .tools or data/transcripts/scripts writes it; the field rests on MUSE_ANSWER_PATH_DESIGN.md, not on a measured live answer"
+ ],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~18/COMM_ASSIST.TO-CA-i-13.receiver-bounds-a-signed-answer-in-time.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\"",
+   "result": "I13-FRESH ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i10_replay.py\"",
+   "result": "I10-REPLAY ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_receiver.py\"",
+   "result": "I2-RECEIVER ok=True arms=7 of 7 failed=none reason=none (rc 0)"
+  },
+  {
+   "tool": "pytest",
+   "invocation": "timeout 120 python -m pytest data/transcripts/scripts/tests/test_teams_chat_tenant.py data/transcripts/scripts/tests/test_muse_verify.py -q -p no:cacheprovider",
+   "result": "78 passed (rc 0; 59 passed at the base c34826c3eb)"
+  },
+  {
+   "tool": "commit gate",
+   "invocation": "bash .tools/commit-gate.sh data/transcripts/scripts/teams_chat/tenant.py data/transcripts/scripts/tests/test_teams_chat_tenant.py",
+   "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc 0)"
+  }
+ ]
+}
