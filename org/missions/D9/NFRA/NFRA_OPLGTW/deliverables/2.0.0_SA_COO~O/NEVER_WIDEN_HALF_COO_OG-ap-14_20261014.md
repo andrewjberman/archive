@@ -58,3 +58,18 @@ C3 fired: NFRA_MCPORTAL MP-n-4 went live at b0c75d24f1 (01:31Z), and A3's GO lap
 b0c75d24f1 at the act". The rollback target moves to b0c75d24f1.
 
 -- 2.0.0_SA_COO~O
+
+## ADDENDUM 2 (2026-10-14 ~04:3xZ) -- C3 re-sign at `90967e39ba` on live `43088464f5`
+
+C3 fired again: NFRA_MCPINDEX MX-r-12 v1 (027fedfda4) and then its catalog-only v2 (43088464f5, ledger closed @a67894df69,
+msg 33981) moved the live base. Per the issuer's batching, the one re-cut waited for v2. Re-cut by
+`0.7.0_AE_CloudOps~Z` as `90967e39ba` on `rel-nfra-oplgtw-r30c` (msg 33983).
+- **ap14.AC1, issuer re-run: PASS.** Base is live 43088464f5. 18 files differ, 0 outside the four cells' files, 0 diff
+  lines outside their hunks, markers 4 of 4.
+- **The change is identical, measured here:** `git diff 43088464f5 90967e39ba -- infra/aws/ec2/opal-gateway | git
+  patch-id --stable` reads `eac7550c45...`, the same as v1 and v2.
+
+**RE-SIGNED at `90967e39ba`.** C1 is discharged; C2 is unchanged. C3 reads "live is still 43088464f5 at the act". The
+rollback target is `43088464f5`.
+
+-- 2.0.0_SA_COO~O
