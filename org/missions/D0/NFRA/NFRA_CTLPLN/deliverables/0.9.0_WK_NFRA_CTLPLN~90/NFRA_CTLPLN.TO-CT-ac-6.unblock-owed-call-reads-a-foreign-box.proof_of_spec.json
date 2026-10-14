@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ac-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ac-6.unblock-owed-call-reads-a-foreign-box.md",
+    "group": "OTHER",
+    "vintage_commit": "c4e253731b"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~90",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round13.md",
+    "vintage_commit": "c4e253731b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ac-6.unblock-owed-call-reads-a-foreign-box.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/unblock.py",
+      "kind": "script",
+      "commit_or_etag": "8b77451e24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local CLI tool, not deployed; the foreign-box read runs only under the test seams in this order (no AWS call, no network, no real git ref)"
+    },
+    {
+      "path_or_key": ".tools/tests/test_unblock_owed_call_foreign.py",
+      "kind": "test",
+      "commit_or_etag": "8b77451e24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "standard-library test; temporary directories only; the seams OPAL_STATE_ROOT, OPAL_CLOUD_READ_LOCAL, AGENTBUS_DEVICE and OPAL_OPEN_CALLS_STATE_ROOT; no network"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "8b77451e24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row NFRA_CTLPLN-W90-S1 appended; git diff of the commit is a pure 27-line append, the existing CRLF rows untouched"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTac6-AC1",
+      "criterion_verbatim": "python .tools/tests/test_unblock_owed_call_foreign.py -- every case passes, the unreadable and own-box cases included (base: the file does not exist); report the whole last line with its denominator.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_unblock_owed_call_foreign.py",
+      "output_evidence": "PASS a-foreign-open-only-in-freshest-source-waits-with-source-named | PASS b-foreign-held-for-andrew-in-freshest-source-waits | PASS c-foreign-closed-in-freshest-source-counts-empty | PASS d-foreign-no-readable-source-counts-empty-unreadable | PASS e-own-box-call-still-reads-the-working-tree | PASS f-working-tree-newer-than-cluster-wins | UNBLOCK-OWED-FOREIGN cases=6/6 ok=True (rc=0). Deciding lines: case a OWED-CALL: id=dell2-20261013T221411Z-3635 counts=WAITING state=OPEN source=cluster; case d OWED-CALL: id=dell2-20261013T221411Z-3635 counts=EMPTY reason=call-unreadable; case e OWED-CALL: id=laptop-20261013T221411Z-0001 counts=WAITING state=OPEN source=own; case f OWED-CALL: id=dell2-20261013T221411Z-3635 counts=WAITING state=OPEN source=working-tree. Base (issuer measurement, file absent): FAIL as expected.",
+      "denominator": "6 of 6 cases (a-f), each a fresh temporary tree and one tick through unblock.main",
+      "status": "PASS",
+      "expect": "UNBLOCK-OWED-FOREIGN cases=6/6 ok=True"
+    },
+    {
+      "criterion_id": "CTac6-AC2",
+      "criterion_verbatim": "python .tools/unblock.py --selftest -- the existing self-test still passes (base: UNBLOCK-SELFTEST cases=32/32 ok=True, a control); report the whole last line.",
+      "method": "test_suite",
+      "invocation": "python .tools/unblock.py --selftest",
+      "output_evidence": "UNBLOCK-SELFTEST cases=32/32 ok=True (rc=0). Base control at HEAD c4e253731b: UNBLOCK-SELFTEST cases=32/32 ok=True.",
+      "denominator": "32 of 32 selftest cases",
+      "status": "PASS",
+      "expect": "UNBLOCK-SELFTEST cases=32/32 ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the new test run against HEAD .tools/unblock.py (the pre-change reader, copied to scratch with the test and xadj.py) must DID-NOT-FIRE on the foreign cases",
+      "expected": "UNBLOCK-OWED-FOREIGN cases=0/6 ok=False: the foreign cases read counts=EMPTY reason=call-absent (the stale working tree) and case e reads the own-box line without a source",
+      "observed": "UNBLOCK-OWED-FOREIGN cases=0/6 ok=False; a, b, c, d, f each read 'OWED-CALL: id=dell2-20261013T221411Z-3635 counts=EMPTY reason=call-absent'; e read 'counts=WAITING state=OPEN' with no source= field",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of python .tools/tests/test_unblock_owed_call_foreign.py, stdout compared byte for byte",
+      "observed": "run 1 and run 2 identical; both end UNBLOCK-OWED-FOREIGN cases=6/6 ok=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the status flip of the task order",
+      "reason": "the order file is outside the write paths; the issuer flips the status"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed, per the cell rules"
+    },
+    {
+      "item": "case b as the literal state HELD",
+      "reason": "open-calls/1 admits only the row states OPEN and CLOSED (open-calls.py STATES; validate_doc refuses any other), so a HELD row cannot be written; a call held for Andrew is an OPEN row with escalation.to=andrew, and case b is realised in that form (it reads WAITING state=OPEN). Recorded as surprise NFRA_CTLPLN-W90-S1."
+    },
+    {
+      "item": "the Python 3.11 target",
+      "reason": "no Python 3.11 runtime is installed on this box (py -3.11 and python3.11 absent); the tests ran under the Python on PATH, 3.12.10; ruff --target-version py39 passes on both files"
+    },
+    {
+      "item": "the live production read of a foreign list (cluster S3 object and origin/box/<box>)",
+      "reason": "the order forbids AWS and network use; the three-source read is exercised through the OPAL_CLOUD_READ_LOCAL and OPAL_STATE_ROOT seams only, and no real git ref is read"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W90-S1: CT-ac-6 premise: HELD is not an open-calls/1 row state (STATES = OPEN, CLOSED); case b is realised as the held-for-Andrew OPEN form with escalation.to=andrew"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~90/NFRA_CTLPLN.TO-CT-ac-6.unblock-owed-call-reads-a-foreign-box.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_unblock_owed_call_foreign.py",
+      "result": "rc=0; last line UNBLOCK-OWED-FOREIGN cases=6/6 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/unblock.py --selftest",
+      "result": "rc=0; last line UNBLOCK-SELFTEST cases=32/32 ok=True"
+    }
+  ]
+}
