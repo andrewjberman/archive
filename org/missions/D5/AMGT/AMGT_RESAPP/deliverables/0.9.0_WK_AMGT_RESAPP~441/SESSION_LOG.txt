@@ -1,0 +1,52 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~441 on AMGT_RESAPP.TO-AMGT-bm-1
+Worktree C:/dev/wk-resapp-441 (outer HEAD d014b315df at start). Portal branch cand/dell1/amgt-sa-pe-basis-and-reasons, base PROD 7db035e4, head 9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36 (LOCAL, not pushed).
+
+1. PREMISES. Worktree paths present (TREE-OK). GOOGL slice carries PX_LAST 2025 = 313.0 USD, IS_EPS 2025 = 10.91, PE_RATIO 2025 = 28.6893 with basis.derived_from [PX_LAST, IS_EPS]; the PX_LAST row carries no period_end_date or fiscal_period_end. The Model tab's All-figures grid and Key Figures are in tabs/ModelTab.tsx; the team-row dash is built in modelSheet.ts (team rows carry cellReasons null). PBR slice: the team sheet has a 'P/E' line (rows index 25, FIGURE, 2026 5.9479, 2027 6.1474).
+
+2. HARNESS RUN ON THE UNCHANGED PAGE (base 7db035e4 ModelTab.tsx and types.ts written into the worktree from git show, harness run, head restored; the restored files are byte-equal to HEAD):
+   CHECK B1_googl_2025_pe_prints_basis_line FAIL (summary text has no "price 313.00 USD at the close of fiscal year 2025")
+   CHECK B1b_served_price_date_is_printed_in_place_of_year FAIL (no "at the close of 2025-12-31" in the Key Figures)
+   CHECK B2_pe_without_derived_from_prints_no_basis_line PASS
+   CHECK B3_non_usd_price_prints_its_code FAIL (no "price 313.00 BRL at the close of fiscal year 2025")
+   CHECK B4a_all_figures_dash_shows_served_reason FAIL (P/E grid row 6586 chars, served reason false)
+   CHECK B4b_all_figures_dash_without_served_reason_prints_fixed_words FAIL (team row 1350 chars, fixed words false)
+   CHECK B5_forecast_pe_cell_shows_withheld_reason FAIL (Key Figures P/E row 955 chars:  class="border-t border-[hsl(var(--hairline))]">P/E5.9x6.1x)
+   CHECK B6_no_forecast_withheld_key_shows_generic_words FAIL (Key Figures P/E row 955 chars:  class="border-t border-[hsl(var(--hairline))]">P/E5.9x6.1x)
+   CHECK B7_saved_values_unchanged PASS
+   BASIS AND REASONS HARNESS: NO (2 of 9 checks)
+   exit=1
+
+   Earlier harness runs in this session (before the final harness, and before the head page was measured) were harness-side fixture mapping defects, corrected in the harness and not in the page: the first run rendered the GOOGL bundle as the ABSENT face (the slice carries no model_status); the second run lost the All-figures years (the slice carries fiscal_years under model, the page reads the envelope).
+
+3. PRODUCT EDITS in src/pages/SecurityAnalysis/ only: types.ts (FigureBasis.derived_from, ThesisModelBlock.forecast_withheld); tabs/ModelTab.tsx (priceBasisLine under the Key Figures historical P/E; withheldPeReason on the Key Figures P/E forecast dash; visible reason or fixed words under every All-figures dash). Saved values unchanged (display only).
+
+4. HARNESS RUN ON THE HEAD PAGE (order's literal AC1 invocation, exit printed):
+   CHECK B1_googl_2025_pe_prints_basis_line PASS
+   CHECK B1b_served_price_date_is_printed_in_place_of_year PASS
+   CHECK B2_pe_without_derived_from_prints_no_basis_line PASS
+   CHECK B3_non_usd_price_prints_its_code PASS
+   CHECK B4a_all_figures_dash_shows_served_reason PASS
+   CHECK B4b_all_figures_dash_without_served_reason_prints_fixed_words PASS
+   CHECK B5_forecast_pe_cell_shows_withheld_reason FAIL (Key Figures P/E row 955 chars:  class="border-t border-[hsl(var(--hairline))]">P/E5.9x6.1x)
+   CHECK B6_no_forecast_withheld_key_shows_generic_words FAIL (Key Figures P/E row 955 chars:  class="border-t border-[hsl(var(--hairline))]">P/E5.9x6.1x)
+   CHECK B7_saved_values_unchanged PASS
+   BASIS AND REASONS HARNESS: NO (7 of 9 checks)
+   exit=1
+
+   Diagnostic only, not committed, removed after the run: GOOGL US with BEST_PE_RATIO 2026E removed, once with forecast_withheld for that year and once without. The Key Figures P/E row then carried the served reason with the key and the generic words without it.
+
+5. AC2 (r103_feature_green_v2.sh, base 7db035e4), output line:
+   typecheck rc 0 | lint rc 0 | harness 21 of 25 pass | base 18 of 24 | regressions 1: basisAndReasons.harness.cjs | pre-existing: assembled.harness.cjs exportCompare.harness.cjs timelineFourStates.harness.cjs
+   R103 FEATURE GREEN: NO (typecheck rc 0, lint rc 0, harness 21 of 25 pass, base 18 of 24, regressions 1)
+   exit=1
+
+6. AC3 (r103_feature_surface_check.py, receipt FEATURE_RECEIPT.md present), output:
+   R103 FEATURE SURFACE: YES (5 files: 5 page, 0 shared named, 0 forbidden, 0 unnamed)
+   exit=0
+   (A first attempt before the receipt existed failed with FileNotFoundError on the receipt path; the receipt was then written and the check re-run.)
+
+7. APPROVAL ROW, check-only (not registered):
+   APPROVAL-REGISTER result=OK row=- head_sha=9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36 commits=1 check-only=yes waived=0
+   exit=0
+
+8. SURPRISE ROWS appended to org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md: AMGT_RESAPP-D1-W441-S1 (BLOCKING, ARMED), AMGT_RESAPP-D1-W441-S2 and AMGT_RESAPP-D1-W441-S3 (OBSERVATION, INERT). Append only, 74 insertions, 0 deletions.

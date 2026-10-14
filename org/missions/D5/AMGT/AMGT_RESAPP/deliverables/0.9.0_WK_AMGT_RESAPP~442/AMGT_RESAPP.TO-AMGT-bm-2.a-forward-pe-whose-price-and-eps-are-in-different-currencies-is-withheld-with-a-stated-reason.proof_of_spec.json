@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-bm-2.a-forward-pe-whose-price-and-eps-are-in-different-currencies-is-withheld-with-a-stated-reason",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-2.a-forward-pe-whose-price-and-eps-are-in-different-currencies-is-withheld-with-a-stated-reason.md",
+  "group": "OTHER",
+  "vintage_commit": "d014b315df"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "d014b315df",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-2.a-forward-pe-whose-price-and-eps-are-in-different-currencies-is-withheld-with-a-stated-reason.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~442",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "1ed763b974",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three additions in one file, shared with other seats: _latest_price_currency (the latest PX_LAST row's currency of fiscal_year_figures), _derive_forward_pe (BEST_PE_RATIO rows withheld when the price currency and the same-period BEST_EPS currency differ; minor unit over major stays; absent code keeps), and read_model, which serves forecast_withheld beside fiscal_unresolved and counts forecast_source_counts over the stored rows. No other region of the file is changed. Not deployed by this cell.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_forward_pe_withheld.py",
+   "kind": "test",
+   "commit_or_etag": "1ed763b974",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New test module, 15 plain test functions over hand-built rows: the USD over BRL withholding with both codes in the reason, GBp over GBP kept, GBp over USD withheld, equal codes kept (also case-only), absent price and absent EPS currency kept, a P/E with no BEST_EPS of its period kept, non-P/E rows untouched and in order, the empty list when nothing is withheld, the latest PX_LAST currency, and the three read_model cases (withheld and served, empty key when nothing is withheld, absent block).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "1ed763b974",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Two rows appended in their own fenced json blocks, LF endings: AMGT_RESAPP-D1-W442-S1 (BLOCKING, ARMED: the round-106 check's F5 reads the checkout's ai_fill block against the live function, which runs with AMGT_AIFILL_ROOT set) and AMGT_RESAPP-D1-W442-S2 (OBSERVATION, INERT: the census reading of withheld rows). The row gate passed: 2 new rows of 1159 total checked.",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a line `names 95 | base forward P/E rows 278 | candidate 218 | withheld 60 (population 60) | names with a withheld row 20 | status not (200, 200): []`, six `PASS` arm lines (F1 to F6) and `R106 FORWARD PE CHECK: YES (6 of 6 arms)`; and exit=0",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-resapp-442 && PYTHONPATH=\"$(pwd)\" timeout 590 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round106_prep/checks/r106_fwd_pe_check.py\" \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round106_prep/forward_pe_population.json\" --workers 4 | grep -E \"^names|PASS|FAIL|R106\"; echo \"exit=${PIPESTATUS[0]}\"",
+   "output_evidence": "names 95 | base forward P/E rows 278 | candidate 218 | withheld 60 (population 60) | names with a withheld row 20 | status not (200, 200): []\n   PASS F1 candidate rows = base rows minus the different-currency rows\n   PASS F2 kept rows equal the base's\n   PASS F3 every withheld row has a reason naming both currencies\n   PASS F4 PBR US withholds with a reason naming USD and BRL\n   PASS F5 no other path differs (floats and clocks only)\n   PASS F6 withheld count equals the population\nR106 FORWARD PE CHECK: YES (6 of 6 arms)\nexit=0",
+   "denominator": "6 arms: 6 PASS, 0 FAIL; names 95; forward P/E rows 278 base, 218 candidate; withheld 60 of population 60 on 20 names. Run on HEAD 7400079c19 (the amended check, which sets AMGT_AIFILL_ROOT as the live function does and sets the ai_fill block aside in F5), from the worker worktree C:/dev/wk-resapp-442.",
+   "status": "PASS",
+   "status_reason": "Re-run after the re-seat (second pass). The first-pass FAIL on F5 was the ai_fill block differing between the live function (AMGT_AIFILL_ROOT set by the AI-fill hold since 2026-10-14 05:10Z) and the checkout run without it; the check is amended by the issuer and ruled in channel row AMGT_RESAPP-D1-W442-S1. The amended check reads YES (6 of 6 arms) on the committed code 1ed763b974 and the amended check file; no code or test was changed in the second pass.",
+   "expect": "names 95 \\| base forward P/E rows 278 \\| candidate 218 \\| withheld 60 \\(population 60\\) \\| names with a withheld row 20 \\| status not \\(200, 200\\): \\[\\]\\n(?:\\s+PASS F[1-6] [^\\n]*\\n){6}R106 FORWARD PE CHECK: YES \\(6 of 6 arms\\)\\nexit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "`N passed` with N at least 8 and no `failed`; and exit=0",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-resapp-442 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest lib/research/api/tests/test_forward_pe_withheld.py -q 2>&1 | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+   "output_evidence": "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n15 passed, 3 warnings in 0.29s\nexit=0",
+   "denominator": "15 of 15 test functions pass in lib/research/api/tests/test_forward_pe_withheld.py (the module defines 15 test functions); 0 failed; ANSI colour codes stripped from the captured line",
+   "status": "PASS",
+   "expect": "[0-9]+ passed[^\\n]*\\nexit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "exactly two lines, `lib/research/api/scoped_amgt.py` and `lib/research/api/tests/test_forward_pe_withheld.py`",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-resapp-442 && git diff --name-only \"$(git merge-base HEAD box/dell1)\" HEAD -- . \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~442\" \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel\" | sort",
+   "output_evidence": "lib/research/api/scoped_amgt.py\nlib/research/api/tests/test_forward_pe_withheld.py\nexit=0",
+   "denominator": "2 of 2 expected lines; no other path in the diff from the merge-base to HEAD 1ed763b974",
+   "status": "PASS",
+   "expect": "lib/research/api/scoped_amgt\\.py\\nlib/research/api/tests/test_forward_pe_withheld\\.py\\n"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The withholding switched off: the single condition `if not price_ccy or not eps_ccy or same:` in _derive_forward_pe replaced by `if True:`, the test module run, then the file restored from a byte copy and compared (cmp) to the committed bytes.",
+   "expected": "the withholding tests fail (the control fires)",
+   "observed": "5 failed, 10 passed of 15 with the withholding disabled; restored file byte-identical (cmp); 15 passed after the restore",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the test module run three times at HEAD 1ed763b974 (once for AC2, once after the mutant restore, once more), the summary line compared",
+   "observed": "run 1: 15 passed; run 2: 15 passed; run 3: 15 passed; identical counts",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The served change itself: no deploy, no store write, no Bloomberg call (the cell is read-only against the world)",
+   "reason": "Order section 2: the issuer deploys; this cell only changes the source and its test module."
+  },
+  {
+   "item": "The never-widen pair (AMGT-bm-3, RA1): the COO half and the CTO half",
+   "reason": "Issuer-side sign-off, not a worker act; the cell carries no sign-off."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-D1-W442-S1: AC1 reads FAIL as invoked: the checkout's /thesis ai_fill block differs from the live function on every name on this box, so F5 cannot pass; the order's premise that base F5 passes does not reproduce. OPEN: BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~R1.",
+  "AMGT_RESAPP-D1-W442-S2: the order names no rule for forecast_source_counts; the cell counts the stored rows so the census is unchanged, and counting the served rows would trip F5. OBSERVATION, INERT; the issuer rules the census reading."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~442/AMGT_RESAPP.TO-AMGT-bm-2.a-forward-pe-whose-price-and-eps-are-in-different-currencies-is-withheld-with-a-stated-reason.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell). Sequence: premises re-grounded at d014b315df (_derive_fiscal_pe and read_model present; the population file and the check present); _derive_forward_pe and read_model edited; test module written, 15 passed; AC1 run: F5 FAIL on the ai_fill block; diagnosed (the live AIFILL root is set on the function; the local shell does not set it; with it mirrored the remaining difference is the ai_fill reason's path rendering on Windows; with ai_fill excluded 0 other-path differences across 95 names); the served forecast_source_counts was changed to read the stored rows so the census is unchanged; mutant control fired; code committed at 1ed763b974; AC2 and AC3 re-run on that commit; AC1 re-run on the committed code gives NO (5 of 6 arms).",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest -q lib/research/api/tests/test_forward_pe_withheld.py",
+   "result": "15 passed"
+  },
+  {
+   "tool": "bash .tools/commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh lib/research/api/scoped_amgt.py lib/research/api/tests/test_forward_pe_withheld.py",
+   "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+  },
+  {
+   "tool": "python round106_prep/checks/r106_fwd_pe_check.py",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round106_prep/checks/r106_fwd_pe_check.py\" \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round106_prep/forward_pe_population.json\" --workers 4",
+   "result": "names 95; R106 FORWARD PE CHECK: NO (5 of 6 arms); F5 FAIL on the ai_fill block"
+  }
+ ]
+}
