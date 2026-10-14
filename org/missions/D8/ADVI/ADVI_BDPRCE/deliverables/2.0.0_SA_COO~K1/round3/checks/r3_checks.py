@@ -76,12 +76,13 @@ def ruleprobe2(rec):
                                               "par_quoted", "types_seen"])
     if why:
         return fail("RULEPROBE2", why)
-    if rec["amendment"] != "R1.1" or rec["deterministic"] is not True:
-        return fail("RULEPROBE2", "amendment must be R1.1 and the probe deterministic")
+    if rec["amendment"] != "R1.2" or rec["deterministic"] is not True:
+        return fail("RULEPROBE2", "amendment must be R1.2 and the probe deterministic")
     if rec["reinvestment_in"] is not True or rec["transfer_in_out"] is not True:
         return fail("RULEPROBE2", "reinvestment buys must be in and Transfer In out")
     pq = rec["par_quoted"]
-    for k in ("class_field", "assets_scaled", "withheld_disagreement", "unit_scale_rows_unchanged"):
+    for k in ("class_field", "assets_scaled", "withheld_disagreement", "unit_scale_rows_unchanged", "per_unit_left",
+              "withheld_ratios"):
         if not isinstance(pq, dict) or k not in pq:
             return fail("RULEPROBE2", "par_quoted lacks %s" % k)
     if not isinstance(rec["assets"], list) or not rec["assets"]:
@@ -90,7 +91,7 @@ def ruleprobe2(rec):
         for k in ("asset_name", "date", "price", "kind", "distinct_trade_ids"):
             if k not in a:
                 return fail("RULEPROBE2", "asset row lacks %s" % k)
-    print("RULEPROBE2 record ok amendment=R1.1 assets=%d par_scaled=%d withheld=%d"
+    print("RULEPROBE2 record ok amendment=R1.2 assets=%d par_scaled=%d withheld=%d"
           % (len(rec["assets"]), int(pq["assets_scaled"]), int(pq["withheld_disagreement"])))
     return 0
 
@@ -101,8 +102,8 @@ def replay2(rec):
                                            "carry_forwards_with_date", "interpolated", "lookback_keying", "list_sha256"])
     if why:
         return fail("REPLAY2", why)
-    if rec["amendment"] != "R1.1" or rec["served_write"] is not False or rec["deterministic"] is not True:
-        return fail("REPLAY2", "amendment must be R1.1, served_write false and the replay deterministic")
+    if rec["amendment"] != "R1.2" or rec["served_write"] is not False or rec["deterministic"] is not True:
+        return fail("REPLAY2", "amendment must be R1.2, served_write false and the replay deterministic")
     why = partition(rec, "classes", REPLAY_CLASSES, "served_rows")
     if why:
         return fail("REPLAY2", why)
@@ -134,8 +135,8 @@ def packet2(rec):
                                            "served_write", "interpolated_fate", "par_rows_in_movers", "plain_page"])
     if why:
         return fail("PACKET2", why)
-    if rec["amendment"] != "R1.1" or rec["served_write"] is not False:
-        return fail("PACKET2", "amendment must be R1.1 and served_write false")
+    if rec["amendment"] != "R1.2" or rec["served_write"] is not False:
+        return fail("PACKET2", "amendment must be R1.2 and served_write false")
     if rec["par_rows_in_movers"] != 0:
         return fail("PACKET2", "the par-quoted rows must not appear as movers")
     f = rec["interpolated_fate"]

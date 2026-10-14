@@ -1,0 +1,18 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~430 on AMGT_RESAPP.TO-AMGT-fc-1.the-model-seam-keeps-only-the-final-answer
+Worktree C:/dev/wk-resapp-430, branch wk-AMGT_RESAPP-430, cut from 7871f10f51. Fix commit 253747f8b5.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-430; test -d org && test -d .tools -> TREE-OK.
+2. Baseline before the edit, check_fc1_seam.py at 7871f10f51 -> "AIFILL FC-1 ARMS: NO (6 of 12)", exit=1.
+   Failing arms: preamble before the search; several searches; citations from the final segment only;
+   narration between a search call and its result; nothing after the last search; call_model returns the final answer only.
+   Passing controls: recorded real response; no-search reply; whitespace-only final segment; max_tokens; counts; no SDK import.
+3. Edit: lib/research/aifill/model.py -- _final_segment() helper; parse_response takes answer text and citations from the
+   final segment; searches and counts still from the whole reply; empty final segment -> ModelError "model gave no final answer".
+4. New test module lib/research/aifill/tests/test_model_final_answer.py (23 test functions). test_model_inputs.py not edited
+   (no test in it asserted the old joining; the recorded fixture has every text block after its searches).
+5. Gate: bash .tools/commit-gate.sh on the two .py files -> "OK: pre-commit gate clean for 2 of 2 file(s)", rc=0.
+6. AC1 check_fc1_seam.py -> "AIFILL FC-1 ARMS: YES (12 of 12)", exit=0.
+7. AC2 pytest on the two modules -> "54 passed in 0.15s", exit=0 (23 + 31 collected).
+8. AC3 check_fa2_model.py -> "AIFILL FA-2 ARMS: YES (21 of 21)", exit=0.
+9. Determinism rerun of check_fc1_seam.py -> "AIFILL FC-1 ARMS: YES (12 of 12)", exit=0 (same as run 1).
+10. Commit via .tools/safe-commit.sh with -F message file; committed 253747f8b5.

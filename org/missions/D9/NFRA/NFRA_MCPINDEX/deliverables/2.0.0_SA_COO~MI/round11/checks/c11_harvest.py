@@ -1,6 +1,11 @@
 """c11_harvest.py -- MX-c-9 AC2 / MX-r-12 instrument (FWD-21 re-pinned to list v4, PRD v0.10 item 1).
 
-Usage: python c11_harvest.py <servable-prefix list .md at its v4 pin> <catalog yaml>
+Usage: python c11_harvest.py <servable-prefix list .md at its v4 pin> <catalog yaml> [<held-rows dir>]
+
+AMENDED A2 (2.0.0_SA_COO~MI, 2026-10-14 ~02:0xZ, row Z-W34-S6, call sitez-20261014T015958Z-a63a): the naming gate refuses
+six hyphenated research-table literals. A research table counts as HELD (not rowed) only when its row file exists in
+<held-rows dir> as harvest_<table>.yaml.txt and names that exact prefix. Rowed + held must still equal 7, and the verdict
+line says how many are held and on which call. A held table is never counted as rowed.
 
 THE LIST SIDE: v4's table row "the 24 top-level prefixes" (every backticked `<name>/` on that line, checked to be 24),
 plus `amgt/`'s sub-prefixes listed EXPLICITLY (the CVO's carried note, CTO msg 33847): row 12b's seven
@@ -16,6 +21,7 @@ import re
 import sys
 
 lst, cat_path = sys.argv[1], sys.argv[2]
+held_dir = sys.argv[3] if len(sys.argv) > 3 else ""
 text = open(lst, encoding="utf-8").read()
 top = []
 for line in text.splitlines():
@@ -41,6 +47,16 @@ rows = [r for r in (doc.get("harvest_datasets") or []) if isinstance(r, dict)]
 prefixes = [str(r.get("prefix") or "") for r in rows]
 covered = [t for t in top if any(p.startswith(t) for p in prefixes)]
 r12b_rowed = [p for p in r12b if p in prefixes]
+held = []
+if held_dir:
+    import os
+    for p in r12b:
+        if p in prefixes:
+            continue
+        t = p.rstrip("/").rsplit("/", 1)[1]
+        f = os.path.join(held_dir, "harvest_%s.yaml.txt" % t)
+        if os.path.isfile(f) and ("prefix: %s" % p) in open(f, encoding="utf-8").read():
+            held.append(p)
 gold6_kept = [p for p in GOLD6 if p in prefixes]
 amgt3_rowed = [p for p in AMGT3 if p in prefixes]
 bad_bucket = sum(1 for r in rows if str(r.get("bucket") or "") != "opal-data-harvest")
@@ -59,8 +75,10 @@ for t in top:
         print("  UNCOVERED %s" % t)
 for p in r12b + AMGT3:
     if p not in prefixes:
-        print("  UNROWED %s" % p)
-ok = (len(top) == 24 and len(r12b) == 7 and len(covered) == 24 and len(r12b_rowed) == 7 and len(gold6_kept) == 6
+        print("  %s %s" % ("HELD (call sitez-20261014T015958Z-a63a)" if p in held else "UNROWED", p))
+print("RESEARCH rowed %d + held %d of 7" % (len(r12b_rowed), len(held)))
+ok = (len(top) == 24 and len(r12b) == 7 and len(covered) == 24 and len(r12b_rowed) + len(held) == 7
+      and len(gold6_kept) == 6
       and len(amgt3_rowed) == 3
       and not whole_gold and not dups and not outside and not no_reader and not bad_bucket)
 sys.exit(0 if ok else 1)
