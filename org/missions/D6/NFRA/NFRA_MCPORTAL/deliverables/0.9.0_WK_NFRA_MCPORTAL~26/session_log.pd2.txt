@@ -1,0 +1,26 @@
+Session log -- 0.9.0_WK_NFRA_MCPORTAL~26 on NFRA_MCPORTAL.TO-MP-pd-2 (cell MP-pd-2)
+Worktree C:/tmp/mp-pd-26, branch wk-NFRA_MCPORTAL-pd-26, base ef2a5b14e176b428600920cbd9ada74817ced168, code commit f40bf7dded.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPORTAL-pd-26; test -d org && test -d .tools -> TREE-OK.
+2. Read the worker face of the order. The Read call returned the whole file, so the record face below the marker was
+   also read in that call; it was not used for the work.
+3. Baseline: pd2.AC1.sh -> "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_person_access.py absent", RESULT: FAIL, exit=1.
+   pd2.AC2.sh -> "writer suite: 24 passed in 12.65s; passed=24 failed=0", RESULT: FAIL, exit=1 (needs 31).
+4. Premises: acs.POLICY_RECORD_TYPES has no person_access (app/access_state.py:64); acs.policy_key refuses it;
+   ops.schwab_entitlement_admin revoke/activate use operator_transact; data_entitlement.profile_put_op carries the
+   optimistic revision condition "#og_rev = :og_rev" with names {"#og_rev": "revision"} and values {":og_rev": n}.
+5. Edits: lambda_function.py (person_access branch after register_tenant; _plain_record; hashlib and Decimal imports);
+   tests/test_person_access.py (seven named tests). The first draft refused every real update because the stored
+   revision is a decimal.Decimal; fixed by _plain_record before the commit.
+6. Criteria after the fix:
+   pd2.AC1.sh -> "writer person_access tests: 12 passed in 0.76s; named tests PASSED 7 of 7", RESULT: PASS, exit=0.
+   pd2.AC1.sh (second same-input run) -> "12 passed in 0.69s; named tests PASSED 7 of 7", RESULT: PASS, exit=0.
+   pd2.AC2.sh -> "writer suite: 36 passed in 10.99s; passed=36 failed=0", RESULT: PASS, exit=0.
+7. Scratch probes (.scratch/, not committed) against the real app/access_state.AccessState over a fake boto client:
+   WITHOUT the planted type, operator_transact on a person_access key -> AccessStateRefused (not a well-formed key), 0 transact calls.
+   WITH the planted type, handle() -> WRITTEN, one transact of 2 puts (person_access; operator_audit#...).
+   Update path: expect 5 -> REFUSED STALE-REVISION, 0 transact calls; expect 1 -> WRITTEN, Put condition "#og_rev = :og_rev",
+   names {"#og_rev": "revision"}, values {":og_rev": {"N": "1"}}, plus the audit put.
+8. Commit f40bf7dded via .tools/safe-commit.sh (commit-gate passed; client account-id list ABSENT, so the commit
+   was not checked against it).
+9. Surprise rows filed: NFRA_MCPORTAL-Z-W26-S1 (Decimal revision), NFRA_MCPORTAL-Z-W26-S2 (status flip outside the granted paths).
