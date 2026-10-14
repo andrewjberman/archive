@@ -34,6 +34,16 @@ PYEOF
 GOODREG="$PLANT_REGISTRY_DIR"; export PLANT_REGISTRY_DIR="$(native "$T/badreg")"
 arm "a registry row missing (ac1)" FAIL ac1 "$T/good"
 export PLANT_REGISTRY_DIR="$GOODREG"
+python - "$GOODREG" "$T/badfork" <<PYEOF
+import json, os, shutil, sys
+shutil.copytree(sys.argv[1], sys.argv[2], dirs_exist_ok=True)
+p = os.path.join(sys.argv[2], 'catalog_fork_keys.json'); d = json.load(open(p, encoding='utf-8'))
+k = sorted(d['rows'])[3]; d['rows'][k]['key_template'] = 'changed'
+json.dump(d, open(p, 'w', encoding='utf-8'), indent=1)
+PYEOF
+export PLANT_REGISTRY_DIR="$(native "$T/badfork")"
+arm "a fork registry row altered (ac1)" FAIL ac1 "$T/good"
+export PLANT_REGISTRY_DIR="$GOODREG"
 mut() { # mut <name> <mode> <python edit applied to a copied dir>
   rm -rf "$T/m"; cp -r "$T/good" "$T/m"
   python - "$(native "$T/m")" <<EOF
@@ -48,13 +58,15 @@ EOF
 mut "drop one row (ac1)" ac1 "os.remove(sorted(glob.glob(os.path.join(d,'*.yaml')))[11])"
 mut "an extra table row (ac1)" ac1 "p=sorted(glob.glob(os.path.join(d,'*.yaml')))[0]; r=yaml.safe_load(open(p,encoding='utf-8')); save(os.path.join(d,'zz_extra.yaml'),r)"
 mut "wrong contract.id (ac1)" ac1 "p,r=list(rows().items())[4]; r['contract']['id']='x'; save(p,r)"
-mut "a fork_keys account block changed (ac2)" ac2 "p,r=list(rows().items())[7]; r['fork_keys']['account']['last4_collisions_within_firm']=-1; save(p,r)"
+mut "a fork_keys block emptied (ac2)" ac2 "p,r=list(rows().items())[7]; r['fork_keys']={}; save(p,r)"
+mut "a firm token left in a row (ac2)" ac2 "p,r=list(rows().items())[8]; r['nl_tags']=list(r['nl_tags'])+['cottonwood']; save(p,r)"
+mut "a row prefix carrying a firm segment (ac2)" ac2 "p,r=list(rows().items())[10]; r['prefix']='silver/cottonwood/'; save(p,r)"
 mut "firm_scope_rule flipped on a client table (ac2)" ac2 "
 for p,r in rows().items():
     if r['firm_scope_rule']=='firm-scoped': r['firm_scope_rule']='opal-internal-only'; save(p,r); break"
 mut "a common_query dropped (ac2)" ac2 "
 for p,r in rows().items():
-    if len(r['example_questions'])>0 and r['contract']['id'].startswith('opal-data-assets'): r['example_questions']=[]; save(p,r); break"
+    if len(r['example_questions'])>0 and r['bucket']=='opal-data-assets': r['example_questions']=[]; save(p,r); break"
 mut "open_items cleared (ac2)" ac2 "
 for p,r in rows().items():
     if r['open_items']: r['open_items']=[]; save(p,r); break"
