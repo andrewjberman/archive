@@ -30,3 +30,15 @@ Not the analysis. What round 13's own work surfaced or left open, each with its 
 - `safe-merge.sh` was run from a copy once (`CT-ab-13`) so the running script was not rewritten under itself; `CT-ab-13` removed the checker-bootstrap class from `1249b0d2d6` on.
 - A Tier-2 seat cannot commit a path whose lane names only the CTO and the COO (`NFRA_CTLPLN_FAST_C` over the identity root): the issuer commits such a path; the seat's `<paths>` grant does not override a lane (it does for workers). The cut should not name such a path in a seat's order, or the lane should list the seat.
 - A proof instance whose artifact row reads `PENDING-THIS-COMMIT` for a file an EARLIER commit carried is INVALID once committed (CCX class). Workers hit it twice (`~89`, `~U7`); the order's worker face could say "pin each artifact row to the commit that carried it" so no worker reports it again.
+
+## D. Owned ARMED rows still OPEN after the CVO's two passes (a0723efcf58 pass 2: W6-S17, W73-S2, W14-S2 REMEDIATED and DISARMED)
+
+Each is a repair this seat owns the disarm of; none serves an ungraded FWD, so none is cut this round. Candidates for the round-14 batch or their own cells:
+
+| row | what | note |
+|---|---|---|
+| `W8-S7` | `dell_fence_census.py` (about :33, :730) defaults `--out` to the baseline file that `check_dell_fence_join.py` and `check_fence_scoped_rows.py` read, so a `--live` re-take silently changes the baseline | small, LOCAL |
+| `Z-S3` | `lib/trading_calendar.py` fallback covers 2010-2027 only; its own text says regenerate (`lib/tests/gen_nyse_closures.py --write`) before 2028 | needs `pandas_market_calendars` (the FWD-15/18/19 package route is carried) |
+| `W12-S1` | the three Lambda-vendored byte-copies of `lib/trading_calendar.py` differ from the lib file (163 lines vs 304) | one chain after `Z-S3`; the copies are code in deployed Lambdas, so the sync rides a deploy |
+| `S9103` | `org/devices/kit_terraform_providers.py` has no replace-not-merge step for the Dell mirror and no dell2 readback | no commit to it since 2026-10-09 |
+| `S9118`, `S9120`, `S9122` | see the CVO's `a5261ded52` (unchanged, unchanged, CLOSED_UNREMEDIATED to 2026-11-10) | `S9118` is the reaper's stop-at-descendant, a CTO-scope call |
