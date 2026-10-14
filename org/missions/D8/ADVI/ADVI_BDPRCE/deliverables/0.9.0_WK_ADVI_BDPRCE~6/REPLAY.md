@@ -58,6 +58,6 @@ The full list was produced by three separate processes after the final code; eac
 
 - Which writer produced the served prices. R1 reproduces the served value on only 1 of round 1's 64 UNEXPLAINED rows.
 - How bond prices should be scaled. The rule as written does not address percent-of-par quotes; the 8 `scale_100x` rows need a ruling before any move.
-- Trades dated later than their partition beyond one day. The lookback reads partitions t and t+1 only.
+- Late-landed trades. In the 2026 partitions, 229,666 trade rows sit in a partition dated after their trade date (none before it); 61,583 of them lag more than one day, up to 519 days. The lookback reads partitions t and t+1 only, so for a pre-2026 trade it can name an older observation than the true latest. The window R1 reads every 2026 partition, so it is unaffected. Trades landing after 2026-10-13 are not seen: the replay is as of its read.
 - The 212 NOT_RECOMPUTABLE rows, whose assets have no trade in the store.
 - Dollar effect on holdings and downstream readers. That is `BP-b-7`'s join and is not measured here.
