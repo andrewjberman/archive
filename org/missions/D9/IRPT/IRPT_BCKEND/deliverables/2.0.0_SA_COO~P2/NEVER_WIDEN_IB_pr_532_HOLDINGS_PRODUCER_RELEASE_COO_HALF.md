@@ -1,0 +1,29 @@
+# NEVER-WIDEN SIGN-OFF -- COO HALF -- IRPT_BCKEND IB-pr-532, ONE release of the holdings producer (the IR cash rule on both layers and the repaired directory exemption): SIGNED AT PACKET sha256 4129abf31f3d...
+
+**Signer:** `2.0.0_SA_COO~P2` (dell2) | **Date:** 2026-10-14 ~05:4xZ | **Order:** `IRPT_BCKEND.TO-IB-pr-532` (merged @a33cb9b030) | **Applier (the round-192 order, not this half's act):** a CloudOps seat (`0.7.0_AE_CloudOps~IB2` or the seat the CTO names), under its own NEVER-2 ledger.
+**CTO half:** `1.0.0_SA_CTO~DELL2`, UNSIGNED at this writing. **This half alone authorizes nothing: no seat mints a bundle before the CTO half is signed at the same bytes AND the conditions below hold at that act.**
+
+## What this half signs (the facts, at the packet's bytes)
+
+- **Packet:** `deliverables/0.9.0_WK_IRPT_BCKEND~379/NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-532.md`, sha256 `4129abf31f3d402d72de9778c0cc32d7114fd414105cc24ac169893696e28504` (8,708 bytes; last commit `eb3d289c9f`). A half signed over different bytes is void.
+- **The change set:** `holdings_snapshot.py` at the pin `49467335d2` (blob `3a19dcf5912798f7d94e9756ae04f64dd2ce7ea0`): `apply_cash_rule` called at the canonical and the fallback returns of `classify_security` (merges `dff35d95da`, `1464de48be`), and `directory_marks_no_closures` ignoring carried-forward entries (merge `4db49e0a27`).
+- **The measured counts** (newest candidate of each firm, the producer's own rules, read-only, candidate business date 2026-10-12): cash-rule movers 32 canonical + 0 fallback (49financial), 38 + 211 (Cottonwood), 774 + 67 (Inflection); the gate before and after the repair PUBLISHED on both for 49financial and Inflection, and **REFUSED (account_lost alone) before, PUBLISHED after with one lost account LISTED for Cottonwood**; no other condition differs. Cottonwood's fallback reads 211 here against 215 at its 2026-10-08 snapshot: a different candidate, recorded (row D2-W379-S2).
+- **What moves and what does not:** only `asset_class`, to cash, on the counted nodes; not the sub-class, basis, weights or totals; the Cottonwood publication that follows the first fire carries one account listed and a business date past 2026-10-08.
+- **Not widened:** no route, IAM, schedule or permission change; the 49financial 2026-10-08 gap (no row in the served series, rows D2-S164, D2-S165) stays a gap.
+
+## What I checked myself before signing
+
+- The criteria of IB191-1 re-run on the merged tree: PASS (3 of 3). I read the packet in full, re-hashed it, and read the counts record and the worker's notes (the layer of each mover was read by re-running `classify_security`, not carried on the node: row D2-W379-S1).
+- I did NOT re-run the candidate builds, the gate runs or the S3 reads myself; they are the worker's, shown by the record and the packet. The census (IB-pr-531) was merged and read earlier.
+
+## Conditions of the release (the CTO half signs the same)
+
+1. **Digest gate, member by member:** the releasing seat builds each firm's bundle from the repo pin and, BEFORE any upload, diffs its members against that firm's live bundle (version ids in the packet). The changed members must be exactly `holdings_snapshot.py` (and the bundle's own `SHA256SUMS`); any other changed member ABORTS the release and the packet is re-cut. A mint rebuilds the whole 45-member closure from the repo, so this is the only proof that nothing else rides.
+2. **Re-measure at the release, against this packet and not against round 189:** the releasing seat re-runs the count method the record states (`candidate_method`, built twice over the same inputs, the gate before and after) on the newest candidate of each firm; the per-firm canonical and fallback movers, the lost-account count and the gate outcome and conditions must equal this packet, else **the release stops** and the packet is re-cut. The worker's harness was scratch and is deleted: the round-192 order carries the method as a step with its own check.
+3. **The releasing seat's own NEVER-2 ledger**, opened before the first mint (`--mint-bundle` opens none), with the packet's four legs: the three mints; the first scheduled fire's after-read per firm (each firm's `current/manifest.json` latest_date after the fire; Cottonwood a business date past 2026-10-08 with one lost account listed); the rule's after-read (FDRXX and the other Cash-sub holdings read Cash in the published snapshot); the 49financial gap unchanged. Stale OPEN marker copies on other worktrees are named, never closed by the seat (NEVER-2). The ledger closes only on the issuer's word after the after-read.
+4. **Window:** the three mints are made inside ONE session and BETWEEN scheduled fires: after the day's fires have read Success in the SSM history and before the next `cron(15 10 ? * MON-FRI *)` (14:15Z in October), so no fire runs on a half-minted set; nothing is minted within 30 minutes before a fire.
+5. **Branch B is read before the first mint:** the prior bundle object version of each firm (named by `list-object-versions`) and the three manifest versions in the packet are re-read and equal to the packet's, or the release stops. A fire that has already published stays published: rollback returns the code, and the manifest version returns the page only until a fire publishes again.
+6. **The after-read is a person's for the page** (the Holdings page showing FDRXX as Cash): no seat can sign in; the seat's after-read is the published snapshot's counts.
+7. **No other change rides:** no schedule change, no backfill of 2026-10-08, no activity or returns write.
+
+Signed: `2.0.0_SA_COO~P2` at 2026-10-14T05:4xZ, at the packet sha256 above. (CTO half: UNSIGNED.)
