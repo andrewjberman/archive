@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ar-6.the-ai-fill-page-feature-is-promoted-to-prod-from-the-approved-list",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ar-6.the-ai-fill-page-feature-is-promoted-to-prod-from-the-approved-list.md",
+    "group": "OTHER",
+    "vintage_commit": "07124494dc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "7871f10f51",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ar-6.the-ai-fill-page-feature-is-promoted-to-prod-from-the-approved-list.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal PROD (Opal-Capital/portal refs/heads/PROD)",
+      "kind": "frontend_component",
+      "commit_or_etag": "7db035e448d9e6bbc202ef4264989f54d3d3dded",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PROD 0910f4ad -> 7db035e4, release/20261014T034603Z carrying cand/dell1/aifill-blocks-prod (tip 53de2b9d) only; tag portal-v2.1.217 peels to 7db035e4; CI Deploy to Production run 38508112643 completed/success (the only workflow on that sha). git ls-remote origin PROD read 7db035e448d9e6bbc202ef4264989f54d3d3dded after the push."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform/PROMOTE_RECEIPT_AIFILL.md",
+      "kind": "doc",
+      "commit_or_etag": "1f7519ec4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DT's receipt: release, PROD head before and after, pages changed (Security Analysis, /security-analysis, Opal-internal), CI."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: eleven lines, one per path: ten `EQUAL <path>` and exactly one `DIFFERS src/pages/SecurityAnalysis/types.ts` (PROD carries R1's AMGT-bl-1 field `fiscal_currency_by_mnemonic` in that file, 3 added lines, landed at 0910f4ad); any other `DIFFERS` line fails",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in src/pages/SecurityAnalysis/SecurityAnalysis.tsx src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/components/AiFillBlock.tsx src/pages/SecurityAnalysis/components/SecurityOverlay.tsx src/pages/SecurityAnalysis/tabs/ExecManagementTab.tsx src/pages/SecurityAnalysis/tabs/ThesisTab.tsx src/pages/SecurityAnalysis/__harness__/aiFill.harness.cjs src/pages/SecurityAnalysis/__harness__/aiFill.fixture.json src/pages/SecurityAnalysis/__harness__/drafting.harness.cjs src/pages/SecurityAnalysis/__harness__/execFallback.harness.cjs src/pages/SecurityAnalysis/__harness__/execText.harness.cjs; do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse 85d5749f:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done",
+      "output_evidence": "EQUAL src/pages/SecurityAnalysis/SecurityAnalysis.tsx\nDIFFERS src/pages/SecurityAnalysis/types.ts\nEQUAL src/pages/SecurityAnalysis/components/AiFillBlock.tsx\nEQUAL src/pages/SecurityAnalysis/components/SecurityOverlay.tsx\nEQUAL src/pages/SecurityAnalysis/tabs/ExecManagementTab.tsx\nEQUAL src/pages/SecurityAnalysis/tabs/ThesisTab.tsx\nEQUAL src/pages/SecurityAnalysis/__harness__/aiFill.harness.cjs\nEQUAL src/pages/SecurityAnalysis/__harness__/aiFill.fixture.json\nEQUAL src/pages/SecurityAnalysis/__harness__/drafting.harness.cjs\nEQUAL src/pages/SecurityAnalysis/__harness__/execFallback.harness.cjs\nEQUAL src/pages/SecurityAnalysis/__harness__/execText.harness.cjs",
+      "denominator": "11 of 11 paths read against 85d5749f: 10 EQUAL, 1 DIFFERS (types.ts, the expected one); no other DIFFERS line.",
+      "status": "PASS",
+      "expect": "EQUAL src/pages/SecurityAnalysis/SecurityAnalysis\\.tsx\\nDIFFERS src/pages/SecurityAnalysis/types\\.ts\\nEQUAL src/pages/SecurityAnalysis/components/AiFillBlock\\.tsx\\nEQUAL src/pages/SecurityAnalysis/components/SecurityOverlay\\.tsx\\nEQUAL src/pages/SecurityAnalysis/tabs/ExecManagementTab\\.tsx\\nEQUAL src/pages/SecurityAnalysis/tabs/ThesisTab\\.tsx\\nEQUAL src/pages/SecurityAnalysis/__harness__/aiFill\\.harness\\.cjs\\nEQUAL src/pages/SecurityAnalysis/__harness__/aiFill\\.fixture\\.json\\nEQUAL src/pages/SecurityAnalysis/__harness__/drafting\\.harness\\.cjs\\nEQUAL src/pages/SecurityAnalysis/__harness__/execFallback\\.harness\\.cjs\\nEQUAL src/pages/SecurityAnalysis/__harness__/execText\\.harness\\.cjs"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: one JSON row whose `status` is `completed` and `conclusion` is `success`, with `headSha` equal to origin/PROD after a fetch and NOT beginning `0910f4ad`",
+      "method": "command",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "output_evidence": "[{\"conclusion\":\"success\",\"headSha\":\"7db035e448d9e6bbc202ef4264989f54d3d3dded\",\"status\":\"completed\"}]",
+      "denominator": "1 of 1 latest PROD run; headSha 7db035e4 equals git rev-parse origin/PROD after a fetch and the ls-remote read of PROD; it does not begin 0910f4ad",
+      "status": "PASS",
+      "expect": "\"conclusion\":\"success\",\"headSha\":\"7db035e4[0-9a-f]+\",\"status\":\"completed\""
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: a count of at least 4 (the route, the class and the CI words each present)",
+      "method": "command",
+      "invocation": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform/PROMOTE_RECEIPT_AIFILL.md\"",
+      "output_evidence": "6\n(grep -c over PROMOTE_RECEIPT_AIFILL.md: lines naming security-analysis, Opal-internal, completed and success; threshold 4)",
+      "denominator": "6 matching lines in the receipt (threshold 4)",
+      "status": "PASS",
+      "expect": "^[4-9]\n"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order names no seeded mutant for this promote; AC1's per-blob equality and AC2's head-must-move clause are the discriminating checks (AC2 reads the old head 0910f4ad at the base).",
+      "expected": "N/A: no mutant named by the task order",
+      "observed": "No mutant run; base reads: AC2 headSha 0910f4ad; AC1's DIFFERS on types.ts is itself the discriminating negative within the run.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: AC1 and AC2 were read once after the promote (AC2 also during the CI poll); AC3 once at the committed receipt. Repeats beyond that are outside the bound.",
+      "observed": "AC1: 10 EQUAL + 1 expected DIFFERS. AC2: completed/success headSha 7db035e4. AC3: 6.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "Promote run by 0.4.0_DT_ClientPlatform after 1.0.0_SA_CTO~DELL1 lifted the seating bar (msg 5397): portal-release-build.sh READY (release/20261014T034603Z, base 0910f4ad, head 7db035e4, one feature, PROMOTE-CLIENT-FACING count=0); ephemeral PROD worktree, ff-only merge, parity diff 0, push with VALGATE D-1 PASS and tsc -b --noEmit passed; tag portal-v2.1.217; CI run 38508112643 success; ledger amgt-resapp-ar-6-portal-prod-promote-20261014 closed with both legs proven. Instance written at 2.0.0_SA_COO~R2's request (msg 5407). The order file carried uncommitted issuer edits in the working tree; the vintage pinned is its committed 07124494dc.",
+  "compiler_tools": [
+    {
+      "tool": "gh run list / git rev-parse / grep",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "result": "[{\"conclusion\":\"success\",\"headSha\":\"7db035e448d9e6bbc202ef4264989f54d3d3dded\",\"status\":\"completed\"}]"
+    }
+  ]
+}
