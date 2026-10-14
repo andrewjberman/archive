@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-j-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-j-1.dev-route-only-merge-forward.md",
+  "group": "OTHER",
+  "vintage_commit": "7969c4a598"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round8.md",
+  "vintage_commit": "7969c4a598",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-j-1.dev-route-only-merge-forward.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-hooks/dev_push_payload_gate.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The pre-push DEV payload limb. The FAST-lease admission is removed from decide(); route B is replaced by route B2 (a two-parent merge with Feature: and Approved-By: test-only @-, every changed path a test path). Module docstring and summary words match. The checker never pushes; it reads the portal repo as given by --portal."
+  },
+  {
+   "path_or_key": ".tools/tests/test_dev_push_payload_gate.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local battery on mktemp repositories and a temporary lease directory; no S3 call, no write to the real portal. Two cases inverted (plain test-only commit REFUSED; live FAST lease for the serial REFUSED), two added (test-only merge ADMITTED; the same trailer with a non-test path REFUSED). Last line cases=21/21 ok=True."
+  },
+  {
+   "path_or_key": ".claude/skills/closer-drive/SKILL.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Step 5 Portal bullet now names the approval-lease row and bash .tools/portal-merge-forward.sh cand/<box>/<slug> --push; the own-commits check and the second-seat sentence are kept; nothing else in the file changed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPj1-AC1",
+   "criterion_verbatim": "python .tools/tests/test_dev_push_payload_gate.py expect: cases=21/21 ok=True",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_dev_push_payload_gate.py",
+   "output_evidence": "rc=0. Last line: DEV-PUSH-GATE-TEST cases=21/21 ok=True. Inverted cases read ok: 'plain test-only commit refused (route B needs a two-parent merge)' REFUSED rc 1, 'live FAST lease for the serial admits nothing' REFUSED rc 1. Added cases read ok: 'test-only merge with Approved-By: test-only @- admitted (route B)' ADMITTED rc 0, 'test-only trailer on a merge that changes a non-test path refused' REFUSED rc 1. All other base cases, including the two real pre-push cases, read ok.",
+   "denominator": "21 of 21 cases ok=True",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPj1-AC2",
+   "criterion_verbatim": "python .tools/portal-hooks/dev_push_payload_gate.py --portal portal --remote-ref refs/heads/DEV --remote-sha 514df1bbf04d91f88dad30f6336b8992228710a6 --local-sha ab8ecc5662c9166bc4b3ff3d9ba370733ba4d3cf expect: route=A",
+   "method": "live_read",
+   "invocation": "python .tools/portal-hooks/dev_push_payload_gate.py --portal portal --remote-ref refs/heads/DEV --remote-sha 514df1bbf04d91f88dad30f6336b8992228710a6 --local-sha ab8ecc5662c9166bc4b3ff3d9ba370733ba4d3cf",
+   "output_evidence": "rc=0. Output: 'PASS ab8ecc5662 route=A Merge cand/dell1/aifill-blocks-prod into DEV (approved feature)'; last line 'DEV-PUSH-GATE result=ADMITTED reason=- commits=1'. Read-only against the real portal; the approved aifill merge stays admitted as route A.",
+   "denominator": "1 of 1 commits in the range admitted by route A",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPj1-AC3",
+   "criterion_verbatim": "grep -c \"portal-merge-forward\" .claude/skills/closer-drive/SKILL.md expect: ^[1-9]",
+   "method": "command",
+   "invocation": "grep -c \"portal-merge-forward\" .claude/skills/closer-drive/SKILL.md",
+   "output_evidence": "rc=0. Output: 1 (the base count is 0).",
+   "denominator": "1 matching line; expectation ^[1-9] holds",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The base checker (7969c4a598, measured before the edit) read cases=19/19 ok=True, with the 'test-only commit admitted (route B)' and 'live FAST lease for the serial admitted' cases both ADMITTED. Those are the two direct-push exemptions this cell removes; the inverted cases now read REFUSED.",
+   "expected": "the base checker admits a plain test-only commit and a lease push",
+   "observed": "base run: DEV-PUSH-GATE-TEST cases=19/19 ok=True; base case lines 'test-only commit admitted (route B)' ok and 'live FAST lease for the serial admitted' ok, both expecting ADMITTED",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of python .tools/tests/test_dev_push_payload_gate.py",
+   "observed": "run 1 and run 2 both print DEV-PUSH-GATE-TEST cases=21/21 ok=True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The never-rules gate (.tools/hooks/never-rules-gate.sh) still carries its FAST-lease and TEST-ONLY DEV carve-outs.",
+   "reason": "The file is outside this cell's <paths> and CLAUDE.md forbids the edit to this cell. Filed as NFRA_DEVPLN-W1-S19 for the owner's ruling. The pre-push checker refuses what those carve-outs admit."
+  },
+  {
+   "item": "The SKILL step 5 names the approval-lease --lease-file path org/mcp/drive_mode/<CODE>.json; the row is written on the seat's own laptop.",
+   "reason": "The lease is device-local (drive-mode.py). The approval-lease call was not executed in this cell; only its flags were read from --help."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S19: the never-rules gate still admits a DEV push from a live FAST lease and a test-only fast-forward; the pre-push checker now refuses both (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~DV)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-j-1.dev-route-only-merge-forward.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check --target-version py39 .tools/portal-hooks/dev_push_payload_gate.py .tools/tests/test_dev_push_payload_gate.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "selftest",
+   "invocation": "bash .tools/portal-merge-forward.sh --selftest; bash .tools/portal-release-build.sh --selftest",
+   "result": "MERGE-FORWARD-SELFTEST cases=29/29 ok=True rc=0; RELEASE-SELFTEST cases=12/12 ok=True rc=0"
+  }
+ ]
+}
