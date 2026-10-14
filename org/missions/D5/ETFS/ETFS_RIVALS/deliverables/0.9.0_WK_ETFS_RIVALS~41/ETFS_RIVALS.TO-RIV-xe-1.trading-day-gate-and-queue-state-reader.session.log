@@ -1,0 +1,25 @@
+SESSION LOG -- 0.9.0_WK_ETFS_RIVALS~41 on ETFS_RIVALS.TO-RIV-xe-1.trading-day-gate-and-queue-state-reader
+worktree C:/tmp/wk-riv-r30-41, branch wk-ETFS_RIVALS-41, cut HEAD c78a4c9722 (box/dell1 base), code commit 81f106f
+
+1. Tree grounding: branch wk-ETFS_RIVALS-41; test -d org && test -d .tools -> TREE-OK.
+   Premises re-grounded: standing.read_state at data/mdpf/scripts/demque/standing.py:79; main, _run_date_et, _owed_line,
+   _history_owed present at the cut lines named by the order; lib/trading_calendar.py is_trading_day at line 177.
+
+2. BASE (before any edit): python -m pytest -q -p no:cacheprovider <round30 check> (run from data/etfs/scripts)
+   -> 10 failed, 1 passed in 2.31s   (the cell's stated base: 10 failed, 1 passed)
+
+3. Edits: enrichment_bloomberg.py (gate in main before the default date; _queue_state; state read in _history_owed
+   after the units branch); test_v2_enrichment_cli.py (_run_date_et pinned on test_main_defaults...);
+   test_r27tw1_history_owed_leg.py and test_r28tc1_topup_currency_and_page_day.py (autouse _queue_active fixture);
+   new test_riv_xe1_gate_and_queue_reader.py (copy of the check, docstring header changed only).
+
+4. Criteria, after 81f106f, run twice (run 1 and run 2, identical counts):
+   AC1: python -m pytest -q -p no:cacheprovider <check> -k ac1  -> "5 passed, 6 deselected in 1.34s" / "5 passed, 6 deselected in 1.45s"  rc=0
+   AC2: python -m pytest -q -p no:cacheprovider <check> -k ac2  -> "6 passed, 5 deselected in 1.40s" / "6 passed, 5 deselected in 1.84s"  rc=0
+   AC3: python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_v2_enrichment_cli.py rivalfunds/tests/test_r27tw1_history_owed_leg.py rivalfunds/tests/test_r28tc1_topup_currency_and_page_day.py rivalfunds/tests/test_e1_enrichment_bloomberg.py
+       -> "39 passed, 2 skipped in 5.51s" / "39 passed, 2 skipped in 7.47s"  rc=0
+       (2 skips: test_e1_enrichment_bloomberg.py:57 and :93, "device-local dividends.json absent"; environment, not this change)
+
+5. Full rivalfunds suite: python -m pytest -q -p no:cacheprovider rivalfunds/tests -> "1043 passed, 6 skipped in 137.57s" rc=0
+
+6. Packager read (rivalfunds_package.py STAGED, lines 33-43): no data/mdpf entry. Row ETFS_RIVALS-D1-W41-S1 filed.
