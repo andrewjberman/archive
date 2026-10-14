@@ -1,4 +1,4 @@
-# ANDREW DIRECT -- a single data call to YCharts for pricing data is OK (2026-10-14 ~16:0xZ)
+# ANDREW DIRECT -- a single data call to YCharts for pricing data is OK (2026-10-14 ~15:5xZ)
 
 **Channel:** Andrew, at the dell2 terminal, in the session of `4.0.0_SA_CRO~DELL2`.
 
