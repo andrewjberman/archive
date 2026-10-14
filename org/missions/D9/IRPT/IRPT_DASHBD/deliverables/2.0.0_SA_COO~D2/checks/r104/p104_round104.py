@@ -76,8 +76,9 @@ def check_render(root):
             continue
         vals = [v] if isinstance(v, (int, float)) and not isinstance(v, bool) else ([x for x in v["by_row"].values() if isinstance(x, (int, float)) and not isinstance(x, bool)] if isinstance(v, dict) and "by_row" in v else [])
         for x in vals:
-            want.add("%.1f%%" % x)
-            scaled.add("%.1f%%" % (x * 100))
+            # a stored negative zero prints as 0.0% (a client is never shown -0.0%); %.1f keeps the sign
+            want.add(("%.1f%%" % x).replace("-0.0%", "0.0%"))
+            scaled.add(("%.1f%%" % (x * 100)).replace("-0.0%", "0.0%"))
     scaled -= want
     for name, text in texts:
         vt = P3.visible_text(text)
