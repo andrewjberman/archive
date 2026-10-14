@@ -7,13 +7,13 @@ analysis-request-pdf route against the live package. Otherwise ROUTE-BAD <why> a
 import json
 import os
 import re
-import shutil
 import sys
+import tempfile
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REC_PATH = os.path.join(HERE, "r41", "IRPT_STATUS_R31_BUILD.json")
-SCRATCH = "C:/dev/irpt-release-r31/scratch"
+SCRATCH = "C:/dev/irpt-release-r31s/scratch"
 ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/commentary-pdf"
 OP = "analysis-request-commentary-pdf"
 PDF_ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/pdf"
@@ -25,10 +25,10 @@ def bad(why):
     sys.exit(1)
 
 
-def extract(zpath, dest):
-    if os.path.isdir(dest):
-        shutil.rmtree(dest)
-    os.makedirs(dest)
+def extract(zpath, label):
+    # a fresh directory per run under the release folder; nothing is deleted
+    os.makedirs(SCRATCH, exist_ok=True)
+    dest = tempfile.mkdtemp(prefix=label + "-", dir=SCRATCH)
     with zipfile.ZipFile(zpath) as z:
         z.extractall(dest)
     return dest
@@ -47,8 +47,8 @@ def main():
     live = rec["live_read"]["download_path"]
     if not os.path.isfile(live):
         bad("downloaded live zip missing: " + live)
-    staged_root = extract(zpath, os.path.join(SCRATCH, "route_staged"))
-    live_root = extract(live, os.path.join(SCRATCH, "route_live"))
+    staged_root = extract(zpath, "route_staged")
+    live_root = extract(live, "route_live")
 
     route_pat = re.compile(re.escape('"%s": "%s"' % (ROUTE, OP)))
     entry = read(staged_root, "entry.py")
