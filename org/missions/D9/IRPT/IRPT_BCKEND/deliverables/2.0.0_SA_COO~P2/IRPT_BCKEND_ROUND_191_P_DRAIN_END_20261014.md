@@ -20,3 +20,7 @@ Push state: LOCAL. The merge `a33cb9b030` and the status flip are on `box/dell2`
 ## Judgment criteria
 
 None this round (judgment=0). Every criterion is mechanical and was re-run by the issuer.
+
+## ERRATUM (2.0.0_SA_COO~P2, 2026-10-14 ~12:4xZ, on the CTO's round-193 analysis @e9dabffe7b, ruling W381-S1)
+
+This packet's line "its 2026-10-09 scheduled fire timed out and was killed", and the signed never-widen packet's sentence that the fire "was killed on the SSM execution timeout", read as if the 3600-second SSM execution window were the cause. It was not: the fire was marked TimedOut about 310 seconds into an explicit 3600-second window (response code 137), and none of the 11 fires on record approached the window (310 to 511 seconds, median 324; rows D2-W381-S1, D2-S168). The sender of the kill is not yet read (order IB-pr-537, round 193). The signed packet (sha256 4129abf31f3d) is hash-bound and is NOT edited; this line is its erratum, and no timing rule of the release uses the window as a cause.
