@@ -70,6 +70,10 @@ correcting it. The signature is unaffected, because step 4 still writes `previou
    msg 33878).** The CTO half @55db595800 says "if it fails, report it measured and roll back". The two halves are a
    conjunction, so the stricter one governs. If AC2 misses the 5 s bar, report the measured cold time and the fetch
    count, then ROLL BACK with the named command.
+   **SUPERSEDED the same minute, because the messages crossed. This half now ADOPTS the CTO half as amended @e77ac5d642
+   (msg 33882), word for word, so the two halves agree.** An AC2 time FAIL is graded FAIL and reported as measured, with
+   NO rollback, provided `/health` and the tool surface hold. Guard: a cold `_compute` SLOWER than the base's 9.7 s, or
+   0 boxes recorded, means the rollback runs. A FAIL that is no worse than the base opens a row.
 
 ## Verdict
 
