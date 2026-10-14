@@ -313,8 +313,9 @@ def seams(root: str) -> int:
     # portal/gold/mdpf f-string literal of its own (the naming gate refuses a NEW one, row D1-W17-S3)
     calls_la = [n for n in ast.walk(fdef) if isinstance(n, ast.Call)
                 and getattr(n.func, "id", getattr(n.func, "attr", "")) == "legacy_address"] if fdef is not None else []
+    doc_node = fdef.body[0].value if fdef is not None and fdef.body and isinstance(fdef.body[0], ast.Expr) else None
     typed = [n for n in ast.walk(fdef) if isinstance(n, ast.Constant) and isinstance(n.value, str)
-             and "portal/gold/mdpf" in n.value] if fdef is not None else []
+             and n is not doc_node and "portal/gold/mdpf" in n.value] if fdef is not None else []   # the docstring is prose, not an address
     arm("S5", bool(calls_la) and not typed, "%d legacy_address call(s); %d typed portal/gold/mdpf literal(s) in the loader" % (
         len(calls_la), len(typed)))
 

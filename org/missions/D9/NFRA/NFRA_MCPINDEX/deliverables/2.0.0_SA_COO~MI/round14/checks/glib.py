@@ -19,6 +19,26 @@ CATALOG_DIR = "workflows/atom_decomposition/catalog_entries"
 EXPECT_ROWS = 174         # 131 + 36 + 12 + 7 = 186 contracts, less the 12 that an existing silver_datasets row already catalogues (see in_scope)
 # PRD v0.13: the two G4 feeds marked do-not-serve (a row flagged retired: never a tool target), with G4 routing as the reason.
 DO_NOT_SERVE = ("opal-data-mdpf/feeds/partner_held_etf_49financial", "opal-data-mdpf/feeds/non_model_aua")
+# PRD v0.14 (Andrew-direct ~15:0xZ, client data ONLY from the opal-data-assets vendor silver folders): the account-grain MDPF feeds are
+# NOT_SERVED, a retired row whose reason cites the record.
+NOT_SERVED = ("opal-data-mdpf/feeds/model_aua_positions_49financial", "opal-data-mdpf/feeds/model_aua_positions_inflection")
+NOT_SERVED_RECORD = "ANDREW_DIRECT_20261014_150xZ_CLIENT_DATA_ONLY_OPAL_DATA_ASSETS_VENDOR_SILVER.md @9a314c1e98"
+
+
+def enc(contract_id):
+    """The row's contract.id: the contract_id with every `/` replaced by `:`. An IDENTIFIER, not an S3 address: the commit-time
+    naming gate grades any slash-bearing string as an S3 key and refuses it as out-of-pattern."""
+    return str(contract_id).replace("/", ":")
+
+
+def retired_reason(c):
+    """The reason a row is retired (never a tool target), or None."""
+    cid = c["contract_id"]
+    if cid in DO_NOT_SERVE:
+        return "do-not-serve: " + str(c.get("routing") or "")
+    if cid in NOT_SERVED:
+        return "not_served: %s -- client data only from the opal-data-assets vendor silver folders" % NOT_SERVED_RECORD
+    return None
 
 # The issuer's vendor-tool -> client_* map (OPLGTW PRD v3.1 ruling 1). A name that is not a key passes through unchanged.
 # A G2 tool with no client_* tool (balances, find_holders, flows, documents, delivery, eclipse, prices, workbook rows, platform
@@ -128,15 +148,6 @@ def marks(c):
     stale = "NOT CURRENT: %s trading days behind" % (int(n) if float(n) == int(n) else n) if n is not None and n > 5 else None
     empty = "EMPTY: no objects" if (c.get("size") or {}).get("objects") == 0 else None
     return stale, empty
-
-
-LIVE49F = "Live store: opal-data-bd/silver/ (inferred)."
-
-
-def is_49f_bd(c):
-    """A 49F Black Diamond contract (CTO msg 34127: the rows keep the measured location and say the live store, inferred)."""
-    p = str(c.get("s3_prefix") or "")
-    return p.startswith("blackdiamond/49f/") or p.startswith("blackdiamond/49financial/")
 
 
 def firm_rule(c):

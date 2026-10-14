@@ -3,6 +3,8 @@
 D="$(cd "$(dirname "$0")" && pwd)"
 . "$D/_root.sh"
 C="$(native "$D/c11_check.py")"
+export PLANT_REGISTRY_DIR="$(python -c "import sys; sys.path.insert(0, r'$(native "$D")'); import g1lib; print(g1lib.plant_registry_dir())" | tr -d '\r\n')"
+
 P="$(native "$D/plant_impl_c11.py")"
 ok=0; wrong=0
 arm() { # arm <name> <expect rc> <env...> -- <mode>
