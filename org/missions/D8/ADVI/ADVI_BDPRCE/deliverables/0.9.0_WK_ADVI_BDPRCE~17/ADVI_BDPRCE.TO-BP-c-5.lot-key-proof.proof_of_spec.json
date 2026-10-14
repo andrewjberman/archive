@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-c-5.lot-key-proof",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-5.lot-key-proof.md",
+    "group": "OTHER",
+    "vintage_commit": "0fc99b5801"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R3.md",
+    "vintage_commit": "63d3478d7e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-5.lot-key-proof.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/merge_daily_incremental.patched2.py",
+      "kind": "script",
+      "commit_or_etag": "fa9d37edb5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "patched copy in the worker deliverables folder, committed LOCAL on wk-ADVI_BDPRCE-17; the repo silver step under data/ is not edited and nothing is deployed or scheduled",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/unrealized_lots2.diff",
+      "kind": "script",
+      "commit_or_etag": "fa9d37edb5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unified diff against HEAD data/black_diamond/scripts/silver/merge-daily-incremental.py at 0fc99b5801, headers a/ and b/ as named in the file",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/test_lot_split2.py",
+      "kind": "script",
+      "commit_or_etag": "ccc8409410",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline fixture test over the recorded export; no S3 write; synthetic Units and Cost Basis are labelled as synthetic in the file",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/LOT_PROOF2.json",
+      "kind": "doc",
+      "commit_or_etag": "ccc8409410",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "emitted by test_lot_split2.py --emit-proof; claim measured; carries the real counts (rows folded 192, colliding groups differing 191) and does not round them",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/LOT_PROOF2.md",
+      "kind": "doc",
+      "commit_or_etag": "fa9d37edb5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-page record: the key and its basis, counts against round 2, residue, CAP reading, rollback VersionId",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the built behaviour (the split, the byte-unchanged legacy, folded and differing at zero): ^LOT SPLIT2 TEST: OK [0-9]+ arms$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-17b && timeout 110 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/test_lot_split2.py",
+      "expect": "^LOT SPLIT2 TEST: OK [0-9]+ arms$",
+      "output_evidence": "rc=1; LOT SPLIT2 TEST: FAIL 9 rows folded by the patched lot table == 0 (measured 192); 10 colliding groups still differing under the ruled key == 0 (measured 191)",
+      "denominator": "8 of 10 arms PASS: 1 legacy bytes repo(orig)==patched(orig); 2 legacy bytes patched(with)==repo(orig); 3 lot rows 499808 > legacy rows 108439, key unique; 4 lot carries units+cost_basis, legacy carries neither; 5 lot address == builder address, legacy key unchanged; 6 SKIP path on the original export; 7 negative control; 8 relationship_id survives. 2 FAIL: 9 rows folded 192 (target 0); 10 colliding groups differing 191 (target 0)",
+      "status": "FAIL",
+      "status_reason": "rc=1 and the expected OK line is absent. Under the ruled key the export folds 192 rows and 191 colliding groups still differ, all on Market Value; the zero targets are not met. Not widened silently; surfaced as BLOCKING row ADVI_BDPRCE-D1-W17-S1"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 grades the proof record's invariants: ^LOTPROOF2 record ok legacy_equal=true lots=[0-9]+ folded=0 differing=0 key=(relationship_id|export_lot_id)$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-17b && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py lotproof2 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/LOT_PROOF2.json",
+      "expect": "^LOTPROOF2 record ok legacy_equal=true lots=[0-9]+ folded=0 differing=0 key=(relationship_id|export_lot_id)$",
+      "output_evidence": "rc=1; LOTPROOF2 record FAIL rows folded 192 and differing colliding groups 191 must both be zero",
+      "denominator": "record gates: legacy_equal true (PASS); rows_folded 192 vs 0 (FAIL); colliding_groups_differing 191 vs 0 (FAIL); key_basis relationship_id (PASS)",
+      "status": "FAIL",
+      "status_reason": "the checker refuses the record on its two zero gates, which is the correct outcome for an honest failure under the ruled key"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged): ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-17b && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-17b --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing",
+      "denominator": "changed set: 7 paths (the instance, LOT_PROOF2.json, LOT_PROOF2.md, merge_daily_incremental.patched2.py, test_lot_split2.py, unrealized_lots2.diff, the investigation file); 0 outside the two allowed entries",
+      "status": "PASS",
+      "status_reason": "rc=0, the printed verdict line matches the expectation, and no path lies outside the two allowed entries"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the round-2 four-column key (merge_daily_incremental.patched.py under deliverables ~10) run in memory through this test in place of patched2; not committed",
+      "expected": "LOT SPLIT2 TEST: FAIL with arm 9 rows folded nonzero (15553), rc=1",
+      "observed": "ARM FAIL 3, 8, 9 (rows folded 15553), 10 (191); LOT SPLIT2 TEST: FAIL ... rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the test run twice on the recorded export at ccc8409410, stdout compared with cmp",
+      "observed": "two runs identical, 40 lines each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the template apply: no S3 write, no runner sync, no export produced",
+      "reason": "the apply is WORLD and waits on its CTO and COO pair; the key is not proven, so it stays closed"
+    },
+    {
+      "item": "a units-bearing lot key",
+      "reason": "the export carries no Units before the template switch; the fixture's units are synthetic, so such a key cannot be tested on this fixture"
+    },
+    {
+      "item": "a paged re-export of the capped 2026-10-09 snapshot",
+      "reason": "a Black Diamond producer run, not a read; no slice export exists in readable S3"
+    },
+    {
+      "item": "edit of the repo silver step under data/",
+      "reason": "patch copies only; the unified diff is written against HEAD and nothing is applied"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W17-S1: under the ruled key 192 rows fold and 191 colliding groups differ on Market Value; BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~K1",
+    "ADVI_BDPRCE-D1-W17-S2: round-2 colliding-group counts were pandas dropna=True; with null Open Date kept they are 14,865 groups and 14,683 differing on Relationship ID",
+    "ADVI_BDPRCE-D1-W17-S3: the CAP record's paging plan cannot be run from readable S3 data; no slice exports exist and the completion markers carry no row count"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "test_lot_split2.py",
+      "invocation": "cd /c/dev/wk-bdprce-r3-17b && timeout 110 python -I org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/test_lot_split2.py --emit-proof",
+      "result": "LOT SPLIT2 TEST: FAIL (arms 9 and 10), rc=1; LOT_PROOF2.json emitted with the real counts"
+    },
+    {
+      "tool": "aws s3api get-object (read verb)",
+      "invocation": "aws s3api get-object --bucket opal-data-bd --key forwardfill_v2/unrealized/UNREALIZED_DAILY_2026-10-09.xlsx --version-id Wf2Pct313A.w7y1GpuSf2f7FfiKUVats (via .tools/aws)",
+      "result": "downloaded to C:/dev/wk-bdprce-r3-17b-data; sha256 5700843f9e661364910a5bbb9d9d4b60521775922539f47b066a10d80039ef5b matches the recorded value"
+    },
+    {
+      "tool": "aws s3 cp and s3api list-objects-v2 (read verbs)",
+      "invocation": "list-objects-v2 --prefix forwardfill_v2/unrealized/ (rail-checked comment); s3 cp of forwardfill_v2/unrealized/_complete/2026-10-09.json and 2026-07-08.json",
+      "result": "one UNREALIZED_DAILY object per date and 15 completion markers; markers carry has_data_rows, bytes, landed_at, no row count"
+    },
+    {
+      "tool": "r3_checks.py lotproof2",
+      "invocation": "cd /c/dev/wk-bdprce-r3-17b && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py lotproof2 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/LOT_PROOF2.json",
+      "result": "LOTPROOF2 record FAIL rows folded 192 and differing colliding groups 191 must both be zero, rc=1"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "cd /c/dev/wk-bdprce-r3-17b && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-17b --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~17/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing, rc=0"
+    }
+  ]
+}

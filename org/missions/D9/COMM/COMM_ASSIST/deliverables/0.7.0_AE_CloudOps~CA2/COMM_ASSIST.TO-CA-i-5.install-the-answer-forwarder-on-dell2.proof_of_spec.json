@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~CA2",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/prd/COMM_ASSIST_PRD.md",
+    "group": "C",
+    "vintage_commit": "6e9e2fc1ff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "a2ec9e1ea9",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-5.install-the-answer-forwarder-on-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "dell2:scheduled-task/MuseAnswerForward",
+      "kind": "aws_resource",
+      "commit_or_etag": "LastRunTime 2026-10-14T02:04:33Z, LastTaskResult 0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NOT AWS: kind aws_resource is the nearest schema value for a dell2-local artifact. Principal Test (S4U, RunLevel Limited), trigger Once repeating PT2M with no duration; action powershell.exe -NoProfile -Command reading the two User variables then running forwarder.py --root $env:USERPROFILE\\muse-reader, WorkingDirectory C:\\dev\\ajb_workspace. Fired by itself at 22:02:32 and 22:04:33 local, both result 0."
+    },
+    {
+      "path_or_key": "dell2:user-env/MUSE_MAILBOX_URL,MUSE_LDO_ID",
+      "kind": "aws_resource",
+      "commit_or_etag": "set from the live handler LDO_MAILBOX_URL and LDO_ID",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NOT AWS: two User-scope environment variables on dell2. Both read back equal to the live teams-global-chat-assist-handler-lambda values (env_url=True env_ldo=True in AC2); nothing typed."
+    },
+    {
+      "path_or_key": "dell2:C:/Users/Test/muse-reader/answers (folder, with done and rejected)",
+      "kind": "aws_resource",
+      "commit_or_etag": "answers/done holds 1 marker b6cff723213c47bd...",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NOT AWS: dell2-local folders. answers/ was created by hand (the forwarder does not, row COMM_ASSIST-D2-S1); done/ and rejected/ by the forwarder. The AC3 test answer e2e-20261014T020311Z.json stays in answers/ with its marker in done/."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi5-AC1",
+      "criterion_verbatim": "the precondition, run BEFORE the install (also true after it): dell2, every reader row carries object_id and the seq key, the forwarder file is present, the live assistant gives a mailbox address and id, and the caller is a dell2 admin-group user. It prints ok=False at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i5_pre.py\"",
+      "output_evidence": "I5-PRE ok=True device=dell2 rows=7 object_id=7 seq_key=7 forwarder=True mailbox=True identity=True reason=none (first run before any variable, task or folder existed; rerun after the install printed the same line).",
+      "denominator": "7 of 7 reader rows carry object_id and 7 of 7 carry the seq key; 5 of 5 limbs true (device, rows, forwarder file, mailbox, identity).",
+      "status": "PASS",
+      "expect": "I5-PRE ok=True"
+    },
+    {
+      "criterion_id": "CAi5-AC2",
+      "criterion_verbatim": "the install: the task MuseAnswerForward exists with last result 0, the two user variables equal the live assistant's values, and the three answers folders exist. It prints ok=False at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i5_install.py\"",
+      "output_evidence": "I5-INSTALL ok=True task=found last_result=0 env_url=True env_ldo=True folders=True reason=none (read twice: after the first task run and again after the 22:04:33 scheduled fire).",
+      "denominator": "1 of 1 task found, 2 of 2 variables equal the live function, 3 of 3 folders (answers, done, rejected) present.",
+      "status": "PASS",
+      "expect": "I5-INSTALL ok=True"
+    },
+    {
+      "criterion_id": "CAi5-AC3",
+      "criterion_verbatim": "the seam against the REAL neighbours, end to end on a forged answer: folder, forwarder, queue, assistant; the assistant records a bad-signature refusal for that draft's tag and nothing else happens. It prints ok=False at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i5_e2e.py\"",
+      "output_evidence": "I5-E2E ok=True forwarded=1 refused=bad-signature waited_s=0 reason=none (run once, at 22:03:08 local, about 30 seconds after the task's own fire).",
+      "denominator": "1 of 1 test answer forwarded and 1 of 1 bad-signature refusal recorded for its tag; the next scheduled fire (22:04:33, result 0) sent nothing: answers/done holds 1 marker and answers/rejected holds 0.",
+      "status": "PASS",
+      "expect": "I5-E2E ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base arm, read from the order's own record: all three checks print ok=False at the base (a laptop caller, no variables, no task, no folders). On this box the install checks were run in the order the install built them, so each flipped from its pre-install state to ok=True only after the act it grades: AC1 was True before any act (it is a precondition), AC2 was read only after the task, variables and folders existed.",
+      "expected": "Before the install the folder had no answers/ and the task did not exist, so AC2 could not pass; after it, AC2 passes.",
+      "observed": "Before the by-hand run Test-Path was False for answers, answers/done and answers/rejected; the task was created later in the same session and AC2 first read ok=True after it. No separate mutation of the checks was run on this order: the AC3 check is a run-once act with a real queue send, so it was not repeated.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran check_i5_pre.py and check_i5_install.py twice, before and after a scheduled fire.",
+      "observed": "The same ok=True line both times for each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Muse's real signed answer, and the time bound on signed answers.",
+      "reason": "Andrew's act and a further assistant change that must be live first; this order asks muse to sign nothing."
+    },
+    {
+      "item": "A second end-to-end run.",
+      "reason": "The order says run AC3 once only: it sends one queue message."
+    },
+    {
+      "item": "A mutation of AC3 itself.",
+      "reason": "AC3 sends a real queue message each time it runs; repeating it with a changed input would be a second send, which the order forbids."
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-D2-S1: CA-i-5 step 3 assumes the forwarder creates answers/; it does not, so answers/ was created by hand"
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/REPORT_TO-CA-i-5.md",
+  "compiler_tools": [
+    {
+      "tool": "git merge-base / lib/devices.py",
+      "invocation": "python lib/devices.py this",
+      "result": "dell2 (the same device read the three checks gate on)."
+    }
+  ]
+}
