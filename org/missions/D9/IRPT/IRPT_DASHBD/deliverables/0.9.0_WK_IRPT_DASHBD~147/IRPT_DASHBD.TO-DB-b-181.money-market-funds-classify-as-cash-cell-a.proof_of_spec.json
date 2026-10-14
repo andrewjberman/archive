@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-181",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "295d98d389"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "295d98d389",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-181.money-market-funds-classify-as-cash-cell-a.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~147",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~147/FDRXX_CASH_CHANGE.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/lib/etf_classifier.py",
+      "kind": "script",
+      "commit_or_etag": "e340e07f4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_row_class: a canonical row whose sub_asset_class is Cash (trimmed, case-insensitive) takes the table's cash class value 'cash'; every other row returns asset_class verbatim; classify and classify_with_identity share it. sha256 e7385264668e9bf746aeab809c8ff0a869f9091685f86751b1679dfc6ddd81ba (committed bytes verified). Not deployed: cell B is the issuer's.",
+      "artifact_covered_by": [
+        "DB96-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_type.py",
+      "kind": "test",
+      "commit_or_etag": "e340e07f4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests with a stub client (no AWS): cash-typed row through classify and classify_with_identity, cash-class row stays cash, ordinary rows verbatim, case and spaces, no sub_asset_class verbatim, name-key identity path. The four classifier test files: 37 passed (30 existing, 7 new).",
+      "artifact_covered_by": [
+        "DB96-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~147/FDRXX_CASH_CHANGE.json",
+      "kind": "doc",
+      "commit_or_etag": "e340e07f4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the count record: 11361 canonical rows, 365 Cash-typed, 348 already cash, 17 would move, FDRXX among them; served 4315 advisor positions scanned, 20 moving, per firm 49financial 20; 178 accounts from the newest holdings_lots snapshot (source, not served).",
+      "artifact_covered_by": [
+        "DB96-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e340e07f4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows appended as bytes: IRPT_DASHBD-D2-W147-S1 (served store is platinum, not gold or silver), S2 (served positions carry no account key), S3 (CASH_USD returns fixed_income; ARMED, disarm owner the issuer).",
+      "artifact_covered_by": [
+        "DB96-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB96-2-AC1",
+      "criterion_verbatim": "DB96-2-AC1 -- the rule is keyed on the row's sub_asset_class, uses a cash class value the table already has, and uses no ticker list; the canonical-row counts are arithmetic-consistent and include FDRXX; the served-holdings count names its stores, sums per firm and counts accounts; the consumers are named; the classifier is tracked, carries the rule and hashes to the stated sha256; the tests pass (3 or more, none failing) and a mutant fails; unchanged rows stay verbatim; no write of any kind, nothing deployed or pushed; no run of 8 or more digits. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r96/p96_round96.py\" . DB96-2-AC1",
+      "output_evidence": "OK: FDRXX rule keyed on sub_asset_class: 17 canonical rows move (of 11361), 20 served positions in 178 accounts move; test with a mutant\nDB96-2-AC1 PASS",
+      "denominator": "canonical: 17 of 11361 rows move (365 Cash-typed, 348 already cash, FDRXX among the 17); served: 20 of 4315 advisor position objects in 189 files move, per firm 49financial 20 of 20; accounts 178 (newest holdings_lots snapshot); tests 7 new of 37 classifier tests, 0 failed; mutant: 4 of 7 new tests fail with the rule dropped",
+      "status": "PASS",
+      "expect": "DB96-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The rule was dropped from _row_class (a guarded False and); test_etf_classifier_cash_type.py was run against it, then the file was restored from a saved copy whose sha256 equals the committed one.",
+      "expected": "the mutant FAILS the new cash-typed tests; the restored file passes all 37 classifier tests",
+      "observed": "mutant: 4 failed, 3 passed; restored: sha256 e738...ba equal to the saved copy and the committed bytes; 37 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The DB96-2-AC1 checker was run twice on the same tree; the outputs were compared byte for byte.",
+      "observed": "two runs identical: OK line and DB96-2-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, the gold job, any write to DynamoDB or S3, any vendor call, any push",
+      "reason": "Hard lines of the order; cell B is the issuer's under a never-widen pair."
+    },
+    {
+      "item": "the CASH_USD special case",
+      "reason": "Kept unchanged by the order; the contradiction is filed as IRPT_DASHBD-D2-W147-S3, not changed here."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W147-S1",
+    "IRPT_DASHBD-D2-W147-S2",
+    "IRPT_DASHBD-D2-W147-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "data/black_diamond/scripts/gold/lib/etf_classifier.py and data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_type.py",
+      "result": "PASS, pre-commit gate clean for 1 of 1 file(s) each"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "e340e07f4e (code, test, record, channel rows)",
+      "result": "PASS, msg-verify MATCH"
+    }
+  ]
+}
