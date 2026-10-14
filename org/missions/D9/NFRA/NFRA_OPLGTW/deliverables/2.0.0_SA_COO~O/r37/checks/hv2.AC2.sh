@@ -29,7 +29,9 @@ try:
 except Exception:
     s = {}
 print("simulate packs=%s wsj_harvest=%s control_unlisted=%s" % (s.get("packs"), s.get("wsj_harvest"), s.get("control_unlisted")))
-sim_ok = s.get("packs") == "allowed" and s.get("wsj_harvest") == "allowed" and s.get("control_unlisted") == "implicitDeny"
+# A5: the simulated role is the one the installed code assumes (INTERNAL_READER_ROLE_ARN), never opal-gateway-role.
+sim_ok = (s.get("role") == "gateway-global-internal-reader-role"
+          and s.get("packs") == "allowed" and s.get("wsj_harvest") == "allowed" and s.get("control_unlisted") == "implicitDeny")
 try:
     b = json.load(open(sys.argv[2], encoding="utf-8")).get("body", {})
 except Exception:

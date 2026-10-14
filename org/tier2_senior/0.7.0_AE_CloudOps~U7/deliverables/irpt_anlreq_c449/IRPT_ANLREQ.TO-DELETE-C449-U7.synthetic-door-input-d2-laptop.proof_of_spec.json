@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_ANLREQ.TO-DELETE-C449-U7.synthetic-door-input-d2-laptop",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "risk_class": "WORLD",
+  "assignee": "0.7.0_AE_CloudOps~U7",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/IRPT_ANLREQ.TO-DELETE-C449-U7.synthetic-door-input-d2-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "eee49dc202"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R37A_Y.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/IRPT_ANLREQ.TO-DELETE-C449-U7.synthetic-door-input-d2-laptop.md",
+    "vintage_commit": "f416810d9a"
+  },
+  "scope": "ONE S3 object version: bucket opal-data-irpt, prefix irpt/49financial/state/normalized_portfolios/, the one key whose name holds the full 64-hex input id, deleted by VersionId in ONE call on 2026-10-14 at ~12:42Z by the Andrew_Berman principal; ledger irpt-c449-delete-u7-20261014, CLOSED. Not recoverable.",
+  "session_log": "org/critical_paths/change_management/20261014T1241Z_irpt-c449-delete-u7-20261014_deploy_completion.md",
+  "never_widen_pair": {
+    "coo_half": "not a never-widen act (it narrows: one object removed); issuer 2.0.0_SA_COO~Y2 orders XB-20261014T121648Z-d847 and the GO XB-20261014T123613Z-be5e after the dell2 ledger irpt-c449-delete-20261014 closed at 050eca6b81",
+    "cto_half": "Andrew verbatim '8.) Yes delete of synthetic leftover is approved.' (org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261014_114xZ_EIGHT_OPEN_CALLS_ANSWERED.md line 10); 1.0.0_SA_CTO msg 109130: the approval covers the act, not a box, and this laptop seat and the Andrew_Berman principal are within it"
+  },
+  "rollback": "none: a deleted S3 version cannot be restored (the object was synthetic and Andrew approved its removal); a STOP before the delete changed nothing",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/irpt_anlreq_c449/C449_DELETE_RESULT.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the five exact result lines of a completed delete",
+      "artifact_covered_by": [
+        "C449U7-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-irpt/irpt/49financial/state/normalized_portfolios/ (one version)",
+      "kind": "aws_resource",
+      "commit_or_etag": "VersionId sE_H5lz2MhTiv_mZm_EVe7aJTbV5HFzD deleted",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "DeleteObject with VersionId returned HTTP 204, version id echoed; head-object without a VersionId answers 404/NoSuchKey; list-object-versions for the exact key returns 0 versions and 0 delete markers; the prefix went from 11 versions / 0 markers / 11 keys to 10 / 0 / 10",
+      "artifact_covered_by": [
+        "C449U7-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261014T1241Z_irpt-c449-delete-u7-20261014_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ledger CLOSED, all 3 legs proven, sentinel removed",
+      "artifact_covered_by": [
+        "C449U7-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C449U7-AC1",
+      "criterion_verbatim": "The result file carries either the five lines of a completed delete or the single denial line.",
+      "method": "command",
+      "invocation": "grep -c -E '^(KEYS_SELECTED 1|VERSIONS_BEFORE 1|DELETED 1|HEAD NoSuchKey|VERSIONS_AFTER 0|DENIED .+)$' org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/irpt_anlreq_c449/C449_DELETE_RESULT.txt",
+      "expect": "^(5|1)$",
+      "output_evidence": "file lines: KEYS_SELECTED 1 | VERSIONS_BEFORE 1 | DELETED 1 | HEAD NoSuchKey | VERSIONS_AFTER 0 ; grep -c output:\n5",
+      "denominator": "5 of 5 lines of the file match, file 76 bytes: KEYS_SELECTED 1, VERSIONS_BEFORE 1, DELETED 1, HEAD NoSuchKey, VERSIONS_AFTER 0. Behind them: 1 key / 1 version selected out of 11 versions / 0 delete markers / 11 keys on one untruncated page, matching the order's date and size; after: 10 / 0 / 10, so exactly one entry left. The control is the dry run of the same guarded script before the delete, which passed with nothing deleted, and the pre-delete head-object that found the key",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C449U7-AC2",
+      "criterion_verbatim": "The ledger irpt-c449-delete-u7-20261014 is closed (CLOSED, or BLOCKED on a denial).",
+      "method": "command",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-c449-delete-u7-20261014_deploy_completion.md",
+      "expect": "^\\*\\*Status:\\*\\* (CLOSED|BLOCKED)",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261014T124327Z",
+      "denominator": "one ledger file for the slug; 3 of 3 legs (L, D, R) closed with proof; the sentinel removed from .open_deploys. The earlier dell2 entry irpt-c449-delete-20261014 was a separate entry, closed at 050eca6b81 before this one was opened",
+      "status": "PASS"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "simulate-principal-policy for Andrew_Berman, s3:DeleteObjectVersion and s3:DeleteObject on the prefix, run as a read",
+      "result": "both allowed, matched statement AdministratorAccess; no IAM change"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open/close-leg L, D, R/close --slug irpt-c449-delete-u7-20261014",
+      "result": "3 legs, all closed with proof, sentinel removed"
+    }
+  ],
+  "controls": {
+    "selection_was_exact_before_the_delete": {
+      "description": "the delete must remove only the one named version",
+      "expected_landed": "exactly 1 key and 1 version contain the full 64-hex, LastModified 2026-10-14T04:23:53Z, 4586 bytes, not a delete marker",
+      "expected_not_landed": "any other count, date or size is a STOP with nothing deleted",
+      "observed": "1 key, 1 version, 2026-10-14T04:23:53Z, 4586 bytes, IsLatest, not a delete marker (read in the ledger leg L, again by a dry run, and a third time inside the delete run)",
+      "status": "PASS"
+    },
+    "nothing_else_removed": {
+      "description": "the other keys of the prefix stay",
+      "expected_landed": "versions 11 to 10, delete markers 0, distinct keys 11 to 10",
+      "expected_not_landed": "any larger drop means more than one version went",
+      "observed": "10 versions, 0 delete markers, 10 distinct keys after",
+      "status": "PASS"
+    },
+    "no_conflicting_open_entry": {
+      "description": "the order's STOP: an open entry naming the intake store bucket",
+      "expected_landed": "0 open entries naming opal-data-irpt across every live worktree",
+      "expected_not_landed": "one entry names it: STOP",
+      "observed": "the first census found 1 (the dell2 applier's own ledger for the same act): STOPPED and asked; after that entry closed at 050eca6b81 the second census read 0 of 32 entries over 2 of 2 worktrees",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the 10 other keys of the prefix (including the release-28 D3 input) were not read, only counted",
+      "reason": "the order bounds the act to one key; their bodies are not needed and none was fetched"
+    },
+    {
+      "item": "the open call c449 itself is not closed by this seat",
+      "reason": "the dell2 issuer closes the call with Andrew's record, per the order"
+    },
+    {
+      "item": "the criterion AC2 invocation uses a glob that comp-find denies as a repo search",
+      "reason": "the named ledger file was read directly with the same pattern; the status line is the one printed above"
+    }
+  ],
+  "surprises": []
+}
