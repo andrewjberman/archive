@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-196",
+  "firm": "COT",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "e03a4991a4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-196.cottonwood-account-dim-and-household-key-adapter.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~161",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~161/COTTONWOOD_ACCOUNT_DIM.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_ACCOUNT_DIM_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build in the worktree; not deployed, not served, not pushed: round 103 writes nothing to AWS",
+      "artifact_covered_by": [
+        "DB103-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_account_dim.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build in the worktree; not deployed, not served, not pushed: round 103 writes nothing to AWS",
+      "artifact_covered_by": [
+        "DB103-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_account_dim.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build in the worktree; not deployed, not served, not pushed: round 103 writes nothing to AWS",
+      "artifact_covered_by": [
+        "DB103-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~161/dry_run_account_dim.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build in the worktree; not deployed, not served, not pushed: round 103 writes nothing to AWS",
+      "artifact_covered_by": [
+        "DB103-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~161/COTTONWOOD_ACCOUNT_DIM.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build in the worktree; not deployed, not served, not pushed: round 103 writes nothing to AWS",
+      "artifact_covered_by": [
+        "DB103-4-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB103-4-AC1",
+      "criterion_verbatim": "DB103-4-AC1 -- the account_dim contract exists with its columns (including firm, account_id, method_version and coverage), a schema hash and the hash basis; the adapter is a tracked .py under data/assets/scripts/gold/irpt_reporting/ whose bytes hash as recorded and mentions Cottonwood, and whose ARROW_SCHEMA hashes (recomputed by the checker, same method) to the contract's schema_hash; the adapter's tests pass when the checker runs them, 3 or more, with a failing mutant; the dry run read only prefixes under blackdiamond/cottonwood/ of opal-data-assets, found accounts and relationship ids above 0, counted nulls and computed the address() gold target s3://opal-data-cottonwood/irpt/cottonwood/gold/account_dim/...; no write, push or deploy; no run of 8 or more digits. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r103/p103_round103.py\" . DB103-4-AC1",
+      "output_evidence": "OK: account_dim contract (16 columns, hash recomputed equal), adapter and 7 tests pass, dry run read 2 prefix(es) of Cottonwood only: 999 accounts, 223 relationship ids | DB103-4-AC1 PASS (rc 0)",
+      "denominator": "1 of 1 criterion; 7 of 7 adapter tests pass (3 required); 1 of 1 mutant fired; 2 of 2 prefixes read under blackdiamond/cottonwood/; 16 of 16 contract columns hash-equal",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "drop the household key: household_id forced to None in build_account_dim, so the household tests must fail",
+      "expected": "at least one household-key test fails",
+      "observed": "2 failed, 5 passed: test_household_key_is_the_relationship_id_shared_by_accounts and test_multi_relationship_account_takes_smallest_key_and_counts_it; adapter restored, sha256 a6b9f1fc75 verified",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the read-only dry run run twice over the same two silver partitions; the two dry_run_counts.json files compared byte for byte",
+      "observed": "run 1 and run 2 byte-identical (sha256 prefix fbfa8345dad68624 both)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "landing account_dim in Cottonwood gold (S3 put)",
+      "reason": "round 103 is LOCAL; emit_account_dim refuses upload=True; a landing is a later round under a never-widen pair"
+    },
+    {
+      "item": "the other seven gold tables",
+      "reason": "DB-b-196 is the first table of the Cottonwood adapter only (C-SHAPE, one table per cell)"
+    },
+    {
+      "item": "the transaction-series universe (a00 TXN-ONLY-HISTORICAL class)",
+      "reason": "the order names holdings and roster as the reads; declared as surprise S5, unmeasured"
+    },
+    {
+      "item": "client_id, tax_status, opened_date, first_data_date values",
+      "reason": "not carried by the Cottonwood silver; null with absent_fields (surprise S1)"
+    },
+    {
+      "item": "a shared pure derivation with a00 and a01",
+      "reason": "their derivation is coupled to S3 reads and gold writes; surprise S4 for the CTO"
+    },
+    {
+      "item": "the portal and the served files",
+      "reason": "no served value changed; no portal change in this order"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W161-S1: the closed coverage vocabulary has no member that says a dimension field is absent from the firm silver; client_id, tax_status, opened_date and first_data_date are null on all 999 rows",
+    "IRPT_DASHBD-D2-W161-S2: 47 accounts with only the no-relationship sentinel carry no household key; the new enum member NO_RELATIONSHIP_SENTINEL needs its four-postulate record and token census (census run, 6 hits, all this round's files)",
+    "IRPT_DASHBD-D2-W161-S3: 3 accounts sit under two or more real relationships; the PRD names no rule, the adapter takes the smallest id and carries the count",
+    "IRPT_DASHBD-D2-W161-S4: the reuse instruction for a00 and a01 cannot be met as written (their derivation is coupled to S3 reads and gold writes); the adapter restates two rules",
+    "IRPT_DASHBD-D2-W161-S5: the adapter reads holdings and roster only, so a00's TXN-ONLY-HISTORICAL class is outside account_dim and unmeasured",
+    "IRPT_DASHBD-D2-W161-S6: method_version has no dim_return_method row for a dimension; the adapter writes the declared constant 1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "checker",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r103/p103_round103.py\" . DB103-4-AC1",
+      "result": "DB103-4-AC1 PASS (rc 0)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <each touched .py>",
+      "result": "rc 0 on the adapter and the dry-run driver; the test file rc 0 after adding from __future__ import annotations"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+SESSION LOG -- 0.9.0_WK_IRPT_DASHBD~160 on IRPT_DASHBD.TO-DB-b-195 (READ only; nothing written to AWS, nothing deployed, pushed or called)
+Commands are summarised as: command | exit code | deciding line. No row values, no object names beyond the addresses in the record, no account identifiers.
+
+1. git rev-parse --abbrev-ref HEAD; test -d org and test -d .tools | rc 0 | wk-IRPT_DASHBD-160, TREE-OK
+2. python p103_round103.py (usage check, empty criterion) | rc 1 | FAIL: unknown criterion '' (expected; the criterion id was not passed)
+3. lib/opal_naming.py address() for source irpt, scope cottonwood, tier gold, table account_return_daily | rc 0 | s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=<D>
+4. .tools/aws s3 ls of the Cottonwood gold account_return_daily prefix | rc 0 | 3325 PRE entries, lexicographic last date=2026-06-22, no non-prefix entries
+5. .tools/aws s3 ls of the newest partition and of the 2013-04-03 partition (named prefixes; the raw listing needed a rail annotation, recorded in the command) | rc 0 | two objects each: data.parquet and manifest.json
+6. .tools/aws s3api get-object of the two manifest.json objects to the worktree scratch folder | rc 0 | LastModified 2026-10-11 on both; keys and non-identifier fields read, values not recorded
+7. comp-find "irpt-reporting-adapter" | rc 0 | producer SOURCE_PIPELINE constant found in the gold file (line 99)
+8. comp-pipescript io on the gold file and on the Commonwealth silver adapter | rc 0 | AST-derived; the gold file's writes go through put_object; the adapter reads served silver addresses
+9. Read of the silver adapter header lines 1-45 and the PERF_DATE constant (line 135) | rc 0 | the adapter pins one served snapshot, 2026-06-23
+10. Read of infra/aws/terraform/investor-reporting/reporting-gold/schedule.tf, main.tf, locals.tf (grep) | rc 0 | DESIRED schedule cron(41 7 ? * MON-FRI *), America/New_York, scope = the one declared source
+11. Name builder: lib/opal_naming.py name() for system irpt, scope cottonwood, function reporting-gold, kinds daily and lambda | rc 0 | irpt-cot-reporting-gold-daily and -lambda. These names are NOT the ones the reporting-gold root builds (its scope is the declared source's registry scope); the live checks in step 12 used the root's own names. Step 11 is not evidence about the Cottonwood series.
+12. Name builder: lib/opal_naming.py name() for scope 49financial | rc 0 | irpt-49f-reporting-gold-daily and -lambda
+13. .tools/aws scheduler get-schedule --name irpt-cot-reporting-gold-daily | rc 254 | ResourceNotFoundException (a name from step 11; not evidence about the Cottonwood series)
+14. .tools/aws lambda get-function-configuration --function-name irpt-cot-reporting-gold-lambda | rc 254 | ResourceNotFoundException (a name from step 11; not evidence)
+15. .tools/aws scheduler get-schedule --name irpt-49f-reporting-gold-daily --group-name default | rc 0 | State ENABLED, cron(41 7 ? * MON-FRI *), America/New_York, target irpt-49f-reporting-gold-lambda
+16. .tools/aws lambda get-function-configuration --function-name irpt-49f-reporting-gold-lambda | rc 0 | State Active, LastUpdateStatus Successful
+17. .tools/aws s3 ls of the Commonwealth Cottonwood silver daily_returns prefix (named prefix) | rc 0 | one entry, date=2026-06-23/, and its part-00000.parquet
+18. python lib/trading_calendar.py trading_days_between 2026-06-22 to 2026-10-14 | rc 0 | WARN: pandas_market_calendars absent, hardcoded fallback; 81 entries, count after the start = 80
+19. python p103_round103.py . DB103-3-AC1 (first run, after writing the record) | rc 0 | OK: ... 80 trading days ... trigger MANUAL / DB103-3-AC1 PASS
+20. Mutant control: the record copied to .scratch with trading_days_since_newest 79 and the entry file present, checker run on that root | rc 1 | FAIL: trading_days_since_newest must equal 80 / DB103-3-AC1 FAIL
+21. Determinism: the checker run three times on the worktree record | rc 0 each | three outputs byte-identical
+22. Investigation rows IRPT_DASHBD-D2-W160-S1 to S5 appended as bytes to INVESTIGATION_v1.md | rc 0 | file grew by the appended block; 5 ids, each as heading and fenced row
+
+Denominators: 3325 date partitions in the Cottonwood gold prefix; 1 Commonwealth silver partition; 2 manifests read; 80 trading days; 5 rows filed (S1 to S5).
