@@ -5,21 +5,45 @@
  "spec_ref": {
   "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR1.ticket-attachment-address-from-the-naming-builder.md",
   "group": "OTHER",
-  "vintage_commit": "023b5ce5b0"
+  "vintage_commit": "b323e7539e"
  },
  "assignee": "0.9.0_WK_TCKT_VNEXT~43",
  "decomp_ref": {
   "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R18.md",
-  "vintage_commit": "023b5ce5b0",
+  "vintage_commit": "b323e7539e",
   "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR1.ticket-attachment-address-from-the-naming-builder.md"
  },
  "artifacts_produced": [
   {
-   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
-   "kind": "doc",
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json",
+   "kind": "config_data",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "one row appended: TCKT_VNEXT-D2-W43-S1 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~V2); no deploy, no AWS call"
+   "deploy_evidence": "bucket_template opal-data-{firm}, key_template portal/{firm}/state/ticket-attachments/trade-form/, tier state (R21); not deployed, no AWS call; the buckets are not created or checked here",
+   "artifact_covered_by": ["R18TR1-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1 checker: re-computes address() for three firms, round-trips both templates, runs lib/opal_naming.py validate; run twice, identical ADDRESS-OK output",
+   "artifact_covered_by": ["R18TR1-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 mutant: key_template with {firm} twice in a tempfile copy outside the worktree; checker prints ADDRESS-BAD rc 1; MUTANT-FIRES",
+   "artifact_covered_by": ["R18TR1-AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "7dfcf9bc5c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "row TCKT_VNEXT-D2-W43-S1 (BLOCKING, ARMED) as committed; answered by AMENDMENT 1, recorded as row_status in ATTACH_ADDRESS.json; the channel file is not edited by this commit"
   }
  ],
  "acceptance": [
@@ -28,10 +52,9 @@
    "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py expect: ^ADDRESS-OK",
    "method": "command",
    "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py",
-   "output_evidence": "run under timeout 120 (rc 2 is the process exit): python.exe: can't open file 'C:\\dev\\wk-tckt-vnext-43\\org\\missions\\D7\\TCKT\\TCKT_VNEXT\\deliverables\\0.9.0_WK_TCKT_VNEXT~43\\address_check.py': [Errno 2] No such file or directory; AC1 rc=2",
-   "denominator": "0 of 1 checker run: the checker was not written, because the order's BLOCKING branch applies (one bucket for three firms cannot be printed)",
-   "status": "FAIL",
-   "status_reason": "address_check.py not written. The tier decision (state, R21) resolves the three served firms to three buckets, so no single ADDRESS-OK bucket exists. Surprise row TCKT_VNEXT-D2-W43-S1.",
+   "output_evidence": "ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket-attachments/trade-form/ (run under timeout 120, rc=0; the same output on a second run, cmp identical). Three firms: 49financial, inflection, cottonwood each round-trip the bucket and key templates with {firm} exactly once",
+   "denominator": "3 of 3 firms round-trip (bucket and key); 1 of 1 validate run rc 0 (54 system rows, 14 scope rows, 0 warnings)",
+   "status": "PASS",
    "expect": "^ADDRESS-OK"
   },
   {
@@ -39,57 +62,52 @@
    "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py expect: MUTANT-FIRES",
    "method": "command",
    "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py",
-   "output_evidence": "run under timeout 120 (rc 2 is the process exit): python.exe: can't open file 'C:\\dev\\wk-tckt-vnext-43\\org\\missions\\D7\\TCKT\\TCKT_VNEXT\\deliverables\\0.9.0_WK_TCKT_VNEXT~43\\mutant_check.py': [Errno 2] No such file or directory; AC2 rc=2",
-   "denominator": "0 of 1 mutant run: the checker it depends on (address_check.py) was not written under the BLOCKING branch",
-   "status": "FAIL",
-   "status_reason": "mutant_check.py not written; it depends on address_check.py, which is not written. Surprise row TCKT_VNEXT-D2-W43-S1.",
+   "output_evidence": "MUTANT-FIRES checker rc=1 (run under timeout 120, rc=0): ADDRESS-BAD key_template must contain {firm} exactly once: 'portal/{firm}/{firm}/state/ticket-attachments/trade-form/'",
+   "denominator": "1 of 1 mutant fired (the unmutated baseline first returned ADDRESS-OK, so the mutant result is not a baseline failure)",
+   "status": "PASS",
    "expect": "MUTANT-FIRES"
   },
   {
    "criterion_id": "R18TR1-AC3J",
    "criterion_verbatim": "R18TR1-AC3J (judgment): the tier follows the cited doctrine rule, the address is builder output and not typed, a registry row exists only if the builder demanded one, and nothing was created in AWS.",
    "method": "manual_read_with_citation",
-   "invocation": "none: judgment criterion, output carried and no verdict; probe run as python -c with sys.path at the worktree lib/ and opal_naming.address(\"portal\", <firm>, <tier>, \"ticket-attachments\", \"trade-form\") for tiers bronze and state and firms 49financial, inflection, cottonwood",
-   "output_evidence": "state 49financial s3://opal-data-49financial/portal/49financial/state/ticket-attachments/trade-form; state inflection s3://opal-data-inflection/portal/inflection/state/ticket-attachments/trade-form; state cottonwood s3://opal-data-cottonwood/portal/cottonwood/state/ticket-attachments/trade-form; bronze (all three) s3://opal-data-assets/portal/<firm>/bronze/ticket-attachments/trade-form. Tier cited: infra/logic/02_DOCTRINE.md R21 lines 588-597 (per-request intake is state) and R4/R9 lines 360-365 and 439-441 (bronze is custodial or raw vendor bytes). No registry row added; python lib/opal_naming.py validate rc=0 at the baseline. No AWS or network call.",
-   "denominator": "6 address() calls: 2 tiers x 3 firms; state gives 3 distinct buckets, bronze gives 1",
+   "invocation": "none: judgment criterion, output carried and no verdict. Builder probe: python -c with sys.path at the worktree lib/ and opal_naming.address(\"portal\", <firm>, \"state\", \"ticket-attachments\", \"trade-form\") for 49financial, inflection, cottonwood",
+   "output_evidence": "49financial s3://opal-data-49financial/portal/49financial/state/ticket-attachments/trade-form ; inflection s3://opal-data-inflection/portal/inflection/state/ticket-attachments/trade-form ; cottonwood s3://opal-data-cottonwood/portal/cottonwood/state/ticket-attachments/trade-form. Tier cited: infra/logic/02_DOCTRINE.md R21 lines 588-597 (per-request intake is state) with tiers.json homes.FIRM.state = scope. Registry: no row added (builder printed all three without refusal); python lib/opal_naming.py validate rc=0. No AWS or network call.",
+   "denominator": "3 of 3 firms printed by the builder at tier state; 0 registry rows added",
    "status": "UNVERIFIABLE-BY-INSTRUMENT",
-   "status_reason": "judgment criterion, not self-graded: the L9 oracle is 3.0.0_SA_CVO, who reads the tier against R21 and the BLOCKING branch",
+   "status_reason": "judgment criterion, not self-graded: the L9 oracle is 3.0.0_SA_CVO, who reads the tier against R21 and the amended cell",
    "judgment": true
   }
  ],
  "controls": {
   "mutant": {
-   "description": "AC2 mutant: copy of ATTACH_ADDRESS.json with key_template carrying {firm} twice, checked by address_check.py from a scratch copy",
+   "description": "AC2 mutant: key_template with {firm} twice (portal/{firm}/{firm}/state/...) in a tempfile copy outside the worktree, checked by address_check.py through ATTACH_ADDRESS_JSON",
    "expected": "MUTANT-FIRES",
-   "observed": "not run: address_check.py, mutant_check.py and ATTACH_ADDRESS.json were not written under the BLOCKING branch; no mutant control executed",
-   "status": "DID-NOT-FIRE (deliverable INVALID)"
+   "observed": "MUTANT-FIRES checker rc=1: ADDRESS-BAD key_template must contain {firm} exactly once: 'portal/{firm}/{firm}/state/ticket-attachments/trade-form/'",
+   "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "N/A: no computed artifact exists to compare across two runs; the probe's address() output is a pure string function of its arguments",
-   "observed": "N/A",
-   "status": "N/A-WITH-REASON"
+   "method": "two runs of address_check.py compared byte for byte (cmp)",
+   "observed": "both runs rc=0 with ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket-attachments/trade-form/; cmp identical",
+   "status": "STABLE"
   }
  },
  "declared_exclusions": [
   {
-   "item": "ATTACH_ADDRESS.json (bucket, key_template, tier, tier_rule, source, table, partition, addresses, builder_calls, registry_rows_added, validate_rc, claim, not_read)",
-   "reason": "BLOCKING branch: the doctrine tier homes the three firms in three buckets, so no single bucket or key_template exists to write; the order says do nothing else"
+   "item": "the bucket existence, policy, CORS and lifecycle of opal-data-49financial, opal-data-inflection, opal-data-cottonwood",
+   "reason": "the order forbids live calls and the cell does not create or check buckets; nothing was created or checked in AWS"
   },
   {
-   "item": "key_template round trip for the three firm ids",
-   "reason": "no single bucket, so no template to round-trip; the three printed addresses are recorded in AC3J output"
+   "item": "the Lambda reading the templates and the Terraform env and permission (TO-R18-TR2, TO-R18-TR3)",
+   "reason": "out of this cell's grant; TR3 writes them into Terraform from ATTACH_ADDRESS.json"
   },
   {
    "item": "registry rows under infra/logic/registry/",
-   "reason": "the builder did not refuse any of the three state addresses and demanded no row; the blocker is the tier decision, not a missing row"
-  },
-  {
-   "item": "bucket existence, policy and CORS for opal-data-49financial, opal-data-inflection, opal-data-cottonwood",
-   "reason": "the order forbids live calls; nothing was created or checked in AWS"
+   "reason": "the builder printed all three without refusal and demanded no row; none added"
   }
  ],
  "surprises": [
-  "TCKT_VNEXT-D2-W43-S1: BLOCKING, ARMED (disarm owner 2.0.0_SA_COO~V2). The doctrine tier for a non-holdings ticket attachment is state (R21), which homes it per firm in three buckets, so the Lambda's single TICKET_ATTACH_BUCKET cannot serve it; the order's BLOCKING branch applies."
+  "TCKT_VNEXT-D2-W43-S1: BLOCKING, ARMED (disarm owner 2.0.0_SA_COO~V2) -- the state tier homes a bucket per firm; ANSWERED by TO-R18-TR1 AMENDMENT 1 (one bucket_template opal-data-{firm}, one key_template); the row is kept unedited, its answer is the row_status line in ATTACH_ADDRESS.json"
  ],
  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/TCKT_VNEXT.TO-R18-TR1.ticket-attachment-address-from-the-naming-builder.proof_of_spec.json",
  "compiler_tools": [
@@ -100,8 +118,13 @@
   },
   {
    "tool": "python",
-   "invocation": "python -c with sys.path at worktree lib/, opal_naming.address() over tiers bronze and state, firms 49financial, inflection, cottonwood",
-   "result": "rc=0; state gives three buckets opal-data-49financial, opal-data-inflection, opal-data-cottonwood; bronze gives opal-data-assets for all three"
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py",
+   "result": "ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket-attachments/trade-form/ rc=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py",
+   "result": "MUTANT-FIRES checker rc=1: ADDRESS-BAD key_template must contain {firm} exactly once rc=0"
   }
  ]
 }
