@@ -1,0 +1,39 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~129 on IRPT_ANLREQ.TO-AR-y-319
+Worktree C:/dev/wk-irpt-anlreq-129, branch wk-IRPT_ANLREQ-129, base HEAD 1b9c92aa4a (LOCAL).
+Values recorded: hashes, counts, field names, check names, status words. No identifier of a person is written here.
+No live call of any kind: no AWS, no network, no push, no deploy, no upload, no apply, no invoke.
+
+1. Reads (local files only)
+   the task order face (lines 21 to 81); the AR-y-318 cause record (r40/COMPOSITION_CAUSE.json, worker 128);
+   the worker 128 session log at the deliverable root (lines 11 and 21: the stored D1 input owner has no home_firm_id);
+   _scope/interactive_access.py; _scope/prospect.py; ycharts/generate/composition_admission.py; ycharts/generate/submission.py;
+   ycharts/generate/prospect_submission.py; reports/request_composition.py; _authz/served.py lines 988-1046;
+   docs/contracts/investor-reporting/v1/RequestComposition.schema.json lines 413-608 and 825-1013;
+   _ids/ids.py lines 112-140; intake/uploads.py repository_owner, load_input_owner, read_input return.
+
+2. Writer change (interactive_access.py prospect_owner): 4 lines added. home_firm_id removed unless principal_class is OPAL_GLOBAL, before the schema_version/firm_id update and the fingerprint call.
+
+3. Reader change: none built (row IRPT_ANLREQ-D2-W129-S1: the premise did not hold on the measured evidence).
+
+4. Tests (worktree)
+   pytest _scope/tests/test_ordinary_owner_composition.py: 4 passed
+   pytest ycharts/generate/tests/test_ordinary_owner_legacy_row.py: 3 passed
+   commit-gate.sh on all six Python files: rc 0 on each (one ruff finding, an unused import, fixed and re-gated)
+
+5. Before-arm (base archive of HEAD 1b9c92aa4a with the new test files copied in)
+   test_ordinary_owner_composition.py: 2 failed (tests a and c), 2 passed (tests b and e)
+   test_ordinary_owner_legacy_row.py: 3 passed (the pins pass on base as well; row IRPT_ANLREQ-D2-W129-S2)
+
+6. Regression (base archive | worktree, python -m pytest <folder> -q)
+   _scope/tests: 1 failed, 276 passed, 67 subtests | 1 failed, 280 passed, 67 subtests (same failing id as base)
+   ycharts/generate/tests/test_composition_refusal_cause.py: 6 passed | 6 passed
+   intake/tests: 447 passed, 1 skipped, 28 subtests | 447 passed, 1 skipped, 28 subtests
+   reports/tests: 208 passed | 208 passed
+   test_ordinary_viewer.py: 43 passed (worktree)
+
+7. OPAL_GLOBAL owner bytes (r40/opal_owner_bytes.py): len 277, sha256 d948320b730a467f8c6c009fa77ebbd722c1829b52184807ee0db406cfb1656e on base and on worktree; equal.
+
+8. Checkers
+   mutant_check.py: MUTANT-FIRES (2 failed, 2 passed in the scratch copy; the copy carries data/firm_registry.json, row S4)
+   regress_check.py: REGRESSION-OK (43 passed; scope_tests failing ids equal base)
+   cause identity: the writer edit is the only product change; no schema, principal or authorizer byte changed.

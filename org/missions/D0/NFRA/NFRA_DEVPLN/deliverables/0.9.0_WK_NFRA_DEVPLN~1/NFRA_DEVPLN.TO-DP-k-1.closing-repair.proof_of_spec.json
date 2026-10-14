@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-k-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-k-1.closing-repair.md",
+  "group": "OTHER",
+  "vintage_commit": "a191d1a8ea"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round9.md",
+  "vintage_commit": "a191d1a8ea",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-k-1.closing-repair.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-hooks/dev_push_payload_gate.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Line 162 spacing repaired: walk = git(portal, ...). One space added after the equals sign; no other byte of the file changed (git diff --numstat 1 1)."
+  },
+  {
+   "path_or_key": ".claude/skills/closer-drive/SKILL.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Step 5 approval-lease example names --project <CODE> in place of the hard-coded NFRA_DEVPLN; the change is one line (git diff --numstat 1 1), the rest of the file is unchanged."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPk1-AC1",
+   "criterion_verbatim": "grep -c \"walk = git(\" .tools/portal-hooks/dev_push_payload_gate.py expect: ^1$",
+   "method": "command",
+   "invocation": "grep -c \"walk = git(\" .tools/portal-hooks/dev_push_payload_gate.py",
+   "output_evidence": "rc=0. Output: 1. Negative control: grep -c \"walk =git(\" on the same file reads 0 (rc=1), so the unspaced form is gone.",
+   "denominator": "1 matching line of 1 (the repaired line 162)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPk1-AC2",
+   "criterion_verbatim": "grep -c \"approval-lease --project .CODE.\" .claude/skills/closer-drive/SKILL.md expect: ^1$",
+   "method": "command",
+   "invocation": "grep -c \"approval-lease --project .CODE.\" .claude/skills/closer-drive/SKILL.md",
+   "output_evidence": "rc=0. Output: 1. Negative control: grep -c 'approval-lease --project NFRA_DEVPLN' on the same file reads 0 (rc=1), so the hard-coded project code is gone from the example.",
+   "denominator": "1 matching line of 1 (step 5, line 35)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPk1-AC3",
+   "criterion_verbatim": "python .tools/tests/test_dev_push_payload_gate.py expect: cases=21/21 ok=True",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_dev_push_payload_gate.py",
+   "output_evidence": "rc=0. Last line: DEV-PUSH-GATE-TEST cases=21/21 ok=True. Run twice on the same input; both runs print the same line. Ruff (python -m ruff check --target-version py39 on the gate file) reads All checks passed! rc=0.",
+   "denominator": "21 of 21 cases ok=True",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The base gate file (a191d1a8ea, git show to .scratch/base_gate.py) carries the unspaced form walk =git(. The repaired file carries walk = git(. Python parses both to the same syntax tree, so the base form is the mutant the suite must not distinguish.",
+   "expected": "ast.dump of the base file equals ast.dump of the repaired file, so the suite result cannot change",
+   "observed": "base contains 'walk =git(' True; repaired contains 'walk = git(' True; AST identical True; byte lengths 8984 base and 8985 repaired (one added space)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of python .tools/tests/test_dev_push_payload_gate.py",
+   "observed": "run 1 and run 2 both print DEV-PUSH-GATE-TEST cases=21/21 ok=True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The approval-lease call the SKILL step 5 example names was not executed.",
+   "reason": "The lease row is device-local (drive-mode.py). This cell edits only the example text; only its flags were read."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-k-1.closing-repair.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check --target-version py39 .tools/portal-hooks/dev_push_payload_gate.py",
+   "result": "All checks passed!"
+  }
+ ]
+}
