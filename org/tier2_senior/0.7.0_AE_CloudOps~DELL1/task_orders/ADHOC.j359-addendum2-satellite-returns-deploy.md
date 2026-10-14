@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~J1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-14</date>
-<status>pending</status>
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (Andrew-directed; start by 20:15Z or after the re-seat; the portal deletion waits on this order's served read)</priority>
