@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-14</date>
-<status>staged</status>
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P1 (round 9 of MDPF_CANON; the CTO ruled the deploy BEFORE 12:44Z on 2026-10-15 so the 13:30Z fire carries it; BEHIND the signed pair and the issuer's written GO -- see PRECONDITIONS)</priority>
