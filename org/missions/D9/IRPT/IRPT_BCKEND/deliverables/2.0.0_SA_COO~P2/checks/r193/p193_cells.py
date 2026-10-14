@@ -17,7 +17,6 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
 """
 import json
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -121,6 +120,21 @@ def apply_ac1():
         v = bb.get(firm) or fail("no branch_b_reread for %s" % firm)
         if v.get("bundle_version_id") != BRANCH_B_BUNDLE[firm] or v.get("manifest_version_id") != BRANCH_B_MANIFEST[firm]:
             fail("%s Branch B versions differ from the packet's: the release stops" % firm)
+        # AMENDMENT 1 (CTO ruling msg 7650): the manifest version at mint is the recorded page anchor. A version newer than
+        # the packet's is admitted only if it is the only newer one, was written by that firm's scheduled fire, and its
+        # published date is T-1 of that fire by the trading calendar.
+        a = v.get("manifest_anchor_at_mint") or fail("%s: no manifest_anchor_at_mint" % firm)
+        if not a.get("version_id"):
+            fail("%s: the anchor needs a version id" % firm)
+        if a["version_id"] == BRANCH_B_MANIFEST[firm]:
+            if a.get("newer_versions") != 0:
+                fail("%s: the anchor equals the packet's but newer versions are claimed" % firm)
+        else:
+            if a.get("newer_versions") != 1 or a.get("written_by_scheduled_fire") is not True:
+                fail("%s: a newer manifest version must be the only one and written by the scheduled fire: a STOP" % firm)
+            fd = a.get("fire_date")
+            if not is_date(fd) or a.get("published_date") != prev_trading_day(fd):
+                fail("%s: the newer manifest's published date must be T-1 of its fire by the calendar: a STOP" % firm)
     dg = r.get("digest_gate") or {}
     for firm in FIRMS:
         ch = (dg.get(firm) or fail("no digest_gate for %s" % firm)).get("changed_members")
@@ -233,12 +247,22 @@ def build_ac2():
     blocks = re.findall(r"^[ \t]*# BEGIN ONE-DATE-ASSERT.*?^[ \t]*# END ONE-DATE-ASSERT[^\n]*\n", src, re.S | re.M)
     if len(blocks) != 1:
         fail("holdings_snapshot.py must hold exactly one BEGIN/END ONE-DATE-ASSERT block, holds %d" % len(blocks))
+    # the mutant is loaded IN PLACE: the producer is executed from the mutated text as the module holdings_snapshot with
+    # its real __file__, so every sys.path and relative import resolves exactly as in the unmutated run
+    runner = (
+        "import sys, types, pathlib\n"
+        "orig = pathlib.Path(sys.argv[1]).resolve(); src = pathlib.Path(sys.argv[2]).read_text(encoding='utf-8')\n"
+        "sys.path.insert(0, str(orig.parent))\n"
+        "m = types.ModuleType('holdings_snapshot'); m.__file__ = str(orig); sys.modules['holdings_snapshot'] = m\n"
+        "exec(compile(src, str(orig), 'exec'), m.__dict__)\n"
+        "import pytest\n"
+        "sys.exit(pytest.main(['-q', '-p', 'no:cacheprovider', sys.argv[3]]))\n")
     with tempfile.TemporaryDirectory() as td:
-        cp = Path(td) / "investor_reporting"
-        shutil.copytree(ROOT / PKG, cp, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-        mutated = src.replace(blocks[0], "")
-        (cp / "holdings_snapshot.py").write_text(mutated, encoding="utf-8")
-        rc, out = run_pytest(cp, ["tests/test_holdings_bypass_one_date.py"])
+        (Path(td) / "mutant_src.py").write_text(src.replace(blocks[0], ""), encoding="utf-8")
+        (Path(td) / "run_mutant.py").write_text(runner, encoding="utf-8")
+        p = subprocess.run([sys.executable, str(Path(td) / "run_mutant.py"), str((ROOT / SNAP).resolve()), str(Path(td) / "mutant_src.py"),
+                            str((ROOT / TEST_NEW).resolve())], cwd=str(ROOT), capture_output=True, text=True, timeout=110)
+        rc, out = p.returncode, p.stdout + p.stderr
     if rc == 0:
         fail("the new tests still pass with the assertion removed: the tests cannot discriminate")
     if not re.search(r"\d+ failed", out):
