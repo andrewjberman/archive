@@ -12,9 +12,9 @@ objects live in that firm's own bucket:
 
 | firm | bucket | the only prefix |
 |---|---|---|
-| 49financial | `opal-data-49financial` | `portal/49financial/state/ticket-attachments/trade-form/` |
-| inflection | `opal-data-inflection` | `portal/inflection/state/ticket-attachments/trade-form/` |
-| cottonwood | `opal-data-cottonwood` | `portal/cottonwood/state/ticket-attachments/trade-form/` |
+| 49financial | `opal-data-49financial` | `portal/49financial/state/ticket_attachments/trade-form/` |
+| inflection | `opal-data-inflection` | `portal/inflection/state/ticket_attachments/trade-form/` |
+| cottonwood | `opal-data-cottonwood` | `portal/cottonwood/state/ticket_attachments/trade-form/` |
 
 The role's own IAM grant (Terraform source `TO-R18-TR3`, applied by the release order) is exactly `s3:PutObject` and `s3:GetObject` on those three ARNs, nothing else.
 
@@ -29,7 +29,7 @@ The role's own IAM grant (Terraform source `TO-R18-TR3`, applied by the release 
 
 1. **Exempt the role from `DenyForeignFirmPrincipals`** by adding `arn:aws:iam::313476888478:role/opal-ticket-api-role` to its `ArnNotLike` list.
 2. **Bound it at once**, in the pattern of `DenyScopedExemption1*`: add Deny statements so that this role may do ONLY `s3:GetObject` and `s3:PutObject`, ONLY on
-   `arn:aws:s3:::<bucket>/portal/<firm>/state/ticket-attachments/trade-form/*`, and may not `s3:ListBucket` (the presigned flow needs no listing). No other prefix in the bucket may be
+   `arn:aws:s3:::<bucket>/portal/<firm>/state/ticket_attachments/trade-form/*`, and may not `s3:ListBucket` (the presigned flow needs no listing). No other prefix in the bucket may be
    reachable by this role, including the cottonwood restricted prefix.
 3. **CORS** (for the browser's PUT to a presigned URL): `AllowedOrigins` = the portal's DEV and PROD origins exactly (NO `*`), `AllowedMethods` `PUT` and `GET`,
    `AllowedHeaders` `Content-Type`, `ExposeHeaders` `ETag`, `MaxAgeSeconds` 300. The laptop knows the portal's origins; I do not type them here.
