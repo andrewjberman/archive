@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-214",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "cceda80af4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-214.inflection-sample-one-household-in-memory-from-silver.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~173",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~173/BUILD_R109.json",
+  "controls": {
+    "mutant": {
+      "description": "planted conflict on a copy of the private sample (hold.net_gain_ytd made absent beside a filled pvs.ytd.net_gain), scanned by the issuer's whole-document rule (p106 whole_document_scan)",
+      "expected": "at least one conflict reported",
+      "observed": "1 conflict reported",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "live silver reads of the partitions at as_of",
+      "observed": "not re-run twice",
+      "status": "N/A-WITH-REASON",
+      "reason": "the sample is a live read of partitions that move daily; the checker recounts the written private sample instead of re-reading silver"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the household return fill from Orion's client-keyed performance (TO cell 4(b))",
+      "reason": "amended by the issuer on surprise row IRPT_DASHBD-D2-W173-S1: contract 0.4.3 sources the household return ABSENT; the member stays NO_SOURCE_YET and any change is the CTO's decision"
+    },
+    {
+      "item": "account window statuses and first data dates from an account return table",
+      "reason": "the account return table is not built for this firm (a later cell, DB-b-216); first dates come from transactions and positions and the statuses from span, named in method_words (row S2, dispositioned by the issuer)"
+    },
+    {
+      "item": "the seven-class allocation of Orion holdings (hold.allocation, holdings.rows.class_hierarchy)",
+      "reason": "the class placement reads a classification table outside this grant; absent NO_SOURCE_YET in words (row S3, dispositioned by the issuer)"
+    },
+    {
+      "item": "any S3 write, put, copy or delete, vendor call, secret read, deploy or push",
+      "reason": "the order grants LIST and GET by prefix only, through the adapter's reader and one served-series GET"
+    },
+    {
+      "item": "reads of the Orion master prefix, of the alien dates, and of any other firm's place",
+      "reason": "not granted; the alien dates are named by the issuer's read gate and are not read; the guard state is copied into the record"
+    },
+    {
+      "item": "the render (TO DB-b-215) and the portal",
+      "reason": "out of this order: the next order of the queue reads what this one builds and stays staged"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W173-S1: contract 0.4.3 sources every household-grain return ABSENT; the issuer ruled (amendment 8aa7e9d3b4): the household return stays NO_SOURCE_YET and the order was an issuer error; BLOCKING, now ruled",
+    "IRPT_DASHBD-D2-W173-S2: account first data dates and window statuses have no account-return source for this firm; first dates from transactions (positions for one account), statuses from span; ARMED, disarm owner is the issuer; dispositioned by the issuer, stands as filed",
+    "IRPT_DASHBD-D2-W173-S3: the seven-class placement of Orion holdings needs a classification table outside this grant; hold.allocation absent per the TO's fallback; dispositioned by the issuer, stands as filed",
+    "IRPT_DASHBD-D2-W173-S4: the served model series ended one trading day before the as-of; the issuer ruled (amendment 8aa7e9d3b4): as_of is the newest positions date on or before the series' last date; the 32 benchmark members now fill, 32 of 32",
+    "IRPT_DASHBD-D2-W173-S5: the household and account ending values are sourced to fact_positions, not to the account return table the contract names; the avs ending values are filled as well for the whole-document rule; dispositioned by the issuer, stands as filed",
+    "IRPT_DASHBD-D2-W173-S6: account_id is the adapter's account key, not the custodian number; last4 comes from the custodian account number; dispositioned by the issuer, stands as filed",
+    "IRPT_DASHBD-D2-W173-S7: the account universe is built from the newest positions and fact_assets partitions while values are read at the as-of partition (2026-10-13); all five accounts carry rows on as-of; OBSERVATION, INERT, for the issuer's disposition"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "build_sample_inflection.py (python -I)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~173/build_sample_inflection.py . --out C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~173/",
+      "result": "BUILT: 117 members, 46 filled, 71 absent; shape_valid_against_contract true; 0 shape problems; as_of 2026-10-13; 5 household accounts; household chosen by the checker's rule"
+    },
+    {
+      "tool": "issuer whole-document rule (checks/r106 whole_document_scan), imported by path",
+      "invocation": "python -I .scratch/verify_r173.py (imports checks/r106/p106_round106.py by its own path; scratch script, not committed)",
+      "result": "259 cells scanned, 194 absent, 198 keys, 0 unmapped, 0 conflicts, 0 disagreements; planted conflict caught (1)"
+    },
+    {
+      "tool": "criterion checker DB109-1-AC1 (amended)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r109/p109_round109.py\" . DB109-1-AC1",
+      "result": "PASS; 32 of 32 benchmark members filled; household_return_windows []; as_of 2026-10-13 not later than benchmark_data_as_of"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~173/build_sample_inflection.py",
+      "kind": "script",
+      "commit_or_etag": "4ee0fead99",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline script in the worker folder, tracked; no AWS write, no vendor call, no deploy; reads only the adapter's GET-only reader and one served-series GET; sha256 d69254f98551452eb32d016db5c44fa747c98b15535b67b92f6f750298152a8e",
+      "artifact_covered_by": [
+        "DB109-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~173/BUILD_R109.json",
+      "kind": "config_data",
+      "commit_or_etag": "950b60e5d2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of the build: counts, hashes and words only; no client figure, household id or account number; the private sample it hashes is outside the repo and is not an artifact row",
+      "artifact_covered_by": [
+        "DB109-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "950b60e5d2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_DASHBD-D2-W173-S1 to S7 appended as bytes; surprise-row gate OK",
+      "artifact_covered_by": [
+        "DB109-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB109-1-AC1",
+      "criterion_verbatim": "DB109-1-AC1 -- the private sample exists outside the repo, bound to its sha256 and to the contract's, passes the kind-aware shape and kind rules; the WHOLE-DOCUMENT rule keys every non-chart cell, reports 0 conflicts, 0 disagreements and 0 unmapped, its denominator equals the record's, and a planted conflict on a copy is caught; the household is the one the checker recomputes from the round-108 dry run (the lowest sha256 among households of 2 or more accounts) and the sample's accounts are exactly its accounts; every account return reads NO_SOURCE_YET with the fixed words, every lot member NO_SOURCE_YET with words that begin with the fixed lots sentence, the six split members stay NO_SOURCE_YET; the household return windows all read NO_SOURCE_YET as the contract sources them and `household_return_windows` is `[]`; `as_of` equals the sample's and is not later than `benchmark_data_as_of`, and `benchmark_members` equals the checker's count of the 32 benchmark members that fill; the household ending value fills in the four windows and `hold.ending_value`; `orion_guard` equals the issuer's read-gate state; the builder is the tracked copy in your folder, hashed, uses the Inflection adapter, names no other firm's place and holds no write call; no write, push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r109/p109_round109.py\" . DB109-1-AC1",
+      "output_evidence": "OK: Inflection sample for one household (5 accounts) chosen by the hash rule; whole-document rule over 259 cells (194 absent, 0 unmapped): 0 conflicts, planted mutant caught; account returns and lots in plain words; household return NO_SOURCE_YET by contract; as_of 2026-10-13 with 32 of 32 benchmark members filled; guard state named\nDB109-1-AC1 PASS\nexit code 0",
+      "denominator": "259 whole-document cells scanned, 194 absent, 198 keys, 0 unmapped, 0 conflicts, 0 disagreements; planted conflict caught 1 of 1; 117 members (46 filled, 71 absent); 5 of 5 household accounts equal the dry-run accounts; 32 of 32 benchmark members filled; 0 of 4 household return windows filled (contract ABSENT)",
+      "status": "PASS",
+      "expect": "DB109-1-AC1 PASS"
+    }
+  ]
+}
