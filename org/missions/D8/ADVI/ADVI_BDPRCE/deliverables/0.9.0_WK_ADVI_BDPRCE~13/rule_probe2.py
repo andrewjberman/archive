@@ -1,13 +1,13 @@
-"""BP-c-1 probe: R1.1 (bd_price_rule AMENDMENT 1) run over real opal-data-bd partitions, read-only.
+"""BP-c-1 probe: R1.2 (bd_price_rule AMENDMENT R1.2) run over real opal-data-bd partitions, read-only.
 
 Reads LOCAL copies downloaded with `.tools/aws s3api get-object` (READ verb only) into C:/dev/wk-bdprce-r3-13-data/.
 Writes one JSON record. The only clock value is --read-at, passed in, so two runs over the same bytes are equal.
 
-Run (from the worktree root, at this path):
+Run (from the worktree root, at this path; PYTHONDONTWRITEBYTECODE=1 keeps __pycache__ out of the tree):
   python -I org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/rule_probe2.py \
       --data C:/dev/wk-bdprce-r3-13-data --silver data/black_diamond/scripts/silver \
       --served org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~6/BEFORE_AFTER.csv \
-      --read-at 2026-10-14T01:28:00Z --out <path>
+      --read-at <ISO UTC> --out <path>
 """
 import argparse
 import csv
@@ -30,7 +30,9 @@ NAMED = [
 ]
 COLS = ['transaction_id', 'transaction_type', 'price', 'trade_date', 'asset_name', 'units', 'market_value']
 DIM_CLASS = 'asset_super_class_bd'  # the dimension's own class column (BD dimension schema, read as data)
-DIM_COLS = ['asset_name', DIM_CLASS, 'coupon_rate']
+FI_CLASS = 'Fixed Income'
+COUPON = 'coupon_rate'
+DIM_COLS = ['asset_name', DIM_CLASS, COUPON]
 
 
 def _next(d):
@@ -56,12 +58,16 @@ def _near(a, b, rel):
     return a is not None and b is not None and abs(a - b) <= rel * max(1.0, abs(b))
 
 
-def _ratio_near_100(price, units, mv):
-    """True when price / (|mv| / |units|) is within 1 percent of 100 (the scale corroboration)."""
+def _ratio_of(price, units, mv):
+    """price / (|market_value| / |units|), computed here independently of the module; None when not computable."""
     p, u, m = _num(price), _num(units), _num(mv)
     if p is None or u is None or m is None or p <= 0 or u == 0 or m == 0:
-        return False
-    return abs(p / (abs(m) / abs(u)) - 100.0) <= 1.0
+        return None
+    return p / (abs(m) / abs(u))
+
+
+def _ratio_key(v):
+    return (v is None, 0.0 if v is None else v)
 
 
 def build(args, R):
@@ -77,9 +83,10 @@ def build(args, R):
     dimp = os.path.join(args.data, 'bd_assets_dim.parquet')
     sources['silver/bd_assets_dim.parquet'] = _md5(dimp)
     dim = pd.read_parquet(dimp, columns=DIM_COLS)
-    cands, conflicting = R.par_quoted_candidates(dim, DIM_CLASS, 'coupon_rate', 'Fixed Income')
-    qualifies = (dim['asset_super_class_bd'] == 'Fixed Income') & dim['coupon_rate'].notna()
-    fi_any = set(str(n) for n in dim.loc[(dim['asset_super_class_bd'] == 'Fixed Income') & dim['asset_name'].notna(), 'asset_name'])
+    # AMENDMENT R1.2: the Fixed Income names from the dimension's class column; the coupon never decides.
+    cands, conflicting = R.par_quoted_candidates(dim, DIM_CLASS, FI_CLASS)
+    coup = R.coupon_corroboration(dim, COUPON, cands)
+    fi_rows_in_dim = int((dim[DIM_CLASS] == FI_CLASS).sum())
 
     # Served 100x rows and the round-2 values, from the round-2 before/after list (read-only, committed record).
     served = []
@@ -107,15 +114,6 @@ def build(args, R):
         types[k] = types.get(k, 0) + 1
     types_seen = {k: types[k] for k in sorted(types)}
 
-    # Fixed-income assets the candidate rule leaves unscaled whose ratio is near 100 (reported, never scaled).
-    fi_unscaled_near100 = set()
-    for _, r in on_target.iterrows():
-        name = r['asset_name']
-        if not isinstance(name, str) or name not in fi_any or name in cands:
-            continue
-        if r['transaction_type'] in R.TRADE_TYPES_A and _ratio_near_100(r['price'], r['units'], r['market_value']):
-            fi_unscaled_near100.add(name)
-
     def carry(asset, target):
         rows = union[(union['asset_name'] == asset)]
         dts = pd.to_datetime(rows['trade_date'], errors='coerce').dt.date
@@ -125,9 +123,17 @@ def build(args, R):
         for d in reversed(prior):
             p = R.price_for_date(union, d.isoformat(), R.TRADE_TYPES_A, cands).get(asset)
             if p is not None:
-                cf = R.carry_forward((p['price'], d.isoformat()))
-                return cf
+                return R.carry_forward((p['price'], d.isoformat()))
         return None
+
+    def row_ratios(asset, target):
+        rows = union[(union['asset_name'] == asset)]
+        dts = pd.to_datetime(rows['trade_date'], errors='coerce').dt.date
+        out = []
+        for d, ty, p, u, m in zip(dts, rows['transaction_type'], rows['price'], rows['units'], rows['market_value']):
+            if d == _date.fromisoformat(target) and isinstance(ty, str) and ty in R.TRADE_TYPES_A:
+                out.append({'transaction_type': ty, 'price': _num(p), 'ratio': _ratio_of(p, u, m)})
+        return out
 
     # Assets: the named set plus the eight round-2 scale_100x rows (deduplicated, in order).
     keys = []
@@ -154,8 +160,11 @@ def build(args, R):
             'price': None if trade is None else trade['price'],
             'kind': kind,
             'distinct_trade_ids': [] if trade is None else trade['trade_ids'],
-            'par_quoted_candidate': asset in cands,
+            'fixed_income_candidate': asset in cands,
+            'coupon_present': coup.get(asset) if asset in cands else None,
             'par_scaled_ids': [] if trade is None else trade['par_scaled_ids'],
+            'per_unit_left': 0 if trade is None else trade['per_unit_left'],
+            'row_ratios': row_ratios(asset, t),
         }
         if w is not None:
             e['withheld'] = w
@@ -173,18 +182,38 @@ def build(args, R):
             unchanged += 1 if eq else 0
         entries.append(e)
 
-    assets_scaled = sum(1 for t in TARGETS for a in res[t] if res[t][a]['par_scaled_ids'])
+    scaled_pairs = []
+    for t in TARGETS:
+        for a in res[t]:
+            if res[t][a]['par_scaled_ids']:
+                scaled_pairs.append({'asset_name': a, 'date': t,
+                                     'scaled_ids': res[t][a]['par_scaled_ids'],
+                                     'coupon_present': coup.get(a, False)})
+    per_unit_names = sorted(set(a for t in TARGETS for a in res[t] if res[t][a]['per_unit_left'] and a in cands))
+    withheld_ratios = []
+    for t in TARGETS:
+        withheld_ratios.extend(census[t]['withheld_ratios'])
+    withheld_ratios.sort(key=_ratio_key)
+    by_reason = {}
+    for t in TARGETS:
+        for k, v in census[t]['withheld_by_reason'].items():
+            by_reason[k] = by_reason.get(k, 0) + v
     par = {
-        'class_field': "asset_super_class_bd == 'Fixed Income' and coupon_rate not null",
-        'candidates_in_dimension': len(cands),
-        'candidate_rows_in_dimension': int(qualifies.sum()),
+        'class_field': "asset_super_class_bd == 'Fixed Income' (names), then the per-row ratio test: within 1 percent of 100 scaled, within 1 percent of 1 per unit left alone, else withheld; a non-Fixed-Income row within 1 percent of 100 withheld",
+        'fixed_income_assets_in_dimension': len(cands),
+        'fixed_income_rows_in_dimension': fi_rows_in_dim,
         'dimension_names_conflicting_excluded': sorted(conflicting),
-        'assets_scaled': assets_scaled,
-        'withheld_disagreement': sum(census[t]['withheld_by_reason'].get('ratio_near_1', 0) for t in TARGETS),
-        'withheld_ratio_unrecognised': sum(census[t]['withheld_by_reason'].get('ratio_unrecognised', 0) for t in TARGETS),
+        'assets_scaled': len(scaled_pairs),
+        'scaled_rows': sum(census[t]['scaled_rows'] for t in TARGETS),
+        'scaled_asset_dates': scaled_pairs,
+        'coupon_corroborated_scaled_rows': sum(1 for s in scaled_pairs if s['coupon_present']),
+        'withheld_disagreement': sum(census[t]['withheld_excluded'] for t in TARGETS),
+        'withheld_by_reason': {k: by_reason[k] for k in sorted(by_reason)},
+        'withheld_ratios': withheld_ratios,
+        'per_unit_left': sum(census[t]['per_unit_left'] for t in TARGETS),
+        'per_unit_left_fixed_income_names': per_unit_names,
         'unit_scale_rows_unchanged': unchanged,
         'unit_scale_rows_total': len(served),
-        'fixed_income_unscaled_with_ratio_near_100': sorted(fi_unscaled_near100),
     }
     return {
         'order': 'BP-c-1',
