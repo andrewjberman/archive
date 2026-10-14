@@ -277,16 +277,22 @@ def check_fill(root):
 
 def check_readiness(root):
     r = load(root, D + "0.9.0_WK_IRPT_DASHBD~155/FIRM_READINESS.json")
-    firms = {"cottonwood": "opal-data-cot", "inflection": "opal-data-inf"}
+    firms = {"cottonwood": "opal-data-cottonwood", "inflection": "opal-data-inflection"}  # lib/opal_naming.address() buckets, not the registry bucket field
     fs = r.get("firms")
     need(isinstance(fs, list) and sorted(f.get("firm") for f in fs if isinstance(f, dict)) == sorted(firms), "firms must hold exactly cottonwood and inflection")
     for f in fs:
         n = f["firm"]
-        need(f.get("bucket") == firms[n] and f.get("irpt_prefix_exists") is False, "%s: bucket %s and irpt_prefix_exists false (the issuer's own read: the prefix lists empty)" % (n, firms[n]))
+        need(f.get("bucket") == firms[n] and f.get("irpt_prefix_exists") is True and isinstance(f.get("gold_prefixes_present"), list) and f["gold_prefixes_present"] and all(nes(x) for x in f["gold_prefixes_present"]),
+             "%s: bucket %s, irpt_prefix_exists true and gold_prefixes_present (the issuer's own read: the prefix exists at the address() bucket)" % (n, firms[n]))
+        need(("account_return_daily" in f["gold_prefixes_present"]) == (n == "cottonwood"), "%s: account_return_daily is present in Cottonwood's gold and absent in Inflection's (the issuer's own list)" % n)
         tb = f.get("tables")
         need(isinstance(tb, list) and sorted(t.get("table") for t in tb if isinstance(t, dict)) == sorted(TABLES), "%s: tables must hold exactly the eight C-SHAPE tables" % n)
         for t in tb:
+            need(isinstance(t.get("exists_in_gold"), bool) and is_int(t.get("partitions")) and (t["partitions"] > 0) == t["exists_in_gold"] and t.get("schema_hash_vs_contract") in ("EQUAL", "DIFFERENT", "NO_CONTRACT", "NOT_CHECKED")
+                 and (t["exists_in_gold"] or t["schema_hash_vs_contract"] in ("NO_CONTRACT", "NOT_CHECKED")),
+                 "%s %s: exists_in_gold, partitions (above 0 exactly when it exists), schema_hash_vs_contract" % (n, t.get("table")))
             need(isinstance(t.get("source_exists"), bool) and nes(t.get("candidate_source")) and nes(t.get("gap_in_words")) and isinstance(t.get("reuses_existing_gold"), bool), "%s %s: source_exists, candidate_source, gap_in_words and reuses_existing_gold" % (n, t.get("table")))
+            need(t["exists_in_gold"] <= t["source_exists"], "%s %s: a table that exists in gold has a source" % (n, t.get("table")))
         need(isinstance(f.get("existing_gold_inputs"), list) and f["existing_gold_inputs"] and all(isinstance(x, dict) and nes(x.get("what")) and nes(x.get("address")) and isinstance(x.get("columns_served"), int) for x in f["existing_gold_inputs"]), "%s: existing_gold_inputs must name the gold IRPT_BCKEND already builds (what, address, columns_served)" % n)
         need(f.get("readiness") in ("READY", "BLOCKED") and nes(f.get("blockers")) and nes(f.get("household_dimension")), "%s: readiness, blockers and household_dimension in words" % n)
         need(f.get("shadow_pull_proposed") is False, "%s: an adapter reuses the existing gold; shadow_pull_proposed must be false" % n)
