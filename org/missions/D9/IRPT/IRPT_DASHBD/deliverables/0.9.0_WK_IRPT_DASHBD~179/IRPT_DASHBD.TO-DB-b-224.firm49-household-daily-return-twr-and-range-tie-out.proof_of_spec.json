@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-224",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "332465706b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-224.firm49-household-daily-return-twr-and-range-tie-out.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "332465706b"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~179",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_HOUSEHOLD_RETURN_DAILY_CONTRACT.json",
+      "kind": "doc",
+      "commit_or_etag": "6b2c4f67b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo contract 0.1.0 for the household daily return. Nothing deployed; no served value changed; the report contract and its sample are untouched.",
+      "artifact_covered_by": [
+        "DB111-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/household_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "6b2c4f67b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib pure function compute_household_returns; no S3 call, no write, no firm name. Not wired to any producer; no deploy.",
+      "artifact_covered_by": [
+        "DB111-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_household_return_daily.py",
+      "kind": "test",
+      "commit_or_etag": "6b2c4f67b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven offline pytest tests, all passing on the committed module (7 passed).",
+      "artifact_covered_by": [
+        "DB111-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~179/dry_run_household_return_r111.py",
+      "kind": "script",
+      "commit_or_etag": "6b2c4f67b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Tracked read-only dry-run driver (LIST and GET only; writes a private parquet and this record). Its sha256 is in the record's driver field and matches the committed file.",
+      "artifact_covered_by": [
+        "DB111-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~179/HOUSEHOLD_TIEOUT_R111.json",
+      "kind": "doc",
+      "commit_or_etag": "6b2c4f67b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts and words only. Reads: 1143 S3 calls (LIST and GET), 0 writes, 0 vendor calls, 0 secret reads. Re-run on the amended method: one-account households 2176 compared, max absolute gap 0.0.",
+      "artifact_covered_by": [
+        "DB111-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~179/session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "6b2c4f67b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log of the commands and their counts.",
+      "artifact_covered_by": [
+        "DB111-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB111-1-AC1",
+      "criterion_verbatim": "DB111-1-AC1 -- the contract parses with exactly the ten columns, the nullable rule, the three day qualities and a schema hash that equals the checker's recomputation by the stated basis; the module is a pure function (no other firm's place, no write call, no boto3), carries ARROW_SCHEMA_COLUMNS equal to the contract's columns and returns, on the checker's synthetic week (a deposit, an account that joins, an account with a missing day, a one-account household), exactly the checker's own independent computation within 1e-12 (and two control computations, one ignoring flows and one treating a missing account as zero, disagree with it); the worker's tests exist (at least 3) and pass; HOUSEHOLD_TIEOUT_R111.json has the form of step 7 with its counts consistent (within plus outside equals compared, the bins sum to outside, the reasons sum to not comparable), no tolerance assumed, every claim in the four-word set, at least one one-account household compared with a largest gap of at most 1e-9, zero writes and no run of 8 or more digits; the driver is tracked, hashed as recorded, names no other firm's place and holds no write call. Base: FAIL (no contract).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r111/p111_household.py\" . DB111-1-AC1",
+      "output_evidence": "DB111-1-AC1 PASS (rc=0), run twice with identical output. Contract, module and tests each pass; the record's clauses pass. Tie-out line: OK: contract household_return_daily (10 columns, schema hash recomputed); compute_household_returns equals the checker's own computation on the synthetic week; tests pass; tie-out over 4013 households: qtd 3807 of 3814 within range, ytd 1966 of 2027, last_12_months 1700 of 1765, since_inception 1297 of 1449; 2176 one-account households equal their account.",
+      "denominator": "one-account households compared 2176 of 4013 households; one-account household-window comparisons 5701, of which 0 exceed 1e-9 (max absolute gap 0.0)",
+      "status": "PASS",
+      "expect": "DB111-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copies only, not committed: (a) the module with the accounts' returns averaged without the prior-day-value weights; (b) the module with a missing account treated as a total loss. Each run against the committed test file.",
+      "expected": "each mutant fails at least 3 of the 9 tests",
+      "observed": "(a) unweighted mean: 3 failed, 6 passed (test_week_matches_hand_values, test_a_null_account_return_makes_the_day_account_missing_and_the_next_day_is_weighted, test_two_accounts_are_weighted_by_prior_value_not_averaged); (b) missing as total loss: 3 failed, 6 passed (test_week_matches_hand_values, test_a_missing_account_is_null_never_zero_and_the_return_resumes, test_a_missing_account_in_a_second_household_is_null_and_its_neighbours_measure)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the issuer checker run twice from the worktree root with the same arguments (DB111-1-AC1); outputs compared byte for byte",
+      "observed": "two identical outputs, rc 0 each; last line DB111-1-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The report contract, its sample and the household members of the performance report",
+      "reason": "Outside the grant. The report contract's open_changes says the members are sourced once this series and its tie-out are ruled; they stay ABSENT."
+    },
+    {
+      "item": "Any adjustment of the method beyond the amended ruling",
+      "reason": "The amended method is the ruled one (coordinator ruling on row IRPT_DASHBD-D2-W179-S1). Any further change is the CTO's to rule."
+    },
+    {
+      "item": "Cottonwood and Inflection households",
+      "reason": "Firm-neutral function; the dry run is 49 Financial only, as the face states. Cottonwood takes the same cell later."
+    },
+    {
+      "item": "Any S3 write, DynamoDB write, vendor call, secret read, push or deploy",
+      "reason": "Read-only grant. The only writes are the private parquet under the private evidence folder and the repo files of the grant."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W179-S1: BLOCKING. The one-account equality failed on the first cut (4 of 5701 since_inception household-window comparisons, max gap 4.04e-4): the endpoint form cannot reproduce a linked return on a carried large-flow day. Ruled by the coordinator as an error in the method (order and checker amended on this branch at c74723a8a9); the method is now the prior-day-value weighted combination of the accounts' own total_return_daily, and the one-account clause holds (max gap 0.0)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~179/session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "p111_household.py (issuer checker, DB111-1-AC1)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r111/p111_household.py\" . DB111-1-AC1",
+      "result": "DB111-1-AC1 PASS; rc=0"
+    },
+    {
+      "tool": "pytest (tests of the module)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_household_return_daily.py",
+      "result": "9 passed"
+    },
+    {
+      "tool": "dry_run_household_return_r111.py (read-only driver)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~179/dry_run_household_return_r111.py <repo_root>",
+      "result": "rc=0; 570 partitions read; 4013 households; table 1704799 rows; record and private parquet written"
+    }
+  ]
+}

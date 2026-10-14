@@ -2,7 +2,7 @@
 # OPLGTW OG-ap-18 AC2 (round-37 G1-TYPED, PHASE B, landed and served):
 #  - ledger nfra-oplgtw-gateway-release-gt is CLOSED at HEAD, its sentinel gone;
 #  - the release LANDED (row Z-S119, time-anchored): the manifest's deployed_commit is the release, or recorded it before a later release displaced it; runbook 7.2 (rb.AC2) is graded only while it is the live one;
-#  - W/GT_SERVED.json, read on the host through the INSTALLED code: the registry grew by exactly ten, and for each of the ten
+#  - W/GT_SERVED.json, read on the host through the INSTALLED code (A4: also trading_days_behind_t1_numeric and host_calendar_md5_equal, both true): the registry grew by exactly ten, and for each of the ten
 #    tools an Opal stand-in principal is served an enveloped answer and a non-Opal principal is refused with zero S3 calls.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/_landed.sh"
@@ -32,8 +32,10 @@ pt = b.get("per_tool") or {}
 good = sum(1 for n in names if isinstance(pt.get(n), dict) and pt[n].get("opal_served") is True and pt[n].get("non_opal_refused") is True and pt[n].get("s3_calls_on_refusal") == 0)
 tl = b.get("tools_listed")
 listed = isinstance(tl, list) and set(names) <= set(tl)
-print("registry %s -> %s (+10); per-tool %d of 10; tools listed %s" % (before, after, good, "yes" if listed else "no"))
-print("OK" if grew and good == 10 and listed else "NO")
+cal = b.get("trading_days_behind_t1_numeric") is True
+md5 = b.get("host_calendar_md5_equal") is True
+print("registry %s -> %s (+10); per-tool %d of 10; tools listed %s; trading-day lag numeric %s; host calendar md5 equal %s" % (before, after, good, "yes" if listed else "no", "yes" if cal else "no", "yes" if md5 else "no"))
+print("OK" if grew and good == 10 and listed and cal and md5 else "NO")
 EOF
 )
 res=$(printf '%s' "$res" | tr -d '\r')

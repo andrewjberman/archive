@@ -8,7 +8,7 @@ gold package's build_package.py into <dest-dir>, applies the cell's change as th
 never committed to the repo), and drops a test file. Then:   R9_ROOT=<dest-dir> python r9_cn_p_1.py pure|seams|oracle
 
 --mutant NAME applies the reference WITH ONE DEFECT so the issuer can show an arm fails on it (an arm that cannot fail is not
-an arm):  typed-literal | no-gaetr | no-test-edit | keep-muni | no-allscope | mutates-input
+an arm):  typed-literal | no-gaetr | no-test-edit | keep-muni | no-allscope | mutates-input | or-fallback | refuse-all
 
 Every patch asserts it applied exactly once; a drift in a target file fails loud instead of silently skipping.
 """
@@ -156,10 +156,24 @@ def apply_global_trend_groups(arts: dict, smartx: dict, smartx_partition: "str |
 
 WIRE_OLD = ("    arts, fold_report = guard_global_min_firms_fold(arts, _isolated)   # CN-f-1: Global per-model lines shown only "
             "where >= 2 firms hold them\n")
-WIRE_NEW = WIRE_OLD + (
-    "    # MDPF_CANON CN-p-1: the Trend groups (client supervised / ETF / ALT) and carried_dates, after every fold that moves a Global figure.\n"
+WIRE_COMMENT = ("    # MDPF_CANON CN-p-1: the Trend groups (client supervised / ETF / ALT) and carried_dates, after every fold that moves a Global figure.\n"
+                "    # A loader raise (denied / failed SMArtX read) refuses Global ALONE; ({}, None) is the honest absent and still applies.\n")
+WIRE_NEW = WIRE_OLD + WIRE_COMMENT + (
+    "    _smx = _isolated(\"global\", lambda: load_smartx_sma_legs(s3, process_start.date().isoformat()))\n"
+    "    if _smx is None:\n"
+    "        arts = dict(arts)\n"
+    "        arts[\"global\"] = None\n"
+    "    else:\n"
+    "        arts = apply_global_trend_groups(arts, _smx[0], _smx[1])\n")
+WIRE_OR_FALLBACK = WIRE_OLD + (
     "    _smx = _isolated(\"global\", lambda: load_smartx_sma_legs(s3, process_start.date().isoformat())) or ({}, None)\n"
     "    arts = apply_global_trend_groups(arts, _smx[0], _smx[1])\n")
+WIRE_REFUSE_ALL = WIRE_OLD + (
+    "    _smx = _isolated(\"global\", lambda: load_smartx_sma_legs(s3, process_start.date().isoformat()))\n"
+    "    if _smx is None:\n"
+    "        arts = {k: None for k in arts}\n"
+    "    else:\n"
+    "        arts = apply_global_trend_groups(arts, _smx[0], _smx[1])\n")
 
 ANCHOR = "def write_taxsma_category_gold(s3, scope: str, knowledge_date: str, category_doc: dict,\n"
 
@@ -220,6 +234,47 @@ def test_apply_all_scope_and_pure():
 
 def test_registry_muni_gone():
     assert "muni" not in {r[0] for r in gc.registry.SMA_MEMBERS}
+
+
+def _wiring(kind):
+    """Exec build_all's statements from the load call to the apply call with stubs; return (arts after, apply calls)."""
+    import ast
+    fn = next(n for n in ast.parse(open(gc.__file__, encoding="utf-8").read()).body
+              if isinstance(n, ast.FunctionDef) and n.name == "build_all")
+
+    def has(st, name):
+        return any(isinstance(x, ast.Call) and getattr(x.func, "id", getattr(x.func, "attr", None)) == name for x in ast.walk(st))
+    i = next(k for k, st in enumerate(fn.body) if has(st, "load_smartx_sma_legs"))
+    j = max(k for k, st in enumerate(fn.body) if has(st, "apply_global_trend_groups"))
+    applied = []
+
+    def loader(s3, today):
+        if kind == "raise":
+            raise RuntimeError("C2-SIBLING FAIL-LOUD: planted")
+        return ({}, None)
+
+    def apply(arts, smartx, part=None):
+        applied.append((smartx, part))
+        return dict(arts, tagged=True)
+
+    def isolated(scope, f):
+        try:
+            return f()
+        except Exception:
+            return None
+    f49 = {"dates": []}
+    ns = {"arts": {"global": {"dates": []}, "49financial": f49}, "_isolated": isolated, "s3": object(),
+          "process_start": type("P", (), {"date": lambda self: __import__("datetime").date(2026, 10, 14)})(),
+          "load_smartx_sma_legs": loader, "apply_global_trend_groups": apply}
+    exec(compile(ast.Module(body=fn.body[i:j + 1], type_ignores=[]), "<wiring>", "exec"), ns)
+    return ns["arts"], applied, f49
+
+
+def test_loader_raise_refuses_global_alone_and_absent_still_applies():
+    arts, applied, f49 = _wiring("raise")
+    assert arts["global"] is None and arts["49financial"] is f49 and applied == []
+    arts, applied, _ = _wiring("absent")
+    assert applied == [({}, None)] and arts.get("tagged") is True and arts["global"] is not None
 '''
 
 
@@ -273,7 +328,7 @@ def main() -> int:
                               "    out = arts\n    for scope, doc in out.items():\n        if doc is None:\n            continue\n        for k in TREND_GROUP_KEYS:")
     _sub(con, IMPORT_OLD, IMPORT_NEW)
     _sub(con, ANCHOR, block + ANCHOR)
-    _sub(con, WIRE_OLD, WIRE_NEW)
+    _sub(con, WIRE_OLD, {"or-fallback": WIRE_OR_FALLBACK, "refuse-all": WIRE_REFUSE_ALL}.get(mutant, WIRE_NEW))
     if mutant != "keep-muni":
         _sub(os.path.join(g, "mdpf_category_registry.py"), MUNI_OLD, MUNI_NEW)
     if mutant not in ("no-test-edit", "keep-muni"):

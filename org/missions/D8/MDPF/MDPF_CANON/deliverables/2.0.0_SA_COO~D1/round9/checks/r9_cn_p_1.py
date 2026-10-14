@@ -8,6 +8,8 @@ read comes from the CRO's two registry rows (ff00e3e265), and the category tree 
   python r9_cn_p_1.py seams     static (AST) + two pytest runs: no typed address, the wiring order in build_all, the worker's tests
   python r9_cn_p_1.py oracle    the REAL served 2026-10-13 Global object and the REAL SMArtX partition, read-only get: the amended
                                 period-end oracle, the partition identity on every dated row, the 9 carried dates, headline untouched
+  python r9_cn_p_1.py selftest  offline, no repo: the S7 wiring grader accepts the corrected wiring and rejects two planted defects;
+                                prints `CN-P-1 SELFTEST: OK`
 
 Each prints `  <ARM> PASS|FAIL <detail>` per arm and `CN-P-1 <NAME>: k of n arms`; exit 0 only when every arm passes.
 Prints dates, counts and differences, never an account id and never a firm level. ASCII only. Bounded: <= 12 S3 calls, ~1 min.
@@ -31,6 +33,10 @@ R9_ROOT overrides the repo root (the issuer's reference-tree dry-run uses it).
              detector is proven on a planted typed literal.
           S3 build_all order: guard_global_min_firms_fold < load_smartx_sma_legs <= apply_global_trend_groups < the first
              _shape_timeseries call.
+          S7 the build_all wiring BEHAVES: the statements from the load call to the apply call are executed with stubs -- a loader
+             that RAISES leaves arts["global"] None (Global refused alone, the other scopes kept) and apply is NOT called; a loader
+             that returns ({}, None) (no partition, honest absent) and one that returns legs both call apply once with exactly
+             what the loader returned. Graded on behaviour, not line text; the grader is proven on two planted wirings.
           T1 the worker's test file passes with >= 5 tests.
           T2 CONTROL (passes at base): test_stratid_round2_inside_model.py passes (its "muni" assertion is the worker's one edit).
   ORACLE  O0 CONTROL (passes at base): the served object has 496 dates and exactly the 9 no-total dates; SMArtX equals Global's
@@ -368,6 +374,112 @@ def _pytest(root, rel):
     return p.returncode, int(m.group(1)) if m else 0, int(f.group(1)) if f else 0
 
 
+# the corrected wiring and the two planted defects (the selftest and S7's own control run the grader on these)
+WIRING_GOOD = (
+    "def build_all():\n"
+    "    arts = 1\n"
+    "    _smx = _isolated('global', lambda: load_smartx_sma_legs(s3, process_start.date().isoformat()))\n"
+    "    if _smx is None:\n"
+    "        arts = dict(arts)\n"
+    "        arts['global'] = None\n"
+    "    else:\n"
+    "        arts = apply_global_trend_groups(arts, _smx[0], _smx[1])\n"
+    "    after = 2\n")
+WIRING_OR_FALLBACK = (                                           # the fail-open: a raise becomes empty legs
+    "def build_all():\n"
+    "    _smx = _isolated('global', lambda: load_smartx_sma_legs(s3, process_start.date().isoformat())) or ({}, None)\n"
+    "    arts = apply_global_trend_groups(arts, _smx[0], _smx[1])\n")
+WIRING_REFUSE_ALL = (                                            # over-refusal: a raise empties every scope
+    "def build_all():\n"
+    "    _smx = _isolated('global', lambda: load_smartx_sma_legs(s3, process_start.date().isoformat()))\n"
+    "    if _smx is None:\n"
+    "        arts = {k: None for k in arts}\n"
+    "    else:\n"
+    "        arts = apply_global_trend_groups(arts, _smx[0], _smx[1])\n")
+
+
+class _PS:                                                       # the stub of process_start
+    def date(self):
+        return dt.date(2026, 10, 14)
+
+
+def _has_call(stmt, name):
+    for sub in ast.walk(stmt):
+        if isinstance(sub, ast.Call):
+            f = sub.func
+            nm = f.id if isinstance(f, ast.Name) else (f.attr if isinstance(f, ast.Attribute) else None)
+            if nm == name:
+                return True
+    return False
+
+
+def _grade_wiring(src: str):
+    """BEHAVIOUR of the build_all wiring. Slice build_all's top-level statements from the first one that calls
+    load_smartx_sma_legs to the last one that calls apply_global_trend_groups, exec the slice with stubs for the names it
+    uses (arts, _isolated, s3, process_start, the loader, apply), once per loader outcome. Returns (ok, detail)."""
+    fn = next((n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "build_all"), None)
+    if fn is None:
+        return False, "no build_all"
+    ld = [i for i, st in enumerate(fn.body) if _has_call(st, "load_smartx_sma_legs")]
+    ap = [i for i, st in enumerate(fn.body) if _has_call(st, "apply_global_trend_groups")]
+    if not ld or not ap or ap[-1] < ld[0]:
+        return False, "load call at statements %s, apply call at %s (need load <= apply)" % (ld[:1], ap[-1:])
+    body = fn.body[ld[0]:ap[-1] + 1]
+
+    def run(kind):
+        applied = []
+
+        def loader(s3, today, *a, **k):
+            if kind == "raise":
+                raise RuntimeError("C2-SIBLING FAIL-LOUD: planted")
+            if kind == "absent":
+                return ({}, None)
+            return ({"2026-05-14": {"div": 1.0}}, "2026-10-14")
+
+        def apply(arts, smartx, part=None):
+            applied.append((smartx, part))
+            out = dict(arts)
+            out["global"] = {"tagged": True}
+            return out
+
+        def isolated(scope, f):
+            try:
+                return f()
+            except BaseException as e:                           # noqa: BLE001 -- the real wrapper's contract
+                if isinstance(e, KeyboardInterrupt):
+                    raise
+                return None
+        g0, f0 = {"dates": []}, {"dates": []}
+        ns = {"arts": {"global": g0, "49financial": f0, "inflection": {}, "cottonwood": None}, "_isolated": isolated,
+              "s3": object(), "process_start": _PS(), "load_smartx_sma_legs": loader, "apply_global_trend_groups": apply,
+              "log": lambda *a, **k: None}
+        exec(compile(ast.Module(body=body, type_ignores=[]), "<wiring>", "exec"), ns)    # noqa: S102 -- stubs only
+        return ns["arts"], applied, g0, f0
+    try:
+        a1, ap1, _g, f0 = run("raise")
+        a2, ap2, _g2, _f2 = run("absent")
+        a3, ap3, _g3, _f3 = run("legs")
+    except Exception as exc:                                     # noqa: BLE001
+        return False, "wiring slice raised %s: %s" % (type(exc).__name__, str(exc)[:100])
+    kept = a1.get("49financial") is f0 and a1.get("inflection") == {}
+    refused = a1.get("global") is None and kept and not ap1
+    absent = ap2 == [({}, None)] and (a2.get("global") or {}).get("tagged") is True
+    legs = ap3 == [({"2026-05-14": {"div": 1.0}}, "2026-10-14")] and (a3.get("global") or {}).get("tagged") is True
+    return refused and absent and legs, ("loader raises -> Global None %s, other scopes kept %s, apply calls %d | no partition -> "
+                                         "apply once with ({}, None) %s | legs -> apply once with them %s") % (
+        a1.get("global") is None, kept, len(ap1), absent, legs)
+
+
+def selftest() -> int:
+    good = _grade_wiring(WIRING_GOOD)[0]
+    bad1 = _grade_wiring(WIRING_OR_FALLBACK)[0]
+    bad2 = _grade_wiring(WIRING_REFUSE_ALL)[0]
+    ok = good and not bad1 and not bad2
+    print("  corrected wiring accepted %s; or-fallback rejected %s; refuse-all rejected %s" % (good, not bad1, not bad2))
+    print("CN-P-1 SELFTEST: %s" % ("OK" if ok else "FAILED"))
+    return 0 if ok else 1
+
+
 def seams(root: str) -> int:
     arm = _Arms()
     with open(os.path.join(root, CONSOLIDATOR), encoding="utf-8") as fh:
@@ -413,6 +525,12 @@ def seams(root: str) -> int:
     s = _call_lines(src, "_shape_timeseries", "build_all")
     arm("S3", bool(g and ld and a and s) and g[0] < ld[0] <= a[0] < s[0],
         "build_all call lines: fold %s, load %s, apply %s, first shape %s" % (g[:1], ld[:1], a[:1], s[:1]))
+
+    # S7
+    ok7, detail7 = _grade_wiring(src)
+    ctl = (_grade_wiring(WIRING_GOOD)[0], _grade_wiring(WIRING_OR_FALLBACK)[0], _grade_wiring(WIRING_REFUSE_ALL)[0])
+    arm("S7", ok7 and ctl == (True, False, False), "%s; grader proven on planted wirings (good, or-fallback, refuse-all) = %s"
+        % (detail7, ctl))
 
     # T1, T2
     try:
@@ -591,9 +709,11 @@ def oracle(root: str) -> int:
 
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    if mode == "selftest":
+        return selftest()
     fns = {"pure": pure, "seams": seams, "oracle": oracle}
     if mode not in fns:
-        print("usage: r9_cn_p_1.py pure|seams|oracle")
+        print("usage: r9_cn_p_1.py pure|seams|oracle|selftest")
         return 2
     return fns[mode](_root())
 
