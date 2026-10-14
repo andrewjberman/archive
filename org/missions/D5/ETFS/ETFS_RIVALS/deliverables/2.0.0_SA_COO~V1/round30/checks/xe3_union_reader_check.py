@@ -112,7 +112,7 @@ def test_ac4_a_void_object_is_not_an_action_row_and_a_voided_action_does_not_com
     other = [_row("B US Equity", "cash_div", "2026-05-01", 1.0, "full", dt.date(2026, 9, 1), raw="Regular Cash")]
     _put(s, "actions-full", full + other)
     _put(s, "actions-short", short)
-    void = pd.DataFrame([{"void_revision": "full", "security_id": "a us equity", "reason": "a wrong inferred split", "as_of": dt.date(2026, 10, 2)}])
+    void = pd.DataFrame([{"void_revision": "full", "security_id": "A US Equity", "reason": "a wrong inferred split", "as_of": dt.date(2026, 10, 2)}])
     buf = io.BytesIO()
     pq.write_table(pa.Table.from_pandas(void, preserve_index=False), buf)
     s.put(homes.address("rivalfunds", "etfs", "gold", "corporate_actions", f"date={D}", "actions-void-v1.parquet"), buf.getvalue())
