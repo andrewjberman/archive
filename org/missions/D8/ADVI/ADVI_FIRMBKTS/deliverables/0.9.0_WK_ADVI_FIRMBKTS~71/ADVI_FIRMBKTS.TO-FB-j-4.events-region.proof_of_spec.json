@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-j-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-4.events-region.md",
+    "group": "OTHER",
+    "vintage_commit": "90be6506d6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+    "vintage_commit": "90be6506d6",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-4.events-region.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~71",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "f0055f3942",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in f0055f3942 on wk-ADVI_FIRMBKTS-71 (LOCAL); emit_chain_complete defines EVENTS_REGION and passes --region to put-events only; not deployed to code/gold/ (deploy is FB-j-7's); no push, no AWS call, no network egress",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "the deploy of gold_dispatch.sh and the first live chain-complete put-events after it",
+      "reason": "order section 2 bounds and section 2.2 sequencing: one commit of the script only, no deploy, no push, no AWS call; the deploy is FB-j-7's, after the CTO reads the FB-j-6 dry-run sample"
+    },
+    {
+      "item": "the live bus region read: events describe-event-bus --name default against arn:aws:events:us-east-1:313476888478:event-bus/default",
+      "reason": "order section 1a.1 says the issuer reads the bus ARN live at the cut and section 2.1 bounds this cell to no AWS call; the us-east-1 value is the order's stated provenance, carried in the one-line comment, not re-measured here"
+    },
+    {
+      "item": "AWS_DEFAULT_REGION, AWS_REGION, aws configure, or any region on a call other than put-events",
+      "reason": "order section 1a.3: not in this cell; the r7_region_test R3 arm and the awsdiff bound grade their absence"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-71 && timeout 60 bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_region_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh   expect ^REGION TEST: 3 of 3 arms$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-71 && timeout 60 bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_region_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "expect": "^REGION TEST: 3 of 3 arms$",
+      "output_evidence": "PASS R1 exactly one EVENTS_REGION assignment, an overridable default\nPASS R2 the put-events call carries --region \"$EVENTS_REGION\" and no other call in the script names a region\nPASS R3 no global region export (AWS_DEFAULT_REGION and AWS_REGION are absent)\nREGION TEST: 3 of 3 arms\n(rc=0 on HEAD f0055f3942; the same 3 of 3 read on the uncommitted edit before the commit)",
+      "denominator": "3 of 3 arms (R1 one EVENTS_REGION assignment; R2 --region on put-events and no other region; R3 no global export)",
+      "status": "PASS",
+      "status_reason": "the decisive line REGION TEST: 3 of 3 arms matches the expect regex, rc=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-71 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py awsdiff --root /c/dev/wk-firmbkts-71 --file data/black_diamond/scripts/gold/gold_dispatch.sh   expect ^AWSDIFF: OK$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-71 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py awsdiff --root /c/dev/wk-firmbkts-71 --file data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "expect": "^AWSDIFF: OK$",
+      "output_evidence": "  aws lines other than the pattern unchanged: True; changed hunks 2; changed lines outside the function and the variable: []\nAWSDIFF: OK\n(rc=0 on HEAD f0055f3942; the same run before the commit read changed hunks 0 and AWSDIFF: FAIL, recorded as ADVI_FIRMBKTS-D1-W71-S1)",
+      "denominator": "2 changed hunks against the merge-base 90be6506d6; 0 changed lines outside emit_chain_complete and the EVENTS_REGION line; every other aws line byte-unchanged (True)",
+      "status": "PASS",
+      "status_reason": "AWSDIFF: OK on the committed HEAD f0055f3942, rc=0; the pre-commit FAIL is the checker reading committed HEAD and is filed as ADVI_FIRMBKTS-D1-W71-S1"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-71 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-71 --allow data/black_diamond/scripts/gold/gold_dispatch.sh --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~71/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md   expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-71 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-71 --allow data/black_diamond/scripts/gold/gold_dispatch.sh --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~71/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "  CHANGED data/black_diamond/scripts/gold/gold_dispatch.sh\nROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing\n(rc=0; read at the script commit f0055f3942, before this instance and the rows were committed)",
+      "denominator": "1 changed path against 3 allowed write surfaces (the script, this deliverables folder, the investigation file); 0 outside the allow list; 0 required missing",
+      "status": "PASS",
+      "status_reason": "the decisive line matches the expect regex, rc=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run on a scratch copy (.scratch/mutant_no_region.sh) with --region \"$EVENTS_REGION\" removed from the put-events line, per the R2 arm",
+      "expected": "2 of 3 arms with R2 FAIL, the missing region argument reproduced",
+      "observed": "PASS R1, FAIL R2 (--region lines=0), PASS R3; REGION TEST: 2 of 3 arms; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run on the uncommitted edit, and again on HEAD f0055f3942 (identical bytes)",
+      "observed": "REGION TEST: 3 of 3 arms on both runs; PASS R1-R3 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W71-S1: the AC2 awsdiff check reads FAIL on the uncommitted edit and passes only after the commit, because it compares committed HEAD with the merge-base (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W71-S2: the commit-time risk reflex printed HOLD for the script by file basename against a COT freshness claim in data/cot/scripts/gold/gold_dispatch.sh; the cited claim does not describe emit_chain_complete (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~71/ADVI_FIRMBKTS.TO-FB-j-4.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash -n data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "rc=0 after the edit"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~71 <0.9.0_WK_ADVI_FIRMBKTS~71@opal.agent>\" -F .scratch/msg_fb-j-4_script.txt -- data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "commit f0055f3942; commit-gate OK 1 of 1; surprise-row-gate OK; to-pipeline-gate OK; msg-verify MATCH"
+    },
+    {
+      "tool": "r7_emit_test.sh",
+      "invocation": "bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_emit_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "EMIT TEST: 4 of 4 arms, rc=0 (must still read 4 of 4 per order section 1b.1)"
+    }
+  ]
+}
