@@ -1,0 +1,48 @@
+# HVST-bz-10 step 6 -- THE FOUR READS. Start was 2026-10-14T00:09:03Z.
+# by 0.7.0_AE_CloudOps~ZW on site Z.
+
+## ============ +3 MINUTES, read at 2026-10-14T00:14:08Z ============
+R1 cycle_runner.log  size 632184 bytes  lastWrite 2026-10-14T00:12:00Z  age 2.13 min
+   predicate: last write under 5 minutes old -> True
+   lines since the 00:09:03Z start:
+     2026-10-14T00:09:04Z PLAN bbg security-4290f151324388ea
+     2026-10-14T00:09:04Z PLAN bbg security-2e0e09f6927d6ab0
+     2026-10-14T00:09:04Z PLAN bbg security-43a24e40093c3198
+     2026-10-14T00:09:04Z PLAN bbg security-9a85cf12d02e9a11
+     2026-10-14T00:09:04Z PLAN bbg security-bf8d3142a86af658
+     2026-10-14T00:12:00Z JOB bbg security-b0fe721e1f2a0d8b status=no_new_articles run_id=20261014T000906Z-run-82f0edcb stored=0
+   count of lines at or after 00:09Z: 40
+R2 schtasks /query /xml -> bz10_task.xml (43 lines)
+   <Command> ends pythonw.exe            -> True
+   <Arguments> contain --refresh-once    -> True
+   NEGATIVE CONTROL, same two predicates against a flag that is NOT there (--refresh-twice) -> True (reads False, so the predicates are tests)
+R3 runner process census: 1
+   PID 17696 pythonw.exe MainWindowHandle=0 children=1 conhost_children=0
+R4 newest bbg checkpoint: 20261014T000904Z.checkpoint.json  lastWrite 2026-10-14T00:12:00Z
+   done length at +3: 1
+   AttributeError|OSError|WinError lines since the start: 0
+
+## ============ +15 MINUTES, read at 2026-10-14T00:25:48Z ============
+R1 cycle_runner.log  size 632804 bytes (was 632184 at +3)  lastWrite 2026-10-14T00:25:12Z  age 0.60 min
+   predicate: a NEW line exists since the +3 read (last write was 00:12:00Z then) -> True
+   lines written AFTER the +3 read: 5
+     2026-10-14T00:14:44Z JOB bbg security-43ac880cbeff2e39 status=no_new_articles run_id=20261014T001201Z-run-a62ff6cc stored=0
+     2026-10-14T00:17:19Z JOB bbg security-3f84640fbc272aee status=no_new_articles run_id=20261014T001445Z-run-fbdc7f25 stored=0
+     2026-10-14T00:19:53Z JOB bbg security-45c4e1ba04304d2c status=no_new_articles run_id=20261014T001720Z-run-f0b19af7 stored=0
+     2026-10-14T00:22:35Z JOB bbg security-88716edce6fc0e54 status=no_new_articles run_id=20261014T001954Z-run-f35322e5 stored=0
+     2026-10-14T00:25:12Z JOB bbg security-9c8928a07b1e047e status=no_new_articles run_id=20261014T002236Z-run-f5665530 stored=0
+   R1 at +15: TRUE
+R2 (re-read) <Command> ends pythonw.exe -> True | <Arguments> contain --refresh-once -> True
+R3 (re-read) runner census 1
+   PID 17696 MainWindowHandle=0 CONHOST_CHILD=NONE
+R4 newest bbg checkpoint: 20261014T000904Z.checkpoint.json  done length at +15: 6  (was 1 at +3)
+   predicate: done grew by at least 3 between +3 and +15 -> True  (delta 5)
+   AttributeError|OSError|WinError lines since the 00:09:03Z start: 0
+   CONTROL on that error grep, CORRECTED -- the line first written here was wrong and said the opposite of
+   what it measured. The error pattern over the WHOLE log reads 0 hits, which does NOT show the pattern
+   can match; it shows the pattern has NEVER matched this file, so its 0 since the start is an UNEXERCISED
+   predicate, not a predicate that ran and found nothing. The instrument itself is shown to work by a pattern
+   that does occur: 'JOB bbg' over the same file with the same Select-String reads 1279 hits. So Select-String
+   can read this log; what is unproven is that these three error tokens would appear in it if such an error
+   happened. R4's OTHER half -- done growing 1 -> 6 -- is the arm that actually discriminates a working spawn,
+   and it is the one this leg rests on.

@@ -1,0 +1,27 @@
+# HVST-bz-10 R3 -- the runner has NO console window, with both limbs shown to discriminate
+# by 0.7.0_AE_CloudOps~ZW on site Z, 2026-10-14T00:18:50Z  (REWRITTEN -- see THE CORRECTION)
+
+SUBJECT  the live cycle runner from pin 3d88eccbc3, started 00:09:03Z by Start-ScheduledTask
+  PID 17696  pythonw.exe  SessionId 1
+  MainWindowHandle=0
+  children: 1 (pythonw.exe)
+  CONHOST_CHILD=NONE
+
+CONTROL A, the conhost limb -- a LIVE console-hosted python in the SAME session, measured not spawned
+  console app PID 8384 (python.exe) SessionId 1
+  its conhost child: PID 4916 conhost.exe (count 1)  -> CONHOST_CHILD=PRESENT
+  So on THIS box conhost.exe IS parented to its console app, and the subject's NONE is a real absence.
+  Denominator for the parenting claim: 72 conhost.exe processes live, of which 60 in session 1.
+
+CONTROL B, the window limb -- a process that genuinely owns a window
+  PID 11728 explorer  MainWindowHandle 65862  (non-zero)
+  So MainWindowHandle is not a field that reads 0 for everything; the subject's 0 is a real absence.
+
+## THE CORRECTION, recorded rather than quietly replaced
+The first write of this file used a control I SPAWNED for the purpose (python.exe -c 'time.sleep(25)') and
+then asserted, in a verdict line I wrote before reading it, that the control 'shows a conhost.exe child'.
+IT DID NOT: read 3 seconds after launch it had 0 children, and by the time I re-read it the process had
+exited, so it proved nothing in either direction. A process started from this non-interactive agent context
+gets no console host of its own, so that control could not have discriminated however long I had waited.
+Both controls above are measured on processes that were already live. The subject's two readings did not
+change; what changed is that they are now actually controlled.
