@@ -1,8 +1,3 @@
-# DRAFT -- NOT ISSUED. Target path at issuance: org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-i-1.aua-trend-grouping.md
-# Round 7 (FWD-9, PRD v2.15 @567018c9e5). The checks move from round7/draft/checks/ to round7/checks/ (same names) at issuance.
-# Revised by a fork of 2.0.0_SA_COO~D1, 2026-10-13 ~20:0xZ: FULL cell (no longer "Variant A") on the CTO's rulings of msgs 5086-5088:
-# ETF = pfde + the carve-outs, Other AUA the true remainder, ALT stays vermilion500, the Client chips ship AS-OF FIRST (the history route is its own cell).
-
 # MDPF_CANON task order -- `CN-i-1` -- THE AUA TREND GROUPS ITS CUSTOM MODELS INTO ONE SERIES AND DRAWS THE STRATEGY GROUPS AS CHIPS IN THE TOTAL ASSETS COLOURS (FWD-9; PORTAL DEV CANDIDATE)
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
@@ -203,7 +198,7 @@ files comes to `1.0.0_SA_CTO~DELL1` for review BEFORE any DEV landing, with the 
 Andrew's card with the before/after, beside the FWD-3 `/portfolios` card, which carries "Client chips: 21 of 495 dates, from 2026-08-27" and the Other AUA
 remainder at the frontier. The `--portal-ref` the issuance names is portal `DEV` HEAD at the cut (the `fanout:` line carries `portal_ref:`).
 
-**RISK CLASS:** `LOCAL` for this cell (portal/src is the LOCAL floor, GATE xii; the candidate lands on portal DEV only); client-facing at the PROD push.
+**RISK CLASS:** `LOCAL` for this cell (portal/src is the LOCAL floor, GATE xii). LANDING (CLAUDE.md Portal, fcdfc34843, 2026-10-14): DEV is written only by `.tools/portal-merge-forward.sh cand/<box>/<slug>` on an approved row, never by this order; a client-facing candidate's approver is Andrew, an Opal-internal one's the building box's CTO; PROD only by a chosen-set promote.
 `worker` (not light): about 150 product lines over three files (one new, about 70), several anchors, two data-point sites and a colour contract.
 
 **WHAT CHANGED SINCE THE FIRST DRAFT (the CTO's rulings, measured):** Fork 2 ruled on the issuer's REC: ETF = pfde + carve-outs, Other AUA the true remainder,
