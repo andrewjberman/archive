@@ -123,3 +123,23 @@ email prefix rather than any hardcoded id.
 **DynamoDB's `ItemCount` was not used as the denominator.** It refreshes roughly every six hours and
 read 1493 while a consistent scan read 1504, then 1510 minutes later. The scan's own count is the
 denominator, and it is printed.
+
+## 8. A constraint on the candidates that the order's step 3 does not state
+
+`prepare()` **refuses** a candidate with no resolvable email: it takes the candidate's own
+`email`/`emails`, else the STORED profile's, and with neither it raises `CandidateRejected` -- row
+W3-S22, AMENDMENT A1, so that no email-less grant can activate without a deny record. The refusal
+happens in `prepare`, before `activate` is ever reached, so nothing is written.
+
+**Both of this order's records are CREATES with no stored profile** (section 7: Andrew and bbg hold
+none), so neither has a stored email to fall back on. Therefore **each candidate must itself carry
+the email**, or Phase A's own `prepare` call fails and Phase B could never run.
+
+That has a consequence for where identifiers live. The email is an identifier, so it goes in the
+candidate files under `X` (`%LOCALAPPDATA%/opal/og-salt/mg1/`) and never into `W`. The ask will
+therefore describe each candidate's `emails` field by its PRESENCE and its effect -- one
+`email_deny` row put per alias in the same transaction -- and not by value.
+
+Noted here rather than discovered at the `prepare` call, because the natural reading of step 3 ("the
+template is the store's own v2.2-width grant") is that identity means tid and oid alone; the writer
+requires a third field, and only for the create case.
