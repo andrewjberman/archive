@@ -55,7 +55,7 @@ partitions -- `operator_audit` 8, `principal_profile` 4, `data_entitlement` 4, `
 
 | pk_hash | sk | status | revision | grant_revision | kind |
 |---|---|---|---|---|---|
-| `2c61471b14` | `principal_…` | **active** | 4 | 4 | restricted |
+| `2c61471b14` | `principal_...` | **active** | 4 | 4 | restricted |
 | `aa4d7c689c` | `PROFILE` | pending | 1 | -- | -- |
 | `3bf9434760` | `PROFILE` | pending | 2 | -- | -- |
 | `57c9cb5067` | `PROFILE` | revoked | 2 | -- | -- |
