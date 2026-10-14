@@ -47,9 +47,10 @@ SIG = ["rows", "membership", "household_id", "opening_anchor", "as_of", "table_d
 W_ACCOUNT = "Account %d of %d has no measured return on %s in this period, so the household return for this period is not shown."
 W_NOROW = "The household has no row on %s in this period, so the household return for this period is not shown."
 W_INSUF = "This household did not exist at the start of this period."
+W_NODAY = "This household has no measured day in this period yet."
 FORMS = {"source_break_account": "Account <k> of <N> has no measured return on <days> in this period, so the household return for this period is not shown.",
          "source_break_household_no_row": "The household has no row on <days> in this period, so the household return for this period is not shown.",
-         "insufficient_history": W_INSUF}
+         "insufficient_history": W_INSUF, "insufficient_history_no_day": W_NODAY}
 KINDS2 = ("account_closed_before_as_of", "account_null_return", "account_row_missing_inside_life", "household_no_row")
 ISO = re.compile(r"\d{4}-\d{2}-\d{2}")
 EPS = 1e-9
@@ -74,6 +75,8 @@ def expected_window(rows, membership, hid, anchor, as_of, table_days, fillin=Fal
         return {"figure": None, "absent": {"absent": W_INSUF, "kind": "INSUFFICIENT_HISTORY"}, "unmeasured": {}, "days_in_window": 0}
     lo = anchor if anchor is not None else first
     days = [d for d in table_days if lo < d <= as_of]
+    if not days:
+        return {"figure": None, "absent": {"absent": W_NODAY, "kind": "INSUFFICIENT_HISTORY"}, "unmeasured": {}, "days_in_window": 0}
     unmeasured, norow, prod, mprod = {}, 0, 1.0, 1.0
     for d in days:
         if d not in by:
@@ -134,6 +137,8 @@ def synthetic():
             r = None if i in (0, 3, 4) else 0.001 * (i + 1)
             rows.append({"account_id": a, "business_date": d[i], "market_value_eod": 100.0, "external_flow": 0.0, "total_return_daily": r})
         mem[a] = "H4"
+    rows.append({"account_id": "K", "business_date": d[5], "market_value_eod": 150.0, "external_flow": 0.0, "total_return_daily": None})
+    mem["K"] = "H5"
     return rows, mem, d
 
 
@@ -157,7 +162,7 @@ def check_function(mod):
         return f(json.loads(json.dumps(rows)), dict(mem), hid, anchor, as_of, list(td))
     cases = (("H1", d[0], d[5], "a planted account gap"), ("H1", d[0], d[3], "a window before the gap"), ("H1", "2026-01-04", d[5], "a household that began after the anchor"),
              ("H2", d[0], d[5], "a one-account household with a linked day"), ("H3", d[0], d[3], "a day with no household row"), ("H4", d[0], d[5], "a tie of two accounts over two days"),
-             ("H1", None, d[5], "the since-inception window"))
+             ("H1", None, d[5], "the since-inception window"), ("H5", None, d[5], "a household whose only date is the as_of day"))
     for hid, anchor, as_of, why in cases:
         want = expected_window(rows, mem, hid, anchor, as_of, td)
         got = run(hid, anchor, as_of)
@@ -169,6 +174,8 @@ def check_function(mod):
     need(tie["absent"] and tie["absent"]["absent"] == W_ACCOUNT % (1, 2, "2 days") and tie["unmeasured"] == {1: 2, 2: 2}, "a tie names the lowest position and the plural '2 days'")
     nr = run("H3", d[0], d[3])
     need(nr["absent"] and nr["absent"]["absent"] == W_NOROW % "1 day", "a day with no household row reads 'The household has no row on 1 day in this period, ...'")
+    nd = run("H5", None, d[5])
+    need(nd["figure"] is None and nd["absent"] == {"absent": W_NODAY, "kind": "INSUFFICIENT_HISTORY"} and nd["days_in_window"] == 0, "a window with no day (a household whose only date is the as_of day, since inception) reads INSUFFICIENT_HISTORY with the words %r, never a figure of 0" % W_NODAY)
     ih = run("H1", "2026-01-04", d[5])
     need(ih["figure"] is None and ih["absent"] == {"absent": W_INSUF, "kind": "INSUFFICIENT_HISTORY"}, "a household that began after the anchor reads INSUFFICIENT_HISTORY with its words")
     for hid, anchor, as_of in (("H1", d[0], d[5]), ("H4", d[0], d[5]), ("H3", d[0], d[3])):
@@ -234,6 +241,9 @@ def recount(table=None):
                 continue
             lo = anchor if anchor is not None else first
             n_wd = bisect.bisect_right(days, as_of) - bisect.bisect_right(days, lo)
+            if n_wd == 0:
+                c["insufficient_history"] += 1
+                continue
             n_h = bisect.bisect_right(hd, as_of) - bisect.bisect_right(hd, lo)
             b = sorted(bad.get(h, []))
             n_b = bisect.bisect_right(b, as_of) - bisect.bisect_right(b, lo)
