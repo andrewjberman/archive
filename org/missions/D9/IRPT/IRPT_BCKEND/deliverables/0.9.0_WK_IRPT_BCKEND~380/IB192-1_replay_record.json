@@ -1,0 +1,158 @@
+{
+  "base_commit": "201e7e9c273e8274c0a4ea1ad1aa0b205f69a079",
+  "harness": "release_count_harness.py",
+  "firms": {
+    "49financial": {
+      "pinned_source_date": "2026-10-12",
+      "run_a": {
+        "movers_canonical": 32,
+        "movers_fallback": 0,
+        "canonical_tickers": [
+          "SNOXX",
+          "SNSXX",
+          "SNVXX",
+          "SWVXX"
+        ],
+        "gate_before": "PUBLISHED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": [],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 0
+      },
+      "run_b": {
+        "movers_canonical": 32,
+        "movers_fallback": 0,
+        "canonical_tickers": [
+          "SNOXX",
+          "SNSXX",
+          "SNVXX",
+          "SWVXX"
+        ],
+        "gate_before": "PUBLISHED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": [],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 0
+      },
+      "receipts_digest": "00b675c644c624257a4c5fc4fce14698fdf3c262d64bf2843a6630dc7bbfb0df",
+      "matches_packet": true,
+      "deviations_from_packet": [],
+      "note": "Matches the packet on all five fields. RUN A and RUN B agree on every field and on the receipts digest; RUN B read no object outside RUN A's pinned set. Canonical movers are the four public symbols listed in run_a. Build plus gate about 5 to 7 minutes per run (inside the 25 minute bound). The packet's candidate node count was not compared (the harness counts SECURITY nodes only)."
+    },
+    "cottonwood": {
+      "pinned_source_date": "2026-10-12",
+      "run_a": {
+        "movers_canonical": 38,
+        "movers_fallback": 211,
+        "canonical_tickers": [
+          "FDRXX",
+          "SWVXX",
+          "VUSXX"
+        ],
+        "gate_before": "REFUSED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": [
+          "account_lost"
+        ],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 1
+      },
+      "run_b": {
+        "movers_canonical": 38,
+        "movers_fallback": 211,
+        "canonical_tickers": [
+          "FDRXX",
+          "SWVXX",
+          "VUSXX"
+        ],
+        "gate_before": "REFUSED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": [
+          "account_lost"
+        ],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 1
+      },
+      "receipts_digest": "daeb6a4daa4b1630681c6d9012e2b9785fbf3bb1989b25f42ba9c13667c20eaf",
+      "matches_packet": true,
+      "deviations_from_packet": [],
+      "note": "Matches the packet on all five fields: 38 canonical, 211 fallback, REFUSED before on account_lost alone, PUBLISHED after, one lost account listed (a count; the identifier stayed in memory). RUN A and RUN B agree exactly and the receipts digest is equal. The served publication was read live in each run (not pinned); both gate runs read the same served state. Build plus gate about 6.5 to 7 minutes per run."
+    },
+    "inflection": {
+      "pinned_source_date": "2026-10-12",
+      "run_a": {
+        "movers_canonical": 774,
+        "movers_fallback": 67,
+        "canonical_tickers": [
+          "FDRXX",
+          "SPAXX"
+        ],
+        "gate_before": "REFUSED",
+        "gate_after": "REFUSED",
+        "conditions_before": [
+          "source_frontier_older"
+        ],
+        "conditions_after": [
+          "source_frontier_older"
+        ],
+        "lost_accounts_listed_after": 0
+      },
+      "run_b": {
+        "movers_canonical": 774,
+        "movers_fallback": 67,
+        "canonical_tickers": [
+          "FDRXX",
+          "SPAXX"
+        ],
+        "gate_before": "REFUSED",
+        "gate_after": "REFUSED",
+        "conditions_before": [
+          "source_frontier_older"
+        ],
+        "conditions_after": [
+          "source_frontier_older"
+        ],
+        "lost_accounts_listed_after": 0
+      },
+      "receipts_digest": "cd8df5257f341e408f51e36600a5998acd2bc31f8f9deb3c8592272bf5f29336",
+      "matches_packet": false,
+      "deviations_from_packet": [
+        "gate_before",
+        "gate_after"
+      ],
+      "note": "Movers match the packet (774 canonical, 67 fallback). Both gate runs REFUSED on source_frontier_older, not PUBLISHED as the packet records, so gate_before and gate_after deviate. Cause, read from the producer at HEAD: the candidate business date is the valuation date, the prior trading day of the custody (accounts) partition (holdings_inf.py build_inf_meshed, valuation_date = prev_trading_day(custody_date)). The pin 2026-10-12 selects the 2026-10-12 custody partition, so the candidate is dated 2026-10-09, one trading day behind the served frontier (the packet's served read was 2026-10-12). The packet's 2026-10-12 candidate implies a 2026-10-13 custody partition at its measurement. The gate difference follows from the pin, not from a changed rule; a pin of 2026-10-13 was not run (not required by the order). RUN A and RUN B agree exactly on every field and on the digest. Build plus gate about 4 minutes per run."
+    }
+  },
+  "first_fire_check": {
+    "fire_date": "2026-10-14",
+    "t_minus_1": "2026-10-13",
+    "newest_candidate_dates": {
+      "49financial": "2026-10-13",
+      "cottonwood": "2026-10-12",
+      "inflection": "2026-10-13"
+    },
+    "all_equal_to_t_minus_1": false
+  },
+  "notes": [
+    "BASE AND CODE. base_commit is the worktree HEAD before the first commit of this order (201e7e9c27). The producer folder, the investor_reporting holdings bundle folder and lib/trading_calendar.py are byte-identical to the packet's base 49467335d2 (git diff over the three paths is empty; holdings_snapshot.py blob 3a19dcf5912798f7d94e9756ae04f64dd2ce7ea0, the same blob the packet names). So the code measured here is the code the packet measured.",
+    "HARNESS. release_count_harness.py imports the producer from this tree and calls build_snapshot over one VersionedInputs per firm: once as the code stands, then once with apply_cash_rule replaced by an identity function (restored in a finally). A mover is a SECURITY node whose asset_class differs by node_id (no unmatched node and no duplicate node_id for any firm). The layer of each mover is the producer's classify_security class_source re-run on its display symbol, description and security id; the re-run asset_class equals the built node's for every mover (rerun_asset_class_mismatch 0, all three firms). Movers on another layer: 0.",
+    "GATE. gate_before is evaluate_publish_gate on the with-rule candidate with the pre-repair marks rule, written in the harness: every landed directory entry counts, a missing termination indicator counts UNKNOWN, all UNKNOWN and the directory non-empty. gate_after uses the producer's directory_marks_no_closures and closed_account_ids. The served side is read with HoldingsPublication.begin() and served_publication() (read calls only); the served side is live, not pinned.",
+    "PINNING. RUN A: each firm at as_of 2026-10-12 (the pin is an input; the order's source date). RUN B: the identical arguments, with VersionedInputs._refs pre-seeded from RUN A's receipts for that firm (a private attribute of the producer's reader; the seeding is the one addition to the arguments). The producer's reader then reads each object at RUN A's version and raises if its bytes differ; RUN B read zero objects outside RUN A's set for every firm. RUN A and RUN B agree exactly on movers, canonical tickers, gate outcomes, conditions, listed lost accounts and the receipts digest for all three firms.",
+    "DIGEST. receipts_digest is the sha256 of the canonical JSON (sorted keys, compact separators, ASCII) of VersionedInputs.receipts() for RUN A. No object key, version id or account identifier is recorded in this file.",
+    "PACKET COMPARISON. 49financial and cottonwood match the signed packet on every field (matches_packet true). inflection: movers match; gate_before and gate_after deviate (REFUSED, not PUBLISHED). Each deviation is a measurement and is explained in its firm note. The packet's stop rule is not applied here; the order asks only for the comparison.",
+    "FIRST FIRE CHECK (fire 2026-10-14). t_minus_1 is lib/trading_calendar.prev_trading_day(2026-10-14), computed with the calendar's hardcoded NYSE fallback (pandas_market_calendars is absent on this device; the library prints a WARN line on stderr). The cutoff select_business_date(2026-10-14) returns 2026-10-14 (a trading day returns itself), the same pattern as surprise row IRPT_BCKEND-D2-W379-S3. The newest candidate date is each firm's built clocks.business_date at that cutoff, no replay. Cottonwood reads 2026-10-12 (one trading day short of t_minus_1); 49financial and inflection read 2026-10-13.",
+    "FIRST FIRE CHECK, TWO READINGS. RUN A's date check (completed about 11:24Z) REFUSED for inflection: the producer's guard 'positions and accounts snapshots are not the same custody date' fired, because the 2026-10-14 accounts partition existed while the positions partition still read 2026-10-13. A read-only partition diagnosis about twenty minutes later showed the 2026-10-14 positions partition present; RUN B's date check (completed about 11:49Z) then built inflection at the cutoff and read 2026-10-13. The record carries RUN B's reading, which is the state at this record's measurement. The earlier refusal is filed as surprise row IRPT_BCKEND-D2-W380-S2; the state change is part of that row.",
+    "CALENDAR. The check recomputes t_minus_1 from lib/trading_calendar.py at HEAD; all_equal_to_t_minus_1 is false because cottonwood reads 2026-10-12.",
+    "TIMING. Every build and gate ran inside the 25 minute bound: RUN A per firm 250 to 406 seconds and RUN B per firm 230 to 400 seconds, measured over the builds and the gate only (not the date check). The three firms ran as three separate processes, one firm each, sequentially, bounded by timeout 1500 each.",
+    "WHAT WAS NOT READ. The bundle member contents; the publish_refusal object body; any Lambda or SSM configuration; the IAM policies; the release pin of the producer blob beyond the blob hash above; any holding value, quantity or position; any account identifier (none was written to a tracked file or to this record). Canonical tickers are public fund symbols. The harness's stdout names no account and no holding.",
+    "COUNTERS. Read-only by construction: the harness holds no write, publish or invoke call (its text is checked by IB192-1-AC1 and was grepped before the first run); it used the caller's own boto3 identity for get, list and head calls only. uploaded false; functions_invoked, sign_ins_made, aws_writes_made, rows_written, figures_written and vendor_requests_sent are 0.",
+    "SCRATCH. The per-run JSON outputs, the receipts files and the run logs sit outside the worktree in the scratch folder and are deleted at the end of this order."
+  ],
+  "uploaded": false,
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
