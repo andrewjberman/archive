@@ -1,0 +1,46 @@
+{
+  "fire": {
+    "fire_date": "2026-10-09",
+    "response_code": 137,
+    "plugin_seconds": 310
+  },
+  "verdict": "UNREADABLE",
+  "verdict_basis": "The runner host that ran the 2026-10-09 fire is stopped (user-initiated shutdown on 2026-10-13) and not registered Online in SSM, so its kernel record could not be read; no host command was sent.",
+  "reads": [
+    {
+      "source": "ssm list-commands, 2026-10-08 to 2026-10-10 window, paginated to the end",
+      "result": "256 commands listed; exactly 1 carries the Comment prefix 'irpt holdings refresh 49financial 2026-10-09', status Failed, one target"
+    },
+    {
+      "source": "ssm list-command-invocations --details for that command",
+      "result": "1 invocation, status TimedOut / ExecutionTimedOut; plugin aws:runShellScript TimedOut / ExecutionTimedOut, response code 137, plugin start 14:15:24Z, finish 14:20:34Z (about 310 s of the 3600 s window); the script's stderr tail reads 'Killed' against the python3 holdings_snapshot.py --firms 49financial --upload line"
+    },
+    {
+      "source": "ec2 describe-instances / describe-instance-types for the host",
+      "result": "t3.medium, 4 GiB class; state stopped; StateTransitionReason 'User initiated (2026-10-13 17:21:18 GMT)'; last launch 2026-10-13T13:30:36Z"
+    },
+    {
+      "source": "cloudwatch list-metrics, namespace CWAgent and every namespace, dimension InstanceId = the host",
+      "result": "CWAgent: 0 metrics, so no memory metric is retained; all namespaces: 29 metrics, AWS/EC2 and AWS/EBS only, none a memory metric (CPU, network, EBS, credit and status-check names)"
+    },
+    {
+      "source": "ssm describe-instance-information filtered to the host",
+      "result": "no row returned: the host is not registered Online; the order's rule gives UNREADABLE and sends nothing"
+    }
+  ],
+  "memory_read_for_release_fire": false,
+  "host_commands": [],
+  "host_commands_sent": 0,
+  "notes": [
+    "The verdict rests on the host's state at 2026-10-14 about 12:4xZ: stopped since 2026-10-13 17:21Z and absent from SSM's instance list. Nothing was started, restarted or worked around.",
+    "NOT read: the kernel log, the journal and dmesg for the 14:15Z to 14:20Z window on 2026-10-09; whether journald persists across the stop and start cycles this host runs; the sender of the kill. 'Killed' with code 137 is consistent with an out-of-memory kill on a 4 GiB class host but also with any SIGKILL, and this record does not choose between them.",
+    "No memory metric exists for the host in any CloudWatch namespace, so no peak memory percent can be stated for the window; that is a finding about retention, not a reading of zero.",
+    "The host is started for the scheduled holdings fires (a launch on 2026-10-13 at 13:30Z is recorded), so it will be Online again around the next fire; whether a read then can still see the 2026-10-09 window depends on journal persistence and is the issuer's to order.",
+    "The instance id, the command id and every pid are kept out of this file by the order."
+  ],
+  "functions_invoked": 0,
+  "aws_writes_made": 0,
+  "files_deleted": 0,
+  "service_restarts": 0,
+  "host_state_changes": 0
+}
