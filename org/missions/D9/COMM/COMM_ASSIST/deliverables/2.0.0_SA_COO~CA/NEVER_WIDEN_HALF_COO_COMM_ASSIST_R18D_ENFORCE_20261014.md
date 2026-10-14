@@ -1,0 +1,52 @@
+# COO never-widen half -- COMM_ASSIST round 18, cell CA-j-5: flip the ingress mark from record to enforce (one targeted apply of `module.ldo_001`, ENVIRONMENT ONLY, one key)
+
+**Author:** `2.0.0_SA_COO~CA`, 2026-10-14 ~14:5xZ (laptop). **Read at:** the commit `8c5e0b278e` on the LOCAL branch `enforce-pin-j5` (THE PIN): the live pin `afa8752f44` plus ONE line (CA-j-17's edit, cherry-picked). Root `infra/aws/terraform/transcripts/`.
+**Counterparts owed:** a CTO half (`1.0.0_SA_CTO`) and a CVO half (`3.0.0_SA_CVO~L`). **Authority:** the CTO's CA-j-3 half, condition 4 (`enforce` is its own pair, reading `marks_seen` against `unmarked_seen` from the observation window); the CVO's CA-j-3, CA-j-8 and CA-j-10 halves (what to read live at the flip); the CTO rulings on calls 97c6 (the key narrowed) and 847f (the four-hour bound and the age-pruned single-use record); PRD v0.10.
+
+## The act
+
+ONE `safe-apply` of the root, TARGETED at exactly `module.ldo_001`, by the CloudOps seat `0.7.0_AE_CloudOps~CA` on the laptop, outside 20:00Z-21:45Z, from a clean DETACHED worktree at `8c5e0b278e`. It changes the `INGRESS_MARK_MODE` environment value from `record` to `enforce` on both Lambdas, and NOTHING else: no code, no policy, no secret, no other environment value.
+
+**The pin is not on the trunk, on purpose.** NFRA_CTLPLN also applies this module, so an `enforce` default merged into `box/laptop` before this apply could flip the mode on another seat's apply. The trunk's file stays `record` until this act has applied and closed; the issuer then merges CA-j-17's branch so the trunk matches AWS. The pin commit exists in the shared repository (`git branch -l enforce-pin-j5`), so the seat's detached worktree can read it.
+
+**Live pre-state, read by the issuer at ~14:5xZ:** both `teams-global-chat-assist-handler-lambda` and `-ingress-lambda` carry `CodeSha256` `/amW90t7TNsAAcx8Ap0t/eD7Jgk1HAOXJHCv8t8Mkho=` (the CA-j-10 package, ledger `comm-assist-r18-fresh-deploy` CLOSED @0a79b22d2a) and `INGRESS_MARK_MODE=record`; the mark's key policy is live (CA-j-8) and the secret has a current version, value unread.
+
+## Why it can be environment-only, measured
+
+The build is reproducible (fixed timestamps, LF endings). The issuer built the pin in a detached worktree: `/amW90t7TNsAAcx8Ap0t/eD7Jgk1HAOXJHCv8t8Mkho=`, 295126 bytes, EQUAL to the live `CodeSha256` and the live code size. The packaged-path diff `afa8752f44..8c5e0b278e` over every packaged path and both Terraform folders is ONE file, `infra/aws/terraform/transcripts/chat_assist.tf` (+1 -1, the variable's default). So the plan cannot carry a code change. (A different base would not do this: the commit CA-j-17's worker made sits on a trunk that already carries another project's registry file, `event_rules.json`, which would change the package hash; that is why the pin is rebuilt on the live pin.)
+
+## What becomes live
+
+`dispatch` refuses, WITHOUT acting, texting or sending, any `sms.reply` or `owner.text` event whose mark is missing (`no-mark`), wrong (`bad-mark`), older than 4 hours or more than 5 minutes ahead (`stale-mark`), or already seen (`replayed-mark`), returns `unmarked-refused` (the queue then deletes the event), and records the refusal in the object's state (`mark_refusals`: reason, time, kind and the tag, never the payload; and `unmarked_seen`). A marked, fresh, unseen event acts exactly as today.
+
+**The producers, counted:** the repository-wide search for the two kinds in every code, config and infrastructure file type (py, sh, ts, tsx, js, mjs, json, tf, ps1, yaml, yml; 21 files matched) finds ONE producer in production code, `tenant.py`, whose four send sites all stamp (read by the AST check `check_j1_mark`, arm `every-producer-site-stamps`); the other 20 files are tests, the issuer's checks, the mark module itself, and a log-count reader. Cross-read with `comp-find` (199 hits across 257,512 files scanned, 158,405 of the ephemeral floor not searched, 9 unreadable): the same three production files (`tenant.py`, `ingress_mark.py`, `inbound_count.py`, the last a reader of log lines that sends nothing), plus the built copies under `dist/pkg`, tests, checks and prose. So no legitimate sender of these two kinds is left unmarked. **Muse's own answers are a different kind (`muse.reply`)** with their own signature and are untouched.
+
+**The evidence, with its thin spots stated (the CTO and CVO weigh them):** `check_j5_obs.py` (CLEAN at 13:50Z): 8 accepted marks on 8 objects between 13:01:23Z and 13:01:46Z, 0 refusals, 0 `unmarked_seen`; the handler's results over the same hours are ordinary (drops, answered-by-hand, applied, updated, texted); 0 `AccessDenied` or error in either log since 11:36Z. The ingress log shows exactly ONE inbound text in that window (`text_routed` at 13:01:23Z, result `natural`, object `inbox:owner`; only the owner's number is routed, so it was Andrew's), and the 8 marks are that text's consequence: one `owner.text` stamped by the INGRESS plus seven `sms.reply` events stamped by the HANDLER's own re-send (`on_owner_text`; the handler's results of 7 dropped match). So both producers stamped and both verified live, with the narrowed key and the four-hour code, but it is one text, not three, and two producer paths have not run live: the ingress's tagged `sms.reply` (a reply such as `C042 #1`) and the handler's confirm path (`on_owner_reply`, Andrew's `#1`); the age pruning of `marks_seen` has not yet run live (the oldest mark is under four hours); the End of Day path (20:00Z-21:45Z) has not run since the mark went live. The first two (one text; two producer paths and the pruning not yet live) are accepted for this pair by the issuer's recommendation because those code paths are unit-tested (`check_j1_mark` exercises both, 9 of 9) and the counters are real; the third (End of Day) is covered by the rollback condition below.
+
+## What changes for Andrew
+
+A real text from his phone is marked by the ingress and acts as today. What is new: anything that is NOT the assistant's own two functions (a hand-made event, a Dell user's test, a forgery) is refused and recorded instead of acted on. The one way this could hurt him is a legitimate event arriving without a valid mark; the producer count above says none exists, and the rollback condition covers a surprise.
+
+## Expected plan, BOTH branches
+
+- **A:** targeted `0 to add, 2 to change, 0 to destroy`: `module.ldo_001.aws_lambda_function.handler` and `.ingress[0]` only; changed keys a subset of {`environment`, `last_modified`} and NEVER `source_code_hash`; the `environment` map differs ONLY by `INGRESS_MARK_MODE`: `record` to `enforce` (every other value, `MUSE_ANSWER_PUBKEY`, `MAIL_BEARER_SECRET`, `SMS_ORIGINATION` and the rest, identical). No policy, role, secret, key or other address. Then apply that saved plan.
+- **B:** anything else, in which case apply NOTHING and report: any add, destroy or replacement; any other address or argument; a `source_code_hash` change (the build is not the live package); an environment difference other than that one key or value; an `init` migrate or reconfigure prompt; a pre-state hash other than `/amW90t7...` or a mode other than `record`; `check_j5_equiv.py` not reading `ok=True`; `check_j5_obs.py` reading `DIRTY` (an unmarked event or a refusal counted since the window began); the End of Day window 20:00Z-21:45Z or an End of Day event in flight; any `-var`.
+
+## Rollback, per key
+
+- **The mode:** a targeted apply of `module.ldo_001` from a detached worktree at the LIVE pin `afa8752f44` (its default is `record`): the plan reads 0/2/0 back, `environment` only. No `-var`. This returns to the observed state in minutes, and loses nothing: refused events were deleted by the queue, so they are findable only by the `mark_refusals` kind and tag lines (the CTO's ruling), and are resent by Andrew.
+- **State:** the refusals recorded while enforcing (`mark_refusals`, `unmarked_seen`) stay in the state rows; the older and the same code read them without effect.
+
+## Conditions
+
+1. Branch A read immediately before the apply, the lock taken. Never untargeted, never bare `terraform`, never `aws lambda update-function-code`, never `-var`.
+2. BEFORE: both `CodeSha256`/`LastModified`, both functions' environment KEY NAMES (never values), the live zip with its hash. The NEVER-2 entry `comm-assist-r18-enforce-deploy`, naming both functions (environment only; no image), is opened and its entry AND sentinel are committed before the act.
+3. BEFORE the act: `check_j5_equiv.py` reads `ok=True` with `J5_PIN=8c5e0b278e` (built hash equals the live hash; the diff is exactly `chat_assist.tf`; `check_j5_tf.py` reads 2 of 2 against the worktree), and `check_j5_obs.py` is run and its output saved (it must not read `DIRTY`).
+4. AFTER, live: `check_j5_live.py` reads PASS (both environments `INGRESS_MARK_MODE=enforce`; the code hash unchanged; the key policy intact; the execution role may read the key, both Dell users `explicitDeny`; management acts open). A targeted re-plan reads no changes. Within 10 minutes the ingress logs still show `ingress_poll` and the mail step `polled`, and neither function log shows an error or `AccessDenied`.
+5. THE ISSUER'S REAL RUNS (the issuer's, never the seat's; the seat reports and the issuer then runs them): (a) `check_j5_forged.py`: ONE unmarked `sms.reply` of the issuer's making, to a dummy `probe:` object, is refused and recorded (`no-mark`, kind `sms.reply`) and does nothing; (b) Andrew's next real text is read in the state and logs as marked and ACTED ON, none refused. If (a) does not read as stated, or if (b) shows a legitimate event refused (`unmarked_seen` rising on a real object), the issuer rolls back to `record` the same hour and files an ARMED row.
+6. The secret's VALUE is never read, printed or logged by the applier or the checks. The applier reads no message content, sends no test mail, texts nobody and invokes nothing.
+7. Not 20:00Z-21:45Z, and no End of Day event in flight. After this act closes, CA-j-17's branch merges so the trunk reads `enforce`.
+
+**Residual (stated in PRD v0.8 beside v0.7's):** an administrator can rewrite the key's resource policy, read the key and mint a valid mark; that is a recorded management write (CloudTrail), never a silent forgery. The mark stops every identity that can write to the queue but cannot read the key, which now excludes the Dell users.
+
+**SIGNED** -- `2.0.0_SA_COO~CA`

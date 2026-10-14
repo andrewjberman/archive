@@ -1,0 +1,66 @@
+{
+  "schema": "AR319-OWNER-FIX.v1",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-319",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~129",
+  "cell": "AR-y-319",
+  "cause_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~128/r40/COMPOSITION_CAUSE.json (AR-y-318 record: step 2, docs/contracts/investor-reporting/v1/RequestComposition.schema.json line 599, field resolved.owner.home_firm_id, principal_class FIRM_ADVISOR)",
+  "base_commit": "1b9c92aa4a",
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/_scope/interactive_access.py (MODIFIED: writer, 4 lines added in prospect_owner)",
+    "infra/aws/lambda/investor-reporting/_scope/tests/test_ordinary_owner_composition.py (NEW: tests a, b, c, e)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ordinary_owner_legacy_row.py (NEW: step-2 refusal pins for a home-bearing owner, resolved.owner and resolved.input_owner, plus the fixed shape passing five steps)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~129/mutant_check.py (NEW)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~129/regress_check.py (NEW)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~129/r40/opal_owner_bytes.py (NEW)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~129/r40/OWNER_FIX.json (NEW)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (rows IRPT_ANLREQ-D2-W129-S1 to S4 appended)"
+  ],
+  "writer_change": "_scope/interactive_access.py prospect_owner(): after the existing actor-minus-entitlement dict is built and before the schema_version/firm_id update and the _fingerprint(owner) call, home_firm_id is removed unless principal_class == OPAL_GLOBAL. The fingerprint is computed over the owner as stored (unchanged call, now after the omission). current() and the principal it returns keep home_firm_id; the ordinary-viewer authorizer (_scope/ordinary_viewer.py condition 2) and its 43 tests are untouched. No schema edit.",
+  "reader_change": "NONE BUILT. The BLOCKING row was not filed: the premise of item 2 did not hold on the measured evidence (the stored D1 input owner carries no home_firm_id per worker 128 session_log.txt lines 11 and 21; the served CREATE path for a non-internal subject stores resolve_prospect_owner's owner, which has none; served.py lines 1017 and 1043-1045). The home_firm_id on the refused composition was on the REQUEST owner, which the writer closes. The open question (whether any STORED FIRM_ADVISOR owner carries home_firm_id) is not read here; it is row IRPT_ANLREQ-D2-W129-S1 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2). If such an owner exists, the reader needs composition_admission.py, prospect_submission.py line 107 and intake/uploads.py line 681, all outside the grant, and the row becomes BLOCKING.",
+  "tests": {
+    "added": 7,
+    "passed": 7,
+    "failed": 0,
+    "by_file": {
+      "_scope/tests/test_ordinary_owner_composition.py": {"added": 4, "passed": 4, "failed": 0, "cases": ["a", "b", "c", "e"]},
+      "ycharts/generate/tests/test_ordinary_owner_legacy_row.py": {"added": 3, "passed": 3, "failed": 0, "cases": ["fixed shape passes five steps", "d pin: resolved.owner refused at step 2", "d pin: resolved.input_owner refused at step 2"]}
+    }
+  },
+  "before_arm": {
+    "method": "base tree = git archive of HEAD 1b9c92aa4a for infra/aws/lambda/investor-reporting and docs/contracts/investor-reporting in a scratch folder, with the new test files copied in; the source change is absent there",
+    "_scope/tests/test_ordinary_owner_composition.py": {"failed": 2, "passed": 2, "failing": ["test_a_firm_advisor_owner_has_no_home_firm_id_and_fingerprints_the_stored_owner", "test_c_the_schema_owner_admits_a_firm_advisor_without_home_firm_id_and_refuses_it_with_one"], "passing": ["test_b_an_opal_global_owner_keeps_home_firm_id_and_its_exact_bytes", "test_e_the_owning_advisor_is_admitted_and_another_advisor_or_firm_is_refused"]},
+    "ycharts/generate/tests/test_ordinary_owner_legacy_row.py": {"failed": 0, "passed": 3, "note": "the two d pins assert the schema's current refusal of a home-bearing owner and pass on the base tree as well; the order expected (d) to FAIL on base, which does not hold for the pinned formulation (row IRPT_ANLREQ-D2-W129-S2)"}
+  },
+  "regression": {
+    "method": "python -m pytest <folder> -q -p no:cacheprovider --color=no, run from infra/aws/lambda/investor-reporting, base archive and worktree",
+    "folders": {
+      "_scope/tests": {
+        "base": {"failed": 1, "passed": 276, "skipped": 0, "subtests_passed": 67, "failing_ids": ["_scope/tests/test_resolve.py::test_every_trusted_header_is_actually_injected_at_the_line_it_claims"]},
+        "fixed": {"failed": 1, "passed": 280, "skipped": 0, "subtests_passed": 67, "failing_ids": ["_scope/tests/test_resolve.py::test_every_trusted_header_is_actually_injected_at_the_line_it_claims"], "note": "280 = 276 + the 4 new tests of test_ordinary_owner_composition.py; failing ids identical to base"}
+      },
+      "ycharts/generate/tests/test_composition_refusal_cause.py": {"base": {"failed": 0, "passed": 6}, "fixed": {"failed": 0, "passed": 6}},
+      "intake/tests": {"base": {"failed": 0, "passed": 447, "skipped": 1, "subtests_passed": 28}, "fixed": {"failed": 0, "passed": 447, "skipped": 1, "subtests_passed": 28}},
+      "reports/tests": {"base": {"failed": 0, "passed": 208}, "fixed": {"failed": 0, "passed": 208}}
+    },
+    "ordinary_viewer": {"file": "_scope/tests/test_ordinary_viewer.py", "passed": 43, "failed": 0}
+  },
+  "opal_global_unchanged": {
+    "method": "r40/opal_owner_bytes.py run once on the base archive and once on the worktree: the canonical JSON bytes (sort_keys, compact separators, ensure_ascii False) of InteractiveAccess.prospect_owner() for the offline OPAL_GLOBAL actor, with the same environment",
+    "base": {"len": 277, "sha256": "d948320b730a467f8c6c009fa77ebbd722c1829b52184807ee0db406cfb1656e"},
+    "fixed": {"len": 277, "sha256": "d948320b730a467f8c6c009fa77ebbd722c1829b52184807ee0db406cfb1656e"},
+    "equal": true,
+    "carries_home_firm_id": true
+  },
+  "checkers": {
+    "AR319-y-AC1": "pytest on test_ordinary_owner_composition.py: 4 passed",
+    "AR319-y-AC2": "mutant_check.py: MUTANT-FIRES (writer undone in a scratch copy; 2 failed, 2 passed)",
+    "AR319-y-AC3": "regress_check.py: REGRESSION-OK (ordinary_viewer 43 passed; scope_tests failing ids equal base)"
+  },
+  "claim": "The writer is fixed: prospect_owner() gives a FIRM_ADVISOR owner no home_firm_id, with a fingerprint over the owner as stored; an OPAL_GLOBAL owner is byte-identical to base; the schema, the principal and the ordinary-viewer authorizer are untouched; the owning advisor is admitted and another advisor or another firm's advisor is refused. The reader half was not built because its premise is not held by the measured evidence (row S1); the step-2 refusal of a home-bearing owner is pinned, not repaired. Nothing is deployed, pushed, applied or invoked. The judgment grade is 3.0.0_SA_CVO's at L9.",
+  "not_read": [
+    "any STORED input owner or retained record in any environment (the question behind row IRPT_ANLREQ-D2-W129-S1 is left for the COO; no live call was made)",
+    "the live analysis route's composition for an advisor (no live call)",
+    "the live function log of the sitting and the live advisor profile reads (not on this worker's read list; no live call)",
+    "the preflight block and anything below the closing proof_of_spec tag of the task order (the record face)"
+  ]
+}

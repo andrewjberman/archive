@@ -91,10 +91,12 @@ def _val(entry, i):
 
 
 # ------------------------------------------------------------------------------------------------ the plant
-def plant_single_firm_pool(firm_arts: dict) -> dict:
+def plant_single_firm_pool(firm_arts: dict, blank_counts: bool = False) -> dict:
     """Edit the firm artifacts IN PLACE (the caller owns copies or in-memory builds) so that on the last date the
     model-class lines held by fewer than two firms (the fold set) are held by exactly one firm. Returns the record.
-    Only `model_value` at the last-date index of other firms' fold lines is set to None; nothing else moves."""
+    Only `model_value` at the last-date index of other firms' fold lines is set to None; nothing else moves, except under
+    `blank_counts` (the QA drive), which also sets that index of `account_count` to None so the cross-axis presence gate (v)
+    sees count and value absent together (D1-W21-S2)."""
     arts = {f: a for f, a in firm_arts.items() if a and a.get("dates")}
     last_date = max(a["dates"][-1] for a in arts.values())
     ix = {f: _idx(a) for f, a in arts.items()}
@@ -116,6 +118,8 @@ def plant_single_firm_pool(firm_arts: dict) -> dict:
         for k in per_firm[f]:
             arr = arts[f]["by_model"][k]["model_value"]
             arr[ix[f][last_date]] = None
+            if blank_counts and isinstance(arts[f]["by_model"][k].get("account_count"), list):
+                arts[f]["by_model"][k]["account_count"][ix[f][last_date]] = None
             blanked.append((f, k))
     # every fold line is now held by `keep` alone or by nobody
     return {"planted": True, "as_of": last_date, "kept_firm": keep, "blanked_firms": sorted({f for f, _ in blanked}),
@@ -287,10 +291,13 @@ def cmd_drive(argv):
     real_bg = gc.spine.build_global_artifact
 
     def planted_build_global(a49, ainf, acot, *a, **k):
-        rec = plant_single_firm_pool({"49financial": a49, "inflection": ainf, "cottonwood": acot})
+        # the plant edits COPIES handed to the Global builder only: the firm artifacts the rest of build_all reads
+        # (category-views peers, firm scopes) stay as built, so no other gate sees a planted total (D1-W21-S1)
+        c49, cinf, ccot = copy.deepcopy(a49), copy.deepcopy(ainf), copy.deepcopy(acot)
+        rec = plant_single_firm_pool({"49financial": c49, "inflection": cinf, "cottonwood": ccot}, blank_counts=True)
         plant_rec.update(rec)
-        print("  QA PLANT (in-memory builds of THIS run only): %s" % json.dumps(rec, sort_keys=True))
-        return real_bg(a49, ainf, acot, *a, **k)
+        print("  QA PLANT (in-memory copies for the Global builder of THIS run only): %s" % json.dumps(rec, sort_keys=True))
+        return real_bg(c49, cinf, ccot, *a, **k)
     gc.spine.build_global_artifact = planted_build_global
     log_path = os.path.join(run_dir, "qa_run.log")
     a4_tmp = tempfile.mkdtemp(prefix="cn_n_1_a4_")
@@ -303,7 +310,7 @@ def cmd_drive(argv):
                                         out_dir=a4_tmp)
         except BaseException as e:  # noqa: BLE001
             lf.write("\nQA DRIVE: build_all raised %s: %s\n" % (type(e).__name__, e))
-            manifest = {"run": {"status": "RAISED"}, "errors": {"_drive": {"error": "%s: %s" % (type(e).__name__, e)}}, "writes": ["?"]}
+            manifest = {"run": {"status": "RAISED"}, "errors": {"_drive": {"error": "%s: %s" % (type(e).__name__, e)}}, "writes": []}  # the op guard, not this record, counts writes (D1-W21-S3)
     gc.spine.build_global_artifact = real_bg
     restore()
     a4_files = sorted(os.path.relpath(os.path.join(r, f), a4_tmp).replace(os.sep, "/")
