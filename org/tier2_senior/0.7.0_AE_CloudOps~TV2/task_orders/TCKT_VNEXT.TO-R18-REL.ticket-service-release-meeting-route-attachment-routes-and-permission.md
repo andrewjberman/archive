@@ -28,7 +28,7 @@
     build from (`built_from_sha`), the expected Terraform plan (3 new route resources, two Lambda environment variables, the `ROUTING_MATRIX`
     value, one IAM statement `TicketAttachmentsTradeForm`, nothing else), the rollback per key, and the laptop's role request for the bucket policy and
     CORS, which must be DONE before you apply (C-DEPLOY: a Dell writes no bucket policy). You do NOT start without the GO.
-    Read first when the GO comes: the pair; `deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json` (the bucket and the key template, builder output);
+    Read first when the GO comes: the pair; `deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json` (the per-firm buckets, the bucket template and the key template, builder output);
     the wire contract (`decompositions/TCKT_VNEXT_DECOMP_R18.md`, section WIRE CONTRACT); and the build procedure of the earlier ticket release
     (`org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-320*.md`, the BUILD of the package that carries the owner check), which is the model for building
     the zip and comparing it with the live package member by member.
@@ -41,12 +41,12 @@
     STAGED. The GO is an AMENDMENT to this order citing the signed pair, written by the issuer. Then, in order:
     1. STEP 0: open the NEVER-2 ledger entry (`deploy_ledger.py open`, leg per step below) and keep it open until the read-backs pass.
     2. STEP 1: build the package from `built_from_sha`; print its member list and sha256; compare with the live package; the members that differ must be exactly the ticket Lambda's source.
-    3. STEP 2: confirm the laptop's bucket policy and CORS exist (read-only `get-bucket-policy`, `get-bucket-cors` on the bucket of `ATTACH_ADDRESS.json`); absent: STOP.
+    3. STEP 2: confirm the laptop's bucket policy and CORS exist (read-only `get-bucket-policy`, `get-bucket-cors` on EACH of the three firm buckets of `ATTACH_ADDRESS.json`); any one absent: STOP.
     4. STEP 3: `safe-apply` plan only; print the plan summary; it must equal the pair's expected plan exactly or STOP.
     5. STEP 4: apply under `safe-apply`, upload the package as the pair says, wait for the function to be `Active`/`Successful`.
     6. STEP 5: read back; run the issuer's check (the criterion). Close the ledger entry only after it prints REL-OK.
     7. Write `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r18_rel/R18_REL_RESULT.json` with the keys `built_from_sha`, `package_sha256`, `code_sha256_before`, `code_sha256_after`
-       (the Lambda's base64 CodeSha256 values), `plan_summary`, `change_ledger` (the entry slug), `pair` (the pair file path and blob), `bucket_policy_read`, `cors_read`, `claim` (`measured`).
+       (the Lambda's base64 CodeSha256 values), `plan_summary`, `change_ledger` (the entry slug), `pair` (the pair file path and blob), `bucket_policy_read`, `cors_read` (each an object keyed by the three firms), `claim` (`measured`).
     8. Write the proof-of-spec instance in your deliverables folder, validate it, flip this order to `complete`, write your session log and report once to `2.0.0_SA_COO~V2`.
        If a STOP fires, report it FIRST with the world as left (and roll back per the pair if the apply was partial: a confirmed deploy is never left half-landed).
   </go>
