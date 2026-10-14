@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fc-2.the-contract-transliterates-and-refuses-narration-and-dropped-letters",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fc-2.the-contract-transliterates-and-refuses-narration-and-dropped-letters.md",
+    "group": "OTHER",
+    "vintage_commit": "7871f10f51"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "7871f10f51",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fc-2.the-contract-transliterates-and-refuses-narration-and-dropped-letters.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~431",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/contract.py",
+      "kind": "script",
+      "commit_or_etag": "b0032cf9da86c5c8f576bd852a937d3f124928fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A stdlib library module with no I/O and no deploy. fold_text transliterates (letter map, NFKD, combining marks removed, then the drop), fold_report returns the dropped characters, make_block refuses a dropped letter, NARRATION_OPENERS (22 openers) and validate_block refuse narration, name_mangling_problems finds a dropped name letter. The builders, orchestrator and seam are other cells.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_contract_v2.py",
+      "kind": "test",
+      "commit_or_etag": "b0032cf9da86c5c8f576bd852a937d3f124928fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test module, 106 tests: one or more per numbered point of the cell (transliteration examples, fold_report, dropped CJK and Cyrillic letters, the 22 openers at the start of a text and on a later line, legitimate openers that must pass, the document-level refusal naming the block, the name finder both ways).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_contract_orchestrate.py",
+      "kind": "test",
+      "commit_or_etag": "b0032cf9da86c5c8f576bd852a937d3f124928fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One assertion changed, as the cell permits: test_fold_text_drops_remaining_non_ascii expected the old drop (caf) and now expects cafe, the accented letter transliterated and the CJK character still dropped. No other line touched.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FC-2 ARMS: YES (N of N)` with N equal to 43, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-431 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round105_aifill_prep/checks/check_fc2_contract.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM validate_document refuses a narrated block and names it PASS [\"mgmt_recent: mgmt_recent: text opens with process narration (i'll)\"]\nARM name_mangling_problems finds 'Nestl' for 'Nestl\\u00e9' and passes the transliterated name PASS (['a character was dropped from the name Nestl\\u00e9: the text carries Nestl'], [], ['a character was dropped from the name Z\\u00fcrich: the text carries Zrich'], [], [])\nARM name_mangling_problems: ASCII input names are never problems PASS ascii names never problems\nAIFILL FC-2 ARMS: YES (43 of 43)\nexit=0\n(Full run, same bytes: 44 lines; 43 lines carry PASS, 0 carry FAIL.)",
+      "denominator": "43 of 43 arms PASS (the prepared check's arm count); 0 FAIL arm lines in the full output",
+      "status": "PASS",
+      "expect": "AIFILL FC-2 ARMS: YES \\(43 of 43\\)[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-431 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_contract_v2.py lib/research/aifill/tests/test_contract_orchestrate.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "........................................................................ [ 98%]\n....                                                                     [100%]\n220 passed in 0.38s\nexit=0",
+      "denominator": "220 of 220 tests passed (106 in test_contract_v2.py, 114 in test_contract_orchestrate.py); the module defines 106 test items",
+      "status": "PASS",
+      "expect": "220 passed in [0-9.]+s\\nexit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the line `AIFILL FA-1 ARMS: YES (31 of 31)`: the round-104 contract check keeps passing (a control, not a hygiene check); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-431 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa1_contract.py\" | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM validate_document refuses each broken document       PASS accepted: []\nARM importing the cell did not import the anthropic SDK  PASS \nAIFILL FA-1 ARMS: YES (31 of 31)\nexit=0",
+      "denominator": "31 of 31 arms PASS",
+      "status": "PASS",
+      "expect": "AIFILL FA-1 ARMS: YES \\(31 of 31\\)[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Narration check switched off: validate_block's line opener = _narration_opener(text) replaced by opener = None in the worktree file, the test module run, then the file restored and compared byte-identical (cmp) to the committed bytes.",
+      "expected": "the narration, document-level and later-line arms of test_contract_v2.py fail (the controls fire)",
+      "observed": "49 failed, 57 passed in 0.67s (of 106); the failures include test_narration_rule_applies_to_a_web_search_text_too and test_document_refusal_names_the_narrated_block; restored file cmp identical",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of lib/research/aifill/tests/test_contract_v2.py compared, after the restore",
+      "observed": "run 1: 106 passed in 0.19s; run 2: 106 passed in 0.22s; identical counts",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "name_mangling_problems skips a token whose ASCII remainder is empty (a token of only non-ASCII letters, such as a lone Latin letter with a stroke)",
+      "reason": "The cell's rule reads a dropped form that occurs as a whole word; an empty dropped form would match every text, so no empty form is graded. A deliberate reading of the rule, stated here rather than left implicit."
+    },
+    {
+      "item": "Cells fc-1 (the seam), fc-3 (the prompts) and fc-4 (the re-validate of the stored documents) and every other file of the aifill package",
+      "reason": "Outside this cell's write surface (bounds, section 2); the orchestrator, builders and store were not touched. Validate_document prefixes each problem with its block id, so a narration problem reads with the id twice; this is the existing prefix behaviour and was left as it is."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~431/AMGT_RESAPP.TO-AMGT-fc-2.the-contract-transliterates-and-refuses-narration-and-dropped-letters.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/",
+      "result": "415 passed in 1.91s (the whole aifill package, before the commit; 309 passed at the base)"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/contract.py lib/research/aifill/tests/test_contract_v2.py lib/research/aifill/tests/test_contract_orchestrate.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~431 <0.9.0_WK_AMGT_RESAPP~431@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/aifill/contract.py lib/research/aifill/tests/test_contract_v2.py lib/research/aifill/tests/test_contract_orchestrate.py",
+      "result": "b0032cf9da86c5c8f576bd852a937d3f124928fa committed on wk-AMGT_RESAPP-431 (LOCAL); msg-verify MATCH"
+    }
+  ]
+}
