@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-cl-0",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d9371ffe81",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-0.client-roles-and-contract.md"
+ },
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "5f27dfcddc"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~83",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~83/G2_ROLES.json",
+   "kind": "doc",
+   "commit_or_etag": "5e52677043",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only design record; no IAM, Terraform, bucket or grant written. Role rows measured from a live read-only IAM call on 2026-10-14.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~83/G2_CLIENT_TOOLS_CONTRACT.md",
+   "kind": "doc",
+   "commit_or_etag": "5e52677043",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Design document; no code, release or deploy.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~83/G2_SCOPES_PROPOSAL.md",
+   "kind": "doc",
+   "commit_or_etag": "5e52677043",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Proposal only; the two registry files are unchanged (AC2 counts zero changed).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the role inventory carries its denominator, a status and a reason for all seven vendors, and no credential.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl0.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "roles: scanned 304, with S3 read on client buckets 49, rows 49, well-formed yes; vendors with a status and a reason 7 of 7; credentials in file 0; ask_inputs present yes\nRESULT: PASS\nexit=0",
+   "denominator": "304 IAM roles scanned (live get-account-authorization-details, IsTruncated false); 49 roles with an object-read grant on the client surface; 49 of 49 rows well-formed; 7 of 7 vendors with status and reason",
+   "status": "PASS",
+   "expect": "(?s)roles: scanned [1-9]\\d*, with S3 read on client buckets \\d+, rows \\d+, well-formed yes; vendors with a status and a reason 7 of 7; credentials in file 0; ask_inputs present yes.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the contract has one section per core tool with its required clauses and carries the five binding decisions, and the registry files are unchanged.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl0.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "contract: tool sections 5 of 5, each with inputs, freshness, fence and refusal clauses 5 of 5; decisions carried 5 of 5\nscopes proposal: names 08403355 yes\nregistry files changed by this cell: 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "5 of 5 core tool sections; 5 of 5 tool sections with inputs, freshness, fence and refusal clauses; 5 of 5 binding decisions carried; 0 of 2 registry files changed",
+   "status": "PASS",
+   "expect": "(?s)contract: tool sections 5 of 5, each with inputs, freshness, fence and refusal clauses 5 of 5; decisions carried 5 of 5.*scopes proposal: names 08403355 yes.*registry files changed by this cell: 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The spec names no mutant control.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "Read-only live IAM read and served-graph query on 2026-10-14; a re-run reads the live role set as it then stands.",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W83-S1",
+  "NFRA_OPLGTW-Z-W83-S2",
+  "NFRA_OPLGTW-Z-W83-S3",
+  "NFRA_OPLGTW-Z-W83-S4",
+  "NFRA_OPLGTW-Z-W83-S5"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "aws iam get-account-authorization-details --filter Role (via .tools/aws shim, read only) and stdlib python over its output (build_roles.py, finalize_roles.py, in the worker scratch, not committed)",
+   "invocation": "python -I .scratch/build_roles.py .scratch/roles_rows.json; python -I .scratch/finalize_roles.py",
+   "result": "304 roles scanned; 49 roles with an object-read grant on the client surface; 5 gateway-trusted; 0 account ids or credentials in G2_ROLES.json"
+  },
+  {
+   "tool": "comp-find --corpus aws (served graph)",
+   "invocation": "comp-find --corpus aws -i '<role-reader token pattern>' IAM_ROLE",
+   "result": "DENOMINATOR 67 hit(s) across 297 aws node(s) scanned; the bucket-name pattern returns 0 of 297"
+  },
+  {
+   "tool": "lib/opal_naming.py name() and validate() (a scratch copy of the registry carrying the proposed edits)",
+   "invocation": "python -I -c \"import sys; sys.path.insert(0,'lib'); import opal_naming as o; o.validate(reg_dir='.scratch/regcopy')\"",
+   "result": "([], []) on the proposed copy and on the unmodified registry"
+  }
+ ]
+}
