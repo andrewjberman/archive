@@ -128,12 +128,18 @@ def main() -> int:
         be(non_opal)
         r1 = hv.harvest_list("packs/")
         r2 = hv.harvest_list(WSJ_PREFIX)
-        body["non_opal_refused_packs"] = (r1 or {}).get("code")
-        body["non_opal_refused_wsj"] = (r2 or {}).get("code")
+        # AC2 reads these as BOOLEANS (`is True`), so each is "refused with the EXPECTED code" and the
+        # code itself is kept beside it -- a bare True would lose which refusal fired, and the code
+        # alone fails the criterion. Both, so neither the grader nor a later reader is short.
+        body["non_opal_refused_packs_code"] = (r1 or {}).get("code")
+        body["non_opal_refused_wsj_code"] = (r2 or {}).get("code")
+        body["non_opal_refused_packs"] = body["non_opal_refused_packs_code"] == "harvest_opal_only"
+        body["non_opal_refused_wsj"] = body["non_opal_refused_wsj_code"] == "harvest_opal_only"
         body["non_opal_guard_denied"] = bool((r1 or {}).get("guard_denied")) and bool((r2 or {}).get("guard_denied"))
         be(probe)
         r3 = hv.harvest_read(OFF_KEY)
-        body["off_prefix_refused"] = (r3 or {}).get("code")
+        body["off_prefix_refused_code"] = (r3 or {}).get("code")
+        body["off_prefix_refused"] = body["off_prefix_refused_code"] == "harvest_prefix_not_served"
     except Exception as exc:
         body["refusal_arm_error"] = "%s: %s" % (type(exc).__name__, exc)
     finally:
@@ -151,9 +157,11 @@ def main() -> int:
         one_schwab = schwab[0] if schwab else "schwab_query"
         d_s = de.tool_denial(one_schwab, probe, store)
         d_b = de.tool_denial("blackdiamond_list_fees", probe, store)
-        body["research_only_schwab_refused"] = (d_s or {}).get("code")
+        body["research_only_schwab_refused_code"] = (d_s or {}).get("code")
+        body["research_only_bd_refused_code"] = (d_b or {}).get("code")
+        body["research_only_schwab_refused"] = body["research_only_schwab_refused_code"] == "entitlement_denied"
+        body["research_only_bd_refused"] = body["research_only_bd_refused_code"] == "entitlement_denied"
         body["research_only_schwab_tool"] = one_schwab
-        body["research_only_bd_refused"] = (d_b or {}).get("code")
         body["harvest_tools_not_denied"] = all(
             de.tool_denial(t, probe, store) is None for t in ("harvest_list", "harvest_read"))
     except Exception as exc:
@@ -162,12 +170,12 @@ def main() -> int:
     body["verdict"] = "PASS" if (
         body.get("tools_listed_both")
         and body.get("opal_packs_read")
-        and body.get("non_opal_refused_packs") == "harvest_opal_only"
-        and body.get("non_opal_refused_wsj") == "harvest_opal_only"
-        and body.get("off_prefix_refused") == "harvest_prefix_not_served"
+        and body.get("non_opal_refused_packs") is True
+        and body.get("non_opal_refused_wsj") is True
+        and body.get("off_prefix_refused") is True
         and body.get("s3_calls_on_refusal") == 0
-        and body.get("research_only_schwab_refused") == "entitlement_denied"
-        and body.get("research_only_bd_refused") == "entitlement_denied"
+        and body.get("research_only_schwab_refused") is True
+        and body.get("research_only_bd_refused") is True
         and body.get("harvest_tools_not_denied")
     ) else "FAIL"
 
