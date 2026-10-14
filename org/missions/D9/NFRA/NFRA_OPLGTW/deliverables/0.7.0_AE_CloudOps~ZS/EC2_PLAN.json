@@ -1,0 +1,50 @@
+{
+  "to_id": "NFRA_OPLGTW.TO-OG-ec-2",
+  "phase": "A",
+  "authored_by": "0.7.0_AE_CloudOps~ZS",
+  "measured_at": "2026-10-14T22:41Z .. 22:58Z",
+  "claim": "measured",
+  "live_code_sha256": "725ad4cff8a4a9232077911db71ee024571e2c7d8b4a3a30edce957eab70eb88",
+  "repo_code_sha256": "1b15916614ccbe4496017b81407bb38d9700c10de6260dc2d1d6bcfd9a03eb35",
+  "code_sha256_basis": "live = base64 CodeSha256 clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g= from get-function-configuration (State Active, LastUpdateStatus Successful, 37461 bytes, OPAL_BUILD_COMMIT b915719f25), decoded to hex. repo = BUILD_ONLY=1 build-and-upload.sh opal-assets opal-assets-silver-eclipse over the package dir at branch base c8f3a38f43 (38093 bytes), base64 GxWRZhTMvkSWAXuBQHuzjZcAwQ3mJg3C0da8/ZoD6zU=, decoded to hex; nothing uploaded. Control: the same build over the package dir at 519552b5d7 (the deployed release) reproduces the live base64 exactly. The repo build was run twice and read the same digest.",
+  "resource_address": "module.silver_converter[\"eclipse\"].aws_lambda_function.this",
+  "terraform_target": "module.silver_converter[\"eclipse\"]",
+  "tf_plan_summary": "0 to add, 1 to change, 0 to destroy. The one change is module.silver_converter[\"eclipse\"].aws_lambda_function.this, environment OPAL_BUILD_COMMIT b915719f25 -> 8929c5f16d. Planned in worktree C:/tmp/og-rel-ec2 (branch rel-nfra-oplgtw-ec2 @4fd05be0d3) with -target, -lock=false, no -out, no apply. The code fields (source_code_hash, s3_object_version, last_modified) join the SAME resource's change only once the artifact is uploaded; see artifact_upload_step.",
+  "tf_plan_log": "scratchpad ec2_plan.txt (plan text kept; the plan block is quoted in the ask, section 'order')",
+  "missing_silver_count": 5,
+  "missing_silver_keys": [
+    "eclipse/inflection/silver/fact_portfolios_simple/date=2026-10-10/data.parquet",
+    "eclipse/inflection/silver/fact_portfolios_simple/date=2026-10-11/data.parquet",
+    "eclipse/inflection/silver/fact_portfolios_simple/date=2026-10-12/data.parquet",
+    "eclipse/inflection/silver/fact_portfolios_simple/date=2026-10-13/data.parquet",
+    "eclipse/inflection/silver/fact_portfolios_simple/date=2026-10-14/data.parquet"
+  ],
+  "missing_silver_basis": "The repo converter's own mirror_conversion.expected_partitions + set_identity run read-only over live listings of s3://opal-data-assets/eclipse/inflection/{bronze,silver}/ (bronze 1852 keys): expected 552, landed 547, matched 547, missing 5, alien 0. This equals the guard's own text in eclipse/inflection/meta/backfill-status.json (written 2026-10-14T16:00:08Z: 'expected 552 landed 547 matched 547 missing 5 alien 0'). All 5 are absent today (prior state of each: absent).",
+  "units_the_sweep_would_convert": ["date-dir:2026-10-10", "date-dir:2026-10-11", "date-dir:2026-10-12", "date-dir:2026-10-13", "date-dir:2026-10-14"],
+  "sweep_converts_only_missing": "convert_eclipse_date(force=False) calls partition_exists per feed and returns skipped-idempotent for a present partition (mirror_conversion.py:402-405), so the 5 date dirs write exactly the 5 absent keys above and rewrite nothing else.",
+  "date_dir_readiness": "Each of the 5 date dirs has 12 bronze data keys, a pull_complete.json sidecar, roster_minus_present 0, present_minus_roster 0, and its portfolios_simple.json parses under the REPO code at 846 records.",
+  "drift_boundary_both_arms": {
+    "deployed_code_519552b5d7": "declared 22 cols; today's landed portfolios_simple -> VendorDriftError; plus a non-admitted column -> VendorDriftError",
+    "repo_code_8929c5f16d": "declared 23 cols; today's landed portfolios_simple -> passes the boundary; plus a non-admitted column -> VendorDriftError",
+    "method": "the converter's own assert_declared_shape over the frame's vendor columns (mirror_conversion.py:425-427), in memory, nothing written, no content printed"
+  },
+  "sweep_invoke": {
+    "command": "aws lambda invoke --function-name opal-assets-silver-eclipse --cli-binary-format raw-in-base64-out --cli-read-timeout 310 --payload '{\"mode\":\"sweep\"}' <outfile>",
+    "basis": "The scheduled rule opal-assets-silver-eclipse-sweep-daily (ENABLED, cron(0 16 * * ? *)) targets this function with the constant input {\"mode\":\"sweep\"}; lambda_entry routes that to run_sweep('eclipse') (mirror_conversion.py:864-865). The manual invoke sends the same payload, so it is the scheduled path driven once, not a different one. Function timeout is 300 s and the CLI default read timeout is 60 s, hence --cli-read-timeout 310."
+  },
+  "artifact_upload_step": {
+    "finding": "The order's Phase B has no step that puts the new package into S3. module yang-lambda reads data.aws_s3_object.artifact (s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-silver-eclipse.zip) for s3_object_version and source_code_hash. With only the pin edit the apply changes the environment value alone and the deployed CodeSha256 stays 725ad4cf..., so AC2 'deployed code equals the repo's' cannot read yes.",
+    "needed": "BUILD (not BUILD_ONLY) of infra/aws/lambda/ci/build-and-upload.sh opal-assets opal-assets-silver-eclipse, which uploads that one key with content-sha256 metadata and verifies size and metadata by head-object. The prior eclipse release did the same (commit 83b77e13d3). The order's bounds say 'No object is written by you'; this is one S3 write to the artifact bucket, so the issuer must rule it in or out.",
+    "prior_artifact_version_for_rollback": "s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-silver-eclipse.zip current latest VersionId 9KbX3Ee84D5n9e2hNtWsRkg6pk40yYcW (37461 bytes, LastModified 2026-10-14T00:14:23Z, metadata content-sha256 clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g= = the live CodeSha256), read 2026-10-14T22:5xZ from list-object-versions + head-object; the version before it is RbbMcE4omBbGLm9IRIBYZTW6Ivoa6bxB (2026-09-27, 36229 bytes). Of 6 versions listed, 1 is latest.",
+    "row": "NFRA_OPLGTW-Z-S131",
+    "ruling": "RULED IN by 2.0.0_SA_COO~O, order amendment A1 @c0c760f4e7, msg 34274 (2026-10-14 ~23:1xZ): build from the repo's bytes, upload to the module's artifact key before the apply, record the prior object's version id and sha256 as the rollback. The ask's order (step 3), widening and rollback sections name it.",
+    "artifact_key_measured": "s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-silver-eclipse.zip (the order's A1 text writes opal-assets/opal-assets-silver-eclipse/...; the module's artifact_key is the .zip key above)"
+  },
+  "preflight_reads": {
+    "comp_schedule_drift": "comp-schedule --drift --budget 420: scanned 6 of 6 carriers (C1=23 C2=22 C3=11 C4=21 C5=333 C6=1), 276 s. GATES ARMED 1 = G-3 (data/inf/scripts/silver/convert_transactions_to_silver.py:94, owner CTO), not the converter. No hold or moratorium names the eclipse converter or its sweep. A first run at the 90 s default hit its budget with 5 of 6 carriers unscanned and was not used.",
+    "open_deploy_sentinels_shared_tree": "16 entries listed (named folder); none names eclipse or the converter. Adjacent: nfra-oplgtw-fd2-etf-drain (ETF family drain) is OPEN and shares the one DLQ.",
+    "dlq": "opal-assets-silver-dlq ApproximateNumberOfMessages 0, NotVisible 0 at 22:58Z, so the sweep's drain finds nothing to return or delete.",
+    "sharers_of_the_converter_code": "comp-find --corpus aws 'eclipse' LAMBDA: 2 hits across 238 LAMBDA nodes, inf-api-eclipse (a different function) and opal-assets-silver-eclipse. The artifact key opal-assets/opal-assets-silver-eclipse.zip is consumed by the one module instance. This is a name match; it does not enumerate functions of other names."
+  },
+  "build_branch": {"branch": "rel-nfra-oplgtw-ec2", "worktree": "C:/tmp/og-rel-ec2", "base": "c8f3a38f43", "pin_commit": "4fd05be0d3", "pin": "silver_build_commit.eclipse b915719f25 -> 8929c5f16d", "merged_to_trunk": false}
+}
