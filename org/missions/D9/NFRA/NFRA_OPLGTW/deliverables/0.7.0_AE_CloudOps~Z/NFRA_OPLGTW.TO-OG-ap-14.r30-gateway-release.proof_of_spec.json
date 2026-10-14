@@ -1,0 +1,192 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-14",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-14/ap14_recut_v2_and_mg1_phase_a.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e5e2ce91ec"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "ee0facdb23",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-14.r30-gateway-release.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the release sits on the LIVE ref and carries ONLY the four cells' gateway hunks.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap14.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)is the live ref: yes.*outside the four cells' files 0 \\(want 0\\).*diff lines outside the four cells' hunks 0 \\(want 0\\); cell markers present 4 of 4.*RESULT: PASS.*exit=0",
+   "output_evidence": "base 43088464f5 is the live ref: yes; release 90967e39ba\nfiles differing 18; outside the four cells' files 0 (want 0)\ndiff lines outside the four cells' hunks 0 (want 0); cell markers present 4 of 4\nRESULT: PASS\nexit=0",
+   "denominator": "18 files differing, 0 outside the four cells' files, 0 outside their hunks, 4 of 4 markers",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the served r30 release -- ledger closed, manifest equals the release, runbook 7.2 current, and the served read shows each cell live.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap14.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)entries at HEAD [1-9]\\d*; status CLOSED=yes; sentinel at HEAD=no.*equal=yes; rb\\.AC2 PASS; served r30 fields: yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "nfra-oplgtw-gateway-release-r30: entries at HEAD 1; status CLOSED=yes; sentinel at HEAD=no\nmanifest deployed_commit=90967e39ba; release_sha=90967e39ba; equal=yes; rb.AC2 PASS; served r30 fields: yes\nRESULT: PASS\nexit=0",
+   "denominator": "9 of 9 served-read body fields true-or-expected, including bbg_identity_admitted_8 = 8 and objects_written 0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The same release payload was cut three times on three different live refs (C3 fired twice) and compared with git patch-id --stable; AC1 was re-run on each base.",
+   "observed": "patch-id eac7550c4539953640bb110f5522dcb48ce5aa81 for v1 db3d1972bc, v2 92698aea8c and v3 90967e39ba -- identical; AC1 PASS on each base.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. In its place the post-deploy md5 read was given a NEGATIVE arm so that a silently-unlanded deploy is distinguishable from a landed one rather than both reading clean: the running bytes are 105 of 105 equal to the release AND 5 differing against the prior live ref. A deploy that had not landed would invert both numbers.",
+   "expected": "running bytes equal to the release AND unequal to the prior live ref",
+   "observed": "105 of 105 equal to release 90967e39ba with 0 differing; and 5 differing against the prior live ref 43088464f5 (app/audit.py, app/data_entitlement.py, app/destructive_ops.py, app/identity_scope.py, app/tools.py). The pre-deploy run of the same instrument read 105 of 105 against 43088464f5, which is the before-state control.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+   "kind": "script",
+   "commit_or_etag": "90967e39ba4bdca17c6f84d9806c29cc67f8482e",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "one SSM md5 read of the RUNNING path: 105 of 105 equal to the release, 0 differing; 5 differing against the prior live ref 43088464f5",
+   "introduces": [
+    "def list_shared_folder(",
+    "sender_tenant_id"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+   "kind": "script",
+   "commit_or_etag": "90967e39ba4bdca17c6f84d9806c29cc67f8482e",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "served read: data_grant_family_size 6, bd_unprofiled_standard_denied true, bd_unprofiled_master_admin_admitted true",
+   "introduces": [
+    "DATA_GRANT_TOOLS",
+    "TIER_ADMITTED_TOOLS"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "script",
+   "commit_or_etag": "ffa350b8b1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deployed_commit 90967e39ba, previous_deployed_commit 43088464f5 (trunk's genuine previous, not the release branch's stale value), all 10 file_checksums recomputed from the release blobs with 4 changed",
+   "introduces": [
+    "90967e39ba4bdca17c6f84d9806c29cc67f8482e"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md",
+   "kind": "script",
+   "commit_or_etag": "ffa350b8b1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "section 7.2 names live 90967e39ba with 43088464f5 as the valid rollback target; rb.AC2 PASS",
+   "introduces": [
+    "the live release is `90967e39ba`"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/AP14_SERVED.json",
+   "kind": "script",
+   "commit_or_etag": "d183fc27c5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "nine served fields read in-process on the host under the service's own interpreter; objects_written 0",
+   "introduces": [
+    "bbg_identity_admitted_8"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261014T1120Z_nfra-oplgtw-gateway-release-r30_deploy_completion.md",
+   "kind": "script",
+   "commit_or_etag": "d183fc27c5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "opened entry-and-sentinel-first before the act; three legs closed with proof; CLOSED and sentinel removed (the row's token is the L2 close proof, which this pin introduces; the slug and the release sha were already present from the open commit)",
+   "introduces": [
+    "105 of 105 EQUAL"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "safe-ec2-deploy.sh",
+   "invocation": "DEPLOY_BASE_REF=43088464f5... bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh i-07dccb1615503ac99",
+   "result": "DEPLOYMENT COMPLETE; no HALT_OVERRIDE; the script's own declared-base guard satisfied"
+  },
+  {
+   "tool": "ssm send-command (md5 read-back of the RUNNING path)",
+   "invocation": "aws ssm send-command AWS-RunShellScript, md5sum over app/ deploy/ dashboard/",
+   "result": "105 of 105 equal to the release, 0 differing; 5 differing against the old base (the negative arm)"
+  },
+  {
+   "tool": "ssm send-command (served read)",
+   "invocation": "/opt/opal-gateway/.venv/bin/python, in-process, synthetic principals",
+   "result": "nine fields; bbg_identity_admitted_8 = 8; objects_written 0"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open / close-leg x3 / close --slug nfra-oplgtw-gateway-release-r30",
+   "result": "entry and sentinel committed before the act; all 3 legs proven; CLOSED"
+  },
+  {
+   "tool": "rb.AC2.sh",
+   "invocation": "bash .../round2/checks/rb.AC2.sh",
+   "result": "FAIL at the cut, PASS after: live 90967e39ba, 7.2 names live=yes, 3 targets, 0 without guard, 0 outside manifest history"
+  },
+  {
+   "tool": "safe-merge.sh",
+   "invocation": "bash .tools/safe-merge.sh rel-nfra-oplgtw-r30c",
+   "result": "CONFLICT on 18 paths, ABORTED with nothing landed -- the release branch descends from the deploy-only cut lineage and does not merge to trunk"
+  },
+  {
+   "tool": "ap14.AC1.sh / ap14.AC2.sh",
+   "invocation": "bash .../r37/checks/ap14.AC<n>.sh",
+   "result": "AC1 exit=0 RESULT: PASS; AC2 exit=0 RESULT: PASS"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S105",
+  "NFRA_OPLGTW-Z-S106"
+ ],
+ "declared_exclusions": [
+  {
+   "item": "AC3 (the judgment criterion)",
+   "reason": "graded by 3.0.0_SA_CVO~Z on 0.0.3_BG_BBGTerminal's own re-exercise of the 8 tools after r30 AND OG-mg-1's writes; not this seat's to grade, recorded UNVERIFIABLE-BY-INSTRUMENT"
+  },
+  {
+   "item": "the 10 host-only files under dashboard/",
+   "reason": "built vite assets the repo does not track, so they sit outside every md5 comparison by construction rather than by omission"
+  },
+  {
+   "item": "merging the release branch into box/sitez",
+   "reason": "it descends from the deploy-only cut lineage, which never merges to trunk; an attempt opened 18 conflicts and was aborted with nothing landed. Only the deploy RECORD belongs on trunk and it is committed at ffa350b8b1"
+  }
+ ]
+}
