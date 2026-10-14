@@ -1,0 +1,63 @@
+{
+  "base_commit": "1d3605e19c5be48cbc0079705829b68e74b30b76",
+  "fdrxx_inflection": {
+    "ticker": "FDRXX",
+    "canonical_row_found": true,
+    "canonical_asset_class": "fixed_income",
+    "canonical_sub_asset_class": "Cash",
+    "inflection_nodes_with_ticker": 757,
+    "resolves_on_canonical_branch": true,
+    "reading": "The canonical row for FDRXX exists (fixed_income, sub Cash) and Inflection's newest accepted snapshot (2026-10-12) holds 757 SECURITY nodes with display symbol FDRXX, all served fixed_income with sub Cash, so the cash rule moves them on the canonical branch; rule_scope is canonical_only."
+  },
+  "rule_scope": "canonical_only",
+  "canonical_table": {"rows": 11361, "cash_subclass_rows": 365},
+  "firms": {
+    "49financial": {
+      "snapshot_read": {"found": true, "business_date": "2026-10-12", "nodes": 124441},
+      "would_move_total": 32,
+      "canonical_branch": 32,
+      "fallback_branch": 0,
+      "canonical_tickers": ["SNOXX", "SNSXX", "SNVXX", "SWVXX"],
+      "fallback_tickers": [],
+      "vs_ib526": {"upper_bound": 32, "delta": 0},
+      "note": "Newest accepted publication: index latest_date 2026-10-12; date manifest (irpt-holdings-manifest-v2) and its header and 200 partition objects read, each sha256 and byte_length verified; nodes = SECURITY nodes across all partitions. All 32 movers carry basis TABLE and their display symbols are canonical keys, so the split rests on the canonical table scanned once in this run. Not read: the bd-securities fallback table, any holding value, any account identifier. 101 SECURITY nodes carry no display symbol; none is a would-move node (surprise IRPT_BCKEND-D2-W375-S3)."
+    },
+    "cottonwood": {
+      "snapshot_read": {"found": true, "business_date": "2026-10-08", "nodes": 15455},
+      "would_move_total": 253,
+      "canonical_branch": 38,
+      "fallback_branch": 215,
+      "canonical_tickers": ["FDRXX", "SWVXX", "VUSXX"],
+      "fallback_tickers": [],
+      "vs_ib526": {"upper_bound": 253, "delta": 0},
+      "note": "Newest accepted publication: index latest_date 2026-10-08 (index last modified 2026-10-09); date manifest, header and 27 partition objects read, each sha256 and byte_length verified. The 38 canonical movers carry basis TABLE; the 215 fallback movers carry basis NAME_ALIAS and are unchanged by the rule: 206 carry Black Diamond-prefixed identifiers (2 distinct, withheld), 6 carry CUSIP-shaped identifiers (3 distinct, withheld as identifiers rather than ticker symbols) and 3 carry a display symbol outside the ticker shape; none is listed (surprise IRPT_BCKEND-D2-W375-S2). current/publish_refusal.json exists, last modified 2026-10-13T14:17:45Z (head-object read only; body not read). Not read: the bd-securities fallback table, any holding value."
+    },
+    "inflection": {
+      "snapshot_read": {"found": true, "business_date": "2026-10-12", "nodes": 34273},
+      "would_move_total": 841,
+      "canonical_branch": 774,
+      "fallback_branch": 67,
+      "canonical_tickers": ["FDRXX", "SPAXX"],
+      "fallback_tickers": [],
+      "vs_ib526": {"upper_bound": 841, "delta": 0},
+      "note": "Newest accepted publication: index latest_date 2026-10-12; date manifest, header and 52 partition objects read, each sha256 and byte_length verified. The 774 canonical movers carry basis TABLE (757 of them FDRXX nodes); the 67 fallback movers carry basis NAME_ALIAS, are unchanged by the rule, and have no ticker-shaped display symbol, so none is listed. Not read: the bd-securities fallback table, any holding value."
+    }
+  },
+  "notes": [
+    "Served location: address() output of lib/opal_naming.py, s3://opal-data-<firm>/irpt/<firm>/platinum/holdings/current/manifest.json (index), then the date row's manifest (irpt-holdings-manifest-v2) and its platinum header and partition objects, as infra/aws/lambda/investor-reporting/holdings/publication.py _load_accepted_row and _load_parts read them. Object versions read by s3api get-object with the version id named in the index.",
+    "Count definition: a SECURITY node is one with node_kind SECURITY. cash-type = sub_asset_class trimmed and lower-cased equal to cash. already_cash = cash-type with asset_class cash. would_move = cash-type minus already_cash (IB-pr-526 definition). Canonical branch = display.symbol is an exact key of the canonical table; fallback branch = the rest of would_move. Canonical plus fallback equals would_move for each firm.",
+    "Canonical table: one dynamodb scan of etf-classifications (us-east-1, projection ticker, asset_class, sub_asset_class) by the worker identity, paginated to the end in 3 pages (4,616 + 4,587 + 2,158 = 11,361 items; ScannedCount equal per page). Cash-subclass rows (sub trimmed and lower-cased equal to cash): 365. Canonical rows carrying Money Market: 22; T-Bill: 11. These are NOT moved by the rule (sub Cash only) and remain fixed_income as served by the canonical table. CUSIP-keyed rows are not read by the display-symbol branch.",
+    "FDRXX: one get-item on the canonical table (read): found, asset_class fixed_income, sub_asset_class Cash.",
+    "Cash definition used: sub-class Cash only (trimmed, lower-cased equal to cash). Money Market and T-Bill sub-classes are not moved. Layer fact: the fallback branch's cash-subclass holdings stay as served: 49financial 0, cottonwood 215, inflection 67.",
+    "Upper bounds: the vs_ib526 upper bounds are the IB-pr-526 counts (32, 253, 841) on the same accepted business dates, so delta 0 on every firm. The blast radius of the canonical-only rule is the canonical_branch counts (32, 38, 774; 844 in total), not the would_move upper bounds.",
+    "Surprise rows filed: IRPT_BCKEND-D2-W375-S1 (the producer named by apply_cash_rule is not in the tree at base), S2 (the ticker-shape definition admits identifiers that are not symbols), S3 (101 SECURITY nodes of 49financial carry no display symbol), S4 (the publication runner's schedule and deploy target were not located within this read).",
+    "Scratch: the snapshots and the canonical scan were held in C:/dev/_scratch375, outside the worktree, and counted by read-only scripts; the scratch is deleted at the end of the run by a bounded script. No object body, node value or identifier is written to a tracked file.",
+    "Not read: the fallback table (bd-securities), any holding value, any account identifier or name, any object body other than the accepted publication, the body of current/publish_refusal.json (head-object only)."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

@@ -1,0 +1,31 @@
+== ticket arms, PKG-3 literal (no prior_attached_at)
+  T4a     ok   T4a ADMITTED status=201 | status=201 body_sha=4e8e5e9fe29899e5
+  T4b     ok   T4b REFUSED status=400 | status=400 count 4->4
+  LIST-A  ok   LIST-A OK own_rows=2 eight_members=true foreign=0 | status=200 rows=2 eight=True foreign=0
+  LIST-B  ok   LIST-B OK foreign=0 | status=200 rows=1 foreign=0
+  GET-B   ok   GET-B REFUSED status=403 | status=403
+  PKG-1   ok   PKG-1 OK report_ref_set | status=200
+  PKG-2   ok   PKG-2 OK unchanged status=409 code=PACKAGE_ALREADY_ATTACHED | status=409 code=PACKAGE_ALREADY_ATTACHED item_unchanged=True
+  PKG-3   FAIL PKG-3 FAIL status=409 code=PACKAGE_ALREADY_ATTACHED | status=409 code=PACKAGE_ALREADY_ATTACHED item_unchanged=True prior_sent=False
+  would-be sends by arm: {"T4a": [["DL", "TCK-20261014-47b1821b"], ["ack", "FA-simulator-address"]]}
+== ticket arms, PKG-3 sends prior_attached_at
+  T4a     ok   T4a ADMITTED status=201 | status=201 body_sha=556e93c9d3592057
+  T4b     ok   T4b REFUSED status=400 | status=400 count 4->4
+  LIST-A  ok   LIST-A OK own_rows=2 eight_members=true foreign=0 | status=200 rows=2 eight=True foreign=0
+  LIST-B  ok   LIST-B OK foreign=0 | status=200 rows=1 foreign=0
+  GET-B   ok   GET-B REFUSED status=403 | status=403
+  PKG-1   ok   PKG-1 OK report_ref_set | status=200
+  PKG-2   ok   PKG-2 OK unchanged status=409 code=PACKAGE_ALREADY_ATTACHED | status=409 code=PACKAGE_ALREADY_ATTACHED item_unchanged=True
+  PKG-3   ok   PKG-3 REFUSED status=409 code=REPORT_REF_ALREADY_RECORDED_OTHER | status=409 code=REPORT_REF_ALREADY_RECORDED_OTHER item_unchanged=True prior_sent=True
+  would-be sends by arm: {"T4a": [["DL", "TCK-20261014-ff845dd9"], ["ack", "FA-simulator-address"]]}
+== PKG-2 as a replace (same body + prior_attached_at): status=200 item_unchanged=False (the replace path rewrites the package and appends an event)
+== door files through the real template reader (sha256 equals r19.3 a61cd0c622f8: True)
+  D1 basis=USD ERROR codes=['ACCOUNT_COLUMN_SEVERAL_VALUES'] all codes=['ACCOUNT_COLUMN_SEVERAL_VALUES']
+  D2 basis=USD ERROR codes=[] all codes=[]
+  D3 basis=SHARES ERROR codes=[] all codes=[]
+== default price date now (New York prior trading day, the door's own function): 2026-10-12
+== C1 toolchain: portal origin/PROD 10e7664d6c, bun found
+  fixture NEEDS_CORRECTION  -> PARSED
+  fixture RESOLVING         -> PARSED
+  fixture NORMALIZED        -> PARSED
+  negative control (wrong contract_version) -> THREW EnvelopeMismatch investor-reporting analysis-input-upload: response envelope field 'contract_version' does not satisfy the v1 contract

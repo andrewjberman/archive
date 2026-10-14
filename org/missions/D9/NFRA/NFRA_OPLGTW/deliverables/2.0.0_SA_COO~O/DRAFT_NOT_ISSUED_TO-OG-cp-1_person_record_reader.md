@@ -50,7 +50,7 @@ design choice below is decided; do not re-decide any of it.
    ```
    {"key": "POLICY#<tid>#<oid> / person_access",
     "writer": "the one grant writer (NFRA_MCPORTAL C18); Andrew-only writes (C2)",
-    "fields": {"status": "active | revoked", "revision": "int >= 1",
+    "fields": {"status": "active | revoked", "revision": "int >= 1", "stopped": "bool (default false)",
                "tools_allow": "[tool name]", "tools_deny": "[tool name]",
                "channels_allow": "[channel id]", "channels_deny": "[channel id]",
                "updated_at": "ISO-8601 UTC", "updated_by": "principal hash"},
@@ -74,6 +74,10 @@ design choice below is decided; do not re-decide any of it.
    - (a) **Unchanged and first:** the Opal-users-only gate, the C2 owner gate, tier admission (OG-bd-3) and `decide()`'s
      data-grant rules. A denial from any of them is NEVER overridden by a record. The data grants are not "the floor";
      the floor is the deploy-time files.
+   - (b0) **STOP (2.0.0_SA_COO~MP msg 33963; MCPORTAL FWD-21 DONE WHEN "the person stopped and restored"):** an active
+     record with `stopped: true` denies EVERY tool to that principal, the master_admin included, code
+     `person_record_denied`. It is checked first among the record rules, and it is a narrowing, so "can narrow anything"
+     covers it. Restoring the person is `stopped: false` (or revoking the record, which returns the floor).
    - (b) **NARROW:** for ANY principal, the master_admin included ("can narrow anything"), an active record denies a
      tool in `tools_deny`, or a tool whose channel is in `channels_deny`. Code `person_record_denied`. Apply it in
      `tool_denial` (so `_run` and `call_tool` refuse) and in `visible_tools` (so the listing drops it). Deny wins over
@@ -95,7 +99,9 @@ design choice below is decided; do not re-decide any of it.
    - `test_ogcp1_ac01`: no record, and a `revoked` record, give answers identical to today for one floor-allowed tool, one
      identity-scope-denied tool and one data-grant tool.
    - `test_ogcp1_ac02`: `tools_deny` and `channels_deny` each deny a tool the floor admits, for a standard principal AND a
-     master_admin; the tool is absent from `visible_tools`; code `person_record_denied`.
+     master_admin; the tool is absent from `visible_tools`; code `person_record_denied`. And a `stopped: true` record
+     denies every tool (a floor-allowed one, a data-grant one and a tier tool) for a master_admin; setting it back to
+     false restores today's answers.
    - `test_ogcp1_ac03`: for a SCOPED Opal identity, `tools_allow` admits a served tool its allowlist lacks, and
      `channels_allow` admits a served tool of that channel. Deny beats allow when both name the tool.
    - `test_ogcp1_ac04`: `tools_allow` naming a tool the gateway does not serve admits nothing, and it appears in
