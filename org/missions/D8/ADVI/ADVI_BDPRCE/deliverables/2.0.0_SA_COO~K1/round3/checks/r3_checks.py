@@ -7,6 +7,7 @@
   lotproof2  --file <LOT_PROOF2.json>    BP-c-5: the lot-key fixture proof, relationship id in the key
   sentinel   --file <SENTINEL.json>      BP-c-6: the sentinel line and the Monday/Tuesday export
   offcanon   --file <OFFCANON.json>      BP-c-7: the source of the lots priced off no canonical row
+  lotproof3  --file <LOT_PROOF3.json>    BP-c-5 re-seat: the v1.3 key (units), the fold without units recounted, the zero deferred
   ruleprobe3 / replay3 / packet3         Amendment 3 (R1.3): the same three records, plus the served-unit map and unit_changed 0
 
 Each prints one last line `<NAME> record ok ...` or `<NAME> record FAIL <why>`; exit 0 on ok. The graders prove shape,
@@ -207,6 +208,39 @@ def lotproof2(rec):
     return 0
 
 
+def lotproof3(rec):
+    need_keys = ["claim", "legacy_bytes_equal", "lot_rows", "lot_key", "units_in_key", "folded_without_units",
+                 "recount_without_units", "zero_fold", "address", "address_from_builder", "new_columns_in_legacy", "key_basis",
+                 "keyed_on_lot"]
+    why = need(rec, need_keys)
+    if why:
+        return fail("LOTPROOF3", why)
+    if rec["claim"] not in CLAIMS:
+        return fail("LOTPROOF3", "claim not in the closed set")
+    if rec["legacy_bytes_equal"] is not True:
+        return fail("LOTPROOF3", "the legacy output is not byte-unchanged")
+    if rec["key_basis"] not in ("relationship_id", "export_lot_id"):
+        return fail("LOTPROOF3", "key_basis must be relationship_id or export_lot_id")
+    if rec["key_basis"] == "relationship_id" and "relationship_id" not in rec["lot_key"]:
+        return fail("LOTPROOF3", "the lot key lacks relationship_id")
+    if rec["units_in_key"] is not True or ("units" not in rec["lot_key"] and rec["key_basis"] == "relationship_id"):
+        return fail("LOTPROOF3", "PRD v1.3: the lot key must carry units")
+    if not isinstance(rec["folded_without_units"], int) or rec["folded_without_units"] != rec["recount_without_units"]:
+        return fail("LOTPROOF3", "folded_without_units %s != the independent recount %s"
+                    % (rec["folded_without_units"], rec["recount_without_units"]))
+    if rec["zero_fold"] != "deferred_to_first_real_export":
+        return fail("LOTPROOF3", "zero_fold must read deferred_to_first_real_export (call 67ac)")
+    if rec["keyed_on_lot"] is not True or rec["address_from_builder"] is not True or not str(rec["address"]).startswith("s3://"):
+        return fail("LOTPROOF3", "keyed_on_lot and builder address are required")
+    if rec["new_columns_in_legacy"]:
+        return fail("LOTPROOF3", "Units or Cost Basis leaked into the legacy table")
+    if not isinstance(rec["lot_rows"], int) or rec["lot_rows"] < 1:
+        return fail("LOTPROOF3", "no lot rows")
+    print("LOTPROOF3 record ok legacy_equal=true lots=%d units_in_key=true folded_without_units=%d recount_equal=true zero_fold=deferred"
+          % (rec["lot_rows"], rec["folded_without_units"]))
+    return 0
+
+
 def sentinel(rec):
     why = head(rec, "SENTINEL") or need(rec, ["rerun", "deployed_fix", "runs_checked", "honest_lines", "dishonest_lines",
                                             "monday_tuesday", "window_rule", "cause"])
@@ -328,7 +362,7 @@ def packet3(rec):
 
 
 CMDS = {"ruleprobe2": ruleprobe2, "replay2": replay2, "packet2": packet2, "ruleprobe3": ruleprobe3,
-        "replay3": replay3, "packet3": packet3, "cap": cap, "lotproof2": lotproof2,
+        "replay3": replay3, "packet3": packet3, "lotproof3": lotproof3, "cap": cap, "lotproof2": lotproof2,
         "sentinel": sentinel, "offcanon": offcanon}
 
 
