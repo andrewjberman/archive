@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t62",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t62.share-class-symbol-forms.md",
+    "group": "OTHER",
+    "vintage_commit": "8a38f47d30"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "8a38f47d30",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t62.share-class-symbol-forms.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~54",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/yahoo_pull.py",
+      "kind": "script",
+      "commit_or_etag": "d8d0fec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no timer, no S3 write, no ledger, queue or shared-pacer write. Adds SHARE_CLASS_FORMS = {BRKB: BRK-B, BRKA: BRK-A} and yahoo_form(symbol); _default_fetch sends yahoo_form(symbol). The only live vendor call is the AC2 probe on a scratch pacer.",
+      "artifact_covered_by": [
+        "DQ9-t62-AC1",
+        "DQ9-t62-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
+      "kind": "script",
+      "commit_or_etag": "d8d0fec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: daily_draw.py was not run against the real store or with --s3. _yf_window sends yp.yahoo_form(symbol); the key of the window request is unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t62-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/batch_pull.py",
+      "kind": "script",
+      "commit_or_etag": "d8d0fec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no batch run against Yahoo. _default_fetch_many requests the de-duplicated yahoo_form list and reads each result and error back under yahoo_form(sym); the returned keys stay the symbol as given.",
+      "artifact_covered_by": [
+        "DQ9-t62-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_symbol_forms.py",
+      "kind": "test",
+      "commit_or_etag": "d8d0fec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: yfinance.Ticker and yfinance.download monkeypatched, pacer state in tmp_path; the two named tests of the order, both PASSED.",
+      "artifact_covered_by": [
+        "DQ9-t62-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "d8d0fec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row MDPF_DEMQUE-D1-W54-S1 appended at the end of the branch's copy, append-only (no existing row edited); surprise-row-gate OK (1 new row of 143 checked)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t62-AC1",
+      "criterion_verbatim": "DQ9-t62-AC1 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t62_tests.py -> FORM-OK (the two named tests: test_a_class_share_symbol_without_a_dash_is_pulled_in_its_yahoo_dash_form_and_keyed_as_given; test_a_symbol_with_no_override_is_pulled_unchanged_in_every_fetch_path).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t62_tests.py",
+      "output_evidence": "test_demque_symbol_forms.py::test_a_class_share_symbol_without_a_dash_is_pulled_in_its_yahoo_dash_form_and_keyed_as_given PASSED [ 50%]\ntest_demque_symbol_forms.py::test_a_symbol_with_no_override_is_pulled_unchanged_in_every_fetch_path PASSED [100%]\n============================== 2 passed in 1.37s ==============================\n\nFORM-OK\n(rc=0 from the check; run at HEAD d8d0fec)",
+      "denominator": "2 of 2 named tests PASSED by name (the file: 2 of 2 passed)",
+      "status": "PASS",
+      "expect": "FORM-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t62-AC2",
+      "criterion_verbatim": "DQ9-t62-AC2 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t62_probe.py -> PROBE-OK (ONE live Yahoo request: yahoo_pull.py --probe BRKB on its own scratch pacer; reads symbol=BRKB status=OK rows>=1000).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t62_probe.py",
+      "output_evidence": "PROBE symbol=BRKB status=OK rows=7656 splits=1 as_traded_2020-08-28=218.55\nPROBE-OK BRKB pulled through its Yahoo dash form: 7656 rows\n(rc=0 from the check; run at HEAD d8d0fec; one Yahoo request, on .scratch/demque_probe_state_BRKB.json)",
+      "denominator": "1 live request of 1 allowed; rows 7656 of a >= 1000 floor; symbol BRKB as given; status OK",
+      "status": "PASS",
+      "expect": "PROBE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "N/A-WITH-REASON: AC2 is a live vendor read and cannot be replayed to identical bytes; AC1 is offline. The folder run was executed once at HEAD d8d0fec.",
+      "observed": "AC1 offline stub tests PASSED by name; AC2 probe read PROBE-OK once; folder 216 passed, 0 failed",
+      "status": "N/A-WITH-REASON"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: do not merge box/dell1; the issuer unions at the drain"
+    },
+    {
+      "item": "daily_draw.py run against the real store, --s3, any S3 write, the queue, the ledger, the actuals and the shared pacer ~/.opal/demque/pacer.json",
+      "reason": "order BOUNDS: none touched; the probe wrote only .scratch/demque_probe_state_BRKB.json"
+    },
+    {
+      "item": "a second Yahoo request",
+      "reason": "order BOUNDS: ONE request in total (the AC2 probe); no other vendor call"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W54-S1: the order's dispatch instruction ends each commit with a Co-Authored-By line naming Claude Sonnet 5.5, but the executing agent is Claude Haiku 5.5; the commits carry the Haiku 5.5 trailer; OBSERVATION, no check depends on it"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~54/MDPF_DEMQUE.TO-DQ-t62.share-class-symbol-forms.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of yahoo_pull.py, daily_draw.py, batch_pull.py, test_demque_symbol_forms.py and the investigation file (commit d8d0fec)",
+      "result": "commit-gate All checks passed on 4 of 5 file(s); surprise-row-gate OK (1 new row of 143 checked); to-pipeline-gate OK (no task orders in the commit); missions-tree-check OK (0 violations); msg-verify MATCH; committed d8d0fec"
+    },
+    {
+      "tool": "python -m ruff check --select F,E9 --target-version py39",
+      "invocation": "lint of yahoo_pull.py, daily_draw.py, batch_pull.py, test_demque_symbol_forms.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "compile of the four changed Python files",
+      "result": "rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole demque folder, run from the worktree root at HEAD d8d0fec",
+      "result": "216 passed in 13.70s (rc=0; 0 failed)"
+    }
+  ]
+}
