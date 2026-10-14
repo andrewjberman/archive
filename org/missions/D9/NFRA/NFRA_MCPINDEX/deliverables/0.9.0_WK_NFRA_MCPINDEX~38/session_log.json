@@ -1,0 +1,21 @@
+{
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-14",
+  "serial": "0.9.0_WK_NFRA_MCPINDEX~38",
+  "worktree": "C:/tmp/wk-mcpindex-r14-38",
+  "branch": "wk-NFRA_MCPINDEX-38",
+  "base": "091f812b7b",
+  "steps": [
+    {"step": "first act", "command": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK", "result": "wk-NFRA_MCPINDEX-38; TREE-OK"},
+    {"step": "pin the four CRO files", "command": "git show <pin>:org/tier1_exec/4.0.0_SA_CRO~Z/deliverables/GATEWAY_DATA_CONTRACTS_20261014/<file> > <deliv>/<G>_pinned.md (G2@339a2804d7, G4@7ec87a87e5, G5@35f45893a7, G6@35f45893a7)", "result": "rc=0 x4; fenced dict contracts 131, 7, 36, 12 = 186"},
+    {"step": "tool census", "command": "timeout 120 python workflows/atom_decomposition/tool_census.py", "result": "rc=0; 70 tools; blackdiamond_list_fees present; no client_* tool present"},
+    {"step": "dry run", "command": "python workflows/atom_decomposition/gen_silver_rows.py --g2 .. --g4 .. --g5 .. --g6 .. --out .scratch/dry --deployed-tools census", "result": "rc=0; skipped 12 (schwab_08242234 and schwab_08335338 and schwab_08403355 dim_asset/balance/position/transaction); wrote 174 rows"},
+    {"step": "unit and integration tests", "command": "python -m unittest workflows.atom_decomposition.tests.test_gen_silver_rows -v", "result": "Ran 20 tests; OK"},
+    {"step": "real write", "command": "python workflows/atom_decomposition/gen_silver_rows.py ... --out workflows/atom_decomposition/catalog_entries --deployed-tools census", "result": "rc=0; wrote 174 rows to workflows/atom_decomposition/catalog_entries; git diff on the 85 pre-existing rows empty"},
+    {"step": "determinism", "command": "two runs of the generator into .scratch/det1 and .scratch/det2, diff -r", "result": "rc=0 both; diff empty; 174 files each"},
+    {"step": "commit gate", "command": "bash .tools/commit-gate.sh workflows/atom_decomposition/gen_silver_rows.py workflows/atom_decomposition/tests/test_gen_silver_rows.py", "result": "pre-commit gate clean for 2 of 2 file(s); rc=0"},
+    {"step": "criterion AC1", "command": "timeout 120 bash .../round14/checks/c14.AC1.sh; echo exit=$?", "result": "RESULT: PASS; exit=0"},
+    {"step": "criterion AC2", "command": "timeout 120 bash .../round14/checks/c14.AC2.sh; echo exit=$?", "result": "RESULT: PASS; exit=0"},
+    {"step": "criterion AC3", "command": "timeout 120 bash .../round14/checks/c14.AC3.sh; echo exit=$?", "result": "RESULT: PASS; exit=0"},
+    {"step": "surprise rows", "command": "append three rows NFRA_MCPINDEX-Z-W38-S1..S3 to INVESTIGATION_v1.md (fenced json array)", "result": "appended array parses as JSON; 317 rows; surprise-row-gate rc=0 with no staged rows (re-run at commit)"}
+  ]
+}
