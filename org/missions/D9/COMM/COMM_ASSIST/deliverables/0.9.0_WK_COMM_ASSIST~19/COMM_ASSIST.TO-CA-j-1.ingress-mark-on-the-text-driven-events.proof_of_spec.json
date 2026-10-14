@@ -1,0 +1,184 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-j-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-1.ingress-mark-on-the-text-driven-events.md",
+  "group": "OTHER",
+  "vintage_commit": "063dff2307"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+  "vintage_commit": "063dff2307",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-1.ingress-mark-on-the-text-driven-events.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~19",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/ingress_mark.py",
+   "kind": "script",
+   "commit_or_etag": "7af9d5d1f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New module, standard library only (hmac, hashlib, json, datetime). stamp() returns a copy with mark_at (UTC from now) and mark (HMAC-SHA256 over object_id, kind, mark_at and the canonical JSON of the payload without mark and mark_at). verify() returns ok, no-mark, bad-mark (hmac.compare_digest) or stale-mark (more than 15 minutes back or 5 minutes forward). KINDS = (sms.reply, owner.text). No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj1-AC1",
+    "CAj1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+   "kind": "script",
+   "commit_or_etag": "7af9d5d1f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Imports ingress_mark as im; _stamp(object_id, kind, payload) helper = im.stamp(a.secret(a.NAMES[secrets][ingress_mark]), ..., a.now_utc()). The four producer sites stamp: _route_commands owner.text (line 1303 at 7af9d5d1f4), _route_commands sms.reply (line 1327), on_owner_text sms.reply (line 1006), on_owner_reply sms.reply (line 1050). dispatch() runs the gate first for sms.reply and owner.text: _mark_mode() reads INGRESS_MARK_MODE at call time (unset or empty is off; an unknown value raises ValueError); _mark_refused() verifies, refuses a replayed mark as replayed-mark, records each failed check in state mark_refusals (last 50, reason and time only) and counts unmarked_seen; enforce returns unmarked-refused before any route runs; record counts and acts; off does not read the secret. marks_seen keeps the last 100. No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj1-AC1",
+    "CAj1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/NAMES.json",
+   "kind": "config_data",
+   "commit_or_etag": "7af9d5d1f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "One row added to secrets: ingress_mark = teams/global/ingress-mark. The commit-time naming gate read it: NAMING CONFORMANT data/transcripts/scripts/teams_chat/NAMES.json:86 as SECRET. The secret resource is not created here (cell CA-j-2).",
+   "artifact_covered_by": [
+    "CAj1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_teams_chat_tenant.py",
+   "kind": "test",
+   "commit_or_etag": "7af9d5d1f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Fakes seeds the ingress secret cache (monkeypatch.setitem on assist._SECRETS, MARK_KEY stand-in) so no test reads AWS. Helpers unmarked(payload) and mark_verifies(sent). test_route_text_only_from_the_owner_and_by_tag now checks the original fields, the mark_at of the fixed clock, and that the mark verifies for the ingress sms.reply, the owner.text and the #0 route. test_several_tagged_replies_in_one_text asserts only the action and event id, so it is unchanged and still passes. Measured: 64 passed in this file (I2-REGRESSION).",
+   "artifact_covered_by": [
+    "CAj1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_ingress_mark.py",
+   "kind": "test",
+   "commit_or_etag": "7af9d5d1f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New file, 17 tests, all pass (0.29 s): kinds; stamp/verify round trip; stamp returns a copy and changes no input; a naive clock reads as UTC; tamper (action, object id, kind, secret, mark_at, mark type) is bad-mark; no-mark when either field is absent; stale window 15 minutes back and 5 minutes forward with the boundaries; the handler re-sends of on_owner_text and on_owner_reply are stamped and verify; enforce acts on a marked event and refuses unmarked, tampered, stale and replayed events, changing nothing; enforce refuses an unmarked owner.text; record acts and counts; off is today's behaviour and never reads the secret (unset and empty); an unknown mode raises on a text event; the refusal list is capped at 50 and the mark list at 100.",
+   "artifact_covered_by": [
+    "CAj1-AC1",
+    "CAj1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_teams_chat_natural.py",
+   "kind": "test",
+   "commit_or_etag": "b1b0e1c6a0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AMENDMENT 1 (issuer ruling on COMM_ASSIST-W19-S2, commit 53be82a3cd) put this file in the order's paths. Two exact-payload asserts changed, on the handler's own sms.reply re-sends (test_a_send_is_echoed_for_a_1_and_a_redraft_goes_at_once, the on_owner_text send and the on_owner_reply send): each compares the original fields through unmarked() and asserts the mark_at of the test clock and mark_verifies. The test patches a.now_utc to NOW for the re-sends, as the tenant tests do. The import line gains mark_verifies and unmarked from test_teams_chat_tenant. Nothing else in the file changed. Measured: 8 of 8 pass alone with PYTHONPATH on the tests directory; 544 of 544 pass in the directory run.",
+   "artifact_covered_by": [
+    "CAj1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAj1-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j1_mark.py\" expect: J1-MARK ok=True arms=9 of 9",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j1_mark.py\"",
+   "output_evidence": "(run from the worktree root on commit 7af9d5d1f4, twice, rc 0 both times) J1-MARK ok=True arms=9 of 9 failed=none reason=none. Base 063dff2307 (mutant): J1-MARK ok=False arms=0 of 9 failed=harness reason=ImportError: cannot import name 'ingress_mark'. RE-RUN after AMENDMENT 1 and commit b1b0e1c6a0 (from the worktree root, rc 0): J1-MARK ok=True arms=9 of 9 failed=none reason=none.",
+   "denominator": "9 of 9 arms pass: ingress-sms-reply-marked, ingress-owner-text-marked, every-producer-site-stamps, enforce-marked-acts, enforce-unmarked-refused, enforce-tampered-refused, enforce-stale-and-replayed-refused, record-mode-acts-and-counts, off-mode-unchanged",
+   "expect": "J1-MARK ok=True arms=9 of 9",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAj1-AC2",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "output_evidence": "(run from the worktree root on commit b1b0e1c6a0, rc 0) I2-REGRESSION ok=True passed=64 failed=0 reason=none: the criterion's own invocation, which covers test_teams_chat_tenant.py only. The wider scope the criterion names (the assistant's flow tests, the text path included) was run as the whole set: python -m pytest data/transcripts/scripts/tests -q from the worktree root (no PYTHONPATH needed for the directory run), output '544 passed in 68.91s', rc 0, 544 tests collected. test_teams_chat_natural.py is inside that set: 8 of 8 pass there; run alone it needs PYTHONPATH=data/transcripts/scripts/tests (without it the file fails at collection, rc 2, surprise COMM_ASSIST-W19-S5).",
+   "denominator": "64 of 64 in test_teams_chat_tenant.py (the invocation's own scope); 544 of 544 across data/transcripts/scripts/tests (the wider flow-test set, 0 failed), including test_teams_chat_natural.py 8 of 8.",
+   "expect": "I2-REGRESSION ok=True",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAj1-AC3",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\" expect: I13-FRESH ok=True arms=6 of 6",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\"",
+   "output_evidence": "(run from the worktree root on commit 7af9d5d1f4, rc 0) I13-FRESH ok=True arms=6 of 6 failed=none reason=none RE-RUN after AMENDMENT 1 and commit b1b0e1c6a0 (from the worktree root, rc 0): I13-FRESH ok=True arms=6 of 6 failed=none reason=none.",
+   "denominator": "6 of 6 arms pass: one-hour-old-acts, just-inside-24h-acts, 25h-old-refused, ten-minutes-future-refused, missing-signed-at-refused, unparsable-signed-at-refused",
+   "expect": "I13-FRESH ok=True arms=6 of 6",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "CAj1-AC1 run against the base 063dff2307, before this order's edits (the baseline run in the worktree): the module does not exist",
+   "expected": "J1-MARK ok=False (the check prints ok=False at the base)",
+   "observed": "J1-MARK ok=False arms=0 of 9 failed=harness reason=ImportError: cannot import name 'ingress_mark' from 'data.transcripts.scripts.teams_chat'",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "CAj1-AC1 run twice on commit 7af9d5d1f4; the J1-MARK lines compared",
+   "observed": "two runs identical: J1-MARK ok=True arms=9 of 9 failed=none reason=none",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "deploy, AWS calls, network, the secret resource, the mode",
+   "reason": "the order says the change is not deployed here; no AWS call was made; the secret resource, the mode and the deploy are cells CA-j-2 and CA-j-3. INGRESS_MARK_MODE is not set anywhere by this order."
+  },
+  {
+   "item": "the issuer's three checks",
+   "reason": "the order says read them and do not edit them; none was edited"
+  },
+  {
+   "item": "the portal submodule gitlink",
+   "reason": "git diff in the worktree lists portal as modified before this order's edits; not touched and not committed (commits name explicit paths)"
+  }
+ ],
+ "surprises": [
+  "COMM_ASSIST-W19-S1: the order places two sms.reply re-sends in on_owner_text; on_owner_text holds one (tenant.py line 999 at 063dff2307) and the other is in on_owner_reply (line 1043). All four producer sites are stamped.",
+  "COMM_ASSIST-W19-S2: test_teams_chat_natural.py, outside the order's paths at 7af9d5d1f4, asserted the exact payloads of the handler re-sends and failed. RESOLVED by AMENDMENT 1 (issuer ruling, commit 53be82a3cd, which put the file in the paths) and by commit b1b0e1c6a0, which updates the two asserts. The row itself is not edited.",
+  "COMM_ASSIST-W19-S3: INGRESS_MARK_MODE values other than off, record and enforce are unspecified; the worker raises ValueError for a text-driven event on an unknown value.",
+  "COMM_ASSIST-W19-S4: the flow-test harness seeds assist._SECRETS instead of patching a.secret, because a patch inside Fakes overwrote the check's own a.secret patch (J1-MARK read 5 of 9 before the change).",
+  "COMM_ASSIST-W19-S5: test_teams_chat_natural.py does not collect when run alone from the root (bare sibling import; pytest.ini does not put the tests directory on the path). The directory run collects it. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "COMM_ASSIST-W19-S6: CAj1-AC2's invocation (check_i2_regression.py) runs test_teams_chat_tenant.py only, so its ok=True does not show the sibling flow file; the wider set was run as the named scope. OBSERVATION, INERT, UNDER_INVESTIGATION."
+ ],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~19/COMM_ASSIST.TO-CA-j-1.ingress-mark-on-the-text-driven-events.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j1_mark.py\"",
+   "result": "J1-MARK ok=True arms=9 of 9 failed=none reason=none (rc 0)"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "result": "I2-REGRESSION ok=True passed=64 failed=0 reason=none (rc 0)"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\"",
+   "result": "I13-FRESH ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+  },
+  {
+   "tool": "pytest (wider set)",
+   "invocation": "timeout 120 python -m pytest data/transcripts/scripts/tests -q -p no:cacheprovider (from the worktree root)",
+   "result": "544 passed in 68.91s, rc 0; 544 tests collected; 0 failed"
+  },
+  {
+   "tool": "pytest (natural file alone)",
+   "invocation": "PYTHONPATH=data/transcripts/scripts/tests timeout 120 python -m pytest data/transcripts/scripts/tests/test_teams_chat_natural.py -q -p no:cacheprovider",
+   "result": "8 passed in 0.24s, rc 0; without PYTHONPATH the file fails at collection (ModuleNotFoundError, rc 2)"
+  },
+  {
+   "tool": "commit gate",
+   "invocation": "bash .tools/safe-commit.sh (commit b1b0e1c6a0, paths: test_teams_chat_natural.py and INVESTIGATION_v1.md)",
+   "result": "rc 0; surprise-row-gate OK: 2 new row(s), all carry their step-7 fields; to-pipeline-gate OK"
+  }
+ ]
+}
