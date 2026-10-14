@@ -34,9 +34,12 @@ acts = set(re.findall(r"\"(s3:[A-Za-z*]+|kms:[A-Za-z*]+|[a-z0-9]+:[A-Za-z*]+)\""
 nonread = len(acts - {"s3:GetObject", "s3:ListBucket", "s3:prefix"})
 named = "gateway-global-harvest-read-policy" in t or "harvest-read" in t
 wide = len(re.findall(r"opal-data-harvest/\*", t))   # a bucket-wide object ARN rides beside the 24 unseen by objs
-print("grant object prefixes equal SERVED_PREFIXES: %d of %d, extra %d; list condition prefixes %d of %d; non-read actions %d; bucket-wide object ARNs %d; builder name %s"
-      % (len(objs & want), len(want), len(objs - want), len(conds & want), len(want), nonread, wide, "yes" if named else "no"))
-print("OK" if want and len(want) == 24 and objs == want and want <= conds and nonread == 0 and wide == 0 and named else "NO")
+# A5: harvest_read.py reads through internal_role.s3_client() (the assumed gateway-global-internal-reader-role, no
+# fallback), so the one policy attaches to aws_iam_role.int_reader and never to aws_iam_role.gw.
+role_ok = "aws_iam_role.int_reader" in t and "aws_iam_role.gw" not in t
+print("grant object prefixes equal SERVED_PREFIXES: %d of %d, extra %d; list condition prefixes %d of %d; non-read actions %d; bucket-wide object ARNs %d; builder name %s; attached to the internal reader role %s"
+      % (len(objs & want), len(want), len(objs - want), len(conds & want), len(want), nonread, wide, "yes" if named else "no", "yes" if role_ok else "no"))
+print("OK" if want and len(want) == 24 and objs == want and want <= conds and nonread == 0 and wide == 0 and named and role_ok else "NO")
 EOF
 )
 tf=$(printf '%s' "$tf" | tr -d '\r')
