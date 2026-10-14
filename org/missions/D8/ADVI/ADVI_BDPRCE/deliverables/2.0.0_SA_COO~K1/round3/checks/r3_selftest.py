@@ -65,6 +65,11 @@ GOOD["ruleprobe3"] = _r13("ruleprobe2", unit_changed_assets=0)
 GOOD["replay3"] = _r13("replay2", unit_changed_rows=0, unit_map_file="U.csv", unit_withheld_rows=1)
 GOOD["packet3"] = _r13("packet2", held_unit_rows=0)
 
+GOOD["lotproof3"] = {"claim": "measured", "legacy_bytes_equal": True, "lot_rows": 5, "keyed_on_lot": True, "key_basis": "relationship_id",
+                     "lot_key": ["relationship_id", "account_id", "asset_id", "open_date", "unit_cost", "units"], "units_in_key": True,
+                     "folded_without_units": 192, "recount_without_units": 192, "zero_fold": "deferred_to_first_real_export",
+                     "address": "s3://b/k", "address_from_builder": True, "new_columns_in_legacy": []}
+
 
 def mutant(kind, why, edit):
     rec = copy.deepcopy(GOOD[kind])
@@ -73,6 +78,12 @@ def mutant(kind, why, edit):
 
 
 MUTANTS = [
+    mutant("lotproof3", "units not in key", lambda r: r.update(units_in_key=False)),
+    mutant("lotproof3", "key lacks units", lambda r: r.update(lot_key=["relationship_id", "account_id", "asset_id", "open_date", "unit_cost"])),
+    mutant("lotproof3", "fold differs from the recount", lambda r: r.update(recount_without_units=191)),
+    mutant("lotproof3", "zero claimed", lambda r: r.update(zero_fold="zero")),
+    mutant("lotproof3", "legacy changed", lambda r: r.update(legacy_bytes_equal=False)),
+    mutant("lotproof3", "units leaked into legacy", lambda r: r.update(new_columns_in_legacy=["units"])),
     mutant("ruleprobe3", "amendment R1.2 offered", lambda r: r.update(amendment="R1.2")),
     mutant("ruleprobe3", "a unit changed", lambda r: r.update(unit_changed_assets=1)),
     mutant("ruleprobe3", "unit classes do not sum", lambda r: r["served_units"].update(per100=4)),
