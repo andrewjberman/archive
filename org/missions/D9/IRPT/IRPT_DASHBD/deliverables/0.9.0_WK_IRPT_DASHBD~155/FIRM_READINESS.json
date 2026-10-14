@@ -1,0 +1,305 @@
+{
+  "firms": [
+    {
+      "firm": "cottonwood",
+      "bucket": "opal-data-cot",
+      "irpt_prefix_exists": false,
+      "tables": [
+        {
+          "table": "account_return_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm gold canonical account gains, daily by account (value, price return, realized, unrealized, income) at s3://opal-data-cot/gold/canonical/account_gains/, joined to firm silver transactions (external flow and income by account) at s3://opal-data-cot/silver/transactions/ and firm silver allocations (cash value by account) at s3://opal-data-cot/silver/allocations/. All in the firm's own bucket.",
+          "gap_in_words": "The gold account gains files stop at a June 2026 partition while the silver inputs run to October 2026, and daily history starts in spring 2026, so no full-inception series exists yet. Flow classes need Black Diamond's transaction types classified inside the Cottonwood adapter, which is not written. The IRPT holdings price return exists for one QA date only, so the holdings price-return guard has no daily series; the firm gold price return would stand in and is not checked against it. Cash in the whole-account value comes from allocations and is not yet verified against a balance table.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_class_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_CLASS_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm gold canonical holdings, daily by account and ticker with market value and cash-equivalent flag, at s3://opal-data-cot/gold/canonical/holdings/, mapped to a canonical class through the shared classifier the PRD names.",
+          "gap_in_words": "No asset-class column exists in any Cottonwood dataset read here. The mapping needs the shared etf-classifications lookup, which this read did not open; every holding without a match must be UNCLASSIFIED rather than guessed. The cash-equivalent flag covers cash only in part.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_activity_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_ACTIVITY_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm gold canonical account gains (daily by account: realized, unrealized, income, net change) at s3://opal-data-cot/gold/canonical/account_gains/, with contributions and withdrawals from firm silver transactions at s3://opal-data-cot/silver/transactions/ split by flow class.",
+          "gap_in_words": "The gold account gains file has a net change and a growth field but no contribution or withdrawal split, so the split comes from transaction classes in the adapter. Its latest partition is June 2026, behind the silver inputs. No fee amount is carried, which is by design (the fee rail is unused).",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_transaction",
+          "contract_file": null,
+          "source_exists": true,
+          "candidate_source": "Firm silver transactions, one row per Black Diamond transaction (action, transaction type and subtype, external-flow flag, income, units, price, market value, fees, ticker, CUSIP, trade and settle dates) at s3://opal-data-cot/silver/transactions/.",
+          "gap_in_words": "The adapter must classify Black Diamond's transaction types, and that classification is not yet written. Daily history starts in March 2026. No contract file exists for this table yet.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_lot_realized",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_LOT_REALIZED_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm silver realized closings, lot rows with open date, trade date, units, cost basis, proceeds, short and long term gain or loss, ticker, CUSIP and account, at s3://opal-data-cot/silver/realized/.",
+          "gap_in_words": "No lot identifier and no custodian cost basis or basis-source column exist, so lot_id and basis_source must be derived or carried null with a coverage value. Holding term is derived from the open and trade dates. About 120 daily partitions exist.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_lot_unrealized_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_LOT_UNREALIZED_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm silver unrealized, daily open-lot rows with open date, cost basis, market value, units, short and long term gain or loss, ticker, CUSIP and account, at s3://opal-data-cot/silver/unrealized/ (daily from April 2026).",
+          "gap_in_words": "No lot identifier and no custodian cost basis exist; the lot key is account, ticker, CUSIP and open date. The market value of the rows must be checked against the holdings gold before a figure is served.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_dim",
+          "contract_file": null,
+          "source_exists": true,
+          "candidate_source": "Firm silver allocations, one row per account (account type, registration type, custodian, owner, Black Diamond relationship id and name, strategy, account and cash market values) at s3://opal-data-cot/silver/allocations/, with firm silver account attributes at s3://opal-data-cot/silver/account_attributes/.",
+          "gap_in_words": "Allocations carry no account display-name column; the owner field is the nearest. The relationship id is Black Diamond's grouping and is not a verified household. The account attributes silver holds one partition only.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "market_topic_daily",
+          "contract_file": null,
+          "source_exists": false,
+          "candidate_source": "None in this bucket. The topic table is market-wide, not a firm input, and has no registry row or contract yet.",
+          "gap_in_words": "No market topic table exists in the Cottonwood bucket or the Inflection bucket. The PRD places it in a general platinum home decided in the round that builds FWD-6, so this is a shared dependency with every firm, not a Cottonwood-only gap.",
+          "reuses_existing_gold": false
+        }
+      ],
+      "existing_gold_inputs": [
+        {
+          "what": "IRPT_BCKEND holdings snapshot, JSON on the QA prefix, one date only (not parquet gold; the only IRPT_BCKEND output found in this bucket)",
+          "address": "s3://opal-data-cot/investor-reporting/qa/holdings/",
+          "columns_served": 19
+        },
+        {
+          "what": "Firm gold canonical holdings, daily by account and ticker (firm gold pipeline, not IRPT_BCKEND)",
+          "address": "s3://opal-data-cot/gold/canonical/holdings/",
+          "columns_served": 8
+        },
+        {
+          "what": "Firm gold canonical account gains, daily by account (firm gold pipeline; latest partition June 2026)",
+          "address": "s3://opal-data-cot/gold/canonical/account_gains/",
+          "columns_served": 9
+        },
+        {
+          "what": "Firm gold canonical performance, relationship grain, not account grain (latest partition June 2026)",
+          "address": "s3://opal-data-cot/gold/canonical/performance/",
+          "columns_served": 3
+        },
+        {
+          "what": "Firm gold positions cube (account, asset name, units)",
+          "address": "s3://opal-data-cot/gold/positions_cube/",
+          "columns_served": 2
+        },
+        {
+          "what": "Firm silver holdings, daily",
+          "address": "s3://opal-data-cot/silver/holdings/",
+          "columns_served": 9
+        },
+        {
+          "what": "Firm silver transactions, daily",
+          "address": "s3://opal-data-cot/silver/transactions/",
+          "columns_served": 18
+        },
+        {
+          "what": "Firm silver realized closings, daily",
+          "address": "s3://opal-data-cot/silver/realized/",
+          "columns_served": 11
+        },
+        {
+          "what": "Firm silver unrealized open lots, daily",
+          "address": "s3://opal-data-cot/silver/unrealized/",
+          "columns_served": 10
+        },
+        {
+          "what": "Firm silver allocations, daily (account to relationship, custodian, cash)",
+          "address": "s3://opal-data-cot/silver/allocations/",
+          "columns_served": 11
+        },
+        {
+          "what": "Firm silver account attributes (one partition)",
+          "address": "s3://opal-data-cot/silver/account_attributes/",
+          "columns_served": 3
+        },
+        {
+          "what": "Firm silver canonical prices (one file)",
+          "address": "s3://opal-data-cot/silver/prices/",
+          "columns_served": 3
+        }
+      ],
+      "readiness": "BLOCKED",
+      "blockers": "market_topic_daily has no source in this bucket; it is a shared general table, and without it the report cannot serve its topic view. Excluding that shared table, all seven firm-level tables have a firm source. Other blockers: the daily history starts in spring 2026 (about six months); the gold account gains file is stale (June 2026); no daily IRPT holdings gold exists (the QA holdings JSON is one date); the flow and transaction-type classification must be written into the adapter; the asset-class lookup is not yet read; and the holdings_snapshot builder reads a blackdiamond/cottonwood/silver/ prefix that is absent from this bucket (blackdiamond/cot/ holds one object), so its path is unverified.",
+      "household_dimension": "none in the ADVI household crosswalk (its contract scope is 49 Financial accounts only); the candidate grouping is the Black Diamond relationship id on the firm silver allocations, not yet verified as a household.",
+      "shadow_pull_proposed": false
+    },
+    {
+      "firm": "inflection",
+      "bucket": "opal-data-inf",
+      "irpt_prefix_exists": false,
+      "tables": [
+        {
+          "table": "account_return_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm gold account gains, daily by account since 2019 (value, cost basis, unrealized gain, term) at s3://opal-data-inf/gold/account_gains/, firm gold holdings daily since 2019 (units, price, market value) at s3://opal-data-inf/gold/holdings/, Orion transactions for flows and income at s3://opal-data-inf/silver/transactions/, and the custodial-cash flag on Orion positions at s3://opal-data-inf/silver/api_dims/positions_mv/.",
+          "gap_in_words": "Flow classes come from the ratified taxonomy file in the data/inf scripts tree, which the adapter must load. Whether Orion's returns include dividends is not measured in this read, as the PRD requires. The IRPT holdings price return exists for one QA date only, so the guard has no daily series.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_class_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_CLASS_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Orion positions silver, one row per position with Orion asset class and product category and the custodial-cash flag, daily since 2020, at s3://opal-data-inf/silver/api_dims/positions_mv/.",
+          "gap_in_words": "The Orion asset-class vocabulary must map to the canonical classes through the shared classifier, and the firm gold holdings carry no class column. The roll-up from positions to class is an adapter step not yet written.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_activity_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_ACTIVITY_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Orion transactions by taxonomy class per account per day (silver transactions at s3://opal-data-inf/silver/transactions/), with gold account gains for realized and unrealized gain at s3://opal-data-inf/gold/account_gains/.",
+          "gap_in_words": "The Orion activity silver is a three-year rollup per account, and its latest partition is weeks old, so the daily contributions and withdrawals must be derived from transactions by the taxonomy. No fee column exists, which is by design (the fee rail is unused).",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_transaction",
+          "contract_file": null,
+          "source_exists": true,
+          "candidate_source": "Orion transactions silver, one row per transaction (transaction id, account, date, type id and description, amount, units, NAV price, ticker, activity category, current account and cash values) at s3://opal-data-inf/silver/transactions/.",
+          "gap_in_words": "Orion type ids stay inside the Inflection adapter through the ratified taxonomy, which the adapter must load. No contract file exists for this table yet.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_lot_realized",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_LOT_REALIZED_CONTRACT.json",
+          "source_exists": false,
+          "candidate_source": "None at lot grain. Silver tax realized at s3://opal-data-inf/silver/api_dims/tax_realized/ holds account totals per period (cost basis, short and long term gain or loss), not closing lots. Gold lots at s3://opal-data-inf/gold/lots/ holds open lots only.",
+          "gap_in_words": "No lot-level closing events exist in this bucket. Under the PRD's rule the Inflection lot coverage stays NO_LOTS until Eclipse tax lots are shown populated; the account-level realized totals can carry an account-grain realized line, not lot rows.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_lot_unrealized_daily",
+          "contract_file": "org/standards/IRPT_DASHBD_ACCOUNT_LOT_UNREALIZED_DAILY_CONTRACT.json",
+          "source_exists": true,
+          "candidate_source": "Firm gold open lots at s3://opal-data-inf/gold/lots/ (buy date, buy price, original and current units, cost basis, account, ticker, custodian; dated files and a latest file).",
+          "gap_in_words": "The PRD's NO_LOTS rule applies until Eclipse tax lots are shown populated. Whether these gold lots come from Eclipse or from Orion is not established in this read, so the rule must be checked before lots are served. Daily lot history is not measured here.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "account_dim",
+          "contract_file": null,
+          "source_exists": true,
+          "candidate_source": "Orion accounts silver, one row per account, current partition (account identifiers, type, status, household id, representative, model, fee schedule, custodian, sweep and sleeve flags) at s3://opal-data-inf/silver/api_dims/accounts_v2/.",
+          "gap_in_words": "No required column is missing. The household key is the Orion household id on this table. The separate household silver holds one April partition only.",
+          "reuses_existing_gold": false
+        },
+        {
+          "table": "market_topic_daily",
+          "contract_file": null,
+          "source_exists": false,
+          "candidate_source": "None in this bucket. The topic table is market-wide, not a firm input, and has no registry row or contract yet.",
+          "gap_in_words": "No market topic table exists in the Inflection bucket or the Cottonwood bucket. The PRD places it in a general platinum home decided in the round that builds FWD-6, so this is a shared dependency with every firm, not an Inflection-only gap.",
+          "reuses_existing_gold": false
+        }
+      ],
+      "existing_gold_inputs": [
+        {
+          "what": "IRPT_BCKEND holdings snapshot, JSON on the QA prefix, one date only (not parquet gold; the only IRPT_BCKEND output found in this bucket)",
+          "address": "s3://opal-data-inf/investor-reporting/qa/holdings/",
+          "columns_served": 17
+        },
+        {
+          "what": "Firm gold holdings, daily since 2019, by account and ticker (firm gold pipeline)",
+          "address": "s3://opal-data-inf/gold/holdings/",
+          "columns_served": 7
+        },
+        {
+          "what": "Firm gold account gains, daily since 2019, by account (firm gold pipeline)",
+          "address": "s3://opal-data-inf/gold/account_gains/",
+          "columns_served": 10
+        },
+        {
+          "what": "Firm gold positions cube, daily since 2019",
+          "address": "s3://opal-data-inf/gold/positions_cube/",
+          "columns_served": 5
+        },
+        {
+          "what": "Firm gold open lots, dated files and a latest file (cost basis by lot; provenance against the Eclipse tax-lot rule not established here)",
+          "address": "s3://opal-data-inf/gold/lots/",
+          "columns_served": 8
+        },
+        {
+          "what": "Orion positions silver, one row per position, daily since 2020 (asset class, product category, custodial-cash flag)",
+          "address": "s3://opal-data-inf/silver/api_dims/positions_mv/",
+          "columns_served": 15
+        },
+        {
+          "what": "Orion accounts silver, daily (current partition read)",
+          "address": "s3://opal-data-inf/silver/api_dims/accounts_v2/",
+          "columns_served": 18
+        },
+        {
+          "what": "Orion transactions silver, daily (one row per transaction)",
+          "address": "s3://opal-data-inf/silver/transactions/",
+          "columns_served": 14
+        },
+        {
+          "what": "Orion tax realized aggregate by account and period (not lot grain)",
+          "address": "s3://opal-data-inf/silver/api_dims/tax_realized/",
+          "columns_served": 10
+        },
+        {
+          "what": "Orion tax unrealized aggregate by account and period (not lot grain)",
+          "address": "s3://opal-data-inf/silver/api_dims/tax_unrealized/",
+          "columns_served": 10
+        },
+        {
+          "what": "Orion activity three-year rollup by account",
+          "address": "s3://opal-data-inf/silver/api_dims/activity/",
+          "columns_served": 10
+        },
+        {
+          "what": "Orion household silver (one April partition)",
+          "address": "s3://opal-data-inf/silver/api_dims/household/",
+          "columns_served": 9
+        },
+        {
+          "what": "Orion household and representative mapping, current partition",
+          "address": "s3://opal-data-inf/silver/api_dims/household_rep_mapping/",
+          "columns_served": 4
+        },
+        {
+          "what": "Orion performance by account (tie-out candidate, not gold)",
+          "address": "s3://opal-data-inf/silver/api_dims/performance/",
+          "columns_served": 6
+        },
+        {
+          "what": "Firm silver canonical prices (one file)",
+          "address": "s3://opal-data-inf/silver/prices/",
+          "columns_served": 3
+        }
+      ],
+      "readiness": "BLOCKED",
+      "blockers": "market_topic_daily has no source in this bucket; it is a shared general table, and without it the report cannot serve its topic view. Excluding that shared table, six of seven firm-level tables have a firm source; account_lot_realized has no lot-grain source, which the PRD's NO_LOTS rule covers only until Eclipse tax lots are shown populated. Other blockers: the gold lots provenance against that rule is not established; the Orion flow taxonomy must be loaded by the adapter; the household silver holds one April partition, so the current grouping rests on the household id column of the current accounts silver.",
+      "household_dimension": "none in the ADVI household crosswalk (its contract scope is 49 Financial accounts only); the firm-native grouping is the Orion household id on the current accounts silver, with the household and representative mapping partition alongside it.",
+      "shadow_pull_proposed": false
+    }
+  ],
+  "recommendation": "Cottonwood's adapter is closest on source coverage: all seven firm-level tables have a firm source, lot-level realized and unrealized included, against six for Inflection, which has no lot-grain realized source. Inflection has the deeper history (gold from 2019) and a household key, while Cottonwood's daily history starts in spring 2026. Both firms stay BLOCKED on the shared market topic table until its home is built.",
+  "adapter_order_proposal": "First order: the Cottonwood account_dim table from the firm's silver allocations (newest partition) and silver account attributes, keyed by account id with the Black Diamond relationship id as the grouping. Criterion: once the account_dim contract is authored, Cottonwood's table carries the same schema hash as 49 Financial's, with firm, account_id, method_version and coverage on every row. It reads only the firm's own bucket and pulls nothing new.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
