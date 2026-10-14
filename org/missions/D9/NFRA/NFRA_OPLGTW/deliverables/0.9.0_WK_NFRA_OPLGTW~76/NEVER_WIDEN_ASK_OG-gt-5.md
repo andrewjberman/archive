@@ -6,11 +6,11 @@ Authority: PRD v3.0 FWD-22; `1.0.0_SA_CTO~Z` msgs 34077 and 34083; census G1 sec
 
 PHASE A ONLY: code, grant file and this ask. NO apply, NO deploy, NO IAM change, NO registration of the tool.
 
-**STATUS (read first):** the grant file and this ask are committed. The module `app/harvest_published.py` and its test
-`tests/test_og_gt5.py` are NOT committed: the naming limb refuses the live function literal `opal-amgt-scoped-api` in the
-module as a new out-of-pattern name (investigation row `NFRA_OPLGTW-Z-W76-S5`, BLOCKING). Section 1 below lists the module
-as part of the diff; that diff lands when S5 is resolved by a registry row or an R20 entry. The halves sign against the
-diff at that commit, and this ask is re-cut only if the grant or the tool's contract changes.
+**STATUS (read first):** the grant file and this ask were committed first (8f88edc6d3). The module, its test and the one
+`.env` line are committed with this revision under Ruling A1 of the issuer (investigation rows `NFRA_OPLGTW-Z-W76-S2` and
+`NFRA_OPLGTW-Z-W76-S5`): the module no longer holds the live function name. It reads the name from the `.env` key
+`AMGT_SCOPED_API_FUNCTION` at call time; the key's value is written by `deploy-to-ec2.sh`. The halves sign against the diff
+at that commit, and this ask is re-cut only if the grant or the tool's contract changes.
 
 **Halves owed (all three, against this file at its commit):**
 - `1.0.0_SA_CTO~Z` (CTO), the widening and the grant;
@@ -19,11 +19,13 @@ diff at that commit, and this ask is re-cut only if the grant or the tool's cont
 
 ## 1. diff by file
 
-Every file below is NEW on the worker branch. Nothing existing is edited.
+The first three files below are NEW on the worker branch. The fourth is ONE line added to an existing file.
 
 - `infra/aws/ec2/opal-gateway/app/harvest_published.py`: the tool, `harvest_get_published_analysis(security_key, sections="overlay")`.
-- `infra/aws/ec2/opal-gateway/tests/test_og_gt5.py`: four tests, `test_oggt5_ac01` .. `test_oggt5_ac04`.
+- `infra/aws/ec2/opal-gateway/tests/test_og_gt5.py`: four tests, `test_oggt5_ac01` .. `test_oggt5_ac04`, plus the unset-key arm of `ac03`.
 - `infra/aws/terraform/opal-gateway/harvest_published_invoke_iam.tf`: ONE `aws_iam_role_policy` on `aws_iam_role.gw`.
+- `infra/aws/ec2/opal-gateway/deploy-to-ec2.sh`: ONE new `.env` key, `AMGT_SCOPED_API_FUNCTION=opal-amgt-scoped-api`, added to the
+  `printf` that writes `.env` (after `ADVI_FEE_STATEMENT_S3_ROOT`). This is the only edit to an existing file.
 - `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~76/` (this file, the proof, the check output).
 
 Not edited, by rule: `app/harvest_typed.py` (OG-gt-0), `app/harvest_read.py` (OG-hv-1), `app/tools.py`,
@@ -32,7 +34,10 @@ Not edited, by rule: `app/harvest_typed.py` (OG-gt-0), `app/harvest_read.py` (OG
 ## 2. tool -- inputs, returns, refused arms
 
 - **Inputs:** `security_key` (a resolved key, `<ROOT>_<CC>_Equity`); `sections` in `overlay | thesis | peers | ledger | versions | timeline`.
-- **Route:** `GET /api/scoped/amgt/security/<key>/<section>`, invoked on `opal-amgt-scoped-api` with the header `x-firm-id: opal`
+- **Admission address:** `amgt/security/<security_key>` (Ruling A1, row `NFRA_OPLGTW-Z-W76-S1`); `amgt/` is a served prefix, and a key with `..` is refused.
+- **Function name:** read at call time from the `.env` key `AMGT_SCOPED_API_FUNCTION` (unset: `harvest_published_unavailable`, zero invokes).
+  The module holds no function name.
+- **Route:** `GET /api/scoped/amgt/security/<key>/<section>`, invoked on the function named by that key (`opal-amgt-scoped-api`) with the header `x-firm-id: opal`
   (the value the assessment measured for the platinum layer; every admitted principal is Opal by admission).
 - **Returns:** the published body of the section, merged with `security_key` and `section`, under the four envelope keys
   `as_of`, `source_keys`, `denominator`, `absent_reason`; projected to 50 KB by `harvest_typed.project`
@@ -92,7 +97,9 @@ of `aws_iam_role_policy.gw_harvest_published_invoke` through `safe-apply`. Neith
 ## 7. triggers that prove it
 
 - The tool is +1 on the live census (the tool registry count moves by one, at the merge, by the issuer).
-- No `.env` key changes: the function name is a literal in the module and the grant carries no secret.
+- ONE `.env` key is added and no other: `AMGT_SCOPED_API_FUNCTION=opal-amgt-scoped-api`, written by the `printf` in
+  `infra/aws/ec2/opal-gateway/deploy-to-ec2.sh` (section 1). The grant carries no secret; the key holds a function name, not a value from a secret store.
+  The `.env` key is a trigger: the apply and the release must show it in `ENV_KEYS_AFTER` and nowhere else changed.
 - The invoke succeeds under an Opal stand-in principal after the apply: one invoke, a 200 body projected to 50 KB, four envelope keys.
 - A non-Opal stand-in principal is refused with zero invokes on the live gateway.
 
