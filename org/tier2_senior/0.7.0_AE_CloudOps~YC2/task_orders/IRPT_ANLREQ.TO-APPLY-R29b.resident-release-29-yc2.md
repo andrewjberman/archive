@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~YC2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -30,7 +30,7 @@ comp-adversary: RUN -- by reading the release-28 order and its V1 output (TO-APP
   Signed pair: COO half org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release29/NEVER_WIDEN_PAIR_ANLREQ_RELEASE29_ORDINARY_VIEWER_AND_SHARES_WORDS_THREE_LEG.md (git hash-object 5e8b3cbd95739fe8b9172329cc671d2ef7ea1aa8) and CTO half org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_ANLREQ_RELEASE29_ORDINARY_VIEWER_AND_SHARES_WORDS_CTO_HALF.md (@abbfe49feb, CTO msg 7591). A different COO blob voids both halves: STOP. Build record: org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/RESIDENT_BUILD.json.</context>
 
   <the_act>
-    GO: both halves are signed. This order is STAGED: you start ONLY when (a) step 1 reads green and (b) 2.0.0_SA_COO~Y2 has MESSAGED you that leg L2 is closed (irpt-status at CodeSha256 yNpw441TP5aMGYuZqkHQAPjAiQJDEPk7q8kFeDiIRIg=: you read that CodeSha256 yourself, read-only, at step 1). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
+    GO: both halves are signed. Leg L2 is CLOSED (the applier 0.7.0_AE_CloudOps~AQ2 reported it and the issuer read irpt-status live at CodeSha256 yNpw441TP5aMGYuZqkHQAPjAiQJDEPk7q8kFeDiIRIg=, 363818 bytes, 2026-10-14T12:19:40Z); the order is PENDING and this is the GO. Start at step 1 and go on when it reads green (you read that CodeSha256 yourself, read-only, at step 1). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
     1. Read the COO half and CTO half at HEAD; `git hash-object` of the COO half must print 5e8b3cbd95739fe8b9172329cc671d2ef7ea1aa8. `get-function irpt-status` CodeSha256 must be yNpw441TP5aMGYuZqkHQAPjAiQJDEPk7q8kFeDiIRIg= (read only). Anything else: STOP, report.
     2. U2: put three files under ec2/investor-reporting-ycharts/resident/ in bucket opal-313476888478-lambda-artifacts, each key 404 before the put, each read back with sha256 equal; a different sha256 is a STOP (a rebuilt file is a new pair):
        - irpt-resident-0485393f3a-r29.tar.gz = C:/dev/irpt-release-r29/irpt-resident-0485393f3a-r29.tar.gz, sha256 2de2adce622f8bb9bbd5ebc071e862446b056303c0d9ffd7d41b050bd17f51a4
