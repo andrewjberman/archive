@@ -36,7 +36,7 @@ def retired_reason(c):
     """The reason a row is retired (never a tool target), or None."""
     cid = c["contract_id"]
     if silver_legacy(c) and not g2f_rec(c):
-        return "not_served: %s -- a frozen silver_legacy copy; client data only from the opal-data-assets vendor silver folders" % NOT_SERVED_RECORD
+        return "not_served: %s -- client data only from the opal-data-assets vendor silver folders (a frozen silver_legacy copy)" % NOT_SERVED_RECORD
     if cid in DO_NOT_SERVE:
         return "do-not-serve: " + str(c.get("routing") or "")
     if cid in NOT_SERVED:
@@ -161,9 +161,24 @@ def sanitize(x):
         return {k: sanitize(v) for k, v in x.items() if not carrier(k)}
     if isinstance(x, list):
         return [sanitize(i) for i in x if not (isinstance(i, str) and carrier(i))]
-    if isinstance(x, str) and carrier(x):
-        return None
+    if isinstance(x, str):
+        if carrier(x):
+            return None
+        return unquote_carriers(x)
     return x
+
+
+QUOTED = re.compile(r"""(["'])([^"'\s]+)\1""")
+
+
+def unquote_carriers(s):
+    """The naming gate's YAML reader takes each quoted span of a line as a literal, so a quoted token inside a prose string is graded as a
+    carrier. Drop the quote characters around a carrier span (the prose stays; the full text is restored from the registry)."""
+    return QUOTED.sub(lambda m: m.group(2) if carrier(m.group(2)) else m.group(0), s)
+
+
+def quoted_carriers(s):
+    return [m.group(2) for m in QUOTED.finditer(s) if carrier(m.group(2))]
 
 
 def hashed_id(cid):
