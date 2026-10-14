@@ -70,7 +70,7 @@ def main():
                 p = state["pending"]
                 return json.dumps({"tag": p["tag"], "action": action, "notes": notes,
                                    "version": p["version"] if version is None else version, "seq": p.get("seq"),
-                                   "signed_at": "2026-10-13T22:00:00Z"}, sort_keys=True)
+                                   "signed_at": a.iso(T.NOW - datetime.timedelta(minutes=1))}, sort_keys=True)
 
             def run(name, build, expect, check):
                 try:
