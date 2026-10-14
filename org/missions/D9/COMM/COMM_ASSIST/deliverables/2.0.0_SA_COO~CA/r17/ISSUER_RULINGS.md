@@ -32,3 +32,12 @@ closes at the CVO's compile; the forwarder (CA-i-5) may now be installed.
 
 **R-9. Row COMM_ASSIST-C-S6 (drafts with no seq: End of Day and mail tags repeat): ACCEPTED as INERT until closed by CA-i-13**, the signed_at bound (24 hours back, 5 minutes forward, against the receiver's clock). It is built and deployed BEFORE
 muse is asked to sign a real answer; CA-i-5 may install the forwarder first because the forwarder alone sends nothing without a signed file.
+
+**R-10 (2026-10-14 ~02:3xZ). Row COMM_ASSIST-C-S6 (drafts with no seq): the third deploy (CA-i-14, ledger `comm-assist-r17c-deploy`) is live; the issuer's own `check_i14_live.py` read RESULT: PASS.** Both functions
+are on `sWltfUwyJQpANEhbY+KFkszo8ScLKEIi7Lm4qyUNWrM=` (02:28:07Z / 02:28:13Z); the four files equal the pin `abc5ad424a`; both environments as recorded; the served code requires `signed_at` and bounds it at 24 hours (and keeps version, seq and the acted-set guard). The CVO's half answered YES that the bound closes C-S6
+(End of Day closed; mail and job tags narrowed to a 24-hour window, a stated limit). The row closes at the CVO's compile (C-S7). The MUSE_ANSWER_CARD is flipped to LIVE.
+
+**R-11 (2026-10-14 ~02:4xZ). Rows COMM_ASSIST-Z-S1 and Z-S3 (BLOCKING, ARMED, site Z, the old CA-d-2 deploy): DISARMED by the issuer as resolved by fact.** Their disarm owner `2.0.0_SA_COO~ZZ` has ended.
+- Z-S1 (the shared root's required variable `second_reader_trust_principal_arns` had no value, so a plan with no `-var` exited 1): the value is now supplied by the committed `infra/aws/terraform/transcripts/readers.auto.tfvars` (`e284d59428`, the applied value, never typed). All four deploys since (r14's `comm-assist-r14-deploy` and r17's three) planned and applied with no `-var`.
+- Z-S3 (the plan could not see a package built from a moving trunk carrying other projects' changes): every deploy since builds from a detached worktree at a named pin, and the equivalence probe (`check_i4_equiv`, `check_i12_equiv`, `check_i14_equiv`) imports the assistant from the BUILT package and from the zip the live function serves and compares what it forms (17 probes). The first r17 deploy carried `lib/opal_naming.py` and eight registry files and read 17 of 17.
+The rows close at the CVO's compile.
