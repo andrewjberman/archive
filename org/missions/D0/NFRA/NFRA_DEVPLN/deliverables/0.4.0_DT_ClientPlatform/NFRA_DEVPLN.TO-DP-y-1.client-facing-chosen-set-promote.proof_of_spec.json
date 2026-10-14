@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-y-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-y-1.client-facing-chosen-set-promote.md",
+    "group": "OTHER",
+    "vintage_commit": "7969c4a598"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round8.md",
+    "vintage_commit": "7969c4a598",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-y-1.client-facing-chosen-set-promote.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; none was run",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a one-time push to a shared branch; the reads are git reads of fixed shas",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "DEV-side merges not on the chosen list (dell1 ab8ecc56, 514df1bb, 5e40e541 and the DEV merges of features PROD holds under release merges)",
+      "reason": "the order promotes only the five named branches; measured origin/PROD..origin/DEV = 7, every line an 'approved feature' merge"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal PROD 501e998b1e576252ba493bd5427e14fba748dcef (five dell2 release merges 22bd0695 3e662b27 690caad5 87e55658 501e998b)",
+      "kind": "frontend_component",
+      "commit_or_etag": "501e998b1e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "CI run 38563449756 Deploy to Production success on the sha; tag portal-v2.1.218 peels to 501e998b (ls-remote and gh reads)",
+      "artifact_covered_by": [
+        "DPy1-AC1",
+        "DPy1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPy1-AC1",
+      "criterion_verbatim": "bash .tools/portal-release-build.sh --check PROD --repo portal --prod-ref 63c4f9e35f259ad76071b1099aeb9dddb150409f -- expect: unapproved=0 ref=refs/remotes/origin/PROD",
+      "method": "command",
+      "invocation": "bash .tools/portal-release-build.sh --check PROD --repo portal --prod-ref 63c4f9e35f259ad76071b1099aeb9dddb150409f",
+      "output_evidence": "RELEASE-CHECK features=10 first_parent_commits=10 unapproved=0 ref=refs/remotes/origin/PROD sha=6a5926fc1194\nrc=0",
+      "denominator": "origin/PROD first-parent line since 63c4f9e3 at tip 6a5926fc (fetched after the 2.0.0_SA_COO~DV amendment e4f3acfcc8): 10 release merges, 0 unapproved; under timeout 120",
+      "status": "PASS",
+      "expect": "unapproved=0 ref=refs/remotes/origin/PROD"
+    },
+    {
+      "criterion_id": "DPy1-AC2",
+      "criterion_verbatim": "bash -c 'git -C portal log origin/PROD --first-parent --format=%B | grep -c \"Approved-By: andrew @dell2-\"' -- expect: ^5$",
+      "method": "command",
+      "invocation": "bash -c 'git -C portal log origin/PROD --first-parent --format=%B | grep -c \"Approved-By: andrew @dell2-\"'",
+      "output_evidence": "5\nrc=0\nThe five matching release merges:\n",
+      "denominator": "origin/PROD first-parent messages at tip 6a5926fc, whole line read, 5 matching trailers; under timeout 120",
+      "status": "PASS",
+      "expect": "^5$"
+    }
+  ],
+  "surprises": [
+    "NFRA_DEVPLN-S6: DPy1-AC1 reads features=10 once another seat promoted a dell1 feature on top of this promote"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.4.0_DT_ClientPlatform/NFRA_DEVPLN.TO-DP-y-1.receipt.md",
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/portal-release-build.sh --features <the five dell2 branches>",
+      "result": "RELEASE result=READY; unapproved=0; PROMOTE-CLIENT-FACING count=5"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug devpln-r8-client-facing-chosen-set-promote-20261014 (L1, L2, L3)",
+      "result": "CLOSED, all 3 legs proven"
+    }
+  ]
+}
