@@ -1,0 +1,46 @@
+{
+ "window_days": 7,
+ "source": "WAF logs for the WebACL attached to CloudFront EVTSA9VEHNZVH -- CloudWatch Logs group aws-waf-logs-opal-cloudfront, queried with Logs Insights. CloudFront STANDARD logging is DISABLED on this distribution (Logging.Enabled=false, empty bucket), there are 0 real-time log configs and no monitoring subscription, and CloudFront metrics are per-distribution, never per-path -- so this is the only instrument that records a request's URI. The logging configuration carries NO LoggingFilter, so every evaluated request is logged and an ALLOWed GET of the bare path does appear; retention is 400 days.",
+ "requests_bare_path": 2,
+ "non_portal_consumers": 0,
+ "claim": "measured",
+ "window_7d": {
+  "total_requests": 41058,
+  "any_uri_containing_json_tiered": 1754,
+  "twin_api_general": 1752,
+  "bare_by_subtraction": 2
+ },
+ "window_30d": {
+  "total_requests": 223843,
+  "any_uri_containing_json_tiered": 7141,
+  "twin_api_general": 7139,
+  "bare_by_subtraction": 2,
+  "why": "the 7-day window cannot see a MONTHLY consumer; 30 days closes that and returns the same 2"
+ },
+ "method": "the bare count is a SUBTRACTION from a printed denominator, not a forward list: every URI containing /json-tiered/ minus every URI containing /api/general/json-tiered/. The twin's 1752 (7d) / 7139 (30d) is the POSITIVE CONTROL -- it proves the instrument sees this traffic class, so the bare path's 2 is a real reading and not a silent query miss.",
+ "the_two_requests": [
+  {
+   "at": "2026-10-14T14:07:49.847Z",
+   "uri": "/json-tiered/market-overview/rsi-summary.json",
+   "method": "GET",
+   "user_agent": "Python-urllib/3.14",
+   "action": "ALLOW",
+   "rule": "Default_Action",
+   "country": "US"
+  },
+  {
+   "at": "2026-10-14T13:47:30.761Z",
+   "uri": "/json-tiered/market-overview/rsi-summary.json",
+   "method": "GET",
+   "user_agent": "curl/8.22.0",
+   "action": "ALLOW",
+   "rule": "Default_Action",
+   "country": "US"
+  }
+ ],
+ "who_they_were": "BOTH came from this device: the client IP equals site Z's own public egress IP, read at the act (checkip.amazonaws.com) and compared -- MATCH. Both carry scripted user agents (Python-urllib, curl), both landed today, after row NFRA_OPLGTW-Z-S114 was filed and around the CTO ruling, and both ask for the exact key the row and this order quote. They are the fabric's own proof-of-hole GETs, not a consumer. No browser, no portal referer, no third-party UA, and nothing on the bare path in the other 29 days.",
+ "portal_consumer": "the portal reads /api/general/json-tiered/* only (portal/src/api/endpoints/market.ts, the CTO's ruling msg 34093); that path carries 7139 of the 7141 json-tiered requests in 30 days.",
+ "non_application": "this read cannot speak for a consumer that has never called in 30 days, and it cannot see a request that bypassed CloudFront (a direct S3 read under the bucket's own policy is a different plane). Neither is in this cell's scope; the act narrows the CloudFront path only.",
+ "read_by": "0.7.0_AE_CloudOps~Z",
+ "read_at": "2026-10-14T15:04:00.131595+00:00"
+}
