@@ -1,0 +1,121 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R18-TR2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR2.meeting-request-routing-and-meeting-route-terraform-source.md",
+  "group": "OTHER",
+  "vintage_commit": "b44da4c989"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~43",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R18.md",
+  "vintage_commit": "b323e7539e",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR2.meeting-request-routing-and-meeting-route-terraform-source.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+   "kind": "terraform",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "source only: ROUTING_MATRIX meeting_request.primary = [jeanette@opalinvest.com] (was manav and alyssa) and one ticket_routes entry meeting = POST /api/scoped/tickets/{ticketId}/meeting; 5 insertions, 1 deletion against 2e0b4b59f8; no plan, no apply, terraform not installed so terraform fmt -check not run",
+   "artifact_covered_by": ["R18TR2-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_mt2.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1 shape checker: (a) meeting_request block, (b) four routing blocks byte-identical to 2e0b4b59f8, (c) ticket_routes; run twice, identical TF-SHAPE-OK output",
+   "artifact_covered_by": ["R18TR2-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_mt2.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 mutant: a second address added to meeting_request.primary in a tempfile copy outside the worktree; checker prints TF-SHAPE-BAD rc 1; MUTANT-FIRES",
+   "artifact_covered_by": ["R18TR2-AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R18TR2-AC1",
+   "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_mt2.py expect: ^TF-SHAPE-OK",
+   "method": "command",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_mt2.py",
+   "output_evidence": "TF-SHAPE-OK meeting_request.primary=[jeanette@opalinvest.com] route=meeting (run under timeout 120, rc=0; the same output on a second run, cmp identical). Base for (b): 2e0b4b59f8, the parent of b44da4c989",
+   "denominator": "3 of 3 checks: (a) 1 of 1 primary address, 2 of 2 empty lists; (b) 4 of 4 routing blocks byte-identical to base; (c) 1 new route key of 1 required, 11 of 11 existing route keys unchanged",
+   "status": "PASS",
+   "expect": "^TF-SHAPE-OK"
+  },
+  {
+   "criterion_id": "R18TR2-AC2",
+   "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_mt2.py expect: MUTANT-FIRES",
+   "method": "command",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_mt2.py",
+   "output_evidence": "MUTANT-FIRES checker rc=1: TF-SHAPE-BAD meeting_request.primary is ['jeanette@opalinvest.com', 'manav@opalinvest.com'], expected exactly [jeanette@opalinvest.com] (run under timeout 120, rc=0; the unmutated main.tf passed first)",
+   "denominator": "1 of 1 mutant fired, after a passing baseline",
+   "status": "PASS",
+   "expect": "MUTANT-FIRES"
+  },
+  {
+   "criterion_id": "R18TR2-AC3J",
+   "criterion_verbatim": "R18TR2-AC3J (judgment): only the meeting coordinator's routing and one route entry changed, no permission or other resource was added, and nothing was planned or applied.",
+   "method": "manual_read_with_citation",
+   "invocation": "none: judgment criterion, output carried and no verdict. Read: git diff 2e0b4b59f8 -- infra/aws/terraform/ticket-center/main.tf",
+   "output_evidence": "1 file changed, 5 insertions(+), 1 deletion(-): the meeting_request primary line (manav and alyssa replaced by jeanette) with one comment line above it, and one ticket_routes entry meeting = \"POST /api/scoped/tickets/{ticketId}/meeting\" with two comment lines. The diff holds no resource, no aws_iam or permission block, and no other route. No terraform plan or apply; terraform is not installed on this box.",
+   "denominator": "2 of 2 changed spots in main.tf; 0 resource blocks added; 0 plan or apply runs",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment criterion, not self-graded: the L9 oracle is 3.0.0_SA_CVO, who reads the diff against C-MEETING-REQUEST and the no-permission bound",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 mutant: a second address (manav) added to meeting_request.primary in a tempfile copy outside the worktree, checked by tf_shape_check_mt2.py",
+   "expected": "MUTANT-FIRES",
+   "observed": "MUTANT-FIRES checker rc=1: TF-SHAPE-BAD meeting_request.primary is ['jeanette@opalinvest.com', 'manav@opalinvest.com'], expected exactly [jeanette@opalinvest.com]",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two runs of tf_shape_check_mt2.py compared byte for byte (cmp)",
+   "observed": "both runs rc=0 with TF-SHAPE-OK meeting_request.primary=[jeanette@opalinvest.com] route=meeting; cmp identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "terraform fmt -check on main.tf",
+   "reason": "the terraform binary is not installed on this box; the order allows the check only if the binary is installed, so it was not run and is not claimed"
+  },
+  {
+   "item": "terraform plan and apply, and any live routing environment, route table or CloudFront behavior check",
+   "reason": "the order forbids any plan, apply, AWS or network call; the release order TO-R18-REL re-checks the route live under safe-apply"
+  },
+  {
+   "item": "the Lambda handler for the meeting route (TO-R18-L1) and the other new routes and environment variables (TO-R18-TR3)",
+   "reason": "out of this cell's grant; main.tf is shared with TO-R18-TR3, and only the two spots named in the cell were touched"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/TCKT_VNEXT.TO-R18-TR2.meeting-request-routing-and-meeting-route-terraform-source.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_mt2.py",
+   "result": "TF-SHAPE-OK meeting_request.primary=[jeanette@opalinvest.com] route=meeting rc=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_mt2.py",
+   "result": "MUTANT-FIRES checker rc=1: TF-SHAPE-BAD meeting_request.primary ... rc=0"
+  },
+  {
+   "tool": "bash",
+   "invocation": "bash .tools/commit-gate.sh on tf_shape_check_mt2.py and mutant_check_mt2.py",
+   "result": "rc=0 for both files"
+  }
+ ]
+}
