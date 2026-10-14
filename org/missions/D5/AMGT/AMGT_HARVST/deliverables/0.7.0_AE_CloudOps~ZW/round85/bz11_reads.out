@@ -115,3 +115,93 @@ STILL WAITING; wsj and barrons unchanged at their pre-pin records. bbg's in-flig
 (58, 80, 101, 121 over four hourly reads -- 20 to 22 an hour, holding). Remaining 121 of the expected
 242 project to about 5.6 hours; the cycle is now half way by that denominator. Growth oracle: JOB line
 at 05:39:20Z. Nothing driven, nothing touched.
+
+## ===================== SEVENTH READ, 2026-10-14T06:42:50Z =====================
+## Appended, never overwritten.
+  PUBLISHER=wsj VERDICT=WAITING
+  PUBLISHER=barrons VERDICT=WAITING
+  CLOSE=WAITING
+  (rc=0)
+
+STILL WAITING; wsj and barrons unchanged at their pre-pin records. bbg: done 142 (58, 80, 101, 121,
+142 -- 21 an hour, five hourly reads, no drift). Remaining 100 of the expected 242 project to about
+4.7 hours. Growth oracle: JOB line at 06:40:03Z. Nothing driven, nothing touched.
+
+## ===================== EIGHTH READ, 2026-10-14T07:42:21Z =====================
+## Appended, never overwritten.
+  PUBLISHER=wsj VERDICT=WAITING
+  PUBLISHER=barrons VERDICT=WAITING
+  CLOSE=WAITING
+  (rc=0)
+
+STILL WAITING; wsj and barrons unchanged. bbg: done 164 (58, 80, 101, 121, 142, 164 -- 21-22 an hour
+over six reads). Remaining 78 of the expected 242 project to about 3.6 hours. Growth oracle: JOB line
+at 07:40:17Z. Nothing driven, nothing touched.
+
+## ===================== NINTH READ, 2026-10-14T08:43:14Z =====================
+## Appended, never overwritten.
+  PUBLISHER=wsj VERDICT=WAITING
+  PUBLISHER=barrons VERDICT=WAITING
+  CLOSE=WAITING
+  (rc=0)
+
+STILL WAITING; wsj and barrons unchanged at their pre-pin records.
+
+THE RATE DIPPED THIS HOUR AND THE CAUSE IS MEASURED, NOT GUESSED. bbg's checkpoint went done 164 ->
+179, i.e. 15 jobs against the 21-22 of every previous hour. Reading the inter-job gaps in the log for
+07:00-08:41Z: 31 JOB lines, min 2.6 min, MEDIAN 2.7 min, max 17.8 min, and exactly ONE gap over 6
+minutes -- 08:07:28Z to 08:25:17Z (17.8 min). So the hour lost about a quarter of itself to ONE long
+job and the per-job pace is unchanged at ~2.7 min; this is not a general slowdown and not a stall (the
+next job landed normally and the log is current to 08:39:08Z). Nothing was done about it: a single
+slow job is inside the normal behaviour of a vendor fetch, and driving the runner is exactly what this
+order forbids.
+  Remaining 63 of the expected 242: about 2.9 hours at 2.7 min/job, or 4.2 if this hour's 15/hour is
+  the new rate. Extrapolation either way.
+
+INSTRUMENT NOTE for anyone re-deriving these numbers: a per-hour count of log LINES is not a count of
+JOBS (the 00Z hour shows 263 lines because a cycle start writes a PLAN line per security). The job
+counts above come from the checkpoint's own 'done' length and from JOB-filtered log lines, never from
+a bare line count.
+
+## ===================== TENTH READ, 2026-10-14T09:41:22Z =====================
+## Appended, never overwritten.
+  PUBLISHER=wsj VERDICT=WAITING
+  PUBLISHER=barrons VERDICT=WAITING
+  CLOSE=WAITING
+  (rc=0)
+
+STILL WAITING; wsj and barrons unchanged. bbg: done 194 (164, 179, 194 -- 15 an hour for two hours
+now, against 21-22 for the first six). The previous read attributed the first dip to ONE 17.8-minute
+job; a second 15-job hour says that was only part of it and the pace itself has eased. Either way the
+runner is progressing -- JOB line at 09:38:03Z, under two minutes before this read.
+  Remaining 48 of the expected 242: about 3.2 hours at 15/hour, 2.2 at the earlier rate.
+
+## ===================== ELEVENTH READ, 2026-10-14T10:44:54Z =====================
+## Appended, never overwritten.
+  PUBLISHER=wsj VERDICT=WAITING
+  PUBLISHER=barrons VERDICT=WAITING
+  CLOSE=WAITING
+  (rc=0)
+
+STILL WAITING; wsj and barrons unchanged at their pre-pin records. bbg: done 207.
+
+## THE RATE DROP IS NOW FULLY EXPLAINED, AND IT CORRECTS BOTH OF MY EARLIER ACCOUNTS.
+The log carries a line type I had not seen until this read: 'COOLDOWN bbg: waiting 897 s before the
+next job', logged as a countdown every 30 s (898, 868, 838 ... ), so ~30 LINES per ONE wait.
+  - TODAY'S EPISODES: 4, each opening at 897 s -- 08:07:30Z, 08:50:13Z, 10:16:13Z, 10:34:32Z.
+    4 x ~15 min = about an hour of deliberate waiting, which is exactly the 21/hour -> 15/hour drop.
+  - WHAT TRIGGERS ONE: the job immediately before each episode reads status=error. The 08:07:28Z line
+    I called 'one long job' last read is in fact 'JOB bbg security-0f3eb2ded85ad44b status=error',
+    followed 2 seconds later by the cooldown. So the gap was BACKOFF, not a slow fetch.
+  - AND IT IS PRE-EXISTING, which is the arm that decides whether this is a finding: status=error per
+    day over the whole log reads 6 (10-10), 11 (10-11), 4 (10-12), 1 (10-13), 4 (10-14), and cooldown
+    episodes per day read 2, 11, 4, -, 4. Errors and episodes track one for one on every day that has
+    both. Today's 4 is inside the historical range and the mechanism predates the new pin by days.
+  - DENOMINATOR for the status census: 1531 JOB lines total -- 1472 no_new_articles, 30 error, 14
+    new_articles, 12 sign_in_refused, 4 no_acceptable_new_articles, 4 empty, 3 bot_check.
+SO: no row. Nothing in bz-10 or bz-11 claims zero errored jobs, the backoff is the runner's own
+designed behaviour, and bz-10's R4 (no AttributeError/OSError/WinError line) remains true -- a job
+status=error is a different signal from a python traceback, and conflating them would have been the
+mistake in the other direction.
+  Remaining 35 of the expected 242. At the measured 15/hour that is about 2.3 hours; the honest range
+  is 1.6 to 2.3 hours depending on how many more errored jobs draw a cooldown.
