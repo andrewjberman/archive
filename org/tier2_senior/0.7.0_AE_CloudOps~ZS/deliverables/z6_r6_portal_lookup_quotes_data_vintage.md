@@ -143,6 +143,56 @@ answers a question, so the next answer already uses the new order.
   locked with no R3 edits.
 - **PORTAL_RETRIEVAL.md:43 not corrected** -- out of the write surface; Z-S19 carries it with suggested text.
 
+## ADDENDUM, 01:06Z -- AMENDMENT 1 landed: `PORTAL_RETRIEVAL.md:43` now carries the vintage order
+
+The issuer drained R6 (`b195dc14fe` on origin, AC1/AC2 PASS), reopened the order `in_progress` @`a8826454a8`, and
+issued **AMENDMENT 1** on the very row this cell filed -- Z-S19 -- with the same one-commit override. GO msg 33870,
+acked. Notes 1 (multi-date arm stub-only) and 2 (two override lines, one act) were taken to the round's drain-end
+record, so neither is lost.
+
+**Commit `31566aa49d`.** ONE table cell, one file, `refs/PORTAL_RETRIEVAL.md` line 43, the `mdpf-platinum` row's
+vintage column:
+
+| | value |
+|---|---|
+| before | `` `as_of_date` `` |
+| after | `` `as_of_date` ``, else `` `_provenance.source_vintages` `` (oldest); LastModified is write time only |
+
+That matches the allowlist and the tool, so the twin and `portal_lookup.py:46`'s "keep in sync" obligation agree again
+-- which is exactly what Z-S19 named. **Row Z-S19's disarm remains the issuer's**, not this seat's; the remedy landing
+is not the disarm.
+
+**Nothing else moved**, and it was checked rather than assumed: the anchor string's count was asserted `== 1` before the
+write (line 42, the separate `mdpf` row, untouched); the file keeps **79 lines**; row 43 keeps **5 table pipes**,
+matching the header row; `sha256 06cb1ee8...` -> `eb559e8dca...`, 6670 -> 6748 bytes.
+
+**Encoding, because this file is one of the mixed ones.** It already carried **26** non-ASCII characters (23 em-dashes,
+2 `≈`, 1 `→`). The edit is binary with ASCII-only replacement text, so the count reads 26 before and 26 after and no
+reader's encoding assumption changes -- CLAUDE.md's "all out, or every reader explicit" is not engaged by this edit
+because the edit neither adds nor removes any. Worth flagging for whoever next touches the file: the naive detector
+prints **52** here, and that is a BYTE delta (26 chars x 3 UTF-8 bytes, minus 26), never a character count.
+
+`commit-gate` again reported `checked 0 of 1 file(s)` -- a `.md` is outside its set, the third suffix this session
+(`.ps1`, `.yaml`, `.md`). The language-appropriate instrument was the structural read above: pipe count against the
+header, line count, non-ASCII count, and the pre-write anchor assertion.
+
+**The override audit, second observation.** `org/git-author-override-audit.sitez.log` 3213 -> 3216 lines:
+
+```
+2026-10-14T01:04:59Z OVERRIDE  0.7.0_AE_CloudOps~ZS  1  (--author-override TIER0_UTILITY applied) act=2b06380c0b36 paths=1:.../PORTAL_RETRIEVAL.md
+2026-10-14T01:05:03Z OVERRIDE  0.7.0_AE_CloudOps~ZS  1  (--author-override TIER0_UTILITY applied) act=2b06380c0b36 paths=1:.../PORTAL_RETRIEVAL.md
+2026-10-14T01:05:11Z LANDED-2P  0.7.0_AE_CloudOps~ZS  31566aa49d  paths=1  validate=14.76s  ...  attempt=1
+```
+
+Again **two OVERRIDE lines for one act** (`act=2b06380c0b36`, 4s apart). This is the second distinct act showing it, so
+the pattern is **systematic, not a one-off coincidence** -- which strengthens the note sent at the drain: an auditor
+counting OVERRIDE lines over-reports overrides by 2x, and the sound denominator is distinct `act=` ids. Two acts, two
+grants, four OVERRIDE lines.
+
+**Push state re-measured at 01:06Z** (`git ls-remote origin box/sitez` = `43bde59c58`, control passing):
+`b195dc14fe`, `ce59b6de56`, `e9b1d65b70` **on origin**; `31566aa49d` **LOCAL**, pending `box-sync`. The deployed twin is
+live at `sha256 eb559e8dca...`, 79 lines, 26 non-ASCII.
+
 ## Compiler Tools
 
 | tool | result |
