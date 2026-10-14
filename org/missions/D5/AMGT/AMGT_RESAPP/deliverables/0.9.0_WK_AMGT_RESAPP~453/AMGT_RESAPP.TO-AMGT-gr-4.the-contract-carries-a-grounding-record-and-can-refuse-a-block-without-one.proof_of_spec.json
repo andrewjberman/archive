@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gr-4.the-contract-carries-a-grounding-record-and-can-refuse-a-block-without-one",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-4.the-contract-carries-a-grounding-record-and-can-refuse-a-block-without-one.md",
+    "group": "OTHER",
+    "vintage_commit": "d88fca1f84e52d81c1538892122897e8757e6a95"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "d88fca1f84e52d81c1538892122897e8757e6a95",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-4.the-contract-carries-a-grounding-record-and-can-refuse-a-block-without-one.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~453",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/contract.py",
+      "kind": "script",
+      "commit_or_etag": "8b61c89d6a3f59aa983ce73876db00dbb324b74b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The contract (opal-aifill/1.1.0) gains GROUNDING_REQUIRED = False (the switch), GROUNDING_VERSION = grounding/1, MIN_QUOTE = 12, the optional grounding key on a filled block, validate_block(block, require_grounding=None), validate_document(doc, require_grounding=None) and make_block(..., grounding=None, require_grounding=None) which folds the record with fold_text. Exercised by check_gr4_contract.py (26 of 26 arms) and by the aifill pytest suite (534 passed).",
+      "introduces": ["GROUNDING_REQUIRED", "GROUNDING_VERSION", "GROUNDING_KEY", "MIN_QUOTE", "_record_shape_problems", "_grounding_problems", "_fold_tree"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_contract_grounding.py",
+      "kind": "test",
+      "commit_or_etag": "8b61c89d6a3f59aa983ce73876db00dbb324b74b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runnable as PYTHONPATH=<worktree> python -m pytest -q -p no:cacheprovider lib/research/aifill/tests/test_contract_grounding.py; 36 passed. Covers each refusal, the switch both ways, folding, and the JSON round trip.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_contract_orchestrate.py",
+      "kind": "test",
+      "commit_or_etag": "8b61c89d6a3f59aa983ce73876db00dbb324b74b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One assertion moved from opal-aifill/1.0.0 to opal-aifill/1.1.0 (test_constants_match_the_contract); nothing else in the file touched. Part of the 534 passed.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PYTHONPATH=\"$(pwd)\" timeout 300 python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr4_contract.py | tail -4; exit=${PIPESTATUS[0]} -- expect the line AIFILL GR-4 ARMS: YES (N of N) with N equal to 26, no FAIL arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-453 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr4_contract.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM validate_document: an all-NONE document is clean, an ungrounded block is named, a grounded one passes PASS ['mgmt_recent: grounding record is missing'] / ARM a grounded block survives a JSON round trip PASS ok / ARM contract.py stays ASCII PASS non-ASCII source / AIFILL GR-4 ARMS: YES (26 of 26) / exit=0",
+      "denominator": "26 of 26 GR-4 arms PASS (no FAIL arm line in the full run)",
+      "status": "PASS",
+      "expect": "AIFILL GR-4 ARMS: YES \\(26 of 26\\)[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests | tail -3; echo \"exit=${PIPESTATUS[0]}\" -- expect the last non-empty line before exit= reads N passed (N at least 498) with no failed and no error in the last 3 lines; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-453 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "534 passed in 1.28s / exit=0",
+      "denominator": "534 passed, 0 failed, 0 errors (base was 498 passed)",
+      "status": "PASS",
+      "expect": "534 passed[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "PYTHONPATH=\"$(pwd)\" timeout 300 python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round105_aifill_prep/checks/check_fc2_contract.py | tail -1 && PYTHONPATH=\"$(pwd)\" timeout 300 python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa1_contract.py | tail -1; echo \"exit=$?\" -- expect the two lines AIFILL FC-2 ARMS: YES (43 of 43) and AIFILL FA-1 ARMS: YES (31 of 31); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-453 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round105_aifill_prep/checks/check_fc2_contract.py\" | tail -1 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa1_contract.py\" | tail -1; echo \"exit=$?\"",
+      "output_evidence": "AIFILL FC-2 ARMS: YES (43 of 43) / AIFILL FA-1 ARMS: YES (31 of 31) / exit=0",
+      "denominator": "FC-2 43 of 43 and FA-1 31 of 31 (earlier contract checks as controls)",
+      "status": "PASS",
+      "expect": "AIFILL FC-2 ARMS: YES \\(43 of 43\\)[\\s\\S]*AIFILL FA-1 ARMS: YES \\(31 of 31\\)[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "contract._grounding_problems replaced in-process by a no-op so the grounding record is never checked; check_gr4_contract.py run against the mutant (.scratch/mutant_gr4.py).",
+      "expected": "the GR-4 arms that exercise a refusal turn FAIL",
+      "observed": "MUTANT FAIL arms: 15; MUTANT summary: AIFILL GR-4 ARMS: NO (11 of 26); MUTANT rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_gr4_contract.py run twice on the same committed bytes, stdout compared with cmp (.scratch/gr4_run_a.txt, gr4_run_b.txt)",
+      "observed": "identical 27-line output on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~453 on AMGT_RESAPP.TO-AMGT-gr-4. Base check: GR-4 ARMS NO (1 of 26), pytest 498 passed, FC-2 43 of 43, FA-1 31 of 31. Built the grounding record, the switch, the refusals and make_block folding in lib/research/aifill/contract.py; added tests/test_contract_grounding.py (36 tests); moved one version assertion in tests/test_contract_orchestrate.py. Code committed 8b61c89d6a; this instance committed separately. No surprise rows filed. The status flip is the issuer's.",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/contract.py lib/research/aifill/tests/test_contract_grounding.py lib/research/aifill/tests/test_contract_orchestrate.py",
+      "result": "pre-commit gate clean for 3 of 3 file(s), rc=0"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~453 <0.9.0_WK_AMGT_RESAPP~453@opal.agent>\" -F .scratch/msg_gr4_code.txt -- <3 paths>",
+      "result": "committed 8b61c89d6a on wk-AMGT_RESAPP-453 (LOCAL), msg-verify MATCH"
+    }
+  ]
+}
