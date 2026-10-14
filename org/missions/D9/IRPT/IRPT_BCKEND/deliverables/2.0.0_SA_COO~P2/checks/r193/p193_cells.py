@@ -44,6 +44,7 @@ READ_ONLY = re.compile(r"^\s*(journalctl|dmesg|grep|cat|free|uptime|ps|ls|zgrep|
 HOST_DANGER = re.compile(r"[;&`>]|\$\(|\b(rm|kill|pkill|systemctl|service|reboot|shutdown|tee|dd|mv|cp|chmod|chown|sudo|curl|wget|pip|apt|yum)\b|\|\s*(sh|bash)\b")
 ALLOWED_BUILD_PREFIX = (D + "0.9.0_WK_IRPT_BCKEND~382/", "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md")
 ALLOWED_BUILD_FILES = {SNAP, TEST_NEW}
+WORKER382 = "0.9.0_WK_IRPT_BCKEND~382"
 ROOT = Path(".")
 CID = ""
 
@@ -275,12 +276,21 @@ def build_ac3():
     base = r.get("base_commit", "")
     if not re.fullmatch(r"[0-9a-f]{40}", base):
         fail("base_commit must be 40 hex")
-    p = subprocess.run(["git", "-C", str(ROOT), "diff", "--name-only", base, "HEAD"], capture_output=True, text=True, timeout=60)
-    if p.returncode != 0:
-        fail("git diff failed: " + p.stderr.strip()[:200])
-    changed = sorted(x for x in p.stdout.split("\n") if x and not x.startswith(ALLOWED_BUILD_PREFIX))
+    # the worker's delta is the union of ITS OWN commits since base (CTO round-194 ruling on D2-S172): the diff base..HEAD
+    # also holds every other seat's commits once the branch is merged into trunk
+    log = subprocess.run(["git", "-C", str(ROOT), "log", "--no-merges", "--format=%H", "--author=" + WORKER382, base + "..HEAD"],
+                         capture_output=True, text=True, timeout=60)
+    if log.returncode != 0:
+        fail("git log failed: " + log.stderr.strip()[:200])
+    names = set()
+    for sha in log.stdout.split():
+        dt = subprocess.run(["git", "-C", str(ROOT), "diff-tree", "--no-commit-id", "--name-only", "-r", sha], capture_output=True, text=True, timeout=60)
+        if dt.returncode != 0:
+            fail("git diff-tree failed: " + dt.stderr.strip()[:200])
+        names.update(x for x in dt.stdout.splitlines() if x)
+    changed = sorted(x for x in names if not x.startswith(ALLOWED_BUILD_PREFIX))
     if sorted(r.get("changed_paths", [])) != changed:
-        fail("changed_paths (the product paths) differs from the git diff since base, deliverables and the channel aside")
+        fail("changed_paths (the product paths) differs from the worker's own commits since base, deliverables and the channel aside")
     stray = [c for c in changed if c not in ALLOWED_BUILD_FILES]
     if stray:
         fail("paths outside the grant: %r" % stray[:4])
