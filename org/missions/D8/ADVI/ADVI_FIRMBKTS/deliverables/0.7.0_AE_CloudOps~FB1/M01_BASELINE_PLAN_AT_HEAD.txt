@@ -1,0 +1,156 @@
+data.aws_s3_object.exec_summary_artifact: Reading...
+data.aws_s3_object.anthropic_sdk_deps_zip: Reading...
+aws_cloudwatch_event_rule.exec_summary_trigger: Refreshing state... [id=exec-summary-trigger]
+aws_cloudwatch_log_group.exec_summary_generator: Refreshing state... [id=/aws/lambda/exec-summary-generator]
+aws_cloudwatch_metric_alarm.advisors_processed_ceiling: Refreshing state... [id=exec-summary-advisors-processed-ceiling]
+aws_iam_role.exec_summary_generator: Refreshing state... [id=exec-summary-generator-role]
+aws_cloudwatch_metric_alarm.tokens_in_anomaly: Refreshing state... [id=exec-summary-tokens-in-anomaly]
+data.aws_s3_object.anthropic_sdk_deps_zip: Read complete after 0s [id=opal-313476888478-lambda-layers/anthropic-sdk-deps.zip]
+aws_lambda_layer_version.anthropic_sdk_deps: Refreshing state... [id=arn:aws:lambda:us-east-1:313476888478:layer:anthropic-sdk-deps:1]
+data.aws_s3_object.exec_summary_artifact: Read complete after 0s [id=opal-313476888478-lambda-artifacts/exec-summary/exec-summary-generator.zip]
+aws_iam_role_policy.exec_summary_canonical_put: Refreshing state... [id=exec-summary-generator-role:advi-49f-exec-summary-canonical-put-policy]
+aws_iam_role_policy.exec_summary_generator: Refreshing state... [id=exec-summary-generator-role:exec-summary-generator-policy]
+aws_lambda_function.exec_summary_generator: Refreshing state... [id=exec-summary-generator]
+aws_lambda_permission.eventbridge_exec_summary: Refreshing state... [id=AllowEventBridgeInvokeExecSummary]
+aws_cloudwatch_event_target.exec_summary_trigger_target: Refreshing state... [id=exec-summary-trigger-exec-summary-generator]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+  - destroy
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_event_rule.exec_summary_trigger will be destroyed
+  # (because aws_cloudwatch_event_rule.exec_summary_trigger is not in configuration)
+  - resource "aws_cloudwatch_event_rule" "exec_summary_trigger" {
+      - arn                 = "arn:aws:events:us-east-1:313476888478:rule/exec-summary-trigger" -> null
+      - description         = "Fires exec-summary-generator on every successful gold chain run (bd-pipeline.gold-chain / chain-complete)." -> null
+      - event_bus_name      = "default" -> null
+      - event_pattern       = jsonencode(
+            {
+              - detail-type = [
+                  - "chain-complete",
+                ]
+              - source      = [
+                  - "bd-pipeline.gold-chain",
+                ]
+            }
+        ) -> null
+      - force_destroy       = false -> null
+      - id                  = "exec-summary-trigger" -> null
+      - is_enabled          = true -> null
+      - name                = "exec-summary-trigger" -> null
+      - state               = "ENABLED" -> null
+      - tags                = {
+          - "Name"   = "exec-summary-trigger"
+          - "System" = "ExecSummary"
+        } -> null
+      - tags_all            = {
+          - "Environment" = "Production"
+          - "ManagedBy"   = "Terraform"
+          - "Name"        = "exec-summary-trigger"
+          - "Project"     = "OpalPortal"
+          - "System"      = "ExecSummary"
+        } -> null
+        # (3 unchanged attributes hidden)
+    }
+
+  # aws_cloudwatch_event_rule.exec_summary_trigger_placeholder will be created
+  + resource "aws_cloudwatch_event_rule" "exec_summary_trigger_placeholder" {
+      + arn                 = (known after apply)
+      + description         = "PLACEHOLDER: TO 7 will replace pattern with the gold-chain-complete signal AE 0.6 confirms. DO NOT enable until TO 7."
+      + event_bus_name      = "default"
+      + force_destroy       = false
+      + id                  = (known after apply)
+      + name                = "exec-summary-trigger-placeholder"
+      + name_prefix         = (known after apply)
+      + schedule_expression = "cron(30 4 * * ? *)"
+      + state               = "DISABLED"
+      + tags                = {
+          + "Name"           = "exec-summary-trigger-placeholder"
+          + "PlaceholderFor" = "ADVI_49EXEC.007"
+          + "System"         = "ExecSummary"
+        }
+      + tags_all            = {
+          + "Environment"    = "Production"
+          + "ManagedBy"      = "Terraform"
+          + "Name"           = "exec-summary-trigger-placeholder"
+          + "PlaceholderFor" = "ADVI_49EXEC.007"
+          + "Project"        = "OpalPortal"
+          + "System"         = "ExecSummary"
+        }
+    }
+
+  # aws_cloudwatch_event_target.exec_summary_trigger_target must be replaced
+-/+ resource "aws_cloudwatch_event_target" "exec_summary_trigger_target" {
+      ~ id             = "exec-summary-trigger-exec-summary-generator" -> (known after apply)
+      ~ rule           = "exec-summary-trigger" -> "exec-summary-trigger-placeholder" # forces replacement
+        # (7 unchanged attributes hidden)
+    }
+
+  # aws_iam_role_policy.exec_summary_generator will be updated in-place
+  ~ resource "aws_iam_role_policy" "exec_summary_generator" {
+        id          = "exec-summary-generator-role:exec-summary-generator-policy"
+        name        = "exec-summary-generator-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (4 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "secretsmanager:GetSecretValue",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:secretsmanager:us-east-1:313476888478:secret:anthropic-api-key-*",
+                        ]
+                        Sid      = "AnthropicApiKey"
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringEquals = {
+                              ~ "cloudwatch:namespace" = "Opal/ExecSummary" -> "ExecSummary"
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                    {
+                        Action   = [
+                            "logs:CreateLogGroup",
+                            "logs:CreateLogStream",
+                            "logs:PutLogEvents",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/exec-summary-generator*",
+                        ]
+                        Sid      = "CloudWatchLogs"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_lambda_permission.eventbridge_exec_summary must be replaced
+-/+ resource "aws_lambda_permission" "eventbridge_exec_summary" {
+      ~ id                  = "AllowEventBridgeInvokeExecSummary" -> (known after apply)
+      ~ source_arn          = "arn:aws:events:us-east-1:313476888478:rule/exec-summary-trigger" -> (known after apply) # forces replacement
+      + statement_id_prefix = (known after apply)
+        # (5 unchanged attributes hidden)
+    }
+
+Plan: 3 to add, 1 to change, 3 to destroy.
+
+Changes to Outputs:
+  ~ eventbridge_rule_arn                 = "arn:aws:events:us-east-1:313476888478:rule/exec-summary-trigger" -> (known after apply)
+  ~ eventbridge_rule_name                = "exec-summary-trigger" -> "exec-summary-trigger-placeholder"
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
