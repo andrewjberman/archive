@@ -61,7 +61,7 @@ def main():
 
             def answer(state, **over):
                 p = state["pending"]
-                body = {"tag": p["tag"], "action": "send", "notes": "", "version": p["version"], "seq": p.get("seq"), "signed_at": "2026-10-13T22:00:00Z"}
+                body = {"tag": p["tag"], "action": "send", "notes": "", "version": p["version"], "seq": p.get("seq"), "signed_at": a.iso(T.NOW - datetime.timedelta(minutes=1))}
                 body.update(over)
                 body = {k: v for k, v in body.items() if v is not _MISSING}
                 text = json.dumps(body, sort_keys=True)
