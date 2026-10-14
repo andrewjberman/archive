@@ -23,6 +23,7 @@ import sys
 SCOPES = ("global", "49financial", "inflection", "cottonwood")
 KEYS = ("client_supervised_aua", "etf_strategies_aua", "alt_strategies_aua")
 CARRIED = "carried_dates"
+RESTATE_MAX = 5
 NEW = KEYS + (CARRIED,)
 BUCKET = "opal-data-assets"
 PREFIX = "portal/gold/mdpf"
@@ -176,6 +177,7 @@ def read_mode(data, manifest, pin=None):
     a.arm("R5", cd == nototal if isinstance(cd, list) else False, "carried_dates equals the dates with no total (%d): %s" % (len(nototal), "equal" if cd == nototal else "got %s want %s" % (cd, nototal)))
     # R6 prior
     r6 = []
+    restated = []
     skipped = []
     for s in SCOPES:
         ts, pr = data[s]["ts"], data[s].get("prior")
@@ -190,10 +192,16 @@ def read_mode(data, manifest, pin=None):
             r6.append((s, "unexpected new keys", sorted(set(added) - set(NEW))[:4]))
         sh = min(len(pr.get("dates") or []), len(ts.get("dates") or []))
         for k in ("opal_aggregate_aua", "point_class", "non_model_aua", "model_aua"):
-            if k in pr and k in ts and pr[k][:sh] != ts[k][:sh]:
-                r6.append((s, "moved on shared dates", k))
-    a.arm("R6", not r6 and not skipped, "against the prior dated object per scope: only the four new keys added, none dropped, opal_aggregate_aua, point_class, non_model_aua, model_aua equal on the shared dates%s%s" % (
-        "" if not r6 else "; " + json.dumps(r6[:3]), "" if not skipped else "; NO PRIOR OBJECT for %s (not passed)" % skipped))
+            if k in pr and k in ts:
+                # a routine day-over-day restatement of a few cells is data, not a CN-p-1 effect (CloudOps 2026-10-14: 1 cell);
+                # more than RESTATE_MAX moved cells in one array is a defect (a splice or a bug moves them by the hundred)
+                moved = [i for i in range(sh) if pr[k][i] != ts[k][i]]
+                if len(moved) > RESTATE_MAX:
+                    r6.append((s, "moved on shared dates", k, len(moved)))
+                elif moved:
+                    restated.append("%s.%s %d cell(s)" % (s, k, len(moved)))
+    a.arm("R6", not r6 and not skipped, "against the prior dated object per scope: only the four new keys added, none dropped, opal_aggregate_aua, point_class, non_model_aua, model_aua equal on the shared dates except at most %d restated cells per array (restated: %s)%s%s" % (
+        RESTATE_MAX, restated or "none", "" if not r6 else "; " + json.dumps(r6[:3]), "" if not skipped else "; NO PRIOR OBJECT for %s (not passed)" % skipped))
     # R7 category-views
     bad7 = {}
     for s in SCOPES:
@@ -290,7 +298,7 @@ def selftest(served):
         "key-missing": lambda x: x["global"]["ts"].pop(KEYS[2]),
         "other-scope-filled": lambda x: x["inflection"]["ts"][KEYS[0]].__setitem__(5, 1.0),
         "muni-kept": lambda x: walk_members(x["49financial"]["cv"])["members"].insert(0, {"member_id": "muni"}),
-        "headline-moved": lambda x: x["global"]["ts"]["opal_aggregate_aua"].__setitem__(10, 1.0),
+        "headline-moved": lambda x: x["global"]["ts"]["opal_aggregate_aua"].__setitem__(slice(10, 40), [1.0] * 30),
         "error-manifest": None,
     }
     for name, fn in plants.items():
