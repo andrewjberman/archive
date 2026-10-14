@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -55,3 +55,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28
   </proof_of_spec>
 </task_order>
 # pipeline-override: an exercise order to a tier-2 applier under a signed addendum (not a worker cell); the cell AR-y-307 is the issuer's, as for TO-EXERCISE-R28.
+
+<!-- ISSUER NOTE 2026-10-14 (2.0.0_SA_COO~Y2): status flipped to complete. AR-y-307 AC1 is recorded 4 of 5: D1, D2, D4 and C1 (answer bodies) passed live as a synthetic internal viewer; D3 answered NEEDS_CORRECTION because the resident composes no Shares price source (upload_resolution.py :112, :133, SHARES_PRICE_SOURCE_NOT_COMPOSED; row D2-S94). The D3 expectation (a Shares file accepted with the default price date) was the ISSUER'S error in the release-28 pair (section 4b): the price-date default of AR-y-245 is dormant until prices are composed; the door's Shares behaviour did not change. The FAIL row stands as recorded. -->
