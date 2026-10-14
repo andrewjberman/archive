@@ -53,9 +53,16 @@ opening anchor), the member is {"absent": "history not yet built: gold account_a
 N the count of its date= partitions (the dates go to the private sample only).
 Members sourced outside this cell's grant (the client summary, dim_return_method) are ABSENT with that reason.
 
+FILLED REPORT (contract document.filled_report, version 0.3.0; amendment 4, issuer 2.0.0_SA_COO~D2, round 97). The
+filled report is exactly two top-level keys, household and values. household is {household_ref, as_of, first_data_date,
+accounts}; each account entry is {account_id (the custodian form), last4, first_data_date (the account's first row in
+account_return_daily), window_status (one of MEASURED, NOT_SPANNED, BREAK for each of the four windows)}. The windows block
+and the row list are not part of a filled report.
+
 UNITS. Dollars are stored as floats rounded to 2 dp. Percent values are stored as percent numbers rounded to 1 dp
-(the decimal fraction times 100). Series are lists of dated objects. Account-grain members hold an object keyed by the
-custodian account id; a member whose whole source is ABSENT holds the single absent form.
+(the decimal fraction times 100). Series are lists of {name, points: [{date, value}]} (a point with no measured figure is
+left out; a chart with no measured point holds its absent form). Account-grain members, and the asset-class allocation,
+hold {"by_row": {key: figure}}; a member whose whole source is ABSENT holds the single absent form.
 
 IDENTITY CHECKS (amendment 3(c)). Tolerance 1.00 dollar; identity.basis "daily_ledger_and_cross_table". The COUNTED
 checks are independent of the window folds:
@@ -280,7 +287,7 @@ def measured_leaves(v):
         return
     if isinstance(v, dict):
         for k, x in v.items():
-            if k != "date":
+            if k not in ("date", "name"):
                 for y in measured_leaves(x):
                     yield y
     elif isinstance(v, list):
@@ -399,6 +406,23 @@ def ret_window_terms(rows, anchor, days, R):
             prod *= 1.0 + float(r[2])
     t["return_cumulative"] = Absent(why) if why else round((prod - 1.0) * 100.0, 1)
     return t
+
+
+def window_status(rows, anchor, days, R):
+    """The window's status by the contract's filled_report.window_status_rule: NOT_SPANNED when the account has no
+    account_return_daily row on the opening anchor day; BREAK when the anchor is SOURCE_LAG or a day inside the window
+    (after the anchor, up to and including as_of) has no row, a SOURCE_LAG row, a null total_return_daily or a
+    GRADED_DISAGREED guard_state; else MEASURED. rows: {business_date: (...)} as in ret_window_terms."""
+    a = rows.get(anchor.isoformat())
+    if a is None:
+        return "NOT_SPANNED"
+    if a[3] == "SOURCE_LAG":
+        return "BREAK"
+    for d in days:
+        r = rows.get(d.isoformat())
+        if r is None or r[3] == "SOURCE_LAG" or r[2] is None or r[4] == "GRADED_DISAGREED":
+            return "BREAK"
+    return "MEASURED"
 
 
 def main(repo, out):
@@ -556,6 +580,19 @@ def main(repo, out):
         terms = [TR[a][name] for a in accounts]
         H[name] = {key: hh_sum(terms, key) for key in ("beginning_value", "net_additions", "net_gain", "ending_value")}
 
+    # the account entries of the filled report: first_data_date (its first account_return_daily row) and the four
+    # window statuses, by the contract's filled_report rules; the since-inception window opens on that first row
+    FIRST, STATUS = {}, {}
+    for a in accounts:
+        rows = RET.get(a, {})
+        FIRST[a] = min(rows)
+        STATUS[a] = {}
+        for name in ("qtd", "ytd", "last_12_months"):
+            anchor = dt.date.fromisoformat(wdefs[name]["anchor"])
+            STATUS[a][name] = window_status(rows, anchor, [d for d in TD if anchor < d <= R], R)
+        first = dt.date.fromisoformat(FIRST[a])
+        STATUS[a]["since_inception"] = window_status(rows, first, [d for d in TD if first < d <= R], R)
+
     # activity-sourced window terms: a window the activity table cannot open is absent in words
     act_n = len(act_dates)
     TA = {}
@@ -641,20 +678,20 @@ def main(repo, out):
     total = len(member_ids)
     absent = total - filled
     contract_absent = sum(1 for m in members if m["source"] == "ABSENT")
-    problems = shape_problems(members, form)
-    shape_ok = (not problems) and filled + absent == total and absent >= contract_absent
 
-    # the sample: private only
+    # the filled report, exactly as the contract's document.filled_report states it: private only
     layout = {
         "household": {
             "household_ref": hh_hash,
             "as_of": R.isoformat(),
-            "accounts": [{"account_key": a, "last_four": a[-4:]} for a in accounts],
+            "first_data_date": min(FIRST[a] for a in accounts),
+            "accounts": [{"account_id": a, "last4": a[-4:], "first_data_date": FIRST[a], "window_status": STATUS[a]}
+                         for a in accounts],
         },
-        "windows": wdefs,
         "values": form,
-        "rows": build_rows(accounts),
     }
+    problems = shape_problems(members, form) + layout_problems(members, layout)
+    shape_ok = (not problems) and filled + absent == total and absent >= contract_absent
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "HOUSEHOLD_SAMPLE.json"), "w", encoding="utf-8") as fh:
         json.dump(layout, fh, indent=1, sort_keys=True)
@@ -737,6 +774,44 @@ def shape_problems(members, values):
     return problems
 
 
+WINDOW_STATUS_VALUES = ("MEASURED", "NOT_SPANNED", "BREAK")
+WINDOW_KEYS_FILLED = ("qtd", "ytd", "last_12_months", "since_inception")
+
+
+def layout_problems(members, layout):
+    """The filled report against document.filled_report: top-level keys, household and account entry fields, window
+    statuses from the enum, accounts in account_id order, the household first date, and every per-row member keyed by
+    the household's accounts or by an asset class (wrapped in by_row)."""
+    problems = []
+    if sorted(layout.keys()) != ["household", "values"]:
+        problems.append("top-level keys are %r, not household and values" % sorted(layout.keys()))
+    hh = layout["household"]
+    if sorted(hh.keys()) != ["accounts", "as_of", "first_data_date", "household_ref"]:
+        problems.append("household keys are %r" % sorted(hh.keys()))
+    accs = hh["accounts"]
+    ids = [a["account_id"] for a in accs]
+    if ids != sorted(ids) or len(set(ids)) != len(ids):
+        problems.append("accounts are not in account_id order without duplicates")
+    for a in accs:
+        if sorted(a.keys()) != ["account_id", "first_data_date", "last4", "window_status"]:
+            problems.append("account entry keys are %r" % sorted(a.keys()))
+        ws = a["window_status"]
+        if sorted(ws.keys()) != sorted(WINDOW_KEYS_FILLED) or any(v not in WINDOW_STATUS_VALUES for v in ws.values()):
+            problems.append("window_status must hold the four windows with a status from the enum")
+    if accs and hh["first_data_date"] != min(a["first_data_date"] for a in accs):
+        problems.append("household first_data_date is not the earliest account first_data_date")
+    keys_ok = set(ids) | set(CLASS_ENUM)
+    for m in members:
+        v = layout["values"].get(m["id"])
+        if isinstance(v, dict) and "by_row" in v:
+            if set(v.keys()) != {"by_row"} or not set(v["by_row"].keys()) <= keys_ok:
+                problems.append("member %s: by_row must be the only key and hold household accounts or asset classes" % m["id"])
+        elif isinstance(v, list):
+            if not all(isinstance(s, dict) and sorted(s.keys()) == ["name", "points"] for s in v):
+                problems.append("member %s: a series is a list of {name, points}" % m["id"])
+    return problems
+
+
 def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act_by_acct, act_dates, sibling_tables,
                  hh_hash, counts):
     """Every member id is assigned here exactly once. Unknown sourced ids raise (no silent absent)."""
@@ -784,7 +859,7 @@ def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act
     cls_hist = hist_reason(sibling_tables[CLS_CONTRACT], len(cls_dates))
 
     def per_account(fn):
-        return {a: fn(a) for a in accounts}
+        return {"by_row": {a: fn(a) for a in accounts}}
 
     def hh_term(w, term):
         return hh_sum([TA[a][w] for a in accounts], term)
@@ -824,7 +899,7 @@ def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act
             out[mid] = hh_term(mid[len("hold.net_gain_"):], "net_gain")
             continue
         if mid == "hold.allocation":
-            out[mid] = allocation_at(accounts, cls_by, act_by_acct, R)
+            out[mid] = {"by_row": allocation_at(accounts, cls_by, act_by_acct, R)}
             continue
         if parts[0] == "trgl":
             if not ytd_lots_open:
@@ -839,13 +914,13 @@ def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act
                 out[mid] = per_account(lambda a, k=parts[1]: glr_value(k, a, lot_r_by, lot_u_by, act_by_acct, R))
             continue
         if mid == "overview.chart.allocation_by_asset_class":
-            out[mid] = class_series(cls_days_l12, accounts, cls_by) if cls_open else Absent(cls_hist)
+            out[mid] = series_or_absent(class_series(cls_days_l12, accounts, cls_by), NO_CHART_POINT) if cls_open else Absent(cls_hist)
             continue
         if mid == "accounts.chart.allocation_by_account":
-            out[mid] = account_series(act_days_l12, accounts, act_by_acct) if act_open else Absent(act_hist)
+            out[mid] = series_or_absent(account_series(act_days_l12, accounts, act_by_acct), NO_CHART_POINT) if act_open else Absent(act_hist)
             continue
         if mid == "accounts.chart.ending_value_and_net_additions_last_12_months":
-            out[mid] = ending_netadd_series(act_days_l12, accounts, act_by_acct) if act_open else Absent(act_hist)
+            out[mid] = series_or_absent(ending_netadd_series(act_days_l12, accounts, act_by_acct), NO_CHART_POINT) if act_open else Absent(act_hist)
             continue
         if mid == "holdings.rows.class_hierarchy":
             out[mid] = ("class level only: Opal's seven asset-class values (" + ", ".join(CLASS_ENUM) +
@@ -969,8 +1044,19 @@ def glr_value(key, a, lot_r_by, lot_u_by, act_by_acct, R):
     raise SystemExit("ERROR: glr key %s has no rule" % key)
 
 
+NO_CHART_POINT = "no figure is measured on any day of the chart's window, so the chart holds no series"
+
+
+def series_or_absent(lines, reason):
+    """A chart's series, or its absent form when no point of any line is measured: a series point has no absent form,
+    so an unmeasured point is left out and a chart with no measured point says why, in words."""
+    return lines if any(line["points"] for line in lines) else Absent(reason)
+
+
 def class_series(days, accounts, cls_by):
-    out = []
+    """One series per asset class (name = the class): a point per day on which the class is measured, its share of
+    the household's class total that day."""
+    pts = {c: [] for c in CLASS_ENUM}
     for d in days:
         tot = 0.0
         per = {}
@@ -980,63 +1066,44 @@ def class_series(days, accounts, cls_by):
                 for c, v in dd.items():
                     per[c] = per.get(c, 0.0) + v
                     tot += v
-        shares = {}
         for c in CLASS_ENUM:
             if c in per and tot > 0:
-                shares[c] = round(per[c] / tot * 100.0, 1)
-            else:
-                shares[c] = Absent("no class value on this day")
-        out.append({"date": d, "shares": shares})
-    return out
+                pts[c].append({"date": d, "value": round(per[c] / tot * 100.0, 1)})
+    return [{"name": c, "points": pts[c]} for c in CLASS_ENUM]
 
 
 def account_series(days, accounts, act_by_acct):
-    out = []
+    """One series per account (name = the account id): a point per day on which the account has an ending value, its
+    share of the household's ending value that day."""
+    pts = {a: [] for a in accounts}
     for d in days:
         vals = {}
         for a in accounts:
             r = act_by_acct.get(a, {}).get(d)
-            vals[a] = Absent("no activity row on this day") if r is None else float(r["ending_value"])
-        total = sum(v for v in vals.values() if not isinstance(v, Absent))
-        shares = {}
+            vals[a] = None if r is None else float(r["ending_value"])
+        total = sum(v for v in vals.values() if v is not None)
         for a in accounts:
-            v = vals[a]
-            if isinstance(v, Absent) or total == 0:
-                shares[a] = Absent("no ending value on this day")
-            else:
-                shares[a] = round(v / total * 100.0, 1)
-        out.append({"date": d, "shares": shares})
-    return out
+            if vals[a] is not None and total != 0:
+                pts[a].append({"date": d, "value": round(vals[a] / total * 100.0, 1)})
+    return [{"name": a, "points": pts[a]} for a in accounts]
 
 
 def ending_netadd_series(days, accounts, act_by_acct):
-    out = []
+    """Two series of the household: ending value and net additions (contributions less withdrawals). A day enters a
+    series only when every account carries a row that day (a household sum is never partial)."""
+    end_pts, net_pts = [], []
     for d in days:
         ends = []
         nets = []
         for a in accounts:
             r = act_by_acct.get(a, {}).get(d)
-            if r is None:
-                ends.append(Absent("no row"))
-                nets.append(Absent("no row"))
-            else:
-                ends.append(float(r["ending_value"]))
-                nets.append(float(r["contributions"]) - float(r["withdrawals"]))
-        out.append({"date": d,
-                    "ending_value": hh_sum([{"v": x} for x in ends], "v"),
-                    "net_additions": hh_sum([{"v": x} for x in nets], "v")})
-    return out
-
-
-def build_rows(accounts):
-    rows = {
-        "account": [{"account_key": a, "label": {"absent": "registration name not held by any sibling contract; "
-                                                           "the label carries the last four digits until a name source exists"},
-                     "last_four": a[-4:]} for a in accounts],
-        "class_household": [{"class": c, "allocation_percent": "see values hold.allocation"} for c in CLASS_ENUM],
-        "class_sub_class": Absent("sub-class rows are not carried by any sibling contract").reason,
-    }
-    return rows
+            ends.append(None if r is None else float(r["ending_value"]))
+            nets.append(None if r is None else float(r["contributions"]) - float(r["withdrawals"]))
+        if all(x is not None for x in ends):
+            end_pts.append({"date": d, "value": round(sum(ends), 2)})
+        if all(x is not None for x in nets):
+            net_pts.append({"date": d, "value": round(sum(nets), 2)})
+    return [{"name": "ending_value", "points": end_pts}, {"name": "net_additions", "points": net_pts}]
 
 
 if __name__ == "__main__":
