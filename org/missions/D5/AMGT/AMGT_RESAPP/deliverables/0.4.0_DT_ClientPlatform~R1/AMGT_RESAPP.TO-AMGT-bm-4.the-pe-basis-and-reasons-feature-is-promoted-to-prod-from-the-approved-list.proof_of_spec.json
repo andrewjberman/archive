@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bm-4.the-pe-basis-and-reasons-feature-is-promoted-to-prod-from-the-approved-list",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-4.the-pe-basis-and-reasons-feature-is-promoted-to-prod-from-the-approved-list.md",
+    "group": "OTHER",
+    "vintage_commit": "e0a350fc7a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e0a350fc7a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-4.the-pe-basis-and-reasons-feature-is-promoted-to-prod-from-the-approved-list.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~R1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal PROD (Opal-Capital/portal refs/heads/PROD)",
+      "kind": "frontend_component",
+      "commit_or_etag": "6a5926fc1194e1ce37e35ff267e5cf4914d9c172",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PROD 501e998b -> 6a5926fc, release/20261014T123810Z carrying cand/dell1/amgt-sa-pe-basis-and-reasons only; tag portal-v2.1.219; CI Deploy to Production run 38565663189 completed/success. ls-remote read of PROD: 6a5926fc1194e1ce37e35ff267e5cf4914d9c172."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~R1/PROMOTE_RECEIPT_BM4.md",
+      "kind": "doc",
+      "commit_or_etag": "e0a350fc7a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DT's receipt: release, PROD head before and after, pages changed (Security Analysis, /security-analysis, Opal-internal), CI."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: five lines `EQUAL <path>` (one per path, none `DIFFERS`)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in src/pages/SecurityAnalysis/tabs/ModelTab.tsx src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs src/pages/SecurityAnalysis/__harness__/basisFixture.GOOGL_US_Equity.json src/pages/SecurityAnalysis/__harness__/basisFixture.PBR_US_Equity.json; do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse 84fd6461bb:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done",
+      "output_evidence": "EQUAL src/pages/SecurityAnalysis/tabs/ModelTab.tsx\nEQUAL src/pages/SecurityAnalysis/types.ts\nEQUAL src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs\nEQUAL src/pages/SecurityAnalysis/__harness__/basisFixture.GOOGL_US_Equity.json\nEQUAL src/pages/SecurityAnalysis/__harness__/basisFixture.PBR_US_Equity.json",
+      "denominator": "5 of 5 paths of origin/PROD (6a5926fc) EQUAL to 84fd6461bb:<path>",
+      "status": "PASS",
+      "expect": "EQUAL src/pages/SecurityAnalysis/tabs/ModelTab\\.tsx\\nEQUAL src/pages/SecurityAnalysis/types\\.ts\\nEQUAL src/pages/SecurityAnalysis/__harness__/basisAndReasons\\.harness\\.cjs\\nEQUAL src/pages/SecurityAnalysis/__harness__/basisFixture\\.GOOGL_US_Equity\\.json\\nEQUAL src/pages/SecurityAnalysis/__harness__/basisFixture\\.PBR_US_Equity\\.json"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: one JSON row whose `status` is `completed` and `conclusion` is `success`, with `headSha` equal to origin/PROD after a fetch and NOT beginning `7db035e4`",
+      "method": "command",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "output_evidence": "[{\"conclusion\":\"success\",\"headSha\":\"6a5926fc1194e1ce37e35ff267e5cf4914d9c172\",\"status\":\"completed\"}]",
+      "denominator": "1 of 1 latest PROD run; headSha 6a5926fc equals git rev-parse origin/PROD after a fetch and the ls-remote read of PROD",
+      "status": "PASS",
+      "expect": "\"conclusion\":\"success\",\"headSha\":\"6a5926fc[0-9a-f]+\",\"status\":\"completed\""
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: a count of at least 4 (the route, the class and the CI words each present)",
+      "method": "command",
+      "invocation": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~R1/PROMOTE_RECEIPT_BM4.md\"",
+      "output_evidence": "5\n(grep -c over PROMOTE_RECEIPT_BM4.md: lines naming security-analysis, Opal-internal, completed and success; threshold 4)",
+      "denominator": "5 matching lines in the receipt (threshold 4)",
+      "status": "PASS",
+      "expect": "^[4-9]\n"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order names no seeded mutant for this promote; AC1's per-blob equality and AC2's head-must-move clause are the discriminating checks (at the base 501e998b AC1 reads DIFFERS for the two modified files and AC2 reads the old head).",
+      "expected": "N/A: no mutant named by the task order",
+      "observed": "No mutant run.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: AC1 was read once after the CI run completed; AC2 was read once by the order's exact invocation and once by the run-id poll; AC3 once. Repeats beyond that are outside the bound.",
+      "observed": "AC1: 5 of 5 EQUAL. AC2: completed/success headSha 6a5926fc in both reads. AC3: 5.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "Run by 0.4.0_DT_ClientPlatform~R1: IN-DEV check passed (84fd6461bb ancestor of origin/DEV 97c66c9364); release builder READY (release/20261014T123810Z, features=1, unapproved=0, client-facing=0); PROD moved 501e998b -> 6a5926fc by ff-only push from an ephemeral worktree; tag portal-v2.1.219; CI run 38565663189 success; worktree removed; ledger amgt-bm4-pe-basis-prod-promote-20261014 closed. DEVIATION: the order names 7db035e4 as the PROD head before; origin/PROD had already moved to 501e998b (dell2 release, run 38563449756, success), so the release was cut from that head. The workspace submodule pointer commit (prod-deploy Step 6) was NOT made: the order bounds the seat's writes to the receipt and the ledger.",
+  "compiler_tools": [
+    {
+      "tool": "gh run list / git rev-parse / grep",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "result": "[{\"conclusion\":\"success\",\"headSha\":\"6a5926fc1194e1ce37e35ff267e5cf4914d9c172\",\"status\":\"completed\"}]"
+    }
+  ]
+}
