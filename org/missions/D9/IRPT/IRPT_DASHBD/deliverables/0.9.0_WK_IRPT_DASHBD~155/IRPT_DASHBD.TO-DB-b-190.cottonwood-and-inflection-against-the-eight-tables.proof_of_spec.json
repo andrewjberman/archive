@@ -18,84 +18,90 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/FIRM_READINESS.json",
       "kind": "doc",
-      "commit_or_etag": "6f8f52e7f2",
+      "commit_or_etag": "99fa6a99fa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Read-only record committed at 6f8f52e7f2 (LOCAL). Nothing deployed, pushed or written to AWS; the record names no served value and changes none."
+      "deploy_evidence": "Read-only record committed at 99fa6a99fa (LOCAL). Nothing deployed, pushed or written to AWS; the record names no served value and changes none. Overwrites the first seat's void record."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/session_log.txt",
       "kind": "doc",
-      "commit_or_etag": "6f8f52e7f2",
+      "commit_or_etag": "99fa6a99fa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Command log of the read, committed at 6f8f52e7f2 (LOCAL). Records command, exit code and deciding line; no row values."
+      "deploy_evidence": "Command log of the re-seat read, committed at 99fa6a99fa (LOCAL). Records command, exit code and deciding line; no row values, no object names, no account identifiers."
     }
   ],
   "acceptance": [
     {
       "criterion_id": "DB101-4-AC1",
-      "criterion_verbatim": "`DB101-4-AC1` -- the record holds exactly the two firms with their buckets and the irpt prefix empty (the issuer's own read); each firm lists the eight C-SHAPE tables with source_exists, a candidate source, a gap in words and whether it reuses existing gold; each names the existing gold inputs with columns served, a readiness, blockers and its household dimension; no shadow pull is proposed; a recommendation and a first adapter order are stated; no write, push or deploy; no run of 8 or more digits. Base: FAIL (no record).",
+      "criterion_verbatim": "`DB101-4-AC1` -- the record holds exactly the two firms with their real buckets (opal-data-cottonwood, opal-data-inflection) and the irpt prefix present (the issuer's own read), Cottonwood's account_return_daily present and Inflection's absent; each firm lists the eight C-SHAPE tables with source_exists, a candidate source, a gap in words and whether it reuses existing gold; each names the existing gold inputs with columns served, a readiness, blockers and its household dimension; no shadow pull is proposed; a recommendation and a first adapter order are stated; no write, push or deploy; no run of 8 or more digits. Base: FAIL (no record).",
       "method": "command",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r101/p101_round101.py\" . DB101-4-AC1",
-      "output_evidence": "OK: both firms read against the eight tables: cottonwood BLOCKED, inflection BLOCKED / DB101-4-AC1 PASS (rc 0, three identical runs)",
-      "denominator": "1 of 1 criterion PASS; 2 of 2 firms (cottonwood, inflection) with their bucket and irpt_prefix_exists false; 16 of 16 table entries (8 per firm) carry the four fields; 5 of 8 contract files exist; firm source_exists true for 7 of 8 tables (cottonwood) and 6 of 8 (inflection); 27 existing gold input items (12 cottonwood, 15 inflection); 0 shadow pulls; 0 runs of 8 or more digits",
+      "output_evidence": "OK: both firms read against the eight tables: cottonwood BLOCKED, inflection BLOCKED / DB101-4-AC1 PASS (rc 0)",
+      "denominator": "1 of 1 criterion PASS; 2 of 2 firms with their real bucket (cottonwood, inflection) and irpt_prefix_exists true; 16 of 16 table entries (8 per firm) carry the required fields; Cottonwood account_return_daily present (1 of 8 tables in gold, schema equal), Inflection 0 of 8 tables in gold; source_exists true for 1 of 8 (cottonwood) and 0 of 8 (inflection); 11 existing gold input items (7 cottonwood, 4 inflection); 0 shadow pulls proposed; 0 runs of 8 or more digits; 6 surprise rows filed this round (S8 to S13), 13 in total for this worker on the project",
       "status": "PASS",
-      "status_reason": "PASS as written: the checker returns DB101-4-AC1 PASS rc 0 on FIRM_READINESS.json at 6f8f52e7f2. Readiness is BLOCKED for both firms on the shared market topic table, which is the grounded answer and not a checker artefact.",
+      "status_reason": "PASS as written: the checker returns DB101-4-AC1 PASS rc 0 on FIRM_READINESS.json at 99fa6a99fa. The record reads the amended buckets from address(): Cottonwood's account_return_daily is present with a schema equal to its contract; Inflection has no account_return_daily; both firms are BLOCKED because the shared-bucket silver that feeds the other seven tables is outside the bound (row S8).",
       "expect": "DB101-4-AC1 PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The official checker run before FIRM_READINESS.json was written (no record at the stated path).",
+      "description": "A copy of the record with Inflection's gold_prefixes_present given account_return_daily (the issuer's own list says it is absent), run through the official checker; the record was then restored byte for byte",
       "expected": "DB101-4-AC1 FAIL",
-      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/FIRM_READINESS.json; DB101-4-AC1 FAIL (rc 1)",
+      "observed": "FAIL: inflection: account_return_daily is present in Cottonwood's gold and absent in Inflection's (the issuer's own list); DB101-4-AC1 FAIL (rc 1)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the official checker run three times from the worktree root with the same arguments, outputs compared",
-      "observed": "the three runs print the same two lines and DB101-4-AC1 PASS with rc 0",
+      "method": "the official checker run three times from the worktree root with the same arguments, outputs compared byte for byte",
+      "observed": "the three runs print the same two lines (OK line and DB101-4-AC1 PASS) with rc 0 each",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "market_topic_daily: no table located in either firm bucket beyond the top-level and second-level listings",
-      "reason": "a general table with no firm location, no contract and no registry row (PRD C-SOURCES); it is a shared dependency, recorded as a blocker on both firms"
+      "item": "Silver and bronze inputs of both firms (Black Diamond, Orion, Eclipse) in the shared bucket opal-data-assets and the legacy bucket opal-data-inf",
+      "reason": "outside the bound (each firm's own bucket only); their locations are named by address() and by the holdings_snapshot.py code text and recorded as source_exists false with the reason in the gap (row S8)"
     },
     {
-      "item": "The per-firm IRPT QA holdings JSON (dated snapshot and latest pointer)",
-      "reason": "JSON, not parquet; the bounds allow LIST and parquet schema reads only. The 19 and 17 column counts are carried from the CTO message and marked as carried"
+      "item": "The ADVI household crosswalk coverage of Cottonwood (commonwealth cottonwood silver crosswalk)",
+      "reason": "named by the ADVI_FIRMBKTS record at the shared bucket; not read; household_dimension states it as unmeasured (row S12)"
     },
     {
-      "item": "The shared etf-classifications lookup",
-      "reason": "not opened in this read; class readiness is stated from the presence or absence of an asset-class column in each firm's data"
-    },
-    {
-      "item": "Whether Inflection gold lots derive from Eclipse or Orion; whether Orion returns include dividends; daily history depth for each table",
+      "item": "Lot population for Inflection (Eclipse tax lots) and the Orion dividend question",
       "reason": "PRD-named measurements that this read does not make; each is stated as a gap, not as a finding"
     },
     {
-      "item": "The 49 Financial bucket",
-      "reason": "not an input to any answer; one top-level LIST during the premise check, disclosed in surprise row IRPT_DASHBD-D2-W155-S5"
+      "item": "Column counts of the holdings-family gold beyond the newest partition's footer, and the IR holdings page columns",
+      "reason": "the record carries the CTO's 19 and 17 IR page counts marked as the CTO's; the gold footers measured 6 columns each (row S11)"
     },
     {
       "item": "Contract files for account_transaction, account_dim and market_topic_daily",
-      "reason": "none exist yet; each is authored by the round that first writes its table (PRD C-SHAPE)"
+      "reason": "none exist; each is authored by the round that first writes its table (PRD C-SHAPE)"
+    },
+    {
+      "item": "The 49 Financial bucket",
+      "reason": "not read in this re-seat; the 49 Financial gold address is used only as a comparison in the order's text"
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W155-S1: OBSERVATION, INERT: aws s3 ls on an empty irpt prefix exits 1 with no output, while s3api list-objects-v2 on the same prefix reads KeyCount 0 and exit 0 (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W155-S2: OBSERVATION, INERT: no IRPT_BCKEND parquet gold sits in either firm bucket; the IR holdings output is a QA JSON for one date plus a latest pointer, and the parquet gold named in the order is written by the firm gold pipelines (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W155-S3: OBSERVATION, INERT: holdings_snapshot.py reads a blackdiamond/cottonwood/ prefix that the Cottonwood bucket does not hold (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W155-S4: OBSERVATION, INERT: Inflection gold lots carry lot-level cost basis; the PRD NO_LOTS rule is neither confirmed nor refuted by this read (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W155-S5: OBSERVATION, INERT: one top-level LIST of the 49 Financial irpt prefix ran during the premise check, outside the two firm buckets; no answer uses it (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W155-S6: OBSERVATION, INERT: comp-estate has no IRPT chain and comp-pipescript io on holdings_snapshot.py is an AST map outside the curated graph, so the enumeration came from S3 LIST and repository reads (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W155-S7: OBSERVATION, INERT: the IR holdings column counts (19 and 17) are carried from the CTO message and were not re-measured, because the QA artifacts are JSON and the bounds allow parquet schema reads only (UNDER_INVESTIGATION)"
+    "IRPT_DASHBD-D2-W155-S1: OBSERVATION, INERT: aws s3 ls on an empty irpt prefix exits 1 with no output, while s3api list-objects-v2 on the same prefix reads KeyCount 0 and exit 0 (UNDER_INVESTIGATION; from the first seat, kept as filed)",
+    "IRPT_DASHBD-D2-W155-S2: OBSERVATION, INERT: the first seat's premise that no gold sat in either firm bucket was taken from the registry bucket; superseded by amendment 1 and by this record (UNDER_INVESTIGATION; from the first seat, kept as filed)",
+    "IRPT_DASHBD-D2-W155-S3: OBSERVATION, INERT: holdings_snapshot.py reads a blackdiamond/cottonwood/ prefix that the Cottonwood bucket does not hold (UNDER_INVESTIGATION; from the first seat, kept as filed)",
+    "IRPT_DASHBD-D2-W155-S4: OBSERVATION, INERT: Inflection gold lots carry lot-level cost basis; the PRD NO_LOTS rule is neither confirmed nor refuted by this read (UNDER_INVESTIGATION; from the first seat, kept as filed)",
+    "IRPT_DASHBD-D2-W155-S5: OBSERVATION, INERT: one top-level LIST of the 49 Financial irpt prefix ran during the premise check, outside the two firm buckets; no answer uses it (UNDER_INVESTIGATION; from the first seat, kept as filed)",
+    "IRPT_DASHBD-D2-W155-S6: OBSERVATION, INERT: comp-estate has no IRPT chain and comp-pipescript io on holdings_snapshot.py is an AST map outside the curated graph (UNDER_INVESTIGATION; from the first seat, kept as filed)",
+    "IRPT_DASHBD-D2-W155-S7: OBSERVATION, INERT: the IR holdings column counts (19 and 17) are carried from the CTO message and were not re-measured on the IR page (UNDER_INVESTIGATION; from the first seat, kept as filed; see S11 for the gold footers)",
+    "IRPT_DASHBD-D2-W155-S8: BLOCKING, INERT: the silver that would feed seven of the eight tables is code-named at the shared bucket opal-data-assets and the legacy bucket opal-data-inf, outside the own-bucket bound, so no source was listed (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S9: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~D2): the registry bucket field and the generated firm_bucket_map name legacy buckets for the two firms, while address() resolves gold to the firm buckets (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S10: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~P2): Cottonwood account_return_daily gold is stale, newest partition 2026-06-22, and the Cottonwood performance tables end on 2026-09-25 (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S11: OBSERVATION, INERT: the gold holdings and holdings_qa parquet footers carry 6 columns in each firm, so the 19 and 17 IR counts are page columns, not this file's columns (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S12: OBSERVATION, INERT: the only household crosswalk recorded is 49 Financial's; the Cottonwood crosswalk input sits at the shared bucket and its coverage was not read under the bound (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S13: OBSERVATION, INERT: the DB-b-190 order already read complete at HEAD on the first seat's void record; this round's passing record re-grounds the status (UNDER_INVESTIGATION)"
   ],
   "compiler_tools": [
     {
       "tool": "p101_round101.py",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r101/p101_round101.py\" . DB101-4-AC1",
-      "result": "DB101-4-AC1 PASS (rc 0) on FIRM_READINESS.json at 6f8f52e7f2; before the record existed the same call returned FAIL (rc 1)"
+      "result": "DB101-4-AC1 PASS (rc 0) on FIRM_READINESS.json at 99fa6a99fa, three identical runs"
     }
   ]
 }
