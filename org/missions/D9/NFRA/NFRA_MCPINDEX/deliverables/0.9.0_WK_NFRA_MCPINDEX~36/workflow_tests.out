@@ -1,0 +1,414 @@
+......................................................................FF [ 77%]
+...FF...............F                                                    [100%]
+================================== FAILURES ===================================
+______ HarvestSchemaTests.test_bucket_scope_reader_and_name_are_enforced ______
+
+self = <tests.test_tool_index_and_harvest.HarvestSchemaTests testMethod=test_bucket_scope_reader_and_name_are_enforced>
+
+    def test_bucket_scope_reader_and_name_are_enforced(self):
+        cases = []
+        d = copy.deepcopy(VALID_ROW)
+        d["bucket"] = "opal-data-portal-v2"
+        cases.append(d)
+        d = copy.deepcopy(VALID_ROW)
+        d["firm_scope_rule"] = "firm-scoped"
+        cases.append(d)
+        d = copy.deepcopy(VALID_ROW)
+        d["gap_owner"] = None
+        cases.append(d)                       # no reader and no owner
+        d = copy.deepcopy(VALID_ROW)
+        d["read_tool"] = "some_tool"
+        cases.append(d)                 # reader AND gap owner
+        d = copy.deepcopy(VALID_ROW)
+        d["tools"] = ["x"]
+        cases.append(d)                          # field outside the schema
+        d = copy.deepcopy(VALID_ROW)
+        del d["producer"]
+        cases.append(d)
+        for d in cases:
+            self.assertNotEqual(emit.validate_harvest("harvest_packs", d), [], d)
+        self.assertNotEqual(emit.validate_harvest("harvest_wrong_name", VALID_ROW), [])
+        d = copy.deepcopy(VALID_ROW)
+        d["read_tool"] = "some_tool"
+        d["gap_owner"] = None
+>       self.assertEqual(emit.validate_harvest("harvest_packs", d), [])                            # the reader arm is valid
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Lists differ: ["harvest_packs: missing field(s): ['contr[464 chars]r']"] != []
+E       
+E       First list contains 7 additional elements.
+E       First extra element 0:
+E       "harvest_packs: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']"
+E       
+E       + []
+E       - ["harvest_packs: missing field(s): ['contract', 'format', 'layer', 'nl_tags', "
+E       -  "'retired', 'table']",
+E       -  'harvest_packs: table -- required, non-empty string',
+E       -  "harvest_packs: layer -- one of ['gold', 'silver', 'bronze', 'state']",
+E       -  'harvest_packs: format -- required, non-empty string',
+E       -  'harvest_packs: nl_tags -- a list of strings (may be empty)',
+E       -  'harvest_packs: retired -- required, a bool',
+E       -  "harvest_packs: contract -- a mapping with exactly the keys ['id', 'size', "
+E       -  "'keys', 'freshness', 'partition', 'producer']"]
+
+workflows\atom_decomposition\tests\test_tool_index_and_harvest.py:84: AssertionError
+_ HarvestSchemaTests.test_committed_harvest_files_are_valid_and_cover_serve_now_once _
+
+self = <tests.test_tool_index_and_harvest.HarvestSchemaTests testMethod=test_committed_harvest_files_are_valid_and_cover_serve_now_once>
+
+    def test_committed_harvest_files_are_valid_and_cover_serve_now_once(self):
+        rows, errs = emit.load_harvest_entries()
+>       self.assertEqual(errs, {})
+E       AssertionError: {'harvest_amgt_harvest_bronze': ["harvest_[23711 chars]']"]} != {}
+E       Diff is 42895 characters long. Set self.maxDiff to None to see it.
+
+workflows\atom_decomposition\tests\test_tool_index_and_harvest.py:104: AssertionError
+_ HarvestSchemaTests.test_the_v4_rows_are_valid_where_round_ten_refused_them __
+
+self = <tests.test_tool_index_and_harvest.HarvestSchemaTests testMethod=test_the_v4_rows_are_valid_where_round_ten_refused_them>
+
+    def test_the_v4_rows_are_valid_where_round_ten_refused_them(self):
+        for prefix in ("management/v1/", "amgt/harvest/gold/research-dossier/", "amgt/harvest/gold/research_dossier/",
+                       "amgt/harvest/bronze/", "amgt/harvest/silver/", "amgt/harvest/state/", "wsj/harvest/", "raw/"):
+            d = copy.deepcopy(VALID_ROW)
+            d["prefix"] = prefix
+>           self.assertEqual(emit.validate_harvest("harvest_" + emit.harvest_slug(prefix), d), [], prefix)
+E           AssertionError: Lists differ: ["harvest_management_v1: missing field(s):[520 chars]r']"] != []
+E           
+E           First list contains 7 additional elements.
+E           First extra element 0:
+E           "harvest_management_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']"
+E           
+E           + []
+E           - ["harvest_management_v1: missing field(s): ['contract', 'format', 'layer', "
+E           -  "'nl_tags', 'retired', 'table']",
+E           -  'harvest_management_v1: table -- required, non-empty string',
+E           -  "harvest_management_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']",
+E           -  'harvest_management_v1: format -- required, non-empty string',
+E           -  'harvest_management_v1: nl_tags -- a list of strings (may be empty)',
+E           -  'harvest_management_v1: retired -- required, a bool',
+E           -  "harvest_management_v1: contract -- a mapping with exactly the keys ['id', "
+E           -  "'size', 'keys', 'freshness', 'partition', 'producer']"] : management/v1/
+
+workflows\atom_decomposition\tests\test_tool_index_and_harvest.py:100: AssertionError
+______________ HarvestSchemaTests.test_valid_row_has_zero_errors ______________
+
+self = <tests.test_tool_index_and_harvest.HarvestSchemaTests testMethod=test_valid_row_has_zero_errors>
+
+    def test_valid_row_has_zero_errors(self):
+>       self.assertEqual(emit.validate_harvest("harvest_packs", VALID_ROW), [])
+E       AssertionError: Lists differ: ["harvest_packs: missing field(s): ['contr[464 chars]r']"] != []
+E       
+E       First list contains 7 additional elements.
+E       First extra element 0:
+E       "harvest_packs: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']"
+E       
+E       + []
+E       - ["harvest_packs: missing field(s): ['contract', 'format', 'layer', 'nl_tags', "
+E       -  "'retired', 'table']",
+E       -  'harvest_packs: table -- required, non-empty string',
+E       -  "harvest_packs: layer -- one of ['gold', 'silver', 'bronze', 'state']",
+E       -  'harvest_packs: format -- required, non-empty string',
+E       -  'harvest_packs: nl_tags -- a list of strings (may be empty)',
+E       -  'harvest_packs: retired -- required, a bool',
+E       -  "harvest_packs: contract -- a mapping with exactly the keys ['id', 'size', "
+E       -  "'keys', 'freshness', 'partition', 'producer']"]
+
+workflows\atom_decomposition\tests\test_tool_index_and_harvest.py:46: AssertionError
+__ EmittedCatalogTests.test_the_emitted_catalog_passes_the_offline_validator __
+
+self = <tests.test_tool_index_and_harvest.EmittedCatalogTests testMethod=test_the_emitted_catalog_passes_the_offline_validator>
+
+    def test_the_emitted_catalog_passes_the_offline_validator(self):
+>       self.assertEqual(validate.validate_harvest_and_tool_index(), [])
+E       AssertionError: Lists differ: ["harvest_amgt_harvest_bronze: missing fie[22584 chars]r']"] != []
+E       
+E       First list contains 273 additional elements.
+E       First extra element 0:
+E       "harvest_amgt_harvest_bronze: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']"
+E       
+E       Diff is 24067 characters long. Set self.maxDiff to None to see it.
+
+workflows\atom_decomposition\tests\test_tool_index_and_harvest.py:332: AssertionError
+---------------------------- Captured stdout call -----------------------------
+HARVEST ROW VALIDATION -- 39 source file(s) (0 valid, 39 refused); table rows 0; SERVE-NOW prefixes rowed 0 of 39 (info)
+TOOL INDEX VALIDATION -- 67 entries: a=11 b=44 c=12; sum 67; errors 273
+  REFUSED  harvest_amgt_harvest_bronze: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_amgt_harvest_bronze: table -- required, non-empty string
+  REFUSED  harvest_amgt_harvest_bronze: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_amgt_harvest_bronze: format -- required, non-empty string
+  REFUSED  harvest_amgt_harvest_bronze: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_amgt_harvest_bronze: retired -- required, a bool
+  REFUSED  harvest_amgt_harvest_bronze: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_amgt_harvest_silver: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_amgt_harvest_silver: table -- required, non-empty string
+  REFUSED  harvest_amgt_harvest_silver: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_amgt_harvest_silver: format -- required, non-empty string
+  REFUSED  harvest_amgt_harvest_silver: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_amgt_harvest_silver: retired -- required, a bool
+  REFUSED  harvest_amgt_harvest_silver: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_amgt_harvest_state: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_amgt_harvest_state: table -- required, non-empty string
+  REFUSED  harvest_amgt_harvest_state: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_amgt_harvest_state: format -- required, non-empty string
+  REFUSED  harvest_amgt_harvest_state: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_amgt_harvest_state: retired -- required, a bool
+  REFUSED  harvest_amgt_harvest_state: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_article_security_mention: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_article_security_mention: table -- required, non-empty string
+  REFUSED  harvest_article_security_mention: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_article_security_mention: format -- required, non-empty string
+  REFUSED  harvest_article_security_mention: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_article_security_mention: retired -- required, a bool
+  REFUSED  harvest_article_security_mention: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_article_sentiment: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_article_sentiment: table -- required, non-empty string
+  REFUSED  harvest_article_sentiment: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_article_sentiment: format -- required, non-empty string
+  REFUSED  harvest_article_sentiment: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_article_sentiment: retired -- required, a bool
+  REFUSED  harvest_article_sentiment: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_barrons_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_barrons_harvest: table -- required, non-empty string
+  REFUSED  harvest_barrons_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_barrons_harvest: format -- required, non-empty string
+  REFUSED  harvest_barrons_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_barrons_harvest: retired -- required, a bool
+  REFUSED  harvest_barrons_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_bloomberg_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_bloomberg_harvest: table -- required, non-empty string
+  REFUSED  harvest_bloomberg_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_bloomberg_harvest: format -- required, non-empty string
+  REFUSED  harvest_bloomberg_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_bloomberg_harvest: retired -- required, a bool
+  REFUSED  harvest_bloomberg_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_candidate_universe: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_candidate_universe: table -- required, non-empty string
+  REFUSED  harvest_candidate_universe: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_candidate_universe: format -- required, non-empty string
+  REFUSED  harvest_candidate_universe: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_candidate_universe: retired -- required, a bool
+  REFUSED  harvest_candidate_universe: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_chatter_daily: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_chatter_daily: table -- required, non-empty string
+  REFUSED  harvest_chatter_daily: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_chatter_daily: format -- required, non-empty string
+  REFUSED  harvest_chatter_daily: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_chatter_daily: retired -- required, a bool
+  REFUSED  harvest_chatter_daily: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_chatter_event: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_chatter_event: table -- required, non-empty string
+  REFUSED  harvest_chatter_event: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_chatter_event: format -- required, non-empty string
+  REFUSED  harvest_chatter_event: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_chatter_event: retired -- required, a bool
+  REFUSED  harvest_chatter_event: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_chatter_window: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_chatter_window: table -- required, non-empty string
+  REFUSED  harvest_chatter_window: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_chatter_window: format -- required, non-empty string
+  REFUSED  harvest_chatter_window: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_chatter_window: retired -- required, a bool
+  REFUSED  harvest_chatter_window: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_crosswalk_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_crosswalk_v1: table -- required, non-empty string
+  REFUSED  harvest_crosswalk_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_crosswalk_v1: format -- required, non-empty string
+  REFUSED  harvest_crosswalk_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_crosswalk_v1: retired -- required, a bool
+  REFUSED  harvest_crosswalk_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_derived: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_derived: table -- required, non-empty string
+  REFUSED  harvest_derived: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_derived: format -- required, non-empty string
+  REFUSED  harvest_derived: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_derived: retired -- required, a bool
+  REFUSED  harvest_derived: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_drafting_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_drafting_v1: table -- required, non-empty string
+  REFUSED  harvest_drafting_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_drafting_v1: format -- required, non-empty string
+  REFUSED  harvest_drafting_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_drafting_v1: retired -- required, a bool
+  REFUSED  harvest_drafting_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_filings_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_filings_v1: table -- required, non-empty string
+  REFUSED  harvest_filings_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_filings_v1: format -- required, non-empty string
+  REFUSED  harvest_filings_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_filings_v1: retired -- required, a bool
+  REFUSED  harvest_filings_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_ft_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_ft_harvest: table -- required, non-empty string
+  REFUSED  harvest_ft_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_ft_harvest: format -- required, non-empty string
+  REFUSED  harvest_ft_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_ft_harvest: retired -- required, a bool
+  REFUSED  harvest_ft_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_identity_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_identity_v1: table -- required, non-empty string
+  REFUSED  harvest_identity_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_identity_v1: format -- required, non-empty string
+  REFUSED  harvest_identity_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_identity_v1: retired -- required, a bool
+  REFUSED  harvest_identity_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_issuer_site_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_issuer_site_harvest: table -- required, non-empty string
+  REFUSED  harvest_issuer_site_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_issuer_site_harvest: format -- required, non-empty string
+  REFUSED  harvest_issuer_site_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_issuer_site_harvest: retired -- required, a bool
+  REFUSED  harvest_issuer_site_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_lib_local_publications: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_lib_local_publications: table -- required, non-empty string
+  REFUSED  harvest_lib_local_publications: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_lib_local_publications: format -- required, non-empty string
+  REFUSED  harvest_lib_local_publications: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_lib_local_publications: retired -- required, a bool
+  REFUSED  harvest_lib_local_publications: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_management_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_management_v1: table -- required, non-empty string
+  REFUSED  harvest_management_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_management_v1: format -- required, non-empty string
+  REFUSED  harvest_management_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_management_v1: retired -- required, a bool
+  REFUSED  harvest_management_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_packs: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_packs: table -- required, non-empty string
+  REFUSED  harvest_packs: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_packs: format -- required, non-empty string
+  REFUSED  harvest_packs: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_packs: retired -- required, a bool
+  REFUSED  harvest_packs: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_peers_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_peers_v1: table -- required, non-empty string
+  REFUSED  harvest_peers_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_peers_v1: format -- required, non-empty string
+  REFUSED  harvest_peers_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_peers_v1: retired -- required, a bool
+  REFUSED  harvest_peers_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_posture_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_posture_v1: table -- required, non-empty string
+  REFUSED  harvest_posture_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_posture_v1: format -- required, non-empty string
+  REFUSED  harvest_posture_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_posture_v1: retired -- required, a bool
+  REFUSED  harvest_posture_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_publication_links_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_publication_links_v1: table -- required, non-empty string
+  REFUSED  harvest_publication_links_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_publication_links_v1: format -- required, non-empty string
+  REFUSED  harvest_publication_links_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_publication_links_v1: retired -- required, a bool
+  REFUSED  harvest_publication_links_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_publications_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_publications_v1: table -- required, non-empty string
+  REFUSED  harvest_publications_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_publications_v1: format -- required, non-empty string
+  REFUSED  harvest_publications_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_publications_v1: retired -- required, a bool
+  REFUSED  harvest_publications_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_raw: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_raw: table -- required, non-empty string
+  REFUSED  harvest_raw: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_raw: format -- required, non-empty string
+  REFUSED  harvest_raw: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_raw: retired -- required, a bool
+  REFUSED  harvest_raw: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research-backlog: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research-backlog: table -- required, non-empty string
+  REFUSED  harvest_research-backlog: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research-backlog: format -- required, non-empty string
+  REFUSED  harvest_research-backlog: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research-backlog: retired -- required, a bool
+  REFUSED  harvest_research-backlog: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research-continuation: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research-continuation: table -- required, non-empty string
+  REFUSED  harvest_research-continuation: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research-continuation: format -- required, non-empty string
+  REFUSED  harvest_research-continuation: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research-continuation: retired -- required, a bool
+  REFUSED  harvest_research-continuation: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research-dossier: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research-dossier: table -- required, non-empty string
+  REFUSED  harvest_research-dossier: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research-dossier: format -- required, non-empty string
+  REFUSED  harvest_research-dossier: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research-dossier: retired -- required, a bool
+  REFUSED  harvest_research-dossier: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research-fund-form: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research-fund-form: table -- required, non-empty string
+  REFUSED  harvest_research-fund-form: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research-fund-form: format -- required, non-empty string
+  REFUSED  harvest_research-fund-form: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research-fund-form: retired -- required, a bool
+  REFUSED  harvest_research-fund-form: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research-model-typecast: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research-model-typecast: table -- required, non-empty string
+  REFUSED  harvest_research-model-typecast: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research-model-typecast: format -- required, non-empty string
+  REFUSED  harvest_research-model-typecast: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research-model-typecast: retired -- required, a bool
+  REFUSED  harvest_research-model-typecast: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research-sector-template: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research-sector-template: table -- required, non-empty string
+  REFUSED  harvest_research-sector-template: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research-sector-template: format -- required, non-empty string
+  REFUSED  harvest_research-sector-template: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research-sector-template: retired -- required, a bool
+  REFUSED  harvest_research-sector-template: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_research_dossier: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_research_dossier: table -- required, non-empty string
+  REFUSED  harvest_research_dossier: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_research_dossier: format -- required, non-empty string
+  REFUSED  harvest_research_dossier: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_research_dossier: retired -- required, a bool
+  REFUSED  harvest_research_dossier: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_scores_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_scores_v1: table -- required, non-empty string
+  REFUSED  harvest_scores_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_scores_v1: format -- required, non-empty string
+  REFUSED  harvest_scores_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_scores_v1: retired -- required, a bool
+  REFUSED  harvest_scores_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_sec_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_sec_harvest: table -- required, non-empty string
+  REFUSED  harvest_sec_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_sec_harvest: format -- required, non-empty string
+  REFUSED  harvest_sec_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_sec_harvest: retired -- required, a bool
+  REFUSED  harvest_sec_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_seeking_alpha_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_seeking_alpha_harvest: table -- required, non-empty string
+  REFUSED  harvest_seeking_alpha_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_seeking_alpha_harvest: format -- required, non-empty string
+  REFUSED  harvest_seeking_alpha_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_seeking_alpha_harvest: retired -- required, a bool
+  REFUSED  harvest_seeking_alpha_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_social_v1_measurement: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_social_v1_measurement: table -- required, non-empty string
+  REFUSED  harvest_social_v1_measurement: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_social_v1_measurement: format -- required, non-empty string
+  REFUSED  harvest_social_v1_measurement: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_social_v1_measurement: retired -- required, a bool
+  REFUSED  harvest_social_v1_measurement: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_universe_v1: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_universe_v1: table -- required, non-empty string
+  REFUSED  harvest_universe_v1: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_universe_v1: format -- required, non-empty string
+  REFUSED  harvest_universe_v1: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_universe_v1: retired -- required, a bool
+  REFUSED  harvest_universe_v1: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+  REFUSED  harvest_wsj_harvest: missing field(s): ['contract', 'format', 'layer', 'nl_tags', 'retired', 'table']
+  REFUSED  harvest_wsj_harvest: table -- required, non-empty string
+  REFUSED  harvest_wsj_harvest: layer -- one of ['gold', 'silver', 'bronze', 'state']
+  REFUSED  harvest_wsj_harvest: format -- required, non-empty string
+  REFUSED  harvest_wsj_harvest: nl_tags -- a list of strings (may be empty)
+  REFUSED  harvest_wsj_harvest: retired -- required, a bool
+  REFUSED  harvest_wsj_harvest: contract -- a mapping with exactly the keys ['id', 'size', 'keys', 'freshness', 'partition', 'producer']
+=========================== short test summary info ===========================
+FAILED workflows/atom_decomposition/tests/test_tool_index_and_harvest.py::HarvestSchemaTests::test_bucket_scope_reader_and_name_are_enforced
+FAILED workflows/atom_decomposition/tests/test_tool_index_and_harvest.py::HarvestSchemaTests::test_committed_harvest_files_are_valid_and_cover_serve_now_once
+FAILED workflows/atom_decomposition/tests/test_tool_index_and_harvest.py::HarvestSchemaTests::test_the_v4_rows_are_valid_where_round_ten_refused_them
+FAILED workflows/atom_decomposition/tests/test_tool_index_and_harvest.py::HarvestSchemaTests::test_valid_row_has_zero_errors
+FAILED workflows/atom_decomposition/tests/test_tool_index_and_harvest.py::EmittedCatalogTests::test_the_emitted_catalog_passes_the_offline_validator
+5 failed, 88 passed in 1.99s
