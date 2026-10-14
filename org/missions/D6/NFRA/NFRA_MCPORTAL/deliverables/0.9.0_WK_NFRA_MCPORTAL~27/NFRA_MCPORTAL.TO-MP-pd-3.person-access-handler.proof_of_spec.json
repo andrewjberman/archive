@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pd-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "9af1cee1ab5ce653315d967c469b020aa1387d63",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-3.person-access-handler.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-3.person-access-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "9af1cee1ab5ce653315d967c469b020aa1387d63"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_people_access.py",
+      "kind": "script",
+      "commit_or_etag": "b6dd9f9249",
+      "introduces": ["access_get", "access_post", "invoke_set_person_access", "routes"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New gateway module on wk-NFRA_MCPORTAL-pd-27. Not deployed. app/admin_api.py does not yet splat its routes; the release cell adds *admin_people_access.routes as its step 0.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_people.py",
+      "kind": "script",
+      "commit_or_etag": "b6dd9f9249",
+      "introduces": ["profiled", "dict(profiled"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Additive principal key on every People row, committed on wk-NFRA_MCPORTAL-pd-27. Not deployed.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_people_access.py",
+      "kind": "script",
+      "commit_or_etag": "b6dd9f9249",
+      "introduces": ["test_access_post_invokes_writer_with_set_person_access_and_relays_verdict", "test_access_get_not_live_when_type_unknown"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven named tests, offline, fake Lambda client and fake store. Run by the AC1 check.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_people.py",
+      "kind": "script",
+      "commit_or_etag": "b6dd9f9249",
+      "introduces": ["ROUND1_PEOPLE", "test_people_row_principal_is_set_only_for_profiled_principals", "test_people_principal_never_leaks_into_other_fields"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new tests appended; the round-1 test at line 202 is unchanged and fails against the mandated principal key (surprise NFRA_MCPORTAL-Z-W27-S1).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "b6dd9f9249",
+      "introduces": ["NFRA_MCPORTAL-Z-W27-S1", "NFRA_MCPORTAL-Z-W27-S2", "NFRA_MCPORTAL-Z-W27-S3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended in commit b6dd9f9249; surprise-row-gate read 3 new rows, OK."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "access handler tests: 0 failed; named tests PASSED 7 of 7 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "access handler tests: ======================== 7 passed, 1 warning in 0.90s =========================; named tests PASSED 7 of 7\nRESULT: PASS\nexit=0",
+      "denominator": "named tests PASSED 7 of 7 in tests/test_admin_people_access.py; 7 passed, 0 failed of 7 collected",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "people rows tests: 0 failed; named tests PASSED 4 of 4 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "people rows tests: =================== 1 failed, 9 passed, 1 warning in 4.99s ====================; named tests PASSED 3 of 4\nRESULT: FAIL\nexit=1",
+      "denominator": "named tests PASSED 3 of 4 in tests/test_admin_people.py; 1 failed, 9 passed of 10 collected",
+      "status": "FAIL",
+      "status_reason": "test_people_lists_every_candidate_even_holding_nothing fails at tests/test_admin_people.py:202 (the unchanged row key-set assertion, which the mandated principal key breaks); surprise NFRA_MCPORTAL-Z-W27-S1 (BLOCKING)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The governing order's proof_of_spec names no mutant, so none is owed.",
+      "expected": "n/a -- the spec names none.",
+      "observed": "No mutant was run. Each check is a pytest run over fixed fakes of the Lambda client and the access-state store.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Not run: each check is one pytest run over fixed fakes.",
+      "observed": "Single run per check on this worktree.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The route splat and import in app/admin_api.py (release step 0).",
+      "reason": "Outside this cell's write surface (order section 2.3). The issuer names the lines for the release."
+    },
+    {
+      "item": "Edits to app/admin_grants.py, app/admin_gateway_breakdown.py, app/access_state.py and the grant-writer Lambda.",
+      "reason": "Read-only for this cell by the order. The writer half is a parallel cell (surprise NFRA_MCPORTAL-Z-W27-S3)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W27-S1: BLOCKING. AC2 cannot pass as written; the mandated principal key breaks the unchanged row key-set assertion at tests/test_admin_people.py:202.",
+    "NFRA_MCPORTAL-Z-W27-S2: the round-1 People body the criterion names is not a stored artifact; it is pinned as ROUND1_PEOPLE from the pre-edit run.",
+    "NFRA_MCPORTAL-Z-W27-S3: the grant-writer Lambda in this base does not name set_person_access; the parallel writer cell has not landed."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~27/session_log.pd3.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd3.AC1.sh",
+      "invocation": "bash ...pd3.AC1.sh; echo exit=$?",
+      "result": "RESULT: PASS exit=0 (7 passed of 7)"
+    },
+    {
+      "tool": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd3.AC2.sh",
+      "invocation": "bash ...pd3.AC2.sh; echo exit=$?",
+      "result": "RESULT: FAIL exit=1 (1 failed, 9 passed; named tests PASSED 3 of 4)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "rc=0 VALID for AC1,AC2 (the instance is valid; AC2 is a FAIL row, so the order stays pending)"
+    }
+  ]
+}
