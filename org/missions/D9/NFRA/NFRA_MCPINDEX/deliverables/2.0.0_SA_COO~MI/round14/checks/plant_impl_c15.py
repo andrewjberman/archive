@@ -38,7 +38,7 @@ def _validate_table(name, d):
     fk = d.get("fork_keys")
     if not (isinstance(fk, dict) and set(fk) <= {"firm", "account", "platform"} and all(v is None or isinstance(v, dict) for v in fk.values())):
         e.append("fork_keys")
-    if not _str_or_null(d.get("prefix")) or not _str_or_null(d.get("table")):
+    if not _str_or_null(d.get("prefix")) or not _str_or_null(d.get("table")) or not _str_or_null(d.get("bucket")):
         e.append("prefix or table")
     if d.get("layer") not in LAYERS:
         e.append("layer")

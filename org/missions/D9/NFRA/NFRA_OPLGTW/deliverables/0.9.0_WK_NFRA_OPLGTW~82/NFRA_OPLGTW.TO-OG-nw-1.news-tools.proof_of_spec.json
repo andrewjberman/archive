@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-nw-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~82",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "693c78155e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "f625acd50e",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-nw-1.news-tools.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/news_typed.py",
+      "kind": "script",
+      "commit_or_etag": "c1f02c8f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only, no deploy: Phase A. The five tools are registered by the issuer at the merge (app/tools.py is not this cell's path). Committed @c1f02c8f63 on wk-NFRA_OPLGTW-82, LOCAL; unchanged by the A1 amendment.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_nw1.py",
+      "kind": "test",
+      "commit_or_etag": "c1f02c8f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five offline tests test_ognw1_ac01..ac05 (recording DynamoDB and S3 fakes, stand-in principal, synthetic table names). Committed @c1f02c8f63; unchanged by the A1 amendment.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "kind": "config_data",
+      "commit_or_etag": "c1f02c8f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The existing .env printf line gains NEWS_ARTICLES_TABLE, NEWS_TRENDING_TABLE and NEWS_KEYWORD_TABLE; bash -n rc=0; the first key appears once. Not deployed (Phase A). Committed @c1f02c8f63.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/news_read_iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "24d2030f11",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Phase A: not applied. Narrowed under the A1 amendment (S2): the source_date_index ARN is dropped, so the one policy grants Query and GetItem on three table ARNs and the one date-index ARN. Targeted plan re-run on the narrowed file: -target=aws_iam_role_policy.gw_news_read -lock=false: Plan: 1 to add, 0 to change, 0 to destroy (TARGETED_PLAN_OG-nw-1.txt, refreshed). The narrowing is in the commit that carries this instance (LOCAL on wk-NFRA_OPLGTW-82); 24d2030f11 is the build commit it amends.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~82/NEVER_WIDEN_ASK_OG-nw-1.md",
+      "kind": "doc",
+      "commit_or_etag": "24d2030f11",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The never-widen ask, seven items (diff, tools, widening, grant, both branches, rollback, triggers), for the three halves. Built @24d2030f11; amended under A1 (S2): the source_date_index index is removed from the widening and grant sections, and the source filter is stated to read the base table per day. Amendment in the commit that carries this instance (LOCAL).",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1cab0f950b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Eight rows NFRA_OPLGTW-Z-W82-S1..S8 appended in the fenced json blocks; surprise-row-gate OK on the row commits (7 new rows @45dd184bbb; 1 new row @1cab0f950b). Committed @1cab0f950b. Not appended by the A1 amendment.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the five tools are built, read only through Query and GetItem, cap the window, hold no table-name literal, and refuse non-Opal before any read.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/nw1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests (test_ognw1_ac01 .. test_ognw1_ac05) passed; failed or error lines 0",
+      "status": "PASS",
+      "status_reason": "Re-run under the A1 amendment (S2 narrowing) on wk-NFRA_OPLGTW-82: pytest rc=0, 5 of 5 named tests passed, RESULT: PASS, exit=0.",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the live tables the per-day count equals an independent COUNT query, the 14-day cap and neither-given refusals fire, the singletons read two keys, the security tool labels its fallback, and a non-Opal principal is refused.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/nw1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nnews: day 2026-10-13 count tool 864 vs independent 864; articles 5 (want 1-5); 15+ day window refused True; trending topics 20 (want >= 1); mood reads 2 keys; neither-keyword refused True; for_security answered True with fallback rows labelled text True; envelope on all True; non-Opal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "live, box credentials, INTERNAL_READER_ROLE_ARN unset: per-day count 864 of 864 independent (day 2026-10-13); articles 5 returned in the 1-5 band; trending topics 20 (at least 1); mood keys 2 of 2; envelope on 4 of 4 answers; fallback rows for ASML 14 of 14 labelled text (separate read of the same tool)",
+      "status": "PASS",
+      "status_reason": "Re-run under the A1 amendment (S2 narrowing) on wk-NFRA_OPLGTW-82: count tool equals the independent COUNT (864 of 864), both refusals fire, two singleton keys, fallback labelled, non-Opal refused; RESULT: PASS, exit=0. The fallback check is non-vacuous: the ASML run carried 14 text rows.",
+      "expect": "(?s)news: day \\d{4}-\\d{2}-\\d{2} count tool (\\d+) vs independent \\1; articles [1-5] \\(want 1-5\\); 15\\+ day window refused True; trending topics [1-9]\\d* \\(want >= 1\\); mood reads 2 keys; neither-keyword refused True; for_security answered True with fallback rows labelled text True; envelope on all True; non-Opal refused True.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the grant file is one policy with Query and GetItem only on named table and index ARNs, and the ask names its seven items.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/nw1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "grant: policies 1 (want 1); actions ['dynamodb:GetItem', 'dynamodb:Query'] (want only Query and GetItem); dynamodb ARNs 4 (want >= 3); bare * resources 0 (want 0)\nask sections: 7 of 7\nRESULT: PASS\nexit=0",
+      "denominator": "grant: 1 policy of 1; actions 2 of 2 allowed (Query, GetItem); DynamoDB ARNs 4 of at least 3 (three table ARNs and the one date-index ARN); bare wildcard resources 0 of 0; ask sections 7 of 7",
+      "status": "PASS",
+      "status_reason": "Re-run under the A1 amendment (S2 narrowing) on wk-NFRA_OPLGTW-82: one policy, the two actions only, four named ARNs (source_date_index dropped), zero bare wildcards, seven of seven ask sections; RESULT: PASS, exit=0.",
+      "expect": "(?s)grant: policies 1 \\(want 1\\); actions \\['dynamodb:GetItem', 'dynamodb:Query'\\] \\(want only Query and GetItem\\); dynamodb ARNs [3-9]\\d* \\(want >= 3\\); bare \\* resources 0 \\(want 0\\).*ask sections: 7 of 7.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The window refusal in app/news_typed.py (the test span >= WINDOW_CAP_DAYS + 1) widened by one day to + 2 in the module, run as the one-test selection -k ac01; the module restored from a saved copy (cmp identical).",
+      "expected": "test_ognw1_ac01 FAILS on the mutant (a 15-day window must be refused with zero calls); it passes on the good module.",
+      "observed": "On the mutant: 1 failed, 4 deselected, rc=1, FAILED test_ognw1_ac01 (KeyError 'code': the 15-day window was answered, not refused). Restored: cmp identical; the five-test run rc=0, 5 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The five-test file run twice on the same HEAD with the pytest timing line stripped; outputs compared with cmp.",
+      "observed": "Run 1 rc=0 and run 2 rc=0; the outputs are byte-identical (6 lines each).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of the five tools in app/tools.py, the app/data_entitlement.py and app/destructive_ops.py maps, and the pinned-count tests",
+      "reason": "Not this cell's <paths>; the issuer registers every tool and re-pins the counts at the merge (ask section 7; the order's section 5)."
+    },
+    {
+      "item": "Apply of the grant gw_news_read, deploy of the release and of the three .env keys, and any IAM or Terraform apply",
+      "reason": "Phase A: build, grant file and ask only. The targeted plan is recorded (1 to add, 0 to change, 0 to destroy); nothing is applied."
+    },
+    {
+      "item": "The full-root terraform plan",
+      "reason": "The order names the targeted plan; the targeted plan is the record. The root plan needs the market_update input fed and was not run."
+    },
+    {
+      "item": "The final <status> flip of NFRA_OPLGTW.TO-OG-nw-1.news-tools.md to complete",
+      "reason": "Not this worker's act: the issuer flips the status at the merge (A1, S8). The proof's three criteria PASS; the status tag is not flipped by this worker."
+    },
+    {
+      "item": "The eight failing tests in test_deploy_base_guard.py (of 19)",
+      "reason": "Not a proof criterion. They refuse on a missing comp_constants_cli.py that the tree lists as tracked (surprise row NFRA_OPLGTW-Z-W82-S7); the owner reads the rig."
+    },
+    {
+      "item": "app/refs/DATA_CATALOG.yaml",
+      "reason": "NFRA_MCPINDEX's file; not written."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W82-S1: the preflight says the cell changes no IAM and adds no AWS call beyond S3 reads; the body requires a DynamoDB read grant (ARMED, disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W82-S2: source_date_index is sparse (9,905 of 381,261 items); the source filter reads the base table per day instead of the GSI (ARMED, disarm_owner 2.0.0_SA_COO~O). Narrowing applied under A1: the ARN is dropped from the grant and the ask.",
+    "NFRA_OPLGTW-Z-W82-S3: the mention index security_key is TICKER_EXCHANGE_Equity; a ticker matches as a prefix and can select several listings (INERT).",
+    "NFRA_OPLGTW-Z-W82-S4: the typed scope seam has no scope for DynamoDB reads; the tools use a DynamoDB admission scope with the served prefix news/ (INERT).",
+    "NFRA_OPLGTW-Z-W82-S5: the order does not say when the text fallback runs; it runs whenever a ticker is given and each row is labelled text (INERT).",
+    "NFRA_OPLGTW-Z-W82-S6: the 14-day window cap is counted inclusively; a 15-day window is refused (INERT).",
+    "NFRA_OPLGTW-Z-W82-S7: eight tests in test_deploy_base_guard.py refuse on a missing comp_constants_cli.py that the tree lists as tracked; not attributed to the .env edit (INERT for this cell).",
+    "NFRA_OPLGTW-Z-W82-S8: BLOCKING -- the final <status> flip is in a task-order file outside <paths>; held for the issuer."
+  ],
+  "session_log": "L7 worker 0.9.0_WK_NFRA_OPLGTW~82 on wk-NFRA_OPLGTW-82 from base f625acd50e. First act: the naming-gate probe (PASS, 1 graded, bucket CONFORMANT; bare S3 keys not graded). Re-grounded the seam, the census and the internal reader's grant; discovered the attribute shapes read-only (no values printed), found the source GSI sparse (S2) and the fear-greed current block at 117 KB (slimmed). Built news_typed.py, tests/test_og_nw1.py, the .env keys and news_read_iam.tf; ran the targeted plan (1/0/0); wrote the ask; the live probe PASS. Mutant and determinism controls run as recorded. Commits: c1f02c8f63 (code, tests, .env keys; one ruff F401 fix before the gate passed), 24d2030f11 (grant, plan record, ask), 45dd184bbb (rows S1..S7), 1cab0f950b (row S8), and the proof commit. Re-seat under the A1 amendment (S2 narrowing only, re-seated worker 0.9.0_WK_NFRA_OPLGTW~82 on the same branch): the source_date_index ARN dropped from news_read_iam.tf and from the ask's widening, grant and diff sections; the targeted plan re-run directly (-var market_update_s3_root from the builder's address() output with the partition removed): 1 to add, 0 to change, 0 to destroy, four resources in the policy; AC1, AC2 and AC3 re-run and PASS. AWS calls this re-seat, read only with box credentials: the AC2 live probe (DynamoDB Query and COUNT on the news tables, GetObject on the two portal singletons) and one targeted terraform plan with -lock=false, no -out, no apply.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff .scratch/nw1_probe.diff --enforce (S3 bucket literal probe); the same gate on the grant ARN and policy name diff (infra/aws/terraform/opal-gateway/news_read_iam.tf path)",
+      "result": "NAMING-GATE: PASS 1 graded (S3 bucket CONFORMANT; policy name CONFORMANT as IAM_POLICY); exit 0; bare S3 key literals are not graded (surprise NFRA_OPLGTW-Z-W82-S1 notes the preflight scope)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~82 <...>\" -F <msgfile> -- <paths>",
+      "result": "rc=0 on c1f02c8f63, 24d2030f11, 45dd184bbb and 1cab0f950b (LOCAL on wk-NFRA_OPLGTW-82); commit-gate and naming-gate PASS; surprise-row-gate OK (7 new rows, then 1); msg-verify MATCH"
+    },
+    {
+      "tool": "lib/opal_naming.py name()",
+      "invocation": "python -c \"import sys; sys.path.insert(0,'lib'); import opal_naming as n; print(n.name('gateway','global','news-read','policy'))\"",
+      "result": "gateway-global-news-read-policy"
+    },
+    {
+      "tool": "lib/opal_naming.py address()",
+      "invocation": "python -I -c \"import sys; sys.path.insert(0,'lib'); import opal_naming as o; print(o.address('sharepoint','transcripts','bronze','market_update','date=2026-10-14'))\" (the partition removed to feed market_update_s3_root)",
+      "result": "s3://opal-data-transcripts/sharepoint/transcripts/bronze/market_update/date=2026-10-14 (trailing date=2026-10-14 removed: s3://opal-data-transcripts/sharepoint/transcripts/bronze/market_update/); exit 0"
+    },
+    {
+      "tool": "terraform plan (targeted)",
+      "invocation": "terraform plan -input=false -no-color -lock=false -target=aws_iam_role_policy.gw_news_read -var market_update_s3_root=<address() output with partition removed> (in infra/aws/terraform/opal-gateway)",
+      "result": "Plan: 1 to add, 0 to change, 0 to destroy; exit 0; the warning 'Resource targeting is in effect' is the expected targeting notice"
+    }
+  ]
+}

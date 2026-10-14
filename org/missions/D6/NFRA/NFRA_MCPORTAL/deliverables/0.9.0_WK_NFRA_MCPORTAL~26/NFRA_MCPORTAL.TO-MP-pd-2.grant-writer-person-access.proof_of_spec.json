@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pd-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "ef2a5b14e176b428600920cbd9ada74817ced168",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-2.grant-writer-person-access.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-2.grant-writer-person-access.md",
+    "group": "OTHER",
+    "vintage_commit": "ef2a5b14e176b428600920cbd9ada74817ced168"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "f40bf7dded",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed to branch wk-NFRA_MCPORTAL-pd-26 only. Nothing applied, planned, packaged or invoked on AWS (TO section 2, bound 1).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_person_access.py",
+      "kind": "test",
+      "commit_or_etag": "f40bf7dded",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline test file: a fake store, a fake changes client and a test ES256 key. No AWS call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "writer person_access tests: 0 failed; named tests PASSED 7 of 7 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "writer person_access tests: ============================= 12 passed in 0.76s ==============================; named tests PASSED 7 of 7\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 named tests PASSED; 12 of 12 pytest items in tests/test_person_access.py PASSED (the bad-shape test is parametrized into 6 items)",
+      "status": "PASS",
+      "expect": "7 of 7.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "writer suite: passed=31 or more failed=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "writer suite: 36 passed in 10.99s; passed=36 failed=0\nRESULT: PASS\nexit=0",
+      "denominator": "36 passed, 0 failed in the writer's tests directory (24 base + 12 new)",
+      "status": "PASS",
+      "expect": "passed=(3[1-9]|[4-9][0-9]) failed=0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The governing order names no mutant; its adversary arms are the named tests (preflight), and each refusal arm asserts zero store calls.",
+      "expected": "n/a -- the spec names none.",
+      "observed": "No mutant was run. The header, bad-shape, not-live and stale-revision arms are asserted by named tests, all PASSED.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of pd2.AC1.sh compared",
+      "observed": "run 1: 12 passed in 0.76s, 7 of 7 named PASSED; run 2: 12 passed in 0.69s, 7 of 7 named PASSED",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flip of the task order <status> to complete",
+      "reason": "The order's granted paths do not include its task-order file; see NFRA_MCPORTAL-Z-W26-S2. The instance is written; the flip is the issuer's or COO's."
+    },
+    {
+      "item": "A committed regression test for the Decimal-typed stored revision",
+      "reason": "Not among the seven named tests. The normalization was verified by a scratch probe against the real AccessState (.scratch/probe_person_access_update.py, not committed)."
+    },
+    {
+      "item": "A committed test that runs the real operator_transact validation",
+      "reason": "The named tests use the fake store, which runs no validation. The real validation was measured by a scratch probe (.scratch/probe_person_access.py, not committed)."
+    },
+    {
+      "item": "The gateway-side reader of person_access",
+      "reason": "NFRA_OPLGTW OG-cp-1, another project's cell; the order says do not build it."
+    },
+    {
+      "item": "Packaging, deploy and live AWS invocation of the writer",
+      "reason": "TO section 2 bound 1. The release cell MP-pd-7 carries the apply."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W26-S1: the stored person_access revision comes back as decimal.Decimal, so an int check refused every real update; normalized by _plain_record before the check.",
+    "NFRA_MCPORTAL-Z-W26-S2: the task-order status flip lies outside the granted paths; not flipped by this worker."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~26/session_log.pd2.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest via the pd2 checks",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd2.AC1.sh; bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd2.AC2.sh",
+      "result": "AC1: 12 passed, 7 of 7 named PASSED. AC2: 36 passed, 0 failed."
+    },
+    {
+      "tool": "scratch probe over the real app/access_state.AccessState with a fake boto client",
+      "invocation": "python .scratch/probe_person_access.py; python .scratch/probe_person_access_update.py",
+      "result": "Without the planted type: AccessStateRefused, 0 transact calls. With it: WRITTEN, 2 puts. Update: expect 5 refused with 0 writes; expect 1 WRITTEN with a conditional put on #og_rev."
+    }
+  ]
+}
