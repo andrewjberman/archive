@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ad-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ad-2.safe-commit-derives-the-project-from-every-staged-path.md",
+    "group": "OTHER",
+    "vintage_commit": "868b773335"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~93",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round14.md",
+    "vintage_commit": "868b773335",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ad-2.safe-commit-derives-the-project-from-every-staged-path.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "59ff7a5fcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the naming stage passes --staged-paths (every in-scope path) to the gate and removes the file on the same path as the diff; the real commit 59ff7a5fcb ran through this script and its naming stage; --help output is byte-identical to the base 868b773335 copy",
+      "artifact_covered_by": [
+        "CTad2-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/naming-gate.py",
+      "kind": "script",
+      "commit_or_etag": "59ff7a5fcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--staged-paths read by staged_entries() and fed to committing_project() in run() only; self-test NAMING-GATE-SELF-TEST: PASS at 59ff7a5fcb; no deploy, read by the gate and its callers only",
+      "artifact_covered_by": [
+        "CTad2-AC1",
+        "CTad2-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_safe_commit_derivation.py",
+      "kind": "test",
+      "commit_or_etag": "59ff7a5fcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 checks; the positive case, controls a-f and the extracted naming stage run in temporary repositories; output SAFE-COMMIT-DERIVATION cases=17/17 ok=True at 59ff7a5fcb",
+      "artifact_covered_by": [
+        "CTad2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTad2-AC1",
+      "criterion_verbatim": "the positive case and all five negative controls pass (base: the file does not exist); report the whole last line with its denominator",
+      "method": "command",
+      "invocation": "python .tools/tests/test_safe_commit_derivation.py",
+      "output_evidence": "SAFE-COMMIT-DERIVATION cases=17/17 ok=True (rc=0; run under timeout 300 from the worktree root at committed state 59ff7a5fcb; the pre-commit run gave the same line; 17 PASS lines, 0 FAIL)",
+      "denominator": "17 of 17 checks",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTad2-AC2",
+      "criterion_verbatim": "the gate's own self-test still passes (base: NAMING-GATE-SELF-TEST: PASS, a control); report the whole last line",
+      "method": "command",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "output_evidence": "NAMING-GATE-SELF-TEST: PASS (rc=0; run under timeout 300 from the worktree root at committed state 59ff7a5fcb)",
+      "denominator": "1 of 1 self-test verdict line",
+      "status": "PASS",
+      "expect": "NAMING-GATE-SELF-TEST: PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the pre-fix behaviour is the mutant: the same graded .json diff with NO staged list (the derivation sees the diff alone) must derive None and REFUSE with rc 1; the test's arm (a) control and arm (e) (byte-identical to the base copy without the option) run this path",
+      "expected": "derived None, REFUSE, rc 1 without --staged-paths; the positive arm derives NFRA_MCPINDEX and grades CONFORMANT rc 0 with it",
+      "observed": "control: rc=1 derived=None; positive: rc=0 derived='NFRA_MCPINDEX' NAMING CONFORMANT; arm (e) identical to the base copy on 4 argv variants",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the derivation test was run before the commit and at the committed state; the self-test once at the committed state",
+      "expected": "cases=17/17 ok=True in both runs; self-test PASS",
+      "observed": "pre-commit run cases=17/17 ok=True (after the ruff and utf-8 fixes); committed-state run cases=17/17 ok=True; self-test PASS at 59ff7a5fcb",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-ad-2 from pending to complete",
+      "reason": "not done: the flip is the issuer's (2.0.0_SA_COO~C); this instance is written and validated, and the order is left open for the issuer"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed: outside <paths>"
+    },
+    {
+      "item": "the gate's live AWS plane (census_live) for S3 literals",
+      "reason": "switched OFF in the test (mod._live_read_plane = None). Disclosed: one earlier scratch experiment (.scratch/exp_ct_ad2.py, and one timing probe) ran the gate on an S3 literal with the live limb ON, which made one bounded read-only AWS plane read; no write, no push, nothing committed from it"
+    },
+    {
+      "item": "interpreter version",
+      "reason": "the order says Python 3.11; the box runs Python 3.12.10 (python on PATH). No 3.11 interpreter was run"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W93-S1: an ENFORCE refusal of the naming stage unstages only the eight graded extensions, so the non-graded staged paths of that commit (a .md deliverable) stay in the index; pre-existing, measured in arm (S), not changed by CT-ad-2"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~93/NFRA_CTLPLN.TO-CT-ad-2.safe-commit-derives-the-project-from-every-staged-path.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~93, 2026-10-14; code commit 59ff7a5fcb on wk-NFRA_CTLPLN-93; base 868b773335)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_safe_commit_derivation.py",
+      "result": "SAFE-COMMIT-DERIVATION cases=17/17 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "result": "NAMING-GATE-SELF-TEST: PASS"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/safe-commit.sh --help",
+      "result": "rc=0; output byte-identical to bash of the base copy (868b773335:.tools/safe-commit.sh); last line '  safe-commit.sh --force --author \"...\" -m \"emergency hotfix\" -- path/to/file'"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_apply_who_and_crossbox.py",
+      "result": "APPLY-GATES-TEST cases=100/100 ok=True"
+    }
+  ]
+}
