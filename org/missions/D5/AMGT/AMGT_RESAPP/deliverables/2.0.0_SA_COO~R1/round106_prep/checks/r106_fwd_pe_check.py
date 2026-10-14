@@ -8,7 +8,7 @@ of the same period. For every resolved name this reads the LIVE function's /thes
   F2  every row it keeps is EQUAL to the base's row (value, currency, basis, every key);
   F3  every withheld row has an entry in `model.forecast_withheld` of the candidate: `{mnemonic: BEST_PE_RATIO, fiscal_year, fiscal_period, reason}` whose reason names BOTH currency codes;
   F4  PBR US (the arm: USD price, BRL EPS) withholds its forward rows and its reason names `USD` and `BRL`;
-  F5  with the BEST_PE_RATIO forecast rows, the `model.forecast_withheld` key and the check-face rows of those figures set aside on both sides, the two bodies differ only in float representation and request clocks (0 other paths);
+  F5  with the BEST_PE_RATIO forecast rows, the `model.forecast_withheld` key, the `ai_fill` block (`~R2`'s workstream: the live function runs with `AMGT_AIFILL_ROOT=/var/empty/aifill-hold` since 2026-10-14 05:10Z and its `as_of` and `reason` are environment-dependent) and the check-face rows of those figures set aside on both sides, the two bodies differ only in float representation and request clocks (0 other paths);
   F6  the count of withheld rows equals the population's different-currency count (a number printed beside the denominator).
 Prints `names N | base forward P/E rows B | candidate C | withheld W (population D) | names with a withheld row K` and `R106 FORWARD PE CHECK: YES|NO (n of 6 arms)` with one PASS/FAIL line per arm. Writes nothing.
 """
@@ -19,8 +19,11 @@ import json
 import re
 import sys
 
+import os
+
 import boto3
 
+os.environ.setdefault("AMGT_AIFILL_ROOT", "/var/empty/aifill-hold")  # as the live function (the AI-fill hold); the block itself is set aside in F5
 sys.path.insert(0, ".")
 from lib.research.api import scoped_amgt as m  # noqa: E402
 from lib.research.corpus import dossier  # noqa: E402
@@ -57,7 +60,7 @@ def pe_rows(body):
 def set_aside(node, counts):
     """Remove BEST_PE_RATIO forecast rows, `forecast_withheld` and the check-face rows of BEST_PE_RATIO at every depth."""
     if isinstance(node, dict):
-        return {k: set_aside(v, counts) for k, v in node.items() if k != "forecast_withheld"}
+        return {k: set_aside(v, counts) for k, v in node.items() if k not in ("forecast_withheld", "ai_fill")}
     if isinstance(node, list):
         out = []
         for item in node:
