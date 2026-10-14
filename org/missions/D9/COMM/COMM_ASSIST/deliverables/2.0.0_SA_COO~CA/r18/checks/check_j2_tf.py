@@ -2,7 +2,7 @@
 
 Prints:  J2-TF ok=<True|False> arms=<n> of 7 failed=<names|none> reason=<text>
 Reads files only (argv[1] = a tree root, default the working directory, so a scratch reference can be graded). No AWS, no init, no plan.
-Arms: names (NAMES.json row), shell (the secret resource reads that row), reads (it is in secret_arns), mode (variable default "record" and the
+Arms: names (NAMES.json row), shell (the secret resource reads that row), reads (it is in secret_arns), mode (variable default "record" at CA-j-2, or "enforce" from CA-j-17, and the
 environment key), value (no secret_string and no secret_version anywhere), keep (the existing joins and secrets are untouched), plus fmt.
 """
 import re
@@ -28,7 +28,7 @@ def main():
         sa = re.search(r"secret_arns\s*=\s*concat\(\[(.*?)\]", text, re.S)
         got["reads"] = bool(sa and "aws_secretsmanager_secret.ca_ingress_mark.arn" in sa.group(1))
         v = re.search(r'variable\s+"%s"\s*\{(.*?)\n\}' % VAR, text, re.S)
-        got["mode"] = bool(v and re.search(r'default\s*=\s*"record"', v.group(1)) and re.search(r"INGRESS_MARK_MODE\s*=\s*var\.%s\b" % VAR, text))
+        got["mode"] = bool(v and re.search(r'default\s*=\s*"(?:record|enforce)"', v.group(1)) and re.search(r"INGRESS_MARK_MODE\s*=\s*var\.%s\b" % VAR, text))
         got["value"] = not re.search(r"secret_string|aws_secretsmanager_secret_version|secret_binary", text)
         keep = [
             "MUSE_ANSWER_PUBKEY = var.chat_assist_muse_answer_pubkey",
