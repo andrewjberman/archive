@@ -1,0 +1,147 @@
+{
+  "base": "9fb149ec07e96aa832dcb4f4092ae37c5aba45ff",
+  "q1": {
+    "handler": {
+      "file": "infra/aws/lambda/investor-reporting/ops/entry.py",
+      "line": 215,
+      "text": "def pdf(request, scope, event, ctx):"
+    },
+    "serves": "other",
+    "keyed_by": "By the request id alone (the requestId path parameter, ops/entry.py:216 issued(event, \"requestId\")). The reader takes the READY job's detail (report_id, revision), loads that ANALYSIS report and reads its release.protected_pdf_ref (ops/owned_report.py:167-191, 303-304). It is not keyed by artifact id, by family and logical id, or by any pdf_ref.",
+    "callers": "Route class OWNED_RECORD (ops/entry.py:250). The verified viewer must pass the owner gate (ops/entry.py:157-159 authorize -> requests.authorize_current): the same firm and principal_id as the request owner, or the OPAL_GLOBAL class (_scope/interactive_access.py:115-117). The data firm comes from the selected_tenant placement. Which concrete authorizer the composition wires was not traced.",
+    "returns": "{download_route: {url, expires_at}, sha256, byte_length}: an Opal-signed link to the report's own protected PDF (ops/owned_report.py:316 signer.sign, 319-320). The envelope carries it in data with contract_version, operation, firm_id and unprojected_grant. The portal adapter reads download_route.url as signedUrl (portal/src/pages/InvestorReporting/contracts/adapt.ts:1567).",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/ops/entry.py", "line": 215, "text": "def pdf(request, scope, event, ctx):"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/entry.py", "line": 216, "text": "return reports.pdf(principal(request, scope, event, ctx), issued(event, \"requestId\"), signer=signer,"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 292, "text": "def pdf(self, principal, request_id, *, signer, data_firm=None):"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 299, "text": "report = self.read(principal, request_id"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 167, "text": "def read(self, principal, request_id, *, data_firm=None, ticket_id=None):"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 175, "text": "state = job.get_state(request_id)"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 186, "text": "ref = {\"report_id\": detail[\"report_id\"]"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 188, "text": "key = \"REPORT#\" + ref[\"report_id\"] + \"#\" + ref[\"revision\"]"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 303, "text": "release = report.get(\"release\") if isinstance(report.get(\"release\"), dict) else {}"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 304, "text": "ref = release.get(\"protected_pdf_ref\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 309, "text": "raise AnalysisUnavailable(\"ANALYSIS_PDF_NOT_RETAINED\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 316, "text": "url, expires_at = signer.sign("},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 319, "text": "return {\"download_route\": {\"url\": url, \"expires_at\": expires_at}, \"sha256\": sha,"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/entry.py", "line": 240, "text": "\"GET /api/scoped/investor-reporting/analysis/requests/{requestId}/pdf\": \"analysis-request-pdf\""},
+      {"file": "infra/aws/lambda/investor-reporting/reports/status_installed.py", "line": 61, "text": "\"GET /api/scoped/investor-reporting/analysis/requests/{requestId}/pdf\": \"analysis-request-pdf\""},
+      {"file": "infra/aws/lambda/investor-reporting/ops/entry.py", "line": 250, "text": "\"analysis-request-pdf\": \"OWNED_RECORD\""},
+      {"file": "infra/aws/lambda/investor-reporting/ops/entry.py", "line": 159, "text": "return requests.authorize_current(viewer, retained)"},
+      {"file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py", "line": 115, "text": "if current[\"principal_class\"] == \"OPAL_GLOBAL\":"},
+      {"file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py", "line": 117, "text": "if firm != current[\"firm_id\"] or retained_owner[\"principal_id\"] != current[\"principal_id\"]:"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 231, "text": "{ operation: 'analysis-request-pdf', method: 'GET'"},
+      {"file": "portal/src/pages/InvestorReporting/contracts/adapt.ts", "line": 1567, "text": "signedUrl: wire.download_route.url,"}
+    ]
+  },
+  "q2": {
+    "can_serve_commentary_pdf": "no",
+    "serves_instead": "The ANALYSIS report's release.protected_pdf_ref. On the YCHARTS vendor path that is the vendor PDF (ycharts/generate/job.py:559 and resident_worker.py:485). On the OPAL_ENGINE path the stored document carries release.released_revision None and no protected_pdf_ref (ycharts/research/opal_producer.py:396), so the route refuses ANALYSIS_PDF_NOT_RETAINED (ops/owned_report.py:309). It never serves the Overview by name (overview.pdf, opal_producer.py:366 and 373) and never serves the packager's commentary PDF.",
+    "change_needed": "Backend: a new OwnedAnalysisReader method beside pdf (ops/owned_report.py:292) that resolves the commentary PDF by request id. The acceptance record's commentary_ref sha256 gives the logical id through commentary_logical_id (ycharts/research/opal_producer.py:237), in family YCHARTS_OPAL_REPORT. It is read through the same owner, retention and final re-reads, then signed. It is wired in ops/entry.py (handler beside line 215, route beside line 240, owner_read_modes line 250, record_id_parameters line 252) and in reports/status_installed.py HISTORY_ROUTES (line 61). Portal: a new declared operation, an IR_ROUTE_TABLE row and a LiveClient method, then the page reader. The route cannot take a pdf_ref as input today, so both halves are needed.",
+    "rides": "resident",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 321, "text": "OPAL_FAMILY, commentary_logical_id(request_id, commentary_sha256), pdf,"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 290, "text": "def produce_commentary_pdf(request_ref, firm, stores, commentary, *, commentary_sha256=None):"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 237, "text": "def commentary_logical_id(request_id, commentary_sha256):"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 366, "text": "pdf_bucket, pdf_key = _address(firm, \"ycharts_opal_reports\", request_id, \"overview.pdf\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 373, "text": "\"%s-overview-%s\" % (request_id, run_doc[\"report\"][\"sha256\"])"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 396, "text": "\"release\": {\"released_revision\": None},"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/job.py", "line": 559, "text": "\"protected_pdf_ref\": {\"storage_key\": artifact_key,"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 485, "text": "\"release\": {\"released_revision\": str(revision), \"protected_pdf_ref\": {"},
+      {"file": "infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.valid.json", "line": 81, "text": "\"protected_pdf_ref\": {"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py", "line": 31, "text": "`pdf_ref` is the I7 ref of the standalone commentary PDF of step 5 (the"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py", "line": 165, "text": "raw_ref = sibling(tenant, request_id) if callable(sibling) else record.get(\"commentary_ref\")"},
+      {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 37, "text": "DIRS = [\"_scope\", \"_ids\", \"_keys\", \"_authz\", \"_contracts\", \"intake\", \"ops\", \"reports\","},
+      {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 38, "text": "\"ycharts/generate\", \"ycharts/session\", \"ycharts/extract\", \"ycharts/research\"]"},
+      {"file": "infra/aws/lambda/ci/lambda-source-map.json", "line": 5336, "text": "\"irpt-status\": {"},
+      {"file": "infra/aws/lambda/ci/lambda-source-map.json", "line": 5360, "text": "\"owned_report.py\","},
+      {"file": "infra/aws/lambda/ci/lambda-source-map.json", "line": 3993, "text": "\"irpt-ycharts-generate\": {"}
+    ]
+  },
+  "q3": {
+    "client_has_getAnalysisRequestPdf": true,
+    "client_has_getAnalysisRequestOriginal": true,
+    "op_table": {
+      "file": "portal/src/api/endpoints/investor-reporting.ts",
+      "line": 231,
+      "text": "{ operation: 'analysis-request-pdf', method: 'GET'"
+    },
+    "missing": "(1) The Commentary item is kind 'commentary' (AnalysisRequestParts.tsx:319). packageFileHasReader has no 'commentary' branch (323-328) and returns false for it. openPackageFile has no commentary branch (335-360). (2) The only PDF path is line 356, which calls getAnalysisRequestPdf(requestId, firm). That route returns the report's own PDF, not the commentary, so wiring kind 'pdf' to the Commentary item would open the wrong file. (3) The ticket's pdf_ref (portal/src/api/endpoints/tickets.ts:74) is typed but no page code reads it. (4) The methods are on LiveClient only. InvestorReportingApi (investor-reporting.ts:864) does not declare them and FixtureAdapter (investor-reporting.ts:1630) has neither, so the fixture plane cannot open a PDF. (5) The page's own doc (AnalysisRequestParts.tsx:302) says the client has no such call; that is stale against LiveClient (investor-reporting.ts:1164).",
+    "tests_to_repin": [
+      "portal/src/pages/TicketCenter/__tests__/package-r2.test.tsx:111 expects data-slot no-reader-commentary for the Commentary item; a change that gives it a reader removes this assertion.",
+      "portal/src/pages/TicketCenter/__tests__/package-open.test.tsx:76-78 loops over ['commentary','original'] and expects data-slot no-reader-commentary and openPackageFile(commentary) === false; re-pins to the new reader, the original branch stays.",
+      "portal/src/pages/TicketCenter/__tests__/package-open.test.tsx:81 expects 'commentary/c1.txt (no reader yet)'; that text leaves the page once a reader exists.",
+      "portal/src/pages/TicketCenter/__tests__/commentary-package.test.tsx:44 expects the text 'ref-commentary' in the rendered page; that text is shown only when there is no reader, so this assertion re-pins.",
+      "portal/src/pages/TicketCenter/__tests__/package-form-item.test.tsx:53 and :84 and :89 pin the four labels 'Original file, Form as filled, Report, Commentary'; they hold if the label is kept."
+    ],
+    "evidence": [
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 302, "text": "the client has no such call TODAY"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 307, "text": "getAnalysisRequestPdf?: (requestId: string"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 315, "text": "const PACKAGE_FILES"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 319, "text": "{ kind: 'commentary', label: 'Commentary', field: 'commentary_ref' },"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 323, "text": "export function packageFileHasReader(kind: PackageFileKind"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 327, "text": "if (kind === 'pdf') return typeof ir.getAnalysisRequestPdf === 'function'"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 328, "text": "return false"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 335, "text": "export async function openPackageFile("},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 342, "text": "const requestId = ticket.report_ref!.request_id"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 356, "text": "await ir.getAnalysisRequestPdf!(requestId, firm)"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 220, "text": "export const IR_ROUTE_TABLE: readonly IrRoute[] = ["},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 231, "text": "{ operation: 'analysis-request-pdf', method: 'GET'"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 864, "text": "export interface InvestorReportingApi {"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1023, "text": "export class LiveClient implements InvestorReportingApi {"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1164, "text": "async getAnalysisRequestPdf(requestId: string"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1176, "text": "async getAnalysisRequestOriginal(requestId: string"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1630, "text": "export class FixtureAdapter implements InvestorReportingApi {"},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1801, "text": "return useFixtures ? new FixtureAdapter(options) : new LiveClient(options)"},
+      {"file": "portal/src/api/endpoints/tickets.ts", "line": 74, "text": "pdf_ref: string"},
+      {"file": "portal/src/api/endpoints/tickets.ts", "line": 77, "text": "commentary_ref: string"},
+      {"file": "portal/src/pages/TicketCenter/__tests__/package-open.test.tsx", "line": 35, "text": "getAnalysisRequestPdf: async (...a: unknown[]) => { calls.push(['pdf', a]);"},
+      {"file": "portal/src/pages/TicketCenter/__tests__/package-open.test.tsx", "line": 76, "text": "for (const kind of ['commentary', 'original']) {"},
+      {"file": "portal/src/pages/TicketCenter/__tests__/package-r2.test.tsx", "line": 111, "text": "no-reader-commentary"},
+      {"file": "portal/src/pages/TicketCenter/__tests__/commentary-package.test.tsx", "line": 44, "text": "'ref-commentary']) expect(html).toContain(ref)"},
+      {"file": "portal/src/pages/TicketCenter/__tests__/package-form-item.test.tsx", "line": 53, "text": "toEqual(['Original file', 'Form as filled', 'Report', 'Commentary'])"}
+    ]
+  },
+  "q4": {
+    "change_set": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+        "function": "OwnedAnalysisReader.commentary_pdf (new), beside pdf (line 292)",
+        "change": "Resolve the commentary PDF by request id: the acceptance record's commentary_ref sha256, through commentary_logical_id, in family YCHARTS_OPAL_REPORT; same owner, retention and final re-reads as pdf; sign it with the same signer. Note: the irpt-status source map does not stage ycharts/research/opal_producer.py, so the import needs a source-map row or a local copy of the naming rule (the naming rule must not be re-typed; LGIC).",
+        "cite": {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 292, "text": "def pdf(self, principal, request_id, *, signer, data_firm=None):"}
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ops/entry.py",
+        "function": "build_owned_entry: handler beside pdf (215-217), routes (240), operations (244-245), owner_read_modes (250), record_id_parameters (252)",
+        "change": "Register the new operation and its GET route with the same OWNED_RECORD mode and requestId parameter as analysis-request-pdf.",
+        "cite": {"file": "infra/aws/lambda/investor-reporting/ops/entry.py", "line": 240, "text": "\"GET /api/scoped/investor-reporting/analysis/requests/{requestId}/pdf\": \"analysis-request-pdf\""}
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/reports/status_installed.py",
+        "function": "HISTORY_ROUTES (57-64)",
+        "change": "Add the same route key so the installed table matches ops/entry.py; the file's own comment at line 62 says the two tables must match.",
+        "cite": {"file": "infra/aws/lambda/investor-reporting/reports/status_installed.py", "line": 62, "text": "the owned original-report reader, so the installed table matches ops/entry.py"}
+      },
+      {
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "function": "IrDeclaredOperation (172-174), IR_ROUTE_TABLE (220-232), LiveClient beside getAnalysisRequestPdf (1164)",
+        "change": "Add the declared operation, a DECLARED route row for the new route, and a LiveClient reader method that returns only the signed URL (the same shape as getAnalysisRequestPdf).",
+        "cite": {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1164, "text": "async getAnalysisRequestPdf(requestId: string"}
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "function": "PackageReaders (307-308), PACKAGE_FILES (319), packageFileHasReader (323-328), openPackageFile (335-360)",
+        "change": "Give the Commentary item a reader: a commentary branch in packageFileHasReader and openPackageFile that calls the new method and sends the URL to openUrl. Correct the page's doc at line 302, which says the client has no such call.",
+        "cite": {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 319, "text": "{ kind: 'commentary', label: 'Commentary', field: 'commentary_ref' },"}
+      }
+    ],
+    "recommend": "BACKEND_AND_PORTAL",
+    "deciding_fact": "analysis-request-pdf takes only the request id and returns the ANALYSIS report's own protected PDF (ops/owned_report.py:303-309). No route in the investor-reporting source returns the packager's commentary PDF by its pdf_ref or its logical id, so a portal-only change cannot open it.",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 304, "text": "ref = release.get(\"protected_pdf_ref\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/owned_report.py", "line": 309, "text": "raise AnalysisUnavailable(\"ANALYSIS_PDF_NOT_RETAINED\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 396, "text": "\"release\": {\"released_revision\": None},"}
+    ]
+  },
+  "not_read": "The live system: no AWS call, the deployed irpt-status and resident bytes, the live portal, and any stored OPAL report (the OPAL refusal in q2 is read from source only). Not traced: the composition that builds OwnedAnalysisReader and the requests object and binds authorize_current (build_owned_entry was read; its callers in status_installed.py were not); PdfSigner internals (ops/pdf_link.py); the ticket service's attach and the stored ticket pdf_ref; the file lists of J7 (cand/dell2/anlreq-internal-filer-chooses-firm) and AR-y-317; portal/CONTRIBUTING-BOXES.md (no portal file is changed here); how TicketCenter.tsx passes the client into the package block; the fixture plane beyond the absence of the two methods. Note: the order's line ranges for AnalysisRequestParts.tsx (308-338, 495-520) are stale; the live functions sit at 296-362 and 480-520, and the cites here are live lines."
+}

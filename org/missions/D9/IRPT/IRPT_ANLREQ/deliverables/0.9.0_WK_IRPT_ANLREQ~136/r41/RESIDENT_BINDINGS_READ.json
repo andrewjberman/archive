@@ -1,0 +1,181 @@
+{
+  "base": "8d9997b5ab1f805afd09dc624bd91c5deaae0f6f",
+  "cell": "AR-y-328",
+  "reading_root": "C:/dev/wk-irpt-anlreq-136 (HEAD = base; the worktree is clean except the workspace portal pointer)",
+  "q1": [
+    {"wiring": "analysis_ready_send", "name": "IRPT_ANALYSIS_READY_QUEUE_URL",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 209, "text": "queue_url = os.environ.get(\"IRPT_ANALYSIS_READY_QUEUE_URL\", \"\")"},
+     "value_class": "queue_url", "when_unset": "warn",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 211, "text": "print(\"WARN: ANALYSIS_READY_QUEUE_UNSET \" + request_id, flush=True)"},
+     "note": "send_ready returns with no marker (RW 210-212). The env value is set in-process by the factory from the bindings key (RI 415), never by the unit (IRIN 57-58). Sent only for a ticketed request with commentary_requested True (RW 237-244)."},
+    {"wiring": "analysis_ready_send", "name": "analysis_ready_queue_url (bindings key)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 411, "text": "ready_url = bindings.get(\"analysis_ready_queue_url\")"},
+     "value_class": "queue_url", "when_unset": "skip",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 413, "text": "if ready_url:"},
+     "note": "Absent: the factory neither sets the env name nor builds ready_send (RI 412-416); the worker then WARNs (RW 211). load_bindings checks the value is an https sqs URL (RI 95-97)."},
+    {"wiring": "analysis_ready_send", "name": "keys.queue_message (body builder)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 215, "text": "body = queue_message(\"analysis_ready\", {\"tenant\": store.tenant, \"request_id\": request_id})"},
+     "value_class": "other", "when_unset": "other",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 225, "text": "print(\"ERROR: ANALYSIS_READY_SEND_FAILED \" + request_id, flush=True)"},
+     "note": "Imported from the _keys directory on sys.path (RI 37; RW 214). Builder at infra/aws/lambda/investor-reporting/_keys/keys.py:551. Any exception is printed as ERROR ANALYSIS_READY_SEND_FAILED and no marker is written (RW 224-226)."},
+    {"wiring": "drafter_consumer", "name": "SQS Records with eventSource aws:sqs (the analysis_ready queue)",
+     "read_at": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 297, "text": "sqs_records = [r for r in (records or []) if _is_sqs(r)]"},
+     "value_class": "other", "when_unset": "other",
+     "when_unset_evidence": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 310, "text": "retry.append({\"itemIdentifier\": record[\"messageId\"]})"},
+     "note": "The consumer is the commentary Lambda. admit_ready_message (KS 191) rebuilds the body with keys.queue_message and requires byte equality (KS 215). A refused body is reported in batchItemFailures (KS 313) and so goes to the redrive DLQ (TF 129-131, maxReceiveCount 3). The Lambda reads no queue URL: the source is the event source mapping."},
+    {"wiring": "drafter_consumer", "name": "aws_lambda_event_source_mapping.commentary_ready (I3 trigger)",
+     "read_at": {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 317, "text": "event_source_arn        = aws_sqs_queue.commentary_ready.arn"},
+     "value_class": "queue_name", "when_unset": "other",
+     "when_unset_evidence": {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 316, "text": "resource \"aws_lambda_event_source_mapping\" \"commentary_ready\" {"},
+     "note": "Terraform, not a runtime read. batch_size 1 and ReportBatchItemFailures (TF 319-320). The file is marked NOT APPLIED (TF 2), so the live mapping is an applier read."},
+    {"wiring": "drafter_consumer", "name": "KIMI_STANDING_WORD_REF",
+     "read_at": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 273, "text": "if env.get(\"KIMI_STANDING_WORD_REF\", \"\").strip():"},
+     "value_class": "flag", "when_unset": "skip",
+     "when_unset_evidence": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 328, "text": "if ports.get(\"model\") is None:"},
+     "note": "Empty means no model: the record stops at no_vendor_word and no commentary_ready is sent (KS 328-331). The Terraform sets it (TF 294)."},
+    {"wiring": "commentary_ready_send", "name": "COMMENTARY_READY_QUEUE_URL",
+     "read_at": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 246, "text": "url = env.get(\"COMMENTARY_READY_QUEUE_URL\", \"\")"},
+     "value_class": "queue_url", "when_unset": "raise",
+     "when_unset_evidence": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 248, "text": "raise RuntimeError(\"NO_COMMENTARY_READY_QUEUE_URL\")"},
+     "note": "Set on the Lambda by Terraform (TF 303) to the commentary_done queue id. This is a Lambda env, not a host env: the resident never reads it."},
+    {"wiring": "commentary_ready_send", "name": "ports send (the I4 send call)",
+     "read_at": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 344, "text": "ports[\"send\"](_load_keys().queue_message(READY_OUT_KIND, {\"tenant\": tenant, \"request_id\": rid}))"},
+     "value_class": "other", "when_unset": "raise",
+     "when_unset_evidence": {"file": "data/transcripts/scripts/commentary/lambda_handler.py", "line": 366, "text": "out[\"failed\"].append({\"request_id\": rid, \"error\": type(exc).__name__})"},
+     "note": "The DRAFT is persisted first (KS 341). A raise from the send is caught per record at KS 364, recorded failed, and not returned in batchItemFailures (only KS 310, KS 313 and KS 374 add one). A redelivery reaches draft_exists at KS 334-337 and never re-sends. See surprise IRPT_ANLREQ-D2-W136-S1."},
+    {"wiring": "packager_consumer", "name": "commentary_ready_queue_url (bindings key, becomes package_queue_url)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 424, "text": "runtime[\"package_queue_url\"] = bindings[\"commentary_ready_queue_url\"]"},
+     "value_class": "queue_url", "when_unset": "skip",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_main.py", "line": 73, "text": "if package is not None:"},
+     "note": "Absent: the factory returns no packager (RI 423) and the loop skips the package poll (RM 73-75). A present key without a packager block is refused (RI 105-106)."},
+    {"wiring": "packager_consumer", "name": "poll_package_once (receive on the commentary_ready queue)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 1026, "text": "messages = sqs.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1,"},
+     "value_class": "queue_url", "when_unset": "skip",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_main.py", "line": 73, "text": "if package is not None:"},
+     "note": "One receive, WaitTimeSeconds 1, VisibilityTimeout 900 (RW 1026-1027). A message is deleted only on a terminal outcome (RW 1041-1044). The poll is called with the bound URL (RM 75)."},
+    {"wiring": "packager_consumer", "name": "PACKAGER_PRINCIPAL_UNSET (refusal raised by the packager attach)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 1036, "text": "if type(exc).__name__ != \"PackagerRefused\" or head not in PACKAGE_MESSAGE_REFUSALS:"},
+     "value_class": "other", "when_unset": "raise",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 1037, "text": "raise"},
+     "note": "PACKAGER_PRINCIPAL_UNSET is not one of the message refusals (RW 989-991), so the exception propagates and the message stays queued (RW 985-987). resident_main then prints retained_for_retry (RM 76-79)."},
+    {"wiring": "packager_ports", "name": "packager (bindings block: api_base, secret_name)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 101, "text": "if (not isinstance(packager, dict) or set(packager) != set(PACKAGER_KEYS)"},
+     "value_class": "other", "when_unset": "refuse",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 104, "text": "raise ResidentInstallRefused(\"RESIDENT_PACKAGER_BINDINGS\")"},
+     "note": "Validated at bindings load only when the key is present (RI 99). Absent, nothing refuses here: the commentary branch is skipped (RI 423)."},
+    {"wiring": "packager_ports", "name": "api_base",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py", "line": 286, "text": "base = config[\"api_base\"].rstrip(\"/\")"},
+     "value_class": "base_url", "when_unset": "refuse",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 104, "text": "raise ResidentInstallRefused(\"RESIDENT_PACKAGER_BINDINGS\")"},
+     "note": "Must be https (RI 103). The in-code fallback for a config that is not exactly the two keys is PACKAGER_PRINCIPAL_UNSET (OP 280-284, the raise at OP 283)."},
+    {"wiring": "packager_ports", "name": "secret_name",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py", "line": 306, "text": "secret = read_secret(config[\"secret_name\"])"},
+     "value_class": "secret_name", "when_unset": "refuse",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 102, "text": "or any(not isinstance(packager[k], str) or not packager[k].strip() for k in PACKAGER_KEYS)"},
+     "note": "A secret NAME, read by the injected Secrets Manager client (RI 126-130, 431). A read or parse failure is PACKAGER_TOKEN_UNREADABLE (OP 315). The IAM grant is resident.tf:171."},
+    {"wiring": "packager_ports", "name": "svc-irpt-packager (PACKAGER_SUBJECT, the package principal)",
+     "read_at": {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py", "line": 71, "text": "PACKAGER_SUBJECT = \"svc-irpt-packager\""},
+     "value_class": "other", "when_unset": "raise",
+     "when_unset_evidence": {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py", "line": 237, "text": "raise PackagerRefused(\"PACKAGER_PRINCIPAL_UNSET\")"},
+     "note": "The module-level live_attach (OP 233-237) is the default attach (RI 338) and always refuses. The factory replaces it with ticket_ports when the packager block is present (RI 339-340, 430-435). The ticket route admits only actor email equal to this principal with userType service (TCK 1633-1634)."}
+  ],
+  "q2": [
+    {"name": "IRPT_ANALYSIS_READY_QUEUE_URL", "r29_state": "unset",
+     "evidence": [
+       {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh", "line": 57, "text": "Environment=PYTHONPATH=$package_root"},
+       {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh", "line": 58, "text": "Environment=PYTHONUNBUFFERED=1"},
+       {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/pre_read_r29.sh", "line": 22, "text": "# STOP-READ: the unit must not carry IRPT_ANALYSIS_READY_QUEUE_URL"},
+       {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 415, "text": "os.environ[READY_QUEUE_ENV] = ready_url"}
+     ]},
+    {"name": "analysis_ready_queue_url (bindings key)", "r29_state": "absent",
+     "evidence": [
+       {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 81, "text": "bindings = {"},
+       {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/RESIDENT_BUILD.json", "line": 100, "text": "the only change inside reports/resident_bindings.json is provenance.package_pin"}
+     ]},
+    {"name": "commentary_ready_queue_url (bindings key)", "r29_state": "absent",
+     "evidence": [
+       {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 81, "text": "bindings = {"},
+       {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/RESIDENT_BUILD.json", "line": 100, "text": "the only change inside reports/resident_bindings.json is provenance.package_pin"}
+     ]},
+    {"name": "packager block (api_base, secret_name)", "r29_state": "absent",
+     "evidence": [
+       {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 81, "text": "bindings = {"},
+       {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/RESIDENT_BUILD.json", "line": 100, "text": "the only change inside reports/resident_bindings.json is provenance.package_pin"}
+     ]},
+    {"name": "COMMENTARY_READY_QUEUE_URL (a Lambda env, not a host env)", "r29_state": "absent",
+     "evidence": [
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 303, "text": "COMMENTARY_READY_QUEUE_URL = aws_sqs_queue.commentary_done.id"},
+       {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh", "line": 47, "text": "cat >\"$unit_file\" <<EOF"}
+     ]}
+  ],
+  "host_env_file": "/etc/systemd/system/irpt-analysis-resident.service (the unit; install-resident.sh line 68 installs it; it carries no EnvironmentFile and no binding). The bindings the factory reads are /opt/irpt-resident/0485393f3a-r29/reports/resident_bindings.json (ROOT is R/NEW, the r29 host script line 11).",
+  "install_mechanism": "No env file. install-resident.sh writes a unit whose only Environment lines are PYTHONPATH and PYTHONUNBUFFERED. The queue and packager bindings come from reports/resident_bindings.json inside the package tar, written by build_resident_package.py (bindings dict, lines 81-98; members line 100) and pinned by WANT_TAR and the member sums in the host script. The factory sets IRPT_ANALYSIS_READY_QUEUE_URL in-process from the bound key (resident_installed.py 411-415). To change a binding a build cell edits that dict, rebuilds the tar and derives install_r30.sh from the r29 host script with new WANT_TAR, WANT sums and member checks. It must not add the env name to the unit: the r29 pre-read STOP-READ refuses that.",
+  "mechanism_evidence": [
+    {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh", "line": 68, "text": "install -m 0644 \"$unit_file\" /etc/systemd/system/irpt-analysis-resident.service"},
+    {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/resident_host_install_0485393f3a-r29.sh", "line": 11, "text": "ROOT=$R/$NEW"},
+    {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/resident_host_install_0485393f3a-r29.sh", "line": 15, "text": "WANT_TAR=2de2adce622f8bb9bbd5ebc071e862446b056303c0d9ffd7d41b050bd17f51a4"},
+    {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/resident_host_install_0485393f3a-r29.sh", "line": 106, "text": "PYTHONPATH=\"$R/$1\" bash \"$R/$1/ycharts/generate/install-resident.sh\""},
+    {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 100, "text": "members[\"reports/resident_bindings.json\"] = (\"<generated>\", encoded)"}
+  ],
+  "q3": [
+    {"target": "analysis_ready_queue", "declared": true,
+     "evidence": [
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 49, "text": "commentary_ready_queue_name = local.commentary_names.ready_queue.name"},
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 122, "text": "resource \"aws_sqs_queue\" \"commentary_ready\" {"},
+       {"file": "data/transcripts/scripts/commentary/NAMES.json", "line": 41, "text": "\"name\": \"outlook-global-commentary-draft-analysis-ready-queue\""}
+     ],
+     "needs": "applier_live_read",
+     "note": "Declared (queue name from NAMES.json). The URL is an apply output and the file is marked NOT APPLIED (commentary.tf 2). A worker can write the URL form from source (https://sqs.us-east-1.amazonaws.com/313476888478/<name>, the pattern at build_resident_package.py 84) but not confirm the queue exists."},
+    {"target": "commentary_ready_queue", "declared": true,
+     "evidence": [
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 54, "text": "commentary_done_queue_name = local.commentary_names.commentary_ready_queue.name"},
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 159, "text": "resource \"aws_sqs_queue\" \"commentary_done\" {"},
+       {"file": "data/transcripts/scripts/commentary/NAMES.json", "line": 57, "text": "\"name\": \"outlook-global-commentary-draft-commentary-ready-queue\""}
+     ],
+     "needs": "applier_live_read",
+     "note": "Declared under the resource label commentary_done (the labels are inverted, surprise IRPT_ANLREQ-D2-W136-S3). Consumer access is the resident role (commentary.tf 172). Same apply caveat as above."},
+    {"target": "dead_letter_queue", "declared": true,
+     "evidence": [
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 115, "text": "resource \"aws_sqs_queue\" \"commentary_ready_dlq\" {"},
+       {"file": "infra/aws/terraform/transcripts/commentary.tf", "line": 152, "text": "resource \"aws_sqs_queue\" \"commentary_done_dlq\" {"},
+       {"file": "data/transcripts/scripts/commentary/NAMES.json", "line": 49, "text": "\"name\": \"outlook-global-commentary-draft-analysis-ready-dlq\""},
+       {"file": "data/transcripts/scripts/commentary/NAMES.json", "line": 65, "text": "\"name\": \"outlook-global-commentary-draft-commentary-ready-dlq\""}
+     ],
+     "needs": "applier_live_read",
+     "note": "Two redrive DLQs declared (I3 and I4). The Lambda failure DLQ is commentary_dlq (commentary.tf 106-107, dead_letter_config at 286-288). No binding carries a DLQ URL."},
+    {"target": "packager_secret", "declared": false,
+     "evidence": [
+       {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 165, "text": "# packager port reads ONE secret by name, json.loads(secret)[\"token\"], and makes no login. One action, one"},
+       {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 171, "text": "Resource = [\"${local.secrets_arn_prefix}opal/ticketing/svc-irpt-packager-??????\"]"}
+     ],
+     "searched": "git grep for svc-irpt-packager over the tracked tree; git grep -E aws_secretsmanager_secret over infra/aws/terraform (no resource or data block names opal/ticketing/svc-irpt-packager); git grep ticketing/svc- over tracked non-md files (commentary and analyst-intake only, plus the resident IAM pattern); nfra-ctlpln-identity vendor_secrets_census.json (no svc-irpt-packager entry).",
+     "needs": "andrew_act",
+     "note": "Only an IAM read grant names the secret (resident.tf 168-171). No secret resource exists in tracked source, and the value is never in source. Creating the secret and its token is a credential act."},
+    {"target": "packager_principal_row", "declared": false,
+     "evidence": [
+       {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 84, "text": "# R4-pk-1: the package principal (svc-irpt-packager) carries NO users PROFILE row."},
+       {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 1629, "text": "(no users PROFILE row is read)"},
+       {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 1634, "text": "if not (principal and actor.get(\"userType\") == SVC_MARKER and actor[\"email\"] == principal):"}
+     ],
+     "searched": "git grep svc-irpt-packager over infra/aws/lambda/ticket_center, infra/aws/terraform and integrations (the package route, its tests, and PACKAGE_ALLOWED_FIRMS in ticket-center/main.tf 306 only; no users row); git grep PROFILE in ticket_center (the packager is said to carry none); nfra-ctlpln-identity census (no entry). The service-subject table (lambda_function.py 31-36) names svc-ticket-form, svc-analyst-intake and svc-commentary, not svc-irpt-packager.",
+     "needs": "applier_live_read",
+     "note": "Source says no users row is needed or read. The live question is whether a token whose sub is svc-irpt-packager with userType service exists and is accepted; that is a live read by the applier, not a row to build."}
+  ],
+  "q4": {
+    "edit_site": {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 165, "text": "OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",)"},
+    "must_agree": [
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 177, "text": "return \"OPAL\" if isinstance(principal_id, str) and principal_id in OPAL_PRODUCER_PRINCIPALS else \"YCHARTS\"", "why": "producer_for reads the list at call time and compares it with the accepted record's owner.principal_id; the new address must equal that string exactly."},
+      {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 250, "text": "\"principal_id\": user[\"email\"]", "why": "The principal the packager and the Opal producer see carries the email as principal_id; a listed address must be an email the profile row holds, or the list never matches the owner."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 748, "text": "if producer_for(record) == \"OPAL\":", "why": "The producer choice: one producer per request, from the accepted principal only."},
+      {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 274, "text": "if producer_for(record) != \"OPAL\":", "why": "The installer's second check (opal_stores). It imports producer_for, so it reads the same list: no second copy to edit, and no edit needed here."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py", "line": 770, "text": "assert resident_worker.OPAL_PRODUCER_PRINCIPALS == ('andrew@opalinvest.com',)", "why": "A test pins the exact one-entry tuple. Any change to the list fails this assertion, so it must change in the same edit."},
+      {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 81, "text": "bindings = {", "why": "The bindings dict the tracked builder writes has no opal_map key. A listed principal's job loads the map from the bindings (see the next row), so the r30 builder must carry it or the listed job is refused."},
+      {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 293, "text": "raise ResidentInstallRefused(\"OPAL_MAP_BINDING_REQUIRED\")", "why": "Without a bindings opal_map member (path and sha256) a listed principal's job is refused. The r19 recipe had a --opal-map step (write_record.py 143); the tracked builder does not, so the two disagree (surprise IRPT_ANLREQ-D2-W136-S2)."},
+      {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~125/r39/install_r29.sh", "line": 66, "text": "print(\"V1 producer import OK: family\", p.OPAL_FAMILY, \"allow list\", resident_worker.OPAL_PRODUCER_PRINCIPALS)", "why": "Not a pin: the r29 install prints the list. The r30 derived script must expect the new value in its check, or its read-back will show a list the checks do not name."}
+    ],
+    "comment_change": "Lines 159-164 say the list holds ONE entry, Andrew's sign-in principal (line 163), that it is changed only on Andrew's word (line 161), and that no other principal goes on it (line 164). The same edit must (1) state the new entry and cite Andrew's word for it by ruling id or verbatim quote, (2) replace 'The single entry' and 'No other principal goes on this list' with the two-entry statement, and (3) change the test pin at test_resident_worker.py:770. The TO names no address (surprise IRPT_ANLREQ-D2-W136-S4), so this record cannot choose one; the issuer must name it."
+  },
+  "recommendation": "For the single r30 release: (1) add analysis_ready_queue_url and commentary_ready_queue_url, and a packager block with api_base and secret_name, to the builder's bindings dict (build_resident_package.py 81-98), using the URL form the builder already uses (line 84) and the NAMES.json queue names, after the applier's live read confirms each queue exists; (2) keep IRPT_ANALYSIS_READY_QUEUE_URL out of the unit, since the factory sets it in-process (resident_installed.py 415) and the pre-read refuses it in the unit; (3) add the opal_map member to the builder before the producer list gains an address; (4) edit the producer list per q4 with its comment and test pin in the same edit, once the issuer names the address; (5) take the packager secret value and the packager token as an Andrew act (q3). The commentary Lambda's post-persist send is a separate defect candidate (surprise S1) and is not a binding.",
+  "surprises": ["IRPT_ANLREQ-D2-W136-S1", "IRPT_ANLREQ-D2-W136-S2", "IRPT_ANLREQ-D2-W136-S3", "IRPT_ANLREQ-D2-W136-S4"],
+  "not_read": "The live system: the resident host, its unit file and running process environment, the release-29 tarball and its reports/resident_bindings.json (the tarball is not in the tree; the r39 scripts, the build record and the tracked builder were read instead), the commentary Lambda and its deployed environment, the SQS queues and DLQs, the Secrets Manager secrets, the ticket service's token issuance and users table. No AWS call of any kind was made, and no deployed bytes were read. The release-29 opal_packager.py bytes match git commit 80cd922e39 by sha256 (read from git history, not the host); that commit predates AR-y-327 (83c32086e8), which HEAD carries. drafter.py was checked for environment reads by grep only (none). The r29 values of opal_map and of any other bindings key the tarball may carry beyond the tracked builder's dict were not read."
+}
