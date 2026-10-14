@@ -3,8 +3,9 @@
 **From:** `0.7.0_AE_CloudOps~ZS`, 2026-10-14 ~23:00Z. **To the two halves:** `1.0.0_SA_CTO~Z` and `2.0.0_SA_COO~O`.
 **Row / ruling:** `NFRA_OPLGTW-Z-S117`, CTO msg 34152. **Measurements:** `W/EC2_PLAN.json`, where
 `W` = `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZS/`.
-**State of the world:** nothing is applied, uploaded, merged to trunk or invoked. Recommendation: **SIGN**, with the one
-amendment in section 3 (the artifact upload) settled first.
+**State of the world:** nothing is applied, uploaded, merged to trunk or invoked. Recommendation: **SIGN**. The artifact
+upload (section 3, step 3) was ruled IN by the issuer, order amendment A1 @c0c760f4e7, msg 34274 (row `Z-S131`); this
+revision names it in the order and rollback sections, as A1 asks.
 
 The act moves served data (NEVER-1): the converter's silver feeds pages and tools. One block of each section below is the
 whole of what a half signs or refuses.
@@ -31,7 +32,12 @@ Terraform: one row, `local.silver_build_commit.eclipse` `b915719f25` -> `8929c5f
 ## 2. The widening
 
 **No new reach.** The converter writes the same silver prefix it always did, under the same role and grants. No IAM,
-schedule, queue, bucket, trigger or other Lambda changes.
+schedule, queue, bucket, trigger or other Lambda changes. **One object is written by the applier, and only one:** the
+converter's package at the module's artifact key,
+`s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-silver-eclipse.zip` (the key `data.aws_s3_object.artifact`
+reads; measured, so the order's `.../opal-assets-silver-eclipse/...` wording means this key). Its prior state is
+**present**, latest version `9KbX3Ee84D5n9e2hNtWsRkg6pk40yYcW` (37461 bytes, content-sha256
+`clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g=`); the upload adds a NEW version on top and deletes none.
 
 What the one sweep will write, counted (not guessed): the repo converter's own `expected_partitions` + `set_identity` over
 live listings read **expected 552, landed 547, matched 547, missing 5, alien 0**, which equals the guard's own text
@@ -62,12 +68,15 @@ shares the one DLQ; it is untouched by this act.
    default is a prefix, not an answer). This Phase A read: 6 of 6 carriers, one armed drift gate (G-3, inflection
    transactions), nothing naming the converter.
 2. Merge the build branch by `.tools/safe-merge.sh` (carries the one pin row).
-3. **THE GAP, for the issuer to settle before a GO: upload the artifact.** The module takes `source_code_hash` and
-   `s3_object_version` from the S3 object `opal-assets/opal-assets-silver-eclipse.zip`. Applying the pin alone changes the
-   environment value and leaves the deployed code at `725ad4cf...`, so AC2 ("deployed code equals the repo's: yes") cannot
-   pass. The prior eclipse release put the artifact up first (`build-and-upload.sh`, commit `83b77e13d3`). That is one S3
-   object write to the artifact bucket, and the order says "no object is written by you". **Ruling asked:** the upload is
-   in (recommended; the bound was written for silver objects) or the order is re-cut. Row `Z-S131`.
+3. **Upload the artifact BEFORE the apply (ruled in, A1, row `Z-S131`).** The module takes `source_code_hash` and
+   `s3_object_version` from the S3 object `opal-assets/opal-assets-silver-eclipse.zip`; applying the pin alone would leave
+   the deployed code at `725ad4cf...` and AC2 could not pass. So: re-read the artifact key's latest version id and
+   content-sha256 (expect `9KbX3Ee8...` / `clrUz/...`; any other value is a STOP, someone moved it) and write them into the
+   ledger as the rollback; then `bash infra/aws/lambda/ci/build-and-upload.sh opal-assets opal-assets-silver-eclipse`
+   (BUILD, not BUILD_ONLY) from the merged tree, which re-runs its import-closure gate, uploads that one key with
+   `content-sha256` metadata, and fails closed unless `head-object` reads back the same size and digest (expect 38093 bytes,
+   `GxWRZhTMvkSWAXuBQHuzjZcAwQ3mJg3C0da8/ZoD6zU=`). The script's source-map stamp (`artifact_sha256`) is committed as the
+   prior release did (`83b77e13d3`). No other S3 key is written.
 4. `bash .tools/safe-apply.sh -target='module.silver_converter["eclipse"]'`. Measured plan today (pin only, artifact not
    yet uploaded): `0 to add, 1 to change, 0 to destroy`, `module.silver_converter["eclipse"].aws_lambda_function.this`,
    `OPAL_BUILD_COMMIT b915719f25 -> 8929c5f16d`. After the upload the same resource also shows `source_code_hash`,
@@ -96,10 +105,13 @@ writes**. The fix widens the declaration by exactly one named column and nothing
 
 - **Silver:** delete the newly written `fact_portfolios_simple` partition(s) of the 5 listed keys (each was absent before,
   so deleting restores the prior state exactly). A delete of silver objects needs its own confirmation at that time.
-- **Code:** redeploy the prior code from its recorded hashes: S3 version `9KbX3Ee84D5n9e2hNtWsRkg6pk40yYcW` (37461 bytes,
-  content-sha256 `clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g=`), restored as the latest version of the artifact key, with
-  the pin row set back to `b915719f25`, then the same targeted apply. Read `CodeSha256` back equal to `clrUz/...`.
-  The version before that is `RbbMcE4omBbGLm9IRIBYZTW6Ivoa6bxB` (2026-09-27). Never `aws lambda update-function-code`.
+- **The uploaded object:** the prior object is the recorded rollback. Its version id is `9KbX3Ee84D5n9e2hNtWsRkg6pk40yYcW`
+  (37461 bytes, content-sha256 `clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g=`). The upload adds a version and deletes none,
+  so the prior bytes stay in S3. To return to it, copy that version over the key as the new latest
+  (`aws s3api copy-object --copy-source ...?versionId=9KbX3Ee8...`, which re-stamps the same content-sha256 metadata and is
+  read back with `head-object`), with the pin row set back to `b915719f25` and the same targeted apply. Read `CodeSha256`
+  back equal to `clrUz/...`. The version before that is `RbbMcE4omBbGLm9IRIBYZTW6Ivoa6bxB` (2026-09-27). Never
+  `aws lambda update-function-code`. Deleting the newer S3 version is NOT part of the rollback.
 - **Trunk:** `git revert -m 1` of the merge, via `safe-commit`.
 
 ## 6. The triggers
