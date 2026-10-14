@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-204",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "c1c903539c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "c1c903539c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-204.model-windows-by-build-time-read-reader-module-and-series-contract-claims.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~168",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~168/IRPT_DASHBD.TO-DB-b-204.model-windows-by-build-time-read-reader-module-and-series-contract-claims.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/model_series_windows.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git mv of the retired producer; reworked as a build-time reader with three public functions (read_served_series, windows_from_series, source_claim); writes nothing, no upload path, no firm named. sha256 84105b78d74a6bc5744d4a842825c3c0e3c73dc52d590b4017db182d0660e658; commit-gate clean.",
+      "artifact_covered_by": ["DB105-3-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_model_series_windows.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git mv of the retired test file; 6 offline tests pass under python -I -m pytest (synthetic served documents, fake get_object reader); commit-gate clean.",
+      "artifact_covered_by": ["DB105-3-AC1"]
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_SERIES_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version 0.2.0 with the 0.1.0 bytes (sha256 40cef6203cbfa109cae26209a9d241b82d6b1071f316c9f71f39d16913853e94) in lineage; the 0.1.0 keys unchanged; model_windows section carries source and data_as_of on every value and the placement rule (the firm's own gold beside the household's series, never the raw series).",
+      "artifact_covered_by": ["DB105-3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~168/MODEL_WINDOWS_READER.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: module hash, test counts, live read (VersionId, data_as_of, 32 members, 32 filled), zero writes, zero reads of vendors or secrets.",
+      "artifact_covered_by": ["DB105-3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~168/live_read_model_windows.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one live read of step 5: one GET of the served key through a get_object-only reader; prints counts, dates and the VersionId only; writes nothing.",
+      "artifact_covered_by": ["DB105-3-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB105-3-AC1",
+      "criterion_verbatim": "`DB105-3-AC1` -- the retired module, test file and contract are gone; the new module is a tracked file hashed as recorded; its test file has 4 or more passing tests and passes when the checker runs it, with a failing mutant; the series contract is above 0.1.0 with the 0.1.0 bytes in its lineage and carries `source` and `data_as_of`; the checker calls `windows_from_series` on a synthetic four-stem series and the result equals its own independent compounding for every stem and window, a series missing a trading day inside the windows gives `None` for each such window, and `source_claim` returns the key and the version id and the ISO date; the live read records a version id, an ISO `data_as_of`, 32 members and how many fill; nothing is written; no write, push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r105/p105_round105.py\" . DB105-3-AC1",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback (see IRPT_DASHBD-D2-W168-S1) / OK: reader model_series_windows.py compounds the four windows for 4 stems equal to independent compounding; a gap day gives None; 32 of 32 benchmark members fill on the live read / DB105-3-AC1 PASS (rc 0). The checker run twice on the same bytes gave identical output; its --selftest printed SELFTEST OK: 14 arms.",
+      "denominator": "1 of 1 criterion invocation, rc 0, last line DB105-3-AC1 PASS; 6 of 6 offline tests pass in this cell's own pytest run; 4 stems x 4 windows checked against independent compounding; 32 of 32 benchmark members filled on the live read.",
+      "status": "PASS",
+      "status_reason": "The checker's own clauses all hold on the committed bytes: the three retired paths are absent, the module hash matches the record, the test subprocess passes, the contract lineage carries 0.1.0, the live read carries a VersionId and an ISO data_as_of with 32 members and 32 filled. Windows: no window is None on the live read, so the gap clause is exercised only synthetically.",
+      "expect": "DB105-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "two same-input runs of the official checker (p105_round105.py, DB105-3-AC1) on the same record bytes, outputs compared byte for byte",
+      "observed": "run 1 and run 2 identical: OK line and DB105-3-AC1 PASS, rc 0 both",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "A temporary mutant of the module's _compound that drops the gap check (the any-missing-trading-day test), the test file run against it, the module restored byte-identical afterwards (sha256 compared before and after).",
+      "expected": "the test file FAILS on the gap tests",
+      "observed": "2 of 6 tests FAILED (test_gap_day_inside_every_window_gives_none and test_gap_day_outside_a_window_leaves_that_window_filled); pytest rc 1; the module restored, sha256 84105b78d74a6bc5744d4a842825c3c0e3c73dc52d590b4017db182d0660e658 identical before and after.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the apply of the model windows into the firm's gold, and the writers of that prefix beyond the repo census",
+      "reason": "not in this cell by design: TO-DB-b-204 writes nothing; the landing is a later round under a never-widen pair."
+    },
+    {
+      "item": "the raw model series as a copy in the repo, a row or this report",
+      "reason": "never copied: the live read held the series in memory and printed counts, dates and the VersionId only."
+    }
+  ],
+  "surprises": ["IRPT_DASHBD-D2-W168-S1"],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh on the module, the test file and the live-read script",
+      "invocation": "bash .tools/commit-gate.sh <each .py path>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) each; gate rc=0 each"
+    }
+  ]
+}
