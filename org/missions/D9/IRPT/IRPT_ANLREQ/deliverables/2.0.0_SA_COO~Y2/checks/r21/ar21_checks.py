@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -927,6 +927,49 @@ def main(argv):
                 best = best or (rc, passed, failed)
             print("%s: %d passed, %d failed (rc=%d)" % (relpath, best[1], best[2], best[0]))
             if best[0] != 0 or best[2] or best[1] < floor:
+                problems.append("%s must pass with at least %d tests" % (relpath, floor))
+    elif check == "y308-words":
+        rec = load(root, D.replace("/r21/", "/r38/") % "122" + "SHARES_WORDS.json", problems)
+        if rec:
+            for member in ("read", "codes_census", "words", "ast_words_only", "tests", "before_arm", "release_needs", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: the new tests must FAIL at HEAD")
+        probe = (
+            "import sys, json\n"
+            "sys.path[:0] = [%r, %r, %r]\n"
+            "import uploads\n"
+            "import status\n"
+            "code = 'SHARES_PRICE_SOURCE_NOT_COMPOSED'\n"
+            "a = uploads.CORRECTION_WORDS.get(code)\n"
+            "b = status.CORRECTION_WORDS.get(code)\n"
+            "print(json.dumps({'a': a, 'b': b, 'equal': a == b and a is not None, 'tables_equal': uploads.CORRECTION_WORDS == status.CORRECTION_WORDS}))\n"
+            % (str(root / INTAKE), str(root / IR / "ops"), str(root / IR)))
+        got = subprocess.run([sys.executable, "-I", "-c", probe], capture_output=True, text=True, cwd=str(root / INTAKE))
+        try:
+            info = json.loads(got.stdout.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            info = {}
+            problems.append("could not read the words tables: %s" % (got.stderr or got.stdout)[-300:])
+        if info:
+            print("words equal in both tables: %s; whole tables equal: %s" % (info.get("equal"), info.get("tables_equal")))
+            if not info.get("equal"):
+                problems.append("SHARES_PRICE_SOURCE_NOT_COMPOSED must have byte-equal words in uploads.py and ops/status.py")
+            if not info.get("tables_equal"):
+                problems.append("the two CORRECTION_WORDS tables must be equal")
+            text = str(info.get("a") or "").lower()
+            if "market value" not in text or "share" not in text:
+                problems.append("the words must mention shares and ask for a Market Value column")
+            if any(ord(ch) > 127 for ch in str(info.get("a") or "")):
+                problems.append("the words must be ASCII")
+        for relpath, floor in (("tests/test_shares_not_composed_words.py", 6), ("tests/test_correction_words.py", 1)):
+            if not (root / INTAKE / relpath).is_file():
+                problems.append("no intake/%s" % relpath)
+                continue
+            rc, passed, failed = pytest(root, relpath, INTAKE)
+            print("%s: %d passed, %d failed (rc=%d)" % (relpath, passed, failed, rc))
+            if rc != 0 or failed or passed < floor:
                 problems.append("%s must pass with at least %d tests" % (relpath, floor))
     return finish(check, problems)
 
