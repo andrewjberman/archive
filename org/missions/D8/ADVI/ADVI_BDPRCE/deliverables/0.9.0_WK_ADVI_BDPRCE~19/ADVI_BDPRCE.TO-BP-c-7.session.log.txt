@@ -1,0 +1,27 @@
+ADVI_BDPRCE.TO-BP-c-7 -- worker 0.9.0_WK_ADVI_BDPRCE~19 -- session log (read-only; no AWS write verb)
+
+Premise checks
+- worktree branch wk-ADVI_BDPRCE-19; TREE-OK (org/ and .tools/ present); base 33b647a50f.
+- extract C:/dev/wk-bdprce-r2-7-data/lot_extract.csv: sha256 e7e618d76516c8b7977179aefb3f77ce4fc13c17fbcf1dbeb92001a6e0a2b50b = extract_sha256 in CENSUS.json. Rows 198295; PRICED_OFF_NO_CANONICAL 1859; distinct triples 353; assets 340.
+- 34 of the 1859 carry the literal price string nan (surprise ADVI_BDPRCE-D1-W19-S1).
+
+Listings (AWS, read verbs)
+- list-object-versions silver/prices/canonical_prices.parquet: 657 versions, 0 delete markers, LastModified 2026-07-14T23:03:13Z .. 2026-10-14T00:13:47Z.
+- list-object-versions silver/prices/ (parquet): 841 versions = 657 canonical + 184 daily (174 daily keys).
+- list-objects-v2 schwab/silver/rps/: 636 objects; last key date=20260723.
+- list-objects-v2 gold/canonical/holdings/: 2026-10-09.parquet present.
+
+Reads
+- stage A (versions newer than 2026-09-30, 140 of 841): 305 lots class EQUALS_OLDER_CANONICAL_VERSION; 1554 lots unexplained. Widened to the full listing because the unexplained residue could not be assigned without it.
+- full read: 841 of 841 versions fetched, 0 failures (bp_c7_fetch.py; projection to the 340 names; full copies deleted).
+- classify: canonical older 310 lots / 22 triples; daily 0 lots (18 triples have a daily row, all also in older canonical); latest-only matches 15 triples, all also older-matched.
+- RPS named check (schwab/silver/rps/date=20260723): 146 of 305 priced unexplained triples matched on account + price; negative control 0 of 305; positive control 300 of 300; ticker coherence 132 of 146 single-ticker.
+- holdings named check (gold/canonical/holdings/2026-10-09.parquet): 0 of 158 matched on name + account + price; negative control 0; positive control 300 of 300.
+- historical value-only check (2026-10-09): 3 of 158 coincide by value; shift control 0; not bindable by name; not classed.
+
+Result
+- lots_total 1859 = older canonical 310 + daily 0 + named RPS 1118 + unexplained 431 (397 priced + 34 nan).
+
+Gates
+- r3_checks.py offcanon: rc 0, "OFFCANON record ok lots=1859 older_canonical=310 daily=0 other=1118 unexplained=431".
+- r4_scope.py: "ROUND 4 SCOPE: OK 10 changed, 0 outside, 0 required missing" (before the commit of these files).
