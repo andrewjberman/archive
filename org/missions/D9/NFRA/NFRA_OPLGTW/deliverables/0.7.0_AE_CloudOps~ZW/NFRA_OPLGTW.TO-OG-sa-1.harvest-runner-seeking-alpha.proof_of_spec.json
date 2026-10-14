@@ -1,0 +1,147 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-sa-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sa-1.harvest-runner-seeking-alpha.md",
+  "group": "OTHER",
+  "vintage_commit": "13f6bb6c7f7e7c9a9fa3bfa75262a0a5365f6a0e"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "5ded7131ea841cb6222c4c212e22c3eb6e9cda95",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sa-1.harvest-runner-seeking-alpha.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~ZW",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW/SA1_ACCESS.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The access record in the amended A1 schema: http_status 200, runner_profile_login false, outcome ACCESS_REFUSED, with the reason naming the failed half.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW/SA1_PROOF.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "branch refused, runner_changed false.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW/sa1_access_read.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The one account read: account_requests 1, http_status 200, data_type authorizedUser, subscription_items 1. The session's own construction (1 Chrome launch, 1 origin page load) is counted in the same file.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW/sa1_AC1.out",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1's literal invocation and output.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW/sa1_AC2.out",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2's literal invocation and output.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "(?s)access read: status (?:\\d+|none), outcome ACCESS_(HOLDS|REFUSED), source named yes, read_at in the order window yes, outcome consistent with status yes.*RESULT: PASS.*exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/sa1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "access read: status 200, outcome ACCESS_REFUSED, source named yes, read_at in the order window yes, outcome consistent with status yes\nRESULT: PASS\nexit=0\n",
+   "denominator": "Run on the site Z box at 2026-10-14T21:55Z with the invocation extracted byte-exact from the order as amended (@13f6bb6c7f). The record it grades was written AFTER the single account read of 21:54:01Z and BEFORE any change (none was made). DISCRIMINATION: the same script printed 'SA1_ACCESS.json absent ... RESULT: FAIL' at 21:39Z, before the record existed (sa1_AC1.out history in the first commit d1e66c9582).",
+   "expect": "(?s)access read: status (?:\\d+|none), outcome ACCESS_(HOLDS|REFUSED), source named yes, read_at in the order window yes, outcome consistent with status yes.*RESULT: PASS.*exit=0",
+   "status": "PASS",
+   "status_reason": "Status 200, outcome ACCESS_REFUSED, source named, read_at in the order window, outcome consistent with status: under A1 REFUSED is consistent with a 2xx when runner_profile_login is false, which the script checks."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "(?s)branch (refused: runner Running, publishers .*sa registered False|restored: runner Running, publishers .*sa registered True, --refresh-once True).*sentinel at HEAD 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/sa1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "branch refused: runner Running, publishers ['bbg', 'wsj', 'barrons'], sa registered False (want no), runner changed False (want False)\nledger entries for nfra-oplgtw-harvest-runner-sa 0 (want 0 on the refused branch, 1+ on the restored); sentinel at HEAD 0 (want 0)\nRESULT: PASS\nexit=0\n",
+   "denominator": "Run at 2026-10-14T21:55Z. The live registration was read from the scheduler by the script itself: Running, publishers bbg wsj barrons, sa not registered. Ledger entries for the order's slug 0 and sentinel at HEAD 0, as the refused branch requires. DISCRIMINATION: the same script printed 'SA1_ACCESS.json or SA1_PROOF.json absent ... RESULT: FAIL' at 21:39Z.",
+   "expect": "(?s)branch (refused: runner Running, publishers .*sa registered False|restored: runner Running, publishers .*sa registered True, --refresh-once True).*sentinel at HEAD 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "status": "PASS",
+   "status_reason": "The refused branch's predicates all hold against the live task: Running, sa registered False, runner_changed False, no ledger, no sentinel at HEAD."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no planted mutant and none was planted: the subject is a live production runner and a vendor account. The discriminating arms are the before/after of the two scripts (FAIL at 21:39Z with the records absent, PASS at 21:55Z with them present) and the two-sided read of the access: the main tree's profile answered 200 authorizedUser while the runner's profile carries no user_id cookie, so the refusal is attributed to the half that failed.",
+   "expected": "A refused branch whose reason names the half that failed.",
+   "observed": "Account half HOLDS (200, authorizedUser, 1 subscription); runner-profile half FAILS (0 user_id cookies of 3).",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "One account request by design (the order's bound), so no repeat. The runner-profile half was measured twice by different instruments: the probe's NotAuthorized at 21:32Z (no user_id in the live tab) and the cookie-name read at 21:5xZ (0 user_id cookies).",
+   "observed": "Both instruments agree the runner's sa profile holds no login.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Steps 3-5 (ledger, stop, re-registration, trigger, bronze proof)",
+   "reason": "The refused branch stops at step 2; no ledger is opened on it and the runner is unchanged."
+  },
+  {
+   "item": "A sign-in, a seed or a copy between profiles",
+   "reason": "The sign-in is a person act per A1; nothing was copied from the main tree's profile into the runner's."
+  },
+  {
+   "item": "A diagnosis of the 402 recorded in Z-W37-S4",
+   "reason": "Today's read is 200; that row was already GRADUATED at ADJUDICATION_v40 and this instance does not reopen it."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S127: step 1 as first written could not be read -- sa is a browser-tab publisher at the pin and the runner's own sa profile holds no login; ruled by A1. BLOCKING / INERT, disarm_owner 2.0.0_SA_COO~O.",
+  "NFRA_OPLGTW-Z-S128: this seat's first probe went past 'one request' (three origin page loads, an uncounted tab launch) -- disclosed, issuer: nothing owed. OBSERVATION / INERT.",
+  "NFRA_OPLGTW-Z-S129: the account half HOLDS (200 authorizedUser) and the runner-profile half fails -- ACCESS_REFUSED on a missing sign-in, not on the account. OBSERVATION / INERT."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-14/zw_oplgtw_sa1_step1_blocked_tab_publisher.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-schedule",
+   "invocation": "--drift, then --drift --budget 540",
+   "result": "PARTIAL_OR_BLIND both times (0 of 6 carriers complete); no gate on the harvest task in the reached part. Not a clean verdict."
+  },
+  {
+   "tool": "sa1_access_read.py",
+   "invocation": "once, cwd = the pin worktree, --profile-root = the main tree's browser-profiles",
+   "result": "http_status 200, authorizedUser, 1 subscription; 1 Chrome launch and 1 origin load counted."
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order <TO>",
+   "result": "see the run recorded in the commit message for this instance."
+  },
+  {
+   "tool": "comp-iam / comp-adversary",
+   "invocation": "declared not applicable by the order",
+   "result": "not run."
+  }
+ ]
+}
