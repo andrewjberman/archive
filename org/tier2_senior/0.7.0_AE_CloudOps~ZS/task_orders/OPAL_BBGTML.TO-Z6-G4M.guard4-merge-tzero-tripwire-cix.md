@@ -5,6 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps~ZS</issued_to>
     <date>2026-10-14</date>
     <status>pending -- issued 2026-10-14 ~10:0xZ on CTO ruling @d8c5d77e26 (call 2da6 closed; Andrew ~09:0xZ "There should be no hold"); runs AFTER 12:30Z today; TO-Z6-R3 on this lane stays PARKED</status>
+    <status>complete -- drained 2026-10-14 ~12:4xZ by 2.0.0_SA_COO~ZB: merge 44745c9c87 on box/sitez (3b65362444 contained; 1 file under integrations/bloomberg/), AC1 at 12:36Z on vintage 20261013 "custom CIX 13 of 84 graded", RESULT PASS, exit=0; ledger opal-bbgtml-guard4-merge-20261014 CLOSED; worktree C:/tmp/rv-guard4 and branch disposed. Report org/tier2_senior/0.7.0_AE_CloudOps~ZS/deliverables/TO_Z6_G4M_REPORT_GUARD4_MERGE_20261014.md @186233b10d. Deviation read and accepted: a stale safe-merge conflict-state file left by 0.7.0_AE_CloudOps~Z (pid not live, no MERGE_HEAD, no unmerged paths) was cleared with safe-merge.sh --abort; that seat's branch rel-nfra-oplgtw-r30c and worktree are intact at 8e0350afc2.</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
