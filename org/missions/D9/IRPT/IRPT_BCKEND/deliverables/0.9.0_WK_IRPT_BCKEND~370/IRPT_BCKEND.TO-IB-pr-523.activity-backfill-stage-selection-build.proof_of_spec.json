@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-523",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "149d7d8384",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-523.activity-backfill-stage-selection-build.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-523.activity-backfill-stage-selection-build.md",
+    "group": "OTHER",
+    "vintage_commit": "149d7d8384"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~370",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "5243b0008c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build only, offline: the served function irpt-49f-reporting-gold-lambda is unchanged until a later, separately signed apply",
+      "artifact_covered_by": ["IB187-1-AC1", "IB187-1-AC2", "IB187-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_backfill_stages.py",
+      "kind": "test",
+      "commit_or_etag": "5243b0008c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline unit tests for the stages key; run by the folder test run (96 passed), no deploy"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~370/IB187-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "5243b0008c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the recorded verbatim output and exit code of the three IB187-1 criteria at the code commit; a record, not a deploy"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "5492787785",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the surprise row IRPT_BCKEND-D2-W370-S1 appended to the project channel; a channel record, not a deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB187-1-AC1",
+      "criterion_verbatim": "the folder's tests pass (at least 95 passed: the 90 pre-existing and your new ones in tests/test_backfill_stages.py, at least 5), the tests directory holds exactly the baseline eight files plus yours, and handler.py differs from its base blob only inside backfill_days, run_backfill, run and module level",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r187/p187_cells.py\" . IB187-1-AC1",
+      "output_evidence": "OK: 96 tests pass; the change is confined\nIB187-1-AC1 PASS",
+      "denominator": "96 of 96 folder tests pass (90 pre-existing at base 149d7d8384 plus 6 new; the order requires at least 95)",
+      "status": "PASS",
+      "expect": "IB187-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB187-1-AC2",
+      "criterion_verbatim": "a lots-only backfill event (the check's own stubs) calls neither compute, the returns emit nor the class emit, calls the lots emit once for the three declared trading days and a non-empty account set, and the result carries stages [\"lots\"]",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r187/p187_cells.py\" . IB187-1-AC2",
+      "output_evidence": "irpt-reporting-gold: BACKFILL stages=lots only; the returns and class partitions are not computed or written\nOK: the lots-only arm touches neither the returns nor the class emit\nIB187-1-AC2 PASS",
+      "denominator": "0 of 3 declared trading days reach compute, the returns emit or the class emit; 1 of 1 lots emit call over all 3 days with a non-empty account set (2 accounts)",
+      "status": "PASS",
+      "expect": "IB187-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB187-1-AC3",
+      "criterion_verbatim": "a default backfill event makes exactly compute, three returns emits, the class emit, the lots emit; an unknown stage, an empty list, [\"returns\"] and a string are each refused by name (text contains REFUSED and stages) with no call made; a stages key on a non-backfill event is refused by name",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r187/p187_cells.py\" . IB187-1-AC3",
+      "output_evidence": "  2026-09-28 rows=2 REWRITTEN\n  2026-09-29 rows=2 REWRITTEN\n  2026-09-30 rows=2 REWRITTEN\nOK: the default path is unchanged; four malformed stage values and a non-backfill stages key are refused by name\nIB187-1-AC3 PASS",
+      "denominator": "3 of 3 default-path returns days emitted; 5 of 5 refused stage forms refused by name (4 malformed stage values and 1 stages key on a non-backfill event)",
+      "status": "PASS",
+      "expect": "IB187-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the check's own arms are the discriminators, and the first build failed AC1 on the module-docstring hunk",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "the order names no mutant; the first build's AC1 FAIL (quoted in IRPT_BCKEND-D2-W370-S1) is the discrimination observed",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the AC2 and AC3 invocations run at the code commit and again at HEAD 5492787785 (handler unchanged since 5243b0008c)",
+      "observed": "identical output lines and rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the served Lambda irpt-49f-reporting-gold-lambda: no deploy, no upload, no invoke, no AWS call",
+      "reason": "the order is BUILD ONLY and offline; the served function changes only under a later, separately signed apply"
+    },
+    {
+      "item": "the 565-day activity backfill itself (the census, the pair and the apply)",
+      "reason": "a later round's matter; this order builds the stage selection only"
+    },
+    {
+      "item": "MAX_BACKFILL_DAYS (kept at 25)",
+      "reason": "the order states the timeout-sized chunking is the later pair's matter"
+    },
+    {
+      "item": "order step 4: the module docstring paragraph naming stages",
+      "reason": "the check refuses a module-docstring hunk (git labels it with a prose line); the paragraph sits in the run_backfill docstring instead; see IRPT_BCKEND-D2-W370-S1"
+    },
+    {
+      "item": "the portal gitlink (shows modified in a fresh worktree)",
+      "reason": "never committed, per the order's worker face"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W370-S1: the module docstring hunk is not module level to the IB187-1-AC1 check (git labels it with a prose line); the stages paragraph moved into run_backfill's docstring"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~370/IB187-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests (from infra/aws/lambda/investor-reporting/reporting-gold)",
+      "result": "96 passed (the 90 pre-existing tests passed at base 149d7d8384 before the change)"
+    },
+    {
+      "tool": "p187_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r187/p187_cells.py\" . IB187-1-AC1|AC2|AC3",
+      "result": "IB187-1-AC1 PASS rc=0; IB187-1-AC2 PASS rc=0; IB187-1-AC3 PASS rc=0"
+    }
+  ]
+}

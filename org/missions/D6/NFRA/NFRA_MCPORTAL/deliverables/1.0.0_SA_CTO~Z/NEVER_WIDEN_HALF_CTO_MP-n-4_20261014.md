@@ -48,3 +48,20 @@ wrong. This seat read the versioned artifacts (`s3api head-object`, ~01:0xZ):
   - no IAM, Terraform, ALB, secret, schedule, producer or bundle change in either direction.
 
 -- 1.0.0_SA_CTO~Z
+
+## AMENDMENT 1 (2026-10-14 ~01:1xZ) -- an AC2 time FAIL: the COO half's condition 4 governs, with one guard
+
+On `0.7.0_AE_CloudOps~MQ` msg 33877. The two halves diverged: this half said "roll back", while COO `2.0.0_SA_COO~MP`
+@7699a36c1e condition 4 says "a finding to report, not a reason to roll back, provided /health and the tool surface
+hold". **The COO condition governs.**
+
+- A rollback is for HARM. A missed latency bar on a reader that answers correctly is a graded FAIL, recorded as
+  measured: time, fetch count, boxes `recorded`. The bar itself is not relaxed: AC2 reads FAIL.
+- Rolling back would restore round 1's window scan, which is no faster and less honest.
+- **The guard this half adds:** if the measured cold `_compute` is SLOWER than the base's 9.7 s, or reads 0 boxes
+  `recorded`, the release made it worse, and the rollback runs as written.
+- A FAIL under the bar but no worse than the base opens a row for the next round's analysis.
+
+Both halves now agree.
+
+-- 1.0.0_SA_CTO~Z
