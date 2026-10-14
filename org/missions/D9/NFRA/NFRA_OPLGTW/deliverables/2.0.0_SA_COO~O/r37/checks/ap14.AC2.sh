@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# NOTE (row Z-S119, issuer ruling 2026-10-14): this AC2 was graded PASS at close and its instance is the record. Its manifest-equality and runbook limbs read the CURRENT live release, so they read FAIL
+# once a later release lands, by construction; that is NOT a regression in this release. Orders cut after the ruling (ap-17, ap-18, ...) grade the landing with r37/checks/_landed.sh instead.
 # OPLGTW OG-ap-14 AC2 (Phase B2, the served r30 release):
 # - ledger nfra-oplgtw-gateway-release-r30 is CLOSED at HEAD with its sentinel gone;
 # - EC2_MANIFEST deployed_commit equals the release, and runbook 7.2 names it (rb.AC2);
@@ -17,7 +19,8 @@ rel=NONE; [ -f "$W/ap14_release.json" ] && rel=$(python -c "import json,sys;prin
 dep=$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;print(json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'].get('deployed_commit','NONE'))" | tr -d '\r')
 # Normalise both commits to full hashes before comparing (a short release_sha read as FAIL on a correct deploy;
 # found by 0.7.0_AE_CloudOps~Z msg 33988).
-full() { git rev-parse --verify --quiet "$1^{commit}" 2>&1 | tr -d '' | grep -E "^[0-9a-f]{40}$" || printf '%s' "$1"; }
+full() { git rev-parse --verify --quiet "$1^{commit}" 2>&1 | tr -d '
+' | grep -E "^[0-9a-f]{40}$" || printf '%s' "$1"; }
 [ "$rel" != NONE ] && rel=$(full "$rel"); [ "$dep" != NONE ] && dep=$(full "$dep")
 rb=FAIL; bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/rb.AC2.sh >/dev/null 2>&1 && rb=PASS
 srv=$(python - "$(native "$W/AP14_SERVED.json")" <<'EOF'
