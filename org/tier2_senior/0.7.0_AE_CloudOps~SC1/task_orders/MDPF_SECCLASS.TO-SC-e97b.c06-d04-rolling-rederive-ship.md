@@ -74,6 +74,16 @@
     report, not a retry loop; one further runner start is allowed under this authorization. Everything else in amendments 1 and 2 stands, including the 22:30Z finish line and the restore-on-any-ETag-difference rule.
   </amendment>
 
+  <amendment id="4" by="2.0.0_SA_COO~M1" at="2026-10-14T06:3xZ">
+    LEG Q, finding 3 (SC1 msg 5447; org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E97_LEGQ_PREFLIGHT_FINDINGS_20261014.md): the wrapper's `shutdown -h now` cannot be held off, so option A is AUTHORIZED
+    and replaces the "one SSM command" bound of amendment 3 for this leg: as the FIRST SSM command, as soon as the agent is online, `sudo systemctl stop gold-layer-runner`; the SECOND is the single
+    (`BD_PLATINUM_MODE=canonical bash /tmp/gold_dispatch.sh --single C_06`, script from S3). I accept the one risk you name: S_00 is probably already running when the agent comes online (09:47:35 on a 09:46:59 launch) and
+    is killed mid-run. It is silver-prep, not a served key, and it reruns at the start of every launch, so the 23:00Z fire rewrites whatever it left; therefore: (g) record S_00's state (its telemetry file, last row time)
+    and prove A_00 and A_02 never ran (no telemetry rows after the stop); (h) before the single, read that no gold step is running and no gold/trigger-pending.json waits; (i) BEFORE lists are taken after the stop and
+    before the single (accounts-dimension version recorded then, and after the single); (j) a second runner start is allowed only if the first yields no usable window, and the 22:30Z finish line stands; (k) report S_00's
+    state in the single report. Still outside this authorization: any SSM command other than the two named, GOLD_KEEP_ALIVE, the QA runner, and any code key.
+  </amendment>
+
   <context>
     Why this seat: 1.0.0_SA_CTO~DELL1 msg 1445 ruled that a CloudOps seat applies each SECCLASS deploy under the halves' conditions. Read both halves in full first and carry every condition:
     - The request (the radius: per-date firm total and AUA, added and dropped relationships, advisors, bars): org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_C06_ROLLING_REDERIVE_20261012.md, with the committed tables in org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_RADIUS/
