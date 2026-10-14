@@ -34,6 +34,8 @@ def enc(contract_id):
 def retired_reason(c):
     """The reason a row is retired (never a tool target), or None."""
     cid = c["contract_id"]
+    if silver_legacy(c):
+        return "not_served: %s -- a frozen silver_legacy copy; client data only from the opal-data-assets vendor silver folders" % NOT_SERVED_RECORD
     if cid in DO_NOT_SERVE:
         return "do-not-serve: " + str(c.get("routing") or "")
     if cid in NOT_SERVED:
@@ -112,6 +114,90 @@ def in_scope(c):
 
 
 NO_REGISTRY_BUCKETS = ("opal-data-news-v2", "opal-data-news-av")   # not buckets scopes.json knows: a legacy row for them is refused by the registry validator
+FORK_REGISTRY = "catalog_fork_keys.json"   # infra/logic/registry/: {"rows": {<hashed id>: {"fork_keys": <full>, "key_template": <full s3_prefix>}}}
+
+_TOK = {}
+
+
+def _tokens():
+    """The naming gate's firm segments and product wholes, read from the registry the way .tools/naming-gate.py does."""
+    if not _TOK:
+        sys.path.insert(0, os.path.join(os.getcwd(), "lib"))
+        import opal_naming
+        reg = opal_naming._registry()
+        systems = {s.get("key") for s in reg["systems"].get("systems", [])}
+        seg, whole = set(), set()
+        for row in reg["scopes"].get("scopes", []):
+            if row.get("class") not in ("FIRM", "PRODUCT"):
+                continue
+            for sp in opal_naming._spellings(row):
+                if row["class"] == "FIRM":
+                    if sp in systems:
+                        continue
+                    whole.add(sp)
+                    if re.match(r"^[A-Za-z0-9]+$", sp):
+                        seg.add(sp)
+                else:
+                    whole.add(sp)
+        _TOK["seg"], _TOK["whole"] = seg, whole
+    return _TOK
+
+
+def carrier(s):
+    """A whitespace-free string that the naming gate reads as a hand-kept firm or product token (its context rule)."""
+    if not isinstance(s, str) or not s or re.search(r"\s", s):
+        return False
+    t = _tokens()
+    if s in t["whole"]:
+        return True
+    return any(p in t["seg"] for p in re.split(r"[-_/.:=@]+", s))
+
+
+def sanitize(x):
+    """The fork_keys a ROW keeps (CTO msg 34160): the shape without any carrier string. A dict drops a carrier key; a carrier value
+    becomes None; a list drops its carrier items. The full object lives in the registry file."""
+    if isinstance(x, dict):
+        return {k: sanitize(v) for k, v in x.items() if not carrier(k)}
+    if isinstance(x, list):
+        return [sanitize(i) for i in x if not (isinstance(i, str) and carrier(i))]
+    if isinstance(x, str) and carrier(x):
+        return None
+    return x
+
+
+def hashed_id(cid):
+    import hashlib
+    return "c-" + hashlib.sha1(str(cid).encode("utf-8")).hexdigest()[:12]
+
+
+def label(c):
+    """A readable contract label with no firm token: layer + table, parentheticals removed, carrier words dropped."""
+    t = re.sub(r"\([^)]*\)", "", str(c.get("table") or "")).strip()
+    words = [w for w in t.split() if not carrier(w)]
+    return ("%s %s" % (c.get("layer"), " ".join(words))).strip()
+
+
+def leading_prefix(c):
+    """The leading literal of the contract's s3_prefix up to the first `{`, cut back to the last `/` (unchanged without `{`);
+    None for a `none` prefix and for a frozen silver_legacy copy."""
+    p = str(c.get("s3_prefix") or "")
+    if p.startswith("none") or "silver_legacy" in re.split(r"[/]+", p):
+        return None
+    if "{" in p:
+        p = p[:p.index("{")]
+        p = p[:p.rfind("/") + 1]
+    return p or None
+
+
+def row_prefix(c):
+    """The row's `prefix` (CTO msg 34160): the leading literal; None when there is none OR when the literal carries a firm or
+    product token (the gate refuses a carrier even in a registered legacy address; the literal then lives in the registry file)."""
+    p = leading_prefix(c)
+    return None if p is None or carrier(p) else p
+
+
+def silver_legacy(c):
+    return "silver_legacy" in re.split(r"[/]+", str(c.get("s3_prefix") or ""))
 
 
 def registry_key(cid):
@@ -120,18 +206,18 @@ def registry_key(cid):
 
 
 def needs_registry(c):
-    """True when the row's prefix is a plain S3 key prefix or object (no `{param}` template, a bucket the registry knows) so a
-    legacy_addresses.json row (reader NFRA_MCPINDEX) can make the literal CONFORMANT in the commit-time naming gate. The gate honours
-    a row only if it is COMMITTED at HEAD and has no params, so the registry commit lands BEFORE the rows."""
-    p = str(c.get("s3_prefix") or "")
+    """True when the row has a non-null `prefix` in a bucket the registry knows, so a legacy_addresses.json row (reader
+    NFRA_MCPINDEX, no params) can make the literal CONFORMANT in the commit-time naming gate. The gate honours a row only if it is
+    COMMITTED at HEAD, so the registry commit lands BEFORE the rows. A `{param}` template registers its leading literal."""
     b = str(c.get("bucket") or "")
-    return bool(p) and not p.startswith("none") and "{" not in p and b.startswith("opal-data-") and b not in NO_REGISTRY_BUCKETS
+    return row_prefix(c) is not None and b.startswith("opal-data-") and b not in NO_REGISTRY_BUCKETS
 
 
 def registry_row(c, group):
     pin = PINS[group][0]
-    return {"key": registry_key(c["contract_id"]), "bucket": c["bucket"], "template": c["s3_prefix"],
-            "shape": "prefix" if str(c["s3_prefix"]).endswith("/") else "object", "params": [], "reader": "NFRA_MCPINDEX",
+    pre = row_prefix(c)
+    return {"key": registry_key(c["contract_id"]), "bucket": c["bucket"], "template": pre,
+            "shape": "prefix" if pre.endswith("/") else "object", "params": [], "reader": "NFRA_MCPINDEX",
             "evidence": "measured by 4.0.0_SA_CRO~Z in the census %s @%s: %s objects (the contract's size.objects, a count; no object content read)"
                         % (PINS[group][1].rsplit("/", 1)[-1], pin, (c.get("size") or {}).get("objects")),
             "note": "Catalog source-row address; the owner of the data renames it (R19)."}
@@ -148,11 +234,75 @@ def plant_registry_dir14(allc):
     shutil.copytree(os.path.join("infra", "logic", "registry"), d, dirs_exist_ok=True)
     p = os.path.join(d, "legacy_addresses.json")
     doc = json.load(open(p, encoding="utf-8"))
+    seen = {(r["bucket"], r["template"]) for r in doc["legacy_addresses"]}
     for cid, (g, c) in allc.items():
         if in_scope(c) and needs_registry(c):
-            doc["legacy_addresses"].append(registry_row(c, g))
+            row = registry_row(c, g)
+            if (row["bucket"], row["template"]) in seen:
+                continue   # (bucket, template) is unique in the registry: the first contract names the row
+            seen.add((row["bucket"], row["template"]))
+            doc["legacy_addresses"].append(row)
     json.dump(doc, open(p, "w", encoding="utf-8"), indent=1)
+    json.dump({"_about": "planted", "rows": fork_registry_rows(allc)}, open(os.path.join(d, FORK_REGISTRY), "w", encoding="utf-8"), indent=1)
     return d
+
+
+def fork_registry_rows(allc):
+    """{hashed id: {key_template, restore}} for every in-scope contract: the full values the clean rows do not carry."""
+    return {hashed_id(cid): expected_row(c, g)[1] for cid, (g, c) in allc.items() if in_scope(c)}
+
+
+def expected_row(c, group, deployed=None):
+    """(clean row, registry entry) the generator must produce for a contract (CTO msg 34160). The clean row holds no firm or product
+    token in any whitespace-free string, key or value; every top-level field the sanitiser changed is restored from the registry
+    entry's `restore`, which also holds `key_template` (the contract's full s3_prefix) for every row. read_tool, tools and gap_owner
+    follow `deployed` (None = nothing deployed)."""
+    deployed = set(deployed or [])
+    cid = c["contract_id"]
+    rt = expected_read_tool(c, deployed)
+    fr = firm_rule(c)
+    pn, pc = (c["producer"] or {}).get("name"), str((c["producer"] or {}).get("claim") or "")
+    producer = (("inferred: " if "inferred" in pc else "") + pn) if pn else "NOT TRACED -- the contract names no producer (absent)"
+    pk = c["partition"].get("keys") or []
+    rule = c["size"].get("row_count_rule")
+    why = retired_reason(c)
+    pre = leading_prefix(c)
+    full = {
+        "bucket": c["bucket"],
+        "prefix": pre,
+        "business_meaning": ("%s %s table `%s` in %s (%s): %s. %s" % (
+            c["layer"].capitalize(), c["format"], c["table"], c["bucket"], c["s3_prefix"], c["grain"],
+            "Client data forked by firm, account last-4 and platform; Opal-internal principals only until a data grant names the firm."
+            if fr == "firm-scoped" else "Opal-internal data.")) + "".join(" %s." % w for w in marks(c) if w),
+        "example_questions": list(c["common_queries"]) or ["Where is the %s %s table?" % (c["table"], c["layer"])],
+        "grain": c["grain"],
+        "freshness_field": ("FIELD:" + pk[0]) if pk else "NONE -- " + str(c["freshness"].get("basis")),
+        "firm_scope_rule": fr,
+        "never_sum_rules": [rule] if rule else "NONE -- the contract states no row-count rule for this table",
+        "producer": producer,
+        "tools": [rt] if rt else [],
+        "read_tool": rt,
+        "gap_owner": None if rt else "NFRA_OPLGTW",
+        "table": c["table"], "layer": c["layer"], "format": c["format"],
+        "contract": {"id": hashed_id(cid), "label": label(c), "size": c["size"], "freshness": c["freshness"],
+                     "partition": c["partition"], "producer": c["producer"]},
+        "fork_keys": c["fork_keys"],
+        "nl_tags": c["nl_tags"],
+        "retired": bool(why),
+        "open_items": c["open_items"],
+    }
+    if why:
+        full["retired_reason"] = why
+    clean, restore = {}, {}
+    for k, v in full.items():
+        sv = sanitize(v)
+        if k == "prefix":
+            sv = row_prefix(c)
+        clean[k] = sv
+        if sv != v:
+            restore[k] = v
+    entry = {"key_template": c["s3_prefix"], "restore": restore}
+    return clean, entry
 
 
 def entity(cid):
