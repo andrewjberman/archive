@@ -31,7 +31,7 @@ Not the analysis. What round 13's own work surfaced or left open, each with its 
 - A Tier-2 seat cannot commit a path whose lane names only the CTO and the COO (`NFRA_CTLPLN_FAST_C` over the identity root): the issuer commits such a path; the seat's `<paths>` grant does not override a lane (it does for workers). The cut should not name such a path in a seat's order, or the lane should list the seat.
 - A proof instance whose artifact row reads `PENDING-THIS-COMMIT` for a file an EARLIER commit carried is INVALID once committed (CCX class). Workers hit it twice (`~89`, `~U7`); the order's worker face could say "pin each artifact row to the commit that carried it" so no worker reports it again.
 
-## D. Owned ARMED rows still OPEN after the CVO's two passes (a0723efcf58 pass 2: W6-S17, W73-S2, W14-S2 REMEDIATED and DISARMED)
+## D. Owned ARMED rows still OPEN after the CVO's two passes (0723efcf58 pass 2: W6-S17, W73-S2, W14-S2 REMEDIATED and DISARMED)
 
 Each is a repair this seat owns the disarm of; none serves an ungraded FWD, so none is cut this round. Candidates for the round-14 batch or their own cells:
 
@@ -41,4 +41,5 @@ Each is a repair this seat owns the disarm of; none serves an ungraded FWD, so n
 | `Z-S3` | `lib/trading_calendar.py` fallback covers 2010-2027 only; its own text says regenerate (`lib/tests/gen_nyse_closures.py --write`) before 2028 | needs `pandas_market_calendars` (the FWD-15/18/19 package route is carried) |
 | `W12-S1` | the three Lambda-vendored byte-copies of `lib/trading_calendar.py` differ from the lib file (163 lines vs 304) | one chain after `Z-S3`; the copies are code in deployed Lambdas, so the sync rides a deploy |
 | `S9103` | `org/devices/kit_terraform_providers.py` has no replace-not-merge step for the Dell mirror and no dell2 readback | no commit to it since 2026-10-09 |
+| `NFRA_MCPINDEX-Z-W34-S8` (routed by CTO~Z via MSTR msg 109072) | `.tools/safe-commit.sh` (about :1086-1101) hands the naming gate only `.py .js .mjs .ts .tf .json .yaml .yml` staged files, so `committing_project()` in `.tools/naming-gate.py` cannot derive the committing project from a `.txt/.out/.md/.sh` deliverable under the project home (a catalog commit was REFUSED 6 of 18 until a `.json` under the home was staged). Shape of a fix: pass the FULL staged path set to the gate for the project-home derivation only, grade the same eight extensions as today. Touches the commit tool every seat uses, so it needs the CTO's word on the edit. INERT: the workaround (stage a `.json` under the home) is documented in the row |
 | `S9118`, `S9120`, `S9122` | see the CVO's `a5261ded52` (unchanged, unchanged, CLOSED_UNREMEDIATED to 2026-11-10) | `S9118` is the reaper's stop-at-descendant, a CTO-scope call |
