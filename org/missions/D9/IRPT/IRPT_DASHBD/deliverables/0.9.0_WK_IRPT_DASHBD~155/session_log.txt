@@ -1,0 +1,23 @@
+SESSION LOG -- 0.9.0_WK_IRPT_DASHBD~155 on IRPT_DASHBD.TO-DB-b-190 (read only; no write, deploy, push or vendor call)
+worktree: C:/dev/wk-irpt-dashbd-155 (branch wk-IRPT_DASHBD-155), base 166228e0d5
+step 0: git rev-parse --abbrev-ref HEAD -> wk-IRPT_DASHBD-155; test -d org and .tools -> TREE-OK; UTC 2026-10-14T02:43:29Z
+step 1: bash .tools/aws s3 ls s3://opal-data-cot/irpt/ -> rc 1, no output; same for opal-data-inf -> rc 1, no output (row S1)
+step 1: bash .tools/aws s3api list-objects-v2 --bucket opal-data-cot --prefix irpt/ -> KeyCount 0, IsTruncated false, rc 0; same for opal-data-inf -> KeyCount 0, rc 0
+step 1 control: s3api list-objects-v2 --bucket opal-data-cot --delimiter / -> CommonPrefixes returned, rc 0
+step 1 premise check (row S5): s3 ls of the 49 Financial irpt/49financial/ prefix, four top-level names, not used for any answer
+step 2: comp-estate --resource investor-reporting -> SUBJECT_ABSENT (135 chains); --resource irpt -> SUBJECT_ABSENT; --resource opal-data-cot -> one chain (row S6)
+step 2: comp-pipescript io holdings_snapshot.py -> OUT-OF-GRAPH, AST-derived map (row S6)
+step 2: data/firm_registry.json read: cottonwood bucket opal-data-cot, inflection bucket opal-data-inf
+step 2: holdings_snapshot.py firm_bucket_map read (lines 179-189); per-firm reads at lines 1327-1331, 1583-1586, 2309-2322, 2529
+step 2: s3api delimiter listings (prefix names only) of both firm buckets: investor-reporting/, gold/, silver/, bronze/, platinum/, blackdiamond/, orion/, eclipse/, qa/, backup/, config/, telemetry/, diagnostic/
+step 2: s3api list-objects-v2 with prefix investor-reporting/qa/holdings/ in both buckets -> two keys each (dated snapshot, latest pointer) (row S2, S7)
+step 2: sort_by latest key per candidate prefix (key names and sizes only)
+step 2: parquet column names and types read by range GET of the footer only, via .scratch/schema_probe.py run under python -I against the box's aws shim (row S4); no row values read or printed
+step 2: contract files listed by name and column names only: five of the eight C-SHAPE tables have a contract file under org/standards/
+step 2: ADVI household crosswalk contract read (org/standards/ADVI_BILLING_HOUSEHOLD_CROSSWALK_CONTRACT.json): scope is 49 Financial (advi/49financial/ prefix); no Cottonwood or Inflection coverage
+step 2: orion_cashflow_taxonomy.yaml located at data/inf/scripts/silver/orion_cashflow_taxonomy.yaml (existence only)
+step 3: FIRM_READINESS.json written in this folder (eight tables per firm, existing gold inputs, readiness, blockers, household dimension, shadow_pull_proposed false)
+step 3 mutant: p101_round101.py run before FIRM_READINESS.json existed -> "FAIL: no ...FIRM_READINESS.json", "DB101-4-AC1 FAIL", rc 1
+step 3: p101_round101.py run against the record -> "OK: both firms read against the eight tables: cottonwood BLOCKED, inflection BLOCKED", "DB101-4-AC1 PASS", rc 0
+step 3: scan of the record for runs of eight or more digits: zero matches; non-ASCII: none
+reads tally: vendor calls 0; S3 writes 0; DynamoDB writes 0; secret reads 0; S3 reads are LIST and range GET of key names, prefix names, and parquet footers only
