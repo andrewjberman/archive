@@ -899,7 +899,8 @@ def main(argv):
             if not (rec.get("guard_dry_run") or {}).get("one_byte_change_refused"):
                 problems.append("guard_dry_run.one_byte_change_refused must be true")
     elif check == "y306-ordinary":
-        rec = load(root, D.replace("/r21/", "/r36/") % "120" + "ORDINARY_AUTHORIZER.json", problems)
+        w306 = "121" if (root / (D.replace("/r21/", "/r36/") % "121" + "ORDINARY_AUTHORIZER.json")).is_file() else "120"  # AMENDMENT 1: the continuation worker
+        rec = load(root, D.replace("/r21/", "/r36/") % w306 + "ORDINARY_AUTHORIZER.json", problems)
         if rec:
             for member in ("read", "rule", "principal_shape", "wiring", "iam_needs", "tests", "before_arm", "authorization_change",
                            "release_needs", "claim", "not_read"):
