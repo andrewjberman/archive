@@ -791,10 +791,13 @@ def main(argv):
                 "y299-build": ("117", "IRPT_YCHARTS_GENERATE_BUILD.json",
                                {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py"},
                                {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py"}, {"trading_calendar.py"}),
+                # AMENDMENT 1 of AR-y-300: opal_packager.py is already in the release-19 tarball, so it is REPLACED (a differing
+                # member), not added; only the calendar is added (worker row W118-S2 was right)
                 "y300-build": ("118", "RESIDENT_BUILD.json",
-                               {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py", "status.py", "resident_worker.py"},
                                {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py", "status.py", "resident_worker.py",
-                                "resident_bindings.json", "SHA256SUMS"}, {"opal_packager.py", "trading_calendar.py"})}[check]
+                                "opal_packager.py"},
+                               {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py", "status.py", "resident_worker.py",
+                                "opal_packager.py", "resident_bindings.json", "SHA256SUMS"}, {"trading_calendar.py"})}[check]
         worker, name, need, allowed, add_need = spec
         rec = load(root, D.replace("/r21/", "/r30/") % worker + name, problems)
         if rec:

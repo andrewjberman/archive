@@ -1,0 +1,122 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-i-10",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-10.receiver-refuses-a-replayed-muse-answer.md",
+  "group": "OTHER",
+  "vintage_commit": "7ba1998bf5"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+  "vintage_commit": "7ba1998bf5",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-10.receiver-refuses-a-replayed-muse-answer.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~16",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+   "kind": "script",
+   "commit_or_etag": "1fc13dc4ba",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_whole() added; _muse_fields requires a whole-number version for every action and accepts seq as a whole number or null; MUSE_ACTED and MUSE_ACTED_KEEP added; on_muse_reply computes sha256(payload + newline + signature), refuses replayed when the hash is in state muse_acted, refuses seq-mismatch when a pending that carries a seq does not match the answer's seq, calls on_sms_reply, and records the hash only when the result is in MUSE_ACTED (last 200). No AWS call, no deploy; the change is a code commit on wk-COMM_ASSIST-16 only.",
+   "artifact_covered_by": [
+    "CAi10-AC1",
+    "CAi10-AC2",
+    "CAi10-AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_teams_chat_tenant.py",
+   "kind": "test",
+   "commit_or_etag": "1fc13dc4ba",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "four existing signed-answer tests now name the draft's seq in their signed payloads (the verified send, the edit then drop, the answer for no open draft, the stale signed edit); new tests: a missing or bool version is bad-payload for every action, the same signed bytes replayed are refused replayed and act once, an old answer aimed at a later draft under the same tag is refused replayed or seq-mismatch with the draft untouched, a seq that is absent, null or 99 is seq-mismatch, a seqless pending is not seq-checked for an absent or carried seq, an unseen result records nothing, and the acted record keeps the last 200. Test changes only; the issuer's checks are not edited.",
+   "artifact_covered_by": [
+    "CAi10-AC1",
+    "CAi10-AC2",
+    "CAi10-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAi10-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i10_replay.py\" expect: I10-REPLAY ok=True arms=6 of 6",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i10_replay.py\"",
+   "output_evidence": "(timeout 120, rc 0, run from the worktree root) I10-REPLAY ok=True arms=6 of 6 failed=none reason=none (rc 0; the only other lines are draft_contract events)",
+   "denominator": "6 of 6 arms pass: good-acts-once, same-bytes-replay-refused, old-signature-vs-new-draft, missing-version-refused, missing-seq-refused, seqless-draft-control",
+   "expect": "I10-REPLAY ok=True arms=6 of 6",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAi10-AC2",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_receiver.py\" expect: I2-RECEIVER ok=True arms=7 of 7",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_receiver.py\"",
+   "output_evidence": "(timeout 120, rc 0, run from the worktree root) I2-RECEIVER ok=True arms=7 of 7 failed=none reason=none (rc 0)",
+   "denominator": "7 of 7 arms pass: valid-send, forged-key, unsigned, direct-send, tampered, wrong-namespace, stale-edit",
+   "expect": "I2-RECEIVER ok=True arms=7 of 7",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAi10-AC3",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "output_evidence": "(timeout 120, rc 0, run from the worktree root) I2-REGRESSION ok=True passed=45 failed=0 reason=none (rc 0); the same file under pytest in the worktree, with test_muse_verify.py: 59 passed",
+   "denominator": "45 passed, 0 failed of the 45 tests in data/transcripts/scripts/tests/test_teams_chat_tenant.py (the check's whole target); 59 passed across the two test files together",
+   "expect": "I2-REGRESSION ok=True",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "CAi10-AC1 run against the base receiver: the same check on the tenant.py at 7ba1998bf5, before this order's edit (the baseline run in the worktree)",
+   "expected": "I10-REPLAY ok=False arms=2 of 6: the two controls pass, the four build arms fail",
+   "observed": "I10-REPLAY ok=False arms=2 of 6 failed=same-bytes-replay-refused;old-signature-vs-new-draft;missing-version-refused;missing-seq-refused reason=none",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "CAi10-AC1 run twice on the edited tree, outputs compared on the I10-REPLAY line",
+   "observed": "two runs identical: I10-REPLAY ok=True arms=6 of 6 failed=none reason=none",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "data/transcripts/scripts/tests/test_muse_verify.py",
+   "reason": "the order names it for a version rule; the file tests muse_verify.verify on raw bytes and never reaches on_muse_reply, so no test in it changes (channel row COMM_ASSIST-W16-S3)"
+  },
+  {
+   "item": "deploy, AWS calls, network",
+   "reason": "the order says the change is not deployed here; a later cell deploys it under change management"
+  },
+  {
+   "item": "the issuer's three checks",
+   "reason": "the order says read them and do not edit them; none was edited"
+  }
+ ],
+ "surprises": [
+  "COMM_ASSIST-W16-S1: the acted-result set in CA-i-10 step 4 is not the full set; expired, already-posted and test-not-posted also clear a draft and are recorded as acted",
+  "COMM_ASSIST-W16-S2: four existing signed-answer tests signed no seq and would be refused seq-mismatch; their signed payloads now name the draft's seq",
+  "COMM_ASSIST-W16-S3: CA-i-10 step 5 names test_muse_verify.py for a version rule, but that file holds no receiver test and was not edited"
+ ],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~16/COMM_ASSIST.TO-CA-i-10.receiver-refuses-a-replayed-muse-answer.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i10_replay.py\"",
+   "result": "I10-REPLAY ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+  },
+  {
+   "tool": "pytest",
+   "invocation": "timeout 120 python -m pytest data/transcripts/scripts/tests/test_teams_chat_tenant.py data/transcripts/scripts/tests/test_muse_verify.py -q -p no:cacheprovider",
+   "result": "59 passed (rc 0)"
+  }
+ ]
+}
