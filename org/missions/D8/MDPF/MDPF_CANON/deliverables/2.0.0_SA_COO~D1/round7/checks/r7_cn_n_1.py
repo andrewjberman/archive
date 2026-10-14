@@ -288,17 +288,24 @@ def cmd_drive(argv):
     ops = _Ops()
     restore = install_op_guard(ops)
     plant_rec = {}
-    real_bg = gc.spine.build_global_artifact
+    real_guard = gc.guard_global_min_firms_fold
 
-    def planted_build_global(a49, ainf, acot, *a, **k):
-        # the plant edits COPIES handed to the Global builder only: the firm artifacts the rest of build_all reads
-        # (category-views peers, firm scopes) stay as built, so no other gate sees a planted total (D1-W21-S1)
-        c49, cinf, ccot = copy.deepcopy(a49), copy.deepcopy(ainf), copy.deepcopy(acot)
-        rec = plant_single_firm_pool({"49financial": c49, "inflection": cinf, "cottonwood": ccot}, fill=0.0)
+    def planted_guard(arts, isolated):
+        # AMENDMENT 3 (D1-W21-S6): the plant sits AT the guard's own call site, after every earlier gate (composition,
+        # cross-axis, served identity) has passed on the UNPLANTED build. The real guard runs on a deep copy whose firm
+        # scopes are planted; if it refuses Global, the run continues on the ORIGINAL scopes with Global dropped (what
+        # the guard itself returns on a swallowed refusal); if it does not refuse, the real guard runs again unplanted.
+        cp = copy.deepcopy(arts)
+        rec = plant_single_firm_pool({f: cp[f] for f in FIRMS if cp.get(f)})
         plant_rec.update(rec)
-        print("  QA PLANT (in-memory copies for the Global builder of THIS run only): %s" % json.dumps(rec, sort_keys=True))
-        return real_bg(c49, cinf, ccot, *a, **k)
-    gc.spine.build_global_artifact = planted_build_global
+        print("  QA PLANT (deep copy handed to the real guard, THIS run only): %s" % json.dumps(rec, sort_keys=True))
+        got, rep = real_guard(cp, isolated)
+        if got.get("global") is None:
+            out = dict(arts)
+            out["global"] = None
+            return out, None
+        return real_guard(arts, isolated)
+    gc.guard_global_min_firms_fold = planted_guard
     log_path = os.path.join(run_dir, "qa_run.log")
     a4_tmp = tempfile.mkdtemp(prefix="cn_n_1_a4_")
     manifest = {}
@@ -311,7 +318,7 @@ def cmd_drive(argv):
         except BaseException as e:  # noqa: BLE001
             lf.write("\nQA DRIVE: build_all raised %s: %s\n" % (type(e).__name__, e))
             manifest = {"run": {"status": "RAISED"}, "errors": {"_drive": {"error": "%s: %s" % (type(e).__name__, e)}}, "writes": []}  # the op guard, not this record, counts writes (D1-W21-S3)
-    gc.spine.build_global_artifact = real_bg
+    gc.guard_global_min_firms_fold = real_guard
     restore()
     a4_files = sorted(os.path.relpath(os.path.join(r, f), a4_tmp).replace(os.sep, "/")
                       for r, _d, fs in os.walk(a4_tmp) for f in fs)

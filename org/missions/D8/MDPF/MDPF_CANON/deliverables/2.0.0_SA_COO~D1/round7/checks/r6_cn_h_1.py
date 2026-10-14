@@ -251,6 +251,9 @@ def _parse(root: str, rel: str):
     return ast.parse(src), src
 
 
+PACKAGE_BUILDER = "infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py"
+
+
 def seams(root: str) -> int:
     arms = []
 
@@ -306,9 +309,26 @@ def seams(root: str) -> int:
                 keys = sorted(ks)
     arm("S4", keys == ["date", "source", "staleness"], "meta.frontier_count keys %s" % keys)
 
+    # S5 the loader takes its prefix from the registry row (AMENDMENT 1): it calls legacy_address and types no
+    # portal/gold/mdpf f-string literal of its own (the naming gate refuses a NEW one, row D1-W17-S3)
+    calls_la = [n for n in ast.walk(fdef) if isinstance(n, ast.Call)
+                and getattr(n.func, "id", getattr(n.func, "attr", "")) == "legacy_address"] if fdef is not None else []
+    typed = [n for n in ast.walk(fdef) if isinstance(n, ast.Constant) and isinstance(n.value, str)
+             and "portal/gold/mdpf" in n.value] if fdef is not None else []
+    arm("S5", bool(calls_la) and not typed, "%d legacy_address call(s); %d typed portal/gold/mdpf literal(s) in the loader" % (
+        len(calls_la), len(typed)))
+
+    # S6 the gold package ships the registry file legacy_address reads (an absent file is a RegistryError in the lambda)
+    try:
+        _bp = open(os.path.join(root, *PACKAGE_BUILDER.split("/")), encoding="utf-8").read()
+    except OSError:
+        _bp = ""
+    arm("S6", "infra/logic/registry/legacy_addresses.json" in _bp, "build_package.py %s infra/logic/registry/legacy_addresses.json" % (
+        "lists" if "infra/logic/registry/legacy_addresses.json" in _bp else "does not list"))
+
     k = sum(1 for a in arms if a)
     print("CN-H-1 SEAMS: %d of %d arms" % (k, len(arms)))
-    return 0 if k == len(arms) == 4 else 1
+    return 0 if k == len(arms) == 6 else 1
 
 
 # ------------------------------------------------------------------ comparator (real objects, read-only)
