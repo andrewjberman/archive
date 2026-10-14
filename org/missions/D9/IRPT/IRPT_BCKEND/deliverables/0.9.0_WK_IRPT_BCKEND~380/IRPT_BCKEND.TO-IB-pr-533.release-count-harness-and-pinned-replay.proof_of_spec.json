@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-533",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-533.release-count-harness-and-pinned-replay.md",
+    "group": "OTHER",
+    "vintage_commit": "201e7e9c27"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "201e7e9c27",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-533.release-count-harness-and-pinned-replay.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~380",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~380/release_count_harness.py",
+      "kind": "script",
+      "commit_or_etag": "cfd20f6bcd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: the release re-measure harness. It imports the producer from the tree (build_snapshot, apply_cash_rule, evaluate_publish_gate, directory_marks_no_closures, VersionedInputs), makes get, list and head calls only, holds no write, publish or invoke call, and writes its JSON outside the repository.",
+      "artifact_covered_by": [
+        "IB192-1-AC1",
+        "IB192-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~380/IB192-1_replay_record.json",
+      "kind": "config_data",
+      "commit_or_etag": "cfd20f6bcd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: the replay record. Per firm, RUN A and RUN B on the pinned source date 2026-10-12 (RUN B pre-seeded from RUN A's receipts), matches_packet and the deviations (inflection: gate_before and gate_after), the first-fire check at the 2026-10-14 cutoff, and notes. Counters uploaded false and the six bound counters 0.",
+      "artifact_covered_by": [
+        "IB192-1-AC2",
+        "IB192-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~380/IB192-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "cfd20f6bcd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The three criteria invocations of the order, run from the worktree root under timeout 120, each with its output and exit code recorded verbatim.",
+      "artifact_covered_by": [
+        "IB192-1-AC1",
+        "IB192-1-AC2",
+        "IB192-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cfd20f6bcd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: rows IRPT_BCKEND-D2-W380-S1 to S3 appended (class OBSERVATION, hazard INERT, disposition UNDER_INVESTIGATION). Each grounding names a path at a commit or a named read; the rows are not edited after commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB192-1-AC1",
+      "criterion_verbatim": "AC1 the harness file exists, compiles, contains none of the write, publish or invoke calls named above, and uses build_snapshot, apply_cash_rule, evaluate_publish_gate, directory_marks_no_closures, VersionedInputs and as_of",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r192/p192_cells.py\" . IB192-1-AC1",
+      "output_evidence": "OK: harness compiles, read-only by its text, uses the producer's functions\nIB192-1-AC1 PASS\nexit=0",
+      "denominator": "0 of 16 forbidden call names found in release_count_harness.py (put/copy/delete/upload, send_command, invoke, publish_client, land, run_firm, start/update, put/delete/update item); 6 of 6 producer tokens present",
+      "expect": "^IB192-1-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB192-1-AC2",
+      "criterion_verbatim": "AC2 per firm the two runs agree EXACTLY (movers by layer, gate outcomes and conditions, lost accounts listed), a 64-hex receipts_digest, matches_packet and deviations_from_packet consistent with the signed packet's numbers, and the first_fire_check recomputed (t_minus_1 against the trading calendar, the equality flag against the three dates)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r192/p192_cells.py\" . IB192-1-AC2",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nOK: replay deterministic, packet deviations named, first-fire check recomputed\nIB192-1-AC2 PASS\nexit=0",
+      "denominator": "3 of 3 firms: run_a equal to run_b on all 8 compared fields; 3 of 3 receipts digests 64-hex; matches_packet true for 2 of 3 (49financial, cottonwood), false for 1 of 3 (inflection: deviations gate_before and gate_after); first_fire_check t_minus_1 2026-10-13 recomputed; newest candidate dates 3 of 3 present; all_equal_to_t_minus_1 false, recomputed false",
+      "expect": "^IB192-1-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB192-1-AC3",
+      "criterion_verbatim": "AC3 a note per firm, no long digit run, uploaded false and the six bound counters 0",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r192/p192_cells.py\" . IB192-1-AC3",
+      "output_evidence": "OK: honest record\nIB192-1-AC3 PASS\nexit=0",
+      "denominator": "3 of 3 firm notes non-empty; 0 long digit runs in the record; uploaded false; 6 of 6 bound counters 0",
+      "expect": "^IB192-1-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "RUN B re-ran RUN A's arguments per firm with the receipts pre-seeded from RUN A; the record compares the two runs field by field and the receipts digests.",
+      "observed": "all three firms: run_a equal to run_b on the 8 compared fields and on the receipts digest; zero objects read outside RUN A's pinned set in RUN B.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No upload, publish, land, invoke, send, sign-in, vendor request, bundle mint, rollback or scheduled fire was run; the harness made get, list and head calls only.",
+      "reason": "The order is READ ONLY and its bounds name these as refused."
+    },
+    {
+      "item": "The inflection pin of 2026-10-13 was not run; the inflection gate deviation is explained from the valuation rule, not measured at that pin.",
+      "reason": "The order fixes the pin at 2026-10-12; a second pin was not required."
+    },
+    {
+      "item": "The bundle member contents, the publish_refusal object body, the release pin of the producer blob beyond its hash, any Lambda or SSM configuration and the IAM policies were not read.",
+      "reason": "Outside the order's read set."
+    },
+    {
+      "item": "The hashed client account-id list is absent on this device, so the commit gate's client-data check did not check the commit; the record holds no account identifier by construction (digit-run check passes).",
+      "reason": "The check's input list is not on this device; the order's client-data rule was applied by reading the record and the harness."
+    },
+    {
+      "item": "The investigation file is the unsuffixed laptop file; the one-writer gate printed WARN for a dell2 write (until C-QUEUE).",
+      "reason": "The order names this file as the carrier; the gate's WARN is recorded, not worked around."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W380-S1: the pinned replay of inflection at 2026-10-12 is dated 2026-10-09 (the prior trading day of the custody partition), so both gates refuse on source_frontier_older where the packet records PUBLISHED; the mover counts match.",
+    "IRPT_BCKEND-D2-W380-S2: inflection's build at the 2026-10-14 cutoff refused in one reading (accounts partition for 2026-10-14 landed before its positions partition) and built in a later reading; no candidate date existed while the window was open.",
+    "IRPT_BCKEND-D2-W380-S3: at the 2026-10-14 cutoff cottonwood's newest candidate is dated 2026-10-12, one trading day short of t_minus_1 2026-10-13, in both readings."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~380/IB192-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "release_count_harness.py RUN A (read only, one process per firm, scratch outputs outside the worktree)",
+      "invocation": "timeout 1500 python release_count_harness.py <worktree root> --as-of 2026-10-12 --firms <firm> --out <scratch json> --receipts-out <scratch json> --date-check 2026-10-14",
+      "result": "rc=0 for 49financial, cottonwood and inflection; the build and gate per firm 250 to 406 seconds; the date check read 2026-10-13 (49financial), 2026-10-12 (cottonwood), refused (inflection, earlier reading)"
+    },
+    {
+      "tool": "release_count_harness.py RUN B (read only, receipts pre-seeded from RUN A)",
+      "invocation": "timeout 1500 python release_count_harness.py <worktree root> --as-of 2026-10-12 --firms <firm> --out <scratch json> --seed-receipts <scratch RUN A receipts> --date-check 2026-10-14",
+      "result": "rc=0 for all three; equal to RUN A on every compared field and digest; zero reads outside the seed; the inflection date check read 2026-10-13"
+    },
+    {
+      "tool": "read-only partition read of the inflection source (scratch script, list and get only)",
+      "invocation": "python -I diag_inf.py 2026-10-12 2026-10-13 2026-10-14 (scratch)",
+      "result": "rc=0; at the earlier read the 2026-10-14 accounts partition existed with positions still 2026-10-13; at the later read both were 2026-10-14"
+    },
+    {
+      "tool": "compose_record.py (scratch): writes the replay record from the two run JSON files",
+      "invocation": "python compose_record.py <record path>",
+      "result": "record written; every measured value taken from the run JSON; the packet's five numbers per firm and the note text typed in"
+    }
+  ]
+}
