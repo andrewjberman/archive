@@ -1,0 +1,90 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-327",
+  "cell": "AR-y-327",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~134",
+  "branch": "wk-IRPT_ANLREQ-134",
+  "round": 40,
+  "workstream": "ZL",
+  "base": "2362755bd3b1c50d4a7e40ec91dcea0a0d5791e8",
+  "first_commit": "6ec5f8a04192621445391f1e52b056ef452afcb1",
+  "commit": "83c32086e8eb96d44ca189541d88605ce493fa00",
+  "commits": [
+    {"hash": "6ec5f8a04192621445391f1e52b056ef452afcb1", "subject": "surprise rows (IRPT_ANLREQ-D2-W134-S1 and -S2)"},
+    {"hash": "83c32086e8eb96d44ca189541d88605ce493fa00", "subject": "commentary standalone branded pdf (source, tests)"}
+  ],
+  "diff_stat_base_to_commit": "8 files changed, 340 insertions(+), 33 deletions(-) (git diff --stat 2362755bd3 83c32086e8, including the surprise channel file)",
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_commentary_standalone_pdf.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_packager.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_packager_request_id.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_packager_own_store.py",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md"
+  ],
+  "layout_elements_reused": {
+    "source": "layout_overview._commentary_section and the page chrome of build(..., commentary=...), at base 2362755bd3 (lines 1079-1092 and 1131-1132) and the css block of build",
+    "elements": [
+      "section.page with the header: img.logo (the brand logo_svg as a data URI, Opal Capital alt text)",
+      "div.meta: div.title 'Commentary' and div.sub '<firm> &middot; page <n>'",
+      "the optional title as div.el h3, then one p.commentary per paragraph split on blank lines, every string escaped as text",
+      "footer: span 'Data: Opal Capital' (pricing=False; 'Data: YCharts' only when pricing=True) and span 'Prepared by Opal Capital'",
+      "the page css of build: Letter size, Lato (brand typography), the brand palette (navy, midnight, grey, accent), .commentary"
+    ],
+    "added_by_this_order": [
+      "div.draft 'DRAFT' in the header meta (COMMENTARY_DRAFT_MARK), new: not present at base",
+      "p.disclaimer with COMMENTARY_DISCLAIMER above the footer, new: not present at base (a placeholder, surprise row S2)",
+      ".draft and .disclaimer css, added only when draft=True"
+    ],
+    "not_reused": "the Overview sections (data-id element sections), the holdings table and the chart SVG: build_commentary_only passes an empty element map and computed={}"
+  },
+  "tests": {
+    "added": 1,
+    "file": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_commentary_standalone_pdf.py",
+    "cases": 7,
+    "passed": 7,
+    "failed": 0,
+    "folders": ["infra/aws/lambda/investor-reporting/ycharts/research/tests"],
+    "neighbours": {
+      "test_opal_packager.py": 25,
+      "test_opal_packager_request_id.py": 13,
+      "test_packager_i7.py": 15,
+      "test_packager_live_ports.py": 38,
+      "test_packager_own_store.py": 34,
+      "test_opal_producer.py": 20,
+      "test_layout_commentary.py": 9,
+      "test_layout_overview.py": 50,
+      "passed_total": 204,
+      "failed_total": 0
+    },
+    "re_pinned_existing": [
+      {"file": "test_opal_packager.py", "change": "the retained-package fake and the expected logical id move from <request_id>-package-<sha> to <request_id>-commentary-<sha>; test (d) pins the Commentary page as the one standalone render with the DRAFT mark and one section", "why": "the packager no longer renders or retains the combined package on this path"},
+      {"file": "test_opal_packager_request_id.py", "change": "the retained-package fixture key moves to <request_id>-commentary-<sha>", "why": "same as above; the test is the retained-path case (f)"},
+      {"file": "test_packager_own_store.py", "change": "LOGICAL_ID is the commentary id; the produce_package call sites keep PACKAGE_LOGICAL_ID; the port key produce_package becomes produce_commentary (3 sites); test_i is renamed and re-pinned to the commentary id and asserts the two ids never collide", "why": "the packager's port and logical id changed; produce_package itself is unchanged and keeps its own id"}
+    ]
+  },
+  "before_arm": {
+    "method": "the new test file run against an unmodified mirror of the base tree (copy of infra/aws/lambda/investor-reporting, lib, infra/logic and org/standards at 2362755bd3, taken before the first source edit)",
+    "result": "6 failed, 1 passed (of 7)",
+    "failing": ["test_a (no build_commentary_only)", "test_c (no produce_commentary_pdf, no commentary_logical_id)", "test_c objects-port case (same AttributeError)", "test_d (monkeypatch of produce_commentary_pdf has no target; base packager calls produce_package)", "test_e (monkeypatch of produce_commentary_pdf has no target)", "test_f (base packager renders the combined package: the forbidden produce_package fires)"],
+    "passing": ["test_b (the byte-identity pins of build with and without commentary: base behaviour is pinned, as the cell requires)"]
+  },
+  "mutant": {
+    "description": "the packager's default producer changed back to opal_producer.produce_package (the combined shape) in a copy outside the product tree",
+    "result": "MUTANT-FIRES: 2 failed, 5 passed; the failures are test_d and test_f, the two cases that name the packager's call",
+    "note": "an earlier run of the copy lacked org/standards and infra/logic, which failed test (c) for a reason unrelated to the mutation; the copy now carries both, and only the two packager cases fail"
+  },
+  "what_a_person_sees": "A one-page PDF in the Opal brand. Header: the Opal Capital logo at left; at right the title 'Commentary', then the firm name and 'page 1', then a bordered DRAFT label. Body: the commentary's optional title and its paragraphs in plain text (no markup is rendered), then a small note above the footer: 'This commentary is a draft. It has not been reviewed or approved and must not be sent to an advisor or client. Disclaimer wording pending Opal ratification.' Footer: 'Data: Opal Capital' at left and 'Prepared by Opal Capital' at right. No holdings table, no chart, no Overview section. Letter size, Lato type, the Opal palette.",
+  "claim": "The AI commentary renders as its own one-page branded Opal PDF marked DRAFT with a disclaimer. The packager attaches that PDF as pdf_ref (the I7 ref of the commentary PDF, retained under <request_id>-commentary-<sha>); the attach payload keys are unchanged; no combined package PDF is rendered, retained or attached on this path, and the packager's code has no reference to produce_package. produce, produce_package and build(..., commentary=None) are unchanged (pinned by test (b)). Source and tests only; nothing deployed, pushed or called.",
+  "not_read": [
+    "the live engine's rendered bytes: the issuer renders one sample at close; this order's tests read the HTML only (render_pdf.cjs was not run)",
+    "the ticket service's and the portal's reading of pdf_ref: the portal cell is the next one; the ticket service is outside this cell",
+    "the disclaimer wording: no Opal disclaimer exists in the repo; the text is a worker placeholder (surprise row IRPT_ANLREQ-D2-W134-S2) for the CRO to ratify",
+    "the live attach: opal_packager.live_attach raises PACKAGER_PRINCIPAL_UNSET until the AR-v-12 pair; no call was made",
+    "the resident release that carries layout_overview.py, opal_producer.py and opal_packager.py: a later cell under its own signed pair"
+  ],
+  "premise_defects": [
+    "AR-y-327 step 1 and PRD v0.11 call _commentary_section the page with the DRAFT mark and disclaimer; at base neither exists (surprise row IRPT_ANLREQ-D2-W134-S1). The DRAFT mark is added by build_commentary_only through a draft keyword on _commentary_section, default off."
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "module": {
+    "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+    "sha256": "43cec400452add1c28635783c968b26ee9487fe9926091270c1a4e0ce369f87b",
+    "tracked": true
+  },
+  "engine": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+    "sha256": "73361b54df395ae4a0de39d149e4ca822144dd9f0003d0fef6f98d786374383a",
+    "unchanged": true,
+    "how_used": "No pure return function is exposed by the engine. The endpoint factor (value minus flow, over the prior value) sits inline in compute_range, inside its valuation-chain loop, so it cannot be called from outside. equity_value is a pure helper, but it takes Schwab's declared value columns, so it was not called. The module reproduces the endpoint form of the engine's method (r_t = (V_t - F_t) / V_(t-1) - 1, F summed over every partition day in (t-1, t], the skipped-day rule) and does not reproduce the engine's link-through-intervening-valuations refinement. No agreement with the engine on a synthetic day was therefore shown. An Inflection declaration would need a sources.json entry for Orion (value columns of the positions rows, the classification table, the transaction key columns, method row 3) and the factor lifted into a callable function; neither was made here, and the engine was not edited."
+  },
+  "tests": {
+    "file": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_account_return_daily.py",
+    "passed": 11,
+    "failed": 0,
+    "mutant_failed": true
+  },
+  "derived": {
+    "path": "C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~174/ACCOUNT_RETURN_DERIVED.parquet",
+    "sha256": "369e45b6a43c884587ebcc59a5d8b6cb22fb6e6a42662cd7472cb8c8ca58f16d",
+    "schema_hash": "1b25d37ba6cfcf5a7413373ccdca57e306b86614aff94472ca65ca0025484946",
+    "rows": 878047,
+    "accounts": 926
+  },
+  "label": "OPAL_COMPUTED",
+  "tie_out": {
+    "gaps_file": {
+      "path": "C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~174/TIEOUT_GAPS.parquet",
+      "sha256": "f11af030570f70912cf72ec3671c14836bbbc4c02fb0664fdeb953c4f9e372cd"
+    },
+    "windows": {
+      "qtd": {
+        "clients_compared": 287,
+        "not_comparable": 33,
+        "bins": {"lt_5bp": 16, "5_25bp": 87, "25_100bp": 175, "ge_100bp": 9}
+      },
+      "ytd": {
+        "clients_compared": 0,
+        "not_comparable": 320,
+        "bins": {"lt_5bp": 0, "5_25bp": 0, "25_100bp": 0, "ge_100bp": 0}
+      },
+      "last_12_months": {
+        "clients_compared": 0,
+        "not_comparable": 320,
+        "bins": {"lt_5bp": 0, "5_25bp": 0, "25_100bp": 0, "ge_100bp": 0}
+      },
+      "since_inception": {
+        "clients_compared": 0,
+        "not_comparable": 320,
+        "bins": {"lt_5bp": 0, "5_25bp": 0, "25_100bp": 0, "ge_100bp": 0}
+      }
+    },
+    "tolerance_assumed": null,
+    "basis_words": "VALUE: the account value V_t is the sum of currentValue over every fact_positions row of the account on the partition day, cash lines included (isCustodialCash rows are rows of the same table). Rows with isActive false are included, because the silver does not define isActive and inactive rows carry non-zero values on some account-days; the CTO rules whether that basis stands. A null currentValue would make the account-day absent; none occurred. An account with no row on a day is absent before its first row and contributes zero to a household sum; no account has a gap inside its life. FLOWS: the newest fact_transactions partition (full history), status Complete only; Pending, Rejected, Reversed, Pending Corporate Action and Inactive rows are excluded. The 46 transaction types are placed in the module's classification table from the ratified Orion cashflow taxonomy: the NNA types are EXTERNAL (capital in positive, capital out negative, magnitude taken by type direction); the Internal types are INTERNAL and excluded; the Return-bucket dividend and interest receipts are INCOME, counted on receipt and inside V through the cash line; other Return-bucket items (gains to cash, fees, taxes) stay in V as booked; CorporateAction types are excluded. UNRESOLVED: zero rows, every type met is placed. Gross of fees in the engine's sense: no fee rail is computed and no net return is served. ORION READING: the reported figure is the client's performance factor read as an index level, the end day over the base day, minus one, from the newest fact_performance partition. The base day is the last trading day before the quarter, the last trading day before the year, the last trading day on or before the date one year before the as-of date, or the client's first performance date for since inception. The window's daily returns are linked over the trading days after the base. CALENDAR: lib/trading_calendar.py, answering from its hardcoded NYSE fallback (pandas_market_calendars is not installed). ALIEN GUARD: the two alien fact_positions partitions, 2026-08-06 and 2026-09-29, are INCLUDED in the value series. The 2026-08-06 partition holds the same account set as its neighbours and enters the 2026-08-07 return as a base. The 2026-09-29 partition holds the same account set as 2026-09-30 and enters the 2026-09-30 return as a base; its own return is not computed because 2026-09-28 has no partition. Neither date enters the quarter-to-date window, whose base is 2026-09-30 and whose first return is 2026-10-01. POSITIONS PARTITIONS READ: 2328 distinct fact_positions dates, every partition the listing holds from 2020-05-26 to 2026-10-14; two of them were read a second time to validate the module's value function against the cached sums. MISSING: fact_positions carries no partition for 2026-07-01 and no partition for 2026-09-28, both NYSE trading days. Every account's value is absent on those days, so the daily returns on them and on the next trading day are absent, and every window containing one of them reads not comparable: for every household, the year-to-date, last-12-month and since-inception windows. Five households have no row in the newest performance partition and are not comparable in every window. Orion partitions are calendar-daily, so flows on a weekend fold into the next trading day under the skipped-day rule. No tolerance is assumed; the CTO rules it on this read."
+  },
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "s3_reads": 2337
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

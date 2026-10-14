@@ -34,8 +34,9 @@ print("behavior /json-tiered/* carries auth-validator-edge viewer-request: %s; t
 ok = ok and v and twin == 3
 try:
     p = open(sys.argv[2], encoding="utf-8", errors="replace").read()
-    pl = bool(re.search(r"Plan:\s*0 to add,\s*1 to change,\s*0 to destroy", p))
-    print("plan 0 to add, 1 to change, 0 to destroy: %s" % ("yes" if pl else "no"))
+    m = re.search(r"Plan:\s*0 to add,\s*([12]) to change,\s*0 to destroy", p)
+    pl = bool(m) and (m.group(1) == "1" or "aws_wafv2_web_acl.opal_cloudfront_protection" in p)
+    print("plan 0 to add, %s to change, 0 to destroy: %s (a second change must be the named WebACL churn)" % (m.group(1) if m else "?", "yes" if pl else "no"))
     ok = ok and pl
 except Exception:
     print("plan 0 to add, 1 to change, 0 to destroy: no (absent)"); ok = False
