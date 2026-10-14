@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -753,11 +753,16 @@ def main(argv):
         chan = root / "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md"
         text = chan.read_text(encoding="utf-8", errors="replace")
         rows = []
-        for block in re.findall(r"```json\n(\{.*?\n\})\n```", text, flags=re.S):
+        # a fenced block holds one row (an object) or several (an array of objects): parse both (the first version of this
+        # check read objects only and missed 117 rows in 86 array blocks, row W114-S1)
+        for block in re.findall(r"```json\n(.*?)\n```", text, flags=re.S):
             try:
-                rows.append(json.loads(block))
+                got = json.loads(block)
             except ValueError:
-                pass
+                continue
+            for r in (got if isinstance(got, list) else [got]):
+                if isinstance(r, dict):
+                    rows.append(r)
         owned = [(i, r) for i, r in enumerate(rows) if r.get("hazard_standing") == "ARMED" and "Y2" in str(r.get("disarm_owner", ""))]
         left = []
         for i, r in owned:
@@ -777,6 +782,62 @@ def main(argv):
                     problems.append("%s: verdict must be RESOLVED, STILL_ARMED or UNCLEAR" % i)
                 elif r.get("verdict") == "RESOLVED" and not (r.get("evidence") or []):
                     problems.append("%s: a RESOLVED verdict needs evidence" % i)
+    elif check in ("y297-build", "y298-build", "y299-build", "y300-build"):
+        # a release BUILD record: the staged artifact is RE-HASHED here; the delta against the live package is compared
+        # with the expected members; nothing removed; the tests ran with no unexplained failure.
+        import hashlib
+        spec = {"y297-build": ("115", "OPAL_TICKET_API_BUILD.json", {"lambda_function.py"}, {"lambda_function.py"}, set()),
+                "y298-build": ("116", "IRPT_STATUS_BUILD.json", {"status.py"}, {"status.py"}, set()),
+                "y299-build": ("117", "IRPT_YCHARTS_GENERATE_BUILD.json",
+                               {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py"},
+                               {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py"}, {"trading_calendar.py"}),
+                "y300-build": ("118", "RESIDENT_BUILD.json",
+                               {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py", "status.py", "resident_worker.py"},
+                               {"template_reader.py", "portfolio.py", "uploads.py", "security_resolution.py", "status.py", "resident_worker.py",
+                                "resident_bindings.json", "SHA256SUMS"}, {"opal_packager.py", "trading_calendar.py"})}[check]
+        worker, name, need, allowed, add_need = spec
+        rec = load(root, D.replace("/r21/", "/r30/") % worker + name, problems)
+        if rec:
+            for member in ("artifact", "delta_vs_live", "only_in_live", "only_in_release", "rollback", "tests", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            art = rec.get("artifact") or {}
+            ap = art.get("path", "")
+            if not ap.startswith("C:/dev/irpt-release-r28/"):
+                problems.append("the artifact must be staged under C:/dev/irpt-release-r28/ (got %r)" % ap)
+            elif not Path(ap).is_file():
+                problems.append("the staged artifact %s does not exist" % ap)
+            else:
+                digest = hashlib.sha256(Path(ap).read_bytes()).hexdigest()
+                print("artifact %s sha256 %s" % (ap, digest))
+                if digest != str(art.get("sha256", "")).lower():
+                    problems.append("the staged artifact hashes to %s, the record says %s" % (digest, art.get("sha256")))
+            names = {str(x).replace("\\", "/").split("/")[-1] for x in (rec.get("delta_vs_live") or [])}
+            missing = need - names
+            extra = names - allowed
+            if missing:
+                problems.append("delta_vs_live lacks the expected member(s) %s" % sorted(missing))
+            if extra:
+                problems.append("delta_vs_live names member(s) outside the release %s" % sorted(extra))
+            added = {str(x).replace("\\", "/").split("/")[-1] for x in (rec.get("only_in_release") or [])}
+            if add_need - added:
+                problems.append("only_in_release lacks the added member(s) %s" % sorted(add_need - added))
+            if rec.get("only_in_live"):
+                problems.append("only_in_live must be empty (nothing removed): %r" % (rec.get("only_in_live"),))
+            if check == "y300-build":
+                if rec.get("removed_members_count") not in (0, "0"):
+                    problems.append("removed_members_count must be 0")
+                if not (rec.get("host_script") or {}).get("member_checks_equal_tarball"):
+                    problems.append("host_script.member_checks_equal_tarball must be true")
+            else:
+                ctl = rec.get("no_move_control") or {}
+                if ctl.get("differs_from_live") not in ([], None) or not ctl.get("code_sha256"):
+                    problems.append("no_move_control must reproduce the live package (differs_from_live [] and a code_sha256)")
+            tests = rec.get("tests") or {}
+            if str(tests.get("failed", "x")) != "0" and not tests.get("failures_explained"):
+                problems.append("tests: failures must be zero or explained one by one")
+            if not tests.get("passed"):
+                problems.append("tests.passed must be a positive count")
     return finish(check, problems)
 
 
