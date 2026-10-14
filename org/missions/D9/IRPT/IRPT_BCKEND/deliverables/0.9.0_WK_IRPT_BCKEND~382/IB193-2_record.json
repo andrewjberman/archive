@@ -1,0 +1,27 @@
+{
+  "base_commit": "411bde74797f46451631eab9442a2f3494d95c4e",
+  "changed_paths": [
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "data/assets/scripts/gold/investor_reporting/tests/test_holdings_bypass_one_date.py"
+  ],
+  "tests_total": 37,
+  "tests_passed": 37,
+  "mutant_tests_failed": 3,
+  "default_path_unchanged": true,
+  "refusals_tested": [
+    "no_upload",
+    "wrong_firm",
+    "no_as_of",
+    "as_of_differs_from_allowed_date",
+    "landed_date_differs",
+    "qa"
+  ],
+  "notes": [
+    "tests_total and tests_passed count one pytest run of BOTH files (test_holdings_bypass_one_date.py 17 tests, the existing test_holdings_publish_gate.py 20 tests) at the code commit 15e0361375: 37 passed, 0 failed, rc 0. Measured in the worktree, not carried forward.",
+    "mutant_tests_failed = 3: the three landed-date assertion tests (absent partition older, newer landed, would-replace-an-accepted-row) fail when the BEGIN/END ONE-DATE-ASSERT block is removed from a copy; the other 14 new tests pass on the mutant, as designed (the flag refusals do not depend on the assertion). Run at a depth-preserving scratch layout under C:/dev/_scratch382/R (lib, infra, org and .tools are directory junctions to the worktree; data/assets/.../investor_reporting is a copy with the block removed), because the producer resolves its repo root as parents[4] and imports lib/infra modules at load; the plain copy the order names cannot import the producer. A positive control at the same layout with the real producer gives 17 passed.",
+    "default_path_unchanged rests on three facts: the assertion and the waiver are both guarded by allow_older_date being not None; main passes allow_older_date=None unless the flag is given (a CLI test spies run_firm and reads None on the scheduled invocation); the scheduled gate refusal of an older candidate is asserted unchanged (test_scheduled_path_without_the_flag_still_refuses_an_older_candidate_as_before). evaluate_publish_gate is not touched.",
+    "the bypass sets gate bypass and outcome PUBLISHED only when no condition remains after the waiver; a waived older date with a remaining condition (account_lost) stays REFUSED with the refusal record written as today, and no bypass key is set on that path (as the order states).",
+    "NOT RUN: no AWS call, no upload, no apply, no bundle mint; the tests use the in-memory versioned store with the source build replaced by a real-shaped fixture. The check AC2 copy run (a temp directory outside the repo) was run as the order names it and FAILS at collection before any test runs; see the surprise rows and the criteria output.",
+    "the commit-gate ruff check flagged one unused import in the new test; it was removed before the commit (the commit 15e0361375 is the clean state). The naming gate reads one WARN on the 49financial literal in main's --firms check (a hand-kept carrier); it is WARN-only and was left as written."
+  ]
+}
