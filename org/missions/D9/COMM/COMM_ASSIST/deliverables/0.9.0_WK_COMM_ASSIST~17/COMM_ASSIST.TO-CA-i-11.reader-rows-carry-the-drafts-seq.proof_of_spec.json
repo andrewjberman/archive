@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-11",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_COMM_ASSIST~17",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/prd/COMM_ASSIST_PRD.md",
+    "group": "C",
+    "vintage_commit": "7ba1998bf5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "7ba1998bf5",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-11.reader-rows-carry-the-drafts-seq.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/muse_reader/refresh.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code change only; not deployed here. The dell2 checkout picks it up through the box pass. Lines changed: _draft_row gains one key (seq); the README text gains one sentence (A draft row's seq (null when it has none) and its version are what a signed answer must carry for that draft.)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi11-AC1",
+      "criterion_verbatim": "the issuer's check (read it; do not edit it): a draft with seq 7 yields a row with seq 7; a draft with no seq yields a row with the key present and null; the other fields are unchanged. It prints ok=False at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i11_seq.py\"",
+      "output_evidence": "I11-SEQ ok=True with_seq=7 without_seq=None reason=none (rc=0). Base, before the edit: I11-SEQ ok=False with_seq=absent without_seq=absent reason=the row for a draft with seq 7 carries seq='absent'.",
+      "denominator": "2 of 2 draft rows built (one from a draft with seq 7, one from a draft with no seq); the check's single verdict reads over both plus the object_id and tag fields.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi11-AC2",
+      "criterion_verbatim": "the bound, a control that PASSES at the base and must still pass: the real refresh against the real sources (ages, object_id, answers/ untouched, README names answers/).",
+      "method": "live_read",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i1_live.py\"",
+      "output_evidence": "I1-LIVE ok=True items=32 aged=32 object_ids=7 of 7 answers_untouched=True readme_answers=True reason=none (rc=0).",
+      "denominator": "32 of 32 items carry a whole-number age; 7 of 7 draft rows carry a non-empty object_id; 4 sources read, none unreadable (per the check's source loop).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The build's one new key removed (the seq line of _draft_row reverted to the base form) and AC1 run against it. This is the base state as measured before the edit.",
+      "expected": "AC1 reads ok=False, the seq-7 draft's row carrying no seq.",
+      "observed": "I11-SEQ ok=False with_seq=absent without_seq=absent reason=the row for a draft with seq 7 carries seq='absent'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run against unchanged inputs after the edit (same HEAD base, same refresh.py bytes).",
+      "observed": "I11-SEQ ok=True with_seq=7 without_seq=None reason=none on the run recorded above.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deployment of refresh.py to dell2 and a live refresh there.",
+      "reason": "Explicitly not this order's: 'Code change; not deployed here (the dell2 checkout picks it up through the box pass).'"
+    },
+    {
+      "item": "Signing instructions by which muse puts the seq into the payload it signs.",
+      "reason": "Out of the cell: how muse carries the seq into a signed answer is the signing instructions (a later card), not CA-i-11."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~17/",
+  "compiler_tools": [
+    {
+      "tool": "Grep",
+      "invocation": "Grep pattern assign_seq|\"seq\" over data/transcripts/scripts/teams_chat/tenant.py",
+      "result": "Premise check: tenant.py sets pending[\"seq\"] (line 122 assign_seq; lines 241 and 559 keep or assign it), so a pending draft carries seq and the row's seq is not always null."
+    },
+    {
+      "tool": "Bash",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i11_seq.py\"; check_i1_live.py; LC_ALL=C grep -nP '[^\\x00-\\x7F]' data/transcripts/scripts/muse_reader/refresh.py",
+      "result": "AC1 ok=True, AC2 ok=True; the non-ASCII grep returned rc=1 (no non-ASCII bytes in refresh.py)."
+    }
+  ]
+}
