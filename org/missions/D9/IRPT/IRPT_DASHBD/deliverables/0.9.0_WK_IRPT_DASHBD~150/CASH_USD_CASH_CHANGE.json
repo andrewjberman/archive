@@ -1,0 +1,116 @@
+{
+  "pin": "e340e07f4e",
+  "code": {
+    "file": "data/black_diamond/scripts/gold/lib/etf_classifier.py",
+    "sha256": "77d0b1550d048c811d09fe56bf4fc82478174b9842cf7189a73b81c3016cec69",
+    "tracked": true
+  },
+  "tests": {
+    "new_file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py",
+    "updated_files": [
+      "data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py",
+      "data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py",
+      "data/black_diamond/scripts/gold/tests/test_composition_canonical.py"
+    ],
+    "passed": 6,
+    "failed": 0,
+    "mutant_failed": true,
+    "base_passed": 52,
+    "suite_passed": 58,
+    "suite_failed": 0
+  },
+  "served_holdings": {
+    "stores_read": [
+      "opal-data-49financial advi/49financial/platinum/advisors/{id}/positions.json (served per-advisor positions; S3 LIST and GET; 189 objects)",
+      "opal-data-bd gold/timeseries/holdings_lots/2026-10-09.parquet (newest holdings_lots snapshot; S3 LIST and GET; source of the accounts count only, not a served store)"
+    ],
+    "positions_scanned": 4315,
+    "positions_that_move": 0,
+    "positions_already_cash": 0,
+    "per_firm": {
+      "49financial": 0
+    },
+    "accounts_with_a_moving_position": 0
+  },
+  "limits": "Read on 2026-10-14 by S3 GET and LIST only. Served: the 189 platinum advisor positions files of one firm scope (49financial) hold 4,315 positions, each file the top 25 per advisor; no position carries the synthetic cash ticker, in any served class. The newest holdings_lots snapshot (2026-10-09, 1,314,777 lot rows, 11,528 accounts) holds no open or closed lot under the synthetic cash ticker either, so accounts_with_a_moving_position is 0 by that read, not by a served read. NOT SEEN: positions beyond each file's top 25 (the premise of the count is one the top-25 files cannot test); other firms' served stores (no other firm bucket was read); earlier holdings_lots partitions (only the newest snapshot was read); the served keys that carry the class after aggregation (mix, composition, summary, dashboard keys were not counted); the silver/allocations cash_market_value column (a dollar field, not a position). The newest snapshot holds 11 lot rows of a cash-like ticker other than the synthetic cash ticker; they are not counted (the order names the synthetic ticker only). Not measured: where the synthetic cash line sits in the BD feed, since no gold or silver code produces that ticker outside the classifier. The silver asset dimension maps a served class through ETF_TO_BD_SUPER, which has no cash key, so a row that now serves cash keeps its BD coarse value there; that is a consumer effect, not a count.",
+  "consumers_checked": [
+    "gold D_03 composition_artifacts.py: classify_with_identity per holding, _ASSET_CLASS_LABELS (cash to Cash)",
+    "gold D_04 client_portal_summary.py: classify and classify_with_identity per position, the cash name rule, CANONICAL_MIX_CLASSES",
+    "gold C_06 client_mix_timeseries.py: classify_holding and classify_series, SERVED_HOLDING_CLASSES (cash is served)",
+    "gold E_25 aua_decomposition_audit.py: the firm-level fixed_income sum read from mix_daily_summary, and its note",
+    "silver build_bd_assets_dim.py: clf.classify per asset, ETF_TO_BD_SUPER (no cash key)",
+    "gold B_01b classify_new_securities.py: the class rule in its system prompt for new securities (name-keyed, not a classifier reader)",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classifier.py: a separate copy of the classifier (CASH_USD returns an empty string; it does not import the gold file)"
+  ],
+  "consumers_assuming_fixed_income": [
+    {
+      "file": "data/black_diamond/scripts/gold/E_25.aua_decomposition_audit.py",
+      "line": 146,
+      "what": "reads the firm-level fixed_income sum from mix_daily_summary; a cash-serving sweep line leaves that sum once C_06 runs under the new bytes, so the sum changes meaning"
+    },
+    {
+      "file": "data/black_diamond/scripts/gold/E_25.aua_decomposition_audit.py",
+      "line": 164,
+      "what": "states in its note that cash and sweep are classified as fixed_income per lib.mix_views; the note goes stale for the synthetic cash ticker after the change"
+    },
+    {
+      "file": "data/black_diamond/scripts/gold/B_01b.classify_new_securities.py",
+      "line": 55,
+      "what": "system-prompt rule: Money Market, Sweep and Cash Reserve map to fixed_income; a name rule for new securities, not keyed on the synthetic cash ticker, left unchanged"
+    },
+    {
+      "file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "line": 48,
+      "what": "hard-coded class for the synthetic cash ticker in the shared classification list (fixed_income); the gold classifier answers that ticker before it reads any row, so this value is not read by it; whether a seed writes this dict into the table is not established; not changed"
+    },
+    {
+      "file": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classification.py",
+      "line": 47,
+      "what": "hard-coded class for the synthetic cash ticker in the partners copy of the list (fixed_income); a separate copy, not changed"
+    }
+  ],
+  "other_cash_usd_literals": [
+    {"file": "data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py", "line": 80},
+    {"file": "data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py", "line": 160},
+    {"file": "data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py", "line": 161},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 74},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 122},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 123},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 154},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 191},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 242},
+    {"file": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py", "line": 244},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py", "line": 118},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py", "line": 119},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 50},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 51},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 52},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 57},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 67},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 68},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 69},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 70},
+    {"file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_usd.py", "line": 71},
+    {"file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py", "line": 48},
+    {"file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py", "line": 519},
+    {"file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py", "line": 1028},
+    {"file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py", "line": 1264},
+    {"file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py", "line": 1266},
+    {"file": "infra/aws/lambda/v2_portal/_shared/etf_classification.py", "line": 1275},
+    {"file": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py", "line": 81},
+    {"file": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py", "line": 130},
+    {"file": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py", "line": 159},
+    {"file": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classification.py", "line": 47},
+    {"file": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classification.py", "line": 365},
+    {"file": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classifier.py", "line": 71}
+  ],
+  "reads": {
+    "dynamodb_writes": 0,
+    "s3_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "deployed": false,
+  "pushed": false,
+  "served_values_changed": false
+}
