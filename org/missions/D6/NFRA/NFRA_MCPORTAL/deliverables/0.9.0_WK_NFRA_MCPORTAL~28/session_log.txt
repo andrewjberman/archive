@@ -1,0 +1,61 @@
+SESSION LOG -- 0.9.0_WK_NFRA_MCPORTAL~28 on NFRA_MCPORTAL.TO-MP-pd-4 (cell MP-pd-4)
+Verbatim commands and the deciding output lines. Times are not recorded; order is the order run.
+
+1. First act
+   git rev-parse --abbrev-ref HEAD            -> wk-NFRA_MCPORTAL-pd-28
+   test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+   git -C mcportal rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPORTAL-pd-28-mcportal
+   mcportal base: 17dcbb2
+
+2. Read the worker face (lines 1-122 of the TO file; stopped at the RECORD FACE marker on line 123).
+
+3. Re-grounding
+   Read pd4.AC1.sh and _root.sh (the pc and pd helpers): the root is taken from git rev-parse in
+   the invocation directory, so a run from C:/tmp/mp-pd-28 grades this worktree.
+   Read src/api/admin.ts, admin.test.ts, src/pages/people/{People,PeopleView,people.test,people.css,index}.
+   Read gateway/refresh.ts for the page structure.
+   Investigation channel: no NFRA_MCPORTAL-Z-W28-* row existed; the next free id is -S1.
+
+4. Build (mcportal worktree only)
+   Edits: src/api/admin.ts, src/api/admin.test.ts, src/pages/people/{People.tsx, PeopleView.tsx,
+   people.css, people.test.tsx}; new: src/pages/people/{personAccess.ts, PersonAccessView.tsx,
+   PersonAccessPanel.tsx}. git status before commit listed only those paths.
+
+5. Bounded test run (before commit)
+   cd mcportal && NO_COLOR=1 timeout 120 bun test src  -> rc=0
+   " 51 pass" / " 0 fail" / "Ran 51 tests across 9 files."
+   (base: 44 pass 0 fail per the order; seven named tests added, 51 = 44 + 7)
+
+6. Typecheck (no emit)
+   cd mcportal && timeout 120 node_modules/.bin/tsc --noEmit -p tsconfig.app.json  -> rc=0 (no output)
+
+7. Commits (nested repo, plain git commit, author set to the serial)
+   c24bcd0  feat(mcportal MP-pd-4, 0.9.0_WK_NFRA_MCPORTAL~28): People page controls (F2 write half)   9 files, +801 -6
+   5ca6596  docs(mcportal MP-pd-4, 0.9.0_WK_NFRA_MCPORTAL~28): admin.ts route header wording          1 file, +2 -2
+   git status --short after the second commit: empty (clean)
+
+8. Criterion AC1, first run (on c24bcd0, before the header commit)
+   timeout 120 bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd4.AC1.sh; echo "exit=$?"
+   " 51 pass" / " 0 fail" / "Ran 51 tests across 9 files. [223.00ms]"
+   "bun test rc=0; named tests present in sources 8 of 8; pass=51; fail=0" / "RESULT: PASS" / "exit=0"
+
+9. Control: mutant (renames one named test in every occurrence, then restores from a saved copy)
+   sed -i 's/stop and restore post the change with the expected revision/.../revisio/' people.test.tsx
+   occurrences after sed: 0 of the original name; bun test ran (51 pass)
+   pd4.AC1.sh -> "bun test rc=0; named tests present in sources 7 of 8; pass=51; fail=0" / "RESULT: FAIL" / exit=1
+   restored by cp from the saved copy; "RESTORED: 2 occurrences"; git status --short empty.
+
+10. Control: determinism (second run of AC1 on the final tree, 5ca6596)
+   timeout 120 bash .../pd4.AC1.sh; echo "exit=$?"
+   " 51 pass" / " 0 fail" / "Ran 51 tests across 9 files. [206.00ms]"
+   "bun test rc=0; named tests present in sources 8 of 8; pass=51; fail=0" / "RESULT: PASS" / "exit=0"
+   git -C mcportal status --short -> empty; HEAD 5ca6596
+
+11. Boundary slip, disclosed
+   One read was run that the order's bounds forbid: git -C mcportal ls-remote --heads origin (a remote
+   query, not a push). Its output listed refs/heads/DEV and refs/heads/PROD only, so the worker branch
+   wk-NFRA_MCPORTAL-pd-28-mcportal is not on origin. No push was made. No further network call was made.
+
+12. Workspace worktree
+   git status showed " M mcportal" (the nested repo's gitlink moved with the nested commits). It is not
+   in this cell's paths and is not staged or committed here.
