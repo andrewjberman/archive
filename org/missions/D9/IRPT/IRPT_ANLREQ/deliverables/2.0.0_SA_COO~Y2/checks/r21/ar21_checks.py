@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS", "y309-build": "Y309-BUILD", "y310-build": "Y310-BUILD", "y311-build": "Y311-BUILD"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -971,6 +971,79 @@ def main(argv):
             print("%s: %d passed, %d failed (rc=%d)" % (relpath, passed, failed, rc))
             if rc != 0 or failed or passed < floor:
                 problems.append("%s must pass with at least %d tests" % (relpath, floor))
+    elif check in ("y309-build", "y310-build", "y311-build"):
+        # release 29 BUILD records: the staged artifact is RE-HASHED here; the delta against the live package (or the release-28
+        # tarball) is compared with the expected members; the resident record also carries three scripts and the staged sums.
+        import hashlib
+        spec = {"y309-build": ("123", "IRPT_STATUS_BUILD.json", {"status.py"}, {"status.py"}, set(), "C:/dev/irpt-release-r29/"),
+                "y310-build": ("124", "IRPT_YCHARTS_GENERATE_BUILD.json", {"uploads.py", "generate_installed.py"},
+                               {"uploads.py", "generate_installed.py"}, {"ordinary_viewer.py"}, "C:/dev/irpt-release-r29/"),
+                "y311-build": ("125", "RESIDENT_BUILD.json", {"uploads.py", "status.py"},
+                               {"uploads.py", "status.py", "resident_bindings.json", "SHA256SUMS"}, set(), "C:/dev/irpt-release-r29/")}[check]
+        worker, name, need, allowed, add_need, stage = spec
+        rec = load(root, D.replace("/r21/", "/r39/") % worker + name, problems)
+        if rec:
+            for member in ("artifact", "delta_vs_live", "only_in_live", "only_in_release", "rollback", "tests", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            art = rec.get("artifact") or {}
+            ap = art.get("path", "")
+            if not ap.startswith(stage):
+                problems.append("the artifact must be staged under %s (got %r)" % (stage, ap))
+            elif not Path(ap).is_file():
+                problems.append("the staged artifact %s does not exist" % ap)
+            else:
+                digest = hashlib.sha256(Path(ap).read_bytes()).hexdigest()
+                print("artifact %s sha256 %s" % (ap, digest))
+                if digest != str(art.get("sha256", "")).lower():
+                    problems.append("the staged artifact hashes to %s, the record says %s" % (digest, art.get("sha256")))
+            names = {str(x).replace("\\", "/").split("/")[-1] for x in (rec.get("delta_vs_live") or [])}
+            if need - names:
+                problems.append("delta_vs_live lacks the expected member(s) %s" % sorted(need - names))
+            if names - allowed:
+                problems.append("delta_vs_live names member(s) outside the release %s" % sorted(names - allowed))
+            added = {str(x).replace("\\", "/").split("/")[-1] for x in (rec.get("only_in_release") or [])}
+            if add_need - added:
+                problems.append("only_in_release lacks the added member(s) %s" % sorted(add_need - added))
+            if not add_need and added:
+                problems.append("only_in_release must be empty (nothing added): %r" % sorted(added))
+            if rec.get("only_in_live"):
+                problems.append("only_in_live must be empty (nothing removed): %r" % (rec.get("only_in_live"),))
+            if check != "y311-build":
+                ctl = rec.get("no_move_control") or {}
+                if ctl.get("differs_from_live") not in ([], None) or not ctl.get("code_sha256"):
+                    problems.append("no_move_control must reproduce the live package (differs_from_live [] and a code_sha256)")
+            else:
+                if rec.get("removed_members_count") not in (0, "0"):
+                    problems.append("removed_members_count must be 0")
+                if not (rec.get("host_script") or {}).get("member_checks_equal_tarball"):
+                    problems.append("host_script.member_checks_equal_tarball must be true")
+                sums = rec.get("sums_file") or {}
+                sp = sums.get("path", "")
+                if not Path(sp).is_file() or hashlib.sha256(Path(sp).read_bytes()).hexdigest() != str(sums.get("sha256", "")).lower():
+                    problems.append("the staged sums file is missing or does not hash to the record")
+                got = {x.get("name"): x for x in (rec.get("scripts") or [])}
+                for sname in ("pre_read_r29.sh", "install_r29.sh", "rollback_r29.sh"):
+                    x = got.get(sname)
+                    if not x:
+                        problems.append("no script record for %s" % sname)
+                        continue
+                    fp = root / x.get("path", "")
+                    if not fp.is_file():
+                        problems.append("%s does not exist at %s" % (sname, x.get("path")))
+                        continue
+                    data = fp.read_bytes()
+                    if hashlib.sha256(data).hexdigest() != str(x.get("sha256", "")).lower():
+                        problems.append("%s does not hash to the record" % sname)
+                    if any(b > 127 for b in data):
+                        problems.append("%s carries non-ASCII bytes" % sname)
+                    if subprocess.run(["bash", "-n", str(fp)], capture_output=True, text=True).returncode != 0:
+                        problems.append("bash -n %s failed" % sname)
+            tests = rec.get("tests") or {}
+            if str(tests.get("failed", "x")) != "0" and not tests.get("failures_explained"):
+                problems.append("tests: failures must be zero or explained one by one")
+            if not tests.get("passed"):
+                problems.append("tests.passed must be a positive count")
     return finish(check, problems)
 
 
