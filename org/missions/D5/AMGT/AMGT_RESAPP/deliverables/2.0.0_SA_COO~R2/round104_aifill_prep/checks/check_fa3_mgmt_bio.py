@@ -120,6 +120,44 @@ def main():
         return contract.validate_block(block) == [], block.get("reason")
     arms.run("both served bodies missing: still a valid block, no exception", missing_bodies)
 
+    # ---- AMENDMENT 2: character limits, the sentence cut, the Opal -> web fall-through
+    def opal_falls_to_web():
+        m = L.StubModel(L.result("NO_INFORMATION"),
+                        L.result("Christophe Fouquet became CEO of ASML in 2024.", citations=[L.web_cite("https://example.com/c", "Profile")], web_search_requests=1))
+        block = B.build_block(L.ctx(L.served_inputs(), m))
+        return (block["source_class"] == "WEB_SEARCH" and len(m.calls) == 2 and m.calls[0]["web_search_max_uses"] == 0
+                and m.calls[1]["web_search_max_uses"] >= 1 and block["citations"][0]["url"] == "https://example.com/c"), (block["source_class"], len(m.calls), block.get("reason"))
+    arms.run("an Opal path that finds nothing falls through to the web path", opal_falls_to_web)
+
+    def opal_guard_falls_to_web_then_none():
+        m = L.StubModel(L.result("Christophe Fouquet joined ASML in 1987 and is CEO."),
+                        L.result("NO_INFORMATION", citations=[L.web_cite()], web_search_requests=1))
+        block = B.build_block(L.ctx(L.served_inputs(), m))
+        return (block["source_class"] == "NONE" and len(m.calls) == 2 and "figure" in block["reason"] and "_" not in block["reason"]), (len(m.calls), block.get("reason"))
+    arms.run("a numeric-guard failure also falls through; if the web path declines too the reason keeps 'figure'", opal_guard_falls_to_web_then_none)
+
+    def long_text_cut():
+        long_text = " ".join(["Dr. Lisa Su has led the company as chief executive officer for many years." for _ in range(20)])
+        m = L.StubModel(L.result(long_text, citations=[L.web_cite()], web_search_requests=1))
+        block = B.build_block(L.ctx(sparse_inputs(), m))
+        text = block["text"] or ""
+        return (block["source_class"] == "WEB_SEARCH" and 0 < len(text) <= 900 and text.endswith(".") and long_text.startswith(text)), (block["source_class"], len(text), block.get("reason"))
+    arms.run("a reply over the 900-character cap is cut at the last sentence end that fits", long_text_cut)
+
+    def long_no_sentence_end():
+        m = L.StubModel(L.result("word " * 400, citations=[L.web_cite()], web_search_requests=1))
+        block = B.build_block(L.ctx(sparse_inputs(), m))
+        return block["source_class"] == "NONE" and "long" in block["reason"], block.get("reason")
+    arms.run("a reply over the cap with no sentence end is withheld, naming 'long'", long_no_sentence_end)
+
+    def prompts_state_limit():
+        m = L.StubModel(L.result("Text.", citations=[L.web_cite()], web_search_requests=1))
+        B.build_block(L.ctx(sparse_inputs(), m))
+        o = L.StubModel(L.result("Christophe Fouquet joined ASML in 2008."))
+        B.build_block(L.ctx(L.served_inputs(), o))
+        return "800 characters" in m.calls[0]["prompt"] and "800 characters" in o.calls[0]["prompt"], (m.calls[0]["prompt"][-120:])
+    arms.run("both prompts state the 800-character limit", prompts_state_limit)
+
     arms.raises("a model failure propagates (the orchestrator converts it)", "RuntimeError",
                 lambda: B.build_block(L.ctx(L.served_inputs(), L.StubModel(RuntimeError("model down")))))
 
