@@ -48,7 +48,7 @@ The window holds 18,566 linear_interpolation rows for the 886 assets that have a
 
 ## Lookback
 
-The window alone cannot carry a price forward for most of the no-trade rows. The lookback scan walked partitions backwards from 2025-12-31 to 2020-03-06, for the 242 residual assets only. It found the latest earlier trade for 52 assets under variant A and 59 under variant B. The rest have no trade in the history read. 618 dates in that span have no partition in S3, 116 of them weekdays. Partitions are fetched by read verb only, into the worker's data folder outside the checkout (`LOOKBACK_FETCH.txt`, one line per date: FETCHED or NO_PARTITION). `lookback.csv` is the scan's output; `residual_assets.csv` is its input.
+The window alone cannot carry a price forward for most of the no-trade rows. The lookback scan walked partitions backwards from 2025-12-31 to 2020-03-06, for the 242 residual assets only. It found the latest earlier trade for 52 assets under variant A and 59 under variant B. The rest have no trade in the history read. Of the 2,127 dates in that span, 436 have no partition in S3, 101 of them weekdays. The log holds 2,309 lines because a resumed run re-logged the missing dates. Partitions are fetched by read verb only, into the worker's data folder outside the checkout (`LOOKBACK_FETCH.txt`, one line per date: FETCHED or NO_PARTITION). `lookback.csv` is the scan's output; `residual_assets.csv` is its input.
 
 ## Determinism
 

@@ -377,7 +377,7 @@ def main():
             'aws s3api head-object --bucket opal-data-bd --key silver/prices/canonical_prices.parquet',
             'aws s3api list-objects-v2 --bucket opal-data-bd --prefix silver/transactions/ (1,928 keys; denominator of the key set)',
             'aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet (286 keys, 2026-01-01..2026-10-13; 50 NoSuchKey, see lookback)',
-            'aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet (lookback_scan.py: 2,127 days, 2020-03-06..2025-12-31; 618 NoSuchKey)',
+            'aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet (lookback_scan.py: 2,127 days, 2020-03-06..2025-12-31; 436 with no partition)',
         ],
         'window': '2026-09-16..2026-10-13 (%d weekday dates)' % summ_a['window_weekdays'],
         'served_rows': summ_a['served_rows'],
