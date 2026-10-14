@@ -1,0 +1,44 @@
+RIV-xe-3 session log -- 0.9.0_WK_ETFS_RIVALS~40, worktree C:/tmp/wk-riv-r30-40, branch wk-ETFS_RIVALS-40, base HEAD 9a1ce314dc
+(ANSI colour codes stripped from the pytest lines below; the deciding text is verbatim.)
+
+1. TREE-OK: branch wk-ETFS_RIVALS-40; org and .tools present.
+2. Baseline, check file at base (before the edit):
+   cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py
+   -> 3 failed, 1 passed in 1.71s  (rc=1; ac1, ac2 and ac3 status scenario FAIL; ac3 empty-store PASS)
+3. Edit: data/etfs/scripts/rivalfunds/gold_trade_schedule.py load_actions (+ helper _is_event, constant _ACTION_KEY).
+   Event rows: union over every pull, dedup on (security_id, event_type, raw_event_type, ex_date), greatest (as_of|revision) wins.
+   Status and other non-event rows: old latest-pull rule. Empty store: (None, None, []) unchanged. Signature and triple unchanged.
+4. AC runs after the edit (literal order invocations):
+   -k ac1 -> 1 passed, 3 deselected in 0.96s (rc=0)
+   -k ac2 -> 1 passed, 3 deselected in 1.02s (rc=0)
+   -k ac3 -> 2 passed, 2 deselected in 4.72s (rc=0); rerun -> 2 passed, 2 deselected in 0.94s (determinism)
+5. New test file data/etfs/scripts/rivalfunds/tests/test_riv_xe3_union_reader.py (copy of the three planted-store scenarios):
+   python -m pytest -q rivalfunds/tests/test_riv_xe3_union_reader.py -> 4 passed in 1.14s
+6. Neighbours: python -m pytest -q rivalfunds/tests/test_g52_trade_schedule_v2.py rivalfunds/tests/test_r10rp2_g5_code_replay.py rivalfunds/tests/test_r9gd1_g5_drift.py -> 43 passed in 10.35s (rc=0)
+7. Full package suite: python -m pytest -q rivalfunds/tests -> 1036 passed, 6 skipped in 131.20s (rc=0)
+8. Scratch probes (worktree .scratch/, not committed): void_probe.py (one row, the action, old and new); void_probe2.py
+   (action r1, void r1, short pull r2: OLD ex_dates [2026-09-25], NEW [2026-06-01, 2026-09-25] label r1+r2). Rows S1 and S2 filed.
+9. No existing test assertion was edited or retired. test_the_latest_pull_per_security_wins_in_the_stage_loader is unedited and green.
+10. Not done (out of bounds): live-store DELTA = 0 arm (issuer's drain act); any S3 read; any deploy.
+
+AMENDMENT 1 (issuer ruling on row ETFS_RIVALS-D1-W40-S1; order commit d8ae1862ca):
+11. load_actions now skips every actions-void-* object as a row (price_series._is_void_uri), takes the (void_revision, normalised
+    security_id) pairs from price_series._voids(s) (lazy import), and drops the EVENT rows they name before the union. The uris list
+    still holds every object read. Status rows are not voided. Void-only store -> empty frame, uris listed.
+12. Check after the amendment (literal order invocations):
+    -k ac1 -> 1 passed, 4 deselected in 0.68s; -k ac2 -> 1 passed, 4 deselected in 0.62s; -k ac3 -> 2 passed, 3 deselected in 0.59s
+    -k ac4 -> 1 failed, 4 deselected in 0.80s (rerun 0.87s). AC4 FAILS as written.
+13. Cause, measured: the AC4 void names security_id 'a us equity'. price_series._norm_key (strip, space to underscore) is case-
+    sensitive: the void normalises to 'a_us_equity', the stored rows to 'A_US_Equity'. price_series._actions keeps the same three
+    rows on that store (scratch probe .scratch/ac4_ps_probe.py), so the two readers agree; the rule as ruled does not drop them.
+    The same void spelled 'A US Equity' drops the two rows: worker test test_ac4_mechanism_with_the_stored_key_spelling passes.
+    Surprise row ETFS_RIVALS-D1-W40-S3 (BLOCKING) asks the issuer for the ruling. No case-folding was added (the ruling forbids a divergence).
+14. Own test file: 5 passed, 1 failed (the verbatim AC4 copy). Neighbours: 43 passed in 6.55s. Full rivalfunds suite: 1037 passed,
+    1 failed (the verbatim AC4 copy), 6 skipped in 90.27s.
+
+RESOLUTION OF ROW S3 (coordinator ruling; issuer check commit e9a637d4c9; no case-folding):
+15. The check's AC4 void now names 'A US Equity' (the stored spelling). The worker test file's AC4 copy carries the same corrected
+    scenario; the duplicate test_ac4_mechanism_with_the_stored_key_spelling was dropped. The file has no failing test.
+16. Literal re-runs on the current build: -k ac1 -> 1 passed, 4 deselected in 0.53s; -k ac2 -> 1 passed, 4 deselected in 0.51s;
+    -k ac3 -> 2 passed, 3 deselected in 0.55s; -k ac4 -> 1 passed, 4 deselected in 0.51s (repeats 0.50s, 0.71s).
+    Own test file -> 5 passed in 0.60s. Neighbours -> 43 passed in 5.95s. Full rivalfunds suite -> 1037 passed, 6 skipped in 74.17s.
