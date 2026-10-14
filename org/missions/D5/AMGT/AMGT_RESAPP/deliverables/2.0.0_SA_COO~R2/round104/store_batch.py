@@ -3,7 +3,7 @@
   AIFILL_SERVED_FUNCTION=<fn> ANTHROPIC_API_KEY=<key> PYTHONPATH=<repo root> python store_batch.py --names A,B --out DIR [--confirm-write] [--workers 4] [--cap-usd 75] [--no-model]
   ... --census-file census_sections.json  takes every resolved name of the V1 census (95).
 
-One `python -m lib.research.aifill.run --key K --out DIR/draw<n>` per draw (a subprocess, so the producer is exactly the merged command). A draw with a block withheld for "no citable source", "too long" or "model call failed" gets ONE more
+One `python -m lib.research.aifill.run --key K --out DIR/draw<n>` per draw (a subprocess, so the producer is exactly the merged command). A draw with a block withheld for "no citable source", "too long", "model call failed", "described its work" or "outside English" (round 105) gets ONE more
 draw (the model's web answers vary run to run); the draw with the most filled blocks is the name's document, and with --confirm-write that document (and only it) is stored through `lib.research.aifill.store.write_document`
 (validated first, to the builder address). Every draw's cost counts toward the cap. After EACH name finishes it reads that name's
 documents from DIR, sums the model calls' token cost at the module's rates (claude-opus-5: 5 USD per million input tokens, 25 per million output), and PROJECTS the total (spent / done * total, times 1.15 for the discarded Opal-path
@@ -47,7 +47,7 @@ def filled(doc):
 
 def retryable(doc):
     reasons = " ".join((b.get("reason") or "") for b in (doc.get("blocks") or {}).values())
-    return "citable" in reasons or "too long" in reasons or "model call failed" in reasons
+    return any(s in reasons for s in ("citable", "too long", "model call failed", "described its work", "outside English"))
 
 
 def run_one(key, out_dir, confirm, no_model):
