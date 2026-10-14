@@ -1,0 +1,77 @@
+{
+  "answer": {
+    "holdings_date_means": "UNDETERMINED",
+    "words": "Not decided. No independent close series for the window is reachable inside the grant or held in the repo, so no partition's prices were compared with any close and the offset is unmeasured. Every date carrier in the 2026-10-13 partition names the partition day (the as-of column and the vendor file label), which shows the label, not the close the prices equal.",
+    "claim": "absent"
+  },
+  "evidence": {
+    "date_carriers": [
+      {
+        "surface": "partition key date= (folder name) under blackdiamond/cottonwood/silver/fact_holdings/",
+        "carries": "the partition date D; 93 partitions dated 2026-06-09 through 2026-10-13, one object each",
+        "claim": "measured"
+      },
+      {
+        "surface": "column _source_as_of (string) in data.parquet",
+        "carries": "a business as-of date equal to the partition key on all 21,412 rows of the 2026-10-13 partition; it labels the file's day and does not say which close the prices hold",
+        "claim": "measured"
+      },
+      {
+        "surface": "column _source_file (string) with the value HOLDINGS_DAILY_<date>.xlsx",
+        "carries": "the vendor file label; its date equals the partition key in the 2026-10-13 partition (one distinct value); whether the label is a close day or a pull day is not stated by the file",
+        "claim": "measured"
+      },
+      {
+        "surface": "S3 object LastModified (object metadata of each data.parquet)",
+        "carries": "the day the object was written: the day after its partition date for 44 of 93 partitions and later for 49, 27 of those 49 written on 2026-07-14; a write stamp, not a business date",
+        "claim": "measured"
+      },
+      {
+        "surface": "any price date or time column in the 26 columns of the 2026-10-13 partition",
+        "carries": "none: no price-date or time column exists in the file",
+        "claim": "measured"
+      },
+      {
+        "surface": "bronze or pull stamp for the Black Diamond holdings (outside the one granted prefix)",
+        "carries": "not read: the grant is one silver prefix, so whether a bronze pull stamp exists is unknown to this read",
+        "claim": "absent"
+      }
+    ],
+    "files_compared": 0,
+    "denominator": {
+      "dated_files": 86,
+      "scope_words": "all partitions of the one granted prefix dated 2026-06-16 through 2026-10-13, the 120 calendar days back from 2026-10-14; 86 of the 93 partitions listed"
+    },
+    "offset_definition": "Not applied. An offset of 0 would mean the prices equal the partition date's close and an offset of 1 the prior trading day's close; measuring either needs an independent close series, and none was reachable within the grant.",
+    "offset_distribution_days": {},
+    "claim": "absent"
+  },
+  "positive_control": {
+    "description": "NOT RUN. The offset method was not applied to a planted one-day shift because the cell stopped at its refusal for lack of an independent close series.",
+    "expected": "offset 1 on a planted one-day shift",
+    "observed": "not run",
+    "passed": false
+  },
+  "citation_today": {
+    "file": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx",
+    "line": 623,
+    "takes_date_from": "snapshot.businessAsOf, set by adaptHoldingsSnapshot (contracts/adapt.ts) from the wire clock wire.clocks.business_date",
+    "words": "The holdings footer prints a date with a fixed 5:00p ET clock. It passes the date alone to PanelFooter, whose formatPanelTimestamp builds the time through create5pmETDate, so the clock is a convention and no time is read from the file or the pull. HoldingsTreemap.tsx line 620 and AllocationBars.tsx line 305 carry the same footer pattern. The workspace portal holds the adapter at adapt.ts lines 1164, 1229 and 1233.",
+    "claim": "measured"
+  },
+  "consequence": {
+    "citation_must_change": false,
+    "words": "Not decided, since the answer is UNDETERMINED. The date stands until the offset is measured. The 5:00p ET clock is a constructed convention and would have to go under a PULL_DATE answer whatever the date source is."
+  },
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "s3_reads": 4
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
