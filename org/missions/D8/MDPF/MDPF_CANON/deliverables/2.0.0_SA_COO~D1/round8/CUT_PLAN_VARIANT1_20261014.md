@@ -14,7 +14,7 @@ Fan-out: 2 of 2 chains, cap 8; one data edge (CN-p-2's real run waits on CN-p-1'
 
 ## Open before the cut (mine to read, or the CTO's to rule)
 
-1. **How the portal knows a session is internal.** The stitch is "internal sessions only"; I have not found the signal the page can read. Read `portal/src` for the user type field the other internal-only pages use before writing CN-p-2.
+1. **How the portal knows a session is internal: ANSWERED (read, ~20:5xZ).** `ModelPortfolios.tsx` already holds it: line 385, `const internal = isInternal() || isDev()` from `useAuth()` (`AuthContext.tsx:786-801`: internal is the opal-capital firm claim, dev is `userType === 'Dev'`). CN-p-2 reuses `internal`; no new signal. Not read: whether `internal` is true in a demo-tenant session (the CVO refused v2.19 because the demo tenant opens Global), which is the case the gate exists for, so the cell's check must name a demo-tenant claim set and grade the stitch OFF for it.
 2. **The history leaf (CN-j-1, deployed) is probably unused by this Trend.** The spec takes Client Supervised per date from the Global difference, "replacing `clientChipAt`", so the Trend no longer reads `category-views-history`. That makes CN-j-2 (surface a history-row error, a condition of the promote under the CTO's earlier ruling) possibly moot. Put to the CTO: withdraw CN-j-2, or keep it for another reader.
 3. **The never-widen pair for CN-p-1:** count the writers of each moved Global leaf (N printed), both branches, a rollback per key; the spec says every Global leaf is read before and after and the headline sums must be byte-equal.
 4. **Tooling:** the pixel comparison and the `--hover-after-press` option exist; the smoke is on 5174 and the CRO wants one line (branch and head hash) when it is ready.
