@@ -27,6 +27,7 @@ NEW_FIELDS = {"table", "layer", "format", "contract", "nl_tags", "retired"}
 
 def resolve_prefix(row):
     if "prefix_key" in row:
+        g1lib.use_registry()
         sys.path.insert(0, os.path.join(ROOT, "lib"))
         import opal_naming
         addr = opal_naming.legacy_address(row["prefix_key"])
@@ -46,7 +47,7 @@ def load_rows(d):
 
 
 def contract_of(c):
-    return {"id": c["contract_id"], "size": c["size"], "keys": c["securities"], "freshness": c["freshness"],
+    return {"id": g1lib.enc(c["contract_id"]), "size": c["size"], "keys": c["securities"], "freshness": c["freshness"],
             "partition": c["partition"], "producer": c["producer"]}
 
 
@@ -65,8 +66,8 @@ def ac1(d, g1):
         if fn != "harvest_%s.yaml" % g1lib.slug(p or ""):
             errs.append("%s: file name is not harvest_%s.yaml" % (fn, g1lib.slug(p or "")))
         if p in g1:
-            if (r.get("contract") or {}).get("id") != g1[p]["contract_id"]:
-                errs.append("%s: contract.id %r != %r" % (fn, (r.get("contract") or {}).get("id"), g1[p]["contract_id"]))
+            if (r.get("contract") or {}).get("id") != g1lib.enc(g1[p]["contract_id"]):
+                errs.append("%s: contract.id %r != %r" % (fn, (r.get("contract") or {}).get("id"), g1lib.enc(g1[p]["contract_id"])))
             lk = g1lib.legacy_key(p)
             if lk and r.get("prefix_key") != lk:
                 errs.append("%s: legacy hyphen table must carry prefix_key %s (never a typed literal)" % (fn, lk))
@@ -76,7 +77,7 @@ def ac1(d, g1):
                 errs.append("%s: exactly one of prefix / prefix_key" % fn)
     missing = sorted(set(g1) - set(prefixes))
     extra = sorted(set(prefixes) - set(g1))
-    ids_ok = sum(1 for p, fn in prefixes.items() if p in g1 and (rows[fn].get("contract") or {}).get("id") == g1[p]["contract_id"])
+    ids_ok = sum(1 for p, fn in prefixes.items() if p in g1 and (rows[fn].get("contract") or {}).get("id") == g1lib.enc(g1[p]["contract_id"]))
     print("ROWS files=%d; G1 contracts=%d @%s; prefix set equal=%s (missing %d, extra %d); contract.id match %d of %d; other errors %d"
           % (len(rows), len(g1), g1lib.PIN, "yes" if not missing and not extra else "NO", len(missing), len(extra), ids_ok, len(g1), len(errs)))
     for x in missing[:5]:
