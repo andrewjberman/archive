@@ -12,7 +12,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-219.shared-as-of-helper-never-shows-an-invented-clock.md",
     "group": "OTHER",
-    "vintage_commit": "a54a1d5d12d7ba622b90e35981918297a947a807"
+    "vintage_commit": "9790e3c5261469f307f36b19446b0f6a3013ecbe"
   },
   "assignee": "0.9.0_WK_IRPT_DASHBD~176",
   "artifacts_produced": [
@@ -57,6 +57,13 @@
       "commit_or_etag": "00f5c1b44cd257a63eacac0ec0cf15202ddf51cd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "test file on the portal candidate branch wk-IRPT_DASHBD-176-portal, never pushed"
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-120.golden/model_portfolios_mount.before.html",
+      "kind": "test",
+      "commit_or_etag": "b763674bb4d5e62e40e6dbec78f4d7dacc34ba06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "golden on the portal candidate branch wk-IRPT_DASHBD-176-portal, one sentence re-pinned per issuer amendment W176-S1; never pushed"
     }
   ],
   "acceptance": [
@@ -85,16 +92,15 @@
       "criterion_verbatim": "no product file under `portal/src` builds its own `17:00:00` timestamp; `formatPanelTimestamp` makes no 5 PM instant for display; `DataAsOf.tsx` builds none; and `ASOF_R110.json` is complete: a portal commit on `wk-IRPT_DASHBD-176-portal` descending from the PROD release `6a5926fc`, files under `src/`, the caller census (at least 25 files), a failing mutant, lint 0, typecheck 0, no new failing test, pushed false, deployed false. Base: FAIL (no record; two pages build a 17:00 string).",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r110/p110_asof.py\" . DB110-4-AC3",
-      "output_evidence": "FAIL: tests: mutant_failed true, lint 0, typecheck 0, no new failing test\nDB110-4-AC3 FAIL",
-      "denominator": "0 of 1 criterion (the record's suite_after.new_failing_ids holds 1 id, IVE120 test (b), outside the grant; every earlier check in the same run passed)",
-      "status": "FAIL",
-      "status_reason": "The checker's record check refuses the record because suite_after.new_failing_ids is not empty: IVE120 test (b), the ModelPortfolios byte-for-byte golden, is outside the <paths> grant. Filed as surprise IRPT_DASHBD-D2-W176-S1 (BLOCKING). Not repaired: the golden was not edited.",
+      "output_evidence": "OK: 646 product files scanned, none builds a 17:00 timestamp; the display paths make no 5pm instant; record bound to a portal commit descending from 6a5926fc\nDB110-4-AC3 PASS",
+      "denominator": "646 product files scanned for 17:00:00 and the display paths; 1 of 1 criterion",
+      "status": "PASS",
       "expect": "DB110-4-AC3 PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "temporary mutant: formatPanelTimestamp's date-only branch returns formatDateWithOrdinal(create5pmETDate(...)), the invented clock put back; then reverted with git checkout",
+      "description": "temporary mutant: formatPanelTimestamp's date-only branch returns formatDateWithOrdinal(create5pmETDate(...)), the invented clock put back; then reverted with git checkout (dateUtils.ts unchanged since the mutant run)",
       "expected": "the new test as-no-invented-clock fails",
       "observed": "FAIL, 1 fail, 7 failing expectations: null/undefined 2026-10-03, 2026-01-09, 2026-03-08, 2026-11-01 each wrote a 5:00p ET clock, and the two before-and-after-5pm readings wrote a clock; git diff HEAD on dateUtils.ts empty after revert",
       "status": "FIRED-AS-EXPECTED"
@@ -111,8 +117,8 @@
       "reason": "forbidden by the order's BOUNDS; the issuer names the candidate branch and registers its approval row"
     },
     {
-      "item": "edit to iv-e-120.total-base-in-the-card.test.tsx golden line (ModelPortfolios date-only footer)",
-      "reason": "outside the <paths> grant; filed as BLOCKING surprise IRPT_DASHBD-D2-W176-S1 for a ruling"
+      "item": "iv-e-120.total-base-in-the-card.test.tsx (the test file itself)",
+      "reason": "left untouched; the issuer amendment names only the golden for one sentence"
     },
     {
       "item": "the 15 base-suite failures (S60, F14-AC3, producer fixtures, AR-y-248 cases, three unnamed)",
@@ -120,7 +126,7 @@
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W176-S1: the shared as-of fix changes a date-only footer whose byte-for-byte golden (iv-e-120 test (b)) sits outside the grant; suite_after gains one failing id"
+    "IRPT_DASHBD-D2-W176-S1: the shared as-of fix changed a date-only footer whose byte-for-byte golden (iv-e-120 test (b)) sat outside the grant; the issuer amendment (9790e3c) admitted the golden for one sentence and it is re-pinned at b763674b"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~176/ASOF_R110.json",
   "compiler_tools": [
@@ -132,12 +138,17 @@
     {
       "tool": "tsc",
       "invocation": "bun run typecheck",
-      "result": "tsc -b --noEmit RC=0"
+      "result": "tsc -b --noEmit RC=0 at b763674b"
     },
     {
       "tool": "eslint",
       "invocation": "bun run lint",
-      "result": "RC=0; 358 problems (0 errors, 358 warnings); the warnings on touched files: DataAsOf.tsx react-refresh/only-export-components (the export the order requires)"
+      "result": "RC=0; 358 problems (0 errors, 358 warnings) at b763674b"
+    },
+    {
+      "tool": "bun test (whole scope)",
+      "invocation": "bun test (portal, tip b763674b)",
+      "result": "1530 tests, 485 files: 1488 pass, 27 skip, 15 fail; the 15 fail are the base failures; new_failing_ids []"
     }
   ]
 }
