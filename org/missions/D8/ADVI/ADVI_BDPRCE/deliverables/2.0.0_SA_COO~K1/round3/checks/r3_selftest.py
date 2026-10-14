@@ -53,6 +53,19 @@ GOOD = {
 }
 
 
+def _r13(kind, **extra):
+    rec = copy.deepcopy(GOOD[kind])
+    rec["amendment"] = "R1.3"
+    rec["served_units"] = {"assets": 10, "per100": 3, "per_unit": 6, "unreadable": 1}
+    rec.update(extra)
+    return rec
+
+
+GOOD["ruleprobe3"] = _r13("ruleprobe2", unit_changed_assets=0)
+GOOD["replay3"] = _r13("replay2", unit_changed_rows=0, unit_map_file="U.csv", unit_withheld_rows=1)
+GOOD["packet3"] = _r13("packet2", held_unit_rows=0)
+
+
 def mutant(kind, why, edit):
     rec = copy.deepcopy(GOOD[kind])
     edit(rec)
@@ -60,6 +73,14 @@ def mutant(kind, why, edit):
 
 
 MUTANTS = [
+    mutant("ruleprobe3", "amendment R1.2 offered", lambda r: r.update(amendment="R1.2")),
+    mutant("ruleprobe3", "a unit changed", lambda r: r.update(unit_changed_assets=1)),
+    mutant("ruleprobe3", "unit classes do not sum", lambda r: r["served_units"].update(per100=4)),
+    mutant("ruleprobe3", "no unit map", lambda r: r.pop("served_units")),
+    mutant("replay3", "a row changed unit", lambda r: r.update(unit_changed_rows=2)),
+    mutant("replay3", "no unit map file", lambda r: r.pop("unit_map_file")),
+    mutant("packet3", "a row still held", lambda r: r.update(held_unit_rows=1)),
+    mutant("packet3", "amendment R1.2 offered", lambda r: r.update(amendment="R1.2")),
     mutant("ruleprobe2", "wrong amendment", lambda r: r.update(amendment="R1")),
     mutant("ruleprobe2", "transfer in kept", lambda r: r.update(transfer_in_out=False)),
     mutant("ruleprobe2", "reinvestment out", lambda r: r.update(reinvestment_in=False)),
