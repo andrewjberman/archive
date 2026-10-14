@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-c-1.rule-amendment",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R3.md",
+    "vintage_commit": "218e74901d",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-1.rule-amendment.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-1.rule-amendment.md",
+    "group": "OTHER",
+    "vintage_commit": "764b250a98"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~20",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/bd_price_rule.py",
+      "kind": "script",
+      "commit_or_etag": "33195e2009",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT R1.3, second correction (order section 1.0000): served_unit_map(pairs) reads asset_name, served_price, per_unit_value; median ratio in [50, 200] -> per100, in [0.5, 2] -> per_unit, else unreadable (inclusive); trade-row 1 percent bands unchanged; RULE_ID R1; no writer imports it; no AWS call and no file read in the module; LOCAL on wk-ADVI_BDPRCE-20, not pushed"
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/tests/test_bd_price_rule.py",
+      "kind": "test",
+      "commit_or_etag": "33195e2009",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "53 arms on planted in-memory frames, no AWS; arm 50 (coarse band readings), arm 52 (constants) and arm 53 (band edges, inclusive, and the gaps) are the second-correction arms; LOCAL"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/RULE_PROBE3.json",
+      "kind": "config_data",
+      "commit_or_etag": "33195e2009",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "probe record over the real partitions and the served canonical series, read_at 2026-10-14T04:34:19Z, deterministic true, md5 73539f000ee5c0728194777bc7bff5fb; read verbs only; LOCAL on wk-ADVI_BDPRCE-20"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/RULE_PROBE3.md",
+      "kind": "doc",
+      "commit_or_etag": "33195e2009",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-page account of the second correction: the bands, the three pair sources, the served-unit counts per100 1 / per_unit 824 / unreadable 63 of 888 with per-source resolved counts, the named assets, the withheld rows and the rows filed; LOCAL"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/rule_probe3.py",
+      "kind": "script",
+      "commit_or_etag": "33195e2009",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the read-only probe that produced RULE_PROBE3.json: three served-pair sources (nearest earlier trade over all 1,928 verified partitions, same-date trade, lot extract) and one median per asset; LOCAL"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/ADVI_BDPRCE.TO-BP-c-1.session.log.txt",
+      "kind": "doc",
+      "commit_or_etag": "d33b801c51",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the commands run and their deciding output for the first pass and the continuations; not updated in the second correction; LOCAL"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs the test (at least 40 arms); AC1 is the built behaviour (each clause on planted frames)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-20 && timeout 100 python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py",
+      "expect": "^BD PRICE RULE TEST: OK ([4-9][0-9]) arms$",
+      "output_evidence": "BD PRICE RULE TEST: OK 53 arms",
+      "denominator": "53 arms run, 53 passed (the test prints FAIL and exits 1 at the first failing arm; none failed); rc 0; the expectation is at least 40 arms",
+      "status": "PASS",
+      "status_reason": "the printed line matches ^BD PRICE RULE TEST: OK ([4-9][0-9]) arms$ and rc is 0. Arm 50 (coarse band readings), arm 52 (the constants) and arm 53 (band edges, inclusive, and the gaps) are the second-correction arms; the other arms stand as built."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 runs r3_checks.py ruleprobe3 on RULE_PROBE3.json; the grader is shape and arithmetic, not the measurement",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-20 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py ruleprobe3 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/RULE_PROBE3.json",
+      "expect": "^RULEPROBE3 record ok amendment=R1.3 assets=[0-9]+ per100=[0-9]+ per_unit=[0-9]+ unreadable=[0-9]+ unit_changed=0$",
+      "output_evidence": "RULEPROBE3 record ok amendment=R1.3 assets=11 per100=1 per_unit=824 unreadable=63 unit_changed=0",
+      "denominator": "11 asset rows in the probe record; 888 served assets in served_units (1 per100 + 824 per_unit + 63 unreadable = 888); unit_changed_assets 0; the expectation regex; rc 0",
+      "status": "PASS",
+      "status_reason": "the printed line matches the expectation and rc is 0. The grader proves the record shape, the read-only calls and the arithmetic; it does not prove the measured values, which are in RULE_PROBE3.md and rows S10 to S13. The named values read as the order expects (see declared_exclusions); the grader is not the evidence for them."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound with the same four allows plus this order file",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-20 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-20 --allow data/black_diamond/scripts/silver/bd_price_rule.py --allow data/black_diamond/scripts/silver/tests/test_bd_price_rule.py --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md --allow org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-1.rule-amendment.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 9 changed, 0 outside, 0 required missing",
+      "denominator": "9 changed paths against the base: 2 module and test files, 5 deliverables (proof instance, session log, RULE_PROBE3.json, RULE_PROBE3.md, rule_probe3.py), 1 surprise-channel file, 1 order file (changed by the issuer at 764b250a98; not changed by this worker in this continuation); 0 outside the allows; 0 required missing; rc 0",
+      "status": "PASS",
+      "status_reason": "every changed path is inside the allows. The printed label reads ROUND 4 because the checker is reused unchanged. The order file is in the allows because the issuer changed it; this worker changed no byte of it."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "status": "FIRED-AS-EXPECTED",
+      "description": "two mutants of RULE_PROBE3.json copied to .scratch and graded by the unchanged grader: (a) unit_changed_assets set to 1; (b) amendment set to R1.2",
+      "expected": "each copy FAILS with rc=1",
+      "observed": "(a) RULEPROBE3 record FAIL unit_changed_assets must be 0 (R1 changes values, never units), rc=1; (b) RULEPROBE3 record FAIL amendment must be R1.3 and the probe deterministic, rc=1"
+    },
+    "determinism": {
+      "status": "STABLE",
+      "observed": "a separate python process at --read-at 2026-10-14T04:34:19Z writes a file byte-equal to the committed RULE_PROBE3.json (md5 73539f000ee5c0728194777bc7bff5fb for both); the probe also compares two builds inside each process (deterministic true, determinism md5 52f96ec0... for both)",
+      "method": "rule_probe3.py run as a separate process with the committed read clock; cmp of the two JSON files"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "MORGAN STANLEY FIN LLC 0% 05/03/2029 reads 100.0 on 2025-05-28 (per100, as executed)",
+      "reason": "MET by measurement. Its served unit is read as per100 (median 115.995) from its nearest earlier Buy (2025-05-28, price 100.0, ratio 100.0), which the coarse band admits; the row is kept as executed (par_as_executed 1)."
+    },
+    {
+      "item": "served per100 assets: the order expects them listed by name",
+      "reason": "MET: one asset, MORGAN STANLEY FIN LLC 0% 05/03/2029 (per100_assets in the record; RULE_PROBE3.md)."
+    },
+    {
+      "item": "MIAMI-DADE CNTY FLA EDL FACS A 5.25% 04/01/2031 reads 1.0419 on 2026-10-09; unit_scale_rows_unchanged 8 of 8",
+      "reason": "MET by measurement: 1.0419 per_unit (served 1.0419); the eight round-2 scale_100x rows read equal to their served prices (8 of 8)."
+    },
+    {
+      "item": "BLACKROCK INC COM reads 1074.9259 on 2026-09-22; ALLSPRING CORE BOND CIT CLASS E2 reads 10.3525 on 2026-10-02",
+      "reason": "MET by measurement: BLACKROCK per_unit (Dividend Reinvestment rows); ALLSPRING per_unit (Buy rows), not scaled."
+    },
+    {
+      "item": "par_quoted: assets_scaled 8, scaled_rows 24, par_as_executed 1, converted_to_per100 0",
+      "reason": "Measured. converted_to_per100 is zero because no Fixed Income row on the probe dates is per-unit-shaped under a per100 unit; that path is exercised only by AC1 arm 38."
+    },
+    {
+      "item": "AC2 as evidence that the amendment is implemented as ruled",
+      "reason": "The grader proves shape, read-only calls and arithmetic. The behaviour is proved by AC1 arms on planted frames; the measured counts are in RULE_PROBE3.md and the surprise rows."
+    },
+    {
+      "item": "unit reads the coarse bands do not carry on the probe dates: four assets between the bands; 202 withheld Fixed Income rows, 190 of them on 17 assets absent from the served map; the ISHARES median set by lot pairs",
+      "reason": "Measured and printed; filed as ADVI_BDPRCE-D1-W20-S11, -S12 and -S13. No number is adjusted; the disposition is the COO's and the CTO's."
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W20-S1: first-pass row on the lot-extract source (MORGAN, the eight round-2 names and the other named bonds absent from the extract); superseded in part by the served-pair source, the eight rows now read equal (8 of 8); the MORGAN part is re-filed as ADVI_BDPRCE-D1-W20-S5; ARMED, disarm 2.0.0_SA_COO~K1",
+    "ADVI_BDPRCE-D1-W20-S2: first-pass row (54 of 84 near-1 rows withheld); re-read on the served-pair source as ADVI_BDPRCE-D1-W20-S9 (197 of 203); ARMED, disarm 2.0.0_SA_COO~K1",
+    "ADVI_BDPRCE-D1-W20-S3: the order's four probe dates omit 2026-09-16; the probe reads that date and its next day; INERT",
+    "ADVI_BDPRCE-D1-W20-S4: the lot-extract skip of a missing or non-positive current price; the pair form now skips a served price or per-unit value that is missing or non-positive, as section 1.000 states; INERT",
+    "ADVI_BDPRCE-D1-W20-S5: MORGAN STANLEY FIN LLC 0% 05/03/2029 had no usable pair under the first-pass sources; on the second correction it reads per100 from its nearest earlier Buy (2025-05-28) and the 2025-05-28 row reads 100.0 as executed. The row no longer holds (no new row filed); the ARMED disarm of W20-S5 is met by the measurement.",
+    "ADVI_BDPRCE-D1-W20-S6: no served asset read per100 under the first-pass ten-percent bands; on the coarse bands one does (MORGAN). The row no longer holds (no new row filed).",
+    "ADVI_BDPRCE-D1-W20-S7: the 2026 same-date partitions sit under tx/ and r3-14-data/tx/, not tx_back/ as the order names; INERT",
+    "ADVI_BDPRCE-D1-W20-S8: the served canonical object was rewritten after the replay read it (ETag a88a7030 at 04:03:36Z, against 8eaa29e3 at 00:13:47Z); ARMED, disarm 2.0.0_SA_COO~K1",
+    "ADVI_BDPRCE-D1-W20-S9: re-read on the second correction as ADVI_BDPRCE-D1-W20-S11: still true in its new form (202 withheld Fixed Income rows, 190 on 17 assets absent from the served map, 12 on ISHARES between the bands).",
+    "ADVI_BDPRCE-D1-W20-S10: re-read of W20-S1 on the second correction: the lot extract still carries no lot for the nine named and scale names (MORGAN and the eight round-2 scale_100x names); their units come from served pairs only; OBSERVATION, INERT.",
+    "ADVI_BDPRCE-D1-W20-S11: re-read of W20-S9 on the second correction: 202 Fixed Income rows withheld unit_unreadable on the five probe dates; 190 on 17 assets the served map does not carry, 12 on ISHARES CORE U.S. AGGREGATE BOND ETF (median 3.5498, between the bands); OBSERVATION, ARMED, disarm 2.0.0_SA_COO~K1.",
+    "ADVI_BDPRCE-D1-W20-S12: four served assets have a median served-pair ratio between the bands and read unreadable (CALL NVIDIA CORP $250 EXP 10/02/26 0.4972; ISHARES 3.5498; VANGUARD FTSE ALL-WORLD EX-US SMALL-CAP ETF 3.8175; VISTANCE NETWORKS INC COM 3.7725); OBSERVATION, INERT.",
+    "ADVI_BDPRCE-D1-W20-S13: the lot pairs set the served-unit median of ISHARES CORE U.S. AGGREGATE BOND ETF against its own same-date trades (median 1.0 over 12 pairs; 61 usable lots median 5.397952; all-pairs median 3.5498); OBSERVATION, ARMED, disarm 2.0.0_SA_COO~K1."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/ADVI_BDPRCE.TO-BP-c-1.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws shim, READ verbs only",
+      "invocation": "aws s3api head-object --bucket opal-data-bd --key silver/prices/canonical_prices.parquet; head-object --key silver/bd_assets_dim.parquet (the second correction issued no get-object; the local copies are the first pass's, and the probe checks their md5 against the ETags)",
+      "result": "rc 0; canonical ETag a88a7030f4506ac7e0cdb844382f9d16 (LastModified 2026-10-14T04:03:36Z) and dimension ETag 45dfaab5b5756b8458c6cfae63bf9f38 (LastModified 2026-10-13T22:12:26Z) read live before the probe and equal its constants; no write verb issued"
+    },
+    {
+      "tool": "rule_probe3.py (read-only probe, python -I)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~20/rule_probe3.py --canonical C:/dev/wk-bdprce-r3-20-data/canonical_prices.parquet --dim C:/dev/wk-bdprce-r3-20-data/bd_assets_dim.parquet --manifest org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~14/PARTITIONS2.csv --silver data/black_diamond/scripts/silver --lots C:/dev/wk-bdprce-r2-7-data/lot_extract.csv --served org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~6/BEFORE_AFTER.csv --read-at 2026-10-14T04:34:19Z --out <path>",
+      "result": "PROBE3 wrote RULE_PROBE3.json deterministic=True assets=11 served={assets 888, per100 1, per_unit 824, unreadable 63} (rc 0); the separate-process rerun at the same read clock is byte-equal (rc 0)"
+    }
+  ]
+}
