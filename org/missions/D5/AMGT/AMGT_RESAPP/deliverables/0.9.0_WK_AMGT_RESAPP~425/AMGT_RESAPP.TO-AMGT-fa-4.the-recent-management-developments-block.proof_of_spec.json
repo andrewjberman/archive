@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-4.the-recent-management-developments-block.md",
     "group": "OTHER",
-    "vintage_commit": "0a4abb922c"
+    "vintage_commit": "31be9c28ac"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
@@ -17,29 +17,29 @@
     {
       "path_or_key": "lib/research/aifill/block_mgmt_recent.py",
       "kind": "script",
-      "commit_or_etag": "707dba3c8eac565d9521ba202a1b7ec27ae73006",
+      "commit_or_etag": "74fa6bb03f24bb97fbcd5028db3bbe9be8be9dd2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The mgmt_recent block builder: build_block(ctx) with the OPAL path (served feed headlines in the 90 days up to ctx.now, newest five), the WEB path (web search, three uses) and NONE. A library module with no I/O and no deploy surface; the acceptance check imports it offline.",
-      "introduces": ["build_block"],
+      "deploy_evidence": "The mgmt_recent block builder, amendment 2 applied: both prompts state the 700-character limit; a reply over the 800-character cap is cut at its last sentence end that fits; the Opal path that yields NONE falls through to the web path; both NONE gives the Opal reason, one space, then the web reason. A library module with no I/O and no deploy surface; the acceptance check imports it offline.",
+      "introduces": ["_cut_at_sentence"],
       "artifact_covered_by": ["AC1"]
     },
     {
       "path_or_key": "lib/research/aifill/tests/test_block_mgmt_recent.py",
       "kind": "test",
-      "commit_or_etag": "707dba3c8eac565d9521ba202a1b7ec27ae73006",
+      "commit_or_etag": "74fa6bb03f24bb97fbcd5028db3bbe9be8be9dd2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Offline pytest module: stub model, the recorded ASML fixture with the feed items replaced. 28 test cases from 25 functions. No network, no AWS, no real model call.",
+      "deploy_evidence": "Offline pytest module: stub model, the recorded ASML fixture with the feed items replaced. 41 test cases from 38 test functions (one function parametrized over four inputs). No network, no AWS, no real model call.",
       "artifact_covered_by": ["AC2"]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "the line `AIFILL FA-4 ARMS: YES (N of N)` with N equal to the count printed and N at least 12, no `FAIL` arm line above it; and exit=0",
+      "criterion_verbatim": "the line `AIFILL FA-4 ARMS: YES (N of N)` with N equal to the count printed and N at least 17, no `FAIL` arm line above it; and exit=0",
       "method": "command",
       "invocation": "cd C:/dev/wk-resapp-425 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa4_mgmt_recent.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
-      "output_evidence": "ARM the 90-day window is measured from ctx.now, not the wall clock PASS None\nARM a model failure propagates                           PASS RuntimeError\nARM no I/O imports; source is ASCII                      PASS []\nAIFILL FA-4 ARMS: YES (12 of 12)\nexit=0",
-      "denominator": "12 of 12 arms (N counted by the check's own finish line; no FAIL arm line in the full output, grep count 0)",
+      "output_evidence": "ARM both prompts state the 700-character limit           PASS nts of strategy by management. Answer in two to four plain sentences of no more than 700 characters.\nARM a model failure propagates                           PASS RuntimeError\nARM no I/O imports; source is ASCII                      PASS []\nAIFILL FA-4 ARMS: YES (17 of 17)\nexit=0",
+      "denominator": "17 of 17 arms (the check's own finish line; the full run printed 17 ARM lines and 0 lines containing ' FAIL', measured with grep -c on the committed bytes at 74fa6bb)",
       "status": "PASS",
       "expect": "AIFILL FA-4 ARMS: YES \\((\\d+) of \\1\\)[\\s\\S]*exit=0"
     },
@@ -48,22 +48,22 @@
       "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
       "method": "test_suite",
       "invocation": "cd C:/dev/wk-resapp-425 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_block_mgmt_recent.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
-      "output_evidence": "............................                                             [100%]\n28 passed in 0.10s\nexit=0",
-      "denominator": "28 of 28 test cases passed (25 test functions; one function parametrized over 4 inputs)",
+      "output_evidence": ".........................................                                [100%]\n41 passed in 0.15s\nexit=0",
+      "denominator": "41 of 41 test cases passed (38 test functions; one function parametrized over four inputs; grep of '^def test_' in the module gives 38)",
       "status": "PASS",
       "expect": "[0-9]+ passed in [0-9.]+s[\\s\\S]*exit=0"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The task order names no mutant for this cell; the acceptance battery is the spec's own check of 12 arms.",
+      "description": "The task order names no mutant for this cell; the acceptance battery is the spec's own check of 17 arms.",
       "expected": "n/a -- no mutant named by the spec",
       "observed": "no mutant run; the spec names none",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "AC1 invocation run twice on the committed bytes (first run full output to .scratch/ac1_full.txt, second run the exact tail invocation); AC2 pytest invocation run twice on the committed bytes",
-      "observed": "AC1 both runs: AIFILL FA-4 ARMS: YES (12 of 12), exit 0. AC2 both runs: 28 passed, exit 0.",
+      "method": "AC1 invocation run on the committed bytes, then the full run (stdout to .scratch/ac1_full.txt) run again; AC2 pytest invocation run twice on the committed bytes",
+      "observed": "AC1 both runs: AIFILL FA-4 ARMS: YES (17 of 17), exit 0, 0 FAIL lines. AC2 both runs: 41 passed in 0.15s, exit 0.",
       "status": "STABLE"
     }
   },
@@ -81,23 +81,33 @@
       "reason": "The task order names no mutant; controls.mutant is recorded N/A-SPEC-NAMES-NONE rather than invented."
     }
   ],
-  "surprises": [],
-  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~425/AMGT_RESAPP.TO-AMGT-fa-4.session_log.txt",
+  "surprises": [
+    "AMGT_RESAPP-D1-W425-S1: the fa-4 preflight says the check exits 1 at base on ModuleNotFoundError for lib.research.aifill; at the reopened base the module imports and the check runs to 13 of 17 arms (stale premise; nothing edited to fit it).",
+    "AMGT_RESAPP-D1-W425-S2: the face says earlier W425 rows exist in the channel; the channel at the reopened base holds none, so k starts at 1.",
+    "AMGT_RESAPP-D1-W425-S3: the channel header says the file must stay one fenced JSON block, but the file holds 149 separate row blocks; the row was appended in the existing layout.",
+    "AMGT_RESAPP-D1-W425-S4: the order does not sequence the numeric guard against the sentence cut; the builder runs the guard on the whole Opal reply, then cuts."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~425/AMGT_RESAPP.TO-AMGT-fa-4.session_log_amend2.txt",
   "compiler_tools": [
     {
-      "tool": "Read",
-      "invocation": "Read C:/dev/wk-resapp-425/lib/research/aifill/contract.py, orchestrate.py, the check file check_fa4_mgmt_recent.py and aifill_check_lib.py (worktree paths)",
-      "result": "contract.py holds the aifill/v1 constants and validators; orchestrate.py holds BlockContext and build_document; the check file has 12 arms with the stub model and the fixture helper."
+      "tool": "Bash",
+      "invocation": "PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa4_mgmt_recent.py\" (baseline, at 31be9c28ac before any edit)",
+      "result": "AIFILL FA-4 ARMS: NO (13 of 17); four FAIL arms; exit 1. The module imported; the failures are on behaviour, not on import."
     },
     {
       "tool": "Bash",
-      "invocation": "python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_block_mgmt_recent.py (with PYTHONPATH set to the worktree)",
-      "result": "First run 23 failed on the fixture path (one level short in the test module, corrected); second run 28 passed in 0.13s."
+      "invocation": "python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_block_mgmt_recent.py (after the amendment edits)",
+      "result": "Two existing NONE tests failed as expected under the fall-through (reasons now combined); both rewritten. Then 41 passed in 0.15s."
     },
     {
       "tool": "Bash",
       "invocation": "bash .tools/commit-gate.sh lib/research/aifill/block_mgmt_recent.py lib/research/aifill/tests/test_block_mgmt_recent.py",
-      "result": "pre-commit gate clean for 2 of 2 file(s) (py_compile, ruff, strict-utf8 log reads)."
+      "result": "pre-commit gate clean for 2 of 2 file(s) (py_compile, ruff, strict-utf8 log reads); ASCII grep on both files: 0 non-ASCII lines."
+    },
+    {
+      "tool": "Bash",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~425 <0.9.0_WK_AMGT_RESAPP~425@opal.agent>\" -F .scratch/msg_fa4_amend2.txt -- <2 modules + INVESTIGATION_v1.md>",
+      "result": "committed 74fa6bb03f (LOCAL on wk-AMGT_RESAPP-425); surprise-row-gate: 4 new row(s) of 1129 total checked, OK."
     }
   ]
 }
