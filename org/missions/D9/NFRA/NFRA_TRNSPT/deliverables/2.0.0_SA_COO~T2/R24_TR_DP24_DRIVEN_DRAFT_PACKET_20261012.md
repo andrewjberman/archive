@@ -9,7 +9,9 @@ IRPT_ANLREQ's partner-advisor run files (pivot packet O2), NOT the staff filing 
 filing are no longer the trigger. Three consequences, none yet applied to the text below: (a) section 2 items 1 and 2 are read against the O1 request id and the ticket id that
 `2.0.0_SA_COO~Y2` reports, printed by the applier from the ticket's `report_ref` at step 0 as before; (b) the ORGANIC arm goes first: the commentary function's event source mapping on
 `outlook-global-commentary-draft-analysis-ready-queue` is Enabled (live read 2026-10-14 12:2xZ, last modified 2026-10-11T01:26:42-04:00, batch 1), so the line in section 1 saying the queue is
-"bound to nothing today" is STALE; `post_census.py --live --since 2026-10-14T00:00:00Z` reads `lines=0 with_ticket=0 posted=0 unposted=0 no_ticket=0`. The driven invoke is cut only if the organic arm
+"bound to nothing today" is STALE; `post_census.py --live --since 2026-10-14T00:00:00Z` reads `lines=0 with_ticket=0 posted=0 unposted=0 no_ticket=0`. The organic arm sends only when the resident reads the request record with a non-empty `ticket_id` AND `commentary_requested` exactly `True`
+(`resident_worker.py:235-242`; the submission accepts the field as an optional JSON boolean, `submission.py:81-83`); otherwise the resident logs
+`IRPT_RESIDENT_READY_SIGNAL skipped=COMMENTARY_NOT_REQUESTED <request_id>` and nothing reaches the queue (queue live read 2026-10-14 13:2xZ: 0 visible, 0 in flight). The driven invoke is cut only if the organic arm
 has not posted for the O1 request once the READY event has had time to arrive, and the wait is set when the pair is cut; (c) the pair (this packet + CTO half) is unchanged otherwise. The model stays Kimi K3
 (`ANDREW_DIRECT_20261013_211xZ_COMMENTARY_MODEL_KIMI_K3_NOW_OPENAI_LATER.md`).
 
