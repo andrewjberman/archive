@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-j-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-7.ingress-mark-key-resource-policy-in-terraform.md",
+    "group": "OTHER",
+    "vintage_commit": "cff6c88511"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+    "vintage_commit": "cff6c88511",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-7.ingress-mark-key-resource-policy-in-terraform.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~22",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/chat_assist.tf",
+      "kind": "terraform",
+      "commit_or_etag": "d4e6e0ac97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "resource aws_secretsmanager_secret_policy ca_ingress_mark added after module ldo_001 and before output ldo_001_manifest (17 insertions, 0 deletions): secret_arn = aws_secretsmanager_secret.ca_ingress_mark.arn; one statement, Sid OnlyTheAssistantReadsTheMarkKey, Effect Deny, Principal *, Action secretsmanager:GetSecretValue, Resource the mark secret ARN, Condition StringNotEquals aws:PrincipalArn = arn:aws:iam::<data.aws_caller_identity.current.account_id>:role/<module.ldo_001.execution_role_name> (built from the caller identity and the module output, no typed ARN); a three-line comment above the resource; terraform fmt applied to this file only; no init, plan, apply or AWS call run",
+      "artifact_covered_by": [
+        "CAj7-AC1",
+        "CAj7-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAj7-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j7_tf.py\" expect: J7-TF ok=True arms=6 of 6",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j7_tf.py\"",
+      "output_evidence": "(timeout 120, rc 0) J7-TF ok=True arms=6 of 6 failed=none reason=none",
+      "denominator": "6 of 6 arms pass in check_j7_tf.py: policy (the resource exists and is attached to the mark secret), deny (one statement, Effect Deny, Principal *, the one action GetSecretValue), scope (the exception is a StringNotEquals on aws:PrincipalArn built from module.ldo_001.execution_role_name and the caller identity, no typed ARN), narrow (no Allow, no wildcard action, no second statement), keep (the CA-j-2 check still reads J2-TF 7 of 7), fmt (terraform fmt -check passes)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAj7-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i4a_tf.py\" expect: I4A-TF ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i4a_tf.py\"",
+      "output_evidence": "(timeout 120, rc 0) I4A-TF ok=True fp=SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ env=True fmt=True mail=True reason=none",
+      "denominator": "the control passes at the base and still passes after the edit: muse key pin fingerprint (env=True), mail-bearer join present (mail=True), terraform fmt -check passes (fmt=True); 4 named fields, reason=none",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAj7-AC1 run against the base file (git show cff6c88511:infra/aws/terraform/transcripts/chat_assist.tf, the file before this order's edit), placed in a scratch tree at .scratch/base with the same data/transcripts/scripts/teams_chat/NAMES.json (also from cff6c88511), so the keep arm can read the CA-j-2 shell",
+      "expected": "J7-TF ok=False arms=2 of 6 (keep and fmt pass; policy, deny, scope and narrow fail)",
+      "observed": "J7-TF ok=False arms=2 of 6 failed=policy,deny,scope,narrow reason=none (rc 0 from the checker process)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the issuer check run three times against the edited file, outputs compared",
+      "observed": "three runs identical: J7-TF ok=True arms=6 of 6 failed=none reason=none, rc=0 each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and every AWS call",
+      "reason": "the order says this cell edits the file and runs nothing against AWS; the deploy is cell CA-j-8, a separate act by a CloudOps seat"
+    },
+    {
+      "item": "every other variable, resource, module call and file",
+      "reason": "the order says edit nothing else; the only files written are this instance, the order's own status flip, and the worker's scratch under .scratch/ (not committed)"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~22/COMM_ASSIST.TO-CA-j-7.ingress-mark-key-resource-policy-in-terraform.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "issuer check",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j7_tf.py\"",
+      "result": "J7-TF ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+    },
+    {
+      "tool": "issuer check",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i4a_tf.py\"",
+      "result": "I4A-TF ok=True fp=SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ env=True fmt=True mail=True reason=none (rc 0)"
+    },
+    {
+      "tool": "issuer check (base control, keep arm source)",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j2_tf.py\" <scratch base tree at .scratch/base>",
+      "result": "J2-TF ok=True arms=7 of 7 failed=none reason=none (rc 0) on the pre-edit file"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt infra/aws/terraform/transcripts/chat_assist.tf",
+      "result": "rc=0; diff against cff6c88511 is 17 insertions and 0 deletions, all in the new block"
+    }
+  ]
+}

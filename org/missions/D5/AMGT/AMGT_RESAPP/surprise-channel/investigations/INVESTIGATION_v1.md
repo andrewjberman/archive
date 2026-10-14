@@ -27122,3 +27122,207 @@ than adding an edge to a frozen spec; the row exists so a reader of the manifest
   "notes": "Form only, but it gates the complete flip. A future worker that runs the file's invocation verbatim gets a void walk. The fix is the issuer's: the file carries the prefix. Not edited here: the order file is outside this worker's write grant."
 }
 ```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W442-S1",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~442",
+  "surfaced_at": "2026-10-14T05:27:59Z",
+  "one_line": "AMGT-bm-2 AC1 reads FAIL as invoked: on this box the checkout's /thesis ai_fill block differs from the live function on every name, so F5 (no other path differs) cannot pass; the order's premise that base F5 passes does not reproduce.",
+  "class": "BLOCKING",
+  "hazard_standing": "ARMED",
+  "disarm_owner": "2.0.0_SA_COO~R1",
+  "spec_asserts": "AMGT-bm-2 preflight (order section 0): r106_fwd_pe_check.py reads R106 FORWARD PE CHECK: NO (3 of 6 arms) at the base with F2, F5 and F6 PASS, because the checkout's own handler equals the live function on every other path. AC1 expects YES (6 of 6 arms) and exit=0 from the literal invocation.",
+  "world_is": "At HEAD d014b315df, with the literal invocation (no AMGT_AIFILL_ROOT in the shell), the checkout's ai_fill block differs from the live function's on all 95 names (.ai_fill.as_of, .ai_fill.producer, .ai_fill.blocks.*, .ai_fill.reason). The live function runs with AMGT_AIFILL_ROOT=/var/empty/aifill-hold, so its ai_fill reads ABSENT with the reason 'AMGT_AIFILL_ROOT is set, so the pool was not asked'; the local shell does not set it. With AMGT_AIFILL_ROOT=/var/empty/aifill-hold mirrored, the first remaining difference is .ai_fill.reason, where the local handler renders the root as C:/Program Files/Git/var/empty/aifill-hold on this Windows box. With .ai_fill excluded, a 95-name diagnostic reads 0 other-path differences, so the F5 failure is the ai_fill block and not the cell's rows. AC1 as invoked printed: names 95 | base forward P/E rows 278 | candidate 218 | withheld 60 (population 60) | names with a withheld row 20 | status not (200, 200): []; PASS F1, F2, F3, F4, F6; FAIL F5; R106 FORWARD PE CHECK: NO (5 of 6 arms); exit=1.",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round106_prep/checks/r106_fwd_pe_check.py@d014b315df: set_aside removes only BEST_PE_RATIO rows, forecast_withheld and BEST_PE_RATIO check-face rows; no ai_fill exclusion, so the live AIFILL root reaches F5",
+      "lib/research/api/scoped_amgt.py@d014b315df (ENV_AIFILL_ROOT = AMGT_AIFILL_ROOT, and the reason string 'no AI fill document at {0} (AMGT_AIFILL_ROOT is set, so the pool was not asked)'): the live ai_fill reason names /var/empty/aifill-hold",
+      "worktree diagnostic (not committed): the r106 check run with AMGT_AIFILL_ROOT=/var/empty/aifill-hold leaves F5 failing on .ai_fill.reason only; the same 95-name run excluding .ai_fill paths reads 0 other-path differences"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Form only, but it gates the AMGT-bm-2 complete flip and any future run of this check from this box. Not patched: the check and the live environment are outside this cell's write grant. The issuer rules whether the check reads with the AIFILL root mirrored or the ai_fill block is excluded from F5, and whether the reason's path rendering on Windows is in scope. The cell's own rows are verified by F1, F2, F3, F4 and F6 and by the 0-difference diagnostic."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W442-S2",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~442",
+  "surfaced_at": "2026-10-14T05:27:59Z",
+  "one_line": "The order does not say whether model.forecast_source_counts counts the served forward rows or the stored rows; the cell counts the stored rows, and counting the served rows would move three counts on each of the 20 withheld names and trip the check's zero-other-path arm.",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "spec_asserts": "AMGT-bm-2 section 1: the withholding is on the served rows only, the stored Bloomberg values are not changed, and every other forecast row is untouched. The order names no rule for the forecast_source_counts census (per period and mnemonic: BBG, SA_FALLBACK, ABSENT).",
+  "world_is": "read_model counts forecast_source_counts over the stored rows (forecast_raw), so a withheld BEST_PE_RATIO still counts as BBG and the census is unchanged on every name. On PBR_US_Equity, AZN_LN_Equity and TSM_US_Equity the base reads BBG 15, ABSENT 0. Counting the served rows instead (measured on a first cut of this cell) gives BBG 12, ABSENT 3, and F5 then names the census as a second other path. The issuer rules which census the page reads.",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "lib/research/api/scoped_amgt.py@d014b315df, read_model: the forecast_source_counts loop reads the stored rows (forecast_raw) in the committed cell",
+      "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round106_prep/checks/r106_fwd_pe_check.py@d014b315df: F5 treats any difference outside BEST_PE_RATIO rows, forecast_withheld and check-face rows as an other path"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Form only. Recorded so the issuer rules the census reading; the cell's current choice keeps the census equal to the stored block."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W441-S1",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~441",
+  "surfaced_at": "2026-10-14T05:26:18Z",
+  "one_line": "AMGT-bm-1 item 3's premise does not reproduce on the built PBR fixture: once BEST_PE_RATIO is removed, the team sheet's own P/E line fills the 2026E and 2027E Key Figures cells, so no forecast dash exists for forecast_withheld to replace.",
+  "class": "BLOCKING",
+  "hazard_standing": "ARMED",
+  "disarm_owner": "2.0.0_SA_COO~R1",
+  "spec_asserts": "AMGT-bm-1 item 3 (order s.1): 'On the Key Figures table's P/E row, a forecast-year cell (2026E, 2027E) with no value whose (BEST_PE_RATIO, fiscal_year) has such an entry shows THAT reason in place of the generic No consensus estimate is served for this line.' Step 2 builds the PBR fixture by spec (remove the BEST_PE_RATIO rows, add two forecast_withheld entries), and checks B5 and B6 read that Key Figures P/E row.",
+  "world_is": "In the built PBR fixture the Key Figures P/E row is the team's own 'P/E' line, not the block row: team_sheet rows index 25 (row_classes FIGURE; row_values 5.9479 for 2026 and 6.1474 for 2027). With the BEST_PE_RATIO rows gone the block row holds no cell, so summarizeSheet takes the team row and both forecast cells print 5.9x and 6.1x. No dash exists. B5 and B6 FAIL on the unchanged-page run and on the run with item 3 applied (harness NO, 7 of 9, at portal 9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36). The item-3 code path itself was exercised on a null cell by a diagnostic probe (GOOGL US with BEST_PE 2026E removed: the served reason with the key, the generic words without it; the probe was not committed).",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-1.the-historical-pe-prints-its-price-basis-and-every-team-grid-dash-and-withheld-forward-pe-says-why.md (order s.1 item 3 and step 2)",
+      "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round105_prep/fixtures/pbr_model_slice.json (model.team_sheet.rows[25] = 'P/E', row_classes[25] = FIGURE, row_values[25] 2026 and 2027)",
+      "portal/src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs@9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36 (checks B5 and B6 read the Key Figures P/E row)"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Not patched around. The fixture is built as the order specifies and B5 and B6 read as measured; no check was re-pointed to a fixture without the team P/E line. Decision for the issuer: whether a withheld forward P/E's reason is meant to stand in place of a team-sourced value on the P/E line (the order's 'no value' premise), or whether the PBR fixture must also drop the team P/E line. The slice is the round-105 fixture of the same body."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W441-S2",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~441",
+  "surfaced_at": "2026-10-14T05:26:18Z",
+  "one_line": "The order's money form is internally inconsistent: it names currencyPrefix as the formatter, but its literal basis line reads 'price 313.00 USD ...', which currencyPrefix cannot print (it prints a dollar sign for USD).",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "spec_asserts": "AMGT-bm-1 item 1 (order s.1): 'Use the existing money formatter (currencyPrefix in components/StatTile.tsx: $ only for USD, <code> otherwise)', and the same item's line 'price <value> <currency> at the close of fiscal year <YYYY>' with the example 'GOOGL US 2025: price 313.00 USD at the close of fiscal year 2025'. Check B1 names '313.00', 'USD' and 'fiscal year 2025'.",
+  "world_is": "currencyPrefix('USD') returns '$', so a line built with it reads 'price $313.00 ...' and cannot carry the token USD that the example and check B1 name. The line is built as 'price <digits> <code> at ...' with the code after the number, as the literal example reads; currencyPrefix is not used for this line. A non-USD code takes the same shape (check B3).",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "portal/src/pages/SecurityAnalysis/components/StatTile.tsx currencyPrefix (line 66) @9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36",
+      "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx priceBasisLine @9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Form only. Decision for the issuer: which form the basis line keeps (the code after the number, as built, or the currencyPrefix form with the example text changed)."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W441-S3",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~441",
+  "surfaced_at": "2026-10-14T05:26:18Z",
+  "one_line": "The GOOGL and PBR slices carry fiscal_years and no model_status inside the model block, while the page reads both from the /thesis envelope; the harness maps them up to the envelope.",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "spec_asserts": "AMGT-bm-1 harness (order s.1 step 2): fixtures are 'a copy of the GOOGL slice' and a PBR slice, rendered as the Model tab's /thesis body.",
+  "world_is": "ModelBody reads data.model_status and ModelTab passes data.fiscal_years to buildModelSheet; both slices carry fiscal_years under model and no model_status. Without the mapping the GOOGL bundle renders the ABSENT face, and with only model_status mapped the All-figures years collapse to the two served figure years. The harness maps model.fiscal_years into the envelope and defaults model_status to SERVED for a slice that carries a block. No page code was changed for this.",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx ModelBody and the buildModelSheet call (data.fiscal_years) @9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36",
+      "portal/src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs bundleOf (model_status, fiscal_years) @9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Form only. Recorded so the next harness on these slices maps the envelope the same way."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W450-S1",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~450",
+  "surfaced_at": "2026-10-14T05:45:31Z",
+  "one_line": "AMGT-gr-1 AC2 cannot read PASS: the cell's join rule makes the existing test test_final_segment_text_is_joined_with_no_separator fail, and the order says touch no other test",
+  "spec_asserts": "The cell's join rule (one space between final-segment text blocks where a sentence ends) and the order's bound 1 (touch no other test) both hold; AC2 expects the three test modules to read N passed with no failed line.",
+  "world_is": "test_final_segment_text_is_joined_with_no_separator (test_model_final_answer.py@d88fca1f84 lines 101-103) asserts the old no-separator result 'now.MUFG announced.'; with the cell's join it reads 'now. MUFG announced.' and the three-module run prints '1 failed, 97 passed'. The bound and the join cannot both hold at this HEAD.",
+  "class": "BLOCKING",
+  "hazard_standing": "ARMED",
+  "disarm_owner": "2.0.0_SA_COO~R2",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "lib/research/aifill/tests/test_model_final_answer.py@d88fca1f84 lines 101-103: test_final_segment_text_is_joined_with_no_separator feeds the final segments _text('now.'), _text('MUFG'), _text(' announced.') and asserts the result equals 'now.MUFG announced.', which is the no-separator join the cell replaces.",
+      "Worker worktree wk-AMGT_RESAPP-450 with the cell's change applied (lib/research/aifill/sentences.py and the join in lib/research/aifill/model.py): pytest on test_sentences.py, test_model_final_answer.py and test_model_inputs.py prints 'AssertionError: assert 'now. MUFG announced.' == 'now.MUFG announced.'' and '1 failed, 97 passed in 0.54s'.",
+      "The order AMGT_RESAPP.TO-AMGT-gr-1 (section 2 bound 1 and section 1 Tests) allows one new test in test_model_final_answer.py and says touch no other test, so the pinned old assertion is outside this cell's write grant."
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Form only: the cell's join rule and the old pin cannot both hold. The worker did not edit the old test (bound 1). The one red test is the only failure of the three modules; the other 97 pass. Resolution is the issuer's: either the grant admits updating that one assertion to 'now. MUFG announced.' or the pin is retired as superseded. ARMED because the red test stays red in the suite until a disarm, and the merge of this package would carry it."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W451-S1",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~451",
+  "surfaced_at": "2026-10-14T05:46:08Z",
+  "one_line": "fetch_source reports a 2xx image or octet-stream body as OK with decoded binary text: the order names no non-text rung, so the spec's 'else the body is decoded' rule applied to a PNG and a zip body alike.",
+  "class": "OBSERVATION",
+  "hazard_standing": "ARMED",
+  "disposition": "UNDER_INVESTIGATION",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md@d88fca1f84: the cell's interface names the seven status words and only PDF as a 2xx exception",
+      "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr2_sources.py@d88fca1f84: 21 arms, none for a non-text 2xx content type",
+      "lib/research/aifill/sources.py@wk-AMGT_RESAPP-451 (uncommitted at filing; _classify): a 2xx body that is neither PDF nor HTML/text falls through to the decode and extract path",
+      "Measured on the worktree with a stub transport: (200, image/png, PNG magic + 10,240 bytes) -> status OK, chars 9935, text begins with the replacement character and the PNG header bytes; (200, application/octet-stream, PK zip header + binary) -> status OK, chars 9884"
+    ]
+  },
+  "spec_asserts": "Cell section 1, lib/research/aifill/sources.py interface: '2xx: a content_type starting application/pdf, or a body starting %PDF-, -> UNSUPPORTED (note pdf, text \"\"); else the body is decoded ... and extract_text gives (title, text)'; the STATUS words are OK, REFUSED, NOT_FOUND, ERROR, EMPTY, PAYWALL, UNSUPPORTED.",
+  "world_is": "Built as written: a 2xx non-text, non-PDF body (image/*, application/octet-stream, a zip) is decoded and parsed as HTML, so it reports OK with binary-decoded text. No status word covers 'not a readable page' for these bodies, and no check arm exercises them. A grounding step that keys on status OK would take that text as a cited source.",
+  "disarm_owner": "2.0.0_SA_COO~R2",
+  "notes": "Not changed in the module: the order's rule was followed literally and the status vocabulary is closed. The issuer decides whether a non-text rung (UNSUPPORTED, note 'content type <t>') is added to the cell or to a later round. Frequency of image or binary citations was not measured here; the CVO's 78-citation census names only PDFs."
+}
+```
+
+```json
+{
+  "id": "AMGT_RESAPP-D1-W456-S1",
+  "project": "AMGT_RESAPP",
+  "fabric": "dell1",
+  "surfaced_by": "0.9.0_WK_AMGT_RESAPP~456",
+  "surfaced_at": "2026-10-14T05:48:16Z",
+  "one_line": "The pre-commit gate on the nested portal worktree checked none of a two-file frontend commit: commit-gate reported 'checked 0 of 2 file(s)' and the risk reflex answered PARTIAL_OR_BLIND on a 199.3h-stale danger map, so the only content check on the commit was the worker's own run of the prepared acceptance checks.",
+  "class": "OBSERVATION",
+  "hazard_standing": "ARMED",
+  "disarm_owner": "2.0.0_SA_COO~R2",
+  "spec_asserts": "CLAUDE.md rule 14: every edit passes .tools/commit-gate.sh (py_compile + ds-precommit + ruff py39), 'Universal'; the order (section 5) names safe-commit as the commit act and presents it as the commit path for the portal branch. The gate's own scope note names what it reads: .py / .sh / .tf / org/projects/*.json.",
+  "world_is": "On the nested portal checkout (C:/dev/wk-resapp-456/portal, branch cand/dell1/aifill-provenance, commit 31337460) the safe-commit run printed 'comp-pulse: the caller toplevel ... carries no .tools/comp-pulse -- EXECUTING THE BAKED PATH C:/dev/ajb_workspace/.tools/comp-pulse', the risk reflex returned ANSWER STATE PARTIAL_OR_BLIND (danger map STALE, 199.3h old), and commit-gate printed 'checked 0 of 2 file(s) -- NOTHING WAS CHECKED' for the two .tsx files. The commit landed; the tool's own note says to use tsc and eslint for a frontend artifact, which AC2 (R103 feature green) ran.",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "safe-commit output at portal commit 31337460fcf771e46ab239429446b2e857041caf (branch cand/dell1/aifill-provenance): '[risk-reflex] WARN: comp-pulse: the caller toplevel C:/dev/wk-resapp-456/portal carries no .tools/comp-pulse -- EXECUTING THE BAKED PATH C:/dev/ajb_workspace/.tools/comp-pulse instead'",
+      "safe-commit output at 31337460: '[risk-reflex]   ANSWER STATE: PARTIAL_OR_BLIND' and 'danger map: 199.3h old  !! STALE' and 'NOT-DECIDABLE: danger map STALE -- the reflex CANNOT clear this diff'",
+      "safe-commit output at 31337460: '[commit-gate] WARN: commit-gate checked 0 of 2 file(s) -- NOTHING WAS CHECKED.' and 'This gate reads only .py / .sh / .tf / org/projects/*.json; every other suffix falls through unexamined.'",
+      "AC2 run on the same head: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_green_v2.sh output 'typecheck rc 0 | lint rc 0 | harness 21 of 24 pass | base 18 of 24 | regressions 0' (rc=0)"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "notes": "Form only. Every frontend commit made through safe-commit from the nested portal worktree will show the same three lines until the reflex carries a .tools of its own or a danger map is current; the FEATURE branch's own green check is the substitute instrument this round. Not edited here: the tooling is outside this worker's write grant."
+}
+```

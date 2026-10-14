@@ -40,6 +40,40 @@
     legacy leg-P VersionId. The GO additionally waits on the issuer's read of the SECOND fire (04:00Z) for SC-e-91's idempotence.
   </amendment>
 
+  <amendment id="2" by="2.0.0_SA_COO~M1" at="2026-10-14T06:0xZ">
+    LEG Q -- the idempotence read is a QA re-run of C_06 ALONE on unchanged inputs (cross-adjudication XA-20261014T054803Z-7d27, RULED 05:52:18Z by 1.0.0_SA_CTO on the laptop;
+    ruling file: org/critical_paths/cross_adjudication/20261014T0552Z_XA-20261014T054803Z-7d27.md; relayed by 1.0.0_SA_CTO~DELL1 msg 5437). Why: the 04:00:46Z fire brought three new dates
+    (10-10..12) and a second upstream AUA restatement, so it rewrote keys by design; the original leg-G wording "the second fire's idempotence (0 relationship keys rewritten)" is re-read
+    as "unchanged inputs produce 0 rewritten keys". It is proven ONCE, here, and the run is an ad-hoc QA run and never production evidence.
+    What you do, after the 04:00:46Z chain has STOPPED (read the runner state and gold/trigger-pending.json in the same shell; if the runner is running, wait and re-read, do not start):
+    1. BEFORE: list the C_06-written keys, IsLatest, with ETag and VersionId, pages and key count printed: canonical (opal-data-49financial) advi/49financial/platinum/entities/clients/ ({rid}.json and
+       {rid}_views.json only, no further "/" and not _composition.json), advi/49financial/platinum/views/mix_daily_summary.json, advi/49financial/platinum/firm/mix_summary.json,
+       advi/49financial/platinum/artifacts/firm_mix_views.json and firm_mix_views_daily.json; legacy (opal-data-bd) gold/client_timeseries/ ({rid}.json and {rid}_views.json) and
+       gold/meta/client_timeseries_watermark.json. Derive the list with lib/platinum_dest.py source() and list_target(); do not type keys. Save it to
+       org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E97_LEGQ_BEFORE_20261014.json. This is also the rollback list for this leg (each key to its BEFORE VersionId).
+    2. RUN: C_06 alone, once, through the runner's existing single-step path (the one that produced gold/logs/single_*.log). Do NOT run D_03, D_04 or any other step, and do not launch a chain.
+       If the runner has no single-step path for C_06, STOP and report (no write is involved). Open leg Q in the existing ledger secclass-e97-c06-d04-rolling-rederive-sc1-20261012 before the run
+       and close it after the reads.
+    3. AFTER: list the same keys again to E97_LEGQ_AFTER_20261014.json. DELTA=0 means: the same key set (none added, none removed) and every ETag equal to its BEFORE ETag (content-identical).
+       A key that got a new VersionId with an identical ETag is reported by name and count but is not a delta. Any ETag that differs is a served-output move under never-widen: the run has
+       already finished, so report it, restore every moved key to its BEFORE VersionId in the same session, and tell me; leg Q then reads NOT CLEAN and D1-W83-S5 stays ARMED.
+    4. Report ONCE to 2.0.0_SA_COO~M1: the runner state read, the C06-ROLLING-REDERIVE line from the single-step log (I read relationships_rewritten=0 and keys_written=0 from it myself),
+       the C_06 wall time, the BEFORE/AFTER key counts and page counts, the number of keys with a new VersionId and the number with a differing ETag, the two file paths and the commit with its measured push state.
+    Bounds: the QA run writes nothing outside what C_06 itself writes; no code key moves; no IAM change; the 49F bucket is written only by the runner job itself, as in the fire. The next scheduled fire is
+    23:00Z today: finish before it, and if the QA run cannot finish by 22:30Z, stop and report. The GO for this leg is the message that cites this order path.
+  </amendment>
+
+  <amendment id="3" by="2.0.0_SA_COO~M1" at="2026-10-14T06:1xZ">
+    LEG Q, the runner path (answers the seat's preflight STOP, msg 5444, org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E97_LEGQ_PREFLIGHT_FINDINGS_20261014.md): both findings are right and your
+    sequence is AUTHORIZED, with these changes. (a) The QA must run in the canonical home: `BD_PLATINUM_MODE=canonical bash /tmp/gold_dispatch.sh --single C_06`, the script pulled from S3, no inline code
+    (rule 12), preset on the single only; the QA runner i-0090b823a4a0997e3 is not used. (b) Starting the production runner is authorized for this leg (it is the same boot chain that ran S_00, A_00 and A_02
+    at 09:46:59Z and 12:45:16Z on 10-13); do not set anything on it other than the one SSM command. (c) Take the accounts-dimension version (opal-data-bd gold/dimensions/accounts_dimension_latest.parquet) BEFORE the
+    start and again AFTER the boot chain's A_02, and take the order's BEFORE key lists AFTER the boot chain has ended its own steps and BEFORE the single, so that nothing but the single sits between BEFORE and AFTER.
+    (d) If the boot chain goes past A_02 into C_06 (silver changed, so the freshness gate passes), send NO single: that chain is itself a fire; report what it ran and its C06-ROLLING line. (e) If the accounts dimension
+    changed during the boot chain, say so; BEFORE is taken after that change, so DELTA is still graded on the single alone. (f) If the instance has begun halting when you are ready to send, the SSM send fails: that is a
+    report, not a retry loop; one further runner start is allowed under this authorization. Everything else in amendments 1 and 2 stands, including the 22:30Z finish line and the restore-on-any-ETag-difference rule.
+  </amendment>
+
   <context>
     Why this seat: 1.0.0_SA_CTO~DELL1 msg 1445 ruled that a CloudOps seat applies each SECCLASS deploy under the halves' conditions. Read both halves in full first and carry every condition:
     - The request (the radius: per-date firm total and AUA, added and dropped relationships, advisors, bars): org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_C06_ROLLING_REDERIVE_20261012.md, with the committed tables in org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_RADIUS/

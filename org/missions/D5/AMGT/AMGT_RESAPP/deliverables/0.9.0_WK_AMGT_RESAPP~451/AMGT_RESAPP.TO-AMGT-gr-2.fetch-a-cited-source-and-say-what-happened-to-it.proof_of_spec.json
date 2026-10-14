@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gr-2.fetch-a-cited-source-and-say-what-happened-to-it",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "d88fca1f84",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-2.fetch-a-cited-source-and-say-what-happened-to-it.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-2.fetch-a-cited-source-and-say-what-happened-to-it.md",
+    "group": "OTHER",
+    "vintage_commit": "d88fca1f84"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~451",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/sources.py",
+      "kind": "script",
+      "commit_or_etag": "5c45084567",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib module on the wk-AMGT_RESAPP-451 branch; no deploy, no AWS call; the grounding step that consumes it is a later cell"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_sources.py",
+      "kind": "test",
+      "commit_or_etag": "5c45084567",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module, 97 passed; every fetch through a stub transport or a urlopen fake"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL GR-2 ARMS: YES (N of N)` with N equal to 21, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-451 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr2_sources.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "alpha beta gamma delta epsilon second paragraph here\nARM default_transport exists and is callable (not called here) PASS ok\nARM the module is ASCII; no anthropic, boto3 or requests import PASS non-ASCII or a forbidden import\nAIFILL GR-2 ARMS: YES (21 of 21)\nexit=0",
+      "denominator": "21 of 21 arms; the full run printed 21 ARM lines and zero FAIL lines",
+      "status": "PASS",
+      "status_reason": "the deciding line AIFILL GR-2 ARMS: YES (21 of 21) is printed, no FAIL arm line appears in the full run, and exit=0.",
+      "expect": "AIFILL GR-2 ARMS: YES \\(21 of 21\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-451 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_sources.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "........................................................................ [ 74%]\n.........................                                                [100%]\n97 passed in 0.15s\nexit=0",
+      "denominator": "97 passed of 97 collected; 0 failed; 0 errors",
+      "status": "PASS",
+      "status_reason": "the last non-empty line before exit= is 97 passed in 0.15s; no failed or error line in the last three; exit=0.",
+      "expect": "[0-9]+ passed in [0-9.]+s\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant; the two criteria grade the built module against its own stub-transport arms",
+      "expected": "N/A",
+      "observed": "no mutant named by the order",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: both criteria are offline and deterministic; AC1 and AC2 were each run twice on the same bytes",
+      "observed": "the same deciding lines on both runs of each criterion (AC2 wall time differs only: 0.35s then 0.15s)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live fetch of any cited url, and default_transport against a real host",
+      "reason": "order egress class NONE: every test uses a stub transport or a urlopen fake; the issuer exercises default_transport in production"
+    },
+    {
+      "item": "a non-text 2xx body (image, octet-stream) as its own status",
+      "reason": "the order names no rung for it; the spec's decode rule was followed literally and the gap is filed as AMGT_RESAPP-D1-W451-S1"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W451-S1: a 2xx image or octet-stream body reports OK with binary-decoded text (measured on the worktree, stub transport: image/png 9935 chars OK; application/octet-stream 9884 chars OK); the order names no non-text rung. ARMED, disarm_owner 2.0.0_SA_COO~R2."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~451/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "check_gr2_sources.py",
+      "invocation": "PYTHONPATH=<worktree> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr2_sources.py",
+      "result": "AIFILL GR-2 ARMS: YES (21 of 21); exit=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=<worktree> python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_sources.py",
+      "result": "97 passed in 0.15s; exit=0"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/sources.py lib/research/aifill/tests/test_sources.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s); gate_rc=0"
+    }
+  ]
+}
