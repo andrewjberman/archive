@@ -1,0 +1,85 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-336",
+  "cell": "AR-y-336",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~143",
+  "branch": "wk-IRPT_ANLREQ-143",
+  "base": "4dace80bdaec7650e6d38a503566945786abdc34",
+  "commit": "26b34d04492df7e848447d465694a61d43936f06",
+  "commit_note": "LOCAL on wk-IRPT_ANLREQ-143; not pushed; not deployed; no AWS or vendor call made",
+  "files_changed": [
+    {"path": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "change": "modified", "lines": "+10"},
+    {"path": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_package_imports.py", "change": "modified (branch-A helper re-pinned)", "lines": "+6 -1"},
+    {"path": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_r31_packager_bindings.py", "change": "added", "lines": "+117"}
+  ],
+  "diff_stat": "3 files changed, 133 insertions(+), 1 deletion(-)",
+  "bindings_added": {
+    "commentary_ready_queue_url": {
+      "value_form": "SQS_PREFIX + names[\"commentary_ready_queue\"][\"name\"]",
+      "sources": [
+        "data/transcripts/scripts/commentary/NAMES.json, key commentary_ready_queue.name (read at PIN by the builder, build_resident_package.py line 87 pattern as analysis_ready)",
+        "infra/aws/terraform/transcripts/commentary.tf:54 reads the same NAMES.json entry for the live queue (commentary_done_queue_name)",
+        "build_resident_package.py:104 (the new binding line; the packager binding is :105)"
+      ],
+      "secret": false
+    },
+    "packager": {
+      "value_form": "{\"api_base\": PACKAGER_API_BASE, \"secret_name\": PACKAGER_SECRET_NAME}, exactly these two keys",
+      "api_base": {
+        "value": "https://7k3ed8px20.execute-api.us-east-1.amazonaws.com",
+        "sources": [
+          "integrations/ticketing/intake/runner_config.json:6 (precedent value, a named constant in build_resident_package.py with a comment citing that line)",
+          "infra/aws/terraform/ticket-center/main.tf:396 ('Shared portal API') and :427 (POST /api/scoped/tickets/{ticketId}/package)",
+          "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:286, :323, :338 (base form, path appended by the packager)"
+        ],
+        "secret": false,
+        "confirmation": "NOT confirmed here: confirmed against the live API by TO-READ-R32 before the release is built (the constant's own comment says so)"
+      },
+      "secret_name": {
+        "value": "opal/ticketing/svc-irpt-packager",
+        "sources": [
+          "infra/aws/terraform/investor-reporting/ycharts/resident.tf:171 grants ${local.secrets_arn_prefix}opal/ticketing/svc-irpt-packager-?????? (the name matches that prefix)",
+          "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:306 reads config[\"secret_name\"] by name"
+        ],
+        "secret": false,
+        "value_read": "NO. The secret's value, shape, version and KMS key were never read by this cell; the name is the only thing bound."
+      }
+    }
+  },
+  "branch_a": {
+    "builder_has_branch_switch": false,
+    "what_was_done": "The builder writes ONE document with both keys and has no option for a document without them. Branch A (the staged document WITHOUT the commentary and packager keys) is built by the test helper _bind(with_queue=False) in test_resident_package_imports.py, which now strips both keys from the staged document instead of asserting their absence.",
+    "why": "The order's step 2(d): keep branch A reachable if the builder has a way; it has none, so the one case that pinned absence is re-pinned.",
+    "control": "test_resident_r31_packager_bindings.py case (c) and case (f) show the factory refuses RESIDENT_PACKAGER_REQUIRED for a commentary key without a packager block."
+  },
+  "tests": {
+    "added": 6,
+    "added_cases": ["(a) built bindings carry commentary_ready_queue_url and a packager of exactly two keys", "(b) built document passes load_bindings", "(c) removing packager from built document makes load_bindings raise RESIDENT_PACKAGER_REQUIRED", "(d) secret_name matches the resident.tf ARN pattern (read from the Terraform text) and api_base is a bare https origin", "(e) no IRPT_ANALYSIS_READY_QUEUE_URL in install-resident.sh or the bindings, no token key, no JWT-shaped or Bearer text", "(f) the resident bindings carry the commentary queue and the packager block together; neither ships alone"],
+    "passed": 6,
+    "failed": 0,
+    "folders": ["infra/aws/lambda/investor-reporting/reports/tests/ (new file and the neighbours)", "infra/aws/lambda/investor-reporting/ycharts/generate/tests/ (neighbours, run by tests_check.py)"],
+    "tests_check_output": "TESTS-OK 6 new, 142 others, 0 failed",
+    "neighbour_counts": {"test_generate_installed.py": 14, "test_generate_installed_custody.py": 6, "test_resident_installed.py": 19, "test_resident_package_imports.py": 5, "test_resident_packager_binding.py": 19, "test_resident_r31_source.py": 7, "test_status_installed.py": 4, "test_status_installed_revisions.py": 6, "test_resident_main.py": 7, "test_resident_template_input.py": 1, "test_resident_worker.py": "54 passed, 8 skipped"}
+  },
+  "before_arm": {
+    "method": "The new test file was run against the BASE builder (git show 4dace80bda:infra/aws/lambda/investor-reporting/reports/build_resident_package.py saved to .scratch/base_builder.py) through the IRPT_R31_BUILDER hook. The tracked tree was not reset.",
+    "output": "5 failed, 1 passed",
+    "failed": ["(a)", "(b)", "(c)", "(d)", "(f)"],
+    "passed": ["(e)"],
+    "expected_by_order": "(a), (b), (d), (f) FAIL",
+    "deviation": "(c) ALSO fails on base: its precondition asserts the builder's own document carries commentary_ready_queue_url, which the base builder does not write. Recorded as measured; the set is a superset of the order's expectation. (e) passes on base, as it should: the base has no IRPT_ANALYSIS_READY_QUEUE_URL and no token."
+  },
+  "mutant": {
+    "checker": "mutant_check.py",
+    "output": "MUTANT-FIRES packager line removed from the scratch copy; new file: 4 failed, 2 passed in 8.75s",
+    "copy_location": ".scratch/r31_mutant/build_resident_package.py (git-ignored, outside the product tree)"
+  },
+  "claim": "At commit 26b34d0449 the tracked builder writes the commentary_ready_queue_url key (NAMES.json commentary_ready_queue name) and the packager block (api_base = the shared ticketing API origin precedent; secret_name = opal/ticketing/svc-irpt-packager, a name matched by the resident.tf grant). Both keys ship together: the installed factory's load_bindings accepts the built document, and refuses a commentary key without the packager block. No secret value, token or credential appears in any file written. Source and tests only. Nothing deployed, pushed, uploaded, applied or invoked; no AWS call.",
+  "build_note": "The builder's bindings are built on this box with MSYS_NO_PATHCONV=1 and a Windows-form worktree path (build_resident_package.py docstring lines 7-9; the new test's built fixture sets the variable for its subprocess). A POSIX $PWD path passed through IRPT_R31_BUILDER from Git Bash failed at fixture setup on this box; the Windows-form path was used.",
+  "not_read": [
+    "the live API origin https://7k3ed8px20.execute-api.us-east-1.amazonaws.com (the precedent value only; TO-READ-R32 confirms it live)",
+    "the live secret opal/ticketing/svc-irpt-packager: its value, shape, version and KMS key (no AWS call)",
+    "the deployed tarball and the installed resident_bindings.json on the host",
+    "the live Terraform state (whether the runner_resident statement is applied as tracked)"
+  ],
+  "premises_checked": "All order premises re-grounded at 4dace80bda: builder bindings dict and analysis_ready source; resident_installed.py PACKAGER_KEYS (line 51), the packager check (lines 98-106); test_resident_package_imports.py _bind (line 102 before the change); test_resident_packager_binding.py refusal pin (lines 78-80, unaffected: it builds from its own fixture, not the builder); opal_packager.py live_ticket_ports (lines 265-345); resident.tf ReadThePackagerServiceToken (lines 168-171); runner_config.json line 6. The resident_path_note (ycharts/reports path) stands as W142-S1."
+}
