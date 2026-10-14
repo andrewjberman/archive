@@ -390,8 +390,13 @@ def build_check_render():
                  ("OUT_R9", "OUT_R10")):
         need(a in src, "check_render generation: %r not in the round-109 source" % a)
         src = src.replace(a, b)
+    # round 109's last4 clause (four digits, distinct) is superseded by round 110's rule (four letters or digits; a shared last four is told apart by (k of n), checked in render_extras)
+    nl = chr(10)
+    lines = [ln for ln in src.split(nl) if "each account's last4 label must be four digits" not in ln]
+    need(len(lines) == len(src.split(nl)) - 1, "check_render generation: the round-109 last4 clause was not found exactly once")
+    src = nl.join(lines)
     ns = dict(vars(P9))
-    ns.update(OUT_R10=OUT_R10, extra_inflection10=extra_inflection10)
+    ns.update(OUT_R10=OUT_R10, extra_inflection10=extra_inflection10, FIRM_TITLE9=P9.firm_title())
     exec(compile(src, "p110_check_render", "exec"), ns)
     return ns["check_render"]
 
