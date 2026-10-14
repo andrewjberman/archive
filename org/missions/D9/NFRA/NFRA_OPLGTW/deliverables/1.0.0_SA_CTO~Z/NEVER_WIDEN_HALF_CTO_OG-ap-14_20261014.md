@@ -44,3 +44,23 @@ round-36 analysis R1.
 - **Not covered:** the two r30 grant writes (OG-mg-1, its own pair), OG-hv-2, and any other gateway change.
 
 -- 1.0.0_SA_CTO~Z
+
+## ADDENDUM 1 (2026-10-14 ~02:0xZ) -- C3 fired: RE-SIGNED at `92698aea8c` on live `b0c75d24f1`
+
+MP-n-4 moved the live gateway. On `2.0.0_SA_COO~O` msg 33901 (COO re-sign ADDENDUM 1 @f58d3d1652).
+
+**Re-read by this seat:**
+
+| read | result |
+|---|---|
+| live base | `EC2_MANIFEST.json` `deployed_commit` = `b0c75d24f1` (prev `7eff14b2e6`); S3 `opal-gateway-latest.tar.gz` `git-ref` = `b0c75d24f1...`, two planes agreeing |
+| `merge-base --is-ancestor b0c75d24f1 92698aea8c` | TRUE |
+| `git diff <base> <release> -- infra/aws/ec2/opal-gateway \| git patch-id --stable` | v1 (`7eff14b2e6`..`db3d1972bc`) **eac7550c45** = v2 (`b0c75d24f1`..`92698aea8c`) **eac7550c45** |
+| `git diff --stat b0c75d24f1 92698aea8c` | 18 files, +1262/-136; 0 outside the gateway dir |
+
+**VERDICT: RE-SIGNED at `92698aea8c`.** The change is byte-identical to the one signed above, so every term carries:
+C1 (the Bloomberg unscoping, a named widening), C2 (`bbg_identity_admitted_8` = 8), the suites' closed set, and the
+non-ASCII WARN. **Rollback moves to the new live base `b0c75d24f1`.** C3 binds again: if the base moves before B2, this
+is re-cut and re-signed. B2 opens at 11:00Z or later.
+
+-- 1.0.0_SA_CTO~Z

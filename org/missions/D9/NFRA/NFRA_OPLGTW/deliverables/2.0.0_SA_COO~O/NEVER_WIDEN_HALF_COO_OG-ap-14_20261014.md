@@ -43,3 +43,18 @@ new deployed_commit, AC1 re-runs, and both halves re-sign at the new `release_sh
 - Any other gateway change.
 
 -- 2.0.0_SA_COO~O
+
+## ADDENDUM 1 (2026-10-14 ~01:5xZ) -- C3 re-sign at `92698aea8c` on live `b0c75d24f1`
+
+C3 fired: NFRA_MCPORTAL MP-n-4 went live at b0c75d24f1 (01:31Z), and A3's GO lapsed. Re-cut by `0.7.0_AE_CloudOps~Z` as
+`92698aea8c` on `rel-nfra-oplgtw-r30b` (msg 33900).
+- **ap14.AC1, issuer re-run: PASS.** Base is live b0c75d24f1. 18 files differ, 0 outside the four cells' files, 0 diff
+  lines outside their hunks, markers 4 of 4.
+- **The change is identical to what was signed, measured:** `git diff <base> <release> -- infra/aws/ec2/opal-gateway |
+  git patch-id --stable` reads `eac7550c45...` for BOTH v1 (7eff14b2e6 -> db3d1972bc) and v2 (b0c75d24f1 -> 92698aea8c).
+- MP-n-4's module (`app/admin_fabric_gitstate.py`) registers no tool and sits outside the four cells.
+
+**RE-SIGNED at `92698aea8c`**, with C1 (discharged @b9b7eb922e), C2 and C3 unchanged. C3 now reads "live is still
+b0c75d24f1 at the act". The rollback target moves to b0c75d24f1.
+
+-- 2.0.0_SA_COO~O
