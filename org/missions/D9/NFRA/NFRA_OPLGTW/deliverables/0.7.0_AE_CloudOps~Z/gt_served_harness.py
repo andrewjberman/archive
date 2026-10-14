@@ -62,10 +62,13 @@ def registry_names(tools_mod) -> list:
 def main() -> int:
     sys.path.insert(0, ROOT)
     os.chdir(ROOT)
-    from app import context, harvest_typed as ht, identity_scope, tools  # noqa: E402
-    from app import harvest_identity as hvi, harvest_press as hvp       # noqa: E402
-    from app import harvest_figures as hvf, harvest_research as hvr     # noqa: E402
-    from app import harvest_read as hv                                  # noqa: E402
+    # ONLY app.tools here. The five typed modules do not EXIST on the host until this release
+    # lands, so importing them at the top makes --registry-only unusable at the one moment the order
+    # needs it: BEFORE the deploy, to read registry_before. Measured -- the first run of this harness
+    # died with "ImportError: cannot import name 'harvest_typed' from 'app'" against the live host.
+    # Same class as Z-S126: an instrument whose imports assume the post-deploy state cannot measure
+    # the pre-deploy state.
+    from app import tools                                               # noqa: E402
 
     names = registry_names(tools)
     if "--registry-only" in sys.argv:
@@ -74,6 +77,11 @@ def main() -> int:
                           "g1_present": sorted(n for n in names if n in TOOLS),
                           "instrument": "app.tools.mcp._tool_manager.list_tools()"}, indent=1))
         return 0
+
+    from app import context, harvest_typed as ht, identity_scope        # noqa: E402
+    from app import harvest_identity as hvi, harvest_press as hvp       # noqa: E402
+    from app import harvest_figures as hvf, harvest_research as hvr     # noqa: E402
+    from app import harvest_read as hv                                  # noqa: E402
 
     out = {"body": {}}
     b = out["body"]
