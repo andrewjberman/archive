@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-zs-1 AC2 (round-37 ZS114-EDGE-AUTH): the deploy closed and the bare path refuses an unauthenticated read.
 #  - ledger nfra-oplgtw-edge-auth-json-tiered is CLOSED at HEAD and its sentinel is gone;
+#  - A1 (row Z-S115): the WebACL conditions -- rules identical before and after with exactly one UpdateWebACL, or no ACL change at all;
 #  - THIS CHECK performs the live unauthenticated GETs: the bare /json-tiered/ path and its twin both answer 401 or 403;
 #  - W/ZS1_PROOF.json: bare_unauth_status 401/403, twin_authed_status 200, a named twin_auth_source, and a scanner_authorizer sentence.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
@@ -12,6 +13,28 @@ for slug in nfra-oplgtw-edge-auth-json-tiered; do
   sent=$((sent + $(git ls-tree --name-only HEAD "org/critical_paths/.open_deploys/${slug}.json" | grep -c .)))
 done
 echo "ledger CLOSED $closed of 1; sentinel at HEAD $sent"
+acl=$(python - "$(native "$W/ZS1_PROOF.json")" "$(native "$W/ZS1_ACL_BEFORE.json")" "$(native "$W/ZS1_ACL_AFTER.json")" <<'EOF'
+import json, os, sys
+ok = False
+try:
+    n = json.load(open(sys.argv[1], encoding="utf-8")).get("updatewebacl_calls")
+except Exception:
+    n = None
+if n == 0 and not os.path.exists(sys.argv[2]) and not os.path.exists(sys.argv[3]):
+    print("WebACL not changed by this apply, updatewebacl_calls 0"); ok = True
+elif n == 1:
+    try:
+        b = json.load(open(sys.argv[2], encoding="utf-8")); a = json.load(open(sys.argv[3], encoding="utf-8"))
+        same = bool(b.get("rules_sha256")) and b.get("rules_sha256") == a.get("rules_sha256") and len(b.get("rules", [])) == len(a.get("rules", [])) > 0
+        print("WebACL rules %s, updatewebacl_calls 1" % ("identical before and after" if same else "DIFFER before and after")); ok = same
+    except Exception as e:
+        print("WebACL before/after files unreadable (%s), updatewebacl_calls 1" % type(e).__name__)
+else:
+    print("WebACL conditions not met (updatewebacl_calls %s)" % n)
+print("OK" if ok else "NO")
+EOF
+)
+acl=$(printf '%s' "$acl" | tr -d '\r'); printf '%s\n' "$acl" | sed '$d'
 res=$(python - "$(native "$W/ZS1_PROOF.json")" <<'EOF'
 import json, sys, urllib.error, urllib.request
 BASE = "https://opalinvest.dev"
@@ -38,5 +61,5 @@ print("OK" if ok else "NO")
 EOF
 )
 res=$(printf '%s' "$res" | tr -d '\r'); printf '%s\n' "$res" | sed '$d'
-[ "$closed" = 1 ] && [ "$sent" = 0 ] && [ "$(printf '%s\n' "$res" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+[ "$closed" = 1 ] && [ "$sent" = 0 ] && [ "$(printf '%s\n' "$acl" | tail -1)" = OK ] && [ "$(printf '%s\n' "$res" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
