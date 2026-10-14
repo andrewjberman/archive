@@ -18,25 +18,25 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_identity.py",
       "kind": "script",
-      "commit_or_etag": "UNCOMMITTED",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "Worktree C:/tmp/wk-oplgtw-72, branch wk-NFRA_OPLGTW-72, not committed: the commit-time naming gate (LGIC_ENFORCE) refused four hyphenated harvest prefixes at lines 50, 51, 60 and 61 (surprise row NFRA_OPLGTW-Z-W72-S4, BLOCKING). No release, no deploy, no IAM or Terraform change; no tool registered (the issuer registers at the merge).",
+      "commit_or_etag": "ca2db2d5c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on branch wk-NFRA_OPLGTW-72 (not pushed). Ruling A1 applied: canonical underscore prefixes only, live spelling resolved by _live_prefix; 31 keyed entries. Naming gate (python .tools/naming-gate.py --diff <both files> --enforce) PASS 21 graded rc=0. No release, no deploy, no IAM or Terraform change; no tool registered (the issuer registers at the merge).",
       "artifact_covered_by": ["AC1", "AC2"]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt1.py",
       "kind": "test",
-      "commit_or_etag": "UNCOMMITTED",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "Offline tests test_oggt1_ac01..ac04 with a recording fake on harvest_read._client and a stand-in principal on harvest_read.get_current_principal. Staged with the module; blocked by the same naming refusal.",
+      "commit_or_etag": "ca2db2d5c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on branch wk-NFRA_OPLGTW-72. Offline tests test_oggt1_ac01..ac04 with a recording fake on harvest_read._client and a stand-in principal. A1 cases added inside ac01 (hyphen-only dossier covers the listing) and ac03 (hyphen-only, both prefers canonical, neither absent).",
       "artifact_covered_by": ["AC1"]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "1d31cdeb50",
+      "commit_or_etag": "2fc324ee18",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Four rows appended (NFRA_OPLGTW-Z-W72-S1..S4), committed on the worker branch; not a deploy artifact.",
+      "deploy_evidence": "Rows NFRA_OPLGTW-Z-W72-S1..S4 committed at 1d31cdeb50; row NFRA_OPLGTW-Z-W72-S5 committed at 2fc324ee18 on the worker branch. Not a deploy artifact.",
       "artifact_covered_by": []
     }
   ],
@@ -47,7 +47,7 @@
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC1.sh; echo \"exit=$?\"",
       "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
-      "denominator": "4 of 4 named tests (test_oggt1_ac01..ac04); failed/error lines 0. Run on the worktree, uncommitted module.",
+      "denominator": "4 of 4 named tests (test_oggt1_ac01..ac04); failed/error lines 0. Run on the committed tree at ca2db2d5c9 (and before the commit, on the same bytes).",
       "status": "PASS",
       "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
     },
@@ -56,8 +56,8 @@
       "criterion_verbatim": "AC2: against the real bucket: ASML resolves exactly, a CUSIP answers not_held, and the coverage rows agree with an independent head_object on the packs ledger.",
       "method": "live_read",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC2.sh; echo \"exit=$?\"",
-      "output_evidence": "resolve ASML: status exact, security_key set; CUSIP query: status not_held; coverage datasets 32, rows well-formed True; packs present True vs independent head True; envelope on all three True\nRESULT: PASS\nexit=0",
-      "denominator": "1 live probe against opal-data-harvest (read only, box credentials): 3 tool answers checked, 32 of 32 coverage rows well-formed, packs ledger presence 1 of 1 agreeing with head_object.",
+      "output_evidence": "resolve ASML: status exact, security_key set; CUSIP query: status not_held; coverage datasets 31, rows well-formed True; packs present True vs independent head True; envelope on all three True\nRESULT: PASS\nexit=0",
+      "denominator": "1 live probe against opal-data-harvest (read only, box credentials) on the committed tree at ca2db2d5c9: 3 tool answers checked, 31 of 31 coverage rows well-formed, packs ledger presence 1 of 1 agreeing with head_object.",
       "status": "PASS",
       "expect": "(?s)resolve ASML: status exact, security_key set; CUSIP query: status not_held; coverage datasets [1-9]\\d*, rows well-formed True; packs present (True|False) vs independent head \\1; envelope on all three True.*RESULT: PASS.*exit=0"
     }
@@ -70,8 +70,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs compared: AC1 pytest run directly on the worktree, then through gt1.AC1.sh; AC2 probe run through gt1.AC2.sh, then a read-only print of the same tool answers.",
-      "observed": "AC1 passed 4 of 4 on both runs. AC2 on both runs: ASML resolved exact to ASML_NA_Equity with other_listings ASML_US_Equity, the CUSIP answered not_held, 32 coverage rows well-formed, and the packs ledger present on both sides.",
+      "method": "AC1 pytest run on the worktree before the module commit and again after it (same bytes); AC2 probe run through gt1.AC2.sh on the committed tree.",
+      "observed": "AC1 passed 4 of 4 on both runs. AC2 on the committed tree: ASML resolved exact to ASML_NA_Equity, the CUSIP answered not_held, 31 coverage rows well-formed, packs ledger present on both sides. The pre-A1 AC2 run (32 datasets) is superseded and is not repeated here.",
       "status": "STABLE"
     }
   },
@@ -80,24 +80,35 @@
     "NFRA_OPLGTW-Z-W72-S1: lib/research/api/name_search.resolve_query cannot be wrapped without a second S3 reader (two boto3 clients); the match is implemented over the three datasets.",
     "NFRA_OPLGTW-Z-W72-S2: the gateway runtime is not shown to carry lib/trading_calendar.py; a runtime without lib/ reports trading_days_behind_t1 as None with its reason.",
     "NFRA_OPLGTW-Z-W72-S3: the 32 keyed prefixes carry five key forms; 11 contracts name no sample object, so their form was placed by a read-only listing.",
-    "NFRA_OPLGTW-Z-W72-S4: BLOCKING -- the commit-time naming gate refuses four hyphenated harvest prefixes the module reads; the module cannot land on the branch as written."
+    "NFRA_OPLGTW-Z-W72-S4: BLOCKING at filing (the commit-time naming gate refused four hyphenated harvest prefixes); dispositioned by Ruling A1 (issuer, amendment 207adb0a51): the module writes canonical underscore spellings only and resolves the live spelling at run time. The row itself is not edited (existing rows are not edited).",
+    "NFRA_OPLGTW-Z-W72-S5: the ruling's premise fails for research_dossier (its canonical underscore spelling holds objects; both spellings hold ASML keys); under the prefer-canonical rule the hyphen-only dates are not read, and the research-dossier pair is one entry (31 keyed entries, not 32). ARMED, disarm_owner 2.0.0_SA_COO~O."
   ],
   "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
   "compiler_tools": [
     {
       "tool": "pytest (named tests), via gt1.AC1.sh",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC1.sh",
-      "result": "AC1 rc=0, 4 of 4 named tests passed"
+      "result": "AC1 rc=0, 4 of 4 named tests passed (on the committed tree)"
     },
     {
       "tool": "live identity-tool probe (read only, box credentials), via gt1.AC2.sh",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC2.sh",
-      "result": "AC2 rc=0, ASML exact, CUSIP not_held, 32 coverage rows, packs ledger presence agrees with head"
+      "result": "AC2 rc=0, ASML exact, CUSIP not_held, 31 coverage rows, packs ledger presence agrees with head"
+    },
+    {
+      "tool": "naming gate (LGIC_ENFORCE), run by the worker before the commit",
+      "invocation": "python .tools/naming-gate.py --diff <both new files as a unified diff> --enforce",
+      "result": "NAMING-GATE: PASS 21 graded, rc=0"
     },
     {
       "tool": "commit gate (py_compile, ruff, strict-utf8 read check) on the two new Python files",
       "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/harvest_identity.py infra/aws/ec2/opal-gateway/tests/test_og_gt1.py",
       "result": "pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": "surprise row gate on the channel file",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (S5 row checked at commit: 1 new row of 544, OK)"
     },
     {
       "tool": "proof-of-spec checker",
