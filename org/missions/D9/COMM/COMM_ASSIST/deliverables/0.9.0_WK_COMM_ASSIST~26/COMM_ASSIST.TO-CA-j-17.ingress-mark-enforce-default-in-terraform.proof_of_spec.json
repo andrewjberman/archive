@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-j-17",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-17.ingress-mark-enforce-default-in-terraform.md",
+    "group": "OTHER",
+    "vintage_commit": "857db6ae4b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+    "vintage_commit": "857db6ae4b",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-17.ingress-mark-enforce-default-in-terraform.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/chat_assist.tf",
+      "kind": "terraform",
+      "commit_or_etag": "da4014f5b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "variable chat_assist_ingress_mark_mode, default changed from \"record\" to \"enforce\" (one line, 1 insertion and 1 deletion in the file; the description names the three modes, not the default, so it is unchanged); terraform fmt run on this file only; no terraform init, plan, apply or AWS call run. The live apply of this default is cell CA-j-5, by the CloudOps seat, and has not happened.",
+      "artifact_covered_by": [
+        "CAj17-AC1",
+        "CAj17-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAj17-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j5_tf.py\" expect: J5-TF ok=True arms=2 of 2",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j5_tf.py\"",
+      "output_evidence": "(rc 0) J5-TF ok=True arms=2 of 2 failed=none reason=none",
+      "denominator": "2 of 2 arms pass in check_j5_tf.py: onlydefault (the working file equals the pin 3af44d523b record-mode file with the one default changed to \"enforce\", LF-normalised, nothing else), fmt (terraform fmt -check passes)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAj17-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j7_tf.py\" expect: J7-TF ok=True arms=6 of 6",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j7_tf.py\"",
+      "output_evidence": "(rc 0) J7-TF ok=True arms=6 of 6 failed=none reason=none",
+      "denominator": "6 of 6 arms pass in check_j7_tf.py: the CA-j-7 control (policy, deny, scope, narrow, keep, fmt) passes at the base and still passes after the edit; the keep arm re-runs the CA-j-2 check, whose mode arm accepts a default of record or enforce",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAj17-AC1 run against the base file (git show 857db6ae4b:infra/aws/terraform/transcripts/chat_assist.tf, the file before this order's edit), placed in a scratch tree at .scratch/base (the checker's argv[1] root, not committed)",
+      "expected": "J5-TF ok=False arms=1 of 2 (the onlydefault arm fails; fmt passes)",
+      "observed": "J5-TF ok=False arms=1 of 2 failed=onlydefault reason=none (rc 0 from the checker process)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "both issuer checks (check_j5_tf.py and check_j7_tf.py) run three times each against the edited file, outputs compared",
+      "observed": "three runs identical: J5-TF ok=True arms=2 of 2 failed=none reason=none, and J7-TF ok=True arms=6 of 6 failed=none reason=none, rc=0 each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and every AWS call",
+      "reason": "the order says this cell edits the file and runs nothing against AWS; the deploy is cell CA-j-5, a separate act by the CloudOps seat"
+    },
+    {
+      "item": "every other variable, resource, module call and file",
+      "reason": "the order says edit nothing else; the only files written are the edit, this instance, the order's own status flip, the investigation row, and the worker's scratch under .scratch/ (not committed)"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W26-S1"
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~26/COMM_ASSIST.TO-CA-j-17.ingress-mark-enforce-default-in-terraform.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "issuer check",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j5_tf.py\"",
+      "result": "J5-TF ok=True arms=2 of 2 failed=none reason=none (rc 0)"
+    },
+    {
+      "tool": "issuer check",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j7_tf.py\"",
+      "result": "J7-TF ok=True arms=6 of 6 failed=none reason=none (rc 0)"
+    },
+    {
+      "tool": "issuer check (base control)",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j5_tf.py\" .scratch/base",
+      "result": "J5-TF ok=False arms=1 of 2 failed=onlydefault reason=none (rc 0) on the pre-edit file"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt infra/aws/terraform/transcripts/chat_assist.tf",
+      "result": "rc=0; the one-line edit is the whole diff (git diff: 1 insertion, 1 deletion)"
+    }
+  ]
+}
