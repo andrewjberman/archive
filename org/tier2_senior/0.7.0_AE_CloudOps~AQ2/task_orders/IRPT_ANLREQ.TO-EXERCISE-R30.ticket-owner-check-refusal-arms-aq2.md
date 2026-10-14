@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -32,7 +32,7 @@ comp-adversary: RUN -- by reading TO-EXERCISE-R29's result and rows D2-S97 and D
   </context>
 
   <the_act>
-    GO: both halves are signed. This order is STAGED: you start ONLY when 2.0.0_SA_COO~Y2 has MESSAGED you that TO-APPLY-R30a is closed (the ticket service at CodeSha256 Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A= with the grant present: you read both yourself, read-only, at step 1). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
+    GO: both halves are signed. TO-APPLY-R30a is CLOSED (your own report, AQ2 msg 7702; the issuer read the Lambda live: CodeSha256 Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A=, 35325 bytes, last modified 2026-10-14T15:10:00Z, IRPT_REQUESTS_TABLE=irpt-requests, and the role policy opal-tickets-table-rw lists IrptRequestsInputOwnerRead beside the three earlier statements). The order is PENDING and this is the GO: start at step 1 (you read both yourself, read-only). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
     1. Read the COO half and CTO half at HEAD. Read the Lambda CodeSha256 and the role policy statement IrptRequestsInputOwnerRead (read-only): anything else: STOP, report. Read your own grants as met (DynamoDB read and conditional put and delete on the minted keys, the signing-key read, the tickets table COUNT scan). Open the NEVER-2 ledger irpt-r30-ticket-sitting-20261014 (legs M mint, K arms, X removal) and commit it; read every live worktree's open deploy entries (git worktree list, then ls-tree) and print the denominator: an open entry naming opal-users-v2, opal-tickets or opal-ticket-api is a STOP.
     2. R0i (a GATE, CTO half condition 1): `GetItem` with ConsistentRead on table irpt-requests, Key {tenant: 49financial, request_revision: INPUT#portfolio_ac6ac6bd0ddb9e33c3766b44b88da5d2253db219848824b202a2ee84b2c40cb0} (advisor A's release-29 D1 input), projected to the owner attributes. The row MUST EXIST, with owner.firm_id 49financial and owner.principal_id equal to advisor A's address (the one you minted in TO-EXERCISE-R29: read it from your own record) and NOT B's. Print only: present yes or no, the field NAMES of owner, and the equality results yes or no (no address in any file). If the row is ABSENT (the delete call 2106 may have run): K1 is re-pointed to an input that exists and is owned by ANOTHER minted advisor (mint it through the door as in TO-EXERCISE-R29 step 3 and name it), or the sitting does not open; say which in the report.
     3. Count the tickets table BEFORE (a COUNT-only scan: Select=COUNT, the number only, the pages summed, the denominator of items scanned printed).

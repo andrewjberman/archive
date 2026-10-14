@@ -1,0 +1,145 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-APPLY-R30a.ticket-service-grant-then-code-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R30a.ticket-service-grant-then-code-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "4cd7cde7dc"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R30a.ticket-service-grant-then-code-aq2.md",
+  "vintage_commit": "4cd7cde7dc"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "iam:role-policy opal-ticket-api-role / opal-tickets-table-rw (statement IrptRequestsInputOwnerRead)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "scoped plan on aws_iam_role_policy.opal_ticket_api_ddb: 0 add, 1 change, 0 destroy, adding only the signed statement (GetItem on the irpt-requests table, LeadingKeys 49financial/inflection/cottonwood, Attributes tenant/request_revision/identity/owner, Select SPECIFIC_ATTRIBUTES if exists); safe-apply 0/1/0; get-role-policy read back: the statement present exactly once, the three earlier statements equal; re-plan No changes",
+   "artifact_covered_by": [
+    "R30a-AC1"
+   ],
+   "commit_or_etag": "statement present 1 of 1"
+  },
+  {
+   "path_or_key": "lambda:opal-ticket-api (code and one environment variable)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "grant read back BEFORE the code; BUILD_ONLY digest Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A= equal EXPECTED and the build bytes equal the staged zip (160f0c75fbc2..); new object version BU27czeb9mc1fcnw.i5aSQbXNavPqt2g read back byte-equal (23 versions after, 22 before); scoped plan 0/1/0 (environment +IRPT_REQUESTS_TABLE, last_modified, s3_object_version, source_code_hash only); safe-apply 0/1/0; live CodeSha256 Fg8MdfvC..; one member lambda_function.py d112ba42..; credential-less envelope equal (822edce9a5618bdf.., five reads); environment 9 -> 10 with only the one added name; re-plan No changes",
+   "artifact_covered_by": [
+    "R30a-AC1"
+   ],
+   "commit_or_etag": "Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A="
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30a.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "G1, A1 and T5c lines, then T1 to T5 results and the uploaded VersionId",
+   "artifact_covered_by": [
+    "R30a-AC1",
+    "R30a-AC2"
+   ],
+   "commit_or_etag": "blob 37a66737c7a6d3a702ff997a97a02083b1303794"
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json (opal-ticket-api entry)",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "map record merged to box/dell2 (on origin, ls-remote read): artifact_sha256 and deployed_code_sha256 Fg8MdfvC.., deploy_ledger irpt-ticket-r29b-20261014; the source-dir tree is a5dd9961 at the recorded commit, the build base and HEAD",
+   "artifact_covered_by": [
+    "R30a-AC3"
+   ],
+   "commit_or_etag": "116d679d62"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R30a-AC1",
+   "invocation": "grep -c -E '^(G1 IrptRequestsInputOwnerRead present 1 of 1|A1 opal-ticket-api live CodeSha256 Fg8MdfvCvcB8at9K\\+Bh\\+IpmuNel8TNWXaKth0W2pv4A=)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30a.txt",
+   "expect": "^2$",
+   "output_evidence": "2\nexit=0",
+   "denominator": "2 lines: the grant present once, the Lambda at the EXPECTED CodeSha256 read live after the applies",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(G1 IrptRequestsInputOwnerRead present 1 of 1|A1 opal-ticket-api live CodeSha256 Fg8MdfvCvcB8at9K\\+Bh\\+IpmuNel8TNWXaKth0W2pv4A=)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30a.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R30a-AC2",
+   "invocation": "grep -c -E '^T5c DENIED$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30a.txt",
+   "expect": "^1$",
+   "output_evidence": "1\nexit=0",
+   "denominator": "1 simulator read with a leading key outside the three firms (opal-capital): implicitDeny; demo also implicitDeny",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^T5c DENIED$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30a.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R30a-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/20261014T1459Z_irpt-ticket-r29b-20261014_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261014T151638Z\nexit=0",
+   "denominator": "4 of 4 ledger legs G, U, C, V carried proof at close (G closed twice: the plan evidence, then the apply and read-back)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ticket-r29b-20261014_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the BUILD_ONLY digest, then the real build printed the same SHA256 and the kept bytes equal the staged zip; the credential-less envelope read three times before and twice after; the simulator read one resource per call with a positive control and a write control",
+   "observed": "digest equal EXPECTED; envelope deterministic (five identical reads); T5c implicitDeny against T5a allowed on the same ARN",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "leg G closed twice in the ledger",
+   "reason": "the evidence of the plan half was recorded with close-leg before the apply (marked PARTIAL in its text); the final proof with the apply and read-back followed as the second close, as release 28's ledger did for its build half"
+  },
+  {
+   "item": "limit (i): the simulator allows GetItem with NO condition context",
+   "reason": "the ForAllValues test on dynamodb:Attributes is vacuously true without a projection; the pair accepts limit (i), the code's ProjectionExpression holds the read to the owner attributes; recorded in T5b"
+  },
+  {
+   "item": "the recorder's CHANGELOG.json entry and reconcile-audit line",
+   "reason": "outside the order's step 9; taken back out by a restore commit, net map record is lambda-source-map.json only"
+  },
+  {
+   "item": "the build temp folder C:/dev/tmp-r30a-aq2-build",
+   "reason": "left in place: a recursive delete of anything but the throwaway worktree needs Andrew's word"
+  },
+  {
+   "item": "the refusal-arm sitting, the portal, any other Lambda",
+   "reason": "not in this order"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261014T1459Z_irpt-ticket-r29b-20261014_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 plan (scoped, two targets) / safe-apply",
+   "invocation": "-target aws_iam_role_policy.opal_ticket_api_ddb then -target module.opal_ticket_api.aws_lambda_function.this from the ticket-center root, saved plans outside the repo, safe-apply on each",
+   "result": "G plan 0/1/0, Apply complete 0/1/0; C plan 0/1/0, Apply complete 0/1/0; both re-plans No changes"
+  },
+  {
+   "tool": "deploy_ledger.py / build-and-upload.sh / safe-merge.sh / record-terraform-deploy.sh",
+   "invocation": "open and close-leg G U C V, close; BUILD_ONLY then real build; map record merged",
+   "result": "ledger CLOSED 4 of 4; map record merged as 116d679d62"
+  },
+  {
+   "tool": "iam get-role-policy / simulate-principal-policy (with context entries)",
+   "invocation": "opal-ticket-api-role, one resource ARN per call, LeadingKeys and Attributes context, with controls",
+   "result": "allowed for the three firms, implicitDeny for opal-capital and demo, non-owner attribute implicitDeny, PutItem implicitDeny, control allowed"
+  }
+ ]
+}
