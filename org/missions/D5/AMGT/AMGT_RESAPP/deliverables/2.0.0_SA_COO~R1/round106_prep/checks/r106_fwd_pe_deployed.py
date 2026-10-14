@@ -2,6 +2,7 @@
 
   PYTHONPATH=<checkout root> python r106_fwd_pe_deployed.py capture <out.json> [--workers 4]
   PYTHONPATH=<checkout root> python r106_fwd_pe_deployed.py verify <population.json> <pre.json> [--workers 4]
+  PYTHONPATH=<LIVE PIN's worktree> python r106_fwd_pe_deployed.py verify <population.json> PAIRED [--workers 4]   (the old code vs the deployed function, name by name)
 
 `capture` reads the LIVE function's /thesis body for every resolved name and writes {key: [status, body]}; it writes nothing else (the file stays local, uncommitted).
 `verify` reads the live function NOW (the candidate) and checks it against the capture (the base), with the same six arms as `r106_fwd_pe_check.py`
@@ -42,8 +43,19 @@ def capture(out):
 
 
 def verify(pop_path, pre_path):
+    real_stdout = sys.stdout  # c.local redirects stdout in worker threads and can leave it swapped
     pop = json.load(open(pop_path, encoding="utf-8"))
-    pre = json.load(open(pre_path, encoding="utf-8"))
+    paired = pre_path == "PAIRED"
+    if paired:
+        # PAIRED: the base is the checkout's OWN handler (run from the LIVE PIN's worktree = the OLD code) read for each name ADJACENT in time to the live function,
+        # so the pool, which the harvest runner refreshes while this runs, is the same on both sides of every pair.
+        ks = keys()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers()) as pool:
+            res = list(pool.map(lambda k: (c.local(k), c.live(k)), ks))
+        pre = {k: list(r[0]) for k, r in zip(ks, res)}
+        post = {k: r[1] for k, r in zip(ks, res)}
+    else:
+        pre = json.load(open(pre_path, encoding="utf-8"))
     expected = {}
     for r in pop:
         for row in r["rows"]:
@@ -51,8 +63,10 @@ def verify(pop_path, pre_path):
             if p and e and p.upper() != e.upper():
                 expected[(r["key"], str(row["fiscal_year"]))] = (p, e)
     ks = sorted(pre)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers()) as pool:
-        post = dict(zip(ks, pool.map(c.local if os.environ.get("R106_POST_LOCAL") == "1" else c.live, ks)))
+    if not paired:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers()) as pool:
+            post = dict(zip(ks, pool.map(c.local if os.environ.get("R106_POST_LOCAL") == "1" else c.live, ks)))
+    sys.stdout = real_stdout
     f1 = f2 = f3 = f5 = f7 = True
     withheld = base_n = cand_n = 0
     names_w = set()
