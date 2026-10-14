@@ -1,0 +1,1402 @@
+{
+  "read_at": "2026-10-14T15:08:43Z",
+  "method": {
+    "instruments": [
+      "aws iam list-roles (read): 304 roles",
+      "aws iam get-account-authorization-details --filter Role (read): RoleDetailList 304, IsTruncated false; inline and attached (default-version) policy documents",
+      "comp-find --corpus aws IAM_ROLE (served graph, read): 297 role nodes scanned; name pattern hits 67; a bucket-name pattern over the role props returns 0 of 297 (the graph does not model S3 grant statements)",
+      "local analysis: .scratch/build_roles.py (stdlib json, read-only) over the authorization details"
+    ],
+    "client_surface": {
+      "opal-data-assets (A2 silver surface)": "vendor silver prefixes only: blackdiamond/49f/silver/, blackdiamond/49financial/silver/, blackdiamond/cottonwood/silver/, orion/inflection/silver/, eclipse/inflection/silver/, smartx/platform/silver/, schwab/<master>/silver/, commonwealth/cottonwood/silver/",
+      "counted at read_at (wider, measured)": "an object-read grant on any opal-data-assets vendor tree (blackdiamond/, orion/, eclipse/, smartx/, schwab/, commonwealth/, gateway/), opal-data-bd, opal-data-49financial and opal-data-cottonwood (mdpf gold); the count is kept, and a2_scope classifies each role under A2"
+    },
+    "counting_rule": "A role counts when it holds an object-read grant (GetObject, GetObjectVersion, s3:Get*, s3:*) on the surface. Listing-only roles (ListBucket) do not count; they are recorded as a count in the denominator note.",
+    "conditioned_rule": "conditioned = true when the object grant is limited below the bucket by ARN prefix or an IAM Condition; false when it is bucket-wide.",
+    "one_firm_rule": "true when every surface entry resolves to one firm: 49financial for opal-data-bd, opal-data-49financial and schwab masters 08242234, 08335338, 08403355; inflection for orion/ and eclipse/; cottonwood for blackdiamond/cottonwood and commonwealth/ and opal-data-cottonwood; false for smartx/ (four firms per object), gateway/ (multi-firm workbook) and any opal-data-assets bucket-wide grant.",
+    "redaction": "account ids are replaced by <acct>; the two person-scoped role names are reduced to <person>; user principal names are reduced to <user>. No credential, key or policy condition value is recorded.",
+    "listonly_roles": 20,
+    "a2_scope_rule": "A2-SILVER: at least one object-read on opal-data-assets under a vendor root whose prefix contains /silver (or a vendor or vendor/firm root). EXCLUDED-ONLY: every object-read is on opal-data-bd, opal-data-49financial, opal-data-cottonwood or opal-data-mdpf. NON-SILVER: none of the above (bronze, gold, meta, _ops, gateway or mdpf prefixes of opal-data-assets, with or without excluded reads)."
+  },
+  "denominator": {
+    "roles_scanned": 304,
+    "roles_with_s3_read_on_client_buckets": 49,
+    "gateway_trusted_with_surface_read": 5
+  },
+  "roles": [
+    {
+      "role": "advi-49f-gold-dispatch-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08335338/meta/complete"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "bd-49f-etf-ownership-daily-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08242234/silver/fact_rps"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "bd-49f-fees-runner-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "silver/fees"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-allocation-checker-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-allocation-processor-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-daily-trigger-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-exporter-ec2-role",
+      "trust_principals": [
+        "Service:ec2.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f/silver/dim_account_xref",
+            "blackdiamond/49f/silver/dim_advisor_fee_role",
+            "blackdiamond/49financial/silver/fact_insurance_insurancerelationshiplist_export",
+            "blackdiamond/49financial/silver/fact_insurance_relationshipaccountdetailsearch",
+            "blackdiamond/cottonwood/silver/fact_holdings",
+            "schwab/08242234/silver",
+            "schwab/08335338/meta/conversions",
+            "schwab/08335338/silver",
+            "smartx/platform/silver/fact_allocation_account_map"
+          ],
+          "conditioned": true
+        },
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "blackdiamond+schwab+smartx",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "bd-gold-detail-generator-role",
+      "trust_principals": [
+        "Service:ec2.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-gold-layer-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-merge-daily-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-pipeline-task-role",
+      "trust_principals": [
+        "Service:ecs-tasks.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-processor-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "bd-silver-merge-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "silver"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "consolidation-gold-runner-role",
+      "trust_principals": [
+        "Service:ec2.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08335338/gold",
+            "schwab/08335338/silver"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "cot-etf-ownership-daily-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/silver/fact_holdings"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "cot-rebalancer-runner-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/meta/*-result.json"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "cot-satellites-registry-producer-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/bronze/rebalancer_model_detail",
+            "blackdiamond/cottonwood/bronze/rebalancer_models"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "gateway-blackdiamond-read-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/opal-gateway-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "silver/fees"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": true,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "gateway-schwab-catalog-read-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/opal-gateway-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08242234/meta/complete",
+            "schwab/08335338/meta/complete",
+            "schwab/08403355/meta/complete"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": true,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "gateway-schwab-read-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/opal-gateway-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08242234/silver/dim_asset",
+            "schwab/08242234/silver/dim_balance",
+            "schwab/08242234/silver/dim_position",
+            "schwab/08242234/silver/dim_transaction",
+            "schwab/08335338/silver/dim_asset",
+            "schwab/08335338/silver/dim_balance",
+            "schwab/08335338/silver/dim_position",
+            "schwab/08335338/silver/dim_transaction",
+            "schwab/08403355/silver/dim_asset",
+            "schwab/08403355/silver/dim_balance",
+            "schwab/08403355/silver/dim_position",
+            "schwab/08403355/silver/dim_transaction"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": true,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "inf-etf-ownership-daily-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "orion/inflection/meta/dedup",
+            "orion/inflection/silver/fact_positions"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "inflection",
+      "vendor": "orion",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-49f-holdings-performance-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08335338/silver/dim_balance",
+            "schwab/08335338/silver/dim_position"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-49f-holdings-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/mdpf-daily-runner-ec2-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "gateway/49financial/bronze/taxsma_workbook_projection",
+            "schwab/08335338/silver/dim_asset",
+            "schwab/08335338/silver/dim_balance",
+            "schwab/08335338/silver/dim_position",
+            "smartx/platform/silver/fact_allocation_account_map",
+            "smartx/platform/silver/fact_allocation_positions",
+            "smartx/platform/silver/fact_allocation_valuation",
+            "smartx/platform/silver/fact_model_allocation_roster"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "schwab+smartx+taxsma",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-49f-reporting-gold-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08335338/silver/dim_balance",
+            "schwab/08335338/silver/dim_position",
+            "schwab/08335338/silver/fact_rld",
+            "schwab/08335338/silver/fact_trn",
+            "schwab/08335338/silver/fact_uln",
+            "schwab/08335338/silver/fact_ult"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-cot-holdings-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/mdpf-daily-runner-ec2-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/silver/fact_allocations",
+            "blackdiamond/cottonwood/silver/fact_holdings",
+            "blackdiamond/cottonwood/silver/fact_model_assignment",
+            "blackdiamond/cottonwood/silver/fact_model_blend",
+            "blackdiamond/cottonwood/silver/fact_model_definition",
+            "blackdiamond/cottonwood/silver/fact_model_roster"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-inf-holdings-performance-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "orion/inflection/silver/fact_positions"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "inflection",
+      "vendor": "orion",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-inf-holdings-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/mdpf-daily-runner-ec2-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "eclipse/inflection/bronze/eclipse_membership_map"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "inflection",
+      "vendor": "eclipse",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "irpt-performance-adapter-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/silver/fact_model_assignment/date=*/data.parquet"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "irpt-ycharts-generate-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/silver/fact_allocations/date=*/data.parquet",
+            "blackdiamond/cottonwood/silver/fact_holdings/date=*/data.parquet"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "lambda-execution-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "mdpf-49f-taxsma-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/mdpf-gold-lambda-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-49financial",
+          "prefixes": [
+            "mdpf/49financial/gold/taxsma_assets"
+          ],
+          "conditioned": true
+        },
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "gateway/global/bronze/taxsma_workbook",
+            "gateway/global/silver/taxsma_workbook",
+            "schwab/08242234/silver/fact_acc",
+            "schwab/08335338/silver/fact_acc",
+            "schwab/08335338/silver/fact_rps_s2"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "schwab+taxsma",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "mdpf-cot-taxsma-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/mdpf-gold-lambda-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/silver/fact_holdings"
+          ],
+          "conditioned": true
+        },
+        {
+          "bucket": "opal-data-cottonwood",
+          "prefixes": [
+            "mdpf/cottonwood/gold/taxsma_assets"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond+taxsma",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "mdpf-daily-runner-ec2-role",
+      "trust_principals": [
+        "Service:ec2.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f/silver/dim_account_xref",
+            "blackdiamond/cottonwood/gold",
+            "blackdiamond/cottonwood/silver",
+            "eclipse/inflection/silver",
+            "orion/inflection/silver",
+            "schwab/08242234/silver",
+            "smartx/platform/silver"
+          ],
+          "conditioned": true
+        },
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "silver/allocations",
+            "silver/fees"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "blackdiamond+eclipse+orion+schwab+smartx",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "mdpf-gold-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/gold",
+            "blackdiamond/cottonwood/silver",
+            "eclipse/inflection/reconstructed",
+            "eclipse/inflection/silver",
+            "orion/inflection/silver",
+            "schwab/08242234/silver",
+            "smartx/platform/silver"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "blackdiamond+eclipse+orion+schwab+smartx",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "opal-advi-stitch-landing-role",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:user/<user>"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "silver"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "opal-assets-bd49f-daily-pull-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "opal-assets-bd49f-dim-convert-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f/bronze",
+            "blackdiamond/49f/silver",
+            "schwab/08335338/silver/fact_acc"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond+schwab",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "opal-assets-bd49f-reporting-pull-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f/_ops/taxsma_roster.json",
+            "blackdiamond/49f/bronze/reporting_",
+            "blackdiamond/49f/silver/dim_account_xref",
+            "blackdiamond/49financial/bronze/insurance_"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "opal-assets-daily-emitter-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/silver",
+            "eclipse/inflection/silver/fact_portfolios_full",
+            "orion/inflection/silver/fact_assets",
+            "schwab/08242234/silver/fact_rps_s2",
+            "smartx/platform/silver"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "blackdiamond+eclipse+orion+schwab+smartx",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    },
+    {
+      "role": "opal-assets-silver-bd49finsurance-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49financial/bronze"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-assets-silver-blackdiamond-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/cottonwood/bronze"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "cottonwood",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-assets-silver-eclipse-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "eclipse/inflection/bronze"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "inflection",
+      "vendor": "eclipse",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-assets-silver-orion-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "orion/inflection/bronze"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "inflection",
+      "vendor": "orion",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-assets-silver-schwab-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "schwab/08242234/bronze",
+            "schwab/08335338/bronze",
+            "schwab/08403355/bronze"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "schwab",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-assets-silver-smartx-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "smartx/*/bronze"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "smartx",
+      "gateway_trusted": false,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-mcp-emp-<person>-onboard",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/opal-gateway-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f/_ops/taxsma_roster.json"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": true,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-mcp-emp-<person>-read",
+      "trust_principals": [
+        "AWS:arn:aws:iam::<acct>:role/opal-gateway-role"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "blackdiamond/49f/gold/dim_taxsma_report"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": true,
+      "a2_scope": "NON-SILVER"
+    },
+    {
+      "role": "opal-portal-lambda-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-bd",
+          "prefixes": [
+            "*"
+          ],
+          "conditioned": false
+        }
+      ],
+      "one_firm": true,
+      "firm": "49financial",
+      "vendor": "blackdiamond",
+      "gateway_trusted": false,
+      "a2_scope": "EXCLUDED-ONLY"
+    },
+    {
+      "role": "smartx-assets-pull-role",
+      "trust_principals": [
+        "Service:lambda.amazonaws.com"
+      ],
+      "s3_reads": [
+        {
+          "bucket": "opal-data-assets",
+          "prefixes": [
+            "smartx"
+          ],
+          "conditioned": true
+        }
+      ],
+      "one_firm": false,
+      "firm": null,
+      "vendor": "smartx",
+      "gateway_trusted": false,
+      "a2_scope": "A2-SILVER"
+    }
+  ],
+  "gateway_trusted_surface_roles": [
+    "gateway-blackdiamond-read-role",
+    "gateway-schwab-catalog-read-role",
+    "gateway-schwab-read-role",
+    "opal-mcp-emp-<person>-onboard",
+    "opal-mcp-emp-<person>-read"
+  ],
+  "vendors": {
+    "blackdiamond": {
+      "status": "MISSING",
+      "role": "gateway-blackdiamond-read-role",
+      "why": "Under A2 no gateway-trusted role reads a BD vendor-silver prefix: the one gateway-trusted BD reader holds only opal-data-bd silver/fees (NOT USED), and no gateway-trusted role reads blackdiamond/49f/silver/ or blackdiamond/cottonwood/silver/. The 49F silver there is stale (dim_account_xref and dim_advisor_fee_role 11 td, fact_bd_allocation 39 td) and holds no holdings, transactions or fees table, so 49F holdings, transactions and fees are refused; Cottonwood (0 td) has no gateway-trusted reader."
+    },
+    "orion": {
+      "status": "MISSING",
+      "role": null,
+      "why": "No gateway-trusted role reads orion/inflection/silver/; the nearest reader, irpt-inf-holdings-performance-role, is an IRPT pipeline role not trusted by the gateway. The proposed NEW role is gateway-inf-orion-read-role (opal_naming), one firm (inflection), key-segment fence; positions and transactions are 0 td."
+    },
+    "eclipse": {
+      "status": "MISSING",
+      "role": null,
+      "why": "No gateway-trusted role reads eclipse/inflection/silver/; irpt-inf-holdings-role reads only the bronze membership map and is an IRPT pipeline role. The proposed NEW role is gateway-inf-eclipse-read-role (opal_naming), one firm (inflection), key-segment fence; fact_portfolios_full, fact_models and fact_model_composition are 0 td."
+    },
+    "schwab": {
+      "status": "MISSING",
+      "role": "gateway-schwab-read-role",
+      "why": "EXISTING-FIT for holdings, allocation and transactions: gateway-schwab-read-role is firm-fenced (49financial; masters 08242234, 08335338 and 08403355) by resource path to schwab/<master>/silver/dim_position, dim_balance, dim_asset and dim_transaction (0 td). MISSING for client_resolve_account: fact_acc (account directory, PII) is not granted and the dim_account projection is not built, so no resolve source exists."
+    },
+    "commonwealth": {
+      "status": "MISSING",
+      "role": null,
+      "why": "None of the 49 counted roles holds an object-read grant on commonwealth/cottonwood/silver/. The proposed NEW role is gateway-cot-commonwealth-read-role (opal_naming), one firm (cottonwood), key-segment fence; the closed delivery reads 78 td."
+    },
+    "smartx": {
+      "status": "MISSING",
+      "role": null,
+      "why": "No gateway-trusted role reads smartx/platform/silver/; the readers that do (irpt-49f-holdings-role, mdpf-gold-lambda-role, opal-assets-daily-emitter-role) are pipeline roles. The object is firm-wide (four firms per object), so IAM cannot fence it: the proposed NEW gateway-smartx-read-role (opal_naming, shared scope) carries the fence in code as a row filter on roster advisor_id, with a two-firm negative arm."
+    },
+    "taxsma": {
+      "status": "MISSING",
+      "role": null,
+      "why": "No opal-data-assets vendor-silver prefix exists for Tax SMA: its served forms are the per-firm mdpf taxsma_assets gold in opal-data-49financial and opal-data-cottonwood (NOT USED under A2) and gateway/global/silver/taxsma_workbook, a multi-firm workbook (RIA column) under the gateway prefix that a key-segment fence cannot serve. mdpf-49f-taxsma-role and mdpf-cot-taxsma-role are recorded and not used."
+    }
+  },
+  "new_or_extended_roles": [
+    "gateway-blackdiamond-read-role (EXTEND: add opal-data-assets blackdiamond/49f/silver/ prefixes; the opal-data-bd grant is not used)",
+    "gateway-cot-blackdiamond-read-role (NEW)",
+    "gateway-inf-orion-read-role (NEW)",
+    "gateway-inf-eclipse-read-role (NEW)",
+    "gateway-cot-commonwealth-read-role (NEW)",
+    "gateway-smartx-read-role (NEW, row filter in code)"
+  ],
+  "ask_inputs": [
+    {
+      "tool": "client_resolve_account",
+      "vendor": "blackdiamond",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/blackdiamond/49f/silver/dim_account_xref/",
+      "role": "gateway-blackdiamond-read-role",
+      "action": "EXTEND",
+      "rollback": "remove the opal-data-assets Resource ARNs this ask adds from the gateway-blackdiamond-read-policy Allow statement; the opal-data-bd silver/fees statement is untouched; if the statement is rewritten, restore the prior document (sha256-16 75bd743b235b3b2e as read)."
+    },
+    {
+      "tool": "client_resolve_account",
+      "vendor": "blackdiamond",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/blackdiamond/49f/silver/fact_bd_allocation/",
+      "role": "gateway-blackdiamond-read-role",
+      "action": "EXTEND",
+      "rollback": "remove the opal-data-assets Resource ARNs this ask adds from the gateway-blackdiamond-read-policy Allow statement; the opal-data-bd silver/fees statement is untouched; if the statement is rewritten, restore the prior document (sha256-16 75bd743b235b3b2e as read)."
+    },
+    {
+      "tool": "client_resolve_account",
+      "vendor": "blackdiamond",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/blackdiamond/cottonwood/silver/fact_allocations/ and fact_allocations_s2/",
+      "role": "gateway-cot-blackdiamond-read-role",
+      "action": "NEW",
+      "rollback": "delete role gateway-cot-blackdiamond-read-role and its inline policy; no served object changes."
+    },
+    {
+      "tool": "client_resolve_account",
+      "vendor": "orion",
+      "firm": "inflection",
+      "prefix": "opal-data-assets/orion/inflection/silver/fact_positions/",
+      "role": "gateway-inf-orion-read-role",
+      "action": "NEW",
+      "rollback": "delete role gateway-inf-orion-read-role and its inline policy; no served object changes."
+    },
+    {
+      "tool": "client_resolve_account",
+      "vendor": "smartx",
+      "firm": "49financial (row filter)",
+      "prefix": "opal-data-assets/smartx/platform/silver/fact_allocation_account_map/ and fact_model_allocation_roster/",
+      "role": "gateway-smartx-read-role",
+      "action": "NEW",
+      "rollback": "delete role gateway-smartx-read-role and its inline policy; no served object changes. The code row filter is removed with the adapter."
+    },
+    {
+      "tool": "client_resolve_account",
+      "vendor": "schwab",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/schwab/<master>/silver/fact_acc/ (PII; not granted; a non-PII dim_account projection is not built)",
+      "role": "gateway-schwab-read-role",
+      "action": "BLOCKED (no grant written)",
+      "rollback": "none: no grant is proposed until the projection exists and its prefix is named."
+    },
+    {
+      "tool": "client_resolve_account",
+      "vendor": "commonwealth",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/commonwealth/cottonwood/silver/crosswalk/ and account_links/",
+      "role": "gateway-cot-commonwealth-read-role",
+      "action": "NEW",
+      "rollback": "delete role gateway-cot-commonwealth-read-role and its inline policy; no served object changes."
+    },
+    {
+      "tool": "client_get_holdings",
+      "vendor": "blackdiamond",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/blackdiamond/cottonwood/silver/fact_holdings/ and fact_holdings_s2/",
+      "role": "gateway-cot-blackdiamond-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_holdings",
+      "vendor": "orion",
+      "firm": "inflection",
+      "prefix": "opal-data-assets/orion/inflection/silver/fact_positions/",
+      "role": "gateway-inf-orion-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_holdings",
+      "vendor": "schwab",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/schwab/{08242234,08335338,08403355}/silver/dim_position/ and dim_balance/ (masters 08242234, 08335338, 08403355)",
+      "role": "gateway-schwab-read-role",
+      "action": "EXISTING",
+      "rollback": "none (no change)."
+    },
+    {
+      "tool": "client_get_holdings",
+      "vendor": "smartx",
+      "firm": "49financial (row filter)",
+      "prefix": "opal-data-assets/smartx/platform/silver/fact_allocation_positions/ and fact_allocation_valuation/",
+      "role": "gateway-smartx-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_holdings",
+      "vendor": "commonwealth",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/commonwealth/cottonwood/silver/positions/ and account_day_value/",
+      "role": "gateway-cot-commonwealth-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_transactions",
+      "vendor": "blackdiamond",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/blackdiamond/cottonwood/silver/fact_transactions/ and fact_transactions_s2/",
+      "role": "gateway-cot-blackdiamond-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_transactions",
+      "vendor": "orion",
+      "firm": "inflection",
+      "prefix": "opal-data-assets/orion/inflection/silver/fact_transactions/",
+      "role": "gateway-inf-orion-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_transactions",
+      "vendor": "schwab",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/schwab/{08242234,08335338,08403355}/silver/dim_transaction/",
+      "role": "gateway-schwab-read-role",
+      "action": "EXISTING",
+      "rollback": "none (no change)."
+    },
+    {
+      "tool": "client_get_transactions",
+      "vendor": "commonwealth",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/commonwealth/cottonwood/silver/transactions/",
+      "role": "gateway-cot-commonwealth-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_allocation",
+      "vendor": "blackdiamond",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/blackdiamond/49f/silver/fact_bd_allocation/",
+      "role": "gateway-blackdiamond-read-role",
+      "action": "EXTEND",
+      "rollback": "remove the opal-data-assets Resource ARNs this ask adds from the gateway-blackdiamond-read-policy Allow statement; the opal-data-bd silver/fees statement is untouched; if the statement is rewritten, restore the prior document (sha256-16 75bd743b235b3b2e as read)."
+    },
+    {
+      "tool": "client_get_allocation",
+      "vendor": "blackdiamond",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/blackdiamond/cottonwood/silver/fact_model_assignment/, fact_model_definition/, fact_model_blend/, fact_model_roster/",
+      "role": "gateway-cot-blackdiamond-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_allocation",
+      "vendor": "orion",
+      "firm": "inflection",
+      "prefix": "opal-data-assets/orion/inflection/silver/fact_positions/ (weights, derived)",
+      "role": "gateway-inf-orion-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_allocation",
+      "vendor": "eclipse",
+      "firm": "inflection",
+      "prefix": "opal-data-assets/eclipse/inflection/silver/fact_models/ and fact_model_composition/",
+      "role": "gateway-inf-eclipse-read-role",
+      "action": "NEW",
+      "rollback": "delete role gateway-inf-eclipse-read-role and its inline policy; no served object changes."
+    },
+    {
+      "tool": "client_get_allocation",
+      "vendor": "smartx",
+      "firm": "49financial (row filter)",
+      "prefix": "opal-data-assets/smartx/platform/silver/fact_model_allocation_roster/ and fact_model_holdings/",
+      "role": "gateway-smartx-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_allocation",
+      "vendor": "schwab",
+      "firm": "49financial",
+      "prefix": "opal-data-assets/schwab/{08242234,08335338,08403355}/silver/dim_position/ and dim_balance/",
+      "role": "gateway-schwab-read-role",
+      "action": "EXISTING",
+      "rollback": "none (no change)."
+    },
+    {
+      "tool": "client_get_fees",
+      "vendor": "blackdiamond",
+      "firm": "cottonwood",
+      "prefix": "opal-data-assets/blackdiamond/cottonwood/silver/fact_transactions/ (Management Fee rows)",
+      "role": "gateway-cot-blackdiamond-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    },
+    {
+      "tool": "client_get_fees",
+      "vendor": "orion",
+      "firm": "inflection",
+      "prefix": "opal-data-assets/orion/inflection/silver/fact_transactions/ (fee rows)",
+      "role": "gateway-inf-orion-read-role",
+      "action": "NEW",
+      "rollback": "as the resolve row (same new role)."
+    }
+  ],
+  "notes": [
+    "gateway-global-internal-reader-role holds no read on any client-data prefix: its only object grants are opal-data-harvest (OG-hv-2) and opal-data-portal-v2 json/ and platinum/. PRD v3.2 holds.",
+    "gateway-schwab-read-role grants dim_position, dim_balance, dim_asset and dim_transaction for 08403355 as well as 08242234 and 08335338; the registry and contract do not name 08403355 (proposal in G2_SCOPES_PROPOSAL.md).",
+    "Live IAM holds 304 roles; the served graph scanned 297 (see the investigation rows for the drift and the node-type token).",
+    "A2: the 49 counted roles are classified by a2_scope (22 A2-SILVER, 14 EXCLUDED-ONLY, 13 NON-SILVER). The inventory is not re-measured.",
+    "A2 gap: under opal-data-assets, 49F Black Diamond has no silver table for holdings, transactions or fees. Those 49F tools are refused (no_source_49f_a2), not sourced from opal-data-bd.",
+    "A2 staleness: 49F dim_account_xref and dim_advisor_fee_role are 11 td (dim_advisor_fee_role is OOM-stalled, census Z-S110); fact_bd_allocation is 39 td. Each answer states its lag.",
+    "Correction to the first pass: the Eclipse holdings line under client_get_holdings is removed, since the contract refuses Eclipse holdings (vendor_no_holdings). The first pass's Commonwealth break-glass claim is removed, since the counted inventory does not show it.",
+    "OPEN ITEM (increment versus snapshot grain, Black Diamond): unmeasured per table; the adapter cell measures it before any tool sums or spans dates."
+  ],
+  "a2_revision": {
+    "revised_at": "2026-10-14T16:51:06Z",
+    "ruling": "Andrew-direct via CTO msg 34134 (record @9a314c1e98): client data reads ONLY opal-data-assets/<vendor>/<firm>/silver/; opal-data-bd, opal-data-mdpf feeds and per-firm Tax SMA gold are not used. Supersedes the CTO msg 34130 'freshest store wins' ruling.",
+    "inventory": "unchanged: the 49 counted roles and their s3_reads are the measured inventory at read_at; not re-measured. Only a2_scope and the vendor, ask_inputs, not_used_under_a2 and notes blocks are revised.",
+    "a2_scope_counts": "22 A2-SILVER, 14 EXCLUDED-ONLY, 13 NON-SILVER"
+  },
+  "not_used_under_a2": [
+    "opal-data-bd (all prefixes: live 49F silver/ fees, transactions, allocations, realized, unrealized, prices; schwab/silver/ 49-schwab-conv tables, stopped 2026-07-23): NOT USED (CTO msg 34134).",
+    "opal-data-assets blackdiamond/49financial/silver_legacy/: frozen 2026-08-25 copy of opal-data-bd silver (assets 80 td, transactions_enriched 122 td, fees 35 td); not a silver/ prefix: NOT USED.",
+    "opal-data-mdpf feeds (for example mdpf/feeds/model_aua_positions/<firm>/, PRD v3.2): NOT USED.",
+    "opal-data-49financial mdpf/49financial/gold/taxsma_assets/ (per-firm Tax SMA gold): NOT USED.",
+    "opal-data-cottonwood mdpf/cottonwood/gold/taxsma_assets/ (per-firm Tax SMA gold): NOT USED.",
+    "opal-data-assets non-silver prefixes (bronze/, gold/, meta/, _ops/, gateway/ workbooks): outside the silver-only rule; no client_* tool reads them.",
+    "gateway-blackdiamond-read-role grant on opal-data-bd silver/fees and the other opal-data-bd readers: not used by G2; their removal is not asked here."
+  ]
+}

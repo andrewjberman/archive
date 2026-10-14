@@ -1,0 +1,21 @@
+session log -- 0.9.0_WK_NFRA_MCPORTAL~24 on NFRA_MCPORTAL.TO-MP-pc-6 (read-only close run, no write, no push, no vendor call)
+worktree C:/tmp/mp-pc-24, branch wk-NFRA_MCPORTAL-pc-24
+
+1. Tree check: branch wk-NFRA_MCPORTAL-pc-24; org and .tools present -- TREE-OK.
+2. S3 pointer heads (.tools/aws s3api head-object, bucket opal-313476888478-globgrph, key fabric/activity/v1/gitstate/box=<B>/last_integrate.json):
+   laptop -> aws rc 0 (present, ContentLength 185)
+   sitez  -> aws rc 254, stderr "(404) ... Not Found" (absent)
+   dell1  -> aws rc 254, stderr "(404) ... Not Found" (absent)
+   dell2  -> aws rc 254, stderr "(404) ... Not Found" (absent)
+   The first pass captured the pipeline rc of tr, not of aws, and was discarded; the re-read above captures the aws rc directly.
+3. s3api get-object for laptop -> rc 0; object body: {"at": "2026-10-14T16:41:04Z", "rc": 0, "note": "pushed=fab0914014 ..."}.
+   box_no = laptop (rc 0). box_not_recorded = sitez (first box with no pointer, in the order laptop sitez dell1 dell2).
+4. Served probe, first send: SSM command 5b64cd1a-4898-48dc-879a-0d9071cc4b95 on i-07dccb1615503ac99, Status Success, stdout a Python TypeError (Decimal not JSON serializable at the json.dumps of the grant revision). No data was read into the output; the probe was corrected to serialize Decimal as int.
+5. Served probe, second send: SSM command 9f354b62-a3d5-40b9-9d2d-07003983a79d, Status Success. Stdout line kept verbatim as pc6_served_probe_stdout.txt. Probe source as pc6_probe.py (committed copy has a noqa comment on the side-effect import line and LF line endings; the body sent is the same logic).
+   Result: person alyssa@opalinvest.com (how: "...; data grant revision 4; ..."), grant_rows 1, profile_matches 1, scan denominator 1.
+   store_tools (5) = page_person_tools (5). channel portal_index (6 catalog tools, the most of any non-m365 channel). holder opalbloomberg@opalinvest.com with 6 tools; page_channel_tools (6) = breakdown_holder_tools (6). served box laptop {"refused": false, "at": "2026-10-14T16:50:57Z"}; served box sitez "not recorded".
+6. Surprises filed in the channel: NFRA_MCPORTAL-Z-W24-S1 (no read/show subcommand in schwab_entitlement_admin.py) and NFRA_MCPORTAL-Z-W24-S2 (worker holds no operator identity; store read under the host instance role).
+7. Run file written (pc6_run.json, python json.dump, ensure_ascii) and committed 53b6a584c7 after a first attempt blocked by the commit gate on F401 for the bare app.server import (fixed with a noqa comment, LF endings).
+8. AC1: bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pc/checks/pc6.AC1.sh; echo "exit=$?" -> "run=read person=alyssa@opalinvest.com store==page:yes channel=portal_index breakdown==page:yes box_no=laptop served_no:yes box_not_recorded=sitez served_not_recorded:yes" / RESULT: PASS / exit=0.
+9. Proof instance validated with python .tools/proof-of-spec-check.py (see instance commit).
+10. Row NFRA_MCPORTAL-Z-W24-S3 filed (commit 21208d11aa): the order's <status> flip names a file outside <paths>, so no flip is made; the instance lists it under surprises.

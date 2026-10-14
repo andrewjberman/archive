@@ -1,0 +1,30 @@
+# IRPT_DASHBD round 108 (the CTO's round-107 L10 answer, msg 7729), workstream B -- drain-end (issuer 2.0.0_SA_COO~D2, 2026-10-14 ~16:5xZ)
+
+**Two orders, both drained; nothing served moved, nothing written to AWS, nothing deployed; counts, hashes and words only in the repo; the client silver and the dry-run table stay in the private folder `C:/dev/_irpt_private_evidence_20261009/`.** Issued @71bd5bec05. Drained: `DB-b-211` (~171, merged @878f4fbb92) and `DB-b-212` (~172, merged @daf628fb72). `DB108-1-AC1` and `DB108-2-AC1` re-run PASS by this seat on the landed tree, and so do all six earlier live criteria (rounds 105-107). `round-close-check` reads **MAY-CLOSE** (2 orders complete, 2 proof instances VALID, 0 judgment criteria: this round has nothing for the CVO to grade by eye). Push state: both merges and round 107's @19370b057a are ON origin box/dell2 (fetch read, origin @d224636183, `merge-base --is-ancestor` true for each); this packet's own commit is LOCAL until the box-sync takes it.
+
+## What the cells found
+
+- **`DB-b-211` (the Inflection adapter's first tables):** `account_dim` and the household key, built from Inflection's own silver in a private dry run: **980 accounts in 320 households**, one row per account, firm `inflection`, every account coverage FULL. The account is Orion's `accountId` (from `fact_positions`, with `fact_assets` as the identity surface); the household key is Orion's `clientId`, which equals `householdId` in `fact_transactions` on all 871 accounts that carry both and is present on all 980; `householdName` is a name and is not used as a key. The silver does not carry `tax_status`, `opened_date` or `first_data_date` (listed as absent fields; `client_id` is carried). The adapter's schema hash, the dry-run table's and the gold contract's are the same hash. The adapter's reader is GET-only and REFUSES any path outside the Inflection scopes it derives from the registry row (a typed prefix is refused by the naming gate, so it derives them): the Orion master prefix and any other firm's place cannot be read through it. 10 offline tests pass and a mutant fails 3 of them. 54 S3 reads, 0 writes.
+- **`DB-b-212` (the two reads):** **Orion's returns include dividends: YES.** The reported window return sits within the tolerance of the with-income figure and outside it for the without-income figure, at account level and at client level (762 transactions checked, 133 dividend flows among them); it lies just BEYOND the with-income figure, not between the two, which the record states. **Eclipse tax lots are not populated: 0 rows carry lot fields across the 4 silver tables** (547 dated partitions), so the lots members carry `NO_LOTS` with the plain sentence "Lot-level detail is not available for this account yet." The `reconstructed/` (7) and `meta/` (1,449) objects were checked by name and key and NOT opened: `NO_LOTS` stands for the silver tables, and the unopened objects are a named limit. 3,822 S3 reads (three full runs and exploratory calls under the two granted prefixes), 0 writes.
+
+## What this seat read for itself
+
+I re-ran both criteria in each worker's tree and on the landed tree, re-validated each proof instance (the first one read INVALID on my run because three artifact pins predated the instance commit; the worker re-pinned them and it reads VALID), confirmed each worker commit's file list, scanned every changed file against the 980 account ids and 320 household ids of the private table (0 hits), and checked the merged channel with the gate's own parser (447 rows, 0 malformed, 0 duplicates, every worker row present once). I did NOT read the raw silver or the dry-run table's contents beyond the recount and the identifier scan, and there was no render this round, so there are no pages to read. **Not a grade.**
+
+## One fork surfaced for the CTO (not decided here)
+
+Orion's `fact_performance` is keyed by CLIENT and carries no account key. An Inflection ACCOUNT-grain return in the gold (the contract's `account_return_daily` grain) therefore cannot be read from Orion's performance table: it must be derived from positions and transactions, or the report's account pages must say in words that an account return is not available for Inflection. This decides whether round 109's render can show an Inflection household with account pages at all (row `D2-S34`).
+
+## Rows held (owners named)
+
+`W172-S1` and `W172-S3` (ARMED, this seat's): disarmed by row `D2-S34` (the newest-partition rule is carried into later order faces; the client-level fact is the fork above). `W172-S2`, `W171-S1` to `S5`: OBSERVATION, INERT (Orion `fact_transactions` and `fact_performance` are cumulative, so the newest partition only; the Orion backfill guard reads FAIL with four alien objects; one Eclipse table's newest partition is five days behind its siblings). No ARMED row has a dark owner.
+
+## What this does to the FWD outcomes
+
+Inputs to `FWD-2` (any firm's account loads the same way: its DONE WHEN is an Inflection and a Cottonwood account on the same page) and to `FWD-21` (a household at each of three firms on DEV): neither is met. Inflection now has its account dimension and household key and its coverage words (full identity and holdings coverage, `NO_LOTS`, Orion returns include dividends at client grain); it has no gold table written, no account-grain return, no render. Cottonwood stays blocked on ADVI_COTBKF's silver input (it stops at 2026-06-23). Grading either FWD is the CTO's and CVO's at L10, not claimed here.
+
+## Open
+
+**Andrew's call a252** (name the 49 Financial template set or its disclosure page): the 49F disclosure page stays "Not available yet" and the release gate holds. **DB-b-183 (FDRXX apply):** APPLIED at 12:08:39Z; leg L3, the first scheduled D_04 run after the upload, is this seat's read and is still open. The Inflection `account_dim` apply needs an upload path in the adapter that refuses a non-empty prefix and a signed pair (round 105, section 4); it is not cut.
+
+-- 2.0.0_SA_COO~D2
