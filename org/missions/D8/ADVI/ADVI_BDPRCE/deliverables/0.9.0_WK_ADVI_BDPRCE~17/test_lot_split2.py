@@ -220,7 +220,9 @@ def main(emit):
     lot = pd.read_parquet(lot_path)
     lot_rows = len(lot)
     legacy_rows = len(legacy_repo)
-    lot_unique = not lot.duplicated(subset=LOT_KEY).any()
+    # rows folded by THE MODULE: distinct export rows minus the lot table the patched function wrote
+    rows_folded = int(len(full) - lot_rows)
+    lot_unique = all(c in lot.columns for c in LOT_KEY) and not lot.duplicated(subset=LOT_KEY).any()
     lot_uris = [u for u in r_pat_with["uploads"] if u[0] == "addr"]
     from lib.opal_naming import address
     builder_uri = address("blackdiamond", "49financial", "silver", "unrealized_lots", "date=" + date)
@@ -242,8 +244,8 @@ def main(emit):
                  all(c in legacy_repo_with.columns for c in SYNTH)))
     arms.append(("8 relationship_id survives into legacy and lot tables",
                  "relationship_id" in legacy_with.columns and "relationship_id" in lot.columns))
-    arms.append(("9 rows folded under the ruled key == 0 (measured %d)" % ruled["rows_folded"],
-                 ruled["rows_folded"] == 0))
+    arms.append(("9 rows folded by the patched lot table == 0 (measured %d)" % rows_folded,
+                 rows_folded == 0))
     arms.append(("10 colliding groups still differing under the ruled key == 0 (measured %d)"
                  % colliding_differing, colliding_differing == 0))
 
@@ -280,7 +282,7 @@ def main(emit):
             "legacy_sha256": sha_repo,
             "legacy_rows": int(legacy_rows),
             "lot_rows": int(lot_rows),
-            "rows_folded": int(ruled["rows_folded"]),
+            "rows_folded": rows_folded,
             "colliding_groups": int(ruled["colliding_groups"]),
             "colliding_groups_differing": int(colliding_differing),
             "differing_columns": differing_cols,
