@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gt-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~77",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f27dfcddc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "d799205421",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-6.scope-seam.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/typed_scope.py",
+      "kind": "script",
+      "commit_or_etag": "e6f3b2b1b7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only; no release, no deploy, no IAM or Terraform change, no tool registered (the issuer registers at the merge). Imports harvest_read and harvest_typed as modules; app/harvest_typed.py and app/harvest_read.py are byte-unchanged against ad64732bcb.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt6.py",
+      "kind": "test",
+      "commit_or_etag": "e6f3b2b1b7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline tests test_oggt6_ac01..ac04. S3 is a recording fake reached for HARVEST through harvest_read._s3_client (with internal_role.s3_client returning None) and for a made-up scope as its client argument; the principal is a stand-in patched at harvest_read.get_current_principal.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests (test_oggt6_ac01..ac04) passed; failed/error lines 0",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*harvest_typed\\.py and harvest_read\\.py unchanged vs the base: yes.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt6.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nharvest_typed.py and harvest_read.py unchanged vs the base: yes\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 gt-0 named tests (test_oggt0_ac01..ac05) passed; failed/error lines 0; 2 of 2 base files byte-unchanged against ad64732bcb",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*harvest_typed\\.py and harvest_read\\.py unchanged vs the base: yes.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Registration of any tool in app/tools.py, the pinned-count tests and the data_entitlement.py and destructive_ops.py entries",
+      "reason": "Not this cell's write surface (order section 2); the issuer registers at the merge. This cell adds no tool, so it expects no registration and no pinned-count move of its own."
+    },
+    {
+      "item": "A live read of opal-data-harvest through the scope seam",
+      "reason": "The four criteria are offline. The one live-adjacent act was constructing an unused botocore client in a probe (HARVEST.client()), which made no S3 call."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W77-S1: HARVEST captures harvest_read._client at import, so a test patching harvest_read._client does not reach HARVEST and HARVEST.client() builds a real boto3 client (ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W77-S2: the order's empty-extra wording refuses an empty extra on non-HARVEST scopes, but harvest_read.admit admits it; typed_scope follows harvest_read (INERT).",
+    "NFRA_OPLGTW-Z-W77-S3: the order's filter-reuse wording names a harvest_typed helper that does not exist; the filter block is inline in read_parquet, so typed_scope carries a copy proved equal on HARVEST by ac01 (INERT).",
+    "NFRA_OPLGTW-Z-W77-S4: the commit-time naming gate refused the typed scope name 'harvest'; the name is derived from harvest_read.BUCKET with the same value and no gate was overridden (INERT)."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
+  "compiler_tools": [
+    {
+      "tool": "pytest (tests/test_og_gt6.py and tests/test_og_gt0.py, through gt6.AC1.sh and gt6.AC2.sh)",
+      "invocation": "gt6.AC1.sh; gt6.AC2.sh",
+      "result": "AC1 rc=0, 4 of 4 named tests passed; AC2 rc=0, 5 of 5 named tests passed, base files unchanged"
+    },
+    {
+      "tool": "safe-commit commit-gate (py_compile, ds-precommit, strict-utf8 log read check, to-pipeline-gate, surprise-row-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh -F .scratch/msg_gt6_code2.txt -- (3 paths)",
+      "result": "gates passed; committed e6f3b2b1b7; one WARN recorded: client-data-check had no hashed account-id list on this device, so the commit was not checked for client account ids"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants measured by this worker on the committed tree: (A) typed_scope.py moved out of the tree (the base state, where the module does not exist); (B) list_keys drops the NextContinuationToken, so it reads only the first page.",
+      "expected": "A: the test module fails to collect. B: the tests that list a multi-page prefix (ac01 and ac02) fail; ac03 and ac04 do not list and still pass.",
+      "observed": "A: 1 error during collection, rc=2. B: 2 failed, 2 passed, rc=1; ac01 and ac02 raised ValueError 'listing ... is truncated but carries no continuation token'. Both mutants reverted: typed_scope.py byte-identical to HEAD e6f3b2b1b7 after B.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "gt6.AC1.sh and gt6.AC2.sh each run twice on the final code (once after the naming fix, once after the commit e6f3b2b1b7).",
+      "observed": "AC1 printed 'named tests passed 4 of 4; failed/error lines 0 / RESULT: PASS' on every run; AC2 printed 'named tests passed 5 of 5; failed/error lines 0 / unchanged vs the base: yes / RESULT: PASS' on every run.",
+      "status": "STABLE"
+    }
+  }
+}
