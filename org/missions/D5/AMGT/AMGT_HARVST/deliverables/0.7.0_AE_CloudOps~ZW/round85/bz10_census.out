@@ -1,0 +1,26 @@
+# HVST-bz-10 step 4 -- Stop-ScheduledTask, then the process census with its positive control
+# by 0.7.0_AE_CloudOps~ZW on site Z, 2026-10-14T00:04:48Z (rewritten once: see the INSTRUMENT NOTE)
+
+state BEFORE Stop-ScheduledTask : Ready
+$ Stop-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle'   rc=0   (run at 00:02:59Z)
+state AFTER                     : Ready
+The runner had already exited on its OWN after the stop file ('no further cycle' at 23:53:59Z), so this
+call is a no-op by design. Nothing was killed: no Stop-Process, no taskkill, no key sent to any window.
+
+## THE CENSUS -- over ALL processes of ANY exe, not only python
+  denominator                              : 555 processes examined
+  matching 'cycle_runner|backfill_driver'  : 0    <- the order requires NONE
+  POSITIVE CONTROL (same instrument, same field, a string that IS live):
+    matching 'inbox-watch'                 : 56   <- non-zero, so the census can see processes;
+    the zero above is therefore an ABSENCE, not a blind instrument.
+  python-family processes still live       : 45  (all broker/poller/skill processes, none harvest)
+  processes whose CommandLine reads $null  : 214  <- INSTRUMENT LIMIT, stated: these are
+    system/protected processes this account cannot read a command line for. They are inside the 555
+    denominator and could not be matched either way. None is a python-family process, so the harvest
+    zero is not hiding in them -- but a CommandLine census is never a complete census, and saying so
+    is the point.
+
+INSTRUMENT NOTE: the first write of this file listed each python process with .Substring() and threw
+'You cannot call a method on a null-valued expression' on a process with a null CommandLine, truncating
+the list mid-way. The counts above are computed with a null guard. A reader of that first file would
+have seen a plausible, complete-looking list that was one entry short of its own stated total.

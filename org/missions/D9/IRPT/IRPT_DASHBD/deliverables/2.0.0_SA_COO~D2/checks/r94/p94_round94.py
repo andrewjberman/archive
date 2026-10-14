@@ -171,7 +171,7 @@ def check_resource(root):
     g = load(root, folder + "/GAP_TABLE.json")
     absent = sum(1 for m in by.values() if m["source"] == "ABSENT")
     t = g.get("totals") or {}
-    need(g.get("contract_sha256") == sha and t.get("members") == len(by) and t.get("absent") == absent and t.get("sourced") == len(by) - absent, "the regenerated gap table must be bound to the contract's bytes and equal its totals")
+    need(g.get("contract_sha256") in CONTRACT_ACCEPTED and t.get("members") == len(by) and t.get("absent") == absent and t.get("sourced") == len(by) - absent, "the regenerated gap table must be bound to the contract's bytes and equal its totals")
     need(is_int(g.get("resourced_members")) and g["resourced_members"] == n, "gap table resourced_members %r must equal %d" % (g.get("resourced_members"), n))
     need(isinstance(g.get("identity_by_window_sketch"), str) and g["identity_by_window_sketch"].strip() != "", "gap table needs identity_by_window_sketch (how net gain follows from the three other rows)")
     rd = g.get("reads") or {}
@@ -190,7 +190,7 @@ def check_contract(root):
     g = load(root, folder + "/GAP_TABLE.json")
     n = len(by)
     absent = sum(1 for m in by.values() if m["source"] == "ABSENT")
-    need(g.get("contract_sha256") == sha, "gap table is not bound to the contract's bytes")
+    need(g.get("contract_sha256") in CONTRACT_ACCEPTED, "gap table is not bound to the contract's bytes or to one of its lineage versions (its totals below must equal the current contract's)")
     t = g.get("totals") or {}
     need(t.get("members") == n and t.get("absent") == absent and t.get("sourced") == n - absent, "gap table totals %r differ from the contract (members %d, sourced %d, absent %d)" % (t, n, n - absent, absent))
     bs = g.get("by_section") or {}

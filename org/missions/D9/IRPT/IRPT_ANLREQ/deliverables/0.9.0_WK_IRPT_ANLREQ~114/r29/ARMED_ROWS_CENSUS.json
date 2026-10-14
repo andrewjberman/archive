@@ -1,0 +1,504 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-296",
+  "cell": "AR-y-296",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~114",
+  "denominator": {
+    "channel": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+    "fenced_json_blocks": 408,
+    "rows_parsed": 439,
+    "armed_owned": 45,
+    "already_disarmed": 12,
+    "left": 33,
+    "verdicts": {
+      "RESOLVED": 10,
+      "STILL_ARMED": 19,
+      "UNCLEAR": 4
+    },
+    "pre_filing_counts_before_this_worker_rows": {
+      "rows_parsed": 437,
+      "fenced_json_blocks": 406,
+      "armed_owned": 43,
+      "already_disarmed": 12,
+      "left": 31
+    },
+    "checker_parse_counts": {
+      "rows_parsed": 322,
+      "armed_owned": 34,
+      "left": 24,
+      "note": "the checker regex matches only blocks opening with an object brace; 86 array blocks (117 rows, of which 11 owned, 2 disarmed) are not seen"
+    },
+    "disarmed_rows": [
+      {
+        "id": "IRPT_ANLREQ-D2-S16",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S27"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-S43",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S44"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W52-S7",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S52"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-S59",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S60"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W53-S5",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S63"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W53-S6",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S63"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W52-S24",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S65"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W52-S31",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S65"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-S66",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S67"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-S69",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S70"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W64-S5",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S70"
+        ]
+      },
+      {
+        "id": "IRPT_ANLREQ-D2-W67-S1",
+        "disarmed_by": [
+          "IRPT_ANLREQ-D2-S75"
+        ]
+      }
+    ]
+  },
+  "rows": [
+    {
+      "id": "IRPT_ANLREQ-D2-W3-S1",
+      "one_line": "The order has `original` sign through the same `signer` the pdf route uses, but PdfSigner.sign admits only keys matching",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "infra/aws/lambda/investor-reporting/ops/pdf_link.py@62880e9bfc: PdfSigner.sign(firm, storage_key, sha256, family=FAMILY) with FAMILIES = (ORIGINAL_VENDOR_PDF, ORIGINAL_HOLDINGS, ORIGINAL_CSV); same on box/dell2 lines 19-21 and 83-95",
+        "LIVE irpt-status (get-function-configuration 2026-10-13T23:40Z): CodeSha256 vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4=, LastModified 2026-10-13T12:55:10Z; the downloaded zip sha256 equals it; its pdf_link.py has def sign(self, firm, storage_key, sha256, family=FAMILY) and FAMILIES = (FAMILY, \"ORIGINAL_HOLDINGS\", \"ORIGINAL_CSV\")",
+        "box/dell2 lambda-source-map.json irpt-status: artifact_sha256 = deployed_code_sha256 = vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4= (the live bytes)"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W7-S1",
+      "one_line": "With status_installed.py importing OPAL_RESEARCH_REVISION from resident_installed, the BUILD_ONLY irpt-status zip fails ",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/investor-reporting/reports/status_installed.py has no OPAL_RESEARCH_REVISION reference; its only resident_installed import is 'from resident_installed import make_authorize' (line 130)",
+        "LIVE irpt-status zip (2026-10-13T23:40Z): status_installed.py contains no OPAL_RESEARCH_REVISION line, so the missing=1 closure failure the row measured cannot reproduce from these bytes",
+        "note: the import AMENDMENT 6 asked for is not on the trunk; whether the research-revision composition is still wanted is the issuer's question, not decided here"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W7-S2",
+      "one_line": "reports/tests/test_status_installed.py's fake policy accessor asserts policy_id == si.REPORTING_POLICY_ID, so composing ",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/investor-reporting/reports/tests/test_status_installed.py:54: the fake accessor returns the row unchanged for any policy id other than REPORTING_POLICY_ID",
+        "run on a git-archive snapshot of box/dell2 (lib, org/standards, infra/logic/registry, infra/aws/lambda/investor-reporting) from the reports directory: python -m pytest -q -p no:cacheprovider tests/test_status_installed.py -> '4 passed in 0.35s' (rc 0)"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-S26",
+      "one_line": "ONE commentary_ready message for the synthetic request REQ-4b5155ac2ea9467ab771b414 (tenant 49financial) sits on outlook",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "LIVE (aws sqs get-queue-url, then get-queue-attributes at 2026-10-13T23:55:05Z): queue outlook-global-commentary-draft-commentary-ready-queue ApproximateNumberOfMessages 1, ApproximateNumberOfMessagesNotVisible 0",
+        "channel row IRPT_ANLREQ-D2-S26 (the message is left to expire; retention 345600 s; the row's expiry about 2026-10-15T06:10Z)"
+      ],
+      "would_disarm": "a measured depth of 0 read live by 2.0.0_SA_COO~Y2 (the row's own rule), or release 4 (AR-g-23, 2.0.0_SA_COO~G2) naming the message in its pair's radius; the message leaves only by expiry, consumption or a named act"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W52-S29",
+      "one_line": "Under the repaired reader, a two-account Account-Number sheet that the round-16 door stored answers NORMALIZED on a same",
+      "verdict": "UNCLEAR",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/investor-reporting/intake/uploads.py lines 659-662: stored_version defaults to before-C-STOREDINPUT and the full re-read is compared only when it equals READER_VERSION; unchanged on the trunk",
+        "the stored population of two-account templates was not enumerated; no live read of stored template documents was made in this census"
+      ],
+      "would_disarm": "a read-only enumeration of stored template documents with two account values and no reader_version (intake table scan, owner 2.0.0_SA_COO~Y2 or the CTO), then a ruling on those stored rows"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W55-S5",
+      "one_line": "The W328-S1 repair (IB-pr-477, a stored-bundle probe whose reply is a WAF challenge ends the run without a second sign-i",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js carries the WAF_CHALLENGE branch (14 matches): the repair is on the trunk",
+        "org/critical_paths/change_management/20261013T0607Z_irpt-resident-r19-20261013_deploy_completion.md (leg V1): the installed library is a1c28801... (= the bindings); the W328-S1 library db43e9f9... is not on the live host",
+        "the recipe release (069b8f797e) is not installed: no change_management record installs it"
+      ],
+      "would_disarm": "the release leg (2.0.0_SA_COO~Y2) carrying ycharts-host/ycharts_session.js with the repair, WANT_LIBRARY and the bindings re-pinned together, installed under its own change_management entry; the repair row IRPT_BCKEND-D2-W328-S1 is owned by 2.0.0_SA_COO~P2"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W51-S16",
+      "one_line": "The release build against the unpatched map moves six members, not the two the census planned: the four native holds dif",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/ci/lambda-source-map.json, irpt-ycharts-generate staged_from pins: acceptance.py 2f7cc7be42 (sha256 138da769bd), submission.py 1eed34a8c0 (82c47bd021), submission_service.py 2f7cc7be42 (24b793e8ab), durable_job.py 3acafb3f45 (afba08fefb)",
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): acceptance.py 138da769bd, submission.py 82c47bd021, submission_service.py 24b793e8ab, durable_job.py afba08fefb -- each equal to its trunk pin's sha256",
+        "the six-member difference the row measured is no longer present for the four natives: the trunk pins and the live bytes agree"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W55-S15",
+      "one_line": "The release built by the recovered st32 recipe at pin 069b8f797e carries SECTION_BOUNDS = True in ycharts/extract/extrac",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/investor-reporting/ycharts/extract/extract.py line 450: SECTION_BOUNDS = True (the trunk file is unchanged)",
+        "the recipe release at 069b8f797e packages the same line (row evidence: C:/dev/ar199-55-tarballs/release_069b8f797e_recipe.tar.gz member ./ycharts/extract/extract.py); the st32 member has no SECTION_BOUNDS line (row evidence)",
+        "the CTO round-19 section 4 item 4 assumes the release rides with the switch OFF; no record shows a built package with the switch OFF"
+      ],
+      "would_disarm": "a release built with SECTION_BOUNDS OFF as the CTO ruled, or the CTO's written amendment of that item recorded in the release record (2.0.0_SA_COO~Y2 cuts; 1.0.0_SA_CTO rules)"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W55-S16",
+      "one_line": "The recipe's release carries ycharts-host/ycharts_session.js at sha db43e9f9... (the IB-pr-477 stored-bundle change) and",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "row evidence: the recipe release carries ycharts-host/ycharts_session.js sha256 db43e9f9744e697098120e11dd862a1348ffea05c6307f980dc24e7ea530a216 and its bindings capture.library_sha256 db43e9f9",
+        "change_management/20261013T0607Z (leg V1): the installed library is a1c28801... = the bindings; the recipe library is not installed",
+        "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh lines 14 and 42 check WANT_LIBRARY a1c288...; the r193 installer (deliverables ~71/r21) line 16 carries the same WANT_LIBRARY"
+      ],
+      "would_disarm": "the release leg (2.0.0_SA_COO~Y2) that re-pins WANT_LIBRARY and the bindings to the repaired library together, after the repair (W55-S5) is on the host; or a recorded decision that the release rides with a1c288"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W55-S19",
+      "one_line": "The builder reads queue URL, table names and core_state_serial from the live core state in S3; the order forbids live AW",
+      "verdict": "UNCLEAR",
+      "evidence": [
+        "release_build_report.json (deliverables ~55/r19/recipe_evidence): queue_url https://sqs.us-east-1.amazonaws.com/313476888478/irpt-generation, jobs_table irpt-jobs, requests_table irpt-requests, core_state_serial 5; the values came from --state-json, taken from st32's recorded bindings (row evidence)",
+        "LIVE (aws sqs get-queue-url irpt-generation; dynamodb describe-table irpt-jobs and irpt-requests; 2026-10-13T23:52Z): the same queue URL; both tables ACTIVE",
+        "core_state_serial 5 is not verified: the core root's remote state was not read"
+      ],
+      "would_disarm": "a read of the core root remote state serial and a compare with 5 (owner 2.0.0_SA_COO~Y2 or the release cell); then the bindings are verified and the row resolves"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W51-S13",
+      "one_line": "AR-y-192 premise: the reader pair's release pins are the r14 census pins (uploads.py 4215d98f26, template_reader.py d95c",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "box/dell2 lambda-source-map.json: no entry carries 4215d98f26 or d95cf11106 (git grep count 0); the generate function pins intake/uploads.py e93258c650 (sha256 176682cb15) and intake/template_reader.py da7b3b10bc (sha256 83ab9b45d5)",
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): uploads.py sha256 176682cb15, template_reader.py sha256 83ab9b45d5 (READER_VERSION irpt-template-reader.r18.1): the trunk pair, not the reverted r14 pair",
+        "org/critical_paths/change_management/20261013T0607Z_irpt-resident-r19-20261013_deploy_completion.md (V1): uploads.py 176682cb and template_reader.py 83ab9b45 on the host"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W52-S33",
+      "one_line": "The Lambda's pinned reader (template_reader.py at 3f29017cfc) has no account check and no total-row check. Reader-level,",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): template_reader.py sha256 83ab9b45d5 contains ACCOUNT_COLUMN_SEVERAL_VALUES and TOTAL_ROW_PRESENT; the pinned reader 3f29017cfc named by the row is no longer the one the Lambda carries",
+        "box/dell2 lambda-source-map.json: template_reader.py pin da7b3b10bc (sha256 83ab9b45d5)",
+        "caveat: the row measured 3f29017cfc in process; the live reader was not re-run in process (see W52-S36)"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W52-S35",
+      "one_line": "Under the r18.1 read_input gate a template stored by the pinned reader is accepted unchanged on re-open, because a templ",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/investor-reporting/intake/uploads.py lines 659-662: stored_version defaults to before-C-STOREDINPUT and the full re-read is compared only when stored_version == READER_VERSION; the gate is unchanged on the trunk",
+        "the row's measurement (MIXED_VERSION_TRACE_THIRD_READER.json@872d2363ed, 8 of 8 headGate ACCEPTED, not compared) stands for templates stored with no reader_version"
+      ],
+      "would_disarm": "a CTO ruling on pre-version stored templates (migrate, or refuse at re-open) implemented by a cell of 2.0.0_SA_COO~Y2; the gate's own owner is the intake code"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W52-S36",
+      "one_line": "Run in a scratch tree on the Lambda's pinned pair (uploads f09b802cdc, reader 3f29017cfc), the door answers NORMALIZED w",
+      "verdict": "UNCLEAR",
+      "evidence": [
+        "row evidence (START_STATE_SCRATCH_RUN.json, door_cases total_row_sheet on the pinned pair uploads f09b802cdc, reader 3f29017cfc): NORMALIZED, total_dollars 600 for a file whose total row reads 300 (not re-run here)",
+        "box/dell2 template_reader.py emits TOTAL_ROW_PRESENT (6 matches), and the live pair (uploads 176682cb15, template_reader 83ab9b45d5) is not the measured pair; the door answer on the live pair was not measured"
+      ],
+      "would_disarm": "an in-process door run on the live pair for total_row_sheet, recording the answer and the total; the verdict then resolves on that record (owner 2.0.0_SA_COO~Y2)"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W52-S37",
+      "one_line": "The planned release move names uploads.py and template_reader.py as the two files that go to HEAD and r18.1. Of the uplo",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 lambda-source-map.json irpt-ycharts-generate pins: ids.py 3f29017cfc, repository.py 605c4cd4ac, uploads.py e93258c650, template_reader.py da7b3b10bc, loaders.py 69679b90e3, served.py 564e604838",
+        "git rev-parse at the pins vs box/dell2 HEAD: ids.py pin blob b77721f314 vs HEAD 05a8b10dac; repository.py 0aab45a3d7 vs 3b81ada6a2; uploads.py 35df2aa461 vs 3bd5b42d71; template_reader.py fbc6c33af0 vs 7c2c761d71 (DIFFER); loaders.py and served.py equal HEAD",
+        "the live package carries the pinned bytes (ids.py sha256 f1659861, repository.py f01fcf54), so the pair run is not the HEAD-complete world"
+      ],
+      "would_disarm": "the CTO decision on whether the four non-reader members (ids, loaders, repository, served) move with the reader pair, recorded in the release census; then a HEAD-complete build run (owner 2.0.0_SA_COO~Y2, with 1.0.0_SA_CTO for the decision)"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W55-S27",
+      "one_line": "Line 112 of the st32 host script re-installs $OLD, which line 6 sets to the st31 root 19b02b2971-st31; the root running ",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "release19/install_r19.sh (deliverables 2.0.0_SA_COO~Y2) line 7: OLD=0485393f3a-st32, the root the P1 pre-read recorded as running (change_management/20261013T0607Z, leg P1)",
+        "deliverables ~71/r21/resident_host_install_0485393f3a-r193.sh line 8: OLD=0485393f3a-r19, the root running before the next pair",
+        "the st32 script line 6 (OLD=19b02b2971-st31) is not used by any installed pair after st32"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W56-S2",
+      "one_line": "AR-y-193's LIVE_EQUIVALENT baseline (package sha256 c285a7a7...) is not the live package: its four native holds carry th",
+      "verdict": "UNCLEAR",
+      "evidence": [
+        "row evidence (~56 r19/LAMBDA_LEG_LIVE_REBASE.json): a holds-only BUILD_ONLY build at 5d8b0390ed gives package sha256 NeAB50CNXWvM5Y6nsba220QmsEiASbVbXcZVRYe4MUM=, byte-equal to the live zip read at 2026-10-13T04:21:17Z",
+        "LIVE now: the generate package changed (CodeSha256 xP47NQDn..., LastModified 2026-10-13T22:48:27Z), so the 04:21Z equivalence is not the current package; the four natives now equal the trunk pins (W51-S16)"
+      ],
+      "would_disarm": "a holds-only BUILD_ONLY build at the current base with the trunk pins, compared member by member with the current live zip (read-only), recorded by 2.0.0_SA_COO~Y2; the RELEASE_MAP_PATCH.diff pin question is answered by the same record"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W57-S1",
+      "one_line": "adaptAnalysisUpload at PROD 37aa1247 (envelope.ts:246-273) THREW EnvelopeMismatch('data') on the AFTER create body of th",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): uploads.py sha256 176682cb15 builds the template-lane NEEDS_CORRECTION answer with a reason key (line 470 reason TEMPLATE_FINDINGS; line 510 reason from the retained row)",
+        "portal origin/DEV 24877b67 src/pages/InvestorReporting/contracts/envelope.ts lines 255-256: the reader still requires a non-empty string reason for NEEDS_CORRECTION, and the deployed body now carries one",
+        "caveat: a served create response was not read (no call is made under this order); the measured body in the row predates the current deployed bytes; the PROD reader (37aa1247) was not re-read"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W57-S2",
+      "one_line": "adaptAnalysisUpload at DEV 64980b4d (envelope.ts:247-274) THREW EnvelopeMismatch('data') on the AFTER create body of the",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): uploads.py sha256 176682cb15 builds the template-lane NEEDS_CORRECTION answer with a reason key (line 470; line 510)",
+        "portal origin/DEV 24877b67 envelope.ts lines 255-256 (DEV reader): non-empty string reason required; the deployed body carries one",
+        "caveat: a served create response was not read; this is the same evidence as W57-S1 at the DEV reader"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W61-S2",
+      "one_line": "The three group-A functions' live CodeSha256 values equal their map artifact_sha256 but not their map deployed_code_sha2",
+      "verdict": "RESOLVED",
+      "evidence": [
+        "LIVE get-function-configuration (2026-10-13T23:4xZ): irpt-performance-adapter NdwQsZ4YsijmDKfv1ElBDuSJzCsNKVv/80/xeT7y7bg= (LastModified 2026-10-13T12:51:39Z); irpt-narrative vBzPCvn9lUEZzmDFGK+9g9ICnF8h7N8Z/hccjw2qoBg= (12:39:03Z); irpt-status vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4= (12:55:10Z)",
+        "box/dell2 lambda-source-map.json: for each of the three, deployed_code_sha256 = artifact_sha256 = the live CodeSha256, and last_deployed_at = the LastModified above",
+        "the act-4 ledger org/critical_paths/change_management/20261012T1340Z_advi-firmbkts-fb-f-11-act4-irpt-leg-20261012_deploy_completion.md still records the earlier kMB8 value (line 165); that historical record is not corrected by this read"
+      ]
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W64-S6",
+      "one_line": "Instrument trap: BUILD_ONLY=1 is honoured only by builders at or after the commit that added the guard, so a holds-only ",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/ci/build-and-upload.sh contains 8 BUILD_ONLY references, so the guard is on the trunk; the older base 9e58503be1 has none (row evidence)",
+        "no rule or gate read here forbids a BUILD_ONLY run from a base that lacks the guard: the worker's choice of base is still unguarded",
+        "box/dell2 checks/r20/ar20_checks.py counts a pytest failure through rc != 0 (lines 125, 129), so the collection-error half of the row's second part is covered on the trunk"
+      ],
+      "would_disarm": "a rule (2.0.0_SA_COO~Y2, issuer) that forbids BUILD_ONLY from a base without the guard, or a gate that checks the base carries it"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W75-S1",
+      "one_line": "The serving path REQUIRES a price date for share quantities: a holdings file with a Shares column and no price date is r",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 intake/uploads.py:439 and intake/portfolio.py:59 carry the server default for a missing price date (commit d9d34f0b77, AR-y-245): the trunk fix exists",
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): portfolio.py contains PRICE_DATE_REQUIRED and no default_price_date; uploads.py has no default_price_date call; the deployed package still refuses a Shares unit with no date"
+      ],
+      "would_disarm": "deploy of the pair that carries d9d34f0b77 (2.0.0_SA_COO~Y2 release leg), then a live zip read showing default_price_date in portfolio.py and its call in uploads.py"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W77-S3",
+      "one_line": "The server default for a Shares price date reads lib/trading_calendar.py, whose hardcoded NYSE table covers 2010-2027 an",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 lib/trading_calendar.py: NYSE_HOLIDAYS_FALLBACK spans 2010-01-01 to 2027-12-24 (170 dates); the trunk has no regeneration beyond 2027",
+        "LIVE irpt-ycharts-generate CodeSha256 xP47NQDnZNZ8Lui1XQKUxUtTMTasR8Cj/A1sQnRDZYY= (LastModified 2026-10-13T22:48:27Z; zip downloaded and sha256-checked at 2026-10-13T23:4xZ): portfolio.py has no default_price_date, so the calendar member of AR-y-245 is not in the deployed package",
+        "the hazard is dated: the default fails loud from 2028-01-02 (row evidence); today is 2026-10-13"
+      ],
+      "would_disarm": "regenerate NYSE_HOLIDAYS_FALLBACK past 2028 (lib/tests/gen_nyse_closures.py --write) or package pandas_market_calendars for irpt-ycharts-generate, by a cell of 2.0.0_SA_COO~Y2; the calendar's owner is the lib/ estate owner"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W90-S3",
+      "one_line": "dom-env registers the DOM once per process and cannot register again; a file that releases it leaves later DOM-bound tes",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "portal origin/DEV 24877b67 src/pages/InvestorReporting/__tests__/dsgn-irptv1/dom-env.ts:27: releaseDom() unregisters; the helper registers at module load (the register-once half stands)",
+        "portal origin/DEV 24877b67 upload-press-did-you-mean.test.tsx:40 uses afterAll(releaseDom): the release pattern the row warns about is already on DEV in at least one file",
+        "the candidate commentary-sent.test.tsx (worktree C:/dev/wk-portal-90) is not on DEV; its measured 12 pass / 4 fail was not re-run"
+      ],
+      "would_disarm": "the helper made idempotent, or its release pattern removed from the DEV test files, by the portal test owner under 2.0.0_SA_COO~Y2"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W104-S1",
+      "one_line": "The AR-y-283 partner view (portal commit e82daf4c98 on wk-IRPT_ANLREQ-104-portal) moves the TicketCenter folder from 89 ",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "candidate e82daf4c98 (wk-IRPT_ANLREQ-104-portal) is not an ancestor of portal origin/DEV 24877b67",
+        "e82daf4c98:src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx:86 still mocks useAuth with isInternal false, the firm caller the candidate's partner branch replaces",
+        "the candidate's TicketCenter folder result (90 pass, 10 fail) was not re-run"
+      ],
+      "would_disarm": "the suite re-pointed to an internal caller, or its firm-caller cases retired, in the AR-y-283 cell's candidate; bun test src/pages/TicketCenter green on that candidate"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W96-S3",
+      "one_line": "bun test and bun run typecheck cannot run in a fresh portal worktree (no node_modules); I linked C:/dev/wk-portal-96/nod",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "ls -ld C:/dev/wk-portal-96/node_modules: a link entry (l) to /c/dev/ajb_workspace/portal/node_modules/; test -L reports true",
+        "the worktree and the link still exist; no recursive delete was run in this census"
+      ],
+      "would_disarm": "the owner removes the link entry itself (unlink, not a recursive delete) before any recursive delete or git worktree remove of wk-portal-96; then ls -ld shows no link"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W107-S4",
+      "one_line": "A KEPT holding is written with security_id = the client's bare ticker under holdings identity_kind YCHARTS_SECURITY, and",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "box/dell2 infra/aws/lambda/investor-reporting/intake/portfolio.py:568-571: the KEPT row carries security_id = the client's ticker and method KEPT_BY_HISTORY; the holdings block is identity_kind YCHARTS_SECURITY (line 595)",
+        "git grep for KEPT_BY_HISTORY over box/dell2 finds intake/portfolio.py, intake/uploads.py, ops/status.py, the tests and org/ records only: no ycharts/ recipe consumer treats the KEPT row as provider-less",
+        "no KEPT state arises until a checker is injected (row evidence); the resident wiring is not on the trunk"
+      ],
+      "would_disarm": "the recipe (ycharts/research step_upload) treats KEPT_BY_HISTORY rows as provider-less or excludes them from the YCharts upload, before the resident wiring lands (owner 2.0.0_SA_COO~Y2)"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W103-S3",
+      "one_line": "On a dev build AR-y-282 lets a known partner firm reach /ticket-center, but the board is unscoped until AR-y-281 (server",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "candidate 46a49e57 (wk-IRPT_ANLREQ-103-portal) is not an ancestor of portal origin/DEV 24877b67: the merge the row warns about has not happened",
+        "git log origin/DEV --grep for AR-y-281 or AR-y-283 returns no commit: the firm-scope and partner-view cells are not on DEV",
+        "the hazard is latent and arms on the merge act; the gate stands"
+      ],
+      "would_disarm": "AR-y-281 (server-side firm scope) and AR-y-283 (partner view) land on DEV first, then the 46a49e57 merge; the merge is held by 2.0.0_SA_COO~Y2"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W103-S4",
+      "one_line": "TicketCenter reads internal as isInternal() || isDev(); isDev() is userType === 'Dev' with no firm check, so a partner f",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "portal origin/DEV 24877b67 src/pages/TicketCenter/TicketCenter.tsx:188: 'const internal = auth.isInternal() || auth.isDev()' (the predicate is unchanged on DEV)",
+        "the route refusal (row evidence, ProtectedRoute.tsx:119) checks firmId, not userType; the page predicate is the open surface"
+      ],
+      "would_disarm": "AR-y-283 replaces the page predicate, or isDev() is firm-checked (portal owner under 2.0.0_SA_COO~Y2), with a test that a firm-scoped Dev claim is not treated as internal"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W109-S2",
+      "one_line": "The packager change released ahead of the ticket service half makes every package attach fail: HEAD package_ticket refus",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "LIVE opal-ticket-api (one member, lambda_function.py; CodeSha256 4sDK8P5mtgodi1IkSfaFQZi1YgmJq6URLeypEcaULu8=; LastModified 2026-10-12T01:50:30Z; read 2026-10-13T23:4xZ): no request_revision string, PACKAGE_ALLOWED_FIELDS has no request_id: the server half (AR-y-284) is not deployed",
+        "box/dell2 infra/aws/lambda/ticket_center/lambda_function.py lines 1592-1593 admit request_id and request_revision: the trunk half exists and is undeployed",
+        "box/dell2 ycharts/research/opal_packager.py line 185 sends request_ref on every attach: the released-ahead hazard stands until the server half is live"
+      ],
+      "would_disarm": "deploy of the AR-y-284 server half (server first, per the row), then a live zip read showing request_revision in lambda_function.py; the packager release waits on that read"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W111-S5",
+      "one_line": "On the internal (staff) analysis form, once staff pick the Analysis Request type, the held submit reads 'Choose the firm",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "candidate 1c71bfd8 is not an ancestor of portal origin/DEV 24877b67",
+        "portal origin/DEV 24877b67 src/pages/TicketCenter/analysisRequest.ts:198 still returns 'Choose the firm this request is filed under.' when f.firm is empty: the staff-facing sentence is on DEV",
+        "the fix (the held reason for staff) exists only on the candidate, as read at 1c71bfd8 (row evidence)"
+      ],
+      "would_disarm": "the staff held-reason change of 1c71bfd8 (AR-y-294 step 4) landed on DEV by the portal owner, then a DEV read of analysisRequest.ts"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W114-S1",
+      "one_line": "The y296-armed checker (checks/r21/ar21_checks.py line 756) reads the channel with a regex that matches only blocks open",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py line 756 at 295d98d389: the object-brace-only regex",
+        "the channel file at 295d98d389 plus the worker's two rows: 406 + 2 fenced blocks; the parse counts are in this record's denominator"
+      ],
+      "would_disarm": "2.0.0_SA_COO~Y2 changes the checker's parse to every fenced block (or names the nine unparsed left rows in the L10 slug) and files the disarm"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W114-S2",
+      "one_line": "The worker worktree C:/dev/wk-irpt-anlreq-114 holds its named paths on disk but its git index is empty: git ls-files ret",
+      "verdict": "STILL_ARMED",
+      "evidence": [
+        "git -C C:/dev/wk-irpt-anlreq-114 ls-files returned 0 entries; git status --short shows 80,527 staged deletions and 24 untracked entries (read at 2026-10-14T00:0xZ)",
+        "the channel file hashes to 9b794a63756a0721705676d742ec4a60b2b8996d, equal to HEAD:<path> at 295d98d389"
+      ],
+      "would_disarm": "2.0.0_SA_COO~Y2 re-indexes or re-cuts the worktree (the worker does not reconstruct it); a git status of the worktree then shows only this order's changes"
+    }
+  ],
+  "groups": [
+    {
+      "resolved_by": "live deploys 2026-10-13T12:39Z-12:55Z of irpt-narrative, irpt-performance-adapter and irpt-status (live CodeSha256 equal to the trunk map's deployed_code_sha256 and artifact_sha256); commit 62880e9bfc for the signer",
+      "rows": [
+        "IRPT_ANLREQ-D2-W3-S1",
+        "IRPT_ANLREQ-D2-W61-S2"
+      ],
+      "proof": "get-function-configuration and zip downloads at 2026-10-13T23:40Z-23:5xZ; box/dell2 lambda-source-map.json last_deployed_at and deployed_code_sha256 for the three functions; ops/pdf_link.py@62880e9bfc"
+    },
+    {
+      "resolved_by": "the live irpt-ycharts-generate package (CodeSha256 xP47NQDn..., LastModified 2026-10-13T22:48:27Z) against the trunk map pins and the r19 install record",
+      "rows": [
+        "IRPT_ANLREQ-D2-W51-S13",
+        "IRPT_ANLREQ-D2-W51-S16",
+        "IRPT_ANLREQ-D2-W52-S33"
+      ],
+      "proof": "zip member sha256 reads (uploads.py 176682cb15, template_reader.py 83ab9b45d5, acceptance.py 138da769bd, submission.py 82c47bd021, submission_service.py 24b793e8ab, durable_job.py afba08fefb) against box/dell2 lambda-source-map.json; change_management/20261013T0607Z leg V1"
+    },
+    {
+      "resolved_by": "the live generate package's uploads.py (template-lane NEEDS_CORRECTION answers carry a reason key) and the portal reader's non-empty reason requirement at origin/DEV 24877b67",
+      "rows": [
+        "IRPT_ANLREQ-D2-W57-S1",
+        "IRPT_ANLREQ-D2-W57-S2"
+      ],
+      "proof": "zip member read of uploads.py lines 470 and 510; portal origin/DEV 24877b67 src/pages/InvestorReporting/contracts/envelope.ts lines 255-256; served response not read"
+    },
+    {
+      "resolved_by": "the release install scripts' rollback root (release19/install_r19.sh OLD=0485393f3a-st32; ~71/r21 resident_host_install_0485393f3a-r193.sh OLD=0485393f3a-r19) and the r19 pre-read",
+      "rows": [
+        "IRPT_ANLREQ-D2-W55-S27"
+      ],
+      "proof": "the two script lines named; change_management/20261013T0607Z leg P1 (running root st32)"
+    },
+    {
+      "resolved_by": "the trunk's status_installed.py and its test file (box/dell2) and the live irpt-status package (no OPAL_RESEARCH_REVISION import)",
+      "rows": [
+        "IRPT_ANLREQ-D2-W7-S1",
+        "IRPT_ANLREQ-D2-W7-S2"
+      ],
+      "proof": "git show box/dell2:...status_installed.py grep (no import); pytest 4 passed on a git-archive snapshot of box/dell2; live irpt-status zip member read"
+    }
+  ],
+  "claim": "Verdicts are read at trunk box/dell2 df8dcaa02c, portal portal origin/DEV 24877b67, and live AWS reads at 2026-10-13T23:40Z-23:55Z (read-only get/describe/list, and zip downloads checked by sha256). A RESOLVED verdict rests on a commit, a trunk file read, or a live read; no row is resolved for being old. The denominator counts every fenced json block (439 rows); the issuer's checker regex sees only the object blocks (322 rows) and misses the array blocks. This census covers the 33 left rows, including the worker's own two rows filed in this order. The worker files no disarm row and changes no channel row; the issuer adjudicates.",
+  "not_read": [
+    "the stored template documents and the stored two-account rows (W52-S29, W52-S35): no enumeration",
+    "a served create response from the upload door (W57-S1, W57-S2): no call is made under this order; the evidence is the deployed code bytes",
+    "the in-process door run on the live reader pair (W52-S36)",
+    "the core root remote state serial (W55-S19): core_state_serial 5 not verified; queue URL and table names were verified live",
+    "the live PROD portal bundle (the PROD reader was not re-read; 37aa1247 is the row's measured commit); origin/DEV is read as the git ref, not the served bundle",
+    "the release tarballs C:/dev/ar199-55-tarballs and C:/dev/irpt-release-st32 (not opened); the recipe members are read from row evidence only",
+    "the candidate portal branches beyond the one file each row names and their ancestry against origin/DEV",
+    "the S26 message body and its DLQ (depth only was read)",
+    "the W55-S5 host library itself on the resident host (the installed library is read from change_management/20261013T0607Z, leg V1)",
+    "Andrew's screenshots (in chat only)"
+  ]
+}
