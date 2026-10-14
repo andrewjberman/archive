@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-216",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "51675bfa49"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "51675bfa49",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-216.inflection-account-return-derivation-and-tie-out-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~174",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~174/TWR_TIEOUT_R109.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "DB109-3-AC1"
+      ],
+      "deploy_evidence": "Tracked read-only derivation module: the account_return_daily method as pure functions over the Inflection silver frames; reads only through the round-108 GET-only reader; no write-call name; every s3:// literal under a granted Inflection prefix (none typed); names no other firm; not deployed."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_account_return_daily.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "DB109-3-AC1"
+      ],
+      "deploy_evidence": "11 offline tests on synthetic data, 11 passed under python -I -m pytest -q; a temporary flow-window mutant failed 2 of them and was reverted byte-identical."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~174/TWR_TIEOUT_R109.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "DB109-3-AC1"
+      ],
+      "deploy_evidence": "The round-109 record: module, engine (unchanged), tests, derived table and gaps file (private, hashed), the per-window counts and the basis words; counts, hashes and words only; files_in_repo, served_values_changed, pushed and deployed all false."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "DB109-3-AC1"
+      ],
+      "deploy_evidence": "Five surprise rows IRPT_DASHBD-D2-W174-S1 to S5 appended as bytes, one fenced json block each, UNDER_INVESTIGATION."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB109-3-AC1",
+      "criterion_verbatim": "DB109-3-AC1 -- the module is a tracked file hashed as recorded, names no other firm and holds no write call, every `s3://` literal sits under a granted Inflection prefix; the engine file is hashed as it stands and is unchanged from HEAD; the test file has 6 or more passing tests and passes when the checker runs it, with a failing mutant; the checker calls `daily_returns` and `window_return` on a synthetic week with a closed day that carries a deposit and finds them equal to its own independent computation (the closed day's flow carried to the next trading day, a missing value gives None, never zero, the window return the product); the derived table is a private parquet outside the repo, hashed as recorded, its own schema hash equals the account_return_daily contract's, its accounts are Inflection accounts of the dry run and `derived.rows` and `derived.accounts` equal the checker's recount; label OPAL_COMPUTED; the tie-out gaps file is a private parquet with exactly one row per household of the dry run per window, every household without a gap carries a reason, the record's compared, not-comparable and bin counts equal the checker's recount per window, at least one window compares at least one client, and no tolerance is assumed; nothing is written; no push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r109/p109_round109.py\" . DB109-3-AC1",
+      "output_evidence": "OK: the TWR method equals the checker's independent computation (closed-day deposit carried to the next day, missing value gives None); 926 derived accounts, 878047 rows (label OPAL_COMPUTED, schema hash equal to the contract's); tie-out over 320 households in 4 windows, bins recounted, no tolerance assumed\nDB109-3-AC1 PASS",
+      "denominator": "1 of 1 criterion; 926 of 980 dry-run accounts derived into 878047 account-day rows (54 accounts hold no positive value and have no rows); 320 households x 4 windows = 1280 gap rows, 287 of 320 compared in quarter-to-date and 0 of 320 in each of the other three windows (the gap in the positions silver: 2026-07-01, 2026-09-28); 11 of 11 tests passed, mutant caught",
+      "status": "PASS",
+      "expect": "DB109-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Temporary edit of the module's flow window to sum only the trading day's own flows (d == t), the failure the skipped-day rule exists to catch; run with the offline tests; the module restored byte-identical afterwards.",
+      "expected": "at least one test fails under the mutant",
+      "observed": "2 of 11 tests failed under the mutant (the skipped-day deposit test and the derived-row carry test); 11 of 11 passed after the revert, module sha256 unchanged",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The issuer checker run twice on the final tree, whole printed output compared.",
+      "observed": "identical output on both runs: the same OK line and DB109-3-AC1 PASS, rc 0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to S3, any put, copy or delete",
+      "reason": "Outside the grant and the cell: nothing is written; the derived table is private."
+    },
+    {
+      "item": "The holdings-price guard on the derived days",
+      "reason": "Not run in this cell; the derived days read GUARD_NOT_REACHED (row S4)."
+    },
+    {
+      "item": "The year-to-date, last-12-month and since-inception tie-out comparisons",
+      "reason": "Blocked by the positions silver gap on 2026-07-01 and 2026-09-28 (row S2): every household reads not comparable; not filled."
+    },
+    {
+      "item": "The engine's link-through of intervening valuations",
+      "reason": "The module states the endpoint form the TO specifies; the engine's refinement is not reproduced (row S3); the engine is not edited or called."
+    },
+    {
+      "item": "Eclipse tables",
+      "reason": "Not read: the TO grants Orion's positions and transactions and performance for this cell."
+    },
+    {
+      "item": "The tolerance on the gap distribution",
+      "reason": "Assumed null by the TO; the CTO rules it on this read."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W174-S1: account_return_daily describes account_id as a 10-character zero-padded custodian id; Orion accountId is not zero-padded, so the derived table keeps the account_dim form (a meaning mismatch, not a schema impossibility; the contract is outside the grant).",
+    "IRPT_DASHBD-D2-W174-S2: BLOCKING. fact_positions has no partition for two NYSE trading days (2026-07-01, 2026-09-28); the YTD, last-12-month and since-inception windows read not comparable for every household; quarter-to-date compares 287 of 320.",
+    "IRPT_DASHBD-D2-W174-S3: Orion partitions are calendar-daily, so carried_days is 3 on Mondays rather than 1 on ordinary days, and the engine's link through intervening valuations is not applied (the endpoint form the TO states).",
+    "IRPT_DASHBD-D2-W174-S4: a computed derived day reads day_quality MEASURED with guard_state GUARD_NOT_REACHED because the enums have no member for computed-but-unguarded.",
+    "IRPT_DASHBD-D2-W174-S5: 19,390 positions rows with isActive false carry non-zero currentValue; the silver defines no isActive; the value basis includes them until the CTO rules."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p109_round109.py (issuer checker, DB109-3-AC1)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r109/p109_round109.py\" . DB109-3-AC1",
+      "result": "rc=0; DB109-3-AC1 PASS"
+    }
+  ]
+}
