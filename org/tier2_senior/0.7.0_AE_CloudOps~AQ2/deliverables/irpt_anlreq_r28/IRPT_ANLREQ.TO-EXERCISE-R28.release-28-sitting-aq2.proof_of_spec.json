@@ -1,0 +1,134 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-EXERCISE-R28.release-28-sitting-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R28.release-28-sitting-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "b1e8648e4e"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R35A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R28.release-28-sitting-aq2.md",
+  "vintage_commit": "b1e8648e4e"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "dynamodb:opal-users-v2 USER#<FA> and USER#<CW> (PROFILE); dynamodb:opal-partner-49financial <FA>",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "three synthetic rows written 03:33:21Z-22Z for the sitting and deleted 03:52:27Z after the later token exp; both addresses ABSENT by GSI and ConsistentRead and the partner row ABSENT",
+   "artifact_covered_by": [
+    "R28E-AC2"
+   ],
+   "commit_or_etag": "removal 03:52:27Z"
+  },
+  {
+   "path_or_key": "dynamodb:opal-tickets TCK-20261014-2965a5e0 (one synthetic ticket, stays)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "created by T4a (201); package and top-level report_ref set once by PKG-1; PKG-2 and PKG-3 changed nothing; no delete route, status open",
+   "artifact_covered_by": [
+    "R28E-AC1"
+   ],
+   "commit_or_etag": "T4a 03:33:22Z"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/SITTING_RESULT.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the thirteen result lines and the NOTE lines",
+   "artifact_covered_by": [
+    "R28E-AC1"
+   ],
+   "commit_or_etag": "8fbad0a1aa"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/SITTING_REMOVAL.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the removal reads",
+   "artifact_covered_by": [
+    "R28E-AC2"
+   ],
+   "commit_or_etag": "8fbad0a1aa"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R28E-AC1",
+   "invocation": "grep -cE '^(T4a ADMITTED status=201|T4b REFUSED status=400|LIST-A OK own_rows=[0-9]+ eight_members=true foreign=0|LIST-B OK foreign=0|GET-B REFUSED status=403|PKG-1 OK report_ref_set|PKG-2 OK unchanged status=409 code=PACKAGE_ALREADY_ATTACHED|PKG-3 REFUSED status=409 code=REPORT_REF_ALREADY_RECORDED_OTHER|D1 NEEDS_CORRECTION ACCOUNT_COLUMN_SEVERAL_VALUES|D2 NORMALIZED|D3 NORMALIZED price_date=[0-9]{4}-[0-9]{2}-[0-9]{2}|D4 ACCEPTED|C1 PARSED 3 of 3)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/SITTING_RESULT.txt",
+   "expect": "^13$",
+   "output_evidence": "9\nexit=0",
+   "denominator": "13 expected lines; 9 match (T4a, T4b, LIST-A, LIST-B, GET-B, PKG-1, PKG-2, PKG-3, C1); D1, D2, D3 and D4 read FAIL",
+   "status": "FAIL",
+   "status_reason": "D1 to D4 were each refused NOT_AUTHORIZED by the upload door before the file was read, because the door's ordinary-viewer authorizer has no producer (reports/generate_installed.py sets ports ordinary_authorizer to None); row IRPT_ANLREQ-D2-S93 (BLOCKING). The C1 line matches but is vacuous: the three bodies parsed were refusal envelopes (SITTING_RESULT.txt NOTE).",
+   "criterion_verbatim": "grep -cE '^(T4a ADMITTED status=201|T4b REFUSED status=400|LIST-A OK own_rows=[0-9]+ eight_members=true foreign=0|LIST-B OK foreign=0|GET-B REFUSED status=403|PKG-1 OK report_ref_set|PKG-2 OK unchanged status=409 code=PACKAGE_ALREADY_ATTACHED|PKG-3 REFUSED status=409 code=REPORT_REF_ALREADY_RECORDED_OTHER|D1 NEEDS_CORRECTION ACCOUNT_COLUMN_SEVERAL_VALUES|D2 NORMALIZED|D3 NORMALIZED price_date=[0-9]{4}-[0-9]{2}-[0-9]{2}|D4 ACCEPTED|C1 PARSED 3 of 3)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/SITTING_RESULT.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R28E-AC2",
+   "invocation": "grep -cE '^ABSENT (GSI|CONSISTENT) (success\\+irpt-r28-fa-[0-9]{8}@simulator.amazonses.com|irpt-r28-cw-[0-9]{8}@opal.invalid)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/SITTING_REMOVAL.txt",
+   "expect": "^4$",
+   "output_evidence": "4\nexit=0",
+   "denominator": "2 addresses x 2 read paths (GSI, ConsistentRead) ABSENT after the delete at 03:52:27Z, after the later exp 03:52:22Z; the FA partner row also ABSENT; re-read independently",
+   "status": "PASS",
+   "criterion_verbatim": "grep -cE '^ABSENT (GSI|CONSISTENT) (success\\+irpt-r28-fa-[0-9]{8}@simulator.amazonses.com|irpt-r28-cw-[0-9]{8}@opal.invalid)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/SITTING_REMOVAL.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R28E-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r28-sitting-20261014_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261014T035431Z\nexit=0",
+   "denominator": "5 of 5 ledger legs M, T4, D, P5, X carried proof at close",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r28-sitting-20261014_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the arm logic was run offline against the real handler before any live act (both PKG-3 variants); the C1 harness was run with fixtures for all three door answers and a negative control",
+   "observed": "offline predictions matched the live ticket arms 8 of 8; the door arms were not predicted (the offline run did not cover the door's access composition)",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "D1 to D4 and the meaning of C1",
+   "reason": "refused NOT_AUTHORIZED by the door (ordinary_authorizer absent); C1 parsed refusal envelopes only; row IRPT_ANLREQ-D2-S93"
+  },
+  {
+   "item": "authorize-decision log lines (step 5)",
+   "reason": "the ticket service writes none; AMENDMENT 2 replaced the count with invocations and tokens sent per window (1 invocation per ticket request; sends only in the T4a window)"
+  },
+  {
+   "item": "PKG-2 and PKG-3 text",
+   "reason": "run per AMENDMENT 2 (literal repeat; with prior_attached_at)"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S93"
+ ],
+ "session_log": "org/critical_paths/change_management/20261014T0332Z_irpt-r28-sitting-20261014_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "sitting_r28.py (offline and live modes)",
+   "invocation": "--offline, then --live --go --doors",
+   "result": "ticket arms 8 of 8 as amended; door arms refused; removal ABSENT"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open, close-leg M T4 D P5 X, close",
+   "result": "CLOSED 5 of 5"
+  }
+ ]
+}
