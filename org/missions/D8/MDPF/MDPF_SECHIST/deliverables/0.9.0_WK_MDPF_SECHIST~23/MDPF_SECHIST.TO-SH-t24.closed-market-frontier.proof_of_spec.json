@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECHIST.TO-SH-t24",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t24.closed-market-frontier.md",
+    "group": "OTHER",
+    "vintage_commit": "6c8dc6dc79"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECHIST~23",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/decompositions/MDPF_SECHIST_DECOMP_R6.md",
+    "vintage_commit": "6c8dc6dc79",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t24.closed-market-frontier.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_gold.py",
+      "kind": "script",
+      "commit_or_etag": "fd5917f511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code change only; not deployed; no S3, DynamoDB, Lambda or Terraform write. compute_returns is byte-identical to its prior blob. frontier_returns and the return_frontier column are not served until a separate deploy act under its own never-widen pair, after this cell drains",
+      "artifact_covered_by": [
+        "SH6-t24-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_publisher.py",
+      "kind": "script",
+      "commit_or_etag": "fd5917f511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code change only; not deployed; not run against S3. returns_frontier and returns_frontier_holdings are emitted only when a holding carried; no served document is written",
+      "artifact_covered_by": [
+        "SH6-t24-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/test_etf_positioning_closed_market_frontier.py",
+      "kind": "test",
+      "commit_or_etag": "fd5917f511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test file; no S3, no network",
+      "artifact_covered_by": [
+        "SH6-t24-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SH6-t24-AC1",
+      "criterion_verbatim": "python -m pytest data/etfs/scripts/gold/test_etf_positioning_closed_market_frontier.py -q expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/gold/test_etf_positioning_closed_market_frontier.py -q",
+      "output_evidence": "run from the worktree root under timeout 120; exit code 0. Final run: '8 passed in 1.55s' (the publisher edit was made before this run). Tests: test_a_no_vendor_day_on_as_of_carries_last_vendor_day, test_b_last_row_five_days_back_is_blank_and_boundary_carries, test_c_absent_count_nonzero_blocks_the_carry, test_d_null_reading_on_as_of_is_blank_for_money_market, test_e_reading_on_as_of_equals_compute_returns, test_f_guards_the_three_arms_do_not_reach, test_p_carried_holding_emits_both_keys, test_q_nothing_carried_emits_neither_key_and_is_unchanged. Last line: '8 passed in 1.55s'",
+      "denominator": "8 of 8 tests passed (arms a-f and publisher p, q)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SH6-t24-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R6_CHECKS/r6_closed_market_real.py expect: CM-REAL-OK D=2026-10-13",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R6_CHECKS/r6_closed_market_real.py",
+      "output_evidence": "read-only run on the real D=2026-10-13 history from the worktree root under timeout 120; exit code 0. Deciding lines: 'arm e: 339 (ticker, book as_of) pairs with a reading are unchanged' ; 'MOVED (no reading on the book as_of): KCDMY@2026-10-12->2026-10-08, SALXX@2026-10-12->2026-10-09, UNVGY@2026-10-12->2026-10-08' ; 'arm a: SALXX@2026-10-12 frontier=2026-10-09 windows={1D: 0.0389, ...}' ; 'arm b: SALXX@2026-10-12 with rows after 10-07 removed frontier=None' ; 'arm c: SALXX@2026-10-12 with absent_count=1 frontier=None' ; 'arm d: FXFXX@2026-10-12 frontier=2026-10-12 windows={all None}' ; last line: 'CM-REAL-OK D=2026-10-13 session_equal=339 moved=3 arms=a,b,c,d,e'. A second same-input run printed the identical MOVED line and CM-REAL-OK line.",
+      "denominator": "5 of 5 arms (a, b, c, d, e) pass; 339 of 339 (ticker, book as_of) pairs carrying a reading are unchanged; 3 pairs with no reading on the book as_of moved (KCDMY, SALXX, UNVGY)",
+      "expect": "CM-REAL-OK D=2026-10-13",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The absent_count guard removed: _gap_days is replaced in-process so every security reads absent_count 0 (a run of test_c under that patch, from .scratch/mutant_c.py, not committed). test_c requires a blank frontier where absent_count is 1.",
+      "expected": "test_c fails: AssertionError because frontier_returns carries 2026-10-09 where a blank is required",
+      "observed": "AssertionError at test_c, frontier carried as '2026-10-09' (MUTANT-C FIRED)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of r6_closed_market_real.py (2026-10-13 history, read-only) compared on the MOVED line and the CM-REAL line",
+      "observed": "run 1 and run 2 identical: MOVED KCDMY@2026-10-12->2026-10-08, SALXX@2026-10-12->2026-10-09, UNVGY@2026-10-12->2026-10-08; CM-REAL-OK D=2026-10-13 session_equal=339 moved=3 arms=a,b,c,d,e",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Served output: the publisher's new keys returns_frontier (per holding) and returns_frontier_holdings (per book) are not in any served document",
+      "reason": "no deploy and no S3 write in this cell; the served change is a separate act under its own never-widen pair after this cell drains"
+    },
+    {
+      "item": "Portal reader: the allowlist adapter portal/src/pages/Positioning/shared/etfAdapter.ts does not carry the two new keys",
+      "reason": "the portal rung belongs to another seat (0.4.0_DE_ClientPlatform); this cell touches nothing under portal/"
+    },
+    {
+      "item": "Gold package vendored into the characteristics producer (cot-satellites-characteristics-producer) carries the pre-SH-t-24 gold",
+      "reason": "already recorded as MDPF_SECHIST-D1-S6; redeploying into that package is a separate act and is not this cell"
+    },
+    {
+      "item": "Full gold folder pytest run as one collection",
+      "reason": "test_etf_positioning_sector_order_carriers.py aborts collection (recorded as MDPF_SECHIST-D1-W23-S1); run with that one file excluded, 32 passed rc 0, reported as a regression result and not as a criterion"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECHIST-D1-W23-S1: test_etf_positioning_sector_order_carriers.py calls sys.exit at module level, so pytest collection of data/etfs/scripts/gold aborts with INTERNALERROR (rc 3); excluding that file, 32 passed rc 0"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.9.0_WK_MDPF_SECHIST~23/MDPF_SECHIST.TO-SH-t24.closed-market-frontier.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/gold/test_etf_positioning_closed_market_frontier.py -q",
+      "result": "rc 0; 8 passed in 1.55s"
+    },
+    {
+      "tool": "r6_closed_market_real.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R6_CHECKS/r6_closed_market_real.py",
+      "result": "rc 0; CM-REAL-OK D=2026-10-13 session_equal=339 moved=3 arms=a,b,c,d,e (second run identical)"
+    },
+    {
+      "tool": "pytest (gold folder regression, not a criterion)",
+      "invocation": "python -m pytest data/etfs/scripts/gold -q -p no:cacheprovider",
+      "result": "rc 3: INTERNALERROR at collection, SystemExit 0 from test_etf_positioning_sector_order_carriers.py line 296 (MDPF_SECHIST-D1-W23-S1); with that file ignored: 32 passed in 2.49s rc 0"
+    }
+  ]
+}

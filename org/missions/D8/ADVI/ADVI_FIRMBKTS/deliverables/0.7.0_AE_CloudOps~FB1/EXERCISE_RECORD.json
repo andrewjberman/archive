@@ -1,0 +1,48 @@
+{
+ "order": "FB-l-5",
+ "acts": "1 and 2",
+ "read_at": "2026-10-14T13:37:00Z",
+ "claim": "measured",
+ "act1_m01": {
+  "commit": "085bdb2f22",
+  "registry_row": "9edbf38575",
+  "scoped_plan": "No changes",
+  "describe_rule": "ENABLED, pattern chain-complete from bd-pipeline.gold-chain, unchanged",
+  "note": "no import was run: the rule was already in state at aws_cloudwatch_event_rule.exec_summary_trigger (row D1-S57)"
+ },
+ "act2_m03": {
+  "terraform_commit": "950ec5e5d2",
+  "apply": "2026-10-14T13:21:34Z via safe-apply on the saved scoped plan: 4 added, 0 changed, 0 destroyed",
+  "floor": {
+   "name": "advi-inf-publish-daily",
+   "state": "DISABLED",
+   "cron": "cron(30 13 * * ? *) UTC",
+   "target": "inf-portal-publisher",
+   "retry": "1 attempt, 3600 s",
+   "dlq": "advi-inf-publish-dlq",
+   "flexible_window": "OFF"
+  },
+  "cron_basis": {
+   "trading_day_completions": 11,
+   "window": "2026-09-25..2026-10-14",
+   "last_10_earliest": "12:45:19Z",
+   "last_10_latest": "12:59:59Z (2026-10-13)",
+   "margin": "30 min 1 s",
+   "source": "gold/meta/pipeline-complete.json version history, trading days by lib/trading_calendar.py"
+  },
+  "early_fire_behaviour": "the handler takes no input, loads whatever parquets are in the bucket and publishes; the cron margin is the only guard until the readiness halt (C4)",
+  "rollback_versions": "rollback_versions_l5.json @770a8fc822: 23 keys (3 snapshots, 20 advisor files), all with a prior VersionId"
+ },
+ "exercise": {
+  "precondition": "gold read complete for 2026-10-14 before the exercise: chain log 'CHAIN chain:full COMPLETE Finished 12:53:37Z'; marker LastModified 12:53:40Z",
+  "mechanism": "one-time at(2026-10-14T13:30:00) UTC schedule advi-inf-publish-exercise-daily (name via name('advi','inflection','publish','daily',qualifier='exercise'); the cadence grammar has no one-time value), ActionAfterCompletion DELETE, same role and DLQ as the floor",
+  "fired": "13:30:24Z; schedule deleted afterwards (get-schedule ResourceNotFound)",
+  "inf-portal-publisher": "1 invocation 13:30:27Z-13:30:41Z, no error; wrote the 3 snapshots (13:30:42Z LastModified, differing from the prior versions only in generated_at); CloudFront invalidation issued",
+  "inf-portal-advisor-publisher": "fanned out at 13:30:27Z with the scheduler event; FAILED 3 of 3 attempts (13:30:31Z, 13:31:37Z, 13:33:40Z): AttributeError 'str' object has no attribute 'get' at lambda_function.py:1032 -> _extract_run_date reads event.get('detail', {}).get('run_date') and a scheduler event's detail is a string; 0 advisor files written",
+  "keys_written": "3 of the 23 named; scan of platinum/ and gold/meta/ (8847 objects) for LastModified >= 13:30:00Z found exactly those 3; 0 outside the named set (other prefixes not scanned: the publisher code writes only these paths)",
+  "dlq_depth": 0
+ },
+ "branch_b": "the signed pair's Branch B names 'the publisher errors': the advisor fan-out errored, so the exercise's rollback was run: the 3 snapshots restored from their prior VersionIds (EXERCISE_ROLLBACK_RESULT.json, bytes equal to prior 3 of 3) at 13:35Z and CloudFront invalidated again (/api/scoped/advisor-intelligence/*). The floor stays DISABLED; the opal-data-inf notification still holds the gold/meta/ entry (the live trigger) and the silver entry.",
+ "finding": "the floor cannot be the publisher's only trigger as built: a scheduler event breaks the advisor publisher's run-date read. A config-only workaround exists (an explicit Input of {} on the floor target makes the event {} and the advisor publisher falls back to today's date); the code fix is inf-portal-advisor-publisher's _extract_run_date. Either needs the pair's word (a change to the floor target is inside act 2's resource but a second exercise needs a new half).",
+ "act3": "not started: held on the CTO's condition C4"
+}
