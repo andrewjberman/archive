@@ -38,7 +38,7 @@
 | t-62 | `e614d1ad2b` | ~54 | a share-class symbol without a dash (BRKB, BRKA) is pulled from Yahoo in its dash form and keyed as given in the three default fetch paths; live probe BRKB status OK rows... |
 
 Not in the table (their drain was not a `drain(MDPF_DEMQUE.TO-DQ-tN)` commit, or the order is not terminal): `DQ-t-30` (complete), `DQ-t-31` (complete), `DQ-t-34` (pending). `DQ-t-34` is the site Z draw: its AC2 waits on the 2026-10-17 non-trading-day fire (owner `~ZQ`).
-Counts at the last `round-close-check.py` read (2026-10-14 ~04:45Z): 33 round-9 orders, 32 complete, 1 not complete (`TO-DQ-t34`); 1 JUDGMENT criterion (`DQ9-t35-AC2`), 0 graded.
+Counts at the last `round-close-check.py` read (2026-10-14 ~04:45Z): 33 round-9 orders, 32 complete, 1 not complete (`TO-DQ-t34`); 1 JUDGMENT criterion (`DQ9-t35-AC2`), 0 graded at that read; graded MET by the CVO afterwards (section 3, item 3).
 
 ## 2. The real runs so far (measured, not asserted)
 
@@ -52,7 +52,7 @@ Counts at the last `round-close-check.py` read (2026-10-14 ~04:45Z): 33 round-9 
 
 1. `DQ-t-34` AC2: the 2026-10-17 site Z fire, then its receipt read on 2026-10-18 (carry-over printed, `bbg_budget` ledger, which requests drew, the not-drawable list).
 2. The first nightly run on the WIRED Yahoo path (2026-10-14 22:30 ET): its receipt against the version baseline (names appended, appended without relock, held restatement, keys written).
-3. `DQ9-t35-AC2` (JUDGMENT, the CVO's): the chain from the price file to the client page for FTHSX, PFORX and RPIFX. The original trace carried account numbers and was moved out under the containment ruling (`MOVED_ACCOUNT_DATA.md`); the de-identified chain is `VALUATION_TRACE_DEIDENTIFIED_DQ_t35.md` in this folder.
+3. ~~`DQ9-t35-AC2`~~ GRADED MET by `3.0.0_SA_CVO` at 2026-10-14 ~07:26 ET (adjudication row `MDPF_DEMQUE-D1-C-S28`, commit `584421b4de`; the grade is the prose verdict in `one_line`, because the row schema's criterion pattern cannot hold the id). The CVO's two limits: "0 of 15" means no applied link, not "on no page" (three FTHSX rows show exact units in a served candidate household, priced at the BD mark); ADVI_COTBKF reads the same store and holds FTHSX/PFORX closes in its unreleased return history (filed as `ADVI_COTBKF-D1-S1`). `round-close-check --round 9` reads `MAY-CLOSE` on the reviewer limb; `TO-DQ-t34` stays outside the verdict and not complete, so no L10 slug yet.
 4. ARMED rows: the surprise tool lists rows with `hazard_standing` ARMED; this seat's disarm evidence files are in `org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/` (W24-S1, W36-S2, W37-S1/S3, W38-S2, W48-S1, W50-S2/S6/S10). `MDPF_DEMQUE-D1-W35-S3` is MSTR's to disarm.
 
 ## 4. Findings for the CTO's round-9 analysis (the enrichment list candidates)
