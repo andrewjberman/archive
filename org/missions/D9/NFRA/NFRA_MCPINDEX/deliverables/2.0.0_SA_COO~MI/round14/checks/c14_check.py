@@ -76,7 +76,7 @@ def ac1(d, allc):
     reg_dir = glib.registry_dir()
     reg = json.load(open(os.path.join(reg_dir, "legacy_addresses.json"), encoding="utf-8")).get("legacy_addresses", [])
     have_reg = {(r.get("bucket"), r.get("template")): r for r in reg}
-    need = {(c["bucket"], glib.row_prefix(c)) for cid, (g, c) in exp.items() if glib.needs_registry(c)}
+    need = {(glib.row_bucket(c), glib.row_prefix(c)) for cid, (g, c) in exp.items() if glib.needs_registry(c)}
     other = {k for k in need if k in have_reg and have_reg[k].get("reader") != "NFRA_MCPINDEX"}   # (bucket, template) is unique: another project holds it
     need = need - other
     reg_ok = sum(1 for k in need if k in have_reg and have_reg[k].get("reader") == "NFRA_MCPINDEX" and not have_reg[k].get("params")
@@ -174,6 +174,9 @@ def ac3(allc):
         with open(p, "w", encoding="utf-8", newline="") as f:
             f.write(glib.group_text(g))
         files[g] = p
+    files["G2F"] = os.path.join(tmp, "G2f_pinned.md")
+    with open(files["G2F"], "w", encoding="utf-8", newline="") as f:
+        f.write(glib.g2f_text())
     ok_arms, rows_ok, rows_all = 0, 0, 0
     for name, deployed in arms.items():
         tag = name.split()[0]
@@ -181,8 +184,8 @@ def ac3(allc):
         dep = os.path.join(tmp, tag + ".json")
         with open(dep, "w", encoding="utf-8") as f:
             json.dump(deployed, f)
-        r = subprocess.run([sys.executable, gen, "--g2", files["G2"], "--g4", files["G4"], "--g5", files["G5"], "--g6", files["G6"], "--out", out,
-                            "--deployed-tools", dep], capture_output=True, timeout=100)
+        r = subprocess.run([sys.executable, gen, "--g2", files["G2"], "--g4", files["G4"], "--g5", files["G5"], "--g6", files["G6"], "--g2f", files["G2F"],
+                            "--out", out, "--deployed-tools", dep], capture_output=True, timeout=100)
         rows_all += len(exp)
         if r.returncode != 0:
             print("ARM %s: generator rc=%d: %s" % (name, r.returncode, (r.stderr or r.stdout).decode("utf-8", "replace")[-200:].strip()))

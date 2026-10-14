@@ -34,7 +34,7 @@ def enc(contract_id):
 def retired_reason(c):
     """The reason a row is retired (never a tool target), or None."""
     cid = c["contract_id"]
-    if silver_legacy(c):
+    if silver_legacy(c) and not g2f_rec(c):
         return "not_served: %s -- a frozen silver_legacy copy; client data only from the opal-data-assets vendor silver folders" % NOT_SERVED_RECORD
     if cid in DO_NOT_SERVE:
         return "do-not-serve: " + str(c.get("routing") or "")
@@ -177,10 +177,44 @@ def label(c):
     return ("%s %s" % (c.get("layer"), " ".join(words))).strip()
 
 
+G2F = ("5e5d312ada", DIR + "parts/G2f_bd_live_prefixes.md", 8)   # the 49F Black Diamond live tables (CTO msgs 34131, 34185; Andrew-direct ~18:3xZ)
+_G2F_CACHE = {}
+
+
+def g2f_text():
+    return git_show(G2F[0], G2F[1])
+
+
+def g2f_records():
+    """{contracted s3_prefix: record} from G2f's per-table JSON records (blocks that carry `contracted` and `live`)."""
+    if not _G2F_CACHE:
+        for b in re.findall(r"```json\n(.*?)\n```", g2f_text(), re.S):
+            d = json.loads(b)
+            if isinstance(d, dict) and "contracted" in d and "live" in d:
+                _G2F_CACHE[d["contracted"]] = d
+        if len(_G2F_CACHE) != G2F[2]:
+            print("ERROR: G2f parsed %d records, expected %d" % (len(_G2F_CACHE), G2F[2]))
+            sys.exit(9)
+    return _G2F_CACHE
+
+
+def g2f_rec(c):
+    """The live-store record of a contract G2f maps to a table in opal-data-bd (the 8 49F Black Diamond silver_legacy copies), else None."""
+    return g2f_records().get(str(c.get("s3_prefix") or ""))
+
+
+def row_bucket(c):
+    rec = g2f_rec(c)
+    return rec["live"][len("s3://"):].partition("/")[0] if rec else c["bucket"]
+
+
 def leading_prefix(c):
     """The leading literal of the contract's s3_prefix up to the first `{`, cut back to the last `/` (unchanged without `{`);
     None for a `none` prefix and for a frozen silver_legacy copy."""
     p = str(c.get("s3_prefix") or "")
+    rec = g2f_rec(c)
+    if rec:
+        return rec["live"][len("s3://"):].partition("/")[2]
     if p.startswith("none") or "silver_legacy" in re.split(r"[/]+", p):
         return None
     if "{" in p:
@@ -209,14 +243,14 @@ def needs_registry(c):
     """True when the row has a non-null `prefix` in a bucket the registry knows, so a legacy_addresses.json row (reader
     NFRA_MCPINDEX, no params) can make the literal CONFORMANT in the commit-time naming gate. The gate honours a row only if it is
     COMMITTED at HEAD, so the registry commit lands BEFORE the rows. A `{param}` template registers its leading literal."""
-    b = str(c.get("bucket") or "")
+    b = str(row_bucket(c) or "")
     return row_prefix(c) is not None and b.startswith("opal-data-") and b not in NO_REGISTRY_BUCKETS
 
 
 def registry_row(c, group):
     pin = PINS[group][0]
     pre = row_prefix(c)
-    return {"key": registry_key(c["contract_id"]), "bucket": c["bucket"], "template": pre,
+    return {"key": registry_key(c["contract_id"]), "bucket": row_bucket(c), "template": pre,
             "shape": "prefix" if pre.endswith("/") else "object", "params": [], "reader": "NFRA_MCPINDEX",
             "evidence": "measured by 4.0.0_SA_CRO~Z in the census %s @%s: %s objects (the contract's size.objects, a count; no object content read)"
                         % (PINS[group][1].rsplit("/", 1)[-1], pin, (c.get("size") or {}).get("objects")),
@@ -268,7 +302,7 @@ def expected_row(c, group, deployed=None):
     why = retired_reason(c)
     pre = leading_prefix(c)
     full = {
-        "bucket": c["bucket"],
+        "bucket": row_bucket(c),
         "prefix": pre,
         "business_meaning": ("%s %s table `%s` in %s (%s): %s. %s" % (
             c["layer"].capitalize(), c["format"], c["table"], c["bucket"], c["s3_prefix"], c["grain"],
@@ -301,7 +335,8 @@ def expected_row(c, group, deployed=None):
         clean[k] = sv
         if sv != v:
             restore[k] = v
-    entry = {"key_template": c["s3_prefix"], "restore": restore}
+    rec = g2f_rec(c)
+    entry = {"key_template": rec["key_shape"] if rec else c["s3_prefix"], "restore": restore}
     return clean, entry
 
 
@@ -328,6 +363,9 @@ def expected_read_tool(c, deployed):
 
 def behind(c):
     """Trading days behind T-1, from whichever key the contract's freshness carries; None when it states none."""
+    rec = g2f_rec(c)
+    if rec is not None:
+        return rec["trading_days_behind_t1"]
     f = c.get("freshness") or {}
     for k in ("trading_days_behind_t1", "trading_days_behind", "trading_days_behind_T-1"):
         if isinstance(f.get(k), (int, float)) and not isinstance(f.get(k), bool):

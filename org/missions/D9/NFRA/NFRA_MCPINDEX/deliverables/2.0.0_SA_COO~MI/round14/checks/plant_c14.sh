@@ -14,7 +14,7 @@ echo '[]' > "$T/none.json"
 export PLANT_REGISTRY_DIR="$(python -c "
 import sys; sys.path.insert(0, r'$(native "$D")'); import glib
 print(glib.plant_registry_dir14(glib.load_all()))" | tr -d '\r\n')"
-python "$G" --g2 "$(native "$T/G2.md")" --g4 "$(native "$T/G4.md")" --g5 "$(native "$T/G5.md")" --g6 "$(native "$T/G6.md")" --out "$(native "$T/good")" --deployed-tools "$(native "$T/none.json")" | tr -d '\r'
+python "$G" --g2 "$(native "$T/G2.md")" --g4 "$(native "$T/G4.md")" --g5 "$(native "$T/G5.md")" --g6 "$(native "$T/G6.md")" --g2f "$(native "$T/G6.md")" --out "$(native "$T/good")" --deployed-tools "$(native "$T/none.json")" | tr -d '\r'
 pass=0; fail=0
 arm() { # arm <name> <expect PASS|FAIL> <mode> <rows dir>
   python "$C" "$3" --rows "$(native "$4")" >"$T/o.txt" 2>&1; rc=$?

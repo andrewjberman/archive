@@ -21,6 +21,7 @@ def main():
     ap.add_argument("--g4", required=True)
     ap.add_argument("--g5", required=True)
     ap.add_argument("--g6", required=True)
+    ap.add_argument("--g2f", default=None)   # accepted for interface parity; glib loads the pinned G2f itself
     ap.add_argument("--out", required=True)
     ap.add_argument("--deployed-tools", required=True)
     ap.add_argument("--fork-registry-out", default=None)
