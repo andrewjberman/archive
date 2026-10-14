@@ -80,7 +80,7 @@ def is_figure_k(v):
     return is_absent_k(v) or (isinstance(v, (int, float)) and not isinstance(v, bool)) or isinstance(v, str)
 
 
-def check_sample_shape_k(sample, contract):
+def check_sample_shape_k(sample, contract, firm=None):
     """round 97's check_sample_shape with the kind-aware absent form: an absent form is exactly {absent, kind}; an asset-class by_row entry may be the text UNHELD."""
     need(isinstance(sample, dict) and set(sample.keys()) == {"household", "values"}, "the sample's top-level keys must be exactly household and values")
     h = sample["household"]
@@ -112,7 +112,7 @@ def check_sample_shape_k(sample, contract):
             need(all(isinstance(s, dict) and set(s.keys()) == {"name", "points"} for s in v), "member %s: a series is a list of {name, points}" % k)
         else:
             need(is_figure_k(v), "member %s holds a value that is not a figure, a text or an absent form {absent, kind}" % k)
-        if members[k]["source"] == "ABSENT":
+        if members[k]["source"] == "ABSENT" and not (firm and firm in (members[k].get("firm_sources") or {})):
             need(is_absent_k(v), "member %s is ABSENT in the contract and must hold the absent form" % k)
     need(n_by_row >= 10, "only %d per-row members" % n_by_row)
 

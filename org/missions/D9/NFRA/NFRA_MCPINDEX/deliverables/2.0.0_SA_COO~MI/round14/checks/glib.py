@@ -13,10 +13,11 @@ DIR = "org/tier1_exec/4.0.0_SA_CRO~Z/deliverables/GATEWAY_DATA_CONTRACTS_2026101
 PINS = {"G2": ("339a2804d7", DIR + "G2_assets_silver.md", 131),
         "G5": ("35f45893a7", DIR + "G5_etfs.md", 36),
         "G6": ("35f45893a7", DIR + "G6_news.md", 12),
-        "G4": ("7ec87a87e5", DIR + "G4_mdpf_delta.md", 7)}
+        "G4": ("7ec87a87e5", DIR + "G4_mdpf_delta.md", 7),
+        "G3": ("339a2804d7", DIR + "G3_portal_v2.md", 42)}
 BASE_PIN = "8c74d1d902"   # the round-12 drain commit: the existing silver/portal source rows the generator must not disturb
 CATALOG_DIR = "workflows/atom_decomposition/catalog_entries"
-EXPECT_ROWS = 174         # 131 + 36 + 12 + 7 = 186 contracts, less the 12 that an existing silver_datasets row already catalogues (see in_scope)
+EXPECT_ROWS = 216         # 131 + 36 + 12 + 7 + 42 = 228 contracts, less the 12 that an existing silver_datasets row already catalogues (see in_scope)
 # PRD v0.13: the two G4 feeds marked do-not-serve (a row flagged retired: never a tool target), with G4 routing as the reason.
 DO_NOT_SERVE = ("opal-data-mdpf/feeds/partner_held_etf_49financial", "opal-data-mdpf/feeds/non_model_aua")
 # PRD v0.14 (Andrew-direct ~15:0xZ, client data ONLY from the opal-data-assets vendor silver folders): the account-grain MDPF feeds are

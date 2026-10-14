@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~J1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-14</date>
-<status>pending</status>
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (Andrew-directed; the portal promote of the same job waits on this order's served read)</priority>
@@ -58,7 +58,8 @@ What this order carries beyond the precedents (read these):
    f. **CTO condition 2, the windows.** At the driven run's `bbg_as_of`, for EVERY ticker `source == bbg` in the served `tickers` block (today GLD), compute its return windows under the DEPLOYED rule (`etf_positioning_gold.py` at `102b2b29d3`) and under the pin's rule over the same history, as `J359_evidence/gld_probe.py` does for GLD at 2026-10-13 (generalize its ticker list and `as_of`; it is read-only). Print both side by side and the windows that moved. A window that moved is named with its cause (a closed market day for that ticker, C-GAP or C-MMF, read from the rule's own branch); a move with no named cause is Branch B. Also confirm the served ticker's `returns` equals the pin rule's output.
    g. **After print.** Re-read: the function configuration (only `CodeSha256`, `LastModified` changed), the artifact key's versions (one new version), the served key (one new version, its bytes saved beside the prior's), the rule and target (unchanged), the role's policy (one added element). Report every other difference; deploy NOTHING from that list.
 4. **Rollback** if (b) shows an unexpected plan, (c) refuses, or (d)/(e)/(f) shows any delta beyond what the pair names: re-upload the saved prior zip bytes (hash in the ledger) to the artifact key with the same metadata form, revert the `.tf` (the patch reversed) and apply the same targets, read back the prior `CodeSha256`; restore the served key from its recorded prior VersionId by `copy_object` (a NEW version, never a delete) and read it back byte-equal to the saved copy; report. The scheduled 13:25Z fire after a rollback runs the prior code on the prior role grant and rewrites the key itself.
-5. Close the ledger. Report to `2.0.0_SA_COO~J1` with each criterion's output (the served read's table, the windows comparison, every VersionId), and the change after the fact to `0.0.0_AB_MSTR~DELL1`. DO NOT tell the portal DT seat anything: the issuer relays the served-read verdict.
+5. AMENDED 2026-10-14 ~19:0xZ by the issuer, on Andrew's addendum (spec @9aeef838d6, his words inside: rerun the producer so the numbers refresh): the ledger CLOSES carrying the driven invoke's request id, the served object's new LastModified and VersionId, and three read values from the served object: Satellite 90 duration and beta (1.92, 0.97 on 2026-10-13 inputs) and Satellite 70 duration (3.49). The read through the SERVED ROUTE (a cached copy still serving old numbers is not done) is the issuer's, after your report; do not close the ledger as "done" on the S3 read alone: close it with the S3 read and name the route read as the issuer's open leg. If the served object is still the 13:26:02Z one after the invoke, that is Branch B: report before anything else.
+   Close the ledger. Report to `2.0.0_SA_COO~J1` with each criterion's output (the served read's table, the windows comparison, every VersionId), and the change after the fact to `0.0.0_AB_MSTR~DELL1`. DO NOT tell the portal DT seat anything: the issuer relays the served-read verdict.
 </scope>
 
 <paths>

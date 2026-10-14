@@ -21,6 +21,7 @@ def main():
     ap.add_argument("--g4", required=True)
     ap.add_argument("--g5", required=True)
     ap.add_argument("--g6", required=True)
+    ap.add_argument("--g3", required=True)
     ap.add_argument("--g2f", default=None)   # accepted for interface parity; glib loads the pinned G2f itself
     ap.add_argument("--out", required=True)
     ap.add_argument("--deployed-tools", required=True)
@@ -30,7 +31,7 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     n = 0
     reg = {}
-    for path in (a.g2, a.g4, a.g5, a.g6):
+    for path in (a.g2, a.g3, a.g4, a.g5, a.g6):
         for c in glib.parse(open(path, encoding="utf-8").read()):
             if not glib.in_scope(c):
                 continue

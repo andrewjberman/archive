@@ -36,3 +36,7 @@ security dialog price curves read the close `PX_LAST` only. No component reads a
 - The history-owed SWITCH (`RIVALFUNDS_HISTORY_OWED`) stays OFF; no producer change ships with these rows. The producer side (the leg's trading-day gate and queue-state reader, ACWI/IWM removal) is merged on box/dell1
   (RIV-xe-1 @47530f3817, RIV-xf-1 @03dbf4b128) and its site-Z deploy is under `1.0.0_SA_CTO~Z`'s half; the vehicle's checkout must carry `data/mdpf/scripts/demque/` (row W41-S1).
 - Not measured: held days after each fund report that holds a security (a fund whose reports skip a day is understated); the dramatic-move window beyond its constant.
+
+## Correction (2026-10-14 ~19:0xZ, from 2.0.0_SA_COO~Q1 msg 5733, confirmed against my own two runs)
+
+Row 3 is **70** securities, not 71. The 71st key in the list above is `nan`: a null `security_id` in the universe table that my set built as the string "nan" (the first run, which dropped nulls with `dropna()` on the other side, counted 70). The dividend request is 70 securities. DQ-t-63 (`org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t63.etfs-rivals-backfill-intake.md` @9b7d894bcb, Q1's) files the three rows.

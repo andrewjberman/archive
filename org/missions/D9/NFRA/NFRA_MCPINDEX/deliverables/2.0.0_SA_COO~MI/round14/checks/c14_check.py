@@ -2,7 +2,7 @@
 
   python c14_check.py ac1 [--rows DIR]   the entity set (174), hashed ids, the legacy_addresses rows and the fork registry file
   python c14_check.py ac2 [--rows DIR]   each row equals the expected CLEAN row (no firm or product token), the carrier scan
-  python c14_check.py ac3                the generator under 5 planted deployed-tool sets (read_tool policy), 870 of 870 rows
+  python c14_check.py ac3                the generator under 5 planted deployed-tool sets (read_tool policy), 1080 of 1080 rows
 
 DIR defaults to workflows/atom_decomposition/catalog_entries. A table row is a non-harvest yaml there that carries a `contract`.
 The generator under test is workflows/atom_decomposition/gen_silver_rows.py unless C14_GEN names another. The registry files are read
@@ -66,7 +66,7 @@ def ac1(d, allc):
     extra = sorted(set(have) - set(want))
     idbad = [fn for fn in set(want) & set(have) if have[fn] != want[fn]]
     uniq = len(set(want)) == len(want) and len(set(want.values())) == len(want)
-    print("ROWS files=%d; in-scope contracts=%d (G2+G4+G5+G6 less %d already rowed in silver_datasets); entity names and hashed ids unique=%s; "
+    print("ROWS files=%d; in-scope contracts=%d (G2+G3+G4+G5+G6 less %d already rowed in silver_datasets); entity names and hashed ids unique=%s; "
           "missing %d, extra %d, contract.id wrong %d"
           % (len(rows), len(exp), len(allc) - len(exp), "yes" if uniq else "NO", len(missing), len(extra), len(idbad)))
     for x in missing[:4]:
@@ -184,7 +184,7 @@ def ac3(allc):
         dep = os.path.join(tmp, tag + ".json")
         with open(dep, "w", encoding="utf-8") as f:
             json.dump(deployed, f)
-        r = subprocess.run([sys.executable, gen, "--g2", files["G2"], "--g4", files["G4"], "--g5", files["G5"], "--g6", files["G6"], "--g2f", files["G2F"],
+        r = subprocess.run([sys.executable, gen, "--g2", files["G2"], "--g4", files["G4"], "--g5", files["G5"], "--g6", files["G6"], "--g3", files["G3"], "--g2f", files["G2F"],
                             "--out", out, "--deployed-tools", dep], capture_output=True, timeout=100)
         rows_all += len(exp)
         if r.returncode != 0:
