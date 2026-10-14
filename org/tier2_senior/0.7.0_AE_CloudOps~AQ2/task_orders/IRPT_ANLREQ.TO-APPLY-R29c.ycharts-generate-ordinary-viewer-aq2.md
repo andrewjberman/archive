@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -32,7 +32,7 @@ comp-adversary: RUN -- by reading rows W124-S3 and W123-S1 (the map's last_deplo
   </context>
 
   <the_act>
-    GO: both halves are signed. This order is STAGED: you start ONLY when (a) step 1 reads green, (b) the ledger irpt-ycg-r28-20261014 reads `**Status:** CLOSED` and any other ledger naming irpt-ycharts-generate reads CLOSED (print which files you read), and (c) 2.0.0_SA_COO~Y2 has MESSAGED you that the resident leg L4 is closed (its root reads 0485393f3a-r29 and V1 is green). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
+    GO: both halves are signed. Leg L4 is CLOSED (the issuer read the applier's V1 output: the running root /opt/irpt-resident/0485393f3a-r29 active, every moved member MATCH, `0 of 298` sums not OK, no sign-in line, ledger irpt-resident-r29-20261014 CLOSED at 2026-10-14T12:42:20Z; output org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_anlreq_r29/D2_V1_INSTALL_R29.txt). The order is PENDING and this is the GO, on two conditions you still check: (a) step 1 reads green, and (b) the ledger irpt-ycg-r28-20261014 reads `**Status:** CLOSED` and any other ledger naming irpt-ycharts-generate reads CLOSED (print which files you read). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
     1. Read the COO half and CTO half at HEAD; `git hash-object` of the COO half must print 5e8b3cbd95739fe8b9172329cc671d2ef7ea1aa8. Open ledger irpt-ycg-r29-20261014 (legs L1 verify, L2 build, L3 plan, L4 apply, L5 after-reads, L6 map record) and commit it; read every live worktree's org/critical_paths/.open_deploys/ (git worktree list, then git -C <wt> ls-tree) FIRST and print the denominator: another open entry naming irpt-ycharts-generate is a STOP.
     2. R0b: `get-function irpt-ycharts-generate` CodeSha256 equals reAjAQOVVfD4Wui2u0UfZRt7cr9o6ioFKIwXa+8EVgc=; the key investor-reporting/irpt-ycharts-generate.zip latest S3 version equals edHLV8L0.FETO34.wAag6i7FHBJvfAuW AND that object, downloaded and hashed, equals the CodeSha256. Any difference: STOP and report (someone released; the issuer rebuilds, which is a new cell).
     3. R0f (a GATE, no threshold; the CTO half section (b)): BEFORE any synthetic row exists, read COUNTS ONLY of users who would be admitted by the authorizer's tests, per firm (49financial, inflection, cottonwood) and per class (FIRM_ADVISOR, FIRM_OPERATIONS) separately: users PROFILE rows with status exactly active and an explicit allowedFirmIds naming the firm, that also have an opal-partner-<firm> row. Read the exact table names and attributes from infra/aws/lambda/investor-reporting/_scope/ordinary_viewer.py and the two readers wired in reports/generate_installed.py (get_user, get_partner_profile); print the lines you read. Read-only; no names, no ids, no addresses in any file or message; print the number of rows scanned as the denominator beside each count. Write the counts into the ledger irpt-ycg-r29-20261014 and into org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/R0F_COUNTS.txt. In R0F_COUNTS.txt write ONE line per firm and class, exactly `R0F <firm> <class> <n> of <m> scanned` (six lines). Any count admits, including zero; a read that fails or prints no denominator is a STOP.
