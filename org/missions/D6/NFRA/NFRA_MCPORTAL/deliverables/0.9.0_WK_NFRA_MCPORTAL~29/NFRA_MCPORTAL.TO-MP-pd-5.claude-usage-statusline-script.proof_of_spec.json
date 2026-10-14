@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pd-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "9af1cee1ab5ce653315d967c469b020aa1387d63",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-5.claude-usage-statusline-script.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-5.claude-usage-statusline-script.md",
+    "group": "OTHER",
+    "vintage_commit": "ef2a5b14e176b428600920cbd9ada74817ced168"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/claude-usage-statusline.py",
+      "kind": "script",
+      "commit_or_etag": "967a02ec89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib Python status-line command; no statusLine is configured anywhere, so nothing runs it yet; enabling it is a later order",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_claude_usage_statusline.py",
+      "kind": "test",
+      "commit_or_etag": "967a02ec89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest module, seven named tests; runs on temp home and config dirs only",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "statusline tests: 0 failed; named tests PASSED 7 of 7 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "statusline tests: ============================== 7 passed in 0.40s ==============================; named tests PASSED 7 of 7\nRESULT: PASS\nexit=0",
+      "denominator": "7 named tests of 7 (7 passed, 0 failed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rc=0 stdout_lines=1; snapshot read with claim measured, five_hour_used=42, remaining=58, ok=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "rc=0 stdout_lines=1 stdout=[5h 42% wk 10%] snapshot=read schema=1 claim=measured five_hour_used=42 remaining=58 ok=yes\nRESULT: PASS\nexit=0",
+      "denominator": "1 stdout line of 1; 4 of 4 snapshot fields checked (schema, claim, five_hour used, remaining)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pd5.AC1.sh run twice",
+      "observed": "RESULT: PASS on both runs; named tests PASSED 7 of 7 on both",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Mutant: a copy of the script with remaining = 101 - used in place of 100 - used; the test file unchanged; run under the copy's own tests",
+      "expected": "test_measured_payload_writes_snapshot_with_remaining fails",
+      "observed": "1 failed, 6 passed; FAILED test_measured_payload_writes_snapshot_with_remaining; the other six PASSED",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live Claude Code status-line refresh and real rate_limits values",
+      "reason": "No statusLine is configured and this cell may not change a setting; the payload layout stays INFERRED (U1), so the reader is defensive and the tests feed synthetic payloads."
+    },
+    {
+      "item": "Enabling the status line in any settings file",
+      "reason": "Explicitly out of this cell; a later order."
+    },
+    {
+      "item": "The account side of the AC2 run reads the real ~/.claude.json",
+      "reason": "AC2 sets CLAUDE_CONFIG_DIR to a temp dir but not HOME, so the script reads the real ~/.claude.json read-only, as step 3 of the order specifies; the credentials file is never opened."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W29-S1",
+    "NFRA_MCPORTAL-Z-W29-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest .tools/tests/test_claude_usage_statusline.py -v -p no:cacheprovider --color=no",
+      "result": "7 passed, 0 failed (run inside pd5.AC1.sh)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh .tools/claude-usage-statusline.py .tools/tests/test_claude_usage_statusline.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s); rc=0 after the one unused-import fix"
+    }
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md"
+}
