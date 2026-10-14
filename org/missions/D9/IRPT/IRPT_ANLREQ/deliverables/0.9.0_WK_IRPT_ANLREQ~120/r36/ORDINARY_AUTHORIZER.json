@@ -1,0 +1,129 @@
+{
+  "cell": "AR-y-306",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-306",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~120",
+  "base_commit": "f416810d9a",
+  "worktree": "C:/dev/wk-irpt-anlreq-120",
+  "build_only": "No release, deploy, push, upload, apply, invoke or live AWS call. Local commit on wk-IRPT_ANLREQ-120 only.",
+  "read": {
+    "interactive_access.py": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py: :45 __init__(read_headers, data_firm, ordinary_authorizer=None, profile_reader=None); :50 self._ordinary; :55 self._profile_reader; :57-76 _allowed_firm_ids (:62-63 None when no reader; :64-67 any exception -> None; :68 email must equal subject; :70-72 comma string split; :73-74 non-list -> None; :75 strips and drops ALL and blanks; :76 empty -> None); :78-99 current(); :83-92 the Opal branch (verified_internal_subject, OPAL_GLOBAL) is the ONLY place that sets allowedFirmIds (:90-92); :93-97 the ordinary branch: :94-95 resolve_prospect_owner(headers, data_firm), :96 row = the four keys firm_id, principal_id, principal_class, advisor_id from owner, :97 home_firm_id = owner firm_id; :98 ownership_fingerprint; :101-121 authorize_current(principal, retained_owner): :108-110 principal must equal current() and owner must be a dict; :112 firm = _data_firm(owner firm); :115-116 OPAL_GLOBAL returns True without consulting the authorizer; :117 owner firm and principal_id must equal the verified actor; :119 callable(self._ordinary) and self._ordinary(principal, retained_owner) is True; :120-121 named refusals are False.",
+    "generate_installed.py": "infra/aws/lambda/investor-reporting/reports/generate_installed.py (HEAD line numbers, then the worktree line numbers after this cell): :134-136 _ordinary_viewer_not_composed returns False (unchanged); :139-144 _ordinary_authorizer_over(readers) NEW (imports ordinary_viewer and returns ordinary_viewer_authorizer(readers.get_user, readers.get_partner_profile)); :170-215 the prospect factory construction (HEAD) with :204 (now :212) ordinary_authorizer=p[ordinary_authorizer] or _ordinary_viewer_not_composed; :300-307 readers = CanonicalProfileReaders(clients[dynamodb]) at HEAD :300, acceptance and repositories; :320-345 the ports dict (HEAD :323-346): HEAD :326-327 get_user and get_partner_profile are the readers, HEAD :336 ordinary_authorizer None (now :345 = _ordinary_authorizer_over(readers)); :380-420 compose_upload (HEAD): :392 owner = scope.get(prospect_owner) (now :401), :395 ordinary = ports.get(ordinary_authorizer) (now :404), :399-413 the request-cached profile_reader wrapper over get_user, :414-416 InteractiveAccess(lambda: request.headers, owner[firm_id], ordinary_authorizer=(lambda p, o: ordinary(request, p, o)) if callable(ordinary) else None, profile_reader=profile_reader) (now :423-424). The ordinary wrapper is called as ordinary(request, principal, owner).",
+    "reports/tests/test_generate_installed.py": "HEAD :70-90 (the two revision tests and :83 assert set(absent_producers) == {ordinary_authorizer} -- NOW FAILS, see tests); :170-215 the upload tests: :163-184 _upload_world(ordinary) passes ordinary into ports; :187-198 the admitted upload publishes RESOLVING with ordinary True (passes); :201-205 test_without_the_ordinary_authorizer_a_partner_upload_is_refused_and_nothing_is_written (passes UNEDITED); HEAD :212 asserts factory.ordinary_authorizer is _ordinary_viewer_not_composed -- NOW FAILS (the factory now holds the producer); :120 _ordinary_viewer_not_composed(None, {}, {}) is False (passes).",
+    "prospect.py": "infra/aws/lambda/investor-reporting/_scope/prospect.py: :14 imports classify_principal and trusted_only from resolve; :22-48 resolve_prospect_owner(headers, requested_firm_id): :29 trusted = trusted_only(headers); :30 principal_class = classify_principal(trusted); :31 firm = trusted x-firm-id; :32 subject = trusted x-user-email lowercased; :33 advisor = trusted x-advisor-id or None; :34-35 refused unless class is FIRM_ADVISOR or FIRM_OPERATIONS, firm in firm_ids() and subject present; :36-37 requested firm must equal verified firm; :38-44 the owner dict (schema_version prospect-owner-v1, firm_id, principal_id, advisor_id, principal_class); :45-47 ownership_fingerprint. :63-102 guard_prospect: :90 owner = actor_owner for a create (no input_id).",
+    "resolve.py": "infra/aws/lambda/investor-reporting/_scope/resolve.py: :104-114 TRUSTED_HEADERS (x-user-email :105 from payload.sub; x-firm-id :109 from payload.firmId; x-user-role :108; x-advisor-id :111; x-origin-verify :113 constant cloudfront); :203-219 trusted_only(raw): the allow-list, dropped names reported; :223-296 classify_principal: :258-260 origin must be cloudfront; :261-262 email required; :284-285 CLIENT when userType is client; :286-292 FIRM_OPERATIONS when role or advisorRole is admin and a firm is verified (never OPAL_GLOBAL); :293-294 FIRM_ADVISOR when x-advisor-id is present; :295-296 UNKNOWN otherwise.",
+    "canonical_profile_reads.py": "infra/aws/lambda/investor-reporting/_scope/canonical_profile_reads.py: :26-29 _USER_FIELDS and _USER_RETURN_FIELDS (email, firmId, status, name, updatedAt, role, userType, allowedFirmIds); :30 _PARTNER_FIELDS; :70-103 get_user(email): :72-75 Query opal-users-v2 index email-index (Limit 2); :76-80 refuses an incomplete or ambiguous page; :81-82 None when no row; :83-86 key checks (SK PROFILE, email equal); :87-89 consistent GetItem of the PROFILE row; :90-91 None when absent; :92-94 key readback; :96 returns only the return fields; :100-102 createdAt. :105-123 get_partner_profile(email, firm_id): :107-111 firm must be in firm_ids() and lowercase alphanumeric; :112-114 GetItem on opal-partner-<firm> keyed by email, consistent; :115-116 None when absent; :117-119 email and firmId mismatch refuses; :120-123 returns {raw, firmRole, advisorKey?}.",
+    "served.py": "infra/aws/lambda/investor-reporting/_authz/served.py:323-335 verified_internal_subject: the Opal (or Dev) predicate on the verified headers (x-firm-id opal-capital or userType Dev); :305-... verified_svc_custody_statement is the one named service subject.",
+    "prospect_submission.py": "infra/aws/lambda/investor-reporting/ycharts/generate/prospect_submission.py:21 the factory takes ordinary_authorizer; :55-56 InteractiveAccess(..., ordinary_authorizer=lambda p, o: self.ordinary_authorizer(request, p, o)). The same callable reaches the owned-input analysis route (see the surprise row IRPT_ANLREQ-D2-W120-S2).",
+    "generate.tf": "infra/aws/terraform/investor-reporting/ycharts/generate.tf: :63 aws_iam_role generate (irpt-ycharts-generate-role); :194-198 Sid ReadCanonicalUserProfileByEmailIndexAndKey (Query on table/opal-users-v2/index/email-index); :200-204 Sid ReadCanonicalUserProfileRow (GetItem on table/opal-users-v2); :206-211 Sid ReadPartnerProfileRowForOnBehalfAdvisor (GetItem on table/opal-partner-<f> for each f in local.om_client_firms); :213-221 Sid DecryptCanonicalUsersTableViaDynamoOnly (kms:Decrypt on the users key, ViaService dynamodb, EncryptionContext opal-users-v2); :243-246 local.om_client_firms = firms of data/firm_registry.json with kind client and enabled.",
+    "iam.tf": "infra/aws/terraform/investor-reporting/ycharts/iam.tf: :68 aws_iam_role runner (an EC2 role, not this Lambda); :140-162 carry the same profile reads for the runner. Not the generate role; read only to rule it out.",
+    "firm_registry": "data/firm_registry.json: 49financial (client, enabled), inflection (client, enabled), cottonwood (client, enabled), mockadv (test, enabled), demo (demo, enabled). om_client_firms at this vintage = 49financial, inflection, cottonwood.",
+    "source_map": "infra/aws/lambda/ci/lambda-source-map.json: the functions whose files[] carry generate_installed.py are irpt-ycharts-generate, irpt-commentary-draft-store-lambda and irpt-commentary-composition-read-lambda; irpt-ycharts-generate also carries interactive_access.py and the other _scope modules.",
+    "ordinary_viewer.py (new)": "infra/aws/lambda/investor-reporting/_scope/ordinary_viewer.py: :35-57 _allowed_firms; :60-102 _admit; :105-120 ordinary_viewer_authorizer(profile_reader, partner_reader)."
+  },
+  "rule": {
+    "statement": "The producer returns True only when the viewer is an ordinary class (FIRM_ADVISOR or FIRM_OPERATIONS) AND all four CTO conditions hold; every other state returns False.",
+    "condition_1_firm_from_verified_token": "ordinary_viewer.py:78 trusted, _dropped = trusted_only(request.headers); :79-80 the trusted x-firm-id must equal the principal firm_id; :81-82 the trusted x-user-email must equal the principal_id; :83-84 classify_principal(trusted) must equal the principal_class. The request body and query are never read (the module touches request.headers only).",
+    "condition_2_firm_equality": "ordinary_viewer.py:69-70 firm = principal firm_id (non-empty, no surrounding blanks); :73-74 principal home_firm_id and owner firm_id must equal it (owner firm = the data firm); :75-76 owner principal_id must equal the subject.",
+    "condition_3_allowed_firm_ids": "ordinary_viewer.py:86 profile = read_profile(subject) (the users PROFILE row); :90 _allowed_firms(profile, subject): :41-42 the row email must equal the subject and the row must be a dict; :44-47 a comma string is split, a non-list refuses; :49-51 any non-string member refuses the whole value; :53-54 ANY member upper-cased equal to ALL refuses the whole value; :55-56 blank members dropped; :57 an empty result refuses. :91-92 the firm must be in the set.",
+    "condition_4_active_users_and_partner_rows": "ordinary_viewer.py:87-88 profile status must equal the exact string active (case-sensitive, no strip); :94-95 partner = read_partner(subject, firm) must be a dict; :98-99 the partner raw email must equal the subject; :100-101 a raw firmId, when present, must equal the firm; :102 return True.",
+    "fail_closed": "ordinary_viewer.py:114-118 the authorize wrapper catches every exception and returns False; :111-112 the factory raises TypeError at composition only when a reader is absent (the wiring always passes the two readers); :87-88 and :95-96 a non-dict profile or partner row refuses.",
+    "opal_path": "ordinary_viewer.py:64-65 principal_class not in ORDINARY_CLASSES returns False, so an OPAL_GLOBAL principal is never admitted here. InteractiveAccess.authorize_current returns True for OPAL_GLOBAL before the consumer's authorizer is consulted (interactive_access.py:115-116); that path is unchanged.",
+    "partner_row_reader": "the existing CanonicalProfileReaders.get_partner_profile (canonical_profile_reads.py:105-123); no new reader, no new client."
+  },
+  "principal_shape": {
+    "source": "InteractiveAccess.current() for a non-Opal caller (interactive_access.py:93-98): the principal dict has exactly firm_id, principal_id, principal_class, advisor_id, home_firm_id, ownership_fingerprint.",
+    "firm_id": "interactive_access.py:96 from owner[firm_id]; owner from prospect.py:39 (trusted x-firm-id, prospect.py:31, stripped).",
+    "principal_id": "interactive_access.py:96 from owner[principal_id]; owner from prospect.py:41 (trusted x-user-email, prospect.py:32, stripped and lowercased).",
+    "principal_class": "interactive_access.py:96 from owner[principal_class]; owner from prospect.py:43 (classify_principal, resolve.py:223-296: FIRM_OPERATIONS at resolve.py:286-292, FIRM_ADVISOR at resolve.py:293-294; prospect.py:34-35 refuses any other class).",
+    "advisor_id": "interactive_access.py:96 from owner[advisor_id]; owner from prospect.py:42 (trusted x-advisor-id, prospect.py:33, or None).",
+    "home_firm_id": "interactive_access.py:97 = owner firm_id (for an ordinary caller it equals firm_id).",
+    "ownership_fingerprint": "interactive_access.py:98 (sha256 over the row).",
+    "allowedFirmIds": "ABSENT for an ordinary caller: interactive_access.py:90-92 sets it only in the Opal branch. The producer reads the users PROFILE row itself (ordinary_viewer.py:86).",
+    "owner_retained": "the retained owner is the prospect-owner-v1 dict (prospect.py:38-44: schema_version, firm_id, principal_id, advisor_id, principal_class, ownership_fingerprint); for the upload it is scope.get(prospect_owner) (generate_installed.py:401 at worktree, :392 at HEAD).",
+    "request_headers_used": "request.headers only, via trusted_only (ordinary_viewer.py:78). Verified headers are the nine TRUSTED_HEADERS plus the three render markers (resolve.py:104-142)."
+  },
+  "wiring": {
+    "lines_changed": "infra/aws/lambda/investor-reporting/reports/generate_installed.py: +8 lines at :137-144 (two blank lines and the helper _ordinary_authorizer_over, which imports ordinary_viewer locally); :344-345 the ports entry 'ordinary_authorizer': None (HEAD :336) becomes 'ordinary_authorizer': _ordinary_authorizer_over(readers) on its own line. git diff --stat: 10 insertions, 1 deletion. Nothing else in the file changed.",
+    "readers_used": "readers = CanonicalProfileReaders(clients[dynamodb]) (generate_installed.py:308 at worktree), the same instance that already supplies get_user and get_partner_profile to the ports.",
+    "no_new_client": "the module and the helper create no AWS client.",
+    "cost_note": "The producer reads the profile and the partner row on each authorize call (the upload path calls authorize_current several times per request); the Opal path's request cache (generate_installed.py:399-413) is not applied to the ordinary path. A cache is a follow-up, not a correctness need.",
+    "absent_path_unchanged": "_ordinary_viewer_not_composed is kept (generate_installed.py:134-136); the upload test that pins the absent producer (test_generate_installed.py:201) passes unedited because _upload_world(None) sets ports ordinary_authorizer None directly."
+  },
+  "iam_needs": {
+    "verdict": "NO IAM change for the producer, from the Terraform source. The irpt-ycharts-generate role already holds every read the producer makes, for the three enabled client firms. The partner read is refused by AWS (AccessDenied) for any other firm, and the producer turns that into a refusal.",
+    "reads_made": [
+      "Query opal-users-v2 index email-index (canonical_profile_reads.py:72-75)",
+      "GetItem opal-users-v2 PROFILE row, ConsistentRead (canonical_profile_reads.py:87-89)",
+      "GetItem opal-partner-<firm> keyed by email, ConsistentRead (canonical_profile_reads.py:112-114)",
+      "kms:Decrypt on the users table key, through DynamoDB only (the GetItem path needs it)"
+    ],
+    "what_the_role_holds_today_source": {
+      "role": "aws_iam_role.generate, generate.tf:63 (name irpt-ycharts-generate-role)",
+      "query_email_index": "generate.tf:194-198 Sid ReadCanonicalUserProfileByEmailIndexAndKey: Action dynamodb:Query, Resource arn:aws:dynamodb:<region>:<account>:table/opal-users-v2/index/email-index",
+      "getitem_users": "generate.tf:200-204 Sid ReadCanonicalUserProfileRow: Action dynamodb:GetItem, Resource arn:aws:dynamodb:<region>:<account>:table/opal-users-v2",
+      "getitem_partner": "generate.tf:206-211 Sid ReadPartnerProfileRowForOnBehalfAdvisor: Action dynamodb:GetItem, Resource [for f in local.om_client_firms: arn:aws:dynamodb:<region>:<account>:table/opal-partner-<f.firm_id>]",
+      "kms": "generate.tf:213-221 Sid DecryptCanonicalUsersTableViaDynamoOnly: Action kms:Decrypt on the users key, Condition kms:ViaService dynamodb.<region>.amazonaws.com and kms:EncryptionContext:aws:dynamodb:tableName opal-users-v2"
+    },
+    "firms_granted_partner_read": "generate.tf:243-246 local.om_client_firms = data/firm_registry.json firms with kind client and enabled. At this vintage: 49financial, inflection, cottonwood.",
+    "runner_role_note": "iam.tf:68 and :140-162 carry similar reads for the EC2 runner role. They are not the Lambda's role.",
+    "if_a_release_lacks_the_partner_read": "Add to generate.tf a statement in the shape of generate.tf:206-211 (Action dynamodb:GetItem, the same om_client_firms resource list), with the existing Sid kept. Not written here: the IAM change is for the issuer's release pair, and nothing is applied.",
+    "not_read": "The deployed role policy and the live Lambda configuration were not read (no AWS call). The verdict is from the Terraform source only."
+  },
+  "tests": {
+    "new_file": "infra/aws/lambda/investor-reporting/_scope/tests/test_ordinary_viewer.py",
+    "new_file_result": "35 passed, rc 0 (python -m pytest <file> -q): 35 cases including the parametrized ones (status x5, allowed-firms x10).",
+    "cases": [
+      "the 49financial advisor with an active row, allowedFirmIds naming 49financial and a partner row is admitted for 49financial (the admitted case)",
+      "the same advisor refused as the retained owner of cottonwood",
+      "cottonwood's advisor refused for 49financial",
+      "status disabled, inactive, ACTIVE, empty, null refused (parametrized); absent status refused",
+      "a missing verified firm claim refused",
+      "a firm only in a request body or query is never consulted; zero reads",
+      "a verified firm that differs from the principal firm refused",
+      "allowedFirmIds absent, empty list, ALL, [ALL], [ALL, 49financial], another firm only, a string without the firm, a non-string member, an empty string, a dict refused (parametrized)",
+      "a missing partner row refused",
+      "a reader that raises refused (the DynamoDB client raising; a lambda raising ZeroDivisionError)",
+      "a profile row whose email is not the subject's refused; a partner row whose email is not the subject's refused",
+      "an Opal viewer: the producer refuses and makes no read; InteractiveAccess.authorize_current still returns True for it",
+      "the write spy: every DynamoDB operation is recorded by name; no write operation is called on admitted or refused paths; the module has no name starting with put, update, delete, write, send or batch",
+      "end to end through InteractiveAccess.authorize_current: the admitted advisor passes for 49financial and is refused for cottonwood; an inactive advisor is refused",
+      "a principal class that is not ordinary (CLIENT) refused with zero reads",
+      "malformed principal or owner refused before any read",
+      "the factory refuses to build without both readers",
+      "the wiring: generate_installed._ordinary_authorizer_over(readers) admits the 49financial advisor end to end through authorize_current"
+    ],
+    "fakes": "FakeDynamo: the DynamoDB client shape CanonicalProfileReaders reads (query, get_item, and every write name raising), with the real CanonicalProfileReaders, the real InteractiveAccess and the real resolve.trusted_only and classify_principal. No AWS, no network.",
+    "existing_folders": {
+      "reports/tests/test_generate_installed.py": "11 passed, 2 FAILED: :83 test_compose_ports_composes_the_nine_and_names_the_absent_one (set() == {ordinary_authorizer}) and :212 test_hop3_the_prospect_factory_composes_from_the_real_ports (factory.ordinary_authorizer is _ordinary_viewer_not_composed). HEAD control (git archive f416810d9a, .scratch/before_arm): 13 passed. The two failures come from the wiring. Both tests are outside the grant; not edited. Surprise row IRPT_ANLREQ-D2-W120-S1 (BLOCKING).",
+      "_scope/tests": "268 passed, 1 failed, 67 subtests passed (the folder with the 35 new cases). The one failure, _scope/tests/test_resolve.py::test_every_trusted_header_is_actually_injected_at_the_line_it_claims, fails identically at HEAD (.scratch/before_arm: test_resolve.py 28 passed, 1 failed). Pre-existing; surprise row IRPT_ANLREQ-D2-W120-S3 (OBSERVATION).",
+      "edits_to_existing_assertions": "NONE. No existing test file was edited."
+    }
+  },
+  "before_arm": {
+    "method": "git archive of HEAD f416810d9a for infra/aws/lambda/investor-reporting, infra/aws/lambda-edge, docs/contracts/investor-reporting, data/firm_registry.json and lib into .scratch/before_arm (outside the product tree), then the new test file copied in. ordinary_viewer.py is absent at HEAD.",
+    "result": "pytest of the new test file: ERROR at collection, ModuleNotFoundError: No module named 'ordinary_viewer'; 0 of 35 cases collected; rc 2. Every new case, including the admitted case, fails at HEAD.",
+    "failed": "1 collection error (0 of 35 cases collected)"
+  },
+  "controls": {
+    "mutant": "A copy under .scratch/mutant (HEAD plus the worktree's three files) with one arm of ordinary_viewer.py disabled: the ALL refusal (:46-48) is replaced by a no-op. Run of the new test file against the mutant: 1 failed, 34 passed. The failing case is allowedFirmIds [ALL, 49financial] (the parametrized case allowed4). The mutant fires.",
+    "determinism": "the new test file run twice with identical output (35 passed both times)."
+  },
+  "authorization_change": "WHO GAINS UPLOAD: a non-Opal viewer whose verified edge token names firm F (x-firm-id) and whose class is FIRM_ADVISOR or FIRM_OPERATIONS, and only for firm F, and only when all four conditions hold: the subject's canonical users PROFILE row has status exactly 'active' and an explicit allowedFirmIds list that names F (not empty, no ALL member, no non-string member); the subject has a partner row in opal-partner-F; and the retained owner of the upload is also firm F. At this vintage that is the advisors and firm-operations users of 49financial, inflection and cottonwood (the enabled client firms in data/firm_registry.json), each for its own firm only. STILL REFUSED NOT_AUTHORIZED before the file is read: a viewer of another firm; a token with no verified firm; a firm named only in a body or query; an inactive, disabled or unknown-status user; a profile without the firm or with ALL; a subject with no partner row for the firm; a profile or partner row for another email; a reader that raises or returns nothing; CLIENT, RENDER_DELEGATE and UNKNOWN classes; and every Opal principal, whose path is unchanged (the producer never consulted for OPAL_GLOBAL). The same callable also reaches the owned-input analysis route (ProspectSubmissionFactory, prospect_submission.py:55-56), so the same viewers gain that route for their own firm's inputs on the same four conditions; the ruling named the upload door only, so the CTO must rule on that route before any release (surprise row IRPT_ANLREQ-D2-W120-S2). Built only: nothing is released, and the never-widen pair that ships it is the issuer's.",
+  "release_needs": {
+    "packaging": "The new module _scope/ordinary_viewer.py must ship with generate_installed.py. Map entries in infra/aws/lambda/ci/lambda-source-map.json whose files[] carry generate_installed.py: N = 3 (irpt-ycharts-generate, irpt-commentary-draft-store-lambda, irpt-commentary-composition-read-lambda).",
+    "new_member": "irpt-ycharts-generate needs a new files[] row: repo_path infra/aws/lambda/investor-reporting/_scope/ordinary_viewer.py, packaged_as ordinary_viewer.py, with its pin and sha256 at the release commit. Its generate_installed.py row pin moves to the release commit as well.",
+    "import_safety": "The helper imports ordinary_viewer only when compose_ports runs (generate_installed.py:139-144, called at :345). A package that carries generate_installed.py without ordinary_viewer.py imports cleanly unless it composes ports. Not read: whether irpt-commentary-draft-store-lambda and irpt-commentary-composition-read-lambda call compose_ports.",
+    "dependency": "ordinary_viewer.py imports resolve (already packaged in irpt-ycharts-generate for prospect.py and interactive_access.py).",
+    "not_edited": "lambda-source-map.json, generate.tf and the packaging scripts are not edited here; they are the issuer's release pair."
+  },
+  "claim": "The four-condition ordinary-viewer producer is built and tested on fakes with the real readers, the real InteractiveAccess and the real trusted_only and classify_principal: 35 new cases pass, the admitted case fails at HEAD, the ALL mutant fires, and the Opal path is unchanged. The wiring is committed at generate_installed.py :139-144 and :345, and it turns two existing assertions in test_generate_installed.py red (outside the grant; surprise row IRPT_ANLREQ-D2-W120-S1). Nothing is released, deployed, pushed or called.",
+  "not_read": [
+    "the live Lambda configuration and the deployed irpt-ycharts-generate role policy (Terraform source only)",
+    "the live opal-users-v2 rows and the live opal-partner-<firm> rows (no live read)",
+    "the edge's header verification at runtime: the nine headers are taken as the edge's contract through resolve.py TRUSTED_HEADERS and the cloudfront origin marker, not observed",
+    "the live PROD and DEV bundles and the deployed artifact hashes",
+    "data/firm_registry.json enablement at apply time (read at this vintage only)",
+    "whether the two commentary Lambdas call compose_ports",
+    "Andrew's screenshots (in his chat)"
+  ]
+}
