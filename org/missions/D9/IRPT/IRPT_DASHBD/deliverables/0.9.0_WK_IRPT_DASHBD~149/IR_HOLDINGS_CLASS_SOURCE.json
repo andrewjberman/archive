@@ -1,0 +1,43 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-184",
+  "criterion": "DB98-2-AC1",
+  "hops": [
+    {"layer": "portal page component", "file": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx", "line": 234, "what": "each security row takes its assetClass from assetClassOf(node) of the served holdings node"},
+    {"layer": "portal class mapping", "file": "portal/src/pages/InvestorReporting/tabs/holdings/assetClass.ts", "line": 84, "what": "assetClassOf: a cashNode is Cash; otherwise the served assetClass key maps to the page label (fixed_income to Fixed Income); a node without one is Unclassified"},
+    {"layer": "portal contract adapter", "file": "portal/src/pages/InvestorReporting/contracts/adapt.ts", "line": 1154, "what": "classificationMembers copies the wire asset_class through ASSET_CLASS_FOR_WIRE (1128-1142); an unknown token becomes unclassified"},
+    {"layer": "portal tab fetch", "file": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx", "line": 280, "what": "HoldingsTab reuses the header snapshot (271-273) or calls getHoldingsSnapshot(scopeRef) (280-281)"},
+    {"layer": "portal API client", "file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1330, "what": "getHoldingsSnapshot sends the holdings-snapshot operation; the route table (line 246) binds it to GET holdings/{accountSetId}, served by the irpt-holdings handler"},
+    {"layer": "Lambda handler", "file": "infra/aws/lambda/investor-reporting/holdings/snapshot.py", "line": 641, "what": "lambda_handler is the deployed irpt-holdings entry; get_holdings (607) calls load_snapshot (158)"},
+    {"layer": "stored object (accepted firm publication in S3)", "file": "infra/aws/lambda/investor-reporting/holdings/snapshot.py", "line": 141, "what": "_publication_reader builds HoldingsPublication over S3 and reads the accepted firm publication; node asset_class is the value the producer wrote into it"},
+    {"layer": "producer publish step", "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 2709, "what": "when the contract admits the classification members, annotate_classification writes asset_class and sub_asset_class onto each SECURITY node before publication"},
+    {"layer": "canonical storage read", "file": "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py", "line": 60, "what": "get_classification(ticker) does one GetItem on the etf-classifications table (default name at line 52) and returns the raw row"},
+    {"layer": "class assignment", "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py", "line": 978, "what": "classify_security: a ticker the canonical row holds takes that row's asset_class verbatim (978-984); a miss goes to the bd-securities fallback (985-993), whose name pattern maps money-market and cash-reserve names to fixed_income"}
+  ],
+  "class_assigned_at": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 978,
+    "rule": "A security whose ticker the canonical etf-classifications table holds is served that row's asset_class exactly as stored, with its sub_asset_class carried beside it; no sub_asset_class cash rule applies on this branch. A cash line named cash by ticker and by description is cash at line 970 before either layer. A ticker the table does not hold takes the bd-securities fallback's answer, where a money-market, sweep or cash-reserve name is fixed_income.",
+    "keyed_on": "canonical_row_asset_class"
+  },
+  "shares_code_with_bd_gold_classifier": false,
+  "reads_same_canonical_table": true,
+  "needs_its_own_rule": true,
+  "proposed_rule": {
+    "words": "On the canonical-row branch of classify_security, when a row's sub_asset_class, trimmed and lower-cased, is cash, the served asset_class is cash whatever asset_class the row stores; every other canonical row is served verbatim as now. The rule mirrors the gold classifier's _row_class without importing it, and it does not change the bd-securities fallback layer.",
+    "keyed_on": "sub_asset_class",
+    "ticker_list_used": false,
+    "where": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py, classify_security, canonical-row branch (lines 977-984)"
+  },
+  "served_class_of_a_money_market_fund_today": "NOT_ESTABLISHED",
+  "served_class_read_from": "Not read. No served object was GET or LISTed, and the canonical row was not read because a DynamoDB read is outside this grant. Code only, not a served value: a money-market name with no canonical row is served fixed_income (bd_securities_fallback.py 54-55 and 152-153, via holdings_snapshot.py 985-993), which the page labels Fixed Income (adapt.ts 1130). A held canonical row is served its stored asset_class (holdings_snapshot.py 978-984); one test fixture types a money-market row as cash (test_holdings_classification.py line 71).",
+  "other_readers_of_that_assignment": [
+    "data/assets/scripts/gold/investor_reporting/bd_securities_fallback.py is a verbatim copy of the pre-SC-t-1 gold classifier (its header cites git show 1f327f52a2), now drifted: it reads the legacy bd-securities table, not etf-classifications; it has no sub_asset_class cash rule; its name pattern (lines 54-55, 152-153) serves money-market and cash-reserve names as fixed_income.",
+    "data/black_diamond/scripts/gold/lib/etf_classifier.py (commit e340e07f4e) carries the cash rule in _row_class (lines 104-116) and uses it in classify and classify_with_identity; classify_security does not import this module, so the gold release does not change the page's output.",
+    "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py is the one canonical client, shared by the gold library and the page's canonical branch; get_classification returns the raw stored row.",
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py aggregate_selection and target_selection (lines 299-302 and 393-395) carry asset_class to account and selection rows from member nodes; they classify nothing themselves.",
+    "data/assets/scripts/gold/investor_reporting/tests/test_holdings_classification.py and test_holdings_narrowed.py pin the fallback's and the canonical branch's own answers; they do not test the gold release."
+  ],
+  "reads": {"vendor_calls": 0, "secret_reads": 0, "writes": 0},
+  "served_values_changed": false,
+  "pushed": false
+}
