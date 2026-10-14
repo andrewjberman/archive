@@ -1,0 +1,53 @@
+ADVI_BDPRCE.TO-BP-c-1.rule-amendment  worker 0.9.0_WK_ADVI_BDPRCE~20  branch wk-ADVI_BDPRCE-20  cut 218e74901d (third seat, Amendment 3)
+Session log: the commands run, in order, and the deciding output of each. Times are UTC.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-ADVI_BDPRCE-20; test -d org && test -d .tools -> TREE-OK.
+2. Reads (local, no AWS): the order (section 1.00 and section 4), bd_price_rule.py (R1.2), test_bd_price_rule.py (36 arms),
+   CTO_RULING_R1_THE_PRICE_RULE_20261013.md (section AMENDMENT 3), round-2 rule_probe2.py and its session log,
+   r3_checks.py ruleprobe3, r4_scope.py, INVESTIGATION_v1.md (format), BEFORE_AFTER.csv (round 2, scale_100x rows).
+3. sha256 of C:/dev/wk-bdprce-r2-7-data/lot_extract.csv -> e7e618d76516c8b7977179aefb3f77ce4fc13c17fbcf1dbeb92001a6e0a2b50b (matches the order).
+4. Downloads, READ verb only, to C:/dev/wk-bdprce-r3-20-data/ (03:4xZ-03:5xZ):
+     .tools/aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet <local path>
+     for 2025-05-28, 2025-05-29, 2026-09-16, 2026-09-17, 2026-09-22, 2026-09-23, 2026-10-02, 2026-10-03, 2026-10-09, 2026-10-10 (rc 0 each)
+     .tools/aws s3api get-object --bucket opal-data-bd --key silver/bd_assets_dim.parquet <local path> (rc 0)
+5. Module amended to R1.3 (served_unit_map; served_units required keyword on price_for_date, withheld_for_date, exclusion_census;
+   per100 rules; unit_unreadable withholds). Test rewritten: 36 round-2 arms passing per_unit, 13 arms added (37 to 49).
+   python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py -> BD PRICE RULE TEST: OK 49 arms (rc 0)
+   python data/black_diamond/scripts/silver/bd_price_rule.py -> RULE_ID R1, AMENDMENT R1.3 / R1.3 module ok (rc 0)
+6. Probe: python -I rule_probe3.py --data C:/dev/wk-bdprce-r3-20-data --silver ... --lots ... --served ... --read-at 2026-10-14T03:59:14Z --out RULE_PROBE3.json
+   -> PROBE3 wrote ... deterministic=True assets=11 (rc 0). served_units 2909 assets: per100 0, per_unit 2500, unreadable 409.
+   An earlier run carried a --read-at value typed by hand; the record was re-run with the clock value above before any commit.
+7. Measurement of the R1.2-shaped effect (python -I .scratch/effect.py, scratch only, not committed): R1.2 reading (every Fixed Income
+   name as per unit) gives scaled 25, per_unit_left 4044, withheld 5 over the five dates; R1.3 gives scaled 0, per_unit_left 3990,
+   withheld 84 (unit_unreadable). Withheld ratios of the 84: 25 near 100, 54 near 1, 5 at about 1.084 (read from the record).
+8. Negative controls on the grader (copies in .scratch, not committed):
+   RULE_PROBE3_mutant_unit.json (unit_changed_assets 1) -> RULEPROBE3 record FAIL unit_changed_assets must be 0 (rc 1)
+   RULE_PROBE3_mutant_amend.json (amendment R1.2) -> RULEPROBE3 record FAIL amendment must be R1.3 and the probe deterministic (rc 1)
+9. Surprise rows ADVI_BDPRCE-D1-W20-S1..S4 appended to INVESTIGATION_v1.md (own section; no existing row edited).
+   .tools/surprise-row-gate.py on the file -> OK (rc 0).
+10. AC1: python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py -> BD PRICE RULE TEST: OK 49 arms, rc 0.
+    AC2: python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py ruleprobe3 --file .../RULE_PROBE3.json
+         -> RULEPROBE3 record ok amendment=R1.3 assets=11 per100=0 per_unit=2500 unreadable=409 unit_changed=0, rc 0.
+    AC3: python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-20 --allow ...
+         -> ROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing, rc 0.
+
+CONTINUATION (third seat, section 1.000 correction, 2026-10-14 ~04:0xZ-04:2xZ)
+11. HEAD 764b250a98 (the issuer's correction commit); worktree tree-check TREE-OK.
+12. head-object and get-object of silver/prices/canonical_prices.parquet (READ): ETag a88a7030f4506ac7e0cdb844382f9d16,
+    LastModified 2026-10-14T04:03:36Z, 110,077,599 bytes; the local copy md5 = the ETag. The replay's object (8eaa29e3...) is
+    not the one served now (surprise ADVI_BDPRCE-D1-W20-S8).
+13. head-object and get-object of silver/bd_assets_dim.parquet (READ): ETag 45dfaab5b5756b8458c6cfae63bf9f38 = local md5.
+14. Module: served_unit_map(pairs) over asset_name, served_price, per_unit_value; 10 percent bands; SERVED_BAND and
+    SERVED_PAIR_COLUMNS added; the lot-based signature removed. AMENDMENT R1.3 kept.
+15. Test: arms 43 to 46 rewritten for pairs; arms 50 to 52 added. python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py
+    -> BD PRICE RULE TEST: OK 52 arms (rc 0).
+16. Probe rewritten (rule_probe3.py): served pairs from transaction_observed rows of the 2026-09-16..2026-10-13 window and
+    the same-date trade rows of verified partitions 2026-09-16..2026-10-14 (manifest paths; md5 checked before each read),
+    plus the lot pairs. Run twice in one process: deterministic=True, md5 1fdc9a8fc3eabfb37f1a73665354b025 both builds.
+    -> PROBE3 wrote ... deterministic=True assets=11 served={assets 888, per100 0, per_unit 807, unreadable 81} (rc 0).
+17. Scratch measurements (not committed): ratio census over the 888 served assets (ratio_census.py); MORGAN's trade rows
+    on 2026-10-05 (inspect_units.py); the withheld-ratio census (withheld_census.py).
+18. Surprise rows ADVI_BDPRCE-D1-W20-S5..S9 appended to INVESTIGATION_v1.md.
+19. AC1: python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py -> BD PRICE RULE TEST: OK 52 arms, rc 0.
+    AC2: python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py ruleprobe3 --file .../RULE_PROBE3.json
+         -> RULEPROBE3 record ok amendment=R1.3 assets=11 per100=0 per_unit=807 unreadable=81 unit_changed=0, rc 0.
