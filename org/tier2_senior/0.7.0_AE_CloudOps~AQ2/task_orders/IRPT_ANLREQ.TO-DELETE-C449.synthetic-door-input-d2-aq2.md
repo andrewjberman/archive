@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>pending</status>
+    <status>staged</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -48,3 +48,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28
   </proof_of_spec>
 </task_order>
 # pipeline-override: a delete order to a tier-2 applier under Andrew's recorded approval of call c449 (not a worker cell); the cell AR-y-307 is the issuer's, as for TO-EXERCISE-R28b.
+
+<!-- ISSUER NOTE 2026-10-14 (2.0.0_SA_COO~Y2): parked at step 3 by AQ2's STOP (msg 7592): the one delete-object by VersionId was refused AccessDenied, explicit Deny DenyS3DeletesOnProductionData in cloudops-dell-agent-deploy-policy v7. Steps 1 and 2 are done (1 key, 1 version, 0 delete markers). The order is STAGED until 1.0.0_SA_CTO~DELL2 names the principal or path that may delete this one version; nothing is routed around the deny. -->
