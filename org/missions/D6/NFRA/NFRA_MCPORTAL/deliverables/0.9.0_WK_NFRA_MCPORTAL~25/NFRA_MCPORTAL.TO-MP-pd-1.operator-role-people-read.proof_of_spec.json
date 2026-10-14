@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pd-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "9af1cee1ab5ce653315d967c469b020aa1387d63",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-1.operator-role-people-read.md"
+  },
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-1.operator-role-people-read.md",
+    "group": "OTHER",
+    "vintage_commit": "9af1cee1ab5ce653315d967c469b020aa1387d63"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~25/pd1_run.json",
+      "kind": "doc",
+      "commit_or_etag": "2300a10035",
+      "introduces": ["caller_arn", "per_principal", "tools_compared", "page_rows_with_grant", "unmatched", "ssm_command_id"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read-only run file: values come from SSM command b1820e96-4cec-4bee-a829-b22426d05ed9 (served page, host role) and GetItem reads under the assumed operator role (session mp-pd-1-20261014185011). No write to any AWS resource.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~25/pd1_page_probe.py",
+      "kind": "script",
+      "commit_or_etag": "2300a10035",
+      "introduces": ["PD1PAGE"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Sent to the host over SSM, base64 on stdin, run as ec2-user; stdout kept as pd1_page_probe_stdout.txt. Nothing installed on the host.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~25/pd1_run.py",
+      "kind": "script",
+      "commit_or_etag": "2300a10035",
+      "introduces": ["store_principal", "served_constants"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local script run from the worktree root; it reads the served data_entitlement.py source by ast and writes pd1_run.json and pd1_store_read.json.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "run=read operator_role:yes; every principal's store tools equal its page tools; denominators_match:yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "run=read operator_role:yes principals=1 equal=1 of 1 tools_compared=5 held_by_recount=5 denominators_match:yes / RESULT: PASS / exit=0",
+      "denominator": "store tools 5 of 5 against page data-grant tools 5 for 1 principal (1 scanned by the served scan; 1 page row with a data grant; 1 matched by email; 0 unmatched)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The governing order's proof_of_spec names no mutant, so none is owed.",
+      "expected": "n/a -- the spec names none.",
+      "observed": "No mutant was run.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Not run as a repeat: the store and page are one read each at one time, and AC1 re-grades the committed run file.",
+      "observed": "Single read; AC1 reads the committed pd1_run.json.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The face's query-first store read (Query by partition key POLICY#<tid>#<oid> under the operator role).",
+      "reason": "Measured denied: AccessDeniedException, dynamodb:Query not allowed for the operator role (row NFRA_MCPORTAL-Z-W25-S1). The face's named fallback, GetItem on the known profile and grant keys, was used under the same role; no partition was enumerated."
+    },
+    {
+      "item": "The face's zero-argument call of app.admin_gateway_breakdown._scan_principals().",
+      "reason": "The served signature is _scan_principals(client) (row NFRA_MCPORTAL-Z-W25-S2); the probe passed the served module's own host-role _ddb_client()."
+    },
+    {
+      "item": "The task order's <status> flip.",
+      "reason": "The order file is outside this order's <paths>, so it was not edited; the status line is left as issued."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W25-S1: the operator role is AccessDenied dynamodb:Query on gateway-access-state-table; GetItem on the known keys succeeded under the same role (BLOCKING, INERT).",
+    "NFRA_MCPORTAL-Z-W25-S2: _scan_principals takes a required client argument; the probe passed the host-role client from _ddb_client() (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~25/pd1_session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws ssm send-command / get-command-invocation",
+      "invocation": "AWS-RunShellScript to i-07dccb1615503ac99, base64 of pd1_page_probe.py on stdin, run as ec2-user from /opt/opal-gateway with .venv",
+      "result": "command b1820e96-4cec-4bee-a829-b22426d05ed9, Status Success; one PD1PAGE line: 1 page row with a data grant, 1 scanned principal"
+    },
+    {
+      "tool": ".tools/aws sts assume-role / sts get-caller-identity",
+      "invocation": "assume arn:aws:iam::313476888478:role/opal-gateway-access-admin, session mp-pd-1-<timestamp>, 900 s; credentials held in shell variables only",
+      "result": "rc 0 on both assumes; caller_arn arn:aws:sts::313476888478:assumed-role/opal-gateway-access-admin/mp-pd-1-20261014185011"
+    },
+    {
+      "tool": ".tools/aws dynamodb query / get-item on gateway-access-state-table",
+      "invocation": "Query (consistent) on POLICY#<tid>#<oid>, then GetItem on principal_profile and data_entitlement#0000000004",
+      "result": "Query rc 254 AccessDeniedException (pd1_query_denied.txt); GetItem profile rc 0 (active, grant_revision 4); GetItem grant rc 0 (active)"
+    },
+    {
+      "tool": "python pd1_run.py",
+      "invocation": "python pd1_run.py <pd1_page_probe_stdout.txt> <raw dir> <caller_arn> <ssm command id>",
+      "result": "principals=1 tools_compared=5 page_rows_with_grant=1 unmatched=0 blocking=0"
+    }
+  ]
+}

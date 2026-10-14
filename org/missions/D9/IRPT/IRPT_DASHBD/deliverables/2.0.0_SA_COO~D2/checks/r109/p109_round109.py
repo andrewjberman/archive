@@ -2,7 +2,7 @@
 
   DB-b-213 (issuer, DIRECT ACT, done first) the W171-S4 read gate: the four alien Orion silver objects are Inflection's own surplus (ALIEN_READ_R109.json), so the render proceeds
                    with the guard state named.
-  DB-b-214 (~173)  the Inflection SAMPLE: one household built in memory from Inflection's own silver (account_dim adapter + Orion/Eclipse reads), the household return from Orion's
+  DB-b-214 (~173)  the Inflection SAMPLE: one household built in memory from Inflection's own silver (account_dim adapter + Orion/Eclipse reads), the household return stays absent by contract (the CTO's decision to fill it)
                    client-keyed performance with its source, account returns NO_SOURCE_YET in plain words, lots NO_LOTS in plain words, passing the whole-document rule.   DB109-1-AC1
   DB-b-215 (~173)  the RENDER of that sample through the 49 Financial layout and the whole-document and note-level rules, in the Inflection firm title; private folder only. DB109-2-AC1 (+ J1, the CVO's)
   DB-b-216 (~174)  the ACCOUNT-RETURN DERIVATION (the method of the existing daily TWR engine as a pure function, from Orion positions and transactions) and the TIE-OUT READ
@@ -148,11 +148,17 @@ def check_sample(root):
         v = vals[mid]
         leaves = list(v["by_row"].values()) if isinstance(v, dict) and "by_row" in v else [v]
         need(all(P5.is_absent_k(x) and x["kind"] == "NO_SOURCE_YET" for x in leaves), "%s: the split columns stay NO_SOURCE_YET (as for 49 Financial)" % mid)
-    # the household return: from Orion's client-keyed performance, with its source; and the ending value filled
+    # the household return stays ABSENT BY CONTRACT (no sibling contract carries a household-grain return: returns do not add across accounts): NO_SOURCE_YET in plain words.
+    # Filling it from Orion's client grain would change what the contract says for every firm, which is the CTO's decision, not this cell's.
     filled = [w for w in ("qtd", "ytd", "last_12_months", "since_inception") if not P5.has_absent_key(vals["pvs.%s.return_cumulative" % w])]
-    need(len(filled) >= 1 and r.get("household_return_windows") == filled, "household_return_windows must list the pvs return windows that fill (the checker reads %s; at least one)" % filled)
-    hr = r.get("household_return_source") or {}
-    need("fact_performance" in str(hr.get("source") or "") and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(hr.get("data_as_of") or "")) and nes(hr.get("words")), "household_return_source: the Orion fact_performance table, an ISO data_as_of and words")
+    need(filled == [] and r.get("household_return_windows") == [], "the contract sources every household return ABSENT: pvs.*.return_cumulative must read NO_SOURCE_YET and household_return_windows must be [] (the checker reads %s)" % filled)
+    hn = r.get("household_return_note") or {}
+    need(nes(hn.get("words")) and "contract" in str(hn.get("words")).lower() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(hn.get("orion_client_series_through") or "")), "household_return_note: words that name the contract rule, and orion_client_series_through (ISO): what Orion's client grain would provide")
+    # the as-of: the newest positions date on or before the last date of the served model series, so every source exists at as_of (T-1 law)
+    asof = sm["household"]["as_of"]
+    need(r.get("as_of") == asof and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(r.get("benchmark_data_as_of") or "")) and asof <= str(r["benchmark_data_as_of"]), "as_of must equal the sample's (%s) and not be later than benchmark_data_as_of (the last date of the served model series)" % asof)
+    n_f, tot_f = P6.members_filled(vals, c)
+    need(r.get("benchmark_members") == {"total": 32, "filled": n_f} and tot_f == 32, "benchmark_members must equal the checker's count {total 32, filled %d}" % n_f)
     need(all(not P5.has_absent_key(vals["pvs.%s.ending_value" % w]) for w in ("qtd", "ytd", "last_12_months", "since_inception")) and not P5.has_absent_key(vals["hold.ending_value"]), "the household ending value must fill (pvs.*.ending_value and hold.ending_value)")
     # the guard state is NAMED, from the issuer's direct-act record
     ar = json.loads((root / ALIEN_REC).read_bytes().decode("utf-8"))
@@ -167,8 +173,8 @@ def check_sample(root):
     need(rd.get("vendor_calls") == 0 and rd.get("s3_writes") == 0 and rd.get("dynamodb_writes") == 0 and rd.get("secret_reads") == 0 and is_int(rd.get("s3_reads")), "reads: zero writes, vendor calls and secret reads, s3_reads an integer")
     need(r.get("files_in_repo") is False and r.get("served_values_changed") is False and r.get("pushed") is False and r.get("deployed") is False, "files_in_repo, served_values_changed, pushed and deployed must be false")
     need(not P.long_digit_runs({k: v for k, v in r.items() if k not in ("sample",)}), "the record holds a run of 8 or more digits")
-    print("OK: Inflection sample for one household (%d accounts) chosen by the hash rule; whole-document rule over %d cells (%d absent, 0 unmapped): 0 conflicts, planted mutant caught; account returns and lots in plain words; household return windows %s from Orion client grain; guard state named"
-          % (len(acc), st["cells_scanned"], st["absent_cells"], filled))
+    print("OK: Inflection sample for one household (%d accounts) chosen by the hash rule; whole-document rule over %d cells (%d absent, 0 unmapped): 0 conflicts, planted mutant caught; account returns and lots in plain words; household return NO_SOURCE_YET by contract; as_of %s with %d of 32 benchmark members filled; guard state named"
+          % (len(acc), st["cells_scanned"], st["absent_cells"], asof, n_f))
 
 
 def extra_inflection(root, r, k, vals, tab, exp):
@@ -180,6 +186,40 @@ def extra_inflection(root, r, k, vals, tab, exp):
     ar = json.loads((root / ALIEN_REC).read_bytes().decode("utf-8"))
     gs = ar["result"]["guard_state_for_render_record"]
     need(r.get("orion_guard") == gs and (k.get("orion_guard") == gs), "the render record must name the Orion guard state %s (the issuer's read gate)" % gs)
+
+
+def mutate_printed_note(html, sample):
+    """a copy with one more note that claims absence of a figure the sample DOES print: the first printed cell whose key is filled."""
+    fk = P7.filled_keys(sample["values"], P7.accounts_of(sample))
+    for mem, ent, _pos in P7.parse_cells(html):
+        if ent is None or mem in P7.VIRTUAL:
+            continue
+        try:
+            k = P7.figure_key(mem, P7.entity_data(ent, sample))
+        except Exception:
+            continue
+        if k in fk:
+            extra = '<p data-note="absent" data-note-keys="%s|%s">This figure is not available yet, because Opal has no source for it.</p>' % (mem, ent)
+            n = html.rfind("</body>")
+            return html[:n] + extra + html[n:] if n > 0 else html + extra
+    return None
+
+
+def note_level9(root, r, c, sm, exp, tab):
+    """round 107's note-level rule, with the absent-note control planted on a key this sample prints (the sample prints no household year-to-date net gain)."""
+    f, st = P7.note_rule(exp, sm, True)
+    need(not f, "note-level rule (export): %s" % "; ".join(f[:3]))
+    ft, _stt = P7.note_rule(tab, sm, False)
+    need(not ft, "note-level rule (tab): %s" % "; ".join(ft[:3]))
+    _conf, _dis, wd = P7.whole_document_scan(sm["values"], P7.accounts_of(sm))
+    need(st["notes"] >= 1 and st["pointer_notes"] >= 1, "the export carries %d keyed notes and %d pointer notes: both kinds must be keyed" % (st["notes"], st["pointer_notes"]))
+    nl = r.get("note_level") or {}
+    need(nl == {"cells_scanned": wd["cells_scanned"], "absent_cells": wd["absent_cells"], "notes": st["notes"], "pointer_notes": st["pointer_notes"]},
+         "note_level must equal the checker's denominator {cells_scanned %d, absent_cells %d, notes %d, pointer_notes %d}" % (wd["cells_scanned"], wd["absent_cells"], st["notes"], st["pointer_notes"]))
+    m1 = P7.mutate_pointer(exp, sm)
+    need(m1 is not None and P7.note_rule(m1, sm, True)[0], "CONTROL: the rule is blind to a pointer to the wrong page (the planted mutant was not reported)")
+    m2 = mutate_printed_note(exp, sm)
+    need(m2 is not None and P7.note_rule(m2, sm, True)[0], "CONTROL: the rule is blind to a note that names a printed figure (the planted mutant was not reported)")
 
 
 def check_render(root):
@@ -209,8 +249,11 @@ def check_render(root):
             want.add(("%.1f%%" % x).replace("-0.0%", "0.0%"))
             scaled.add(("%.1f%%" % (x * 100)).replace("-0.0%", "0.0%"))
     scaled -= want
+    l4 = [str(a.get("last4")) for a in sm["household"]["accounts"]]
+    need(all(re.fullmatch(r"[0-9]{4}", x) for x in l4) and len(set(l4)) == len(l4), "each account's last4 label must be four digits and the labels distinct within the household (%d accounts, %d distinct, %d all-digit)" % (len(l4), len(set(l4)), sum(1 for x in l4 if re.fullmatch(r"[0-9]{4}", x))))
     uc = P5.unheld_count(vals)
-    need(uc >= 1, "the sample holds no unheld class entry to check")
+    # the Inflection sample places no asset class (the allocation is absent in words), so it may hold no UNHELD entry: the dash count below must then be 0
+    pass
     chart_ids = [m for m in ids if is_chart(m)]
     present = {x["kind"] for mid, _e, x in P5.all_absent_forms(vals) if P5.is_absent_k(x) and not is_chart(mid)}
     kn = r.get("kind_notes")
@@ -287,7 +330,7 @@ def check_render(root):
     need(isinstance(wn.get("present_in_sample"), bool) and wn["present_in_sample"] == ns and wn.get("test_arm") is True, "window_not_spanned must state present_in_sample (the checker reads %s) and test_arm true (a test pins the words, with a synthetic NOT_SPANNED cell when the sample has none)" % ns)
     need(r.get("disclosure_pointer_kept") is True and r.get("kind_read_from_field") is True and r.get("fee_line_follows_member") is True, "disclosure_pointer_kept, kind_read_from_field and fee_line_follows_member must be true")
     extra_inflection(root, r, k, vals, tab, exp)
-    note_level(root, r, c, sm, exp, tab)
+    note_level9(root, r, c, sm, exp, tab)
     P.footer_ok(exp, sm["household"]["as_of"])
     pages = P.pdf_pages(paths["export_pdf"])
     need(pages >= 8, "the PDF holds %d pages" % pages)

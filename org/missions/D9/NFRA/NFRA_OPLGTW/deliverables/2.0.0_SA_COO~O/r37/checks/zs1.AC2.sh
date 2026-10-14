@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-zs-1 AC2 (round-37 ZS114-EDGE-AUTH): the deploy closed and the bare path refuses an unauthenticated read.
 #  - ledger nfra-oplgtw-edge-auth-json-tiered is CLOSED at HEAD and its sentinel is gone;
-#  - A1 (row Z-S115): the WebACL conditions -- rules identical before and after with exactly one UpdateWebACL, or no ACL change at all;
+#  - A1/A2 (rows Z-S115, Z-S121): the WebACL conditions -- rules identical before and after with at most ONE UpdateWebACL (0 is safer than 1: nothing was sent), or no ACL change at all;
 #  - THIS CHECK performs the live unauthenticated GETs: the bare /json-tiered/ path and its twin both answer 401 or 403;
 #  - W/ZS1_PROOF.json: bare_unauth_status 401/403, twin_authed_status 200, a named twin_auth_source, and a scanner_authorizer sentence.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
@@ -20,15 +20,16 @@ try:
     n = json.load(open(sys.argv[1], encoding="utf-8")).get("updatewebacl_calls")
 except Exception:
     n = None
-if n == 0 and not os.path.exists(sys.argv[2]) and not os.path.exists(sys.argv[3]):
-    print("WebACL not changed by this apply, updatewebacl_calls 0"); ok = True
-elif n == 1:
+have = os.path.exists(sys.argv[2]) and os.path.exists(sys.argv[3])
+if n in (0, 1) and have:
     try:
         b = json.load(open(sys.argv[2], encoding="utf-8")); a = json.load(open(sys.argv[3], encoding="utf-8"))
         same = bool(b.get("rules_sha256")) and b.get("rules_sha256") == a.get("rules_sha256") and len(b.get("rules", [])) == len(a.get("rules", [])) > 0
-        print("WebACL rules %s, updatewebacl_calls 1" % ("identical before and after" if same else "DIFFER before and after")); ok = same
+        print("WebACL rules %s, updatewebacl_calls %s" % ("identical before and after" if same else "DIFFER before and after", n)); ok = same
     except Exception as e:
-        print("WebACL before/after files unreadable (%s), updatewebacl_calls 1" % type(e).__name__)
+        print("WebACL before/after files unreadable (%s), updatewebacl_calls %s" % (type(e).__name__, n))
+elif n == 0 and not have:
+    print("WebACL not changed by this apply, updatewebacl_calls 0"); ok = True
 else:
     print("WebACL conditions not met (updatewebacl_calls %s)" % n)
 print("OK" if ok else "NO")
