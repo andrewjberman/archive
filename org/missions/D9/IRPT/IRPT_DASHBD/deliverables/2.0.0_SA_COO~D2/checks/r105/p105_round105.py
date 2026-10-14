@@ -130,7 +130,7 @@ def all_absent_forms(values):
     return out
 
 
-def kind_problems(values, contract):
+def kind_problems(values, contract, firm=None):
     out = []
     members = {m["id"]: m for m in contract["members"]}
     for k, key, x in all_absent_forms(values):
@@ -142,7 +142,7 @@ def kind_problems(values, contract):
         if x["absent"].startswith("no holding in this asset class"):
             out.append("%s[%s]: an unheld class is the value %s, never an absent form" % (k, key, UNHELD))
     for k, m in members.items():
-        if m["source"] == "ABSENT" and k in values and is_absent_k(values[k]) and values[k]["kind"] != "NO_SOURCE_YET":
+        if m["source"] == "ABSENT" and not (firm and firm in (m.get("firm_sources") or {})) and k in values and is_absent_k(values[k]) and values[k]["kind"] != "NO_SOURCE_YET":
             out.append("%s: a member the contract sources to ABSENT must be NO_SOURCE_YET, got %s" % (k, values[k]["kind"]))
     return out
 

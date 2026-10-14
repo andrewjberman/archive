@@ -1,0 +1,13 @@
+{
+ "field": "registry_before",
+ "value": 46,
+ "claim": "measured",
+ "read_at_utc": "2026-10-14T20:15:03.256271+00:00",
+ "read_at_live_ref": "bacec95ccd6cafd2201f7433af24ae2748732355",
+ "g1_tools_present_before": [],
+ "instrument": "app.tools.mcp._tool_manager.list_tools() on the host, under /opt/opal-gateway/.venv/bin/python, from gt_served_harness.py --registry-only pulled from S3 (local md5 == host md5 == bbfcb5141ac4107619750b3d289561bc)",
+ "expected_after_the_release": 56,
+ "why_recorded_now": "OG-ap-18 step 5 requires registry_before to be the count read BEFORE the deploy. The deploy is HELD (the issuer's msg 34207, the parents[5] import defect), so this reading is banked against the ref it was taken at rather than reconstructed later. If another release lands before the gt-8 re-cut deploys, this must be re-read: the field is 'the count before THIS deploy', not a constant.",
+ "a_defect_in_my_own_instrument_found_by_running_it_early": "the harness's first run on the host died with ImportError: cannot import name 'harvest_typed' from 'app'. Its --registry-only mode imported the five typed modules at the top, and those modules do not exist on the host until this very release lands -- so the mode was unusable at the one moment the order needs it. Fixed by importing only app.tools for that mode. Same class as Z-S126: an instrument whose imports assume the post-deploy state cannot measure the pre-deploy state, and running it early is what surfaced it.",
+ "read_by": "0.7.0_AE_CloudOps~Z"
+}
