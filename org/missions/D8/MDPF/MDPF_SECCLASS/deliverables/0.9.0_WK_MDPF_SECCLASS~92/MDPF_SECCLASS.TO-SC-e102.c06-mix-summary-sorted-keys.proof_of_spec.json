@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e102",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e102.c06-mix-summary-sorted-keys.md",
+    "group": "OTHER",
+    "vintage_commit": "009326809739153d2c85a5173fcbbf326d65a18f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R25.md",
+    "vintage_commit": "009326809739153d2c85a5173fcbbf326d65a18f",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e102.c06-mix-summary-sorted-keys.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~92",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "717405d44e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo edit only, one line: _write_mix_summary's json.dumps gains sort_keys=True (git show 717405d44e --stat: 1 insertion, 1 deletion in this file). Not deployed; the ship to the served script is a later CloudOps order under a never-widen pair.",
+      "artifact_covered_by": [
+        "SC25-e102-AC1",
+        "SC25-e102-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_c06_sorted_keys_r25.py",
+      "kind": "test",
+      "commit_or_etag": "717405d44e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, 7 tests, stubbed S3, no AWS call. Run: 7 passed (AC1). Mutant run against the pre-change C_06: 2 failed, 5 passed.",
+      "artifact_covered_by": [
+        "SC25-e102-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC25-e102-AC1",
+      "criterion_verbatim": "the new test passes, including the difference control (c).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_c06_sorted_keys_r25.py -q --tb=short",
+      "output_evidence": "7 passed in 0.91s (exit 0). Includes test_difference_control_unsorted_encoding_tells_the_orders_apart (c).",
+      "denominator": "7 passed of 7 collected",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "SC25-e102-AC2",
+      "criterion_verbatim": "the three sibling C_06 suites stay green (30 passed at the base, 0.9 s).",
+      "method": "command",
+      "invocation": "bash -c 'python -m pytest data/black_diamond/scripts/gold/tests/test_c06_rolling_rederive_r23.py data/black_diamond/scripts/gold/tests/test_c06_retained_unclassified_r21.py data/black_diamond/scripts/gold/tests/test_c06_retained_dates_six_class.py -q --tb=line; echo PYTEST-RC=$?'",
+      "output_evidence": "30 passed in 0.89s; PYTEST-RC=0. Base before the change: 30 passed in 1.17s; PYTEST-RC=0.",
+      "denominator": "30 passed of 30 collected (base 009326809739: 30 passed of 30)",
+      "status": "PASS",
+      "expect": "PYTEST-RC=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the pre-change C_06 (json.dumps without sort_keys, base 009326809739) fed to the new test file: the same-content-bytes arm and the sorted-encoding arm must fire, and the difference control must still pass",
+      "expected": "failures on test_same_content_in_two_insertion_orders_gives_identical_bytes and test_bytes_are_the_sorted_compact_encoding",
+      "observed": "2 failed, 5 passed; the two named arms failed, the difference control and the parse and restated_through arms passed (measured before the one-line change)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the arms call _write_mix_summary on fixed in-memory dicts with a recording stub; no clock, randomness or network. Byte equality is the assertion itself.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the ship of the one-line change to the served C_06 script (code/gold/) and any run of safe-deploy",
+      "reason": "BOUNDS: a later order to a CloudOps seat under a never-widen pair. Nothing is deployed by this order."
+    },
+    {
+      "item": "served downstream objects whose bytes move at the first fire after the ship: gold/artifacts/firm_mix_views_daily.json and gold/entities/advisors/{id}/mix_daily.json (D_03 re-serialises them in iteration order)",
+      "reason": "not edited; the reader survey found the dependency and the surprise rows W92-S2 (ARMED, disarm 2.0.0_SA_COO~M1) name it for the never-widen pair."
+    },
+    {
+      "item": "the other three json.dumps calls in C_06 (_write_watermark, _write_relationship_json, _write_relationship_views)",
+      "reason": "BOUNDS and the cell: not changed; sorting them would rewrite every relationship key once with no content change."
+    },
+    {
+      "item": "E_25 key name firm_daily (E_25.aua_decomposition_audit.py:138)",
+      "reason": "outside the <paths> grant; recorded as surprise W92-S4, not fixed."
+    },
+    {
+      "item": "lib/, D_03, D_04 and every other gold script",
+      "reason": "BOUNDS: not edited. The reader survey is a read-only report."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W92-S1: the order names the C_06 loader _load_c06; no such name exists in the tests folder, and the sibling suite defines _load. The new test uses _load; criteria unchanged.",
+    "MDPF_SECCLASS-D1-W92-S2: D_03 re-serialises firm_daily (D_03:510) and each advisor daily dict (D_03:556) in iteration order into served objects; the first D_03 fire after the ship moves those bytes with no content change. Disarm owner 2.0.0_SA_COO~M1 (never-widen pair).",
+    "MDPF_SECCLASS-D1-W92-S3: D_04 float-sums C_06 class values in snapshot iteration order (D_04:545); the served platinum/firm/mix_summary.json composition total can move in its last digit after the ship. INERT.",
+    "MDPF_SECCLASS-D1-W92-S4: E_25 reads summary.get('firm_daily') (E_25:138), which C_06 never writes (C_06 writes 'firm'); it returns its error dict for every object this writer produces. INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e102.c06-mix-summary-sorted-keys.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (new test file, then the three sibling suites)",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_c06_sorted_keys_r25.py -q --tb=short",
+      "result": "7 passed in 0.91s; sibling suites 30 passed in 0.89s, PYTEST-RC=0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~92 <0.9.0_WK_MDPF_SECCLASS~92@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 717405d44e (code and test) and 03d16a49a5 (surprise rows): commit-gate OK; surprise-row-gate OK, 4 new rows of 292 checked"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e101",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e101.rebase-read-instrument.md",
+    "group": "OTHER",
+    "vintage_commit": "3e1365fdaa"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R25.md",
+    "vintage_commit": "3e1365fdaa",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e101.rebase-read-instrument.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~91",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/r25_rebase_read.py",
+      "kind": "script",
+      "commit_or_etag": "5bb3e3db44",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo file only, committed on wk-MDPF_SECCLASS-91 (LOCAL). Read-only instrument: it reads S3 through r24 head/get and writes nothing to S3 or a table. Nothing deployed, invoked or scheduled.",
+      "artifact_covered_by": [
+        "SC25-e101-AC1",
+        "SC25-e101-AC2",
+        "SC25-e101-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/baseline/REBASE_BASELINE_20261014.json",
+      "kind": "config_data",
+      "commit_or_etag": "5bb3e3db44",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo file only: the one live capture of the served objects, written once by capture (refuses to overwrite). 15 firm dates, 56 advisors, 5 bars, restated_through 2026-09-28; the four served VersionIds are in its served block. No client name or account id in the file.",
+      "artifact_covered_by": [
+        "SC25-e101-AC2",
+        "SC25-e101-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC25-e101-AC1",
+      "criterion_verbatim": "every positive fixture grades ok and every negative fixture fails on exactly its own clause.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/r25_rebase_read.py selftest",
+      "output_evidence": "R25-SELFTEST ok=True positives=3 of 3 negatives=8 of 8 (rc=0). Each NEG line reads exact=True with failing equal to its own clause: totals, classes (strict), classes (moved), advisors (missing), advisors (moved), bars, s27, restated.",
+      "denominator": "3 of 3 positive fixtures ok; 8 of 8 negative fixtures failing == {own clause}; 6 clauses in the grader",
+      "status": "PASS",
+      "expect": "R25-SELFTEST ok=True"
+    },
+    {
+      "criterion_id": "SC25-e101-AC2",
+      "criterion_verbatim": "the live capture writes the baseline file. Run it ONCE, today, and commit the file: it must be captured BEFORE 2026-10-14T23:00Z, because the next scheduled fire rewrites the objects it reads.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/r25_rebase_read.py capture --out org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/baseline/REBASE_BASELINE_20261014.json",
+      "output_evidence": "R25-CAPTURE-CHECK stable=True csv_advisor_keys_agree=True served_only=0 csv_only=0; R25-CAPTURE ok=True dates=15 advisors=56 bars=5 out=...R25_CHECKS/baseline/REBASE_BASELINE_20261014.json; R25-CAPTURE-WRITE written=True restated_through=2026-09-28 aua_dates=15; R25-TIME capture_total_run_s=21.44 (run at 2026-10-14T12:33:03Z, before 23:00Z; rc=0). A second run refused: R25-CAPTURE ok=False refused=exists (rc=1).",
+      "denominator": "5 of 5 bars captured; 4 of 4 served sources stable across their head-get-head reads; 15 firm dates at or after restated_through; 56 of 56 advisor keys equal to the CSV set",
+      "status": "PASS",
+      "expect": "R25-CAPTURE ok=True"
+    },
+    {
+      "criterion_id": "SC25-e101-AC3",
+      "criterion_verbatim": "the live read against the baseline just captured grades ok with every date STRICT (nothing has moved between the two reads); the summary line prints moved=0 and the window count.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/r25_rebase_read.py read --baseline org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/baseline/REBASE_BASELINE_20261014.json",
+      "output_evidence": "R25-REBASE ok=True window=15 strict=15 moved=0 dropped_from_window=0 totals=True classes=True advisors=True bars=True s27=True max_s27=165.09 restated=True (rc=0); R25-WINDOW rt=2026-09-28 window=15 dropped_from_window=0 absent_from_live=0 unknown_aua=0; R25-TIME read_total_run_s=26.10 (first run); 24.03 on the re-run after the lint fix.",
+      "denominator": "6 of 6 clauses ok; window 15 of 15 baseline dates graded; strict 15 of 15; moved 0 of 15; 5 of 5 bars graded (0 ungraded); 56 of 56 advisor keys",
+      "status": "PASS",
+      "expect": "R25-REBASE ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the eight NEGATIVE fixtures built from the synthetic baseline, one per clause: totals off by 5; a STRICT-date class off by TOL_S27; a MOVED-date class moved by MOVE + TOL_S27 (not conserved); an advisor missing from the live set; a MOVED-date advisor sum moved by MOVE + TOL_S27; a bar total off by 5; a firm date whose total differs from its class sum by TOL_S27 + TOL_AUA; restated_through absent on the mix summary. Each must fail on exactly its own clause.",
+      "expected": "each negative fails its own clause and no other",
+      "observed": "8 of 8 exact (failing set == own clause); see the R25-FIX NEG lines of the selftest run",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the grader is pure over plain dicts and the verdict of a live read depends on the served objects, not on the script.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A second live capture, to show the baseline is reproducible",
+      "reason": "capture is one-time by design (it refuses an existing file) and a second capture after a fire would not be the baseline the order names; not run."
+    },
+    {
+      "item": "The first scheduled fire after 23:00Z (the issuer's read)",
+      "reason": "the order assigns it to the issuer; this worker runs no read after 2026-10-14T12:33Z other than AC3."
+    },
+    {
+      "item": "Grading bar class dollars against the baseline bar classes instead of the baseline firm day",
+      "reason": "clause 4 says the class dollars are graded as in clause 2, which grades firm[d]; the alternative is recorded as surprise MDPF_SECCLASS-D1-W91-S1, not built."
+    },
+    {
+      "item": "A scheduled or deployed run of the read",
+      "reason": "order BOUNDS: read-only, repo files only; nothing is deployed, invoked or scheduled."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W91-S1: clause 4 names no baseline for a bar's class dollars; the read grades them against the baseline firm day at the bar end date, and the bar classes differ from that day by up to 112.89 on the capture (inside TOL_ROUND)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e101.rebase-read-instrument.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile (on r25_rebase_read.py) and .tools/commit-gate.sh (via safe-commit)",
+      "invocation": "python -m py_compile org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/r25_rebase_read.py",
+      "result": "COMPILE-OK; the commit gate ruff check blocked once on an unused variable (rows) and passed after the one-line fix (commit 5bb3e3db44, msg-verify MATCH)."
+    },
+    {
+      "tool": "r24_legg_read.py imported by path (spec_from_file_location), not copied, not edited",
+      "invocation": "importlib.util.spec_from_file_location('r24_legg_read', org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py)",
+      "result": "reused: K_MDS, K_MIXSUM, K_FMV, K_CP, LABEL_MAP, resolve_mode, head, get_bytes, get_json, source(); copied with citation: the AUA reader (r24 cmd_e97 lines 652-657) and the bar reader (r24 crit_bars lines 227-239)"
+    }
+  ]
+}
