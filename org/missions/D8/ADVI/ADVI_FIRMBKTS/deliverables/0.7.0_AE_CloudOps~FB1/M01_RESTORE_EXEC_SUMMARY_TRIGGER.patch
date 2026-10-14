@@ -1,0 +1,91 @@
+diff --git a/infra/aws/terraform/exec-summary/main.tf b/infra/aws/terraform/exec-summary/main.tf
+index 054feeeb2a..60888b4c90 100644
+--- a/infra/aws/terraform/exec-summary/main.tf
++++ b/infra/aws/terraform/exec-summary/main.tf
+@@ -211,35 +211,38 @@ resource "aws_cloudwatch_metric_alarm" "tokens_in_anomaly" {
+ }
+ 
+ # -----------------------------------------------------------------------------
+-# EventBridge -- PLACEHOLDER (DISABLED). TO 7 wires the actual signal pattern
+-# after AE 0.6 confirms the gold-chain-complete event format.
++# EventBridge -- gold-chain-complete trigger (ADVI_49EXEC.007)
+ #
+-# Per PRD §4.1, the rule should fire after the nightly gold/canonical chain
+-# completes (~04:00 UTC). Today (2026-04-16) the canonical chain runs via
+-# bd-canonical-prices-daily EventBridge rule (cron 0 4 * * ? *) -> bd-gold-trigger.
+-# The "gold-chain-complete" signal source has not been published as a custom
+-# event yet; AE 0.6 will produce it and confirm the pattern (TO 7).
++# Signal confirmed by 0.6.0_AE_PartnerETL (2026-04-27):
++#   Source:      bd-pipeline.gold-chain
++#   DetailType:  chain-complete
++#   Bus:         default
++#   Emit gate:   MODE=chain + DRY_RUN=0 + chain_exit=0
++#                (gold_dispatch.sh lines 934-940, commit 1829007a)
++#
++# Fires nightly on chain_full (~23:00 UTC) and chain_canonical (~04:00 UTC).
++# Manual --group / --single runs and failed chains do NOT emit.
++# No label filter needed -- emit gate already guarantees clean signal.
+ # -----------------------------------------------------------------------------
+ 
+-resource "aws_cloudwatch_event_rule" "exec_summary_trigger_placeholder" {
+-  name        = "exec-summary-trigger-placeholder"
+-  description = "PLACEHOLDER: TO 7 will replace pattern with the gold-chain-complete signal AE 0.6 confirms. DO NOT enable until TO 7."
+-  state       = "DISABLED"
++resource "aws_cloudwatch_event_rule" "exec_summary_trigger" {
++  name        = "exec-summary-trigger"
++  description = "Fires exec-summary-generator on every successful gold chain run (bd-pipeline.gold-chain / chain-complete)."
++  state       = "ENABLED"
+ 
+-  # Schedule placeholder -- TO 7 will replace with event_pattern matching the
+-  # custom event AE 0.6 emits at gold chain end. Schedule chosen so a stray
+-  # enable would land at the same midnight-ET window the canonical chain uses.
+-  schedule_expression = "cron(30 4 * * ? *)"
++  event_pattern = jsonencode({
++    source      = ["bd-pipeline.gold-chain"]
++    detail-type = ["chain-complete"]
++  })
+ 
+   tags = {
+-    Name           = "exec-summary-trigger-placeholder"
+-    System         = "ExecSummary"
+-    PlaceholderFor = "ADVI_49EXEC.007"
++    Name   = "exec-summary-trigger"
++    System = "ExecSummary"
+   }
+ }
+ 
+ resource "aws_cloudwatch_event_target" "exec_summary_trigger_target" {
+-  rule      = aws_cloudwatch_event_rule.exec_summary_trigger_placeholder.name
++  rule      = aws_cloudwatch_event_rule.exec_summary_trigger.name
+   target_id = "exec-summary-generator"
+   arn       = aws_lambda_function.exec_summary_generator.arn
+ }
+@@ -249,5 +252,5 @@ resource "aws_lambda_permission" "eventbridge_exec_summary" {
+   action        = "lambda:InvokeFunction"
+   function_name = aws_lambda_function.exec_summary_generator.function_name
+   principal     = "events.amazonaws.com"
+-  source_arn    = aws_cloudwatch_event_rule.exec_summary_trigger_placeholder.arn
++  source_arn    = aws_cloudwatch_event_rule.exec_summary_trigger.arn
+ }
+diff --git a/infra/aws/terraform/exec-summary/outputs.tf b/infra/aws/terraform/exec-summary/outputs.tf
+index 5225310496..4914142eb7 100644
+--- a/infra/aws/terraform/exec-summary/outputs.tf
++++ b/infra/aws/terraform/exec-summary/outputs.tf
+@@ -23,13 +23,13 @@ output "anthropic_layer_arn" {
+ }
+ 
+ output "eventbridge_rule_name" {
+-  description = "Name of the placeholder EventBridge rule (DISABLED until TO 7)"
+-  value       = aws_cloudwatch_event_rule.exec_summary_trigger_placeholder.name
++  description = "Name of the EventBridge rule (gold-chain-complete trigger)"
++  value       = aws_cloudwatch_event_rule.exec_summary_trigger.name
+ }
+ 
+ output "eventbridge_rule_arn" {
+-  description = "ARN of the placeholder EventBridge rule"
+-  value       = aws_cloudwatch_event_rule.exec_summary_trigger_placeholder.arn
++  description = "ARN of the EventBridge rule (gold-chain-complete trigger)"
++  value       = aws_cloudwatch_event_rule.exec_summary_trigger.arn
+ }
+ 
+ output "advisors_processed_ceiling_alarm_arn" {
