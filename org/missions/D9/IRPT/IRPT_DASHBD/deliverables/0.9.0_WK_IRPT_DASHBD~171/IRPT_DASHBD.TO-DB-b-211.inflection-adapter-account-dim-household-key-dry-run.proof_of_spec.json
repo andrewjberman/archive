@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-211",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "71bd5bec05"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "71bd5bec05",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-211.inflection-adapter-account-dim-household-key-dry-run.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~171",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~171/ACCOUNT_DIM_R108.json",
+  "controls": {
+    "mutant": {
+      "description": "household key dropped (household_id forced to null in the adapter), the adapter restored byte-identical afterwards (sha256 73bca0b7c1e9e4999cc358a95249b7479993f92c6bcabc51b788728106c7c19c)",
+      "expected": "at least one test fails",
+      "observed": "3 failed, 7 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "live silver read of the newest partitions",
+      "observed": "not re-run twice",
+      "status": "N/A-WITH-REASON",
+      "reason": "the dry run is a live read of partitions that move daily; the checker recounts the written private table instead of re-reading silver"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS write, vendor call, deploy or push",
+      "reason": "the order grants S3 LIST and GET by prefix only; no write, no vendor call, no deploy, no push"
+    },
+    {
+      "item": "client figures in the repo",
+      "reason": "the order holds the repo to counts, hashes and words; the dry-run table is private and outside the repo"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W171-S1: Inflection silver has no account roster separate from its holdings; fact_assets carries the same accounts as fact_positions with identical identity values",
+    "IRPT_DASHBD-D2-W171-S2: Orion clientId equals transactions householdId on every account that carries both, so client_id and household_id take one value for Inflection",
+    "IRPT_DASHBD-D2-W171-S3: Eclipse fact_portfolios_simple newest silver partition is 2026-10-09 while the other Eclipse silver tables are at 2026-10-14",
+    "IRPT_DASHBD-D2-W171-S4: Orion backfill-status reads a silver guard verdict FAIL with four alien objects and backfill_complete false",
+    "IRPT_DASHBD-D2-W171-S5: the naming gate refuses a typed s3 prefix that carries the firm key, so the adapter derives its granted prefixes from the registry row instead of typing them"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -I -m pytest -q data/assets/scripts/gold/irpt_reporting/tests/test_inflection_account_dim.py -p no:cacheprovider",
+      "result": "10 passed"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_dim.py",
+      "kind": "script",
+      "commit_or_etag": "920987f99d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline module; no AWS write call, no vendor call, no deploy; emit_account_dim(upload=True) raises NotImplementedError",
+      "artifact_covered_by": [
+        "DB108-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_account_dim.py",
+      "kind": "test",
+      "commit_or_etag": "920987f99d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline synthetic frames; 10 passed; mutant caught",
+      "artifact_covered_by": [
+        "DB108-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~171/ACCOUNT_DIM_R108.json",
+      "kind": "config_data",
+      "commit_or_etag": "920987f99d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of the dry run: counts, hashes, words; no client figure",
+      "artifact_covered_by": [
+        "DB108-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB108-1-AC1",
+      "criterion_verbatim": "DB108-1-AC1 -- the adapter is a tracked file hashed as recorded; it names no other firm's bucket, prefix or master id, holds no write-call name, and every `s3://` literal sits under `s3://opal-data-assets/orion/inflection/` or `s3://opal-data-assets/eclipse/inflection/`; its test file has 6 or more passing tests and passes when the checker runs it, with a failing mutant; the adapter's `ARROW_SCHEMA` hash equals the gold contract's `schema_hash` and the record says so; every `source_prefixes` entry is a granted prefix; the private dry-run table exists outside the repo, is hashed as recorded, its own schema hash equals the contract's, it holds one row per account with firm `inflection`, and `accounts` and `households` equal the checker's recount from it; `household_key_source`, `absent_fields` and `coverage_words` are present; nothing is written; no push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r108/p108_round108.py\" . DB108-1-AC1",
+      "output_evidence": "OK: Inflection account_dim adapter: 980 accounts in 320 households recounted from the private dry-run table, schema hash equal to the gold contract, 12 Inflection prefix(es), no write call, no other firm named, 10 tests pass\nDB108-1-AC1 PASS\nexit code 0",
+      "denominator": "980 accounts (one row each) in 320 households; 10 of 10 tests pass; 12 granted prefixes read; 1 mutant of 1 caught",
+      "status": "PASS",
+      "expect": "DB108-1-AC1 PASS"
+    }
+  ]
+}
