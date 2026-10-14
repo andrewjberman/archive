@@ -1,0 +1,40 @@
+{
+ "order": "FB-l-4",
+ "read_at": "2026-10-14T12:47:00Z",
+ "target": "inf-gold-full-on-bronze-complete",
+ "decision_ref": "ledger/NEVER_WIDEN_ROUND8_FIRST_RETIREMENT_C3_COO_HALF.md first section (the decision record; target named by the CTO, msg 5509), CTO half 28ae3ff0b4",
+ "pair": {"coo_half": "cc781f974a", "cto_half": "28ae3ff0b4", "cto_condition_C1": "alarms.tf byte-unchanged: held (not in the commit, not in the plan)"},
+ "consumers_before": {
+  "scanned": 2929,
+  "consumers": 0,
+  "read_at": "2026-10-14T12:35:39Z",
+  "calls": "FB-l-3 candidate C3 calls, repeated: events describe-rule and list-targets-by-rule (rule DISABLED, pattern opal-data-inf bronze/orion-api/*/_BRONZE_COMPLETE.json, ONE target inf-gold-trigger with DLQ inf-gold-trigger-dlq); comp-find --corpus aws name sweep (1 hit, the rule itself, over 2929 nodes, vintage 2026-10-14 12:33:55 UTC); comp-find repo name sweep (180 files; every non-record hit is the definition, a comment, a one-off verify script, or the generated trigger-map entry)",
+  "claim": "measured"
+ },
+ "prior_state": {"record": "deliverables/0.7.0_AE_CloudOps~FB1/PRIOR_STATE_C3.json", "holds": "rule, its one target, inf-gold-trigger's 3 policy statements, the DLQ policy with 3 SourceArns", "claim": "measured"},
+ "change": {
+  "commit": "af9e04d94a",
+  "terraform_dir": "infra/aws/terraform/inf-pipeline",
+  "plan": "Plan: 0 to add, 1 to change, 3 to destroy (4 -target addresses; the DLQ policy diff is only the rule's SourceArn removed)",
+  "apply": "bash .tools/safe-apply.sh on the saved plan at 2026-10-14T12:44:50Z: Apply complete! Resources: 0 added, 1 changed, 3 destroyed.",
+  "claim": "measured"
+ },
+ "after_read": {
+  "absent": true,
+  "read_at": "2026-10-14T12:46:31Z",
+  "evidence": "events describe-rule inf-gold-full-on-bronze-complete -> ResourceNotFoundException; events list-rules --name-prefix inf-gold-full -> 0 rules; inf-gold-trigger resource policy -> 2 statements (canonical-prices, incremental); inf-gold-trigger-dlq policy -> the same 2 rules in the SourceArn list; scoped plan after the apply: No changes",
+  "unchanged": "inf-gold-trigger get-function-configuration identical before and after (CodeSha, LastModified 2026-07-16, every field including INF_GOLD_DISPATCH_HOLD); rules inf-canonical-prices-daily and inf-gold-incremental-daily: describe-rule and list-targets-by-rule identical before and after",
+  "graph_note": "comp-find --corpus aws still lists the rule's own node (1 hit of 2929, vintage 2026-10-14 12:45:19 UTC, src full-derive): the derived graph was not refreshed after the apply, so the live reads above, not the graph, carry the absent verdict",
+  "claim": "measured"
+ },
+ "rollback": {
+  "recorded": true,
+  "how": "git revert af9e04d94a, then the same scoped bash .tools/safe-apply.sh on the four addresses: re-creates the rule DISABLED, its target (constant input mode full, source bronze-complete; DLQ inf-gold-trigger-dlq; retry 0, age 60), the invoke permission, and the DLQ-policy SourceArn line. Enabling it is not covered by the pair.",
+  "test": "held: re-creating the rule changes the world (DISABLED, fires nothing, but it is a write); the pair names no non-world rollback test",
+  "claim": "held"
+ },
+ "ledger_closed": true,
+ "ledger": "org/critical_paths/change_management/20261014T1241Z_advi-firmbkts-fb-l-4-retire-c3-rule-20261014_deploy_completion.md (legs L1-L4 closed with proof before this record; L5 closed on this record's commit)",
+ "observations": "generated infra/aws/lambda/ci/trigger-map.json still carries an entry for the retired rule (outside the act's four addresses; left unchanged); alarms.tf:171 and :183 still name the rule in a comment and an alarm_description (C1: left byte-unchanged)",
+ "claim": "measured"
+}
