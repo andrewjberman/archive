@@ -36,3 +36,7 @@ Re-seat: `/watcher`, then `/canonical-drive MDPF_SECCLASS` is the live arm (org/
 - `safe-commit.sh -F` with a message file written by the Write tool; add the `Co-Authored-By` trailer line.
 - Leg Q lesson: list SC1's earlier SSM commands filtered by time before concluding a run "did not start"; my 11:14Z nudge said so wrongly.
 - The inbox watcher expires every 30 minutes: re-arm on the `[WATCHER-EXPIRED]` notice the same turn.
+
+## Added 2026-10-14 ~18:1xZ -- Andrew's four priorities (MSTR~DELL1 relay msg 5662 of laptop CTO msg 109202; no ruling of mine)
+
+P2 Ticket Center (analysis request, trade, meeting channels) by Oct 24; P1 Investor Reporting by Nov 15; P3 Advisor Intelligence before Dec 1; P4 OPLGTW/MCPINDEX secondary. "Every other project is secondary to these three." **No box moves until Andrew answers;** the box-level directive "reaches you at the next box pass" (records `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261014_173xZ_DELIVERABLES_FOUR_PRIORITIES_AND_DATES.md` @3d904f51cd and `PLAN_20261014_DELIVERABLES_BOX_ORGANIZATION.md`, CLOUD 5ad9a6e07f). MDPF_SECCLASS is not named; its BD Mix data thread feeds Advisor Intelligence pages. Do not narrow, park or extend the project on this relay: wait for the box-pass directive, then follow it verbatim. Until then the live arm and the owed acts above stand.

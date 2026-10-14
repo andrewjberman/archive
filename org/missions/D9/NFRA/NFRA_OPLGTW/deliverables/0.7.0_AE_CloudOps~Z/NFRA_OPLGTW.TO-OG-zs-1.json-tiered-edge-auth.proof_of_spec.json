@@ -1,0 +1,234 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-zs-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-14/og_hv2_phase_a_and_b_live_plus_zs1_stop_and_ap15_l3.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "693c78155e"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "835f9452c3",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-zs-1.json-tiered-edge-auth.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the 7-day read shows no non-portal consumer, the Terraform carries the validator on behavior 7 beside an untouched twin, and the saved plan was exactly one change.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/zs1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)log read: window \\d+ days, source named, non-portal consumers 0.*behavior /json-tiered/\\* carries auth-validator-edge viewer-request: yes; twin associations 3 of 3.*plan 0 to add, [12] to change, 0 to destroy: yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "log read: window 7 days, source named, non-portal consumers 0\nbehavior /json-tiered/* carries auth-validator-edge viewer-request: yes; twin associations 3 of 3\nplan 0 to add, 2 to change, 0 to destroy: yes (a second change must be the named WebACL churn)\nRESULT: PASS\nexit=0",
+   "denominator": "7-day WAF-log window: 41058 requests total, 1754 containing /json-tiered/, 1752 the twin, BARE = 2 by subtraction; a 30-day window returns the same 2. Both were this device's own probes (egress IP matched at the act). Plan: 2 resources, the ACL half 39 minus / 39 plus lines identical as sets and in order.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the deploy closed, the bare path now refuses an unauthenticated read (the check performs it live), and the authenticated twin still serves.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/zs1.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0.*WebACL (rules identical before and after, updatewebacl_calls 1|not changed by this apply, updatewebacl_calls 0).*live bare path unauthenticated: 40[13]; twin unauthenticated: 40[13].*proof file: bare 40[13], twin authenticated 200, scanner authorizer read yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0\nWebACL conditions not met (updatewebacl_calls 0)\nlive bare path unauthenticated: 401; twin unauthenticated: 401\nproof file: bare 401, twin authenticated 200, scanner authorizer read yes\nRESULT: FAIL\nexit=1",
+   "denominator": "4 limbs: 3 PASS (ledger CLOSED 1 of 1 with 0 sentinels; live bare 401 AND twin 401; proof file bare 401, twin authenticated 200, scanner authorizer read yes) and 1 FAIL -- the WebACL limb, on updatewebacl_calls 0 where the branch accepting 0 additionally requires the before/after snapshots to be ABSENT.",
+   "status": "FAIL",
+   "status_reason": "ONE of the four limbs fails, and it fails on a branch the ruling did not anticipate rather than on the world being wrong. A1 condition (iii) names exactly 1 UpdateWebACL; the measured count is 0, because terraform logged a WebACL modification it never sent -- CloudTrail shows no UpdateWebACL in a window proven settled by my own five GetWebACL calls, the LockToken is byte-identical either side, capacity is unchanged, and the rule set digests identical. The event class IS recorded (UpdateIPSet: 2 events in 30 days from wafv2), so the 0 is a true absence. Zero is strictly safer than one: the condition's purpose, that no interval exists in which the ACL evaluates without its managed rules, holds completely because the ACL was never written. But zs1.AC2's n==0 branch fires only when the before/after snapshots are ABSENT, and the same ruling told me to take them, so the honest record cannot satisfy either branch. Neither the count nor the snapshot files were adjusted to make a branch fire. Referred to the issuer as row NFRA_OPLGTW-Z-S121; the deploy is landed, read back live and its ledger is CLOSED with four legs proven."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The plan was re-run fresh after the ruling rather than reused from before it, and the ACL half of the NEW plan was re-measured the same way; the live refusal was read twice; the authenticated read was done once per path with the same credential.",
+   "observed": "the fresh plan reproduces 0 to add, 2 to change, 0 to destroy with the ACL half again 39 minus / 39 plus lines, identical as sets AND in order, 0 attributes on one side only; the bare path returned 401 on two consecutive reads; both paths returned the same 607-byte body authenticated.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Three negative arms stand in its place so that a non-event is distinguishable from the real one. (a) The site root (https://opalinvest.dev/) still returns 200, so the 401s are the validator refusing and not the distribution breaking. (b) The SAME credential that is refused unauthenticated returns 200 on BOTH paths, so the act gated rather than blocked. (c) For the WebACL, the CloudTrail zero was tested against the event CLASS: UpdateIPSet returns 2 events in 30 days from wafv2.amazonaws.com, so a missing UpdateWebACL is a real absence rather than an unrecorded class -- and the window's settledness was proven by my own five GetWebACL calls, two of them bracketing the apply.",
+   "expected": "root 200; bare and twin 401 unauthenticated and 200 authenticated; the ACL rule set identical either side",
+   "observed": "root 200; bare 401 and twin 401 unauthenticated; bare 200 and twin 200 authenticated (607 bytes each); rules_sha256 identical (e18311e9c8315107da5f8719748bb9aea1ae7cf0bb5eb5e19cd829e420c0bbf4), LockToken byte-identical, capacity unchanged at 947, UpdateWebACL count 0",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+   "kind": "script",
+   "commit_or_etag": "ecd9fd0146",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "applied 17:21:40Z-17:24:39Z; read back live: behavior /json-tiered/* carries exactly ONE association, viewer-request=auth-validator-edge:23, and the twin still carries its three; distribution Status=Deployed",
+   "introduces": [
+    "edge-authenticated, viewer-request only"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ZS1_LOGREAD.json",
+   "kind": "script",
+   "commit_or_etag": "ecd9fd0146",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the 7-day and 30-day WAF-log reads, each a subtraction from a printed denominator, with the twin's volume as the positive control and both bare-path requests attributed to this device's own egress",
+   "introduces": [
+    "window_30d"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ZS1_PLAN.txt",
+   "kind": "script",
+   "commit_or_etag": "626c8897af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the ROOT plan re-run after the ruling, reading 0 to add, 2 to change, 0 to destroy over exactly the distribution and the ACL",
+   "introduces": [
+    "data.aws_iam_role.portal_lambda: Read complete after 1s"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ZS1_ACL_BEFORE.json",
+   "kind": "script",
+   "commit_or_etag": "626c8897af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A1 condition (i): the live ACL read at 17:14:33Z, 6 rules, bodies hashed and never printed, with the LockToken captured -- which is what later showed the ACL was never written",
+   "introduces": [
+    "848a6d0b"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ZS1_ACL_AFTER.json",
+   "kind": "script",
+   "commit_or_etag": "626c8897af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A1 condition (ii): the live ACL read at 17:25:54Z with the SAME rules_sha256 over the whole ordered rule list and 0 statement digests outside the before set",
+   "introduces": [
+    "\"phase\": \"after\""
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ZS1_PROOF.json",
+   "kind": "script",
+   "commit_or_etag": "626c8897af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the live narrowing read four ways (bare and twin, unauthenticated and authenticated) plus the four instruments on the WebACL and the UpdateIPSet control on the event class",
+   "introduces": [
+    "updatewebacl_instrument_control"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ZS1_SCANNER.json",
+   "kind": "script",
+   "commit_or_etag": "ecd9fd0146",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "step 6's single read: all four security-scanner routes carry portal-jwt-authorizer, from a denominator of 121 routes of which 3 are NONE and all three are the login proxy and CORS preflights; nothing changed",
+   "introduces": [
+    "portal-jwt-authorizer"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/zs1_acl_snapshot.py",
+   "kind": "script",
+   "commit_or_etag": "626c8897af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the instrument for conditions (i) and (ii); it digests the WHOLE ordered rule list and not just each Statement, because the plan's churn touched override_action lines",
+   "introduces": [
+    "digest_scope"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261014T1717Z_nfra-oplgtw-edge-auth-json-tiered_deploy_completion.md",
+   "kind": "script",
+   "commit_or_etag": "626c8897af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "opened entry-and-sentinel-first before the apply; four legs closed with proof, L4's proof opening with the fact that the measured count diverges from that leg's own target text; CLOSED and sentinel removed",
+   "introduces": [
+    "Apply complete! Resources: 0 added, 2 changed, 0 destroyed"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "cloudtrail lookup-events (the 7-day and 30-day traffic read)",
+   "invocation": "aws logs start-query over aws-waf-logs-opal-cloudfront, and aws cloudtrail lookup-events for the wafv2 event classes",
+   "result": "bare path 2 requests in 7 days and the same 2 in 30, by subtraction from printed denominators; both this device's own probes"
+  },
+  {
+   "tool": "terraform plan (root and targeted, re-run after the ruling)",
+   "invocation": "terraform plan -input=false [-target=aws_cloudfront_distribution.portal -out <plan>]",
+   "result": "0 to add, 2 to change, 0 to destroy; the ACL half identical 39/39 both ways; the distribution half 4 added lines and 0 removed"
+  },
+  {
+   "tool": "safe-apply.sh (from the saved targeted plan)",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/portal-auth apply -no-color <saved plan>",
+   "result": "Apply complete! 0 added, 2 changed, 0 destroyed. Seat gates in WARN mode; crossbox-deploy-check gave NO verdict (rc=124), recorded as such"
+  },
+  {
+   "tool": "zs1_acl_snapshot.py (A1 conditions (i) and (ii))",
+   "invocation": "python .../zs1_acl_snapshot.py before|after",
+   "result": "6 rules either side, rules_sha256 EQUAL, LockToken byte-identical, capacity unchanged, bodies never printed"
+  },
+  {
+   "tool": "the live narrowing read (curl and an in-process authenticated read)",
+   "invocation": "curl for the unauthenticated statuses and headers; an in-process login against the service account for the authenticated pair",
+   "result": "bare 401 / twin 401 unauthenticated with WWW-Authenticate: Bearer and X-Cache: LambdaGeneratedResponse; bare 200 / twin 200 authenticated; site root 200"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open / close-leg x4 / close --slug nfra-oplgtw-edge-auth-json-tiered",
+   "result": "entry and sentinel committed before the act; four legs proven; CLOSED"
+  },
+  {
+   "tool": "zs1.AC1.sh / zs1.AC2.sh",
+   "invocation": "bash .../r37/checks/zs1.AC<n>.sh",
+   "result": "AC1 exit=0 RESULT: PASS; AC2 exit=1 RESULT: FAIL on the WebACL limb alone (updatewebacl_calls 0 with the snapshots present), its other three limbs passing"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S115: the root plan could not read 0/1/0 and step 4's targeting could not exclude the WebACL (web_acl_id makes it a dependency). Ruled by the issuer at A1 route (c): the identical-block churn is accepted on three recorded conditions.",
+  "NFRA_OPLGTW-Z-S116: the twin's other two edge functions are no-ops on the bare path and are deliberately left off; the deployed code of both was read at the versions the twin runs.",
+  "NFRA_OPLGTW-Z-S121: A1 condition (iii) wanted exactly ONE UpdateWebACL and the measured count is ZERO, because terraform logged a modification it never sent; four instruments agree the ACL was not written, and zs1.AC2's branch accepting 0 additionally requires the snapshots to be absent, so the honest record grades FAIL. Carries the correction that my pre-apply CloudTrail control proved only that wafv2 READS are recorded."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the <status> flip to complete",
+   "reason": "the order flips it only if AC1 and AC2 both PASS. AC2 reads FAIL on one limb, so the tag stays staged and the flip waits on the issuer's ruling in Z-S121. The deploy itself is landed, read back and CLOSED."
+  },
+  {
+   "item": "runbook 7.2 and the EC2_MANIFEST",
+   "reason": "this cell touches neither; it is a CloudFront and WAF act with no gateway release. The separate staleness of 7.2 after the mcportal release is row Z-S120 and belongs to that release's applier."
+  },
+  {
+   "item": "the /api/scoped/security-scanner/* authorizer",
+   "reason": "read once as step 6 requires and NOT changed. It carries portal-jwt-authorizer on all four routes, so no OBSERVATION row was owed; the reading is in ZS1_SCANNER.json and in the proof file's scanner_authorizer sentence."
+  },
+  {
+   "item": "the two bare-path requests in the traffic window",
+   "reason": "they are this seat's own proof-of-hole probes, attributed by matching the client IP to this device's public egress IP read at the act, with scripted user agents and the exact key the row quotes. They are not a consumer, and the record says so rather than reporting a bare zero."
+  }
+ ]
+}
