@@ -2,64 +2,78 @@
  "to_id": "NFRA_OPLGTW.TO-OG-ap-18",
  "phase": "A",
  "cut_by": "0.7.0_AE_CloudOps~Z",
+ "cut": "v2 (A4/A5 re-cut)",
+ "supersedes": {
+  "release_sha": "4275edccad2d48fe0183a783a120527bab6fb16b",
+  "why": "it could not start on the host -- harvest_identity.py indexed Path(__file__).parents[5] and /opt/opal-gateway/app/ has 4 parents (row Z-S126). Nothing was deployed; the ledger was never opened; A4 withdrew the GO and all three halves re-sign at the new release_sha."
+ },
  "base_sha": "bacec95ccd6cafd2201f7433af24ae2748732355",
- "release_sha": "4275edccad2d48fe0183a783a120527bab6fb16b",
- "base_is": "EC2_MANIFEST services.opal-gateway.deployed_commit at box/sitez HEAD, md5-verified against the host before the cut: 107 of 107 EQUAL over app/, deploy/ and dashboard/, 0 differing, 0 repo-only.",
- "release_branch": "rel-nfra-oplgtw-gt",
- "worktree": "C:/tmp/og-rel-gt",
+ "release_sha": "7521aee72528ca4d1d5ec811e11af74a0153faa2",
+ "base_is": "EC2_MANIFEST deployed_commit, RE-READ at this cut (A4: it moves) and still bacec95ccd; md5 107 of 107 at the first cut",
+ "release_branch": "rel-nfra-oplgtw-gt2",
+ "worktree": "C:/tmp/og-rel-gt2",
  "source": {
-  "whole_from_pinned_trunk": {
-   "pin": "6ff58597d6e8",
-   "why_pinned": "box/sitez HEAD moves under concurrent seats; the cut records the sha it took, never the moving ref",
-   "files": [
-    "app/harvest_typed.py",
-    "app/harvest_identity.py",
-    "app/harvest_press.py",
-    "app/harvest_figures.py",
-    "app/harvest_research.py",
-    "tests/test_og_gt0.py",
-    "tests/test_og_gt1.py",
-    "tests/test_og_gt2.py",
-    "tests/test_og_gt3.py",
-    "tests/test_og_gt4.py"
-   ]
+  "whole_at_pin": {
+   "pin": "b6075b276d",
+   "why_one_pin": "gt-8's app/harvest_identity.py and gt-9's app/harvest_press.py are byte-identical to trunk HEAD, and the other three modules and the five gt0-gt4 tests are unchanged since the first cut's pin -- verified blob by blob, so one pin covers the whole whole-file set",
+   "files": 12
   },
-  "by_hunk_from_hookup": {
-   "commit": "0cda8e2505",
-   "files": [
+  "by_hunk": {
+   "0cda8e2505": [
     "app/tools.py",
     "app/destructive_ops.py",
     "app/data_entitlement.py",
     "tests/test_entitlement_admin.py",
     "tests/test_data_entitlement_family.py"
    ],
-   "note": "that commit touches exactly those five files, so every hunk in it is a hunk this release wants; applied 3-way, cleanly, with 0 conflicts",
-   "pins_moved": [
-    "registered_tool_names 65 -> 75",
-    "non_data 56 -> 66"
+   "43e5e0383e (gt-8)": [
+    "deploy-to-ec2.sh -- the lib/trading_calendar.py staging and `lib` in the tar"
    ]
   },
-  "build_cells": {
-   "OG-gt-0": "077a46f5e1",
-   "OG-gt-1": "c053092447",
-   "OG-gt-2": "7c0197d9c2",
-   "OG-gt-3": "f4a65ac665",
-   "OG-gt-4": "ca23de384a",
-   "OG-gt-7 (hookup)": "705e6f7406"
-  },
-  "files": 15,
+  "files_total": 18,
   "outside_the_gateway": 0
  },
- "excluded_and_verified_absent": {
-  "files": [
-   "app/typed_scope.py",
-   "app/harvest_published.py",
-   "tests/test_og_gt5.py",
-   "tests/test_og_gt6.py"
-  ],
-  "in_the_cut": 0,
-  "on_disk_in_the_release_tree": 0,
-  "the_risk_this_closes": "the ten files are taken WHOLE from trunk HEAD, which is NEWER than the excluded typed_scope.py (OG-gt-6 drained it after these cells), so a HEAD copy could have grown an import of a file this release omits -- a release that deploys green and dies at import. Measured: no shipped app or test file references typed_scope or harvest_published, and all five modules import cleanly in the release tree."
+ "excluded_and_verified_absent": [
+  "app/news_typed.py (rides OG-ap-19)",
+  "app/typed_scope.py",
+  "app/harvest_published.py",
+  "tests/test_og_gt5.py",
+  "tests/test_og_gt6.py",
+  "the gt-10 portal modules",
+  "the /yearinreview refresh (its own OG-yr-1)"
+ ],
+ "host_shaped_import_check": {
+  "why": "A4 makes it a Phase A trigger because the A2 evidence ('imports cleanly in the release tree') is a property of a module AT A DEPTH: the checkout is 8 parents deep, the host is 4, and parents[5] is correct in one and fatal in the other.",
+  "how": "the release tree's app/ copied to C:/tmp/g1/app with lib/trading_calendar.py beside it at C:/tmp/g1/lib, then all five G1 modules AND app.tools imported in a FRESH interpreter whose sys.path is that root only",
+  "depth_proof": {
+   "probe_file": "C:/tmp/g1/app/harvest_identity.py",
+   "parents": 4,
+   "host_equivalent": "/opt/opal-gateway/app/harvest_identity.py",
+   "host_parents": 4,
+   "matched": true
+  },
+  "result": {
+   "app.harvest_typed": "OK",
+   "app.harvest_identity": "OK",
+   "app.harvest_press": "OK",
+   "app.harvest_figures": "OK",
+   "app.harvest_research": "OK",
+   "app.tools": "OK",
+   "of": "6 of 6"
+  },
+  "calendar_at_that_depth": {
+   "resolves": true,
+   "calendar_source": "NYSE/hardcoded-fallback-2024-2027",
+   "t1": "2026-10-13",
+   "trading_days_behind_t1_for_a_2026_10_09_stamp": 2,
+   "absent_reason": null,
+   "why_it_matters": "Phase B must see a NUMBER here rather than the absent reason; this is that number, measured before the deploy at the host's own depth"
+  }
+ },
+ "the_artifact_lib_is_the_DEPLOY_TREE_copy": {
+  "md5_that_will_ship": "3de6a337e268614698943b038248113b",
+  "md5_at_repo_HEAD": "6596e52fa01f2bee1160863c4e39318a",
+  "reading": "gt-8's deploy hunk stages $WORKSPACE_ROOT/lib/trading_calendar.py, and WORKSPACE_ROOT is the DEPLOY TREE -- pinned at the base for every file this cut did not take. So the artifact carries the base's calendar (hardcoded NYSE fallback 2024-2027), not trunk's newer one (2010-2027, generated, and FAIL-CLOSED outside its covered years). Both cover the current frontier and the numeric lag above was measured against the copy that will actually ship. PHASE B MUST COMPARE THE HOST'S md5 AGAINST 3de6a337, NOT 6596e52f: the repo-HEAD copy is the wrong oracle and would read as a mismatch on a correct deploy."
  },
  "tests_in_the_release_tree": {
   "tests/test_og_gt0.py": "5 passed",
@@ -67,12 +81,21 @@
   "tests/test_og_gt2.py": "5 passed",
   "tests/test_og_gt3.py": "5 passed",
   "tests/test_og_gt4.py": "7 passed",
+  "tests/test_og_gt9.py": "4 passed",
   "tests/test_og_hv1.py": "5 passed",
   "tests/test_entitlement_admin.py": "9 passed",
   "tests/test_data_entitlement_family.py": "4 passed",
-  "total": "44 tests, 0 failures, 0 errors",
-  "a_false_reading_corrected": "the first run of this suite set read '2 passed, 7 errors' for tests/test_entitlement_admin.py. The 7 were FileNotFoundError at fixture setup on org/standards/NFRA_OPLGTW_CONTRACT.json -- a path outside the sparse cone I had cut, not a defect in the code: the base tree at bacec95ccd produced the identical 7 errors for the identical reason. Widening both cones to include org/standards and re-running gives 9 passed. A sparse worktree that runs TESTS needs every path the tests READ, not only the code under test."
+  "tests/test_og_gt8.py": "2 failed, 1 passed -- BY CONSTRUCTION, see below",
+  "totals": "49 passed, 2 failed, 0 errors"
  },
- "deployed": false,
- "note": "release_sha is the FULL 40-char sha; the deploy-source guard compares it to the deploy tree's HEAD as a string."
+ "the_two_failures_are_the_exclusion_A4_ordered": {
+  "tests": [
+   "test_oggt8_ac01",
+   "test_oggt8_ac02"
+  ],
+  "cause": "both assert on TWO modules: harvest_identity AND news_typed. A4 keeps news_typed out of this release (it rides OG-ap-19), so its half reads {'import': 'ModuleNotFoundError', 'calendar': None} and the assertion fails. The harvest_identity half of each PASSES -- {'import': 'ok', 'calendar': True} with lib/ present and {'import': 'ok', 'calendar': False} without it -- which independently corroborates the host-shaped check above, using the cell's own test rather than my instrument.",
+  "not_a_defect_in_what_ships": true,
+  "the_issuer_s_call": "three routes: take news_typed too (contradicts A4 and widens the release), accept these two as unmeetable here and name them, or let tests/test_og_gt8.py ride OG-ap-19 with the module it covers. Filed as a row; this seat picked none of them."
+ },
+ "deployed": false
 }
