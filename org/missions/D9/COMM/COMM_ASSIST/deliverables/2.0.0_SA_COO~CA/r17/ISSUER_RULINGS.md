@@ -32,3 +32,7 @@ closes at the CVO's compile; the forwarder (CA-i-5) may now be installed.
 
 **R-9. Row COMM_ASSIST-C-S6 (drafts with no seq: End of Day and mail tags repeat): ACCEPTED as INERT until closed by CA-i-13**, the signed_at bound (24 hours back, 5 minutes forward, against the receiver's clock). It is built and deployed BEFORE
 muse is asked to sign a real answer; CA-i-5 may install the forwarder first because the forwarder alone sends nothing without a signed file.
+
+**R-10 (2026-10-14 ~02:3xZ). Row COMM_ASSIST-C-S6 (drafts with no seq): the third deploy (CA-i-14, ledger `comm-assist-r17c-deploy`) is live; the issuer's own `check_i14_live.py` read RESULT: PASS.** Both functions
+are on `sWltfUwyJQpANEhbY+KFkszo8ScLKEIi7Lm4qyUNWrM=` (02:28:07Z / 02:28:13Z); the four files equal the pin `abc5ad424a`; both environments as recorded; the served code requires `signed_at` and bounds it at 24 hours (and keeps version, seq and the acted-set guard). The CVO's half answered YES that the bound closes C-S6
+(End of Day closed; mail and job tags narrowed to a 24-hour window, a stated limit). The row closes at the CVO's compile (C-S7). The MUSE_ANSWER_CARD is flipped to LIVE.
