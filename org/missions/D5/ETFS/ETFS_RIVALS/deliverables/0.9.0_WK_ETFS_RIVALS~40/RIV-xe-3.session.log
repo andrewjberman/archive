@@ -20,3 +20,18 @@ RIV-xe-3 session log -- 0.9.0_WK_ETFS_RIVALS~40, worktree C:/tmp/wk-riv-r30-40, 
    (action r1, void r1, short pull r2: OLD ex_dates [2026-09-25], NEW [2026-06-01, 2026-09-25] label r1+r2). Rows S1 and S2 filed.
 9. No existing test assertion was edited or retired. test_the_latest_pull_per_security_wins_in_the_stage_loader is unedited and green.
 10. Not done (out of bounds): live-store DELTA = 0 arm (issuer's drain act); any S3 read; any deploy.
+
+AMENDMENT 1 (issuer ruling on row ETFS_RIVALS-D1-W40-S1; order commit d8ae1862ca):
+11. load_actions now skips every actions-void-* object as a row (price_series._is_void_uri), takes the (void_revision, normalised
+    security_id) pairs from price_series._voids(s) (lazy import), and drops the EVENT rows they name before the union. The uris list
+    still holds every object read. Status rows are not voided. Void-only store -> empty frame, uris listed.
+12. Check after the amendment (literal order invocations):
+    -k ac1 -> 1 passed, 4 deselected in 0.68s; -k ac2 -> 1 passed, 4 deselected in 0.62s; -k ac3 -> 2 passed, 3 deselected in 0.59s
+    -k ac4 -> 1 failed, 4 deselected in 0.80s (rerun 0.87s). AC4 FAILS as written.
+13. Cause, measured: the AC4 void names security_id 'a us equity'. price_series._norm_key (strip, space to underscore) is case-
+    sensitive: the void normalises to 'a_us_equity', the stored rows to 'A_US_Equity'. price_series._actions keeps the same three
+    rows on that store (scratch probe .scratch/ac4_ps_probe.py), so the two readers agree; the rule as ruled does not drop them.
+    The same void spelled 'A US Equity' drops the two rows: worker test test_ac4_mechanism_with_the_stored_key_spelling passes.
+    Surprise row ETFS_RIVALS-D1-W40-S3 (BLOCKING) asks the issuer for the ruling. No case-folding was added (the ruling forbids a divergence).
+14. Own test file: 5 passed, 1 failed (the verbatim AC4 copy). Neighbours: 43 passed in 6.55s. Full rivalfunds suite: 1037 passed,
+    1 failed (the verbatim AC4 copy), 6 skipped in 90.27s.
