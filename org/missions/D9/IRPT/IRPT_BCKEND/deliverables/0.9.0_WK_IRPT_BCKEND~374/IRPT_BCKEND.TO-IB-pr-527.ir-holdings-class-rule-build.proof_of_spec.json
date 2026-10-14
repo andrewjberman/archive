@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-527",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-527.ir-holdings-class-rule-build.md",
+    "group": "OTHER",
+    "vintage_commit": "1d3605e19c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "1d3605e19c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-527.ir-holdings-class-rule-build.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~374",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "kind": "script",
+      "commit_or_etag": "ec20f73ff8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD ONLY and offline: committed on the worker branch; nothing deployed, uploaded, applied or invoked; the served holdings do not change until a later, separately signed apply moves the producer",
+      "introduces": [
+        "def apply_cash_rule"
+      ],
+      "artifact_covered_by": [
+        "IB189-1-AC1",
+        "IB189-1-AC2",
+        "IB189-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_cash_rule.py",
+      "kind": "test",
+      "commit_or_etag": "ec20f73ff8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "in-memory offline test module, committed on the worker branch; not run against any live resource",
+      "artifact_covered_by": [
+        "IB189-1-AC1",
+        "IB189-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB189-1-AC1",
+      "criterion_verbatim": "AC1 the nine-file classification set passes (at least 106 passed), tests/ holds exactly the 32 baseline files plus test_holdings_cash_rule.py, and holdings_snapshot.py differs from its base blob only at cusip_key (the new function's neighbour), classify_security and module level",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r189/p189_cells.py\" . IB189-1-AC1",
+      "output_evidence": "OK: 107 tests pass; the change is confined\nIB189-1-AC1 PASS\nexit_code=0",
+      "denominator": "107 passed of the 107 collected in the nine-file set (101 baseline + 6 new; floor 106); 1 of 1 criterion",
+      "expect": "IB189-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB189-1-AC2",
+      "criterion_verbatim": "AC2 the behaviour above on the check's own stub classifier (a Cash sub serves cash on the canonical branch including the lower-case, padded and CUSIP-key forms; an equity row, an already-cash row, a Money Market row and a null sub are unchanged; a fallback-table row with sub Cash is unchanged; the Pathward CASH-line rule is unchanged)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r189/p189_cells.py\" . IB189-1-AC2",
+      "output_evidence": "OK: the rule acts on the canonical branch only, on a Cash sub only\nIB189-1-AC2 PASS\nexit_code=0",
+      "denominator": "10 of 10 behaviour arms checked (canonical FDRXX; LOWCS and PADCS; CUSIP-key hit; SPY, ALRCS, MMKT, NOSUB; fallback FBCSH; CASH line); 1 of 1 criterion",
+      "expect": "IB189-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB189-1-AC3",
+      "criterion_verbatim": "AC3 exactly one top-level function named like cash_rule, called exactly once, inside classify_security and before the fallback answer line, called nowhere else, and ASSET_CLASS_VALUES unchanged",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r189/p189_cells.py\" . IB189-1-AC3",
+      "output_evidence": "OK: one definition, one call, canonical branch only\nIB189-1-AC3 PASS\nexit_code=0",
+      "denominator": "1 of 1 top-level cash_rule definition; 1 of 1 call inside classify_security (0 calls elsewhere); ASSET_CLASS_VALUES unchanged; 1 of 1 criterion",
+      "expect": "IB189-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control for IB-pr-527; the three criteria above are the grade and no mutant was run by the worker.",
+      "expected": "N/A (no mutant named by the order)",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of the nine-file test set compared: run at commit ec20f73ff8 (107 passed in 5.75s) and run at HEAD 732330aed9, whose holdings_snapshot.py and test file are byte-identical to ec20f73ff8 (107 passed in 4.47s)",
+      "observed": "107 passed in both runs; rc 0 in both",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-D2-W374-S1: the commit-time client-data check printed WARN, not FAIL: the hashed account-id list is absent on dell2, so commit ec20f73ff8 was not checked for client account ids (ARMED, disarm owner 2.0.0_SA_COO~P2)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "any deploy, upload, apply, Lambda invocation or AWS call, and any change to the served holdings",
+      "reason": "BUILD ONLY and offline per the order's BOUNDS; the producer moves only under a later, separately signed apply"
+    },
+    {
+      "item": "bd_securities_fallback.py, ASSET_CLASS_VALUES, any other test, the source map and any .tf",
+      "reason": "outside the order's write grant and the rule's confinement; the fallback layer is served unchanged"
+    },
+    {
+      "item": "run of tests/test_holdings_rearm_trigger.py",
+      "reason": "the order says not to run it: it reads live AWS state and fails at base for a reason that is not this change's"
+    },
+    {
+      "item": "the IB-pr-528 count, packet and split (deliverables 0.9.0_WK_IRPT_BCKEND~375)",
+      "reason": "the sister order on its own worker; not in this order's cells"
+    },
+    {
+      "item": "status flip of the task order to complete, and any push",
+      "reason": "the worker face says do not flip <status> and the order file is outside <paths>; the work is committed LOCAL on branch wk-IRPT_BCKEND-374 and not pushed"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/test_holdings_classification.py tests/test_holdings_cusip_fallback.py tests/test_holdings_narrowed.py tests/test_holdings_unclassified.py tests/test_holdings_snapshot.py tests/test_holdings_publish_gate.py tests/test_holdings_multi_asset_v1_enum.py tests/test_holdings_display.py tests/test_holdings_cash_rule.py (cwd data/assets/scripts/gold/investor_reporting)",
+      "result": "107 passed, rc 0"
+    },
+    {
+      "tool": "safe-commit.sh commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~374 <0.9.0_WK_IRPT_BCKEND~374@opal.agent>\" -F <msgfile> -- <explicit paths>",
+      "result": "first attempt BLOCKED on ruff F401 (unused import pytest at test_holdings_cash_rule.py:13), commit aborted; import removed; second attempt committed ec20f73ff8 with commit-gate All checks passed"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-190",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "166228e0d5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "166228e0d5",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-190.cottonwood-and-inflection-against-the-eight-tables.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~155",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/session_log.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/FIRM_READINESS.json",
+      "kind": "doc",
+      "commit_or_etag": "6f8f52e7f2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record committed at 6f8f52e7f2 (LOCAL). Nothing deployed, pushed or written to AWS; the record names no served value and changes none."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "6f8f52e7f2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Command log of the read, committed at 6f8f52e7f2 (LOCAL). Records command, exit code and deciding line; no row values."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB101-4-AC1",
+      "criterion_verbatim": "`DB101-4-AC1` -- the record holds exactly the two firms with their buckets and the irpt prefix empty (the issuer's own read); each firm lists the eight C-SHAPE tables with source_exists, a candidate source, a gap in words and whether it reuses existing gold; each names the existing gold inputs with columns served, a readiness, blockers and its household dimension; no shadow pull is proposed; a recommendation and a first adapter order are stated; no write, push or deploy; no run of 8 or more digits. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r101/p101_round101.py\" . DB101-4-AC1",
+      "output_evidence": "OK: both firms read against the eight tables: cottonwood BLOCKED, inflection BLOCKED / DB101-4-AC1 PASS (rc 0, three identical runs)",
+      "denominator": "1 of 1 criterion PASS; 2 of 2 firms (cottonwood, inflection) with their bucket and irpt_prefix_exists false; 16 of 16 table entries (8 per firm) carry the four fields; 5 of 8 contract files exist; firm source_exists true for 7 of 8 tables (cottonwood) and 6 of 8 (inflection); 27 existing gold input items (12 cottonwood, 15 inflection); 0 shadow pulls; 0 runs of 8 or more digits",
+      "status": "PASS",
+      "status_reason": "PASS as written: the checker returns DB101-4-AC1 PASS rc 0 on FIRM_READINESS.json at 6f8f52e7f2. Readiness is BLOCKED for both firms on the shared market topic table, which is the grounded answer and not a checker artefact.",
+      "expect": "DB101-4-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The official checker run before FIRM_READINESS.json was written (no record at the stated path).",
+      "expected": "DB101-4-AC1 FAIL",
+      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~155/FIRM_READINESS.json; DB101-4-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run three times from the worktree root with the same arguments, outputs compared",
+      "observed": "the three runs print the same two lines and DB101-4-AC1 PASS with rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "market_topic_daily: no table located in either firm bucket beyond the top-level and second-level listings",
+      "reason": "a general table with no firm location, no contract and no registry row (PRD C-SOURCES); it is a shared dependency, recorded as a blocker on both firms"
+    },
+    {
+      "item": "The per-firm IRPT QA holdings JSON (dated snapshot and latest pointer)",
+      "reason": "JSON, not parquet; the bounds allow LIST and parquet schema reads only. The 19 and 17 column counts are carried from the CTO message and marked as carried"
+    },
+    {
+      "item": "The shared etf-classifications lookup",
+      "reason": "not opened in this read; class readiness is stated from the presence or absence of an asset-class column in each firm's data"
+    },
+    {
+      "item": "Whether Inflection gold lots derive from Eclipse or Orion; whether Orion returns include dividends; daily history depth for each table",
+      "reason": "PRD-named measurements that this read does not make; each is stated as a gap, not as a finding"
+    },
+    {
+      "item": "The 49 Financial bucket",
+      "reason": "not an input to any answer; one top-level LIST during the premise check, disclosed in surprise row IRPT_DASHBD-D2-W155-S5"
+    },
+    {
+      "item": "Contract files for account_transaction, account_dim and market_topic_daily",
+      "reason": "none exist yet; each is authored by the round that first writes its table (PRD C-SHAPE)"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W155-S1: OBSERVATION, INERT: aws s3 ls on an empty irpt prefix exits 1 with no output, while s3api list-objects-v2 on the same prefix reads KeyCount 0 and exit 0 (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S2: OBSERVATION, INERT: no IRPT_BCKEND parquet gold sits in either firm bucket; the IR holdings output is a QA JSON for one date plus a latest pointer, and the parquet gold named in the order is written by the firm gold pipelines (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S3: OBSERVATION, INERT: holdings_snapshot.py reads a blackdiamond/cottonwood/ prefix that the Cottonwood bucket does not hold (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S4: OBSERVATION, INERT: Inflection gold lots carry lot-level cost basis; the PRD NO_LOTS rule is neither confirmed nor refuted by this read (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S5: OBSERVATION, INERT: one top-level LIST of the 49 Financial irpt prefix ran during the premise check, outside the two firm buckets; no answer uses it (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S6: OBSERVATION, INERT: comp-estate has no IRPT chain and comp-pipescript io on holdings_snapshot.py is an AST map outside the curated graph, so the enumeration came from S3 LIST and repository reads (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W155-S7: OBSERVATION, INERT: the IR holdings column counts (19 and 17) are carried from the CTO message and were not re-measured, because the QA artifacts are JSON and the bounds allow parquet schema reads only (UNDER_INVESTIGATION)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p101_round101.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r101/p101_round101.py\" . DB101-4-AC1",
+      "result": "DB101-4-AC1 PASS (rc 0) on FIRM_READINESS.json at 6f8f52e7f2; before the record existed the same call returned FAIL (rc 1)"
+    }
+  ]
+}
