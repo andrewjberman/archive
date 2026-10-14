@@ -1,0 +1,374 @@
+diff --git a/infra/aws/ec2/opal-gateway/app/portal_macro.py b/infra/aws/ec2/opal-gateway/app/portal_macro.py
+new file mode 100644
+--- /dev/null
++++ b/infra/aws/ec2/opal-gateway/app/portal_macro.py
+@@ -0,0 +1,369 @@
++"""NFRA_OPLGTW OG-pt-2 (round 37, workstream FWD22-W5, FWD-22 G3): four portal tools over s3://opal-data-portal-v2, served JSON only.
++
++  portal_get_macro(slug=None)               json/macro/{macro_data,volatility_data,yield_curve_fred}.json; with a slug, json/macro/timeseries/<slug>.json
++  portal_get_valuation(index=None)          json/valuation/{valuation_data,risk_premium_data}.json; with an index, only that index's block of each
++  portal_get_security_scan(universe, factor=None, top=20)
++                                            json/security_scanner/latest/universes/<universe>/scanner_data.json + json/security_scanner/latest/factor_metadata.json
++  portal_get_pipeline_freshness()           json/latest/manifest.json
++
++Order of work, every call: (1) typed_scope.admit_scope -- principal, Opal user, served prefix -- BEFORE any S3 call;
++(2) the argument checks (harvest_bad_argument, zero S3 calls); (3) get_object of exactly the keys named above (a missing
++key is an absent item, never an error); (4) the envelope.
++
++The envelope: as_of is the OBJECT'S OWN as-of field (data_as_of, as_of or asOf, or each manifest source's data_as_of),
++never the read time; when an answer reads several objects its as_of is the OLDEST of them. denominator is
++{"members": n, "trading_days_behind_t1": k}: k is the largest trading-day lag of the objects read, measured against T-1
++by lib/trading_calendar.py (never by calendar days). An answer more than one trading day behind T-1 carries stale=true;
++a pipeline source more than five trading days behind also carries frozen=true.
++
++json-tiered/ is never read here (market data only; portal_get_market_returns owns it). This scope serves no platinum/
++key and no json/portfolios/ key. The security scan returns public-security fields only (no weights, no market values).
++"""
++from __future__ import annotations
++
++import datetime as _dt
++import gzip
++import io
++import json
++import sys
++from pathlib import Path
++
++from . import harvest_typed as ht
++from . import internal_role
++from . import typed_scope as ts
++
++BUCKET = "opal-data-portal-v2"
++SERVED = ("json/macro/", "json/valuation/", "json/security_scanner/", "json/latest/")
++KEY_MACRO = "json/macro/macro_data.json"
++KEY_VOLATILITY = "json/macro/volatility_data.json"
++KEY_YIELD_CURVE = "json/macro/yield_curve_fred.json"
++PREFIX_SERIES = "json/macro/timeseries/"
++KEY_VALUATION = "json/valuation/valuation_data.json"
++KEY_RISK_PREMIUM = "json/valuation/risk_premium_data.json"
++PREFIX_UNIVERSES = "json/security_scanner/latest/universes/"
++SCANNER_FILE = "scanner_data.json"
++KEY_FACTORS = "json/security_scanner/latest/factor_metadata.json"
++KEY_MANIFEST = "json/latest/manifest.json"
++
++CODE_BAD_ARG = "harvest_bad_argument"
++CODE_OVER = "harvest_over_cap"
++_GZIP_MAGIC = b"\x1f\x8b"
++TOP_CAP = 100
++STALE_TDAYS = 1         # more than one trading day behind T-1
++FROZEN_TDAYS = 5        # more than five trading days behind T-1: a frozen source
++_ABSENT_CODES = ("NoSuchKey", "404", "NotFound")
++_REPO_ROOT = Path(__file__).resolve().parents[5]     # app -> opal-gateway -> ec2 -> aws -> infra -> the repo root
++_s3 = None
++
++
++def _client():
++    """The assumed internal reader role when it is configured (internal_role), else a lazily created boto3 client."""
++    global _s3
++    client = internal_role.s3_client()    # ARN set: the assumed reader role; unset: None
++    if client is None:
++        if _s3 is None:
++            import boto3
++            _s3 = boto3.client("s3")
++        client = _s3
++    return client
++
++
++def _scope():
++    return ts.Scope("portal", BUCKET, SERVED, _client)
++
++
++def _today() -> _dt.date:
++    return _dt.datetime.now(_dt.timezone.utc).date()
++
++
++def _calendar():
++    """lib/trading_calendar.py, or None when this runtime does not carry lib/ (reported, never guessed)."""
++    try:
++        if str(_REPO_ROOT) not in sys.path:
++            sys.path.append(str(_REPO_ROOT))
++        from lib import trading_calendar
++        return trading_calendar
++    except ImportError:
++        return None
++
++
++def _lag(as_of) -> tuple:
++    """(trading days behind T-1, reason-if-None) for one object's own as-of date."""
++    if not isinstance(as_of, str) or len(as_of) < 10:
++        return None, "the object carries no as-of date"
++    cal = _calendar()
++    if cal is None:
++        return None, "lib/trading_calendar.py is not importable on this runtime, so no trading-day lag is measured"
++    try:
++        day = _dt.date.fromisoformat(as_of[:10])
++        return int(cal.trading_days_behind(day, cal.prev_trading_day(_today()))), None
++    except Exception as exc:  # noqa: BLE001 -- a calendar that cannot place the date is reported with its type
++        return None, "the trading calendar cannot place %s (%s)" % (as_of[:10], type(exc).__name__)
++
++
++def _measure(as_ofs) -> tuple:
++    """(largest trading-day lag, reason) over the as-of dates of the objects read; the lag is None when none can be measured."""
++    lags, reasons = [], []
++    for a in as_ofs:
++        lag, why = _lag(a)
++        if lag is None:
++            reasons.append(why)
++        else:
++            lags.append(lag)
++    if lags:
++        return max(lags), None
++    return None, (reasons[0] if reasons else "no object was read")
++
++
++def _field(obj, name):
++    return obj.get(name) if isinstance(obj, dict) else None
++
++
++def _safe(value) -> bool:
++    """One key segment: a non-empty string with no '/', no backslash and no '..'."""
++    return isinstance(value, str) and value != "" and "/" not in value and "\\" not in value and ".." not in value
++
++
++def _bad(message: str) -> dict:
++    return ht.refusal(message, CODE_BAD_ARG)
++
++
++def _read(scope, key) -> tuple:
++    """(obj, nbytes) of one served JSON object; (None, 0) when the key is absent. Any other error propagates.
++
++    The bytes come through the seam's capped loader (typed_scope._load_capped, the same cap as read_json). The decoder
++    is chosen by the gzip magic, not the suffix: some served objects are gzip-encoded under a plain .json key
++    (ContentEncoding gzip, e.g. json/macro/timeseries/<slug>.json), which read_json would hand to json.loads raw.
++    """
++    try:
++        body = ts._load_capped(scope, key)
++    except Exception as exc:  # noqa: BLE001 -- only a missing key is an absent item; anything else is a real error
++        resp = getattr(exc, "response", None) or {}
++        if (resp.get("Error") or {}).get("Code") in _ABSENT_CODES:
++            return None, 0
++        raise
++    if body[:2] == _GZIP_MAGIC:
++        with gzip.GzipFile(fileobj=io.BytesIO(body)) as gz:
++            raw = gz.read(scope.max_bytes + 1)
++        if len(raw) > scope.max_bytes:
++            raise ts.TypedOverCap(key)
++    else:
++        raw = body
++    return json.loads(raw), len(raw)
++
++
++def _serve(tool, ref, build):
++    """Admit (principal, Opal user, served prefix) BEFORE any S3 call, then build the answer; an over-cap object is refused."""
++    scope = _scope()
++    refused = ts.admit_scope(scope, tool, ref)
++    if refused:
++        return refused
++    try:
++        return build(scope)
++    except ts.TypedOverCap:
++        return ht.refusal("an object read is over the %d-byte cap" % scope.max_bytes, CODE_OVER)
++
++
++def _answer(tool, body, keys, as_ofs, nbytes, members, lag, lag_reason=None, absent_reason=None) -> dict:
++    """The envelope of one answer. Audited once when any byte was read; the audit carries the keys, never the content."""
++    body = dict(body)
++    if nbytes:
++        ts.audit_ok(tool, ",".join(keys), nbytes)
++    if lag is not None and lag > STALE_TDAYS:
++        body["stale"] = True
++    if lag is None and lag_reason:
++        body["trading_days_behind_t1_absent"] = lag_reason
++    present = [a for a in as_ofs if a]
++    if not body and not absent_reason:
++        absent_reason = "no member of the requested object is present"
++    return ht.envelope(body, as_of=min(present) if present else None, source_keys=list(keys),
++                       denominator={"members": members, "trading_days_behind_t1": lag},
++                       absent_reason=absent_reason)
++
++
++def _without_history(obj: dict) -> dict:
++    """The object with each one-level dict's `historical` array dropped (the arrays run to thousands of points)."""
++    return {k: ({kk: vv for kk, vv in v.items() if kk != "historical"} if isinstance(v, dict) else v) for k, v in obj.items()}
++
++
++def _macro(scope, tool) -> dict:
++    keys = [KEY_MACRO, KEY_VOLATILITY, KEY_YIELD_CURVE]
++    macro, n1 = _read(scope, KEY_MACRO)
++    vol, n2 = _read(scope, KEY_VOLATILITY)
++    curve, n3 = _read(scope, KEY_YIELD_CURVE)
++    present = [o for o in (macro, vol, curve) if o is not None]
++    as_ofs = [_field(o, "data_as_of") for o in present]
++    lag, why = _measure(as_ofs)
++    body, members = {}, 0
++    if macro is not None:
++        groups = macro.get("groups") or []
++        body["macro"] = {"year": macro.get("year"), "groups": groups}
++        members += len(groups)
++    if vol is not None:
++        body["volatility"] = _without_history(vol)
++    if curve is not None:
++        latest = []
++        for name in curve.get("series") or []:
++            pts = curve.get(name) or []
++            if pts:
++                latest.append({"tenor": name, "date": pts[-1].get("date"), "value": pts[-1].get("value"), "points": len(pts)})
++        body["yield_curve"] = {"latest": latest}
++        members += len(latest)
++    return _answer(tool, body, keys, as_ofs, n1 + n2 + n3, members, lag, why)
++
++
++def _series(scope, tool, slug) -> dict:
++    if not _safe(slug):
++        return _bad("slug must be one non-empty segment: no '/' and no '..'")
++    key = PREFIX_SERIES + slug + ".json"
++    obj, nbytes = _read(scope, key)
++    if obj is None:
++        return _answer(tool, {}, [key], [], 0, 0, None,
++                       absent_reason="no macro series %r in json/macro/timeseries/" % slug)
++    data = obj.get("data") or []
++    body = {"indicator": obj.get("indicator"), "stats": obj.get("stats"), "data": data}
++    lag, why = _measure([obj.get("as_of")])
++    return _answer(tool, body, [key], [obj.get("as_of")], nbytes, len(data), lag, why)
++
++
++def _without_key(obj, name) -> dict:
++    return {k: v for k, v in (obj or {}).items() if k != name}
++
++
++def _valuation(scope, tool, index) -> dict:
++    if index is not None and not isinstance(index, str):
++        return _bad("index must be a string")
++    keys = [KEY_VALUATION, KEY_RISK_PREMIUM]
++    val, n1 = _read(scope, KEY_VALUATION)
++    risk, n2 = _read(scope, KEY_RISK_PREMIUM)
++    as_ofs = [_field(o, "data_as_of") for o in (val, risk) if o is not None]
++    lag, why = _measure(as_ofs)
++    body = {}
++    if index is None:
++        if val is not None:
++            body["summary"] = val.get("summary") or []
++        if risk is not None:
++            credit = risk.get("credit") or {}
++            body["risk_premium"] = {
++                "data_source": risk.get("data_source"), "note": risk.get("note"),
++                "erp_thresholds": (risk.get("erp") or {}).get("thresholds"),
++                "credit": {leg: _without_key(credit[leg], "data") for leg in ("ig", "hy") if leg in credit}}
++        return _answer(tool, body, keys, as_ofs, n1 + n2, len(body.get("summary") or []), lag, why)
++    v = val or {}
++    rows = [r for r in (v.get("summary") or []) if isinstance(r, dict) and r.get("index") == index]
++    if rows:
++        body["summary"] = rows[0]
++    if (v.get("ranges") or {}).get(index) is not None:
++        body["ranges"] = v["ranges"][index]
++    if (v.get("time_series") or {}).get(index) is not None:
++        body["time_series"] = v["time_series"][index]
++    rp, r = {}, risk or {}
++    if index == "erp" and r.get("erp") is not None:
++        rp["erp"] = r["erp"]
++    credit = r.get("credit") or {}
++    if index in ("ig", "hy") and index in credit:
++        rp["credit"] = {index: credit[index]}
++    if rp:
++        body["risk_premium"] = rp
++    if not body:
++        return _answer(tool, {}, keys, as_ofs, n1 + n2, 0, lag, why,
++                       absent_reason="no valuation index %r in valuation_data.json or risk_premium_data.json" % index)
++    return _answer(tool, body, keys, as_ofs, n1 + n2, len(body), lag, why)
++
++
++def _pick_row(factor, pair) -> dict:
++    pct, row = pair
++    return {"ticker": row.get("ticker"), "name": row.get("name"), "sector": row.get("sector"), "country": row.get("country"),
++            "value": (row.get("values") or {}).get(factor), "percentile": pct}
++
++
++def _scan(scope, tool, universe, factor, top) -> dict:
++    if not _safe(universe):
++        return _bad("universe must be one non-empty segment: no '/' and no '..'")
++    if factor is not None and not isinstance(factor, str):
++        return _bad("factor must be a string factor code")
++    if isinstance(top, bool) or not isinstance(top, int):
++        return _bad("top must be an integer")
++    applied = min(max(top, 1), TOP_CAP)
++    limit = None if applied == top else {"requested": top, "applied": applied}
++    key = PREFIX_UNIVERSES + universe + "/" + SCANNER_FILE
++    keys = [key, KEY_FACTORS]
++    sc, n1 = _read(scope, key)
++    fm, n2 = _read(scope, KEY_FACTORS)
++    as_ofs = [_field(o, "asOf") for o in (sc, fm) if o is not None]
++    lag, why = _measure(as_ofs)
++    if sc is None:
++        return _answer(tool, {}, keys, as_ofs, n1 + n2, 0, lag, why,
++                       absent_reason="no universe %r in json/security_scanner/latest/universes/" % universe)
++    factors = (fm or {}).get("factors") or []
++    if factor is None:
++        body = {"factors_available": [f.get("code") for f in factors], "top": [], "bottom": [], "limit_applied": limit}
++        return _answer(tool, body, keys, as_ofs, n1 + n2, 0, lag, why,
++                       absent_reason="no factor given: name one of factors_available")
++    meta = next((f for f in factors if f.get("code") == factor), None)
++    if meta is None:
++        return _answer(tool, {}, keys, as_ofs, n1 + n2, 0, lag, why,
++                       absent_reason="no factor %r in factor_metadata.json" % factor)
++    rows = sc.get("rows") or []
++    ranked = []
++    for row in rows:
++        pct = (row.get("pctls") or {}).get(factor)
++        if pct is not None:
++            ranked.append((pct, row))
++    desc = sorted(ranked, key=lambda p: p[0], reverse=True)
++    asc = sorted(ranked, key=lambda p: p[0])
++    body = {"factor": meta, "universe": sc.get("universeId", universe), "rows_in_universe": len(rows),
++            "limit_applied": limit,
++            "top": [_pick_row(factor, p) for p in desc[:applied]],
++            "bottom": [_pick_row(factor, p) for p in asc[:applied]]}
++    return _answer(tool, body, keys, as_ofs, n1 + n2, len(ranked), lag, why)
++
++
++def _freshness(scope, tool) -> dict:
++    keys = [KEY_MANIFEST]
++    man, n1 = _read(scope, KEY_MANIFEST)
++    if man is None:
++        return _answer(tool, {}, keys, [], n1, 0, None, absent_reason="the pipeline manifest json/latest/manifest.json is absent")
++    srcs = man.get("sources") or {}
++    rows = {}
++    for name in sorted(srcs):
++        s = srcs[name] or {}
++        lag, why = _lag(s.get("data_as_of"))
++        rows[name] = {"data_as_of": s.get("data_as_of"), "timestamp": s.get("timestamp"), "frequency": s.get("frequency"),
++                      "pipeline_execution_id": s.get("pipeline_execution_id"), "updated_at": s.get("updated_at"),
++                      "trading_days_behind_t1": lag,
++                      "stale": lag is not None and lag > STALE_TDAYS,
++                      "frozen": lag is not None and lag > FROZEN_TDAYS}
++        if why:
++            rows[name]["absent_reason"] = why
++    as_ofs = [(srcs[n] or {}).get("data_as_of") for n in sorted(srcs)]
++    lag, why = _measure(as_ofs)
++    run = {k: man.get(k) for k in ("generated_at", "pipeline_execution_id", "pipeline_started_at", "source_count")}
++    body = {"run": run, "sources": rows, "frozen_sources": sorted(n for n, r in rows.items() if r["frozen"])}
++    return _answer(tool, body, keys, as_ofs, n1, len(rows), lag, why)
++
++
++def portal_get_macro(slug: str = None) -> dict:
++    """The macro indicators, volatility and yield curve (no slug), or one indicator's series (slug)."""
++    tool = "portal_get_macro"
++    if slug is None:
++        return _serve(tool, KEY_MACRO, lambda scope: _macro(scope, tool))
++    return _serve(tool, PREFIX_SERIES, lambda scope: _series(scope, tool, slug))
++
++
++def portal_get_valuation(index: str = None) -> dict:
++    """Valuation multiples and risk premium (no index), or one index's block of each (index)."""
++    tool = "portal_get_valuation"
++    return _serve(tool, KEY_VALUATION, lambda scope: _valuation(scope, tool, index))
++
++
++def portal_get_security_scan(universe: str, factor: str = None, top: int = 20) -> dict:
++    """The top and bottom names of one universe by one factor's percentile (top is clamped to 100)."""
++    tool = "portal_get_security_scan"
++    return _serve(tool, PREFIX_UNIVERSES, lambda scope: _scan(scope, tool, universe, factor, top))
++
++
++def portal_get_pipeline_freshness() -> dict:
++    """Each pipeline source's own data_as_of and run, with its trading-day lag behind T-1."""
++    tool = "portal_get_pipeline_freshness"
++    return _serve(tool, KEY_MANIFEST, lambda scope: _freshness(scope, tool))
