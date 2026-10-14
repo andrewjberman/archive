@@ -1,0 +1,15 @@
+ADVI_BDPRCE.TO-BP-c-2 -- worker 0.9.0_WK_ADVI_BDPRCE~14 -- session log (READ verbs only; no S3 write; no product file edited)
+
+1. Identity and tree: git rev-parse --abbrev-ref HEAD = wk-ADVI_BDPRCE-14; test -d org and test -d .tools = TREE-OK; base 6a49e63f99.
+2. Premises read: task order BP-c-2 (worker face), ruling AMENDMENT 1 and AMENDMENT 2, RULE_PROBE2.md (BP-c-1 @ 6a49e63f99), round-2 REPLAY.md, replay_r1.py and lookback_scan.py (copied, not edited), the round-3 grader r3_checks.py (read only).
+3. Served set: aws s3api get-object silver/prices/canonical_prices.parquet -> ContentLength 105405895, ETag 8eaa29e37c4e651381413b02ca2b43b2, LastModified 2026-10-14T00:13:47Z. Window: 1,664 transaction_observed rows (round 2: 1,657).
+4. Dimension: aws s3api get-object silver/bd_assets_dim.parquet -> ContentLength 996840, ETag 45dfaab5b5756b8458c6cfae63bf9f38.
+5. Key listing: aws s3api list-objects-v2 --prefix silver/transactions/ -> 1,929 keys (1,928 dated, _README.txt); tx_listing.json in C:/dev/wk-bdprce-r3-14-data.
+6. Verification: aws s3api head-object on all 1,928 dated keys (16 parallel, READ verb) -> heads.tsv, 1,928 rc=0. verify_partitions.py against round 2's cache (tx_back, tx; read only) and the local data folder -> 1,926 VERIFIED_MD5, 2 VERIFIED_SIZE_MULTIPART, 3 MISMATCH_SIZE (2026-10-02, 2026-10-08, 2026-10-11), 1 MISSING (2026-10-14).
+7. Refetch: aws s3api get-object for the four keys above into C:/dev/wk-bdprce-r3-14-data/tx/ (LastModified 2026-10-14T00:11:32Z, 00:12:55Z, 00:13:00Z, 00:13:04Z). Second verification pass -> 1,926 VERIFIED_MD5, 2 VERIFIED_SIZE_MULTIPART, 0 needing fetch (PARTITIONS2.csv).
+8. Replay: python -I replay_r1_r3.py (scratch run, separate process) -> BEFORE_AFTER2 md5 4899a1e331ff8e3e37a5153cbb24e345, served 1664, classes UNCHANGED 731 / CHANGED 585 / NOW_CARRY_FORWARD 160 / NOT_RECOMPUTABLE 188.
+9. Final run into the deliverables folder with --peer-md5 4899a1e3... -> peer_equal true, deterministic true; REPLAY2.json, BEFORE_AFTER2.csv, ESTIMATED_ROWS2.csv written.
+10. Sensitivity: python -I replay_r1_r3.py --exclude-day 2026-10-14 (scratch) -> one served row differs (GLOBAL X S&P 500 TAIL RISK ETF 2026-10-12: CHANGED 29.349 with the partition, NOT_RECOMPUTABLE without).
+11. Spot checks against the probe: BLACKROCK INC COM 2026-09-22 1074.9259; MIAMI-DADE 2026-10-09 1.0419 (UNCHANGED); CITIGROUP 2026-09-22 0.97021; MISSOURI 2026-10-09 1.0401; ALLSPRING 2026-10-02 10.3525; EXXONMOBIL 2026-10-09 carry 168.29 from 2026-10-08; five null-coupon banks 2026-09-16 UNCHANGED.
+12. Grader: r3_checks.py replay2 --file REPLAY2.json -> "REPLAY2 record ok served=1664 moved=745 unchanged=731 par_unchanged=8 deterministic=true" rc=0. Mutant control (classes sum +1 in a copy under .scratch) -> "REPLAY2 record FAIL classes sum 1665 != served_rows 1664" rc=1.
+13. Scope: r4_scope.py --root <worktree> --allow <deliverable folder> --allow <investigation file> -> see the instance (AC2).
