@@ -1,0 +1,164 @@
+{
+  "schema": "AR318-COMPOSITION-CAUSE.v1",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-318",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~128",
+  "method": "Offline. The product's own functions are imported (CompositionAdmission, compose_frozen_request, validate_bindings, verify_frozen_portfolio, InteractiveAccess, UploadService.repository_owner). Declared stubs: served.verified_internal_subject (no verified request exists offline, so the ordinary branch is taken), prospect.resolve_prospect_owner (returns the four identity fields of the D1 retained owner record), loaders.bucket_for and ids.opaque_firm (identity). The five steps of validate run one at a time with the same calls in the same order.",
+  "steps": [
+    {
+      "step": 1,
+      "name": "canonical",
+      "D1": "PASS",
+      "D1_class": null,
+      "D6": "PASS",
+      "D6_class": null,
+      "CONTROL": "PASS",
+      "CONTROL_class": null
+    },
+    {
+      "step": 2,
+      "name": "schema",
+      "D1": "FAIL",
+      "D1_class": "ValidationError",
+      "D6": "PASS",
+      "D6_class": null,
+      "CONTROL": "PASS",
+      "CONTROL_class": null
+    },
+    {
+      "step": 3,
+      "name": "compose",
+      "D1": "PASS",
+      "D1_class": null,
+      "D6": "PASS",
+      "D6_class": null,
+      "CONTROL": "PASS",
+      "CONTROL_class": null
+    },
+    {
+      "step": 4,
+      "name": "bindings",
+      "D1": "PASS",
+      "D1_class": null,
+      "D6": "PASS",
+      "D6_class": null,
+      "CONTROL": "PASS",
+      "CONTROL_class": null
+    },
+    {
+      "step": 5,
+      "name": "portfolio",
+      "D1": "PASS",
+      "D1_class": null,
+      "D6": "PASS",
+      "D6_class": null,
+      "CONTROL": "PASS",
+      "CONTROL_class": null
+    }
+  ],
+  "D1_detail": {
+    "class": "ValidationError",
+    "keyword": "not",
+    "field_path": [
+      "resolved",
+      "owner"
+    ]
+  },
+  "negative_control": {
+    "name": "D1_without_home_firm_id",
+    "steps": {
+      "1": "PASS",
+      "2": "PASS",
+      "3": "PASS",
+      "4": "PASS",
+      "5": "PASS"
+    }
+  },
+  "cause": {
+    "step": 2,
+    "step_name": "schema",
+    "file": "docs/contracts/investor-reporting/v1/RequestComposition.schema.json",
+    "line": 599,
+    "field": "resolved.owner.home_firm_id",
+    "field_path": [
+      "resolved",
+      "owner"
+    ],
+    "difference_in_words": "resolved.owner.principal_class is FIRM_ADVISOR for D1 and OPAL_GLOBAL for D6. The owner definition requires home_firm_id only when principal_class is OPAL_GLOBAL (then branch, lines 520-598) and forbids it otherwise (else branch, lines 599-605). The D1 request owner carries home_firm_id because InteractiveAccess.current() sets it on every ordinary viewer (_scope/interactive_access.py line 97) and prospect_owner() carries it into the owner (line 134). The D6 owner is OPAL_GLOBAL, where home_firm_id is required. Removing only home_firm_id from the D1 request owner makes all five steps PASS."
+  },
+  "owner_principal_class": {
+    "D1": "FIRM_ADVISOR",
+    "D6": "OPAL_GLOBAL"
+  },
+  "reads": [
+    {
+      "name": "control_composition",
+      "status": "OK",
+      "bytes": 22954,
+      "sha256": "00cce0b000ace95608d37a11a4cfd44d7d143a9af0f3189f10e92b28c02c59ce"
+    },
+    {
+      "name": "normalized_d1",
+      "status": "OK",
+      "bytes": 4577,
+      "sha256": "ac6ac6bd0ddb9e33c3766b44b88da5d2253db219848824b202a2ee84b2c40cb0"
+    },
+    {
+      "name": "normalized_d6",
+      "status": "OK",
+      "bytes": 4586,
+      "sha256": "bccc5a4ad77f77a668d23038e6b532c99623451db1a0e0a6653784543ea806b6"
+    },
+    {
+      "name": "owner_record_d1",
+      "status": "OK",
+      "bytes": 2297,
+      "sha256": "a743ac8ef7e2597da6650da520fa301dc7606dd9ab9f677eacafb582e7b3ed81"
+    },
+    {
+      "name": "owner_record_d6",
+      "status": "OK",
+      "bytes": 2363,
+      "sha256": "9c1d1a139d8800f0cb633d45de3313cbd323807f81297a4ac19851c398f5194a"
+    },
+    {
+      "name": "keys_normalized_d1",
+      "status": "OK",
+      "count": 1
+    },
+    {
+      "name": "keys_normalized_d6",
+      "status": "OK",
+      "count": 1
+    }
+  ],
+  "tests": {
+    "added": 14,
+    "passed": 14,
+    "failed": 0,
+    "files": [
+      "ycharts/generate/tests/test_composition_refusal_cause.py",
+      "intake/tests/test_load_input_owner_typed.py"
+    ],
+    "folders": [
+      "ycharts/generate/tests",
+      "intake/tests"
+    ]
+  },
+  "before_arm": {
+    "test_composition_refusal_cause": {
+      "failed": 5,
+      "passed": 1
+    },
+    "test_load_input_owner_typed": {
+      "failed": 5,
+      "passed": 3
+    }
+  },
+  "claim": "At step 2 (schema) the D1 composition fails on resolved.owner. Steps 1, 3, 4 and 5 pass for D1 in this run. The D6 row and the CONTROL row are one object: the stored accepted composition of the internal viewer's analysis, whose bytes hash to its own content address, and it passes all five steps. The D1 composition is a reconstruction, not the live route's output. The cause is named from the table, not from the live function's log.",
+  "not_read": [
+    "the live function's log for the refused request; the only live evidence is the exception text recorded by the sitting",
+    "the live analysis route's composition path for the advisor: the profile, organization and source descriptors of the advisor (resolve_profile_fields with live get_user, get_partner_profile, get_organization) were not read",
+    "the D1 candidate borrows profile, profile_provenance, comparison_catalog and source_descriptors from the stored D6 composition and rebinds each source binding to the D1 owner; steps 3 to 5 for D1 are conditional on that borrow",
+    "the verified-subject path of an ordinary viewer (served.verified_internal_subject is stubbed)"
+  ]
+}
