@@ -1,0 +1,30 @@
+{
+  "producer": {
+    "name": "commonwealth_account_return_daily (ADVI_COTBKF adapter), which imports the gold writer account_return_daily.py and calls its emit_day",
+    "entry_file": "data/assets/scripts/silver/commonwealth_account_return_daily.py"
+  },
+  "schedule": {
+    "trigger_kind": "MANUAL",
+    "desired": "No schedule is declared for this series. The adapter header (commonwealth_account_return_daily.py lines 1-10) describes a default build that writes locally only and a guarded --apply mint that writes gold; nothing in the repo declares a timer or an event for it. The one scheduled reporting-gold trigger, infra/aws/terraform/investor-reporting/reporting-gold/schedule.tf (weekdays 07:41 America/New_York), is built from the scope of the single custody source declared in data/assets/scripts/gold/irpt_reporting/sources.json, which is the 49 Financial source, so it does not cover Cottonwood.",
+    "applied": "No live trigger reaches this series. The reporting-gold schedule that exists, irpt-49f-reporting-gold-daily, is ENABLED at cron(41 7 ? * MON-FRI *) in America/New_York and targets irpt-49f-reporting-gold-lambda (Active, last update Successful); it writes the 49 Financial scope. Cottonwood gold therefore moves only when someone runs the adapter's mint by hand; who ran the 2026-10-11 write is NOT_ESTABLISHED.",
+    "evidence": "Read: schedule.tf and locals.tf (the scope is the declared source's registry scope); sources.json (one custody source, the 49 Financial key; the adapter's header lines 1-10 and PERF_DATE at line 135). Live: aws scheduler get-schedule on irpt-49f-reporting-gold-daily (rc 0); aws lambda get-function-configuration on irpt-49f-reporting-gold-lambda (rc 0). Live: aws s3 ls of the Cottonwood gold account_return_daily prefix (3325 date partitions, newest 2026-06-22) and of the Commonwealth silver daily_returns prefix (one partition, date=2026-06-23); s3api get-object of the newest and the 2013 manifest.json (metadata and keys read, no values)."
+  },
+  "newest_partition": "2026-06-22",
+  "address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/",
+  "read_on": "2026-10-14",
+  "trading_days_since_newest": 80,
+  "why_it_stops": "No live trigger feeds this series, so it advances only when the adapter's mint is run by hand. The adapter pins its one input to a single served snapshot (PERF_DATE 2026-06-23; the only partition under the Commonwealth Cottonwood silver daily_returns prefix is that date). Its last gold day is 2026-06-22 (the newest manifest asof is 2026-06-22; the series holds 3325 date partitions from 2013-04-03). The newest and the 2013 manifest.json objects both carry LastModified 2026-10-11 (07:17 and 07:03 UTC), so a write ran on that day and still ended at 2026-06-22; who ran it is NOT_ESTABLISHED. No failing run, disabled rule or removed trigger was found, because the series has no trigger to fail. Why the adapter maps through 2026-06-22 and not 2026-06-23 was not traced in this read: NOT_ESTABLISHED.",
+  "resume_needs": "A run of the adapter's guarded --apply mint by a seat, which writes gold partitions. Inputs: the Commonwealth FWD-3 silver snapshot is current only to 2026-06-23, about 80 trading days before this read; a resume needs a newer delivery and a change to the pinned PERF_DATE, which is a code edit. The producer also reads the holdings neighbour holdings_performance_daily for the days it holds; that neighbour's currency was NOT_ESTABLISHED here. Method version 3, as the _commonwealth_delivery entry in sources.json names it. The mint's guards (check_pair_files and require_pinned_split_store) refuse an unpinned run, and the never-widen rule of the project applies.",
+  "resume_writes_gold": true,
+  "recommendation": "Do not resume from this read. A resume writes gold partitions, so it is a later round under a never-widen pair, and it first needs a Commonwealth delivery dated after 2026-06-23 and a pinned PERF_DATE change. The contract still names the gold file as the producer; the decision whether this series stays a manual mint or gets its own schedule belongs to that later round.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
