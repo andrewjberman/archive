@@ -19,12 +19,19 @@ Subcommands:
   before                    print the numbers from the newest UNFOLDED dated objects and (unless refused) pin them to
                             portfolios_card_before.snapshot.json beside this file. Refuses to pin a snapshot built from a
                             folded object (meta.by_model_fold present).
-  after --date D            recompute from the dated objects at or before D (the same rule) and print a before/after
+  after [--date D]          recompute from the dated objects at or before D (the same rule) and print a before/after
                             table with deltas against the pinned snapshot. D is the run date: the distribution is keyed by
                             run date and aum-metrics / aggregate-aua-timeseries by the frontier date, so each type takes its
-                            newest key <= D. Use --source platinum to read the served platinum copies instead.
+                            newest key <= D. --date is optional: with no --date, D is the date of the NEWEST
+                            account-distribution key (the one run-date-keyed type, so its newest key is the latest run); a
+                            wall-clock default would read the previous run before the fire. Use --source platinum to read
+                            the served platinum copies instead.
+                            The FIRST stdout line states what was read: PORTFOLIOS-CARD READ date=D (how) and the full key
+                            of each of the three types. With --source a4, a second line WARNs when a newer account-distribution
+                            key exists than D.
 
-Run on 2026-10-14 after the first folded fire:  python portfolios_card.py after --date 2026-10-14
+Run after a fire:  python portfolios_card.py after        (D = the newest account-distribution key, the run date)
+                   python portfolios_card.py after --date 2026-10-14   (an explicit D; the first line says "explicit")
 No account id is read into any output (the objects carry none at this grain); dollars and counts are printed because
 the card to Andrew states them.
 """
@@ -271,17 +278,18 @@ def table(b, a):
     return nonzero
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     pb = sub.add_parser("before")
     pb.add_argument("--source", choices=("a4", "platinum"), default="a4")
     pb.add_argument("--refresh", action="store_true", help="overwrite an existing pinned snapshot")
     pa = sub.add_parser("after")
-    pa.add_argument("--date", required=True)
+    pa.add_argument("--date", default=None,
+                    help="the run date D; optional: with no --date, D is the newest account-distribution key")
     pa.add_argument("--source", choices=("a4", "platinum"), default="a4")
     pa.add_argument("--before-date", default=None, help="recompute the before side at this date instead of the pinned snapshot")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     c = s3()
     if args.cmd == "before":
         d = newest_date(c)
@@ -300,14 +308,31 @@ def main():
         json.dump(res, open(SNAP, "w", encoding="utf-8", newline="\n"), indent=1, sort_keys=True)
         print("pinned: %s" % SNAP)
         return 0
-    after = compute(c, args.date, args.source)
+    # The newest account-distribution key is listed for the default date and, on the a4 source, for the newer-key WARN.
+    newest = None
+    if args.date is None or args.source == "a4":
+        dist_keys = a4_keys(c, "account-distribution")
+        newest = dist_keys[-1][0] if dist_keys else None
+    if args.date is None:
+        if newest is None:
+            raise SystemExit("no account-distribution key under the A4 prefix: pass --date D")
+        d_read, how = newest.split("/")[-1][:-5], "default: newest account-distribution key"
+    else:
+        d_read, how = args.date, "explicit"
+    after = compute(c, d_read, args.source)
+    objs = after["objects"]
+    print("PORTFOLIOS-CARD READ date=%s (%s) account-distribution=%s aum-metrics=%s aggregate-aua-timeseries=%s"
+          % (d_read, how, objs["account-distribution"][0], objs["aum-metrics"][0], objs["aggregate-aua-timeseries"][0]))
+    if args.source == "a4" and newest is not None and newest.split("/")[-1][:-5] > d_read:
+        print("WARN: a newer account-distribution key exists (%s); the objects after %s were NOT read"
+              % (newest.split("/")[-1], d_read))
     if args.before_date:
         before = compute(c, args.before_date, args.source)
     elif os.path.exists(SNAP):
         before = json.load(open(SNAP, encoding="utf-8"))
     else:
         raise SystemExit("no pinned snapshot: run `before` first or pass --before-date")
-    show(after, "AFTER (dated global objects at or before %s, source %s)" % (args.date, args.source))
+    show(after, "AFTER (dated global objects at or before %s, source %s)" % (d_read, args.source))
     print()
     print("== BEFORE (pinned): %s" % {t: k[0].split("/")[-1] for t, k in before["objects"].items()})
     n = table(before, after)
