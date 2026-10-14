@@ -1,0 +1,11 @@
+K0 IrptRequestsDecryptViaDynamoOnly present 1 of 5
+K1a kms:Decrypt ViaService+context allowed
+K1b kms:Decrypt no ViaService DENIED
+K1c kms:Decrypt other table DENIED
+K1d kms:GenerateDataKey DENIED
+DIFF git hash-object f250023e2530ee4944b0886890d68c7dcf4e998a (infra/aws/terraform/ticket-center/main.tf, 12 insertions, 0 deletions, base 879e7badcb)
+COMMIT 8220c590a0 on local branch aq2-r30b-kms
+PLAN 0 to add, 1 to change, 0 to destroy (the one statement; resolved Resource equal to the table's KMSMasterKeyArn); Apply complete 0 added, 1 changed, 0 destroyed at 2026-10-14T15:47:55Z; re-plan No changes
+READBACK 5 statements; the new Sid present exactly once; Action exactly [kms:Decrypt]; Resource exactly the key ARN (not the alias, not a wildcard); Condition exactly StringEquals kms:ViaService dynamodb.us-east-1.amazonaws.com and kms:EncryptionContext:aws:dynamodb:tableName irpt-requests; the earlier four equal to the step 2 read
+EXTRA simulator reads (recorded, not required): kms:DescribeKey with the full context implicitDeny; kms:Decrypt with no context implicitDeny; kms:Decrypt on a different key implicitDeny; dynamodb:GetItem on irpt-requests with LeadingKeys opal-capital implicitDeny (the first window's T5c still holds)
+NOT DONE BY THIS ORDER: no code rollback; irpt-ticket-r29b-20261014 reads CLOSED since 20261014T151638Z (closed before this order, the tool has no reopen); irpt-r30-ticket-sitting-20261014 is OPEN; the K1 re-run is TO-EXERCISE-R30, which resumes on the issuer's message

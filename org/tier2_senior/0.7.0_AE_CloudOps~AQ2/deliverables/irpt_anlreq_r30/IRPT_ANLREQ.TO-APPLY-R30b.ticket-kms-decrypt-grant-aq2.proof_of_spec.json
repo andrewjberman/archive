@@ -1,0 +1,120 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-APPLY-R30b.ticket-kms-decrypt-grant-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R30b.ticket-kms-decrypt-grant-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "6e7bb79b4e"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R30b.ticket-kms-decrypt-grant-aq2.md",
+  "vintage_commit": "6e7bb79b4e"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "iam:role-policy opal-ticket-api-role / opal-tickets-table-rw (statement IrptRequestsDecryptViaDynamoOnly)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "scoped plan on aws_iam_role_policy.opal_ticket_api_ddb: 0 add, 1 change, 0 destroy, adding only the signed statement (kms:Decrypt on the resolved table key ARN equal to the table's KMSMasterKeyArn, StringEquals kms:ViaService dynamodb.us-east-1.amazonaws.com and kms:EncryptionContext:aws:dynamodb:tableName irpt-requests); safe-apply 0/1/0; get-role-policy read back: five statements, the new one exactly once and equal to the signed text, the earlier four equal; re-plan No changes; a plan from the shared root with the merged trunk source also reads No changes",
+   "artifact_covered_by": [
+    "R30b-AC1"
+   ],
+   "commit_or_etag": "statement present 1 of 5"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "12 insertions, 0 deletions, git diff hash-object f250023e2530ee4944b0886890d68c7dcf4e998a, committed 8220c590a0 on local branch aq2-r30b-kms from trunk 879e7badcb, merged to box/dell2 by safe-merge as 51da2ad8a4",
+   "artifact_covered_by": [
+    "R30b-AC1"
+   ],
+   "commit_or_etag": "8220c590a0"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30b.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the K0, K1a, K1b, K1c, K1d lines, then the diff hash, the commit, the plan, the read-back and extra simulator reads",
+   "artifact_covered_by": [
+    "R30b-AC1"
+   ],
+   "commit_or_etag": "blob a320569c10a5c9303ba7e19699916aa0823e6706"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R30b-AC1",
+   "invocation": "grep -c -E '^(K0 IrptRequestsDecryptViaDynamoOnly present 1 of 5|K1a kms:Decrypt ViaService\\+context allowed|K1b kms:Decrypt no ViaService DENIED|K1c kms:Decrypt other table DENIED|K1d kms:GenerateDataKey DENIED)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30b.txt",
+   "expect": "^5$",
+   "output_evidence": "5\nexit=0",
+   "denominator": "5 lines: the statement present once of five; the simulator allowed with the DynamoDB context and denied without ViaService, for another table and for GenerateDataKey",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(K0 IrptRequestsDecryptViaDynamoOnly present 1 of 5|K1a kms:Decrypt ViaService\\+context allowed|K1b kms:Decrypt no ViaService DENIED|K1c kms:Decrypt other table DENIED|K1d kms:GenerateDataKey DENIED)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/A_AFTER_R30b.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the simulator read one resource per call with the contexts of the addendum, and with extra controls: no context, a different key, DescribeKey, and the first window's out-of-firm DynamoDB key",
+   "observed": "K1a allowed; every denial arm and every extra control implicitDeny",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 29b ledger irpt-ticket-r29b-20261014 reads CLOSED",
+   "reason": "it was closed at 20261014T151638Z, before this order (the CTO half item 4 and the order asked that it stay open); deploy_ledger.py has no reopen; this order's own ledger irpt-ticket-r29b-kms-20261014 is CLOSED with its 4 legs proven; the sitting ledger irpt-r30-ticket-sitting-20261014 stays OPEN"
+  },
+  {
+   "item": "merging the Terraform source commit to box/dell2",
+   "reason": "the order names one local commit; the merge (safe-merge, main.tf only) was added so the trunk source carries the statement now live, otherwise the next plan from trunk would remove it; a plan from the shared root after the merge reads No changes"
+  },
+  {
+   "item": "the plan was run from the worktree's ticket-center root",
+   "reason": "the edit lives on the worktree's branch; the root's .terraform init data and the untracked lock file were copied from the shared root (gitignored, local); no backend or provider change"
+  },
+  {
+   "item": "terraform fmt -check rc 3",
+   "reason": "three pre-existing deviations identical at the unedited HEAD (the closing bracket indent and two aligned assignments); none from the new block; no fmt write was run on a repo file"
+  },
+  {
+   "item": "the K1 re-run",
+   "reason": "not in this order: TO-EXERCISE-R30 resumes on the issuer's message; the first run's files are kept as TICKET_*_R30_RUN1.txt"
+  },
+  {
+   "item": "the build temp folders and the copied init data",
+   "reason": "the worktree and its copied .terraform folder are removed with the worktree; no other recursive delete"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S100"
+ ],
+ "session_log": "org/critical_paths/change_management/20261014T1538Z_irpt-ticket-r29b-kms-20261014_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 plan (scoped) / safe-apply",
+   "invocation": "-target aws_iam_role_policy.opal_ticket_api_ddb from the worktree's ticket-center root, saved plan outside the repo, safe-apply on the saved plan",
+   "result": "Plan 0 to add, 1 to change, 0 to destroy; Apply complete 0/1/0; re-plans No changes (worktree and shared root)"
+  },
+  {
+   "tool": "deploy_ledger.py / safe-commit.sh / safe-merge.sh",
+   "invocation": "open and close-leg G2 A S T5, close; main.tf commit; merge",
+   "result": "ledger CLOSED 4 of 4; commit 8220c590a0 merged as 51da2ad8a4"
+  },
+  {
+   "tool": "iam simulate-principal-policy (kms contexts)",
+   "invocation": "opal-ticket-api-role, kms:Decrypt/GenerateDataKey/DescribeKey on the one key ARN, one resource per call, with ViaService and tableName contexts and controls",
+   "result": "allowed only for Decrypt with both contexts; implicitDeny for every other arm"
+  }
+ ]
+}
