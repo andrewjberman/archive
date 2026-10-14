@@ -358,8 +358,10 @@ def main(argv):
         driver_sha = hashlib.sha256(fh.read()).hexdigest()
     rec = {
         "method": {
-            "words": ("THE METHOD of household_return_daily (contract 0.1.0): household daily return r_t over the accounts with rows on both the previous "
-                      "household date and day t, external flows removed; ACCOUNT_MISSING and NO_PRIOR_VALUE days are null, never zero. A window return is "
+            "words": ("THE METHOD of household_return_daily (contract 0.1.0, amended on row W179-S1): household daily return r_t is the prior-day-value "
+                      "weighted combination of the accounts' own total_return_daily over the accounts with rows on both the previous household date and "
+                      "day t (weight = the account's market_value_eod on the previous date); ACCOUNT_MISSING (a missing account or a null account return) "
+                      "and NO_PRIOR_VALUE days are null, never zero. A window return is "
                       "the product of (1 + r_t) over the trading days after the window's opening anchor up to and including as_of, minus one; it is null when "
                       "the household has no row on the anchor or on any window day, or any r_t is null. Anchors: the last trading day before the window start "
                       "(qtd, ytd, last_12_months; lib/trading_calendar.py); since_inception opens on the household's first date in the read, so its claim is "
