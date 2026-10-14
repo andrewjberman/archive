@@ -14,7 +14,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, *([os.pardir] * 7)))  # deliverables/<serial>/ up to the worktree root
 FIRMS = ["49financial", "inflection", "cottonwood"]
-SOURCE, TIER, TABLE, PARTITION = "portal", "state", "ticket-attachments", "trade-form"
+SOURCE, TIER, TABLE, PARTITION = "portal", "state", "ticket_attachments", "trade-form"
 TOKEN = "{firm}"
 S3_RE = re.compile(r"^s3://([^/]+)/(.+)$")
 

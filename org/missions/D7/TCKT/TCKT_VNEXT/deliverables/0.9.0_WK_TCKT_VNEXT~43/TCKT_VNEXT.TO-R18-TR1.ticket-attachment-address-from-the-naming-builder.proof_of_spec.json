@@ -5,12 +5,12 @@
  "spec_ref": {
   "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR1.ticket-attachment-address-from-the-naming-builder.md",
   "group": "OTHER",
-  "vintage_commit": "b323e7539e"
+  "vintage_commit": "482503129c"
  },
  "assignee": "0.9.0_WK_TCKT_VNEXT~43",
  "decomp_ref": {
   "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R18.md",
-  "vintage_commit": "b323e7539e",
+  "vintage_commit": "482503129c",
   "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR1.ticket-attachment-address-from-the-naming-builder.md"
  },
  "artifacts_produced": [
@@ -19,7 +19,7 @@
    "kind": "config_data",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "bucket_template opal-data-{firm}, key_template portal/{firm}/state/ticket-attachments/trade-form/, tier state (R21); not deployed, no AWS call; the buckets are not created or checked here",
+   "deploy_evidence": "bucket_template opal-data-{firm}, key_template portal/{firm}/state/ticket_attachments/trade-form/, table ticket_attachments, tier state (R21); not deployed, no AWS call; the buckets are not created or checked here",
    "artifact_covered_by": ["R18TR1-AC1"]
   },
   {
@@ -27,23 +27,23 @@
    "kind": "script",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "AC1 checker: re-computes address() for three firms, round-trips both templates, runs lib/opal_naming.py validate; run twice, identical ADDRESS-OK output",
+   "deploy_evidence": "AC1 checker: re-computes address() for three firms, round-trips both templates, runs lib/opal_naming.py validate; its TABLE constant follows AMENDMENT 2 (ticket_attachments); run twice, identical ADDRESS-OK output",
    "artifact_covered_by": ["R18TR1-AC1"]
   },
   {
    "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py",
    "kind": "test",
-   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "commit_or_etag": "2e0b4b59f8",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "AC2 mutant: key_template with {firm} twice in a tempfile copy outside the worktree; checker prints ADDRESS-BAD rc 1; MUTANT-FIRES",
+   "deploy_evidence": "AC2 mutant: key_template with {firm} twice in a tempfile copy outside the worktree; checker prints ADDRESS-BAD rc 1; MUTANT-FIRES; unchanged by AMENDMENT 2",
    "artifact_covered_by": ["R18TR1-AC2"]
   },
   {
    "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
    "kind": "doc",
-   "commit_or_etag": "7dfcf9bc5c",
+   "commit_or_etag": "9d5f5a04dd",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "row TCKT_VNEXT-D2-W43-S1 (BLOCKING, ARMED) as committed; answered by AMENDMENT 1, recorded as row_status in ATTACH_ADDRESS.json; the channel file is not edited by this commit"
+   "deploy_evidence": "rows TCKT_VNEXT-D2-W43-S1 (answered by AMENDMENT 1) and TCKT_VNEXT-D2-W43-S2 (answered by AMENDMENT 2) as committed; this commit does not edit the channel"
   }
  ],
  "acceptance": [
@@ -52,7 +52,7 @@
    "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py expect: ^ADDRESS-OK",
    "method": "command",
    "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py",
-   "output_evidence": "ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket-attachments/trade-form/ (run under timeout 120, rc=0; the same output on a second run, cmp identical). Three firms: 49financial, inflection, cottonwood each round-trip the bucket and key templates with {firm} exactly once",
+   "output_evidence": "ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket_attachments/trade-form/ (run under timeout 120, rc=0; the same output on a second run, cmp identical). Three firms: 49financial, inflection, cottonwood each round-trip the bucket and key templates with {firm} exactly once",
    "denominator": "3 of 3 firms round-trip (bucket and key); 1 of 1 validate run rc 0 (54 system rows, 14 scope rows, 0 warnings)",
    "status": "PASS",
    "expect": "^ADDRESS-OK"
@@ -63,7 +63,7 @@
    "method": "command",
    "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py",
    "output_evidence": "MUTANT-FIRES checker rc=1 (run under timeout 120, rc=0): ADDRESS-BAD key_template must contain {firm} exactly once: 'portal/{firm}/{firm}/state/ticket-attachments/trade-form/'",
-   "denominator": "1 of 1 mutant fired (the unmutated baseline first returned ADDRESS-OK, so the mutant result is not a baseline failure)",
+   "denominator": "1 of 1 mutant fired, after a passing baseline",
    "status": "PASS",
    "expect": "MUTANT-FIRES"
   },
@@ -71,11 +71,11 @@
    "criterion_id": "R18TR1-AC3J",
    "criterion_verbatim": "R18TR1-AC3J (judgment): the tier follows the cited doctrine rule, the address is builder output and not typed, a registry row exists only if the builder demanded one, and nothing was created in AWS.",
    "method": "manual_read_with_citation",
-   "invocation": "none: judgment criterion, output carried and no verdict. Builder probe: python -c with sys.path at the worktree lib/ and opal_naming.address(\"portal\", <firm>, \"state\", \"ticket-attachments\", \"trade-form\") for 49financial, inflection, cottonwood",
-   "output_evidence": "49financial s3://opal-data-49financial/portal/49financial/state/ticket-attachments/trade-form ; inflection s3://opal-data-inflection/portal/inflection/state/ticket-attachments/trade-form ; cottonwood s3://opal-data-cottonwood/portal/cottonwood/state/ticket-attachments/trade-form. Tier cited: infra/logic/02_DOCTRINE.md R21 lines 588-597 (per-request intake is state) with tiers.json homes.FIRM.state = scope. Registry: no row added (builder printed all three without refusal); python lib/opal_naming.py validate rc=0. No AWS or network call.",
-   "denominator": "3 of 3 firms printed by the builder at tier state; 0 registry rows added",
+   "invocation": "none: judgment criterion, output carried and no verdict. Builder probe: python -c with sys.path at the worktree lib/ and opal_naming.address(\"portal\", <firm>, \"state\", \"ticket_attachments\", \"trade-form\") for 49financial, inflection, cottonwood",
+   "output_evidence": "49financial s3://opal-data-49financial/portal/49financial/state/ticket_attachments/trade-form ; inflection s3://opal-data-inflection/portal/inflection/state/ticket_attachments/trade-form ; cottonwood s3://opal-data-cottonwood/portal/cottonwood/state/ticket_attachments/trade-form. Tier cited: infra/logic/02_DOCTRINE.md R21 lines 588-597 (per-request intake is state) with tiers.json homes.FIRM.state = scope; table cited: NAMING_SCHEMA.json key.table_case snake_case (AMENDMENT 2). Registry: no row added (builder printed all three without refusal); python lib/opal_naming.py validate rc=0. No AWS or network call.",
+   "denominator": "3 of 3 served firms printed by the builder at tier state; 0 registry rows added",
    "status": "UNVERIFIABLE-BY-INSTRUMENT",
-   "status_reason": "judgment criterion, not self-graded: the L9 oracle is 3.0.0_SA_CVO, who reads the tier against R21 and the amended cell",
+   "status_reason": "judgment criterion, not self-graded: the L9 oracle is 3.0.0_SA_CVO, who reads the tier against R21, the table against NAMING_SCHEMA key.table_case, and the amended cell",
    "judgment": true
   }
  ],
@@ -88,7 +88,7 @@
   },
   "determinism": {
    "method": "two runs of address_check.py compared byte for byte (cmp)",
-   "observed": "both runs rc=0 with ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket-attachments/trade-form/; cmp identical",
+   "observed": "both runs rc=0 with ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket_attachments/trade-form/; cmp identical",
    "status": "STABLE"
   }
  },
@@ -107,7 +107,8 @@
   }
  ],
  "surprises": [
-  "TCKT_VNEXT-D2-W43-S1: BLOCKING, ARMED (disarm owner 2.0.0_SA_COO~V2) -- the state tier homes a bucket per firm; ANSWERED by TO-R18-TR1 AMENDMENT 1 (one bucket_template opal-data-{firm}, one key_template); the row is kept unedited, its answer is the row_status line in ATTACH_ADDRESS.json"
+  "TCKT_VNEXT-D2-W43-S1: BLOCKING, ARMED, ANSWERED by TO-R18-TR1 AMENDMENT 1 (one bucket_template opal-data-{firm}, one key_template); the row is kept unedited.",
+  "TCKT_VNEXT-D2-W43-S2: BLOCKING, answered by TO-R18-TR1 AMENDMENT 2 (table ticket_attachments, snake_case per NAMING_SCHEMA key.table_case); the row is kept unedited."
  ],
  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/TCKT_VNEXT.TO-R18-TR1.ticket-attachment-address-from-the-naming-builder.proof_of_spec.json",
  "compiler_tools": [
@@ -119,12 +120,12 @@
   {
    "tool": "python",
    "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/address_check.py",
-   "result": "ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket-attachments/trade-form/ rc=0"
+   "result": "ADDRESS-OK opal-data-{firm} portal/{firm}/state/ticket_attachments/trade-form/ rc=0"
   },
   {
    "tool": "python",
    "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check.py",
-   "result": "MUTANT-FIRES checker rc=1: ADDRESS-BAD key_template must contain {firm} exactly once rc=0"
+   "result": "MUTANT-FIRES checker rc=1: ADDRESS-BAD key_template ... rc=0"
   }
  ]
 }
