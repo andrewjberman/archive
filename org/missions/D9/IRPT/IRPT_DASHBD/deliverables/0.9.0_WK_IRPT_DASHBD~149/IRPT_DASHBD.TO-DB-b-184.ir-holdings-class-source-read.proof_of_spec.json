@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-184",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5860c35e98"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "5860c35e98",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-184.ir-holdings-class-source-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~149",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~149/IRPT_DASHBD.TO-DB-b-184.ir-holdings-class-source-read.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~149/IR_HOLDINGS_CLASS_SOURCE.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read record of the Investor Reporting holdings class path at 5860c35e98; nothing deployed, written, pushed or served"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows IRPT_DASHBD-D2-W149-S1 to S3 appended as bytes; no existing row edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB98-2-AC1",
+      "criterion_verbatim": "`DB98-2-AC1` -- the record names 3 or more hops from the IR holdings page to the class assignment, the one assignment site with its rule and what it is keyed on, whether it shares the gold classifier's code and the canonical table, and whether it needs its own rule (a rule keyed on sub_asset_class with no ticker list, or the reason none is needed); it states the served class of a money-market fund today or NOT_ESTABLISHED with the reason; no vendor call, secret read, write, push or served change; no run of 8 or more digits. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r98/p98_round98.py\" . DB98-2-AC1",
+      "output_evidence": "DB98-2-AC1 PASS (rc 0); the deciding line: OK: the IR holdings' class is read through 10 hop(s) and assigned at one site keyed on canonical_row_asset_class; own rule needed: true",
+      "denominator": "1 of 1 criterion PASS; 10 hops against a minimum of 3; 1 assignment site; the money-market class is NOT_ESTABLISHED with its reason; 0 vendor calls, 0 secret reads, 0 writes",
+      "status": "PASS",
+      "status_reason": "PASS as written at the worktree root on 5860c35e98: the record names the ten hops, the one assignment site and its keying, shares_code false and reads_same_canonical_table true, needs_its_own_rule true with a sub_asset_class rule and no ticker list, the money-market class NOT_ESTABLISHED with its reason, reads all zero, served_values_changed and pushed false, no run of 8 or more digits",
+      "expect": "DB98-2-AC1 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the record copied to a scratch root with its hops cut to 2",
+      "expected": "DB98-2-AC1 FAIL",
+      "observed": "FAIL: hops must be 3 or more {layer, file, line, what}: from the portal holdings tab to the place the class is read or assigned (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion run twice more from the worktree root with the same arguments; outputs compared",
+      "observed": "rc 0 in all runs; outputs identical; last line DB98-2-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The canonical etf-classifications row for a money-market fund.",
+      "reason": "not read: a DynamoDB GetItem is outside this order's grant (repo files and S3 GET/LIST of served objects only); the served class is therefore NOT_ESTABLISHED."
+    },
+    {
+      "item": "The served publication object for a firm, read by S3 GET or LIST.",
+      "reason": "not read: no served object was touched; the served class is stated from code only and marked NOT_ESTABLISHED."
+    },
+    {
+      "item": "The proposed cash rule.",
+      "reason": "recorded as a proposal in the record only; the order forbids writing it, and no product file was edited."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W149-S1: comp-cluster --list names 15 pages and no InvestorReporting page, so the order's discovery route did not find the holdings view; the view was located by path (OBSERVATION, INERT)",
+    "IRPT_DASHBD-D2-W149-S2: a money-market name outside the canonical table is served Fixed Income by bd_securities_fallback.py, a drifted verbatim copy of the pre-SC-t-1 gold classifier with no cash rule (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D2)",
+    "IRPT_DASHBD-D2-W149-S3: the IR canonical branch serves the stored asset_class verbatim and never reads sub_asset_class, so the gold release's cash rule does not reach the page's canonical rows (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D2)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p98_round98.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r98/p98_round98.py\" . DB98-2-AC1",
+      "result": "PASS rc 0: DB98-2-AC1 PASS"
+    },
+    {
+      "tool": "comp-cluster --list",
+      "invocation": "comp-cluster --list",
+      "result": "rc 0; 15 page clusters; no InvestorReporting page listed (vintage 2026-10-14 00:50:49 UTC)"
+    }
+  ]
+}
