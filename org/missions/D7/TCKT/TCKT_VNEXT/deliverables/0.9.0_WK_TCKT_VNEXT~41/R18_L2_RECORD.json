@@ -1,0 +1,99 @@
+{
+  "to_id": "TCKT_VNEXT.TO-R18-L2",
+  "serial": "0.9.0_WK_TCKT_VNEXT~41",
+  "cell": "R18-tf-2",
+  "base": "02b8f5d805 (status pending; the lambda is the L1 state, 9f26f42ab8)",
+  "lines_changed": {
+    "infra/aws/lambda/ticket_center/lambda_function.py": [
+      "TYPE_DEFINITIONS['trade_request']: firm required; fund, weights_as_of, trade_comments, attestations_confirmed NOT required; attachment kind 'trade_form'",
+      "MATRIX gains ATTACH_UPLOAD and ATTACH_OPEN, both frozenset({INTERNAL})",
+      "new block before _validate_attachment: TRADE_FORM_KIND, TRADE_FORM_TYPES, TRADE_FORM_MAX_BYTES, ATTACH_URL_EXPIRES, ATTACH_NAME_MAX_CHARS, _PLAIN_FIRM_RE, UPLOAD_BODY_MEMBERS; helpers _attach_template, _attach_templates, _safe_attach_name, _trade_form_fields_error, _validate_trade_form",
+      "_validate_attachment(kind, attachment, firm=None): kind 'trade_form' routes to _validate_trade_form; analysis_upload unchanged",
+      "create_ticket: for trade_form, an unset or malformed template returns 503 before any attachment is read or written; the ticket firm is passed to _validate_attachment",
+      "new before metrics: _s3_client() (the seam, built on call), attachment_upload_ticket(event), attachment_open_ticket(event, tid)",
+      "lambda_handler: POST attachment-upload beside submit; GET {id}/attachment beside the meeting route"
+    ],
+    "infra/aws/lambda/ticket_center/tests/test_trade_form_attachment.py": ["new file, 46 cases"],
+    "infra/aws/lambda/ticket_center/tests/test_trade_request_type.py": [
+      "re-pins (old -> new), listed in full below",
+      "new test test_trade_request_old_questions_are_optional_now (5 tests in the file; 4 existed)"
+    ],
+    "infra/aws/lambda/ticket_center/tests/_no_live.py": ["new file: install() replaces every loaded ticket lambda's _ses_client with a raiser and refuses every SES send at botocore; returns restore()"],
+    "infra/aws/lambda/ticket_center/tests/test_no_live_by_path.py": ["new file, 3 tests: the AST guard over every unittest.main file, the seam raises, the botocore send refuses"],
+    "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py": ["ROUTES gains the upload and the open routes; the action count goes 12 to 14; the __main__ block calls _no_live.install() first"],
+    "infra/aws/lambda/ticket_center/tests/test_directory_resolution.py": ["__main__ block: _no_live.install() before unittest.main"],
+    "infra/aws/lambda/ticket_center/tests/test_client_notify.py": ["__main__ block: _no_live.install() before unittest.main"],
+    "infra/aws/lambda/ticket_center/tests/test_client_mail_digest.py": ["__main__ block: _no_live.install() before unittest.main"],
+    "infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py": ["__main__ block: _no_live.install() before unittest.main"],
+    "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~41/mutant_check_tf2.py": ["new file: the mutant runner for AC2"]
+  },
+  "re_pins_test_trade_request_type": [
+    {
+      "where": "module docstring and imports",
+      "change": "added 'import pytest', the TRADE_ATTACHMENT member set, and an autouse fixture that sets TICKET_ATTACH_BUCKET_TEMPLATE and TICKET_ATTACH_KEY_TEMPLATE",
+      "why": "CREATE now needs the attachment and the templates (R18-tf-2)"
+    },
+    {
+      "where": "create(ans) helper",
+      "old": "return H.call(\"POST\", \"/api/scoped/tickets\", H.INTERNAL, {\"ticket_type\": \"trade_request\", \"title\": \"Trade\", \"answers\": ans})",
+      "new": "create(ans, attachment=TRADE_ATTACHMENT): the body gains the attachment unless attachment is None",
+      "why": "attachment is required on trade_request"
+    },
+    {
+      "where": "test_trade_request_required_answers_refused",
+      "old": "for name in (\"firm\", \"fund\", \"weights_as_of\", \"attestations_confirmed\"):",
+      "new": "for name in (\"firm\",):",
+      "why": "only the firm is required now; the three old questions are optional (contract)"
+    },
+    {
+      "where": "new test test_trade_request_old_questions_are_optional_now",
+      "old": "(no such assertion)",
+      "new": "fund, weights_as_of and attestations_confirmed each absent -> 201; the firm alone -> 201",
+      "why": "the new required flags, asserted"
+    },
+    {
+      "where": "test_trade_request_valid_create, test_trade_request_unknown_answer_refused, test_other_untyped_types_unchanged",
+      "old": "unchanged assertions",
+      "new": "unchanged assertions; the create helper now carries the attachment",
+      "why": "no assertion changed"
+    }
+  ],
+  "counts": {
+    "new_file_test_trade_form_attachment": "46 passed",
+    "test_trade_request_type": "5 passed",
+    "test_no_live_by_path": "3 passed",
+    "AC1_three_files": "54 passed, rc 0",
+    "folder_after": "383 passed, 42 subtests passed, rc 0, twice (determinism); base at 02b8f5d805: 300 + 33 (L1) = 333",
+    "test_analysis_request": "13 passed, rc 0",
+    "test_submit_analysis_request": "15 passed, rc 0"
+  },
+  "before_arm": {
+    "run": "the three new files (test_trade_form_attachment.py, test_trade_request_type.py, test_no_live_by_path.py, _no_live.py) run under pytest against the base lambda (git archive HEAD into .scratch/base_arm2)",
+    "result": "21 failed, 6 passed, 27 errors (54 cases)",
+    "detail": "test_trade_form_attachment.py: 0 of 46 pass on the base (19 failed, 27 errors at fixture setup on the missing _s3_client seam). test_trade_request_type.py: 1 failed (test_trade_request_old_questions_are_optional_now), 4 pass as controls that hold on the base by construction. test_no_live_by_path.py: 1 failed (the AST guard: the base test_authz_matrix has no install call), 2 pass (the guard primitive does not depend on the handler)."
+  },
+  "mutant": {
+    "script": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~41/mutant_check_tf2.py",
+    "mutation": "the CREATE firm fence line 'if not isinstance(key, str) or not key.startswith(key_tpl.format(firm=firm)):' replaced by 'if False:' in a scratch copy under .scratch/",
+    "result": "MUTANT-FIRES: pytest rc=1 on the mutant copy; 1 failed, 45 passed; the failing test is test_create_with_a_key_under_another_firms_prefix_is_refused"
+  },
+  "environment_for_the_terraform_cell": {
+    "TICKET_ATTACH_BUCKET_TEMPLATE": "a string with {firm} exactly once, one bucket per firm, for example opal-data-{firm} (required; unset or malformed -> 503 on the upload, the open and the trade CREATE)",
+    "TICKET_ATTACH_KEY_TEMPLATE": "a string with {firm} exactly once, ending in /, for example portal/{firm}/state/ticket-attachments/trade-form/ (required; unset, malformed or not ending in / -> 503)",
+    "note": "there is no single-bucket TICKET_ATTACH_BUCKET variable; both templates are read at call time, not at import. The Lambda needs s3 PutObject and GetObject on each firm's bucket and prefix (TO-R18-TR3)."
+  },
+  "contract_interpretations": [
+    "the upload body must carry exactly firm, filename, content_type and size; any other member is a 400 (the contract lists those four)",
+    "a firm that is not a plain id (letters, digits, dash, underscore) is refused 400 on the upload route and on a trade CREATE, before any formatting; the answers.firm check of the firm kind admits dots, so a dotted firm id can be a valid answer yet no attachment (surprise TCKT_VNEXT-D2-W41-S7)",
+    "the stored and returned attachment filename is the safe name (ASCII letters, digits, dot, dash, underscore; at most 100 characters, the extension kept); the key segment uses the same safe name",
+    "the open route answers 503 (not 404) when the templates are broken, and 404 when the ticket has no attachment or its key is outside the firm's prefix"
+  ],
+  "not_read": [
+    "infra/aws/terraform/ (the environment, the routes and the S3 permissions belong to TO-R18-TR3)",
+    "lib/opal_naming.py and the TO-R18-TR1 builder output (this cell reads the templates from the environment and imports no naming module)",
+    "the live buckets, their CORS and policy (the laptop's role request, C-DEPLOY)",
+    "portal/ (a separate repository, not touched)"
+  ],
+  "live_calls": "none. Every test runs under pytest with the S3 seam faked; the mutant and the before-arm ran pytest on scratch copies. No test file was run by path.",
+  "surprise_rows": ["TCKT_VNEXT-D2-W41-S7"]
+}
