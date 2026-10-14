@@ -1,0 +1,40 @@
+{
+ "bare_unauth_status": 401,
+ "twin_authed_status": 200,
+ "twin_auth_source": "the SERVICE ACCOUNT in Secrets Manager opal/portal/svc-data-refresh (email + password), exchanged once at POST https://opalinvest.dev/auth/login for a Bearer token. No token, password or address was written, echoed or passed in argv; the exchange ran in-process.",
+ "scanner_authorizer": "YES -- all four /api/scoped/security-scanner/* routes on opal-portal-data-proxy-api (7k3ed8px20, an HTTP api) carry the API's own custom authorizer portal-jwt-authorizer (REQUEST type, identity source $request.header.Authorization), so the missing Lambda@Edge association on that CloudFront behavior does not leave the scanner open; denominator 121 routes, 118 CUSTOM, 3 NONE, and the three are the login proxy and two CORS preflights. Nothing was changed.",
+ "updatewebacl_calls": 0,
+ "updatewebacl_calls_claim": "measured",
+ "updatewebacl_calls_reading": "ZERO, and it is a TRUE ABSENCE rather than an unreadable instrument: the apply never wrote the WebACL at all. Four instruments agree. (1) CloudTrail over 17:10Z-17:33Z returns 21 wafv2 events and NO UpdateWebACL, in a window proven SETTLED by my own five GetWebACL calls on this ACL at 17:14, 17:19, 17:19, 17:23 and 17:25 -- two of them bracketing the apply. (2) The ACL's LockToken is byte-identical before and after (848a6d0b-d69f-40e0-876a-cfc0ce40b6b2); wafv2 re-issues it on every successful update. (3) Capacity is unchanged at 947. (4) rules_sha256 is identical over the whole ordered rule list. Terraform nonetheless logged 'aws_wafv2_web_acl.opal_cloudfront_protection: Modifications complete after 19s' -- a modification it reported and did not send.",
+ "updatewebacl_instrument_control": "The control that settles it is UpdateIPSet: 2 events in 30 days with eventSource wafv2.amazonaws.com, so THIS TRAIL DOES RECORD wafv2 WRITES and a zero for UpdateWebACL is a real absence. The control I ran BEFORE the apply proved something weaker and I recorded it as sufficient at the time: it showed wafv2 READS (GetWebACL, GetIPSet, ListTagsForResource) reaching the trail, and reads being recorded does not establish that writes are. Same service, different event class.",
+ "a1_condition_i": "satisfied -- W/ZS1_ACL_BEFORE.json, 6 rules, rules_sha256 e18311e9c8315107da5f8719748bb9aea1ae7cf0bb5eb5e19cd829e420c0bbf4",
+ "a1_condition_ii": "satisfied -- W/ZS1_ACL_AFTER.json carries the SAME rules_sha256 and the same 6 rules; 0 statement digests outside the before set",
+ "a1_condition_iii": "the count is 0, not the 1 the condition names. Its PURPOSE -- that no interval exists in which the ACL evaluates without its managed rules -- is met more strongly than by one atomic update, because the ACL was never written. Recorded honestly and referred to the issuer (row Z-S121): zs1.AC2's n==0 branch additionally requires the before/after snapshots to be ABSENT, so an honest 0 beside the snapshots the same ruling told me to take reads FAIL. Neither the value nor the snapshots were adjusted to fit the branch.",
+ "the_narrowing_measured": {
+  "bare_unauthenticated": 401,
+  "twin_unauthenticated": 401,
+  "bare_authenticated": 200,
+  "twin_authenticated": 200,
+  "site_root_control": 200,
+  "reading": "the act is exactly a narrowing and nothing more: both paths now refuse an unauthenticated caller and both serve the same 607-byte body to an authenticated one. The bare path answered 200 unauthenticated before this apply.",
+  "refusal_shape": "HTTP 401 with WWW-Authenticate: Bearer, Content-Type application/json, body {\"error\":\"Missing or invalid Authorization header\"}, and X-Cache: LambdaGeneratedResponse from cloudfront -- the validator answered at the edge on viewer-request, so a cached 200 cannot be served around it."
+ },
+ "distribution": {
+  "id": "EVTSA9VEHNZVH",
+  "status": "Deployed",
+  "last_modified": "2026-10-14T17:23:52.967Z",
+  "behavior_7_associations": [
+   "viewer-request=auth-validator-edge:23"
+  ],
+  "twin_associations": [
+   "viewer-request=auth-validator-edge:23",
+   "origin-request=public-data-router:7",
+   "origin-response=cache-control-injector:2"
+  ]
+ },
+ "apply_window_utc": "2026-10-14T17:21:40Z..17:24:39Z",
+ "apply_result": "Apply complete! Resources: 0 added, 2 changed, 0 destroyed (ACL 19s, distribution 47s)",
+ "seat_gate_note": "safe-apply's seat gates ran in WARN mode; APPLY-WHO ADMITTED, and crossbox-deploy-check gave NO verdict (rc=124, a timeout) rather than a pass. Recorded because a gate that could not answer is not a gate that agreed.",
+ "written_by": "0.7.0_AE_CloudOps~Z",
+ "written_at": "2026-10-14T17:38:28.853367+00:00"
+}
