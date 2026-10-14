@@ -59,3 +59,32 @@ Authorize this sequence for leg Q, or name another:
 What I will NOT do without your word: start the runner (it launches a production chain), set
 `BD_PLATINUM_MODE` by hand, or send anything to the instance. The finish line stays before the 23:00Z fire;
 a decision by about 20:00Z leaves room. Nothing written, nothing to restore.
+
+## Finding 3 (added ~06:35Z, after amendment 3 / msg 5445) -- the authorized sequence cannot hold the instance up (MEASURED)
+
+Nothing has been started. The runner is still on the 04:00:46Z chain. Reading the boot path for the sequence
+amendment 3 authorizes:
+
+- `code/runner/run-gold-layer.sh` as SERVED (ETag `12ad546fdda541a40e86b1e382f02bbc`, 2026-05-13, equal to the repo
+  copy) ends with `shutdown -h now` unless `GOLD_KEEP_ALIVE=1`. That line runs seconds after
+  `run_gold_layer.sh` returns (a log upload and a pending-marker check sit between). It is not the
+  dispatcher's `shutdown -h +2`, which `sudo shutdown -c` could cancel; and it ignores the dispatcher's
+  "last chain-bearing process arms" deferral.
+- The 10-13 no-work boot launches measure the whole chain at about 3 minutes (09:46:59Z launch; S_00 09:47:35 to
+  09:49:49; A_00 and A_02 09:49:54 to 09:49:58; EC2 gone by the next CloudWatch bucket). C_06's last runs took 186 s
+  and 353 s. A single sent while the boot chain runs is killed by that `shutdown -h now`, mid-write on served keys;
+  a single sent after the boot chain ends finds a halting instance (amendment 3 (f) is that case).
+- `GOLD_KEEP_ALIVE=1` is not a way out: `gold_dispatch.sh:1085-1089` REFUSES `BD_PLATINUM_MODE=canonical` when it is
+  set, by design.
+
+So no sequence made of "start the runner, then one SSM command" can run C_06 to completion on the production
+runner. Options, each outside the one-SSM-command bound and so needing your word:
+
+A. As the FIRST SSM command, as soon as the agent is online, `sudo systemctl stop gold-layer-runner`. It kills the
+   boot wrapper (the shutdown line never runs) and, if S_00 has started, S_00 with it; S_00 is silver-prep and
+   reruns on every launch, but I cannot rule out a partial write from being killed mid-run. The instance then
+   stays up (the watchdog needs 10 minutes of uptime and 5 minutes of no gold process), and the second SSM command
+   is the authorized `BD_PLATINUM_MODE=canonical bash /tmp/gold_dispatch.sh --single C_06`. The single's own end
+   arms `shutdown -h +2`. Side effect that helps the test: A_00 does not run, so the accounts dimension cannot move.
+B. Do not run leg Q on the production runner, and disarm D1-W83-S5 on other evidence (the issuer's and the CTO's
+   call; the ruling named this run as the instrument).
