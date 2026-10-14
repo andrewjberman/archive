@@ -111,6 +111,50 @@ def in_scope(c):
     return not (bool((c.get("catalog_entry") or {}).get("present")) and key.startswith("silver_datasets."))
 
 
+NO_REGISTRY_BUCKETS = ("opal-data-news-v2", "opal-data-news-av")   # not buckets scopes.json knows: a legacy row for them is refused by the registry validator
+
+
+def registry_key(cid):
+    """The legacy_addresses.json key for a contract's prefix: `catalog-` + the entity slug with `_` -> `-` (lowercase kebab-case)."""
+    return "catalog-" + entity(cid).replace("_", "-")
+
+
+def needs_registry(c):
+    """True when the row's prefix is a plain S3 key prefix or object (no `{param}` template, a bucket the registry knows) so a
+    legacy_addresses.json row (reader NFRA_MCPINDEX) can make the literal CONFORMANT in the commit-time naming gate. The gate honours
+    a row only if it is COMMITTED at HEAD and has no params, so the registry commit lands BEFORE the rows."""
+    p = str(c.get("s3_prefix") or "")
+    b = str(c.get("bucket") or "")
+    return bool(p) and not p.startswith("none") and "{" not in p and b.startswith("opal-data-") and b not in NO_REGISTRY_BUCKETS
+
+
+def registry_row(c, group):
+    pin = PINS[group][0]
+    return {"key": registry_key(c["contract_id"]), "bucket": c["bucket"], "template": c["s3_prefix"],
+            "shape": "prefix" if str(c["s3_prefix"]).endswith("/") else "object", "params": [], "reader": "NFRA_MCPINDEX",
+            "evidence": "measured by 4.0.0_SA_CRO~Z in the census %s @%s: %s objects (the contract's size.objects, a count; no object content read)"
+                        % (PINS[group][1].rsplit("/", 1)[-1], pin, (c.get("size") or {}).get("objects")),
+            "note": "Catalog source-row address; the owner of the data renames it (R19)."}
+
+
+def registry_dir():
+    return os.environ.get("PLANT_REGISTRY_DIR") or os.path.join("infra", "logic", "registry")
+
+
+def plant_registry_dir14(allc):
+    """A temp copy of the registry holding every `catalog-*` row (planted arms only). Returns its path."""
+    import shutil
+    d = tempfile.mkdtemp(prefix="c14reg_")
+    shutil.copytree(os.path.join("infra", "logic", "registry"), d, dirs_exist_ok=True)
+    p = os.path.join(d, "legacy_addresses.json")
+    doc = json.load(open(p, encoding="utf-8"))
+    for cid, (g, c) in allc.items():
+        if in_scope(c) and needs_registry(c):
+            doc["legacy_addresses"].append(registry_row(c, g))
+    json.dump(doc, open(p, "w", encoding="utf-8"), indent=1)
+    return d
+
+
 def entity(cid):
     return re.sub(r"[^a-z0-9]+", "_", cid.lower()).strip("_")
 
