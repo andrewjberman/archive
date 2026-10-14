@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cg-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cg-1.set-and-reverse-match-open-accounts.md",
+    "group": "OTHER",
+    "vintage_commit": "70616e8c1b"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~168",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round85.md",
+    "vintage_commit": "70616e8c1b",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cg-1.set-and-reverse-match-open-accounts.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~168/ACTIVE_SET_V2_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only record of the definition, counts, invariants and reason codes; counts only, no account key, number or value; nothing deployed, no S3 write",
+      "artifact_covered_by": [
+        "CB85cg1-AC1",
+        "CB85cg1-AC2",
+        "CB85cg1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~168/ACTIVE_SET_V2_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "short record of the counts, the invariants with match flags, the four identifiers and the not_established list; no account value",
+      "artifact_covered_by": [
+        "CB85cg1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB85cg1-AC1",
+      "criterion_verbatim": "the three counts are printed side by side, the reverse match's classes are counted against its rows, no none row lacks a reason, and the invariants are printed with their match flags.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~168/ACTIVE_SET_V2_RECORD.json',encoding='utf-8'));df=d['definition'];r=d['reverse_match'];print('ACTIVE-SET-V2 primary=%d vs769=%d vs90d=%d active=%d securities=%d window_rows=%d current=%d matched=%d near=%d none=%d none_without_reason=%d rows_in_file=%d invariants_match=%d/%d'%(df['count_primary'],df['count_769'],df['count_90d'],d['active_accounts'],d['securities_active'],d['window_rows'],r['current_accounts'],r['crosswalk_matched'],r['near_match_waiting_on_a_person'],r['none'],r['none_without_reason'],r['rows_in_file'],sum(1 for x in d['invariants'] if x['match']==True),len(d['invariants'])))\"",
+      "expect": "ACTIVE-SET-V2 primary=",
+      "output_evidence": "ACTIVE-SET-V2 primary=860 vs769=769 vs90d=875 active=860 securities=3368 window_rows=41826 current=860 matched=460 near=13 none=387 none_without_reason=0 rows_in_file=860 invariants_match=9/15 (rc 0)",
+      "denominator": "860 of 860 current accounts classed (460 + 13 + 0 + 387 = 860); 0 of 387 none rows without a reason; 9 of 15 invariants MATCH, 6 DIFF reported not forced",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB85cg1-AC2",
+      "criterion_verbatim": "the two files exist at the recorded paths with the recorded checksum and size, outside the repository.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~168/ACTIVE_SET_V2_RECORD.json',encoding='utf-8'));f=d['files'];ok=all(hashlib.sha256(open(x['path'],'rb').read()).hexdigest()==x['sha256'] and len(open(x['path'],'rb').read())==x['bytes'] for x in f);n=[sum(1 for _ in open(x['path'],encoding='utf-8'))-1 for x in f];print('ACTIVE-SET-V2-FILES files=%d sha256_match=%s rows=%s outside_repo=%s'%(len(f),ok,n,all(not x['path'].startswith('org/') for x in f)))\"",
+      "expect": "ACTIVE-SET-V2-FILES files=2 sha256_match=True",
+      "output_evidence": "ACTIVE-SET-V2-FILES files=2 sha256_match=True rows=[41826, 860] outside_repo=True (rc 0); re-run on the same bytes: identical",
+      "denominator": "2 of 2 files at the recorded sha256 and byte length; 41826 + 860 data rows against the record's rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB85cg1-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: \"active\" is the CTO's, defined before it is counted and shown against 769 and 875; every window respects the 2012 floor and the account's earliest record; the reverse match drops no active account and every none row carries a code from the committed list, assigned by its tests in its order; the invariants against the round-82 files are printed with their results and a DIFF is explained, not forced; the four identifiers are answered; no account number, name or value appears in the committed record, the report or any message.",
+      "method": "manual_read_with_citation",
+      "invocation": "read ACTIVE_SET_V2_RECORD.md and ACTIVE_SET_V2_RECORD.json: definition, invariants, none_by_code, four_identifiers, not_established",
+      "expect": "judgment, graded by 3.0.0_SA_CVO at L9",
+      "output_evidence": "Recorded for L9, no verdict. Definition: open = non-null non-zero units on any row of the 2026-10-12 snapshot, cash included; 860 open against 769 (+91 cash-only) and 875 (90-day); 139 zero-unit-only accounts excluded and counted. Floor: no window starts before 2012-01-01 (clipped 0); earliest window 2013-04-08. Reverse match: 860 current accounts, 0 dropped; none rows coded 168 NEW_CLIENT_AFTER_MIGRATION, 101 MISMATCH_NO_IDENTIFIER, 91 OTHER (NO_CANDIDATE_OVERLAP), 27 AMBIGUOUS, 0 NO_COMMONWEALTH_HOUSEHOLD, 0 LINKED_NOT_RECORDED. Invariants: 9 of 15 match; the six DIFFs (window rows, securities, joined, Commonwealth-side rows, Black Diamond-side rows, not_established rows) are explained in not_established and surprise ADVI_COTBKF-D2-W168-S2; the worker trusts the raw-key reverse match and source counts, and the round-82 window segmentation is not recoverable from committed material. Four identifiers: one row each in the set; accounts 1 each. No account value in the committed record or the report; scan in the worker report.",
+      "denominator": "860 of 860 accounts classed; 387 of 387 none rows coded; 15 of 15 invariants printed with a flag",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment=\"true\" criterion, graded by 3.0.0_SA_CVO at L9 and never self-graded; the worker records output only, no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC2 sha256 and byte-length check of the two outside files, run twice on the same bytes",
+      "observed": "sha256_match=True on each read; rows [41826, 860]",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "one crosswalk_matched data line of a scratch copy of REVERSE_MATCH_V3.csv altered in memory and compared line by line with the real file",
+      "expected": "differing lines 1 on the mutant; 0 on the real file compared with itself",
+      "observed": "differing_lines_real_vs_mutant=1; real_self_compare=0",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "C:/dev/_cotbkf_active_set_20261013/ACTIVE_COTTONWOOD_SET_V2.csv",
+      "reason": "outside the repository by design (account keys must not enter the tree); not a git ref the checker can resolve; rows, bytes and sha256 recorded in ACTIVE_SET_V2_RECORD.json and read back by CB85cg1-AC2; the file is the subject of CB85cg1-AC2 and is not an artifact row (kind data is not in the artifact enum)"
+    },
+    {
+      "item": "C:/dev/_cotbkf_active_set_20261013/REVERSE_MATCH_V3.csv",
+      "reason": "outside the repository by design; not a git ref the checker can resolve; rows, bytes and sha256 recorded in ACTIVE_SET_V2_RECORD.json and read back by CB85cg1-AC2; the file is the subject of CB85cg1-AC1 and CB85cg1-AC2 and is not an artifact row (kind data is not in the artifact enum)"
+    },
+    {
+      "item": "the account-id scan of the repository (pytest test_cotbkf_no_account_ids.py)",
+      "reason": "run after the commit that carries this instance, as the order directs; its DENOMINATOR line is reported in the worker report, not in this instance"
+    },
+    {
+      "item": "the Commonwealth salt, the round-82 salted tokens and the restricted evidence folder",
+      "reason": "not used, not opened, not listed; the rebuild keys both sides by raw account number from the source tables"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W168-S1: the task order's 769 sentence says units above zero; the 769 and the 875 reproduce on non-zero units (above zero gives 766)",
+    "ADVI_COTBKF-D2-W168-S2: the round-82 window counts are not reproducible from committed material; the rebuild DIFFs on window rows, joined, side counts and not_established; armed, disarm owner the issuer",
+    "ADVI_COTBKF-D2-W168-S3: the 47 no-snapshot gold keys carry no cusip and no cash_equivalent; the cash flag is not established for their rows",
+    "ADVI_COTBKF-D2-W168-S4: one Black Diamond id is the candidate of two AWAITING_PERSON Commonwealth accounts; one predecessor_key cell carries two keys",
+    "ADVI_COTBKF-D2-W168-S5: round 84's NEW_CLIENT count used window starts; the partition test as the list defines it gives 145 on the same 273 rows (152 recorded)",
+    "ADVI_COTBKF-D2-W168-S6: the MISMATCH candidate test does not discriminate (candidate sets 1 to 751 Commonwealth accounts)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~168/ADVI_COTBKF.TO-CB-cg-1.set-and-reverse-match-open-accounts.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .scratch/cb/build.py, assemble.py, final.py, emit.py, record.py (worker scratch under the worktree, gitignored, not committed)",
+      "result": "V2 41826 rows sha256 5cef7ab0c9e10fe299cb757d4dba31792d069bad35f7250defa76e18773046ae; V3 860 rows sha256 0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f; record written"
+    },
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws s3api list-objects-v2 and s3 sync / s3 cp (read-only GET), through the shim",
+      "result": "silver holdings 88 keys; gold canonical holdings 135 keys; Commonwealth transactions 14 parts; crosswalk.csv and account_links.csv read; no write"
+    }
+  ]
+}
