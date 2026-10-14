@@ -408,7 +408,20 @@ def h9(ctx: dict) -> tuple:
     d = os.path.join(root, "org", "critical_paths", "change_management") if root else None
     names = []
     if d and os.path.isdir(d):
-        names = [n for n in os.listdir(d) if n.endswith(".md") and any(t in n.lower() for t in LEDGER_TOKENS)]
+        for n in os.listdir(d):
+            if not n.endswith(".md"):
+                continue
+            hit = any(t in n.lower() for t in LEDGER_TOKENS)
+            if not hit:
+                # the ledger's slug is CloudOps's to choose: also read the entry's own header, which names the cell
+                try:
+                    with open(os.path.join(d, n), encoding="utf-8", errors="replace") as fh:
+                        top = fh.read(1500).lower()
+                    hit = any(t in top for t in LEDGER_TOKENS)
+                except OSError:
+                    hit = False
+            if hit:
+                names.append(n)
     if not names:
         return "SKIP", "ledger not found (no change_management entry names the history leaf); LastModified not compared"
     name = sorted(names)[-1]
@@ -429,7 +442,8 @@ def h9(ctx: dict) -> tuple:
         after = lm > closed
         ok = ok and after
         parts.append("%s: after close=%s" % (sc, after))
-    return ("PASS" if ok else "FAIL"), "ledger %s closed %s; %s" % (name, m.group(1), "; ".join(parts))
+    note = "" if ok else " (H9 is the first-SCHEDULED-run arm: a leaf written by the on-demand D2 run before the close reads False until the scheduled run rewrites it)"
+    return ("PASS" if ok else "FAIL"), "ledger %s closed %s; %s%s" % (name, m.group(1), "; ".join(parts), note)
 
 
 ARMS = {"H1": h1, "H2": h2, "H3": h3, "H4": h4, "H5": h5, "H6": h6, "H7": h7, "H8": h8, "H9": h9}

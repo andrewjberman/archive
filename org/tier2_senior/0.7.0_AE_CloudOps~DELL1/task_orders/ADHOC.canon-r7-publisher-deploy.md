@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-14</date>
-<status>staged</status>
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (round 7 of MDPF_CANON; BEHIND the issuer's written GO and both pair halves -- see PRECONDITIONS)</priority>
