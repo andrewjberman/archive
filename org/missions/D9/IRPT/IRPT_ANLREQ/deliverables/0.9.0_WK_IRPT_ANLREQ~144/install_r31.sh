@@ -4,15 +4,15 @@ set -u
 # back itself on a failed start), then read the running package back. Sent through Systems Manager by host_read.py. No vendor call.
 # Written under IRPT_ANLREQ.TO-AR-y-338 (worker 0.9.0_WK_IRPT_ANLREQ~144). NOT RUN: the applier 0.7.0_AE_CloudOps~YC2 runs it under a later order.
 # Derived from install_r30.sh (release 30) by the AR-y-301 method. Changed: NEW, WANT, WANTSUM; a guard before the fetch that refuses unless the running root is
-# 0485393f3a-r29 (exit 34) and the unit carries no IRPT_ANALYSIS_READY_QUEUE_URL (exit 35); the release-31 member table (twelve members, each at its release-31 sha256);
+# 0485393f3a-r29 (exit 34) and the unit carries no IRPT_ANALYSIS_READY_QUEUE_URL (exit 35); the release-31 member table (thirteen members, each at its release-31 sha256);
 # the expected producer list printed and read back; the imports of layout_overview and opal_producer. Every fetch, sha256 and refusal guard of install_r30.sh is kept with its exit code.
 NEW=0485393f3a-r31
 OLD=0485393f3a-r29
 P=ec2/investor-reporting-ycharts/resident
 KEY=$P/resident_host_install_$NEW.sh
-WANT=02940a308abc865c6e0c855e3f7e456eac12a6bf7d1c1df3b3c1a75c056f7d1b
+WANT=6f5590899dc64b2371e7dd04a21de386e15e33ce955420ec4b0083c673611987
 SUMKEY=$P/irpt-resident-$NEW.package.SHA256SUMS
-WANTSUM=d36e590fabbd2a489003c1ca48ce059697c1821677b78cf38f36a6bba8e6a8ed
+WANTSUM=4710d4eab4e4f1e87fdcc4ab422f5b29a70af4fe74423a534dd411603a2db449
 T=/tmp/resident_host_install_$NEW.sh
 S=/tmp/irpt-resident-$NEW.package.SHA256SUMS
 R=/opt/irpt-resident
@@ -46,6 +46,7 @@ for ent in \
   "ops/pdf_link.py 9ac02114da9383022e4c30bb6a276b7c98b3b92d0999975d679b6fb8dee6ebb0" \
   "reports/build_resident_package.py 9cfa787a457cbb3c07945d6023dc431cb5abc0e01f1fed47786292c66be93bc1" \
   "reports/status_installed.py 8ae1892eef9fe43c3e03b53f1310b9663d5a0cb95c8ef108d912ba3a42028de5" \
+  "ycharts/generate/acceptance.py 0c4acec625b7da70da82efccf58cc967e9e5bf53c32e955d67079b711701513d" \
   "ycharts/generate/composition_admission.py 8d9b7aadc7c4db0b078737b155b4ec999d245d20c8bee83515c628639d0f64fd" \
   "ycharts/generate/resident_worker.py d779f7dc2e2218822f6b1b2cbca8cc15580202d67e51374f8cd170cb05a31eab" \
   "ycharts/research/layout_overview.py c368aa71db3cec88054c0c508fb005d3d97046469ed417e69b509fce824e9f48" \

@@ -1,6 +1,6 @@
 set -uo pipefail
 # Ledger irpt-resident-r31-20261014: resident root 0485393f3a-r29 -> 0485393f3a-r31 (the r29 member set with the trunk blobs of the
-# twelve package members that the merged cells of AR-y-318, AR-y-319, AR-y-327, AR-y-330, AR-y-331, AR-y-333 and AR-y-336 change, the package sums and the
+# thirteen package members that the merged cells of AR-y-318, AR-y-319, AR-y-327, AR-y-330, AR-y-331, AR-y-333 and AR-y-336 change, the package sums and the
 # bindings replaced; base pin 0485393f3a, package pin c4c2afe89639071f41242fc9f663cadaffa0ffd8), and the 0485393f3a-r29 root and its library stay on the host for rollback.
 # Copy of the r30 script with NEW, WANT_TAR, the member checks (one per differing member, equal to the extracted r31 tarball), the ledger and this header changed;
 # written by 0.9.0_WK_IRPT_ANLREQ~144 for 2.0.0_SA_COO~Y2 (TO-AR-y-338, build only); operator 0.7.0_AE_CloudOps~YC2. Authoring this script uploaded, installed and applied nothing.
@@ -12,7 +12,7 @@ ROOT=$R/$NEW
 UNIT=irpt-analysis-resident.service
 Q=https://sqs.us-east-1.amazonaws.com/313476888478/irpt-generation
 KEY=ec2/investor-reporting-ycharts/resident/irpt-resident-$NEW.tar.gz
-WANT_TAR=cc6581ed3ff040046c04b202f110a2cb7dc679d79dafb1a6380c64a52c330db8
+WANT_TAR=22193944345ce2dd52d2b732ce0ac8d569aa2359958601686239b7e1da8e6021
 WANT_LIBRARY=a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841
 WANT_WRAPPER=55ddb8f7947cba7cdca1b9139d4d0a1a3ad620e330c86ba3ab648d334763aff9
 check() { [ "$(sha256sum "$ROOT/$1" | cut -d' ' -f1)" = "$2" ] || { echo "ERROR: $1 is not the built member"; exit 17; }; }
@@ -25,15 +25,16 @@ aws s3 cp "s3://opal-313476888478-lambda-artifacts/$KEY" /tmp/irpt-resident-$NEW
 tar -xzf /tmp/irpt-resident-$NEW.tar.gz -C "$ROOT" || exit 12
 cd "$ROOT" || exit 13
 sha256sum -c SHA256SUMS --quiet && echo "package SHA256SUMS OK ($(wc -l < SHA256SUMS) members)" || exit 14
-check "SHA256SUMS" d36e590fabbd2a489003c1ca48ce059697c1821677b78cf38f36a6bba8e6a8ed
+check "SHA256SUMS" 4710d4eab4e4f1e87fdcc4ab422f5b29a70af4fe74423a534dd411603a2db449
 check "_scope/interactive_access.py" d416e3755d587b14a0b8ccbd2599b9183bada64c6aed5a9b56edc5a7ce19838b
 check "intake/uploads.py" 48f39329ea4c947dc30cba02e07ed499d6f683726204710b16656c29d6f3c0c1
 check "ops/entry.py" 8d9b7e76242af5b731875c2fc169e1f57963ecc0f48e97a965549f1e1cabdd1e
 check "ops/owned_report.py" fd57437f792d4904232f2a6d2d9c0853e34bce7bc2fc3cd3ff3e76a68712a5d2
 check "ops/pdf_link.py" 9ac02114da9383022e4c30bb6a276b7c98b3b92d0999975d679b6fb8dee6ebb0
 check "reports/build_resident_package.py" 9cfa787a457cbb3c07945d6023dc431cb5abc0e01f1fed47786292c66be93bc1
-check "reports/resident_bindings.json" 67d4f4f4128ca6418d37dec339083a9eac1087e91d0ed3ee0e71315df2d4761e
+check "reports/resident_bindings.json" 804404d95b947d4f12e8b8a521d8867890d6bac195e90eb1df02e7eb33e7ca11
 check "reports/status_installed.py" 8ae1892eef9fe43c3e03b53f1310b9663d5a0cb95c8ef108d912ba3a42028de5
+check "ycharts/generate/acceptance.py" 0c4acec625b7da70da82efccf58cc967e9e5bf53c32e955d67079b711701513d
 check "ycharts/generate/composition_admission.py" 8d9b7aadc7c4db0b078737b155b4ec999d245d20c8bee83515c628639d0f64fd
 check "ycharts/generate/resident_worker.py" d779f7dc2e2218822f6b1b2cbca8cc15580202d67e51374f8cd170cb05a31eab
 check "ycharts/research/layout_overview.py" c368aa71db3cec88054c0c508fb005d3d97046469ed417e69b509fce824e9f48

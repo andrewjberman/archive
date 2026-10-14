@@ -2,7 +2,7 @@ set -u
 # Ledger irpt-resident-r31-20261014, leg X1 (NOT run unless the issuer orders it): put the resident back on the r29 root. The library bytes are the same before and after
 # release 31 (a1c288, reinstalled by the r31 install from the package), so no library step is needed beyond the refusal check.
 # Written under IRPT_ANLREQ.TO-AR-y-338 (worker 0.9.0_WK_IRPT_ANLREQ~144). NOT RUN: the applier 0.7.0_AE_CloudOps~YC2 runs it only if the issuer orders it.
-# Derived from rollback_r30.sh by the AR-y-301 method. Changed: NEW, the reader read-back (the twelve members the release changes, each at its release-29 sha256, the values the
+# Derived from rollback_r30.sh by the AR-y-301 method. Changed: NEW, the reader read-back (the thirteen members the release changes, each at its release-29 sha256, the values the
 # rollback target must hold), and the wording. Every refusal guard of rollback_r30.sh is kept with its exit code.
 NEW=0485393f3a-r31
 OLD=0485393f3a-r29
@@ -30,6 +30,7 @@ for ent in \
   "ops/pdf_link.py 41d98e94d39ea63c7da088a102ff738648b6cd0b6544a0b96611626d185d4afd" \
   "reports/build_resident_package.py c74554be2fa141f17f91d9feb52fa228c114da7e406baeb1037d07b14f2bc9f4" \
   "reports/status_installed.py 326fed4f54b4bbb8419379d686c89faec92ca3ae00846b4d9c9c858fc82d8d13" \
+  "ycharts/generate/acceptance.py 138da769bdf424c56dfe8666c1eb4f5e779d32696d16d8cff45066ce3c4b3b99" \
   "ycharts/generate/composition_admission.py 50f5d11cd8ffb8161b9f42af61bdfcdffe698cfc4e66b5cc3338048572563606" \
   "ycharts/generate/resident_worker.py 190f0e14bceb97ca870b6eefeffbc6d96e6e63fb1eb3fcc905541d789b8e40d5" \
   "ycharts/research/layout_overview.py 752eee099caf720eb1e5ea271f40c01951efb6be4eee38438059b2ff850330d3" \

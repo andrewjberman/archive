@@ -1,25 +1,21 @@
-"""TO-AR-y-338 criterion AR338-y-AC3: the build was BUILD ONLY and touched nothing outside its grant. Offline, read-only.
+"""TO-AR-y-338 criterion AR338-y-AC3: the scope check (a build that touched the repository or the cloud is a release nobody signed).
+Offline; read-only over git and the worktree.
 
-Prints `SCOPE-OK ...` only when: `git diff --name-only <base> HEAD` (base = the parent of this worker's first commit, printed)
-lists only paths under org/missions/D9/IRPT/IRPT_ANLREQ/; `git status --porcelain -- infra` of this worktree is empty; and
-the staged artifacts all live under C:/dev/irpt-release-r31/ with none inside the repository. Otherwise `SCOPE-BAD <why>`,
-exit 1. ASCII only.
+Prints `SCOPE-OK ...` only when: `git diff --name-only <base> HEAD` (base = the parent of the first commit of this branch,
+printed) lists only paths under org/missions/D9/IRPT/IRPT_ANLREQ/ (the deliverable folder and the surprise channel file and the
+order file); `git status --porcelain -- infra` shows nothing; and the staged artifacts all live under C:/dev/irpt-release-r31/
+(none inside the repository: no tracked or untracked-not-ignored path is named like a release artifact, and the gitignored
+.scratch folder holds no file named like the tarball or its sums). Otherwise `SCOPE-BAD <why>`, exit 1. ASCII only.
 """
+import hashlib
 import os
 import subprocess
 import sys
 
-DL = os.path.dirname(os.path.abspath(__file__))
-WT = os.path.abspath(os.path.join(DL, "..", "..", "..", "..", "..", "..", ".."))
-ORDER_BASE = "f117aac140"
-PREFIX = "org/missions/D9/IRPT/IRPT_ANLREQ/"
+WT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "..", ".."))
 STAGE = "C:/dev/irpt-release-r31"
-STAGED = [
-    STAGE + "/irpt-resident-0485393f3a-r31.tar.gz",
-    STAGE + "/irpt-resident-0485393f3a-r31.package.SHA256SUMS",
-    STAGE + "/build_a",
-    STAGE + "/build_b",
-]
+FIRST = "171fa77f59"
+PREFIX = "org/missions/D9/IRPT/IRPT_ANLREQ/"
 
 
 def bad(why):
@@ -28,31 +24,51 @@ def bad(why):
 
 
 def git(*args):
-    proc = subprocess.run(["git", "-C", WT] + list(args), capture_output=True)
+    proc = subprocess.run(["git", "-C", WT] + list(args), capture_output=True, text=True, timeout=240)
     if proc.returncode != 0:
-        bad("git %s rc=%d" % (" ".join(args), proc.returncode))
-    return proc.stdout.decode("utf-8")
+        bad("git %s rc %d: %s" % (" ".join(args), proc.returncode, proc.stderr.strip()[:200]))
+    return proc.stdout
 
 
-first = git("rev-list", "--reverse", ORDER_BASE + "..HEAD").split()
-if not first:
-    bad("no commit of this worker after the order commit %s" % ORDER_BASE)
-base = git("rev-parse", first[0] + "^").strip()
-changed = [p for p in git("diff", "--name-only", base, "HEAD").split("\n") if p.strip()]
+base = git("rev-parse", FIRST + "^").strip()
+if len(base) != 40:
+    bad("base is not a sha: %r" % base)
+print("BASE parent of first commit %s = %s" % (FIRST, base))
+
+# (1) every path the branch changes since the base is under the deliverable folder, the channel or the order
+changed = [p for p in git("diff", "--name-only", base, "HEAD").split("\n") if p]
+print("DIFF names since base: %d" % len(changed))
 outside = [p for p in changed if not p.startswith(PREFIX)]
 if outside:
-    bad("committed paths outside %s: %s" % (PREFIX, outside[:5]))
-infra = git("status", "--porcelain", "--", "infra").strip()
+    bad("paths changed outside %s: %s" % (PREFIX, outside[:5]))
+
+# (2) the product tree shows nothing untracked or modified
+infra = [ln for ln in git("status", "--porcelain", "--", "infra").split("\n") if ln.strip()]
 if infra:
-    bad("product tree infra/ is not clean: %s" % infra[:200])
-for path in STAGED:
-    if not os.path.exists(path):
-        bad("staged artifact missing: %s" % path)
-    if os.path.commonpath([os.path.abspath(path).lower(), WT.lower()]) == WT.lower():
-        bad("staged artifact inside the repository: %s" % path)
-tracked = git("ls-files").split("\n")
-stray = [p for p in tracked if "irpt-resident-0485393f3a-r31" in p]
-if stray:
-    bad("a release-31 artifact is tracked in the repository: %s" % stray[:3])
-print("SCOPE-OK base %s, %d committed paths, all under %s; infra/ clean; %d staged artifacts outside the repository under %s/"
-      % (base[:12], len(changed), PREFIX, len(STAGED), STAGE))
+    bad("product tree infra/ is not clean: %s" % infra[:5])
+
+# (3) the staged artifacts live under the stage folder and none is inside the repository
+stage_abs = os.path.abspath(STAGE)
+if os.path.commonpath([os.path.abspath(WT), stage_abs]) == os.path.abspath(WT):
+    bad("the stage folder is inside the repository")
+tracked = [p for p in git("ls-files", "--", ":(glob)**/*irpt-resident-0485393f3a-r31*").split("\n") if p]
+untracked = [p for p in git("ls-files", "--others", "--exclude-standard", "--", ":(glob)**/*irpt-resident-0485393f3a-r31*").split("\n") if p]
+if tracked or untracked:
+    bad("release artifact names inside the repository: %s" % (tracked + untracked)[:5])
+scratch = os.path.join(WT, ".scratch")
+TAR = STAGE + "/irpt-resident-0485393f3a-r31.tar.gz"
+TAR_SIZE = os.path.getsize(TAR)
+TAR_SHA = hashlib.sha256(open(TAR, "rb").read()).hexdigest()
+hits = []
+if os.path.isdir(scratch):
+    for dp, _dn, fn in os.walk(scratch):
+        for f in fn:
+            full = os.path.join(dp, f)
+            if os.path.getsize(full) == TAR_SIZE and hashlib.sha256(open(full, "rb").read()).hexdigest() == TAR_SHA:
+                hits.append(os.path.relpath(full, WT))
+if hits:
+    bad("byte copies of the tarball under .scratch (gitignored, inside the repository): %s" % hits[:5])
+print("STAGE %s is outside the repository: OK" % stage_abs)
+
+print("SCOPE-OK base %s; %d changed path(s), all under %s; infra/ clean; artifacts under %s only"
+      % (base[:12], len(changed), PREFIX, STAGE))

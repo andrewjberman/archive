@@ -7,7 +7,7 @@ DL=/c/dev/wk-irpt-anlreq-144/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0
 I=$DL/install_r31.sh
 H=$DL/resident_host_install_0485393f3a-r31.sh
 SUMS=C:/dev/irpt-release-r31/irpt-resident-0485393f3a-r31.package.SHA256SUMS
-S=/c/dev/wk-irpt-anlreq-144/.scratch/gate_r31
+S=/c/dev/wk-irpt-anlreq-144/.scratch/gate_r31_p2
 rm -rf "$S"; mkdir -p "$S"
 cp "$H" "$S/host_ok.sh"; cp "$H" "$S/host_bad.sh"; cp "$H" "$S/host_bad_g2.sh"
 cp "$SUMS" "$S/sums_ok"; cp "$SUMS" "$S/sums_bad"

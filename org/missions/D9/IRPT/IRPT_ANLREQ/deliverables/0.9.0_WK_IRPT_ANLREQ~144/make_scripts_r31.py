@@ -15,7 +15,7 @@ import sys
 SRC, DST, X31, X29, TAR = sys.argv[1:6]
 SUMS = "SHA256SUMS"
 BINDINGS = "reports/resident_bindings.json"
-EXPECT_TAR = "cc6581ed3ff040046c04b202f110a2cb7dc679d79dafb1a6380c64a52c330db8"
+EXPECT_TAR = "22193944345ce2dd52d2b732ce0ac8d569aa2359958601686239b7e1da8e6021"
 EXPECT_LIB = "a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841"
 EXPECT_WRAP = "55ddb8f7947cba7cdca1b9139d4d0a1a3ad620e330c86ba3ab648d334763aff9"
 SRC_SHA = {
@@ -60,11 +60,11 @@ if set(n31) != set(n29):
 R31 = {n: sha_file(os.path.join(X31, *n.split("/"))) for n in n31}
 R29 = {n: sha_file(os.path.join(X29, *n.split("/"))) for n in n29}
 DIFF = [n for n in n31 if R31[n] != R29[n]]
-if len(DIFF) != 14:
-    refuse("differing members %d, want 14: %s" % (len(DIFF), DIFF))
+if len(DIFF) != 15:
+    refuse("differing members %d, want 15: %s" % (len(DIFF), DIFF))
 PKG = [n for n in DIFF if n not in (SUMS, BINDINGS)]
-if len(PKG) != 12:
-    refuse("package members differing %d, want 12" % len(PKG))
+if len(PKG) != 13:
+    refuse("package members differing %d, want 13" % len(PKG))
 TAR_SHA = sha_file(TAR)
 SUMS_SHA = R31[SUMS]
 SHIFT = re.compile(r"(?<![0-9A-Za-z])(r|release[- ])30(?![0-9])")
@@ -136,7 +136,7 @@ assert lines[0] == "set -uo pipefail", lines[0]
 body = split_header(host, "NEW=")
 HOST_HEADER = [
     "# Ledger irpt-resident-r31-20261014: resident root 0485393f3a-r29 -> 0485393f3a-r31 (the r29 member set with the trunk blobs of the",
-    "# twelve package members that the merged cells of AR-y-318, AR-y-319, AR-y-327, AR-y-330, AR-y-331, AR-y-333 and AR-y-336 change, the package sums and the",
+    "# thirteen package members that the merged cells of AR-y-318, AR-y-319, AR-y-327, AR-y-330, AR-y-331, AR-y-333 and AR-y-336 change, the package sums and the",
     "# bindings replaced; base pin 0485393f3a, package pin c4c2afe89639071f41242fc9f663cadaffa0ffd8), and the 0485393f3a-r29 root and its library stay on the host for rollback.",
     "# Copy of the r30 script with NEW, WANT_TAR, the member checks (one per differing member, equal to the extracted r31 tarball), the ledger and this header changed;",
     "# written by 0.9.0_WK_IRPT_ANLREQ~144 for 2.0.0_SA_COO~Y2 (TO-AR-y-338, build only); operator 0.7.0_AE_CloudOps~YC2. Authoring this script uploaded, installed and applied nothing.",
@@ -165,7 +165,7 @@ INS_HEADER = [
     "# back itself on a failed start), then read the running package back. Sent through Systems Manager by host_read.py. No vendor call.",
     "# Written under IRPT_ANLREQ.TO-AR-y-338 (worker 0.9.0_WK_IRPT_ANLREQ~144). NOT RUN: the applier 0.7.0_AE_CloudOps~YC2 runs it under a later order.",
     "# Derived from install_r30.sh (release 30) by the AR-y-301 method. Changed: NEW, WANT, WANTSUM; a guard before the fetch that refuses unless the running root is",
-    "# 0485393f3a-r29 (exit 34) and the unit carries no IRPT_ANALYSIS_READY_QUEUE_URL (exit 35); the release-31 member table (twelve members, each at its release-31 sha256);",
+    "# 0485393f3a-r29 (exit 34) and the unit carries no IRPT_ANALYSIS_READY_QUEUE_URL (exit 35); the release-31 member table (thirteen members, each at its release-31 sha256);",
     "# the expected producer list printed and read back; the imports of layout_overview and opal_producer. Every fetch, sha256 and refusal guard of install_r30.sh is kept with its exit code.",
 ]
 ibody = [ln for ln in ibody]
@@ -205,7 +205,7 @@ PRE_HEADER = [
     "# Ledger irpt-resident-r31-20261014, leg P1 (READ ONLY): the host state before the r31 install (expect the r29 root running, the library and wrapper unmoved, the r31 root absent). No write, no vendor call.",
     "# Written under IRPT_ANLREQ.TO-AR-y-338 (worker 0.9.0_WK_IRPT_ANLREQ~144). NOT RUN: the applier 0.7.0_AE_CloudOps~YC2 runs it under a later order.",
     "# Derived from pre_read_r30.sh by the AR-y-301 method, shifted to release 31. Changed: the fail-closed running-root read (STOP-READ-0, exit 40), the release-31 member read-back",
-    "# (the twelve members the release changes, each at its release-29 sha256), the worker read-back (release 29), the receipt ledger (r29), and the release-31 wording of the stop-reads.",
+    "# (the thirteen members the release changes, each at its release-29 sha256), the worker read-back (release 29), the receipt ledger (r29), and the release-31 wording of the stop-reads.",
 ]
 ptext = "\n".join(plines)
 ptext = rep(ptext, "RUN=$(systemctl show $UNIT -p ExecStart | grep -o \"$R/[0-9a-z-]*\" | head -1)",
@@ -233,7 +233,7 @@ RB_HEADER = [
     "# Ledger irpt-resident-r31-20261014, leg X1 (NOT run unless the issuer orders it): put the resident back on the r29 root. The library bytes are the same before and after",
     "# release 31 (a1c288, reinstalled by the r31 install from the package), so no library step is needed beyond the refusal check.",
     "# Written under IRPT_ANLREQ.TO-AR-y-338 (worker 0.9.0_WK_IRPT_ANLREQ~144). NOT RUN: the applier 0.7.0_AE_CloudOps~YC2 runs it only if the issuer orders it.",
-    "# Derived from rollback_r30.sh by the AR-y-301 method. Changed: NEW, the reader read-back (the twelve members the release changes, each at its release-29 sha256, the values the",
+    "# Derived from rollback_r30.sh by the AR-y-301 method. Changed: NEW, the reader read-back (the thirteen members the release changes, each at its release-29 sha256, the values the",
     "# rollback target must hold), and the wording. Every refusal guard of rollback_r30.sh is kept with its exit code.",
 ]
 rtext = "\n".join(rlines)
