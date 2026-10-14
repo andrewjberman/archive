@@ -41,7 +41,7 @@
     STAGED. The GO is an AMENDMENT to this order citing the signed pair, written by the issuer. Then, in order:
     1. STEP 0: open the NEVER-2 ledger entry (`deploy_ledger.py open`, leg per step below) and keep it open until the read-backs pass.
     2. STEP 1: build the package from `built_from_sha`; print its member list and sha256; compare with the live package; the members that differ must be exactly the ticket Lambda's source.
-    3. STEP 2: confirm the laptop's bucket policy and CORS exist (read-only `get-bucket-policy`, `get-bucket-cors` on EACH of the three firm buckets of `ATTACH_ADDRESS.json`); any one absent: STOP.
+    3. STEP 2: confirm the laptop's bucket policy and CORS exist (read-only `get-bucket-policy`, `get-bucket-cors` on EACH of the three firm buckets of `ATTACH_ADDRESS.json`); any one absent: STOP. Read the statements' PREFIX too: it must be `portal/<firm>/state/ticket_attachments/trade-form/` (snake_case); a bucket policy built from the earlier kebab-case rows (`ticket-attachments`, which existed for a short window in exemptions.json on box/dell1) is a STOP, whatever else reads correct.
     4. STEP 3: `safe-apply` plan only; print the plan summary; it must equal the pair's expected plan exactly or STOP.
     5. STEP 4: apply under `safe-apply`, upload the package as the pair says, wait for the function to be `Active`/`Successful`.
     6. STEP 5: read back; run the issuer's check (the criterion). Close the ledger entry only after it prints REL-OK.
