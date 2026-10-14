@@ -100,17 +100,25 @@ def write_hits(src):
 
 
 # ---------------------------------------------------------------- THE METHOD, independently of the worker's module
-def expected(rows, membership, flows=True, missing_as_zero=False):
-    """the household daily return: for a household and a date t with previous date p (the previous date the household has any row), S = accounts with a row on BOTH p and t;
-    r = (sum V_t over S - sum F_t over S) / (sum V_p over S) - 1. First date: NO_PRIOR_VALUE. An account with a row on p and none on t: ACCOUNT_MISSING, r None.
-    An account with a row on t and none on p joins that day (outside S). r None (NO_PRIOR_VALUE) when sum V_p over S <= 0 or S is empty.
-    market_value_eod, external_flow and accounts_n are over ALL of the household's accounts with a row on t."""
+def _group(rows, membership):
     by = {}
     for r in rows:
         h = membership.get(r["account_id"])
         if h is None:
             continue
         by.setdefault(h, {}).setdefault(r["business_date"], {})[r["account_id"]] = r
+    return by
+
+
+def expected(rows, membership, weighted=True, missing_as_zero=False):
+    """THE METHOD (amended on worker row W179-S1): the household daily return is the prior-day-value WEIGHTED combination of its accounts' own total_return_daily.
+    For a household and a date t with previous date p (the previous date the household has any row), S = accounts with a row on BOTH p and t:
+    r = sum over S of V_p(a) * r_t(a) / sum over S of V_p(a), r_t(a) the account's own total_return_daily on t (so an account's linked return on a carried or large-flow day is used as it is).
+    First date: NO_PRIOR_VALUE. An account with a row on p and none on t, or an account of S whose total_return_daily is None: ACCOUNT_MISSING, r None.
+    An account with a row on t and none on p joins that day (outside S). r None (NO_PRIOR_VALUE) when sum V_p over S <= 0 or S is empty.
+    Where every account's return is the endpoint form (V_t - F_t) / V_p - 1 this equals (sum V_t - sum F_t) / sum V_p - 1 over S, the summed values and flows form.
+    market_value_eod, external_flow and accounts_n are over ALL of the household's accounts with a row on t."""
+    by = _group(rows, membership)
     out = []
     for h in sorted(by):
         dates = sorted(by[h])
@@ -123,31 +131,59 @@ def expected(rows, membership, flows=True, missing_as_zero=False):
                 prev = by[h][dates[i - 1]]
                 missing = [a for a in prev if a not in cur]
                 s = [a for a in prev if a in cur]
-                if missing and not missing_as_zero:
+                unmeasured = [a for a in s if cur[a].get("total_return_daily") is None]
+                if (missing and not missing_as_zero) or unmeasured:
                     q = "ACCOUNT_MISSING"
                 else:
-                    vp = sum(prev[a]["market_value_eod"] for a in prev if (a in s or missing_as_zero))
-                    vt = sum(cur[a]["market_value_eod"] for a in s)
-                    ft = sum(cur[a]["external_flow"] for a in s) if flows else 0.0
-                    if s and vp > 0:
-                        ret, q = (vt - ft) / vp - 1.0, "MEASURED"
+                    use = list(prev) if missing_as_zero else s
+                    rets = {a: (cur[a]["total_return_daily"] if a in cur else -1.0) for a in use}
+                    wts = {a: prev[a]["market_value_eod"] if weighted else 1.0 for a in use}
+                    base = sum(prev[a]["market_value_eod"] for a in use)
+                    if use and base > 0 and sum(wts.values()) > 0:
+                        ret, q = sum(wts[a] * rets[a] for a in use) / sum(wts.values()), "MEASURED"
             out.append({"household_id": h, "business_date": t, "market_value_eod": v_all, "external_flow": f_all, "total_return_daily": ret, "accounts_n": len(cur), "day_quality": q})
     return out
 
 
-def synthetic():
-    """one two-account household H1 (A from D1; B joins D3; a deposit into A on D4; B has no row on D5, returns D6) and a one-account household H2 (C)."""
-    d = ["2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12"]
-    rows = []
+def expected_endpoint(rows, membership):
+    """the ENDPOINT form that the first cut used (summed values and flows over S): (sum V_t - sum F_t) / sum V_p - 1. CONTROL ONLY: on a day where an account's own return is not the
+    endpoint form (a carried day linked through custodian valuations) it disagrees with the account, so a one-account household would not equal its account."""
+    by = _group(rows, membership)
+    out = []
+    for h in sorted(by):
+        dates = sorted(by[h])
+        for i, t in enumerate(dates):
+            cur = by[h][t]
+            ret = None
+            if i > 0:
+                prev = by[h][dates[i - 1]]
+                s = [a for a in prev if a in cur]
+                vp = sum(prev[a]["market_value_eod"] for a in s)
+                if s and vp > 0 and not [a for a in prev if a not in cur]:
+                    ret = (sum(cur[a]["market_value_eod"] for a in s) - sum(cur[a]["external_flow"] for a in s)) / vp - 1.0
+            out.append({"household_id": h, "business_date": t, "total_return_daily": ret})
+    return out
 
-    def add(a, i, v, f=0.0):
-        rows.append({"account_id": a, "business_date": d[i], "market_value_eod": v, "external_flow": f})
-    for i, v in enumerate([1000.0, 1010.0, 1020.0, 2040.0, 2060.0, 2070.0]):
-        add("A", i, v, 1000.0 if i == 3 else 0.0)
-    for i, v in ((2, 500.0), (3, 505.0), (5, 520.0)):
-        add("B", i, v)
-    for i, v in enumerate([300.0, 297.0, 303.0, 306.0, 309.0, 303.0]):
-        add("C", i, v, 0.0)
+
+def synthetic():
+    """one two-account household H1 (A from D1; B joins D3; a deposit into A on D4; B has no row on D5, returns D6) and a one-account household H2 (C) whose return on D4 is a
+    LINKED return (0.02) that the endpoint form would not give. Each row carries the account's own total_return_daily (the endpoint form, None on an account's first row or after a gap)."""
+    d = ["2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12"]
+    seq = {"A": [(i, v, 1000.0 if i == 3 else 0.0) for i, v in enumerate([1000.0, 1010.0, 1020.0, 2040.0, 2060.0, 2070.0])],
+           "B": [(2, 500.0, 0.0), (3, 505.0, 0.0), (5, 520.0, 0.0)],
+           "C": [(i, v, 0.0) for i, v in enumerate([300.0, 297.0, 303.0, 306.0, 309.0, 303.0])]}
+    override = {("C", 3): 0.02}
+    rows = []
+    for a, items in seq.items():
+        prev = None
+        for i, v, f in items:
+            r = None
+            if prev is not None and prev[0] == i - 1:
+                r = (v - f) / prev[1] - 1.0
+            if (a, i) in override:
+                r = override[(a, i)]
+            rows.append({"account_id": a, "business_date": d[i], "market_value_eod": v, "external_flow": f, "total_return_daily": r})
+            prev = (i, v)
     return rows, {"A": "H1", "B": "H1", "C": "H2"}
 
 
@@ -180,7 +216,7 @@ def check_contract(root):
     need(nes(c.get("schema_hash_basis")) and "sorted" in c["schema_hash_basis"], "schema_hash_basis must state the sorted name:type rule")
     need(c.get("schema_hash") == schema_hash(COLUMNS), "schema_hash must equal the recomputed hash %s" % schema_hash(COLUMNS))
     m = str(c.get("method") or "")
-    need("ACCOUNT_MISSING" in m and "NO_PRIOR_VALUE" in m and "external" in m.lower() and "joins" in m.lower(), "the contract's method must state the rule in words (ACCOUNT_MISSING, NO_PRIOR_VALUE, external flows, an account that joins)")
+    need("ACCOUNT_MISSING" in m and "NO_PRIOR_VALUE" in m and "weight" in m.lower() and "total_return_daily" in m and "joins" in m.lower(), "the contract's method must state the rule in words (the prior-day-value weighted combination of the accounts' own total_return_daily, ACCOUNT_MISSING, NO_PRIOR_VALUE, an account that joins)")
     need(str(c.get("firm_specific_columns", "")).startswith("NONE"), "firm_specific_columns must read NONE: no firm code survives into this table")
     return c
 
@@ -206,17 +242,18 @@ def check_module(root):
     got = mod.compute_household_returns(json.loads(json.dumps(rows)), dict(mem))
     diff = same_rows(got, expected(rows, mem))
     need(diff is None, "compute_household_returns disagrees with the checker's own computation on the synthetic week: %s" % diff)
-    need(same_rows(got, expected(rows, mem, flows=False)) is not None, "CONTROL: a computation that ignores external flows agrees with the module on the synthetic week (the arm does not exercise the deposit)")
-    need(same_rows(got, expected(rows, mem, missing_as_zero=True)) is not None, "CONTROL: a computation that treats a missing account as zero agrees with the module (the arm does not exercise the missing day)")
+    need(same_rows(got, expected(rows, mem, weighted=False)) is not None, "CONTROL: an unweighted mean of the accounts' returns agrees with the module on the synthetic week (the arm does not exercise two accounts of different size)")
+    need(same_rows(got, expected(rows, mem, missing_as_zero=True)) is not None, "CONTROL: a computation that treats a missing account as a total loss agrees with the module (the arm does not exercise the missing day)")
     by = {(r["household_id"], r["business_date"]): r for r in got}
+    ep = {(r["household_id"], r["business_date"]): r["total_return_daily"] for r in expected_endpoint(rows, mem)}
+    need(ep[("H2", "2026-01-08")] is not None and abs(ep[("H2", "2026-01-08")] - 0.02) > 1e-6, "CONTROL: the endpoint form agrees with the account's linked return on the synthetic carried day (the arm does not exercise it)")
     own = {}
     for r in rows:
         if r["account_id"] == "C":
             own[r["business_date"]] = r
     ds = sorted(own)
-    for a, b in zip(ds, ds[1:]):
-        want = (own[b]["market_value_eod"] - own[b]["external_flow"]) / own[a]["market_value_eod"] - 1.0
-        need(abs(by[("H2", b)]["total_return_daily"] - want) <= EPS, "a one-account household must equal its account's own daily return")
+    for b_ in ds[1:]:
+        need(abs(by[("H2", b_)]["total_return_daily"] - own[b_]["total_return_daily"]) <= EPS, "a one-account household must equal its account's own daily return (including its linked day)")
     q = {(r["household_id"], r["business_date"]): r["day_quality"] for r in got}
     need(q[("H1", "2026-01-09")] == "ACCOUNT_MISSING" and by[("H1", "2026-01-09")]["total_return_daily"] is None, "an account with a row on the previous date and none on the day makes the day ACCOUNT_MISSING and its return None, never zero")
     need(q[("H1", "2026-01-05")] == "NO_PRIOR_VALUE", "a household's first date is NO_PRIOR_VALUE")
@@ -326,7 +363,11 @@ def selftest():
     ok("a missing account makes the day ACCOUNT_MISSING and None", by[("H1", "2026-01-09")]["day_quality"] == "ACCOUNT_MISSING" and by[("H1", "2026-01-09")]["total_return_daily"] is None)
     ok("an account that returns after a gap is outside S on its return day", abs(by[("H1", "2026-01-12")]["total_return_daily"] - (2070.0 / 2060.0 - 1.0)) < EPS)
     ok("a one-account household equals its account", abs(by[("H2", "2026-01-06")]["total_return_daily"] - (297.0 / 300.0 - 1.0)) < EPS)
-    ok("the ignore-flows mutant disagrees", same_rows(e, expected(rows, mem, flows=False)) is not None)
+    ok("a one-account household equals its account on a linked day", abs(by[("H2", "2026-01-08")]["total_return_daily"] - 0.02) < EPS)
+    ok("the endpoint form disagrees on the linked day", abs({(x["household_id"], x["business_date"]): x["total_return_daily"] for x in expected_endpoint(rows, mem)}[("H2", "2026-01-08")] - 0.02) > 1e-6)
+    nulled = [dict(r, total_return_daily=None) if (r["account_id"] == "C" and r["business_date"] == "2026-01-07") else r for r in rows]
+    ok("a null account return makes the day ACCOUNT_MISSING", [x for x in expected(nulled, mem) if x["household_id"] == "H2" and x["business_date"] == "2026-01-07"][0]["day_quality"] == "ACCOUNT_MISSING")
+    ok("the unweighted mean mutant disagrees", same_rows(e, expected(rows, mem, weighted=False)) is not None)
     ok("the missing-as-zero mutant disagrees", same_rows(e, expected(rows, mem, missing_as_zero=True)) is not None)
     ok("same_rows is quiet on equal rows", same_rows(e, json.loads(json.dumps(e))) is None)
     ok("schema hash is stable", schema_hash(COLUMNS) == schema_hash(list(reversed(COLUMNS))))
