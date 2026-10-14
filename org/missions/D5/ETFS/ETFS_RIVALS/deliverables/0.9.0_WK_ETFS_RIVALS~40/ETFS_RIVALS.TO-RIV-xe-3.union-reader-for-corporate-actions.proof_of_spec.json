@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-xe-3.union-reader-for-corporate-actions",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "9a1ce314dc",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xe-3.union-reader-for-corporate-actions.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xe-3.union-reader-for-corporate-actions.md",
+    "group": "OTHER",
+    "vintage_commit": "9a1ce314dc"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~40",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "8c5339255f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local cell (LOCAL class); no deploy in this order. The Lambda deploy goes under its own pair after the issuer's live-store DELTA = 0 arm.",
+      "introduces": ["ps._voids(s)"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_xe3_union_reader.py",
+      "kind": "test",
+      "commit_or_etag": "9e2cfe4557",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local test file; no deploy in this order.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~40/RIV-xe-3.session.log",
+      "kind": "doc",
+      "commit_or_etag": "9e2cfe4557",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker session log; no deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- short incremental pull keeps every older action. Check: xe3_union_reader_check.py -k ac1 (the short pull keeps the older actions; the old rule kept only the short pull's row).",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py -k ac1",
+      "output_evidence": "1 passed, 4 deselected in 0.53s (rc=0; colour codes stripped; check at e9a637d4c9, worker build 8c5339255f)",
+      "denominator": "1 passed of 1 selected by -k ac1 (5 collected in the check file)",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the same action in two pulls appears once, with the latest pull's values. Check: xe3_union_reader_check.py -k ac2 (one key, two pulls: one row, the latest pull's values; two distinct raw types stay two rows).",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py -k ac2",
+      "output_evidence": "1 passed, 4 deselected in 0.51s (rc=0; colour codes stripped; check at e9a637d4c9, worker build 8c5339255f)",
+      "denominator": "1 passed of 1 selected by -k ac2 (5 collected in the check file)",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- status rows follow the old rule, a full-snapshot store reads as before, an empty store returns the old triple. Check: xe3_union_reader_check.py -k ac3 (two tests: the status and full-snapshot scenario; the empty-store control).",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py -k ac3",
+      "output_evidence": "2 passed, 3 deselected in 0.55s (rc=0; colour codes stripped; check at e9a637d4c9, worker build 8c5339255f)",
+      "denominator": "2 passed of 2 selected by -k ac3 (5 collected in the check file)",
+      "status": "PASS",
+      "expect": "2 passed"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 -- a void object is not an action row and a voided action does not come back (AMENDMENT 1, row ETFS_RIVALS-D1-W40-S1: a void object's rows are not returned, and the (void_revision, normalised security_id) pairs of every void object drop the event rows they name, before the union). Check: xe3_union_reader_check.py -k ac4 (the void names the stored spelling 'A US Equity', per the issuer's correction at e9a637d4c9; row W40-S3).",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py -k ac4",
+      "output_evidence": "1 passed, 4 deselected in 0.51s (rc=0; colour codes stripped). Repeat runs: 1 passed, 4 deselected in 0.50s and 0.71s. The void drops the two 'A US Equity' event rows of pull 'full'; the short-pull row and B's row stay; the void object contributes no row.",
+      "denominator": "1 passed of 1 selected by -k ac4 (5 collected in the check file)",
+      "status": "PASS",
+      "expect": "1 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check run against the base reader (HEAD 9a1ce314dc load_actions, the latest-pull rule for every row) must FIRE: the planted-store scenarios that pin the union must fail.",
+      "expected": "ac1, ac2 and the ac3 status scenario FAIL at the base; the empty-store control PASSes at the base",
+      "observed": "3 failed, 1 passed in 1.71s (rc=1), whole check file, before the edit: ac1 assert [('cash_div', '2026-09-25')] vs the three-row union; ac2 [('Regular Cash', 2.0, 'late')] short by the Special Cash row; ac3 status row D and E superseded; the empty-store test passed. On the corrected check at e9a637d4c9 the issuer records base 4 failed, 1 passed (not re-measured in this worker lane).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each -k invocation compared in the same session",
+      "observed": "ac1 runs: 1 passed, 4 deselected (0.68s, 0.53s); ac2: 1 passed, 4 deselected (0.62s, 0.51s); ac3: 2 passed, 3 deselected (0.59s, 0.55s); ac4: 1 passed, 4 deselected (0.50s, 0.71s); the same outcome on every rerun",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live-store arm: the new reader's G5 output equals today's (DELTA = 0, read-only, before any deploy)",
+      "reason": "The issuer's drain act per the order's section 1 and section 3 (no S3 read in a worker lane)."
+    },
+    {
+      "item": "The Lambda deploy and any gateway release or Terraform",
+      "reason": "Out of this order; the deploy goes under its own pair (J1 none for this LOCAL cell)."
+    },
+    {
+      "item": "A case-folded void match",
+      "reason": "Ruled out by the issuer (row ETFS_RIVALS-D1-W40-S3): price_series._norm_key stays case-sensitive; no case-folding in either reader."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-D1-W40-S1: the union reader resurrected a voided action; AMENDMENT 1 (d8ae1862ca) makes load_actions honour the void records as price_series does (ARMED, disarm owner 2.0.0_SA_COO~V1).",
+    "ETFS_RIVALS-D1-W40-S2: the cell gives no rule for a row_kind other than event or status; the worker applied the old latest-pull rule to every non-event row (accepted as built by AMENDMENT 1).",
+    "ETFS_RIVALS-D1-W40-S3: AC4's void spelling 'a us equity' was the issuer's error; ruled by the coordinator, the check is corrected at e9a637d4c9 to the stored spelling 'A US Equity', and no case-folding is added (BLOCKING row; disposition left to the issuer)."
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~40/RIV-xe-3.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (the check file, literal order invocations, AC1-AC4)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py -k ac1 (and -k ac2, -k ac3, -k ac4)",
+      "result": "1 passed, 1 passed, 2 passed, 1 passed (AC1, AC2, AC3, AC4); base before the first edit: 3 failed, 1 passed"
+    },
+    {
+      "tool": "pytest (the readers' neighbours)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_g52_trade_schedule_v2.py rivalfunds/tests/test_r10rp2_g5_code_replay.py rivalfunds/tests/test_r9gd1_g5_drift.py",
+      "result": "43 passed in 5.95s (rc=0)"
+    },
+    {
+      "tool": "pytest (the cell's own test file)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_riv_xe3_union_reader.py",
+      "result": "5 passed in 0.60s (rc=0)"
+    },
+    {
+      "tool": "pytest (the whole rivalfunds package suite, regression)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests",
+      "result": "1037 passed, 6 skipped in 74.17s (rc=0)"
+    }
+  ]
+}

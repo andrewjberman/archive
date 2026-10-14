@@ -1,0 +1,207 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-j-12",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-12.assistant-keeps-mention-and-mail-records.md",
+  "group": "OTHER",
+  "vintage_commit": "4b23bc3cce"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+  "vintage_commit": "4b23bc3cce",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-12.assistant-keeps-mention-and-mail-records.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~24",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/folder_records.py",
+   "kind": "script",
+   "commit_or_etag": "5041e19001",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New module, standard library only. snippet(text, limit=120) strips tags (entity-encoded too), removes https?://\\S+, \\S+@\\S+ and runs of 20 or more characters from [A-Za-z0-9+/_=-], collapses whitespace and cuts to limit. prune(rows, stamp, now, cap) keeps rows whose stamp is within 7 days of now (unreadable stamps dropped), oldest first, newest cap only. No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj12-AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/channel_mentions.py",
+   "kind": "script",
+   "commit_or_etag": "5041e19001",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Import of folder_records as fr; MENTIONS_KEY = 'mentions', MENTIONS_CAP = 50; new _keep_mention(ctx, p, m) writes {id, team, channel, from, snippet, mentioned_at, seen_at} once per id, pruned on write; on_channel_mention calls _keep_mention after ctx.once, so the record is written only where the text is sent (paused path returns before). The text, the once key and the return value are unchanged. No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj12-AC1",
+    "CAj12-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/mail_requests.py",
+   "kind": "script",
+   "commit_or_etag": "5041e19001",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Import of folder_records as fr; MAIL_LOG_KEY = 'mail_log', MAIL_LOG_CAP = 10; new _log_mail(ctx, pending, who, addr, subject) appends {seq, tag, considered_at, from, domain, firm, subject} and prunes on write; on_mail_messages calls it on the line directly after ctx.state['pending'] = pending. pending, draft_seq, the text and the counts are unchanged. No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj12-AC1",
+    "CAj12-AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_folder_records.py",
+   "kind": "test",
+   "commit_or_etag": "5041e19001",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New: twelve arms for the helper (tags, links, addresses, tokens and the 19/20 boundary, entity-encoded tags, the 120 cut, the 7-day boundary, the cap of newest 50 oldest first, unreadable stamps, zero cap, naive now). Runs under pytest and as a script. Measured at HEAD 5041e19001: FOLDER-RECORDS ok=True arms=12/12.",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
+   "kind": "test",
+   "commit_or_etag": "5041e19001",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The handler Ctx gained a state dict and now() returning T0 (the handler arm passes unchanged). The original ARMS list (seven arms) is unchanged. A second list RECORD_ARMS (four arms: record_once, record_two_mentions, record_retry_adds_none, record_paused_writes_none) prints on its own line CHANNEL-MENTIONS-RECORD. Measured at HEAD 5041e19001: CHANNEL-MENTIONS ok=True arms=7/7; CHANNEL-MENTIONS-RECORD ok=True arms=4/4.",
+   "artifact_covered_by": [
+    "CAj12-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_inbound_mail_draft.py",
+   "kind": "test",
+   "commit_or_etag": "5041e19001",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Five mail-log arms added to ARMS (mail_log_record, mail_log_two_rows, mail_log_not_considered, mail_log_expiry_cap, mail_log_no_body_no_address). No existing arm changed. Measured at HEAD 5041e19001: MAIL-DRAFT ok=False arms=11/12; the one failing arm, client_no_request, failed the same way at the base 4b23bc3cce (filed as COMM_ASSIST-W24-S1).",
+   "artifact_covered_by": [
+    "CAj12-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAj12-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_k1_records.py\" expect: K1-RECORDS ok=True arms=8 of 8 (base reads 1 of 8)",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_k1_records.py\"",
+   "output_evidence": "(run from the worktree root at HEAD 5041e19001, rc 0) K1-RECORDS ok=True arms=8 of 8 failed=none reason=none. Base 4b23bc3cce, before this order's edits (rc 0): K1-RECORDS ok=False arms=1 of 8 failed=mention-record;mention-retry-once(KeyError: 'mentions');mention-expiry-cap;mail-record;mail-two-rows;mail-expiry-cap;mail-no-body-no-address(KeyError: 'mail_log') reason=none.",
+   "denominator": "8 of 8 arms pass: mention-record, mention-retry-once, mention-expiry-cap, mention-paused-writes-nothing, mail-record, mail-two-rows, mail-expiry-cap, mail-no-body-no-address",
+   "expect": "K1-RECORDS ok=True arms=8 of 8",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAj12-AC2",
+   "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py expect: CHANNEL-MENTIONS ok=True arms=7/7",
+   "method": "command",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
+   "output_evidence": "(run from the worktree root at HEAD 5041e19001, rc 0) ARM post_mention..handler all ok=True; CHANNEL-MENTIONS ok=True arms=7/7 (the seven original arms, ARMS list unchanged); then CHANNEL-MENTIONS-RECORD ok=True arms=4/4 on its own line (the record arms, a second list, reported as a separate line so the seven-arm line is exactly as the criterion reads). Base 4b23bc3cce before the edits: CHANNEL-MENTIONS ok=True arms=7/7.",
+   "denominator": "7 of 7 original arms pass (post_mention, reply_mention, not_him, once, first_run, budget, handler); separate list: 4 of 4 record arms pass",
+   "expect": "CHANNEL-MENTIONS ok=True arms=7/7",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAj12-AC3",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "output_evidence": "(run from the worktree root at HEAD 5041e19001, rc 0) I2-REGRESSION ok=True passed=64 failed=0 reason=none. Base 4b23bc3cce: I2-REGRESSION ok=True passed=64 failed=0 reason=none.",
+   "denominator": "64 of 64 in the flow tests the invocation runs (test_teams_chat_tenant.py scope)",
+   "expect": "I2-REGRESSION ok=True",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "CAj12-AC1 run against the base 4b23bc3cce, before this order's edits (the first run in the worktree)",
+   "expected": "K1-RECORDS ok=False (the check prints ok=False at the base; base reads 1 of 8)",
+   "observed": "K1-RECORDS ok=False arms=1 of 8 failed=mention-record;mention-retry-once;mention-expiry-cap;mail-record;mail-two-rows;mail-expiry-cap;mail-no-body-no-address reason=none",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "CAj12-AC1 run twice on commit 5041e19001; the K1-RECORDS lines compared",
+   "observed": "two runs identical: K1-RECORDS ok=True arms=8 of 8 failed=none reason=none (rc 0 both)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "deploy, AWS calls, network",
+   "reason": "the order says the change is code and tests only and is deployed by a later cell; no AWS call and no network call was made"
+  },
+  {
+   "item": "the issuer's two checks",
+   "reason": "the order says read them and do not edit them; neither was edited"
+  },
+  {
+   "item": "the negative control that keeps links in the snippet",
+   "reason": "not run by this worker; the links and tokens are covered by the check's mention-record arm and by test_folder_records.py"
+  },
+  {
+   "item": "test_inbound_mail.py",
+   "reason": "outside the order's paths and not edited; it prints INBOUND-MAIL-TEST ok=False cases=11/15 both at the base and after the edits (filed as COMM_ASSIST-W24-S2)"
+  }
+ ],
+ "surprises": [
+  "COMM_ASSIST-W24-S1: arm client_no_request of test_inbound_mail_draft.py fails at the base 4b23bc3cce on a stale end-of-text assertion; not changed by this order. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "COMM_ASSIST-W24-S2: test_inbound_mail.py is 11 of 15 at the base, outside the order's paths, unchanged by this order. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "COMM_ASSIST-W24-S3: the pytest set run (562 passed) does not collect the plain-script mail files, so its total does not cover their results. OBSERVATION, INERT, UNDER_INVESTIGATION."
+ ],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~24/COMM_ASSIST.TO-CA-j-12.assistant-keeps-mention-and-mail-records.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_k1_records.py\"",
+   "result": "K1-RECORDS ok=True arms=8 of 8 failed=none reason=none (base 4b23bc3cce: ok=False arms=1 of 8)"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "result": "I2-REGRESSION ok=True passed=64 failed=0 reason=none"
+  },
+  {
+   "tool": "script (mention file)",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
+   "result": "CHANNEL-MENTIONS ok=True arms=7/7; CHANNEL-MENTIONS-RECORD ok=True arms=4/4; rc 0"
+  },
+  {
+   "tool": "script (folder records file)",
+   "invocation": "python data/transcripts/scripts/tests/test_folder_records.py",
+   "result": "FOLDER-RECORDS ok=True arms=12/12; rc 0"
+  },
+  {
+   "tool": "script (mail draft file)",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_draft.py",
+   "result": "MAIL-DRAFT ok=False arms=11/12 (client_no_request fails at the base too, S1); rc 1"
+  },
+  {
+   "tool": "script (silent paths file)",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_silent_paths.py",
+   "result": "SILENT-PATHS ok=True arms=9/9 base_texts_second_draft=1; rc 0"
+  },
+  {
+   "tool": "script (mail reply file)",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_reply.py",
+   "result": "INBOUND-MAIL-REPLY-TEST ok=True cases=15/15; rc 0"
+  },
+  {
+   "tool": "script (mail poll file)",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_poll.py",
+   "result": "MAIL-POLL ok=True arms=8/8; rc 0"
+  },
+  {
+   "tool": "script (mail file)",
+   "invocation": "python data/transcripts/scripts/tests/test_inbound_mail.py",
+   "result": "INBOUND-MAIL-TEST ok=False cases=11/15 model_calls_on_failed=0; rc 1 (the same at the base 4b23bc3cce; S2)"
+  },
+  {
+   "tool": "pytest (whole set)",
+   "invocation": "python -m pytest data/transcripts/scripts/tests -q -p no:cacheprovider",
+   "result": "562 passed in 96.12s, rc 0; 0 failed (the plain-script files are not collected; S3)"
+  },
+  {
+   "tool": "commit gate",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_COMM_ASSIST~24 <0.9.0_WK_COMM_ASSIST~24@opal.agent>\" -F .scratch/msg_caj12_code.txt -- data/transcripts/scripts/teams_chat/folder_records.py data/transcripts/scripts/teams_chat/channel_mentions.py data/transcripts/scripts/teams_chat/mail_requests.py data/transcripts/scripts/tests/test_folder_records.py data/transcripts/scripts/tests/test_inbound_channel_mentions.py data/transcripts/scripts/tests/test_inbound_mail_draft.py",
+   "result": "first attempt refused by ruff F841 in test_inbound_mail_draft.py (an unused w); fixed; second attempt rc 0; commit 5041e19001; surprise-row and pipeline gates OK; client account-id list ABSENT on this box (WARN, a known box-level condition)"
+  }
+ ]
+}
