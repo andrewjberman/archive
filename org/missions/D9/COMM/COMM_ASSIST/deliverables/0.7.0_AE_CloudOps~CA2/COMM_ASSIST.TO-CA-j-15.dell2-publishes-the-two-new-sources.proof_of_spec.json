@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-j-15",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~CA2",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/prd/COMM_ASSIST_PRD.md",
+    "group": "C",
+    "vintage_commit": "78de9ee50f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+    "vintage_commit": "72a77819d8",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-15.dell2-publishes-the-two-new-sources.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/r18/ac1_before.txt",
+      "kind": "doc",
+      "commit_or_etag": "ba5549890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 2, the folder BEFORE the seat started the task: 'K4-FOLDER ok=True arms=6 of 6 failed=none sources=6 mentions=absent mail_log=absent run_age_min=13 files=10'. The order expected ok=False; it read True because the scheduled 15-minute run at 15:41:24Z (11:41:24 local) had already run the new reader code (the checkout held 0ea947e32d, git merge-base --is-ancestor rc=0, HEAD 48f9bc8064 at read). Saved with statuses_before.txt."
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/r18/statuses_before.txt",
+      "kind": "doc",
+      "commit_or_etag": "ba5549890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Status words only, from INDEX.json run_at 2026-10-14T15:41:24Z: drafts=ok eod_today=absent mail_log=absent mentions=absent open_calls=ok sprint_today=absent. The four old sources: drafts ok, open_calls ok, eod_today absent, sprint_today absent."
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/r18/start_time.txt",
+      "kind": "doc",
+      "commit_or_etag": "ba5549890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 3: Start-ScheduledTask -TaskName MuseReaderRefresh run once at 2026-10-14T11:54:57-04:00. Before: LastRunTime 11:41:24, LastTaskResult 0. After the wait loop: state Ready, LastRunTime 11:54:58 (newer than the start), LastTaskResult 0. No task, variable, file in the checkout or setting was changed."
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/r18/statuses_after.txt",
+      "kind": "doc",
+      "commit_or_etag": "ba5549890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Status words only, INDEX.json run_at 2026-10-14T15:54:58Z: drafts=ok eod_today=absent mail_log=absent mentions=absent open_calls=ok sprint_today=absent. Identical to before; no source that read ok became unreadable."
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/r18/folder_names_after.txt",
+      "kind": "doc",
+      "commit_or_etag": "ba5549890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Folder %USERPROFILE%\\muse-reader file NAMES after the run: INDEX.json, README.txt, answers/ (a directory, 3 entries, not read), drafts.json, eod_today.json, mail_log.json, mentions.json, open_calls.json, sprint_today.json. No item text from any file is recorded."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAj15-AC1",
+      "criterion_verbatim": "the issuer's folder check (read it; do not edit it), run ON dell2 from the repository root after step 3: INDEX.json lists exactly six sources including mentions and mail_log; both files exist as valid envelopes with status ok or absent (an absent source has null items; unreadable fails); the folder was written within the last 20 minutes; an ok source's items have exactly the contracted keys; README.txt names both files; and no address, key or token shaped string appears in ANY file of the folder (FWD-11). It reads ok=False before the new code has run.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_k4_folder.py\"",
+      "output_evidence": "K4-FOLDER ok=True arms=6 of 6 failed=none sources=6 mentions=absent mail_log=absent run_age_min=1 files=10 reason=none, run on dell2 from the repository root at ~11:55 local, one minute after the seat's own task start. Saved: r18/ac1_after.txt.",
+      "denominator": "6 of 6 arms the check prints, 6 of 6 sources in INDEX.json, 10 files counted by the check. The BASE read (r18/ac1_before.txt, 13 minutes after the previous scheduled run) was ALSO ok=True, not the ok=False the order expected, so this read at the base does not separate 'before the new code ran' from 'after': the new code had already run on dell2 at the 15:41Z scheduled run. The discrimination rests on the issuer's recorded generated-folder arms (a good folder 6 of 6; a missing file, a four-source INDEX, a stray address and an unreadable source each fail one arm), which this seat did not re-run.",
+      "status": "PASS",
+      "expect": "K4-FOLDER ok=True"
+    },
+    {
+      "criterion_id": "CAj15-AC2",
+      "criterion_verbatim": "the bound, a control that PASSES at the base and must still pass on dell2's checkout: the reader's ages on the existing sources.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i1_ages.py\"",
+      "output_evidence": "I1-AGES ok=True arms=5 of 5 failed=none reason=none, run on dell2 from the repository root after the task run. Saved: r18/ac2_after.txt.",
+      "denominator": "5 of 5 arms the check prints. This criterion is a bound that the order records as PASS at the trunk base; it was run once on dell2 after the step-3 run and not before it, so its stability across two reads is not measured.",
+      "status": "PASS",
+      "expect": "I1-AGES ok=True arms=5 of 5"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "NOT RUN, scoped to this act. The order is a read-only pick-up check on dell2 (it starts the existing task once and edits nothing), so this seat built nothing to mutate and planted nothing in the folder; a planted address or a deleted file in a live folder Muse reads is outside the order's rules.",
+      "expected": "N/A: the discriminating arms (a missing file, a four-source INDEX, a stray address, an unreadable source) were proved by the issuer on a generated folder, recorded in the order's Base paragraph.",
+      "observed": "SCOPE: not exercised by this seat. The order names no mutant. The seat's only two reads of the check on the live folder were both ok=True (before and after the task run), so on dell2 the check has not been seen to read False.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 was run twice on the live folder, before and after the task start; AC2 once, after.",
+      "observed": "AC1 read ok=True both times (run_age_min 13, then 1). AC2 was not repeated.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real @mention or considered-mail row through the folder.",
+      "reason": "Both new sources read absent: the assistant that writes the records in AWS is deployed by a separate act, so no ok row of mentions or mail_log exists on dell2. The ok-row item-key arm is therefore not exercised here (cells CA-j-14 and CA-j-16, per the order's BLIND clause)."
+    },
+    {
+      "item": "The contents of any file in the folder and of the answers/ directory.",
+      "reason": "The report is names and status words only, as the order directs. The seat read INDEX.json status words and listed file names; no item text was read, printed or recorded."
+    },
+    {
+      "item": "A run of step 1's box-sync.",
+      "reason": "git merge-base --is-ancestor 0ea947e32d HEAD exited 0 at HEAD 48f9bc8064 on branch box/dell2, so the order's conditional sync was not needed and not run."
+    },
+    {
+      "item": "A push of this seat's commits.",
+      "reason": "Seats on box/dell2 do not push (box-sync does); push state is reported in the broker message from an ls-remote read."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CA2/logs/2026-10-14/",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "not run",
+      "result": "The A.3 forwarder exercise was not run this session; the order named every command and path, so no search was needed."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run",
+      "result": "Declared NOT-APPLICABLE in the order's preflight (no grant moves); the seat made no AWS call of its own, only the existing task's reads."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "not run",
+      "result": "Not run. The act starts one existing task and changes no resource."
+    }
+  ]
+}
