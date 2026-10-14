@@ -1,0 +1,87 @@
+{
+  "base_commit": "5bc47c469366883a2f28a44215b2cdc71ffeca1a",
+  "producer": {
+    "runner": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "dispatch": "The schedule invokes the Lambda irpt-holdings-refresh-lambda (refresh_dispatch.lambda_handler, source infra/aws/lambda/investor-reporting/holdings_refresh/refresh_dispatch.py), which sends one AWS-RunShellScript SSM command per firm to the daily-runner host; each command fetches that firm's standalone bundle, verifies SHA256SUMS, and runs holdings_snapshot.py --firms <firm> --upload.",
+    "schedule": {
+      "name": "irpt-holdings-snapshot",
+      "state": "ENABLED",
+      "expression": "cron(15 10 ? * MON-FRI *)",
+      "timezone": "America/New_York",
+      "target": "Lambda irpt-holdings-refresh-lambda (account id redacted; scheduler group default)"
+    },
+    "bundles": {
+      "49financial": {
+        "key_shape": "s3://opal-data-49financial/irpt/<firm>/code/gold/investor-reporting-holdings.tar.gz",
+        "version_id": "UHOCIkWj3QiIzNucG1VjNnk_AufIg6oD",
+        "sha256": "f945da680596607ed152c4bc321c06b2b2b98908383279b67a4fb16758de8534",
+        "last_modified": "2026-10-13T13:35:24Z",
+        "members": 45,
+        "has_apply_cash_rule": false
+      },
+      "cottonwood": {
+        "key_shape": "s3://opal-data-cottonwood/irpt/<firm>/code/gold/investor-reporting-holdings.tar.gz",
+        "version_id": "oyIYMVdh_l2zCg5ZWvn3ISPPS6_9Q82_",
+        "sha256": "3f2e738f83aa415a2b56cf506d54368f9d2f86f7ded8f19202fc373ef6a28901",
+        "last_modified": "2026-10-09T10:29:07Z",
+        "members": 45,
+        "has_apply_cash_rule": false
+      },
+      "inflection": {
+        "key_shape": "s3://opal-data-inflection/irpt/<firm>/code/gold/investor-reporting-holdings.tar.gz",
+        "version_id": "PzhCs97qVBXkZcIjaOklHmzWiFsOFafM",
+        "sha256": "8709a0d5fd7b44e24cec91905837323d56091f59d6efaecdef7af7ea53c965c7",
+        "last_modified": "2026-10-13T13:36:08Z",
+        "members": 45,
+        "has_apply_cash_rule": false
+      }
+    }
+  },
+  "release_path": {
+    "deploy_tool": "bash .tools/safe-deploy.sh --mint-bundle <irpt_holdings_49f|irpt_holdings_cot|irpt_holdings_inf> (execs safe_deploy_core.py; mint_bundle uploads with stamp metadata and verifies the ETag and the stamp echoed on head-object)",
+    "ledger_required": true,
+    "rollback": "Copy the prior S3 object version of the same key back over it (copy-object with CopySource VersionId, the prior VersionId read by list-object-versions on that one key), confirm head-object ETag equals the prior version's ETag; the next scheduled fire then serves it. The manifest target per firm is in rollback_by_manifest_version."
+  },
+  "rollback_by_manifest_version": {
+    "49financial": {
+      "manifest_key": "s3://opal-data-49financial/irpt/49financial/platinum/holdings/current/manifest.json",
+      "version_id": "daFZJt6f7G9.CXj3MJftFYV.DNUOVFQh",
+      "last_modified": "2026-10-13T14:20:49Z"
+    },
+    "cottonwood": {
+      "manifest_key": "s3://opal-data-cottonwood/irpt/cottonwood/platinum/holdings/current/manifest.json",
+      "version_id": "lQMhNnImgj0ikICMdhFeasBGJKSbl55s",
+      "last_modified": "2026-10-09T14:18:11Z"
+    },
+    "inflection": {
+      "manifest_key": "s3://opal-data-inflection/irpt/inflection/platinum/holdings/current/manifest.json",
+      "version_id": "MLSPlfHHsZa7mSnXEzorRkR9zgs2Q68u",
+      "last_modified": "2026-10-13T14:18:39Z"
+    }
+  },
+  "s71_reconciliation": {
+    "missing_member_count": 4,
+    "scheduled_fires_wrote_records": true,
+    "reading": "The four absent files (infra/logic/registry feeds.json, firm_pages.json, legacy_addresses.json, platinum_destinations.json) are OPTIONAL_REGISTRY_FILES in lib/opal_naming.py, which load_registry reads as None when absent, so the runner completes; the probe records the open attempt. Each firm's 2026-10-13 scheduled SSM fire reads Success and its current/manifest.json or publish_refusal.json LastModified falls after the bundle's LastModified, so the fires wrote records; this does not establish the runtime path beyond those records."
+  },
+  "notes": [
+    "base_commit: git rev-parse HEAD in the worktree before the first commit (5bc47c469366883a2f28a44215b2cdc71ffeca1a).",
+    "Code read at base: test_holdings_rearm_trigger.py (rearm_verdict, served_bundle_members, holdings_opened_files); holdings_refresh/refresh_dispatch.py (fire, holdings_script); .tools/safe_deploy_core.py (_irpt_holdings_bundles lines 538-569, mint_bundle 1192-1250, main --mint-bundle 1516-1549); .tools/safe-deploy.sh line 183; infra/aws/terraform/investor-reporting/directory/schedule.tf and holdings_refresh.tf.",
+    "The mint branch (safe_deploy_core.py 1523-1549) writes no change-management ledger entry itself; NEVER-2 requires an operator entry under org/critical_paths/change_management/ for a confirmed deploy, so ledger_required is true.",
+    "Schedule: scheduler get-schedule (name irpt-holdings-snapshot, group default), one read; the target function name is read from the Target ARN, account id redacted.",
+    "Dispatcher: lambda get-function-configuration, one Query of Environment.Variables.IRPT_HOLDINGS_BUNDLE_MAP; it equals the three declared s3 URIs (49financial, cottonwood, inflection). No invoke was made.",
+    "Bundles: s3api head-object (VersionId, LastModified, ContentLength) and get-object with --version-id into the scratch directory outside the worktree (deleted at the end). sha256 is hashlib over the downloaded bytes. members = tar file members (45 each); the SHA256SUMS file lists 44 paths plus itself. has_apply_cash_rule = any member's bytes contain the token apply_cash_rule (false in all 45 members of each bundle). No member was executed.",
+    "Manifests: s3api list-object-versions on each firm's one current/manifest.json key with an IsLatest filter. The round-189 values are not in the worker face, so no moved or not-moved statement is made.",
+    "Refusals: head-object on publish_refusal.json. cottonwood exists (LastModified 2026-10-13T14:17:45Z, body not read); 49financial and inflection return 404 (no refusal record).",
+    "SSM history: ssm list-commands, filtered client-side on the Comment prefix 'irpt holdings refresh'. The last scheduled fire per firm on 2026-10-13 reads Success; 49financial's 2026-10-09 fire reads Failed (cause not read). list-command-invocations was not called; command bodies and outputs were not read. The CLI length(Commands) query returns a per-page count, so no total denominator is claimed.",
+    "S71 probe: holdings_opened_files() from the rearm test module (no-network audit probe) returned 24 repo files; the bundle SHA256SUMS lists differ from it by the same four files for each firm.",
+    "Not read: the contents of the four registry files, the IAM policies, the bundle members beyond the apply_cash_rule token search, and any command output.",
+    "Counters: no Lambda invoke, no send-command, no S3 write, no terraform, no sign-in beyond the dell2 agent identity used for reads, no vendor call."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
