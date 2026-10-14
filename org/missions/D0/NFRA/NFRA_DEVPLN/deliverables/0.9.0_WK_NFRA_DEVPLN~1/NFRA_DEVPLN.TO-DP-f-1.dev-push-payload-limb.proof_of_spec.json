@@ -1,0 +1,120 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-f-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-f-1.dev-push-payload-limb.md",
+  "group": "OTHER",
+  "vintage_commit": "bb0100a77b"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round5.md",
+  "vintage_commit": "bb0100a77b",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-f-1.dev-push-payload-limb.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-hooks/dev_push_payload_gate.py",
+   "kind": "script",
+   "commit_or_etag": "3ca55c6683",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local checker run by git's pre-push limb; nothing is deployed. Read only against the real portal (approval-status read; git read of portal refs)."
+  },
+  {
+   "path_or_key": ".tools/portal-hooks/pre-push",
+   "kind": "script",
+   "commit_or_etag": "3ca55c6683",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The canonical hook edited in the worktree. The installed copy portal/.git/hooks/pre-push is NOT touched; install is the hook lane owner's act (not this order), so the live portal hook does not yet run the limb."
+  },
+  {
+   "path_or_key": ".tools/tests/test_dev_push_payload_gate.py",
+   "kind": "test",
+   "commit_or_etag": "3ca55c6683",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local battery on temporary git repositories in the system temp directory; nothing under the real portal is written."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPf1-AC1",
+   "criterion_verbatim": "python .tools/tests/test_dev_push_payload_gate.py expect: ok=True (the test above, every case passing)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_dev_push_payload_gate.py",
+   "output_evidence": "timeout 120 rc=0. LAST line: DEV-PUSH-GATE-TEST cases=19/19 ok=True. 19 ok lines and 0 FAIL lines. Cases: route A admitted; route A refused for a different row, a head that is not the second parent, state OPEN, an unreadable reader (rc 2) and an unparsable reader; a plain commit refused; a test-only commit admitted (route B); a PROD-into-DEV back-merge admitted (route C); a non-DEV ref skipped; a delete, a new ref and a non-fast-forward refused; a live FAST lease for the serial admitted; an expired lease, a lease for another seat and an unreadable lease file each admit nothing; the real .tools/portal-hooks/pre-push admits an approved DEV push and refuses a plain commit (the refusal line is the ERROR text).",
+   "denominator": "19 of 19 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPf1-AC2",
+   "criterion_verbatim": "python .tools/portal-hooks/dev_push_payload_gate.py --portal portal --remote-ref refs/heads/DEV --remote-sha a577cba5644192bf1f62b10dc03dd3657e12b59f --local-sha 24877b67b7a175bcfe73c779f69c0bf7c3c639c8 expect: DEV-PUSH-GATE result=ADMITTED",
+   "method": "live_read",
+   "invocation": "python .tools/portal-hooks/dev_push_payload_gate.py --portal portal --remote-ref refs/heads/DEV --remote-sha a577cba5644192bf1f62b10dc03dd3657e12b59f --local-sha 24877b67b7a175bcfe73c779f69c0bf7c3c639c8",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: PASS 24877b67b7 route=A Merge cand/laptop/contributing-boxes into DEV (approved feature) / DEV-PUSH-GATE result=ADMITTED reason=- commits=1. The reader read the working-tree laptop list: APPROVAL branch=cand/laptop/contributing-boxes state=APPROVED valid=yes row=laptop-20261013T200117Z-9e8a by=1.0.0_SA_CTO head_sha=07f065e69f54b6821d1197cd7b947ec1131c8026 (the merge's second parent). Identical on a second run.",
+   "denominator": "1 of 1 commit in the range a577cba5..24877b67 passes (route A); 0 refused",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPf1-AC3",
+   "criterion_verbatim": "python .tools/portal-hooks/dev_push_payload_gate.py --portal portal --remote-ref refs/heads/DEV --remote-sha 10e7664d6c4824cb88f04acf47f06264345b5b8b --local-sha b5222d78784e779fe0411516b5073f697665bded expect: DEV-PUSH-GATE result=REFUSED",
+   "method": "live_read",
+   "invocation": "python .tools/portal-hooks/dev_push_payload_gate.py --portal portal --remote-ref refs/heads/DEV --remote-sha 10e7664d6c4824cb88f04acf47f06264345b5b8b --local-sha b5222d78784e779fe0411516b5073f697665bded",
+   "output_evidence": "timeout 120 rc=1. OUTPUT: UNAPPROVED b5222d7878 docs(portal): declined-arm example for the approval route (NFRA_DEVPLN FWD-2) :: route A: not a two-parent merge; route B: changes non-test paths; route C: not a two-parent merge / DEV-PUSH-GATE result=REFUSED reason=unapproved-commit commits=1. Identical on a second run. This is the difference control: AC2 admits the approved merge, AC3 refuses the plain commit, on the same portal and the same checker.",
+   "denominator": "1 of 1 commit in the range 10e7664d..b5222d78 is refused; 0 admitted",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the approval inputs: the route A reader answer is varied per case (different row, head = first parent, state OPEN, unreadable rc 2, unparsable output). Each must refuse; the same approved merge with the matching answer must admit. The checker source is not mutated.",
+   "expected": "every mutated reader answer REFUSED; the unmutated answer ADMITTED",
+   "observed": "test cases 'routeA refused: different row', 'routeA refused: head is the first parent, not the second', 'routeA refused: state OPEN', 'routeA refused: reader unreadable (rc 2)', 'routeA refused: reader output unparsable' all refused; 'routeA admitted (approved row, head = second parent)' admitted; real portal AC2 admitted vs AC3 refused on the same checker.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs compared: the AC2 and AC3 invocations were each run twice in this session, and the AC1 battery was run twice.",
+   "observed": "AC2 identical on both runs (PASS 24877b67b7 route=A ... / DEV-PUSH-GATE result=ADMITTED reason=- commits=1); AC3 identical on both runs (UNAPPROVED b5222d7878 ... / result=REFUSED reason=unapproved-commit commits=1); AC1 DEV-PUSH-GATE-TEST cases=19/19 ok=True on both runs.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "install of the limb into the live portal hook portal/.git/hooks/pre-push",
+   "reason": "install is the hook lane owner's act, named as NOT part of this order; the installed copy still runs the pre-limb hook, so the structural close is not live on any box until install."
+  },
+  {
+   "item": "the FAST-lease branch against the real workspace lease directory org/mcp/drive_mode",
+   "reason": "that directory is absent in this worktree; the lease branch is exercised on temporary lease directories in the test (valid, expired, other seat, unreadable), so no live lease is read."
+  },
+  {
+   "item": "the reader invoked as sys.executable rather than the literal word python",
+   "reason": "the default reader command is the same interpreter that runs the checker; the literal python on PATH would name the same program. OPAL_APPROVAL_STATUS_CMD overrides it verbatim when set."
+  },
+  {
+   "item": "the order of the structural refusals (delete, new ref, not-fast-forward) against the FAST lease",
+   "reason": "the order names no precedence; the cell runs the refusals first, so a lease admits only the commit walk. Filed as NFRA_DEVPLN-W1-S15 for the lane owner's ruling."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S15 -- the order gives a live FAST lease admission for the whole push (BUILD 4) and refusals for a delete, a new ref and a non-fast-forward (BUILD 2) without an order between them; the cell runs the structural refusals first, so a lease admits only the commit walk (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-f-1.dev-push-payload-limb.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/portal-hooks/dev_push_payload_gate.py .tools/tests/test_dev_push_payload_gate.py",
+   "result": "All checks passed! (rc 0)"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/portal-hooks/dev_push_payload_gate.py .tools/tests/test_dev_push_payload_gate.py",
+   "result": "COMPILE-OK (rc 0); bash -n .tools/portal-hooks/pre-push SYNTAX-OK; non-ASCII byte count 0 in all three files"
+  },
+  {
+   "tool": "commit-gate",
+   "invocation": "bash .tools/commit-gate.sh .tools/portal-hooks/dev_push_payload_gate.py .tools/tests/test_dev_push_payload_gate.py",
+   "result": "pre-commit gate clean for 2 of 2 file(s) (rc 0)"
+  }
+ ]
+}
