@@ -5,17 +5,22 @@
  * /api/general/mdpf/<folder>/ (public-data-router rewrites that prefix to platinum/mdpf/ with no firm check).
  * THE GATE: a non-internal claim may read only the leaf folders its own firm owns.
  *
- *   claim firmId            leaf folders admitted
- *   opal-capital / Dev      every path under the prefix (the page's isInternal() || isDev(), as aggregate_gate.mjs)
- *   49financial             49financial
- *   inflection              inflection
- *   cottonwood              cottonwood
- *   demo                    global   (the page's MDPF_GLOBAL_VIEW_FIRMS: the demo tenant views the aggregate)
- *   no firm (absent / "")   global
- *   any other firmId        none
+ *   claim firmId                                  leaf folders admitted
+ *   the internal firm / userType Dev              every path under the prefix (the page's isInternal() || isDev(), as aggregate_gate.mjs)
+ *   a key of the firm map (a partner firm)        the folder named by that key, nothing else
+ *   a firm in globalViewFirms (the demo tenant)   the global folder (the page's MDPF_GLOBAL_VIEW_FIRMS: it views the aggregate)
+ *   no firm (absent, null or "")                  the global folder
+ *   any other firmId, or a non-string             none
  *
- * The map is the page's own: ModelPortfolios.tsx effectiveFirmId = internal ? selectedFirmId : (demo -> 'global' :
- * claims.firmId), and every per-firm fetch interpolates that id straight into /api/general/mdpf/{id}/... .
+ * THE FIRM TOKENS ARE PARAMETERS, NOT LITERALS (the LGIC naming gate refuses a NEW hand-kept firm token):
+ * mdpfGate(uri, payload, firmMap, globalViewFirms) takes two GENERATED carriers of ../_shared/firm-config.mjs, which
+ * index.mjs passes: FIRM_BUCKET_MAP (its OWN keys are the partner folders) and MDPF_GLOBAL_VIEW_FIRMS (the firm ids that
+ * view the aggregate). This module keeps no firm slug of its own. A missing, non-object or array firmMap denies every MDPF
+ * request of a non-internal claim: it fails closed, it never throws. A missing or unusable globalViewFirms means no firm
+ * views global. A prototype key (__proto__, constructor) is not an own key, so it reads nothing.
+ *
+ * The folder rule is the page's own: ModelPortfolios.tsx resolves effectiveFirmId (internal: the selector; demo: global;
+ * otherwise claims.firmId) and every per-firm fetch interpolates that id straight into /api/general/mdpf/{id}/... .
  *
  * THE MATCH IS ON THE PATH THE ORIGIN WILL RESOLVE (as aggregate_gate.mjs): the query is dropped and the path is
  * percent-decoded ONCE, the way S3 decodes a request path into a key. After that one decode, every segment under the
@@ -36,13 +41,8 @@ export const MDPF_DENY = "deny";
 
 const MDPF_PREFIXES = Object.freeze(["/api/general/mdpf", "/api/general/json/mdpf"]);
 
-export const MDPF_FIRM_FOLDERS = Object.freeze({
-  "49financial": Object.freeze(["49financial"]),
-  inflection: Object.freeze(["inflection"]),
-  cottonwood: Object.freeze(["cottonwood"]),
-  demo: Object.freeze(["global"]),
-});
-export const MDPF_NO_FIRM_FOLDERS = Object.freeze(["global"]);
+const GLOBAL_FOLDER = "global";
+const INTERNAL_FIRM = "opal-capital";
 
 const PLAIN_SEGMENT = /^[A-Za-z0-9._-]+$/;
 
@@ -92,21 +92,34 @@ export function mdpfRoute(uri) {
 
 export function admitsAllMdpf(payload) {
   if (!payload || typeof payload !== "object") return false;
-  return payload.firmId === "opal-capital" || payload.userType === "Dev";
+  return payload.firmId === INTERNAL_FIRM || payload.userType === "Dev";
 }
 
-export function mdpfFoldersFor(payload) {
+function usableMap(firmMap) {
+  return !!firmMap && typeof firmMap === "object" && !Array.isArray(firmMap);
+}
+
+function viewsGlobal(globalViewFirms, firm) {
+  if (Array.isArray(globalViewFirms)) return globalViewFirms.includes(firm);
+  if (globalViewFirms instanceof Set) return globalViewFirms.has(firm);
+  return false;
+}
+
+export function mdpfFoldersFor(payload, firmMap, globalViewFirms) {
   const firm = payload && typeof payload === "object" ? payload.firmId : undefined;
-  if (firm === undefined || firm === null || firm === "") return MDPF_NO_FIRM_FOLDERS;
+  if (firm === undefined || firm === null || firm === "") return [GLOBAL_FOLDER];
   if (typeof firm !== "string") return [];
-  return Object.prototype.hasOwnProperty.call(MDPF_FIRM_FOLDERS, firm) ? MDPF_FIRM_FOLDERS[firm] : [];
+  if (viewsGlobal(globalViewFirms, firm)) return [GLOBAL_FOLDER];
+  if (!usableMap(firmMap)) return [];
+  return Object.prototype.hasOwnProperty.call(firmMap, firm) ? [firm] : [];
 }
 
-export function mdpfGate(uri, payload) {
+export function mdpfGate(uri, payload, firmMap, globalViewFirms) {
   const route = mdpfRoute(uri);
   if (route === null) return MDPF_PASS;
   if (!payload || typeof payload !== "object") return MDPF_DENY;
   if (admitsAllMdpf(payload)) return MDPF_PASS;
+  if (!usableMap(firmMap)) return MDPF_DENY;
   if (!route.clean || route.folder === null) return MDPF_DENY;
-  return mdpfFoldersFor(payload).includes(route.folder) ? MDPF_PASS : MDPF_DENY;
+  return mdpfFoldersFor(payload, firmMap, globalViewFirms).includes(route.folder) ? MDPF_PASS : MDPF_DENY;
 }

@@ -1,9 +1,11 @@
 import { describe, test, expect } from "bun:test";
 import { MDPF_PASS, MDPF_DENY, mdpfGate } from "../mdpf_gate.mjs";
+import { FIRM_BUCKET_MAP, MDPF_GLOBAL_VIEW_FIRMS } from "../../_shared/firm-config.mjs";
 
 const P = "/api/general/mdpf/";
 const claim = (firmId, extra = {}) => ({ sub: "u@test", firmId, ...extra });
-const gate = (uri, payload) => mdpfGate(uri, payload);
+// the module keeps no firm slug: the partner folders are the keys of the generated FIRM_BUCKET_MAP, the demo tenant is in MDPF_GLOBAL_VIEW_FIRMS
+const gate = (uri, payload) => mdpfGate(uri, payload, FIRM_BUCKET_MAP, MDPF_GLOBAL_VIEW_FIRMS);
 
 describe("mdpf_gate: a partner reads its own folder only", () => {
   test("(i) each partner passes on its own leaf, every file", () => {
@@ -67,9 +69,11 @@ describe("mdpf_gate: internal, demo and no-firm claims", () => {
   });
 
   test("(ix) an unknown, prototype-key, non-string or case-variant firm reads nothing, global included", () => {
-    for (const firm of ["mockadv", "bd", "__proto__", "constructor", "toString", "hasOwnProperty", 49, {}, [], " inflection", "Inflection", "INFLECTION"]) {
+    for (const firm of ["bd", "__proto__", "constructor", "toString", "hasOwnProperty", 49, {}, [], " inflection", "Inflection", "INFLECTION"]) {
       expect(gate(`${P}global/aum-metrics.json`, claim(firm))).toBe(MDPF_DENY);
       expect(gate(`${P}inflection/aum-metrics.json`, claim(firm))).toBe(MDPF_DENY);
+      // a firm id that is only a prototype key or a variant must not read the folder of its own name either
+      if (typeof firm === "string" && firm.trim() !== "") expect(gate(`${P}${encodeURIComponent(firm)}/aum-metrics.json`, claim(firm))).toBe(MDPF_DENY);
     }
   });
 });
@@ -153,5 +157,45 @@ describe("mdpf_gate: robustness", () => {
     expect(gate(`${P}global/x.json`, "s")).toBe(MDPF_DENY);
     expect(gate("/api/general/etfs/x.json", null)).toBe(MDPF_PASS);
     expect(MDPF_PASS).not.toBe(MDPF_DENY);
+  });
+});
+
+describe("mdpf_gate: the firm map and the global-view list are parameters", () => {
+  const U = P;
+  test("(xix) mockadv is a key of the generated map, so it reads its own name and not global or a partner folder", () => {
+    expect(gate(`${U}mockadv/aum-metrics.json`, claim("mockadv"))).toBe(MDPF_PASS);
+    expect(gate(`${U}global/aum-metrics.json`, claim("mockadv"))).toBe(MDPF_DENY);
+    expect(gate(`${U}49financial/aum-metrics.json`, claim("mockadv"))).toBe(MDPF_DENY);
+  });
+
+  test("(xx) a missing, non-object or array firm map denies every non-internal MDPF request (fail closed) and never throws", () => {
+    for (const m of [undefined, null, "str", 7, [], true]) {
+      for (const [firm, folder] of [["49financial", "49financial"], ["demo", "global"], [undefined, "global"], ["mockadv", "mockadv"]]) {
+        let r;
+        expect(() => { r = mdpfGate(`${U}${folder}/x.json`, claim(firm), m, MDPF_GLOBAL_VIEW_FIRMS); }).not.toThrow();
+        expect(r).toBe(MDPF_DENY);
+      }
+      expect(mdpfGate(`${U}inflection/x.json`, claim("opal-capital"), m, MDPF_GLOBAL_VIEW_FIRMS)).toBe(MDPF_PASS);
+      expect(mdpfGate("/api/general/etfs/x.json", claim("49financial"), m, MDPF_GLOBAL_VIEW_FIRMS)).toBe(MDPF_PASS);
+    }
+  });
+
+  test("(xxi) a missing or unusable global-view list means no firm views global; a Set behaves as the array", () => {
+    for (const g of [undefined, null, "demo", 7, {}]) {
+      expect(mdpfGate(`${U}global/x.json`, claim("demo"), FIRM_BUCKET_MAP, g)).toBe(MDPF_DENY);
+    }
+    expect(mdpfGate(`${U}global/x.json`, claim("demo"), FIRM_BUCKET_MAP, new Set(MDPF_GLOBAL_VIEW_FIRMS))).toBe(MDPF_PASS);
+    expect(mdpfGate(`${U}global/x.json`, claim("demo"), FIRM_BUCKET_MAP, [...MDPF_GLOBAL_VIEW_FIRMS])).toBe(MDPF_PASS);
+  });
+
+  test("(xxii) the partner folders come from the map it is given: a synthetic map admits its own keys and no others, a null-prototype map answers no prototype key", () => {
+    const syn = Object.freeze({ acme: 1 });
+    expect(mdpfGate(`${U}acme/x.json`, claim("acme"), syn, [])).toBe(MDPF_PASS);
+    expect(mdpfGate(`${U}49financial/x.json`, claim("49financial"), syn, [])).toBe(MDPF_DENY);
+    const np = Object.create(null);
+    np.acme = 1;
+    expect(mdpfGate(`${U}acme/x.json`, claim("acme"), np, [])).toBe(MDPF_PASS);
+    expect(mdpfGate(`${U}constructor/x.json`, claim("constructor"), np, [])).toBe(MDPF_DENY);
+    expect(mdpfGate(`${U}__proto__/x.json`, claim("__proto__"), np, [])).toBe(MDPF_DENY);
   });
 });
