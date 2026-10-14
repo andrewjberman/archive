@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-9.pin-muse-key-in-the-assistant-environment.md",
+    "group": "OTHER",
+    "vintage_commit": "88afeb9276"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "88afeb9276",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-9.pin-muse-key-in-the-assistant-environment.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/chat_assist.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "variable chat_assist_muse_answer_pubkey added beside chat_assist_mail_bearer_secret_arn (type string, one-sentence description, default = the ssh-ed25519 muse line); one comment line above it naming PRD v0.7's change-managed limit and MUSE_KEY_RECORD.md; local.ca_env gains MUSE_ANSWER_PUBKEY = var.chat_assist_muse_answer_pubkey beside GATEWAY_BASE, SMS_ORIGINATION and IGNORE_NAMES; MAIL_BEARER_SECRET join untouched; terraform fmt applied to this file only; no init, plan, apply or AWS call run",
+      "artifact_covered_by": [
+        "CAi9-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi9-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i4a_tf.py\" expect: I4A-TF ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i4a_tf.py\"",
+      "output_evidence": "(timeout 120, rc 0) I4A-TF ok=True fp=SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ env=True fmt=True mail=True reason=none",
+      "denominator": "5 of 5 checks in the script pass: the variable is declared; its ssh-ed25519 default fingerprints to SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ, equal to the record's fingerprint in MUSE_KEY_RECORD.md; local.ca_env joins MUSE_ANSWER_PUBKEY = var.chat_assist_muse_answer_pubkey; the MAIL_BEARER_SECRET join text is present unchanged; terraform fmt -check passes on chat_assist.tf",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAi9-AC1 run against the base file (git show 88afeb9276:infra/aws/terraform/transcripts/chat_assist.tf, the file before this order's edit), i.e. the same check with no pinned key present",
+      "expected": "I4A-TF ok=False (the variable is not declared at the base)",
+      "observed": "I4A-TF ok=False fp=none env=False fmt=True mail=True reason=variable chat_assist_muse_answer_pubkey is not declared",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the issuer check run three times against the edited file, outputs compared",
+      "observed": "three runs identical: I4A-TF ok=True fp=SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ env=True fmt=True mail=True reason=none, rc=0 each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and every AWS call",
+      "reason": "the order says the deploy is cell CA-i-4, a separate act by a CloudOps seat; this cell edits the file only"
+    },
+    {
+      "item": "the MAIL_BEARER_SECRET join and every other variable, resource, module call and file",
+      "reason": "the order says edit nothing else"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~15/COMM_ASSIST.TO-CA-i-9.pin-muse-key-in-the-assistant-environment.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "issuer check",
+      "invocation": "timeout 120 python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i4a_tf.py\"",
+      "result": "I4A-TF ok=True fp=SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ env=True fmt=True mail=True reason=none (rc 0)"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt infra/aws/terraform/transcripts/chat_assist.tf",
+      "result": "rc=0; the ca_env map keys were realigned to the new longest key, no other change"
+    }
+  ]
+}
