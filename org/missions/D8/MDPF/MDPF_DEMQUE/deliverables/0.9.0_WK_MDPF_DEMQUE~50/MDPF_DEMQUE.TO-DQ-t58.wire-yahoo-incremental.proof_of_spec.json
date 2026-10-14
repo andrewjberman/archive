@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t58",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "genre": "BUILD",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t58.wire-yahoo-incremental.md",
+    "group": "OTHER",
+    "vintage_commit": "502c991c40"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "502c991c40",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t58.wire-yahoo-incremental.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~50",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
+      "kind": "script",
+      "commit_or_etag": "1029c04f3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "second rule (amendment 2026-10-14, second pass), commit 1029c04f3c: combined_applicability returns not_applicable when ANY trade row is dated before the stored first day; applicable when no trade predates the range and at least one is inside [first day, last day]; no_trade_inside when every trade follows the range (NOT_RELOCKED_REASON 'no trade falls inside the stored window'); no_trade_rows when the name has none. combined_relock returns None unless applicable; run() appends such a name without the combined relock, listed in appended_without_relock with relock_reason. window_relock (S6/S7), the hold rules and the unresolved registration (identity rejections only) are unchanged. No S3 write, no queue, ledger or shared pacer write.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1",
+        "DQ9-t58-AC2",
+        "DQ9-t58-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/price_store.py",
+      "kind": "script",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unchanged this round. write_incremental(root, cusip, appended, lock_row): appends the new prices and dividends and extends lock.json; never writes splits.parquet; refuses (written False, reason) on a stored schema mismatch, a row not dated after the stored max, a gained split, a lock differing in any field but valid_to, a backwards valid_to, or a stored row that would change on re-read. index() reads the names in a 16-thread pool with the same rows and order.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1",
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_append.py",
+      "kind": "script",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unchanged this round. append_tr(stored, window, act, symbol, bbg): tr_column.build over the stored max row plus the new rows (the stored max's close as the prior close), cut to the new dates. apply_incremental is unchanged: it does not re-prove the identity; the combined relock is in daily_draw.combined_relock.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1",
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_equal.py",
+      "kind": "script",
+      "commit_or_etag": "1029c04f3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "commit 1029c04f3c: --relock-census applies the second rule (no_trade_inside counts under no_trade_rows) and its held entries gain trades_before_window. Read only: no Yahoo request, no write. The 50-name comparison and the --spot path are unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC2",
+        "DQ9-t58-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_incremental_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "1029c04f3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nine named tests PASS in the wiring file. The ninth, test_a_name_with_some_trades_before_the_stored_window_is_not_held_by_the_combined_check_and_is_listed_without_relock (commit 1029c04f3c): one trade on 2019-11-22 before the stored window and two trades inside it; the stored lock is LOCKED with 3 observations; the name is appended, listed as appended_without_relock with the reason, and the unresolved list gets no row. Its synthetic stored window starts at the helper's first day (see row S9).",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1029c04f3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "commit 1029c04f3c: rows S8, S9 and S10 appended at the end of the array; rows S1 to S7 unchanged. S8 records that AC2 was not re-run; S9 the synthetic window start; S10 the count of names appended without a combined check under the second rule.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~50/RELOCK_CENSUS_WHOLE_STORE.json",
+      "kind": "doc",
+      "commit_or_etag": "1029c04f3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the whole-store census record of this pass (read only, S3 store and client transactions, no Yahoo, no write; tool at 1029c04f3c): names 483, no_trade_rows 80, not_applicable 238, applicable 165, locked 151, held 14, price_mismatch_holds 0; held symbols LCEYX, FTHSX, HLMEX, IWS, IWP, IWN, IWO, VSEIX, PFORX, RPIFX, VSS, VWO, MISIX, PIMSX.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t58-AC1",
+      "criterion_verbatim": "DQ9-t58-AC1: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py -> WIRE-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
+      "output_evidence": "test_a_stored_name_takes_the_five_day_window_and_appends_only_new_rows_with_tr_columns_and_an_extended_lock PASSED; test_a_gained_split_or_a_restated_overlap_bar_is_held_restatement_and_the_name_keeps_its_files PASSED; test_a_gap_beyond_five_days_pulls_from_the_stored_max_and_appends_only PASSED; test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held PASSED; test_a_name_whose_combined_history_relock_is_rejected_is_held_even_when_the_appended_window_passes PASSED; test_a_held_name_never_breaks_the_unresolved_fold_and_only_a_rejected_relock_opens_a_row PASSED; test_a_window_only_trade_mismatch_holds_the_name_even_when_the_combined_relock_passes PASSED; test_a_name_whose_trades_all_predate_the_stored_window_is_not_held_by_the_combined_check_and_is_listed_without_relock PASSED; test_a_name_with_some_trades_before_the_stored_window_is_not_held_by_the_combined_check_and_is_listed_without_relock PASSED | 9 passed in 1.81s | WIRE-OK (this pass, from the worktree root, code commit 1029c04f3c)",
+      "denominator": "9 of 9 named tests PASSED (the ninth added this pass); folder pytest data/mdpf/scripts/demque: 207 passed, 0 failed (rc=0, was 206 before the ninth test); negative control: the previous applicability rule patched in-process fails the ninth test (1 failed, 8 passed)",
+      "status": "PASS",
+      "expect": "WIRE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t58-AC2",
+      "criterion_verbatim": "DQ9-t58-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py -> WIREEQ-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
+      "output_evidence": "CARRIED from commit 80a8479c2f, NOT RE-RUN this pass (the Yahoo budget is spent, 125 of 120; row MDPF_DEMQUE-D1-W50-S8): no_split n=50 equal=50 mismatches=0 | split n=1 held=True unchanged=True | cells={'dividends': 5441, 'prices': 571352, 'splits': 50, 'tr': 924} http=60 | relock_held: ['FTHSX', 'LCEYX'] | spot: {\"equal\": 5, \"of\": 5, \"tr_cells\": 88} | WIREEQ-OK 50 symbols equal on a no-split day including 924 TR cells; 1 gained-split name(s) HELD, files unchanged; http 60; rc=0 (the report is the inherited merged 50-name report, not re-pulled)",
+      "denominator": "carried, not re-run: no_split 50 of 50 equal, 0 mismatches; split arm 1 of 1 held with files unchanged; relock_held 2 of 2 (LCEYX, FTHSX); live spot 5 of 5 (carried)",
+      "status": "PASS",
+      "expect": "WIREEQ-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t58-AC3",
+      "criterion_verbatim": "DQ9-t58-AC3: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_census.py -> CENSUS-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_census.py",
+      "output_evidence": "names=483 no_trade_rows=80 not_applicable=238 applicable=165 locked=151 held=14 price_mismatch_holds=0 | CENSUS-OK 483 names: 165 applicable (151 locked, 14 held), 238 trades predate the window and are not held, 80 without trade rows; 0 price-mismatch holds | held (each trades_before_window 0): LCEYX, FTHSX, HLMEX, IWS, IWP, IWN, IWO, VSEIX, PFORX, RPIFX, VSS, VWO, MISIX, PIMSX | rc=0, 52 s",
+      "denominator": "483 of 483 names (whole store, no --limit; the store was 326 names before tonight's run); 80 + 238 + 165 = 483; 151 + 14 = 165; 14 held of 165 applicable, each with trades_before_window 0 and trades_inside >= 1; price_mismatch_holds 0 (before the change: 17 held including 3 PRICE_MISMATCH)",
+      "status": "PASS",
+      "expect": "CENSUS-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the PREVIOUS applicability rule (applicable when any trade is inside the stored range; no before-window gate) patched in-process by .scratch/mutant_rule.py (no file edit), run from data/mdpf/scripts/demque: pytest -p mutant_rule test_demque_incremental_wiring.py",
+      "expected": "the ninth named test fails: under the old rule the name with a 2019 trade is relocked, so it is not listed as appended_without_relock",
+      "observed": "1 failed, 8 passed: test_a_name_with_some_trades_before_the_stored_window_is_not_held_by_the_combined_check_and_is_listed_without_relock (appended_without_relock [] under the old rule; 'assert [] == [C1]')",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the stub night, outputs byte-compared",
+      "observed": "NOT RE-MEASURED: the stub night was not re-run this pass; the receipt is carried in STUB_NIGHT_RECEIPT.txt beside this instance from commit 80a8479c2f. The census was run twice (once inside AC3 and once to capture the held symbols) with identical counts.",
+      "status": "N/A-WITH-REASON",
+      "expected": "two identical runs (the determinism control of this round is not measured)"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write, the real store, the queue, the ledger, the actuals, the shared pacer (~/.opal/demque/pacer.json), any AWS write, any deploy, any timer; daily_draw.py against the real store or --s3; extend_frontier.py --apply; standing_drawer.py --apply",
+      "reason": "order BOUNDS. This pass ran the census (read only) and the local tests; the stub night was not re-run."
+    },
+    {
+      "item": "AC2 (dq_t58_equal.py) was NOT re-run this pass: its live --spot 5 --tr needs 5 Yahoo requests and the budget is spent (125 of 120); the order says it is not pre-approved again",
+      "reason": "the 50-name report at 80a8479c2f is carried as the issuer's grading basis (row MDPF_DEMQUE-D1-W50-S8). The second rule changes the relock only for names with trades before their stored window; the report's relock_measured key was produced under the previous rule and may differ for those names, while the census keeps LCEYX and FTHSX held."
+    },
+    {
+      "item": "the stub-night receipt (STUB_NIGHT_RECEIPT.txt) and the inherited 50-name report (INCREMENTAL_WIRED_EQUALITY_REPORT.json) are carried unchanged, not regenerated this pass",
+      "reason": "the order's change touches no Yahoo or stub-night path; no re-run was asked for. Carried with their commit."
+    },
+    {
+      "item": "the window-only mutant control of commit 80a8479c2f (window_relock returns None; the seventh test must fail) was NOT re-run this pass",
+      "reason": "no change to window_relock in this pass; the control is inherited with its commit, not measured again."
+    },
+    {
+      "item": "the 50-name report was produced BEFORE the appended-window check (window_relock). Its relock_held (FTHSX, LCEYX) and the 48 LOCKED states are measured against the combined check only.",
+      "reason": "inherited exclusion from the earlier passes, unchanged; the S6 ruling (window check) is the one that followed it."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W50-S1: the order's proof call 'incremental_equal.py --n 10 --tr' cannot select 10 names (the stratified sampler is cut for n=50); the 50-name proof ran as five --piece chunks of one selection (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S2: two names whose served lock reads LOCKED (claim held) are REJECTED by a relock over the combined history (LCEYX, FTHSX); the fix is in the combined relock; the disarm is the issuer's (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Q1)",
+    "MDPF_DEMQUE-D1-W50-S3: at 22:21Z on 2026-10-13 Yahoo held no 2026-10-13 bar for the sampled mutual funds (ACTSX last bar 2026-10-12); 19 of 50 names appended 4 rows where the window has 5 trading days; both paths agree (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S4: price_store.index read 326 names sequentially (50.5 s), too slow for the 100-second subprocess limit on the live spot run; index() now reads them in a thread pool, same rows and order (4.0 s) (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S5: the re-seating message asks for the commit trailer Co-Authored-By: Claude Sonnet 5.5; this worker runs as claude-haiku-5-5 and its commits carry the Haiku 5.5 trailer (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S6: the wired run's identity check ran over the COMBINED history only, so a trade that disagreed only inside the appended window was LOCKED by it (measured 20 of 21 LOCKED; window-only REJECTED:PRICE_MISMATCH 0 of 1). Fixed in 342308b1d3: both checks run before any write (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Q1; disarm after the merge is the issuer's)",
+    "MDPF_DEMQUE-D1-W50-S7: the amended appended-window check names no valid_from. A window-start valid_from makes lock.check's early-third rule reject an agreeing late-window trade (measured 1 of 1 REJECTED); window_relock anchors valid_from at the window's first in-window trade (LOCKED 1 of 1). The issuer is asked to confirm (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S8: AC2 (dq_t58_equal.py) was not re-run after the second applicability rule; its live --spot 5 --tr needs 5 Yahoo requests, the budget is spent and no new spot is pre-approved; the 50-name report is carried from 80a8479c2f (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S9: the ninth test's synthetic stored window starts at the helper's DAYS[0] (90 calendar days before the frontier), not at 2026-04-14 as the order's description reads; the rule depends on the order of the dates (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S10: under the second rule 238 of 483 stored names carry a trade before their stored window and are appended without the combined relock; where their appended window also holds no trade, no identity check runs on their appended days (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Q1)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~50/INCREMENTAL_WIRED_EQUALITY_REPORT.json (the 50-name report, carried, not regenerated); org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~50/RELOCK_CENSUS_WHOLE_STORE.json (the whole-store census record of this pass)",
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
+      "invocation": "from the worktree root, after code commit 1029c04f3c",
+      "result": "WIRE-OK; 9 passed in 1.81s; rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_census.py",
+      "invocation": "from the worktree root (read only; the census run once inside the check, and once more by hand to capture the held symbols with identical counts)",
+      "result": "CENSUS-OK 483 names: 165 applicable (151 locked, 14 held), 238 not applicable, 80 without trade rows; 0 price-mismatch holds; rc=0; 52 s"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
+      "invocation": "NOT RUN this pass (the Yahoo budget is spent; row MDPF_DEMQUE-D1-W50-S8)",
+      "result": "carried from 80a8479c2f: WIREEQ-OK; no_split 50 of 50 equal; rc not re-measured this pass"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "from the worktree root, after code commit 1029c04f3c",
+      "result": "207 passed in 14.16s; rc=0"
+    },
+    {
+      "tool": "PYTHONPATH=<worktree>/.scratch python -m pytest -p mutant_rule test_demque_incremental_wiring.py",
+      "invocation": "from data/mdpf/scripts/demque (the previous applicability rule patched in-process)",
+      "result": "1 failed, 8 passed: the ninth test fails (negative control FIRED-AS-EXPECTED); rc=1 as expected"
+    },
+    {
+      "tool": "python .scratch/stub_night_r2.py (stub night over a TEMPORARY store, stub fetch, stub Bloomberg frame, unresolved_path set; C4 has one 2019 trade)",
+      "invocation": "carried from commit 80a8479c2f; NOT re-run this pass",
+      "result": "carried: appended [100000011, 100000044]; appended_without_relock [100000044] with relock_reason 'trades predate the stored window; identity was proven on the full history at lock time'; held_restatement [100000022 PRICE_MISMATCH on the appended window, 100000033 gained_split]; UNRESOLVED_ROWS 1; Yahoo requests 0"
+    }
+  ]
+}
