@@ -4,6 +4,8 @@
   census --file F [--min N]                                 FB-l-3: the legacy-operation consumer census and the first zero-consumer case.
   retire --file F                                           FB-l-4: the one real retirement's record.
   move --file F                                             FB-l-5: the first moved trigger's record.
+  guarddiff --root R --file F --base-blob B                 FB-m-1: the readiness guard is purely additive against a pinned base blob.
+  readyhalt --file F                                        FB-m-2: the deployed readiness halt, three arms read live.
 Plain ASCII; exit 0 on a pass. Proves SHAPE and read-only discipline, never that a finding is true.
 """
 import argparse
@@ -205,6 +207,77 @@ def move(a):
     return 0
 
 
+def guarddiff(a):
+    """FB-m-1: the guard is PURELY ADDITIVE against a pinned base blob (no existing line changed or removed)."""
+    import difflib
+    import subprocess
+    try:
+        base = subprocess.run(["git", "-C", a.root, "show", a.base_blob], capture_output=True, timeout=30, check=True).stdout.decode("utf-8", "replace").splitlines()
+        cur = open(a.file, "rb").read().decode("utf-8", "replace").splitlines()
+    except (OSError, subprocess.SubprocessError) as e:
+        print("GUARDDIFF: FAIL cannot read: %s" % type(e).__name__)
+        return 1
+    sm = difflib.SequenceMatcher(None, base, cur, autojunk=False)
+    ins = 0
+    bad = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == "insert":
+            ins += j2 - j1
+        elif tag in ("replace", "delete"):
+            bad.append("%s at base line %d-%d" % (tag, i1 + 1, i2))
+    if bad:
+        print("GUARDDIFF: FAIL an existing line changed or was removed: " + "; ".join(bad[:4]))
+        return 1
+    if ins == 0 or ins > a.max_insert:
+        print("GUARDDIFF: FAIL inserted lines %d (want 1 to %d)" % (ins, a.max_insert))
+        return 1
+    print("GUARDDIFF: OK inserted=%d changed=0" % ins)
+    return 0
+
+
+def readyhalt(a):
+    """FB-m-2: the deployed readiness halt, three arms read live."""
+    raw, d = _load(a.file, "READYHALT")
+    if d is None:
+        return 1
+    p = _common("READYHALT", raw, d, ("order", "read_at", "signal", "deployed", "arms", "pair", "rollback", "ledger_closed", "claim"))
+    if p and p[-1].startswith("missing"):
+        print("READYHALT: FAIL " + "; ".join(p))
+        return 1
+    sg = d["signal"]
+    if not isinstance(sg, dict) or not str(sg.get("key", "")).strip() or not str(sg.get("writer", "")).strip() or "pipeline-complete.json" in str(sg.get("key")):
+        p.append("signal needs a key and a single writer, and the key is not the Door 6 marker")
+    dp = d["deployed"]
+    if not isinstance(dp, dict) or len(str(dp.get("code_sha256", ""))) != 44 and len(str(dp.get("code_sha256", ""))) != 64:
+        p.append("deployed needs the function CodeSha256")
+    ar = d["arms"]
+    ok = isinstance(ar, dict) and all(k in ar for k in ("complete", "incomplete", "log"))
+    if not ok:
+        p.append("arms needs complete, incomplete and log")
+    else:
+        if ar["complete"].get("published") is not True:
+            p.append("arm complete: published must be true")
+        inc = ar["incomplete"]
+        if inc.get("halted") is not True or inc.get("listing_before") is None or inc.get("listing_before") != inc.get("listing_after") or not isinstance(inc.get("listing_before"), int):
+            p.append("arm incomplete: halted true and the bucket listing equal before and after (integers)")
+        lg = ar["log"]
+        if lg.get("names_date") is not True or lg.get("names_signal") is not True:
+            p.append("arm log: the halt line must name the date and the missing signal")
+    pair = d["pair"]
+    if not isinstance(pair, dict) or not str(pair.get("coo_half", "")).strip() or not str(pair.get("cto_half", "")).strip():
+        p.append("pair needs coo_half and cto_half commits")
+    rb = d["rollback"]
+    if not isinstance(rb, dict) or rb.get("recorded") is not True or not str(rb.get("how", "")).strip():
+        p.append("rollback needs recorded true and how")
+    if d["ledger_closed"] is not True:
+        p.append("the ledger entry is not closed")
+    if p:
+        print("READYHALT: FAIL " + "; ".join(p[:6]))
+        return 1
+    print("READYHALT: OK signal=%s arms=3" % d["signal"]["key"])
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -216,11 +289,16 @@ def main():
     ce = sub.add_parser("census")
     ce.add_argument("--file", required=True)
     ce.add_argument("--min", type=int, default=10)
-    for nm in ("retire", "move"):
+    for nm in ("retire", "move", "readyhalt"):
         q = sub.add_parser(nm)
         q.add_argument("--file", required=True)
+    gd = sub.add_parser("guarddiff")
+    gd.add_argument("--root", required=True)
+    gd.add_argument("--file", required=True)
+    gd.add_argument("--base-blob", required=True)
+    gd.add_argument("--max-insert", type=int, default=120)
     a = ap.parse_args()
-    return {"plan": plan, "census": census, "retire": retire, "move": move}[a.cmd](a)
+    return {"plan": plan, "census": census, "retire": retire, "move": move, "readyhalt": readyhalt, "guarddiff": guarddiff}[a.cmd](a)
 
 
 if __name__ == "__main__":
