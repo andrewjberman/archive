@@ -1,0 +1,88 @@
+{
+  "producer": {
+    "name": "yang-model-portfolio-benchmarks",
+    "entry_file": "infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-model-portfolio-benchmarks/lambda_function.py",
+    "reads": [
+      {
+        "address": "s3://opal-data-portal-v2/benchmarks/LATEST.json",
+        "kind": "pointer JSON naming the latest data pickle (get_latest_data_pkl_key)"
+      },
+      {
+        "address": "s3://opal-data-portal-v2/benchmarks/",
+        "kind": "data pickle snapshots data_*_v1.pkl (return_daily and price_monthly, Yang canonical); not gold, not date-partitioned"
+      },
+      {
+        "address": "s3://opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json",
+        "kind": "served JSON read back by the publish guard (served data_as_of)"
+      }
+    ],
+    "writes": [
+      {
+        "address": "s3://opal-data-portal-v2/json/benchmarks/benchmark_returns.json",
+        "kind": "served JSON, legacy format"
+      },
+      {
+        "address": "s3://opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json",
+        "kind": "served JSON, comprehensive format (the object mdpf_get_model_benchmarks reads)"
+      },
+      {
+        "address": "s3://opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json",
+        "kind": "served JSON, per-date daily model series"
+      }
+    ]
+  },
+  "served": {
+    "tool": "mdpf_get_model_benchmarks",
+    "bucket": "opal-data-portal-v2",
+    "prefix": "json/benchmarks/model_portfolio_benchmarks.json",
+    "windows": ["1D", "WTD", "MTD", "1M", "QTD", "1Q", "YTD", "1Y", "Since Inception", "TTW"],
+    "dated_series": false,
+    "vintage": "current vintage only; the object carries period windows per model and no dated series",
+    "data_as_of_field": "data_as_of"
+  },
+  "dated_daily_model_series": {
+    "exists": false,
+    "address": null,
+    "columns": [],
+    "partitions": 0,
+    "evidence": "The producer reads no parquet and writes no parquet: it reads benchmarks/LATEST.json and one data pickle (lambda_function.py get_latest_data_pkl_key and load_pkl). One named-prefix LIST of the benchmarks/ prefix of opal-data-portal-v2 returned 229 keys, 218 of them dated pickle snapshots, none under a date= partition. The canon has no gold home for the yang source: address() refuses a yang gold address (lib/opal_naming.py address, _home_bucket). The dated daily return tables that exist sit inside the pickle snapshots and in the served object json/benchmarks/model_portfolio_timeseries.json; neither is gold. The LIST of the yang/ prefix at the bucket root returned 0 objects."
+  },
+  "benchmarks": [
+    {
+      "member_stem": "benchmark_ultra_short_term",
+      "served_name": "Ultra-Short Term",
+      "found_in_served": true
+    },
+    {
+      "member_stem": "benchmark_short_term",
+      "served_name": "Short Term",
+      "found_in_served": true
+    },
+    {
+      "member_stem": "benchmark_intermediate_term",
+      "served_name": "Intermediate Term",
+      "found_in_served": true
+    },
+    {
+      "member_stem": "benchmark_long_term",
+      "served_name": "Long Term",
+      "found_in_served": true
+    }
+  ],
+  "mapping_plan": {
+    "choice": "MAP_SERVED_PERIOD_FIGURES",
+    "windows_covered": ["qtd", "ytd", "last_12_months"],
+    "chart_available": false,
+    "label_words": "model-design returns as of data_as_of"
+  },
+  "recommendation": "The builder maps the four stems to the served model rows Ultra-Short Term, Short Term, Intermediate Term and Long Term in the served object (served windows QTD, YTD and 1Y, the last labelled as the last 12 months), leaves since inception and the chart absent, and prints the label model-design returns as of data_as_of. Mismatches the builder must carry: served 1Y is a trailing 365-calendar-day window, not a 12-calendar-month window; served 1Q is a rolling 91-day window and is not used; the producer annualizes served Since Inception while the contract labels the members cumulative, which is one reason since inception stays absent; the served figures are on the index-benchmark basis (index_benchmark key) and the rows must name that basis. A dated daily series exists only as served JSON and not in gold, so whether a served series may serve as a source is a CTO decision and not this read's.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0
+  },
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

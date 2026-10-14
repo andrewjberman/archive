@@ -1,23 +1,20 @@
-SESSION LOG -- 0.9.0_WK_IRPT_DASHBD~155 on IRPT_DASHBD.TO-DB-b-190 (read only; no write, deploy, push or vendor call)
-worktree: C:/dev/wk-irpt-dashbd-155 (branch wk-IRPT_DASHBD-155), base 166228e0d5
-step 0: git rev-parse --abbrev-ref HEAD -> wk-IRPT_DASHBD-155; test -d org and .tools -> TREE-OK; UTC 2026-10-14T02:43:29Z
-step 1: bash .tools/aws s3 ls s3://opal-data-cot/irpt/ -> rc 1, no output; same for opal-data-inf -> rc 1, no output (row S1)
-step 1: bash .tools/aws s3api list-objects-v2 --bucket opal-data-cot --prefix irpt/ -> KeyCount 0, IsTruncated false, rc 0; same for opal-data-inf -> KeyCount 0, rc 0
-step 1 control: s3api list-objects-v2 --bucket opal-data-cot --delimiter / -> CommonPrefixes returned, rc 0
-step 1 premise check (row S5): s3 ls of the 49 Financial irpt/49financial/ prefix, four top-level names, not used for any answer
-step 2: comp-estate --resource investor-reporting -> SUBJECT_ABSENT (135 chains); --resource irpt -> SUBJECT_ABSENT; --resource opal-data-cot -> one chain (row S6)
-step 2: comp-pipescript io holdings_snapshot.py -> OUT-OF-GRAPH, AST-derived map (row S6)
-step 2: data/firm_registry.json read: cottonwood bucket opal-data-cot, inflection bucket opal-data-inf
-step 2: holdings_snapshot.py firm_bucket_map read (lines 179-189); per-firm reads at lines 1327-1331, 1583-1586, 2309-2322, 2529
-step 2: s3api delimiter listings (prefix names only) of both firm buckets: investor-reporting/, gold/, silver/, bronze/, platinum/, blackdiamond/, orion/, eclipse/, qa/, backup/, config/, telemetry/, diagnostic/
-step 2: s3api list-objects-v2 with prefix investor-reporting/qa/holdings/ in both buckets -> two keys each (dated snapshot, latest pointer) (row S2, S7)
-step 2: sort_by latest key per candidate prefix (key names and sizes only)
-step 2: parquet column names and types read by range GET of the footer only, via .scratch/schema_probe.py run under python -I against the box's aws shim (row S4); no row values read or printed
-step 2: contract files listed by name and column names only: five of the eight C-SHAPE tables have a contract file under org/standards/
-step 2: ADVI household crosswalk contract read (org/standards/ADVI_BILLING_HOUSEHOLD_CROSSWALK_CONTRACT.json): scope is 49 Financial (advi/49financial/ prefix); no Cottonwood or Inflection coverage
-step 2: orion_cashflow_taxonomy.yaml located at data/inf/scripts/silver/orion_cashflow_taxonomy.yaml (existence only)
-step 3: FIRM_READINESS.json written in this folder (eight tables per firm, existing gold inputs, readiness, blockers, household dimension, shadow_pull_proposed false)
-step 3 mutant: p101_round101.py run before FIRM_READINESS.json existed -> "FAIL: no ...FIRM_READINESS.json", "DB101-4-AC1 FAIL", rc 1
-step 3: p101_round101.py run against the record -> "OK: both firms read against the eight tables: cottonwood BLOCKED, inflection BLOCKED", "DB101-4-AC1 PASS", rc 0
-step 3: scan of the record for runs of eight or more digits: zero matches; non-ASCII: none
-reads tally: vendor calls 0; S3 writes 0; DynamoDB writes 0; secret reads 0; S3 reads are LIST and range GET of key names, prefix names, and parquet footers only
+SESSION LOG -- 0.9.0_WK_IRPT_DASHBD~155 on IRPT_DASHBD.TO-DB-b-190, re-seat under amendment 1 (read only; no write, deploy, push or vendor call)
+worktree: C:/dev/wk-irpt-dashbd-155 (branch wk-IRPT_DASHBD-155); HEAD at start 35f5c9ba0d
+step 0: git rev-parse --abbrev-ref HEAD -> wk-IRPT_DASHBD-155; test -d org and test -d .tools -> TREE-OK
+step 1: lib/opal_naming.py address() per firm, tier gold, table account_return_daily (probe segment): cottonwood -> opal-data-cottonwood, inflection -> opal-data-inflection, rc 0
+step 1: .tools/aws s3 ls s3://opal-data-cottonwood/irpt/cottonwood/gold/ -> rc 0, seven prefixes (account_return_daily, account_return_daily_blank_reasons, dim_return_method, holdings, holdings_performance_daily, holdings_performance_manifest, holdings_qa)
+step 1: .tools/aws s3 ls s3://opal-data-inflection/irpt/inflection/gold/ -> rc 0, four prefixes (holdings, holdings_performance_daily, holdings_performance_manifest, holdings_qa); no account_return_daily
+step 1: top-level listings of both firm buckets and of irpt/<firm>/ (code, gold, platinum, state) and mdpf/ -> rc 0 each; no silver or bronze prefix in either firm bucket
+step 2: account_return_daily partitions of Cottonwood listed to a scratch file: 3325 PRE lines, 3325 date=YYYY-MM-DD, first 2013-04-03, last 2026-06-22
+step 2: other gold prefixes listed (partition counts only): holdings 10 Cottonwood and 12 Inflection; holdings_performance_daily 75 and 1621; holdings_performance_manifest 75 and 1621; holdings_qa 4 and 4; dim_return_method 1 (method_version=3); blank_reasons 1
+step 3: one range GET (bytes -1048576) per newest parquet object, 10 objects in total; each footer read in python -I with pyarrow.read_schema on the tail (zero-padded to the object's size); row values not read or printed
+step 3: Cottonwood account_return_daily newest partition: 19 columns; sha256 over sorted name:type lines EQUAL to the contract schema_hash
+step 3: footer columns: holdings 6 (both firms), holdings_qa 6 (both, identical schema), holdings_performance_daily 19 (Cottonwood) and 20 (Inflection), holdings_performance_manifest 24 and 25, dim_return_method 31, blank_reasons 4
+step 3: contract files under org/standards/ listed by name: five of the eight C-SHAPE tables have one (account_return_daily, account_class_daily, account_activity_daily, account_lot_realized, account_lot_unrealized_daily); account_transaction, account_dim, market_topic_daily have none
+step 4: data/firm_registry.json bucket fields read (opal-data-inf, opal-data-cot): NOT used as read targets (rows S9)
+step 4: holdings_snapshot.py firm_bucket_map read (lines 179-189) and its silver reads at lines 1336-1343, 1583-1598, 2316-2339 (code text only; the named buckets were not listed, rows S8)
+step 4: comp-which and comp-find 'household_crosswalk' (two pages); ADVI_BILLING household crosswalk record read: its key is under opal-data-49financial (row S12)
+step 4: PRD C-ADAPTERS, C-SOURCES and backlog section read (named sections only)
+step 5: p101_round101.py run against the refreshed record -> "OK: both firms read against the eight tables: cottonwood BLOCKED, inflection BLOCKED", "DB101-4-AC1 PASS", rc 0
+step 5: scratch directory .scratch holds listing text and footer bytes; it is gitignored and the parquet tails were deleted after the footer read (the first-seat rows S1-S7 stay as filed)
+reads tally: vendor calls 0; S3 writes 0; DynamoDB writes 0; secret reads 0; S3 reads are LIST of prefixes and partition names and one range GET per newest parquet object (footer only)
