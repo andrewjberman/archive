@@ -1,0 +1,88 @@
+--- a/data/black_diamond/scripts/silver/merge-daily-incremental.py
++++ b/org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/merge_daily_incremental.patched3.py
+@@ -84,6 +84,51 @@
+ UNREALIZED_MANIFEST_KEY = "silver/incremental_unrealized_manifest.json"
+ UNREALIZED_MIN_COL_COUNT = 10
+ 
++# BP-c-5 (ADVI_BDPRCE round 3, PRD v1.3 re-seat): lot-level unrealized. Lot key = relationship_id, account_id,
++# asset_id, open_date, unit_cost, UNITS (v1.3 ruling, call 67ac). Market Value does not join the key.
++# BP-b-6 (ADVI_BDPRCE round 2): lot-level unrealized. The template's Units (measure 15) and Cost Basis
++# (measure 16) columns are routed to silver/unrealized_lots, de-duplicated on the LOT key. They never reach
++# the legacy silver/unrealized table, which keeps its rows, columns and values.
++LOT_MEASURE_COLS = ['units', 'cost_basis']
++LOT_KEY_COLS = ['relationship_id', 'account_id', 'asset_id', 'open_date', 'unit_cost', 'units']  # BP-c-5 v1.3 key
++LOT_DATASET = ('blackdiamond', '49financial', 'silver', 'unrealized_lots')
++
++
++def build_unrealized_lots(df):
++    """Lot-level rows from one export frame. Returns (lot_df, rows_before, rows_after) or (None, 0, 0)."""
++    missing = [c for c in LOT_MEASURE_COLS + LOT_KEY_COLS if c not in df.columns]
++    if missing:
++        return None, 0, 0
++    # 'units' is both a key column and a measure: list each name once, or the lot frame carries a duplicate column.
++    cols = LOT_KEY_COLS + [c for c in LOT_MEASURE_COLS if c not in LOT_KEY_COLS] + [
++        c for c in ('asset_name', '_source_file', '_ingested_at') if c in df.columns]
++    lot = df[cols].copy()
++    before = len(lot)
++    lot = lot.drop_duplicates(subset=LOT_KEY_COLS, keep='first')
++    return lot, before, len(lot)
++
++
++def lot_address(file_date):
++    """The lot partition address, from the naming builder (never typed). None if the builder is not importable."""
++    try:
++        from lib.opal_naming import address
++    except Exception:
++        return None
++    return address(*LOT_DATASET, f'date={file_date}')
++
++
++def _s3_upload_addr(local_path, address_uri):
++    """Upload local_path to an s3:// address in any bucket (the lot table lives outside S3_BUCKET)."""
++    c = _s3c()
++    if c is None:
++        return False
++    bucket, key = address_uri[len('s3://'):].split('/', 1)
++    try:
++        c.upload_file(str(local_path), bucket, key + '/data.parquet')
++        return True
++    except Exception:
++        return False
++
+ 
+ # ============================================================================
+ # boto3-native S3 I/O (ADVI_BDAPIMIG D2b) -- Lambda-runnable. Replaces the prior aws-cli
+@@ -1202,6 +1247,11 @@
+             file_date = date_match.group(1) if date_match else datetime.now().strftime('%Y-%m-%d')
+             print(f"    Data date from filename (Timestamps fallback): {file_date}")
+ 
++        # BP-b-6: lot rows are built from the export BEFORE the legacy construction, and the measure
++        # columns are dropped from the frame the legacy table is built from.
++        lot_df, lot_before, lot_after = build_unrealized_lots(df)
++        df = df.drop(columns=[c for c in LOT_MEASURE_COLS if c in df.columns])
++
+         # Dedup by (account_id, asset_name) -- snapshot key
+         dedup_cols = ['account_id', 'asset_name']
+         available_dedup = [c for c in dedup_cols if c in df.columns]
+@@ -1219,6 +1269,21 @@
+         s3_key = f"{SILVER_UNREALIZED_PREFIX}/{parquet_filename}"
+         _s3_upload(parquet_path, s3_key)
+ 
++        if lot_df is None:
++            print("    SKIP: unrealized_lots -- export carries no Units/Cost Basis measure (template not switched on)")
++        else:
++            lot_uri = lot_address(file_date)
++            if lot_uri is None:
++                print("    FAIL: unrealized_lots -- naming builder not importable; lot table NOT written")
++            else:
++                lot_path = LOCAL_DIR / f"lots_{file_date}.parquet"
++                lot_df.to_parquet(lot_path, index=False, engine='pyarrow', compression='snappy')
++                if _s3_upload_addr(lot_path, lot_uri):
++                    print(f"    OK: unrealized_lots -> {lot_uri} ({lot_before:,} lot rows in, "
++                          f"{lot_after:,} lots after lot-key dedup)")
++                else:
++                    print(f"    FAIL: unrealized_lots upload to {lot_uri}")
++
+         print(f"  OK: {xlsx_filename} -> {s3_key} ({len(df)} rows, {len(df.columns)} cols)")
+         return s3_key, len(df)
+ 

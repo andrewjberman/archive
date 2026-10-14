@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-c-5.lot-key-proof",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-5.lot-key-proof.md",
+    "group": "OTHER",
+    "vintage_commit": "7d0be22d30"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R3.md",
+    "vintage_commit": "63d3478d7e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-5.lot-key-proof.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/merge_daily_incremental.patched3.py",
+      "kind": "script",
+      "commit_or_etag": "1d8ac40119",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "patched copy in the worker deliverables folder, committed LOCAL on wk-ADVI_BDPRCE-23; the repo silver step under data/ is not edited and nothing is deployed or scheduled",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/unrealized_lots3.diff",
+      "kind": "script",
+      "commit_or_etag": "1d8ac40119",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unified diff against HEAD data/black_diamond/scripts/silver/merge-daily-incremental.py, headers a/ and b/ as named in the file",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/test_lot_split3.py",
+      "kind": "script",
+      "commit_or_etag": "1d8ac40119",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline fixture test over the recorded export; no S3 write; the synthetic Units and Cost Basis are labelled synthetic in the file and the arms that use them say so",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/LOT_PROOF3.json",
+      "kind": "doc",
+      "commit_or_etag": "1d8ac40119",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "emitted by test_lot_split3.py --emit-proof; claim measured; carries the real five-column fold (192, equal to the independent recount) and the zero stated as deferred, not as a measured zero",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/LOT_PROOF3.md",
+      "kind": "doc",
+      "commit_or_etag": "1d8ac40119",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-page record: the key and why, the 192 and what it means, why a fixture cannot prove the zero, what the first real export must show, the CAP and paging reading, the round-2 rollback VersionId",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs test_lot_split3.py (^LOT SPLIT3 TEST: OK ([1-9][0-9]) arms$)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-23 && timeout 110 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/test_lot_split3.py",
+      "expect": "^LOT SPLIT3 TEST: OK ([1-9][0-9]) arms$",
+      "output_evidence": "LOT SPLIT3 TEST: OK 10 arms",
+      "denominator": "10 of 10 arms PASS; 0 FAIL. Arms 1-2 legacy sha256 d65ce03d4efb0ddd182f54ba0430a327c368eabf3fe3f5f00f896bbd689405ad (the round-2 value) with the clock pinned to seat ~17's value; 3 lot rows 500000 (SYNTHETIC units) > legacy rows 108439 and unique on the v1.3 key; 4 units and cost basis in the lot table only; 5 builder address; 6 SKIP path on the original export; 7 negative control; 8 relationship_id survives; 9 planted frame; 10 five-column fold 192 == recount 192",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed verdict line matches the expectation. Run twice, byte-identical (47 lines). Arm 9 planted frame: units differ -> 2 lots, units equal -> 1 lot. Arm 10: five-column fold through the patched module 192 == independent pandas recount 192. The zero-fold proof is deferred to the first real export under the apply's pair, as PRD v1.3 rules, and is not claimed here"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 runs r3_checks.py lotproof3 on LOT_PROOF3.json (^LOTPROOF3 record ok legacy_equal=true lots=[0-9]+ units_in_key=true folded_without_units=[0-9]+ recount_equal=true zero_fold=deferred$)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-23 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py lotproof3 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/LOT_PROOF3.json",
+      "expect": "^LOTPROOF3 record ok legacy_equal=true lots=[0-9]+ units_in_key=true folded_without_units=[0-9]+ recount_equal=true zero_fold=deferred$",
+      "output_evidence": "LOTPROOF3 record ok legacy_equal=true lots=500000 units_in_key=true folded_without_units=192 recount_equal=true zero_fold=deferred",
+      "denominator": "record gates: legacy_bytes_equal true (PASS); key_basis relationship_id with relationship_id in lot_key (PASS); units_in_key true and units in lot_key (PASS); folded_without_units 192 == recount_without_units 192 (PASS); zero_fold deferred_to_first_real_export (PASS); keyed_on_lot and builder address (PASS); new_columns_in_legacy empty (PASS); lot_rows 500000 int >= 1 (PASS). lots=500000 is the SYNTHETIC-units lot count, labelled in the record (lot_rows_basis) and in surprise row ADVI_BDPRCE-D1-W23-S1",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed record line matches the expectation; the grader proves the record's shape and arithmetic, not a measured zero"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged): ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-23 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-23 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md --allow org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-5.lot-key-proof.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing",
+      "denominator": "changed set: 7 paths (the patched copy, unrealized_lots3.diff, test_lot_split3.py, LOT_PROOF3.json, LOT_PROOF3.md, the instance, the investigation file); 0 outside the three allowed entries",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed verdict line matches the expectation; no path lies outside the allowed entries"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the five-column key (the pre-v1.3 key) in place of the v1.3 key on the planted frame of arm 9, through the same module function; the arm must catch it",
+      "expected": "the five-column key folds the two planted rows (1 of 2), so arm 9 would FAIL on it; the v1.3 key keeps both when units differ (2 lots) and folds them when units are equal (1 lot)",
+      "observed": "PLANTED: five-column key folds 1 of 2 rows; PLANTED: v1.3 key, units differ -> lot rows 2; units equal -> lot rows 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice at 0.9.0_WK_ADVI_BDPRCE~23 on the recorded export, stdout compared with cmp",
+      "observed": "two runs byte-identical, 47 lines each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the zero-fold under the v1.3 key on the recorded export",
+      "reason": "the recorded export carries no Units column, so no fixture can measure the zero; PRD v1.3 (call 67ac) defers it to the first real export under the apply's pair"
+    },
+    {
+      "item": "the template apply: no S3 write, no upload, no producer run, no export produced",
+      "reason": "the apply is WORLD and waits on the pair signed at the current bytes, on the CTO's ruling of this proof, and on a dell1 CloudOps lane"
+    },
+    {
+      "item": "a paged re-export of the capped 2026-10-09 snapshot",
+      "reason": "a Black Diamond producer run, not a read; the S3 key listing shows one daily object per date and no slice object, so the CAP paging plan cannot be run from readable data"
+    },
+    {
+      "item": "edit of the repo silver step under data/",
+      "reason": "patch copies only; the unified diff is written against HEAD and nothing is applied"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W23-S1: the v1.3 zero cannot be measured on the recorded export (no Units column); the synthetic units fold nothing by construction, so the grader's lots=500000 is a synthetic count; ARMED, disarm owner 2.0.0_SA_COO~K1",
+    "ADVI_BDPRCE-D1-W23-S2: the copied test derives its data directory from the worktree name; the export is in the first seat's data directory, so the copy reads it from the sibling and writes its own outputs",
+    "ADVI_BDPRCE-D1-W23-S3: the legacy parquet bytes carry _ingested_at, so the recorded legacy sha256 reproduces only under the pinned clock of seat ~17; the byte-equality arms pass at any clock"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "test_lot_split3.py",
+      "invocation": "cd /c/dev/wk-bdprce-r3-23 && timeout 110 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/test_lot_split3.py [--emit-proof]",
+      "result": "LOT SPLIT3 TEST: OK 10 arms, rc=0; LOT_PROOF3.json emitted with the real counts (folded_without_units 192 == recount 192; zero deferred)"
+    },
+    {
+      "tool": "aws s3api list-objects-v2 (read verb, via .tools/aws)",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-bd --prefix forwardfill_v2/unrealized/ --query Contents[].Key --output text",
+      "result": "rc=0; 91 keys: 76 daily UNREALIZED_DAILY xlsx (one per date), 15 _complete markers, 0 other; no slice object for 2026-10-09; the export's bytes were not re-fetched by this seat (sha256 verified locally against the recorded value)"
+    },
+    {
+      "tool": "r3_checks.py lotproof3",
+      "invocation": "cd /c/dev/wk-bdprce-r3-23 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py lotproof3 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/LOT_PROOF3.json",
+      "result": "LOTPROOF3 record ok ... zero_fold=deferred, rc=0"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "cd /c/dev/wk-bdprce-r3-23 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-23 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~23/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md --allow org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-5.lot-key-proof.md",
+      "result": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing, rc=0"
+    }
+  ]
+}
