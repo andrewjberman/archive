@@ -1,13 +1,15 @@
-"""BP-c-1 probe, AMENDMENT R1.3 as corrected by order section 1.000 (2026-10-14). Read-only; ASCII only.
+"""BP-c-1 probe, AMENDMENT R1.3 as corrected by order section 1.0000 (second correction, 2026-10-14). Read-only; ASCII only.
 
 The served unit of every served asset is read from SERVED PAIRS (served_unit_map, pairs of asset_name,
-served_price, per_unit_value):
+served_price, per_unit_value), one median per asset over all its pairs:
   - served pairs: the transaction_observed rows of the SERVED canonical series for 2026-09-16..2026-10-13
-    (silver/prices/canonical_prices.parquet), and, for each such (asset, date), the Buy / Sale / Dividend
-    Reinvestment / Income Reinvestment rows of that asset whose trade_date is that date, read from the verified
-    daily partitions (PARTITIONS2.csv; partitions dated 2026-09-16..2026-10-14 are read because clause 6 keys a
-    row on its trade_date, not its file). per_unit_value = |market_value| / |units| of the trade row;
-  - lot pairs: the round-2 lot extract's (current_price, |market_value| / |quantity|) as a second source.
+    (silver/prices/canonical_prices.parquet). For each such (asset, date):
+      (1) nearest_earlier_pairs: the most recent EARLIER trade row of that asset (trade_date before the served
+          date), searched over every verified cached partition (PARTITIONS2.csv: tx_back and tx);
+      (2) trade_pairs: the Buy / Sale / Dividend Reinvestment / Income Reinvestment rows of that asset whose
+          trade_date is that served date, from the verified daily partitions 2026-09-16..2026-10-14 (clause 6 keys
+          a row on its trade_date, not its file). per_unit_value = |market_value| / |units| of the trade row;
+  - lot_pairs: the round-2 lot extract's (current_price, |market_value| / |quantity|) as a third source.
 Then R1.3 (bd_price_rule.py) runs over the real partitions for the probe dates, reading each date and the next.
 
 Inputs: the canonical series and the asset dimension (fetched this session with `.tools/aws s3api get-object`, a READ
@@ -26,6 +28,7 @@ Run at this path, from the worktree root (PYTHONDONTWRITEBYTECODE=1 keeps __pyca
       --read-at <ISO UTC> --out <path>
 """
 import argparse
+import bisect
 import csv
 import hashlib
 import json
@@ -207,6 +210,56 @@ def trade_pairs(manifest, cache, served_price, served_assets, R):
     return pairs, stats
 
 
+def nearest_earlier_pairs(manifest, cache, served_price, served_assets, R):
+    """AMENDMENT R1.3 second correction (section 1.0000): for each served (asset, date), ONE pair from the asset's most
+    recent EARLIER trade row -- trade_date strictly before the served date, a type in TRADE_TYPES_A, a computable
+    per-unit value -- searched over EVERY verified cached partition (the manifest lists all of them: tx_back and tx,
+    each md5-checked before it is read). Clause 6: trade_date keys a row, never its file. Ties on the latest earlier
+    trade date take the first row in partition-date order, then file order (deterministic). The same-date trades are
+    a separate source (trade_pairs); a served date with no earlier cached trade gets no pair from this source.
+    Returns (pairs, stats)."""
+    end = pd.Timestamp(PAIR_END)
+    per_asset = {}  # asset -> list of (trade_date, seq, per_unit_value)
+    seq = 0
+    stats = {'partitions_read': 0, 'rows_scanned': 0, 'earlier_trade_rows_on_served_assets': 0,
+             'rows_without_usable_per_unit': 0}
+    for key in sorted(manifest):
+        day = _date.fromisoformat(key)
+        path, _md5v = checked_partition(manifest, day, cache)
+        t = pd.read_parquet(path, columns=COLS)
+        stats['partitions_read'] += 1
+        stats['rows_scanned'] += int(len(t))
+        tdt = pd.to_datetime(t['trade_date'], errors='coerce')
+        on_served = t['asset_name'].astype(str).isin(sorted(served_assets)) & t['transaction_type'].isin(list(R.TRADE_TYPES_A))
+        sub = t.loc[on_served & (tdt < end)]
+        for tdate, name, units, mv in zip(tdt[sub.index], sub['asset_name'], sub['units'], sub['market_value']):
+            if pd.isna(tdate):
+                continue
+            stats['earlier_trade_rows_on_served_assets'] += 1
+            pu = _per_unit(units, mv)
+            if pu is None:
+                stats['rows_without_usable_per_unit'] += 1
+                continue
+            per_asset.setdefault(str(name), []).append((tdate.date(), seq, pu))
+            seq += 1
+    for name in per_asset:
+        per_asset[name].sort(key=lambda e: (e[0], e[1]))
+    pairs = []
+    for (d, asset), served in sorted(served_price.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+        entries = per_asset.get(asset)
+        if not entries:
+            continue
+        keys = [(e[0],) for e in entries]
+        pos = bisect.bisect_left(keys, (d,)) - 1  # last entry with trade_date < d
+        if pos < 0:
+            continue
+        latest = entries[pos][0]
+        first = bisect.bisect_left(keys, (latest,))  # first row of the latest earlier trade date
+        pairs.append((asset, served, entries[first][2]))
+    stats['assets_with_earlier_trade_in_cache'] = len({a for a, _p, _u in pairs})
+    return pairs, stats
+
+
 def lot_pairs(lots, served_assets):
     """The lot extract's (current_price, |market_value| / |quantity|) pairs for the served assets."""
     out = []
@@ -237,10 +290,11 @@ def build(args, R, manifest):
 
     # ---- the served series and the served unit of every served asset (AMENDMENT R1.3 clause 1, section 1.000) ----
     served_price, served_assets, observed_rows = served_series(args.canonical)
+    npairs, nstats = nearest_earlier_pairs(manifest, cache, served_price, served_assets, R)
     tpairs, tstats = trade_pairs(manifest, cache, served_price, served_assets, R)
     lots = pd.read_csv(args.lots, usecols=LOT_COLS)
     lpairs, lstats = lot_pairs(lots, served_assets)
-    rows = [(a, p, u) for a, p, u in tpairs] + [(a, p, u) for a, p, u in lpairs]
+    rows = [(a, p, u) for a, p, u in npairs] + [(a, p, u) for a, p, u in tpairs] + [(a, p, u) for a, p, u in lpairs]
     rows += [(a, None, None) for a in sorted(served_assets)]  # every served asset is present; no pair -> unreadable
     pair_frame = pd.DataFrame(rows, columns=['asset_name', 'served_price', 'per_unit_value'])
     unit_map = R.served_unit_map(pair_frame)
@@ -249,8 +303,25 @@ def build(args, R, manifest):
                    'per100': sum(1 for u in served_units.values() if u == 'per100'),
                    'per_unit': sum(1 for u in served_units.values() if u == 'per_unit'),
                    'unreadable': sum(1 for u in served_units.values() if u == 'unreadable')}
+    assets_with_nearest_pair = len({a for a, _p, _u in npairs})
     assets_with_trade_pair = len({a for a, _p, _u in tpairs})
     assets_with_lot_pair = len({a for a, _p, _u in lpairs})
+    per_source_resolved = {
+        'nearest_earlier_trade': assets_with_nearest_pair,
+        'same_date_trade': assets_with_trade_pair,
+        'lot_extract': assets_with_lot_pair,
+        'any_source': len({a for a, _p, _u in npairs} | {a for a, _p, _u in tpairs} | {a for a, _p, _u in lpairs}),
+    }
+    unreadable_no_pair = sum(1 for a in served_units if served_units[a] == 'unreadable' and unit_map[a][1] is None)
+    per100_names = sorted(a for a, u in served_units.items() if u == 'per100')
+    unit_census = {
+        'unreadable_assets': [{'asset_name': a, 'median_ratio': unit_map[a][1],
+                               'reason': 'no_usable_pair' if unit_map[a][1] is None else 'ratio_outside_bands'}
+                              for a in sorted(served_units) if served_units[a] == 'unreadable'],
+        'per_unit_ratio_outside_0_9_to_1_1': [{'asset_name': a, 'median_ratio': unit_map[a][1]}
+                                              for a in sorted(served_units)
+                                              if served_units[a] == 'per_unit' and not (0.9 <= unit_map[a][1] <= 1.1)],
+    }
 
     # The lot extract's served current price (median per asset): the reference for unit_changed (as round 3 built it).
     lot_price = lots.groupby('asset_name')['current_price'].median().to_dict()
@@ -382,6 +453,16 @@ def build(args, R, manifest):
             unchanged += 1 if eq else 0
         entries.append(e)
 
+    withheld_unit_by_asset = {}
+    for t in TARGETS:
+        for a, slot in wh[t].items():
+            n = slot['reasons'].get('unit_unreadable', 0)
+            if n:
+                w = withheld_unit_by_asset.setdefault(a, {'rows': 0, 'dates': [],
+                                                          'served_unit': served_units.get(a, 'unreadable'),
+                                                          'median_ratio': unit_map[a][1] if a in unit_map else None})
+                w['rows'] += n
+                w['dates'].append(t)
     scaled_pairs = []
     for t in TARGETS:
         for a in res[t]:
@@ -415,6 +496,7 @@ def build(args, R, manifest):
         'unit_unreadable_rows': sum(census[t]['unit_unreadable_rows'] for t in TARGETS),
         'unit_scale_rows_unchanged': unchanged,
         'unit_scale_rows_total': len(served),
+        'withheld_unit_unreadable_by_asset': {a: withheld_unit_by_asset[a] for a in sorted(withheld_unit_by_asset)},
     }
     return {
         'order': 'BP-c-1',
@@ -426,19 +508,28 @@ def build(args, R, manifest):
         'reinvestment_in': ('Dividend Reinvestment' in R.TRADE_TYPES_A and 'Income Reinvestment' in R.TRADE_TYPES_A),
         'transfer_in_out': ('Transfer In' not in R.TRADE_TYPES_A),
         'extract_sha256': sources['lot_extract.csv sha256'],
-        'units_source': ('two sources, one median per asset (served_unit_map, section 1.000): (1) the served canonical series '
+        'units_source': ('three sources, one median per asset over all its pairs (served_unit_map, section 1.0000): '
+                         '(1) nearest_earlier_trade: for each served (asset, date) of the served canonical series '
                          'silver/prices/canonical_prices.parquet (md5 %s), its source transaction_observed rows for '
-                         '2026-09-16..2026-10-13 (%d rows, %d assets), each paired with the same-date Buy, Sale, Dividend '
-                         'Reinvestment and Income Reinvestment rows of that asset (per_unit_value = |market_value| / |units|, '
-                         'read from the verified daily partitions, trade_date keyed); (2) the lot extract lots (current_price, '
-                         '|market_value| / |quantity|) of the served assets. Bands: 10 percent of 100 -> per100, 10 percent of 1 -> per_unit.'
-                         % (sources['canonical_prices.parquet md5'], observed_rows, len(served_assets))),
+                         '2026-09-16..2026-10-13 (%d rows, %d assets), the most recent EARLIER trade row of that asset '
+                         '(trade_date before the served date; types Buy, Sale, Dividend Reinvestment, Income Reinvestment; '
+                         'per_unit_value = |market_value| / |units|) searched over all %d verified cached partitions '
+                         '(tx_back and tx, md5-checked); (2) same_date_trade: the same types on the served date itself, '
+                         'from the verified daily partitions 2026-09-16..2026-10-14, trade_date keyed; (3) lot_extract: the '
+                         'lot extract lots (current_price, |market_value| / |quantity|) of the served assets. Bands (coarse, '
+                         'inclusive, on the median ratio): [50, 200] -> per100; [0.5, 2] -> per_unit; else unreadable.'
+                         % (sources['canonical_prices.parquet md5'], observed_rows, len(served_assets), len(manifest))),
         'served_units': units_count,
-        'served_pairs': {'trade_pairs': len(tpairs), 'lot_pairs': len(lpairs),
+        'unit_census': unit_census,
+        'unreadable_with_no_pair': unreadable_no_pair,
+        'per100_assets': per100_names,
+        'resolved_by_source': per_source_resolved,
+        'served_pairs': {'nearest_earlier_pairs': len(npairs), 'same_date_trade_pairs': len(tpairs),
+                         'lot_pairs': len(lpairs),
+                         'assets_with_nearest_pair': assets_with_nearest_pair,
                          'assets_with_trade_pair': assets_with_trade_pair, 'assets_with_lot_pair': assets_with_lot_pair,
-                         'assets_with_no_pair': units_count['assets'] - len(
-                             {a for a, _p, _u in tpairs} | {a for a, _p, _u in lpairs}),
-                         'trade_scan': tstats, 'lot_scan': lstats},
+                         'assets_with_no_pair': units_count['assets'] - per_source_resolved['any_source'],
+                         'nearest_scan': nstats, 'trade_scan': tstats, 'lot_scan': lstats},
         'lot_skips': lot_skips,
         'unit_changed_assets': unit_changed,
         'par_quoted': par,
