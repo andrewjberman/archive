@@ -41,6 +41,7 @@ SAMPLE_DIR = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~167/"
 KINDS = ("NO_SOURCE_YET", "INSUFFICIENT_HISTORY", "SOURCE_BREAK")
 UNHELD = "UNHELD"
 V041_SHA = "c43306eb8681648025fbdbe548afc9de3d175d132ab9db81afcc42f0630124e5"
+V042_SHA = "e9c389b75c1981bfe8a2aee9ebb8b0b21f45c686071b75950bb5db2e806e151d"
 SERIES_V010_SHA = "40cef6203cbfa109cae26209a9d241b82d6b1071f316c9f71f39d16913853e94"
 CONTRACT_REL = "org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json"
 SERIES_REL = "org/standards/IRPT_DASHBD_SERIES_CONTRACT.json"
@@ -218,7 +219,8 @@ def check_kind(root):
     r = P.load(root, D + "0.9.0_WK_IRPT_DASHBD~167/KIND_CARRIER_R105.json")
     c = P.contract(root)
     doc = c["document"]
-    need(c["contract_version"] == "0.4.2" and any(x.get("sha256") == V041_SHA for x in c.get("lineage") or []), "the contract must be 0.4.2 with the 0.4.1 bytes (sha256 %s...) in its lineage" % V041_SHA[:12])
+    ver = tuple(int(x) for x in str(c.get("contract_version") or "0.0.0").split("."))
+    need(ver >= (0, 4, 2) and any(x.get("sha256") == V041_SHA for x in c.get("lineage") or []), "the contract must be 0.4.2 or later (a later text edit keeps this round's change) with the 0.4.1 bytes (sha256 %s...) in its lineage" % V041_SHA[:12])
     need(doc.get("absent_kinds") == list(KINDS), "document.absent_kinds must be exactly %s" % list(KINDS))
     ur = str(doc.get("unheld_rule") or "")
     need(UNHELD in ur and "dash" in ur.lower() and "by_row" in ur, "document.unheld_rule must say that a by_row asset-class entry holding the text UNHELD prints the baseline's dash")
@@ -230,7 +232,8 @@ def check_kind(root):
     sp = str(s.get("path") or "").replace("\\", "/")
     need(sp.startswith(SAMPLE_DIR) and sp.endswith("HOUSEHOLD_SAMPLE.json") and Path(sp).is_file(), "sample.path must be the private HOUSEHOLD_SAMPLE.json under %s" % SAMPLE_DIR)
     need(not sp.startswith(str(root.resolve()).replace("\\", "/").rstrip("/") + "/"), "the sample is inside the repo: client data never goes there")
-    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") == sha(root / CONTRACT_REL), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes")
+    # a record bound to the 0.4.2 bytes stays valid through the lineage after a later text-only edit (0.4.3)
+    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") in (sha(root / CONTRACT_REL), V042_SHA), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes (current, or the 0.4.2 bytes this round built against)")
     sm = P.sample_json(sp)
     check_sample_shape_k(sm, c)
     prob = kind_problems(sm["values"], c)
