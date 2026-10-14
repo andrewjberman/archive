@@ -1,0 +1,149 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-j-9",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-9.ingress-mark-four-hour-freshness.md",
+  "group": "OTHER",
+  "vintage_commit": "349d687606"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round18.md",
+  "vintage_commit": "349d687606",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-j-9.ingress-mark-four-hour-freshness.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~23",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/ingress_mark.py",
+   "kind": "script",
+   "commit_or_etag": "b4c5218661",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MAX_AGE_S = 4 * 3600 (was 15 * 60), with a comment naming the queue's 3600 s redelivery. MAX_AHEAD_S unchanged at 5 minutes. verify() unchanged. No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj9-AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+   "kind": "script",
+   "commit_or_etag": "b4c5218661",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MARKS_KEEP removed; REFUSALS_KEEP = 50 kept; MARK_MODES unchanged. New _held_marks(ctx): state[marks_seen] as {mark, at} entries, a bare mark string is held dated now, an entry older than ingress_mark.MAX_AGE_S from ctx.now() is dropped, every entry inside the window is kept (no count cap); it writes the list back. _mark_refused uses it: a replayed mark is replayed-mark, an accepted mark is appended as {mark, at: mark_at}; a refusal appends {at, reason, kind, tag} (tag only when the payload's tag is a string) and nothing else from the payload. _mode, dispatch, the reasons and unmarked_seen are unchanged. No AWS call; not deployed.",
+   "artifact_covered_by": [
+    "CAj9-AC1",
+    "CAj9-AC2",
+    "CAj9-AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/transcripts/scripts/tests/test_ingress_mark.py",
+   "kind": "test",
+   "commit_or_etag": "b4c5218661",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Updated: the window test is four hours back and five minutes forward (3h59m ok, 4h01m stale, +6m stale, +4m ok); the refusal-reasons test uses a 4h01m stale mark and checks the new record fields; the cap test is now the refusal-list cap plus no accepted-mark cap (105 held, the first replayed refused). Added: a replay at 3h59m is replayed-mark; a mark 4h01m old is stale-mark; 150 marks in the window are all held and the first replayed is refused; a mark older than the window is no longer held after a later delivery; a refusal carries kind and tag and never the payload note or the mark; a legacy bare mark string is held, dated now, and ages out. Measured: 23 passed in this file.",
+   "artifact_covered_by": [
+    "CAj9-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAj9-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j9_fresh.py\" expect: J9-FRESH ok=True arms=7 of 7",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j9_fresh.py\"",
+   "output_evidence": "(run from the worktree root on commit b4c5218661, rc 0) J9-FRESH ok=True arms=7 of 7 failed=none reason=none. Base 349d687606, before this order's edits (rc 0): J9-FRESH ok=False arms=1 of 7 failed=edge;redelivery;replay;nocap;prune;refusal-fields reason=none.",
+   "denominator": "7 of 7 arms pass: edge, redelivery, replay, nocap, prune, refusal-fields, regress (regress runs check_j1_mark.py as a subprocess and reads J1-MARK ok=True arms=9 of 9)",
+   "expect": "J9-FRESH ok=True arms=7 of 7",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAj9-AC2",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "output_evidence": "(run from the worktree root on commit b4c5218661, rc 0) I2-REGRESSION ok=True passed=64 failed=0 reason=none. The wider scope the criterion names (the assistant's flow tests, the text path included) was run as the whole set: python -m pytest data/transcripts/scripts/tests -q -p no:cacheprovider from the worktree root, output '550 passed in 77.70s', rc 0.",
+   "denominator": "64 of 64 in test_teams_chat_tenant.py (the invocation's own scope); 550 passed, 0 failed across data/transcripts/scripts/tests (the wider flow-test set)",
+   "expect": "I2-REGRESSION ok=True",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAj9-AC3",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\" expect: I13-FRESH ok=True arms=6 of 6",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\"",
+   "output_evidence": "(run from the worktree root on commit b4c5218661, rc 0) I13-FRESH ok=True arms=6 of 6 failed=none reason=none.",
+   "denominator": "6 of 6 arms pass: one-hour-old-acts, just-inside-24h-acts, 25h-old-refused, ten-minutes-future-refused, missing-signed-at-refused, unparsable-signed-at-refused",
+   "expect": "I13-FRESH ok=True arms=6 of 6",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "CAj9-AC1 run against the base 349d687606, before this order's edits (the first run in the worktree)",
+   "expected": "J9-FRESH ok=False (the check prints ok=False at the base)",
+   "observed": "J9-FRESH ok=False arms=1 of 7 failed=edge;redelivery;replay;nocap;prune;refusal-fields reason=none",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "CAj9-AC1 run twice on commit b4c5218661; the J9-FRESH lines compared",
+   "observed": "two runs identical: J9-FRESH ok=True arms=7 of 7 failed=none reason=none (rc 0 both)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "deploy, AWS calls, network, the mode",
+   "reason": "the order says the change is not deployed here; no AWS call and no network call was made; INGRESS_MARK_MODE is not set by this order"
+  },
+  {
+   "item": "the issuer's three checks",
+   "reason": "the order says read them and do not edit them; none was edited"
+  },
+  {
+   "item": "the negative control that restores a count cap",
+   "reason": "not run by this worker; the nocap arm of CAj9-AC1 is the only count-cap check measured"
+  }
+ ],
+ "surprises": [
+  "COMM_ASSIST-W23-S1: BUILD step 2 names a bare mark string and a {mark, at} dict; a dict whose at cannot be read is re-dated to now by the code. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "COMM_ASSIST-W23-S2: BUILD step 3 names five new tests; a sixth, for the legacy bare-string tolerance, was added. OBSERVATION, INERT, UNDER_INVESTIGATION."
+ ],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~23/COMM_ASSIST.TO-CA-j-9.ingress-mark-four-hour-freshness.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r18/checks/check_j9_fresh.py\"",
+   "result": "J9-FRESH ok=True arms=7 of 7 failed=none reason=none (base 349d687606: ok=False arms=1 of 7)"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "result": "I2-REGRESSION ok=True passed=64 failed=0 reason=none"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i13_fresh.py\"",
+   "result": "I13-FRESH ok=True arms=6 of 6 failed=none reason=none"
+  },
+  {
+   "tool": "pytest (ingress mark file)",
+   "invocation": "python -m pytest data/transcripts/scripts/tests/test_ingress_mark.py -q -p no:cacheprovider",
+   "result": "23 passed, rc 0"
+  },
+  {
+   "tool": "pytest (wider set)",
+   "invocation": "python -m pytest data/transcripts/scripts/tests -q -p no:cacheprovider (from the worktree root)",
+   "result": "550 passed in 77.70s, rc 0; 0 failed"
+  },
+  {
+   "tool": "commit gate",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_COMM_ASSIST~23 <0.9.0_WK_COMM_ASSIST~23@opal.agent>\" -F .scratch/msg_caj9_code.txt -- data/transcripts/scripts/teams_chat/ingress_mark.py data/transcripts/scripts/teams_chat/tenant.py data/transcripts/scripts/tests/test_ingress_mark.py",
+   "result": "rc 0; commit b4c5218661; commit-gate, surprise-row-gate and to-pipeline-gate OK; client account-id list ABSENT on this box (WARN, a known box-level condition)"
+  }
+ ]
+}
