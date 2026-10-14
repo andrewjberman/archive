@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gr-3.the-grounding-step-checks-every-sentence-against-its-sources",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "d88fca1f84",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-3.the-grounding-step-checks-every-sentence-against-its-sources.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-3.the-grounding-step-checks-every-sentence-against-its-sources.md",
+    "group": "OTHER",
+    "vintage_commit": "d88fca1f84"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~452",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/grounding.py",
+      "kind": "script",
+      "commit_or_etag": "6a405762af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib module on the wk-AMGT_RESAPP-452 branch; no deploy, no AWS call, no network; the producer wiring that calls ground_block before storing a block is a later cell (gr-5)"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_grounding.py",
+      "kind": "test",
+      "commit_or_etag": "6a405762af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module, 47 passed of 47 collected; every model call a stub, every source a hand-made dict"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL GR-3 ARMS: YES (N of N)` with N equal to 18, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-452 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr3_grounding.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM the same inputs give the same record and text        PASS ok\nARM an empty text: ok False, no model call               PASS (False, 0)\nARM the module is ASCII and does no network of its own (the model and the sources arrive as arguments) PASS non-ASCII or a forbidden import\nAIFILL GR-3 ARMS: YES (18 of 18)\nexit=0",
+      "denominator": "18 of 18 arms; the full run printed 18 ARM lines carrying PASS and zero FAIL lines (counted on a second full run)",
+      "status": "PASS",
+      "status_reason": "the deciding line AIFILL GR-3 ARMS: YES (18 of 18) is printed, the full run has no FAIL arm line, and exit=0.",
+      "expect": "AIFILL GR-3 ARMS: YES \\(18 of 18\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-452 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_grounding.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "...............................................                          [100%]\n47 passed in 0.20s\nexit=0",
+      "denominator": "47 passed of 47 collected; 0 failed; 0 errors; the module defines 42 test functions (one parametrized over 6 statuses)",
+      "status": "PASS",
+      "status_reason": "the last non-empty line before exit= is 47 passed in 0.20s; 47 is at least the 42 defined functions; no failed or error line in the last three; exit=0.",
+      "expect": "[0-9]+ passed in [0-9.]+s\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant; the two criteria grade the built module against its own stub-model arms",
+      "expected": "N/A",
+      "observed": "no mutant named by the order",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: both criteria are offline and deterministic; AC1 and AC2 were each run twice on the same bytes",
+      "observed": "AC1 printed AIFILL GR-3 ARMS: YES (18 of 18) on both runs with zero FAIL lines; AC2 printed 47 passed on both runs (wall time 0.22s then 0.20s)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real model call and any live source fetch through the grounding pass",
+      "reason": "order egress class NONE: the model and the sources are arguments; every test uses a stub model and hand-made source dicts"
+    },
+    {
+      "item": "the producer wiring that calls ground_block before a block is stored",
+      "reason": "a later cell (gr-5 per the decomposition); this cell is the library and its tests only"
+    },
+    {
+      "item": "a length cap on a returned verbatim quote (200 characters)",
+      "reason": "the order states the 200-character limit as a prompt instruction only; the mechanical check verifies a quote by its presence in the source text, which does not depend on its length"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W452-S1: a CONTRADICTED sentence is recorded with source null and quote null because the order does not state what it records in those fields; the record does not name the newer source that contradicted it. OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R2.",
+    "AMGT_RESAPP-D1-W452-S2: read literally, the quote rule accepts a SUPPORTED quote that normalises to nothing (punctuation only, 12 or more characters), since the empty string is a substring of every text; the module refuses it. OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R2.",
+    "AMGT_RESAPP-D1-W452-S3: an OK source with empty text is not usable but keeps status OK in the record; fetch_source does not emit that case, so it arises only from a hand-built source. OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R2."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~452/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "check_gr3_grounding.py",
+      "invocation": "PYTHONPATH=<worktree> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr3_grounding.py",
+      "result": "AIFILL GR-3 ARMS: YES (18 of 18); exit=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=<worktree> python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_grounding.py",
+      "result": "47 passed in 0.20s; exit=0"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/grounding.py lib/research/aifill/tests/test_grounding.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
