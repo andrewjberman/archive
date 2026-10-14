@@ -1,0 +1,43 @@
+{
+  "address_args": ["irpt", "cottonwood", "gold", "account_dim", "date=2026-10-12"],
+  "keys_written": [
+    {
+      "bucket": "opal-data-cottonwood",
+      "prefix": "irpt/cottonwood/gold/account_dim/",
+      "objects_per_partition": 2
+    }
+  ],
+  "rollback": "Delete the two keys the apply writes (data.parquet and manifest.json under date=2026-10-12), removing the version ids the apply created so the prefix returns to empty; the bucket versioning is Enabled, so a plain delete would only add a delete marker. This is an S3 delete and needs human confirmation before it runs. No other key is touched.",
+  "no_other_key_moves": true,
+  "writes_in_this_cell": false,
+  "counts": {
+    "accounts": 999,
+    "relationship_ids": 223,
+    "partitions_written_by_the_apply": 1
+  },
+  "adapter_file": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_account_dim.py",
+  "adapter_sha256": "a6b9f1fc750bcfa10d86484452877f375bcbb24b6fc4f864ce8580dd58867fcc",
+  "applier": "An AE-class applier (the AE seat class, cloud-ops) named by the applier's own order. No applier exists at HEAD; the adapter has no upload path (emit_account_dim raises NotImplementedError for upload=True).",
+  "run_command_shape": "NOT EXISTING AT HEAD. The applier's order must add the entry point. Shape to add, following the producer's flag convention (account_return_daily.py main(): --upload, default off): python <applier entry point> --firm cottonwood --as-of 2026-10-12 --upload. No live run in this cell.",
+  "writers_of_the_property": [
+    "COUNT 0: no code writer of irpt/cottonwood/gold/account_dim/ at a1d871ec33 in data/, infra/ or lib/",
+    "the adapter cottonwood_account_dim.py names account_dim but writes nothing (upload refused by design)",
+    "the 49F producer account_return_daily.py writes account_return_daily/ and dim_return_method/ only",
+    "the reporting-gold role may write only the account_return_daily, account_class_daily and activity and lot gold prefixes (its iam.tf)",
+    "the reporting-publish role writes only the platinum reporting prefix",
+    "NOT ESTABLISHED: the holdings-performance role and any human principal (not read)"
+  ],
+  "both_branches": "Lands: both keys exist and the prefix holds exactly two objects, no other key moves. Fails before data.parquet finishes: the stream writer aborts and nothing lands. Fails after data.parquet and before manifest.json: a partial partition (data.parquet with no manifest.json), detected by listing the partition prefix; rollback removes whatever keys exist.",
+  "packet_file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~165/ACCOUNT_DIM_GOLD_PACKET.md",
+  "packet_sha256": "1dcc3653418f13f40201b2ccb97aa21405c04fbb495d5c01b3322a7042f75f8a",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

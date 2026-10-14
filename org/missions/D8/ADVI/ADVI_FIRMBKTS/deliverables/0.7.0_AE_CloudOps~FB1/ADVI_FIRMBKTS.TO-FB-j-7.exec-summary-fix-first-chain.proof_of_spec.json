@@ -1,0 +1,90 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-j-7",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-7.exec-summary-fix-first-chain.md",
+  "group": "OTHER",
+  "vintage_commit": "86d0344e44"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-7.exec-summary-fix-first-chain.md",
+  "vintage_commit": "86d0344e44"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-bd/code/gold/gold_dispatch.sh (VersionId .bNYVetB5sGV8bZki7EgXBfChCH_uPyE, sha256 bddbcaf7a1cc755f3ff4d900507f3dc08782a01e7f4eb6258194bbb493ca8d8b)",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "aws s3 cp at 2026-10-14T01:48:58Z; read back 2026-10-14 ~11:2xZ: sha256 equal to the repo file at f0055f3942; the 04:01Z chain ran it (emitted line, no put-events WARN)",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "f0055f3942"
+  },
+  {
+   "path_or_key": "lambda exec-summary-generator environment EXEC_SUMMARY_DISABLED_SLOTS = all six slots (CodeSha256 edeEcjP8Sz7IuvksnakiVayP3H3UQuJ3Aa3kPrDhhH0= unchanged)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "get-function-configuration at 2026-10-14 ~11:2xZ: LastModified 2026-10-14T01:48:00Z, six slots",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "1607b7898a"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/FIRST_CHAIN_READ.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "605714a441"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py firstchain --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/FIRST_CHAIN_READ.json",
+   "expect": "^FIRSTCHAIN record ok regenerated=[0-9]+ invocations=[1-9][0-9]*$",
+   "output_evidence": "FIRSTCHAIN record ok regenerated=194 invocations=1",
+   "denominator": "one chain (chain:full, 2026-10-14T04:01:18Z to 06:12:39Z); 194 named keys, 194 read; CloudTrail PutEvents lookup 0 events with a control (271 events.amazonaws.com events, none PutEvents); run at grader 8606f7305e (amendment 9) after adding chain.triggered_rules_sum 1; the first run, before amendment 9, read FAIL on the CloudTrail PutEvents clause only",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py firstchain --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/FIRST_CHAIN_READ.json",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. The control: the same CloudTrail window, source events.amazonaws.com, returns events, so the lookup works and PutEvents is simply not among what it returns.",
+   "expected": "events returned for the source, none named PutEvents",
+   "observed": "271 events (DescribeRule, ListTargetsByRule, ListTagsForResource, ListEventBuses), 0 PutEvents",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one chain; the CTO read the same 194 keys independently (1607b7898a, MEASURED_20261014_103xZ)",
+   "observed": "same counts: 194 keys, first 06:12:44Z, last 06:13:57Z, 0 non-empty bullets",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "CloudTrail S3 PutObject data events for the first regenerated key",
+   "reason": "not available; the writer is stated as inferred from the VersionId timestamp and the generator's log"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-S56: CloudTrail lookup never returns PutEvents; resolved by the issuer in AMENDMENT 9 (8606f7305e), which accepts the rule's TriggeredRules >= 1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r7_checks.py firstchain",
+   "invocation": "as quoted",
+   "result": "FIRSTCHAIN record ok regenerated=194 invocations=1"
+  }
+ ]
+}
