@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""make_reference_cn_q_1.py -- the scratch REFERENCE for CN-q-1 (never committed to a product path; the issuer's proof the arms can pass).
+
+  python make_reference_cn_q_1.py build <dest>     copy infra/aws/lambda-edge/{auth-validator-edge,_shared,public-data-router} from the
+                                                    git toplevel into <dest>/infra/... and apply the cell (mdpf_gate.mjs, the spec, index.mjs)
+  python make_reference_cn_q_1.py mutants          build a reference tree per planted defect and print which arm(s) went red
+  python make_reference_cn_q_1.py insertion        print the exact two insertions the order gives the worker
+
+Files are written with LF, as index.mjs is. ASCII only.
+"""
+from __future__ import annotations
+
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+CHECKS = HERE.parent
+sys.path.insert(0, str(CHECKS))
+import r9_cn_q_1 as R  # noqa: E402
+
+IMPORT_AFTER = 'import { aggregateGate, AGGREGATE_DENY } from "./aggregate_gate.mjs";'
+BLOCK_AFTER = "    // --- end POSN_AGGFIX AF1-s-11 ---"
+BLOCK = """
+    // --- MDPF_CANON CN-q-1: per-firm MDPF leaf gate (mdpf_gate.mjs) ---
+    // A non-internal claim reads only its own firm's leaf folders under /api/general/mdpf/ (XA-c7cd).
+    // 403, not 401: the distribution carries no custom_error_response (TRSB_LEDGER.011), and a 401 would
+    // send the portal's api-client into its refresh-then-retry path.
+    if (mdpfGate(uri, payload) === MDPF_DENY) {
+      console.warn(JSON.stringify({
+        event: "mdpf_scope_denied",
+        rule: "mdpf_canon",
+        userId: payload.sub || "",
+        jwtFirmId: payload.firmId || null,
+        jwtUserType: payload.userType || null,
+        path: uri,
+      }));
+      return forbidden("MDPF: not authorized for this resource");
+    }
+    // --- end MDPF_CANON CN-q-1 ---""".rstrip("\n")
+
+
+def toplevel() -> Path:
+    return Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True).stdout.strip())
+
+
+def crlf(text: str) -> bytes:
+    """name kept for the call sites: the edge files this cell touches are LF (index.mjs, firm-config.mjs), so LF it is"""
+    return text.replace("\r\n", "\n").encode("utf-8")  # index.mjs already carries non-ASCII comments; the insertions are ASCII
+
+
+def patch_index(text: str) -> str:
+    t = text.replace("\r\n", "\n")
+    assert t.count(IMPORT_AFTER) == 1 and t.count(BLOCK_AFTER) == 1
+    t = t.replace(IMPORT_AFTER, IMPORT_AFTER + "\n" + R.IMPORT_LINE)
+    t = t.replace(BLOCK_AFTER, BLOCK_AFTER + "\n" + BLOCK)
+    return t
+
+
+def build(dest: Path, gate_text: str | None = None, index_edit=None) -> None:
+    root = toplevel()
+    if dest.exists():
+        shutil.rmtree(dest)
+    R.copy_edge_tree(root, dest)
+    edge = dest / R.EDGE_REL
+    gate = gate_text if gate_text is not None else (HERE / "mdpf_gate.mjs").read_text(encoding="utf-8")
+    (edge / "mdpf_gate.mjs").write_bytes(crlf(gate))
+    (edge / "tests" / "mdpf_gate.spec.mjs").write_bytes(crlf((HERE / "mdpf_gate.spec.mjs").read_text(encoding="utf-8")))
+    idx = patch_index((edge / "index.mjs").read_text(encoding="utf-8"))
+    if index_edit:
+        idx = index_edit(idx)
+    (edge / "index.mjs").write_bytes(crlf(idx))
+
+
+def run(mode: str, root: Path) -> tuple[int, dict[str, bool], list[str]]:
+    p = subprocess.run([sys.executable, str(CHECKS / "r9_cn_q_1.py"), mode, "--root", str(root)], capture_output=True, text=True, timeout=900)
+    lines = p.stdout.splitlines()
+    return p.returncode, R.arms_of(lines), lines
+
+
+def planted() -> list[tuple[str, str, object, object]]:
+    """(id, expected red arms, gate-text edit or None, index edit or None)"""
+    ref = (HERE / "mdpf_gate.mjs").read_text(encoding="utf-8")
+    out = []
+    expect = {
+        "M1-always-pass": "handler:A3,A5,A6,A7,A8,A9,A10,A12 seam:S1",
+        "M2-internal-not-admitted": "handler:A4 seam:S3",
+        "M3-folder-prefix-match": "handler:A3 seam:S1",
+        "M4-folder-case-insensitive": "handler:A10 seam:S1",
+        "M5-no-traversal-check": "handler:A10 seam:S1",
+        "M6-no-firm-reads-all": "handler:A6",
+        "M7-demo-reads-49financial": "handler:A5",
+        "M8-prototype-key": "handler:A7",
+        "M9-dev-not-admitted": "handler:A4",
+        "M10-bare-prefix-passes": "handler:A9",
+        "M11-legacy-prefix-ungated": "handler:A10 seam:S1",
+        "M12-prefix-case-variant-passes": "handler:A10",
+        "M13-trailing-empty-segment-anywhere": "handler:A10",
+    }
+    for mid, text in R.mutants(ref):
+        out.append((mid, expect[mid], text, None))
+    out.append(("I1-status-401", "handler:A3,A5,A6,A7,A8,A9,A10,A12", None, lambda t: t.replace('return forbidden("MDPF: not authorized for this resource");', 'return unauthorized("MDPF: not authorized for this resource");')))
+    out.append(("I2-log-event-renamed", "handler:A12", None, lambda t: t.replace('event: "mdpf_scope_denied"', 'event: "mdpf_denied"')))
+    out.append(("I3-response-echoes-folder", "handler:A12", None, lambda t: t.replace('return forbidden("MDPF: not authorized for this resource");', 'return forbidden("MDPF: not authorized for " + uri);')))
+    out.append(("I4-role-admin-bypasses", "handler:A8", None, lambda t: t.replace("if (mdpfGate(uri, payload) === MDPF_DENY) {", 'if (payload.role !== "admin" && mdpfGate(uri, payload) === MDPF_DENY) {')))
+    out.append(("I5-head-method-denied", "handler:A11", None, lambda t: t.replace("if (mdpfGate(uri, payload) === MDPF_DENY) {", 'if (request.method === "HEAD" || mdpfGate(uri, payload) === MDPF_DENY) {')))
+    out.append(("I6-token-logged", "handler:A12", None, lambda t: t.replace("path: uri,\n      }));\n      return forbidden(\"MDPF", "path: uri, token: authHeader,\n      }));\n      return forbidden(\"MDPF")))
+    return out
+
+
+def main(argv: list[str]) -> int:
+    if not argv:
+        print(__doc__)
+        return 2
+    if argv[0] == "build":
+        build(Path(argv[1]).resolve())
+        print("OK: reference tree at", Path(argv[1]).resolve())
+        return 0
+    if argv[0] == "insertion":
+        print(R.IMPORT_LINE)
+        print(BLOCK)
+        return 0
+    if argv[0] == "mutants":
+        bad = 0
+        tmp = Path(tempfile.mkdtemp(prefix="q1_ref_"))
+        try:
+            for mid, expect, gate_text, idx_edit in planted():
+                dest = tmp / mid
+                build(dest, gate_text, idx_edit)
+                if idx_edit:
+                    t = (dest / R.EDGE_REL / "index.mjs").read_bytes()
+                    base_t = patch_index((toplevel() / R.EDGE_REL / "index.mjs").read_text(encoding="utf-8")).encode()
+                    assert t != base_t, "index mutant %s changed nothing" % mid
+                want: dict[str, set[str]] = {}
+                for part in expect.split():
+                    m, arms = part.split(":")
+                    want[m] = set(arms.split(","))
+                red: dict[str, set[str]] = {}
+                for m in want:
+                    _, arms_got, _ = run(m, dest)
+                    red[m] = {a for a, ok in arms_got.items() if not ok}
+                good = all(want[m] <= red[m] for m in want)
+                print("%-38s expect red %-44s got red %s :: %s" % (mid, expect, "; ".join("%s:%s" % (m, ",".join(sorted(v))) for m, v in red.items()), "OK" if good else "MISSED"))
+                bad += 0 if good else 1
+            # the spec arm (K5) is run separately on the reference: it must pass K3, K4, K5 and the handler/seam/control arms
+            ref = tmp / "reference"
+            build(ref)
+            for m, n in (("handler", 14), ("seam", 5), ("control", 5)):
+                rc, arms_got, lines = run(m, ref)
+                ok = rc == 0 and len(arms_got) == n and all(arms_got.values())
+                print("reference %-8s %d of %d arms %s" % (m, sum(arms_got.values()), n, "OK" if ok else "NOT GREEN"))
+                if not ok:
+                    bad += 1
+                    print("\n".join(lines[-14:]))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        print("MUTANTS: %s" % ("ALL CAUGHT" if bad == 0 else "%d PROBLEM(S)" % bad))
+        return 0 if bad == 0 else 1
+    print(__doc__)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
