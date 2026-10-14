@@ -4,7 +4,8 @@ Scans the state table (teams-global-chat-assist-table, the sk "state" rows) for 
   marks_ok   = marks in `marks_seen` (events whose mark verified and was new)   -- the legitimate-text count
   unmarked   = sum of `unmarked_seen`                                           -- events the handler would REFUSE in enforce mode
   reasons    = counts of the recorded refusal reasons (no-mark, bad-mark, stale-mark, replayed-mark)
-Prints:  OBS scanned=<n> state_rows=<n> with_counters=<n> marks_ok=<n> unmarked=<n> reasons=<json> first_refusal=<iso|none> last_refusal=<iso|none>
+Rows whose pk starts with "probe:" (the issuer's forged-event probes) are counted apart (probes, probe_unmarked) and never as traffic.
+Prints:  OBS scanned=<n> state_rows=<n> with_counters=<n> marks_ok=<n> unmarked=<n> reasons=<json> first_refusal=<iso|none> last_refusal=<iso|none> probes=<n> probe_unmarked=<n>
          VERDICT: NO-EVIDENCE (no marked text yet) | CLEAN (marks_ok >= MIN and unmarked == 0) | DIRTY (unmarked > 0: read the reasons) | THIN (marks_ok < MIN, unmarked == 0)
 Env: OBS_MIN (default 3) is the number of marked texts the observation window needs before CLEAN. Read-only: one paginated scan; ScannedCount is the denominator.
 """
@@ -30,7 +31,7 @@ def main():
         print("VERDICT: ERROR")
         return 1
     doc = json.loads(r.stdout)
-    marks_ok = unmarked = with_counters = 0
+    marks_ok = unmarked = with_counters = probes = probe_unmarked = 0
     reasons, ats = {}, []
     for item in doc.get("Items", []):
         try:
@@ -38,6 +39,10 @@ def main():
         except Exception:  # noqa: BLE001 -- a row that does not parse is counted as not carrying counters
             continue
         seen, refusals, n = st.get("marks_seen") or [], st.get("mark_refusals") or [], int(st.get("unmarked_seen") or 0)
+        if item.get("pk", {}).get("S", "").startswith("probe:"):   # the issuer's own forged-event probes (CTO C4): counted apart, never as traffic
+            probes += 1
+            probe_unmarked += n
+            continue
         if not (seen or refusals or n):
             continue
         with_counters += 1
@@ -48,9 +53,9 @@ def main():
             if x.get("at"):
                 ats.append(x["at"])
     ats.sort()
-    print("OBS scanned=%s state_rows=%s with_counters=%d marks_ok=%d unmarked=%d reasons=%s first_refusal=%s last_refusal=%s"
+    print("OBS scanned=%s state_rows=%s with_counters=%d marks_ok=%d unmarked=%d reasons=%s first_refusal=%s last_refusal=%s probes=%d probe_unmarked=%d"
           % (doc.get("ScannedCount"), doc.get("Count"), with_counters, marks_ok, unmarked, json.dumps(reasons, sort_keys=True),
-             ats[0] if ats else "none", ats[-1] if ats else "none"))
+             ats[0] if ats else "none", ats[-1] if ats else "none", probes, probe_unmarked))
     if marks_ok == 0 and unmarked == 0:
         print("VERDICT: NO-EVIDENCE")
     elif unmarked > 0:
