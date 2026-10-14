@@ -221,3 +221,46 @@ read or two, and the refresh can only fire once it does.
   Growth oracle: JOB lines at 11:52:49Z and 11:55:55Z.
   wsj and barrons still carry only their pre-pin records, so T0 is still excluding exactly what it
   should; nothing has been driven to move either line.
+=== READ 2026-10-14T12:33:33Z (respawn ~ZW) ===
+PUBLISHER=wsj VERDICT=NOT_CURED
+PUBLISHER=barrons VERDICT=NOT_CURED
+CLOSE=NOT_MET
+rc=0
+
+## ===================== THIRTEENTH READ, 2026-10-14T12:33:33Z -- THE CLOSING READ =====================
+## Appended, never overwritten. Written by 0.7.0_AE_CloudOps~ZW after a respawn; the raw output is the block
+## headed '=== READ 2026-10-14T12:33:33Z (respawn ~ZW) ===' directly above this entry.
+  PUBLISHER=wsj VERDICT=NOT_CURED
+  PUBLISHER=barrons VERDICT=NOT_CURED
+  CLOSE=NOT_MET
+  (rc=0)
+
+THIS IS THE CLOSING READ. Per the order (section 2 step 3) reading stops here and the result is filed as a
+RECORDED RESULT, not an error to engineer away. The two checkpoint paths the verdicts came from:
+  wsj      C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state/cycles/wsj/20261014T121845Z.checkpoint.json
+  barrons  C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state/cycles/barrons/20261014T122950Z.checkpoint.json
+
+WHAT THE LOG SHOWS (state/cycle_runner.log, UTC), read after the verdict and agreeing with it:
+  bbg's first cycle under the new pin ended; wsj's first cycle under the pin began 12:18:45Z.
+  wsj      12:27:51 REFUSAL class=expired -> 12:27:51 REFRESH begin -> 12:28:08 REFRESH done (17 s)
+           -> 12:29:46 REFUSAL class=expired AGAIN, DETAIL 'SignInRefused: 401 under --no-sign-in: no refresh'
+           -> STOP wsj sign_in_refused; cycle completed false, failed 1, never_started 237 of 242.
+  barrons  12:30:08 REFUSAL class=expired -> REFRESH begin -> 12:30:24 REFRESH done (16 s)
+           -> 12:30:43 REFUSAL class=expired AGAIN, the same DETAIL -> STOP barrons sign_in_refused;
+           cycle completed false, failed 1, never_started 241 of 242.
+  Each checkpoint holds refreshes.<publisher>.outcome = done and exactly two class=expired refusals of that
+  publisher, which is the instrument's NOT_CURED predicate (bz11_close_read.py lines 62-67), verified by
+  reading both checkpoint files directly.
+  The runner then began its next bbg cycle at 12:30:43Z (JOB bbg at 12:34:00Z): it is running, untouched.
+
+WHAT THIS DOES AND DOES NOT ESTABLISH
+  - It establishes that the one refresh per publisher per cycle fired, reported done, and the same publisher's
+    retried job was refused as expired again within about 100 s, for BOTH publishers.
+  - It does NOT establish why. The log does not say what the refresh did in its 16-17 s, and this seat read no
+    session, credential or producer source. 'under --no-sign-in: no refresh' is the retry's own error text and
+    is recorded verbatim, not interpreted. Row AMGT_HARVST-Z-S121 carries it as an OBSERVATION.
+  - AC2 (the instrument's own test): 10 passed in 1.30s, rc=0, rerun at this read.
+
+NOT DONE, deliberately and as the order requires: no sign-in, no mint, no re-queue, no stop, no plant, no
+second refresh, and no change to the task or to any file under the state dir. Per the order's issuer note,
+REFRESH_FAILED and NOT_CURED go to the CTO's round-85 analysis, not a re-try by this seat.
