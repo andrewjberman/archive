@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t59",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t59.porting-verdict-column.md",
+    "group": "OTHER",
+    "vintage_commit": "2de831ee1b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "2de831ee1b",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t59.porting-verdict-column.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/price_store.py",
+      "kind": "script",
+      "commit_or_etag": "34628832f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no S3 write, no deploy, no timer. Adds porting_verdict as the last of INDEX_COLS (nine old columns unchanged in order), verdicts_path(), index(root, verdicts=None) with df.attrs['verdicts_source'], write_index passing verdicts_path() (its two puts unchanged), and price_store.py --index-preview [--verdicts PATH] (read only, no put, positional root refused). A repo-root sys.path guard is added at the top (see row MDPF_DEMQUE-D1-W51-S3). The real store was read only through --index-preview; write_index was run only against a local scratch directory.",
+      "artifact_covered_by": [
+        "DQ9-t59-AC1",
+        "DQ9-t59-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_porting_verdict.py",
+      "kind": "test",
+      "commit_or_etag": "34628832f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on temp directories and synthetic frames; no network, no S3. The three named tests of the order, each PASSED by name at HEAD 34628832f3; each sets OPAL_DEMQUE_HOME to an empty temp directory so no real porting_verdicts.json is read.",
+      "artifact_covered_by": [
+        "DQ9-t59-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_store.py",
+      "kind": "test",
+      "commit_or_etag": "34628832f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "line 64 only: the column-list assertion now pins the ten-column list with porting_verdict last; the other assertions are unedited. The folder run (217 passed, 0 failed) includes it.",
+      "artifact_covered_by": [
+        "DQ9-t59-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "34628832f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W51-S1, -S2, -S3 appended in a new section at the end of the branch's copy; no existing row edited; surprise-row-gate OK (3 new rows of 145 checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t59-AC1",
+      "criterion_verbatim": "DQ9-t59-AC1 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t59_tests.py -> VERDICT-OK (the three named tests: test_the_index_gains_a_porting_verdict_column_defaulting_to_unverified_for_every_name_when_no_verdicts_file_exists; test_a_verdicts_file_sets_pass_fail_untestable_per_name_and_a_name_without_a_row_or_with_no_bloomberg_stays_unverified; test_a_malformed_or_unreadable_verdicts_file_writes_unverified_for_every_name_and_never_pass).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t59_tests.py",
+      "output_evidence": "test_demque_porting_verdict.py::test_the_index_gains_a_porting_verdict_column_defaulting_to_unverified_for_every_name_when_no_verdicts_file_exists PASSED [ 33%]\ntest_demque_porting_verdict.py::test_a_verdicts_file_sets_pass_fail_untestable_per_name_and_a_name_without_a_row_or_with_no_bloomberg_stays_unverified PASSED [ 66%]\ntest_demque_porting_verdict.py::test_a_malformed_or_unreadable_verdicts_file_writes_unverified_for_every_name_and_never_pass PASSED [100%]\n============================== 3 passed in 1.86s ==============================\nVERDICT-OK   (rc=0 from the check; run at HEAD 34628832f3)",
+      "denominator": "3 of 3 named tests PASSED by name (the file: 3 of 3 passed); folder: python -m pytest data/mdpf/scripts/demque -q = 217 passed, 0 failed (rc=0) at HEAD 34628832f3",
+      "status": "PASS",
+      "expect": "VERDICT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t59-AC2",
+      "criterion_verbatim": "DQ9-t59-AC2 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t59_real.py -> VERDICT-REAL-OK (three previews of price_store.py --index-preview against the REAL S3 index, read only: arm 1 no verdicts file -> nine old columns plus porting_verdict last, every name UNVERIFIED, verdicts_source absent; arm 2 a temp file naming three real CUSIPs (PASS, FAIL, NO_BLOOMBERG) -> PASS 1, FAIL 1, the rest UNVERIFIED, source read; arm 3 a broken file -> every name UNVERIFIED, source unreadable; arm 4 the old columns identical between arms 1 and 3).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t59_real.py",
+      "output_evidence": "arm1 columns=['cusip', 'yahoo_symbol', 'valid_from', 'valid_to', 'rows', 'claim', 'method', 'as_of', 'run_id', 'porting_verdict'] rows=483 verdicts={'UNVERIFIED': 483} source=absent\narm2 verdicts={'UNVERIFIED': 481, 'PASS': 1, 'FAIL': 1} source=read\narm3 verdicts={'UNVERIFIED': 483} source=unreadable\nVERDICT-REAL-OK 483 names; default UNVERIFIED, PASS/FAIL read per name, NO_BLOOMBERG and a broken file fail closed, old columns unchanged   (rc=0; run under timeout 260 at HEAD 34628832f3; elapsed 21 s for the three previews)",
+      "denominator": "arm 1: 483 of 483 names UNVERIFIED; arm 2: 1 PASS, 1 FAIL, 481 of 483 UNVERIFIED (the NO_BLOOMBERG name reads UNVERIFIED); arm 3: 483 of 483 UNVERIFIED; the store index holds 483 rows (see surprise MDPF_DEMQUE-D1-W51-S2)",
+      "status": "PASS",
+      "expect": "VERDICT-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "dq_t59_real.py arm 4 compares the old-column digest of arm 1 with that of arm 3 (two reads of the real index); a direct --index-preview run in this session printed old_columns_digest 5fe689fd2a76d2bb4ad5b65191ed4afb855056a408092f32952bacb3d2fdf2e9",
+      "observed": "arm 4 passed inside the check (the digests are equal); the rows are the same 483 names in the same ascending order in each read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: the merge is the issuer's; the branch carries the code, the tests, the proof and the investigation rows only"
+    },
+    {
+      "item": "the verdicts file for the real store and the porting-test comparator",
+      "reason": "order BOUNDS: the file is written after the Bloomberg draw by a later cell; no verdicts file exists under the real state home (the check's arm 1 reads source absent)"
+    },
+    {
+      "item": "any S3 write, any store key, the queue, the ledger, the actuals, the pacer, any Yahoo or Bloomberg call",
+      "reason": "order BOUNDS: not performed. write_index ran only against a local scratch directory (.scratch/empty_store, not committed); the real root was read only through --index-preview"
+    },
+    {
+      "item": "the portal submodule pointer shown modified in this worktree",
+      "reason": "not in the order's <paths>; left unstaged and not committed"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W51-S1: the order's message-file instruction ends each commit with a Co-Authored-By line naming Claude Sonnet 5.5; the executing agent is Claude Haiku 5.5, so the commits carry the Haiku 5.5 trailer; OBSERVATION, no check depends on it",
+    "MDPF_DEMQUE-D1-W51-S2: the signed pair and the check docstring say 326 CUSIPs; the live index read by the real preview holds 483 rows; OBSERVATION, AC2 accepts 300 or more and its verdict is unaffected",
+    "MDPF_DEMQUE-D1-W51-S3: a plain script run cannot resolve lib.opal_naming (PYTHONPATH unset; the name resolves to an unrelated pywin32 namespace package), so s3_root() needed the repo-root sys.path guard; OBSERVATION, added in price_store.py at the top"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~51/MDPF_DEMQUE.TO-DQ-t59.porting-verdict-column.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of price_store.py, test_demque_porting_verdict.py, test_demque_store.py and the investigation file (commit 34628832f3)",
+      "result": "commit-gate ran ruff E402 on price_store.py, which was fixed with a noqa on the two imports after the path guard, then passed; surprise-row-gate OK (3 new rows of 145 checked); to-pipeline-gate OK (no task orders in the commit); missions-tree-check OK (0 violations); msg-verify MATCH; committed 34628832f3"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole demque folder, run from the worktree root at HEAD 34628832f3",
+      "result": "217 passed in 14.69s (rc=0; 0 failed)"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/price_store.py --index-preview",
+      "invocation": "direct read-only preview with no --verdicts (the default verdicts_path())",
+      "result": "rc=0; one JSON line; rows 483; porting_verdict {UNVERIFIED: 483}; verdicts_source absent; sample_cusips 00039J772, 00130H105, 001419423"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/price_store.py --index-preview <positional>",
+      "invocation": "a positional root passed with --index-preview, against a nonexistent path",
+      "result": "rc=2, argparse 'unrecognized arguments'; no S3 access"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/price_store.py <local root> with OPAL_DEMQUE_HOME pointing at a malformed porting_verdicts.json",
+      "invocation": "write path against .scratch/empty_store (local, not S3)",
+      "result": "rc=0; 'index root ...: 0 CUSIPs'; 'WARN: porting verdicts file unreadable (<home>\\porting_verdicts.json): every name reads UNVERIFIED'; index.csv header ends porting_verdict"
+    },
+    {
+      "tool": "python -c price_store.verdicts_path()",
+      "invocation": "derivation check with and without OPAL_DEMQUE_HOME",
+      "result": "unset: C:\\Users\\Test\\.opal\\demque\\porting_verdicts.json (the home run_daily_draw.sh derives as $HOME/.opal/demque); set: <OPAL_DEMQUE_HOME>\\porting_verdicts.json"
+    }
+  ]
+}
