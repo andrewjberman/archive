@@ -53,6 +53,17 @@ def ac1(d, allc):
     extra = sorted(set(have) - set(want))
     idbad = [fn for fn in set(want) & set(have) if have[fn] != want_id[fn]]
     uniq = len(set(want)) == len(want)
+    # the registry rows (CTO msg 34143): every plain prefix has a legacy_addresses.json row, reader NFRA_MCPINDEX, that resolves to it
+    reg_path = os.path.join(glib.registry_dir(), "legacy_addresses.json")
+    reg = {r["key"]: r for r in json.load(open(reg_path, encoding="utf-8")).get("legacy_addresses", [])}
+    need = [(cid, g, c) for cid, (g, c) in exp.items() if glib.needs_registry(c)]
+    reg_ok = 0
+    for cid, g, c in need:
+        r = reg.get(glib.registry_key(cid))
+        if r and r.get("bucket") == c["bucket"] and r.get("template") == c["s3_prefix"] and r.get("reader") == "NFRA_MCPINDEX" \
+                and not r.get("params") and r.get("shape") == ("prefix" if c["s3_prefix"].endswith("/") else "object"):
+            reg_ok += 1
+    print("REGISTRY legacy_addresses rows (reader NFRA_MCPINDEX) resolve %d of %d plain prefixes" % (reg_ok, len(need)))
     print("ROWS files=%d; in-scope contracts=%d (G2+G4+G5+G6 less %d already rowed in silver_datasets); entity names unique=%s; "
           "missing %d, extra %d, contract.id wrong %d"
           % (len(rows), len(exp), len(allc) - len(exp), "yes" if uniq else "NO", len(missing), len(extra), len(idbad)))
@@ -60,7 +71,7 @@ def ac1(d, allc):
         print("  missing: %s" % x)
     for x in extra[:4]:
         print("  extra: %s" % x)
-    return uniq and not missing and not extra and not idbad and len(rows) == glib.EXPECT_ROWS
+    return uniq and not missing and not extra and not idbad and len(rows) == glib.EXPECT_ROWS and reg_ok == len(need)
 
 
 def ac2(d, allc):
