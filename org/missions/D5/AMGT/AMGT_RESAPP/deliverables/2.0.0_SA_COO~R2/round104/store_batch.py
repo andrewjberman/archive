@@ -3,8 +3,10 @@
   AIFILL_SERVED_FUNCTION=<fn> ANTHROPIC_API_KEY=<key> PYTHONPATH=<repo root> python store_batch.py --names A,B --out DIR [--confirm-write] [--workers 4] [--cap-usd 75] [--no-model]
   ... --census-file census_sections.json  takes every resolved name of the V1 census (95).
 
-One `python -m lib.research.aifill.run --key K --out DIR --to-s3 [--confirm-write]` per name (a subprocess, so the producer is exactly the merged command). After EACH name finishes it reads that name's
-document from DIR, sums the model calls' token cost at the module's rates (claude-opus-5: 5 USD per million input tokens, 25 per million output), and PROJECTS the total (spent / done * total, times 1.15 for the discarded Opal-path
+One `python -m lib.research.aifill.run --key K --out DIR/draw<n>` per draw (a subprocess, so the producer is exactly the merged command). A draw with a block withheld for "no citable source", "too long" or "model call failed" gets ONE more
+draw (the model's web answers vary run to run); the draw with the most filled blocks is the name's document, and with --confirm-write that document (and only it) is stored through `lib.research.aifill.store.write_document`
+(validated first, to the builder address). Every draw's cost counts toward the cap. After EACH name finishes it reads that name's
+documents from DIR, sums the model calls' token cost at the module's rates (claude-opus-5: 5 USD per million input tokens, 25 per million output), and PROJECTS the total (spent / done * total, times 1.15 for the discarded Opal-path
 calls the document does not record). A projection over --cap-usd STOPS the batch (no new name is started; names in flight finish) and reports. Without --confirm-write nothing is written to S3 (the command's own DRY-RUN).
 Prints one line per name and a final `AIFILL STORE BATCH: ...` line; writes DIR/batch_census.json (per name: status, source class per block, tokens, usd).
 """
@@ -39,19 +41,42 @@ def doc_cost(doc):
     return inp, out, inp * USD_PER_INPUT_TOKEN + out * USD_PER_OUTPUT_TOKEN
 
 
+def filled(doc):
+    return sum(1 for b in (doc.get("blocks") or {}).values() if b.get("source_class") != "NONE")
+
+
+def retryable(doc):
+    reasons = " ".join((b.get("reason") or "") for b in (doc.get("blocks") or {}).values())
+    return "citable" in reasons or "too long" in reasons or "model call failed" in reasons
+
+
 def run_one(key, out_dir, confirm, no_model):
-    cmd = [sys.executable, "-m", "lib.research.aifill.run", "--key", key, "--out", out_dir, "--to-s3"]
-    if confirm:
-        cmd.append("--confirm-write")
-    if no_model:
-        cmd.append("--no-model")
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=1500)
-    path = os.path.join(out_dir, "%s.json" % slash_safe(key))
-    doc = None
-    if os.path.exists(path):
+    """Up to two draws; returns (last proc, best doc, all docs, writer receipt or None)."""
+    docs = []
+    proc = None
+    for attempt in (1, 2):
+        draw_dir = os.path.join(out_dir, "draw%d" % attempt)
+        cmd = [sys.executable, "-m", "lib.research.aifill.run", "--key", key, "--out", draw_dir]
+        if no_model:
+            cmd.append("--no-model")
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=1500)
+        path = os.path.join(draw_dir, "%s.json" % slash_safe(key))
+        if proc.returncode != 0 or not os.path.exists(path):
+            break
         with open(path, "r", encoding="utf-8") as handle:
-            doc = json.load(handle)
-    return proc, doc
+            docs.append(json.load(handle))
+        if not retryable(docs[-1]):
+            break
+    best = max(docs, key=filled) if docs else None
+    receipt = None
+    if best is not None and confirm:
+        from lib.research.aifill import store
+
+        receipt = store.write_document(best)
+        final = os.path.join(out_dir, "%s.json" % slash_safe(key))
+        with open(final, "w", encoding="utf-8") as handle:
+            json.dump(best, handle, indent=1, sort_keys=True)
+    return proc, best, docs, receipt
 
 
 def main():
@@ -83,21 +108,37 @@ def main():
         with lock:
             if state["stopped"]:
                 return key, None
-        proc, doc = run_one(key, args.out, args.confirm_write, args.no_model)
+        try:
+            proc, best, docs, receipt = run_one(key, args.out, args.confirm_write, args.no_model)
+        except Exception as err:  # noqa: BLE001 -- a failed name is reported, never fatal to the batch
+            with lock:
+                state["done"] += 1
+                print("%-22s FAILED %s: %s" % (key, type(err).__name__, str(err)[:120]), flush=True)
+            return key, {"rc": 1, "summary": "%s: %s" % (type(err).__name__, str(err)[:160]), "wrote": False}
         summary = [ln for ln in proc.stdout.splitlines() if ln.startswith("AIFILL RUN:")]
-        row = {"rc": proc.returncode, "summary": summary[0] if summary else (proc.stdout + proc.stderr)[-200:]}
-        if doc is not None:
+        row = {"rc": proc.returncode, "summary": summary[0] if summary else (proc.stdout + proc.stderr)[-200:], "draws": len(docs)}
+        usd_total = 0.0
+        in_total = out_total = 0
+        for doc in docs:
             inp, out, usd = doc_cost(doc)
-            row.update({"classes": {b: doc["blocks"][b]["source_class"] for b in BLOCKS}, "input_tokens": inp, "output_tokens": out, "usd": round(usd, 4)})
+            in_total += inp
+            out_total += out
+            usd_total += usd
+        if best is not None:
+            row.update({"classes": {b: best["blocks"][b]["source_class"] for b in BLOCKS}, "input_tokens": in_total, "output_tokens": out_total, "usd": round(usd_total, 4),
+                        "reasons": {b: best["blocks"][b]["reason"] for b in BLOCKS if best["blocks"][b]["source_class"] == "NONE"}})
+        row["wrote"] = receipt is not None
+        if receipt is not None:
+            row["uri"] = receipt["uri"]
+            row["sha256"] = receipt["sha256"][:16]
         with lock:
             state["done"] += 1
-            state["spent"] += row.get("usd", 0.0)
+            state["spent"] += usd_total
             projected = state["spent"] / state["done"] * len(names) * MARGIN
-            row["wrote"] = bool(args.confirm_write and proc.returncode == 0 and any(ln.startswith("WROTE: s3://") for ln in proc.stdout.splitlines()))
             if projected > args.cap_usd and not state["stopped"]:
                 state["stopped"] = True
                 state["stop_note"] = "projected %.2f USD over the %.2f cap after %d of %d names (spent %.2f)" % (projected, args.cap_usd, state["done"], len(names), state["spent"])
-            print("%-22s rc=%d %s usd=%s%s" % (key, proc.returncode, row["summary"][:110], row.get("usd"), "  [WROTE]" if row["wrote"] else ""), flush=True)
+            print("%-22s rc=%d draws=%d %s usd=%s%s" % (key, proc.returncode, len(docs), (best and "filled=%d" % filled(best)) or "no document", row.get("usd"), "  [WROTE]" if row["wrote"] else ""), flush=True)
         return key, row
 
     with concurrent.futures.ThreadPoolExecutor(args.workers) as ex:

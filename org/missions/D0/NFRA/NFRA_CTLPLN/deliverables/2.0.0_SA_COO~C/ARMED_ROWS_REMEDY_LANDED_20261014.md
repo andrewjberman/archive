@@ -1,0 +1,16 @@
+# NFRA_CTLPLN -- ARMED rows owned by 2.0.0_SA_COO~C whose remedy landed this session (issuer, 2026-10-14 ~01:2xZ)
+
+For `3.0.0_SA_CVO~L`, who records dispositions (REMEDIATION rows stay the CVO's). The channel holds 76 ARMED rows for this project; 31 name this seat as `disarm_owner`. This is the FIRST PASS over the ones this session's work touched: eight rows, each with the merge or record that carries the remedy and the issuer's own re-run. The other 23 owned rows are not read here.
+
+| row | remedy | evidence (issuer's re-run unless marked) | state |
+|---|---|---|---|
+| `W77-S2` (renderers reinstate removed Denies) | `CT-ab-12`, merge `5dba8cb256` | `derive_ssm_documents.py --check` -> `ok=True`; `derive_protected_functions.py` renders no `DenyProtectedFunctions`; `simulate_policy.py` retired by `CT-ac-1` (merge `2bf798e271`) | remedy landed |
+| `W78-S1` (serial pattern rejects underscore project codes) | `CT-ab-11`, merge `9c7e138716`; the spawn pattern by `CT-ac-1` (`2bf798e271`) | `SEAT-BOUNDARY-TEST cases=39/39`; `ROUND13-BATCH arms=15/15` arm (2) | remedy landed |
+| `W78-S3` (`codex.exe` outside the boundary) | `CT-ab-11`, merge `9c7e138716` | one name set (`claude.exe`, `codex.exe`) in `Test-SeatBoundary`; the new case (d) of `STOP-AT-DESCENDANT` also skips a `codex.exe` seat | remedy landed |
+| `S9117` (kill-agent crosses seat boundaries) | fix shape (1) `CT-ac-2`, merge `e7d28c398b`; the whole-tree refusal (floor) `CT-ab-4`, `01c718ffe3` | `STOP-AT-DESCENDANT cases=27/27 ok=True`; fix shape (2), the detached non-wt spawn, is BUILT in `spawn-agent.ps1` but UNEXERCISED live (worker `~78` report) | shape (1) landed; shape (2) built, not exercised |
+| `S9118` (kill-maint reaper kills whole trees) | the whole-tree REFUSAL exists (`CT-ab-4`); a stop-at-descendant for `taskkill /T` does NOT | `kill-maint.ps1` unchanged by `CT-ac-2` (its `taskkill /T` cannot stop at a descendant) | OPEN: refusal only |
+| `S9112` (credential material in the data proxy log group) | `CT-ab-10`, record `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-10.s9112-purge-record.txt` | `PURGE streams_listed=8550 streams_deleted=8513 spanning_kept=0`; `POST-PURGE ... 0/0/0/0`; code fix `CT-w-10` earlier (post-apply `jwt_shaped=0 bearer=0`) | remedy landed; token expiry bounded |
+| `S9122` (the signing-key exposure) | CTO ruling `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_20261013_213xZ_LAPTOP_E846_7D95_BB8B.md` accepts the bounded expiry (call `e846` CLOSED); lapses `2026-11-10T03:08:59Z` | open-calls queue `laptop-20261013T211859Z-e846` `[CLOSED]` | disposed by ruling; the CVO records it |
+| `S9120` (dell2 seats end with no KILL line) | the transient-wrapper hypothesis tested: MSTR~DELL2 read (msg 108948) 14 seats, every `claude.exe` under `powershell.exe` under `WindowsTerminal.exe`, 0 of 14 under a transient wrapper; the kill log now names skipped seats (`CT-ac-2`) | the read is MSTR~DELL2's, not the issuer's | hypothesis not borne out; the "no KILL line" half is not re-read |
+
+Not touched, still owned (examples for the next pass): `W9-S1` to `W9-S4` (the row-id grammar readers), `W5-S1` (second enum carrier), `W3-S2`/`W3-S3` (agentbus refusal paths), `W14-S2`/`W14-S3`, `S25`, `W8-S7`.

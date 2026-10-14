@@ -10,7 +10,7 @@ Not the analysis. What round 13's own work surfaced or left open, each with its 
 | FWD-9 | `1.0.0_SA_CTO` | a real lease (C-LEASE is unbuilt; the Dells hold no vendor lease) -- PARKED, no order |
 | FWD-27: muse's key on dell2 | `0.0.0_AB_MSTR~DELL2` | the read of the key (COMM_ASSIST FWD-6 needs it); the three boxes otherwise read 3 of 3 (`FWD27_READBACK_20261013.txt`) |
 | FWD-27: the laptop local account | Andrew | his word ("another time") |
-| S9119, the broker heartbeat writer | `0.0.0_AB_MSTR~DELL2` | a read taken while `~CB2`, `~TR2` or `~DELL2` is live names the writer |
+| S9119, the broker heartbeat writer | `0.0.0_AB_MSTR~DELL2` | a read taken while `~CB2`, `~TR2` or `~DELL2` is live names the writer. MSTR~DELL2's correction (msg 109004): the 14 orphan-parent pollers are NOT all on old code (4 started before the fix `5948c06a4f`, the rest after); the first seat-end read (`~C2` stood down ~00:47Z) left its MCP server and poller not running while `liveness.json` still held the pid with last_seen 00:47:56Z; whether the poller exited itself or died with the kill is unread; the writer is still unnamed |
 | `W77-S3`, three IAM policy descriptions name removed Denies | the next apply of the identity root | rides that apply (CTO ruling) |
 | reached-roles census freshness against the 5 functions `CT-ac-4` added | a CloudOps seat | `derive_reached_roles.py --check-fresh` (no `--check` exists) did not finish within 200 s offline; read it with a longer bound or fix the check |
 
