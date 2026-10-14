@@ -51,22 +51,22 @@ Freshness: every answer states its store's newest date and its lag in TRADING da
 ## 3. widening
 
 - The gateway instance role `aws_iam_role.gw` gains `dynamodb:Query` and `dynamodb:GetItem` only, on the three tables and the
-  two indexes (read only; no Scan, no write, no wildcard).
+  one `date-index` index (read only; no Scan, no write, no wildcard). The `source` filter of `news_search_articles` reads the
+  base table per day: `source_date_index` is sparse (9,905 of 381,261 items), so no grant covers it and none is requested.
 - The S3 singleton reads need NO grant change: the internal reader role already carries `s3:GetObject` on `json/*` of the
   portal bucket (`infra/aws/terraform/opal-gateway/mcpmsp_internal_reader.tf`, served bucket from `modules/opal_name`).
 - Three `.env` keys are written by the deploy printf: `NEWS_ARTICLES_TABLE`, `NEWS_TRENDING_TABLE`, `NEWS_KEYWORD_TABLE`
   (values are the live table names; the deploy writes them, the code reads them from the environment at call time).
-- The grant names `source_date_index` because the order lists it. No tool reads it (surprise row S2). Narrowing the grant
-  to `date-index` is a safe option the CTO may choose; this ask does not narrow it on its own.
 
 ## 4. grant
 
 - Policy: ONE `aws_iam_role_policy` `gw_news_read`, name `gateway-global-news-read-policy`, the builder's output for
   `lib/opal_naming.py name("gateway", "global", "news-read", "policy")`, on role `aws_iam_role.gw`.
 - Actions: `dynamodb:Query`, `dynamodb:GetItem` (no others).
-- Resources (five): `arn:aws:dynamodb:us-east-1:313476888478:table/opal-news-articles` and its index
-  `.../index/source_date_index`; `.../table/opal-news-trending-daily`; `.../table/opal-keyword-intelligence` and its index
-  `.../index/date-index`. No `*` resource.
+- Resources (four): `arn:aws:dynamodb:us-east-1:313476888478:table/opal-news-articles`; `.../table/opal-news-trending-daily`;
+  `.../table/opal-keyword-intelligence` and its index `.../index/date-index`. No `*` resource. The `source` filter reads the
+  base table per day (the `source_date_index` GSI is sparse: 9,905 of 381,261 items; surprise row S2); the ARN is dropped
+  from the grant, not kept for a read no tool makes.
 - Plan: `terraform plan -target=aws_iam_role_policy.gw_news_read -lock=false` (no `-out`, no apply). Result:
   1 to add, 0 to change, 0 to destroy. The only resource in the targeted plan is the one policy. The full plan record is
   `TARGETED_PLAN_OG-nw-1.txt` in this folder. The `market_update_s3_root` input was fed from the builder's `address()` output
