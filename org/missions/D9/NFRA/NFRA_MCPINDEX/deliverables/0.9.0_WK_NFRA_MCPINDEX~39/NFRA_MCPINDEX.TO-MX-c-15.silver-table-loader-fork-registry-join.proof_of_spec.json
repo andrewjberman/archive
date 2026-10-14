@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-15",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "bb9d1ece12"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "30819ee4e6",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-15.silver-table-loader-fork-registry-join.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~39",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/atom_decomposition/emit_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-NFRA_MCPINDEX-39; no deploy. Constants: SILVER_TABLE_CONTRACT_FIELDS gains label; FORK_KEY_FIELDS is the closed key set of a subset test; FORK_REGISTRY_FILE added. Functions: _validate_table_fields (prefix and table may be null; contract.label required; fork_keys a subset test); silver_catalog_row (key_template after retired_reason for a table row); read_fork_registry_rows and join_fork_registry (new); load_catalog_entries (a valid table row is returned joined). The emitter main was not run; DATA_CATALOG.yaml and catalog_entries/ were not written.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/tests/test_silver_table_grain.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-NFRA_MCPINDEX-39. 24 of 24 pass (deliverables/0.9.0_WK_NFRA_MCPINDEX~39/test_silver_table_grain.out). Adds CleanTableRowShapeTests and ForkRegistryJoinTests; the table fixture gains contract.label; the fork_keys-without-account case is replaced by the unknown-key case (a subset is now valid).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended inside the fenced array: NFRA_MCPINDEX-Z-W39-S1 (OBSERVATION, ARMED, disarm 2.0.0_SA_COO~MI) and NFRA_MCPINDEX-Z-W39-S2 (OBSERVATION, INERT). No existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ACCEPT: 174 of 174 clean table rows load; 174 of 174 JOINED to their full expected row; existing rows still load 10 of 10; REFUSE: 10 of 10 one-defect rows refused -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round14/checks/c15.AC1.sh; echo \"exit=$?\"",
+      "expect": "ACCEPT: 174 of 174 clean table rows load; 174 of 174 JOINED.*existing rows still load 10 of 10.*REFUSE: 10 of 10 one-defect rows refused.*RESULT: PASS.*exit=0",
+      "output_evidence": "ACCEPT: 174 of 174 clean table rows load; 174 of 174 JOINED to their full expected row (fork_keys, contract, table, prefix, key_template); existing rows still load 10 of 10 (errors 0)\nREFUSE: 10 of 10 one-defect rows refused\nRESULT: PASS\nexit=0",
+      "denominator": "174 of 174 clean table rows (the check's reference set from the G2, G4, G5, G6 pins, built by the check); 174 of 174 joined rows compared to their full expected row; 10 of 10 existing non-harvest, non-need rows at the base pin; 10 of 10 one-defect rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "CHECKS pass 6 of 6 (the joined row is written with key_template; an un-joined row and an old row are unchanged) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round14/checks/c15.AC2.sh; echo \"exit=$?\"",
+      "expect": "CHECKS pass 6 of 6.*RESULT: PASS.*exit=0",
+      "output_evidence": "CHECK ok : the one row loads\nCHECK ok : silver_catalog_row emits the joined row (fork_keys restored)\nCHECK ok : silver_catalog_row emits key_template, and the restored table, prefix and contract\nCHECK ok : entity first, every other field of the loaded row present\nCHECK ok : an un-joined row emits no key_template\nCHECK ok : an old row emits exactly its old fields\nCHECKS pass 6 of 6\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 checks",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base dry-run: the same c15 checks run with C15_IMPL pointing at the emitter as it stood at 30819ee4e6 (copied to .scratch/base). The base emitter refuses the clean row and writes no key_template, so both checks must fail on it.",
+      "expected": "AC1 FAIL (0 of 174 load) and AC2 FAIL (1 of 6) on the base emitter",
+      "observed": "AC1: ACCEPT 0 of 174 (errors 174), REFUSE 9 of 10, RESULT FAIL exit=1 (a run at the base, before any edit, reported the same). AC2: CHECKS pass 1 of 6, RESULT FAIL exit=1. Saved in deliverables/0.9.0_WK_NFRA_MCPINDEX~39/controls_base_mx_c_15.txt.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion's invocation was run more than once in this worktree (AC1 twice, AC2 twice) and the deciding lines were compared.",
+      "observed": "AC1 ACCEPT 174 of 174, JOINED 174 of 174, REFUSE 10 of 10; AC2 CHECKS pass 6 of 6. The same lines on every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "workflows/atom_decomposition/validate_catalog_v02.py (listed in paths)",
+      "reason": "Not changed. It imports validate_entry and load_catalog_entries unchanged and its silver pass needs no edit; the validator change lives in the emitter's _validate_table_fields."
+    },
+    {
+      "item": "catalog_entries/ rows, infra/logic/registry/catalog_fork_keys.json, DATA_CATALOG.yaml, the emitter main, any deploy, any push, any AWS call",
+      "reason": "Out of this order's grant (Bounds 1). The 174 clean rows and the registry file are MX-c-14's; the catalog regeneration and drain checks are the issuer's. Until MX-c-14 lands, the real REGISTRY_DIR holds no catalog_fork_keys.json and the loader joins nothing; the checks plant their own registry."
+    },
+    {
+      "item": "Gateway failing-ID delta: test_schwab_engine.py::test_ogq1_ac04 (in the after set, not in the base set)",
+      "reason": "Graded, not fixed (Bounds 2). It is a timing test on a just-killed child process; it failed in 1 of 2 after-change full runs, passed in the base full run, and passed 2 of 2 alone. It imports no changed code. Recorded as surprise row NFRA_MCPINDEX-Z-W39-S2 (OBSERVATION, INERT). The 48 base failing IDs are all still failing (fixed 0)."
+    },
+    {
+      "item": "The before/after excerpt of one joined row",
+      "reason": "Printed in the worker report, not written to the deliverables folder: its whitespace-free values name a firm alias, and the folder is committed."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W39-S1: the clean table row keeps firm-bearing prose strings (a spaced string the sanitiser does not drop, and the naming gate does not read); the row shape is accepted as specified (OBSERVATION, ARMED, disarm 2.0.0_SA_COO~MI).",
+    "NFRA_MCPINDEX-Z-W39-S2: test_schwab_engine.py::test_ogq1_ac04 is load-sensitive and enters the failing-ID delta in one of two full runs (OBSERVATION, INERT).",
+    "NFRA_MCPINDEX-Z-W39-S3: the order asks for its status flip in the task-order file, which is not among its <paths> (OBSERVATION, INERT)."
+  ],
+  "session_log": "NONE -- no session log is kept in the worktree; the criterion outputs are deliverables/0.9.0_WK_NFRA_MCPINDEX~39/c15.AC{1,2}.out, the base controls controls_base_mx_c_15.txt, the unit-test result test_silver_table_grain.out and the gateway delta suite_delta_mx_c_15.txt.",
+  "compiler_tools": [
+    {
+      "tool": "c15.AC1.sh / c15.AC2.sh (the issuer's round-14 check scripts, not edited)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round14/checks/c15.AC{1,2}.sh",
+      "result": "AC1 PASS rc=0 (174 of 174 load; 174 of 174 joined; existing 10 of 10; refused 10 of 10); AC2 PASS rc=0 (6 of 6)"
+    },
+    {
+      "tool": "tests/suite_delta.py --shape full (gateway failing-ID delta, base pass run in the same tree)",
+      "invocation": "python infra/aws/ec2/opal-gateway/tests/suite_delta.py --report <pytest -rA output> --shape full",
+      "result": "base 48 failed, 820 passed; after 49 failed, 819 passed; failing-ID sets: base 48, after 49; only in after: test_schwab_engine.py::test_ogq1_ac04; only in base: none; fixed 0"
+    },
+    {
+      "tool": "pytest workflows/atom_decomposition/tests (the atom workflow folder)",
+      "invocation": "python -m pytest workflows/atom_decomposition/tests -q",
+      "result": "135 passed, 0 failed (rc=0); test_silver_table_grain.py 24 of 24"
+    },
+    {
+      "tool": ".tools/commit-gate.sh on the two changed .py files",
+      "invocation": "bash .tools/commit-gate.sh workflows/atom_decomposition/emit_catalog_v02.py workflows/atom_decomposition/tests/test_silver_table_grain.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc=0"
+    }
+  ]
+}
