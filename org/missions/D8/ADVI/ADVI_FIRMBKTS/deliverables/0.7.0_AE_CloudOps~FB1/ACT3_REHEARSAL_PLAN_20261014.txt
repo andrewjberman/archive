@@ -1,0 +1,107 @@
+module.inf_silver_aggregator.data.aws_s3_object.artifact: Reading...
+module.inf_portal_publisher.data.aws_s3_object.artifact: Reading...
+aws_iam_role.inf_portal_publisher_floor_scheduler: Refreshing state... [id=advi-inf-publish-role]
+aws_sqs_queue.inf_portal_publisher_floor_dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/313476888478/advi-inf-publish-dlq]
+aws_iam_role.inf_silver_aggregator: Refreshing state... [id=inf-silver-aggregator-lambda-role]
+aws_iam_role.inf_gold_layer_lambda: Refreshing state... [id=inf-gold-layer-lambda-role]
+module.inf_portal_publisher.data.aws_s3_object.artifact: Read complete after 0s [id=opal-313476888478-lambda-artifacts/inf-pipeline/inf-portal-publisher.zip]
+module.inf_silver_aggregator.data.aws_s3_object.artifact: Read complete after 0s [id=opal-313476888478-lambda-artifacts/inf-pipeline/inf-silver-aggregator.zip]
+module.inf_silver_aggregator.aws_lambda_function.this: Refreshing state... [id=inf-silver-aggregator]
+module.inf_portal_publisher.aws_lambda_function.this: Refreshing state... [id=inf-portal-publisher]
+aws_s3_bucket_notification.opal_data_inf: Refreshing state... [id=opal-data-inf]
+aws_scheduler_schedule.inf_portal_publisher_floor: Refreshing state... [id=default/advi-inf-publish-daily]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_s3_bucket_notification.opal_data_inf will be updated in-place
+  ~ resource "aws_s3_bucket_notification" "opal_data_inf" {
+        id          = "opal-data-inf"
+        # (2 unchanged attributes hidden)
+
+      ~ lambda_function {
+          ~ filter_prefix       = "gold/meta/" -> "silver/_silver_complete/"
+          ~ filter_suffix       = "pipeline-complete.json" -> ".json"
+            id                  = "tf-s3-lambda-20260507183605613800000001"
+          ~ lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-publisher" -> "arn:aws:lambda:us-east-1:313476888478:function:inf-silver-aggregator"
+            # (1 unchanged attribute hidden)
+        }
+      - lambda_function {
+          - events              = [
+              - "s3:ObjectCreated:*",
+            ] -> null
+          - filter_prefix       = "silver/_silver_complete/" -> null
+          - filter_suffix       = ".json" -> null
+          - id                  = "tf-s3-lambda-20260507195529440700000002" -> null
+          - lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:inf-silver-aggregator" -> null
+        }
+    }
+
+  # aws_scheduler_schedule.inf_portal_publisher_catchup will be created
+  + resource "aws_scheduler_schedule" "inf_portal_publisher_catchup" {
+      + arn                          = (known after apply)
+      + group_name                   = "default"
+      + id                           = (known after apply)
+      + name                         = "advi-inf-publish-catchup-daily"
+      + name_prefix                  = (known after apply)
+      + schedule_expression          = "cron(30 16 * * ? *)"
+      + schedule_expression_timezone = "UTC"
+      + state                        = "ENABLED"
+
+      + flexible_time_window {
+          + mode = "OFF"
+        }
+
+      + target {
+          + arn      = "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-publisher"
+          + input    = jsonencode({})
+          + role_arn = "arn:aws:iam::313476888478:role/advi-inf-publish-role"
+
+          + dead_letter_config {
+              + arn = "arn:aws:sqs:us-east-1:313476888478:advi-inf-publish-dlq"
+            }
+
+          + retry_policy {
+              + maximum_event_age_in_seconds = 3600
+              + maximum_retry_attempts       = 1
+            }
+        }
+    }
+
+  # aws_scheduler_schedule.inf_portal_publisher_floor will be updated in-place
+  ~ resource "aws_scheduler_schedule" "inf_portal_publisher_floor" {
+        id                           = "default/advi-inf-publish-daily"
+        name                         = "advi-inf-publish-daily"
+      ~ state                        = "DISABLED" -> "ENABLED"
+        # (9 unchanged attributes hidden)
+
+      ~ target {
+          + input    = jsonencode({})
+            # (2 unchanged attributes hidden)
+
+            # (2 unchanged blocks hidden)
+        }
+
+        # (1 unchanged block hidden)
+    }
+
+Plan: 1 to add, 2 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
