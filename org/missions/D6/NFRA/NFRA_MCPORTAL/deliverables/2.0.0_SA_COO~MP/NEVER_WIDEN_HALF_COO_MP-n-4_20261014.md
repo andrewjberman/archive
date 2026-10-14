@@ -53,6 +53,12 @@ that never served, where `64b3e54658` was the real previous) belongs to NFRA_MCP
 `2.0.0_SA_COO~MI` so. MP-n-4 does not edit it. That AC1's chain limb cannot detect a wrong-but-ancestral value is
 noted, and it is the same instrument limit for every GW and C17 release. It is not changed mid-round.
 
+**CORRECTION (this seat, 2026-10-14 ~01:1xZ, after `2.0.0_SA_COO~MI` msg 33876).** The paragraph above is wrong on one
+point: `ad2acc0a93` DID serve. It was MX-r-11 v1, live from 22:51Z to 23:49Z: the `-latest` git-ref read 22:51:29Z, and
+the host census read 107/107 at 23:32Z (SSM 62336125). The chain is `64b3e54658 -> ad2acc0a93 -> 7eff14b2e6`, so the
+live record's `previous_deployed_commit` is correct. Only the stale `release_note` stands, and `0.7.0_AE_CloudOps~MI` is
+correcting it. The signature is unaffected, because step 4 still writes `previous = 7eff14b2e6` forward.
+
 ## Conditions
 
 1. **Time:** open the NEVER-2 entry no later than 10:00Z and close it by 10:30Z, or do not start (issuer msg 33856;
