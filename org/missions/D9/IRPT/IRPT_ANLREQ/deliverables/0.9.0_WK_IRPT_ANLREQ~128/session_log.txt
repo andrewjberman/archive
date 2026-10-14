@@ -1,0 +1,41 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~128 on IRPT_ANLREQ.TO-AR-y-318
+Worktree C:/dev/wk-irpt-anlreq-128, branch wk-IRPT_ANLREQ-128, base HEAD 345ae95c52 (LOCAL).
+Values recorded: hashes, counts, field names, check names, status words. No identifier of a person is written here.
+
+1. Reads (read-only, via the .tools/aws shim; saved under .scratch/r40, outside the product tree)
+   s3 get-object, control composition (request_compositions key, leaf 00cce0b0...): rc 0, 22954 bytes, sha256 00cce0b000ace95608d37a11a4cfd44d7d143a9af0f3189f10e92b28c02c59ce
+   s3 list-object-versions, normalized_portfolios leaf of the D1 input: 1 key
+   s3 list-object-versions, normalized_portfolios leaf of the D6 input: 1 key
+   s3 get-object, normalized document D1: rc 0, 4577 bytes, sha256 ac6ac6bd0ddb9e33c3766b44b88da5d2253db219848824b202a2ee84b2c40cb0
+   s3 get-object, normalized document D6: rc 0, 4586 bytes, sha256 bccc5a4ad77f77a668d23038e6b532c99623451db1a0e0a6653784543ea806b6
+   dynamodb get-item irpt-requests, key tenant 49financial and request_revision INPUT#portfolio_<D1 hex> (consistent): rc 0, 2297 bytes, sha256 a743ac8ef7e2597d... ; owner field names advisor_id, firm_id, ownership_fingerprint, principal_class, principal_id, schema_version ; principal_class FIRM_ADVISOR ; owner equals the normalized document owner (True)
+   dynamodb get-item irpt-requests, key INPUT#portfolio_<D6 hex>: rc 0, 2363 bytes, sha256 9c1d1a139d8800f0... ; owner field names advisor_id, firm_id, home_firm_id, ownership_fingerprint, principal_class, principal_id, schema_version ; principal_class OPAL_GLOBAL ; owner equals the normalized document owner (True)
+   Trap, recorded as row IRPT_ANLREQ-D2-W128-S4: the first two get-item calls used the bare 64-hex with no portfolio_ prefix and returned zero-byte output with rc 0 (absence). The --debug trace showed a 2-character body. The prefixed key returned the rows above.
+
+2. Cause read (offline, product functions imported; stubs served.verified_internal_subject, prospect.resolve_prospect_owner, loaders.bucket_for, ids.opaque_firm)
+   Step table (1 canonical, 2 schema, 3 compose, 4 bindings, 5 portfolio):
+     D1 (candidate, borrowed profile fields): PASS, FAIL (ValidationError, keyword not, field path resolved.owner), PASS, PASS, PASS
+     D6 (stored accepted composition; same object as the control): PASS, PASS, PASS, PASS, PASS
+     CONTROL (stored composition 00cce0b0...): PASS, PASS, PASS, PASS, PASS
+     Negative control (D1 with home_firm_id removed from the request owner only): PASS, PASS, PASS, PASS, PASS
+   Request owner for D1 from InteractiveAccess.current() and prospect_owner(): field names include home_firm_id (True); the input owner has no home_firm_id (False).
+
+3. Source changes (commit-gate rc 0 on each)
+   ycharts/generate/composition_admission.py: validate names the failing step: print COMPOSITION-REFUSED step=<n> error_class=<class>; the raise is unchanged.
+   intake/uploads.py: load_input_owner raises InputUnavailable (public NOT_FOUND) in the four cases; the malformed-id refusal is unchanged.
+
+4. Tests (after the change)
+   pytest ycharts/generate/tests/test_composition_refusal_cause.py -q: 6 passed in 2.36s (run 2: 6 passed in 2.87s)
+   pytest intake/tests/test_load_input_owner_typed.py -q: 8 passed in 0.10s (run 2: 8 passed in 0.11s)
+   Existing suites, combined run (test_uploads, test_stored_input_contract, test_uploads_refusal_class, test_uploads_on_behalf, test_retained_uploads, test_composition_admission, test_submission, test_custody_composition, test_prospect_submission): 86 passed, 20 skipped, 13 errors (fixture world not found), identical on the base sources (row S5). The admission file alone: 13 passed.
+   No existing assertion was edited: the existing assertRaises(PermissionError) checks still catch InputUnavailable, a subclass of PermissionError.
+
+5. Before-arm (base sources swapped in from HEAD for the run, then restored; restored hashes equal the changed files)
+   test_composition_refusal_cause.py: 5 failed, 1 passed (the valid-composition case passes on base, as expected)
+   test_load_input_owner_typed.py: 5 failed, 3 passed (the own-input, malformed-id and own-input-through-guard cases pass on base, as expected)
+
+6. Mutant (fires): the logged step number for the schema step set to 3 in composition_admission.py, run against the step-case test: 1 failed, 5 passed, the schema case failed (rc 1). Source restored; hash equal.
+
+7. Deliverable checks
+   cause_check.py: CAUSE-NAMED step=2 file=docs/contracts/investor-reporting/v1/RequestComposition.schema.json line=599 (rc 0), twice.
+   Checker mutant (cause step set to 1 and step_name to canonical, in a scratch copy of the record): CAUSE-NOT-NAMED the cause step 1 is not the first failing step 2 (rc 1).

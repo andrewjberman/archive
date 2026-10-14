@@ -103,7 +103,7 @@ def make(root, live, pin):
            "remeasure": {"pins": dict(P.PINS), "firms": {f: {"movers_canonical": v[0], "movers_fallback": v[1], "gate_before": v[2], "gate_after": v[3],
                                                              "lost_accounts_listed_after": v[4]} for f, v in P.PACKET_NUMBERS.items()}},
            "notes": ["synthetic control record"], **{k: 0 for k in P.BOUND}}
-    evid = {"firms": {f: {"changed_by_content": [len(CHANGED), CHANGED], "changed_by_line_endings_only": [len(EOL), EOL], "added_in_built": [len(ADDED), ADDED]} for f in P.FIRMS}}
+    evid = {"firms": {f: {"changed_by_content": list(CHANGED), "changed_by_line_endings_only": list(EOL), "added_in_built": list(ADDED)} for f in P.FIRMS}}
     paths = sorted({x["path"] for x in rows})
     packet = ("# Packet v2 (synthetic)\n\nBranch A, Branch B, the blast radius, the stop rule, the ledger, the manifest anchor rule, T-1 by the trading calendar, "
               "opal_strategy_matcher, the sha256 left for the signers, every moved member, line endings, every other date, the business date, "

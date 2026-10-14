@@ -93,7 +93,7 @@ def evidence_sets():
     out = {}
     for firm in FIRMS:
         f = (ev.get("firms") or {}).get(firm) or fail("the stop evidence holds no %s" % firm)
-        out[firm] = {"changed": set(f["changed_by_content"][1]), "eol": set(f["changed_by_line_endings_only"][1]), "added": set(f["added_in_built"][1])}
+        out[firm] = {"changed": set(f["changed_by_content"]), "eol": set(f["changed_by_line_endings_only"]), "added": set(f["added_in_built"])}
     return out
 
 

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -51,3 +51,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28
 # pipeline-override: a delete order to a tier-2 applier under Andrew's recorded approval of call c449 (not a worker cell); the cell AR-y-307 is the issuer's, as for TO-EXERCISE-R28b.
 
 <!-- ISSUER NOTE 2026-10-14 (2.0.0_SA_COO~Y2): parked at step 3 by AQ2's STOP (msg 7592): the one delete-object by VersionId was refused AccessDenied, explicit Deny DenyS3DeletesOnProductionData in cloudops-dell-agent-deploy-policy v7. Steps 1 and 2 are done (1 key, 1 version, 0 delete markers). The order is STAGED until 1.0.0_SA_CTO~DELL2 names the principal or path that may delete this one version; nothing is routed around the deny. -->
+
+<!-- ISSUER NOTE 2026-10-14 (2.0.0_SA_COO~Y2): SUPERSEDED by the laptop seat 0.7.0_AE_CloudOps~U7's order IRPT_ANLREQ.TO-DELETE-C449-U7.synthetic-door-input-d2-laptop (crossbox ORDER XB-20261014T123613Z-be5e): U7 deleted the one version (KEYS_SELECTED 1, VERSIONS_BEFORE 1, DELETED 1, HEAD NoSuchKey, VERSIONS_AFTER 0; commit 75bc7350a1). The issuer read the prefix irpt/49financial/state/normalized_portfolios/ in opal-data-irpt afterwards: 12 versions, 12 distinct keys, 0 delete markers, no key containing the approved 64-hex (11 keys before, 1 deleted, 2 written by the release-29 sitting). Call dell2-20261014T044915Z-c449 closed with Andrew's record (row 8 of ANDREW_DIRECT_20261014_114xZ_EIGHT_OPEN_CALLS_ANSWERED.md). -->

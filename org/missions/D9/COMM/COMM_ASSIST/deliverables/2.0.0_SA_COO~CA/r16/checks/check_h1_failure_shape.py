@@ -21,7 +21,9 @@ try:
 except Exception as e:  # noqa: BLE001 -- the base has no module: that is the expected FAIL
     out(False, "import %s: %s" % (type(e).__name__, e))
 names = list(getattr(m, "SOURCES", ()))
-if sorted(names) != ["drafts", "eod_today", "open_calls", "sprint_today"]:
+BASE4 = {"drafts", "eod_today", "open_calls", "sprint_today"}   # round 16; CA-j-13 (FWD-13) adds mentions and mail_log, so the four must be present and nothing else may be
+EXTRA = {"mentions", "mail_log"}
+if not BASE4 <= set(names) or not set(names) <= BASE4 | EXTRA or len(names) != len(set(names)):
     out(False, "SOURCES=%r" % (names,))
 
 
@@ -38,6 +40,7 @@ with tempfile.TemporaryDirectory() as td:
     t1, t2 = "2026-10-13T16:00:00Z", "2026-10-13T16:30:00Z"
     ok_readers = {"open_calls": good([{"id": "a"}]), "drafts": good([]), "eod_today": good([{"id": "e"}]),
                   "sprint_today": good([{"id": "s"}])}
+    ok_readers.update({n: good([]) for n in names if n not in ok_readers})   # a source CA-j-13 added reads as a true empty here
     m.refresh(root, ok_readers, t1)
     d0 = json.loads((root / "drafts.json").read_text(encoding="utf-8"))
     if d0.get("status") != "ok" or d0.get("items") != [] or d0.get("read_at") != t1:
