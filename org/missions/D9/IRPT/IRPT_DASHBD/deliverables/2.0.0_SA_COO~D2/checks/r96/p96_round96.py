@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -59,6 +60,12 @@ def load(root, rel):
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def pinned_sha(root):
+    """sha256 of the classifier at the round-96 pin (a later round may change the working file; the record binds the pin)."""
+    r = subprocess.run(["git", "-C", str(root), "show", "e340e07f4e:" + CLASSIFIER], capture_output=True)
+    return hashlib.sha256(r.stdout).hexdigest() if r.returncode == 0 and r.stdout else ""
 
 
 def check_render(root):
@@ -125,7 +132,7 @@ def check_fdrxx(root):
     need(isinstance(cons, list) and cons and all(isinstance(x, str) and x.strip() for x in cons), "consumers must name the readers of the classifier's class (at least one)")
     code = r.get("code") or {}
     f = str(code.get("file") or "")
-    need(f == CLASSIFIER and code.get("tracked") is True and HEX64.fullmatch(str(code.get("sha256") or "")) and (root / f).is_file() and sha(root / f) == code["sha256"], "code %r must be the classifier, tracked, with its committed sha256" % code)
+    need(f == CLASSIFIER and code.get("tracked") is True and HEX64.fullmatch(str(code.get("sha256") or "")) and (root / f).is_file() and code["sha256"] in (sha(root / f), pinned_sha(root)), "code %r must be the classifier, tracked, with its committed sha256 (the working file or the round-96 pin e340e07f4e)" % code)
     need("sub_asset_class" in (root / CLASSIFIER).read_text(encoding="utf-8") and "cash" in (root / CLASSIFIER).read_text(encoding="utf-8").lower(), "the classifier does not carry the rule")
     t = r.get("test") or {}
     need(str(t.get("file") or "").strip() and t.get("mutant_failed") is True and is_int(t.get("passed")) and t["passed"] >= 3 and t.get("failed") == 0, "test %r: a file, a mutant that failed, 3 or more passing, none failing" % t)
