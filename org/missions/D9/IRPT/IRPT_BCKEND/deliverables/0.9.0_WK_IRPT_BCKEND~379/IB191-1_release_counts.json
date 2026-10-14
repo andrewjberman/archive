@@ -1,0 +1,81 @@
+{
+  "base_commit": "49467335d288d5c0012fe339c4cafcb74bd43fb5",
+  "candidate_method": "For each firm, build_snapshot(firm, VersionedInputs(read client), select_business_date()) runs once with the code as it stands and once with apply_cash_rule replaced by identity over the same pinned inputs; movers are SECURITY nodes whose asset_class differs by node_id; the layer is the producer's classify_security class_source re-run on each mover; the exemption is evaluate_publish_gate on the served publication (plain read client, begin() and served_publication only) with the pre-repair marks rule and with directory_marks_no_closures.",
+  "firms": {
+    "49financial": {
+      "candidate": {"built": true, "business_date": "2026-10-12", "nodes": 156521},
+      "cash_rule": {
+        "movers_canonical": 32,
+        "movers_fallback": 0,
+        "movers_total": 32,
+        "canonical_tickers": ["SNOXX", "SNSXX", "SNVXX", "SWVXX"],
+        "vs_round189": {"canonical": 0, "fallback": 0}
+      },
+      "exemption": {
+        "gate_before": "PUBLISHED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": [],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 0
+      },
+      "note": "Built in about 3 minutes per build, inside the 25 minute bound. The served index was read in one call: 10 dates, latest 2026-10-12, 2026-10-08 absent (unchanged from the order). Cash-sub SECURITY nodes 33 with the rule and 1 without; the 32 movers are all canonical. The fallback layer has no mover. Gate evaluated before and after on the same candidate; no condition differs (both empty). Not read: node-level fields other than asset_class, the bundle members, any holding value."
+    },
+    "cottonwood": {
+      "candidate": {"built": true, "business_date": "2026-10-12", "nodes": 17966},
+      "cash_rule": {
+        "movers_canonical": 38,
+        "movers_fallback": 211,
+        "movers_total": 249,
+        "canonical_tickers": ["FDRXX", "SWVXX", "VUSXX"],
+        "vs_round189": {"canonical": 0, "fallback": -4}
+      },
+      "exemption": {
+        "gate_before": "REFUSED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": ["account_lost"],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 1
+      },
+      "note": "The served index latest date is 2026-10-08 (read in one call). The candidate is the producer's own 2026-10-12 build, not the 2026-10-08 snapshot the round-189 figures were measured on; the fallback delta of -4 is a candidate-level difference, not decomposed (surprise row IRPT_BCKEND-D2-W379-S2). The gate before the repair refused on account_lost alone; after the repair the one lost account is listed, not refused, and the candidate publishes. The publish_refusal object exists (head read, body not read). Not read: the lost account identifier (count only is recorded), the bundle members, any holding value."
+    },
+    "inflection": {
+      "candidate": {"built": true, "business_date": "2026-10-12", "nodes": 36702},
+      "cash_rule": {
+        "movers_canonical": 774,
+        "movers_fallback": 67,
+        "movers_total": 841,
+        "canonical_tickers": ["FDRXX", "SPAXX"],
+        "vs_round189": {"canonical": 0, "fallback": 0}
+      },
+      "exemption": {
+        "gate_before": "PUBLISHED",
+        "gate_after": "PUBLISHED",
+        "conditions_before": [],
+        "conditions_after": [],
+        "lost_accounts_listed_after": 0
+      },
+      "note": "Built in about 2 minutes. Served index read in one call: 12 dates, latest 2026-10-12. Cash-sub SECURITY nodes 843 with the rule and 2 without; movers 774 canonical and 67 fallback, both equal to the round-190 figures. Gate PUBLISHED before and after. Not read: node-level fields other than asset_class, the bundle members, any holding value."
+    }
+  },
+  "both_branches": {
+    "counts_match_expectation": false,
+    "stop_rule": "The release stops, and the packet is re-cut, unless at the release the per-firm canonical and fallback movers, the lost-account count and the gate outcome and conditions before and after equal this record. Cottonwood fallback reads 211 here against the 215 expected from round 189 (surprise row IRPT_BCKEND-D2-W379-S2), so the release counts for Cottonwood must be re-measured at the release and compared with this record, not with 215. Any condition other than account_lost that differs between the two gate runs also stops the release."
+  },
+  "notes": [
+    "Counts were measured in one process per firm from the producer's functions, with the default boto3 credential chain of the worker's agent identity used for get, list and head calls only, plus one sts get-caller-identity. No put, copy, delete, invoke, send, publish, land or upload was called; the producer's publish path was not entered.",
+    "publication.HoldingsPublication.begin() was read from the source before use: it calls get_object only. served_publication uses read_exact, which calls get_object with VersionId only.",
+    "Layer split: the built node carries asset_class_basis but not class_source (annotate_classification pops it and the census holds only totals). Each mover's layer was read by re-running the producer's classify_security on its display symbol, description and security_id; the re-run's asset_class matched the built node for every mover in all three firms (surprise row IRPT_BCKEND-D2-W379-S1).",
+    "Before-repair marks rule: the base commit's directory_marks_no_closures (no carried-forward filter), written in the scratch harness from git diff 5bc47c4693 HEAD. After-repair: directory_marks_no_closures as merged. marks_no_closures was False before and after for 49financial and inflection, and False before and True after for cottonwood.",
+    "Expected counts (32, 38, 774 canonical and 0, 215, 67 fallback) come from the round-189/190 packets; the cottonwood fallback figure differs and is recorded as a measurement, not a failure.",
+    "Served-index facts re-read this session: 49financial 10 dates, latest 2026-10-12, 2026-10-08 absent; cottonwood latest 2026-10-08; inflection latest 2026-10-12. The census bundle version ids and manifest version ids matched the re-read.",
+    "The trading calendar answered from its hardcoded NYSE fallback (pandas_market_calendars absent on this device); the business-date cutoff read 2026-10-14 (surprise row IRPT_BCKEND-D2-W379-S3).",
+    "Not read: bundle member contents beyond the census, the release pin of the producer blob, any Lambda or SSM configuration beyond the census, the IAM policies, any command output, any holding value, any account identifier. Bundle sha256 values are carried from the census and were not recomputed here."
+  ],
+  "uploaded": false,
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
