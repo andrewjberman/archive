@@ -275,6 +275,14 @@ def c3_ac1():
             fail("%s: commit %r does not exist or its subject does not name it" % (x["name"], c))
         if x.get("revert_applied") is not True or not is_int(x.get("removed_nodes")) or x["removed_nodes"] < 0 or not is_num(x.get("largest_abs_delta")):
             fail("%s: the revert must be applied, with a removed-node count and the largest delta" % x["name"])
+        # AMENDMENT 1: a git revert that conflicts is resolved so that it undoes ONLY this commit's change to the closure members
+        if x.get("resolution") not in ("clean", "non_closure_taken_from_head", "hand_resolved_closure_member"):
+            fail("%s: resolution must be clean, non_closure_taken_from_head or hand_resolved_closure_member" % x["name"])
+        names = set(git("show", "--name-only", "--format=", c).stdout.split())
+        clos = set(closure(git_show(load(R1)["new_pin"], CORE) or fail("no core at the new pin")))
+        tf = x.get("toggled_files")
+        if not isinstance(tf, list) or not tf or not set(tf) <= (names & clos):
+            fail("%s: toggled_files must be closure members that the commit itself changed" % x["name"])
         if not isinstance(x.get("groups"), list) or sum(g.get("nodes", 0) for g in x["groups"]) < x["removed_nodes"] and x["removed_nodes"] > 0:
             fail("%s: groups must account for the removed nodes" % x["name"])
         attributed_sum += x["removed_nodes"]
