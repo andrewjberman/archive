@@ -27,7 +27,7 @@ NEW tree, as A2 requires (MX-r-11's `C:/tmp/mx-dep-r11` is kept and locked as v2
 `data/transcripts/scripts/teams/meeting_allowlist.json`, `infra/aws/ec2/EC2_MANIFEST.json`,
 `data/firm_registry.json`.
 
-⭐ **THE ORACLE, run rather than reasoned** -- the two `address()` calls whose closure cost MX-r-11 its first apply
+NOTE: **THE ORACLE, run rather than reasoned** -- the two `address()` calls whose closure cost MX-r-11 its first apply
 (rows `Z-S108` / `Z-S111`) both resolve from this tree:
 
 ```
