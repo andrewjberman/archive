@@ -1,0 +1,25 @@
+BP-c-2 third seat (0.9.0_WK_ADVI_BDPRCE~21), session log. Read-only on AWS: every S3 call was a read verb.
+
+1. Worktree check: branch wk-ADVI_BDPRCE-21, org and .tools present (TREE-OK). Order premises re-grounded.
+2. aws s3api get-object silver/prices/canonical_prices.parquet -> C:/dev/wk-bdprce-r3-21-data/canonical_prices.parquet.
+   ETag a88a7030f4506ac7e0cdb844382f9d16, LastModified 2026-10-14T04:03:36Z, ContentLength 110077599; md5 equal.
+3. aws s3api get-object silver/bd_assets_dim.parquet -> C:/dev/wk-bdprce-r3-21-data/bd_assets_dim.parquet; md5 45dfaab5b5756b8458c6cfae63bf9f38 equal to the ETag.
+4. aws s3api list-objects-v2 --prefix silver/transactions/ (rail-checked: BP-c-2 replay needs the key listing): 1,929 keys, 1,928 dated.
+5. aws s3api head-object per dated key (1,928 calls, 8 in parallel, scratch script .scratch/head_one.sh): rc 0 on all.
+6. python -I verify_partitions.py (deliverables folder) against the cache C:/dev/wk-bdprce-r2-6-data (read) and C:/dev/wk-bdprce-r3-21-data:
+   first pass VERIFIED_MD5 1922, VERIFIED_SIZE_MULTIPART 2, MISMATCH_SIZE 3 (2026-10-02, 2026-10-08, 2026-10-11), MISSING 1 (2026-10-14).
+7. aws s3api get-object for those four keys into C:/dev/wk-bdprce-r3-21-data/tx/; each md5 equal to its head ETag.
+   second pass: VERIFIED_MD5 1926, VERIFIED_SIZE_MULTIPART 2 (2026-06-30, 2026-07-07). Manifest: PARTITIONS3.csv.
+8. python -I unit_map_pairs.py: lot extract sha256 e7e618d7...2b50b checked; pairs by priority (same-date trade, then
+   nearest earlier trade, then lot). served_units {"assets": 888, "per100": 1, "per_unit": 827, "unreadable": 60}.
+   UNIT_MAP.csv sha256 c47ce738cd1ca34b132d785704a210f5528accacf3dbe4d02c9309c50428435e.
+9. python -I replay_r1_amend3.py, run A to C:/dev/wk-bdprce-r3-21-data/runA (no peer): served=1689
+   CHANGED 599, NOT_RECOMPUTABLE 183, NOW_CARRY_FORWARD 160, UNCHANGED 747; unit_changed 0; unit_withheld 19;
+   BEFORE_AFTER3 md5 3f0de9889ca0748fe0235dadf8834db2.
+10. Same script, run B to the deliverables folder with --peer-md5 3f0de9889ca0748fe0235dadf8834db2:
+    peer_equal true, deterministic true; BEFORE_AFTER3.csv sha256 0dfcd23dd606db5fd6283d6564b09cf8e81e81fdb2138e7e5d60e7ea12bd937a;
+    ESTIMATED_ROWS3.csv sha256 8c07ccc1167c816e74b25349bb2532742fa71199cbde372170b01535527c94dc.
+11. Analysis (scratch only, not a deliverable): compare with the second seat's REPLAY2 outputs on common keys; interpolated
+    sources in the current canonical; MORGAN counts; the mutant grader run (unit_changed_rows 1 -> REPLAY3 record FAIL, rc 1).
+12. Grader: r3_checks.py replay3 -> REPLAY3 record ok served=1689 moved=759 unchanged=747 unit_changed=0 unit_withheld=19 deterministic=true (rc 0).
+    r4_scope.py (ROUND 4 SCOPE) run with the three --allow paths (rc 0).
