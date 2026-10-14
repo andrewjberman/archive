@@ -110,6 +110,8 @@ Checked on a scratch copy of `infra/logic/registry/` carrying both edits above: 
 
 Open for the registry owner, not decided here: the sibling rows name `opal-data-49financial` as the master's bucket, while the census measures the Schwab silver under `opal-data-assets/schwab/<master>/`. Whether the new row should carry the same value is the owner's call.
 
+Under A2 (Andrew-direct via CTO msg 34134) no `client_*` adapter reads `opal-data-49financial`, so the bucket value selects no client read in this proposal. The 08403355 data prefixes above are `opal-data-assets/schwab/08403355/silver/` keys, which are the only ones the adapters use.
+
 ## 4. What this proposal does not do
 
 - It does not add `08403355` to `DATA_CATALOG.yaml` (catalog is NFRA_MCPINDEX's file).
