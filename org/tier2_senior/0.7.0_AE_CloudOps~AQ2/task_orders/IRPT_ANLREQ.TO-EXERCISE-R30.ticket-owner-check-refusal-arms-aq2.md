@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -33,6 +33,7 @@ comp-adversary: RUN -- by reading TO-EXERCISE-R29's result and rows D2-S97 and D
 
   <the_act>
     GO: both halves are signed. TO-APPLY-R30a is CLOSED (your own report, AQ2 msg 7702; the issuer read the Lambda live: CodeSha256 Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A=, 35325 bytes, last modified 2026-10-14T15:10:00Z, IRPT_REQUESTS_TABLE=irpt-requests, and the role policy opal-tickets-table-rw lists IrptRequestsInputOwnerRead beside the three earlier statements). The order is PENDING and this is the GO: start at step 1 (you read both yourself, read-only). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
+    **RUN 2 (issuer, after Addendum 1):** G2 (TO-APPLY-R30b) is CLOSED (AQ2 msg 7730; the issuer read the role policy live: five statements, IrptRequestsDecryptViaDynamoOnly exactly once, kms:Decrypt only, Resource the table's own key ARN arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111, the two StringEquals conditions as signed). Run 1 stopped at K1 (503) and is kept as your *_RUN1.txt. Run again from step 1 with R0i read again: K1, K2 and K3 must each answer HTTP 400 with the one text, equal bodies, the tickets COUNT equal. A 503 again is a STOP and a report; it is NOT retried. Read the run-1 minted addresses first: any state other than ABSENT is a STOP. The 29b ledger is already CLOSED (15:16Z, per your report); this order's sitting ledger closes on K1 to K3 reading as expected.
     1. Read the COO half and CTO half at HEAD. Read the Lambda CodeSha256 and the role policy statement IrptRequestsInputOwnerRead (read-only): anything else: STOP, report. Read your own grants as met (DynamoDB read and conditional put and delete on the minted keys, the signing-key read, the tickets table COUNT scan). Open the NEVER-2 ledger irpt-r30-ticket-sitting-20261014 (legs M mint, K arms, X removal) and commit it; read every live worktree's open deploy entries (git worktree list, then ls-tree) and print the denominator: an open entry naming opal-users-v2, opal-tickets or opal-ticket-api is a STOP.
     2. R0i (a GATE, CTO half condition 1): `GetItem` with ConsistentRead on table irpt-requests, Key {tenant: 49financial, request_revision: INPUT#portfolio_ac6ac6bd0ddb9e33c3766b44b88da5d2253db219848824b202a2ee84b2c40cb0} (advisor A's release-29 D1 input), projected to the owner attributes. The row MUST EXIST, with owner.firm_id 49financial and owner.principal_id equal to advisor A's address (the one you minted in TO-EXERCISE-R29: read it from your own record) and NOT B's. Print only: present yes or no, the field NAMES of owner, and the equality results yes or no (no address in any file). If the row is ABSENT (the delete call 2106 may have run): K1 is re-pointed to an input that exists and is owned by ANOTHER minted advisor (mint it through the door as in TO-EXERCISE-R29 step 3 and name it), or the sitting does not open; say which in the report.
     3. Count the tickets table BEFORE (a COUNT-only scan: Select=COUNT, the number only, the pages summed, the denominator of items scanned printed).
