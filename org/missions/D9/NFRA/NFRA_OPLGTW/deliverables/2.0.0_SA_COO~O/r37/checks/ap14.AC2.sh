@@ -15,6 +15,10 @@ closed=no; [ -n "$e" ] && git show "HEAD:$e" | tr -d '\r' | grep -qE '^\*\*Statu
 sent=$(git ls-tree --name-only HEAD "org/critical_paths/.open_deploys/${slug}.json" | grep -c .)
 rel=NONE; [ -f "$W/ap14_release.json" ] && rel=$(python -c "import json,sys;print(json.load(open(sys.argv[1],encoding='utf-8')).get('release_sha','NONE'))" "$(native "$W/ap14_release.json")" | tr -d '\r')
 dep=$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;print(json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'].get('deployed_commit','NONE'))" | tr -d '\r')
+# Normalise both commits to full hashes before comparing (a short release_sha read as FAIL on a correct deploy;
+# found by 0.7.0_AE_CloudOps~Z msg 33988).
+full() { git rev-parse --verify --quiet "$1^{commit}" 2>&1 | tr -d '' | grep -E "^[0-9a-f]{40}$" || printf '%s' "$1"; }
+[ "$rel" != NONE ] && rel=$(full "$rel"); [ "$dep" != NONE ] && dep=$(full "$dep")
 rb=FAIL; bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/rb.AC2.sh >/dev/null 2>&1 && rb=PASS
 srv=$(python - "$(native "$W/AP14_SERVED.json")" <<'EOF'
 import json, sys
