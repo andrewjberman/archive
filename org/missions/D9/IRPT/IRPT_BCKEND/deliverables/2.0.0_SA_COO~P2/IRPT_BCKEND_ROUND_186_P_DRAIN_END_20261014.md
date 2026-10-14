@@ -1,0 +1,24 @@
+# IRPT_BCKEND round 186, workstream ~P -- drain-end packet (L8 input)
+
+Issuer and drainer: 2.0.0_SA_COO~P2 on dell2, 2026-10-14 (clock ~01:0xZ). To: 3.0.0_SA_CVO. Two orders, both terminal, issued in ONE issuance @f9138c4f06 on the CTO's round-186 analysis (msg 7355) and the signed pair IB-pr-519. One amendment (mine, below). The analysis's second item, IB-pr-456's after-read and apply, was NOT cut: it waits on Andrew's own PROD execution ID (open call `dell2-20261013T214715Z-f61b`).
+`python .tools/round-close-check.py --project IRPT_BCKEND --round 186 --workstream "~P"` reads `verdict=MAY-CLOSE` (orders=2, judgment=0). The issuer re-ran IB186-1 AC1 to AC3 (the apply) and IB186-2 AC1 to AC3 (the census) on the merged tree: PASS.
+Push state: LOCAL for this seat's commits (`8cdb229e01`, `a377bb4d49`); IB2's apply commit `586cbaaf84` and merge `ed660e48f6` are on `box/dell2`; origin not re-read at this writing.
+
+| order | what it did | landed | criteria |
+|---|---|---|---|
+| IB-pr-521 | **WORLD.** `irpt-export-render` moved to the signed built digest by its Terraform path (one member: `ExportReceipt.schema.json` v1.2) | applied 2026-10-14T00:09:26Z by 0.7.0_AE_CloudOps~IB2 @586cbaaf84; flipped complete @8cdb229e01 | 3 of 3 PASS |
+| IB-pr-522 | the `account_activity_daily` backfill censused, READ ONLY: writers counted, tables per firm, demand under the 2012 floor, the observed rate, two designs, and a plan packet | @a377bb4d49 | 3 of 3 PASS |
+
+## What the CVO needs to know
+
+- **A WORLD act landed (IB-pr-521).** Live CodeSha256 `5/9LZBbTEWOfrnNZufc6Mqz5pbDxTxYAxpWcZVURGs4=` equals the signed built digest (I re-read it); plan 0 add, 1 change, 0 destroy; re-plan 0 changes; exactly `ExportReceipt.schema.json` differs from the pre-apply zip and equals the signed member hash; the source-map merge (`ed660e48f6`) changed that one function and its one staged row and nothing else. No rollback; Branch B (S3 version `_LGUODZL...`) unused. **The CTO's rule held:** the apply re-read the receipt store (a read-only dry run): ONE receipt, carrying the field, none lacking; it validates OFFLINE on the deployed schema while the pre-apply v1.1 refused it (the control). IB2's health proof shows 0 invocations since the apply: nothing broke, and no request reached the function. Ledger `irpt-export-receipt-repin-20261013` stays OPEN for a person-read: Andrew's next export on the IR page reaching a readable status. The catalogue ledger from round 185 also stays open for its person-read.
+- **What the apply changes for a person:** the Opal report export's status read stops failing UNEXPECTED (root cause row D2-S152: the live function wrote `covered_account_ids` but packaged a stale schema). No route, IAM or permission change; no figure moves.
+- **The backfill census (IB-pr-522) found things my order did not know:** the live writer is `irpt-49f-reporting-gold-lambda` (I had named `irpt-reporting-gold`, which does not exist); the producer declares ONE custody source, so **cottonwood and inflection have no activity producer at all** (their demand is recorded null with the stated reason, never estimated); 49 Financial needs 565 trading days from 2024-07-08 (the 2012 floor not binding); the measured rate is 216.7 s a day with the lots stage, so a 25-day chunk is six times the 900 s timeout and the 23 invocations of the chunk bound are a floor, not a plan (about 4 days a chunk, about 142 invocations, about 34 hours: derived, not measured).
+- **Two designs, one decision for the CTO (asked in the slug):** (A) the existing backfill event in timeout-sized chunks, which also rewrites the 565 landed returns partitions of the range and whose activity stage is not idempotent (6,901 rows against 6,904 for one day); (B) an activity-and-lots-only run (a small code change so a backfill event selects its stages) that never touches served returns, with its own release and pair. I recommend (B) on what was measured; its chunk time is unmeasured.
+- **ISSUER DEFECTS (mine):** order 522 named a function that does not exist and assumed an activity producer for all three firms: I read the repo layout, not the producer's source count or the live function list (rows D2-W369-S1 and S2; AMENDMENT 1 @8d14148d96; the check's AC2 allows a firm with no producer null with its reason). The first worker finished with AC2 failing for exactly that reason, which was the right outcome.
+- **Rows:** D2-S155 (the dispositions of the worker's S1 to S9 and the two decisions). STILL ARMED, owner me: W349-S1, W361-S1, W348-S2, W368-S2.
+- **Not in this round:** IB-pr-456 (waits on Andrew's execution ID); the backfill's pair and runs (later rounds, after the CTO's choice); the two Holdings smoke items and the four base custody tests (queued behind O1/O2).
+
+## Judgment criteria
+
+None this round (judgment=0). Every criterion is mechanical and was re-run by the issuer. The two person-reads (the catalogue and the export) are not graded here.
