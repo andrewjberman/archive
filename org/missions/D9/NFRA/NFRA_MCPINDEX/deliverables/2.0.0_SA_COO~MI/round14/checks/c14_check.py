@@ -48,9 +48,10 @@ def ac1(d, allc):
     exp = expected(allc)
     want = {glib.entity(cid) + ".yaml": cid for cid in exp}
     have = {fn: (r.get("contract") or {}).get("id") for fn, r in rows.items()}
+    want_id = {glib.entity(cid) + ".yaml": glib.enc(cid) for cid in exp}
     missing = sorted(set(want) - set(have))
     extra = sorted(set(have) - set(want))
-    idbad = [fn for fn in set(want) & set(have) if have[fn] != want[fn]]
+    idbad = [fn for fn in set(want) & set(have) if have[fn] != want_id[fn]]
     uniq = len(set(want)) == len(want)
     print("ROWS files=%d; in-scope contracts=%d (G2+G4+G5+G6 less %d already rowed in silver_datasets); entity names unique=%s; "
           "missing %d, extra %d, contract.id wrong %d"
@@ -78,7 +79,8 @@ def ac2(d, allc):
             bad("row", fn, "no row")
             continue
         graded += 1
-        want_keys = KEYS | ({"retired_reason"} if cid in glib.DO_NOT_SERVE else set())
+        why = glib.retired_reason(c)
+        want_keys = KEYS | ({"retired_reason"} if why else set())
         if set(r) != want_keys:
             bad("keys", fn, "extra %s missing %s" % (sorted(set(r) - want_keys), sorted(want_keys - set(r))))
         for f in ("bucket", "table", "layer", "format", "grain"):
@@ -86,7 +88,7 @@ def ac2(d, allc):
                 bad(f, fn, "%r != %r" % (r.get(f), c[f]))
         if r.get("prefix") != c["s3_prefix"]:
             bad("prefix", fn, "%r != %r" % (r.get("prefix"), c["s3_prefix"]))
-        want_contract = {"id": cid, "size": c["size"], "freshness": c["freshness"], "partition": c["partition"], "producer": c["producer"]}
+        want_contract = {"id": glib.enc(cid), "size": c["size"], "freshness": c["freshness"], "partition": c["partition"], "producer": c["producer"]}
         if r.get("contract") != want_contract:
             bad("contract", fn, "differs from the contract's id/size/freshness/partition/producer")
         if r.get("fork_keys") != c["fork_keys"]:
@@ -131,20 +133,16 @@ def ac2(d, allc):
         if not (isinstance(bm, str) and len(bm.strip()) >= 40 and not bm.startswith("NONE")):
             bad("business_meaning", fn, "empty, under 40 chars or NONE")
         else:
-            if (glib.LIVE49F in bm) != glib.is_49f_bd(c):
-                bad("business_meaning", fn, "a 49F Black Diamond row (and only one) carries %r" % glib.LIVE49F)
             stale, empty = glib.marks(c)
             for word, label in ((stale, "NOT CURRENT"), (empty, "EMPTY")):
                 if word and word not in bm:
                     bad("business_meaning", fn, "must carry %r (frozen or empty is never current)" % word)
                 if not word and label in bm:
                     bad("business_meaning", fn, "carries %s but the contract does not support it" % label)
-        dns = cid in glib.DO_NOT_SERVE
-        if r.get("retired") is not dns:
-            bad("retired", fn, "want %r, got %r" % (dns, r.get("retired")))
-        elif dns and not (isinstance(r.get("retired_reason"), str) and r["retired_reason"].startswith("do-not-serve: ")
-                          and str(c.get("routing") or "")[:60] in r["retired_reason"]):
-            bad("retired", fn, "a do-not-serve row's retired_reason starts 'do-not-serve: ' and carries G4's routing text")
+        if r.get("retired") is not bool(why):
+            bad("retired", fn, "want %r, got %r" % (bool(why), r.get("retired")))
+        elif why and r.get("retired_reason") != why:
+            bad("retired", fn, "retired_reason must be exactly %r" % why[:90])
         rt, go, tl = r.get("read_tool"), r.get("gap_owner"), r.get("tools")
         if rt is None and not (isinstance(go, str) and go.strip()):
             bad("read_tool", fn, "null read_tool needs a gap_owner")

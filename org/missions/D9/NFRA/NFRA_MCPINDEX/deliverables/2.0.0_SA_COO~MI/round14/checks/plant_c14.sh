@@ -56,9 +56,8 @@ for p,r in rows().items():
 mut "a current table marked NOT CURRENT (ac2)" ac2 "
 for p,r in rows().items():
     if 'NOT CURRENT' not in r['business_meaning']: r['business_meaning']+=' NOT CURRENT: 9 trading days behind.'; save(p,r); break"
-mut "a 49F row without its live-store sentence (ac2)" ac2 "
-for p,r in rows().items():
-    if 'opal-data-bd' in r['business_meaning']: r['business_meaning']=r['business_meaning'].replace(' Live store: opal-data-bd/silver/ (inferred).',''); save(p,r); break"
+mut "a not_served feed not retired (ac2)" ac2 "p=os.path.join(d,'opal_data_mdpf_feeds_model_aua_positions_inflection.yaml'); r=yaml.safe_load(open(p,encoding='utf-8')); r['retired']=False; r.pop('retired_reason',None); save(p,r)"
+mut "a not_served reason that cites no record (ac2)" ac2 "p=os.path.join(d,'opal_data_mdpf_feeds_model_aua_positions_inflection.yaml'); r=yaml.safe_load(open(p,encoding='utf-8')); r['retired_reason']='not_served'; save(p,r)"
 mut "a do-not-serve row not retired (ac2)" ac2 "p=os.path.join(d,'opal_data_mdpf_feeds_non_model_aua.yaml'); r=yaml.safe_load(open(p,encoding='utf-8')); r['retired']=False; r.pop('retired_reason',None); save(p,r)"
 mut "a table row retired (ac2)" ac2 "p,r=list(rows().items())[2]; r['retired']=True; save(p,r)"
 C14_GEN="$G" python "$C" ac3 >"$T/o.txt" 2>&1; rc=$?

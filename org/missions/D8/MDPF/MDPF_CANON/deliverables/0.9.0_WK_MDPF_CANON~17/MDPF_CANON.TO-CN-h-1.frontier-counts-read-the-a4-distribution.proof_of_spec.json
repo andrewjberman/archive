@@ -16,12 +16,58 @@
   "assignee": "0.9.0_WK_MDPF_CANON~17",
   "artifacts_produced": [
     {
+      "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "4b75363bc0",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load_account_dist_frontier_counts(firm_id, axis_date) reads the newest A4 account-distribution at or before the axis date, its prefix from the registry row mdpf-portal-gold-account-distribution via lib/opal_naming.legacy_address; the staged object is no longer read. Amended at 7c5fff2765 (AMENDMENT 1). Committed in this commit; not deployed; the deploy is CloudOps's, in its own window."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "4b75363bc0",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One package-list line ships infra/logic/registry/legacy_addresses.json beside the other registry entries. Amended at 7c5fff2765 (AMENDMENT 1). Committed in this commit; not deployed; the deploy is CloudOps's, in its own window."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_canplat_p1_1.py",
+      "kind": "test",
+      "commit_or_etag": "4b75363bc0",
+      "artifact_covered_by": [],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One lambda stub accepts axis_date (line 88); nothing else changed."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_global_fold_flag2.py",
+      "kind": "test",
+      "commit_or_etag": "4b75363bc0",
+      "artifact_covered_by": [],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One stub line (46) accepts axis_date; nothing else changed."
+    },
+    {
+      "path_or_key": "data/mdpf/tests/canon/test_frontier_counts_a4.py",
+      "kind": "test",
+      "commit_or_etag": "4b75363bc0",
+      "artifact_covered_by": [],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven tests, pytest 7 passed; an autouse fixture pins the real loader (row MDPF_CANON-D1-W17-S2)."
+    },
+    {
       "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "f2c550f3fa",
       "artifact_covered_by": [],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-17 (commit f2c550f3fa). Appends rows MDPF_CANON-D1-W17-S1 (OBSERVATION, premise drift), W17-S2 (OBSERVATION, test-state leak) and W17-S3 (BLOCKING, naming gate). The loader, the two stubs and the new test file are NOT in this table: they are uncommitted in the worktree (see declared_exclusions item 1)."
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-17 (commit f2c550f3fa). Rows MDPF_CANON-D1-W17-S1 (OBSERVATION), -S2 (OBSERVATION), -S3 (BLOCKING; answered by the registry row and this commit)."
     }
   ],
   "acceptance": [
@@ -30,7 +76,7 @@
       "criterion_verbatim": "AC1 (CN-h-1): run r6_cn_h_1.py reader -- expect: CN-H-1 READER: 8 of 8 arms -- and exit=0",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r6_cn_h_1.py\" reader; echo \"exit=$?\"",
-      "output_evidence": "  H0 PASS: loader present=True; staleness verdicts ['FRESH', 'STALE', 'AHEAD_OF_AXIS', 'UNKNOWN']\n  H1 PASS: axis 10-09 -> 2026-10-09; 10-10 -> 2026-10-09; 10-12 -> 2026-10-12; 12-31 -> 2026-10-12 \n  H2 PASS: no A4 <= axis -> {}; staged requested=False \n  H3 PASS: only a staged object present -> {}; staged requested=False \n  H4 PASS: listing AccessDenied -> RuntimeError: C2-SIBLING FAIL-LOUD: A4 account-distribution LISTING FAILED (NOT absent) ...\n  H5 PASS: key 10-09 with period 10-12 on axis 10-09 -> {} \n  H6 PASS: as-of 2026-10-12 verdict FRESH \n  H7 PASS: pytest rc=0: 7 passed in 1.48s\nCN-H-1 READER: 8 of 8 arms\nexit=0",
+      "output_evidence": "  H0 PASS: loader present=True; staleness verdicts ['FRESH', 'STALE', 'AHEAD_OF_AXIS', 'UNKNOWN']\n  H1 PASS: axis 10-09 -> 2026-10-09; 10-10 -> 2026-10-09; 10-12 -> 2026-10-12; 12-31 -> 2026-10-12 \n[2026-10-14T15:25:37Z]   WARN frontier-count: no A4 account-distribution for global at or before 2026-10-09 -> frontier honest-None\n  H2 PASS: no A4 <= axis -> {}; staged requested=False \n[2026-10-14T15:25:37Z]   WARN frontier-count: no A4 account-distribution for global at or before 2026-10-09 -> frontier honest-None\n  H3 PASS: only a staged object present -> {}; staged requested=False \n  H4 PASS: listing AccessDenied -> RuntimeError: C2-SIBLING FAIL-LOUD: A4 account-distribution LISTING FAILED (NOT absent) for s3://opal-data-assets/portal/gold/mdpf/global/account-distribu\n[2026-10-14T15:25:37Z]   WARN frontier-count: A4 portal/gold/mdpf/global/account-distribution/2026-10-09.json period '2026-10-12' absent or after axis 2026-10-09 -> frontier honest-None\n  H5 PASS: key 10-09 with period 10-12 on axis 10-09 -> {} \n  H6 PASS: as-of 2026-10-12 verdict FRESH \n  H7 PASS: pytest rc=0: \u001b[32m\u001b[32m\u001b[1m7 passed\u001b[0m\u001b[32m in 0.83s\u001b[0m\u001b[0m\nCN-H-1 READER: 8 of 8 arms\nexit=0",
       "denominator": "8 of 8 arms",
       "status": "PASS",
       "expect": "CN-H-1 READER: 8 of 8 arms.*exit=0",
@@ -41,10 +87,10 @@
       "criterion_verbatim": "AC2 (CN-h-1): run r6_cn_h_1.py seams -- expect: CN-H-1 SEAMS: 4 of 4 arms -- and exit=0",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r6_cn_h_1.py\" seams; echo \"exit=$?\"",
-      "output_evidence": "  S1 PASS: 2 call site(s); 2 pass the axis date\n  S2 PASS: loader body names no a staged key literal\n  S3 PASS: 2 stub(s) found, 2 accept the second argument\n  S4 PASS: meta.frontier_count keys ['date', 'source', 'staleness'] \nCN-H-1 SEAMS: 4 of 4 arms\nexit=0",
-      "denominator": "4 of 4 arms",
+      "output_evidence": "  S1 PASS: 2 call site(s); 2 pass the axis date\n  S2 PASS: loader body names no a staged key literal\n  S3 PASS: 2 stub(s) found, 2 accept the second argument\n  S4 PASS: meta.frontier_count keys ['date', 'source', 'staleness']\n  S5 PASS: 1 legacy_address call(s); 0 typed portal/gold/mdpf literal(s) in the loader\n  S6 PASS: build_package.py lists infra/logic/registry/legacy_addresses.json\nCN-H-1 SEAMS: 6 of 6 arms\nexit=0",
+      "denominator": "6 of 6 arms",
       "status": "PASS",
-      "expect": "CN-H-1 SEAMS: 4 of 4 arms.*exit=0",
+      "expect": "CN-H-1 SEAMS: 6 of 6 arms.*exit=0",
       "judgment": false
     },
     {
@@ -52,7 +98,7 @@
       "criterion_verbatim": "AC3 (CN-h-1): run r6_cn_h_1.py comparator -- expect: CN-H-1 COMPARATOR: 5 of 5 arms -- and exit=0",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r6_cn_h_1.py\" comparator; echo \"exit=$?\"",
-      "output_evidence": "  K0 PASS: served objects read, as_of_last 2026-10-13; served frontier == staged roster on 17 of 17 mapped keys\n  K1 PASS: loader at axis 2026-10-13 -> as-of {'global': '2026-10-13', '49financial': '2026-10-13', 'inflection': '2026-10-13'} \n      global       map_keys=14 moved= 5  served_sum=  7974  fresh_sum=  8401  delta=+427  account_count_total[-1] 8264 -> 8691\n      49financial  map_keys= 5 moved= 5  served_sum=  7144  fresh_sum=  7483  delta=+339  account_count_total[-1] 7144 -> 7483\n      inflection   map_keys= 7 moved= 6  served_sum=   548  fresh_sum=   561  delta=+13  account_count_total[-1] 548 -> 561\n  K2 PASS: per-scope delta table printed; moved >= 1 in every scope: True\n  K3 PASS: axis 2000-01-01 -> {}\n  K4 PASS: 3 get(s), 0 on a staged key\nCN-H-1 COMPARATOR: 5 of 5 arms\nexit=0",
+      "output_evidence": "  K0 PASS: served objects read, as_of_last 2026-10-13; served frontier == staged roster on 17 of 17 mapped keys\n  K1 PASS: loader at axis 2026-10-13 -> as-of {'global': '2026-10-13', '49financial': '2026-10-13', 'inflection': '2026-10-13'} \n      global       map_keys=14 moved= 5  served_sum=  7974  fresh_sum=  8401  delta=+427  account_count_total[-1] 8264 -> 8691\n      49financial  map_keys= 5 moved= 5  served_sum=  7144  fresh_sum=  7483  delta=+339  account_count_total[-1] 7144 -> 7483\n      inflection   map_keys= 7 moved= 6  served_sum=   548  fresh_sum=   561  delta=+13  account_count_total[-1] 548 -> 561\n  K2 PASS: per-scope delta table printed; moved >= 1 in every scope: True\n[2026-10-14T15:25:50Z]   WARN frontier-count: no A4 account-distribution for global at or before 2000-01-01 -> frontier honest-None\n  K3 PASS: axis 2000-01-01 -> {}\n  K4 PASS: 3 get(s), 0 on a staged key\nCN-H-1 COMPARATOR: 5 of 5 arms\nexit=0",
       "denominator": "5 of 5 arms; 17 of 17 mapped keys equal the staged roster at K0",
       "status": "PASS",
       "expect": "CN-H-1 COMPARATOR: 5 of 5 arms.*exit=0",
@@ -73,33 +119,29 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Planted in a scratch copy (.scratch/mut, not the worktree): the selection line 'if name[:10] <= axis_date:' replaced by 'if True:', so the newest A4 is read whatever the axis date.",
-      "expected": "the reader arms that pin the axis rule fail (H1 and the new test file's H7); the reader prints fewer than 8 of 8",
-      "observed": "H0 PASS, H1 FAIL (axis 10-09 -> None; 10-10 -> None; 10-12 -> 2026-10-12), H2 PASS, H3 PASS, H4 PASS, H5 PASS, H6 PASS, H7 FAIL (pytest rc=1, 1 failed); CN-H-1 READER: 6 of 8 arms, exit=1",
+      "description": "Planted in a scratch copy (not the worktree): the selection line if name[:10] <= axis_date: replaced by if True:, so the newest A4 is read whatever the axis date.",
+      "expected": "the reader arms that pin the axis rule fail (H1 and the test file H7); the reader prints fewer than 8 of 8",
+      "observed": "H0 PASS, H1 FAIL (axis 10-09 -> None; 10-10 -> None; 10-12 -> 2026-10-12), H2-H6 PASS, H7 FAIL (pytest 1 failed); CN-H-1 READER: 6 of 8 arms, exit=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the AC2 seams invocation run twice at the worktree state, each stdout captured to .scratch/det1.txt and .scratch/det2.txt and compared with cmp",
-      "observed": "IDENTICAL: both runs exit 0 with the same output ending CN-H-1 SEAMS: 4 of 4 arms",
+      "method": "the AC2 seams invocation run twice, each stdout captured to .scratch/det1.txt and .scratch/det2.txt and compared with cmp",
+      "observed": "IDENTICAL: both runs exit 0, same output ending CN-H-1 SEAMS: 6 of 6 arms",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
-    {
-      "item": "The code commit. The safe-commit naming gate refused the loader change (line 798, a new out-of-pattern S3 literal, rule 30). The worker did not rewrite the key to evade the gate. The code, the stubs and the test file are uncommitted in the worktree.",
-      "reason": "BLOCKING row MDPF_CANON-D1-W17-S3: a registry row under infra/logic/registry/ (outside this order's paths) or an R20 entry Andrew acknowledges is required first."
-    },
-    {
-      "item": "The order's status is NOT flipped to complete. The order stays pending.",
-      "reason": "The status flip is in the same commit as the proof. The code commit has not landed, so the completion gate is not met."
-    },
     {
       "item": "AC4 judgment was not graded by the worker.",
       "reason": "Judgment criterion; graded at the round-7 close by the CVO at L9."
     },
     {
       "item": "No AWS write of any kind; no deploy; no invoke; no staged-object write.",
-      "reason": "Order bound 1 and 3; read-only get and list only (AC3 comparator)."
+      "reason": "Order bounds 1 and 3; read-only get and list only (AC3 comparator). The deploy is CloudOps, in its own window, after a never-widen pair."
+    },
+    {
+      "item": "The naming gate refused the typed A4 literal at first (row MDPF_CANON-D1-W17-S3).",
+      "reason": "AMENDMENT 1 (7c5fff2765) routed the key through the registry row mdpf-portal-gold-account-distribution; the code lands in this commit."
     }
   ],
   "surprises": [
@@ -107,22 +149,17 @@
     "MDPF_CANON-D1-W17-S2",
     "MDPF_CANON-D1-W17-S3"
   ],
-  "session_log": "Worker 0.9.0_WK_MDPF_CANON~17 on DELL1, worktree C:/dev/wk-canon-r7-17, branch wk-MDPF_CANON-17, base 7df957722b. Loader, call sites, two stubs and the new seven-test file were built and run (AC1 8 of 8, AC2 4 of 4, AC3 5 of 5; mutant and determinism controls as recorded). Surprise rows appended and committed at f2c550f3fa. The code commit was refused by the naming gate (row W17-S3), so the code is uncommitted and the order stays pending. Nothing was deployed; no AWS write was made.",
+  "session_log": "Worker 0.9.0_WK_MDPF_CANON~17 on DELL1, worktree C:/dev/wk-canon-r7-17, branch wk-MDPF_CANON-17. Built at 7df957722b, amended at 7c5fff2765 (AMENDMENT 1: registry-row prefix and the package-list line). Re-run after the amendment: AC1 reader 8 of 8, AC2 seams 6 of 6, AC3 comparator 5 of 5 (exit 0 each); mutant fired (6 of 8); seams determinism STABLE. Surprise rows W17-S1 to W17-S3 filed (S3 BLOCKING, answered by the registry row). The order is flipped to complete in the same commit as this instance. Nothing deployed; no AWS write.",
   "compiler_tools": [
     {
-      "tool": "r6_cn_h_1.py (issuer check, offline reader arms and static seams, plus read-only comparator)",
+      "tool": "r6_cn_h_1.py (issuer check)",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r6_cn_h_1.py\" reader|seams|comparator; echo \"exit=$?\"",
-      "result": "reader 8 of 8 (exit 0); seams 4 of 4 (exit 0); comparator 5 of 5 (exit 0)"
+      "result": "reader 8 of 8; seams 6 of 6; comparator 5 of 5 (exit 0 each)"
     },
     {
       "tool": "pytest on the new test file",
       "invocation": "timeout 120 python -m pytest -q data/mdpf/tests/canon/test_frontier_counts_a4.py",
       "result": "7 passed (rc 0)"
-    },
-    {
-      "tool": "safe-commit naming gate (commit-time, LGIC_ENFORCE)",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~17 <0.9.0_WK_MDPF_CANON~17@opal.agent>\" -F .scratch/msg1.txt -- <four code and test paths>",
-      "result": "REFUSE 1 graded: data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py:798 (rc=1, files unstaged; no commit)"
     }
   ]
 }

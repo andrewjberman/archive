@@ -3,6 +3,8 @@
 D="$(cd "$(dirname "$0")" && pwd)"
 . "$D/_root.sh"
 C="$(native "$D/c12_check.py")"
+export PLANT_REGISTRY_DIR="$(python -c "import sys; sys.path.insert(0, r'$(native "$D")'); import g1lib; print(g1lib.plant_registry_dir())" | tr -d '\r\n')"
+
 G="$(native "$D/plant_gen.py")"
 T="$(mktemp -d)"
 python -c "
