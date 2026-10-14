@@ -29,6 +29,7 @@ def load_impl():
     m = importlib.util.module_from_spec(spec)
     sys.modules["c11_impl"] = m
     spec.loader.exec_module(m)
+    g1lib.use_registry()
     return m
 
 

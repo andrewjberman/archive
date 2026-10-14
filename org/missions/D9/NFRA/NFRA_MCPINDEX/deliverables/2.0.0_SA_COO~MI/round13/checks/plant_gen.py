@@ -66,7 +66,7 @@ def main():
             "read_tool": rt,
             "gap_owner": None if rt else "NFRA_OPLGTW",
             "table": c["table"], "layer": c["layer"], "format": c["format"],
-            "contract": {"id": c["contract_id"], "size": c["size"], "keys": c["securities"], "freshness": c["freshness"],
+            "contract": {"id": g1lib.enc(c["contract_id"]), "size": c["size"], "keys": c["securities"], "freshness": c["freshness"],
                          "partition": c["partition"], "producer": c["producer"]},
             "nl_tags": c["nl_tags"],
             "retired": p in g1lib.RETIRE_REQUIRED,
