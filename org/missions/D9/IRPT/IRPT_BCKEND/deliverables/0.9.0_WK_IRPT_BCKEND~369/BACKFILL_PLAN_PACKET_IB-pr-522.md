@@ -39,10 +39,39 @@ The observed rate is 216.7 seconds per trading day. It is the REPORT duration of
 
 The time is derived, not measured. At the linear rate, 565 days take about 34 hours serial over 23 invocations. A 25-day chunk would take about 5,400 seconds, past the function's 900-second timeout. The lots stage is one producer call per invocation, so the linear figure may overstate. No 25-day chunk with the lots stage has run, so the chunk time is unmeasured. The 25-day chunks of 2026-10-03 took 21 to 63 seconds each, but they predate the lots stage.
 
+## Timeout fact
+
+- The function's timeout is 900 seconds (get-function-configuration, read at base f9138c4f06).
+- The measured rate is 216.7 seconds per trading day: the REPORT duration of the scheduled 1-day run for 2026-10-12, with the lots stage. Five current-stage 1-day runs since 2026-10-09 measured 96.4 to 389.1 seconds.
+- At 216.7 seconds a day, a 25-day chunk is about 5,400 seconds, six times the timeout. The largest chunk the timeout allows at that rate is about 4 trading days (900 divided by 216.7 is 4.15).
+- So the 23 invocations counted from the 25-day chunk bound are a floor and not a runnable plan. At 4 trading days a chunk, the same 565 days would need about 142 invocations (derived from the measured rate, not measured).
+- The linear rate is an extrapolation. The lots stage is one producer call per invocation, so the true chunk time is unmeasured.
+- The 2026-10-03 passes do not change this. Twenty-three backfill invocations (22 chunks of 25 trading days and one of 12) over 2024-07-08 to 2026-10-01 logged 21 to 63 seconds each (median 37.8 seconds, about 1.51 seconds a day). No account_activity_daily line appears in their logs, so they predate the lots stage. They show what a returns-only run cost in that period, not what the current code costs, and they rewrote the returns days of their range.
+
+## Two designs for the CTO
+
+The CTO must choose one. Neither is run, and neither half is signed. The names (A) and (B) here are the designs; Branch A and Branch B below are the run order and the rollback.
+
+**Design (A): the existing explicit backfill event, in timeout-sized chunks.** The function's backfill event as it stands, `{"backfill": {"start", "end"}, "accounts": "population"}`, run oldest-first in chunks of about 4 trading days, for the one custody source.
+
+- Cost: no code change. About 142 invocations (derived), each preceded by a dry run. The serial wall time is about 34 hours at the linear rate (derived, not measured).
+- What it puts at risk: run_backfill calls the returns emit for every day of the range, so the 565 landed returns days are rewritten as well as the class partitions. The range lies inside the 569 landed returns days, so served returns are touched.
+- The activity stage is not idempotent: 2026-10-08 landed 6901 rows, and dry runs of the same day later logged 6904. A re-run changes the activity content.
+- Undo: versioning is Enabled on the gold bucket, so a rewritten returns object can be restored by version id, but only by an operator identity with GetObjectVersion and PutObject. The function role cannot do it. A new activity partition can be removed only by a delete from an operator identity.
+- A timeout mid-chunk leaves some days written and others not.
+
+**Design (B): an activity-and-lots-only run.** A small change to the function so that a backfill event can select its stages, running the activity and lots stages and not the returns or class stages.
+
+- Cost: a code change to the function, which needs its own code release and its own pair (COO half and CTO half, both unsigned here). The change is not written, tested or deployed by this census.
+- What it keeps safe: the served returns and class partitions are not written by a run of this shape, so the rewrite in Design (A) does not arise.
+- What it does not fix: the activity stage stays non-idempotent (6901 against 6904), so a re-run still changes activity content. The lots stage refused 2026-10-07 and 2026-10-08 on the realized-lot key check (LOTS_SKIPPED), and that cause was not read.
+- Not measured: the wall time of an activity-and-lots chunk with no returns stage, so the 4-day chunk size is not verified for this design. Whether the activity and lots stages can run without the returns emit in the same pass was not read.
+- Undo: versioning covers rewritten objects, and new activity and lots partitions can be removed only by an operator delete, as under Design (A).
+
 ## Branch A: run order
 
 1. Re-list the activity and returns prefixes and record the counts before the first chunk.
-2. Range: 2024-07-08 to 2026-10-06, oldest first, in 23 chunks of at most 25 trading days. The range end must not pass the newest returns day, 2026-10-12, and it does not.
+2. Range: 2024-07-08 to 2026-10-06, oldest first, in chunks of at most 25 trading days (MAX_BACKFILL_DAYS). At the measured rate a 25-day chunk exceeds the 900-second timeout, so the 23 chunks are a floor; under Design (A) the chunk is about 4 trading days (see Timeout fact). The range end must not pass the newest returns day, 2026-10-12, and it does not.
 3. For each chunk, send a dry_run invocation first: `{"backfill": {"start", "end"}, "accounts": "population", "dry_run": true}`. Read the printed row counts and any LOTS_SKIPPED or CLASS_SKIPPED line. Send the real chunk only when the dry run is clean.
 4. Invoker and identity: the function role irpt-49f-reporting-gold-role executes the code. The invoker needs lambda:InvokeFunction and must be an operator identity, not the scheduler role. The invoker was not read.
 5. After each chunk, verify three things. The new activity partitions are present for every trading day of the chunk. There are no LOTS_SKIPPED lines. The returns key count is still 569, since the keys do not change, although the bytes are rewritten.
