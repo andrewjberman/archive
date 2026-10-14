@@ -46,6 +46,16 @@ The served index lacks one trading day, 2026-10-08, for 49financial. The release
 - The same cell reads why the 2026-10-09 fire hit the SSM execution timeout, so the next long fire does not repeat it.
 - Until then the page shows that date as not published, in words.
 
+## Condition 8, added 2026-10-14 ~05:3xZ on the CVO slug (msg 7550, row D2-W379-S3); the packet hash is unchanged
+
+8. **Each firm's published business date is stated and checked.** The CVO observed that `select_business_date()` returned 2026-10-14
+   before the session. The release's re-measure therefore states, per firm, the business date its first scheduled fire will publish.
+   - That date must equal the trading calendar's previous trading day for the fire's date (`lib/trading_calendar.py`). For the
+     2026-10-14 10:15 ET fire, that is 2026-10-13.
+   - The after-read leg checks the same: a fire that stamps the current day, or any date other than T-1, is a STOP and a rollback (branch
+     B), not a pass.
+   - This binds the release act. It does not re-open the packet.
+
 ## Disarms on this release's after-read
 
 D2-S158 (Cottonwood serving 2026-10-08) and the Holdings-page cash item from Andrew's smoke test (FDRXX reading CASH).
