@@ -637,6 +637,9 @@ def build_values(members, accounts, mv, mv_null, first, STATUS, R, hh_first, ser
                 and "inflection" in m["firm_sources"]:
             out[mid] = hh_return[parts[1]]   # round 110 step 2(f): Orion's client-grain ratio, or INSUFFICIENT_HISTORY
             continue
+        if mid.startswith("hold.return_") and isinstance(m.get("firm_sources"), dict) and "inflection" in m["firm_sources"]:
+            out[mid] = hh_return[mid[len("hold.return_"):]]   # round 110 step 2a: the holdings twin of the same household return
+            continue
         if src == "ABSENT":
             out[mid] = Absent(m["reason"], NSY)
             continue
