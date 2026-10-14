@@ -1,0 +1,129 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-bz-11.the-refresh-is-read-closed-for-wsj-and-barrons",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-11.the-refresh-is-read-closed-for-wsj-and-barrons.md",
+  "group": "OTHER",
+  "vintage_commit": "5e4f8fe6d5a3d42f5e5d01d7bcb81f94c04d53e9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "5e4f8fe6d5a3d42f5e5d01d7bcb81f94c04d53e9",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-11.the-refresh-is-read-closed-for-wsj-and-barrons.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~ZW",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round85/bz11_reads.out",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Thirteen appended reads from 2026-10-14T00:40:20Z to 12:33:33Z, twelve CLOSE=WAITING and the thirteenth CLOSE=NOT_MET, each with its UTC time. The thirteenth entry names the two checkpoint paths the verdicts came from.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round85/bz11_AC1.out",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1's literal invocation and its closing output, extracted byte-exact from the order.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round85/bz11_AC2.out",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2's literal invocation and its output, the instrument's own test: 10 passed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "(?m)^CLOSE=MET$",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_W1/round85/bz11_close_read.py --state-dir \"C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state\" --t0-file org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round85/bz10_t0.txt",
+   "output_evidence": "PUBLISHER=wsj VERDICT=NOT_CURED\nPUBLISHER=barrons VERDICT=NOT_CURED\nCLOSE=NOT_MET\nrc=0\n",
+   "denominator": "Run on the site Z box at 2026-10-14T12:33:33Z with the invocation extracted BYTE-EXACT from the order file, and the 13th and closing read of the cell (twelve earlier reads, 00:40Z-11:58Z, all CLOSE=WAITING, in bz11_reads.out). The two checkpoints the verdicts rest on were then read DIRECTLY, not through the instrument: cycles/wsj/20261014T121845Z.checkpoint.json holds refreshes.wsj {outcome: done, at 12:28:08Z} and two class=expired refusals of wsj; cycles/barrons/20261014T122950Z.checkpoint.json holds refreshes.barrons {outcome: done, at 12:30:24Z} and two class=expired refusals of barrons. That is the instrument's NOT_CURED predicate (bz11_close_read.py lines 62-67), confirmed against the files and against cycle_runner.log, whose lines agree. DISCRIMINATION: the same instrument printed CLOSE=WAITING for both publishers at 11:58:07Z, 35 minutes before, so it varies with the world rather than returning a constant; and its own test AC2 covers every verdict and a control showing the cut discriminates.",
+   "expect": "(?m)^CLOSE=MET$",
+   "status": "FAIL",
+   "status_reason": "The criterion's own literal invocation prints CLOSE=NOT_MET, which does not match (?m)^CLOSE=MET$. This is a RECORDED RESULT, not an error to engineer away (order, instance paragraph): for BOTH wsj and barrons one refresh was reported done and the same publisher's retried job was refused class=expired again within about 100 s. The order's issuer note routes NOT_CURED to the CTO's round-85 analysis, not to a re-try by this seat. Row AMGT_HARVST-Z-S121 carries the finding."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "(?m)^\\d+ passed in",
+   "method": "command",
+   "invocation": "python -m pytest org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_W1/round85/test_bz11_close_read.py -q -p no:cacheprovider --color=no",
+   "output_evidence": "..........                                                               [100%]\n10 passed in 1.30s\nrc=0\n",
+   "denominator": "Run at 2026-10-14T12:3xZ on the site Z box (AC2 runs anywhere). The 10 tests are the instrument's own: every verdict, the CLOSE line, the cut, a control showing the cut discriminates, and the t0 file. Run first at the 00:40Z read (10 passed in 2.06s) and again at this closing read (10 passed in 1.30s): the number of tests is the same both times, 10 of 10.",
+   "expect": "(?m)^\\d+ passed in",
+   "status": "PASS",
+   "status_reason": "The literal invocation prints '10 passed in 1.30s' at rc=0, which matches (?m)^\\d+ passed in. It grades the INSTRUMENT, not the runner: it says the NOT_MET above was printed by a tested reader."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no planted mutant and none was planted: the subject is a live production runner, and the order forbids any plant. The discriminating arm is the instrument's own reading across time: 12 reads of CLOSE=WAITING, then CLOSE=NOT_MET after wsj and barrons each ran a first cycle under the pin.",
+   "expected": "A reader that returns WAITING until a publisher cycle exists under the pin, and a closing verdict only from a cycle checkpoint.",
+   "observed": "WAITING at 00:40Z through 11:58Z (while neither publisher had a cycle at or after T0), NOT_CURED for both at 12:33Z once cycles 20261014T121845Z (wsj) and 20261014T122950Z (barrons) had ended, each checkpoint read directly and agreeing.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "The cell is a repeated read by design (about hourly, thirteen reads). The closing verdict was then re-derived from the two checkpoint files directly rather than re-run through the same instrument.",
+   "observed": "The instrument and the direct file reads agree on both publishers: refresh done, two expired refusals, for wsj and for barrons.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any sign-in, mint, refresh, re-queue, stop or plant by this seat",
+   "reason": "The order forbids all of them in section 2 step 2, and nothing did any. The only refreshes in the record are the runner's own, at 12:28:08Z and 12:30:24Z. The state dir, the task and every file under it were read, not written."
+  },
+  {
+   "item": "A diagnosis of why the refresh did not hold",
+   "reason": "The log does not say what the refresh did in its 16-17 s and this seat read no session, credential or producer source. 'SignInRefused: 401 under --no-sign-in: no refresh' is the retry's own error text, recorded verbatim in row Z-S121 and not interpreted."
+  },
+  {
+   "item": "A re-try, a second read to see whether it recovers, or any act to make AC1 read MET",
+   "reason": "The order says CLOSE=MET or CLOSE=NOT_MET both end the reading, and the issuer note routes NOT_CURED to the CTO's round-85 analysis (the bz-7 shape), not to a re-try by this seat."
+  },
+  {
+   "item": "The <status> flip of this order file and the disposition of rows Z-S119 and Z-S121",
+   "reason": "The order states the issuer flips its status; Z-S119 and Z-S121 name 2.0.0_SA_COO~W1 as disarm_owner."
+  }
+ ],
+ "surprises": [
+  "AMGT_HARVST-Z-S121: HVST-bz-11 reads CLOSE=NOT_MET -- for both wsj and barrons one refresh was reported done (17 s, 16 s) and the same publisher's retried job was refused class=expired again with 'SignInRefused: 401 under --no-sign-in: no refresh'; the refresh as run does not cure Z-S119's expiry. OBSERVATION / INERT, disarm_owner 2.0.0_SA_COO~W1."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-14/zw_harvst_bz11_close_read_not_met.md",
+ "compiler_tools": [
+  {
+   "tool": "bz11_close_read.py",
+   "invocation": "AC1's literal invocation, 13 times between 00:40Z and 12:33Z",
+   "result": "12 x CLOSE=WAITING, then CLOSE=NOT_MET (wsj NOT_CURED, barrons NOT_CURED)."
+  },
+  {
+   "tool": "pytest (test_bz11_close_read.py)",
+   "invocation": "AC2's literal invocation",
+   "result": "10 passed, at both the first read and the closing read."
+  },
+  {
+   "tool": "comp-schedule / comp-iam / comp-adversary",
+   "invocation": "not run this session",
+   "result": "NOT RUN: all three are L5 (the issuer) in this order's preflight. This cell made no AWS call, no schedule change and no write under the state dir."
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order <TO>",
+   "result": "see the run recorded in the commit message for this instance."
+  }
+ ]
+}

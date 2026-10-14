@@ -1,0 +1,100 @@
+{
+ "order": "FB-l-4",
+ "captured_at": "2026-10-14T12:41:20Z",
+ "target": "inf-gold-full-on-bronze-complete",
+ "rule": {
+  "Name": "inf-gold-full-on-bronze-complete",
+  "Arn": "arn:aws:events:us-east-1:313476888478:rule/inf-gold-full-on-bronze-complete",
+  "EventPattern": "{\"detail\":{\"bucket\":{\"name\":[\"opal-data-inf\"]},\"object\":{\"key\":[{\"wildcard\":\"bronze/orion-api/*/_BRONZE_COMPLETE.json\"}]}},\"detail-type\":[\"Object Created\"],\"source\":[\"aws.s3\"]}",
+  "State": "DISABLED",
+  "Description": "ADVI_INFREF L7 (CTO option B): fire inf-gold-trigger {mode:full} on bronze/orion-api/*/_BRONZE_COMPLETE.json. DISABLED 2026-07-13 under the INF gold dispatch hold (b7bce51bd).",
+  "EventBusName": "default",
+  "CreatedBy": "313476888478"
+ },
+ "targets": [
+  {
+   "Id": "InfGoldTriggerFullOnBronzeComplete",
+   "Arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-gold-trigger",
+   "Input": "{\"mode\":\"full\",\"source\":\"bronze-complete\"}",
+   "DeadLetterConfig": {
+    "Arn": "arn:aws:sqs:us-east-1:313476888478:inf-gold-trigger-dlq"
+   },
+   "RetryPolicy": {
+    "MaximumRetryAttempts": 0,
+    "MaximumEventAgeInSeconds": 60
+   }
+  }
+ ],
+ "lambda_policy_inf_gold_trigger": {
+  "Version": "2012-10-17",
+  "Id": "default",
+  "Statement": [
+   {
+    "Sid": "AllowEventBridgeInfCanonicalPricesDaily",
+    "Effect": "Allow",
+    "Principal": {
+     "Service": "events.amazonaws.com"
+    },
+    "Action": "lambda:InvokeFunction",
+    "Resource": "arn:aws:lambda:us-east-1:313476888478:function:inf-gold-trigger",
+    "Condition": {
+     "ArnLike": {
+      "AWS:SourceArn": "arn:aws:events:us-east-1:313476888478:rule/inf-canonical-prices-daily"
+     }
+    }
+   },
+   {
+    "Sid": "AllowEventBridgeInfGoldIncrementalDaily",
+    "Effect": "Allow",
+    "Principal": {
+     "Service": "events.amazonaws.com"
+    },
+    "Action": "lambda:InvokeFunction",
+    "Resource": "arn:aws:lambda:us-east-1:313476888478:function:inf-gold-trigger",
+    "Condition": {
+     "ArnLike": {
+      "AWS:SourceArn": "arn:aws:events:us-east-1:313476888478:rule/inf-gold-incremental-daily"
+     }
+    }
+   },
+   {
+    "Sid": "AllowEventBridgeInfGoldFullOnBronzeComplete",
+    "Effect": "Allow",
+    "Principal": {
+     "Service": "events.amazonaws.com"
+    },
+    "Action": "lambda:InvokeFunction",
+    "Resource": "arn:aws:lambda:us-east-1:313476888478:function:inf-gold-trigger",
+    "Condition": {
+     "ArnLike": {
+      "AWS:SourceArn": "arn:aws:events:us-east-1:313476888478:rule/inf-gold-full-on-bronze-complete"
+     }
+    }
+   }
+  ]
+ },
+ "dlq_policy_inf_gold_trigger_dlq": {
+  "Version": "2012-10-17",
+  "Statement": [
+   {
+    "Sid": "AllowEventBridgeSend",
+    "Effect": "Allow",
+    "Principal": {
+     "Service": "events.amazonaws.com"
+    },
+    "Action": "sqs:SendMessage",
+    "Resource": "arn:aws:sqs:us-east-1:313476888478:inf-gold-trigger-dlq",
+    "Condition": {
+     "ArnEquals": {
+      "aws:SourceArn": [
+       "arn:aws:events:us-east-1:313476888478:rule/inf-canonical-prices-daily",
+       "arn:aws:events:us-east-1:313476888478:rule/inf-gold-incremental-daily",
+       "arn:aws:events:us-east-1:313476888478:rule/inf-gold-full-on-bronze-complete"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "claim": "measured"
+}
