@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-pt-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~79",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "835f9452c3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "835f9452c3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pt-1.portal-models-tools.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_models.py",
+      "kind": "script",
+      "commit_or_etag": "ac3df8412c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only; no release, no deploy, no IAM or Terraform change, no tool registered (the issuer registers the four tools at the merge). Four top-level tools: portal_get_model_positioning, portal_get_model_attribution, portal_get_market_returns(ticker=None), portal_get_market_regime(include_history=False). Imports harvest_read, internal_role and typed_scope as modules; app/typed_scope.py, app/harvest_typed.py and app/harvest_read.py are not edited.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pt1.py",
+      "kind": "test",
+      "commit_or_etag": "ac3df8412c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline tests test_ogpt1_ac01..ac04. S3 is a recording fake reached through app.portal_models._client; the principal is a stand-in patched at app.harvest_read.get_current_principal; T-1 is fixed by patching app.portal_models._t1_date.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests (test_ogpt1_ac01..ac04) passed; failed/error lines 0",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)portal tools: 5 of 5 answered from their keys with the object's own as-of \\(.*\\); non-Opal principal refused True.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nportal tools: 5 of 5 answered from their keys with the object's own as-of (positioning ok; attribution ok; returns ok; series ok; regime ok); non-Opal principal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 live answers (positioning, attribution, returns, series, regime) answered from their keys with the object's own as-of inside the object; non-Opal principal refused True; box's own credentials, INTERNAL_READER_ROLE_ARN unset; read only",
+      "status": "PASS",
+      "expect": "(?s)portal tools: 5 of 5 answered from their keys with the object's own as-of \\(.*\\); non-Opal principal refused True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Registration of the four tools in app/tools.py, the pinned-count tests, and the app/data_entitlement.py and app/destructive_ops.py entries",
+      "reason": "Not this cell's write surface (order section 2); the issuer registers every tool and re-pins the counts at the merge, in one commit. Expected at the merge: four tool registrations (portal_get_model_positioning, portal_get_model_attribution, portal_get_market_returns, portal_get_market_regime) and a +4 move in the tool-count pins."
+    },
+    {
+      "item": "The commit-time naming gate did not grade the eleven S3 key and prefix literals of portal_models.py",
+      "reason": "Recorded as NFRA_OPLGTW-Z-W79-S1. The gate's --enforce probe and the commit-time run both graded the bucket literal only (PASS 1 graded). No literal was split, built from pieces, or overridden."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W79-S1: the naming gate's --enforce probe and commit-time run graded the bucket literal only, so its PASS does not certify the eleven S3 key and prefix literals (ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W79-S2: opal_aggregate.json and market-regime.json carry no catalog row, and the CRO contract says each needs one before any tool; the order reads both (ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W79-S3: typed_scope.read_json decides gzip by the key suffix only, so gzip bodies under .json keys raise UnicodeDecodeError; the tools read them through a local magic-byte sniff under the seam's capped loader (ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W79-S4: harvest_typed.envelope types denominator as int, while the order places trading_days_behind_t1 inside it; the tools carry the denominator as a dict and nothing refuses it (INERT).",
+    "NFRA_OPLGTW-Z-W79-S5: under the 50 KB projection, portal_get_model_positioning answers holdings for 3 of 5 models (truncated=True) and the regime history for include_history is trimmed to 731 of 1,065 points; the no-argument shape cannot carry every model's holdings within the cap (ARMED, disarm owner 2.0.0_SA_COO~O)."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
+  "compiler_tools": [
+    {
+      "tool": "pytest (tests/test_og_pt1.py, through pt1.AC1.sh)",
+      "invocation": "pt1.AC1.sh",
+      "result": "rc=0, 4 of 4 named tests passed, failed/error lines 0"
+    },
+    {
+      "tool": "live probe (pt1.AC2.sh, issuer's read-only check over the real portal bucket)",
+      "invocation": "pt1.AC2.sh",
+      "result": "5 of 5 portal tools answered from their keys with the object's own as-of; non-Opal principal refused True; RESULT: PASS"
+    },
+    {
+      "tool": "naming-gate (--diff, --enforce; staged probe of the literal list, then the commit-time run)",
+      "invocation": "python .tools/naming-gate.py --diff <probe diff> --enforce; safe-commit.sh naming limb",
+      "result": "NAMING-GATE: PASS 1 graded at both runs (the bucket literal only); no literal refused"
+    },
+    {
+      "tool": "safe-commit commit-gate (py_compile, naming limb, surprise-row-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author <serial> -F .scratch/msg_w79_code.txt -- (9 paths)",
+      "result": "gates passed; committed ac3df8412c on wk-NFRA_OPLGTW-79 (LOCAL); surprise-row-gate OK on 5 new rows"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Admission bypass: in a scratch copy of app/portal_models.py the admit_scope call was replaced by refused = None, so no tool refuses a non-Opal or absent principal. The file was then restored byte-identical from the committed copy (cmp).",
+      "expected": "test_ogpt1_ac03 fails; the other three named tests pass.",
+      "observed": "1 failed, 3 passed, rc=1; test_ogpt1_ac03 failed on the first refusal assertion (principal_required expected, a None code returned). After restore: 4 passed, rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pt1.AC1.sh and pt1.AC2.sh each run twice on the committed tree (ac3df8412c).",
+      "observed": "AC1 printed 'pytest rc=0; named tests passed 4 of 4; failed/error lines 0' and RESULT: PASS on both runs; AC2 printed '5 of 5 ... non-Opal principal refused True' and RESULT: PASS on both runs.",
+      "status": "STABLE"
+    }
+  }
+}
