@@ -39,6 +39,7 @@ WORDS_FORMS = {
     "source_break_account": "Account <k> of <N> has no measured return on <days> in this period, so the household return for this period is not shown.",
     "source_break_household_no_row": "The household has no row on <days> in this period, so the household return for this period is not shown.",
     "insufficient_history": "This household did not exist at the start of this period.",
+    "insufficient_history_no_day": "This household has no measured day in this period yet.",
 }
 
 
