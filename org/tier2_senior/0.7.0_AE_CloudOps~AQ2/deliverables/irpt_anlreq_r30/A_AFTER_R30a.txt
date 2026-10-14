@@ -1,0 +1,14 @@
+G1 IrptRequestsInputOwnerRead present 1 of 1
+A1 opal-ticket-api live CodeSha256 Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A=
+T5c DENIED
+T1 opal-ticket-api: LastModified 2026-10-14T15:10:00.000+0000, Active, LastUpdateStatus Successful, CodeSize 35325, memory 256, timeout 30 unchanged. TRUE
+T2 opal-ticket-api: the live zip has ONE member, lambda_function.py, sha256 d112ba42e361160260716891e0d5305a89fb5d8dec3890aa64269e8a23ed3d10 = the build record's value; the live zip sha256 160f0c75fbc2.. = the staged zip. TRUE
+T3 opal-ticket-api: the credential-less refusal envelope after the apply equals the one read before (invoke status 200, no FunctionError, body sha256 822edce9a5618bdf.. on all five reads, 114 bytes). TRUE
+T4 opal-ticket-api: environment 9 variables before, 10 after; the only added name is IRPT_REQUESTS_TABLE = irpt-requests; no existing value changed or removed; role, handler, runtime, memory, timeout, layers, architecture, DLQ and VPC equal before and after. TRUE
+T5a simulate-principal-policy dynamodb:GetItem on the irpt-requests table ARN, context dynamodb:LeadingKeys: 49financial allowed; cottonwood allowed.
+T5b the same with context dynamodb:Attributes = one NON-owner attribute: implicitDeny (recorded only; the pair accepts limit (i)); with the four owner attributes: allowed; with NO condition context at all: allowed (the ForAllValues test is vacuously true, which is limit (i): the code's ProjectionExpression holds the read to the owner attributes, not IAM alone).
+T5c the same with dynamodb:LeadingKeys = opal-capital (outside the three): implicitDeny. DENIED, as required; dynamodb:LeadingKeys = demo: implicitDeny.
+T5d positive control GetItem on opal-tickets: allowed; PutItem on irpt-requests: implicitDeny.
+Terraform: G plan 0 add, 1 change, 0 destroy (the one statement), Apply complete 0/1/0 at 2026-10-14T15:04:33Z; C plan 0/1/0 (environment +IRPT_REQUESTS_TABLE, last_modified, s3_object_version, source_code_hash), Apply complete 0/1/0 at 2026-10-14T15:10:07Z; targeted re-plans of both targets: No changes.
+Object VersionId uploaded: ticket-center/opal-ticket-api.zip BU27czeb9mc1fcnw.i5aSQbXNavPqt2g (35325 bytes, 23 versions after, 22 before, 0 delete markers; sha256 equals the staged zip 160f0c75fbc2..).
+Rollback targets, unused: code VersionId 7vn6xyMOZjpSaKwiT73UaNfXj6mNSljr (sha256 0bf46dfc.., 34057 bytes), then the grant.
