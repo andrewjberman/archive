@@ -24,12 +24,14 @@ def bad(why):
 
 def run(files):
     cmd = [sys.executable, "-m", "pytest", "-q", "--color=no", "-p", "no:cacheprovider"] + [str(f) for f in files]
-    proc = subprocess.run(cmd, cwd=str(PKG), capture_output=True, text=True, timeout=900)
+    proc = subprocess.run(cmd, cwd=str(PKG), capture_output=True, encoding="utf-8", errors="replace", timeout=900)
     lines = [ln for ln in (proc.stdout + proc.stderr).splitlines() if re.search(r"\d+ (passed|failed|error)", ln)]
+    if not lines:
+        bad("NO_SUMMARY_LINE " + str(files[0]) + " rc=%d" % proc.returncode)
     counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
-    for number, kind in SUMMARY.findall(lines[-1] if lines else ""):
+    for number, kind in SUMMARY.findall(lines[-1]):
         counts["errors" if kind.startswith("error") else kind] += int(number)
-    return proc.returncode, counts, lines[-1] if lines else "(no summary line)"
+    return proc.returncode, counts, lines[-1]
 
 
 def case_count(path):
