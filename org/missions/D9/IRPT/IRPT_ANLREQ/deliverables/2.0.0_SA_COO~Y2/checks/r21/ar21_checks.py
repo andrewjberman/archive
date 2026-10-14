@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS", "y309-build": "Y309-BUILD", "y310-build": "Y310-BUILD", "y311-build": "Y311-BUILD", "y320-build": "Y320-BUILD"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY", "y308-words": "Y308-WORDS", "y309-build": "Y309-BUILD", "y310-build": "Y310-BUILD", "y311-build": "Y311-BUILD", "y320-build": "Y320-BUILD", "y323-build": "Y323-BUILD", "y324-build": "Y324-BUILD"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -971,7 +971,7 @@ def main(argv):
             print("%s: %d passed, %d failed (rc=%d)" % (relpath, passed, failed, rc))
             if rc != 0 or failed or passed < floor:
                 problems.append("%s must pass with at least %d tests" % (relpath, floor))
-    elif check in ("y309-build", "y310-build", "y311-build", "y320-build"):
+    elif check in ("y309-build", "y310-build", "y311-build", "y320-build", "y323-build", "y324-build"):
         # release 29 BUILD records: the staged artifact is RE-HASHED here; the delta against the live package (or the release-28
         # tarball) is compared with the expected members; the resident record also carries three scripts and the staged sums.
         import hashlib
@@ -982,9 +982,17 @@ def main(argv):
                                {"uploads.py", "status.py", "resident_bindings.json", "SHA256SUMS"}, set(), "C:/dev/irpt-release-r29/"),
                 # release 29b (the ticket service, round 40): the record lives under r40/ of the worker's folder
                 "y320-build": ("130", "OPAL_TICKET_API_BUILD.json", {"lambda_function.py"}, {"lambda_function.py"}, set(),
-                               "C:/dev/irpt-release-r29b/")}[check]
+                               "C:/dev/irpt-release-r29b/"),
+                # release 30 (the intake package: AR-y-318 and AR-y-319): the Lambda and the resident carry the same three members
+                "y323-build": ("131", "IRPT_YCHARTS_GENERATE_BUILD.json",
+                               {"uploads.py", "interactive_access.py", "composition_admission.py"},
+                               {"uploads.py", "interactive_access.py", "composition_admission.py"}, set(), "C:/dev/irpt-release-r30/"),
+                "y324-build": ("132", "RESIDENT_BUILD.json",
+                               {"uploads.py", "interactive_access.py", "composition_admission.py"},
+                               {"uploads.py", "interactive_access.py", "composition_admission.py", "resident_bindings.json", "SHA256SUMS"},
+                               set(), "C:/dev/irpt-release-r30/")}[check]
         worker, name, need, allowed, add_need, stage = spec
-        rec = load(root, D.replace("/r21/", "/r40/" if check == "y320-build" else "/r39/") % worker + name, problems)
+        rec = load(root, D.replace("/r21/", "/r40/" if check in ("y320-build", "y323-build", "y324-build") else "/r39/") % worker + name, problems)
         if rec:
             for member in ("artifact", "delta_vs_live", "only_in_live", "only_in_release", "rollback", "tests", "claim", "not_read"):
                 if member not in rec:
@@ -1012,7 +1020,7 @@ def main(argv):
                 problems.append("only_in_release must be empty (nothing added): %r" % sorted(added))
             if rec.get("only_in_live"):
                 problems.append("only_in_live must be empty (nothing removed): %r" % (rec.get("only_in_live"),))
-            if check != "y311-build":
+            if check not in ("y311-build", "y324-build"):
                 ctl = rec.get("no_move_control") or {}
                 if ctl.get("differs_from_live") not in ([], None) or not ctl.get("code_sha256"):
                     problems.append("no_move_control must reproduce the live package (differs_from_live [] and a code_sha256)")
@@ -1026,7 +1034,8 @@ def main(argv):
                 if not Path(sp).is_file() or hashlib.sha256(Path(sp).read_bytes()).hexdigest() != str(sums.get("sha256", "")).lower():
                     problems.append("the staged sums file is missing or does not hash to the record")
                 got = {x.get("name"): x for x in (rec.get("scripts") or [])}
-                for sname in ("pre_read_r29.sh", "install_r29.sh", "rollback_r29.sh"):
+                for sname in (("pre_read_r30.sh", "install_r30.sh", "rollback_r30.sh") if check == "y324-build"
+                              else ("pre_read_r29.sh", "install_r29.sh", "rollback_r29.sh")):
                     x = got.get(sname)
                     if not x:
                         problems.append("no script record for %s" % sname)
