@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "phase": "BUILD-GENERAL",
+  "to_id": "ETFS_RIVALS.TO-RIV-xe-1.trading-day-gate-and-queue-state-reader",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "c78a4c9722",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xe-1.trading-day-gate-and-queue-state-reader.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c78a4c9722"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "81f106f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 81f106f on branch wk-ETFS_RIVALS-41; no deploy, no served write. The site-Z deploy is under 1.0.0_SA_CTO~Z's half (TO section 1, J1 none).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_xe1_gate_and_queue_reader.py",
+      "kind": "test",
+      "commit_or_etag": "81f106f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 81f106f on branch wk-ETFS_RIVALS-41; test file only.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_v2_enrichment_cli.py",
+      "kind": "test",
+      "commit_or_etag": "81f106f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 81f106f on branch wk-ETFS_RIVALS-41; test file only.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r27tw1_history_owed_leg.py",
+      "kind": "test",
+      "commit_or_etag": "81f106f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 81f106f on branch wk-ETFS_RIVALS-41; test file only.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r28tc1_topup_currency_and_page_day.py",
+      "kind": "test",
+      "commit_or_etag": "81f106f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 81f106f on branch wk-ETFS_RIVALS-41; test file only.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the gate: non-trading days skip with one line and exit 0 without the leg; the other cases are not gated.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe1_gate_and_queue_reader_check.py -k ac1",
+      "output_evidence": "run 1: '.....  [100%]' then '5 passed, 6 deselected in 1.34s' rc=0; run 2: '5 passed, 6 deselected in 1.45s' rc=0",
+      "denominator": "5 of 5 selected (-k ac1) out of 11 collected in the round-30 check file; 0 failed",
+      "status": "PASS",
+      "expect": "5 passed, 6 deselected"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the reader: active draws, every other state draws zero and names the state, unreadable fails closed, print does not read it.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe1_gate_and_queue_reader_check.py -k ac2",
+      "output_evidence": "run 1: '......  [100%]' then '6 passed, 5 deselected in 1.40s' rc=0; run 2: '6 passed, 5 deselected in 1.84s' rc=0",
+      "denominator": "6 of 6 selected (-k ac2) out of 11 collected in the round-30 check file; 0 failed",
+      "status": "PASS",
+      "expect": "6 passed, 5 deselected"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- the existing enrichment tests stay green (the final line reads N passed with no failed and no error).",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_v2_enrichment_cli.py rivalfunds/tests/test_r27tw1_history_owed_leg.py rivalfunds/tests/test_r28tc1_topup_currency_and_page_day.py rivalfunds/tests/test_e1_enrichment_bloomberg.py",
+      "output_evidence": "run 1: '.................................ss......  [100%]' then '39 passed, 2 skipped in 5.51s' rc=0; run 2: '39 passed, 2 skipped in 7.47s' rc=0. The 2 skips are test_e1_enrichment_bloomberg.py:57 and :93, 'device-local dividends.json absent' (environment, present before this change).",
+      "denominator": "39 passed of 41 collected across the four files; 0 failed; 0 errors; 2 skipped (environment)",
+      "status": "PASS",
+      "expect": "39 passed, 2 skipped"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base checkout (HEAD c78a4c9722, before 81f106f) with the round-30 check: the gate and reader rows must fail there",
+      "expected": "the gate and reader rows fail at the base (10 failed, 1 passed)",
+      "observed": "10 failed, 1 passed in 2.31s (run by this worker before any edit; the one pass is the trading-day control row)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of AC1, AC2 and AC3 compared on the pass counts and the final lines",
+      "observed": "run 1 and run 2 identical: AC1 5 passed, 6 deselected; AC2 6 passed, 5 deselected; AC3 39 passed, 2 skipped",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of the task order to complete",
+      "reason": "TO section 5 reserves the status flip to the issuer (\"Leave the <status> flip to the issuer\"); this instance is valid and the flip is not made by the worker"
+    },
+    {
+      "item": "the site-Z deploy of RIV-xe-1 and any packager change",
+      "reason": "the deploy is site Z's under 1.0.0_SA_CTO~Z's half (TO J1 none); rivalfunds_package.py is outside this order's paths, so the packager gap is filed as ETFS_RIVALS-D1-W41-S1 and not fixed"
+    },
+    {
+      "item": "the worktree's portal submodule pointer (0a06280a4 in the worktree against 97c66c936 at the base)",
+      "reason": "not touched by this order and not committed: the commit used explicit paths only"
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-D1-W41-S1: rivalfunds_package.py does not stage data/mdpf/scripts/demque/, so the deployed reader fails closed on ImportError ('unreadable') and refuses every ask-mode draw; not fixed here, the packager is outside <paths>."
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~41/ETFS_RIVALS.TO-RIV-xe-1.trading-day-gate-and-queue-state-reader.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (rivalfunds suite)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests --color=no",
+      "result": "1043 passed, 6 skipped in 137.57s (rc=0)"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~41 <0.9.0_WK_ETFS_RIVALS~41@opal.agent>\" -F .scratch/commit_a_msg.txt -- <6 paths>",
+      "result": "rc=0; surprise-row-gate OK: 1 file(s), all new rows carry their step-7/step-10 fields; commit 81f106f"
+    }
+  ]
+}
