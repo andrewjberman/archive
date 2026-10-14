@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """MDPF_CANON CN-p-1 -- the acceptance READ-BACK of the Variant 1 Trend groups on the served gold objects (issuer's instrument, read-only).
 
-  python r9_trend_groups_readback.py read                    newest served objects from S3 (+ the prior dated object per scope), 10 arms
+  python r9_trend_groups_readback.py read                    newest served objects from S3 (+ the prior dated object per scope), 11 arms
   python r9_trend_groups_readback.py read --dir D            the same arms over local files in D (names below)
   python r9_trend_groups_readback.py read --expect absent    the PRE-FIRE state: the four keys must be ABSENT on every scope (exit 0 = absent)
   python r9_trend_groups_readback.py fixture --served D --out O   build a PASS fixture from served files with the merged CN-p-1 code (repo import)
@@ -217,6 +217,32 @@ def read_mode(data, manifest, pin=None):
     # R10 disjoint from the frontier cell: the CN-p-1 keys are not among the keys that CN-h-1/CN-l-1 move
     h1 = {"account_count_total", "account_count_total_raw", "count_provenance", "count_basis", "count_as_of"}
     a.arm("R10", not (set(NEW) & h1), "the CN-p-1 key set %s shares no top-level key with the CN-h-1 count fields %s (the leaf-by-leaf table of the pair, section 4)" % (sorted(NEW), sorted(h1)))
+    # R11 leg presence (CTO condition C1, msg 5940): a leg absent on the newest dated row while it held a value the day before is Branch B
+    ndr = last_dated_idx(g, "9999-12-31")
+    prev = None
+    if ndr is not None:
+        for j in range(ndr - 1, -1, -1):
+            if (g.get("opal_aggregate_aua") or [None] * n)[j] is not None:
+                prev = j
+                break
+    bm = g.get("by_model") or {}
+
+    def _leg(name, i):
+        if i is None:
+            return None
+        if name == "sma_additive_aua":
+            arr = g.get(name) or []
+        else:
+            arr = (bm.get(name) or {}).get("model_value") or []
+        return i < len(arr) and arr[i] is not None
+
+    legs = ("opal_div_sma", "opal_growth_sma", "sma_additive_aua")
+    now = {nm: _leg(nm, ndr) for nm in legs}
+    before = {nm: _leg(nm, prev) for nm in legs}
+    lost = [nm for nm in legs if before[nm] and not now[nm]]
+    a.arm("R11", ndr is not None and not lost,
+          "leg presence on the newest dated row %s vs the previous dated row %s: now %s, before %s; absent now but present before %s (Branch B for CN-p-1)" % (
+              dates[ndr] if ndr is not None else None, dates[prev] if prev is not None else None, now, before, lost))
     return a.done()
 
 
