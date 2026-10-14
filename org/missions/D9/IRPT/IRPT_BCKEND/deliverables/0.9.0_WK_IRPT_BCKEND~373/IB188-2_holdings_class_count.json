@@ -1,0 +1,46 @@
+{
+  "base_commit": "9f41eeeec9e56484110e4316f2ef09d19913e740",
+  "firms": {
+    "49financial": {
+      "snapshot_read": {"found": true, "business_date": "2026-10-12", "nodes": 124441},
+      "cash_subclass_nodes": 33,
+      "would_move": 32,
+      "already_cash": 1,
+      "moving_tickers": ["SNOXX", "SNSXX", "SNVXX", "SWVXX"],
+      "note": "Newest ACCEPTED publication: current/manifest.json latest_date 2026-10-12 (index, v2 manifest, 200 partition objects, each verified by sha256 and byte_length, counted in memory). nodes = node_kind SECURITY across all partitions (CASH 9228, ACCOUNT, CATEGORY, MODEL_LEAF kinds not counted). All 32 movers carry asset_class_basis TABLE; the served basis does not prove the canonical branch (see notes). Served sub_asset_class and asset_class present on every SECURITY node. Not read: any canonical row by ticker, the bd-securities fallback table, any holding value."
+    },
+    "cottonwood": {
+      "snapshot_read": {"found": true, "business_date": "2026-10-08", "nodes": 15455},
+      "cash_subclass_nodes": 257,
+      "would_move": 253,
+      "already_cash": 4,
+      "moving_tickers": ["FDRXX", "SWVXX", "VUSXX"],
+      "note": "Newest ACCEPTED publication: current/manifest.json latest_date 2026-10-08 (index, v2 manifest, 27 partition objects, each verified by sha256 and byte_length). Of the 253 movers, 38 carry basis TABLE and 215 carry basis NAME_ALIAS (fallback answers, unchanged by the rule): 206 of them have Black Diamond-prefixed identifiers (two distinct, withheld as not public symbols, count only) and 9 have no ticker-shaped symbol (not listed). Served sub_asset_class present on every SECURITY node. Not read: any canonical row by ticker, the bd-securities fallback table, any holding value."
+    },
+    "inflection": {
+      "snapshot_read": {"found": true, "business_date": "2026-10-12", "nodes": 34273},
+      "cash_subclass_nodes": 843,
+      "would_move": 841,
+      "already_cash": 2,
+      "moving_tickers": ["FDRXX", "SPAXX"],
+      "note": "Newest ACCEPTED publication: current/manifest.json latest_date 2026-10-12 (index, v2 manifest, 52 partition objects, each verified by sha256 and byte_length). Of the 841 movers, 774 carry basis TABLE and 67 carry basis NAME_ALIAS (fallback answers, unchanged by the rule); the 67 have no ticker-shaped display symbol and are not listed. Served sub_asset_class present on every SECURITY node. Not read: any canonical row by ticker, the bd-securities fallback table, any holding value."
+    }
+  },
+  "canonical_table": {"rows": 11361, "cash_subclass_rows": 365},
+  "notes": [
+    "Served location read: s3://opal-data-<firm>/irpt/<firm>/platinum/holdings/current/manifest.json (address() output, lib/opal_naming.py; the firm bucket and prefix are address() output, not typed), then the date row's manifest (schema irpt-holdings-manifest-v2) and its partition objects, as publication.py _load_accepted_row and _load_parts (lines 385-460) read them.",
+    "Count definition: a SECURITY node is one with node_kind SECURITY in a partition's nodes list. cash_subclass_nodes = sub_asset_class trimmed and lower-cased equal to cash; already_cash = those whose served asset_class is cash (the builder's value, holdings_snapshot.py line 851 ASSET_CLASS_VALUES); would_move = cash_subclass_nodes minus already_cash. Counted in memory by a read-only script in C:/dev/_scratch373 (outside the worktree); no node value was written to disk.",
+    "Upper bound, not a measure of the rule: the proposed rule acts only on the canonical branch (holdings_snapshot.py 977-984, basis TABLE). The served basis TABLE is also written by the fallback when the ticker is in the bd-securities table (_classifier_basis, lines 931-932), so the snapshot does not separate canonical from fallback movers. would_move is therefore an UPPER bound of what the canonical-only rule would move. Movers with basis NAME_ALIAS are fallback answers the rule does not change: cottonwood 215, inflection 67, 49financial 0.",
+    "Money-market ticker with no canonical row (code read, not run): bd_securities_fallback.py lines 54-55 (_RE_CASH) and 152-153 return fixed_income for money-market, sweep and cash-reserve names; holdings_snapshot.py 985-994 carries that answer. The proposed rule does not change this layer.",
+    "Canonical table: read by the worker identity (cloudops-dell2-agent-user) with a dynamodb scan of etf-classifications (default name, v2_portal/_shared/etf_classifications_dynamodb.py line 52), 3 pages, projection of asset_class and sub_asset_class only. rows = all items; cash_subclass_rows = items whose sub_asset_class is a string equal to cash after trim and lower-case. A non-string sub_asset_class would not be counted; none was checked.",
+    "Dates: cottonwood's newest accepted business date is 2026-10-08; its index object was last modified 2026-10-09; the other two firms are at 2026-10-12. The counts are as served on those dates.",
+    "Symbols: moving_tickers lists only ticker-shaped public symbols. Black Diamond-prefixed identifiers (cottonwood) and non-ticker-shaped display symbols (cottonwood 9, inflection 67) are counted, not listed.",
+    "No canonical row was read per ticker (no GetItem); the canonical table was read as counts only. The order's cash-type test on sub_asset_class was applied to served nodes, not to the table."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
