@@ -107,7 +107,10 @@ def make_root(apply=None, kill=None, build_mut=None):
         rec["changed_paths"] = [P.SNAP]
     w(root, P.BUILD_REC, rec)
     git(root, "add", "-A")
-    git(root, "commit", "-qm", "work")
+    git(root, "commit", "-qm", "work", "--author", P.WORKER382 + " <w@x>")
+    w(root, "docs/other_seat_change.md", "another seat's later commit on trunk")
+    git(root, "add", "-A")
+    git(root, "commit", "-qm", "foreign")
     return root
 
 
