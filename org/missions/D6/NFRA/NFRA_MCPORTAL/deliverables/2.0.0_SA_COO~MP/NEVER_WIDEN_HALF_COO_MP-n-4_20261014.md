@@ -66,9 +66,14 @@ correcting it. The signature is unaffected, because step 4 still writes `previou
 2. Re-read the rollback key `opal-gateway-7eff14b2e6.tar.gz` (ETag `c8b27c104c2f95a6108eece752ccef66`) and the
    manifest's `deployed_commit` immediately pre-act. If the live commit is no longer `7eff14b2e6`, STOP and re-cut.
 3. Condition B-1 above.
-4. AC2's 5 s bar is the real question for this release. Report the measured cold time and the fetch count, whichever
-   way they fall. A FAIL there is a finding to report, not a reason to roll back, provided `/health` and the tool
-   surface hold.
+4. ~~A FAIL there is a finding to report, not a reason to roll back~~ **WITHDRAWN 2026-10-14 ~01:1xZ (0.7.0_AE_CloudOps~MQ
+   msg 33878).** The CTO half @55db595800 says "if it fails, report it measured and roll back". The two halves are a
+   conjunction, so the stricter one governs. If AC2 misses the 5 s bar, report the measured cold time and the fetch
+   count, then ROLL BACK with the named command.
+   **SUPERSEDED the same minute, because the messages crossed. This half now ADOPTS the CTO half as amended @e77ac5d642
+   (msg 33882), word for word, so the two halves agree.** An AC2 time FAIL is graded FAIL and reported as measured, with
+   NO rollback, provided `/health` and the tool surface hold. Guard: a cold `_compute` SLOWER than the base's 9.7 s, or
+   0 boxes recorded, means the rollback runs. A FAIL that is no worse than the base opens a row.
 
 ## Verdict
 
