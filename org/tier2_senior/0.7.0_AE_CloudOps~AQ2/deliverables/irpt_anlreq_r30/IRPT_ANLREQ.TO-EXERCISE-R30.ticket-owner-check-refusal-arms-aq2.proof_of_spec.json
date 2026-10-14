@@ -1,0 +1,136 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-EXERCISE-R30.ticket-owner-check-refusal-arms-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R30.ticket-owner-check-refusal-arms-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "0e8b6cbed2"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R30.ticket-owner-check-refusal-arms-aq2.md",
+  "vintage_commit": "0e8b6cbed2"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_ARMS_R30.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "run 2: R0I OWNER_ROW_PRESENT_NOT_B; K1, K2, K3 REFUSED 400 INPUT_NOT_AVAILABLE; K123 SAME_BODY 1589868f0872..; TICKETS_COUNT_EQUAL 31",
+   "artifact_covered_by": [
+    "R30E-AC1"
+   ],
+   "commit_or_etag": "blob 6e0ab36df9d3b7f07b55ebfd0f8147ca2bebaf49"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_REMOVAL_R30.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "four ABSENT lines (GSI and ConsistentRead, two addresses); the first removal read at 16:16:09Z, no lag",
+   "artifact_covered_by": [
+    "R30E-AC2"
+   ],
+   "commit_or_etag": "blob 44ed8f1e5d40c5aceb9d79a8870b737c22ab0679"
+  },
+  {
+   "path_or_key": "opal-users-v2 (two minted synthetic client rows, run 1 and run 2)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "minted for each run and removed after exp; all read ABSENT by GSI and ConsistentRead; no row outlives the sitting; no ticket written (COUNT 31 equal), no mail sent",
+   "artifact_covered_by": [
+    "R30E-AC2"
+   ],
+   "commit_or_etag": "removed"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R30E-AC1",
+   "invocation": "grep -c -E '^(R0I OWNER_ROW_PRESENT_NOT_B|K1 REFUSED 400 INPUT_NOT_AVAILABLE|K2 REFUSED 400 INPUT_NOT_AVAILABLE|K3 REFUSED 400 INPUT_NOT_AVAILABLE|K123 SAME_BODY [0-9a-f]{64}|TICKETS_COUNT_EQUAL [0-9]+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_ARMS_R30.txt",
+   "expect": "^6$",
+   "output_evidence": "6\nexit=0",
+   "denominator": "6 lines: the owner row present and not B's; three refusal arms with the one text; one body hash for all three; the tickets count equal before and after (31)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R0I OWNER_ROW_PRESENT_NOT_B|K1 REFUSED 400 INPUT_NOT_AVAILABLE|K2 REFUSED 400 INPUT_NOT_AVAILABLE|K3 REFUSED 400 INPUT_NOT_AVAILABLE|K123 SAME_BODY [0-9a-f]{64}|TICKETS_COUNT_EQUAL [0-9]+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_ARMS_R30.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R30E-AC2",
+   "invocation": "grep -c -E '^ABSENT (GSI|CONSISTENT) irpt-r30-(b|c)-[0-9]{8}@opal.invalid$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_REMOVAL_R30.txt",
+   "expect": "^4$",
+   "output_evidence": "4\nexit=0",
+   "denominator": "2 addresses x 2 reads; first removal read at 16:16:09Z",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^ABSENT (GSI|CONSISTENT) irpt-r30-(b|c)-[0-9]{8}@opal.invalid$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_REMOVAL_R30.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R30E-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/20261014T1524Z_irpt-r30-ticket-sitting-20261014_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261014T161745Z\nexit=0",
+   "denominator": "3 of 3 ledger legs M, K, X carried proof at close (run 1 and run 2 both recorded)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r30-ticket-sitting-20261014_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the body proof ran offline first against the service's own validators and submit_form with the reader stubbed (OFFLINE_PROOF_R30.txt, PASS, with a positive control reaching 201 on a fake table only and a raising reader reaching 503); the live arms each ran once",
+   "observed": "the three live bodies hash equal; the tickets count is equal before, after and at the end; run 1's 503 (K1) was the missing KMS read, not the body",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "run 1 (K1 503) and run 2",
+   "reason": "run 1 stopped at K1 with a 503 because the ticket role lacked the KMS read on the irpt-requests key (row IRPT_ANLREQ-D2-S100); after TO-APPLY-R30b the run was repeated from step 1 on the issuer's word; run 1's files are kept as TICKET_*_R30_RUN1.txt; K1 to K3 were not retried within a run"
+  },
+  {
+   "item": "one worktree not read in the marker census",
+   "reason": "57 listed, 56 read; mstr-dell2-merge-0240 is a prunable registration whose directory does not exist (another seat's, not pruned by this seat); 0 live open entries on the ticket surfaces"
+  },
+  {
+   "item": "no ticket and no mail",
+   "reason": "all three arms were refused before any write; the tickets table COUNT is 31 before, after and at the end; no mail seam was reached"
+  },
+  {
+   "item": "the positive arm (the owner files its own input, 201)",
+   "reason": "not in this order: the FWD-1 run's one filing; the 201 path stays covered by the service's unit tests until a client-class filing exists"
+  },
+  {
+   "item": "the signing-key read",
+   "reason": "reported through 0.0.0_AB_MSTR~DELL2 for both runs"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S100"
+ ],
+ "session_log": "org/critical_paths/change_management/20261014T1524Z_irpt-r30-ticket-sitting-20261014_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open, close-leg M K X, close",
+   "result": "ledger CLOSED 3 of 3"
+  },
+  {
+   "tool": "sitting_r30.py (this seat's executor)",
+   "invocation": "python -I sitting_r30.py --offline, then --live --go twice",
+   "result": "offline proof PASS; run 1 stopped at K1 503 by design; run 2 exit 0, six arm lines, four ABSENT lines"
+  },
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "on sitting_r30.py",
+   "result": "pre-commit gate clean"
+  }
+ ]
+}
