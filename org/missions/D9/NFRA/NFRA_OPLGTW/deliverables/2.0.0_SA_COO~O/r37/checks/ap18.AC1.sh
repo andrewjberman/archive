@@ -2,7 +2,7 @@
 # OPLGTW OG-ap-18 AC1 (round-37 G1-TYPED, PHASE A): the re-cut carries exactly the G1 build and its hookups.
 #  - W/gt_release.json base_sha is the live ref BEFORE this release (EC2_MANIFEST deployed_commit at HEAD, or, once this
 #    release is the deployed one, its previous_deployed_commit);
-#  - base..release differs only in the G1 files and their five hookup files, and OG-gt-5's module is NOT in it;
+#  - base..release differs only in the G1 files, their five hookup files and the A4 re-cut set (OG-gt-8's deploy-script staging, OG-gt-8/9 tests), and OG-gt-5's module is NOT in it;
 #  - the release's app/tools.py registers all ten tools, and its SAFE_TOOLS and NATIVE_TOOLS carry all ten names.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 REC="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/gt_release.json"
@@ -11,7 +11,7 @@ read -r base rel <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],e
 git cat-file -e "${rel}^{commit}" || { echo "release_sha ${rel:-EMPTY} is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
 live=$dep; [ "$dep" = "$rel" ] && live=$prev
-ALLOW="^$GW/(app/(harvest_typed|harvest_identity|harvest_press|harvest_figures|harvest_research)\.py|app/tools\.py|app/destructive_ops\.py|app/data_entitlement\.py|tests/test_og_gt[0-4]\.py|tests/test_entitlement_admin\.py|tests/test_data_entitlement_family\.py)$"
+ALLOW="^$GW/(app/(harvest_typed|harvest_identity|harvest_press|harvest_figures|harvest_research)\.py|app/tools\.py|app/destructive_ops\.py|app/data_entitlement\.py|tests/test_og_gt([0-4]|8|9)\.py|deploy-to-ec2\.sh|tests/test_entitlement_admin\.py|tests/test_data_entitlement_family\.py)$"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); outside=$(printf '%s\n' "$files" | grep -vE "$ALLOW" | grep -c .)
 pub=no; printf '%s\n' "$files" | grep -q "app/harvest_published\.py" && pub=yes
 reg=$(python - "$rel" <<'EOF'
