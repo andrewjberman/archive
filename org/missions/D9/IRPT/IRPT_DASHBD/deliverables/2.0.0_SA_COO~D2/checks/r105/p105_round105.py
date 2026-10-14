@@ -254,6 +254,14 @@ def check_kind(root):
 
 
 # ---------------------------------------------------------------- DB105-2-AC1 (the render remedy)
+def example_printed(example, vt):
+    """a kind note's example is printed in the export; an account's last four digits are recorded as #### and match any four digits."""
+    if "####" not in example:
+        return example in vt
+    rx = re.escape(example).replace(re.escape("####"), r"\d{4}")
+    return re.search(rx, vt) is not None
+
+
 def check_render(root):
     r = P.load(root, D + "0.9.0_WK_IRPT_DASHBD~167/RENDER_R105.json")
     k = P.load(root, D + "0.9.0_WK_IRPT_DASHBD~167/KIND_CARRIER_R105.json")
@@ -304,7 +312,8 @@ def check_render(root):
         foot = len(re.findall(r"(?<![A-Za-z\)])\*\s+[A-Z]", vt))
         need(lab == 0 or foot >= 1, "%s prints an asterisk on a label (%d) with no footnote line (%d)" % (name, lab, foot))
     vt = P3.visible_text(exp)
-    need(all(x["example"] in vt for x in kn) and all(";" not in x["example"] for x in kn), "each kind note's example must be printed in the export, as one sentence with no semicolon run")
+    need(all(example_printed(x["example"], vt) for x in kn) and all(";" not in x["example"] for x in kn), "each kind note's example must be printed in the export, as one sentence with no semicolon run")
+    need(not any(re.search(r"ending\s+\d{4}(?!\d)", x["example"]) for x in kn), "an example must write an account's last four digits as ####, never the digits (client data stays out of the repo)")
     chart = "overview.chart.portfolio_performance_last_12_months"
     names = [str(s.get("name", "")) for s in (sm["values"][chart] if isinstance(sm["values"][chart], list) else []) if isinstance(s, dict)]
     at = exp.find('data-member="%s"' % chart)
@@ -461,6 +470,7 @@ def selftest():
     arm("green: kind_problems on well-formed forms", kind_problems({first: {"absent": "no source", "kind": "NO_SOURCE_YET"}}, c) == [])
     arm("kind_counts and unheld_count", kind_counts({"a": ok("SOURCE_BREAK"), "b": {"by_row": {"x": ok("NO_SOURCE_YET")}}}) == {"NO_SOURCE_YET": 1, "INSUFFICIENT_HISTORY": 0, "SOURCE_BREAK": 1}
         and unheld_count({"h": {"by_row": {"cash": 1.0, "alternatives": UNHELD, "9999999999": UNHELD}}}) == 1)
+    arm("example_printed: a masked last four digits match any four digits", example_printed("Account ending ####: x.", "a b Account ending 1234: x. c") and not example_printed("Account ending ####: x.", "Account ending 12: x.") and example_printed("Plain note.", "see Plain note. here") and not example_printed("Plain note.", "other"))
     sys.path.insert(0, str(Path(sys.argv[2]).resolve() / "lib" if len(sys.argv) > 2 else Path("lib").resolve()))
     import trading_calendar as tc
     R = dt.date(2026, 10, 12)
