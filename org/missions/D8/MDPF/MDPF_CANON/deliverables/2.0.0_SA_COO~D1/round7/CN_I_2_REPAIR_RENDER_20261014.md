@@ -11,10 +11,16 @@
 - **Client Unsupervised is lime**, no longer the Ultra-Short Term orange: legend and the Client breakdown both show it green; the five model colours are untouched (Ultra Short-Term orange, Short-Term amber, Intermediate-Term green, Long-Term blue, Ultra Long-Term red).
 - **The Total Assets breakdown repaints with it.** The Client drill-down (opened by the walk) shows `Client - Opal Unsupervised` as a lime dot and a lime bar. This is the shared colour table; there is no Trend-only override. The fresh approval row names it.
 
-## NOT exercised
+## The Trend tooltip, rendered (ADDED ~19:5xZ, at the same head fd5433a3a76c, the CRO's new `--hover-after-press` option @e3647bf08e)
 
-- **The tooltip fix was not rendered.** The walker's hover step ran on the Snapshot view before Trend was pressed, so no Trend tooltip was drawn; the fix is graded only by its pure helper and the build arm (`r8_cn_i_2.py build`, 13 of 13 at the worker's commit). The CVO's tooltip clause (dates C and D) still wants a hover on the Trend daily chart.
-- Per-firm scopes (the per-firm objects carry no fold meta, so no note is drawn there by design); the Client chips' dated history on dates A to E.
+Local screenshots (gitignored, never committed; paths relative to the repository root):
+- **A date before 2026-05-15:** `tmp/ui-walk/20261014T194743Z/shots/hover-after-press-1-viewport.png`. Tooltip dated 2025-05-15: **Total AUA $1.03B** and **Other AUA $276M** only. No Client row, no `$0` row; the stack is below the Total by the model assets that the boundary note says are in the Total and not broken out (the CTO's ruling, exception (ii)); no band.
+- **A date with no category-views object (where the old tooltip printed a `$0` Client row):** `tmp/ui-walk/20261014T194432Z/shots/hover-after-press-2-viewport.png`. Tooltip dated 2026-09-23: Total AUA $2.10B, then Custom Models, Other AUA, ETF Strategies and the five models. **No Client Supervised or Client Unsupervised row and no `$0` row.** (A Client row is expected only on the dates that have a category-views object, the latest dates; that case is not captured here.)
+- The hover positions were taken on the daily chart's own container (`.recharts-responsive-container[style*="450px"]`), because the first `.recharts-area` is a model series that starts in May 2026 and the bar chart shares the class `.recharts-wrapper`.
+
+## Still NOT exercised
+
+- Per-firm scopes (the per-firm objects carry no fold meta, so no note is drawn there by design); the Client chips on a date that HAS a category-views object (A, B and E in FWD-9 (3)); the Other Models "as of" (the pool is present, so no value is carried).
 
 ## Observed, not caused by this repair, not examined
 
