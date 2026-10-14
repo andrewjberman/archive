@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fc-1.the-model-seam-keeps-only-the-final-answer",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fc-1.the-model-seam-keeps-only-the-final-answer.md",
+    "group": "OTHER",
+    "vintage_commit": "7871f10f51"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "7871f10f51",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fc-1.the-model-seam-keeps-only-the-final-answer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~430",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/model.py",
+      "kind": "script",
+      "commit_or_etag": "253747f8b5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-AMGT_RESAPP-430 only. parse_response now keeps only the final segment's text and citations (_final_segment helper). No deploy is in this cell's scope: the order's preflight declares no AWS call and no network egress."
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_model_final_answer.py",
+      "kind": "test",
+      "commit_or_etag": "253747f8b5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-AMGT_RESAPP-430 only. Offline module: hand-made replies, the recorded round-104 response and a stub transport. 23 test functions, all passing (54 passed across this module and test_model_inputs.py)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FC-1 ARMS: YES (N of N)` with N equal to 12, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-430 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round105_aifill_prep/checks/check_fc1_seam.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM searches, web_search_requests and token counts still cover the whole reply PASS (['q1', 'q2'], 2)\nARM call_model returns the final answer only             PASS 'Answer only.'\nARM the anthropic SDK is still never imported            PASS anthropic imported\nAIFILL FC-1 ARMS: YES (12 of 12)\nexit=0",
+      "denominator": "12 of 12 arms (check_fc1_seam.py); 0 FAIL arm lines in the full run",
+      "status": "PASS",
+      "expect": "AIFILL FC-1 ARMS: YES \\(12 of 12\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-430 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_model_final_answer.py lib/research/aifill/tests/test_model_inputs.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "......................................................                   [100%]\n54 passed in 0.15s\nexit=0",
+      "denominator": "54 of 54 collected tests passed (23 in test_model_final_answer.py, 31 in test_model_inputs.py); 0 failed, 0 errors",
+      "status": "PASS",
+      "expect": "\\d+ passed in [0-9.]+s\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the line `AIFILL FA-2 ARMS: YES (21 of 21)`: the round-104 seam check keeps passing (a control, not a hygiene check); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-430 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa2_model.py\" | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM inputs.py types no Lambda name literal (the LGIC naming gate, rule 30) PASS inputs.py types the function name\nARM the anthropic SDK was never imported (0.45 cannot parse server-tool blocks) PASS anthropic imported\nAIFILL FA-2 ARMS: YES (21 of 21)\nexit=0",
+      "denominator": "21 of 21 arms (check_fa2_model.py)",
+      "status": "PASS",
+      "expect": "AIFILL FA-2 ARMS: YES \\(21 of 21\\)\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-fix parse_response (commit 7871f10f51, before 253747f8b5) run against the same 12 seam arms: the join-every-text-block defect must make the new-behaviour arms fail",
+      "expected": "AIFILL FC-1 ARMS: NO (6 of 12); the six new-behaviour arms FAIL and the six controls PASS",
+      "observed": "AIFILL FC-1 ARMS: NO (6 of 12), exit=1. FAIL: preamble before the search ('I'll research this now.MUFG named a new president.'); several searches ('Let me check.Now another look.Final one. Final two.'); citations from the final segment only; narration between a search call and its result ('Searching again.The answer.'); nothing after the last search (did not raise); call_model returns the final answer only. PASS: recorded real response; no-search reply; whitespace-only final segment; max_tokens; counts; no SDK import.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of check_fc1_seam.py at 253747f8b5 compared on the summary line",
+      "observed": "run 1: AIFILL FC-1 ARMS: YES (12 of 12), exit=0; run 2: AIFILL FC-1 ARMS: YES (12 of 12), exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-validate of all 95 stored AIFILL documents against the new contract (the page does not land until it reads 0 refused)",
+      "reason": "Not this cell: its bound is lib/research/aifill/model.py and its tests only. The revalidate command is task order AMGT-fc-4; the contract, builders and store are other cells'."
+    },
+    {
+      "item": "Live model call, network and AWS access",
+      "reason": "Declared EGRESS CLASS NONE in the order preflight. Every model call in the tests is a stub or the recorded fixture; the anthropic package is never imported."
+    },
+    {
+      "item": "Task-order <status> flip to complete",
+      "reason": "The order face states the <status> flip is the issuer's (2.0.0_SA_COO~R2). The task order file is outside this worker's <paths>."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~430/AMGT_RESAPP.TO-AMGT-fc-1.the-model-seam-keeps-only-the-final-answer.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_model_final_answer.py lib/research/aifill/tests/test_model_inputs.py",
+      "result": "54 passed in 0.15s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/model.py lib/research/aifill/tests/test_model_final_answer.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc=0"
+    }
+  ]
+}

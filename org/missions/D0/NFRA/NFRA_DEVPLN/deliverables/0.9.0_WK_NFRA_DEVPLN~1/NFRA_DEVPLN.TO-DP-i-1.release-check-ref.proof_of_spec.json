@@ -1,0 +1,120 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-i-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-i-1.release-check-ref.md",
+  "group": "OTHER",
+  "vintage_commit": "bd5ddc1947"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round7.md",
+  "vintage_commit": "bd5ddc1947",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-i-1.release-check-ref.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-release-build.sh",
+   "kind": "script",
+   "commit_or_etag": "4955ebf41e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local release builder a seat runs; never pushes. main_check resolves a trunk name (DEV, PROD) to refs/remotes/origin/<name> first and falls back to the local branch only when origin has none; any other name keeps local first. release_check prints ref=<ref read> sha=<12-char sha> on the RELEASE-CHECK line and RELEASE result lines carry the same suffix. Live read in AC1 names refs/remotes/origin/PROD."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_cloudread.py",
+   "kind": "test",
+   "commit_or_etag": "4955ebf41e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary directories. Case 9 runs its subprocess with GIT_DIR pointing at an empty repository made by git init in the test's own temporary base, so no real origin/box ref is looked up. Ten cases, last line cases=10/10 ok=True."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPi1-AC1",
+   "criterion_verbatim": "bash .tools/portal-release-build.sh --check PROD --repo portal --prod-ref 63c4f9e35f259ad76071b1099aeb9dddb150409f expect: unapproved=0 ref=refs/remotes/origin/PROD",
+   "method": "live_read",
+   "invocation": "bash .tools/portal-release-build.sh --check PROD --repo portal --prod-ref 63c4f9e35f259ad76071b1099aeb9dddb150409f",
+   "output_evidence": "rc=0. RELEASE-CHECK features=2 first_parent_commits=2 unapproved=0 ref=refs/remotes/origin/PROD sha=7d5cb34daabc ; RELEASE result=READY reason=- branch=PROD base=63c4f9e35f259ad76071b1099aeb9dddb150409f head=7d5cb34daabce225bb9a2635c541f6ff3fd64e52 ref=refs/remotes/origin/PROD sha=7d5cb34daabc. The stale local PROD (10e7664d) is not read.",
+   "denominator": "1 of 1 RELEASE-CHECK lines carries unapproved=0 and ref=refs/remotes/origin/PROD",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPi1-AC2",
+   "criterion_verbatim": "bash .tools/portal-release-build.sh --selftest expect: cases=12/12 ok=True (the self-test with its two new cases; it reads 10/10 at the base)",
+   "method": "test_suite",
+   "invocation": "bash .tools/portal-release-build.sh --selftest",
+   "output_evidence": "rc=0. CASE 11 check-PROD-reads-origin-PROD-not-stale-local ok=True; CASE 12 check-nontrunk-reads-local-branch ok=True; last line RELEASE-SELFTEST cases=12/12 ok=True. The ten base cases, 1 to 10, are all ok=True.",
+   "denominator": "12 of 12 cases ok=True",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPi1-AC3",
+   "criterion_verbatim": "grep -c \"GIT_DIR\" .tools/tests/test_open_calls_cloudread.py expect: ^[1-9] (case 9 isolates its git from the real repository; the count is 0 at the base)",
+   "method": "command",
+   "invocation": "grep -c \"GIT_DIR\" .tools/tests/test_open_calls_cloudread.py",
+   "output_evidence": "rc=0. Output: 5 (the base count is 0). The five lines: the run() docstring, the pop of GIT_DIR from the inherited environment, the GIT_DIR assignment for git_dir, the case 9 comment, and the GIT_DIR argument of case 9's status call.",
+   "denominator": "5 matching lines; expectation ^[1-9] holds",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPi1-AC4",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_cloudread.py expect: cases=10/10 ok=True (the edited test must stay green with the same 10 cases)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_cloudread.py",
+   "output_evidence": "rc=0. Ten PASS lines, case 9 among them ('stand-in set, OPAL_STATE_ROOT unset: the seam is ignored (UNREADABLE rc 2, fixture row not used), NOTE on stderr'). Last line: OPEN-CALLS-CLOUDREAD-TEST cases=10/10 ok=True. The other four open-calls suites also stay green: test_open_calls 19/19, _approval 13/13, _register 10/10, _waiver 11/11, _withdraw 7/7, each ok=True.",
+   "denominator": "10 of 10 cases pass",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The base rule, git show of the pre-commit builder (bd5ddc1947 era) run against the real portal with the same arguments as AC1: local refs/heads/<name> first.",
+   "expected": "the base rule reads the stale local PROD: features=1 and head=10e7664d, the defect the order names",
+   "observed": "RELEASE-CHECK features=1 first_parent_commits=1 unapproved=0 ; RELEASE result=READY reason=- branch=PROD base=63c4f9e35f259ad76071b1099aeb9dddb150409f head=10e7664d6c4824cb88f04acf47f06264345b5b8b (rc=0, no ref= field)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of python .tools/tests/test_open_calls_cloudread.py compared on the last line, plus one run of --selftest",
+   "observed": "run 1 and run 2 both print OPEN-CALLS-CLOUDREAD-TEST cases=10/10 ok=True; --selftest prints RELEASE-SELFTEST cases=12/12 ok=True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "release_check is shared by --check and --features, so the build mode's RELEASE-CHECK and RELEASE result=READY lines also carry ref= sha=",
+   "reason": "The order asks for the printed ref on the RELEASE-CHECK and RELEASE result lines; the field is appended to the end of both lines in both modes, and every prefix is unchanged. The build mode reads refs/heads/release/<stamp>, which is the ref it names."
+  },
+  {
+   "item": "run() in the cloud-read test clears an inherited GIT_DIR for every case, not only case 9",
+   "reason": "A git hook exports GIT_DIR to its children, which would reach the real repository from any case. In a normal shell the clear is a no-op. Filed as NFRA_DEVPLN-W1-S18 for the lane owner's ruling on the wider clear."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S17: the order says every existing selftest case stays, but cases 1 and 9 matched the RELEASE-CHECK line with grep -qx, which the appended ref= sha= suffix breaks; both greps became prefix matches with counts unchanged (OBSERVATION, INERT)",
+  "NFRA_DEVPLN-W1-S18: case 9 is the only case the order names for GIT_DIR isolation, but run() clears an inherited GIT_DIR for all ten cases; a wider edit than the order states (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-i-1.release-check-ref.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/tests/test_open_calls_cloudread.py",
+   "result": "All checks passed! (rc 0)"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/tests/test_open_calls_cloudread.py",
+   "result": "rc 0, no output"
+  },
+  {
+   "tool": "bash -n",
+   "invocation": "bash -n .tools/portal-release-build.sh",
+   "result": "rc 0, no output (commit-gate comp-shell scan clean, 0 findings)"
+  },
+  {
+   "tool": "commit-gate",
+   "invocation": "bash .tools/safe-commit.sh (commit 4955ebf41e; commit-gate on .tools/portal-release-build.sh and .tools/tests/test_open_calls_cloudread.py)",
+   "result": "OK: pre-commit gate clean for 2 of 3 file(s); surprise-row-gate OK: 2 new rows; msg-verify MATCH"
+  }
+ ]
+}
