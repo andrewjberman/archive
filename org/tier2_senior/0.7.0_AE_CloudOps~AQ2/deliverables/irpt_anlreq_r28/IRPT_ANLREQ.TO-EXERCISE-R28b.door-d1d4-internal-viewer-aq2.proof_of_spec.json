@@ -1,0 +1,134 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-EXERCISE-R28b.door-d1d4-internal-viewer-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R28b.door-d1d4-internal-viewer-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "521495ac4c"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R37A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R28b.door-d1d4-internal-viewer-aq2.md",
+  "vintage_commit": "521495ac4c"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "dynamodb:opal-users-v2 USER#irpt-r28-iv-20261014@opal.invalid (PROFILE)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "one synthetic internal-class row (no allowedFirmIds, no partner row) written 04:23:33Z for the sitting and deleted 04:42:38Z after token exp 04:42:33Z; ABSENT by GSI and ConsistentRead, re-read independently",
+   "artifact_covered_by": [
+    "R28F-AC2"
+   ],
+   "commit_or_etag": "removal 04:42:38Z"
+  },
+  {
+   "path_or_key": "intake store 49financial: one synthetic stored input from D2 (stays)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "D2 NORMALIZED stored one input; D4 re-opened the same input id; D3 stored nothing; deletion is Andrew's word; id in DOOR_INPUTS.txt",
+   "artifact_covered_by": [
+    "R28F-AC1"
+   ],
+   "commit_or_etag": "D2 04:24:07Z"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_RESULT.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the five result lines (D3 reads FAIL)",
+   "artifact_covered_by": [
+    "R28F-AC1"
+   ],
+   "commit_or_etag": "f97b8fc43a"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_REMOVAL.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the two ABSENT lines",
+   "artifact_covered_by": [
+    "R28F-AC2"
+   ],
+   "commit_or_etag": "f97b8fc43a"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R28F-AC1",
+   "invocation": "grep -cE '^(D1 NEEDS_CORRECTION ACCOUNT_COLUMN_SEVERAL_VALUES|D2 NORMALIZED|D3 NORMALIZED price_date=[0-9]{4}-[0-9]{2}-[0-9]{2}|D4 ACCEPTED|C1 PARSED 3 of 3 answers)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_RESULT.txt",
+   "expect": "^5$",
+   "output_evidence": "4\nexit=0",
+   "denominator": "5 expected lines; 4 match (D1, D2, D4, C1); D3 reads 'D3 FAIL 200 NEEDS_CORRECTION'",
+   "status": "FAIL",
+   "status_reason": "D3 (a Shares file with no price date) answered 200 NEEDS_CORRECTION, not NORMALIZED: the resident composes no Shares price source (resolve_prices is _not_composed SHARES_PRICE_SOURCE_NOT_COMPOSED, pinned by intake/tests/test_deferred_resolution.py:172); the code is INFERRED, the sitting kept state only. Row IRPT_ANLREQ-D2-S94 (BLOCKING). The other four lines are real answers: the door admitted the internal viewer and C1 parsed three answer bodies.",
+   "criterion_verbatim": "grep -cE '^(D1 NEEDS_CORRECTION ACCOUNT_COLUMN_SEVERAL_VALUES|D2 NORMALIZED|D3 NORMALIZED price_date=[0-9]{4}-[0-9]{2}-[0-9]{2}|D4 ACCEPTED|C1 PARSED 3 of 3 answers)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_RESULT.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R28F-AC2",
+   "invocation": "grep -cE '^ABSENT (GSI|CONSISTENT) irpt-r28-iv-[0-9]{8}@opal.invalid$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_REMOVAL.txt",
+   "expect": "^2$",
+   "output_evidence": "2\nexit=0",
+   "denominator": "1 address x 2 read paths (GSI, ConsistentRead) ABSENT after the delete at 04:42:38Z, after exp 04:42:33Z; re-read independently at 04:43Z",
+   "status": "PASS",
+   "criterion_verbatim": "grep -cE '^ABSENT (GSI|CONSISTENT) irpt-r28-iv-[0-9]{8}@opal.invalid$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_REMOVAL.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R28F-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r28-door-20261014_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261014T044404Z\nexit=0",
+   "denominator": "3 of 3 ledger legs M, D, X carried proof at close",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r28-door-20261014_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "before any live act the door's access path was run offline against the real served handler: an internal row with NO allowedFirmIds and no advisor was admitted, and a row listing the tenant was refused NOT_AUTHORIZED (3 of 3 cases as predicted)",
+   "observed": "live: the door admitted the internal viewer on every request (function log INTERNAL-CALLER-CLASS class=row_present outcome=admitted x6); the D3 answer was not predicted offline (the offline harness does not compose the resident)",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "D3 reason code",
+   "reason": "the sitting kept status and state only; the code SHARES_PRICE_SOURCE_NOT_COMPOSED is INFERRED from the code and its test, not measured"
+  },
+  {
+   "item": "request count",
+   "reason": "six door posts, not four: D2 and D3 each answered RESOLVING once and were re-posted by the same protocol; D1 and D4 once each"
+  },
+  {
+   "item": "three synthetic files in .scratch",
+   "reason": "the files were built in the script's memory (base64 bodies) and never written to disk"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S94"
+ ],
+ "session_log": "org/critical_paths/change_management/20261014T0422Z_irpt-r28-door-20261014_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "sitting_r28b.py",
+   "invocation": "--live --go",
+   "result": "door admitted; D1, D2, D4, C1 as expected; D3 NEEDS_CORRECTION; removal ABSENT"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open, close-leg M D X, close",
+   "result": "CLOSED 3 of 3"
+  }
+ ]
+}
