@@ -7,12 +7,15 @@
   lotproof2  --file <LOT_PROOF2.json>    BP-c-5: the lot-key fixture proof, relationship id in the key
   sentinel   --file <SENTINEL.json>      BP-c-6: the sentinel line and the Monday/Tuesday export
   offcanon   --file <OFFCANON.json>      BP-c-7: the source of the lots priced off no canonical row
+  ruleprobe3 / replay3 / packet3         Amendment 3 (R1.3): the same three records, plus the served-unit map and unit_changed 0
 
 Each prints one last line `<NAME> record ok ...` or `<NAME> record FAIL <why>`; exit 0 on ok. The graders prove shape,
 read-only discipline and arithmetic; they do not prove a measurement is right (the issuer re-reads cited objects).
 ASCII only. Never edit this file.
 """
 import argparse
+import contextlib
+import io
 import json
 import re
 import sys
@@ -71,87 +74,87 @@ def head(rec, name):
     return None
 
 
-def ruleprobe2(rec):
-    why = head(rec, "RULEPROBE2") or need(rec, ["amendment", "deterministic", "assets", "reinvestment_in", "transfer_in_out",
+def ruleprobe2(rec, amend="R1.2", label="RULEPROBE2"):
+    why = head(rec, label) or need(rec, ["amendment", "deterministic", "assets", "reinvestment_in", "transfer_in_out",
                                               "par_quoted", "types_seen"])
     if why:
-        return fail("RULEPROBE2", why)
-    if rec["amendment"] != "R1.2" or rec["deterministic"] is not True:
-        return fail("RULEPROBE2", "amendment must be R1.2 and the probe deterministic")
+        return fail(label, why)
+    if rec["amendment"] != amend or rec["deterministic"] is not True:
+        return fail(label, "amendment must be %s" % amend + " and the probe deterministic")
     if rec["reinvestment_in"] is not True or rec["transfer_in_out"] is not True:
-        return fail("RULEPROBE2", "reinvestment buys must be in and Transfer In out")
+        return fail(label, "reinvestment buys must be in and Transfer In out")
     pq = rec["par_quoted"]
     for k in ("class_field", "assets_scaled", "withheld_disagreement", "unit_scale_rows_unchanged", "per_unit_left",
               "withheld_ratios"):
         if not isinstance(pq, dict) or k not in pq:
-            return fail("RULEPROBE2", "par_quoted lacks %s" % k)
+            return fail(label, "par_quoted lacks %s" % k)
     if not isinstance(rec["assets"], list) or not rec["assets"]:
-        return fail("RULEPROBE2", "assets empty")
+        return fail(label, "assets empty")
     for a in rec["assets"]:
         for k in ("asset_name", "date", "price", "kind", "distinct_trade_ids"):
             if k not in a:
-                return fail("RULEPROBE2", "asset row lacks %s" % k)
-    print("RULEPROBE2 record ok amendment=R1.2 assets=%d par_scaled=%d withheld=%d"
-          % (len(rec["assets"]), int(pq["assets_scaled"]), int(pq["withheld_disagreement"])))
+                return fail(label, "asset row lacks %s" % k)
+    print(label + " record ok amendment=%s assets=%d par_scaled=%d withheld=%d"
+          % (amend, len(rec["assets"]), int(pq["assets_scaled"]), int(pq["withheld_disagreement"])))
     return 0
 
 
-def replay2(rec):
-    why = head(rec, "REPLAY2") or need(rec, ["amendment", "window", "served_rows", "classes", "served_write", "deterministic",
+def replay2(rec, amend="R1.2", label="REPLAY2"):
+    why = head(rec, label) or need(rec, ["amendment", "window", "served_rows", "classes", "served_write", "deterministic",
                                            "list_file", "par_quoted_rows", "par_rows_unchanged", "transfer_in_carry_forwards",
                                            "carry_forwards_with_date", "interpolated", "lookback_keying", "list_sha256"])
     if why:
-        return fail("REPLAY2", why)
-    if rec["amendment"] != "R1.2" or rec["served_write"] is not False or rec["deterministic"] is not True:
-        return fail("REPLAY2", "amendment must be R1.2, served_write false and the replay deterministic")
+        return fail(label, why)
+    if rec["amendment"] != amend or rec["served_write"] is not False or rec["deterministic"] is not True:
+        return fail(label, "amendment must be %s" % amend + ", served_write false and the replay deterministic")
     why = partition(rec, "classes", REPLAY_CLASSES, "served_rows")
     if why:
-        return fail("REPLAY2", why)
+        return fail(label, why)
     if rec["par_rows_unchanged"] != rec["par_quoted_rows"]:
-        return fail("REPLAY2", "par-quoted rows are not all UNCHANGED (%s of %s)" % (rec["par_rows_unchanged"], rec["par_quoted_rows"]))
+        return fail(label, "par-quoted rows are not all UNCHANGED (%s of %s)" % (rec["par_rows_unchanged"], rec["par_quoted_rows"]))
     ncf = rec["classes"]["NOW_CARRY_FORWARD"]
     if rec["carry_forwards_with_date"] != ncf:
-        return fail("REPLAY2", "carry-forwards with an observation date %s != NOW_CARRY_FORWARD %s" % (rec["carry_forwards_with_date"], ncf))
+        return fail(label, "carry-forwards with an observation date %s != NOW_CARRY_FORWARD %s" % (rec["carry_forwards_with_date"], ncf))
     it = rec["interpolated"]
     for k in ("rows", "with_trade_price", "with_last_traded_date", "unresolved"):
         if not isinstance(it, dict) or k not in it:
-            return fail("REPLAY2", "interpolated lacks %s" % k)
+            return fail(label, "interpolated lacks %s" % k)
     if int(it["with_trade_price"]) + int(it["with_last_traded_date"]) + int(it["unresolved"]) != int(it["rows"]):
-        return fail("REPLAY2", "interpolated fates do not sum to rows")
+        return fail(label, "interpolated fates do not sum to rows")
     lk = rec["lookback_keying"]
     if not isinstance(lk, dict) or lk.get("mode") not in ("trade_date_all_partitions", "limited") or not lk.get("statement"):
-        return fail("REPLAY2", "lookback_keying needs a mode in {trade_date_all_partitions, limited} and a statement")
+        return fail(label, "lookback_keying needs a mode in {trade_date_all_partitions, limited} and a statement")
     if not re.fullmatch(r"[0-9a-f]{64}", str(rec["list_sha256"])):
-        return fail("REPLAY2", "list_sha256 is not a sha256")
+        return fail(label, "list_sha256 is not a sha256")
     c = rec["classes"]
-    print("REPLAY2 record ok served=%d moved=%d unchanged=%d par_unchanged=%d deterministic=true"
+    print(label + " record ok served=%d moved=%d unchanged=%d par_unchanged=%d deterministic=true"
           % (rec["served_rows"], c["CHANGED"] + c["NOW_CARRY_FORWARD"], c["UNCHANGED"], rec["par_rows_unchanged"]))
     return 0
 
 
-def packet2(rec):
-    why = head(rec, "PACKET2") or need(rec, ["amendment", "snapshot_date", "price_changes", "assets_changed", "lots_touched",
+def packet2(rec, amend="R1.2", label="PACKET2"):
+    why = head(rec, label) or need(rec, ["amendment", "snapshot_date", "price_changes", "assets_changed", "lots_touched",
                                            "dollar_effect_latest_snapshot", "readers", "movers_file", "before_after_file",
                                            "served_write", "interpolated_fate", "par_rows_in_movers", "plain_page"])
     if why:
-        return fail("PACKET2", why)
-    if rec["amendment"] != "R1.2" or rec["served_write"] is not False:
-        return fail("PACKET2", "amendment must be R1.2 and served_write false")
+        return fail(label, why)
+    if rec["amendment"] != amend or rec["served_write"] is not False:
+        return fail(label, "amendment must be %s" % amend + " and served_write false")
     if rec["par_rows_in_movers"] != 0:
-        return fail("PACKET2", "the par-quoted rows must not appear as movers")
+        return fail(label, "the par-quoted rows must not appear as movers")
     f = rec["interpolated_fate"]
     for k in ("rows", "trade_price", "last_traded_date", "unresolved"):
         if not isinstance(f, dict) or k not in f:
-            return fail("PACKET2", "interpolated_fate lacks %s" % k)
+            return fail(label, "interpolated_fate lacks %s" % k)
     if int(f["trade_price"]) + int(f["last_traded_date"]) + int(f["unresolved"]) != int(f["rows"]):
-        return fail("PACKET2", "interpolated fates do not sum to rows")
+        return fail(label, "interpolated fates do not sum to rows")
     rd = rec["readers"]
     if not isinstance(rd, list) or len(rd) < 4:
-        return fail("PACKET2", "fewer than four downstream readers named")
+        return fail(label, "fewer than four downstream readers named")
     for r in rd:
         if "reader" not in r or r.get("class") not in ("client-facing", "internal", "unknown"):
-            return fail("PACKET2", "a reader lacks its name or a class in {client-facing, internal, unknown}")
-    print("PACKET2 record ok changed=%d assets=%d readers=%d interpolated=%d served_write=false"
+            return fail(label, "a reader lacks its name or a class in {client-facing, internal, unknown}")
+    print(label + " record ok changed=%d assets=%d readers=%d interpolated=%d served_write=false"
           % (rec["price_changes"], rec["assets_changed"], len(rd), int(f["rows"])))
     return 0
 
@@ -260,7 +263,72 @@ def offcanon(rec):
     return 0
 
 
-CMDS = {"ruleprobe2": ruleprobe2, "replay2": replay2, "packet2": packet2, "cap": cap, "lotproof2": lotproof2,
+
+def _quiet(fn, *a, **k):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = fn(*a, **k)
+    return rc, buf.getvalue().strip()
+
+
+def _units(rec, label):
+    su = rec.get("served_units")
+    keys = ("assets", "per100", "per_unit", "unreadable")
+    if not isinstance(su, dict) or any(k not in su for k in keys):
+        return "served_units needs assets, per100, per_unit, unreadable"
+    if int(su["per100"]) + int(su["per_unit"]) + int(su["unreadable"]) != int(su["assets"]) or int(su["assets"]) <= 0:
+        return "served_units classes do not sum to assets"
+    return None
+
+
+def ruleprobe3(rec):
+    rc, out = _quiet(ruleprobe2, rec, "R1.3", "RULEPROBE3")
+    if rc:
+        print(out)
+        return rc
+    why = _units(rec, "RULEPROBE3")
+    if why:
+        return fail("RULEPROBE3", why)
+    if rec.get("unit_changed_assets") != 0:
+        return fail("RULEPROBE3", "unit_changed_assets must be 0 (R1 changes values, never units)")
+    su = rec["served_units"]
+    print("RULEPROBE3 record ok amendment=R1.3 assets=%d per100=%d per_unit=%d unreadable=%d unit_changed=0"
+          % (len(rec["assets"]), int(su["per100"]), int(su["per_unit"]), int(su["unreadable"])))
+    return 0
+
+
+def replay3(rec):
+    rc, out = _quiet(replay2, rec, "R1.3", "REPLAY3")
+    if rc:
+        print(out)
+        return rc
+    why = _units(rec, "REPLAY3")
+    if why:
+        return fail("REPLAY3", why)
+    if rec.get("unit_changed_rows") != 0:
+        return fail("REPLAY3", "unit_changed_rows must be 0: no served row may change its unit")
+    for k in ("unit_map_file", "unit_withheld_rows"):
+        if k not in rec:
+            return fail("REPLAY3", "lacks %s" % k)
+    c = rec["classes"]
+    print("REPLAY3 record ok served=%d moved=%d unchanged=%d unit_changed=0 unit_withheld=%d deterministic=true"
+          % (rec["served_rows"], c["CHANGED"] + c["NOW_CARRY_FORWARD"], c["UNCHANGED"], int(rec["unit_withheld_rows"])))
+    return 0
+
+
+def packet3(rec):
+    rc, out = _quiet(packet2, rec, "R1.3", "PACKET3")
+    if rc:
+        print(out)
+        return rc
+    if rec.get("held_unit_rows") != 0:
+        return fail("PACKET3", "held_unit_rows must be 0: the unit is ruled, nothing is held out")
+    print(out.replace("PACKET3 record ok", "PACKET3 record ok", 1))
+    return 0
+
+
+CMDS = {"ruleprobe2": ruleprobe2, "replay2": replay2, "packet2": packet2, "ruleprobe3": ruleprobe3,
+        "replay3": replay3, "packet3": packet3, "cap": cap, "lotproof2": lotproof2,
         "sentinel": sentinel, "offcanon": offcanon}
 
 
