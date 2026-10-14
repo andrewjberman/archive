@@ -3,11 +3,11 @@
 Prints:  J1-MARK ok=<True|False> arms=<n> of 9 failed=<names|none> reason=<text>
 Contract (fixed by the issuer): module data/transcripts/scripts/teams_chat/ingress_mark.py with
     stamp(secret, object_id, kind, payload, now) -> a COPY of payload plus "mark_at" (UTC ISO, from `now`) and "mark" (hex HMAC-SHA256 over object_id, kind, mark_at and the
-    canonical JSON of the payload without "mark"); verify(secret, object_id, kind, payload, now) -> "ok" | "no-mark" | "bad-mark" | "stale-mark" (mark_at older than 15 minutes or more than
-    5 minutes ahead of `now`).
+    canonical JSON of the payload without "mark"); verify(secret, object_id, kind, payload, now) -> "ok" | "no-mark" | "bad-mark" | "stale-mark" (mark_at older than the freshness bound -- 15 minutes at CA-j-1, 4 hours from CA-j-9 -- or more than
+    5 minutes ahead of `now`; this check stales a mark at 5 hours so it reads the same before and after CA-j-9).
 The kinds marked are sms.reply and owner.text. tenant.dispatch reads env INGRESS_MARK_MODE at call time: unset or "off" = no check; "record" = check, record a failure in
 state["mark_refusals"] (last 50) and count it in state["unmarked_seen"], but ACT; "enforce" = check, record, and refuse (return "unmarked-refused", act on nothing, send nothing). A mark already seen
-(state["marks_seen"], last 100) is "replayed-mark" and is refused in enforce mode. The secret is a.secret(a.NAMES["secrets"]["ingress_mark"]); a.NAMES carries that row.
+(state["marks_seen"]: the last 100 at CA-j-1, every mark inside the freshness bound from CA-j-9) is "replayed-mark" and is refused in enforce mode. The secret is a.secret(a.NAMES["secrets"]["ingress_mark"]); a.NAMES carries that row.
 The producers are found by reading the source: every `.send(object_id, "sms.reply"|"owner.text", payload ...)` in tenant.py passes its payload through a call named stamp.
 No AWS, no network.
 """
@@ -123,7 +123,7 @@ def main():
 
         def enforce_stale_and_replayed_refused(mp):
             f, st = fresh(mp, "enforce")
-            old = marked({"tag": None, "action": "edit", "notes": "x"}, NOW - datetime.timedelta(minutes=20))
+            old = marked({"tag": None, "action": "edit", "notes": "x"}, NOW - datetime.timedelta(hours=5))
             r1 = t.dispatch(reply(st, old))
             r1_reason = reason(st)
             ok1 = marked({"tag": None, "action": "none", "notes": ""})
