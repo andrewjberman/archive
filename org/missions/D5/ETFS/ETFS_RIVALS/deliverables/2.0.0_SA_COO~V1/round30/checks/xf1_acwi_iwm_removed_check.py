@@ -36,13 +36,18 @@ def test_ac1_no_gate_state_brings_acwi_or_iwm_back(monkeypatch, gates):
     assert not any(e.get("role") == "index_control" for e in universe.entries())
 
 
-def test_ac2_the_holdings_plan_is_the_13_funds_with_every_gate_on_and_one_unit(monkeypatch):
+BBG_PRIMARY = ["IDVZ", "TXUE", "BIDD", "CGIC", "INEQ", "SCHY", "PFOE"]   # the holdings plan's funds with every gate on: the bloomberg_primary set
+
+
+def test_ac2_the_holdings_plan_is_the_bloomberg_primary_funds_with_every_gate_on_and_one_unit(monkeypatch):
+    # AMENDMENT 1 (issuer, on row ETFS_RIVALS-D1-W42-S1): `request_plan` plans the `bloomberg_primary` funds only (7 with ENABLE on; the six
+    # issuer_first funds are not Bloomberg-pulled), so the prior list was these 7 plus ACWI and IWM (9); the change removes exactly the two.
     monkeypatch.setenv("RIVALFUNDS_LEG_ENABLE", "1")
     plan = cb.request_plan("2026-09-29")
-    assert sorted(plan["funds"]) == sorted(THIRTEEN) and plan["names"] == 13
+    assert sorted(plan["funds"]) == sorted(BBG_PRIMARY) and plan["names"] == 7
     assert not GONE & set(plan["funds"])
-    units = cb.split_units(universe.funds())
-    assert units == [(universe.funds(), cb.RIVAL_ROW_CAP)]               # no benchmark is queried on its own any more
+    units = cb.split_units(plan["funds"])
+    assert units == [(plan["funds"], cb.RIVAL_ROW_CAP)]                  # no benchmark is queried on its own any more
 
 
 def test_ac3_the_budget_config_no_longer_sizes_the_two_funds():

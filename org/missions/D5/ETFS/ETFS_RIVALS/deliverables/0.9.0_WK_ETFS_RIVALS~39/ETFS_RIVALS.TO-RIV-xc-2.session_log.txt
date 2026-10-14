@@ -1,0 +1,31 @@
+SESSION LOG -- 0.9.0_WK_ETFS_RIVALS~39 on ETFS_RIVALS.TO-RIV-xc-2.frame-families-and-stored-reason
+worktree: C:/tmp/wk-riv-r30-39 (branch wk-ETFS_RIVALS-39), base HEAD ca6eedbb6d
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-ETFS_RIVALS-39; test -d org && test -d .tools -> TREE-OK.
+2. Base check (before any edit): cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider <xc2 check file>
+   -> "2 failed" (test_ac1 and test_ac2), rc=1. This is the mutant control.
+3. Edits (data/etfs/scripts/rivalfunds/ai_accounts.py): FRAME_STOP and frame_of v2; run_chain assess() returns
+   shared_with; run_chain records shared_frame_with / frame_still_shared in input_manifest. No prompt constant,
+   opening_check, grounding_check, wording_check, ai_stage.py, sweep.py, PROMPT_VERSION touched.
+4. Edits (tests/test_riv_xc1_verdict_frame.py): rewritten to the v2 rule. Changed assertions:
+   - "Bank of America fell sharply: it was sold." "<name> fell sharply: it was" -> "<name> fell sharply:"
+   - "The Alpha Co trade led: it was bought." "the <name> trade led: it" -> "the <name> trade led:"
+   - test name five_tokens -> eight_tokens; "Alpha Co led it all the way home today." "<name> led it all the" ->
+     "<name> led it all the way home today"
+   - seen key "<name> is the clearest fund-specific" -> "<name> is the clearest tell:"
+   - added: manifest shared_frame_with == TST1, frame_still_shared True, corrections == 1 (v2 addition)
+   Unchanged: the connector, digit-collapse and second-fund assertions; the "Smith & Jones rose." and "Holds 2 and 3 names." cases.
+5. AC1: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/.../round30/checks/xc2_frame_family_check.py -k ac1
+   -> "1 passed, 1 deselected in 0.58s", rc=0.
+6. AC2: same file, -k ac2 -> "1 passed, 1 deselected in 1.05s", rc=0.
+7. AC3: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_riv_xc1_verdict_frame.py
+   rivalfunds/tests/test_r6ap1_ai_stage.py rivalfunds/tests/test_r15pd3_ai_periods.py rivalfunds/tests/test_r8an1_ai_prose_one_name.py
+   -> "24 passed in 1.61s", rc=0.
+8. Determinism: the xc2 check file run twice after the final edit -> "2 passed in 1.30s" both times, rc=0.
+9. Full suite: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider --color=no rivalfunds/tests
+   -> "1032 passed, 6 skipped in 87.25s (0:01:27)", rc=0.
+10. Commit gate: bash .tools/commit-gate.sh on the two .py files -> "OK: pre-commit gate clean for 2 of 2 file(s)", rc=0.
+11. Surprise rows filed in org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md:
+   ETFS_RIVALS-D1-W39-S1 (colon carry, rule 3) and ETFS_RIVALS-D1-W39-S2 (still-shared mark on an errored correction).
+   The fenced array parses (33 rows, 2 appended).
+12. No vendor call, no S3, no deploy, no Secrets Manager call. The portal submodule pointer in the worktree is not touched by this order.
