@@ -1,0 +1,28 @@
+session log -- 0.9.0_WK_NFRA_MCPORTAL~25 on NFRA_MCPORTAL.TO-MP-pd-1 (read-only: no write to the grant store, no deploy, no push, no vendor call)
+worktree C:/tmp/mp-pd-25, branch wk-NFRA_MCPORTAL-pd-25 -- tree check: org and .tools present (TREE-OK).
+
+1. Page side (host role, the served module). SSM AWS-RunShellScript on i-07dccb1615503ac99, command b1820e96-4cec-4bee-a829-b22426d05ed9, Status Success.
+   Run as ec2-user from /opt/opal-gateway with the host .venv; the probe pd1_page_probe.py was sent base64-encoded on stdin.
+   Stdout kept verbatim as pd1_page_probe_stdout.txt (one PD1PAGE line). The served scan returned 1 principal; 1 page row carries a data grant
+   (alyssa@opalinvest.com, "data grant revision 4"). Stderr (pydantic and integration warnings) is not kept.
+   Order note: the page read ran before the operator assume, because the principal list it returns is what the store read needs. The
+   assume happened after it, within its 900 s window.
+
+2. Operator role, first assume (session name mp-pd-1-20261014184341): sts assume-role via .tools/aws rc 0; sts get-caller-identity rc 0.
+   caller_arn arn:aws:sts::313476888478:assumed-role/opal-gateway-access-admin/mp-pd-1-20261014184341.
+   The three credential values lived in shell variables inside one bash call and were unset after use; none was printed or written to a file.
+
+3. Query on POLICY#<tid>#<oid>, consistent read, under that role: rc 254, AccessDeniedException (dynamodb:Query). The text is kept as
+   pd1_query_denied.txt. Surprise row NFRA_MCPORTAL-Z-W25-S1 filed (class BLOCKING, principal key and error on the row).
+
+4. Second assume (session name mp-pd-1-20261014185011, caller_arn of the run file). The face's named fallback: GetItem on known keys.
+   GetItem principal_profile rc 0 (status active, grant_revision 4, email on the item); GetItem data_entitlement#0000000004 rc 0 (status active).
+   Store reads used only GetItem. No store write, no activate or revoke, no fallback to the host role.
+   Raw items stayed in the scratch directory (not committed); the derived per-principal detail is pd1_store_read.json.
+
+5. pd1_run.py (run from the worktree root) paired the scan principal with the page row by email (matched_by email). The store tools come
+   from the served SCHWAB_TOOLS and the adapter's active and portal-only rules. Result: principals 1, tools_compared 5, page_rows_with_grant 1, unmatched 0.
+
+6. Surprise row NFRA_MCPORTAL-Z-W25-S2 filed: _scan_principals takes a required client argument; the probe passed the host client from _ddb_client().
+
+7. Next: commit the deliverables and the two rows, run AC1 (pd1.AC1.sh), then write the proof instance and validate it.
