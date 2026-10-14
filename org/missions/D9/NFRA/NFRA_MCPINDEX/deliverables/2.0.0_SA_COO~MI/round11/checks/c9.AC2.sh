@@ -17,7 +17,10 @@ out=$(timeout 60 python "$(native "$H/c11_harvest.py")" "$(native "$T/list.md")"
 rm -rf "$T"
 printf '%s\n' "$out" | tail -30
 # A4: the gate honours the registered rows (self-test arms + an independent planted diff with its negative arm).
-g1=$(bash "$H/g1.AC1.sh" 2>&1 | tr -d ''); g1rc=$?; g2=$(bash "$H/g1.AC2.sh" 2>&1 | tr -d ''); g2rc=$?
+# A5: the planted arms are graded at the gate-branch commit 0fce89bb11, where the six literals are still NEW.
+g1=$(bash "$H/g1.AC1.sh" 2>&1 | tr -d '
+'); g1rc=$?; g2=$(G1_AT="${G1_AT:-0fce89bb11}" bash "$H/g1.AC2.sh" 2>&1 | tr -d '
+'); g2rc=$?
 printf '%s
 ' "$g1" | grep -E '^self-test rc' ; printf '%s
 ' "$g2" | grep -E '^own reader'
