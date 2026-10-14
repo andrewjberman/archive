@@ -1,0 +1,33 @@
+# v2 pre-apply gates, from C:/tmp/mx-dep-r11 (HEAD 7eff14b2e620c8c1f688d41de6f37c09addde7b4)
+cone: .tools data/transcripts/scripts/teams infra/aws/ec2/opal-gateway infra/logic/registry lib org/mcp/inbox/0.7.0_AE_CloudOps org/standards org/tier2_senior/0.7.0_AE_CloudOps 
+
+## HALT GATE -- NEGATIVE CONTROL: a serial that names no agent, same tree, cone untouched. Expect rc=3
+negative rc=0
+
+## HALT GATE -- POSITIVE: the real serial. Expect rc=0
+positive rc=0
+HALT_OVERRIDE in env: '<unset>'
+
+## CORRECTION: the bogus-AGENT_NAME run above is a VOID control, not a gate finding.
+   halt-gate-check.sh:68-98 resolves its serial from (1) this checkout's org/mcp/sessions/<CLAUDE_CODE_SESSION_ID>.serial,
+   (2) $OPAL_AGENT_SERIAL, (3) the shared checkout's <session>.serial. AGENT_NAME is NOT in that chain -- it is
+   safe-ec2-deploy.sh's attribution variable. So passing a bogus AGENT_NAME varied an input the gate never reads,
+   and its rc=0 says nothing about discrimination. Not cited as a control.
+
+## HALT GATE -- VALID NEGATIVE CONTROL: make limb (1) and (3) miss by naming a session that has no .serial file.
+   Nothing on disk and no cone entry is touched. Expect rc=3, serial unresolvable.
+negative rc=0
+
+## WHY BOTH ATTEMPTS WERE VOID, measured: OPAL_AGENT_SERIAL='0.7.0_AE_CloudOps~MI' is EXPORTED in this
+   environment, so limb (2) resolved the serial no matter what AGENT_NAME or CLAUDE_CODE_SESSION_ID were set to.
+   Both attempts therefore varied an input the gate does not read, and both failed toward PASS.
+
+## HALT GATE -- VALID NEGATIVE CONTROL (limb (1) AND limb (2) both defeated):
+   CLAUDE_CODE_SESSION_ID=<no such session> OPAL_AGENT_SERIAL= bash .tools/halt-gate-check.sh
+   -> rc=3, 2 lines matching BLOCKED / NO KNOWN AGENT / cannot be resolved. The gate FAILS CLOSED.
+
+## THE DISCRIMINATOR FOR THIS TREE, cited: the gate's only limb that moves on this tree is the agent-home
+   lookup, and it was exercised as a valid pair earlier in this session on this SAME tree and serial --
+   cone WITHOUT org/tier2_senior/0.7.0_AE_CloudOps -> rc=3 ('SERIAL RESOLVES TO NO KNOWN AGENT -- BLOCKED
+   (fail-closed)'); cone WITH it -> rc=0. See halt_gate_PHASEB.txt.
+## VERDICT: positive rc=0 with HALT_OVERRIDE <unset>, and the admission is backed by two valid negative arms.
