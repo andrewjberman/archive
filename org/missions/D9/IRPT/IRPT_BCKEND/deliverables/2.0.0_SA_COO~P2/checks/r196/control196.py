@@ -19,7 +19,8 @@ REAL = Path(sys.argv[1]).resolve()
 sys.path.insert(0, str(REAL / "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r196"))
 import p196_cells as P  # noqa: E402
 
-CLOS = ["data/a.py", "data/b.py", "data/data.json"]
+NAMES4 = ("account_id", "keyed_gate", "cusip_fallback", "multi_asset")
+CLOS = ["data/a.py", "data/b.py", "data/data.json"] + ["data/m_%s.py" % n for n in NAMES4]
 ORDER540 = P.ORDER540 + ".verify-closure.md"
 
 
@@ -51,6 +52,8 @@ def build(extra_closure_edit=None, stray=False):
     wt(root, P.CORE, core(CLOS))
     wt(root, "data/a.py", "import b\n")
     wt(root, "data/b.py", "X = 1\n")
+    for n in NAMES4:
+        wt(root, "data/m_%s.py" % n, "V = 0")
     old = commit(root, "old pin")
     wt(root, P.CORE, core(CLOS + [P.MISSING]))
     if extra_closure_edit:
@@ -61,14 +64,14 @@ def build(extra_closure_edit=None, stray=False):
     cm = {}
     for name, subj in (("account_id", "build: account_id on every account node"), ("keyed_gate", "feat: keyed sets publish gate"),
                        ("cusip_fallback", "port: e62 + SC-e-56 classifier"), ("multi_asset", "release: multi_asset readers"), ("other", "refactor: rename")):
-        wt(root, "f_%s.txt" % name, name)
+        wt(root, "data/m_%s.py" % name if name != "other" else "f_other.txt", "V = 1")
         cm[name] = commit(root, subj)
     return root, old, new, cm
 
 
 def recs(new, cm, old):
     members = sorted(m for m in CLOS + [P.MISSING] if m.endswith(".py"))
-    traced = ["data/a.py", "data/b.py", "data/data.json", P.MISSING]
+    traced = list(CLOS) + [P.MISSING]
     r1 = {"base_pin": old, "new_pin": new, "import_proof": {f: {"python_flags": "-I", "members_imported": members, "import_errors": [], "bundle_tree_members": len(CLOS) + 2} for f in P.FIRMS},
           "closure_vs_trace": {"traced_files": traced, "missing": [], "extra": []},
           "bundle_delta": {"members_added": [P.MISSING], "members_changed": [], "members_removed": []}, "notes": ["synthetic"], **{k: 0 for k in P.BOUND}}
@@ -88,7 +91,7 @@ def recs(new, cm, old):
         if f == "cottonwood":
             firms[f]["beyond_rule_nodes"] = 236
     r2 = {"new_pin": new, "custody_pins": dict(P.PINS), "live_versions": dict(P.LIVE_VERSIONS), "firms": firms, "notes": ["synthetic"], **{k: 0 for k in P.BOUND}}
-    pc = [{"name": n, "commit": cm[n], "revert_applied": True, "removed_nodes": c, "largest_abs_delta": 0.0, "groups": [{"group": "g", "nodes": c}]}
+    pc = [{"name": n, "commit": cm[n], "revert_applied": True, "resolution": "hand_resolved_closure_member", "toggled_files": ["data/m_%s.py" % n], "removed_nodes": c, "largest_abs_delta": 0.0, "groups": [{"group": "g", "nodes": c}]}
           for n, c in (("account_id", 0), ("keyed_gate", 0), ("cusip_fallback", 236), ("multi_asset", 0))]
     r3 = {"beyond_rule_total": 236, "per_commit": pc, "overlap_nodes": 0, "joint_nodes": 0, "unattributed_nodes": 0, "run1_digest": "cd" * 32, "run2_digest": "cd" * 32,
           "mutant": {"flagged": True, "unattributed_nodes_with_mutant": 1}, "notes": ["synthetic"], **{k: 0 for k in P.BOUND}}
@@ -163,6 +166,9 @@ neg("an UNATTRIBUTED node", "IB196-3-AC1", lambda r: r[2].update({"unattributed_
 neg("a revert not applied", "IB196-3-AC1", lambda r: r[2]["per_commit"][0].update({"revert_applied": False}))
 neg("a commit whose subject does not name it", "IB196-3-AC1", lambda r: r[2]["per_commit"][3].update({"commit": cm["other"]}))
 neg("a joint node not counted", "IB196-3-AC1", lambda r: r[2].update({"joint_nodes": 1}))
+neg("a toggled file outside the closure", "IB196-3-AC1", lambda r: r[2]["per_commit"][0].update({"toggled_files": ["f_account_id.txt"]}))
+neg("a toggled file the commit did not change", "IB196-3-AC1", lambda r: r[2]["per_commit"][0].update({"toggled_files": ["data/m_keyed_gate.py"]}))
+neg("no resolution word", "IB196-3-AC1", lambda r: r[2]["per_commit"][1].pop("resolution"))
 neg("only three commits", "IB196-3-AC1", lambda r: r[2]["per_commit"].pop())
 neg("beyond-rule total not 541's", "IB196-3-AC1", lambda r: r[2].update({"beyond_rule_total": 235}))
 neg("two digests (toggling)", "IB196-3-AC2", lambda r: r[2].update({"run2_digest": "ef" * 32}))
