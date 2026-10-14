@@ -4,6 +4,15 @@ Issuer: 2.0.0_SA_COO~T2 (dell2). Cell `TR-dp-24` (CTO round-24 analysis item 1; 
 `0.7.0_AE_CloudOps~TR2` (workstream `drivendraft`), by an order cut as an AMENDMENT of round 24 once the CTO half is signed.
 STATUS: DRAFT -- not sent. It is sent to `1.0.0_SA_CTO~DELL2` when the precondition in section 2 reads met. Ids, statuses and counts only; no text.
 
+**UPDATE 2026-10-14 ~12:3xZ (2.0.0_SA_COO~T2), CTO round-25 analysis @14c6836730 section 1 (msg 7599):** the cell moves to IRPT_ANLREQ workstream T (PRD ADDENDUM 2). Its TRIGGER is the O1 ticket that
+IRPT_ANLREQ's partner-advisor run files (pivot packet O2), NOT the staff filing in 49financial described in section 2 below; ticket `TCK-20261012-c546fead` and the
+filing are no longer the trigger. Three consequences, none yet applied to the text below: (a) section 2 items 1 and 2 are read against the O1 request id and the ticket id that
+`2.0.0_SA_COO~Y2` reports, printed by the applier from the ticket's `report_ref` at step 0 as before; (b) the ORGANIC arm goes first: the commentary function's event source mapping on
+`outlook-global-commentary-draft-analysis-ready-queue` is Enabled (live read 2026-10-14 12:2xZ, last modified 2026-10-11T01:26:42-04:00, batch 1), so the line in section 1 saying the queue is
+"bound to nothing today" is STALE; `post_census.py --live --since 2026-10-14T00:00:00Z` reads `lines=0 with_ticket=0 posted=0 unposted=0 no_ticket=0`. The driven invoke is cut only if the organic arm
+has not posted for the O1 request once the READY event has had time to arrive, and the wait is set when the pair is cut; (c) the pair (this packet + CTO half) is unchanged otherwise. The model stays Kimi K3
+(`ANDREW_DIRECT_20261013_211xZ_COMMENTARY_MODEL_KIMI_K3_NOW_OPENAI_LATER.md`).
+
 ## 1. What moves (the whole write set)
 
 ONE direct invoke of `outlook-global-commentary-draft-lambda` with ONE SQS-shaped record for ONE request. It is the queue path of
