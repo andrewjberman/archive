@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bk-7.the-header-money-and-dash-reasons-feature-is-promoted-to-prod-from-the-approved-list",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bk-7.the-header-money-and-dash-reasons-feature-is-promoted-to-prod-from-the-approved-list.md",
+    "group": "OTHER",
+    "vintage_commit": "445c707b51"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "445c707b51",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bk-7.the-header-money-and-dash-reasons-feature-is-promoted-to-prod-from-the-approved-list.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal PROD (Opal-Capital/portal refs/heads/PROD)",
+      "kind": "frontend_component",
+      "commit_or_etag": "7d5cb34daabce225bb9a2635c541f6ff3fd64e52",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PROD 10e7664d -> 7d5cb34d, release/20261014T003210Z carrying cand/dell1/amgt-sa-header-money-and-dash-reasons only; tag portal-v2.1.215; CI Deploy to Production run 38491072873 completed/success. Issuer's ls-remote read of PROD: 7d5cb34daabce225bb9a2635c541f6ff3fd64e52."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform/PROMOTE_RECEIPT.md",
+      "kind": "doc",
+      "commit_or_etag": "4f6b0979de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DT's receipt: release, PROD head before and after, pages changed (Security Analysis, /security-analysis, Opal-internal), CI."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: four lines `EQUAL <path>` (one per path, none `DIFFERS`)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in src/pages/SecurityAnalysis/components/HeaderCards.tsx src/pages/SecurityAnalysis/components/StatTile.tsx src/pages/SecurityAnalysis/components/model/WhatChangedPanel.tsx src/pages/SecurityAnalysis/__harness__/tileMoneyAndReasons.harness.cjs; do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse 624e2533f6:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done",
+      "output_evidence": "EQUAL src/pages/SecurityAnalysis/components/HeaderCards.tsx\nEQUAL src/pages/SecurityAnalysis/components/StatTile.tsx\nEQUAL src/pages/SecurityAnalysis/components/model/WhatChangedPanel.tsx\nEQUAL src/pages/SecurityAnalysis/__harness__/tileMoneyAndReasons.harness.cjs",
+      "denominator": "4 of 4 paths of origin/PROD (7d5cb34d) EQUAL to 624e2533f6:<path>; git diff --name-only 10e7664d origin/PROD = 4 files",
+      "status": "PASS",
+      "expect": "EQUAL src/pages/SecurityAnalysis/components/HeaderCards\\.tsx\\nEQUAL src/pages/SecurityAnalysis/components/StatTile\\.tsx\\nEQUAL src/pages/SecurityAnalysis/components/model/WhatChangedPanel\\.tsx\\nEQUAL src/pages/SecurityAnalysis/__harness__/tileMoneyAndReasons\\.harness\\.cjs"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: one JSON row whose `status` is `completed` and `conclusion` is `success`, with `headSha` equal to origin/PROD after a fetch and NOT beginning `10e7664d`",
+      "method": "command",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "output_evidence": "[{\"conclusion\":\"success\",\"headSha\":\"7d5cb34daabce225bb9a2635c541f6ff3fd64e52\",\"status\":\"completed\"}]",
+      "denominator": "1 of 1 latest PROD run; headSha 7d5cb34d equals the ls-remote read of PROD",
+      "status": "PASS",
+      "expect": "\"conclusion\":\"success\",\"headSha\":\"7d5cb34d[0-9a-f]+\",\"status\":\"completed\""
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: a count of at least 4 (the route, the class and the CI words each present)",
+      "method": "command",
+      "invocation": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform/PROMOTE_RECEIPT.md\"",
+      "output_evidence": "5\n(grep -c over PROMOTE_RECEIPT.md: lines naming security-analysis, Opal-internal, completed and success; threshold 4)",
+      "denominator": "5 matching lines in the receipt (threshold 4)",
+      "status": "PASS",
+      "expect": "^[4-9]\n"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order names no seeded mutant for this promote; AC1's per-blob equality and AC2's head-must-move clause are the discriminating checks (both read FAIL at the base 10e7664d before the promote).",
+      "expected": "N/A: no mutant named by the task order",
+      "observed": "No mutant run; base reads: AC1 DIFFERS, AC2 headSha 10e7664d6c, AC3 receipt absent.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: AC1, AC2 and AC3 were read twice by the issuer (once at the grade, once when writing this instance), identical both times; the DT read them once at its report. Repeats beyond that are outside the bound.",
+      "observed": "AC1: 4 of 4 EQUAL both reads. AC2: completed/success headSha 7d5cb34d both reads. AC3: 5 both reads.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "The promote was run by 0.4.0_DT_ClientPlatform (release/20261014T003210Z, PROD 10e7664d -> 7d5cb34d, tag portal-v2.1.215, CI run 38491072873 success; its report msg 5313, receipt commit 4f6b0979de). The DT was stood down (MSTR msg 5320) before it wrote this instance. THIS INSTANCE WAS WRITTEN BY THE ISSUER 2.0.0_SA_COO~R1 from its own re-run of AC1-AC3 at 2026-10-14T00:5xZ against origin/PROD, not from the DT's output; the output_evidence fields are the issuer's reads.",
+  "compiler_tools": [
+    {
+      "tool": "gh run list / git rev-parse / grep",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "result": "[{\"conclusion\":\"success\",\"headSha\":\"7d5cb34daabce225bb9a2635c541f6ff3fd64e52\",\"status\":\"completed\"}]"
+    }
+  ]
+}
