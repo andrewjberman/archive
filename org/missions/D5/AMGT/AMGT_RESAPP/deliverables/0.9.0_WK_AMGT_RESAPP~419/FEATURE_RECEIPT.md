@@ -37,4 +37,4 @@
 ## How to look
 
 - `cd portal && bun run dev:live --port 5174`
-- page: `/security-analysis`; names: `PBR US` (team Revenue and EPS print `BRL`), `BATS LN`, `GOOGL US` (its Key Figures dashes; not checked by the harness, which reads only the two slices)
+- page: `/security-analysis`; names: `PBR US` (team Revenue prints `BRL`; the other team money rows with no served currency print no symbol), `BATS LN`, `GOOGL US` (its Key Figures dashes; not checked by the harness, which reads only the two slices)
