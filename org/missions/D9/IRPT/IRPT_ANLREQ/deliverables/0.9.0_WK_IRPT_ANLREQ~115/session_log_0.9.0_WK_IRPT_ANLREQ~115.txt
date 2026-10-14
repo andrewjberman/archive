@@ -1,0 +1,31 @@
+SESSION LOG 0.9.0_WK_IRPT_ANLREQ~115 -- TO IRPT_ANLREQ.TO-AR-y-297 (AR-y-297, leg L1 build of opal-ticket-api, BUILD ONLY)
+Worktree: C:/dev/wk-irpt-anlreq-115 (branch wk-IRPT_ANLREQ-115). Nothing uploaded, applied, deployed, invoked, pushed or planned.
+
+1. Preflight: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-115; test -d org && test -d .tools -> TREE-OK.
+2. Live read (read only): aws lambda get-function-configuration --function-name opal-ticket-api -> CodeSha256 4sDK8P5mtgodi1IkSfaFQZi1YgmJq6URLeypEcaULu8=, CodeSize 31405, LastModified 2026-10-12T01:50:30.000+0000 (equal to census).
+   aws lambda get-function --query Code.Location -> URL written to .scratch/r30/live_url.txt (not recorded).
+   s3api list-object-versions --prefix ticket-center/opal-ticket-api.zip -> 21 versions, latest _EWULf4C_TO9vwRzeYaCzmHe5ciwnLpS (equal to census).
+   python -I .scratch/r30/scripts/fetch_live.py -> 31405 bytes, sha256 base64 equal to CodeSha256; 1 member lambda_function.py 4136587a...ef7cf9.
+3. Base and control: map entry opal-ticket-api last_deployed_commit 97d2d4bedec9e9bf3a8a3d0ec39d37d9c7df3638 (trunk map; equal to census last_built_pin).
+   guard: git show 97d2d4bede:infra/aws/lambda/ci/build-and-upload.sh | grep -c BUILD_ONLY -> 8 (printed before the build).
+   git worktree add --detach C:/dev/irpt-release-r28/wt-control-97d2d4be 97d2d4bedec9e9bf3a8a3d0ec39d37d9c7df3638 -> ok.
+   BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh ticket-center opal-ticket-api (TMPDIR C:/dev/irpt-release-r28/tmp-control) -> rc 0, BUILD_ONLY sha256=4sDK8P5mtgodi1IkSfaFQZi1YgmJq6URLeypEcaULu8= (log: .scratch/r30/control_build.log).
+   Control zip copied to C:/dev/irpt-release-r28/control/opal-ticket-api-control-97d2d4be.zip; cmp against the live zip -> byte-identical. differs_from_live [].
+4. Trunk: git fetch origin; origin/CLOUD = 4279513f95f67fae07d12889df70dc63954a2d5a at the pin (a4b7c48fad at an earlier read in this run).
+   git diff --name-only 97d2d4bede 4279513f95 -- infra/aws/lambda/ticket_center -> 8 paths (lambda_function.py + 7 tests/).
+   trunk map files[] for opal-ticket-api = [lambda_function.py].
+   git show 4279513f95:.../lambda_function.py -> blob fb6fe3dd3c, sha256 cfa99176f89f7cdb32c3e171bdfdf930a605ee51fd3e590b1a55e878073d4d70, 112207 bytes.
+   Release worktree: git -c core.longpaths=true worktree add --detach C:/dev/irpt-release-r28/wt-release-4279513f 4279513f95f67fae07d12889df70dc63954a2d5a -> ok (the default checkout failed on a long path; see surprise row IRPT_ANLREQ-D2-W115-S1). status clean.
+   No edit made in any worktree: no map, builder or recipe changed.
+5. Release build: guard 8 printed; BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh ticket-center opal-ticket-api (TMPDIR C:/dev/irpt-release-r28/tmp-release) -> rc 0, BUILD_ONLY sha256=C/Rt/FnSqOj7SnZC1GeoEilj8jbCKdvAUHnxYrnNZNM=.
+   Copied to C:/dev/irpt-release-r28/opal-ticket-api-r28.zip (34057 bytes, sha256 0bf46dfc59d2a8e8fb4a7642d467a8122963f236c229dbc05079f162b9cd64d3).
+   Second same-input build (TMPDIR tmp-release-2): byte-identical (cmp).
+   The release log contains no s3 cp line (the BUILD_ONLY branch exits before the upload).
+6. Compare: python -I .scratch/r30/scripts/compare_zip.py <release zip> <live manifest> -> delta_vs_other [lambda_function.py]; only_in_this []; only_in_other [].
+7. Tests (release tree, infra/aws/lambda/ticket_center): python -m pytest tests/test_submit_analysis_request.py -> 15 passed rc 0; tests/test_list_scoped_firm.py -> 25 passed rc 0; tests/test_package_request_id.py -> 33 passed rc 0; python -m pytest tests -q -p no:cacheprovider -> 279 passed, 42 subtests passed, rc 0.
+8. Rollback version: head-object --version-id _EWULf4C_TO9vwRzeYaCzmHe5ciwnLpS (ContentLength 31405, content-sha256 4sDK...); get-object --version-id to .scratch/r30/pkg_live/rollback_version_EWULf4C.zip -> sha256 base64 4sDK..., byte-identical to the live code zip.
+9. Terraform read (HCL only, no plan): infra/aws/terraform/ticket-center/main.tf:238-241; infra/aws/terraform/modules/yang-lambda/main.tf:17-20, 36-39.
+10. Checker: python C:/dev/wk-irpt-anlreq-115/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y297-build --root C:/dev/wk-irpt-anlreq-115 -> artifact sha256 0bf46dfc...; Y297-BUILD-OK rc 0.
+11. Mutant: copy of the record at .scratch/r30/mutant_root with delta_vs_live + status.py; same checker with --root .scratch/r30/mutant_root -> FAIL: delta_vs_live names member(s) outside the release ['status.py']; Y297-BUILD-FAIL rc 1 (fired).
+12. Surprise rows filed: IRPT_ANLREQ-D2-W115-S1 (long-path checkout), IRPT_ANLREQ-D2-W115-S2 (map note names another sha and size).
+Scratch (not committed, worker scratch): C:/dev/wk-irpt-anlreq-115/.scratch/r30/ ; throwaway worktrees: C:/dev/irpt-release-r28/wt-control-97d2d4be and C:/dev/irpt-release-r28/wt-release-4279513f (left in place; not removed).
