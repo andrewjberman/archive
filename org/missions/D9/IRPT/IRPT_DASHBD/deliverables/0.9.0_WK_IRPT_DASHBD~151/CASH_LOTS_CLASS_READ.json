@@ -1,0 +1,64 @@
+{
+  "lots": {
+    "snapshot": "2026-10-09",
+    "rows_scanned": 1314777,
+    "cash_stem_ticker_lots": 11,
+    "accounts": 4,
+    "distinct_tickers": 1,
+    "lots_with_description_cash": 0,
+    "open_lots": 7,
+    "closed_lots": 4,
+    "columns_used": ["ticker", "asset_name", "account_id", "is_open"],
+    "open_closed_rule": "The snapshot's own is_open boolean column: true counts as open (7 lots), false as closed (4 lots); no null values among the 11 lots. The snapshot has no column named description; asset_name is the asset-name column used for the description test (trimmed, upper-cased, equal to CASH: 0 of 11 lots). distinct_tickers counts distinct tickers containing the stem CASH among all rows: 1 (CASH only; the synthetic CASH_USD appears on no row)."
+  },
+  "canonical_row": {
+    "exists": true,
+    "asset_class": "cash",
+    "sub_asset_class": "Cash",
+    "read_from": "etf-classifications get_item",
+    "cash_usd_row_exists": true,
+    "cash_usd_asset_class": "fixed_income",
+    "cash_usd_sub_asset_class": "Cash"
+  },
+  "gold_classifier": {
+    "classify": "cash",
+    "classify_with_identity_class": "cash",
+    "basis": "Canonical row: the CASH row is read by ticker and its sub_asset_class Cash takes the class cash through _row_class (etf_classifier.py lines 104-116); no name path is used for a ticker present in the table."
+  },
+  "served_per_page": [
+    {
+      "page": "advisor_intelligence",
+      "established": false,
+      "store": "opal-data-49financial advi/49financial/platinum/advisors/{id}/positions.json, one file per advisor folder",
+      "served_class": "NOT_ESTABLISHED",
+      "read_from": "S3 LIST of the advisors prefix, then one S3 GET per folder (box identity, no write)",
+      "positions_seen": 0,
+      "reason": "194 advisor folders listed; 189 carry positions.json and were read (4,315 positions in all). No position carries ticker CASH, CASH_USD or any ticker containing the stem CASH, so the page serves no class for these lots. The probed file carries top_n_limit 25 and 25 positions, so a CASH line outside an advisor's top 25 would not appear in the file. 5 folders carry no positions.json and were not read further."
+    },
+    {
+      "page": "investor_reporting",
+      "established": false,
+      "store": "investor-reporting holdings accepted publication for the 49financial firm (platinum current index, then the accepted manifest)",
+      "served_class": "NOT_ESTABLISHED",
+      "read_from": "publication.py HoldingsPublication.load() under the box identity (GET only)",
+      "positions_seen": 0,
+      "reason": "The accepted index and the accepted manifest were read. The unscoped load then refused at the reader's own bound, 'selected publication request count exceeds bound' (publication.py line 445), before any node was read. A scoped read needs an account scope this order does not name, so none was run. Code path only, not observed: the canonical-row branch serves the stored asset_class verbatim (holdings_snapshot.py lines 977-984), so the 11 lots would be served cash, which the page labels Cash."
+    }
+  ],
+  "investor_reporting_special_case": {
+    "rule_at": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py line 966 (classify_security, defined at line 952)",
+    "requires_ticker_and_description_both_cash": true,
+    "lots_that_meet_it": 0
+  },
+  "what_the_page_shows_in_words": "Investor Reporting: no published object was read, so the served class is not established. By code, a CASH lot whose description is not CASH misses the special case at line 966 and takes the canonical-row branch, which serves the stored class cash; the page labels cash as Cash (portal assetClass.ts CLASS_FOR_SERVED, rank 0, first in the legend). A reader would see the class column read Cash, if the publication carries the classification members. Advisor Intelligence: observed, no served positions file carries a CASH position, so the reader sees no line for these 11 lots; had one appeared, the Advisor Intelligence label map (composition.ts PLATINUM_LABEL_MAP) would show cash as Cash. Andrew's note 'Cash as a ticker should be CASH': the class is already cash with label Cash on both sources, so the note concerns the ticker identity of the cash line, not a class label. portal assetClass.ts is a class-to-label display mapping, not a ticker label. The one ticker-level divergence is CASH_USD: the gold classifier returns fixed_income for it by override (etf_classifier.py lines 150-151) although the canonical table holds a CASH_USD row typed Cash.",
+  "recommendation": "No class change is needed for the 11 CASH lots: the canonical CASH row already serves cash (label Cash) on the gold classifier and, by code, on the Investor Reporting page. If Andrew's note means the cash line must be identified as ticker CASH rather than CASH_USD, the change is the CASH_USD override in data/black_diamond/scripts/gold/lib/etf_classifier.py (lines 150-151, which return fixed_income), a CTO ruling not made by this read.",
+  "reads": {
+    "dynamodb_writes": 0,
+    "s3_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "deployed": false,
+  "pushed": false,
+  "served_values_changed": false
+}
