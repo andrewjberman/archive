@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>parked</status>
+<status_reason>Held on Andrew's word ~20:49Z; re-cut when he names the hour (CTO ruling, msg 109252, 2026-10-14 ~21:08Z; record org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-ac-5_RESTART_HELD_20261014.md; open call laptop-20261014T205216Z-7841). FWD-11 is a qualified wait on his word. S0 at 20:15:08Z (403fbe344e) is superseded when a window is set.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>EXERCISE</proof_genre>
 <round>1</round>
