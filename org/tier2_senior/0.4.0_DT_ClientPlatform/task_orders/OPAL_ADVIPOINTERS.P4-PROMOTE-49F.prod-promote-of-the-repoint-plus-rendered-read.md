@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>R+3, where R = Schwab FAM resumption for 08335338 (RE-DATED from 2026-08-22 by COO notice @f79760179a, 2026-08-19 1311Z: vendor-side FAM outage after as_of 08-10; chain = floor/P3 R+1, pins R+2, flip R+3). Still executes at DE's P4R-5 handoff; payload = their flip commits exactly; PROD..DEV re-measured at GO-time.</dated>
-<status>pending -- GO 160754Z acknowledged; RE-DATED to R+3 per COO @f79760179a; executes on DE P4R-5 handoff</status>
+<status>superseded -- payload served in d9a98bcc (ancestor of origin/PROD); flipped by 2.0.0_SA_COO~DV for the unseated base issuer</status>
 <priority>P1 — the phase-close criterion for row 4c is the portal VERIFIED taking data in and displaying it; your rendered read IS that evidence</priority>
 <authority>Push plan @a2f27c8d0a §3 row 4c + §2 DT row. /prod-deploy is the canonical procedure (DT lane). GATE-5 mechanics from your 154211Z stand ADOPTED: `git push origin PROD` is integrator-only for your serial — run /prod-deploy through merge/parity/worktree, hand MSTR the exact push, verify CI yourself. No audited override.</authority>
 </task_order>
