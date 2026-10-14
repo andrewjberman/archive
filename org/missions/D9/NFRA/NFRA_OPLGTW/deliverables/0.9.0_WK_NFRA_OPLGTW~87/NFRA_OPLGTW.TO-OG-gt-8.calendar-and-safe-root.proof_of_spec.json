@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-gt-8",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~87",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "fdf8d53ccb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "fdf8d53ccb",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-8.calendar-and-safe-root.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_identity.py",
+   "kind": "script",
+   "commit_or_etag": "d21927a248",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_REPO_ROOT = parents[5] line removed; _calendar() now tries the artifact root (parent of app/) then every ancestor of the file, returns None when none holds lib/trading_calendar.py. Not deployed: the release is NFRA_OPLGTW.TO-OG-ap-18.",
+   "artifact_covered_by": ["AC1", "AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/news_typed.py",
+   "kind": "script",
+   "commit_or_etag": "d21927a248",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Same change as harvest_identity.py: parents[5] line removed, _calendar() searches the artifact root then the ancestors. Not deployed: the release is NFRA_OPLGTW.TO-OG-ap-18.",
+   "artifact_covered_by": ["AC1", "AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "kind": "script",
+   "commit_or_etag": "d21927a248",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Packaging block only: an existence check (ERROR, exit 1, before any upload), mkdir and cp of lib/trading_calendar.py into $TMP/bundle/lib, and lib added to the tar bundle list. bash -n rc 0. Nothing else in the script changed; the md5 read-back at line 525 is unedited (surprise row NFRA_OPLGTW-Z-W87-S2). Not run: no deploy, no upload.",
+   "artifact_covered_by": ["AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt8.py",
+   "kind": "test",
+   "commit_or_etag": "d21927a248",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Offline module, three tests: test_oggt8_ac01 (host-shaped copy with lib/ staged), test_oggt8_ac02 (no lib/, degradation reported), test_oggt8_ac03_deploy_stages_lib (static read of the deploy script). Copies live under C:/tmp and are removed by the fixture.",
+   "artifact_covered_by": ["AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d21927a248",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Two surprise rows appended: NFRA_OPLGTW-Z-W87-S1 (the same parents[5] line in app/portal_macro.py and app/portal_models.py, outside this cell's paths) and NFRA_OPLGTW-Z-W87-S2 (the md5 read-back names two app/ files, not the premise's set). The row gate passed on 2 of 609 rows.",
+   "artifact_covered_by": ["AC1", "AC2", "AC3"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: both modules import from a host-shaped path and find the staged calendar.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt8.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nhost-shaped import: harvest_identity OK, news_typed OK; calendar importable yes; T-1 computable yes\nRESULT: PASS\nexit=0",
+   "denominator": "modules importing from the host-shaped copy 2 of 2 (harvest_identity, news_typed); calendar found by _calendar() 2 of 2; T-1 computed 1 of 1 (harvest_identity._t1)",
+   "expect": "(?s)host-shaped import: harvest_identity OK, news_typed OK; calendar importable yes; T-1 computable yes.*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the deploy script stages and tars lib/.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt8.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "bash -n rc 0; stage line 1 (want 1); tar names lib 1 (want 1+); a second copy of the calendar under the gateway dir 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "bash -n on 1 script (rc 0); stage lines 1 of 1 expected; tar lines naming lib 1 (want 1+); calendar copies under the gateway dir 0 of 0 expected",
+   "expect": "(?s)bash -n rc 0; stage line 1 \\(want 1\\); tar names lib [1-9]\\d* \\(want 1\\+\\); a second copy of the calendar under the gateway dir 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: your tests and the suites of the two modules pass.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt8.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "17 passed in 2.30s\npytest rc=0; tests defined in test_og_gt8.py 3 (want 2+); failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "pytest collected 17 items (test_og_gt8.py 3, test_og_gt1.py, test_og_gt0.py, test_og_nw1.py), 17 passed; failed/error lines 0 of 17; tests defined in test_og_gt8.py 3 (want 2+)",
+   "expect": "(?s)pytest rc=0; tests defined in test_og_gt8.py [2-9]\\d* \\(want 2\\+\\); failed/error lines 0.*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted in a host-depth scratch copy (C:/tmp/gt8mut.<pid>/opal-gateway/app, removed after the run): harvest_identity.py restored to its HEAD bytes at fdf8d53ccb (the parents[5] line), with the calendar staged beside app/.",
+   "expected": "import of app.harvest_identity raises IndexError at module load (the defect class OG-gt-8 removes).",
+   "observed": "MUTANT import raised IndexError : 5",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "gt8.AC2.sh run at the pre-commit tree and again at HEAD d21927a248 (the deploy-script grep and bash -n are read-only).",
+   "observed": "identical AC2 line both runs: bash -n rc 0; stage line 1 (want 1); tar names lib 1 (want 1+); a second copy of the calendar under the gateway dir 0 (want 0)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The gateway deploy and release (NFRA_OPLGTW.TO-OG-ap-18): no deploy, no upload, no S3 write, no SSM, no IAM or Terraform.",
+   "reason": "Code, one deploy-script edit and tests only; the order's bounds (section 2) and its preflight declare no deploy."
+  },
+  {
+   "item": "The parents[5] lines in app/portal_macro.py:55 and app/portal_models.py:39, and in ops/ (schwab_status.py, schwab_entitlement_admin.py).",
+   "reason": "Outside this order's paths; the lane gate admits only the named paths. Filed as surprise row NFRA_OPLGTW-Z-W87-S1."
+  },
+  {
+   "item": "The md5 read-back at deploy-to-ec2.sh:525 (names app/server.py and app/oauth_as.py only).",
+   "reason": "The order says to report it, not edit it. Filed as surprise row NFRA_OPLGTW-Z-W87-S2."
+  },
+  {
+   "item": "The portal submodule gitlink, shown as modified in this worktree before the cell started.",
+   "reason": "Not in this order's paths and not touched; never committed by this worker."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W87-S1: the same parents[5] line sits in app/portal_macro.py:55 and app/portal_models.py:39, outside this cell's paths, so it is not removed here; ARMED with disarm owner 2.0.0_SA_COO~O.",
+  "NFRA_OPLGTW-Z-W87-S2: the deploy script's md5 read-back names app/server.py and app/oauth_as.py only, not app/, deploy/ and dashboard/ as the order's premise states, and no lib/ file."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the code commit d21927a248, the surprise rows NFRA_OPLGTW-Z-W87-S1 and NFRA_OPLGTW-Z-W87-S2 in INVESTIGATION_v1.md, and the mutant run recorded under controls.",
+ "compiler_tools": [
+  {
+   "tool": "pytest (opal-gateway, the new module plus the two module suites)",
+   "invocation": "cd infra/aws/ec2/opal-gateway && timeout 120 python -m pytest tests/test_og_gt8.py tests/test_og_gt1.py tests/test_og_gt0.py tests/test_og_nw1.py -q -p no:cacheprovider --color=no",
+   "result": "17 passed in 2.30s (run by gt8.AC3.sh; the baseline before the edit was 14 passed on tests/test_og_gt1.py, test_og_gt0.py and test_og_nw1.py)"
+  },
+  {
+   "tool": "bash -n and the commit gate",
+   "invocation": "bash -n infra/aws/ec2/opal-gateway/deploy-to-ec2.sh ; .tools/safe-commit.sh (py_compile, ruff py39, ds-precommit, surprise-row gate)",
+   "result": "bash -n rc 0; the commit gate passed at d21927a248 after one ruff F401 fix in the test module; the surprise-row gate read 2 new rows of 609 and returned OK"
+  }
+ ]
+}
