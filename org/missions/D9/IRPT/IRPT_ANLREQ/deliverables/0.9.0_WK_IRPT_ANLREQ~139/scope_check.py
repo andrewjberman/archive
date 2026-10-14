@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""AR331-y-AC3 (TO-AR-y-331, AMENDED by AMENDMENT 2): the scope check over the commits of this order.
+"""AR331-y-AC3 (TO-AR-y-331, AMENDED by AMENDMENT 2 and AMENDMENT 3): the scope check over the commits of this order.
 
 Reads `base` from the record JSON (the parent of the first commit of this order) and prints it. Prints SCOPE-OK only when
 ALL of the following hold; otherwise SCOPE-BAD <why>, exit 1:
   (1) `git diff --name-only <base> HEAD` lists only paths under infra/aws/lambda/investor-reporting/, the one published
-      route file docs/contracts/investor-reporting/v1/routes.json, and paths under org/missions/D9/IRPT/IRPT_ANLREQ/;
+      route file docs/contracts/investor-reporting/v1/routes.json, the one new response schema file
+      docs/contracts/investor-reporting/v1/responses/analysis-request-commentary-pdf.response.schema.json (AMENDMENT 3),
+      and paths under org/missions/D9/IRPT/IRPT_ANLREQ/; no other path under docs/;
   (2) ops/pdf_link.py changes at module level ONLY the FAMILIES tuple (by exactly one added family, YCHARTS_OPAL_REPORT)
       and what the destination check needs: the new FAMILY_REVISION constant and the _default_destination function.
       Every other top-level statement of the module is unchanged (compared by AST, so comments do not count);
-  (3) routes.json changes ONLY by ADDING one route row: removing the added row leaves the base file's routes list, and
-      every top-level key other than "routes" is unchanged.
+  (3) routes.json changes ONLY by ADDING one route row (AMENDMENT 3: and by raising the `_denominator` `declared` and
+      `total` counts by one each; every other `_denominator` key is unchanged): removing the added row leaves the base
+      file's routes list, and every top-level key other than "routes" and "_denominator" is unchanged.
 ASCII only. The repository root is derived from this file's location.
 """
 import ast
@@ -22,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[7]  # deliverables/<serial> -> IRPT_ANLR
 RECORD = Path(__file__).resolve().parent / "r41" / "COMMENTARY_PDF_ROUTE_RECORD.json"
 ALLOWED = ("infra/aws/lambda/investor-reporting/", "org/missions/D9/IRPT/IRPT_ANLREQ/")
 ROUTES = "docs/contracts/investor-reporting/v1/routes.json"
+RESPONSE = "docs/contracts/investor-reporting/v1/responses/analysis-request-commentary-pdf.response.schema.json"
 PDF_LINK = "infra/aws/lambda/investor-reporting/ops/pdf_link.py"
 ADDED_FAMILY = "YCHARTS_OPAL_REPORT"
 # The only top-level names of pdf_link.py that may differ between the base and HEAD: the families tuple, the family-to-
@@ -113,10 +117,25 @@ def check_routes(base):
         return "routes.json unreadable: %s" % exc
     keys = set(base_doc) | set(head_doc)
     for key in sorted(keys):
-        if key == "routes":
+        if key in ("routes", "_denominator"):
             continue
         if base_doc.get(key) != head_doc.get(key):
             return "routes.json top-level key %r changed; the grant is one added route row and nothing else" % key
+    # AMENDMENT 3: the `_denominator` counts `declared` and `total` rise by one each; every other key is unchanged.
+    base_den, head_den = base_doc.get("_denominator"), head_doc.get("_denominator")
+    if not isinstance(base_den, dict) or not isinstance(head_den, dict):
+        return "routes.json _denominator is absent or not an object at the base or at HEAD"
+    if set(base_den) != set(head_den):
+        return "routes.json _denominator changes its key set; the grant raises declared and total only"
+    for key in sorted(base_den):
+        if key in ("declared", "total"):
+            continue
+        if base_den[key] != head_den[key]:
+            return "routes.json _denominator.%s changed; the grant raises declared and total only" % key
+    for key in ("declared", "total"):
+        if head_den[key] != base_den[key] + 1:
+            return "routes.json _denominator.%s is %r at HEAD against %r at the base; the grant raises it by one" % (
+                key, head_den[key], base_den[key])
     base_rows, head_rows = base_doc["routes"], head_doc["routes"]
     added = [r for r in head_rows if r not in base_rows]
     if len(head_rows) != len(base_rows) + 1 or len(added) != 1:
@@ -149,10 +168,12 @@ def main():
     if not paths:
         print("SCOPE-BAD no path changed between the base and HEAD")
         return 1
-    outside = [p for p in paths if not (p.startswith(ALLOWED) or p == ROUTES)]
+    outside = [p for p in paths if not (p.startswith(ALLOWED) or p in (ROUTES, RESPONSE))]
     if outside:
         print("SCOPE-BAD %d path(s) outside the granted trees: %s" % (len(outside), "; ".join(outside)))
         return 1
+    if RESPONSE in paths:
+        print("response schema: the one new file %s" % RESPONSE)
     if PDF_LINK in paths:
         why = check_pdf_link(base)
         if why:
@@ -164,7 +185,8 @@ def main():
         if why:
             print("SCOPE-BAD routes.json: " + why)
             return 1
-        print("routes.json: one added row, %s; no other row or key changed" % ROUTE_KEY)
+        print("routes.json: one added row, %s; _denominator declared and total +1 each; no other row or key changed"
+              % ROUTE_KEY)
     print("SCOPE-OK %d paths, all under the granted trees; the widening and the route row are the only non-test changes"
           % len(paths))
     return 0
