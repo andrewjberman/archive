@@ -1,0 +1,45 @@
+# HVST-bz-10 section 2 -- THE STOP, by the runner's OWN stop file. NOTHING WAS KILLED.
+# by 0.7.0_AE_CloudOps~ZW on site Z, written 2026-10-13T23:57:25Z
+
+## (i) the stop-file path, READ from the task's own --stop-file argument, never typed from memory
+C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa\.runtime\harvest-cycle\STOP
+created at 2026-10-13T23:51:41Z (CreationTimeUtc read off the file itself, 0 bytes)
+DEVIATION, RECORDED: its PARENT DIRECTORY did not exist. '.runtime' was present under the old pin but
+'.runtime\harvest-cycle' was not, so a plain New-Item FAILED (DirectoryNotFoundException) and I created the
+directory first. The runner polls the path with Path(stop_file).exists() (cycle_runner.py:297 at the RUNNING
+pin), so an existence poll is all it needs -- but until this act the baked stop-file path named a directory
+that was never created, i.e. the graceful-stop mechanism had no place to put its file. Row filed.
+
+## (ii) the cycle ended on its own at a JOB boundary and wrote its record
+record: <state>/cycles/bbg/20261013T185816Z.cycle.json
+  publisher   bbg
+  cycle_id    20261013T185816Z
+  started_at  2026-10-13T18:58:16Z
+  ended_at    2026-10-13T23:53:59Z
+  stopped     stopped_by_operator
+  completed   False
+  asked 242 new 0 already_held 2 failed 0
+
+the runner's own log lines, verbatim:
+  8698:2026-10-13T23:53:59Z STOP-FILE C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa\.runtime\harvest-cycle\STOP present: ending after the current job (108 pairs done)
+  8811:2026-10-13T23:53:59Z CYCLE bbg 20261013T185816Z floor 2026-10-12 asked 242 new 0 held 2 failed 0 stopped stopped_by_operator completed false
+  8812:2026-10-13T23:53:59Z STOP-FILE C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa\.runtime\harvest-cycle\STOP present: no further cycle
+
+  108 pairs were done when the stop was seen, and the job in flight was allowed to finish:
+  ZERO PAIRS LOST, which is the whole reason the stop is a file and not a kill.
+  NOTE on the instrument: the first attempt at the field read above passed an MSYS /c/... path to native
+  Python, which cannot resolve it (FileNotFoundError on a file that demonstrably exists). Re-run with the
+  Windows path. A reader who saw only that traceback would have concluded the record was absent.
+
+## (iii) C-g -- THE STOP FILE IS DELETED, before any Start-ScheduledTask
+The new pin keeps the OLD runtime root, so the same STOP file would have ended the new runner at once.
+  path          C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa\.runtime\harvest-cycle\STOP
+  Test-Path BEFORE delete  True
+  deleted at               2026-10-13T23:58:06Z
+  Test-Path AFTER delete   False
+  (the parent directory I had to create is left in place, empty)
+
+## the runner exited on its OWN, measured rather than assumed
+  processes matching cycle_runner|backfill_driver, over ALL exes: 0
+  scheduled task state: Ready
+  No kill, no Stop-Process, no key sent to any window at any point in this act.

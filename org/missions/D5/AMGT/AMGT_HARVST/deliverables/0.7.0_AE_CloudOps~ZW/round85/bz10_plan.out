@@ -1,0 +1,30 @@
+# HVST-bz-10 step 5 -- the installer PLAN, read before registering
+# by 0.7.0_AE_CloudOps~ZW on site Z, 2026-10-14T00:06:09Z
+# invocation (LITERAL, as the order names it, with -Plan):
+#   powershell -NoProfile -ExecutionPolicy Bypass -File "<new>\lib\opal_data_harvest\install-cycle-schedule.ps1" -RepoRoot "<new>" -Publishers bbg,wsj,barrons -StateDir "<state>" -RuntimeRoot "<runtime>" -Windowless -RefreshOnce -Plan
+# ---- output ----
+TASK Opal Data Harvest - Continuous Cycle
+TRIGGER AtLogOn Opal_Bloomberg\Opal Bloomberg
+ACTION C:\Program Files\Python314\pythonw.exe -m lib.opal_data_harvest.cycle_runner --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --runtime-root "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-3d88eccbc3\.runtime\harvest-cycle\STOP" --publishers bbg wsj barrons --refresh-once
+WORKDIR C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-3d88eccbc3
+TIMELIMIT PT0S
+MULTIPLE IgnoreNew
+RESTART 3 PT5M
+REGISTERED NOTHING (plan)
+
+# ---- the plan GRADED against the order's five named reads (each a predicate, not an eyeball) ----
+  interpreter ends pythonw.exe            : True
+  arguments contain --refresh-once        : True
+  --state-dir is <state> (c1be67f53c)     : True
+  WORKDIR is <new> (3d88eccbc3)           : True
+  publishers are bbg wsj barrons          : True
+  NEGATIVE CONTROL on the same predicates : True (a flag that is NOT there reads False, so these are tests and not constants)
+  REGISTERED NOTHING (plan)               : True
+
+# NOTED, and it changes C-g's reasoning rather than its act: the installer derives the stop-file path
+# from -RepoRoot, not from the runtime root, so the NEW task's --stop-file is
+#   C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-3d88eccbc3\.runtime\harvest-cycle\STOP
+# which is a DIFFERENT path from the one this act used to stop the old runner. C-g feared the old STOP
+# file would end the new runner at once; on this installer it would not, because the new runner watches
+# its own pin's path. The old file was deleted anyway, as C-g requires, and that deletion is recorded in
+# bz10_stopped.out. The same latent defect carries forward: that new directory does not exist yet either.
