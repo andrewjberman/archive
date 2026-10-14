@@ -23,7 +23,13 @@ HOUSEHOLD RULE (the rule the checker recomputes): among the households of the ad
 accounts, the one whose sha256 of its household id (utf-8, hex digest) sorts lowest. The household id is the Orion
 clientId the adapter keys on. The account set is the adapter's account_dim membership of that household.
 
-AS OF: the newest fact_positions partition. Every row of it carries that asOfDate (checked, else the build stops).
+AS OF: the newest fact_positions partition on or before the last date of the served model series (T-1: the report never
+reads the open day; amendment W173-S4). Every row of that partition carries its asOfDate (checked, else the build stops).
+The account universe is the adapter's account_dim built from the newest fact_positions and fact_assets partitions (the
+basis the checker's dry run uses); the values are read at as_of from the as_of partition.
+
+HOUSEHOLD RETURN: every household-grain return (pvs.<w>.return_cumulative, hold.return_<w>) stays absent NO_SOURCE_YET as
+the contract sources it (amendment W173-S1); Orion's client-keyed performance is not used to fill them this round.
 
 ACCOUNT IDENTITY: account_id is the adapter's account key (the Orion account id that account_dim carries). last4 is the
 last four characters of the custodian account number carried on the account's fact_positions rows.
@@ -368,13 +374,29 @@ def main(repo, out):
     reader = adapter.InflectionSilverReader()
     counts = {"firm": "inflection", "contract_version": contract["contract_version"], "members_in_contract": len(members)}
 
-    # 1. the as-of: the newest fact_positions partition; the account universe: the adapter's account_dim
-    pos_part, pos = reader.latest_partition(ORION_SILVER + "fact_positions")
+    # 0. the served model series first (one GET). Its last date bounds the as-of: the report is T-1 (amendment W173-S4)
+    series, claim = mod.read_served_series(ServedGet(reader, mod.SERVED_BUCKET, mod.SERVED_KEY))
+    bench_last = str(claim["data_as_of"])
+    # 1. the account universe: the adapter's account_dim from the NEWEST partitions (the basis of the dry run the
+    #    checker recomputes the household from). The as-of: the newest fact_positions partition on or before bench_last.
+    pos_parts = reader.list_partitions(ORION_SILVER + "fact_positions")
+    pos_part = pos_parts[-1]
+    pos = reader.read_parquet(ORION_SILVER + "fact_positions/" + pos_part + "/data.parquet")
     asset_part, assets = reader.latest_partition(ORION_SILVER + "fact_assets")
-    as_of_iso = pos_part[len("date="):]
+    eligible = [p for p in pos_parts if p[len("date="):] <= bench_last]
+    if not eligible:
+        raise SystemExit("ERROR: no fact_positions partition on or before the served series' last date")
+    as_of_part = eligible[-1]
+    as_of_iso = as_of_part[len("date="):]
     R = dt.date.fromisoformat(as_of_iso)
-    if set(str(x) for x in pos["asOfDate"].tolist()) != {as_of_iso}:
+    if as_of_part == pos_part:
+        asof_pos = pos
+    else:
+        asof_pos = reader.read_parquet(ORION_SILVER + "fact_positions/" + as_of_part + "/data.parquet")
+    if set(str(x) for x in asof_pos["asOfDate"].tolist()) != {as_of_iso}:
         raise SystemExit("ERROR: fact_positions asOfDate does not equal its partition date %s" % as_of_iso)
+    counts["benchmark_data_as_of"] = bench_last
+    counts["as_of_partition_is_newest"] = (as_of_part == pos_part)
     dim_rows = adapter.build_account_dim(pos, assets).to_pylist()
     counts["account_dim_rows"] = len(dim_rows)
     counts["account_dim_households"] = len({r["household_id"] for r in dim_rows if r["household_id"]})
@@ -395,8 +417,7 @@ def main(repo, out):
     mv, mv_null, rows_n, last4, created = {}, {}, {}, {}, {}
     for a in accounts:
         mv[a], mv_null[a], rows_n[a] = 0.0, 0, 0
-    for aid, val, num, cd in zip(pos["accountId"].tolist(), pos["currentValue"].tolist(),
-                                 pos["accountNumber"].tolist(), pos["createdDate"].tolist()):
+    for aid, val in zip(asof_pos["accountId"].tolist(), asof_pos["currentValue"].tolist()):
         a = clean_text(adapter, aid)
         if a not in aset:
             continue
@@ -405,14 +426,22 @@ def main(repo, out):
             mv_null[a] += 1
         else:
             mv[a] += float(val)
+    for a in accounts:
+        if rows_n[a] == 0:
+            mv_null[a] += 1   # no position row on as_of: the value is absent, never a zero
+    # the custodian last four and the creation dates come from the newest partition (the account universe's basis)
+    for aid, num, cd in zip(pos["accountId"].tolist(), pos["accountNumber"].tolist(), pos["createdDate"].tolist()):
+        a = clean_text(adapter, aid)
+        if a not in aset:
+            continue
         n = clean_text(adapter, num)
         if n and a not in last4:
             last4[a] = n[-4:]
         c = clean_text(adapter, cd)
         if c and DATE_RX.fullmatch(c[:10]) and (a not in created or c[:10] < created[a]):
             created[a] = c[:10]
-    counts["positions_rows_household"] = sum(rows_n.values())
-    counts["account_positions_rows"] = {a: rows_n[a] for a in accounts}
+    counts["positions_rows_household_as_of"] = sum(rows_n.values())
+    counts["account_positions_rows_as_of"] = {a: rows_n[a] for a in accounts}
     missing_last4 = [a for a in accounts if a not in last4]
     if missing_last4:
         raise SystemExit("ERROR: %d account(s) carry no custodian account number on positions" % len(missing_last4))
@@ -469,9 +498,9 @@ def main(repo, out):
             STATUS[a][name] = "NOT_SPANNED" if dt.date.fromisoformat(first[a]) > anchor[name] else "BREAK"
         STATUS[a]["since_inception"] = "BREAK"
 
-    # 6. the served model series (one GET) and its windows
-    series, claim = mod.read_served_series(ServedGet(reader, mod.SERVED_BUCKET, mod.SERVED_KEY))
+    # 6. the served model series (read in step 0) and its windows
     model_windows = mod.windows_from_series(series, R, hh_first)
+    counts["orion_client_series_through"] = max(perf_dates) if perf_dates else None
     counts["model_series_trading_days"] = {s: len(v) for s, v in sorted(series.items())}
     counts["model_source"] = claim
 
