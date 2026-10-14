@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-186",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fdc37a0f92"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "fdc37a0f92",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-186.cash-ticker-lots-class-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~151",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~151/CASH_LOTS_CLASS_READ.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~151/CASH_LOTS_CLASS_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "1eb0f9699e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read record: lots counts, canonical row, gold classifier answer, two served-page entries, special case, words and recommendation. No deploy, no push, no AWS write (reads block: 0 writes, 0 vendor calls, 0 secret reads). Counts and words only.",
+      "artifact_covered_by": [
+        "DB100-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1eb0f9699e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended as bytes (IRPT_DASHBD-D2-W151-S1..S3); surprise-row-gate OK on the 3 new rows of 338 checked. The gate's one-writer WARN for the unsuffixed file is recorded, not suppressed.",
+      "artifact_covered_by": [
+        "DB100-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB100-1-AC1",
+      "criterion_verbatim": "DB100-1-AC1 -- the record reads the 2026-10-09 snapshot at 1,314,777 rows with 11 lots whose ticker is CASH (the issuer's own anchor), counts accounts, open and closed lots and the lots meeting the Investor Reporting special case; states the canonical row (exists or not) and where it was read; states what the gold classifier returns; holds one entry for each of the two pages, each established or NOT_ESTABLISHED with a reason; says in words what each page shows and gives a recommendation; no write, deploy or push; no run of 8 or more digits. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r100/p100_round100.py\" . DB100-1-AC1",
+      "output_evidence": "OK: 11 cash-stem lots in 4 accounts read; canonical row exists: true; IR page served class NOT_ESTABLISHED\nDB100-1-AC1 PASS",
+      "denominator": "11 CASH-ticker lots of 1,314,777 snapshot rows (2026-10-09); 4 accounts; 2 served pages; 9 record keys checked by the criterion",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Read-only order with no mutable artifact to perturb: the criterion's own checker is the only instrument; a mutated record (a removed page entry) is the discriminating case, not run here.",
+      "expected": "N/A: the spec names no mutable behaviour; the checker's structural limbs are exercised by the criterion itself",
+      "observed": "N/A: no mutant run; the record was graded once against the checker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the lot count read (python -I, pyarrow) run twice on the same downloaded snapshot bytes, output byte-compared",
+      "observed": "the two runs' output is IDENTICAL (rows 1314777, cash-stem lots 11, accounts 4, open 7, closed 4, description-cash 0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any deploy, push, AWS write, vendor call or secret read",
+      "reason": "The order is a read: nothing is changed, deployed or written."
+    },
+    {
+      "item": "Investor Reporting published-object served class",
+      "reason": "The accepted publication's unscoped load refused at the reader's own request-count bound; the scoped read needs an account scope the order does not name (IRPT_DASHBD-D2-W151-S1). Reported NOT_ESTABLISHED with the reason."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W151-S1: the accepted holdings publication cannot be read in full under the box identity; the reader refuses the unscoped load at its request-count bound before any node is read, so the Investor Reporting served class is NOT_ESTABLISHED.",
+    "IRPT_DASHBD-D2-W151-S2: the canonical table holds a CASH_USD row typed Cash (fixed_income), which the gold classifier's CASH_USD override never reads.",
+    "IRPT_DASHBD-D2-W151-S3: no Advisor Intelligence served positions file carries a CASH position (0 of 4,315), so the page shows no line for the 11 CASH lots."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -I (pyarrow)",
+      "invocation": "python -I .scratch/read_lots.py .scratch/lots_2026-10-09.parquet",
+      "result": "rows 1314777; cash-stem ticker lots 11; accounts 4; open 7; closed 4; description-cash 0; run twice, identical"
+    },
+    {
+      "tool": "aws dynamodb get-item (box identity, read-only)",
+      "invocation": ".tools/aws dynamodb get-item --table-name etf-classifications --region us-east-1 --key {ticker: CASH} and key CASH_USD",
+      "result": "CASH exists (cash / Cash); CASH_USD exists (fixed_income / Cash)"
+    },
+    {
+      "tool": "python -I ETFClassifier with stub client",
+      "invocation": "python -I .scratch/gold_classify.py <get-item output>",
+      "result": "classify CASH = cash; classify_with_identity CASH = cash (canonical row)"
+    },
+    {
+      "tool": "python -I boto3 GET (Advisor Intelligence positions)",
+      "invocation": "S3 LIST of opal-data-49financial advi/49financial/platinum/advisors/ then GET of each folder positions.json",
+      "result": "194 folders, 189 read, 4,315 positions, 0 with ticker CASH"
+    },
+    {
+      "tool": "python -I HoldingsPublication.load (Investor Reporting, GET only)",
+      "invocation": "load() under the box identity",
+      "result": "refused at publication.py line 445 (selected publication request count exceeds bound); no node read"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> DB100-1-AC1",
+      "result": "see the flip commit"
+    }
+  ]
+}
