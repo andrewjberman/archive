@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 
-PRE_CODE = "nX67q2k05fh77lG2gBLsNlp6HLAZeELPq85CJpWCVhA="
+PRE_CODE = "/amW90t7TNsAAcx8Ap0t/eD7Jgk1HAOXJHCv8t8Mkho="   # the CA-j-10 package: an environment-only change leaves the code hash where it is
 FUNCS = ["teams-global-chat-assist-handler-lambda", "teams-global-chat-assist-ingress-lambda"]
 SECRET = "teams/global/ingress-mark"
 DELLS = ["cloudops-dell1-agent-user", "cloudops-dell2-agent-user"]
