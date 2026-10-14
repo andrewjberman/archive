@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-306",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R36A_Y.md",
+    "vintage_commit": "977117d37a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-306.ordinary-viewer-authorizer.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-306.ordinary-viewer-authorizer.md",
+    "group": "OTHER",
+    "vintage_commit": "977117d37a"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~120",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/ordinary_viewer.py",
+      "kind": "script",
+      "commit_or_etag": "c861f0b78b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit c861f0b78b on wk-IRPT_ANLREQ-120 only; not pushed, not uploaded, not packaged, not deployed. commit-gate.sh clean (py_compile, ds-precommit, ruff py39). ASCII only. The producer: a factory over injected readers returning (request, principal, owner) -> bool, True only on the four CTO conditions.",
+      "artifact_covered_by": [
+        "AR306-y-AC1",
+        "AR306-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/tests/test_ordinary_viewer.py",
+      "kind": "test",
+      "commit_or_etag": "c861f0b78b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit c861f0b78b. 35 cases, all pass (python -m pytest <file> -q: 35 passed, rc 0). On fakes: the real CanonicalProfileReaders over a recording fake DynamoDB client, the real InteractiveAccess, trusted_only and classify_principal. No AWS call.",
+      "artifact_covered_by": [
+        "AR306-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/generate_installed.py",
+      "kind": "script",
+      "commit_or_etag": "c861f0b78b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit c861f0b78b. The wiring: _ordinary_authorizer_over(readers) at :139-144 and the ports entry ordinary_authorizer at :345 (was None). 10 insertions, 1 deletion. This wiring turns two existing assertions in reports/tests/test_generate_installed.py red (surprise row IRPT_ANLREQ-D2-W120-S1).",
+      "artifact_covered_by": [
+        "AR306-y-AC1",
+        "AR306-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~120/r36/ORDINARY_AUTHORIZER.json",
+      "kind": "doc",
+      "commit_or_etag": "c861f0b78b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record: read (file:line), rule (four conditions with the code line for each), principal_shape, wiring, iam_needs (the generate role already holds the three reads for the three enabled client firms; no IAM change), tests, before_arm (collection error at HEAD), authorization_change (one paragraph), release_needs (N = 3 map entries carry generate_installed.py), claim, not_read.",
+      "artifact_covered_by": [
+        "AR306-y-AC1",
+        "AR306-y-AC2J"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR306-y-AC1",
+      "criterion_verbatim": "the record states the four-condition rule with the code line that tests each, the principal shape, the wiring, what the Lambda role holds for the two tables, a new test file with at least 14 passing tests whose admitted case fails at HEAD, the existing generate_installed tests passing unedited, and the one-paragraph authorization change.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-120/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y306-ordinary --root C:/dev/wk-irpt-anlreq-120",
+      "output_evidence": "_scope/tests/test_ordinary_viewer.py: 35 passed, 0 failed (rc=0)\nreports/tests/test_generate_installed.py: 11 passed, 2 failed (rc=1)\nFAIL: reports/tests/test_generate_installed.py must pass with at least 1 tests\nY306-ORDINARY-FAIL\n(exit rc=1; two runs byte-identical). The record-side checks (every member present, authorization_change non-empty, before_arm non-zero) passed: no FAIL line names them.",
+      "denominator": "2 of 2 named test files run; 35 of 35 new cases pass (floor 14); 11 of 13 generate_installed cases pass; the 2 failing cases are test_generate_installed.py:83 and :212, both outside the grant and not edited; the record has 11 of 11 required members",
+      "status": "FAIL",
+      "status_reason": "The new module, the new tests and the record all pass the check. The existing reports/tests/test_generate_installed.py has 2 failing assertions (:83 absent_producers, :212 factory stub) that the wiring necessarily flips; the criterion requires those tests to pass unedited, and the file is outside the grant. Surprise row IRPT_ANLREQ-D2-W120-S1 (BLOCKING). The order stays open until the issuer amends the grant or the pins.",
+      "expect": "Y306-ORDINARY-OK"
+    },
+    {
+      "criterion_id": "AR306-y-AC2J",
+      "criterion_verbatim": "the producer admits only on all four conditions, takes the firm from the verified headers and never from a body or query, fails closed on every exception and every missing or malformed field, leaves the Opal path unchanged, writes nothing, is wired only over readers the Lambda already holds, and states honestly who gains upload.",
+      "method": "manual_read_with_citation",
+      "invocation": "read infra/aws/lambda/investor-reporting/_scope/ordinary_viewer.py (:60-102 _admit, :105-120 the factory) against the record's rule and authorization_change blocks; the wiring diff git show c861f0b78b -- infra/aws/lambda/investor-reporting/reports/generate_installed.py; the spy test test_no_write_operation_is_called_on_any_path_and_the_module_has_no_write_name",
+      "output_evidence": "Four conditions: :64-65 class in {FIRM_ADVISOR, FIRM_OPERATIONS}; :73-76 firm equality across principal, owner and owner principal; :78-84 the verified token firm, email and re-derived class; :86-88 ACTIVE status exact; :90-92 allowedFirmIds contains the firm; :94-101 partner row for the subject and firm; :102 True. Fail closed: :114-118 every exception returns False. Opal: :64-65 refuses OPAL_GLOBAL, never consulted. Writes: the module touches request.headers only and calls only the two injected readers. Wiring: the two readers already composed as get_user and get_partner_profile. Who gains upload: stated in the record's authorization_change paragraph, with the analysis-route reach named (surprise row IRPT_ANLREQ-D2-W120-S2).",
+      "denominator": "4 of 4 conditions with a line; 35 of 35 new cases pass; the refusal classes named in the record's authorization_change are each exercised by at least one case; the module makes 0 write calls on any tested path (the spy records every DynamoDB operation)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the grade belongs to 3.0.0_SA_CVO at L9 and is not graded here; this row carries the output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy under .scratch/mutant (HEAD plus the worktree's three files) with the ALL refusal of _allowed_firms (ordinary_viewer.py:53-54) replaced by a no-op (if False:), so [ALL, 49financial] would admit; the new test file run against that copy.",
+      "expected": "at least one case FAILS, because the allowedFirmIds ALL arm is a tested refusal",
+      "observed": "1 failed, 34 passed. FAILED test_allowed_firms_absent_empty_all_or_not_naming_the_firm_is_refused[allowed4] (the case [ALL, 49financial]).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 checker (ar21_checks.py y306-ordinary), stdout compared with cmp; and the new test file run twice",
+      "observed": "the checker output is byte-identical on both runs (rc 1 both); the new test file 35 passed on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live Lambda configuration, the deployed irpt-ycharts-generate role policy and the deployed artifact",
+      "reason": "no AWS call in this order; the IAM verdict is from the Terraform source (generate.tf:194-246) only"
+    },
+    {
+      "item": "the live opal-users-v2 rows and the live opal-partner-<firm> rows",
+      "reason": "no live read; every read in the tests is a fake"
+    },
+    {
+      "item": "the edge's header verification at runtime",
+      "reason": "not observed; the producer relies on the verified-header contract resolve.py TRUSTED_HEADERS already encodes"
+    },
+    {
+      "item": "reports/tests/test_generate_installed.py :83 and :212, and the release map and the IAM Terraform",
+      "reason": "outside the grant; the two assertions are reported by IRPT_ANLREQ-D2-W120-S1 and not edited; no release map or Terraform change is made"
+    },
+    {
+      "item": "the portal, DEV and PROD bundles",
+      "reason": "not touched; the order names no portal path"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W120-S1: the wiring at generate_installed.py :345 turns two existing assertions in reports/tests/test_generate_installed.py red (:83 absent_producers and :212 the factory stub); outside the grant, not edited (BLOCKING, INERT)",
+    "IRPT_ANLREQ-D2-W120-S2: the same ports entry also admits a non-Opal viewer to the owned-input analysis route through prospect_submission.py:55-56; the ruling named the upload door only (BLOCKING, INERT)",
+    "IRPT_ANLREQ-D2-W120-S3: _scope/tests does not pass at HEAD f416810d9a: test_resolve.py test_every_trusted_header_is_actually_injected_at_the_line_it_claims fails before any change of mine (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AR306-y-AC1,AR306-y-AC2J",
+      "result": "run after the instance commit; see the worker report"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "via safe-commit.sh, on the investigation file",
+      "result": "OK: 3 new row(s) of 473 total checked"
+    },
+    {
+      "tool": "session log (checks and runs)",
+      "invocation": "the runs listed in this instance: the y306-ordinary checker twice, pytest on the three targets, HEAD controls under .scratch/before_arm, the mutant under .scratch/mutant, commit-gate on each .py",
+      "result": "Y306-ORDINARY-FAIL rc 1 (two identical runs); new file 35 passed; _scope/tests 268 passed 1 failed (S3); generate_installed 11 passed 2 failed (S1); HEAD control new file collection error rc 2; HEAD generate_installed 13 passed; mutant 1 failed 34 passed"
+    }
+  ]
+}
