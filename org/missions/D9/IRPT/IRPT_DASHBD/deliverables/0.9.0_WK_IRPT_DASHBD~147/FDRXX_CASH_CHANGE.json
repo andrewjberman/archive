@@ -1,0 +1,71 @@
+{
+  "rule": {
+    "keyed_on": "sub_asset_class",
+    "cash_asset_class_value": "cash",
+    "ticker_list_used": false
+  },
+  "vocabulary": {
+    "asset_class_values_in_table": {
+      "equity": 7152,
+      "fixed_income": 2900,
+      "structured": 527,
+      "cash": 381,
+      "alternatives": 239,
+      "commodities": 162
+    },
+    "sub_asset_class_spellings": {
+      "Cash": 365
+    }
+  },
+  "canonical_rows": {
+    "total": 11361,
+    "sub_asset_class_cash": 365,
+    "cash_rows_already_cash_class": 348,
+    "would_move": 17
+  },
+  "fdrxx_in_would_move": true,
+  "served_holdings": {
+    "stores_read": [
+      "opal-data-49financial advi/49financial/platinum/advisors/{id}/positions.json (served per-advisor positions, S3 LIST and GET)",
+      "opal-data-bd gold/timeseries/holdings_lots/ newest snapshot (S3 LIST and GET; source of the accounts count only, not the served store)"
+    ],
+    "positions_scanned": 4315,
+    "positions_that_move": 20,
+    "per_firm": {
+      "49financial": 20
+    },
+    "accounts_with_a_moving_position": 178
+  },
+  "consumers": [
+    "gold D_03 composition_artifacts: asset_class per holding into the platinum composition artifacts",
+    "gold D_04 client_portal_summary: asset_class per position into platinum/advisors/{id}/positions.json, and the mix by asset_class into platinum/accounts/{id}/summary.json",
+    "gold C_06 client_mix_timeseries: classify_holding into the client mix timeseries",
+    "gold E_18 detect_new_securities and E_25 aua_decomposition_audit: read the classifier class (audit readers)",
+    "silver build_bd_assets_dim: canonical class per asset",
+    "served keys carrying the class (D_04 I/O manifest): platinum/firm/mix_summary.json, platinum/firm/dashboard.json, platinum/advisors/{id}/mix.json, platinum/clients/{id}/composition.json, platinum/firm/header_metrics.json",
+    "portal components reading those keys (D_04 I/O manifest): AdvisorBookView, ClientsTab, DistributionTab, AdvisorPublicProfile, AdvisorAnalytics, PartnerAnalytics, AdvisorsTab"
+  ],
+  "code": {
+    "file": "data/black_diamond/scripts/gold/lib/etf_classifier.py",
+    "sha256": "e7385264668e9bf746aeab809c8ff0a869f9091685f86751b1679dfc6ddd81ba",
+    "tracked": true
+  },
+  "test": {
+    "file": "data/black_diamond/scripts/gold/tests/test_etf_classifier_cash_type.py",
+    "mutant_failed": true,
+    "passed": 7,
+    "failed": 0
+  },
+  "unchanged_rows_still_verbatim": true,
+  "cash_usd_special_case": "unchanged",
+  "reads": {
+    "dynamodb_writes": 0,
+    "s3_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "deployed": false,
+  "pushed": false,
+  "served_values_changed": false,
+  "limits": "Read on 2026-10-13. Canonical counts are over the full table scan (3 pages, projection of ticker, asset_class, sub_asset_class). Served counts cover only the advisor positions files: each file is limited to the top 25 positions per advisor, so positions_that_move is a floor for the served store, and partitions or files beyond the listing were not read (the store is not date-partitioned). The served positions carry no account key; accounts_with_a_moving_position is taken from the newest holdings_lots snapshot (the gold input), not from the served store, and counts accounts holding an open lot on a would-move ticker. The 17 would-move rows are canonical rows typed Cash with a non-cash class; none of the 17 would-move rows is a NAME:: or CUSIP: key (0 of 17), so the count is over ticker keys only. The IR page binding is named by the D_04 manifest components, not traced to a route in this record. The CASH_USD special case is unchanged and still serves fixed_income for a synthetic cash position; it is a surprise row, not a change here. The test count is the new file's 7 tests; the existing classifier tests (30) and the consumer tests (71) also pass after the change."
+}

@@ -143,6 +143,51 @@ def main():
         return contract.validate_block(block) == [] and block["source_class"] == "NONE" and "overlay" not in block["reason"].lower(), block.get("reason")
     arms.run("description: the overlay body missing -> NONE (cannot tell whether the header has one)", desc_overlay_missing)
 
+    # ---------------------------------------------------------------- AMENDMENT 2
+    def team_long_cut():
+        long_text = " ".join(["Management has a record of disciplined capital allocation and steady execution." for _ in range(20)])
+        block = T.build_block(L.ctx(pack_none(), L.StubModel(L.result(long_text, citations=[L.web_cite()], web_search_requests=1))))
+        text = block["text"] or ""
+        return block["source_class"] == "WEB_SEARCH" and 0 < len(text) <= 800 and text.endswith(".") and long_text.startswith(text), (block["source_class"], len(text), block.get("reason"))
+    arms.run("team_view: a reply over the 800-character cap is cut at the last sentence end", team_long_cut)
+
+    def pillars_long_cut():
+        long_text = "\n".join(["Demand for the company's flagship products keeps growing at a steady pace." for _ in range(20)])
+        inputs = pillars_none()
+        for s in inputs["thesis"]["drafted_sections"]:
+            s["sentences"] = []
+        block = P.build_block(L.ctx(inputs, L.StubModel(L.result(long_text, citations=[L.web_cite()], web_search_requests=1))))
+        text = block["text"] or ""
+        return block["source_class"] == "WEB_SEARCH" and 0 < len(text) <= 1000 and text.endswith(".") and long_text.startswith(text), (block["source_class"], len(text), block.get("reason"))
+    arms.run("pillars: a reply over the 1000-character cap is cut at the last sentence end", pillars_long_cut)
+
+    def pillars_falls_to_web():
+        m = L.StubModel(L.result("NO_INFORMATION"), L.result("Pillar one. Pillar two.", citations=[L.web_cite()], web_search_requests=1))
+        block = P.build_block(L.ctx(pillars_none(), m))
+        return block["source_class"] == "WEB_SEARCH" and len(m.calls) == 2 and m.calls[0]["web_search_max_uses"] == 0 and m.calls[1]["web_search_max_uses"] >= 1, (block["source_class"], len(m.calls), block.get("reason"))
+    arms.run("pillars: an Opal path that finds nothing falls through to the web path", pillars_falls_to_web)
+
+    def desc_falls_to_web():
+        inputs = desc_none()
+        inputs["thesis"]["drafted_sections"][0]["sentences"] = [{"text": "ASML develops and sells lithography systems for chipmakers.", "evidence": [{"id": "P0001", "location": None, "accession": None}]}]
+        m = L.StubModel(L.result("NO_INFORMATION"), L.result("ASML makes lithography machines for chip manufacturing.", citations=[L.web_cite()], web_search_requests=1))
+        block = D.build_block(L.ctx(inputs, m))
+        return block["source_class"] == "WEB_SEARCH" and len(m.calls) == 2 and m.calls[1]["web_search_max_uses"] >= 1, (block["source_class"], len(m.calls), block.get("reason"))
+    arms.run("description: an Opal path that finds nothing falls through to the web path", desc_falls_to_web)
+
+    def prompts_state_limits():
+        mt = L.StubModel(L.result("Text.", citations=[L.web_cite()], web_search_requests=1))
+        T.build_block(L.ctx(pack_none(), mt))
+        inputs = pillars_none()
+        for s in inputs["thesis"]["drafted_sections"]:
+            s["sentences"] = []
+        mp = L.StubModel(L.result("Text.", citations=[L.web_cite()], web_search_requests=1))
+        P.build_block(L.ctx(inputs, mp))
+        md = L.StubModel(L.result("Text.", citations=[L.web_cite()], web_search_requests=1))
+        D.build_block(L.ctx(desc_none(), md))
+        return ("700 characters" in mt.calls[0]["prompt"] and "900 characters" in mp.calls[0]["prompt"] and "300 characters" in md.calls[0]["prompt"]), "limits missing"
+    arms.run("the prompts state the limits (team_view 700, pillars 900, description 300 characters)", prompts_state_limits)
+
     # ---------------------------------------------------------------- all three
     def all_no_citation():
         for mod, inputs in ((T, pack_none()), (P, _silent_both()), (D, desc_none())):

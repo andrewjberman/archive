@@ -99,6 +99,40 @@ def main():
         return block["source_class"] == "WEB_SEARCH", block.get("reason")
     arms.run("the 90-day window is measured from ctx.now, not the wall clock", now_is_ctx_now)
 
+    # ---- AMENDMENT 2
+    def opal_falls_to_web():
+        m = L.StubModel(L.result("NO_INFORMATION"), L.result("The company named a new chief financial officer.", citations=[L.web_cite("https://example.com/n", "News")], web_search_requests=1))
+        block = B.build_block(L.ctx(with_items(HEAD), m))
+        return (block["source_class"] == "WEB_SEARCH" and len(m.calls) == 2 and m.calls[0]["web_search_max_uses"] == 0 and m.calls[1]["web_search_max_uses"] >= 1), (block["source_class"], len(m.calls), block.get("reason"))
+    arms.run("an Opal path that finds nothing falls through to the web path", opal_falls_to_web)
+
+    def guard_falls_then_none():
+        m = L.StubModel(L.result("ASML named a new CFO and raised guidance to 45 billion."), L.result("NO_INFORMATION", citations=[L.web_cite()], web_search_requests=1))
+        block = B.build_block(L.ctx(with_items(HEAD), m))
+        return block["source_class"] == "NONE" and len(m.calls) == 2 and "figure" in block["reason"] and "_" not in block["reason"], (len(m.calls), block.get("reason"))
+    arms.run("a numeric-guard failure falls through; if the web path declines too the reason keeps 'figure'", guard_falls_then_none)
+
+    def long_text_cut():
+        long_text = " ".join(["The company announced a leadership change at the top." for _ in range(30)])
+        m = L.StubModel(L.result(long_text, citations=[L.web_cite()], web_search_requests=1))
+        block = B.build_block(L.ctx(with_items(), m))
+        text = block["text"] or ""
+        return (block["source_class"] == "WEB_SEARCH" and 0 < len(text) <= 800 and text.endswith(".") and long_text.startswith(text)), (block["source_class"], len(text), block.get("reason"))
+    arms.run("a reply over the 800-character cap is cut at the last sentence end that fits", long_text_cut)
+
+    def long_no_sentence_end():
+        block = B.build_block(L.ctx(with_items(), L.StubModel(L.result("word " * 400, citations=[L.web_cite()], web_search_requests=1))))
+        return block["source_class"] == "NONE" and "long" in block["reason"], block.get("reason")
+    arms.run("a reply over the cap with no sentence end is withheld, naming 'long'", long_no_sentence_end)
+
+    def prompts_state_limit():
+        m = L.StubModel(L.result("Text.", citations=[L.web_cite()], web_search_requests=1))
+        B.build_block(L.ctx(with_items(), m))
+        o = L.StubModel(L.result("ASML named a new chief financial officer."))
+        B.build_block(L.ctx(with_items(HEAD), o))
+        return "700 characters" in m.calls[0]["prompt"] and "700 characters" in o.calls[0]["prompt"], m.calls[0]["prompt"][-100:]
+    arms.run("both prompts state the 700-character limit", prompts_state_limit)
+
     arms.raises("a model failure propagates", "RuntimeError", lambda: B.build_block(L.ctx(with_items(HEAD), L.StubModel(RuntimeError("down")))))
 
     def no_io_imports():

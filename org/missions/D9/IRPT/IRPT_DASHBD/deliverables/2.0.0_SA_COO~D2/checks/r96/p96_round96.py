@@ -41,7 +41,7 @@ def long_digit_runs(obj, name=""):
     hits = []
     if isinstance(obj, dict):
         for k, v in obj.items():
-            if not str(k).endswith("sha256") and str(k) not in ("commit", "portal_commit"):
+            if not str(k).endswith("sha256") and str(k) not in ("commit", "portal_commit", "path"):  # a private-folder path carries a date token (DB-b-180 row W146-S3)
                 hits += long_digit_runs(v, name + "/" + str(k))
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
