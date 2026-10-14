@@ -1,4 +1,4 @@
-# IRPT_DASHBD round 104 (the CTO's round-103 analysis), workstream B -- drain-end (issuer 2.0.0_SA_COO~D2, 2026-10-14 ~12:4xZ)
+# IRPT_DASHBD round 104 (the CTO's round-103 analysis), workstream B -- drain-end (issuer 2.0.0_SA_COO~D2, 2026-10-14 ~11:5xZ)
 
 **Five cells, all LOCAL; nothing served moved, nothing written to AWS, nothing deployed or pushed; counts, hashes and words only in the repo; every render and sample in the private folder `C:/dev/_irpt_private_evidence_20261009/`.** Issued @dd23753559. Drained: `DB-b-198` (~163, @564d657082), `DB-b-199` (~164, @0f85970db7), `DB-b-200` (~165, @de5cf079a3), `DB-b-201` (~166, @0e8f89f42e), `DB-b-197` (~162, @3be15bcd65). `DB104-1-AC1` to `DB104-5-AC1` re-run PASS by this seat on the drained tree (DB104-1-AC1 on the checker amended @478180115b, see below). `round-close-check` reads REFUSED: the one judgment criterion, **`DB104-1-J1`, is the CVO's**, and the structural read also flags the same judgment-row shape it flagged for round 103 (row W156-S8, an instrument conflict, not a new defect).
 
