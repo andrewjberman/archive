@@ -70,6 +70,12 @@ GOOD["lotproof3"] = {"claim": "measured", "legacy_bytes_equal": True, "lot_rows"
                      "folded_without_units": 192, "recount_without_units": 192, "zero_fold": "deferred_to_first_real_export",
                      "address": "s3://b/k", "address_from_builder": True, "new_columns_in_legacy": []}
 
+GOOD["replay4"] = _r13("replay2", unit_changed_rows=0, unit_map_file="U.csv", unit_withheld_rows=1, stale_threshold_trading_days=5,
+                      stale_carry_not_applied=3, stale_age_buckets={"6-10": 2, "11-60": 1}, non_estimate_stale_applied=0)
+GOOD["replay4"]["amendment"] = "R1.4"
+GOOD["packet4"] = _r13("packet2", held_unit_rows=0, touched_not_moved=4, touched_not_moved_ages={"0": 1, "6-10": 3}, stale_carry_not_applied=3)
+GOOD["packet4"]["amendment"] = "R1.4"
+
 
 def mutant(kind, why, edit):
     rec = copy.deepcopy(GOOD[kind])
@@ -78,6 +84,15 @@ def mutant(kind, why, edit):
 
 
 MUTANTS = [
+    mutant("replay4", "R1.3 offered", lambda r: r.update(amendment="R1.3")),
+    mutant("replay4", "threshold off", lambda r: r.update(stale_threshold_trading_days=7)),
+    mutant("replay4", "a stale carry applied to an observation", lambda r: r.update(non_estimate_stale_applied=2)),
+    mutant("replay4", "buckets do not sum", lambda r: r["stale_age_buckets"].update({"6-10": 5})),
+    mutant("replay4", "no stale block", lambda r: r.pop("stale_carry_not_applied")),
+    mutant("packet4", "ages do not sum", lambda r: r["touched_not_moved_ages"].update({"0": 5})),
+    mutant("packet4", "stale exceeds touched", lambda r: r.update(stale_carry_not_applied=9)),
+    mutant("packet4", "no touched count", lambda r: r.pop("touched_not_moved")),
+    mutant("packet4", "R1.3 offered", lambda r: r.update(amendment="R1.3")),
     mutant("lotproof3", "units not in key", lambda r: r.update(units_in_key=False)),
     mutant("lotproof3", "key lacks units", lambda r: r.update(lot_key=["relationship_id", "account_id", "asset_id", "open_date", "unit_cost"])),
     mutant("lotproof3", "fold differs from the recount", lambda r: r.update(recount_without_units=191)),

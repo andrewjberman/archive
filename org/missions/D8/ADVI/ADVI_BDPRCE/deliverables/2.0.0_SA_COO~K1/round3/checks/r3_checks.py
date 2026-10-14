@@ -8,6 +8,7 @@
   sentinel   --file <SENTINEL.json>      BP-c-6: the sentinel line and the Monday/Tuesday export
   offcanon   --file <OFFCANON.json>      BP-c-7: the source of the lots priced off no canonical row
   lotproof3  --file <LOT_PROOF3.json>    BP-c-5 re-seat: the v1.3 key (units), the fold without units recounted, the zero deferred
+  replay4 / packet4                      Amendment 4 (R1.4): the stale-carry rule (5 trading days), the age buckets, touched-not-moved
   ruleprobe3 / replay3 / packet3         Amendment 3 (R1.3): the same three records, plus the served-unit map and unit_changed 0
 
 Each prints one last line `<NAME> record ok ...` or `<NAME> record FAIL <why>`; exit 0 on ok. The graders prove shape,
@@ -361,8 +362,62 @@ def packet3(rec):
     return 0
 
 
+def _stale(rec, label):
+    for k in ("stale_threshold_trading_days", "stale_carry_not_applied", "stale_age_buckets", "non_estimate_stale_applied"):
+        if k not in rec:
+            return "lacks %s" % k
+    if rec["stale_threshold_trading_days"] != 5:
+        return "the stale threshold is 5 trading days (Amendment 4)"
+    if rec["non_estimate_stale_applied"] != 0:
+        return "%s non-estimated served rows took a stale carry (must be 0)" % rec["non_estimate_stale_applied"]
+    b = rec["stale_age_buckets"]
+    if not isinstance(b, dict) or sum(int(v) for v in b.values()) != int(rec["stale_carry_not_applied"]):
+        return "stale_age_buckets do not sum to stale_carry_not_applied"
+    return None
+
+
+def replay4(rec):
+    rc, out = _quiet(replay2, rec, "R1.4", "REPLAY4")
+    if rc:
+        print(out)
+        return rc
+    why = _units(rec, "REPLAY4") or _stale(rec, "REPLAY4")
+    if why:
+        return fail("REPLAY4", why)
+    if rec.get("unit_changed_rows") != 0:
+        return fail("REPLAY4", "unit_changed_rows must be 0: no served row may change its unit")
+    for k in ("unit_map_file", "unit_withheld_rows"):
+        if k not in rec:
+            return fail("REPLAY4", "lacks %s" % k)
+    c = rec["classes"]
+    print("REPLAY4 record ok served=%d moved=%d unchanged=%d unit_changed=0 stale_not_applied=%d deterministic=true"
+          % (rec["served_rows"], c["CHANGED"] + c["NOW_CARRY_FORWARD"], c["UNCHANGED"], int(rec["stale_carry_not_applied"])))
+    return 0
+
+
+def packet4(rec):
+    rc, out = _quiet(packet2, rec, "R1.4", "PACKET4")
+    if rc:
+        print(out)
+        return rc
+    if rec.get("held_unit_rows") != 0:
+        return fail("PACKET4", "held_unit_rows must be 0: the unit is ruled, nothing is held out")
+    for k in ("touched_not_moved", "touched_not_moved_ages", "stale_carry_not_applied"):
+        if k not in rec:
+            return fail("PACKET4", "lacks %s" % k)
+    tn = rec["touched_not_moved"]
+    ages = rec["touched_not_moved_ages"]
+    if not isinstance(tn, int) or not isinstance(ages, dict) or sum(int(v) for v in ages.values()) != tn:
+        return fail("PACKET4", "touched_not_moved_ages do not sum to touched_not_moved")
+    if int(rec["stale_carry_not_applied"]) > tn:
+        return fail("PACKET4", "stale_carry_not_applied exceeds touched_not_moved")
+    print(out.replace(" served_write=false", " touched_not_moved=%d served_write=false" % tn))
+    return 0
+
+
+
 CMDS = {"ruleprobe2": ruleprobe2, "replay2": replay2, "packet2": packet2, "ruleprobe3": ruleprobe3,
-        "replay3": replay3, "packet3": packet3, "lotproof3": lotproof3, "cap": cap, "lotproof2": lotproof2,
+        "replay3": replay3, "packet3": packet3, "lotproof3": lotproof3, "replay4": replay4, "packet4": packet4, "cap": cap, "lotproof2": lotproof2,
         "sentinel": sentinel, "offcanon": offcanon}
 
 
