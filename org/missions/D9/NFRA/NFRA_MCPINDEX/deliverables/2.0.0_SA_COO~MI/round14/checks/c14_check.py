@@ -131,6 +131,8 @@ def ac2(d, allc):
         if not (isinstance(bm, str) and len(bm.strip()) >= 40 and not bm.startswith("NONE")):
             bad("business_meaning", fn, "empty, under 40 chars or NONE")
         else:
+            if (glib.LIVE49F in bm) != glib.is_49f_bd(c):
+                bad("business_meaning", fn, "a 49F Black Diamond row (and only one) carries %r" % glib.LIVE49F)
             stale, empty = glib.marks(c)
             for word, label in ((stale, "NOT CURRENT"), (empty, "EMPTY")):
                 if word and word not in bm:

@@ -46,7 +46,7 @@ def main():
                 "business_meaning": ("%s %s table `%s` in %s (%s): %s. %s" % (
                     c["layer"].capitalize(), c["format"], c["table"], c["bucket"], c["s3_prefix"], c["grain"],
                     "Client data forked by firm, account last-4 and platform; Opal-internal principals only until a data grant names the firm."
-                    if fr == "firm-scoped" else "Opal-internal data.")) + "".join(" %s." % w for w in glib.marks(c) if w),
+                    if fr == "firm-scoped" else "Opal-internal data.")) + "".join(" %s." % w for w in glib.marks(c) if w) + (" " + glib.LIVE49F if glib.is_49f_bd(c) else ""),
                 "example_questions": list(c["common_queries"]) or ["Where is the %s %s table?" % (c["table"], c["layer"])],
                 "grain": c["grain"],
                 "freshness_field": ("FIELD:" + pk[0]) if pk else "NONE -- " + str(c["freshness"].get("basis")),

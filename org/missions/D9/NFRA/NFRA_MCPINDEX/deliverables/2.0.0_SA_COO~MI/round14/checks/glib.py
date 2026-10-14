@@ -130,6 +130,15 @@ def marks(c):
     return stale, empty
 
 
+LIVE49F = "Live store: opal-data-bd/silver/ (inferred)."
+
+
+def is_49f_bd(c):
+    """A 49F Black Diamond contract (CTO msg 34127: the rows keep the measured location and say the live store, inferred)."""
+    p = str(c.get("s3_prefix") or "")
+    return p.startswith("blackdiamond/49f/") or p.startswith("blackdiamond/49financial/")
+
+
 def firm_rule(c):
     f = (c.get("fork_keys") or {}).get("firm") or {}
     vals = [v for v in (f.get("values") or []) if str(v) not in ("global", "opal-internal")]
