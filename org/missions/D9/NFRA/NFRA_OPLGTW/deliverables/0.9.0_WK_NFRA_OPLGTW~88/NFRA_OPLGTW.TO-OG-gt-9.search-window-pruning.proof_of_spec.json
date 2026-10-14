@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gt-9",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~88",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fdf8d53ccb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "fdf8d53ccb",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-9.search-window-pruning.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_press.py",
+      "kind": "script",
+      "commit_or_etag": "661838f224",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only (order section 2: no release, no deploy, no IAM, no Terraform, no bucket write). Committed @661838f224 on wk-NFRA_OPLGTW-88, LOCAL. Changes: the sentiment partition cut, the silver part-stamp prune with its fallback, the denominator keys, PRUNE and the measured constants. harvest_get_article keeps the full read.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt9.py",
+      "kind": "test",
+      "commit_or_etag": "661838f224",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline tests (recording fake, stand-in principal, synthetic keys): test_oggt9_ac01, test_oggt9_ac02, test_oggt9_ac03 and test_oggt9_silver. 4 of 4 pass. Committed @661838f224.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "661838f224",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows NFRA_OPLGTW-Z-W88-S1..S5 appended as fenced json blocks; surprise-row-gate OK (5 new rows) at the commit. Committed @661838f224.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the offline pruning, difference-control and denominator tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt9.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests (test_oggt9_ac01, test_oggt9_ac02, test_oggt9_ac03) passed; failed or error lines 0; the file's fourth test test_oggt9_silver also passes (4 of 4 in tests/test_og_gt9.py)",
+      "status": "PASS",
+      "status_reason": "Run after the code commit @661838f224 from the worktree root: pytest rc=0, named tests passed 3 of 3, RESULT: PASS, exit=0.",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: on the real bucket both calls answer under 40 s and the denominator names the partitions.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt9.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "search ASML: no window 5 article(s) in 39.4 s (want < 40); 7d ending at the newest (2026-10-05) 2 article(s), 1 with a sentiment label, in 13.5 s (want < 40); denominator names partitions read True; envelope whole True\nRESULT: PASS\nexit=0",
+      "denominator": "real bucket, box credentials, read only: no-window 5 of 5 articles in 39.4 s (under 40); 7-day window 2 of 2 articles, 1 with a sentiment label, in 13.5 s (under 40); the denominator names partitions read on the windowed call; envelope whole on both answers",
+      "status": "PASS",
+      "status_reason": "Run after the code commit @661838f224: no-window 39.4 s (margin 0.6 s), 7-day 13.5 s. Earlier after-runs of the same code: 38.1 s (AC2 run before the commit) and 39.5 s (the dump of three calls). Before the change, the same no-window call measured 42.3 s and 47.5 s. The margin is thin; see surprise row S3.",
+      "expect": "(?s)search ASML: no window [1-5] article\\(s\\) in \\d+\\.\\d s \\(want . 40\\); 7d ending at the newest .* in \\d+\\.\\d s \\(want . 40\\); denominator names partitions read True; envelope whole True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The sentiment cut in _sentiment_cut moved one day later (min(fetch day) + 1 day) in app/harvest_press.py, run as pytest -k ac01; the module restored from a saved copy and compared with cmp.",
+      "expected": "test_oggt9_ac01 FAILS on the mutant (the 10-03 partition, dated on the page's earliest fetch day, must be read); it passes on the good module.",
+      "observed": "On the mutant: 1 failed, 3 deselected, rc=1, FAILED test_oggt9_ac01 (AssertionError on the read log). Restored: cmp identical to the saved copy and to HEAD 661838f224.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The four-test file tests/test_og_gt9.py run twice on the same HEAD with -v; the timing suffix stripped; the two outputs compared with cmp.",
+      "observed": "Run 1 rc=0 and run 2 rc=0; the outputs are byte-identical (13 lines each, 4 PASSED).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The final <status> flip of NFRA_OPLGTW.TO-OG-gt-9.search-window-pruning.md to complete",
+      "reason": "The task-order file is outside this order's <paths> (section 3 lists the module, the test file and the channel file), so the lane grant does not cover it. Both criteria PASS. Filed as surprise row NFRA_OPLGTW-Z-W88-S5 (BLOCKING); held for the issuer or the CTO."
+    },
+    {
+      "item": "A concurrency change (PART_THREADS above 10) to lower the silver join's wall time",
+      "reason": "Outside the order's stated method (reading less, identical answers). Named as a candidate in surprise row NFRA_OPLGTW-Z-W88-S3; not made."
+    },
+    {
+      "item": "A release, deploy, IAM or Terraform change, a bucket write, a module-level cache",
+      "reason": "Excluded by order section 2 (code and tests only). None made."
+    },
+    {
+      "item": "A cut that prunes by a structural bound on fetched_at instead of the measured one",
+      "reason": "No structural bound exists in the base; the silver bound is a measurement (surprise row NFRA_OPLGTW-Z-W88-S2, ARMED, disarm_owner 2.0.0_SA_COO~O)."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W88-S1: the premise that the gold article_sentiment read dominates is refuted: 5 parts, 2.1 MB, one date partition; the silver join is 38.2 of 42.3 s (INERT).",
+    "NFRA_OPLGTW-Z-W88-S2: the silver part-stamp prune rests on a measured lateness bound (under one second on every sampled row), not a guarantee; a lag beyond the one-hour margin would drop records silently (ARMED, disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W88-S3: the no-window call answers in 38.1 to 39.5 s on three after-runs against the 40 s bar; no further identity-preserving read reduction is left in the module (INERT).",
+    "NFRA_OPLGTW-Z-W88-S4: the sentiment partition pruning removes nothing on this bucket (1 of 1 partitions on both calls); implemented and tested (INERT).",
+    "NFRA_OPLGTW-Z-W88-S5: BLOCKING for the final <status> flip only: the task-order file is outside <paths> (INERT)."
+  ],
+  "session_log": "L7 worker 0.9.0_WK_NFRA_OPLGTW~88 on wk-NFRA_OPLGTW-88 from base ae365fc589 (cut fdf8d53ccb). First act: branch and TREE-OK. Re-grounded the module (harvest_search_articles, _silver_join, harvest_get_article's call site), the three existing gt2 tests and the two check scripts. Profiled the two calls on the real bucket read only (silver join 38.2 of 42.3 s; sentiment 0.7 s). Measured the sentiment premise (0 violations in 13,195 rows) and the silver stamp premise (lateness under one second; 1,050 of 9,356 rows fetched after their stamp). Built the sentiment cut, the silver part prune with the identity fallback, the denominator keys, and tests/test_og_gt9.py (4 tests). Compared three calls field by field against the saved base outputs: articles identical. A one-day-late cut mutant failed test_oggt9_ac01 and was restored byte-identical. Commit 661838f224 (code, tests, five rows). AC1 and AC2 re-run after the commit: PASS. Scratch measurement scripts stay in .scratch and are not committed. The status flip is not made (S5).",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~88 <0.9.0_WK_NFRA_OPLGTW~88@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "rc=0 on 661838f224 (LOCAL on wk-NFRA_OPLGTW-88); commit-gate OK 2 of 2 files; surprise-row-gate OK 5 new rows of 612; to-pipeline-gate OK; msg-verify MATCH. WARN: client-data-check had no hashed account-id list on this device (absent, not checked for account ids)."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/harvest_press.py infra/aws/ec2/opal-gateway/tests/test_og_gt9.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); py_compile, ds-precommit, ruff and log-open lint on each"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 --no-cache infra/aws/ec2/opal-gateway/app/harvest_press.py infra/aws/ec2/opal-gateway/tests/test_og_gt9.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
