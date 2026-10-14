@@ -1,0 +1,110 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-308",
+  "cell": "AR-y-308",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~122",
+  "head_at_read": "7e083e0beb",
+  "product_commit": "15a387dd36",
+  "read": [
+    "infra/aws/lambda/investor-reporting/intake/upload_resolution.py :90-140 (_not_composed :95-99; the six call sites :110-112 and :131-133) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/intake/uploads.py :1-180 (CORRECTION_WORDS :58-148; SYMBOL_WORDS_CODES :160; _words_for :163-178; UploadLaneNotComposed :30-32), :405-458 (the POST: parse_mapping :425, resolve_prices :440, freeze_parsed_portfolio :445), :512-586 (_answer; resolve_deferred, whose except at :559-564 turns a not-composed refusal into NEEDS_CORRECTION with the code), :588-615 (_freeze_template; resolve_prices :606-608) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/ops/status.py :60-250 (CORRECTION_WORDS :86-176; build_envelope :207-234; the source_dates validation import :293) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py (whole file: the lock; finding_codes_in_the_code :111-120; len(codes) == 33 at :130-132) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py :290-299 (grep-read: the per-code and whole-table equality against status.CORRECTION_WORDS) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_deferred_resolution.py (whole file: the fakes payload, offline_resolver, post, resolve, post_and_resolve; the shares refusal test at :168-173) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/intake/template_reader.py :24-25 (BASES), :145-152 (finding), :427-430 (UNIT_UNRECOGNIZED) @7e083e0beb",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_template_uploads.py :39-40 (grep-read: the template lane never calls parse_mapping or resolve_security) @7e083e0beb",
+    "infra/aws/lambda/ci/lambda-source-map.json, functions (grep and json read: which functions carry the files)",
+    "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/DOOR_RESULT.txt (line D3: FAIL 200 NEEDS_CORRECTION; the reason code was not recorded there)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md row IRPT_ANLREQ-D2-S94 (grounding INFERRED for the reason code)"
+  ],
+  "codes_census": {
+    "denominator": "6 call sites of _not_composed(...) in intake/upload_resolution.py (grep over infra/aws/lambda/investor-reporting: 6 call sites, 0 elsewhere); 2 distinct codes",
+    "raise_path": "UploadLaneNotComposed is raised only inside _not_composed's refuse() (upload_resolution.py:95-99); no other raise site in the tree",
+    "rows": [
+      {
+        "code": "SHARES_PRICE_SOURCE_NOT_COMPOSED",
+        "call_sites": ["intake/upload_resolution.py:112", "intake/upload_resolution.py:133"],
+        "words_today": "NO (absent from uploads.CORRECTION_WORDS and from ops/status.py CORRECTION_WORDS at HEAD)",
+        "reachable_live": "YES: the template lane. The resident's resolve_deferred (uploads.py:559-564) writes NEEDS_CORRECTION with this code as the finding and reason; the served answer then carries a bare finding (severity ERROR, actions REPLACE_FILE). The csv lane never reaches it, because parse_mapping (uploads.py:425) raises CSV_LANE first. Offline, test_a_shares_file_through_the_real_upload_path_answers_with_the_words reproduces the path.",
+        "action": "words added to both tables, byte-equal (commit 15a387dd36)"
+      },
+      {
+        "code": "CSV_LANE_NOT_COMPOSED",
+        "call_sites": ["intake/upload_resolution.py:110", "intake/upload_resolution.py:111", "intake/upload_resolution.py:131", "intake/upload_resolution.py:132"],
+        "words_today": "NO (absent from both tables)",
+        "reachable_live": "AS A REFUSAL ONLY: the csv_base64 POST calls parse_mapping before any parsing (uploads.py:425); the raise leaves as UploadLaneNotComposed, whose public_reason_code is NOT_READY (uploads.py:30-32). The code string never reaches a finding or the answer, so a words entry keyed by it could never be looked up. The template lane never calls parse_mapping or resolve_security (test_template_uploads.py:39-40).",
+        "action": "left unchanged, with this reason. The person sees NOT_READY, which is not a finding and carries no correction words by design."
+      }
+    ]
+  },
+  "words": {
+    "code": "SHARES_PRICE_SOURCE_NOT_COMPOSED",
+    "text": "This file lists shares, and we cannot price shares yet. Give each holding as its market value in dollars instead: put Dollars in cell B1, enter the market value of each holding in column B, and upload the file again.",
+    "in_intake_uploads_py": "CORRECTION_WORDS, inserted before SHARES_PRICE_UNAVAILABLE (uploads.py:111-114 after the change)",
+    "in_ops_status_py": "CORRECTION_WORDS, inserted before SHARES_PRICE_UNAVAILABLE (status.py:144-147 after the change)",
+    "byte_equal": true,
+    "ascii": true,
+    "entries_added_per_table": 1,
+    "why_not_the_order_literal": "The order asks for words that say a Market Value column. The reader takes the unit only from cell B1 (template_reader.py:24-25, :427-430), so a Market Value header is refused as UNIT_UNRECOGNIZED. The words name the cell the reader takes. See channel row IRPT_ANLREQ-D2-W122-S1 (BLOCKING, INERT).",
+    "jargon_check": "the new test file's JARGON tuple (resolve, resident, provider, lambda, securities, normaliz, template, json, schema, queue, endpoint, api, system, source, code, underscore): no term present"
+  },
+  "ast_words_only": {
+    "method": "ast.parse of the HEAD file (git show 7e083e0beb:<path>) and of the working file; the new key is removed from the single CORRECTION_WORDS dict literal of the working tree; ast.dump equality of the two modules. Script: r38/ast_words_only.py in this folder.",
+    "ops/status.py": {"keys_before": 31, "keys_after": 32, "added": ["SHARES_PRICE_SOURCE_NOT_COMPOSED"], "removed": [], "ast_equal_after_removing_new_key": true, "verdict": "AST-WORDS-ONLY-OK"},
+    "intake/uploads.py": {"keys_before": 31, "keys_after": 32, "added": ["SHARES_PRICE_SOURCE_NOT_COMPOSED"], "removed": [], "ast_equal_after_removing_new_key": true, "verdict": "AST-WORDS-ONLY-OK"},
+    "negative_control": "status.py with one OTHER key renamed (REFERENCE_NOTIONAL_REQUIRED to a _X name): ast_equal false, verdict AST-WORDS-ONLY-FAIL (the script's exit status was read through a pipe; the printed verdict is the reading)",
+    "diff_scope": "git diff 7e083e0beb..15a387dd36 for the two files: 4 added lines each, 0 removed; the test file is new"
+  },
+  "tests": {
+    "new_file": {"path": "infra/aws/lambda/investor-reporting/intake/tests/test_shares_not_composed_words.py", "count": 10, "after_result": "10 passed"},
+    "lock_file": {"path": "infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py", "edited": false, "reason": "the code count stays at 33 (the lock counts finding literals in template_reader.py and portfolio.py; this code is not one); 9 of 9 pass unchanged"},
+    "folders": {
+      "intake/tests": {"at_head_7e083e0beb": "429 passed, 1 skipped, 28 subtests passed", "after_15a387dd36": "439 passed, 1 skipped, 28 subtests passed (the +10 are the new file)", "rc_after": 0},
+      "ops/tests": {"at_head_7e083e0beb": "313 passed, 22 skipped", "after_15a387dd36": "313 passed, 22 skipped", "rc_after": 0},
+      "ycharts/generate/tests (two files that compare the two tables: test_y5_proxy_corrections.py, test_resolve_upload.py)": {"after_15a387dd36": "35 passed", "rc_after": 0}
+    },
+    "commit_gate": "bash .tools/commit-gate.sh passed on intake/uploads.py, ops/status.py, the new test file and r38/ast_words_only.py. One ruff F401 (an unused pytest import) was removed before the product commit."
+  },
+  "before_arm": {
+    "method": "a scratch copy of the Lambda folder with HEAD uploads.py and HEAD ops/status.py (git show 7e083e0beb:<path>, verified to carry no SHARES key), the committed test file run against it. The worktree itself was not reverted.",
+    "file": "intake/tests/test_shares_not_composed_words.py",
+    "failed": 7,
+    "passed": 3,
+    "of": 10,
+    "failing_at_head": [
+      "test_the_code_has_words_in_both_tables_and_they_are_byte_equal",
+      "test_the_words_say_shares_cannot_be_priced_yet_and_ask_for_a_market_value_in_dollars",
+      "test_the_words_carry_no_jargon_and_are_ascii",
+      "test_a_shares_file_through_the_real_upload_path_answers_with_the_words",
+      "test_the_words_come_from_the_table_not_from_the_stored_finding",
+      "test_the_status_envelope_returns_the_same_words_for_the_code",
+      "test_every_not_composed_code_the_door_can_raise_has_words_or_is_refusal_only"
+    ],
+    "passing_at_head_by_design": [
+      "test_a_market_value_file_is_unaffected_and_carries_no_shares_words (guard)",
+      "test_the_table_lock_still_passes (guard)",
+      "test_the_finding_the_reader_writes_for_the_code_is_the_bare_record (guard)"
+    ]
+  },
+  "release_needs": {
+    "packages": [
+      {"function": "irpt-ycharts-generate", "carries": ["intake/uploads.py", "intake/upload_resolution.py"], "source": "infra/aws/lambda/ci/lambda-source-map.json, functions[irpt-ycharts-generate]"},
+      {"function": "irpt-status", "carries": ["ops/status.py"], "source": "infra/aws/lambda/ci/lambda-source-map.json, functions[irpt-status]"}
+    ],
+    "writers_of_the_words": 2,
+    "writers_note": "two literal tables (uploads.py and status.py); the lock test keeps them equal; N writers = 2 rules read",
+    "door_and_resident": "the map carries uploads.py and upload_resolution.py in ONE function, irpt-ycharts-generate. No second function in the map carries them, so the door and the resident are not measured as separate packages here; the Terraform handler declarations were not read.",
+    "release_act": "none. Nothing is released, applied, deployed, uploaded or invoked by this order."
+  },
+  "claim": "In the worktree at 15a387dd36 (LOCAL), SHARES_PRICE_SOURCE_NOT_COMPOSED has one set of words in both CORRECTION_WORDS tables, byte-equal, ASCII, and they ask the person for a market value in dollars in cell B1 and column B, then an upload again. The refusal, the actions and the reader are unchanged. The words reach the person through the real upload path offline (the resident's NEEDS_CORRECTION answer). Nothing is released, pushed or called live. The words differ from the order's literal Market Value column, for the reason in words.why_not_the_order_literal.",
+  "not_read": [
+    "the portal (0 portal files read; the portal's rendering of the words is not seen)",
+    "the live PROD and DEV bundles, and any live door or status response",
+    "Andrew's screenshots (in his chat, not in the repository)",
+    "ycharts/generate/resident_worker.py and the resident's own service wiring beyond upload_resolution.py",
+    "the Terraform handler declarations for the two functions (the map was used instead)",
+    "the irpt-status function's code beyond ops/status.py",
+    "the other investor-reporting test folders beyond intake/tests, ops/tests and the two ycharts files",
+    "docs/contracts beyond the copy made for the HEAD run (read only as a path)"
+  ]
+}

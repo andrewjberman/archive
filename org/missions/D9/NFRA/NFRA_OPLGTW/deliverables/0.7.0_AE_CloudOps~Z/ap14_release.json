@@ -120,5 +120,22 @@
  },
  "ap17_sequencing": "OG-bd-3 (42f31eea0a) is NOT an ancestor of this base -- the live gateway ref is a deploy-only cut predating bd-3's drain, and app/data_entitlement.py differs between them. So OG-ap-17's re-cut applies bd-3 ON TOP of whatever r30 leaves: the sequential case, not the conflicting one.",
  "release_sha_short": "90967e39ba",
- "release_sha_format_note": "FULL 40-char sha ON PURPOSE. ap14.AC2.sh compares EC2_MANIFEST's deployed_commit to this field as strings ([ \"$dep\" = \"$rel\" ]); the manifest stores the full sha, so a short release_sha could never match and a CORRECT deploy would have graded FAIL. AC1 is indifferent (it resolves the value with git cat-file -e), which is why this only bites after the irreversible step. base_sha was already full-length."
+ "release_sha_format_note": "FULL 40-char sha ON PURPOSE. ap14.AC2.sh compares EC2_MANIFEST's deployed_commit to this field as strings ([ \"$dep\" = \"$rel\" ]); the manifest stores the full sha, so a short release_sha could never match and a CORRECT deploy would have graded FAIL. AC1 is indifferent (it resolves the value with git cat-file -e), which is why this only bites after the irreversible step. base_sha was already full-length.",
+ "served_read_plan": {
+  "status": "MAPPED, not yet run -- the read must go through the INSTALLED code, which does not carry r30 until B2 deploys",
+  "transport": "ONE SSM read, in-process on i-07dccb1615503ac99 against /opt/opal-gateway, synthetic principals, no Graph call, no grant or profile written",
+  "fields": {
+   "installed_code": "assert the imported modules' __file__ resolve under /opt/opal-gateway -- the read proves it ran on the host, not in a release tree",
+   "data_grant_family_size": "len(de.DATA_GRANT_TOOLS); DATA_GRANT_TOOLS = frozenset(SCHWAB_TOOLS) | {blackdiamond_list_fees}, so 6",
+   "bd_unprofiled_standard_denied": "de.decide('blackdiamond_list_fees', Access(restricted=False, profile=None, grant=None, tools=frozenset()), tier=<standard>) returns a dict. No store call: Access is a NamedTuple and restricted=False IS 'no profile'",
+   "bd_unprofiled_master_admin_admitted": "the same with tier=Tier.MASTER_ADMIN returns None. Tier comes from app/tier.py (the preflight names resolve_tier), not from data_entitlement",
+   "list_shared_folder_listed": "the tool is in the installed registry (@mcp.tool() decorated set)",
+   "list_shared_folder_safe": "destructive_ops.classify('list_shared_folder') is the SAFE class",
+   "opal_users_gate_refuses_non_opal": "the tg-1 gate in tools.py (~:1014-1122) keyed on sender_tenant_id; a non-Opal sender yields code _OPAL_USERS_DENIED = 'opal_users_only_denied' and an opal_users_gate audit record",
+   "objects_written": "0 -- asserted, not assumed: the read writes nothing",
+   "bbg_identity_admitted_8": "count of the 8 named tools for which identity_scope.check(ident, tool) returns None. A7 @ac4d20c17a: ident comes from the INSTALLED module's own pinned constant identity_scope.OPAL_USERS_ONLY, read on the host and NEVER typed; record only its hash and the constant's name"
+  },
+  "what_the_8_measures": "TG-1'S UNSCOPING, not OG-mg-1's grant. check() returns None for an UNSCOPED identity, and r30 deletes that principal's _SEED entry and both overlay rows, so after r30 it is unscoped and every tool admits. The data-grant family is decide()'s path and mg-1's write; the end-to-end proof stays AC3, the BG seat's own exercise after both. Confirmed by the issuer as the intended reading (A7).",
+  "why_not_prebuilt": "The harness is deliberately not run or dry-validated against a release tree: installed_code must be true, and a tree-local run would make it false while every other field still looked right."
+ }
 }
