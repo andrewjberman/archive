@@ -1,0 +1,65 @@
+diff --git a/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py b/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+index 3a19dcf591..ed3cf609a7 100644
+--- a/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
++++ b/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+@@ -849,7 +849,7 @@ def display_census(nodes) -> dict:
+ # IRPT_BCKEND-W93-S1 for why the CTO's literal "asset_class_basis CANONICAL" / "class source" node
+ # fields are not on the wire.
+ ASSET_CLASS_VALUES = ("equity", "fixed_income", "alternatives", "cash", "other", "structured", "commodities",
+-                      "unclassified")  # SC-e-56: multi_asset left (the table holds 0 rows; the six-class rule refuses it)
++                      "multi_asset", "unclassified")  # multi_asset: CTO batch 164 (readers first)
+ ASSET_CLASS_BASES = ("TABLE", "NAME_ALIAS", "NAME_PATTERN", "TICKER_SHAPE", "NONE")
+ CLASSIFICATION_MEMBERS = ("asset_class", "sub_asset_class", "asset_class_basis", "model_code")
+ CANONICAL_CLASS_SOURCE = "etf-classifications"
+@@ -940,15 +940,6 @@ def _classifier_basis(ec, clf, ticker, name) -> str:
+     return "NONE"
+ 
+ 
+-def cusip_key(security_id) -> "str | None":
+-    """`CUSIP:<VALUE>` (upper-cased, the table's own CUSIP-row key) for a node's `security_id` whose namespace is
+-    CUSIP, else None. Anything else -- another namespace, no value -- names no CUSIP key."""
+-    if not isinstance(security_id, dict) or str(security_id.get("namespace") or "").strip().upper() != "CUSIP":
+-        return None
+-    value = str(security_id.get("value") or "").strip().upper()
+-    return "CUSIP:" + value if value else None
+-
+-
+ def apply_cash_rule(result: dict) -> dict:
+     """IR holdings class rule (CTO round-189 analysis item 2; count IB-pr-526; row D2-S156; CTO round-190 analysis
+     item 1, IB-pr-529): on the canonical-row return and on the bd-securities fallback return of classify_security,
+@@ -960,14 +951,10 @@ def apply_cash_rule(result: dict) -> dict:
+     return result
+ 
+ 
+-def classify_security(ec, clf, ticker, name, description=None, security_id=None) -> dict:
++def classify_security(ec, clf, ticker, name, description=None) -> dict:
+     """{asset_class, sub_asset_class, asset_class_basis, class_source} for ONE security.
+     CANONICAL FIRST (CTO RULING 103169): a ticker `etf-classifications` holds is served exactly as
+     the row holds it -- no hedge fold, no guess -- with `class_source` CANONICAL_CLASS_SOURCE.
+-    SC-e-56 (round-8 S27): after a SYMBOL miss, a node whose `security_id` is a CUSIP is asked for as
+-    `CUSIP:<value>` in the same canonical table; a hit is served exactly as that row holds it
+-    (class_source canonical); a miss goes on to the fallback as before. Symbol first, then CUSIP,
+-    then the fallback -- never the reverse, never blended, and a symbol hit never consults the CUSIP key.
+     Every other ticker falls to the declared bd-securities FALLBACK, exactly as before this cell
+     (same four layers, same mirror-disagreement refusal, same cash rule), with `class_source`
+     FALLBACK_CLASS_SOURCE. `class_source` is an internal-only key: `annotate_classification` pops
+@@ -981,10 +968,6 @@ def classify_security(ec, clf, ticker, name, description=None, security_id=None)
+         return {"asset_class": "cash", "sub_asset_class": None, "asset_class_basis": "NAME_PATTERN",
+                 "class_source": FALLBACK_CLASS_SOURCE}
+     canonical_row = clf.canonical_lookup(ticker)
+-    if canonical_row is None:
+-        key = cusip_key(security_id)
+-        if key is not None:
+-            canonical_row = clf.canonical_lookup(key)
+     if canonical_row is not None:
+         asset_class = canonical_row.get("asset_class") or "unclassified"
+         if asset_class not in ASSET_CLASS_VALUES:
+@@ -1041,7 +1024,7 @@ def annotate_classification(nodes, classifier=None) -> dict:
+         if kind == "SECURITY":
+             disp = n.get("display") or {}
+             found = classify_security(ec, clf, disp.get("symbol"), disp.get("description") or disp.get("label"),
+-                                      description=disp.get("description"), security_id=n.get("security_id"))
++                                      description=disp.get("description"))
+             source = found.pop("class_source", FALLBACK_CLASS_SOURCE)
+             n.update(found)
+             by_basis[found["asset_class_basis"]] = by_basis.get(found["asset_class_basis"], 0) + 1
