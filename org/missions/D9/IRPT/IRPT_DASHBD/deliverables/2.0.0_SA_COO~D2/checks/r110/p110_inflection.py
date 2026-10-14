@@ -182,6 +182,12 @@ def check_contract(root):
             need(nes(fa["inflection"]), "pvs.%s.return_cumulative firm_absent.inflection must hold the reason in words" % w)
             absent.append(w)
     need(len(sourced) >= 1, "at least one household return window must be sourced for Inflection from Orion's client grain")
+    # the holdings overview repeats the household return: hold.return_<window> carries the same firm source as pvs.<window>.return_cumulative and is its equivalent
+    for w in WINDOWS:
+        pv, hd = members["pvs.%s.return_cumulative" % w], members["hold.return_%s" % w]
+        need(hd["source"] == "ABSENT" and (hd.get("firm_sources") or {}) == (pv.get("firm_sources") or {}) and (hd.get("firm_absent") or {}) == (pv.get("firm_absent") or {}),
+             "hold.return_%s must keep source ABSENT and carry exactly the firm_sources and firm_absent of pvs.%s.return_cumulative (the holdings table prints the same household return)" % (w, w))
+        need(any(cl["entity"] == "household" and {"pvs.%s.return_cumulative" % w, "hold.return_%s" % w} <= set(cl["members"]) for cl in eq), "an equivalence class of entity household must hold pvs.%s.return_cumulative and hold.return_%s" % (w, w))
     # the control: the equivalence rule reports a planted conflict and is quiet on a consistent set
     accs = ["a1", "a2"]
     sv = synthetic_values(c, accs)
@@ -215,7 +221,7 @@ def check_sample(root):
     need(s.get("sha256") == sha(sp) and s.get("contract_sha256") == sha(root / CONTRACT_REL), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes")
     sm = P.sample_json(sp)
     P5.check_sample_shape_k(sm, c, "inflection")
-    prob = P5.kind_problems(sm["values"], c)
+    prob = P5.kind_problems(sm["values"], c, "inflection")
     need(not prob, "kind carrier: %s" % "; ".join(prob[:3]))
     acc = accounts_of(sm)
     vals = sm["values"]
