@@ -162,16 +162,25 @@ def census_arms(arm):
         cb = r.get("chunk_bound_days")
         if not (is_int(cb) and cb >= 1):
             fail("chunk_bound_days must be an integer >= 1")
+        unsourced = 0
         for f, v in firms.items():
             d = v.get("demand") or {}
             if d.get("floor_applied") != "2012-01-01":
                 fail("%s: demand.floor_applied must read 2012-01-01 (Andrew-direct 2026-10-07: nothing earlier than the earliest record, cut at 2012)" % f)
+            if d.get("earliest_record") is None:
+                # AMENDMENT 1: a firm with no activity producer is recorded null WITH its reason, never estimated
+                if not (str(d.get("unsourced_reason", "")).strip() and d.get("start_day") is None and d.get("trading_days_to_fill") is None and d.get("invocations_needed") is None):
+                    fail("%s: an unsourced demand needs unsourced_reason (the stated cause) and null start_day, trading_days_to_fill and invocations_needed" % f)
+                unsourced += 1
+                continue
             if not (is_date(d.get("earliest_record")) and is_int(d.get("trading_days_to_fill")) and d["trading_days_to_fill"] >= 0 and is_int(d.get("invocations_needed")) and d["invocations_needed"] >= 0):
                 fail("%s: demand needs earliest_record (a date), trading_days_to_fill and invocations_needed (integers >= 0)" % f)
             if d["earliest_record"] < "2012-01-01" and d.get("start_day") != "2012-01-01":
                 fail("%s: an earliest record before 2012 means start_day 2012-01-01" % f)
             if d["trading_days_to_fill"] and d["invocations_needed"] != -(-d["trading_days_to_fill"] // cb):
                 fail("%s: invocations_needed must equal ceil(trading_days_to_fill / chunk_bound_days)" % f)
+        if unsourced >= len(firms):
+            fail("at least one firm's demand must be sourced (a measured earliest_record)")
         o = r.get("observed_seconds_per_day")
         if not ((isinstance(o, (int, float)) and not isinstance(o, bool) and o > 0) or (o is None and str(r.get("observed_seconds_per_day_absence", "")).strip())):
             fail("observed_seconds_per_day must be a positive number from the logs, or null with observed_seconds_per_day_absence stating why")
