@@ -1,0 +1,24 @@
+Session log -- 0.9.0_WK_IRPT_DASHBD~182 on IRPT_DASHBD.TO-DB-b-227 (round 112, cell DB-b-227)
+Worktree: C:/dev/wk-irpt-dashbd-182 (branch wk-IRPT_DASHBD-182). Counts and words only: no household or account id, no client value.
+
+1. Tree check: branch wk-IRPT_DASHBD-182; org/ and .tools/ present (TREE-OK). Issuance HEAD c33edfe326.
+2. Base run of the criterion checker before any edit: DB112-1-AC1 FAIL, rc=1 (the contract carries no window_rule). As the order predicts.
+3. Module tests at base: 9 passed (rc=0).
+4. Added household_window_result (six parameters, standard library only) to the module, and 9 tests to the test file: 18 passed (rc=0).
+5. Fill-in mutant (scratch copy under the worktree scratch folder, not committed): the function returns the product of the measured days over an account gap and over a household-no-row gap. Run against the committed test file with HOUSEHOLD_MODULE: 5 failed, 13 passed. The committed module is not changed by the mutant.
+6. Contract: added the top-level string window_rule. columns and schema_hash unchanged; the contract parses as JSON.
+7. Checker self-test (p112_household.py --selftest): SELFTEST OK, 27 arms, rc=0.
+8. Checker's contract, module, function and test checks run in-process: all four pass.
+9. Private driver run (dry_run_household_windows_r112.py, read-only LIST and GET), started 2026-10-14T22:28Z, finished 2026-10-14T22:31Z:
+   - crosswalk: newest date span 2026-10-09; 7,620 rows; 473 rows without an account or relationship id; 0 accounts in more than one relationship.
+   - account gold: 570 date= partitions listed, 570 dated on or before 2026-10-13, 0 later partitions not read; 2,672,910 rows kept; 0 duplicate account-day rows; 0 null value rows.
+   - households: 4,013 kept, 207 dropped (no account in the gold).
+   - table: 1,704,799 rows, 570 distinct dates, last date equal to as_of.
+   - tie-out against round 111's private table: 1,704,799 rows on each side; 0 differing or missing rows.
+   - windows (households_total 4,013 each): qtd figure 3,814, source_break account 194, source_break household no row 1, insufficient history 4; ytd figure 2,027, source_break account 1,329, household no row 1, insufficient history 656; last_12_months figure 1,765, source_break account 1,319, household no row 1, insufficient history 928; since_inception figure 1,450, source_break account 2,563, household no row 0, insufficient history 0.
+   - reads: 1,143 S3 calls (LIST and GET), 0 writes, 0 vendor calls, 0 secret reads.
+   - private parquet written under the private evidence folder for this worker; record HOUSEHOLD_WINDOWS_R112.json written in this folder.
+10. Criterion checker DB112-1-AC1 after the record was written: DB112-1-AC1 PASS, rc=0; the checker recount from round 111's table agrees with the record's class counts.
+11. Determinism: the checker run twice from the worktree root with the same arguments; the two outputs compared byte for byte: identical, rc 0 each.
+12. No write, push or deploy. Nothing was sent to AWS. The worktree portal gitlink is not touched.
+13. The first commit attempt was blocked by the commit gate's ruff check (one unused variable in the driver, the contract read). The unused read was removed and the driver was re-run (started 2026-10-14T22:33Z, finished 2026-10-14T22:36Z): the same counts, 0 differing rows against round 111, the same private parquet row count (16,052). The record's driver sha256 is the re-run's and matches the committed driver file. The checker was then run twice more: identical output, rc 0 each.
