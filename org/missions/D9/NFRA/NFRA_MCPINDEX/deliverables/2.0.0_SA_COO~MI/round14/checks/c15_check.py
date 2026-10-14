@@ -45,7 +45,7 @@ def build(tmp, allc):
         f.write("[]")
     out = os.path.join(tmp, "good")
     r = subprocess.run([sys.executable, os.path.join(HERE, "plant_gen14.py"), "--g2", files["G2"], "--g4", files["G4"], "--g5", files["G5"],
-                        "--g6", files["G6"], "--out", out, "--deployed-tools", dep], capture_output=True)
+                        "--g6", files["G6"], "--g3", files["G3"], "--out", out, "--deployed-tools", dep], capture_output=True)
     if r.returncode != 0:
         print("ERROR: reference rows: %s" % r.stderr.decode("utf-8", "replace")[-200:])
         sys.exit(9)
