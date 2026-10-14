@@ -1,0 +1,121 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ec-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~86",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "6d6702425a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d835fcdabf",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ec-1.eclipse-schema-defect.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/silver/mirror_schemas.py",
+   "kind": "script",
+   "commit_or_etag": "8929c5f16d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The eclipse portfolios_simple declaration gains defaultTradingEngineId as the 23rd and LAST column, type string; the first 22 names, types and order are unchanged (AC1 test_ogec1_ac01 compares them against the base commit d835fcdabf). Not deployed: this cell has no apply, deploy or invoke; the release is NFRA_OPLGTW.TO-OG-ap-18.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-eclipse/mirror_schemas.py",
+   "kind": "script",
+   "commit_or_etag": "8929c5f16d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Re-vendored byte-identical to the source: cmp reports no difference at 8929c5f16d. Before this cell the copy differed from the source only by BD-only lines (BD_TABLE_EXTENSIONS, nine lines, and two blackdiamond holdings column names); the eclipse converter does not reference them. The orion, blackdiamond and etf copies were not touched. BUILD_MANIFEST.json records no hash of mirror_schemas.py and is unchanged.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/tests/test_og_ec1.py",
+   "kind": "test",
+   "commit_or_etag": "8929c5f16d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Offline test module, six collected items (four named test_ogec1_ac01..ac04; ac03 parametrized over three drift cases). No AWS call. Run by the issuer's ec1.AC1.sh.",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the schema declares the column last and unchanged otherwise, the converter's drift check passes the new shape and still refuses any other drift, and the vendored copy is byte-equal.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ec1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "named tests passed 4 of 4 (test_ogec1_ac01, ac02, ac03 with its three parametrized cases, ac04; pytest collected 6 items, 6 passed); failed/error lines 0 of 6",
+   "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: against the real bronze portfolios_simple objects of 2026-10-10 to 2026-10-14 the vendored schema declares every column they carry.",
+   "method": "live_read",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ec1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "eclipse portfolios_simple: bronze objects checked 5 (2026-10-10..2026-10-14); extra columns 0; missing columns 0; vendored copy byte-equal to source yes; defaultTradingEngineId declared yes\nRESULT: PASS\nexit=0",
+   "denominator": "bronze objects checked 5 of 5 dates (2026-10-10..2026-10-14, read only); extra columns 0; missing columns 0 of 23 declared columns",
+   "expect": "(?s)eclipse portfolios_simple: bronze objects checked [3-5] \\(2026-10-10\\.\\.2026-10-14\\); extra columns 0; missing columns 0; vendored copy byte-equal to source yes; defaultTradingEngineId declared yes.*RESULT: PASS.*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted in a scratch copy (.scratch/mut, not the tree): the declaration line of defaultTradingEngineId removed from the eclipse mirror_schemas.py, the converter's drift check then run on the real 23-column vendor shape.",
+   "expected": "assert_declared_shape raises VendorDriftError for eclipse/portfolios_simple with extra=['defaultTradingEngineId'].",
+   "observed": "eclipse/portfolios_simple: vendor shape DRIFT -- extra=['defaultTradingEngineId'] missing=[] (declared 22 cols). A schema change is a reviewed edit to ...",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs compared: ec1.AC1.sh and ec1.AC2.sh run before the code commit and again at HEAD 8929c5f16d",
+   "observed": "AC2 line identical in both runs (bronze objects checked 5; extra columns 0; missing columns 0; defaultTradingEngineId declared yes); AC1 line identical in both runs (named tests passed 4 of 4; failed/error lines 0)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The eclipse Lambda deploy, the ledger entry, and the re-drive of the 12 failed Eclipse bronze keys of 2026-10-10 onward.",
+   "reason": "Applier order (the release NFRA_OPLGTW.TO-OG-ap-18). This cell is code, tests and proof only: no apply, no deploy, no Lambda invoke, no bucket write."
+  },
+  {
+   "item": "A live proof that the converter lands the 2026-10-10..14 objects after the fix.",
+   "reason": "Needs the deploy; AC2 proves the declaration against the bronze shape only, read-only."
+  },
+  {
+   "item": "Confirming the type of defaultTradingEngineId against a non-null value.",
+   "reason": "No non-null value exists in the 2026-10-10..14 objects (846 of 846 null per date). The type is a flagged choice, surprise NFRA_OPLGTW-Z-W86-S1, for the issuer to confirm."
+  },
+  {
+   "item": "The converter catch-up (mirror_conversion.py is about eight days behind its source; BUILD_MANIFEST.json holds it as a scoped catch-up).",
+   "reason": "Outside this cell's paths; no mirror_conversion.py change was needed for the schema fix."
+  },
+  {
+   "item": "Gateway tool registrations and pinned-count moves.",
+   "reason": "None expected from this cell: it changes no Gateway file. app/tools.py, app/data_entitlement.py and app/destructive_ops.py are untouched."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W86-S1: the order's type rule for defaultTradingEngineId has no non-null value to apply (846 of 846 null on every bronze date 2026-10-10..14); the type was chosen as string and is flagged for the issuer to confirm."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the code commit 8929c5f16d, the surprise row NFRA_OPLGTW-Z-W86-S1 in INVESTIGATION_v1.md, and the scratch mutant run under .scratch/mut.",
+ "compiler_tools": [
+  {
+   "tool": "pytest (opal-assets test suite, the new module only)",
+   "invocation": "cd infra/aws/lambda/opal-assets && timeout 120 python -m pytest tests/test_og_ec1.py -v -p no:cacheprovider --color=no",
+   "result": "6 passed in 1.27s (before the rename of the four test functions to their exact names); after the rename the issuer's AC1 check reads named tests passed 4 of 4, rc 0"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~86 <0.9.0_WK_NFRA_OPLGTW~86@opal.agent>\" -F .scratch/msg_ogec1_code.txt -- data/assets/scripts/silver/mirror_schemas.py infra/aws/lambda/opal-assets/opal-assets-silver-eclipse/mirror_schemas.py infra/aws/lambda/opal-assets/tests/test_og_ec1.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "committed 8929c5f16d (LOCAL); to-pipeline-gate OK; surprise-row-gate OK (1 new row, 596 checked); WARN client-data-check: the hashed account-id list is absent on this device, so the commit was not checked against it (the commit carries no account data)"
+  },
+  {
+   "tool": "cmp",
+   "invocation": "cmp data/assets/scripts/silver/mirror_schemas.py infra/aws/lambda/opal-assets/opal-assets-silver-eclipse/mirror_schemas.py",
+   "result": "no difference, rc 0"
+  }
+ ]
+}
