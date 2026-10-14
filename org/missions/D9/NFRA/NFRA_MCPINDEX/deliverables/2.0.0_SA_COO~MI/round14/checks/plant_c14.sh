@@ -11,6 +11,9 @@ import sys; sys.path.insert(0, r'$(native "$D")'); import glib
 open(r'$(native "$T")/$g.md','w',encoding='utf-8',newline='').write(glib.group_text('$g'))"
 done
 echo '[]' > "$T/none.json"
+export PLANT_REGISTRY_DIR="$(python -c "
+import sys; sys.path.insert(0, r'$(native "$D")'); import glib
+print(glib.plant_registry_dir14(glib.load_all()))" | tr -d '\r\n')"
 python "$G" --g2 "$(native "$T/G2.md")" --g4 "$(native "$T/G4.md")" --g5 "$(native "$T/G5.md")" --g6 "$(native "$T/G6.md")" --out "$(native "$T/good")" --deployed-tools "$(native "$T/none.json")" | tr -d '\r'
 pass=0; fail=0
 arm() { # arm <name> <expect PASS|FAIL> <mode> <rows dir>
@@ -20,6 +23,17 @@ arm() { # arm <name> <expect PASS|FAIL> <mode> <rows dir>
 }
 arm "good rows, ac1" PASS ac1 "$T/good"
 arm "good rows, ac2" PASS ac2 "$T/good"
+# a registry copy that lacks one catalog row: the registry limb of ac1 FAILs
+python - "$PLANT_REGISTRY_DIR" "$T/badreg" <<PYEOF
+import json, os, shutil, sys
+shutil.copytree(sys.argv[1], sys.argv[2], dirs_exist_ok=True)
+p = os.path.join(sys.argv[2], 'legacy_addresses.json'); d = json.load(open(p, encoding='utf-8'))
+d['legacy_addresses'] = [r for r in d['legacy_addresses'] if r['key'] != [x['key'] for x in d['legacy_addresses'] if x['key'].startswith('catalog-')][5]]
+json.dump(d, open(p, 'w', encoding='utf-8'), indent=1)
+PYEOF
+GOODREG="$PLANT_REGISTRY_DIR"; export PLANT_REGISTRY_DIR="$(native "$T/badreg")"
+arm "a registry row missing (ac1)" FAIL ac1 "$T/good"
+export PLANT_REGISTRY_DIR="$GOODREG"
 mut() { # mut <name> <mode> <python edit applied to a copied dir>
   rm -rf "$T/m"; cp -r "$T/good" "$T/m"
   python - "$(native "$T/m")" <<EOF
