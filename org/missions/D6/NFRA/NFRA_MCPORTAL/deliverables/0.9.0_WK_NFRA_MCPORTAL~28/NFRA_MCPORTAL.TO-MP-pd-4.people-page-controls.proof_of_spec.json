@@ -18,9 +18,9 @@
     {
       "path_or_key": "mcportal/src/api/admin.ts",
       "kind": "frontend_component",
-      "commit_or_etag": "5ca6596",
+      "commit_or_etag": "f7760a6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "principal on PeoplePerson (optional-null); getPersonAccess, setPersonAccess (verdict returned on 2xx, non-2xx throws AdminStatusError), getPersonChanges (set_person_access entries for the tid and oid); AdminStatusError, PersonAccess, PersonAccessChange, PersonAccessVerdict, PersonChange types",
+      "deploy_evidence": "principal on PeoplePerson (optional-null); getPersonAccess, setPersonAccess (AMENDMENT 1: returns the verdict on a 2xx and on a 409 whose body has verdict WRITTEN or REFUSED; every other non-2xx throws AdminStatusError, a 403 reads 'not allowed'), getPersonChanges (set_person_access entries for the tid and oid); AdminStatusError, PersonAccess, PersonAccessChange, PersonAccessVerdict, PersonChange types",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -28,9 +28,9 @@
     {
       "path_or_key": "mcportal/src/api/admin.test.ts",
       "kind": "test",
-      "commit_or_etag": "c24bcd0",
+      "commit_or_etag": "f7760a6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "access client posts change and expect_revision; history lists only set_person_access entries for the person; the existing people test unchanged",
+      "deploy_evidence": "access client posts change and expect_revision (AMENDMENT 1 cases added: 409 REFUSED verdict returned, 200 REFUSED returned, 409 non-verdict and 403 thrown as AdminStatusError); history lists only set_person_access entries for the person; the existing people test unchanged",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -88,9 +88,9 @@
     {
       "path_or_key": "mcportal/src/pages/people/people.test.tsx",
       "kind": "test",
-      "commit_or_etag": "c24bcd0",
+      "commit_or_etag": "f7760a6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "five of the named tests: person row with a principal shows channel and tool switches; a row without a principal shows no control and says why; record kind not live reads per-person control is not live yet; stop and restore post the change with the expected revision; a refused write shows the reason and changes nothing on the page; the four original page tests unchanged",
+      "deploy_evidence": "five of the named tests: person row with a principal shows channel and tool switches; a row without a principal shows no control and says why; record kind not live reads per-person control is not live yet; stop and restore post the change with the expected revision; a refused write shows the reason and changes nothing on the page (AMENDMENT 1: the refusal stub is a 409 whose body is a REFUSED verdict); the four original page tests unchanged",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -112,8 +112,8 @@
       "criterion_verbatim": "bun test rc=0; named tests present in sources 8 of 8; pass=8 or more; fail=0 -- RESULT: PASS -- exit=0",
       "method": "test_suite",
       "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd4.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": " 51 pass\n 0 fail\n 240 expect() calls\nRan 51 tests across 9 files. [206.00ms]\nbun test rc=0; named tests present in sources 8 of 8; pass=51; fail=0\nRESULT: PASS\nexit=0",
-      "denominator": "8 of 8 named tests present in sources; 51 pass, 0 fail across 9 files (44 at base, 7 added); run under timeout 120 on mcportal 5ca6596",
+      "output_evidence": " 51 pass\n 0 fail\n 244 expect() calls\nRan 51 tests across 9 files. [281.00ms]\nbun test rc=0; named tests present in sources 8 of 8; pass=51; fail=0\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 named tests present in sources; 51 pass, 0 fail across 9 files (44 at base, 7 added); run under timeout 120 from C:/tmp/mp-pd-28 on mcportal f7760a6 (AMENDMENT 1 build)",
       "status": "PASS"
     }
   ],
@@ -132,33 +132,35 @@
     },
     {
       "item": "the HTTP status of a REFUSED verdict",
-      "reason": "not stated by the order; see surprise NFRA_MCPORTAL-Z-W28-S1"
+      "reason": "resolved by MP-pd-4 AMENDMENT 1 (issuer): the gateway answers REFUSED with 409 and the verdict as the body; setPersonAccess reads it (f7760a6) and the refused-write test drives that 409 stub. The live writer is not checked here (no network call). Row NFRA_MCPORTAL-Z-W28-S1 stays ARMED under its disarm owner 2.0.0_SA_COO~MP"
     }
   ],
   "surprises": [
-    "NFRA_MCPORTAL-Z-W28-S1: the order does not say which HTTP status carries a REFUSED verdict; non-2xx throws AdminStatusError and a 2xx returns the verdict, so a REFUSED sent with a non-2xx shows its status and body, not its reason and detail (ARMED, disarm_owner 2.0.0_SA_COO~MP)",
-    "NFRA_MCPORTAL-Z-W28-S2: the admin.ts route header at 17dcbb2 omits GET /api/admin/people, which getPeople calls; not repaired here (OBSERVATION, INERT)"
+    "NFRA_MCPORTAL-Z-W28-S1: the order did not say which HTTP status carries a REFUSED verdict; the first build threw on every non-2xx. Answered by AMENDMENT 1 (409 with the verdict body) and built in f7760a6; the row stays ARMED under disarm_owner 2.0.0_SA_COO~MP for the issuer to disarm",
+    "NFRA_MCPORTAL-Z-W28-S2: the admin.ts route header at 17dcbb2 omits GET /api/admin/people, which getPeople calls; not repaired here (OBSERVATION, INERT)",
+    "NFRA_MCPORTAL-Z-W28-S3: the check script's printed 'bun test rc' is the exit status of its trailing tr/sed stage, not bun's; the verdict still fails closed on the parsed pass and fail counts (OBSERVATION, INERT); not repaired here, the script is outside the write paths",
+    "NFRA_MCPORTAL-Z-W28-S4: the <status> flip to complete lives in the task-order file, which is outside <paths>; not flipped by this worker (OBSERVATION, INERT); left for the COO"
   ],
   "compiler_tools": [
     {
       "tool": "git -C mcportal commit (nested repo, plain git, author set to the serial)",
-      "invocation": "git -c user.name=0.9.0_WK_NFRA_MCPORTAL~28 -c user.email=0.9.0_WK_NFRA_MCPORTAL~28@opal.agent commit --author \"0.9.0_WK_NFRA_MCPORTAL~28 <0.9.0_WK_NFRA_MCPORTAL~28@opal.agent>\" -F <message file>",
-      "result": "c24bcd0 then 5ca6596 on wk-NFRA_MCPORTAL-pd-28-mcportal over 17dcbb2; LOCAL, not pushed"
+      "invocation": "git -C C:/tmp/mp-pd-28/mcportal commit --author=\"0.9.0_WK_NFRA_MCPORTAL~28 <0.9.0_WK_NFRA_MCPORTAL~28@opal.agent>\" -F <message file>",
+      "result": "c24bcd0 and 5ca6596 (prior worker) then f7760a6 on wk-NFRA_MCPORTAL-pd-28-mcportal over 17dcbb2; LOCAL, not pushed"
     },
     {
       "tool": "node_modules/.bin/tsc --noEmit -p tsconfig.app.json (existing linked install; no bun install)",
       "invocation": "cd mcportal && timeout 120 node_modules/.bin/tsc --noEmit -p tsconfig.app.json",
-      "result": "rc=0, no output, on c24bcd0 (the later header commit is a comment only)"
+      "result": "rc=0, no output, on f7760a6"
     }
   ],
   "controls": {
     "determinism": {
-      "method": "pd4.AC1.sh run twice on the final tree (mcportal 5ca6596): once after the first commit and again at proof time",
+      "method": "pd4.AC1.sh run twice on the final tree (mcportal f7760a6): once after the AMENDMENT 1 commit and again at proof time",
       "observed": "both RESULT: PASS exit=0 (51 pass, 0 fail, 8 of 8 named)",
       "status": "STABLE"
     },
     "mutant": {
-      "description": "renamed the named test 'stop and restore post the change with the expected revision' in every occurrence in people.test.tsx (the test call and its RAN log line), ran pd4.AC1.sh, restored the file from a saved copy; git status clean after",
+      "description": "run by the prior worker on c24bcd0, not re-run on f7760a6: renamed the named test 'stop and restore post the change with the expected revision' in every occurrence in people.test.tsx (the test call and its RAN log line), ran pd4.AC1.sh, restored the file from a saved copy; git status clean after",
       "expected": "the check reads 7 of 8 named tests and FAILs",
       "observed": "named tests present in sources 7 of 8; pass=51; fail=0; RESULT: FAIL; exit=1",
       "status": "FIRED-AS-EXPECTED"
