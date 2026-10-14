@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -32,7 +32,7 @@ comp-adversary: RUN -- by reading TO-EXERCISE-R28b's result (DOOR_RESULT.txt: D1
   </context>
 
   <the_act>
-    GO: both halves are signed. This order is STAGED: you start ONLY when 2.0.0_SA_COO~Y2 has MESSAGED you that leg L3 is closed (irpt-ycharts-generate at CodeSha256 5TRFZf6Grgd9V9jWBVu2QDPRVbgfWBjsuuw8rtf8hRA=: you read it yourself, read-only, at step 1). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
+    GO: both halves are signed. Leg L3 is CLOSED (your own report, AQ2 msg 7660; the issuer read irpt-ycharts-generate live: CodeSha256 5TRFZf6Grgd9V9jWBVu2QDPRVbgfWBjsuuw8rtf8hRA=, last modified 2026-10-14T13:03:45Z, 635191 bytes). The order is PENDING and this is the GO. Your R0f counts (0 of 56 in all six cells; only 5 profiles hold an explicit allowedFirmIds and none of them holds a partner row) mean the widening admits nobody today, so D1 needs exactly the synthetic profiles and partner rows this order mints: do not borrow any existing profile. Start at step 1 (you read the CodeSha256 yourself, read-only). Otherwise tell 2.0.0_SA_COO~Y2 and wait.
     1. Read the COO half and CTO half at HEAD. Read the three legs as closed, read-only (irpt-status yNpw441TP5aMGYuZqkHQAPjAiQJDEPk7q8kFeDiIRIg=; irpt-ycharts-generate 5TRFZf6Grgd9V9jWBVu2QDPRVbgfWBjsuuw8rtf8hRA=; the resident root 0485393f3a-r29 from YC2's D2_V1_INSTALL_R29.txt); anything else: STOP, report. Read your own grants as met (DynamoDB read, conditional put and conditional delete on the minted keys of opal-users-v2 and of the three firms' partner tables; the signing-key read; the intake store read and list). Open the NEVER-2 ledger irpt-r29-door-20261014 (legs M mint, D door, X removal) and commit it; read every live worktree's open deploy entries (git worktree list, then ls-tree) and print the denominator: an open entry naming opal-users-v2, a partner table or irpt-ycharts-generate is a STOP.
     2. ConsistentRead each IV key and the email-index (GSI) for each address: ABSENT. Any other state: STOP, nothing written. List the intake store's prefix for tenant 49financial and for cottonwood BEFORE (keys and VersionIds, counts printed) so the after-read can prove what the sitting wrote. Write the rows (conditions as above), read each back ConsistentRead. Mint the tokens.
     3. Create SYNTHETIC CSV files in your .scratch (outside the repository; round numbers, tickers SYNTHA SYNTHB SYNTHC style, no client data): a market-value file (the column headed Acct Market Value, one account) and a Shares file with a Shares column. Requests, each ONCE, at least 15 s apart: D1 (A uploads the market-value file; keep the input id and key), D2 (A analyses that input), D3 (B analyses A's input), D4 (C analyses A's input by its id, selected firm cottonwood), D5 (A uploads the Shares file), D6 (the internal viewer on the upload route with a market-value file, and on the analysis route; the second upload may store a second input only if the route stores one for an internal viewer: list it). Keep only status, finding code or state and the sha256 of each body.

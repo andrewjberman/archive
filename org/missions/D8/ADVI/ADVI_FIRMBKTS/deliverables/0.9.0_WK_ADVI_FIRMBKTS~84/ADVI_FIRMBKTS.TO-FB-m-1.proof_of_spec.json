@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-m-1.readiness-halt-guard",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_READYHALT.md",
+    "vintage_commit": "b1d703c1e1",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-m-1.readiness-halt-guard.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-m-1.readiness-halt-guard.md",
+    "group": "OTHER",
+    "vintage_commit": "b1d703c1e1"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~84",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/READINESS_SIGNAL.json",
+      "kind": "config_data",
+      "commit_or_etag": "7d01c4cfa8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 7d01c4cfa8 on wk-ADVI_FIRMBKTS-84 (LOCAL); chosen null; read-only S3 reads; no AWS write, no deploy, no invoke",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/READINESS_SIGNAL.md",
+      "kind": "doc",
+      "commit_or_etag": "7d01c4cfa8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 7d01c4cfa8 on wk-ADVI_FIRMBKTS-84 (LOCAL); the one-page record of the blocked choice",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_FIRMBKTS-D1-W84-S1 (BLOCKING, ARMED), -S2 and -S3 (OBSERVATION, INERT) appended in this commit (LOCAL)",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/wk-firmbkts-84 && timeout 120 python -m pytest infra/aws/lambda/inf-portal-publisher/tests/test_readiness_halt.py -q -- expect ^3 passed",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-84 && timeout 120 python -m pytest infra/aws/lambda/inf-portal-publisher/tests/test_readiness_halt.py -q",
+      "expect": "^3 passed",
+      "output_evidence": "ERROR: file or directory not found: infra/aws/lambda/inf-portal-publisher/tests/test_readiness_halt.py (rc=4, 'no tests ran in 0.00s'); reproduced on two runs",
+      "denominator": "0 of 3 tests collected (expected 3)",
+      "status": "FAIL",
+      "status_reason": "the test file was not written because no readiness signal qualifies; the STOP branch of the order applies (READINESS_SIGNAL.md, CTO decision needed)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "guarddiff against base blob 371eb01b42e5c1e4f6ce1c8ddac20071c0636762 -- expect ^GUARDDIFF: OK inserted=[0-9]+ changed=0$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-84 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py guarddiff --root C:/dev/wk-firmbkts-84 --file C:/dev/wk-firmbkts-84/infra/aws/lambda/inf-portal-publisher/lambda_function.py --base-blob 371eb01b42e5c1e4f6ce1c8ddac20071c0636762",
+      "output_evidence": "GUARDDIFF: FAIL inserted lines 0 (want 1 to 120) (rc=1); reproduced on two runs",
+      "denominator": "0 inserted lines of the 1 to 120 required; 0 changed lines; lambda_function.py unchanged from base 371eb01b42e5",
+      "status": "FAIL",
+      "status_reason": "no guard inserted: the order's STOP branch applies because no readiness signal qualifies (READINESS_SIGNAL.md, CTO decision needed)"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "r4_scope.py --root C:/dev/wk-firmbkts-84 with --allow for the deliverables folder, lambda_function.py, the tests folder and INVESTIGATION_v1.md -- expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-84 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-84 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/ --allow infra/aws/lambda/inf-portal-publisher/lambda_function.py --allow infra/aws/lambda/inf-portal-publisher/tests/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing",
+      "denominator": "3 changed files (READINESS_SIGNAL.json, READINESS_SIGNAL.md, INVESTIGATION_v1.md); 0 outside the write surface",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "no mutant applied: the order names no code path that a mutant could reach, because no guard was written",
+      "expected": "N/A",
+      "observed": "N/A: no mutant applied",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 pytest invocation and of the AC2 guarddiff invocation on the unchanged worktree, outputs and return codes compared",
+      "observed": "AC1 run 1 and run 2: rc=4, 'file or directory not found'; AC2 run 1 and run 2: 'GUARDDIFF: FAIL inserted lines 0', rc=1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "the guard helper _gold_ready and the handler call (FB-m-1 section 1a item 3)", "reason": "not written: the order's STOP branch applies because no signal object qualifies; the CTO decision is in READINESS_SIGNAL.md"},
+    {"item": "tests/test_readiness_halt.py (three tests)", "reason": "not written for the same reason; AC1 FAILs on the missing file"},
+    {"item": "the dispatch script edit that would write a new run-dated signal", "reason": "outside this order's paths (FB-m-1 section 1a item 1); a CTO option, not an act of this worker"},
+    {"item": "the data-frontier read in the publisher", "reason": "needs a calendar decision; the Lambda cannot import lib/trading_calendar.py; CTO option"},
+    {"item": "the live arm test and the live bucket read of a chosen signal", "reason": "no signal chosen; FB-m-2 reads the arms live"},
+    {"item": "status flip of the task order", "reason": "the order is not met (AC1 and AC2 FAIL); the order must stay open and the order says not to flip the status"}
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W84-S1: FB-m-1 premise fails: no opal-data-inf object is a chain-written, run-dated, single-writer readiness signal that the MDPF register does not class as a gate-read sidecar; the only run-dated chain-tail object is the eclipse status, which MDPF_REMEDIATION_REGISTER.md:198 and :226 class TRASH when read as a gate",
+    "ADVI_FIRMBKTS-D1-W84-S2: the gold chain freshness gate reads gold/artifacts/header_metrics.json, which returns 404, and treats the absence as a first run",
+    "ADVI_FIRMBKTS-D1-W84-S3: the eclipse status object is written after the best-effort eclipse steps; measured gap 9 s on 2026-10-14, worst case three bounded 600 s steps"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/READINESS_SIGNAL.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (.tools/aws, read verbs only)",
+      "invocation": "aws s3 ls s3://opal-data-inf/gold/ ; aws s3 ls s3://opal-data-inf/gold/meta/ ; aws s3 ls s3://opal-data-inf/gold/eclipse/_meta/ ; aws s3 ls s3://opal-data-inf/gold/artifacts/ ; aws s3 cp s3://opal-data-inf/<key> - for gold/meta/pipeline-complete.json, gold/meta/pull-complete.json, gold/eclipse/_meta/dispatch_eclipse_status.json ; aws s3api head-object gold/artifacts/header_metrics.json",
+      "result": "gold/meta/pipeline-complete.json run_date 2026-10-14 chain full; pull-complete run_date 2026-10-14; dispatch_eclipse_status overall ok chain full chain_exit 0; header_metrics.json 404 Not Found"
+    },
+    {
+      "tool": "git grep and reads of the dispatch script, the 49F terraform note, the INF_D_00/INF_D_10 sources and MDPF_REMEDIATION_REGISTER.md",
+      "invocation": "git grep -n on data/inf/scripts/gold and docs/architecture; Read on orion-gold-dispatch.sh and MDPF_REMEDIATION_REGISTER.md",
+      "result": "RUN_DATE at dispatch:71; sentinels at :1879 and :1905; eclipse status at :2027; register sidecar classing at :198 and :226"
+    },
+    {
+      "tool": "r8_checks.py guarddiff",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py guarddiff --root <worktree> --file <lambda_function.py> --base-blob 371eb01b42e5c1e4f6ce1c8ddac20071c0636762",
+      "result": "GUARDDIFF: FAIL inserted lines 0 (want 1 to 120)"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root <worktree> --allow <deliverables folder> --allow <lambda_function.py> --allow <tests folder> --allow <INVESTIGATION_v1.md>",
+      "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~84 <0.9.0_WK_ADVI_FIRMBKTS~84@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 7d01c4cfa8 (READINESS_SIGNAL.json, READINESS_SIGNAL.md, LOCAL)"
+    }
+  ]
+}
