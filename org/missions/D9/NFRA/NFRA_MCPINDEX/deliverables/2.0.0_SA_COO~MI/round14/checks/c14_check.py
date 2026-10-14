@@ -55,6 +55,8 @@ def leaves(x, path=""):
                 yield p
     elif isinstance(x, str):
         yield path, x
+        for q in glib.quoted_carriers(x):
+            yield path + "/quoted", q
 
 
 def ac1(d, allc):
