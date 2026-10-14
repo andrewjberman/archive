@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -841,6 +841,63 @@ def main(argv):
                 problems.append("tests: failures must be zero or explained one by one")
             if not tests.get("passed"):
                 problems.append("tests.passed must be a positive count")
+    elif check == "y301-scripts":
+        import hashlib
+        import tarfile
+        rec = load(root, D.replace("/r21/", "/r31/") % "119" + "RESIDENT_APPLY_SCRIPTS.json", problems)
+        HOST_SHA = "bbead0d2b560ca49be3ab1e758d3111c22174e755771a46bce23ae3977122832"
+        TARBALL = "C:/dev/irpt-release-r28/irpt-resident-0485393f3a-r28.tar.gz"
+        SUMS = "C:/dev/irpt-release-r28/irpt-resident-0485393f3a-r28.package.SHA256SUMS"
+        if rec:
+            for member in ("scripts", "sums_file", "host_script", "tarball", "guard_dry_run", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not Path(SUMS).is_file():
+                problems.append("the staged sums file %s does not exist" % SUMS)
+                sums_sha = None
+            else:
+                sums_sha = hashlib.sha256(Path(SUMS).read_bytes()).hexdigest()
+                with tarfile.open(TARBALL, "r:gz") as t:
+                    inner = [m for m in t.getmembers() if m.isfile() and m.name.split("/", 1)[-1] == "SHA256SUMS"]
+                    inner_bytes = t.extractfile(inner[0]).read() if inner else b""
+                if hashlib.sha256(inner_bytes).hexdigest() != sums_sha:
+                    problems.append("the staged sums file is not the tarball's own SHA256SUMS member")
+                nlines = len(Path(SUMS).read_text(encoding="utf-8").splitlines())
+                print("sums file sha256 %s lines %d" % (sums_sha, nlines))
+                if nlines != 298:
+                    problems.append("the sums file must have 298 lines (got %d)" % nlines)
+                if str((rec.get("sums_file") or {}).get("sha256", "")).lower() != sums_sha:
+                    problems.append("the record's sums_file.sha256 is not the staged file's")
+            got = {x.get("name"): x for x in (rec.get("scripts") or [])}
+            for name in ("pre_read_r28.sh", "install_r28.sh", "rollback_r28.sh"):
+                x = got.get(name)
+                if not x:
+                    problems.append("no script record for %s" % name)
+                    continue
+                fp = root / x.get("path", "")
+                if not fp.is_file():
+                    problems.append("%s does not exist at %s" % (name, x.get("path")))
+                    continue
+                data = fp.read_bytes()
+                if hashlib.sha256(data).hexdigest() != str(x.get("sha256", "")).lower():
+                    problems.append("%s hashes to %s, the record says %s" % (name, hashlib.sha256(data).hexdigest(), x.get("sha256")))
+                if any(b > 127 for b in data):
+                    problems.append("%s carries non-ASCII bytes" % name)
+                rc = subprocess.run(["bash", "-n", str(fp)], capture_output=True, text=True).returncode
+                if rc != 0:
+                    problems.append("bash -n %s rc %d" % (name, rc))
+                text = data.decode("utf-8", errors="replace")
+                if name == "install_r28.sh":
+                    if HOST_SHA not in text:
+                        problems.append("install_r28.sh does not carry the signed host script sha256")
+                    if sums_sha and sums_sha not in text:
+                        problems.append("install_r28.sh does not carry the staged sums file's real sha256")
+                    if "0485393f3a-r28" not in text or "0485393f3a-r19" not in text:
+                        problems.append("install_r28.sh must name the new and the rollback root")
+                if name == "pre_read_r28.sh" and text.count("STOP-READ") < 5:
+                    problems.append("pre_read_r28.sh must carry the five stop-reads")
+            if not (rec.get("guard_dry_run") or {}).get("one_byte_change_refused"):
+                problems.append("guard_dry_run.one_byte_change_refused must be true")
     return finish(check, problems)
 
 
