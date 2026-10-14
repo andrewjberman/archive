@@ -1,0 +1,14 @@
+BP-c-3 FWD-7 packet (0.9.0_WK_ADVI_BDPRCE~22), session log. Read-only: no AWS call, no served write, no producer run.
+
+1. Worktree check: branch wk-ADVI_BDPRCE-22; org and .tools present (TREE-OK). Premises re-grounded against the merged R1.3 records (deliverables ~21, commit 6002ee6dcc) and the census (deliverables ~7, commit e7588a0117).
+2. sha256 checks: C:/dev/wk-bdprce-r2-7-data/lot_extract.csv = e7e618d76516c8b7977179aefb3f77ce4fc13c17fbcf1dbeb92001a6e0a2b50b (equal to CENSUS.json extract_sha256). BEFORE_AFTER3.csv = 0dfcd23d...937a (equal to REPLAY3.json list_sha256). ESTIMATED_ROWS3.csv = 8c07ccc1...94dc. UNIT_MAP.csv = c47ce738...435e.
+3. Snapshot: lot counts by data_as_of over 198,295 lots; 2026-10-09 carries 196,675 (share 0.991830); 1,620 lots outside.
+4. packet3_compute.py (committed beside this log) computes the snapshot effect with Decimal arithmetic, the lot-price and served market_value bases beside the headline, the market_value identity, the movers, the NOT_RECOMPUTABLE counts and the interpolated fates. It writes PACKET3.json and MOVERS3.csv. Run at its own path: python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~22/packet3_compute.py
+5. Independent recomputation (a separate pass over the extract with Fraction arithmetic, not the script): total 90964.7617407115 over 819 lots and 9 assets with lots, 15 names; touched value 15095778.5038341. Equal to the script.
+6. Readers: PRD reads (ADVI_BDPRCE_PRD.md CONTRACTS, Not in scope, DEC-6, DEC-7; MDPF_SECCLASS_PRD.md:744; IRPT_DASHBD_PRD.md:1) and native pathed greps of portal/src/pages/InvestorReporting, infra/aws/lambda/exec-summary-generator, data/inf/scripts/gold and data/black_diamond/scripts/gold/B_03.account_gains.py. Lines in readers3.json.
+7. AC1: r3_checks.py packet3 -> "PACKET3 record ok changed=15 assets=15 readers=7 interpolated=18397 served_write=false", rc 0.
+8. Mutant control: PACKET3.json copied to .scratch with served_write true; packet3 -> "PACKET3 record FAIL amendment must be R1.3 and served_write false", rc 1 (FIRED).
+9. Determinism: packet3_compute.py run twice; MOVERS3.csv md5 6fab5f7df3d098ea0279ef3c6bd5618d both times; numbers md5 28dc4cd3ca42b45ae0016bb1fd307339 both times (read_at excluded).
+10. AC2: r4_scope.py --root <worktree> with the two --allow paths -> "ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing", rc 0 (before the commits).
+11. Surprise rows ADVI_BDPRCE-D1-W22-S1..S5 appended to INVESTIGATION_v1.md (lot price basis; 15 not 25 movers; 34 nan lots; interpolated snapshot moves outside the headline; no verbatim decision sentence in the order).
+12. Order <status> is NOT flipped (the issuer's instruction for this run).
