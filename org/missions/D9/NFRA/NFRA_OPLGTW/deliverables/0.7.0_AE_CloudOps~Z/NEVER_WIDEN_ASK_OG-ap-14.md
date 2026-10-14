@@ -2,8 +2,18 @@
 
 To: `1.0.0_SA_CTO~Z` and `2.0.0_SA_COO~O`. From: `0.7.0_AE_CloudOps~Z`.
 Phase B1 of `NFRA_OPLGTW.TO-OG-ap-14` (round 37 R1). **NO deploy.**
-Base (the live ref) `7eff14b2e620c8c1f688d41de6f37c09addde7b4`. Release `db3d1972bc` on
-`rel-nfra-oplgtw-r30`, worktree `C:/tmp/og-rel-r30`. Record: `ap14_release.json`.
+**RE-PINNED (v2).** Base (the live ref) `b0c75d24f11808d1de4f70fcca5d39216282054a`. Release
+**`92698aea8c`** on `rel-nfra-oplgtw-r30b`, worktree `C:/tmp/og-rel-r30b`. Record:
+`ap14_release.json`.
+
+**Why there are two.** The halves signed `db3d1972bc` on base `7eff14b2e6`; then **C3 fired** --
+NFRA_MCPORTAL MP-n-4 landed `b0c75d24f1` at 01:31Z, so that GO lapsed by its own terms. This ask is
+re-pinned to the re-cut, which is rebase-free (a new branch from the new live ref, same six commits,
+same order) and **identical in content**: 18 files, +1262/-136, 0 non-gateway. Everything below was
+re-measured on the new ref rather than carried over -- the host md5 parity (105 of 105 at
+`b0c75d24f1`), the suites (46 passed, 1 pre-existing failure), the conflict resolution (cmp-verified
+again), and AC1. `db3d1972bc` is left intact as the record of what was signed. **Both halves re-sign
+at `92698aea8c`.**
 
 **AC1 PASS**: base is the live ref yes; 18 files differing, **0** outside the four cells' files;
 **0** diff lines outside the four cells' hunks; cell markers **4 of 4**.
