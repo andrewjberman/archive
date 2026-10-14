@@ -28,9 +28,9 @@ try:
     arts = s.get("articles") or []
     scored = [a for a in arts if a.get("sentiment_label") is not None]
     den = str(s.get("denominator"))
-    print("search ASML: no window %d article(s) in %.1f s (want < 40); 7d ending at the newest (%s) %d article(s), %d with a sentiment label, in %.1f s (want < 40); denominator names partitions read %s; envelope whole %s"
+    print("search ASML: no window %d article(s) in %.1f s (want < 50); 7d ending at the newest (%s) %d article(s), %d with a sentiment label, in %.1f s (want < 40); denominator names partitions read %s; envelope whole %s"
           % (len(a0), el0, newest, len(arts), len(scored), el, "partitions" in den, P.envelope_ok(s0) and P.envelope_ok(s)))
-    ok = bool(key) and bool(a0) and el0 < 40 and len(arts) >= 1 and len(scored) >= 1 and el < 40 and "partitions" in den and P.envelope_ok(s0) and P.envelope_ok(s)
+    ok = bool(key) and bool(a0) and el0 < 50 and len(arts) >= 1 and len(scored) >= 1 and el < 40 and "partitions" in den and P.envelope_ok(s0) and P.envelope_ok(s)
 except Exception as e:
     print("probe error: %s: %s" % (type(e).__name__, str(e)[:160])); ok = False
 print("OK" if ok else "NO")

@@ -1,0 +1,38 @@
+{
+ "bucket_template": "opal-data-{firm}",
+ "buckets": {
+  "49financial": "opal-data-49financial",
+  "inflection": "opal-data-inflection",
+  "cottonwood": "opal-data-cottonwood"
+ },
+ "key_template": "portal/{firm}/state/ticket_attachments/trade-form/",
+ "tier": "state",
+ "tier_rule": "R21 (infra/logic/02_DOCTRINE.md:588-597): a per-request ticket upload is workflow intake keyed by the request, and state lives in the bucket whose tenancy it belongs to (infra/logic/registry/tiers.json homes.FIRM.state = scope), so each served firm homes its attachments in its own bucket, one template over the firm id.",
+ "source": "portal",
+ "table": "ticket_attachments",
+ "partition": "trade-form",
+ "addresses": {
+  "49financial": "s3://opal-data-49financial/portal/49financial/state/ticket_attachments/trade-form",
+  "inflection": "s3://opal-data-inflection/portal/inflection/state/ticket_attachments/trade-form",
+  "cottonwood": "s3://opal-data-cottonwood/portal/cottonwood/state/ticket_attachments/trade-form"
+ },
+ "builder_calls": [
+  "address(\"portal\", \"49financial\", \"state\", \"ticket_attachments\", \"trade-form\")",
+  "address(\"portal\", \"inflection\", \"state\", \"ticket_attachments\", \"trade-form\")",
+  "address(\"portal\", \"cottonwood\", \"state\", \"ticket_attachments\", \"trade-form\")"
+ ],
+ "registry_rows_added": [],
+ "validate_rc": 0,
+ "claim": "This proves that lib/opal_naming.address() returns, for the state tier of the three served firms, one bucket per firm that one template (opal-data-{firm}) reproduces, and one key that one template (portal/{firm}/state/ticket_attachments/trade-form/) reproduces, and that the registry validates (rc 0, 0 warnings). It does NOT prove that any bucket exists, nor its policy, CORS or lifecycle; those are not created or checked here, and no AWS or network call was made. It does not prove the Lambda or Terraform reads these values (TO-R18-TR2 and TO-R18-TR3).",
+ "not_read": [
+  "the live S3 buckets opal-data-49financial, opal-data-inflection, opal-data-cottonwood: existence, policy, CORS, lifecycle",
+  "infra/aws/terraform/ticket-center/main.tf and every other Terraform file",
+  "the ticket Lambda source under infra/aws/lambda/ticket_center/",
+  "lib/opal_naming.py beyond address() and validate (read only; not edited)",
+  "infra/logic/06_CONFORMANCE_LEDGER.md (no ruling needed: the tier decision cites R21 and tiers.json only)"
+ ],
+ "row_status": {
+  "TCKT_VNEXT-D2-W43-S1": "ANSWERED by TO-R18-TR1 AMENDMENT 1 (issuer 2.0.0_SA_COO~V2, 2026-10-14): the state tier homes a bucket per firm, and the cell is re-cut to one bucket_template (opal-data-{firm}) and one key_template. The row is kept unedited (committed at c5c3e453d2; line endings restored at 7dfcf9bc5c).",
+  "TCKT_VNEXT-D2-W43-S2": "ANSWERED by TO-R18-TR1 AMENDMENT 2 (issuer 2.0.0_SA_COO~V2, 2026-10-14): the naming gate refused the kebab-case table ticket-attachments (NAMING_SCHEMA key.table_case is snake_case). The table is now ticket_attachments; the bucket template and buckets are unchanged; the key template is portal/{firm}/state/ticket_attachments/trade-form/. The row is kept unedited (committed at 9d5f5a04dd)."
+ }
+}
