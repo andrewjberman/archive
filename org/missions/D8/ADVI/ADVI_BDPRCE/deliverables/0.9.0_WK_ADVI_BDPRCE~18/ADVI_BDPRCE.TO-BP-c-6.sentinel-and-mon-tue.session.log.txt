@@ -1,0 +1,25 @@
+Session log -- 0.9.0_WK_ADVI_BDPRCE~18 on ADVI_BDPRCE.TO-BP-c-6 (round 3, read-only). Worktree C:/dev/wk-bdprce-r3-18, branch wk-ADVI_BDPRCE-18, base 33b647a50f.
+
+1. Tree check: branch wk-ADVI_BDPRCE-18; org and .tools present (TREE-OK).
+2. aws lambda get-function-configuration bd-49f-runner: LastModified 2026-10-07T00:50:44.000+0000; CodeSha256 9PbO1/mVokBTWGNn8NjjTyjkhWvBdZ6pZk2zcCE0/eY=; role bd-49f-runner-role.
+3. aws lambda get-function: Code.Location downloaded to the data folder (6936 bytes). base64 sha256 of the zip equals CodeSha256. lambda_function.py md5 968b33e2e14b0a1e0416445c7da19d98 = git show 3709ae40d6 = git show 33b647a50f.
+4. aws iam list-attached-role-policies / list-role-policies / get-role-policy on bd-49f-runner-role: attached AWSLambdaBasicExecutionRole; inline bd-49f-runner-policy with ReadBackBdBronzeSentinel (GetObject on bronze/*/_BRONZE_COMPLETE.json).
+5. aws s3api get-object code/bronze/cot_bronze_ingest.py: ETag a1d81b96e8b679142176ad827af2c00d = md5 of repo file at 33b647a50f.
+6. aws logs describe-log-groups: retentionInDays 14. Oldest readable event (start 2026-09-14, limit 1): 2026-10-01T00:00:19Z.
+7. aws logs filter-log-events on bd-49f-runner, pattern "bronze sentinel" from 2026-09-14: 21 lines for 2026-10-01 to 2026-10-14 (14 run dates).
+8. aws logs filter-log-events pattern RESULT: 14 lines; sentinel emitted on 2026-10-08 to 2026-10-14.
+9. aws logs filter-log-events pattern "txn chunk" from 2026-10-01: newest chunk per run date recorded (10-12 [10-10..10-12] event prefix 399576550229; 10-13 [10-11..10-13] event prefix 399595818161).
+10. aws logs filter-log-events pattern "0 data rows" from 2026-10-01: 10-05, 10-06, 10-12, 10-13 WARN lines.
+11. aws s3api head-object bronze/<date>/_BRONZE_COMPLETE.json for 2026-09-14 to 2026-10-14: present on 09-16 to 09-20, 09-23 to 09-27, 09-30 to 10-04, 10-07 to 10-14; absent (404) on 09-14, 09-15, 09-21, 09-22, 09-28, 09-29, 10-05, 10-06.
+12. aws s3api list-object-versions bronze/2026-09-14/ and bronze/2026-09-15/: zero versions, zero delete markers.
+13. aws s3api list-object-versions forwardfill_v2/transactions/TRANSACTIONS_DAILY_ (422 versions, 113 keys): first version per run date read; Monday and Tuesday first versions 4354 to 4358 bytes.
+14. aws s3api get-object by VersionId (first versions of 10-06, 10-07, 10-08, 10-11, 10-12, 10-13, 10-14) to the data folder. Read-only: python -I .scratch/parse_xlsx.py and .scratch/stream_dates.py counted the Return Date and Trade Date values only.
+    10-11 (Sun): Return Date 10/09; Trade Date 10/09 6264, 10/08 10, 10/07 4.
+    10-14 (Wed): Return Date 10/12; Trade Date 10/12 2804, 10/09 52, 10/10 32, 10/08 22, 10/11 6, 10/01 5; no 10/13.
+    10-07 (Wed): Return Date 10/05; Trade Date 10/05 68474 and earlier; no 10/06.
+    10-08 (Thu): Return Date 10/06; Trade Date 10/06 119944, 10/05 14, 10/02 4, 09/30 5.
+    10-12 and 10-13 (Mon, Tue): header only; 10-06 (Tue): header only.
+15. git show 3709ae40d6^ lambda_function.py (positive control: lines 206-207 read emit_bronze_sentinel then an unconditional OK print).
+16. git log -S asOfDate on the runner file: no commit (empty). Positive control git log -S _window_for on the same file: 9d44d6af5b, f6ca77914b.
+17. AC1 grader (r3_checks.py sentinel) on SENTINEL.json: rc=0. Mutants in .scratch: put-object in calls -> FAIL rc=1; rerun true -> FAIL rc=1. Determinism: two runs byte-equal.
+18. Scratch files (.scratch/, gitignored) and downloads (C:/dev/wk-bdprce-r3-18-data/) are outside the commit. No AWS write verb, invoke, export or producer run was issued.
