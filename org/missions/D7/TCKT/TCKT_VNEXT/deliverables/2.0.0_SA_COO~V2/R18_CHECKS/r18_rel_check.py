@@ -57,7 +57,7 @@ def main():
         if cfg.get("CodeSha256") != res["code_sha256_after"]:
             print("REL-BAD live CodeSha256 %s is not the recorded after-hash" % cfg.get("CodeSha256"))
             return 1
-        if env.get("TICKET_ATTACH_BUCKET") != rec["bucket"] or env.get("TICKET_ATTACH_KEY_TEMPLATE") != rec["key_template"]:
+        if env.get("TICKET_ATTACH_BUCKET_TEMPLATE") != rec["bucket_template"] or env.get("TICKET_ATTACH_KEY_TEMPLATE") != rec["key_template"]:
             print("REL-BAD the two attachment environment variables differ from the builder record")
             return 1
         matrix = json.loads(env.get("ROUTING_MATRIX") or "{}")
@@ -83,7 +83,7 @@ def main():
         if sorted(acts) != ["s3:GetObject", "s3:PutObject"]:
             print("REL-BAD the statement's actions are %r" % (acts,))
             return 1
-        want = sorted("arn:aws:s3:::%s/%s*" % (rec["bucket"], rec["key_template"].format(firm=f)) for f in FIRMS)
+        want = sorted("arn:aws:s3:::%s/%s*" % (rec["buckets"][f], rec["key_template"].format(firm=f)) for f in FIRMS)
         have = st["Resource"] if isinstance(st["Resource"], list) else [st["Resource"]]
         if sorted(have) != want:
             print("REL-BAD the statement's resources differ from the three firm prefixes")
