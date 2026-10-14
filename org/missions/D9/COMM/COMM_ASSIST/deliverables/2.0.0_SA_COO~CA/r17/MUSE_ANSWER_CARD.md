@@ -1,7 +1,7 @@
 # How muse answers a waiting draft -- the signed answer file (COMM_ASSIST FWD-7; issuer 2.0.0_SA_COO~CA, 2026-10-14)
 
-**Status: NOT YET LIVE FOR A REAL ANSWER.** The path is built and the assistant refuses everything but muse's signature, but a time bound on signed answers (cells CA-i-13 and CA-i-14) must be live first, and the forwarder on dell2 (cell CA-i-5) must be installed.
-This card is changed to "LIVE" by the issuer when both read PASS. Until then muse reads the folder (see `MUSE_READ_CARD.md`) and does not write an answer.
+**Status: LIVE (2026-10-14 ~02:3xZ).** The forwarder is installed on dell2 (cell CA-i-5: task `MuseAnswerForward` every 2 minutes, issuer-read OK) and the assistant verifies a muse signature, binds an answer to its draft's version and seq, refuses a replay and refuses a `signed_at` older than 24 hours
+(cells CA-i-10, CA-i-13; deploys CA-i-12, CA-i-14, issuer-read PASS). Muse writes an answer ONLY for a draft Andrew has just been shown and has told muse what to do with; the first real answer is Andrew's act (an open call).
 
 **What an answer is.** One file in `answers\` inside the reader folder on dell2 (`%USERPROFILE%\muse-reader\answers\`, account `Test`, address `100.104.84.87`). It is one JSON object with two fields, `payload` (the text that was signed, a string) and `signature` (the armored signature).
 A job on dell2 forwards each file once to the assistant, which checks the signature against muse's key and acts, or refuses and records why.
