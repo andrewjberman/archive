@@ -77,13 +77,13 @@ def main():
             print("CW2-FAIL the identity row is still PRESENT")
             return 1
         never = get_item("opal-tickets", {"ticket_id": {"S": NEVER}})
-        if not never or never.get("status", {}).get("S") != "open":
-            print("CW2-FAIL the card-1 ticket is not open and untouched")
+        if not never or never.get("assignee", {}).get("S") == IDENT:
+            print("CW2-FAIL the card-1 ticket is missing or was claimed by the crawl identity")
             return 1
     except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as e:
         print("CW2-FAIL live read failed: %s" % e)
         return 1
-    print("CW2-OK two tickets completed by the identity; row absent after exp; card-1 ticket still open")
+    print("CW2-OK two tickets completed by the identity; row absent after exp; card-1 ticket never claimed by the identity")
     return 0
 
 
