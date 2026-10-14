@@ -1,0 +1,85 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-331",
+  "cell": "AR-y-331",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~139",
+  "branch": "wk-IRPT_ANLREQ-139",
+  "base": "83c98f380de89ba87d334ecfba1e3da8f16431b5",
+  "base_note": "the parent of the first commit of this order (amendment 1 on the worker branch, 83c98f380d); the cell's own read base is 9fb149ec07 (AR-y-329)",
+  "commit": "2a535a7859da5009f98e9a9448056f0efecd4143",
+  "commit_subject": "route(IRPT_ANLREQ TO-AR-y-331, 0.9.0_WK_IRPT_ANLREQ~139): analysis-request-commentary-pdf, the owned commentary PDF route (source and tests; nothing deployed)",
+  "push_state": "LOCAL on wk-IRPT_ANLREQ-139 (not pushed, not deployed)",
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/_authz/tests/test_svc_custody_statement.py",
+    "infra/aws/lambda/investor-reporting/ops/entry.py",
+    "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+    "infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_route.py",
+    "infra/aws/lambda/investor-reporting/reports/status_installed.py",
+    "infra/aws/lambda/investor-reporting/reports/tests/test_status_installed.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_commentary_logical_id_matches_ops.py"
+  ],
+  "diff_stat": "7 files changed, 311 insertions(+), 4 deletions(-) (git diff --stat 83c98f380d 2a535a7859)",
+  "contract": {
+    "operation": "analysis-request-commentary-pdf",
+    "route": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/commentary-pdf",
+    "mode": "OWNED_RECORD",
+    "parameter": "requestId",
+    "response_shape": "the analysis-request-pdf shape: {download_route: {url, expires_at}, sha256, byte_length}",
+    "refusals": {
+      "no commentary ref, or the commentary PDF not retained": "COMMENTARY_PDF_NOT_RETAINED (AnalysisUnavailable, NOT_FOUND class)",
+      "commentary ref malformed or artifact binding mismatch": "COMMENTARY_PDF_BINDING (RequestReadRefused)",
+      "owner gate": "the same refusals as pdf, through the same _materialize and _final re-reads"
+    },
+    "family": "YCHARTS_OPAL_REPORT",
+    "logical_id": "<request_id>-commentary-<commentary sha256>",
+    "family_constant": "no shared constant is importable from ops/: status_installed.RESEARCH_FAMILY exists, but status_installed imports owned_report (a cycle), so owned_report.COMMENTARY_FAMILY is typed locally and ycharts/research/tests/test_commentary_logical_id_matches_ops.py asserts it equals opal_producer.OPAL_FAMILY"
+  },
+  "tests": {
+    "added": [
+      "ops/tests/test_commentary_pdf_route.py: 6 cases, (a) test_the_owner_gets_a_signed_link_to_the_retained_commentary_artifact, (b) test_a_non_owner_is_refused_exactly_as_the_report_pdf_is, (c) test_an_opal_global_viewer_meets_the_same_owner_gate_as_the_report_pdf, (d) test_no_commentary_ref_or_no_retained_commentary_pdf_is_refused_by_name, (e) test_the_route_is_registered_with_the_owned_record_mode_and_the_request_id_parameter, (f) test_the_commentary_pdf_route_serves_the_commentary_artifact_never_the_reports_own_pdf",
+      "ycharts/research/tests/test_commentary_logical_id_matches_ops.py: 3 cases, (g) the cross-check (three pairs and the family) and a control (the commentary id is not the package id)"
+    ],
+    "passed": {
+      "new_route_file": 6,
+      "cross_check_file": 3,
+      "ops/tests": 319,
+      "reports/tests": 208,
+      "_authz/tests": 353,
+      "_contracts/tests": 122,
+      "ycharts/research/tests": 333
+    },
+    "skipped": {"ops/tests": 22},
+    "failed": {
+      "_authz/tests": 1,
+      "_contracts/tests": 4,
+      "failing_cases": [
+        "_authz/tests/test_unguarded_census.py::test_every_entry_carries_the_published_route_table_it_serves (row IRPT_ANLREQ-D2-W139-S2: routes.json does not publish the route; docs/ is outside the grant)",
+        "_contracts/tests/test_seam_paired.py::test_the_consumer_fixture_source_is_named_and_non_empty (19 != 12; row S6, no clean base run)",
+        "_contracts/tests/test_seam_paired.py::test_the_operation_map_covers_the_consumers_own_denominator (row S6)",
+        "_contracts/tests/test_seam_paired.py::test_every_declared_route_has_a_response_contract_whose_refs_resolve (analysis-request-original has no response schema, routes.json:246; row S6)",
+        "_contracts/tests/test_seam_paired.py::test_control_a_known_good_document_conforms_and_a_known_bad_one_does_not[analysis-request-original] (row S6)"
+      ]
+    },
+    "folders": ["ops/tests", "reports/tests", "_authz/tests", "_contracts/tests", "ycharts/research/tests"],
+    "run_note": "each folder run in its own pytest process: one process over several folders collides on the module name 'entry' (pre-existing; not a change of this order)"
+  },
+  "before_arm": {
+    "base": "83c98f380de89ba87d334ecfba1e3da8f16431b5",
+    "method": "git archive of infra/aws/lambda/investor-reporting, docs/contracts/investor-reporting, infra/aws/lambda/ci and data/firm_registry.json at the base, extracted to .scratch/before; the new test files copied in; no worktree checkout",
+    "route_file": "6 failed of 6: (a) AttributeError commentary_pdf; (b) AttributeError (the refusal comparison); (c) AttributeError; (d) AttributeError; (e) KeyError on the commentary-pdf route; (f) AttributeError. (The cell expected (a), (d), (e), (f) to fail; (b) and (c) also fail on base, on the missing method, not on a gate.)",
+    "cross_check_file": "2 failed of 3: test_commentary_logical_id_matches_the_producer_for_three_pairs and test_commentary_family_matches_the_producer (AttributeError: owned_report has no COMMENTARY_FAMILY); the control passes"
+  },
+  "mutant": {
+    "check": "deliverables/0.9.0_WK_IRPT_ANLREQ~139/mutant_check.py",
+    "copy": ".scratch/mutant_check/infra/aws/lambda/investor-reporting (outside the product tree; the copy keeps the repository depth)",
+    "control": "6 passed (unmutated copy)",
+    "mutant": "commentary_pdf made to call pdf (the report's own protected PDF): 3 failed, 3 passed; the failing cases are (a), (d) and (f)",
+    "verdict": "MUTANT-FIRES"
+  },
+  "existing_tests_repinned": [
+    "reports/tests/test_status_installed.py: the operation set gains analysis-request-commentary-pdf; route count 7 to 8 (test renamed to ...six_operations...); owner_read_modes gains the new operation at OWNED_RECORD",
+    "_authz/tests/test_svc_custody_statement.py: the closed-grant loop gains the new route and operation, so the custody statement's grant is pinned as NOT including it (no count pinned here)"
+  ],
+  "source_map_edit": "none. Ruling AMENDMENT 1 (2.0.0_SA_COO~Y2): the irpt-status source map (infra/aws/lambda/ci/lambda-source-map.json) and _keys/keys.py are not touched; the commentary logical-id rule and the family are typed LOCAL in ops/owned_report.py, and the cross-check test guards them against opal_producer.",
+  "claim": "The route, the reader method, the handler, the table rows and their tests are committed LOCAL on wk-IRPT_ANLREQ-139 at 2a535a7859. The route is NOT servable yet: (1) PdfSigner refuses the family YCHARTS_OPAL_REPORT (ops/pdf_link.py FAMILIES, outside the grant; row S3, BLOCKING); (2) the route is not published in docs/contracts/investor-reporting/v1/routes.json, so the published-table census test fails (row S2, BLOCKING). The order is therefore NOT closed.",
+  "not_read": "the live route and API Gateway integration; the deployed irpt-status and resident bytes; the concrete authorizer the composition installs (resident_installed.make_authorize was not traced for this route); the stored commentary artifacts and their destination keys under reporting_destination for YCHARTS_OPAL_REPORT; whether the destination key equals the blob key (needed by PdfSigner); the portal (no portal file changed; portal/ is ' M' in the worktree and was not committed); the admitted side of OPAL_GLOBAL (the offline world refuses both routes identically); AWS (no call was made)."
+}
