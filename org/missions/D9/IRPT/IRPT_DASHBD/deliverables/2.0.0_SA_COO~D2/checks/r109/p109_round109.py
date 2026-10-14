@@ -2,7 +2,7 @@
 
   DB-b-213 (issuer, DIRECT ACT, done first) the W171-S4 read gate: the four alien Orion silver objects are Inflection's own surplus (ALIEN_READ_R109.json), so the render proceeds
                    with the guard state named.
-  DB-b-214 (~173)  the Inflection SAMPLE: one household built in memory from Inflection's own silver (account_dim adapter + Orion/Eclipse reads), the household return from Orion's
+  DB-b-214 (~173)  the Inflection SAMPLE: one household built in memory from Inflection's own silver (account_dim adapter + Orion/Eclipse reads), the household return stays absent by contract (the CTO's decision to fill it)
                    client-keyed performance with its source, account returns NO_SOURCE_YET in plain words, lots NO_LOTS in plain words, passing the whole-document rule.   DB109-1-AC1
   DB-b-215 (~173)  the RENDER of that sample through the 49 Financial layout and the whole-document and note-level rules, in the Inflection firm title; private folder only. DB109-2-AC1 (+ J1, the CVO's)
   DB-b-216 (~174)  the ACCOUNT-RETURN DERIVATION (the method of the existing daily TWR engine as a pure function, from Orion positions and transactions) and the TIE-OUT READ
@@ -148,11 +148,17 @@ def check_sample(root):
         v = vals[mid]
         leaves = list(v["by_row"].values()) if isinstance(v, dict) and "by_row" in v else [v]
         need(all(P5.is_absent_k(x) and x["kind"] == "NO_SOURCE_YET" for x in leaves), "%s: the split columns stay NO_SOURCE_YET (as for 49 Financial)" % mid)
-    # the household return: from Orion's client-keyed performance, with its source; and the ending value filled
+    # the household return stays ABSENT BY CONTRACT (no sibling contract carries a household-grain return: returns do not add across accounts): NO_SOURCE_YET in plain words.
+    # Filling it from Orion's client grain would change what the contract says for every firm, which is the CTO's decision, not this cell's.
     filled = [w for w in ("qtd", "ytd", "last_12_months", "since_inception") if not P5.has_absent_key(vals["pvs.%s.return_cumulative" % w])]
-    need(len(filled) >= 1 and r.get("household_return_windows") == filled, "household_return_windows must list the pvs return windows that fill (the checker reads %s; at least one)" % filled)
-    hr = r.get("household_return_source") or {}
-    need("fact_performance" in str(hr.get("source") or "") and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(hr.get("data_as_of") or "")) and nes(hr.get("words")), "household_return_source: the Orion fact_performance table, an ISO data_as_of and words")
+    need(filled == [] and r.get("household_return_windows") == [], "the contract sources every household return ABSENT: pvs.*.return_cumulative must read NO_SOURCE_YET and household_return_windows must be [] (the checker reads %s)" % filled)
+    hn = r.get("household_return_note") or {}
+    need(nes(hn.get("words")) and "contract" in str(hn.get("words")).lower() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(hn.get("orion_client_series_through") or "")), "household_return_note: words that name the contract rule, and orion_client_series_through (ISO): what Orion's client grain would provide")
+    # the as-of: the newest positions date on or before the last date of the served model series, so every source exists at as_of (T-1 law)
+    asof = sm["household"]["as_of"]
+    need(r.get("as_of") == asof and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(r.get("benchmark_data_as_of") or "")) and asof <= str(r["benchmark_data_as_of"]), "as_of must equal the sample's (%s) and not be later than benchmark_data_as_of (the last date of the served model series)" % asof)
+    n_f, tot_f = P6.members_filled(vals, c)
+    need(r.get("benchmark_members") == {"total": 32, "filled": n_f} and tot_f == 32, "benchmark_members must equal the checker's count {total 32, filled %d}" % n_f)
     need(all(not P5.has_absent_key(vals["pvs.%s.ending_value" % w]) for w in ("qtd", "ytd", "last_12_months", "since_inception")) and not P5.has_absent_key(vals["hold.ending_value"]), "the household ending value must fill (pvs.*.ending_value and hold.ending_value)")
     # the guard state is NAMED, from the issuer's direct-act record
     ar = json.loads((root / ALIEN_REC).read_bytes().decode("utf-8"))
@@ -167,8 +173,8 @@ def check_sample(root):
     need(rd.get("vendor_calls") == 0 and rd.get("s3_writes") == 0 and rd.get("dynamodb_writes") == 0 and rd.get("secret_reads") == 0 and is_int(rd.get("s3_reads")), "reads: zero writes, vendor calls and secret reads, s3_reads an integer")
     need(r.get("files_in_repo") is False and r.get("served_values_changed") is False and r.get("pushed") is False and r.get("deployed") is False, "files_in_repo, served_values_changed, pushed and deployed must be false")
     need(not P.long_digit_runs({k: v for k, v in r.items() if k not in ("sample",)}), "the record holds a run of 8 or more digits")
-    print("OK: Inflection sample for one household (%d accounts) chosen by the hash rule; whole-document rule over %d cells (%d absent, 0 unmapped): 0 conflicts, planted mutant caught; account returns and lots in plain words; household return windows %s from Orion client grain; guard state named"
-          % (len(acc), st["cells_scanned"], st["absent_cells"], filled))
+    print("OK: Inflection sample for one household (%d accounts) chosen by the hash rule; whole-document rule over %d cells (%d absent, 0 unmapped): 0 conflicts, planted mutant caught; account returns and lots in plain words; household return NO_SOURCE_YET by contract; as_of %s with %d of 32 benchmark members filled; guard state named"
+          % (len(acc), st["cells_scanned"], st["absent_cells"], asof, n_f))
 
 
 def extra_inflection(root, r, k, vals, tab, exp):
