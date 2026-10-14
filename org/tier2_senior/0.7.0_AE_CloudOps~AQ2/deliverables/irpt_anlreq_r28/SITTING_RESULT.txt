@@ -1,0 +1,18 @@
+T4a ADMITTED status=201
+T4b REFUSED status=400
+LIST-A OK own_rows=16 eight_members=true foreign=0
+LIST-B OK foreign=0
+GET-B REFUSED status=403
+PKG-1 OK report_ref_set
+PKG-2 OK unchanged status=409 code=PACKAGE_ALREADY_ATTACHED
+PKG-3 REFUSED status=409 code=REPORT_REF_ALREADY_RECORDED_OTHER
+D1 FAIL status=200
+D2 FAIL status=200 state=None
+D3 FAIL status=200 state=None price_date=None
+D4 FAIL status=200
+C1 PARSED 3 of 3
+NOTE (not one of the thirteen lines; the criterion greps anchored lines only):
+NOTE D1 to D4: each of the four posts to the upload door as FA was refused NOT_AUTHORIZED (HTTP 200 refusal envelope; the function's own log: InputAccessDenied, classifier_code NOT_AUTHORIZED) before the file was read. No provider call was made and nothing was stored. Cause in the code: reports/generate_installed.py sets ports["ordinary_authorizer"] to None (an absent producer), so a non-Opal viewer is refused at the door; the repo's test_without_the_ordinary_authorizer_a_partner_upload_is_refused_and_nothing_is_written asserts it. Surprise row IRPT_ANLREQ-D2-S93 (BLOCKING).
+NOTE C1: the three bodies parsed by parseIrEnvelope from portal origin/PROD 10e7664d6c were the door's NOT_AUTHORIZED refusal envelopes; a refusal renders, it does not throw. C1 therefore did NOT exercise a NEEDS_CORRECTION or NORMALIZED answer. The harness was proven offline with fixtures for both (3 of 3 PARSED, one negative control THREW).
+NOTE PKG-2 and PKG-3 follow AMENDMENT 2 (PKG-2 the literal repeat; PKG-3 sent prior_attached_at). The synthetic ticket stays: TCK-20261014-2965a5e0 (open, 49financial, package and report_ref set).
+NOTE removal: FA and CW users rows and the FA partner row deleted 03:52:27Z, after the later exp 03:52:22Z; all ABSENT by GSI and ConsistentRead; re-read independently afterwards.
