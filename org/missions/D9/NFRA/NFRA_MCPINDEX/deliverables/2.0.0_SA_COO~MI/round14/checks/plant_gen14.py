@@ -46,7 +46,7 @@ def main():
                 "business_meaning": ("%s %s table `%s` in %s (%s): %s. %s" % (
                     c["layer"].capitalize(), c["format"], c["table"], c["bucket"], c["s3_prefix"], c["grain"],
                     "Client data forked by firm, account last-4 and platform; Opal-internal principals only until a data grant names the firm."
-                    if fr == "firm-scoped" else "Opal-internal data.")) + "".join(" %s." % w for w in glib.marks(c) if w) + (" " + glib.LIVE49F if glib.is_49f_bd(c) else ""),
+                    if fr == "firm-scoped" else "Opal-internal data.")) + "".join(" %s." % w for w in glib.marks(c) if w),
                 "example_questions": list(c["common_queries"]) or ["Where is the %s %s table?" % (c["table"], c["layer"])],
                 "grain": c["grain"],
                 "freshness_field": ("FIELD:" + pk[0]) if pk else "NONE -- " + str(c["freshness"].get("basis")),
@@ -57,15 +57,15 @@ def main():
                 "read_tool": rt,
                 "gap_owner": None if rt else "NFRA_OPLGTW",
                 "table": c["table"], "layer": c["layer"], "format": c["format"],
-                "contract": {"id": c["contract_id"], "size": c["size"], "freshness": c["freshness"],
+                "contract": {"id": glib.enc(c["contract_id"]), "size": c["size"], "freshness": c["freshness"],
                              "partition": c["partition"], "producer": c["producer"]},
                 "fork_keys": c["fork_keys"],
                 "nl_tags": c["nl_tags"],
-                "retired": c["contract_id"] in glib.DO_NOT_SERVE,
+                "retired": bool(glib.retired_reason(c)),
                 "open_items": c["open_items"],
             }
             if row["retired"]:
-                row["retired_reason"] = "do-not-serve: " + str(c.get("routing") or "")
+                row["retired_reason"] = glib.retired_reason(c)
             with open(os.path.join(a.out, glib.entity(c["contract_id"]) + ".yaml"), "w", encoding="utf-8", newline="\n") as f:
                 yaml.safe_dump(row, f, sort_keys=False, allow_unicode=True)
             n += 1

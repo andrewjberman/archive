@@ -1,0 +1,53 @@
+{
+ "question": "OG-zs-1 step 6: does the /api/scoped/security-scanner/* route carry its own authorizer, given its CloudFront behavior has no Lambda@Edge association?",
+ "answer_one_sentence": "YES -- all four security-scanner routes on the API the behavior forwards to carry the API's own custom authorizer, so the missing edge association on that behavior does not leave the scanner open.",
+ "api": {
+  "id": "7k3ed8px20",
+  "name": "opal-portal-data-proxy-api",
+  "protocol": "HTTP (apigatewayv2, NOT a REST api -- `apigateway get-rest-api` answers NotFoundException for this id, which reads like a missing API)"
+ },
+ "authorizer": {
+  "id": "naqxlm",
+  "name": "portal-jwt-authorizer",
+  "type": "REQUEST",
+  "identity_source": "$request.header.Authorization",
+  "result_ttl_seconds": null,
+  "lambda": "opal-portal-authorizer"
+ },
+ "scanner_routes": [
+  {
+   "route": "GET /api/scoped/security-scanner/factors",
+   "auth": "CUSTOM",
+   "authorizer": "naqxlm"
+  },
+  {
+   "route": "GET /api/scoped/security-scanner/universe/{universeId}/data",
+   "auth": "CUSTOM",
+   "authorizer": "naqxlm"
+  },
+  {
+   "route": "GET /api/scoped/security-scanner/universe/{universeId}/scanner",
+   "auth": "CUSTOM",
+   "authorizer": "naqxlm"
+  },
+  {
+   "route": "POST /api/scoped/security-scanner/upload-url",
+   "auth": "CUSTOM",
+   "authorizer": "naqxlm"
+  }
+ ],
+ "denominator": {
+  "routes_total": 121,
+  "auth_custom": 118,
+  "auth_none": 3,
+  "the_three_none": [
+   "ANY /auth/{proxy+}",
+   "OPTIONS /auth/{proxy+}",
+   "OPTIONS /{proxy+}"
+  ],
+  "why_those_are_expected": "the login path and CORS preflight; `$default` itself is CUSTOM"
+ },
+ "no_row_filed": "the order says to file an OBSERVATION row only IF the route carries no authorizer. It carries one, on every one of its four routes, so no row is owed and nothing here is changed.",
+ "read_by": "0.7.0_AE_CloudOps~Z",
+ "read_at": "2026-10-14T15:20:58.148816+00:00"
+}
