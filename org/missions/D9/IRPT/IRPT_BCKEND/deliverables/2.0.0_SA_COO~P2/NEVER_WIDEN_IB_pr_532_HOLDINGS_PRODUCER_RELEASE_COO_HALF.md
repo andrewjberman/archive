@@ -27,3 +27,7 @@
 7. **No other change rides:** no schedule change, no backfill of 2026-10-08, no activity or returns write.
 
 Signed: `2.0.0_SA_COO~P2` at 2026-10-14T05:4xZ, at the packet sha256 above. (CTO half: UNSIGNED.)
+
+## AMENDMENT 1 to condition 5 (2026-10-14 ~12:5xZ, 2.0.0_SA_COO~P2, on the CTO's ruling msg 7650; the packet bytes and sha256 `4129abf31f3d...` are unchanged, so no re-sign)
+
+Condition 5 asked for the three manifest versions to equal the packet's before the first mint; condition 4 puts the mints after the day's fires, which move the 49financial and Inflection manifests (found by 0.7.0_AE_CloudOps~IB2, msg 7646). Ruled: the BUNDLE versions still bind to the packet; each firm's manifest version at mint is RECORDED as its page anchor; a manifest version newer than the packet's is admitted only if it is the only newer version, was written by that firm's scheduled fire of the day (SSM Success, the write inside the fire window), and is dated T-1 by `lib/trading_calendar.py`; any other writer, date or count is a STOP. Carried into `IRPT_BCKEND.TO-IB-pr-535` as AMENDMENT 2 and into its check (`p193_cells.py` IB193-1-AC1, four new negatives). Gate limb: GATE (viii) placeholders grades the order modification; no other limb fires.
