@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-308",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R38A_Y.md",
+    "vintage_commit": "7e083e0beb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-308.shares-not-composed-words.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-308.shares-not-composed-words.md",
+    "group": "OTHER",
+    "vintage_commit": "7e083e0beb"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~122",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "15a387dd36",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_ANLREQ-122 at 15a387dd36; not pushed, not uploaded, not deployed. Four added lines: the CORRECTION_WORDS entry for SHARES_PRICE_SOURCE_NOT_COMPOSED. AST words-only verdict AST-WORDS-ONLY-OK (r38/ast_words_only.py).",
+      "introduces": ["SHARES_PRICE_SOURCE_NOT_COMPOSED"],
+      "artifact_covered_by": ["AR308-y-AC1", "AR308-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/status.py",
+      "kind": "script",
+      "commit_or_etag": "15a387dd36",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_ANLREQ-122 at 15a387dd36; not pushed, not uploaded, not deployed. Four added lines: the same entry, byte-equal to uploads.py. AST words-only verdict AST-WORDS-ONLY-OK (r38/ast_words_only.py).",
+      "introduces": ["SHARES_PRICE_SOURCE_NOT_COMPOSED"],
+      "artifact_covered_by": ["AR308-y-AC1", "AR308-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_shares_not_composed_words.py",
+      "kind": "test",
+      "commit_or_etag": "15a387dd36",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 10 tests, all pass with the table lock (ar21 y308-words run: 10 passed). Seven of the ten fail on the HEAD copy (before_arm).",
+      "artifact_covered_by": ["AR308-y-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~122/r38/SHARES_WORDS.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record: read, codes_census (2 codes, 6 call sites), words (byte-equal to both tables), ast_words_only, tests, before_arm (7 failed of 10 at HEAD), release_needs (irpt-ycharts-generate and irpt-status), claim, not_read.",
+      "artifact_covered_by": ["AR308-y-AC1", "AR308-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~122/r38/ast_words_only.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AST words-only checker. Positive run: both files AST-WORDS-ONLY-OK. Negative control (a second key renamed): AST-WORDS-ONLY-FAIL.",
+      "artifact_covered_by": ["AR308-y-AC2J"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR308-y-AC1",
+      "criterion_verbatim": "the record lists every not-composed code with its words today, the words added are byte-equal in both tables and ask for a market-value column in plain English, ops/status.py is words-only by AST, and the new tests pass with the table lock.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-122/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y308-words --root C:/dev/wk-irpt-anlreq-122",
+      "output_evidence": "words equal in both tables: True; whole tables equal: True\ntests/test_shares_not_composed_words.py: 10 passed, 0 failed (rc=0)\ntests/test_correction_words.py: 9 passed, 0 failed (rc=0)\nY308-WORDS-OK (rc 0; a second run's stdout is byte-identical)",
+      "denominator": "10 of 10 new tests pass; 9 of 9 table-lock tests pass; 2 of 2 tables hold the entry, byte-equal; 2 of 2 not-composed codes censused (SHARES_PRICE_SOURCE_NOT_COMPOSED with words, CSV_LANE_NOT_COMPOSED refusal-only, of 6 call sites); ops/status.py AST: 31 keys before, 32 after, 1 key added, 0 other changes",
+      "status": "PASS",
+      "expect": "Y308-WORDS-OK"
+    },
+    {
+      "criterion_id": "AR308-y-AC2J",
+      "criterion_verbatim": "the words say in plain English that shares cannot be priced yet and ask for a Market Value column in dollars, with no jargon, they are byte-equal in both tables, nothing else in either file changed, and the person sees them through the real upload path.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment: read intake/uploads.py:111-114 and ops/status.py:144-147 (the words); r38/ast_words_only.py run on HEAD 7e083e0beb against the worktree; intake/tests/test_shares_not_composed_words.py::test_a_shares_file_through_the_real_upload_path_answers_with_the_words",
+      "output_evidence": "Words as shipped: 'This file lists shares, and we cannot price shares yet. Give each holding as its market value in dollars instead: put Dollars in cell B1, enter the market value of each holding in column B, and upload the file again.' AST-WORDS-ONLY-OK for uploads.py (31 to 32 keys) and ops/status.py (31 to 32 keys). The real-upload-path test passes: a Shares sheet answers NEEDS_CORRECTION with reason SHARES_PRICE_SOURCE_NOT_COMPOSED and the description carries these words. Deviation for the grader: the order asks for 'a Market Value column'; the words name cell B1 and column B because the reader takes no Market Value header (channel row IRPT_ANLREQ-D2-W122-S1).",
+      "denominator": "2 of 2 tables hold the words byte-equal; 2 of 2 files AST-words-only; 1 of 1 real-upload-path test passes; 0 of 0 other lines changed in either file",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the grade belongs to 3.0.0_SA_CVO at L9 and is not graded here; this row carries the output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Copy of the post-change Lambda folder under .scratch/mutant (the worktree's gitignored scratch, outside the tracked product tree) with the SHARES entry removed from ops/status.py only; the same AC1 checker run with --root on the copy.",
+      "expected": "the checker prints FAIL lines for the byte-equal words and the table equality, and Y308-WORDS-FAIL with rc 1",
+      "observed": "FAIL: SHARES_PRICE_SOURCE_NOT_COMPOSED must have byte-equal words in uploads.py and ops/status.py | FAIL: the two CORRECTION_WORDS tables must be equal | FAIL: tests/test_shares_not_composed_words.py must pass with at least 6 tests | Y308-WORDS-FAIL rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 checker on the worktree, stdout compared with cmp",
+      "observed": "identical output (10 passed, 9 passed, Y308-WORDS-OK) on both runs, rc 0 on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "the portal (portal/ is not read or changed; the rendering of the words in the portal is not seen)", "reason": "the order names no portal path; the portal is a separate repository; no portal commit is made"},
+    {"item": "the live door, the live status envelope, the live PROD and DEV bundles, and any upload", "reason": "BUILD ONLY: no live call, no aws call, no push, no deploy, no upload, no apply, no invoke"},
+    {"item": "the release of intake/uploads.py and intake/upload_resolution.py (irpt-ycharts-generate) and ops/status.py (irpt-status)", "reason": "nothing is released by this order; the packages and their writers are recorded in r38/SHARES_WORDS.json release_needs"},
+    {"item": "Andrew's screenshots of the door", "reason": "they are in his chat, not in the repository, and were not read"},
+    {"item": "the surprise-corpus refusal on another project's REMEDIATION_v4.md (MDPF_SECHIST, MDPF_SECHIST-Z-S2)", "reason": "not this project's channel and not touched by this order; reported to the final message only"}
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W122-S1: the order asks for words that name a Market Value column, but the upload reader takes the unit only from cell B1 (Dollars, Shares, Target Weight or Current Weight), so the shipped words name cell B1 and column B instead (BLOCKING, INERT)",
+    "IRPT_ANLREQ-D2-W122-S2: the order expects the code-count lock in test_correction_words.py to move for the new code, but the count stays at 33 and no edit was made (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ar21_checks.py y308-words (criterion checker, read only)",
+      "invocation": "python C:/dev/wk-irpt-anlreq-122/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y308-words --root C:/dev/wk-irpt-anlreq-122",
+      "result": "Y308-WORDS-OK, rc 0; run twice with identical output. Mutant copy: Y308-WORDS-FAIL, rc 1."
+    },
+    {
+      "tool": "r38/ast_words_only.py (AST words-only proof, read only)",
+      "invocation": "python ast_words_only.py <HEAD copy of the file> <worktree file> SHARES_PRICE_SOURCE_NOT_COMPOSED, with HEAD copies from git show 7e083e0beb:<path>",
+      "result": "ops/status.py AST-WORDS-ONLY-OK (31 to 32 keys); intake/uploads.py AST-WORDS-ONLY-OK (31 to 32 keys); negative control AST-WORDS-ONLY-FAIL"
+    },
+    {
+      "tool": "pytest (intake/tests, ops/tests, ycharts/generate two files)",
+      "invocation": "python -m pytest tests -q -p no:cacheprovider --color=no (in intake/ and ops/); python -m pytest tests/test_shares_not_composed_words.py on a HEAD copy",
+      "result": "intake/tests 439 passed, 1 skipped (429 at HEAD); ops/tests 313 passed, 22 skipped (unchanged); ycharts two files 35 passed; new file on HEAD copy 7 failed, 3 passed"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each changed or added .py file>",
+      "result": "pre-commit gate clean for each file"
+    }
+  ]
+}
