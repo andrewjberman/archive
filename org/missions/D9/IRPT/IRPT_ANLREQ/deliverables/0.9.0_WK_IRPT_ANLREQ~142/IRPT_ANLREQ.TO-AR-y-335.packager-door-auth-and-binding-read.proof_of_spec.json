@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-335",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "bf351147d2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-335.packager-door-auth-and-binding-read.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3f4214a3ea"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~142",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/r41/PACKAGER_DOOR_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "0ecc4bc4b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the AR-y-335 record: four answers with cited lines (78 cites), the NEEDS line and the not_read list. A read record, not a deploy."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/shape_check.py",
+      "kind": "script",
+      "commit_or_etag": "0ecc4bc4b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the AC1 checker; reads the record beside it; no AWS call; not deployed anywhere."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/cite_check.py",
+      "kind": "script",
+      "commit_or_etag": "0ecc4bc4b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the AC2 checker; re-opens every cite against the worktree; no AWS call; not deployed anywhere."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0ecc4bc4b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_ANLREQ-D2-W142-S1..S4 appended (OBSERVATION, INERT); no existing row edited. A channel file, not a deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR335-y-AC1",
+      "criterion_verbatim": "shape_check.py loads r41/PACKAGER_DOOR_READ.json and prints SHAPE-OK <keys> only when every key above is present with an allowed value (q1.token_compared_with, q1.existing_secret_enough, q3 fields, q4.secret_value_shape in their enums) and every answer block has at least one evidence item; otherwise SHAPE-BAD <why>, exit 1.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-142/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/shape_check.py",
+      "output_evidence": "SHAPE-OK base,cell,not_read,order,q1,q2,q3,q4,read_only,resident_path_note q1-q4 each with evidence; q4.needs=SECRET_VALUE_SHAPE\nrc=0",
+      "denominator": "1 checker run, rc 0. Required top-level keys checked: 6 (base, q1, q2, q3, q4, not_read). Answer blocks checked: 4 of 4 (q1, q2, q3, q4), each with a non-empty evidence list of cites. Enum checks: q1.token_compared_with, q1.existing_secret_enough, q4.secret_value_shape, q4.needs (1 of 1 item).",
+      "expect": "^SHAPE-OK ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR335-y-AC2",
+      "criterion_verbatim": "cite_check.py re-opens every {file, line, text} of the record and prints CITES-OK <n> of <n> only when each cited line number exists and the cited text is a substring of that line (after stripping); a miss prints CITES-BAD <file>:<line> and exits 1. It prints the denominator n.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-142/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/cite_check.py",
+      "output_evidence": "CITES-OK 78 of 78\nrc=0\nNegative control (scratch copy of the record with q2.read_at.text replaced by a non-line, run through the same checker): CITES-BAD infra/aws/lambda/ticket_center/lambda_function.py:86, rc=1",
+      "denominator": "78 of 78 cites re-opened: every cited file exists under the worktree root, every cited line number exists, every cited text is a substring of its line after stripping. The negative control fails 1 of 1 planted miss.",
+      "expect": "^CITES-OK ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR335-y-AC3J",
+      "criterion_verbatim": "the answers follow from the cited lines, a \"not found\" is said plainly with what was searched, and the recommendation is the one the evidence supports.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/r41/PACKAGER_DOOR_READ.json (q1 to q4, not_read) against the cited lines, which cite_check.py re-opens (78 of 78) at commit 0ecc4bc4b3",
+      "output_evidence": "Q1 authenticator: handler (portal-authorizer index.mjs:327) verifies the RS256 JWT (index.mjs:380-383); token_compared_with signed_claim; svc-irpt-packager recognised by source constant lambda_function.py:120 and package_ticket 1633-1634; existing_secret_enough unknown (value unread); unknown subject refused at lambda_function.py:339 and 1634-1635. Q2 format comma list (lambda_function.py:86-87); unset, ALL and a missing firm refuse at 1666-1667; declared main.tf:306; lines 84 and 1629 followed, 119 stale. Q3 subject userType service and email svc-irpt-packager; fields and I7 checks 1638-1664; class check 1673-1675; closed codes 1662-1723; writes package, report_ref and events 1687-1707. Q4 api_base https origin with path /api/scoped/tickets/<id>/package; secret NAME opal/ticketing/svc-irpt-packager; secret JSON with a token member (opal_packager.py:306-310); IAM statement declared at resident.tf:168-171 on aws_iam_role.runner. needs SECRET_VALUE_SHAPE. Searches stated in the record: PACKAGE_ALLOWED_FIRMS and svc-irpt-packager over infra/aws/terraform (hits listed), derive_vendor_secrets.py for the packager secret (absent).",
+      "denominator": "4 questions, each answered with cited lines (78 cites in total); 6 judgment sub-clauses read (answers follow from cites; not-found stated with searches; recommendation SECRET_VALUE_SHAPE). Output recorded; no verdict by the worker.",
+      "expect": "judgment: graded at L9 by 3.0.0_SA_CVO",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion: graded at L9 by 3.0.0_SA_CVO, never by the worker. Output recorded above with no verdict. The substitute oracle is the cited lines at commit 0ecc4bc4b3, re-opened by cite_check.py (CITES-OK 78 of 78)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a planted miss in a scratch copy of the record (.scratch/neg, not committed): q2.read_at.text replaced by a string that is not in lambda_function.py:86",
+      "expected": "cite_check.py refuses the copy: CITES-BAD on the planted cite and rc 1",
+      "observed": "CITES-BAD infra/aws/lambda/ticket_center/lambda_function.py:86 and rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of shape_check.py and cite_check.py at commit 0ecc4bc4b3, compared on output and rc",
+      "observed": "run 1 and run 2 both: SHAPE-OK ... rc=0 and CITES-OK 78 of 78 rc=0. Identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live secret opal/ticketing/svc-irpt-packager (value, shape, version, KMS key)",
+      "reason": "the order forbids AWS calls; the existence and creation date are AQ2's TO-READ-R31 premise, not re-measured. The record names it as not_read."
+    },
+    {
+      "item": "the live PACKAGE_ALLOWED_FIRMS value, the deployed ticket_center and portal-authorizer bytes, the live users row",
+      "reason": "the order is a source read of the base sha; deployed state is not read."
+    },
+    {
+      "item": "AR335-y-AC3J verdict",
+      "reason": "judgment criterion, graded at L9 by 3.0.0_SA_CVO; recorded with no verdict."
+    },
+    {
+      "item": "any source edit, push, deploy, invoke or live call",
+      "reason": "read only by the order's grant; none made."
+    },
+    {
+      "item": "the portal worktree change (M portal) in the worker's tree",
+      "reason": "not staged or committed; outside the grant."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W142-S1: OBSERVATION. The TO's path infra/aws/lambda/investor-reporting/ycharts/reports/resident_installed.py is absent; the file is at infra/aws/lambda/investor-reporting/reports/resident_installed.py. The record cites the real path.",
+    "IRPT_ANLREQ-D2-W142-S2: OBSERVATION. lambda_function.py:119 and CHANGELOG.json:368 say the packager is firm-bound by a PROFILE row; package_ticket reads no PROFILE row (lines 84 and 1629 are right). A doc-versus-code drift.",
+    "IRPT_ANLREQ-D2-W142-S3: OBSERVATION. The packager test fixture names the secret svc-irpt-packager/token, which the resident's IAM grant (resident.tf:171) does not admit. Test value only; nothing wrong today.",
+    "IRPT_ANLREQ-D2-W142-S4: OBSERVATION. The packager secret opal/ticketing/svc-irpt-packager has no tracked Terraform declaration and no vendor-secrets census entry, unlike svc-analyst-intake and svc-commentary. Existence is AQ2's read."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/session_log_0.9.0_WK_IRPT_ANLREQ~142.txt",
+  "compiler_tools": [
+    {
+      "tool": "shape_check.py (AC1)",
+      "invocation": "python C:/dev/wk-irpt-anlreq-142/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/shape_check.py",
+      "result": "SHAPE-OK ... rc=0"
+    },
+    {
+      "tool": "cite_check.py (AC2)",
+      "invocation": "python C:/dev/wk-irpt-anlreq-142/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~142/cite_check.py",
+      "result": "CITES-OK 78 of 78 rc=0"
+    },
+    {
+      "tool": "commit-gate.sh on each new .py",
+      "invocation": "bash .tools/commit-gate.sh <shape_check.py | cite_check.py>",
+      "result": "All checks passed; pre-commit gate clean for 1 of 1 file each; rc 0"
+    },
+    {
+      "tool": "safe-commit.sh (record, scripts, rows)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~142 <0.9.0_WK_IRPT_ANLREQ~142@opal.agent>\" -F <msgfile> -- <4 paths>",
+      "result": "rc 0; committed 0ecc4bc4b3; surprise-row-gate OK (4 new rows); to-pipeline-gate OK"
+    }
+  ]
+}
