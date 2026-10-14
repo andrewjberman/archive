@@ -12,8 +12,10 @@ import sys
 RES = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r18_run/R18_RUN_RESULT.json"
 REC = "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json"
 COORDINATOR = "jeanette@opalinvest.com"
-KEYS = {"identity", "firm", "mt_ticket", "tf_ticket", "mt_filer", "tf_filer", "row_deleted_at", "token_exp",
+KEYS = {"identity", "coordinator_identity", "mt_confirmed_time", "routing_before", "routing_during", "routing_after",
+        "firm", "mt_ticket", "tf_ticket", "mt_filer", "tf_filer", "row_deleted_at", "token_exp",
         "row_absent_after", "form_key", "form_name", "placeholder_named", "no_engine_call", "token_printed"}
+FUNCTION = "opal-ticket-api"
 AWS = os.path.abspath(".tools/aws.cmd")
 
 
@@ -74,20 +76,35 @@ def main():
             print("RUN-BAD the meeting ticket is missing or not a meeting_request")
             return 1
         meeting = mt.get("meeting", {}).get("M")
-        if not meeting or meeting.get("status", {}).get("S") not in ("confirmed", "rescheduled") or meeting.get("by", {}).get("S") != COORDINATOR:
-            print("RUN-BAD the meeting ticket carries no outcome recorded by the coordinator")
+        coord = doc["coordinator_identity"]
+        if (not meeting or meeting.get("status", {}).get("S") != "confirmed" or meeting.get("by", {}).get("S") != coord
+                or meeting.get("time", {}).get("S") != doc["mt_confirmed_time"]):
+            print("RUN-BAD the meeting ticket carries no confirmation by the recorded coordinator identity")
             return 1
         if mt.get("status", {}).get("S") == "completed":
             print("RUN-BAD the meeting ticket was completed; the outcome must not complete it")
             return 1
-        row = item("opal-users-v2", {"PK": {"S": "USER#" + ident}, "SK": {"S": "PROFILE"}})
-        if row is not None:
-            print("RUN-BAD the identity row is still PRESENT")
+        for who in (ident, coord):
+            row = item("opal-users-v2", {"PK": {"S": "USER#" + who}, "SK": {"S": "PROFILE"}})
+            if row is not None:
+                print("RUN-BAD an identity row is still PRESENT")
+                return 1
+        cfg = aws("lambda", "get-function-configuration", "--function-name", FUNCTION)
+        matrix = json.loads(((cfg.get("Environment") or {}).get("Variables") or {}).get("ROUTING_MATRIX") or "{}")
+        if (matrix.get("meeting_request") or {}).get("primary") != [COORDINATOR]:
+            print("RUN-BAD the live meeting_request routing primary is not restored to exactly the coordinator")
+            return 1
+        if (doc["routing_during"].get("primary") if isinstance(doc["routing_during"], dict) else None) != [coord]:
+            print("RUN-BAD the recorded routing window did not name the synthetic coordinator as the sole primary")
+            return 1
+        if (doc["routing_before"].get("primary") if isinstance(doc["routing_before"], dict) else None) != [COORDINATOR] \
+                or (doc["routing_after"].get("primary") if isinstance(doc["routing_after"], dict) else None) != [COORDINATOR]:
+            print("RUN-BAD the recorded routing before or after the window is not the coordinator alone")
             return 1
     except (RuntimeError, ValueError, KeyError, OSError, subprocess.SubprocessError) as e:
         print("RUN-BAD live read failed: %s" % e)
         return 1
-    print("RUN-OK trade ticket open with its form object under %s; meeting outcome %s by the coordinator; identity row absent" % (prefix, meeting["status"]["S"]))
+    print("RUN-OK trade ticket open with its form object under %s; meeting confirmed by the synthetic coordinator inside a routing window now restored; both identity rows absent" % prefix)
     return 0
 
 
