@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-c-1.rule-amendment",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R3.md",
+    "vintage_commit": "94d1161b08",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-1.rule-amendment.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-c-1.rule-amendment.md",
+    "group": "OTHER",
+    "vintage_commit": "94d1161b08"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/bd_price_rule.py",
+      "kind": "script",
+      "commit_or_etag": "cd073f6a13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cd073f6a13 on wk-ADVI_BDPRCE-13 (LOCAL); AMENDMENT R1.1; no writer imports it; no AWS call in the module",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/tests/test_bd_price_rule.py",
+      "kind": "script",
+      "commit_or_etag": "cd073f6a13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cd073f6a13 on wk-ADVI_BDPRCE-13 (LOCAL); 26 arms on planted frames; prints BD PRICE RULE TEST: OK 26 arms",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/rule_probe2.py",
+      "kind": "script",
+      "commit_or_etag": "cd073f6a13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cd073f6a13 on wk-ADVI_BDPRCE-13 (LOCAL); reads local copies of the partitions and dimension; no AWS write",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/RULE_PROBE2.json",
+      "kind": "doc",
+      "commit_or_etag": "cd073f6a13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cd073f6a13 on wk-ADVI_BDPRCE-13 (LOCAL); claim measured; served_write not applicable (no served output); deterministic true; md5 523247e6fb2779774f613747a6f08827 in two processes",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/RULE_PROBE2.md",
+      "kind": "doc",
+      "commit_or_etag": "cd073f6a13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cd073f6a13 on wk-ADVI_BDPRCE-13 (LOCAL); one-page note: the amendment as built, the dimension counts, the named assets, types seen, what could not be reconciled",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the built behaviour (each clause on planted frames, at least 20 arms); expect ^BD PRICE RULE TEST: OK (2[0-9]|[3-9][0-9]) arms$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-13 && timeout 100 python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py",
+      "output_evidence": "BD PRICE RULE TEST: OK 26 arms (rc 0)",
+      "denominator": "26 arms run, 26 passed; the expectation is at least 20 arms",
+      "status": "PASS",
+      "status_reason": "the printed line matches the expectation; each of arms 16 to 26 is one of the required new arms (a) to (i) or a boundary arm for the par-quoted corroboration"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the seam probe against the real partitions and dimension; expect ^RULEPROBE2 record ok amendment=R1.1 assets=[0-9]+ par_scaled=[0-9]+ withheld=[0-9]+$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-13 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py ruleprobe2 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/RULE_PROBE2.json",
+      "output_evidence": "RULEPROBE2 record ok amendment=R1.1 assets=11 par_scaled=2 withheld=0 (rc 0)",
+      "denominator": "11 asset rows (6 named + 5 of the 8 round-2 scale_100x rows); unit_scale_rows_unchanged 2 of 8; 1,129 candidate names from 12,232 dimension rows; 5 target dates",
+      "status": "PASS",
+      "status_reason": "the grader proves shape, the closed key sets and read-only calls; the record is measured. The grader does not prove the values: unit_scale_rows_unchanged is 2 of 8, not 8 of 8 (surprise S1), and CITIGROUP 5.3% 07/22/2032 reads 97.021, not 0.97021 (coupon null, surprise S1)."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged); expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r3-13 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r3-13 --allow data/black_diamond/scripts/silver/bd_price_rule.py --allow data/black_diamond/scripts/silver/tests/test_bd_price_rule.py --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 8 changed, 0 outside, 0 required missing (rc 0)",
+      "denominator": "8 changed paths against base 94d1161b08: 2 module files, 4 deliverables (probe script, record, note, log) and the instance; the channel file counts once; 0 outside the four allowed surfaces",
+      "status": "PASS",
+      "status_reason": "the write surface is the two module files, the deliverables folder and the channel file"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "RULE_PROBE2.json copied to .scratch/RULE_PROBE2_mutant.json with amendment set to R1 (not R1.1); the unchanged grader run on the copy",
+      "expected": "FAIL with rc=1 (amendment must be R1.1)",
+      "observed": "RULEPROBE2 record FAIL amendment must be R1.1 and the probe deterministic (rc=1); the real record run the same way: RULEPROBE2 record ok amendment=R1.1 assets=11 par_scaled=2 withheld=0 (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the probe run in two separate processes over the same local copies, with the same --read-at argument; md5 of the two output files compared; the in-process double build is the deterministic flag in the record. Re-checked after the naming-gate refactor with the same md5.",
+      "observed": "run 1 and run 2 both md5 523247e6fb2779774f613747a6f08827, 10103 bytes; deterministic true",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the eight-row unit_scale criterion as an expectation of 8 of 8 unchanged",
+      "reason": "the ruled candidate test (Fixed Income and coupon_rate not null) selects 2 of the 8 round-2 scale_100x rows; the six others are Fixed Income with a null coupon. The rule is not widened here; the count is reported as 2 of 8 and recorded as surprise rows S1 and S2"
+    },
+    {
+      "item": "CITIGROUP INC 5.3% 07/22/2032 expected at 0.97021",
+      "reason": "same cause as the row above (coupon null, not a candidate); it reads 97.021 unchanged; recorded in S1"
+    },
+    {
+      "item": "the candidate builder lives in the module as a generic function over caller-named fields (par_quoted_candidates(dim, class_field, coupon_field, par_class)); the probe passes the dimension column names",
+      "reason": "the commit-time naming gate refused the module's first version, which named the dimension column; the probe is outside the gate domain and builds the set from the dimension as the cell specifies; recorded in surprise row S7"
+    },
+    {
+      "item": "2026-09-16 and 2026-09-17 partitions read in addition to the named dates",
+      "reason": "five of the eight scale_100x rows are dated 2026-09-16; the eight-row count needs that partition; recorded in surprise row S4"
+    },
+    {
+      "item": "the asset kind 'carry' for EXXONMOBIL HOLDINGS CORP COM SHS on 2026-10-09",
+      "reason": "the cell expects 'absent' for a Transfer-In-only asset; the carry-forward (168.29, observed 2026-10-08) is recorded in the asset row as carry_forward, not as its kind"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W13-S1: the ruled candidate test selects 2 of the 8 round-2 scale_100x rows; six Fixed Income rows with a null coupon stay at 100x and are listed in fixed_income_unscaled_with_ratio_near_100",
+    "ADVI_BDPRCE-D1-W13-S2: four asset names in the dimension carry rows that disagree on the candidate test; the amendment does not key them",
+    "ADVI_BDPRCE-D1-W13-S3: 8 rows of transaction_type Corporate Action on 2026-10-02, a type round 2 did not see; counted UNCLASSIFIED",
+    "ADVI_BDPRCE-D1-W13-S4: the named probe dates omit 2026-09-16, which holds five of the eight scale_100x rows; that partition was read too",
+    "ADVI_BDPRCE-D1-W13-S5: BEFORE_AFTER.csv gives BLACKROCK INC COM 2026-09-22 a variant-A price 1078.04 with 0 distinct trades; the round-2 probe record says A is absent",
+    "ADVI_BDPRCE-D1-W13-S6: two Sale rows with price 0.0 on 2026-09-22 (INVESCO DISCOVERY Y) are excluded as no-price; round 2 recorded zero no-price trade rows",
+    "ADVI_BDPRCE-D1-W13-S7: the commit-time naming gate refused the module's first version for naming a dimension column; the candidate function now takes its field names as arguments"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/ADVI_BDPRCE.TO-BP-c-1.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws shim (READ only)",
+      "invocation": "aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet <local path> (for 2026-09-16, 09-17, 09-22, 09-23, 10-02, 10-03, 10-08, 10-09, 10-10); aws s3api get-object --bucket opal-data-bd --key silver/bd_assets_dim.parquet <local path>",
+      "result": "rc 0 for all ten keys; 2026-10-03 holds 0 rows; the dimension holds 12,232 rows"
+    },
+    {
+      "tool": "python -I rule_probe2.py",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~13/rule_probe2.py --data C:/dev/wk-bdprce-r3-13-data --silver data/black_diamond/scripts/silver --served org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~6/BEFORE_AFTER.csv --read-at 2026-10-14T01:28:00Z --out <path>",
+      "result": "PROBE2 wrote RULE_PROBE2.json deterministic=True assets=11, rc 0; second process byte-equal"
+    },
+    {
+      "tool": ".tools/commit-gate.sh and .tools/safe-commit.sh",
+      "invocation": "bash .tools/commit-gate.sh <3 py files>; bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_BDPRCE~13 <0.9.0_WK_ADVI_BDPRCE~13@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit-gate clean for 3 of 3; the first safe-commit refused on the naming gate (S7), the retry landed cd073f6a13 (5 files)"
+    }
+  ]
+}

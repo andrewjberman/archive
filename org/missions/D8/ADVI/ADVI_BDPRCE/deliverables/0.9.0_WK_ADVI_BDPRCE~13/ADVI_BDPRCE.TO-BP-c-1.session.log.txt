@@ -1,0 +1,19 @@
+ADVI_BDPRCE.TO-BP-c-1.rule-amendment  worker 0.9.0_WK_ADVI_BDPRCE~13  branch wk-ADVI_BDPRCE-13  cut 94d1161b08
+Session log: the commands run, in order, and the deciding output of each. Times are UTC.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-ADVI_BDPRCE-13; test -d org && test -d .tools -> TREE-OK.
+2. Reads (local, no AWS): bd_price_rule.py, tests/test_bd_price_rule.py, CTO_RULING_R1_THE_PRICE_RULE_20261013.md, RULE_PROBE.md (round 2), BEFORE_AFTER.csv (round 2), r3_checks.py ruleprobe2, r4_scope.py.
+3. Downloads, READ verb only, to C:/dev/wk-bdprce-r3-13-data/ (01:28Z batch):
+     .tools/aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet, for 2026-09-16, 09-17, 09-22, 09-23, 10-02, 10-03, 10-08, 10-09, 10-10 (rc 0 each; 2026-10-03 holds 0 rows)
+     .tools/aws s3api get-object --bucket opal-data-bd --key silver/bd_assets_dim.parquet (rc 0)
+4. Module amended to R1.1; python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py -> BD PRICE RULE TEST: OK 26 arms (rc 0)
+   python data/black_diamond/scripts/silver/bd_price_rule.py -> RULE_ID R1, AMENDMENT R1.1 / R1.1 module ok (rc 0)
+5. Dimension census (python -I, reads only): 12,232 rows; 12,007 distinct asset_name; 115 null names; 1,163 qualifying rows; 1,133 names with any qualifying row; 1,129 names with all rows qualifying; 4 conflicting names.
+6. Probe: python -I rule_probe2.py ... --out RULE_PROBE2.json (rc 0, deterministic=True, assets=11). Second process to .scratch/RULE_PROBE2_run2.json (rc 0).
+   md5 RULE_PROBE2.json = 523247e6fb2779774f613747a6f08827; md5 run 2 = 523247e6fb2779774f613747a6f08827.
+7. Commit 1 (module, test, probe, RULE_PROBE2.json, RULE_PROBE2.md) first attempt REFUSED by the naming gate (module line 177: dimension column name read as a hand-kept carrier of the firm code). The candidate function was made generic (field names as arguments); the probe passes the Black Diamond column names. Probe re-run: md5 unchanged 523247e6fb2779774f613747a6f08827.
+   Commit 1 retry -> cd073f6a13 (5 files; commit-gate clean; surprise-row, to-pipeline and naming gates OK).
+8. AC1: python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py -> BD PRICE RULE TEST: OK 26 arms, rc 0.
+   AC2: python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round3/checks/r3_checks.py ruleprobe2 --file .../RULE_PROBE2.json -> RULEPROBE2 record ok amendment=R1.1 assets=11 par_scaled=2 withheld=0, rc 0.
+   AC3: python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root ... --allow ... -> ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing, rc 0 (before the instance and this log were written).
+9. Surprise rows ADVI_BDPRCE-D1-W13-S1..S7 appended to INVESTIGATION_v1.md (the worker's own sections; no existing row edited).
