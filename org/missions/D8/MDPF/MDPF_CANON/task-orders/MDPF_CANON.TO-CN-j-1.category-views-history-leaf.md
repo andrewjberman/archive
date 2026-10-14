@@ -1,6 +1,3 @@
-# DRAFT -- NOT ISSUED. Target path at the round-7 issuance: org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-j-1.category-views-history-leaf.md
-# Round 7 is cut on the CTO's round-6 analysis; the checks below move from round7/draft/checks/ to round7/checks/ (same file names) at issuance.
-
 # MDPF_CANON task order -- `CN-j-1` -- THE HISTORY LEAF: ONE READ-ONLY SERVED SERIES PER SCOPE OVER THE DATED CATEGORY-VIEWS OBJECTS (FWD-9, the Client chips)
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
@@ -9,7 +6,7 @@
 <decomp_doc>org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md</decomp_doc>
 <owned_cells>CN-j-1</owned_cells>
 </decomp_ref>
-<issued_to>0.9.0_WK_MDPF_CANON~17</issued_to>
+<issued_to>0.9.0_WK_MDPF_CANON~23</issued_to>
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <placeholders>NONE</placeholders>
 <preflight>
@@ -126,7 +123,7 @@ infra/aws/lambda/opal-assets/opal-assets-mdpf-portal-publisher/lambda_function.p
 infra/aws/lambda/opal-assets/opal-assets-mdpf-portal-publisher/tests/test_completeness.py
 infra/aws/lambda/opal-assets/opal-assets-mdpf-portal-publisher/tests/test_history_leaf.py
 org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-j-1.category-views-history-leaf.md
-org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~17/
+org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~23/
 org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md
 </paths>
 
@@ -153,7 +150,7 @@ on the leaf's dates and are absent, never zero, on every other date).
 ## 5. WHEN YOU ARE DONE
 
 Write the instance at
-`org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~17/MDPF_CANON.TO-CN-j-1.category-views-history-leaf.proof_of_spec.json`
+`org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~23/MDPF_CANON.TO-CN-j-1.category-views-history-leaf.proof_of_spec.json`
 (beside the order's own file stem, which is the name the pipeline gate searches for), with AC4 UNVERIFIABLE-BY-INSTRUMENT and status_reason
 "graded at the round-7 close". **Flip this order's `<status>` to `complete` in the SAME commit as your proof instance** (the order file is in your
 paths), and only when every mechanical criterion passes.
@@ -188,7 +185,7 @@ single-pointer-read claim, the commit hash, and any row.
   precondition. No consolidator or gold-lambda deploy: nothing here touches `mdpf-gold-lambda`.
 - **Risk and class:** WORLD (once deployed the cell adds four served keys and a manifest field). `worker`, not light: about 110 product lines, a new test file, and an edit to
   an existing test file.
-- **Fanout:** one cell, one chain, slot ~17; no shared file with CN-h-1 (`dim_mdpf_aggregate_aua_timeseries.py` and tests) or CN-i-1 (portal files); a deploy-order edge
+- **Fanout:** one cell, one chain, slot ~23; no shared file with CN-h-1 (`dim_mdpf_aggregate_aua_timeseries.py` and tests) or CN-i-1 (portal files); a deploy-order edge
   only: CN-i-1's Client chips draw the history from this leaf once it is served (CN-i-1 ships as-of first without it), and FWD-9's grade waits for it. Base box/dell1.
 - **Checks at base (dry-run before the cut):** `r7_cn_j_1.py unit` 0 of 6, `seam` 3 of 8 (S2, S7, S8 controls), `real` 2 of 6 (R0, R2 controls). Scratch reference: 6/6, 8/8, 6/6;
   `selftest` OK (two mutants RED).
@@ -198,7 +195,7 @@ single-pointer-read claim, the commit hash, and any row.
 <status>pending</status>
 <round>7</round>
 <to_id>MDPF_CANON.TO-CN-j-1</to_id>
-<slot>~17</slot>
+<slot>~23</slot>
 <fabric>dell1</fabric>
 <risk>WORLD</risk>
 <worker_class>worker</worker_class>

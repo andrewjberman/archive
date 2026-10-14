@@ -1,7 +1,3 @@
-# DRAFT -- NOT ISSUED. Target path at the round-7 issuance: org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-h-1.frontier-counts-read-the-a4-distribution.md
-# Written by a fork of 2.0.0_SA_COO~D1, 2026-10-13 ~11:2xZ, on the CTO's round-5 ADDENDUM 5 (msg 4782). The checks below move from round7/draft/checks/ to
-# round7/checks/ (same file names) at issuance. Cut only after the fold's first scheduled fire is read. Nothing here is issued or committed.
-
 # MDPF_CANON task order -- `CN-h-1` -- THE FRONTIER ACCOUNT COUNTS READ THE NEWEST A4 ACCOUNT-DISTRIBUTION AT OR BEFORE THE AXIS DATE, NEVER THE STAGED RUNNER OBJECT (S5 disarm; FWD-5)
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
