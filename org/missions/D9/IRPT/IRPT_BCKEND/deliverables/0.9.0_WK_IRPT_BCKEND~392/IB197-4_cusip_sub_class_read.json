@@ -1,0 +1,51 @@
+{
+ "base_commit": "70f82239a8bb41389dda7c2b6e74bd9d65d2aa24",
+ "pin": "b1d354cfc9341168a3b4c316a344876ce0049b97",
+ "sub_class_blanked_nodes": 45,
+ "causes": [
+  {
+   "nodes": 45,
+   "securities_public_symbols": ["023551AM6", "037833AT7", "053015AJ2", "05612LBD3", "05612LHJ4", "05612LHS4", "06051X3R1", "06051YBM1", "139805CS2", "220802AV4", "31749TDB0", "31925YDG4", "31986HAK1", "335857EJ3", "38150V5M7", "38151PCW9", "38151PET4", "38151PFA4", "38151PLX7", "434207AA4", "46659CHT0", "5380366N9", "5380366P4", "549271AF1", "754730AG4", "842400HQ9", "845437BR2", "88269ACU0", "89214A102", "912797VH7", "91282CFM8", "91282CJT9", "91282CKE0", "91282CLY5", "91282CME8", "91282CMH1", "91282CMN8", "91282CMP3", "91282CMY4", "91282CNL1", "9128334Y3", "949764XN9", "95000U2D4", "98970LTE3"],
+   "rule": "On a symbol miss, classify_security reads the canonical table under the node's CUSIP key (lines 985-987) and returns that row at lines 988-995 without consulting the fallback. Line 993 reads sub_asset_class from the row with a plain get and or None; each of the 45 CUSIP-keyed rows has no sub_asset_class key at all, so the served sub-class is None, the return at line 994 carries it, and the fallback sub-class lookup at line 1003 is never reached.",
+   "rule_site": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py:993",
+   "rule_identifier": "canonical_row",
+   "prior_path": "Live code (the live bundle's classify_security) has no CUSIP lookup: the symbol missed the canonical table, so the node fell to the fallback, _NarrowedClassifier.get_sub_asset_class (holdings_snapshot.py lines 898-899), which reached bd_securities_fallback.py get_sub_asset_class through its name-alias branch (lines 175-180, basis NAME_ALIAS) and returned the bd-securities sub-class: Investment Grade 29, Intermediate 12, Cash 2, Municipal 1, US Small Cap 1."
+  }
+ ],
+ "options": [
+  {
+   "kind": "keep_prior_sub_class",
+   "consequence": "The port keeps the sub-class where the prior path held it. Code change in words: when the CUSIP-keyed row carries no sub_asset_class, the canonical branch must not return None for the sub-class; it falls through to the fallback sub-class lookup, as the prior path did, and keeps the row's asset_class and TABLE basis. The 45 positions keep their prior labels (Investment Grade 29, Intermediate 12, Cash 2, Municipal 1, US Small Cap 1) and asset_class is unchanged on all 45.",
+   "nodes_affected": 45
+  },
+  {
+   "kind": "documented_correction",
+   "consequence": "The absence is a documented correction that Andrew is told of before the port ships. The client sees a blank sub-class on the 45 Cottonwood positions (44 fixed-income, 1 equity) where the prior release showed Investment Grade 29, Intermediate 12, Cash 2, Municipal 1 and US Small Cap 1. Asset class is unchanged on all 45; only the sub-class column goes blank for those rows.",
+   "nodes_affected": 45
+  },
+  {
+   "kind": "backfill_canonical_rows",
+   "consequence": "The 45 CUSIP-keyed canonical rows gain a sub_asset_class from their classifying source, under that source's own release and outside this port. The port then serves the sub-class from the row and no fallback is needed. Nothing in the holdings code changes, but the port cannot ship until the rows are backfilled.",
+   "nodes_affected": 45
+  }
+ ],
+ "recommendation": "keep_prior_sub_class",
+ "notes": [
+  "Pin and base: base_commit is this worktree HEAD before my first commit; the pin is b1d354cfc9 (verified by git rev-parse in the detached pin worktree and by git cat-file). The read is at the pin for every rule_site line.",
+  "Live bytes: the Cottonwood live bundle was downloaded by the version id named in the order (s3api get-object, rc 0, 45 files untarred to scratch). The built bundle is core.build_bundle_payload(find_bundle('irpt_holdings_cot')) at the pin: 47 entries, untarred to scratch. Neither tree is tracked.",
+  "Count: the built and live snapshots were built on one pre-seeded receipts file through the round-196 harness's read-only S3 client (refused calls 0 on both). Both hold 15,558 SECURITY nodes and matched 1:1 by node identity. sub_asset_class differs on 51 nodes: 45 are a label on live and absent on built (the order's count, confirmed), 6 change between two labels. asset_class differs on 253 nodes, all fixed_income to cash (the signed cash rule, not in this read).",
+  "The 45 all share basis NAME_ALIAS on live and TABLE on built, and asset_class is unchanged (44 fixed_income, 1 equity). Every security_id on the 45 is CUSIP namespace; display symbol equals the CUSIP value on all 45.",
+  "Rule path (traced, not inferred): a tracing wrapper on canonical_lookup, called with the same arguments annotate_classification passes, recorded for each of the 45 the same sequence: the symbol lookup misses, the CUSIP key lookup hits, the row returned has no sub_asset_class key, and the built sub-class is None with class_source etf-classifications. The prior answer, computed from the fallback's own get_sub_asset_class with the same symbol and name, equals the recorded live sub-class on 45 of 45 and the recorded live basis NAME_ALIAS on 45 of 45.",
+  "Row provenance: all 45 CUSIP-keyed rows carry identifier_namespace CUSIP, classified_by scheduled, and updated_by mdpf-secclass-clean-names-v2; the row keys carry no sub_asset_class on any of the 45. This is a fact of the rows, not a reading of the writer: the writer's source was NOT read, and no claim is made about why it omits the field.",
+  "Not read: the writer mdpf-secclass-clean-names-v2; the canonical table's other rows; the fallback's data beyond the name-alias branch; the served Cottonwood output; the live tree's classifier by trace (its answer is cross-checked only by the recorded live values). The sub-class labels on the 45 were not compared against any client or served publication.",
+  "Reads: the canonical lookups are DynamoDB get_item reads through the same classifier object the harness's build already calls; none is a write. No function was invoked, no sign-in made, no AWS write made, no row or figure written to a data store, and no vendor request sent.",
+  "Symbols: the 45 display symbols are nine-character CUSIP identifiers, not ticker-shaped symbols as the order's cell text assumed. They are public security identifiers; no account, node id or holding name is recorded in this file.",
+  "Options and recommendation are the worker's read for the CTO's decision on the port's own release. No code was changed, no check edited, no pin moved, and no release made."
+ ],
+ "functions_invoked": 0,
+ "sign_ins_made": 0,
+ "aws_writes_made": 0,
+ "rows_written": 0,
+ "figures_written": 0,
+ "vendor_requests_sent": 0
+}
