@@ -61,7 +61,7 @@ def long_digit_runs(obj, name=""):
     hits = []
     if isinstance(obj, dict):
         for k, v in obj.items():
-            if not str(k).endswith("sha256") and str(k) not in ("path", "commit", "portal_commit", "file", "key", "checked_by"):
+            if not str(k).endswith("sha256") and str(k) not in ("path", "commit", "portal_commit", "file", "key", "checked_by", "baseline_schema_read"):
                 hits += long_digit_runs(v, name + "/" + str(k))
     elif isinstance(obj, list):
         for i, v in enumerate(obj):

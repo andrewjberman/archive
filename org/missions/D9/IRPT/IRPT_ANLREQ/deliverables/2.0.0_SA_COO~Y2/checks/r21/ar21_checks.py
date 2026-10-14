@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED", "y297-build": "Y297-BUILD", "y298-build": "Y298-BUILD", "y299-build": "Y299-BUILD", "y300-build": "Y300-BUILD", "y301-scripts": "Y301-SCRIPTS", "y306-ordinary": "Y306-ORDINARY"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -898,6 +898,35 @@ def main(argv):
                     problems.append("pre_read_r28.sh must carry the five stop-reads")
             if not (rec.get("guard_dry_run") or {}).get("one_byte_change_refused"):
                 problems.append("guard_dry_run.one_byte_change_refused must be true")
+    elif check == "y306-ordinary":
+        rec = load(root, D.replace("/r21/", "/r36/") % "120" + "ORDINARY_AUTHORIZER.json", problems)
+        if rec:
+            for member in ("read", "rule", "principal_shape", "wiring", "iam_needs", "tests", "before_arm", "authorization_change",
+                           "release_needs", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not (rec.get("authorization_change") or "").strip():
+                problems.append("authorization_change must state in a paragraph who gains upload")
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: the new tests must FAIL at HEAD without the module")
+        mod = root / IR / "_scope/ordinary_viewer.py"
+        if not mod.is_file():
+            problems.append("no _scope/ordinary_viewer.py")
+        for relpath, floor in (("_scope/tests/test_ordinary_viewer.py", 14), ("reports/tests/test_generate_installed.py", 1)):
+            if not (root / IR / relpath).is_file():
+                problems.append("no %s" % relpath)
+                continue
+            best = None
+            for cwd in (IR, IR + "/" + relpath.split("/")[0]):
+                target = relpath if cwd == IR else "/".join(relpath.split("/")[1:])
+                rc, passed, failed = pytest(root, target, cwd)
+                if rc == 0 and not failed and passed >= floor:
+                    best = (rc, passed, failed)
+                    break
+                best = best or (rc, passed, failed)
+            print("%s: %d passed, %d failed (rc=%d)" % (relpath, best[1], best[2], best[0]))
+            if best[0] != 0 or best[2] or best[1] < floor:
+                problems.append("%s must pass with at least %d tests" % (relpath, floor))
     return finish(check, problems)
 
 
