@@ -1,0 +1,93 @@
+{
+ "order": "BP-c-7",
+ "read_at": "2026-10-14T03:19:16Z",
+ "claim": "measured",
+ "calls": [
+  "aws sts get-caller-identity (identity only)",
+  "aws s3api head-object --bucket opal-data-bd --key silver/prices/canonical_prices.parquet",
+  "aws s3api list-object-versions --bucket opal-data-bd --prefix silver/prices/canonical_prices.parquet --output json (657 versions)",
+  "aws s3api list-objects-v2 --bucket opal-data-bd --prefix silver/prices/ --output json (176 objects)",
+  "boto3 s3 list_object_versions Bucket=opal-data-bd Prefix=silver/prices/ (paginated; 841 parquet versions: 657 canonical, 184 daily)",
+  "boto3 s3 download_file Bucket=opal-data-bd Key=silver/prices/* VersionId=<each of 841 versions> (GET, 6 threads; full copy deleted after projection)",
+  "aws s3api get-object --bucket opal-data-bd --key silver/prices/canonical_prices.parquet --version-id <one version> (probe)",
+  "aws s3api get-object --bucket opal-data-bd --key silver/prices/2026-10-09.parquet (probe)",
+  "aws s3api get-object --bucket opal-data-bd --key gold/dimensions/schwab_bd_account_mapping.parquet",
+  "aws s3api list-objects-v2 --bucket opal-data-bd --prefix schwab/silver/rps/ --output json (636 objects)",
+  "aws s3api get-object --bucket opal-data-bd --key schwab/silver/rps/date=20260723/data.parquet",
+  "aws s3api list-objects-v2 --bucket opal-data-bd --prefix gold/canonical/holdings/ --query (last 4 keys)",
+  "aws s3api head-object --bucket opal-data-bd --key gold/canonical/holdings/2026-10-09.parquet",
+  "aws s3api get-object --bucket opal-data-bd --key gold/canonical/holdings/2026-10-09.parquet",
+  "local: sha256 of C:/dev/wk-bdprce-r2-7-data/lot_extract.csv; pandas join of the projections; no S3 write"
+ ],
+ "lots_total": 1859,
+ "distinct_triples": 353,
+ "extract_sha256": "e7e618d76516c8b7977179aefb3f77ce4fc13c17fbcf1dbeb92001a6e0a2b50b",
+ "versions_read": 841,
+ "classes": {
+  "EQUALS_OLDER_CANONICAL_VERSION": 310,
+  "EQUALS_DAILY_FILE_ROW": 0,
+  "EQUALS_NAMED_OTHER_SOURCE": 1118,
+  "UNEXPLAINED": 431
+ },
+ "named_sources": [
+  "schwab/silver/rps/date=20260723/data.parquet closing_price, the newest RPS partition listed (2026-07-23; the B_01 resolver falls back to the latest key for a 2026-10-09 snapshot): B_01.holdings_lots.py:529-560 (partition resolver), 581-589 (mapping read via gold/dimensions/schwab_bd_account_mapping.parquet), 690-705 (price lookup), 2215-2288 (_apply_rps_price_override writes closing_price to current_price), 2223-2226 (bond percent-of-par /100)"
+ ],
+ "exemplars": {
+  "EQUALS_OLDER_CANONICAL_VERSION": "LORD ABBETT SHORT DURATION INCOME I, served 3.82, data_as_of 2026-10-09 (72 lots): found in canonical version RlGtntmHkmodRAI2xfKDDDHYzaMHdovq (LastModified 2026-07-14T23:03:13+00:00, earliest matching version) as row row_date 2022-10-12 source transaction_observed; the price is carried in 656 of the older canonical versions",
+  "EQUALS_DAILY_FILE_ROW": "none: 0 lots. The triples with a silver/prices daily-file row (any version) all also carry an older canonical row, and the first-match order assigns them to EQUALS_OLDER_CANONICAL_VERSION",
+  "EQUALS_NAMED_OTHER_SOURCE": "VANGUARD MORNINGSTAR GROWTH ETF, served 83.78, data_as_of 2026-10-09 (300 lots): 273 matching rows in schwab/silver/rps/date=20260723/data.parquet closing_price (ticker VUG), on BD accounts that hold the lot; negative control 0 of 305",
+  "UNEXPLAINED": "COLUMBIA INTERMEDIATE DUR MUNI BD ADV, served 9.5379, data_as_of 2026-10-09 (106 lots): no canonical row equal in any of the 657 canonical versions, no daily-file row, no schwab/silver/rps/date=20260723/data.parquet row for its accounts at that price, no 2026-10-09 holdings row at that name, account and price"
+ },
+ "by_asset_kind": {
+  "BOND_OR_INCOME_FUND": 700,
+  "OTHER_FUND_OR_SECURITY": 740,
+  "ETF": 419
+ },
+ "detail": {
+  "extract_rows": 198295,
+  "canonical_versions_listed_and_read": 657,
+  "daily_file_versions_listed_and_read": 184,
+  "fetch_failures": 0,
+  "triples": {
+   "EQUALS_OLDER_CANONICAL_VERSION": 22,
+   "EQUALS_NAMED_OTHER_SOURCE": 146,
+   "UNEXPLAINED": 185
+  },
+  "triples_with_no_served_price_literal_nan": 26,
+  "lots_with_no_served_price_literal_nan": 34,
+  "triples_with_match_in_latest_version_only_path": 15,
+  "triples_latest_match_but_unexplained": 0,
+  "triples_daily_row_also_older_canonical": 18,
+  "rps_check": {
+   "source": "schwab/silver/rps/date=20260723/data.parquet",
+   "triples_tested": 305,
+   "triples_matched": 146,
+   "negative_control_matched": 0,
+   "positive_control_recall": "300 of 300"
+  },
+  "holdings_check": {
+   "source": "gold/canonical/holdings/2026-10-09.parquet",
+   "scope": "2026-10-09",
+   "triples_tested": 158,
+   "triples_matched": 0,
+   "negative_control_matched": 0,
+   "positive_control_recall": "300 of 300"
+  },
+  "historical_value_only_check": {
+   "source": "silver/historical_prices.parquet (round-2 local copy)",
+   "scope": "2026-10-09",
+   "historical_rows_on_scope_date": 3466,
+   "triples_tested": 158,
+   "value_only_matches": 3,
+   "shift_control_matches": 0,
+   "bindable_by_name": false,
+   "note": "value-only; the table has no asset_name and the lots carry no ticker; not classed"
+  },
+  "not_read": [
+   "the 1,859 lots' object-level fields beyond those in the extract (no per-lot price source field is served)",
+   "canonical versions and daily files outside the listing (none; listing is complete)",
+   "gold/canonical/holdings for data_as_of other than 2026-10-09 (1 unexplained lot at another date)",
+   "name-variant canonical rows (the projection kept only rows whose asset_name is one of the 340 off-canonical names or whose ticker is in the lookup)"
+  ]
+ }
+}
