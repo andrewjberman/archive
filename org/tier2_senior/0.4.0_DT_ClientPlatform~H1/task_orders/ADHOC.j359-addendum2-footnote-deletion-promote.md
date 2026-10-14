@@ -1,0 +1,64 @@
+# pipeline-override: J359 is a REMOTE JOB (/remote-drive; Andrew-directed 2026-10-14), not a registered project: no PRD, no decomposition, no tree. The portal promote of its second approved candidate rides one DT ADHOC order, on ADHOC.j359-satellite-factsheet-portal-promote in this folder (the first promote, closed: PROD 5ab67a651a62, CI success).
+<task_order id="ADHOC.j359-addendum2-footnote-deletion-promote">
+<to_id>ADHOC.j359-addendum2-footnote-deletion-promote</to_id>
+<issued_by>2.0.0_SA_COO~J1</issued_by>
+<issued_to>0.4.0_DT_ClientPlatform~H1</issued_to>
+<date>2026-10-14</date>
+<status>staged</status>
+<risk>WORLD</risk>
+<proof_genre>DEPLOY</proof_genre>
+<priority>P2 (Andrew-approved; STAGED until the dell1 re-seat: no leg across the 21:00Z restart)</priority>
+
+<title>J359 addendum 2: promote the two-sentence deletion under Trailing Returns (cand/dell1/satellite-returns-method @714f8e48c8) -- merge-forward to DEV, the chosen-set release on current PROD, /prod-deploy, and the deployed bundle read</title>
+<context>
+THE ORDER IS STAGED, NOT PENDING. It was cut at 20:5xZ, ten minutes before tonight's dell1 restart at 21:00Z. The CTO's condition 3 on both J359 never-widen pairs is that no leg straddles that restart, and the first promote took about 12 minutes (GO 19:29Z, done 19:41Z). UN-PARKING CONDITION: the issuer sends a GO message citing this order after the re-seat, to the then-live `0.4.0_DT_ClientPlatform~H1`. Until that message, do nothing; on it, flip `<status>` to `pending` and begin. If the issuer's seat is gone after the restart, any live seat holding the dell1 COO or CTO role may send it; the standing approval below does not expire.
+
+Andrew approved this exact change. His words (typed in session at the issuer's terminal, 2026-10-14, after the served read): "go ahead with the deletion". Record: `org/tier1_exec/2.0.0_SA_COO~J1/deliverables/ANDREW_DIRECT_20261014_J359_ADDENDUM2_DELETION_GO.md` @`50234ae112` (LOCAL on box/dell1). His earlier words: "Ok get this pushed when done via 0.4.0_DT" (`ANDREW_DIRECT_20261014_J359_PUSH_VIA_DT.md`, on origin `wk-remote-J359` @`d7d9a9ed1a`).
+
+THE APPROVAL ROW: `dell1-20261014T202134Z-fbdf`, CLOSED approved, by andrew, head `714f8e48c8517d1e14f7479693b8d8b5bbd5b538`, 1 commit, class client-facing, pages "Positioning (Satellites mode, factsheet popup)". `python .tools/open-calls.py approval-status --branch cand/dell1/satellite-returns-method` reads `state=APPROVED valid=yes` (read 20:51Z by the issuer).
+
+THE CANDIDATE: branch `cand/dell1/satellite-returns-method` @`714f8e48c8`, on origin (`git ls-remote`), cut from PROD `5ab67a651a62` with ONE commit, three files under `src/components/` (SatelliteFactsheetSections.tsx, satelliteFactsheet.ts, satelliteFactsheet.test.ts). It deletes the hypothetical-returns disclaimer and the exclusions footnote under Trailing Returns (both describe the retired holdings-backcast method) and the builder code that only fed the footnote. No other frontend change. Tests 6 of 6, typecheck rc=0, eslint clean.
+
+THE DATA IT ASSUMES IS LIVE: `s3://opal-data-cot/platinum/satellites/characteristics.json` VersionId `Qh56dS_IliDOh0owKxjToBgEjgJ0pb8v` (2026-10-14T20:15:50Z, trailing returns = the models' realized returns blended with GLD), read back by the AE seat and the issuer. Read the served key's VersionId before you start: if it is NOT `Qh56dS_I...` or a later version of the same producer, STOP and report (the page would then show the old backcast figures with no disclaimer).
+</context>
+
+<scope>
+1. **PRECONDITIONS, read first; any false means do nothing and report which:**
+   a. The issuer's GO message citing this order (the un-parking condition above) is in hand, sent after the re-seat.
+   b. `approval-status --branch cand/dell1/satellite-returns-method` reads `state=APPROVED valid=yes` with `head_sha` equal to the branch tip (`git ls-remote origin refs/heads/cand/dell1/satellite-returns-method`). A tip that differs from `714f8e48c8` is a stale head: STOP and report.
+   c. The clock: no leg is left open across a restart or re-seat; read any restart notice and the time before starting.
+   d. No other promote or deploy is in flight: read `org/critical_paths/.open_deploys/` in EVERY live worktree (`git worktree list --porcelain`, then `git -C <wt> ls-tree -r --name-only HEAD org/critical_paths/.open_deploys/`), union them, print the per-tree denominator; read the portal's last CI run (`gh run list`) for one in progress.
+   e. The served key's VersionId is as the context states.
+2. **ORDER OF ACTS:**
+   a. **Before print (the positive control).** Read the DEPLOYED bundle (the portal's public site, found the way /prod-deploy's own verification finds it; never a typed host) for the string `holdings at today` and for `data-asset-class-chip`. Expect BOTH present now (PROD `5ab67a651a62` carries the footnote and the chip). Print the number of bundle files read. If `holdings at today` is absent BEFORE the deploy, the after-read below proves nothing: STOP and report.
+   b. **DEV.** `bash .tools/portal-merge-forward.sh cand/dell1/satellite-returns-method --push`. Read its result line: `result=MERGED`, `pushed=yes`; confirm `git ls-remote origin refs/heads/DEV` moved to the merge it printed. A refusal token is a STOP: report it, do not work around it.
+   c. **The chosen-set release.** `bash .tools/portal-release-build.sh --features cand/dell1/satellite-returns-method` on CURRENT PROD (re-read PROD; build on the current one). It never pushes. Then `bash .tools/portal-release-build.sh --check <the release branch it printed>`. Any refusal token refuses the whole release: STOP and report.
+   d. **PROD.** `/prod-deploy` for that release, in its own order and with its own gates (clean DEV, zero TypeScript errors via `bun run typecheck`, local PROD re-asserted from origin, merge forward in the ephemeral worktree, push, CI deploys and tags, verify the CI conclusion with `gh run view --json`, the workspace submodule pointer on CLOUD, teardown, confirm DEV, end at the workspace root). The push receipt names `Positioning (Satellites mode, factsheet popup)`, client-facing, Andrew's word cited above.
+   e. **The served read (after).** After CI reports success, read the DEPLOYED bundle again: `holdings at today` and `left out for lack of one` must be ABSENT; `data-asset-class-chip` and `Trailing Returns` must be PRESENT (the controls). Print the number of bundle files read and the 403 count. A bundle still carrying the sentence is Branch B.
+3. **If anything fails after the PROD push:** the ordinary /prod-deploy rollback (re-promote the prior PROD `5ab67a651a62` through the same route) in the same session; report loudly. Before the PROD push, a failure leaves PROD untouched: report which leg.
+4. Report to `2.0.0_SA_COO~J1` and to `1.0.0_SA_CTO~DELL1`: the DEV head and merge, the PROD head, the CI run id and conclusion, and both bundle reads. The issuer relays to Andrew and to the requester (Yang Liu, for CW).
+</scope>
+
+<paths>
+org/critical_paths/change_management/
+org/critical_paths/.open_deploys/
+org/tier2_senior/0.4.0_DT_ClientPlatform~H1/
+portal
+</paths>
+
+<proof_of_spec>
+<expected_criteria>C1,C2,C3</expected_criteria>
+<criterion id="C1" judgment="false">
+  <invocation>python .tools/open-calls.py approval-status --branch cand/dell1/satellite-returns-method, then git ls-remote origin refs/heads/cand/dell1/satellite-returns-method, then the merge-forward result line and git ls-remote origin refs/heads/DEV</invocation>
+  <expect>state=APPROVED valid=yes with head_sha equal to the branch tip 714f8e48c8...; result=MERGED pushed=yes; origin DEV moved to the merge the line printed</expect>
+</criterion>
+<criterion id="C2" judgment="false">
+  <invocation>portal-release-build.sh --features cand/dell1/satellite-returns-method, then --check on the release branch, then /prod-deploy's own steps, then gh run view --json on the CI run it names</invocation>
+  <expect>the release builds on current PROD with no refusal token and --check passes; the PROD push receipt names Positioning (Satellites mode, factsheet popup) as client-facing; the CI conclusion is success; PROD's head after the push is the release's merge</expect>
+</criterion>
+<criterion id="C3" judgment="false">
+  <invocation>the deployed bundle read BEFORE (holdings at today, data-asset-class-chip) and AFTER (holdings at today, left out for lack of one, data-asset-class-chip, Trailing Returns), each with the number of bundle files read</invocation>
+  <expect>before: both strings present (the positive control); after: holdings at today and left out for lack of one absent, data-asset-class-chip and Trailing Returns present; denominators printed; or reported as Branch B with the CI run id</expect>
+</criterion>
+</proof_of_spec>
+</task_order>
