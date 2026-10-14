@@ -21,7 +21,7 @@
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "artifact_covered_by": ["AC1"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL; QA record of one dry-run drive (status non-green, errors global, writes 0, blocked-calls 0). QA, not production evidence."
+      "deploy_evidence": "LOCAL; QA record of the third (last) dry-run drive (status non-green, errors global, writes 0, blocked-calls 0). QA, not production evidence."
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~21/run/qa_run.log",
@@ -29,31 +29,31 @@
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "artifact_covered_by": ["AC1"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL; instrument-printed log of the QA drive. QA, not production evidence."
+      "deploy_evidence": "LOCAL; instrument-printed log of the QA drive; carries the FATAL composition line and the SCOPE FAILED global line. QA, not production evidence."
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~21/run/served_before.json",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "45c73fee71",
       "artifact_covered_by": ["AC2"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL; served-prefix snapshot before the drive (2886 object-versions). Read-only listing; no write."
+      "deploy_evidence": "LOCAL; served-prefix snapshot before the drive (2886 object-versions). Read-only listing; no write. This drive's output is byte-identical to the file carried at 45c73fee71 (git reports no change to the path)."
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~21/run/served_after.json",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "45c73fee71",
       "artifact_covered_by": ["AC2"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL; served-prefix snapshot after the drive (2886 object-versions, identical to before). Read-only listing; no write."
+      "deploy_evidence": "LOCAL; served-prefix snapshot after the drive (2886 object-versions, identical to before). Read-only listing; no write. This drive's output is byte-identical to the file carried at 45c73fee71 (git reports no change to the path)."
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~21/run/s3_ops.json",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "45c73fee71",
       "artifact_covered_by": ["AC2"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL; botocore call-kind record: blocked [], read kinds only (GetObject, ListObjectsV2), no write-kind call."
+      "deploy_evidence": "LOCAL; botocore call-kind record: 2 calls, blocked [], read kinds only, no write-kind call. This drive's output is byte-identical to the file carried at 45c73fee71 (git reports no change to the path)."
     }
   ],
   "acceptance": [
@@ -65,7 +65,7 @@
       "output_evidence": "  N1 PASS: single-firm pool planted in the run's own in-memory builds (kept firm cottonwood, 2 line(s) blanked on ['inflection'], as-of 2026-10-13)\n  N2 FAIL: Global refused by the min-firms guard: manifest errors.global names the refusal, the as-of and '1 firm(s)'\n  N3 PASS: refused alone: no error recorded for the siblings (49financial,inflection,cottonwood); errors = ['global']\n  N4 PASS: whole: 13 local A4 file(s) built, 0 of them a Global body, and a4_objects_built 12 is below a4_expected 16\n  N5 FAIL: the refusal is logged: qa_run.log carries the refusal prefix on a Global line\n  N6 PASS: dry run: trigger kind qa-local(manual), manifest writes 0\nROUND 7 CN-N-1 GRADE: 4 of 6 arms\nexit=1",
       "denominator": "4 of 6 arms",
       "status": "FAIL",
-      "status_reason": "Global was refused on the cross-axis presence gate (v), not the min-firms guard prefix (N2 and N5 FAIL). The refusal arm is not demonstrated; the order stays open. Rows MDPF_CANON-D1-W21-S4 and -S5.",
+      "status_reason": "The third drive was refused by the spine composition gate (manifest errors.global: 'GLOBAL COMPOSITION GATE FAILED: ... 1 band/total violation(s) across 496 dates'), not by the min-firms guard. The min-firms prefix is absent from the log. N2 and N5 FAIL. The refusal arm is not demonstrated; the order stays open. Row MDPF_CANON-D1-W21-S6.",
       "expect": "ROUND 7 CN-N-1 GRADE: 6 of 6 arms"
     },
     {
@@ -91,21 +91,21 @@
   ],
   "controls": {
     "mutant": {
-      "description": "AC3 difference control named by the order: the same guard over unplanted served objects must fold Global (G1) and over the planted one-firm pool must refuse it whole (G2). Drive-side mutant (AC1): the one-firm plant reached Global, which was refused, but by the cross-axis presence gate rather than the min-firms guard (N2 FAIL).",
-      "expected": "Guard control: G1 folds, G2 refuses. Drive: refusal text carries the min-firms prefix.",
-      "observed": "Guard control: G1 PASS, G2 PASS. Drive: refusal text is 'CROSS-AXIS COHERENCE GATE FAILED (global)' with presence disagreement (v); N2 FAIL. See rows MDPF_CANON-D1-W21-S4 and MDPF_CANON-D1-W21-S5.",
+      "description": "AC3 difference control named by the order: the same guard over unplanted served objects must fold Global (G1) and over the planted one-firm pool must refuse it whole (G2). Drive-side mutant (AC1): the one-firm plant reached the Global builder, which refused on the spine composition gate before build_all reached guard_global_min_firms_fold (consolidator line 2943; the Global build call is at line 2836).",
+      "expected": "Guard control: G1 folds, G2 refuses. Drive: refusal text carries the min-firms prefix GLOBAL MIN-FIRMS FOLD REFUSED.",
+      "observed": "Guard control: G1 PASS, G2 PASS. Drive: refusal text is 'GLOBAL COMPOSITION GATE FAILED: 0 partial-row, 0 headline-identity, 0 49F-leg, 0 inflection-leg, 1 band/total violation(s) across 496 dates'; the min-firms prefix is absent from qa_run.log; N2 and N5 FAIL. See row MDPF_CANON-D1-W21-S6.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "N/A: the order fixes one drive per outcome (Step 2: do not run it twice for one outcome); the grade and served reads were each run once on the same run/ directory.",
-      "observed": "One drive, one grade (4 of 6), one served (4 of 4), one guard (5 of 5).",
+      "observed": "One drive (third seat, after the corrected instrument of AMENDMENT 2), one grade (4 of 6), one served (4 of 4), one guard (5 of 5).",
       "status": "N/A-WITH-REASON"
     }
   },
   "declared_exclusions": [
     {
       "item": "The min-firms refusal arm (AC1 N2 and N5) is not demonstrated end to end",
-      "reason": "The drive's Global refusal came from the cross-axis presence gate (v) on two by_model lines whose model_value the plant blanked and whose account_count stayed set. The min-firms guard is not shown to run before that gate in this build. Recorded as rows S4 and S5; the instrument and plant are read-only for this order."
+      "reason": "The drive's Global refusal came from the spine composition gate, a FATAL band/total check on 2026-10-13 raised inside the Global builder call. In build_all the Global build call (consolidator line 2836) precedes guard_global_min_firms_fold (line 2943), and the plant is applied inside that builder call (r7_cn_n_1.py lines 293-300). Recorded as row S6; the instrument and plant are read-only for this order. Resolution owner: 2.0.0_SA_COO~D1."
     },
     {
       "item": "No production evidence",
@@ -117,18 +117,14 @@
     }
   ],
   "surprises": [
-    "MDPF_CANON-D1-W21-S1: the first seat's drive ended RAISED on the inflection scope (ViewPlaneError, the W16-S1 family); inherited, this run superseded it.",
-    "MDPF_CANON-D1-W21-S2: the plant sets model_value None without moving account_count, so the presence gate (v) fails Global before the min-firms guard.",
-    "MDPF_CANON-D1-W21-S3: a RAISED drive's fallback manifest carries writes ['?'], a record-keeping defect; this run was not RAISED and wrote 0.",
-    "MDPF_CANON-D1-W21-S4: the corrected drive refused Global on the cross-axis presence gate, not the min-firms guard prefix; AC1 FAIL, the refusal arm is not demonstrated.",
-    "MDPF_CANON-D1-W21-S5: Amendment 1 says the plant blanks account_count with the value; on this drive the presence gate still read account_count set on the two blanked lines."
+    "MDPF_CANON-D1-W21-S6: the third drive was refused by the spine composition gate (manifest errors.global), not the min-firms guard; the min-firms prefix is absent from the log; AC1 FAIL at 4 of 6 arms; the plant is applied after the Global build call that raises the refusal."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "python",
       "invocation": "r7_cn_n_1.py selftest; r7_cn_n_1.py plan; r7_cn_n_1.py drive --run-dir <worktree>/run (once)",
-      "result": "ROUND 7 CN-N-1 SELFTEST: OK; plan planted true (2886 served object-versions); QA run done in 166.0s: status=non-green errors=['global'] a4_objects_built=12 writes=0 blocked-calls=0"
+      "result": "ROUND 7 CN-N-1 SELFTEST: OK; plan planted true (2886 served object-versions); QA run done in 95.8s: status=non-green errors=['global'] a4_objects_built=12 writes=0 blocked-calls=0"
     },
     {
       "tool": "python",
