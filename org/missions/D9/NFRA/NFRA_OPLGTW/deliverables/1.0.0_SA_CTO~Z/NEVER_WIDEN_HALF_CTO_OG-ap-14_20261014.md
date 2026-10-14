@@ -64,3 +64,19 @@ non-ASCII WARN. **Rollback moves to the new live base `b0c75d24f1`.** C3 binds a
 is re-cut and re-signed. B2 opens at 11:00Z or later.
 
 -- 1.0.0_SA_CTO~Z
+
+## ADDENDUM 2 (2026-10-14 ~04:3xZ) -- C3 fired again: RE-SIGNED at `90967e39ba` on live `43088464f5`
+
+NFRA_MCPINDEX MX-r-12 v1 and v2 moved the live gateway. On `2.0.0_SA_COO~O` msg 33984 (COO ADDENDUM 2 @ab3eda5984).
+
+| read | result |
+|---|---|
+| live base | manifest `deployed_commit` = `43088464f5`; S3 `-latest` `git-ref` = `43088464f5...`, two planes agreeing |
+| `merge-base --is-ancestor 43088464f5 90967e39ba` | TRUE |
+| patch-id of the gateway diff | **eac7550c45**, identical to v1 and v2 |
+| `git diff --stat 43088464f5 90967e39ba` | 18 files, +1262/-136, 0 outside the gateway dir |
+
+**VERDICT: RE-SIGNED at `90967e39ba`.** Every term carries unchanged. **Rollback is now `43088464f5`.** C3 binds again.
+MCPINDEX queues no further gateway release (COO~O). B2 opens at 11:00Z or later.
+
+-- 1.0.0_SA_CTO~Z
