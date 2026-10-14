@@ -1,0 +1,76 @@
+{
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-15",
+ "graded_by": "0.7.0_AE_CloudOps~Z",
+ "graded_at": "2026-10-14T16:15:41.679734+00:00",
+ "method": "per family: the live CodeSha256 read from the function configuration and compared to that family's package_sha256 in W/ap15_build.json; the sweep identified by the ONE invocation in its cron window (a second invocation would mean an ad-hoc run, which the gate forbids); and the dlq_drain key read from the served meta/backfill-status.json at layers.silver.dlq_drain -- NOT the top level, where it is absent.",
+ "families": [
+  {
+   "family": "schwab",
+   "released": true,
+   "live_code_sha256": "U6l7D4fUe125WC53/GblkfHQKtDbpzRorHLLsvlbFmc=",
+   "sweep_was_scheduled": true,
+   "dlq_drain_present": true,
+   "sweep_request_id": "53885c9e-cbf8-4bb7-9221-b565c0eb09ae",
+   "sweep_start_utc": "2026-10-14T12:15:49.668Z",
+   "dlq_drain": {
+    "drained": 0,
+    "messages_total": 0
+   },
+   "note": "three scopes written (08242234, 08335338, 08403355) at 12:18:12/19/25Z; cron(15 12 * * ? *)"
+  },
+  {
+   "family": "blackdiamond",
+   "released": true,
+   "live_code_sha256": "bcvS/qYFMVxnAi/dLlExMB2RhEC2MJRNaLgqNaUCPp0=",
+   "sweep_was_scheduled": true,
+   "dlq_drain_present": true,
+   "sweep_request_id": "887fcea4-41dc-4fe4-bfa7-236b0b00f913",
+   "sweep_start_utc": "2026-10-14T13:00:34.194Z",
+   "dlq_drain": {
+    "drained": 0,
+    "messages_total": 0
+   },
+   "note": "scope cottonwood written 13:00:37Z; cron(0 13 * * ? *)"
+  },
+  {
+   "family": "orion",
+   "released": true,
+   "live_code_sha256": "n7kVWHvtYBXn8xaNRsO0y5e7tVAH63i5LSYNJ9+dAo4=",
+   "sweep_was_scheduled": true,
+   "dlq_drain_present": true,
+   "sweep_request_id": "04f1f69f-d69f-4eb0-8fc8-0ba8fa1555bb",
+   "sweep_start_utc": "2026-10-14T16:00:42.862Z",
+   "dlq_drain": {
+    "drained": 0,
+    "messages_total": 0
+   },
+   "note": "scope inflection written 16:00:46Z. The same sweep's set-identity guard reads FAIL (expected 4997 landed 5001 missing 0 alien 4): row NFRA_OPLGTW-Z-S118. The guard is not this criterion -- a drain record is -- and the row exists so the FAIL is not lost in a released row."
+  },
+  {
+   "family": "eclipse",
+   "released": true,
+   "live_code_sha256": "clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g=",
+   "sweep_was_scheduled": true,
+   "dlq_drain_present": true,
+   "sweep_request_id": "1bd3a5f0-e995-4b01-b76a-f7a54f4422b2",
+   "sweep_start_utc": "2026-10-14T16:00:05.021Z",
+   "dlq_drain": {
+    "drained": 12,
+    "messages_total": 12,
+    "messages_capped": false,
+    "one_signature": true
+   },
+   "note": "scope inflection written 16:00:08Z. THE ONLY NON-ZERO DRAIN: 12 distinct keys, ONE signature -- VendorDriftError on eclipse/portfolios_simple, extra=['defaultTradingEngineId']. The same sweep's guard reads FAIL (expected 552 landed 547 missing 5) and silver is 3 trading days behind the frontier: rows NFRA_OPLGTW-Z-S117 (ARMED, citing the CRO's Z-S111). The DRAIN RECORD is what this criterion grades and it is present, non-zero and family-named; the drift is a producer defect owned outside this seat."
+  },
+  {
+   "family": "etf",
+   "released": null,
+   "live_code_sha256": "zNCf2GLiRNSpUYsdQUUPvwuAHtDZBlPevai0YqdzRh4=",
+   "sweep_was_scheduled": null,
+   "dlq_drain_present": false,
+   "pending": "its scheduled sweep is cron(30 23 * * ? *) and has not run yet (read at 16:1xZ). The converter IS released -- the live CodeSha256 already equals the built package_sha256 -- and the ledger's L1 and L2 are closed; only L3, the family's own sweep writing the dlq_drain key, is outstanding. There is NO etf meta/backfill-status.json object at all yet (list-objects-v2 over etf/ returns 0 matching keys), so the key cannot be read early.",
+   "note": "`released` is deliberately NEITHER true nor false, which ap15.AC2 reports as a defect and grades FAIL. That is the accurate state: etf is neither released-and-proven nor refused. Writing true here would make the criterion pass on an unproven family, and writing false would claim a refusal that nobody issued. This row flips to true after the 23:30Z sweep and AC2 is re-run then."
+  }
+ ],
+ "state": "4 of 5 families TERMINAL and CLOSED; etf outstanding on its 23:30Z sweep. ap15.AC2 reads FAIL until then, by construction."
+}
