@@ -753,11 +753,16 @@ def main(argv):
         chan = root / "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md"
         text = chan.read_text(encoding="utf-8", errors="replace")
         rows = []
-        for block in re.findall(r"```json\n(\{.*?\n\})\n```", text, flags=re.S):
+        # a fenced block holds one row (an object) or several (an array of objects): parse both (the first version of this
+        # check read objects only and missed 117 rows in 86 array blocks, row W114-S1)
+        for block in re.findall(r"```json\n(.*?)\n```", text, flags=re.S):
             try:
-                rows.append(json.loads(block))
+                got = json.loads(block)
             except ValueError:
-                pass
+                continue
+            for r in (got if isinstance(got, list) else [got]):
+                if isinstance(r, dict):
+                    rows.append(r)
         owned = [(i, r) for i, r in enumerate(rows) if r.get("hazard_standing") == "ARMED" and "Y2" in str(r.get("disarm_owner", ""))]
         left = []
         for i, r in owned:
