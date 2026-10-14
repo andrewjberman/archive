@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-h-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-h-1.seam-guard.md",
+  "group": "OTHER",
+  "vintage_commit": "cf8b7618e0"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round6.md",
+  "vintage_commit": "cf8b7618e0",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-h-1.seam-guard.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "d5871bc04b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs. _seam_dir() gives the OPAL_CLOUD_READ_LOCAL stand-in only when OPAL_STATE_ROOT is set; _source_cluster and _source_git both use it; approval_read prints the ignored NOTE once per call when the stand-in is set without the switch. Live probes in AC2 and AC3 read the real cluster copy and this box's working-tree row."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_cloudread.py",
+   "kind": "test",
+   "commit_or_etag": "d5871bc04b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary directories; OPAL_OPENCALLS_CLOUD=0 on every call, so no S3 call; the zz9 case reads no real ref because zz9 exists in no branch (see surprise NFRA_DEVPLN-W1-S16)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPh1-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_cloudread.py expect: cases=10/10 ok=True (the cloud-read test with its two new cases; it reads 8/8 at the base)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_cloudread.py",
+   "output_evidence": "timeout 120 rc=0. Ten PASS lines, the new ones 'stand-in set, OPAL_STATE_ROOT unset: the seam is ignored (UNREADABLE rc 2, fixture row not used), NOTE on stderr' and 'stand-in set with OPAL_STATE_ROOT set: the fixture row is used (state=OPEN row=zz9-fixture), no ignored NOTE'. LAST line: OPEN-CALLS-CLOUDREAD-TEST cases=10/10 ok=True. A second run on the committed tree printed the same last line.",
+   "denominator": "10 of 10 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPh1-AC2",
+   "criterion_verbatim": "OPAL_CLOUD_READ_LOCAL=/tmp/dph1_probe with no OPAL_STATE_ROOT, python .tools/open-calls.py approval-status --branch cand/dell1/amgt-sa-header-money-and-dash-reasons expect: state=APPROVED valid=yes (the real row; it reads ABSENT at the base)",
+   "method": "live_read",
+   "invocation": "bash -c 'mkdir -p /tmp/dph1_probe/box=dell1 && printf \"%s\" \"{\\\"schema\\\":\\\"open-calls/1\\\",\\\"device\\\":\\\"dell1\\\",\\\"written_at\\\":\\\"2099-01-01T00:00:00Z\\\",\\\"written_by\\\":\\\"probe\\\",\\\"rows\\\":[]}\" > /tmp/dph1_probe/box=dell1/open_calls.json && OPAL_CLOUD_READ_LOCAL=/tmp/dph1_probe python .tools/open-calls.py approval-status --branch cand/dell1/amgt-sa-header-money-and-dash-reasons'",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: 'NOTE: OPAL_CLOUD_READ_LOCAL ignored: it is a test seam and OPAL_STATE_ROOT is not set' then 'NOTE: dell1 list read from cluster written_at=2026-10-14T01:23:54Z' then 'APPROVAL branch=cand/dell1/amgt-sa-header-money-and-dash-reasons state=APPROVED valid=yes row=dell1-20261014T001511Z-633a by=1.0.0_SA_CTO~DELL1 head_sha=624e2533f665bf786e41594adba17b82c447aa7d commits=1 class=opal-internal box=dell1 pages=Security Analysis'. The 2099 fixture was ignored; the real cluster copy was read.",
+   "denominator": "1 of 1 APPROVAL lines carries state=APPROVED valid=yes",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPh1-AC3",
+   "criterion_verbatim": "python .tools/open-calls.py approval-status --branch cand/laptop/contributing-boxes expect: state=APPROVED valid=yes (the control: this box's own real row is unchanged; it reads from the working tree)",
+   "method": "live_read",
+   "invocation": "python .tools/open-calls.py approval-status --branch cand/laptop/contributing-boxes",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: 'NOTE: laptop list read from working-tree written_at=2026-10-13T22:31:07Z' then 'APPROVAL branch=cand/laptop/contributing-boxes state=APPROVED valid=yes row=laptop-20261013T200117Z-9e8a by=1.0.0_SA_CTO head_sha=07f065e69f54b6821d1197cd7b947ec1131c8026 commits=1 class=opal-internal box=laptop pages=portal/CONTRIBUTING-BOXES.md'.",
+   "denominator": "1 of 1 APPROVAL lines carries state=APPROVED valid=yes",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The base rule run in-process: _seam_dir is replaced by the stand-in alone (no OPAL_STATE_ROOT switch), against the AC2 probe with OPAL_CLOUD_READ_LOCAL=/tmp/dph1_probe and no OPAL_STATE_ROOT.",
+   "expected": "the 2099 fixture is read from the stand-in (NOTE cluster written_at=2099-01-01T00:00:00Z) and the row reads state=ABSENT",
+   "observed": "NOTE: dell1 list read from cluster written_at=2099-01-01T00:00:00Z | APPROVAL branch=cand/dell1/amgt-sa-header-money-and-dash-reasons state=ABSENT valid=- row=- rc=0",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of python .tools/tests/test_open_calls_cloudread.py compared on the last line",
+   "observed": "run 1 and run 2 both print OPEN-CALLS-CLOUDREAD-TEST cases=10/10 ok=True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The git source in case 9 still runs a real git show against origin/box/zz9 when OPAL_STATE_ROOT is unset",
+   "reason": "The order fixes case 9 with the switch unset, and the production git path is what runs then; zz9 exists in no branch, so nothing is read. Filed as NFRA_DEVPLN-W1-S16 for the lane owner's ruling; no change made beyond the order."
+  },
+  {
+   "item": "The AC2 probe writes its fixture to /tmp/dph1_probe, the path the order names",
+   "reason": "Run verbatim as the criterion states it; the fixture is a two-file probe outside the repo and is not part of the deliverable."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S16: the order says tests read no real origin/box ref, but case 9 (stand-in set, OPAL_STATE_ROOT unset) runs the production git source, a real git show against origin/box/zz9; the ref is absent so nothing is read (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-h-1.seam-guard.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/open-calls.py .tools/tests/test_open_calls_cloudread.py",
+   "result": "All checks passed! (rc 0)"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/open-calls.py .tools/tests/test_open_calls_cloudread.py",
+   "result": "rc 0, no output"
+  },
+  {
+   "tool": "commit-gate",
+   "invocation": "bash .tools/commit-gate.sh .tools/open-calls.py .tools/tests/test_open_calls_cloudread.py",
+   "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc 0)"
+  }
+ ]
+}
