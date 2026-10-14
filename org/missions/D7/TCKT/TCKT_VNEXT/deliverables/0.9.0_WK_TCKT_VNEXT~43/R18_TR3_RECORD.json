@@ -1,0 +1,75 @@
+{
+ "order": "TCKT_VNEXT.TO-R18-TR3",
+ "amendments_applied": ["AMENDMENT 1 (state tier, bucket template and key template)", "AMENDMENT 2 (table ticket_attachments; policy name -policy; module-derived firm ARNs)"],
+ "file": "infra/aws/terraform/ticket-center/main.tf",
+ "base_commit": "5cb98dbac4",
+ "lines_changed": {
+  "insertions": 59,
+  "deletions": 0,
+  "spots": [
+   "module opal_ticket_api environment_variables: TICKET_ATTACH_BUCKET_TEMPLATE = opal-data-{firm} and TICKET_ATTACH_KEY_TEMPLATE = portal/{firm}/state/ticket_attachments/trade-form/, after IRPT_REQUESTS_TABLE, each with a comment naming ATTACH_ADDRESS.json and rule 30",
+   "locals ticket_routes: attachment_upload and attachment_open, after the meeting entry of TO-R18-TR2",
+   "three module calls of source ../modules/opal_name, scope 49financial, inflection and cottonwood (ticket_attach_49financial, ticket_attach_inflection, ticket_attach_cottonwood), and a locals block: ticket_attach_key_template and ticket_attach_arns (three format() expressions over the module bucket outputs), placed before the policy resource",
+   "new resource aws_iam_role_policy.opal_ticket_api_attachments, name opal-ticket-attachments-trade-form-policy, statement TicketAttachmentsTradeForm with Resource = local.ticket_attach_arns, placed before the SES section header"
+  ]
+ },
+ "routes": {
+  "attachment_upload": "POST /api/scoped/tickets/attachment-upload",
+  "attachment_open": "GET /api/scoped/tickets/{ticketId}/attachment"
+ },
+ "environment": {
+  "TICKET_ATTACH_BUCKET_TEMPLATE": "opal-data-{firm}",
+  "TICKET_ATTACH_KEY_TEMPLATE": "portal/{firm}/state/ticket_attachments/trade-form/",
+  "source": "deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json bucket_template and key_template (TO-R18-TR1, AMENDMENT 2)"
+ },
+ "permission": {
+  "resource": "aws_iam_role_policy.opal_ticket_api_attachments",
+  "role": "aws_iam_role.opal_ticket_api",
+  "policy_name": "opal-ticket-attachments-trade-form-policy",
+  "sid": "TicketAttachmentsTradeForm",
+  "why_separate_resource": "the file's pattern: each concern has its own aws_iam_role_policy (opal_ticket_api_ddb, opal_ticket_api_ses); the SES block says an S3 or SES grant is not a table grant",
+  "actions": ["s3:PutObject", "s3:GetObject"],
+  "buckets_from_module_output": {
+   "49financial": "module.ticket_attach_49financial.bucket",
+   "inflection": "module.ticket_attach_inflection.bucket",
+   "cottonwood": "module.ticket_attach_cottonwood.bucket"
+  },
+  "buckets_resolved_at_record_time": {
+   "49financial": "opal-data-49financial",
+   "inflection": "opal-data-inflection",
+   "cottonwood": "opal-data-cottonwood"
+  },
+  "key_prefixes": {
+   "49financial": "portal/49financial/state/ticket_attachments/trade-form/",
+   "inflection": "portal/inflection/state/ticket_attachments/trade-form/",
+   "cottonwood": "portal/cottonwood/state/ticket_attachments/trade-form/"
+  },
+  "resources_expressions": [
+   "format(\"arn:aws:s3:::%s/%s*\", module.ticket_attach_49financial.bucket, replace(local.ticket_attach_key_template, \"{firm}\", trimprefix(module.ticket_attach_49financial.bucket, \"opal-data-\")))",
+   "format(\"arn:aws:s3:::%s/%s*\", module.ticket_attach_inflection.bucket, replace(local.ticket_attach_key_template, \"{firm}\", trimprefix(module.ticket_attach_inflection.bucket, \"opal-data-\")))",
+   "format(\"arn:aws:s3:::%s/%s*\", module.ticket_attach_cottonwood.bucket, replace(local.ticket_attach_key_template, \"{firm}\", trimprefix(module.ticket_attach_cottonwood.bucket, \"opal-data-\")))"
+  ],
+  "resources_resolved_at_record_time": [
+   "arn:aws:s3:::opal-data-49financial/portal/49financial/state/ticket_attachments/trade-form/*",
+   "arn:aws:s3:::opal-data-inflection/portal/inflection/state/ticket_attachments/trade-form/*",
+   "arn:aws:s3:::opal-data-cottonwood/portal/cottonwood/state/ticket_attachments/trade-form/*"
+  ]
+ },
+ "names_for_release_and_laptop_role_request": {
+  "buckets": ["opal-data-49financial", "opal-data-inflection", "opal-data-cottonwood"],
+  "key_prefixes": ["portal/49financial/state/ticket_attachments/trade-form/", "portal/inflection/state/ticket_attachments/trade-form/", "portal/cottonwood/state/ticket_attachments/trade-form/"],
+  "env_names": ["TICKET_ATTACH_BUCKET_TEMPLATE", "TICKET_ATTACH_KEY_TEMPLATE"],
+  "policy_name": "opal-ticket-attachments-trade-form-policy"
+ },
+ "naming_gate": {
+  "command": "python .tools/naming-gate.py --diff .scratch/tr3_probe.diff --enforce (the working diff of main.tf)",
+  "result": "rc=0, NAMING-GATE: WARN 4 graded: key template line 241 CONFORMANT as S3Key; policy name CONFORMANT as IAM_POLICY; env bucket template RAISE-EXISTING (warning, the existing shape); env key template CONFORMANT as S3Key. No REFUSE."
+ },
+ "not_read": [
+  "terraform plan, apply and fmt: the terraform binary is not installed on this box, so terraform fmt -check was not run and no plan or apply was run",
+  "the live Lambda role, its other statements and the live bucket policy and CORS of the three buckets",
+  "the Lambda source under infra/aws/lambda/ticket_center/ (TO-R18-L2 reads the templates; not checked here)",
+  "the bucket policy and CORS, which are the laptop's role request (C-DEPLOY), not written here",
+  "infra/aws/terraform/modules/opal_name (read for its outputs only; not edited)"
+ ]
+}
