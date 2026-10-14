@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gt-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~72",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "95d985d1a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "d9371ffe81",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-1.identity-tools.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_identity.py",
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Worktree C:/tmp/wk-oplgtw-72, branch wk-NFRA_OPLGTW-72, not committed: the commit-time naming gate (LGIC_ENFORCE) refused four hyphenated harvest prefixes at lines 50, 51, 60 and 61 (surprise row NFRA_OPLGTW-Z-W72-S4, BLOCKING). No release, no deploy, no IAM or Terraform change; no tool registered (the issuer registers at the merge).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gt1.py",
+      "kind": "test",
+      "commit_or_etag": "UNCOMMITTED",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Offline tests test_oggt1_ac01..ac04 with a recording fake on harvest_read._client and a stand-in principal on harvest_read.get_current_principal. Staged with the module; blocked by the same naming refusal.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1d31cdeb50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended (NFRA_OPLGTW-Z-W72-S1..S4), committed on the worker branch; not a deploy artifact.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: both tools are built and answer a CUSIP query not_held.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests (test_oggt1_ac01..ac04); failed/error lines 0. Run on the worktree, uncommitted module.",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the real bucket: ASML resolves exactly, a CUSIP answers not_held, and the coverage rows agree with an independent head_object on the packs ledger.",
+      "method": "live_read",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "resolve ASML: status exact, security_key set; CUSIP query: status not_held; coverage datasets 32, rows well-formed True; packs present True vs independent head True; envelope on all three True\nRESULT: PASS\nexit=0",
+      "denominator": "1 live probe against opal-data-harvest (read only, box credentials): 3 tool answers checked, 32 of 32 coverage rows well-formed, packs ledger presence 1 of 1 agreeing with head_object.",
+      "status": "PASS",
+      "expect": "(?s)resolve ASML: status exact, security_key set; CUSIP query: status not_held; coverage datasets [1-9]\\d*, rows well-formed True; packs present (True|False) vs independent head \\1; envelope on all three True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "At the cut base de8bd420d2 the module is absent: app/harvest_identity.py has no object at that commit, so the AC1 and AC2 invocations cannot import the tool and read FAIL there (the issuer recorded this pre-cut).",
+      "expected": "base reads RESULT: FAIL",
+      "observed": "git cat-file -e de8bd420d2:infra/aws/ec2/opal-gateway/app/harvest_identity.py -> rc=128 (absent); git cat-file -e de8bd420d2:infra/aws/ec2/opal-gateway/tests/test_og_gt1.py -> rc=128 (absent). The AC1 invocation has no test file to collect at that base, so it cannot name four passing tests; the base run itself was not executed in this session.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: AC1 pytest run directly on the worktree, then through gt1.AC1.sh; AC2 probe run through gt1.AC2.sh, then a read-only print of the same tool answers.",
+      "observed": "AC1 passed 4 of 4 on both runs. AC2 on both runs: ASML resolved exact to ASML_NA_Equity with other_listings ASML_US_Equity, the CUSIP answered not_held, 32 coverage rows well-formed, and the packs ledger present on both sides.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W72-S1: lib/research/api/name_search.resolve_query cannot be wrapped without a second S3 reader (two boto3 clients); the match is implemented over the three datasets.",
+    "NFRA_OPLGTW-Z-W72-S2: the gateway runtime is not shown to carry lib/trading_calendar.py; a runtime without lib/ reports trading_days_behind_t1 as None with its reason.",
+    "NFRA_OPLGTW-Z-W72-S3: the 32 keyed prefixes carry five key forms; 11 contracts name no sample object, so their form was placed by a read-only listing.",
+    "NFRA_OPLGTW-Z-W72-S4: BLOCKING -- the commit-time naming gate refuses four hyphenated harvest prefixes the module reads; the module cannot land on the branch as written."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
+  "compiler_tools": [
+    {
+      "tool": "pytest (named tests), via gt1.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC1.sh",
+      "result": "AC1 rc=0, 4 of 4 named tests passed"
+    },
+    {
+      "tool": "live identity-tool probe (read only, box credentials), via gt1.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt1.AC2.sh",
+      "result": "AC2 rc=0, ASML exact, CUSIP not_held, 32 coverage rows, packs ledger presence agrees with head"
+    },
+    {
+      "tool": "commit gate (py_compile, ruff, strict-utf8 read check) on the two new Python files",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/harvest_identity.py infra/aws/ec2/opal-gateway/tests/test_og_gt1.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": "proof-of-spec checker",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-1.identity-tools.md",
+      "result": "recorded in the worker report at write time"
+    }
+  ]
+}
