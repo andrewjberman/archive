@@ -1,0 +1,33 @@
+SESSION LOG -- 0.9.0_WK_IRPT_DASHBD~178 on IRPT_DASHBD.TO-DB-b-221 (round 110, read only)
+Worktree C:/dev/wk-irpt-dashbd-178, branch wk-IRPT_DASHBD-178. Commands are listed with exit code and the deciding line. No client data, no account identifiers, no figures.
+
+1. git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools -> rc 0; branch wk-IRPT_DASHBD-178; TREE-OK
+2. comp-which "irpt holdings performance schedule" -> rc 0; no curated rule matched (fuzzy guesses only); not used as evidence
+3. comp-read org/modules/graph/graph-call-manifest.yaml -> rc 0; a routing manifest, no AWS read route for schedules
+4. comp-find --corpus aws over holdings performance names -> rc 0; 15 hits over 2929 aws nodes; vintage 2026-10-14 18:59:23 UTC
+5. comp-find --corpus aws '.' SCHEDULE -> rc 0; DENOMINATOR 40 SCHEDULE nodes (32 DECLARED, 7 LIVE-no-DECLARED, 1 MULTI_STATE_MANAGED); none names cottonwood or blackdiamond_z09
+6. comp-find --corpus aws cottonwood|blackdiamond|z09 -> rc 0; no SCHEDULE node; the Black Diamond sweep event rule and silver writer lambda are the upstream, not read further
+7. python -I read-only import of holdings_performance.resolved_prefix -> rc 0; firm scope cottonwood; Black Diamond silver prefix blackdiamond/cottonwood/silver/fact_holdings/ on the declared bucket
+8. python -I import of lib/trading_calendar -> rc 0; WARN fallback NYSE/hardcoded-fallback-2010-2027; expected_last_trading_day(2026-10-14) = 2026-10-14; prev_trading_day = 2026-10-13
+9. python -I opal_naming.address() for the Cottonwood gold table names -> rc 0; prefixes under opal-data-cottonwood irpt/cottonwood/gold/
+10. aws s3api list-objects-v2 opal-data-cottonwood irpt/cottonwood/gold/ --delimiter / -> rc 0; 7 common prefixes
+11. aws s3api list-objects-v2 holdings_performance_daily/ --delimiter / -> rc 0; 75 partitions, first 2026-06-10, newest 2026-09-25
+12. aws s3api list-objects-v2 holdings/ --delimiter / -> rc 0; 10 partitions, 2026-09-22 then 2026-09-28 to 2026-10-08
+13. aws s3api list-objects-v2 opal-data-assets blackdiamond/cottonwood/silver/fact_holdings/ --delimiter / -> rc 0; 93 partitions, newest 2026-10-13
+14. aws s3api list-objects-v2 holdings_performance_daily/date=2026-09-25/ -> rc 0; one object (data.parquet); no manifest.json at this key
+15. aws s3api list-objects-v2 holdings/date=2026-10-08/ -> rc 0; one parquet object; no manifest.json at this key
+16. aws s3api get-object holdings_performance_daily/date=2026-09-25/manifest.json -> rc 254 NoSuchKey (wrong key; the manifest lives in the manifest table)
+17. aws s3api get-object holdings/date=2026-10-08/manifest.json -> rc 254 NoSuchKey (no manifest at this table)
+18. aws s3api list-objects-v2 holdings_performance_manifest/ --delimiter / -> rc 0; 75 partitions, newest 2026-09-25
+19. aws s3api list-objects-v2 holdings_performance_manifest/date=2026-09-25/ -> rc 0; data.parquet and manifest.json
+20. aws s3api get-object holdings_performance_manifest/date=2026-09-25/manifest.json -> rc 0; non-figure fields read (table, asof, firm_scope, schema_version 1.1, source_pipeline, declaration, calendar_source NYSE/pandas_market_calendars)
+21. comp-find over repo for the gold holdings writer -> rc 0; the holdings writer is holdings_snapshot.py (publisher writes gold/<revision>.parquet) run by the refresh dispatch
+22. aws scheduler get-schedule --name irpt-holdings-snapshot --group-name default -> rc 0; State ENABLED; cron(15 10 ? * MON-FRI *) America/New_York; target irpt-holdings-refresh-lambda
+23. aws scheduler get-schedule --name irpt-holdings-performance-daily --group-name default -> rc 0; State ENABLED; cron(30 7 ? * MON-FRI *); positive control
+24. aws s3api list-objects-v2 opal-data-assets blackdiamond/cottonwood/silver/fact_holdings/date=2026-10-13/ with LastModified -> rc 0; one object, LastModified 2026-10-14T11:46:04Z (listing metadata only)
+25. Two GET attempts and two LIST attempts on the gold prefix were refused once by the comp-rail AWS-FRESH hook; re-run with a rail-checked annotation naming the grant; the refused call ran nothing
+26. Surprise rows appended as bytes to INVESTIGATION_v1.md: IRPT_DASHBD-D2-W178-S1 to S4 -> rc 0; prefix intact
+27. python -I checker DB110-6-AC1 -> rc 0 PASS (after one FAIL on a digit run in why_none, fixed by removing a custody source number from the words)
+28. checker determinism: three runs -> rc 0 each, outputs identical
+29. checker --selftest -> rc 0; 9 refusal arms and 2 passing arms
+30. in-memory mutant: frontier.trading_days_behind set to 11 -> REFUSED (checker recomputes 12)
