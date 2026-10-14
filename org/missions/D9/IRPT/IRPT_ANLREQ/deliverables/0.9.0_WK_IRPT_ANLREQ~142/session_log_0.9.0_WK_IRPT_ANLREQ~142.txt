@@ -1,0 +1,14 @@
+session log -- 0.9.0_WK_IRPT_ANLREQ~142 on IRPT_ANLREQ.TO-AR-y-335 (read only)
+worktree: C:/dev/wk-irpt-anlreq-142   branch: wk-IRPT_ANLREQ-142   base: bf351147d228fd7f8fd552c31985f7e1538030bc
+
+1. git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-142; test -d org && test -d .tools -> TREE-OK
+2. Read the task order; grep and read of infra/aws/lambda/ticket_center/lambda_function.py (principal_class, _actor, package_ticket, lambda_handler, MATRIX, PACKAGE_ALLOWED_FIRMS)
+3. Read infra/aws/users/lambda/portal-authorizer/index.mjs (handler, verifyWithSlots, computeAllowedFirms) and infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs (JWT_PUBLIC_KEY_SECRET_ID, verifyWithSlots)
+4. Searched infra/aws/terraform for PACKAGE_ALLOWED_FIRMS, svc-irpt-packager and GetSecretValue: hits in ticket-center/main.tf:306, investor-reporting/ycharts/resident.tf:168-171 and the two CHANGELOG files
+5. Read infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py (live_ticket_ports) and reports/resident_installed.py (packager block); the TO path ycharts/reports/resident_installed.py is absent, the file is at reports/ (surprise row S1)
+6. Wrote r41/PACKAGER_DOOR_READ.json, shape_check.py, cite_check.py; ran commit-gate on both scripts: rc 0
+7. Negative control (scratch copy under .scratch/neg, not committed): a corrupted q2 read_at text -> CITES-BAD infra/aws/lambda/ticket_center/lambda_function.py:86, rc 1
+8. Appended surprise rows IRPT_ANLREQ-D2-W142-S1..S4 to INVESTIGATION_v1.md
+9. Committed the record, both scripts and the rows: 0ecc4bc4b3 (LOCAL on wk-IRPT_ANLREQ-142; safe-commit rc 0)
+10. Re-ran both checks twice: SHAPE-OK ... rc 0 and CITES-OK 78 of 78 rc 0, identical on each run
+11. No push, no deploy, no AWS call, no live call, no source file edited. The portal worktree change (M portal) was not staged.
