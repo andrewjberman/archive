@@ -38,7 +38,7 @@ Push gates: VALGATE D-1 PASS (no-op), pre-push `tsc -b --noEmit` passed.
 - Same check on this promote's own head (`--check release/20261014T122041Z`) -> `RELEASE-CHECK features=9 first_parent_commits=9 unapproved=0 ref=refs/heads/release/20261014T122041Z sha=501e998b1e57`.
 The trunks differ by the approved set only; the one deviation is the count in DPy1-AC1 (10 at the live tip, 9 at this promote's head), filed as `NFRA_DEVPLN-S6`.
 
-**Acceptance:** DPy1-AC1 as written reads features=10 at the live tip, so it does NOT match its expectation (`features=9`); unapproved=0 holds. DPy1-AC2 = 5, PASS. The TO stays `pending`: the issuer amends its own criterion (CLAUDE.md rule 27) or re-grades against the release head.
+**Acceptance:** DPy1-AC1 as first issued expected `features=9`; it read `features=10` at the live tip (see `NFRA_DEVPLN-S6`). The issuer amended it at `e4f3acfcc8` to `unapproved=0 ref=refs/remotes/origin/PROD`, and the re-run reads `RELEASE-CHECK features=10 first_parent_commits=10 unapproved=0 ref=refs/remotes/origin/PROD sha=6a5926fc1194`: PASS. DPy1-AC2 = 5, PASS. Instance VALID (rc=0).
 
 **Ledger:** `devpln-r8-client-facing-chosen-set-promote-20261014` opened at start, legs L1 (PROD commit), L2 (CI), L3 (tag) proven, CLOSED.
 **Teardown:** worktree deregistered (`worktree prune`); the directory `.runtmp/portal-promote-20261014T122112Z` persists on the Windows long-path error, gitignored and inert. Main portal tree on DEV, fast-forwarded to `97c66c93`. The local `release/20261014T122041Z` ref is kept (contained in origin/PROD).
