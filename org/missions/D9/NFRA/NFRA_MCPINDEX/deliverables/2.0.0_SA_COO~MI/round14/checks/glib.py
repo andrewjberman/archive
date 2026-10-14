@@ -60,7 +60,7 @@ CLIENT_MAP = {
     "orion_get_household_performance": "client_get_performance", "orion_get_account_performance": "client_get_performance",
     "commonwealth_get_performance": "client_get_performance",
     "blackdiamond_get_account_fee_roles": "client_get_fees", "blackdiamond_list_fees": "client_get_fees",
-    "blackdiamond_get_account_profile": "client_get_profile", "smartx_account_lookup": "client_get_profile",
+    "smartx_account_lookup": "client_get_profile",
     "blackdiamond_list_insurance": "client_get_insurance",
 }
 

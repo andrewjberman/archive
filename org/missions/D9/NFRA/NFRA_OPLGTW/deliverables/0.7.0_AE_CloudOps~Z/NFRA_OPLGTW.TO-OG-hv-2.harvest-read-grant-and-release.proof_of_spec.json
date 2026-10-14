@@ -1,0 +1,257 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-hv-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-14/og_hv2_phase_a_and_b_live_plus_zs1_stop_and_ap15_l3.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "26a247b289"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "f1a3e57829",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-hv-2.harvest-read-grant-and-release.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the re-cut carries exactly OG-hv-1 on the live ref, and the grant names exactly the 24 prefixes.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/hv2.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)base [0-9a-f]+ is the live ref before this release: yes.*outside OG-hv-1's files 0 \\(want 0\\); harvest_read\\.py byte-equal to HEAD: yes.*grant object prefixes equal SERVED_PREFIXES: 24 of 24, extra 0; list condition prefixes 24 of 24; non-read actions 0.*RESULT: PASS.*exit=0",
+   "output_evidence": "base 90967e39ba is the live ref before this release: yes (manifest 90967e39ba/43088464f5); release 7c558b4e21\nfiles differing 7; outside OG-hv-1's files 0 (want 0); harvest_read.py byte-equal to HEAD: yes\ngrant object prefixes equal SERVED_PREFIXES: 24 of 24, extra 0; list condition prefixes 24 of 24; non-read actions 0; bucket-wide object ARNs 0; builder name yes; attached to the internal reader role yes\nRESULT: PASS\nexit=0",
+   "denominator": "7 files differing, 0 outside OG-hv-1's seven; 24 of 24 SERVED_PREFIXES matched as object ARNs with 0 extra, the same 24 covered by the s3:prefix condition (48 values, bare and starred), 0 non-read actions, 0 bucket-wide object ARNs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: both acts landed and closed; the role reads the listed prefixes and nothing else; the installed tools admit an Opal principal and refuse a non-Opal one on packs/ and wsj/harvest/.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/hv2.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)ledgers CLOSED 2 of 2; sentinels at HEAD 0.*equal=yes; rb\\.AC2 PASS.*simulate packs=allowed wsj_harvest=allowed control_unlisted=implicitDeny.*served fields: yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "ledgers CLOSED 2 of 2; sentinels at HEAD 0\nmanifest deployed_commit=7c558b4e21; release_sha=7c558b4e21; equal=yes; rb.AC2 PASS\nsimulate packs=allowed wsj_harvest=allowed control_unlisted=implicitDeny\nserved fields: yes\nRESULT: PASS\nexit=0",
+   "denominator": "2 of 2 ledgers CLOSED with 0 sentinels at HEAD; 3 isolated simulations (2 allowed, 1 implicitDeny) on the internal reader role; 8 served-read body fields true-or-expected, including s3_calls_on_refusal = 0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The cut is not hand-assembled: it is OG-hv-1's own gateway hunks taken from 4e26a29872 and graded by per-file add/delete counts against that commit's own diff, so the same release can be rebuilt from the same two refs. The served read was run twice on the host from the same S3-pulled harness, with local md5 == host md5 printed on each run.",
+   "observed": "numstat identical per file for all 7 files (1/0, 2/0, 181/0, 21/0, 3/3, 2/1, 240/0); the harness ran at md5 cfca9a3feeeff6b345df6915df4aa61c with the host reporting the same md5, and both runs returned the same arm answers.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Two negative arms stand in its place, each built so that a silent non-event is distinguishable from the real one rather than both reading clean. (a) The post-deploy md5 read: the running bytes are 106 of 106 equal to the release AND differ from the base in exactly the deployed files the cells touch -- a deploy that had not landed would invert both numbers. (b) The refusal arms of the served read: hv._client was replaced by a counter that raises on any attribute access, so a single S3 call on a refusal path would both count and fail loudly, rather than being inferred from the order in which the code reads.",
+   "expected": "running bytes equal to the release and unequal to the base; 0 S3 attribute accesses on any refusal path; the off-list prefix still implicitDeny after the grant",
+   "observed": "106 of 106 equal to release 7c558b4e21 with 0 differing; against base 90967e39ba exactly 3 differ (app/tools.py, app/data_entitlement.py, app/destructive_ops.py) plus the new app/harvest_read.py. s3_calls_on_refusal 0 with an empty list of touched attributes. opal-data-harvest/zzz-not-served/x.json read implicitDeny before AND after the grant, while packs/ and wsj/harvest/ moved implicitDeny -> allowed.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_read.py",
+   "kind": "script",
+   "commit_or_etag": "7c558b4e2176a632d13e6301af3e06d434aa1540",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "one SSM md5 read of the RUNNING path: 106 of 106 equal to the release, 0 differing; this file is absent at the base, so it is one of the four files the negative control names",
+   "introduces": [
+    "SERVED_PREFIXES",
+    "harvest_prefix_not_served"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+   "kind": "script",
+   "commit_or_etag": "7c558b4e2176a632d13e6301af3e06d434aa1540",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "served read through the installed code: tools_listed carries both names from the registry the server itself builds (native registry 46, against 44 at the base)",
+   "introduces": [
+    "def harvest_list(",
+    "def harvest_read("
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/harvest_read_iam.tf",
+   "kind": "script",
+   "commit_or_etag": "013844d3e6",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "applied from a SAVED plan reading 1 to add, 0 to change, 0 to destroy; get-role-policy read back 24 object ARNs and 48 s3:prefix condition values on gateway-global-internal-reader-role, beside an UNCHANGED gateway-global-internal-reader-policy and 0 attached managed policies",
+   "introduces": [
+    "gateway-global-harvest-read-policy",
+    "HarvestReadServedObjects"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/HV2_IAM_SIM.json",
+   "kind": "script",
+   "commit_or_etag": "f52210e98e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three isolated simulate-principal-policy calls on the role the installed code assumes, plus a same-principal positive control on the role's pre-existing portal read and a head-bucket existence read",
+   "introduces": [
+    "control_unlisted"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/HV2_SERVED.json",
+   "kind": "script",
+   "commit_or_etag": "e05b30aecc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read on the host through the INSTALLED code under /opt/opal-gateway/.venv/bin/python from an S3-pulled harness (local md5 == host md5); verdict PASS with 0 S3 calls on any refusal path",
+   "introduces": [
+    "field_shape"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "script",
+   "commit_or_etag": "03a344306a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deployed_commit 7c558b4e21 with previous_deployed_commit 90967e39ba (trunk's own current value, not the release branch's stale 2c0f84966d) and all 10 file_checksums recomputed from the release blobs, 2 of them moved; the edit is a brace-matched span with 26 of 27 sibling services compared byte-equal",
+   "introduces": [
+    "7c558b4e2176a632d13e6301af3e06d434aa1540"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md",
+   "kind": "script",
+   "commit_or_etag": "03a344306a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "section 7.2 names live 7c558b4e21 with 90967e39ba as the valid rollback target (both R-56 conditions checked, with a negative control at d88cd32d0c~1 where the guard file is absent), and states that a binary rollback does NOT undo the IAM half; rb.AC2 PASS",
+   "introduces": [
+    "the live release is `7c558b4e21`"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261014T1341Z_nfra-oplgtw-harvest-read-grant_deploy_completion.md",
+   "kind": "script",
+   "commit_or_etag": "f52210e98e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "opened entry-and-sentinel-first before the apply; three legs closed with proof; CLOSED and sentinel removed. The entry also records, rather than hides, that safe-apply's seat gates ran in WARN mode and printed CROSSBOX-DEPLOY verdict=STOP on an OPEN-CALL hit naming this terraform root",
+   "introduces": [
+    "Apply complete! Resources: 1 added"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261014T1355Z_nfra-oplgtw-gateway-release-hv_deploy_completion.md",
+   "kind": "script",
+   "commit_or_etag": "03a344306a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "opened entry-and-sentinel-first before the deploy; four legs closed with proof, including the md5 read with its negative control and the served read; CLOSED and sentinel removed",
+   "introduces": [
+    "106 of 106 EQUAL"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "ssm send-command (md5 parity at the base, before the cut)",
+   "invocation": "aws ssm send-command AWS-RunShellScript, md5sum over app/ deploy/ dashboard/ compared to 90967e39ba",
+   "result": "105 of 105 EQUAL, 0 differing, 0 repo-only -- the live ref confirmed before anything was cut"
+  },
+  {
+   "tool": "git cherry-pick -n (the re-cut) + safe-commit with the audited lane override",
+   "invocation": "git cherry-pick -n 4e26a29872 in C:/tmp/og-rel-hv at 90967e39ba; GIT_COMMIT_AUTHOR_OVERRIDE=CLOUD_OPS_OR_ETL safe-commit.sh -F <msgfile>",
+   "result": "release 7c558b4e21 on rel-nfra-oplgtw-hv, parent = the live deployed_commit; 7 gateway files staged, 0 outside"
+  },
+  {
+   "tool": "pytest in the release tree",
+   "invocation": "python -m pytest tests/test_og_hv1.py tests/test_entitlement_admin.py tests/test_data_entitlement_family.py",
+   "result": "5 passed, 9 passed, 4 passed"
+  },
+  {
+   "tool": "hv2_grant_gen.py (the grant file's generator)",
+   "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/hv2_grant_gen.py",
+   "result": "24 prefixes read by AST from SERVED_PREFIXES, builder name gateway-global-harvest-read-policy asserted against lib/opal_naming.py, 48 condition values, 0 non-ASCII characters"
+  },
+  {
+   "tool": "terraform plan -out (the plan the apply consumed)",
+   "invocation": "terraform plan -input=false -var market_update_s3_root=<address() output> -target=aws_iam_role_policy.int_reader_harvest_read -out <plan>",
+   "result": "Plan: 1 to add, 0 to change, 0 to destroy; terraform show of the saved file lists exactly ONE resource"
+  },
+  {
+   "tool": "safe-apply.sh (the apply, from the saved plan)",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -no-color <saved plan>",
+   "result": "Apply complete! Resources: 1 added, 0 changed, 0 destroyed. Seat gates ran in WARN mode and printed CROSSBOX-DEPLOY verdict=STOP on an OPEN-CALL hit; recorded in the ledger entry rather than passed over"
+  },
+  {
+   "tool": "safe-ec2-deploy.sh",
+   "invocation": "DEPLOY_BASE_REF=90967e39ba... bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh i-07dccb1615503ac99",
+   "result": "rc=0, SSM 7934e4ac-eb11-4733-823d-9ff9d41e7b36 Success, opal-gateway active; the script's own stale-base guard read the live ref at the upload and found it equal"
+  },
+  {
+   "tool": "hv2_served_harness.py (the served read, S3-pulled per Rule 12)",
+   "invocation": "/opt/opal-gateway/.venv/bin/python /tmp/hv2_served_harness.py, pulled from s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/harnesses/",
+   "result": "verdict PASS; local md5 == host md5; 0 S3 calls on any refusal path; schwab and blackdiamond still entitlement_denied for the same principal"
+  },
+  {
+   "tool": "hv2_manifest_record.py (the trunk manifest record)",
+   "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/hv2_manifest_record.py",
+   "result": "12 changed lines; 10 checksums recomputed from the release blobs with 2 moved; 26 of 27 sibling services compared byte-equal; refuses on any out-of-span byte change"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open / close-leg / close --slug nfra-oplgtw-harvest-read-grant and --slug nfra-oplgtw-gateway-release-hv",
+   "result": "both entries and sentinels committed before their acts; 3 and 4 legs proven; both CLOSED"
+  },
+  {
+   "tool": "hv2.AC1.sh / hv2.AC2.sh",
+   "invocation": "bash .../r37/checks/hv2.AC<n>.sh",
+   "result": "AC1 exit=0 RESULT: PASS; AC2 exit=0 RESULT: PASS (AC2 first read 'served fields: no' because the record carried refusal CODES where the criterion grades booleans; the harness was fixed and RE-RUN rather than the record edited)"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S107: the grant named the wrong principal -- harvest_read reads through internal_role.s3_client(), the assumed gateway-global-internal-reader-role with no fallback, so a grant on opal-gateway-role would have passed every check while every served read returned AccessDenied. Resolved by the issuer's amendment A5 before this cut, and the live served read is the arm that proves the corrected grant works.",
+  "NFRA_OPLGTW-Z-S108: step 3 named 'safe-apply plan mode', which does not exist -- safe-apply gates the apply subcommand only and routes a plan to the resolved terraform binary. Ruled by the issuer at A6; the plan line the step asks for was produced by the path safe-apply's own header prescribes, and the apply still went through safe-apply."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "AC3 (the judgment criterion)",
+   "reason": "FWD-21's driven call -- a real Opal asset manager, signed in to their own work Claude, asking for one covered name and getting its pack and chatter through the gateway. Graded by 3.0.0_SA_CVO~Z, and PARTIAL at best until a named asset manager runs it (A1: none is on record yet, so the first live read runs on Andrew's own work Claude as a stand-in, which cannot grade the research-only arm because he is master_admin). Recorded UNVERIFIABLE-BY-INSTRUMENT; the negative arms are AC2's and did not wait."
+  },
+  {
+   "item": "the exposed tool total of 63 -> 65",
+   "reason": "measured by the app's own registry, which is what tests/test_entitlement_admin.py::test_ogz2_ac08 asserts and which passes at the release. The host-side instrument available to this seat reads the NATIVE registry only (44 at the base, 46 at the release, both harvest names present); a grep of @mcp.tool over the installed tree is a different denominator and reads 65 on the PRE-release host, so it is named in the record as the wrong instrument rather than quoted as the number."
+  },
+  {
+   "item": "the Opal-only boundary itself",
+   "reason": "it is a CODE gate (tools._is_opal_user) and cannot be expressed in IAM, because the principal is a gateway-level identity and not an AWS one. After this act IAM admits the served surface to the role the gateway assumes, so a regression in that predicate would not be caught by IAM. Named plainly in the never-widen ask; what holds it is test_oghv1_ac02/ac04 plus AC2's live negative arms."
+  },
+  {
+   "item": "the 10 host-only files under dashboard/",
+   "reason": "built vite assets the repo does not track, so they sit outside every md5 comparison by construction rather than by omission"
+  }
+ ]
+}
