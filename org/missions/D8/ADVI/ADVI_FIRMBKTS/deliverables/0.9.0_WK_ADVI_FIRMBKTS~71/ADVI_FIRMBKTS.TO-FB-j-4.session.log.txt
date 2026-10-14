@@ -1,0 +1,23 @@
+SESSION LOG -- 0.9.0_WK_ADVI_FIRMBKTS~71 on ADVI_FIRMBKTS.TO-FB-j-4 (round 7, FB-j-4)
+worktree: C:/dev/wk-firmbkts-71  branch: wk-ADVI_FIRMBKTS-71  base HEAD: 90be6506d6
+tree check: git rev-parse --abbrev-ref HEAD -> wk-ADVI_FIRMBKTS-71; test -d org && test -d .tools -> TREE-OK
+
+1. Edit (data/black_diamond/scripts/gold/gold_dispatch.sh, emit_chain_complete only):
+   - added one line EVENTS_REGION="${EVENTS_REGION:-us-east-1}" with a one-line provenance comment (bus ARN)
+   - put-events call now: aws events put-events --region "$EVENTS_REGION" --entries "file://$entries_file" 2>&1
+   - no AWS_DEFAULT_REGION, no AWS_REGION, no aws configure, no export
+2. bash -n rc=0.
+3. Pre-commit run of r7_checks.py awsdiff read AWSDIFF: FAIL (changed hunks 0) because the checker reads committed HEAD.
+   Commit first (as the order directs), then re-run: AWSDIFF: OK. Recorded as ADVI_FIRMBKTS-D1-W71-S1.
+4. Commit f0055f3942 via safe-commit.sh (commit-gate OK 1 of 1; surprise-row-gate OK; msg-verify MATCH).
+   The commit-time risk reflex printed HOLD by basename against the COT freshness claim (R2); the claim concerns
+   check_freshness in the COT copy, not emit_chain_complete. Recorded as ADVI_FIRMBKTS-D1-W71-S2.
+5. Checks on the committed HEAD f0055f3942:
+   AC1 r7_region_test.sh -> 3 of 3 arms, rc=0 (also run on the working tree before the commit: 3 of 3)
+   r7_emit_test.sh -> EMIT TEST: 4 of 4 arms, rc=0
+   AC2 r7_checks.py awsdiff -> AWSDIFF: OK, rc=0
+   AC3 r4_scope.py -> ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing, rc=0
+6. Mutant control: scratch copy with --region removed from the put-events line -> REGION TEST: 2 of 3 arms, R2 FAIL, rc=1.
+7. No deploy, no push, no AWS call, no network egress. Not run: events describe-event-bus (the bus region is the
+   order's stated provenance; the issuer reads it live at the cut).
+8. <status> of the task order not flipped by this worker.

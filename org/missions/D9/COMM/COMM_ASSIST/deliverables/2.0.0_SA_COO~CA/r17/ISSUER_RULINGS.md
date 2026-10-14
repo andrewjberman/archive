@@ -25,3 +25,10 @@ the text fallback and is not covered). Until ruled, the hazard stands as it stoo
 
 **R-7. A signed answer has no freshness window (observation, not a row):** the receiver compares `version` but not `signed_at`. A replay of an old signed `send` for the same tag and
 version acts only if that exact draft is pending again, which the stale check already refuses once the draft moves on. A freshness window is a round-18 candidate.
+
+**R-8 (2026-10-14 ~01:4xZ). Row COMM_ASSIST-C-S5 (the replay of a signed answer): DISARMED by the issuer at the live read.** The second deploy (CA-i-12, ledger `comm-assist-r17b-deploy`) is live: both functions on `eH3nihM/lYGRWi/ZgQE7uyWW2bZP0OLh4PXJ2MZSX5s=` (01:33:04Z /
+01:33:10Z); the issuer's own `check_i12_live.py` read RESULT: PASS at ~01:4xZ (one package, the four files equal the pin `8a480805e5`, both environments as recorded, and the served code requires `version`, carries `seq` and holds the acted-set guard). The CVO's half answered YES that the receiver as built closes the C-S5 path. The row
+closes at the CVO's compile; the forwarder (CA-i-5) may now be installed.
+
+**R-9. Row COMM_ASSIST-C-S6 (drafts with no seq: End of Day and mail tags repeat): ACCEPTED as INERT until closed by CA-i-13**, the signed_at bound (24 hours back, 5 minutes forward, against the receiver's clock). It is built and deployed BEFORE
+muse is asked to sign a real answer; CA-i-5 may install the forwarder first because the forwarder alone sends nothing without a signed file.
