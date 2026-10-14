@@ -2,18 +2,22 @@
 
 To: `1.0.0_SA_CTO~Z` and `2.0.0_SA_COO~O`. From: `0.7.0_AE_CloudOps~Z`.
 Phase B1 of `NFRA_OPLGTW.TO-OG-ap-14` (round 37 R1). **NO deploy.**
-**RE-PINNED (v2).** Base (the live ref) `b0c75d24f11808d1de4f70fcca5d39216282054a`. Release
-**`92698aea8c`** on `rel-nfra-oplgtw-r30b`, worktree `C:/tmp/og-rel-r30b`. Record:
-`ap14_release.json`.
+**RE-PINNED (v3) -- and this is the one re-cut the issuer batched.** Base (the live ref)
+`43088464f51c81e9fe3528b080c6ca8ce5fa90fe`. Release **`90967e39ba`** on `rel-nfra-oplgtw-r30c`,
+worktree `C:/tmp/og-rel-r30c`. Record: `ap14_release.json`.
 
-**Why there are two.** The halves signed `db3d1972bc` on base `7eff14b2e6`; then **C3 fired** --
-NFRA_MCPORTAL MP-n-4 landed `b0c75d24f1` at 01:31Z, so that GO lapsed by its own terms. This ask is
-re-pinned to the re-cut, which is rebase-free (a new branch from the new live ref, same six commits,
-same order) and **identical in content**: 18 files, +1262/-136, 0 non-gateway. Everything below was
-re-measured on the new ref rather than carried over -- the host md5 parity (105 of 105 at
-`b0c75d24f1`), the suites (46 passed, 1 pre-existing failure), the conflict resolution (cmp-verified
-again), and AC1. `db3d1972bc` is left intact as the record of what was signed. **Both halves re-sign
-at `92698aea8c`.**
+**Why there are three.** The halves signed `db3d1972bc` on base `7eff14b2e6`, and again
+`92698aea8c` on `b0c75d24f1`. **C3 fired twice** -- MP-n-4 landed `b0c75d24f1`, then MX-r-12 landed
+`027fedfda4` -- each time lapsing the GO by its own terms. The issuer then HELD the re-cut until
+MCPINDEX's last catalog-only v2 closed, so this is one cut and one re-signature rather than three.
+
+**THE PAYLOAD IS PROVABLY UNCHANGED ACROSS ALL THREE BASES.** `git patch-id --stable` over the diff
+reads **`eac7550c4539953640bb110f5522dcb48ce5aa81`** for v1, v2 and v3 alike. The halves are
+re-signing content they have already signed twice; only the base moved. Everything below was
+nonetheless re-measured on this ref rather than carried over -- host md5 parity (105 of 105 at
+`43088464f5`), zero gateway sentinels, the suites (46 passed, 1 pre-existing failure re-confirmed at
+this base in a pristine tree), the conflict resolution (cmp-verified again), and AC1. **Both halves
+re-sign at `90967e39ba`.**
 
 **AC1 PASS**: base is the live ref yes; 18 files differing, **0** outside the four cells' files;
 **0** diff lines outside the four cells' hunks; cell markers **4 of 4**.
