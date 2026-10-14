@@ -1,0 +1,16 @@
+ADVI_BDPRCE.TO-BP-c-4.export-cap-check -- session log, 0.9.0_WK_ADVI_BDPRCE~16 (worktree C:/dev/wk-bdprce-r3-16, branch wk-ADVI_BDPRCE-16)
+All AWS calls were READ verbs. No put, copy-to-S3, delete, invoke or export run was made.
+
+1. TREE CHECK: git rev-parse --abbrev-ref HEAD -> wk-ADVI_BDPRCE-16; test -d org && test -d .tools -> TREE-OK
+2. PREMISE CHECK: runner key pattern read from cot_bronze_ingest.py:481 and :538 (forwardfill_v2/{table}/{TABLE}_DAILY_{date}.xlsx); silver read from merge-daily-incremental.py:81 and :1153
+3. aws s3 ls s3://opal-data-bd/forwardfill_v2/unrealized/ (tail) -> rc=0; the tail showed 30 keys only
+4. aws s3api list-objects-v2 --bucket opal-data-bd --prefix forwardfill_v2/unrealized/ --query Contents[].[Key,Size,LastModified] --output text -> rc=0, 91 lines (76 UNREALIZED_DAILY, 15 _complete)
+5. aws s3 cp of the 76 UNREALIZED_DAILY keys to C:/dev/wk-bdprce-r3-16-data/ -> 76 files, DL_DONE, exit 0
+6. aws lambda get-function-configuration --function-name bd-49f-runner -> Timeout 900, MemorySize 1024, env key names only (values printed for non-secret knobs: MAX_RETRIES 3, BACKOFF_BASE_S 10, BD_TXN_CHUNK_DAYS 3; BD_S3_BUCKET and BD_FIRM_ID not set in env)
+7. python -I count_rows.py <76 xlsx> -> 76 JSON lines, 0 dimension mismatches, 9 zero-row stubs, 15 days at 500000
+8. openpyxl read_only iter_rows on UNREALIZED_DAILY_2026-10-09.xlsx -> 500001 rows including header
+9. build_cap.py 2026-10-14T01:45:49Z -> CAP.json (days=76 at_500000=15 zero=9 nonzero=67 verdict=CAP)
+10. AC1 r3_checks.py cap -> rc=0 (run three times, identical output); mutants: write verb FAIL rc=1, days_at_500000 mismatch FAIL rc=1
+11. AC2 r4_scope.py -> ROUND 4 SCOPE: OK, 0 outside, 0 required missing, rc=0
+
+Scratch and data (outside the checkout): C:/dev/wk-bdprce-r3-16-data/ holds the 76 downloaded xlsx files; not committed.
