@@ -67,7 +67,7 @@ def main():
         if att.get("key", {}).get("S") != doc["form_key"]:
             print("RUN-BAD the trade ticket's attachment key is not the recorded form key")
             return 1
-        head = aws("s3api", "head-object", "--bucket", rec["bucket"], "--key", doc["form_key"])
+        head = aws("s3api", "head-object", "--bucket", rec["buckets"][doc["firm"]], "--key", doc["form_key"])
         if int(head.get("ContentLength", 0)) < 1:
             print("RUN-BAD the form object is empty or absent")
             return 1
