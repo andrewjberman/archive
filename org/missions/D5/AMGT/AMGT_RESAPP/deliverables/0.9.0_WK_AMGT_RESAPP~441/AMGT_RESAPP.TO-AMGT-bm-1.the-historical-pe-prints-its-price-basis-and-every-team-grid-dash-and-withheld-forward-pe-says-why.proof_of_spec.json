@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bm-1.the-historical-pe-prints-its-price-basis-and-every-team-grid-dash-and-withheld-forward-pe-says-why",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d014b315df",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-1.the-historical-pe-prints-its-price-basis-and-every-team-grid-dash-and-withheld-forward-pe-says-why.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bm-1.the-historical-pe-prints-its-price-basis-and-every-team-grid-dash-and-withheld-forward-pe-says-why.md",
+    "group": "OTHER",
+    "vintage_commit": "d014b315df"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~441",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "9a1adc6e35",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal branch cand/dell1/amgt-sa-pe-basis-and-reasons, LOCAL, cut from PROD 7db035e4; not pushed, not on DEV or PROD; the approval row is check-only and not registered"
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "9a1adc6e35",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal branch cand/dell1/amgt-sa-pe-basis-and-reasons, LOCAL; adds the optional FigureBasis.derived_from and ThesisModelBlock.forecast_withheld fields only"
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs",
+      "kind": "test",
+      "commit_or_etag": "9a1adc6e35",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the harness renders the page's own ModelTab.tsx with react-dom/server; on the unchanged page it prints NO (2 of 9) and on the head page NO (7 of 9), see SESSION_LOG.txt"
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/basisFixture.PBR_US_Equity.json",
+      "kind": "test",
+      "commit_or_etag": "9a1adc6e35",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "built by spec from round105_prep/fixtures/pbr_model_slice.json: BEST_PE_RATIO rows removed from forecast_figures, two forecast_withheld entries added (2026, 2027)"
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/basisFixture.GOOGL_US_Equity.json",
+      "kind": "test",
+      "commit_or_etag": "9a1adc6e35",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a copy of round106_prep/googl_model_slice.json"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~441/FEATURE_RECEIPT.md",
+      "kind": "doc",
+      "commit_or_etag": "the outer commit that carries this file (branch wk-AMGT_RESAPP-441)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "receipt sections: What the branch carries, Pages changed (Security Analysis, /security-analysis, Opal-internal, internal), Shared files (none), Not carried (all four counts 0)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `BASIS AND REASONS HARNESS: YES (<n> of <n> checks)` with n at least 7 and every check named PASS; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-441/portal && node src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs; echo \"exit=$?\"",
+      "output_evidence": "CHECK B1_googl_2025_pe_prints_basis_line PASS\nCHECK B1b_served_price_date_is_printed_in_place_of_year PASS\nCHECK B2_pe_without_derived_from_prints_no_basis_line PASS\nCHECK B3_non_usd_price_prints_its_code PASS\nCHECK B4a_all_figures_dash_shows_served_reason PASS\nCHECK B4b_all_figures_dash_without_served_reason_prints_fixed_words PASS\nCHECK B5_forecast_pe_cell_shows_withheld_reason FAIL (Key Figures P/E row 955 chars:  class=\"border-t border-[hsl(var(--hairline))]\">P/E5.9x6.1x)\nCHECK B6_no_forecast_withheld_key_shows_generic_words FAIL (Key Figures P/E row 955 chars:  class=\"border-t border-[hsl(var(--hairline))]\">P/E5.9x6.1x)\nCHECK B7_saved_values_unchanged PASS\nBASIS AND REASONS HARNESS: NO (7 of 9 checks)\nexit=1",
+      "denominator": "9 checks; 7 PASS (the YES line needs 9 of 9)",
+      "status": "FAIL",
+      "status_reason": "NO line, 7 of 9: B5 and B6 read the PBR Key Figures P/E row, which carries the team's own 2026E and 2027E values once the BEST_PE_RATIO rows are removed as the order specifies (surprise AMGT_RESAPP-D1-W441-S1). Not patched around.",
+      "expect": "BASIS AND REASONS HARNESS: YES \\((\\d+) of \\1 checks\\)[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the line `R103 FEATURE GREEN: YES (typecheck rc 0, lint rc 0, harness P of T pass, base Q of U, regressions 0, pre-existing: <names>)` with T equal to U plus one (the new harness); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-441 && timeout 590 bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_green_v2.sh\" \"C:/dev/wk-resapp-441/portal\" 7db035e4 | tail -2; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "typecheck rc 0 | lint rc 0 | harness 21 of 25 pass | base 18 of 24 | regressions 1: basisAndReasons.harness.cjs | pre-existing: assembled.harness.cjs exportCompare.harness.cjs timelineFourStates.harness.cjs\nR103 FEATURE GREEN: NO (typecheck rc 0, lint rc 0, harness 21 of 25 pass, base 18 of 24, regressions 1)\nexit=1",
+      "denominator": "harness 25 checks (21 pass); base 24 (18 pass); regressions 1 of 25 (basisAndReasons.harness.cjs)",
+      "status": "FAIL",
+      "status_reason": "NO: the one regression is basisAndReasons.harness.cjs, failing B5 and B6 as in AC1. The typecheck, the lint and the other harnesses are as at base; T equals U plus one (25 and 24).",
+      "expect": "R103 FEATURE GREEN: YES \\(typecheck rc 0, lint rc 0, harness (\\d+) of (\\d+) pass, base (\\d+) of (\\d+), regressions 0, pre-existing: [^)]*\\)[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "every changed file listed as page, none forbidden or unnamed, and the line `R103 FEATURE SURFACE: YES (<n> files: <n> page, 0 shared named, 0 forbidden, 0 unnamed)`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-441/portal && python \"C:/dev/wk-resapp-441/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_feature_surface_check.py\" --portal . --base 7db035e4 --head HEAD --receipt \"C:/dev/wk-resapp-441/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~441/FEATURE_RECEIPT.md\"; echo \"exit=$?\"",
+      "output_evidence": "  page      src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs\n  page      src/pages/SecurityAnalysis/__harness__/basisFixture.GOOGL_US_Equity.json\n  page      src/pages/SecurityAnalysis/__harness__/basisFixture.PBR_US_Equity.json\n  page      src/pages/SecurityAnalysis/tabs/ModelTab.tsx\n  page      src/pages/SecurityAnalysis/types.ts\nR103 FEATURE SURFACE: YES (5 files: 5 page, 0 shared named, 0 forbidden, 0 unnamed)\nexit=0",
+      "denominator": "5 changed files: 5 page, 0 shared, 0 forbidden, 0 unnamed",
+      "status": "PASS",
+      "expect": "R103 FEATURE SURFACE: YES \\(\\d+ files: \\d+ page, 0 shared named, 0 forbidden, 0 unnamed\\)[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant; the harness grades rendered text against the served fixtures, and its checks are the order's B1 to B7",
+      "expected": "N/A",
+      "observed": "no mutant named by the order",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the harness is a single static render of committed fixtures; the unchanged-page run and the head run were each made once with the final harness, and the head run was repeated once with the order's literal invocation (identical output)",
+      "observed": "NO (2 of 9) on the base page; NO (7 of 9) on the head page, both runs identical on repeat",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-D1-W441-S1: AMGT-bm-1 item 3's premise does not reproduce on the built PBR fixture: with BEST_PE_RATIO removed, the team sheet's own P/E line (rows index 25, 2026 5.9479, 2027 6.1474) fills the 2026E and 2027E Key Figures cells, so no forecast dash exists for forecast_withheld to replace; B5 and B6 FAIL; BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~R1.",
+    "AMGT_RESAPP-D1-W441-S2: the order names currencyPrefix as the money formatter, but its literal basis line 'price 313.00 USD ...' cannot come from currencyPrefix (it prints a dollar sign for USD); the line is built with the code after the number; OBSERVATION, INERT.",
+    "AMGT_RESAPP-D1-W441-S3: the GOOGL and PBR slices carry fiscal_years under model and no model_status, which the page reads from the /thesis envelope; the harness maps them up to the envelope (no page change); OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~441/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "basisAndReasons.harness.cjs",
+      "invocation": "cd C:/dev/wk-resapp-441/portal && node src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs; echo \"exit=$?\"",
+      "result": "BASIS AND REASONS HARNESS: NO (7 of 9 checks), exit=1"
+    },
+    {
+      "tool": "r103_feature_green_v2.sh",
+      "invocation": "timeout 590 bash r103_feature_green_v2.sh C:/dev/wk-resapp-441/portal 7db035e4",
+      "result": "R103 FEATURE GREEN: NO (typecheck rc 0, lint rc 0, harness 21 of 25 pass, base 18 of 24, regressions 1), exit=1"
+    },
+    {
+      "tool": "r103_feature_surface_check.py",
+      "invocation": "python r103_feature_surface_check.py --portal . --base 7db035e4 --head HEAD --receipt FEATURE_RECEIPT.md",
+      "result": "R103 FEATURE SURFACE: YES (5 files: 5 page, 0 shared named, 0 forbidden, 0 unnamed), exit=0"
+    },
+    {
+      "tool": "open-calls.py",
+      "invocation": "python .tools/open-calls.py add --check-only --kind approval --project NFRA_DEVPLN --box dell1 --branch cand/dell1/amgt-sa-pe-basis-and-reasons --purpose \"AMGT_RESAPP bm-1: ...\" --pages \"Security Analysis\" --class opal-internal --how \"cd portal && bun run dev:live --port 5174; /security-analysis, GOOGL US, PBR US and ISP IM\" --portal portal",
+      "result": "APPROVAL-REGISTER result=OK row=- head_sha=9a1adc6e35834f1e5060dc3e9a677f4aff8cbb36 commits=1 check-only=yes waived=0"
+    }
+  ]
+}
