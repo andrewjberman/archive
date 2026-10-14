@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-192",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0ad572779"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "f0ad572779",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-192.model-benchmark-source-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~157",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~157/IRPT_DASHBD.TO-DB-b-192.model-benchmark-source-read.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~157/BENCHMARK_SOURCE_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the read record: names, addresses, counts and words only; no benchmark figure written; served_values_changed, pushed and deployed all false; no AWS write, vendor call or secret read",
+      "artifact_covered_by": [
+        "DB102-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended as bytes (IRPT_DASHBD-D2-W157-S1 to S4), each parsed back as JSON with its id; no existing row edited",
+      "artifact_covered_by": [
+        "DB102-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB102-1-AC1",
+      "criterion_verbatim": "the record names the producer (yang-model-portfolio-benchmarks) with an existing entry file and its reads and writes; names the served tool, bucket, prefix and windows with the as-of field; states whether a dated daily model series exists (partitions above 0 exactly when it does, with an address and columns when it does); holds one entry for each of the four benchmark stems; states a mapping plan consistent with the evidence (COMPOUND_FROM_GOLD only with a dated series; MAP_SERVED_PERIOD_FIGURES only without one, with since-inception and the chart absent and every stem found in the served figures); no write, push or deploy; no vendor call; no run of 8 or more digits. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r102/p102_round102.py\" . DB102-1-AC1",
+      "expect": "DB102-1-AC1 PASS",
+      "output_evidence": "OK: benchmark source read: dated daily model series exists: false; plan MAP_SERVED_PERIOD_FIGURES covering qtd,ytd,last_12_months\nDB102-1-AC1 PASS",
+      "denominator": "1 of 1 criterion; 4 of 4 benchmark stems with found_in_served true; 3 of 3 producer reads and 3 of 3 producer writes named with kind; 0 of 0 partitions (no date= partition listed, exists false); served windows named 10 of 10; reads counters 4 of 4 zero",
+      "status": "PASS",
+      "status_reason": "PASS on the checker run against the committed record: the producer's entry file exists (lambda_function.py, 843 lines); the served tool, bucket, prefix, windows and data_as_of key are named; no dated daily model series exists in gold (exists false, partitions 0), so the plan is MAP_SERVED_PERIOD_FIGURES with windows qtd, ytd and last_12_months, chart absent and since inception absent; every stem is found in the served figures; no write, push, deploy or vendor call."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "not applicable: the order is a read; the record has no build artifact to mutate. The criterion script ran against the committed record only.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the criterion script run once on the committed record; the S3 LIST and GET were each one call at the named prefix",
+      "observed": "one run; the record's served shape is the single GET of the current object, so repeat stability is not measured",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the content of the served timeseries object and the pickle snapshots",
+      "reason": "outside the order's read: the order asks for the object's shape and the gold prefixes only; neither was read beyond its key names"
+    },
+    {
+      "item": "the 15 synthetic arms of the criterion",
+      "reason": "the order's preflight declares the adversary check not run by the issuer as a tool; the criterion was run once on the record"
+    },
+    {
+      "item": "correction of docs/reference/yang-pipeline-lineage-map.md",
+      "reason": "outside the grant; filed as row IRPT_DASHBD-D2-W157-S4 instead"
+    },
+    {
+      "item": "any AWS write, vendor call (no YCharts call), secret read, push or deploy",
+      "reason": "outside the grant of this order; none taken"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W157-S1: the producer reads no gold parquet; its only dated inputs are pickle snapshots in the portal bucket, so the gold path the cell names has no input",
+    "IRPT_DASHBD-D2-W157-S2: a dated daily model series is served as json/benchmarks/model_portfolio_timeseries.json beside the period-window object the tool reads, outside gold",
+    "IRPT_DASHBD-D2-W157-S3: address() has no gold home for the yang source, so no Yang gold bucket comes from the canon",
+    "IRPT_DASHBD-D2-W157-S4: the yang lineage map describes SmartX sidecar reads the producer no longer makes"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p102_round102.py (criterion DB102-1-AC1)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r102/p102_round102.py\" . DB102-1-AC1",
+      "result": "OK: benchmark source read: dated daily model series exists: false; plan MAP_SERVED_PERIOD_FIGURES covering qtd,ytd,last_12_months; DB102-1-AC1 PASS"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (read only)",
+      "invocation": "python -I -c \"import opal_naming as o; o.address(...)\" with sys.path set to lib",
+      "result": "address for yang at tier platinum of scope global returned the served bucket; address for yang at tier gold of scope global refused with no home bucket"
+    }
+  ]
+}
