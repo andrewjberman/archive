@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-pt-3",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~81",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "835f9452c3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "835f9452c3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pt-3.mdpf-category-views-tool.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~81/naming_probe/probe_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "fb38c60106",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "No deploy scope. The FIRST ACT naming-gate probe output, verbatim: NAMING-GATE: REFUSE 3 graded, rc=1 (1 CONFORMANT, 2 REFUSE). Committed LOCAL on wk-NFRA_OPLGTW-81 at fb38c60106 with the probe diff and literals beside it.",
+      "introduces": [
+        "NAMING-GATE: REFUSE 3 graded"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "fb38c60106",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPLGTW-Z-W81-S1 (BLOCKING, INERT, disarm_owner 2.0.0_SA_COO~O) appended in the fenced json array. surprise-row-gate at commit: OK, 1 new row of 575 checked.",
+      "introduces": [
+        "NFRA_OPLGTW-Z-W81-S1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the tool is built, reuses the existing firm gate, proves the two-firm negative arm, and refuses bad scopes before any read.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "infra/aws/ec2/opal-gateway/tests/test_og_pt3.py absent\nRESULT: FAIL\nexit=1",
+      "denominator": "named tests passed 0 of 4 (the test file is absent at HEAD fb38c60106; module portal_mdpf.py also absent)",
+      "status": "FAIL",
+      "status_reason": "FIRST ACT stop: the naming gate refused the served key literals (surprise NFRA_OPLGTW-Z-W81-S1), so the module, the tests and the probe were not built. The order's own rule is to stop and report on a refused literal.",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the real portal bucket a bad scope reads nothing, a non-Opal principal is refused, and an admitted read equals an independent read (or the gate's own refusal is returned).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "probe error: ImportError: cannot import name 'portal_mdpf' from 'app' (C:\\tmp\\wk-oplgtw-81\\infra\\aws\\ec2\\opal-gateway\\app\\__init__.py)\nRESULT: FAIL\nexit=1",
+      "denominator": "0 of 3 probe facts observed (bad scopes refused; global served with its own as-of; non-Opal refused). The probe could not import the module, so no read was made.",
+      "status": "FAIL",
+      "status_reason": "FIRST ACT stop: the module is absent at HEAD fb38c60106 because the build was stopped by the naming gate (surprise NFRA_OPLGTW-Z-W81-S1). No S3 read was made by this worker.",
+      "expect": "(?s)category views: bad scopes refused True; global served (True|False) with its own as-of inside the object (True|False); non-Opal refused True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant control was run: the order names none, and the module the mutant would perturb was not built after the FIRST ACT stop.",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no output was produced by the build, so there are no two same-input runs to compare",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The module app/portal_mdpf.py, the tests tests/test_og_pt3.py and the live probe",
+      "reason": "FIRST ACT: the naming gate REFUSES two of the three staged literals (platinum/mdpf/ and platinum/mdpf/{scope}/category-views.json). The order says do not type a refused literal; STOP and file one BLOCKING row. Row NFRA_OPLGTW-Z-W81-S1 was filed."
+    },
+    {
+      "item": "Any AWS call, including the read-only live probe of opal-data-portal-v2",
+      "reason": "No AWS call was made. The probe needs the module, which was not built, and the order's AC2 is not runnable without it."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W81-S1: the naming commit limb refuses the served platinum/mdpf/ key literals as NEW OUT-OF-PATTERN S3Key, with canonical mdpf/{scope}/platinum/ forms; the bucket literal opal-data-portal-v2 is CONFORMANT (BLOCKING, INERT, disarm_owner 2.0.0_SA_COO~O; the issuer rules the resolution)."
+  ],
+  "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~81 on C:/tmp/wk-oplgtw-81, branch wk-NFRA_OPLGTW-81, base 835f9452c3. First act: rev-parse printed wk-NFRA_OPLGTW-81 and TREE-OK. Re-grounded the order's FIRST ACT. Staged three literals as a 3-line diff and ran the naming gate: REFUSE 3 graded, rc=1. Stopped per the order and filed NFRA_OPLGTW-Z-W81-S1. The first safe-commit attempt was killed by the 120 s bound after its gates passed, which left a zero-byte index.lock in this worktree's gitdir; that lock was removed (it was dated to the killed attempt and no git process of this worktree was live), and the retry landed at fb38c60106. Ran the AC1 and AC2 criterion invocations verbatim, bounded at the shell level by timeout 120 (outer wrapper not part of the recorded invocation); both FAIL as recorded. No AWS call, no deploy, no edit outside the paths of the order.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~81/naming_probe/probe.diff --enforce",
+      "result": "rc=1. NAMING CONFORMANT opal-data-portal-v2 (S3_BUCKET); NAMING REFUSE platinum/mdpf/ (S3Key); NAMING REFUSE platinum/mdpf/{scope}/category-views.json (S3Key); NAMING-GATE: REFUSE 3 graded."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (surprise-row-gate and naming-gate legs)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~81 <0.9.0_WK_NFRA_OPLGTW~81@opal.agent>\" -F .scratch/msg_row.txt -- <investigation file> <naming_probe artifacts>",
+      "result": "[surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields; 1 new row(s) of 575 total checked. Commit landed at fb38c60106 on wk-NFRA_OPLGTW-81 (LOCAL)."
+    }
+  ]
+}
