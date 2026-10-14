@@ -205,6 +205,11 @@ def unheld_count(values):
     return sum(1 for v in values.values() if isinstance(v, dict) and "by_row" in v for key, x in v["by_row"].items() if x == UNHELD and key in CLASSES)
 
 
+def strip_firm(members):
+    """the members without the per-firm source keys that contract 0.5.0 adds (firm_sources, firm_absent): a later per-firm source is not a change to what 0.4.1 and 0.4.2 said."""
+    return [{k: v for k, v in m.items() if k not in ("firm_sources", "firm_absent")} for m in members]
+
+
 def prior_contract(root, rel, want_sha):
     h = subprocess.run(["git", "-C", str(root), "log", "--format=%H", "-n", "80", "--", rel], capture_output=True, text=True)
     for cm in h.stdout.split():
@@ -227,7 +232,7 @@ def check_kind(root):
     need("kind" in str(doc.get("absent_rule") or "") and "NOT_HELD" not in json.dumps(doc), "document.absent_rule must name the kind field, and NOT_HELD leaves the axis")
     prior = prior_contract(root, CONTRACT_REL, V041_SHA)
     need(prior is not None, "the 0.4.1 contract bytes were not found in the file's git history")
-    need(c["members"] == prior["members"], "no member may change in 0.4.2 (the members are byte-for-byte the 0.4.1 members)")
+    need(strip_firm(c["members"]) == strip_firm(prior["members"]), "no member may change in 0.4.2 (the members are byte-for-byte the 0.4.1 members, apart from the per-firm source keys of contract 0.5.0)")
     s = r.get("sample") or {}
     sp = str(s.get("path") or "").replace("\\", "/")
     need(sp.startswith(SAMPLE_DIR) and sp.endswith("HOUSEHOLD_SAMPLE.json") and Path(sp).is_file(), "sample.path must be the private HOUSEHOLD_SAMPLE.json under %s" % SAMPLE_DIR)
