@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-212",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "48f9bc8064"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "48f9bc8064",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-212.inflection-coverage-reads-orion-dividends-eclipse-lots.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~172",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~172/READ_COVERAGE_RUN_R108.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~172/read_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only script run with python -I; reads only the two granted Inflection prefixes; holds no write call and names no other firm; prints counts and words only; not deployed.",
+      "artifact_covered_by": [
+        "DB108-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~172/COVERAGE_READS_R108.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The coverage record: orion_dividends answer YES with method and basis words; eclipse_lots populated false with NO_LOTS and one plain sentence; counts, hashes and words only; files_in_repo, served_values_changed, pushed and deployed all false.",
+      "artifact_covered_by": [
+        "DB108-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~172/READ_COVERAGE_RUN_R108.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Printed output of the final run of read_coverage.py: counts, the account's sha256, window dates, decisions and the reads tally; no client value.",
+      "artifact_covered_by": [
+        "DB108-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three surprise rows, each with class, hazard standing and disposition UNDER_INVESTIGATION; no existing row edited.",
+      "artifact_covered_by": [
+        "DB108-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB108-2-AC1",
+      "criterion_verbatim": "DB108-2-AC1 -- orion_dividends.answer is YES, NO or NOT_ESTABLISHED, and an answer other than NOT_ESTABLISHED rests on transactions actually checked (a positive count); the method, the basis and the counts are present; the account is named only by a sha256; eclipse_lots states populated as a boolean with the tables inspected and the count of rows that carry lot fields, and when not populated names NO_LOTS and carries one plain sentence with no code token in it; the read script is a tracked file hashed as recorded, every s3:// literal in it sits under a granted Inflection prefix, it holds no write-call name and names no other firm; nothing is written; no push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r108/p108_round108.py\" . DB108-2-AC1",
+      "output_evidence": "OK: Orion returns include dividends: YES (762 transactions checked, 133 dividend flows); Eclipse lots populated: False (0 rows carry lot fields across 4 table(s))\nDB108-2-AC1 PASS",
+      "denominator": "1 of 1 criterion; Orion answer YES over 762 account transactions checked in a 666-day window (665 linked daily returns); Eclipse: 4 of 4 silver tables, 547 of 547 dated partitions scanned, 0 lot-field columns, 0 rows with lot fields",
+      "status": "PASS",
+      "expect": "DB108-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant for this read. The answer was sensitive to the window choice: the first window, which kept 20 days with a non-positive account value and skipped them in the return link, returned NOT_ESTABLISHED; the narrowed window, with no such day, returned YES.",
+      "expected": "N/A: the spec names no mutant",
+      "observed": "first window NOT_ESTABLISHED (reported figure within neither tolerance); narrowed window YES at account level and at client level",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Two full runs of the final script compared on the whole printed output: run 3 and run 4 (run 4 is the committed script, after renaming one local variable for the lint gate)",
+      "observed": "identical output: account sha256 000f21ac06ace..., window 2024-09-03 to 2026-06-30 (666 days), 762 transactions checked, 133 dividend flows, answer YES at account and client level, Eclipse populated false with 0 rows",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any read of the Orion master prefix or of any other firm's place, and any name of one",
+      "reason": "Not granted by the order (the cross-firm rule); the grant is the two Inflection prefixes only."
+    },
+    {
+      "item": "Any figure of the account or client: dollar, percentage, the tolerance as a number, the factor values",
+      "reason": "Client-data bound: counts, hashes and words only in the repo; the tolerance is stated in words."
+    },
+    {
+      "item": "Writes of any kind, vendor calls, secret reads, push and deploy",
+      "reason": "Refusal clause and bounds of the order; none made (reads.s3_writes 0, vendor_calls 0, secret_reads 0, pushed false, deployed false)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W172-S1: the Orion silver fact_transactions and fact_performance partitions are cumulative, so a per-date read double-counts history (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D2).",
+    "IRPT_DASHBD-D2-W172-S2: the ratified taxonomy classes reinvested income as Internal, so the WITHOUT-income figure keeps reinvested income (OBSERVATION, INERT).",
+    "IRPT_DASHBD-D2-W172-S3: the performance table is client-level and the client holds two accounts, so the reported figure is not account-level (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D2)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "read_coverage.py (python -I)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~172/read_coverage.py <repo_root>",
+      "result": "rc 0 on the final run; 1254 S3 reads (12 LIST, 1242 GET), 0 writes, 0 vendor calls, 0 secret reads; answer YES, Eclipse populated false"
+    },
+    {
+      "tool": "p108_round108.py (check_reads)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r108/p108_round108.py . DB108-2-AC1",
+      "result": "OK line and DB108-2-AC1 PASS, rc 0, on the committed record"
+    }
+  ]
+}
