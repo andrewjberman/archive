@@ -59,6 +59,18 @@ try:
     out["typo_raises"] = False
 except ValueError:
     out["typo_raises"] = True
+class _C:
+    def __init__(self):
+        self.state = {"marks_seen": ["legacy", {"mark": "m1", "at": a.iso(now - datetime.timedelta(hours=3))}, {"mark": "m2", "at": a.iso(now - datetime.timedelta(hours=5))}]}
+
+    def now(self):
+        return now
+
+
+try:
+    out["held"] = [e["mark"] for e in t._held_marks(_C())] == ["legacy", "m1"]
+except Exception:
+    out["held"] = False
 print(json.dumps(out))
 '''
 
@@ -147,7 +159,7 @@ def main():
             probe = json.loads((r.stdout or "").strip().splitlines()[-1])
         except Exception:  # noqa: BLE001 -- a failed probe reads as a FAIL with its stderr shown
             print("ERROR: probe failed: %s" % (r.stderr or "")[-300:])
-    keys = ("roundtrip", "tamper", "unset_off", "record", "enforce", "typo_raises", "max_age_4h", "edge_ok", "edge_stale")
+    keys = ("roundtrip", "tamper", "unset_off", "record", "enforce", "typo_raises", "max_age_4h", "edge_ok", "edge_stale", "held")
     c5 = bool(probe) and probe.get("name") == SECRET and all(probe.get(k) is True for k in keys)
     print("CHECK served code: secret name from the NAMES row, mark round trip, tamper refused, modes parse, typo raises: %s (%s)" % (c5, probe))
     ok &= c5
