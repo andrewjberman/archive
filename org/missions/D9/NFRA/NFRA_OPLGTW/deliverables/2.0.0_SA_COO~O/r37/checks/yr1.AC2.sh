@@ -19,11 +19,12 @@ try:
 except Exception:
     b = {}
 src, host = b.get("md5_source"), b.get("md5_served_host")
-eq = isinstance(src, str) and len(src) == 32 and src == host
+eq = src == "3bbd5ab2d325657020357003c3ea387d" and src == host
 until = b.get("contains_until_2026_10_11") is True
+op = b.get("opal_user_admitted") is True and b.get("guest_refused") is True
 pub = b.get("public_md5_equal") is True or (b.get("public_md5_equal") is False and bool(b.get("public_note")))
-print("served page: host md5 equals the source %s; carries the data date 2026-10-11 %s; public endpoint recorded %s" % ("yes" if eq else "no", "yes" if until else "no", "yes" if pub else "no"))
-print("OK" if eq and until and pub else "NO")
+print("served page: host md5 equals the source %s; carries the data date 2026-10-11 %s; an Opal user is admitted and a guest refused %s; public endpoint recorded %s" % ("yes" if eq else "no", "yes" if until else "no", "yes" if op else "no", "yes" if pub else "no"))
+print("OK" if eq and until and op and pub else "NO")
 PY
 )
 res=$(printf '%s' "$res" | tr -d '\r')
