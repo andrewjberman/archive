@@ -85,6 +85,12 @@ def is_absent(v):
     return isinstance(v, dict) and set(v.keys()) == {"absent"} and isinstance(v["absent"], str) and v["absent"].strip() != ""
 
 
+def member_absent(v):
+    """A MEMBER is absent at member grain when it holds the absent form, or a per-account map in which EVERY entry is absent (the builder's own
+    measured-leaf count: 44 filled and 73 absent of 117 on the real sample). The earlier top-level reading (55 and 62) counted such a map as filled."""
+    return is_absent(v) or (isinstance(v, dict) and set(v.keys()) == {"by_row"} and isinstance(v["by_row"], dict) and bool(v["by_row"]) and all(is_absent(x) for x in v["by_row"].values()))
+
+
 def sample_json(path):
     need(Path(path).is_file(), "the private sample %s is missing" % path)
     return json.loads(Path(path).read_text(encoding="utf-8"))
@@ -198,7 +204,7 @@ def check_fix(root):
 
 
 def absent_ids(sample):
-    return sorted(k for k, v in sample["values"].items() if is_absent(v))
+    return sorted(k for k, v in sample["values"].items() if member_absent(v))
 
 
 def check_classify(root):
@@ -250,11 +256,14 @@ def check_fill(root):
     p97(root).check_sample_shape(new, c)
     need(new["household"]["household_ref"] == old["household"]["household_ref"] and [a["account_id"] for a in new["household"]["accounts"]] == [a["account_id"] for a in old["household"]["accounts"]],
          "the household must be the same (household_ref and the account ids)")
-    filled_now = sorted(k for k, v in new["values"].items() if not is_absent(v))
-    filled_before = sorted(k for k, v in old["values"].items() if not is_absent(v))
+    filled_now = sorted(k for k, v in new["values"].items() if not member_absent(v))
+    filled_before = sorted(k for k, v in old["values"].items() if not member_absent(v))
     newly = sorted(set(filled_now) - set(filled_before))
     need(newly == a_ids, "the newly filled members must be exactly the (a) members of the classification: %d filled, %d expected (extra %s, missing %s)" % (len(newly), len(a_ids), sorted(set(newly) - set(a_ids))[:3], sorted(set(a_ids) - set(newly))[:3]))
-    need(r.get("newly_filled_ids") == newly and r.get("filled_before") == len(filled_before) and r.get("filled_after") == len(filled_now) == len(filled_before) + len(a_ids), "newly_filled_ids, filled_before and filled_after must equal what the samples hold")
+    top_before = sum(1 for v in old["values"].values() if not is_absent(v))  # filled_before and filled_after are TOP-LEVEL counts (the order's own wording, 55 and 57); the member-grain count is 44 and 46
+    top_after = sum(1 for v in new["values"].values() if not is_absent(v))
+    need(r.get("newly_filled_ids") == newly and r.get("filled_before") == top_before and r.get("filled_after") == top_after == top_before + len(a_ids) and len(filled_now) == len(filled_before) + len(a_ids),
+         "newly_filled_ids, filled_before and filled_after (top-level counts) must equal what the samples hold")
     need(all(new["values"][k] == old["values"][k] for k in filled_before), "a member filled before changed its value: a fill moves nothing else")
     ic = r.get("identity_checks") or {}
     need(is_int(ic.get("counted")) and ic["counted"] > 0 and ic.get("failed") == 0 and is_int(ic.get("passed")) and ic["passed"] + ic.get("not_gradeable", 0) <= ic["counted"] + ic.get("not_gradeable", 0) and r.get("window_residual_checks_failed") == 0,
@@ -302,7 +311,7 @@ def check_section(root):
     need(isinstance(ss, list) and [s.get("section") for s in ss] == list(SECTIONS), "sections must hold the eight baseline sections in order")
     for s in ss:
         mem = [x["id"] for x in c["members"] if x["section"] == s["section"]]
-        filled = sum(1 for i in mem if not is_absent(new["values"][i]))
+        filled = sum(1 for i in mem if not member_absent(new["values"][i]))
         need(s.get("members_total") == len(mem) and s.get("members_filled") == filled, "section %s: members_total and members_filled must be %d and %d" % (s["section"], len(mem), filled))
         want = "PRESENT" if filled == len(mem) else ("ABSENT" if filled == 0 else "PARTIAL")
         need(s.get("state") == want and nes(s.get("reason")) and nes(s.get("seen_in_render")), "section %s: state %r must be %s, with a reason and what was seen in the render" % (s["section"], s.get("state"), want))
