@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t61",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t61.yahoo-failed-14-bloomberg-request.md",
+    "group": "OTHER",
+    "vintage_commit": "838bd5190c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "838bd5190c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t61.yahoo-failed-14-bloomberg-request.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~53",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/b1_request.py",
+      "kind": "script",
+      "commit_or_etag": "e59be19511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no timer, no vendor call, no S3 write. Adds --names PATH and --request-id ID (named mode: card_a_slice.build P1 over the named CUSIPs, no funds join, the same pipeline as the default build); the default build path is unchanged in code. The real named build ran S3 read only and wrote only to .scratch/.",
+      "artifact_covered_by": [
+        "DQ9-t61-AC1",
+        "DQ9-t61-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_b1_names_mode.py",
+      "kind": "test",
+      "commit_or_etag": "e59be19511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on stub frames; no network, no S3; the two named tests of the order, plus one shared stub fixture and a key-walk helper for the account check (the held-back reason text is not an account key)",
+      "artifact_covered_by": [
+        "DQ9-t61-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "e59be19511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row MDPF_DEMQUE-D1-W53-S1 appended at the end of the branch's copy, append-only (no existing row edited); surprise-row-gate OK (1 new row of 131 checked)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t61-AC1",
+      "criterion_verbatim": "DQ9-t61-AC1 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t61_tests.py -> NAMES-OK (the two named tests: test_a_named_cusip_list_builds_the_option_c_request_over_those_names_only; test_the_named_request_carries_its_own_request_id_and_the_default_b1_request_id_is_unchanged).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t61_tests.py",
+      "output_evidence": "test_demque_b1_names_mode.py::test_a_named_cusip_list_builds_the_option_c_request_over_those_names_only PASSED [ 50%]\ntest_demque_b1_names_mode.py::test_the_named_request_carries_its_own_request_id_and_the_default_b1_request_id_is_unchanged PASSED [100%]\n============================== 2 passed in 1.11s ==============================\n\nNAMES-OK   (rc=0 from the check; run at HEAD e59be19511)",
+      "denominator": "2 of 2 named tests PASSED by name (the file: 2 of 2 passed); folder: python -m pytest data/mdpf/scripts/demque -q = 205 passed, 0 failed (rc=0)",
+      "status": "PASS",
+      "expect": "NAMES-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t61-AC2",
+      "criterion_verbatim": "DQ9-t61-AC2 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t61_real.py -> NAMES-REAL-OK (run under timeout 260; each build call allowed 110 seconds). On the REAL names file (S3 and the V2 active set read only): securities 1 to 14, priced_names 14, held_back + securities + emptied == 14, cells above 0 and below 20,000, a finish date, only the 14 CUSIPs, nothing before 2012-01-01, valid, deterministic, no account key, zero account-id oracle hits.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t61_real.py",
+      "output_evidence": "build {\"cells\": 7685, \"claim\": \"measured\", \"clipped_cusips\": 4, \"days_to_finish\": 2, \"emptied_cusips\": 0, \"finish_date\": \"2026-10-18\", \"funds_joined\": 0, \"held_back\": 0, \"priced_names\": 14, \"securities\": 14, \"skipped_one_dollar\": 0, \"total_return_names\": 0, \"unread_pulled\": 0, \"window_start\": \"2013-04-08\"}\naccount-id oracle: 0 hit line(s) against 29617 hashes\nNAMES-REAL-OK 14 of the 14 names in the request (0 held back, 0 emptied), 7685 cells, finish 2026-10-18\n(rc=0; two builds inside the 260 s bound; run at HEAD e59be19511)",
+      "denominator": "securities 14 of the 1-14 band; priced_names 14 of 14; held_back 0 + securities 14 + emptied 0 = 14 of 14; cells 7685 in (0, 20000); finish_date 2026-10-18; only the 14 CUSIPs of YAHOO_FAILED_14_NAMES.json; earliest start 2013-04-08 (>= 2012-01-01); the six arms (request_id, only_the_14, floor, valid, deterministic, no_account_key) all PASS; account-id oracle 0 hits against 29617 hashes (the oracle RAN, not NOT RUN)",
+      "status": "PASS",
+      "expect": "NAMES-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check's own deterministic arm runs two --build calls to two scratch files and compares their bytes (sha256); the unit test builds the named request twice and compares its JSON",
+      "observed": "deterministic arm passed; NAMES-REAL-OK printed at rc=0; the unit test second build equal to the first",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: do not merge box/dell1 (blocked by a foreign row); the issuer unions at the drain"
+    },
+    {
+      "item": "the B1 request under org/missions/.../requests/ and any vendor call, S3 write, ledger, queue or pacer write",
+      "reason": "order BOUNDS and step 4: the issuer files and quotes the request on the merged bytes; the real --build output sits in .scratch/ only (dq_t61_yahoo_failed_14.json, 130734 bytes)"
+    },
+    {
+      "item": "a live run of the default (no-flag) build for byte comparison against the pre-change code",
+      "reason": "not a criterion of this order and not run this turn (it reads S3 for about a minute); the default path is unchanged in code: request_id defaults to REQUEST_ID, the funds join and card_a_cusips path run as before, and the existing B1 tests pass unchanged (test_demque_b1_request.py, 3 tests in the 205-test folder run)"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W53-S1: the order's message-file instruction ends each commit with a Co-Authored-By line naming Claude Sonnet 5.5; the executing agent is Claude Haiku 5.5, so the commits carry the Haiku 5.5 trailer; OBSERVATION, no check depends on it"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~53/MDPF_DEMQUE.TO-DQ-t61.yahoo-failed-14-bloomberg-request.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of b1_request.py, test_demque_b1_names_mode.py and the investigation file (commit e59be19511)",
+      "result": "commit-gate All checks passed; surprise-row-gate OK (1 new row of 131 checked); to-pipeline-gate OK (no task orders in the commit); missions-tree-check OK (0 violations); msg-verify MATCH; committed e59be19511"
+    },
+    {
+      "tool": "python -m ruff check --select F,E9 --target-version py39",
+      "invocation": "lint of b1_request.py and test_demque_b1_names_mode.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "compile of b1_request.py and test_demque_b1_names_mode.py",
+      "result": "rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole demque folder, run from the worktree root at HEAD e59be19511",
+      "result": "205 passed in 11.51s (rc=0; 0 failed)"
+    }
+  ]
+}
