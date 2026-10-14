@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ad-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ad-3.calendar-copies-measure-and-holiday-set-diff.md",
+    "group": "OTHER",
+    "vintage_commit": "868b773335"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~94",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round14.md",
+    "vintage_commit": "868b773335",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ad-3.calendar-copies-measure-and-holiday-set-diff.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/measure_calendar_copies.py",
+      "kind": "script",
+      "commit_or_etag": "d2c82f12a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measure of lib/trading_calendar.py and the Lambda-vendored copies; stdlib only, reads files only, no AWS, no network; run at d2c82f12a2 prints CALENDAR-COPIES found=4 same_2026_2027=4 differs_2026_2027=0 import_failed=0 ok=True",
+      "artifact_covered_by": [
+        "CTad3-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_measure_calendar_copies.py",
+      "kind": "test",
+      "commit_or_etag": "d2c82f12a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four arms in temporary directories (identical copies SAME, dropped 2026 holiday DIFFERS, import failure counted with arithmetic closed, empty folder set found=0 ok=False); run at d2c82f12a2 prints MEASURE-CALENDAR-COPIES arms=4/4 ok=True",
+      "artifact_covered_by": [
+        "CTad3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~94/CALENDAR_COPIES_MEASURE_20261014.txt",
+      "kind": "doc",
+      "commit_or_etag": "d2c82f12a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-time measurement output plus a five-line READING section; the four copies are SAME for 2026-2027 and the library is unchanged; sha256 of the library 9bc467c6ce4d11e435803681f3ba62835d531cea7c06c39770f1d085c7e4446f",
+      "artifact_covered_by": [
+        "CTad3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTad3-AC1",
+      "criterion_verbatim": "every arm of the measure tool's test passes (base: the file does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_measure_calendar_copies.py",
+      "output_evidence": "MEASURE-CALENDAR-COPIES arms=4/4 ok=True (rc=0; run under timeout 120 from the worktree root; ARM PASS identical-copies-read-same, ARM PASS dropped-2026-holiday-differs, ARM PASS import-failure-counted-arithmetic-closes, ARM PASS empty-folder-set-found-0-not-ok)",
+      "denominator": "4 of 4 arms",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTad3-AC2",
+      "criterion_verbatim": "the tool reads the real library and every real copy and prints its last line (base: the file does not exist); report the whole last line, including found= and differs_2026_2027=.",
+      "method": "command",
+      "invocation": "python .tools/measure_calendar_copies.py",
+      "output_evidence": "CALENDAR-COPIES found=4 same_2026_2027=4 differs_2026_2027=0 import_failed=0 ok=True (rc=0; run under timeout 120 from the worktree root; the four copies are bd-served-vintage-alarm, inf-etf-ownership-daily, opal-assets-absence-check and opal-assets/advi-49f-gold-dispatch, all SAME-2026-2027)",
+      "denominator": "4 copies of 4 read, 0 differ, 0 import-failed",
+      "status": "PASS",
+      "expect": "CALENDAR-COPIES found=",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a copy that drops one 2026 holiday (2026-07-03) must read DIFFERS-2026-2027 with that date named in only_in_lib; the test's dropped-holiday arm is this mutant",
+      "expected": "DIFFERS-2026-2027 only_in_lib=2026-07-03 only_in_copy=none, and the arm PASSes",
+      "observed": "ARM PASS dropped-2026-holiday-differs; the arm asserts only_in_lib=2026-07-03 and only_in_copy=none on the copy line",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the test and the measure each run before and after the commit at d2c82f12a2; the measurement file was written from one run and the AC2 run was repeated after the commit",
+      "expected": "identical verdict lines",
+      "observed": "test arms=4/4 ok=True both runs; measure found=4 same_2026_2027=4 differs_2026_2027=0 import_failed=0 ok=True both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-ad-3 from pending to complete",
+      "reason": "not done here: the issuer owns the flip and the order file is outside this worker's <paths>"
+    },
+    {
+      "item": "any edit to a trading_calendar.py copy, to lib/trading_calendar.py, to lib/tests/gen_nyse_closures.py, or any Terraform",
+      "reason": "not done: this cell only measures (CTO round-13 ruling 3); a sync rides each function's next deploy and is cut later"
+    },
+    {
+      "item": "the two inline NYSE_HOLIDAYS sets in mdpf-daily-trigger and mdpf-freshness-checker",
+      "reason": "not measured: they are not vendored copies of the library module; filed as surprise row NFRA_CTLPLN-W94-S1"
+    },
+    {
+      "item": "any AWS call, network call, pip install or push",
+      "reason": "none in this order"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed by this worker"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W94-S1: two mdpf Lambdas (mdpf-daily-trigger, mdpf-freshness-checker) hold inline 2026-2027 NYSE holiday sets with their own is_trading_day; they are not vendored copies of lib/trading_calendar.py, so the measure does not count or compare them"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~94/NFRA_CTLPLN.TO-CT-ad-3.calendar-copies-measure-and-holiday-set-diff.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~94, 2026-10-14; code commit d2c82f12a2 on wk-NFRA_CTLPLN-94)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_measure_calendar_copies.py",
+      "result": "MEASURE-CALENDAR-COPIES arms=4/4 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/measure_calendar_copies.py",
+      "result": "CALENDAR-COPIES found=4 same_2026_2027=4 differs_2026_2027=0 import_failed=0 ok=True"
+    }
+  ]
+}
