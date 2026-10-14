@@ -5,7 +5,9 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-14</date>
-<status>staged</status>
+**CLOSED 2026-10-14 ~23:2xZ (2.0.0_SA_COO~D1) on the CloudOps report (msg 5959, ledger `20261014T2304Z_mdpf-canon-r9-trend-publish-tonight`).** Eight gold puts 23:10Z, one publisher run 23:11Z (18 published, failed none); the issuer re-measured the eight keys against their pre-splice versions: each differs ONLY by the CN-p-1 keys (Global also `meta.trend_groups`) or the one `muni` member. PROVENANCE (CTO condition C1): these eight objects are a splice authorised by Andrew's overwrite OK, not a lambda run, and are NEVER cited as evidence of the lambda; the first scheduled fire carrying the code (2026-10-15 13:30Z) is that evidence. CTO C2 was amended at `da6e7b36d0` (the publisher republishes all 18 pairs: 8 change, 10 data-identical). C3: no claim is made about PROD visibility (served-plane cache TTL 300 s; the PROD portal does not read the new keys). Criteria deviations accepted by the issuer: (1) three served category-views equal the built body plus the publisher's own Tax status keys (old and new alike); (2) the readback arm R6 compared the newest object with the previous dated object and failed on a routine one-cell restatement present before the splice: R6 now tolerates at most five restated cells per array and reads PASS (11 of 11 live); (3) four history leaves were republished data-identical.
+
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P1 (Andrew-direct ~22:5xZ: "do it", overwrite OK; BEHIND the CTO half of ADDENDUM 1 and the issuer's written GO -- see PRECONDITIONS)</priority>
