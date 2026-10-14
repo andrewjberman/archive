@@ -1,0 +1,11 @@
+R0G, TO-APPLY-R29c, 0.7.0_AE_CloudOps~AQ2, read 2026-10-14 ~12:5xZ (account id redacted)
+Role of irpt-ycharts-generate: irpt-ycharts-generate-role. list-attached-role-policies: 0 managed policies. list-role-policies: 4 inline (irpt-ycharts-generate, -custody-factory-policy, -directory-read-policy, -ownership-map-read-policy); each read by get-role-policy (PolicyDocument only).
+Statements naming dynamodb (the other three inline policies carry none):
+  ReadPartnerProfileRowForOnBehalfAdvisor  Allow  dynamodb:GetItem  on table/opal-partner-49financial, table/opal-partner-inflection, table/opal-partner-cottonwood  (no wildcard, no Condition)
+  ReadCanonicalUserProfileByEmailIndexAndKey  Allow  dynamodb:Query  on table/opal-users-v2/index/email-index
+  ReadCanonicalUserProfileRow  Allow  dynamodb:GetItem  on table/opal-users-v2
+  (also: irpt-jobs GetItem/PutItem/UpdateItem; irpt-requests GetItem/PutItem; etf-classifications Scan -- none a partner table)
+Partner tables that exist (list-tables, 46 tables read): opal-partner-49financial, opal-partner-cottonwood, opal-partner-demo, opal-partner-inflection (4).
+RESULT: the policy admits the three signed partner tables and NONE outside them (opal-partner-demo is not named). It admits GetItem only on them, no write.
+simulate-principal-policy, one resource per call, each table exists: dynamodb:GetItem 49financial allowed, inflection allowed, cottonwood allowed, demo implicitDeny; positive control irpt-requests GetItem allowed; PutItem on opal-partner-49financial implicitDeny.
+Limit: the simulation proves the policy patterns, not a permissions boundary or organisation policy; none was read.
