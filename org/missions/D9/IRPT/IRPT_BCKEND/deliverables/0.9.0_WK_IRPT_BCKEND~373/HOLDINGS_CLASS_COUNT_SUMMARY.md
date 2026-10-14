@@ -24,5 +24,8 @@ What the build cell needs to know:
 4. cottonwood's newest accepted date is 2026-10-08; the other two are 2026-10-12.
 5. Not read: any canonical row per ticker, the fallback table, any holding value.
 
-Rows filed: IRPT_BCKEND-D2-W373-S1 (basis not a canonical discriminant) and S2 (the worker identity can scan the
-canonical table, which D2's grant did not expect) and S3 (cottonwood date gap).
+6. cottonwood's current/ prefix holds publish_refusal.json (written 2026-10-13T14:17:45Z, body not read: outside
+   the read grant). No 2026-10-09 or 2026-10-12 partition exists for cottonwood. Consistent with a refused fire.
+
+Rows filed: IRPT_BCKEND-D2-W373-S1 (basis not a canonical discriminant), S2 (the worker identity can scan the
+canonical table, which D2's grant did not expect), S3 (cottonwood date gap), S4 (the publish_refusal record).
