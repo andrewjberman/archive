@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-522",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-522.activity-backfill-census-and-plan.md",
+    "group": "OTHER",
+    "vintage_commit": "f9138c4f06"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "f9138c4f06",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-522.activity-backfill-census-and-plan.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~369",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~369/IB186-2_activity_backfill_census.json",
+      "kind": "config_data",
+      "commit_or_etag": "6271e6513f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: nothing invoked, uploaded, written to AWS or deployed. Census record: writers, per-firm table state and demand, rate, plan booleans, bound counters 0."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~369/BACKFILL_PLAN_PACKET_IB-pr-522.md",
+      "kind": "doc",
+      "commit_or_etag": "6271e6513f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: design only. Plan packet with Branch A, Branch B, writers, blast radius, red list, the 2012 floor, the pair. Both halves UNSIGNED; this packet signs neither.",
+      "artifact_covered_by": [
+        "IB186-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2c7dc63544",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: nine rows IRPT_BCKEND-D2-W369-S1 to S9 appended (class OBSERVATION, hazard INERT). Each row's grounding is path at commit or a named read."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB186-2-AC1",
+      "criterion_verbatim": "AC1 the writers counted and named, and for the three firms the partition counts of the activity table and of the upstream returns table with earliest and latest dates",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r186/p186_cells.py\" . IB186-2-AC1",
+      "output_evidence": "OK: 2 writer(s) named; partitions read for 3 firms\nIB186-2-AC1 PASS\nrc=0",
+      "denominator": "2 of 2 writers listed (count equals list length); 3 of 3 firms; 49financial activity 4 partitions (2026-10-07..2026-10-12) and returns 569 (2024-07-08..2026-10-12); cottonwood activity 0 and returns 3325 (2013-04-03..2026-06-22); inflection 0 and 0.",
+      "expect": "^IB186-2-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB186-2-AC2",
+      "criterion_verbatim": "AC2 the per-firm demand with the literal 2012 floor, trading days to fill, and invocations needed equal to ceil(days / chunk bound), the chunk bound, and the observed rate or its stated absence",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r186/p186_cells.py\" . IB186-2-AC2",
+      "output_evidence": "OK: demand per firm with the 2012 floor; cap 25\nIB186-2-AC2 PASS\nrc=0",
+      "denominator": "1 of 3 firms with a sourced demand (49financial: floor 2012-01-01, earliest_record 2024-07-08, start_day 2024-07-08, 565 trading days, 23 invocations = ceil(565/25)); 2 of 3 null with unsourced_reason (cottonwood and inflection: no activity producer, one custody source declared and a second refused, handler.py lines 222-224; not sourced, not estimated); chunk bound 25; observed 216.7 seconds per day from 1 run.",
+      "expect": "^IB186-2-AC2 PASS$",
+      "status": "PASS",
+      "status_reason": "Re-run after AMENDMENT 1 of the order and its check (issuer commit 8d14148d96): PASS. Surprise row IRPT_BCKEND-D2-W369-S2 carries the premise failure."
+    },
+    {
+      "criterion_id": "IB186-2-AC3",
+      "criterion_verbatim": "AC3 the plan (mechanism, event keys, idempotence, overwrite and rollback as booleans, batches, write set), the packet's sections (Branch A, Branch B, writers, 2012, both halves, blast radius, red list, rollback, at least 3000 characters), no long digit run, and the six bound counters 0",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r186/p186_cells.py\" . IB186-2-AC3",
+      "output_evidence": "OK: plan recorded (23 batch(es)); packet complete; counters 0\nIB186-2-AC3 PASS\nrc=0",
+      "denominator": "23 batches (49financial only); 5 event keys; 3 plan booleans (idempotent false, overwrites_existing_partitions true, rollback_possible true); 6 write_set key shapes; packet with every required section, at least 3000 characters; 6 of 6 bound counters 0.",
+      "expect": "^IB186-2-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not run as a build control: the order names none. The re-run content evidence is in surprise row IRPT_BCKEND-D2-W369-S7 (the same activity day logged 6901 then 6904 rows).",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No Lambda invoke (not even dry_run), no aws s3 cp, put-object or rm, no terraform, no source-map write, no change-management entry, no sign-in, no vendor call.",
+      "reason": "READ ONLY and DESIGN ONLY per the order bounds."
+    },
+    {
+      "item": "No backfill chunk, dry run or real, was run for any firm.",
+      "reason": "Design only; nothing invoked."
+    },
+    {
+      "item": "cottonwood and inflection demand (earliest activity record, days to fill, invocations) not sourced; recorded null.",
+      "reason": "No activity source is declared for either firm, and reading their source prefixes is outside the bounded read allowance. A figure is not estimated."
+    },
+    {
+      "item": "The wall time of a 25-day chunk with the lots stage; the per-account earliest positive-value day; the class and lot partition counts; the invoker identity; the live Scheduler schedule; the DEV after-read.",
+      "reason": "Not measured: a chunk needs an invoke, the per-account day needs object bodies, the others are outside the bounded read allowance or need a person's read."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W369-S1: the order names the writer irpt-reporting-gold; the live function and log group are irpt-49f-reporting-gold-lambda, and the named one does not exist.",
+    "IRPT_BCKEND-D2-W369-S2: one reporting-gold writer cannot serve three firms; cottonwood and inflection have no declared custody source and no function, so their demand is recorded null.",
+    "IRPT_BCKEND-D2-W369-S3: 23 returns-only backfill invocations over 2024-07-08..2026-10-01 ran on 2026-10-03 and logged no activity line; the activity table's history starts 2026-10-07.",
+    "IRPT_BCKEND-D2-W369-S4: an explicit backfill rewrites the returns days of its range, so Branch A cannot keep the returns tables untouched; the check must read key count and dates.",
+    "IRPT_BCKEND-D2-W369-S5: the lots stage logged LOTS_SKIPPED for 2026-10-07 and 2026-10-08 on the realized-lot key check, and a backfill logs such a refusal without raising.",
+    "IRPT_BCKEND-D2-W369-S6: the 25-day chunk bound has never run with the lots stage; at the measured one-day rate a chunk would pass the 900-second function timeout.",
+    "IRPT_BCKEND-D2-W369-S7: a re-run of 2026-10-08 computed 6904 activity rows against 6901 landed, so the order's idempotence premise does not hold.",
+    "IRPT_BCKEND-D2-W369-S8: the 565-day trading-day count rests on the calendar's hardcoded NYSE fallback, because pandas_market_calendars is absent.",
+    "IRPT_BCKEND-D2-W369-S9: events list-rules returns no reporting-gold rule; the schedule is an EventBridge Scheduler schedule, which the order's named read does not cover."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~369/BACKFILL_PLAN_PACKET_IB-pr-522.md",
+  "compiler_tools": [
+    {
+      "tool": "aws",
+      "invocation": "aws sts get-caller-identity (through the .tools/aws shim)",
+      "result": "rc=0; the dell2 agent identity (name not recorded)"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws s3api list-objects-v2 --bucket <firm gold bucket> --prefix irpt/<firm>/gold/<account_activity_daily|account_return_daily>/ --delimiter / (three firms, six listings)",
+      "result": "rc=0; 49financial activity 4, returns 569; cottonwood activity 0, returns 3325; inflection 0 and 0"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws s3api list-objects-v2 on the custody source's dim_balance, fact_trn, fact_rld, fact_uln and fact_ult prefixes (delimiter /)",
+      "result": "rc=0; dim_balance and fact_trn 570 partitions from 2024-07-08; fact_rld from 2023-07-12; fact_uln and fact_ult 570 from 2024-07-08"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws lambda get-function-configuration --function-name irpt-49f-reporting-gold-lambda",
+      "result": "rc=0; Timeout 900, MemorySize 3008, Runtime python3.12, State Active"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws logs filter-log-events on the live reporting-gold log group (REPORT, computing, BACKFILL, activity, LOTS_SKIPPED patterns, from 2026-09-01 and 2026-09-20)",
+      "result": "rc=0; 10 paired scheduled runs, 32 paired backfill runs, 674 matched lines since 2026-09-01; no line content with a lot identifier copied"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws s3api get-bucket-versioning on the 49financial gold bucket",
+      "result": "rc=0; Status Enabled"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws iam get-role-policy (function role, its one policy)",
+      "result": "rc=0; PutObject on five gold prefixes; no delete"
+    },
+    {
+      "tool": "aws",
+      "invocation": "aws events list-rules --name-prefix irpt",
+      "result": "rc=0; one rule, none naming reporting-gold"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I with lib/trading_calendar.py trading_days_between(2024-07-08, 2026-10-06)",
+      "result": "565 trading days, ceil(565/25) = 23; calendar_source NYSE/hardcoded-fallback-2010-2027 with WARN"
+    },
+    {
+      "tool": "Grep",
+      "invocation": "Grep of the activity table name over infra/, data/ and lib/ (absolute worktree paths)",
+      "result": "infra/: handler.py, locals.tf, iam.tf, two tests; data/: account_activity_lots.py and its test; lib/: none. Two writers counted."
+    }
+  ]
+}
