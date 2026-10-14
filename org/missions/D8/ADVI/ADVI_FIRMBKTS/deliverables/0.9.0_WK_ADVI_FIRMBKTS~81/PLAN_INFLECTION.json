@@ -1,0 +1,1146 @@
+{
+ "order": "FB-l-1",
+ "read_at": "2026-10-14T12:25:30Z",
+ "firm": "inflection",
+ "calls": [
+  "aws sts get-caller-identity (identity check only; account id not recorded)",
+  "aws s3api get-bucket-notification-configuration --bucket opal-data-49financial (empty)",
+  "aws s3api get-bucket-notification-configuration --bucket opal-data-inf (2 Lambda entries, EventBridgeConfiguration {})",
+  "aws s3api get-bucket-notification-configuration --bucket opal-data-inflection (empty)",
+  "aws events list-rules --output json (156 rules, saved outside the checkout)",
+  "aws lambda list-functions --output json (237 functions, saved outside the checkout)",
+  "aws scheduler list-schedules --group-name default --output json (33 schedules)",
+  "aws scheduler get-schedule --name advi-49f-publisher | advi-49f-gold-floor | irpt-49f-reporting-publish-daily | opal-assets-mdpf-portal-publisher-daily | mdpf-feeder-backstop-daily | mdpf-scheduled-floor",
+  "aws events list-targets-by-rule --rule exec-summary-trigger | mdpf-feeder-accelerator | inf-canonical-prices-daily | FIRMSEP-s3-direct-access-bypass",
+  "aws events describe-rule --name FIRMSEP-s3-direct-access-bypass ; describe-rule --name exec-summary-trigger-placeholder (ResourceNotFound)",
+  "aws events list-rule-names-by-target --target-arn <exec-summary-generator, advi-49f-gold-dispatch, inf-portal-advisor-publisher>",
+  "aws lambda get-policy --function-name advi-49f-gold-dispatch | irpt-49f-reporting-publish-lambda (ResourceNotFound) | opal-assets-mdpf-portal-publisher | inf-portal-publisher",
+  "aws lambda get-function-configuration --function-name inf-gold-trigger (kill-switch variable values only); inf-gold-freshness-guard and mdpf-daily-trigger (ResourceNotFound)",
+  "aws lambda get-policy --function-name inf-gold-freshness-guard | mdpf-daily-trigger (none)",
+  "aws events list-rule-names-by-target --target-arn <inf-gold-freshness-guard, mdpf-daily-trigger> (none)",
+  "aws s3api get-bucket-policy --bucket opal-data-inf (2 statements); --bucket opal-data-inflection (4 statements, saved outside the checkout)",
+  "aws s3api list-objects-v2 --bucket <opal-data-inf | opal-data-49financial | opal-data-inflection> --delimiter / (CommonPrefixes)",
+  "aws s3api list-objects-v2 --bucket opal-data-49financial --prefix advi/49financial/ --delimiter /",
+  "aws s3api list-objects-v2 --bucket opal-data-inflection --prefix advi/ --max-items 5 (KeyCount None)",
+  "aws s3api list-objects-v2 --bucket opal-data-inf --prefix / --max-items 2000 (339 keys; LastModified range)",
+  "aws s3api head-object --bucket opal-data-inf --key gold/meta/pipeline-complete.json (one sample)",
+  "aws iam get-account-authorization-details --filter Role (inline) and --filter Role LocalManagedPolicy (303 roles, 56 managed policies; saved outside the checkout; parsed with python -I .scratch/iam_env_summary.py)",
+  "aws cloudtrail describe-trails ; get-event-selectors (opal-served-key-write-trail, opal-organization-trail) ; get-trail-status --name opal-organization-trail (IsLogging true)",
+  "comp-find --corpus aws '49financial|49fin' (13 hits across 2929 nodes; 49 Financial graph read)",
+  "native Grep and Glob on the worktree paths: router_iam, exec-summary placeholder (infra/aws/terraform/exec-summary/main.tf:210-240), inf-sentinel-deny (empty of .tf), advi_49f_publisher.tf:1-110, lambda-edge firm-config.mjs, inf-pipeline function folders, inf-portal-publisher lambda_function.py",
+  "sed -n on the worktree files cited above (read only)",
+  "python -I (read-only analysis of the saved JSON; no AWS write, no producer run, no terraform command)"
+ ],
+ "denominators": {
+  "eventbridge_rules_listed_live": 156,
+  "eventbridge_rules_naming_opal-data-inf_in_pattern_live": 7,
+  "eventbridge_rules_naming_opal-data-inflection_live": 0,
+  "scheduler_default_group_schedules_live": 33,
+  "scheduler_default_group_schedules_recorded_FB-k-1": 34,
+  "scheduler_schedules_read_by_name_live": 6,
+  "lambda_functions_listed_live": 237,
+  "lambda_functions_with_opal-data-inf_in_env_live": 21,
+  "lambda_functions_named_absent_live": 2,
+  "iam_roles_scanned_live": 303,
+  "iam_customer_managed_policies_scanned_live": 56,
+  "iam_roles_with_allow_on_opal-data-inf_live": 40,
+  "iam_roles_with_deny_only_on_opal-data-inf_live": 20,
+  "iam_allow_roles_admitted_by_inflection_fence_live": 5,
+  "iam_fan-in_fence_attached_roles_live": 13,
+  "s3_notification_entries_opal-data-inf_live": 2,
+  "s3_notification_entries_opal-data-49financial_live": 0,
+  "s3_notification_entries_opal-data-inflection_live": 0,
+  "s3_bucket_policy_statements_opal-data-inf_live": 2,
+  "s3_bucket_policy_statements_opal-data-inflection_live": 4,
+  "s3_top_level_prefixes_opal-data-inf_live": 20,
+  "s3_top_level_prefixes_opal-data-49financial_live": 6,
+  "s3_advi_subprefixes_opal-data-49financial_live": 2,
+  "s3_top_level_prefixes_opal-data-inflection_live": 2,
+  "s3_leading-slash_keys_opal-data-inf_live": 339,
+  "cloudtrail_trails_live": 2,
+  "cloudtrail_org_trail_classic_data_selectors_on_opal-data-inf_live": 2,
+  "inflection_lambda_env_bucket_irpt_map_functions_live": 8,
+  "marker_head_object_samples_live": 1,
+  "legacy_inventory_pipeline_rows_FB-k-1": 54,
+  "legacy_inventory_serving_rows_FB-k-2": 97,
+  "moves_in_this_plan": 44,
+  "retire_rows_in_this_plan": 13
+ },
+ "moves": [
+  {
+   "id": "M01",
+   "function": "exec-summary-trigger (rule) and exec-summary-generator (target)",
+   "kind": "rule",
+   "from": "Live rule exec-summary-trigger: ENABLED, event pattern detail-type chain-complete from source bd-pipeline.gold-chain, sole target exec-summary-generator (events describe-rule and list-targets-by-rule, read live 2026-10-14). Terraform declares only resource exec_summary_trigger_placeholder, name exec-summary-trigger-placeholder, DISABLED, schedule cron(30 4 * * ? *) (infra/aws/terraform/exec-summary/main.tf:224-227); that placeholder name does not exist live (describe-rule ResourceNotFound).",
+   "to": "Terraform declares aws_cloudwatch_event_rule named exec-summary-trigger with the live pattern and target (replacing the placeholder resource), then imported into state; no AWS change. The rule is 49 Financial-scoped: the generator defaults to the 49financial firm and writes only 49financial destinations (INF-FN-28), so this move brings the rule under code, it does not move any Inflection data.",
+   "order": 1,
+   "depends_on": [],
+   "rollback": "terraform state rm of the imported rule and target, then revert the Terraform commit; the live rule is untouched by the import, so the rollback is a state and code revert only",
+   "proof": "terraform plan (infrastructure lane, read-only) shows zero changes to the rule and target after import; aws events describe-rule --name exec-summary-trigger still returns State ENABLED with the same EventPattern before and after",
+   "covers": [
+    "INF-RULE-02",
+    "INF-FN-28"
+   ],
+   "evidence": "events describe-rule --name exec-summary-trigger; events list-targets-by-rule --rule exec-summary-trigger; describe-rule exec-summary-trigger-placeholder (ResourceNotFound); infra/aws/terraform/exec-summary/main.tf:214-236; INF-FN-28 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M02",
+   "function": "opal-data-inflection (bucket policy, EventBridge delivery)",
+   "kind": "role",
+   "from": "opal-data-inflection exists (created 2026-09-18 by IRPT_BCKEND; adopted here) with 4 policy statements, 2 Deny statements; DenyForeignFirmPrincipals (Deny s3:* for Principal *, except principals matching ArnNotLike) admits role/*-inf-* (pattern), two named roles (irpt-holdings-role, irpt-performance-adapter-role) and five user principals. Of the 40 roles holding Allow on opal-data-inf, 5 match the admit list today (opal-inf-served-guard, opal-inf-value-parity, irpt-inf-holdings-role, irpt-holdings-role, irpt-performance-adapter-role); 35 do not, because the inf-* role names carry no leading hyphen. The bucket has NO notification configuration (get-bucket-notification-configuration returned empty), so EventBridge rules cannot match it.",
+   "to": "Explicit ARN admission for each role that the M05 to M39 moves assign to the new bucket (no widening to a wildcard), via the bucket-policy Terraform and safe-apply; add EventBridgeConfiguration {} to the bucket notification so R02, R03, R05 and R06 can match the new bucket. The admit list is the 35 roles named in the grant clauses of moves M06 to M39.",
+   "order": 2,
+   "depends_on": [],
+   "rollback": "put-bucket-policy with the pre-change policy document saved at apply time (Terraform revert of the bucket-policy resource, then safe-apply); remove the EventBridgeConfiguration entry by the same revert",
+   "proof": "get-bucket-policy shows every named role ARN in the admit list; simulate-custom-policy (identity policy of one role per move, with the bucket policy as resource policy) returns allowed on the new prefix; get-bucket-notification-configuration shows EventBridgeConfiguration",
+   "covers": [],
+   "evidence": "s3api get-bucket-policy --bucket opal-data-inflection (4 statements, sids and conditions read); s3api get-bucket-notification-configuration --bucket opal-data-inflection (empty); s3api get-bucket-notification-configuration --bucket opal-data-inf (EventBridgeConfiguration {} present); get-account-authorization-details (Allow roles, fence admit comparison)",
+   "claim": "measured"
+  },
+  {
+   "id": "M03",
+   "function": "inf-portal-publisher (trigger leg)",
+   "kind": "schedule",
+   "from": "S3 ObjectCreated notification on opal-data-inf, prefix gold/meta/, suffix pipeline-complete.json, target inf-portal-publisher (get-bucket-notification-configuration, read live). The notification's Lambda permission is scoped to the opal-data-inf ARN (get-policy on inf-portal-publisher).",
+   "to": "New EventBridge Scheduler schedule inf-portal-publisher-floor in the default group, target inf-portal-publisher, retry 1 and 3600 s maximum event age, dead-letter queue, flexible window OFF, state DISABLED at creation. Shape copies the 49 Financial publisher floor (infra/aws/terraform/opal-assets/advi_49f_publisher.tf:75-110: clock floor, DLQ, retry, UTC cron after the gold floor). Cron time is set from the measured gold completion (Q3). Exercised once through a one-time at() schedule before any recurring enable.",
+   "order": 3,
+   "depends_on": [
+    "M01"
+   ],
+   "rollback": "delete or disable inf-portal-publisher-floor (Terraform revert, safe-apply); the S3 notification stays the live trigger until M04, so the rollback restores the status quo",
+   "proof": "aws scheduler get-schedule --name inf-portal-publisher-floor shows target and state; the one-time at() exercise produces a publisher invocation (CloudWatch log line) and a LastModified on platinum/firm/snapshots/aua_by_*.json after the exercise time",
+   "covers": [
+    "INF-FN-01"
+   ],
+   "evidence": "scheduler get-schedule advi-49f-publisher (DISABLED, cron(15 13 * * ? *), target advi-49f-gold-dispatch, document advi-49f-publisher-dispatch); scheduler get-schedule advi-49f-gold-floor (ENABLED cron(45 12 * * ? *)); advi_49f_publisher.tf:1-60 (the NEVER#4 clock-floor rule); head-object gold/meta/pipeline-complete.json (LastModified 2026-10-13T12:59:59Z, one sample)",
+   "claim": "measured"
+  },
+  {
+   "id": "M04",
+   "function": "Door 6: gold/meta/pipeline-complete.json, its notification, rule mdpf-feeder-accelerator, router deny",
+   "kind": "notification",
+   "from": "(a) S3 notification gold/meta/ + pipeline-complete.json to inf-portal-publisher on opal-data-inf; (b) rule mdpf-feeder-accelerator ENABLED, S3 Object Created on the prohibited key, target mdpf-feeder-trigger (events list-targets-by-rule, read live); (c) marker object gold/meta/pipeline-complete.json (135 bytes, LastModified 2026-10-13T12:59:59Z, one sample); (d) DenyInfGoldSentinelAbsolutely (Deny s3:* on the marker ARN) inside managed policy opal-assets-one-way-fan-in-fence, attached to 13 roles including opal-assets-ingest-router-role (infra/aws/terraform/opal-assets/router_iam.tf:170-176; live policy read); (e) repo sources inf-gold-freshness-guard and mdpf-daily-trigger name the marker as their key, both ABSENT live.",
+   "to": "After M03 is proven: (1) enable inf-portal-publisher-floor; (2) remove the gold/meta/ entry only (the silver entry moves in M23); (3) disable then delete rule mdpf-feeder-accelerator (L01 keeps running from mdpf-feeder-backstop-daily, cron(52 12 * * ? *), ENABLED); (4) with Andrew's word, copy then delete the marker object; (5) only after (4), remove the Deny statement from the fence policy; (6) delete the two absent repo sources in code review. Steps 1 and 2 land in one Terraform apply so the publisher never fires twice.",
+   "order": 4,
+   "depends_on": [
+    "M03"
+   ],
+   "rollback": "(1) disable inf-portal-publisher-floor; (2) put-bucket-notification-configuration (Terraform revert) to restore the gold/meta/ entry; (3) re-enable rule mdpf-feeder-accelerator from its saved pattern; (4) restore the marker object from the saved copy; (5) restore the Deny statement by Terraform revert and safe-apply",
+   "proof": "get-bucket-notification-configuration on opal-data-inf shows only the silver entry after step 2; events describe-rule mdpf-feeder-accelerator returns ResourceNotFound after step 3; head-object gold/meta/pipeline-complete.json returns 404 after step 4 and the copy exists under the saved path; simulate-custom-policy shows no Deny on the marker after step 5",
+   "covers": [
+    "R01-mdpf-feeder-accelerator",
+    "INF-RULE-01",
+    "L27-inf-gold-freshness-guard"
+   ],
+   "evidence": "events describe-rule mdpf-feeder-accelerator (ENABLED); events list-targets-by-rule (MdpfFeederTrigger); scheduler get-schedule mdpf-feeder-backstop-daily (ENABLED cron(52 12 * * ? *)); get-policy inf-portal-publisher (S3 invoke, scoped to opal-data-inf); lambda get-function-configuration inf-gold-freshness-guard and mdpf-daily-trigger (ResourceNotFound); router_iam.tf:170-176; the fence policy's attachment count (13) from get-account-authorization-details",
+   "claim": "held"
+  },
+  {
+   "id": "M05",
+   "function": "Inflection bulk data copy (all layers, copy-only)",
+   "kind": "other",
+   "from": "opal-data-inf prefixes (20 top-level prefixes including the leading-slash namespace; list-objects-v2 --delimiter /, read live): _compare, _pre_rebuild_backup, _rebuild_status, _scratch, _toolprobe_scratch, backup, bronze, code, config, diagnostic, eclipse, gold, investor-reporting, orion, otp, platinum, qa, silver, telemetry, and the '/' namespace (M40).",
+   "to": "opal-data-inflection/advi/inflection/{bronze,silver,gold,platinum,state,code,telemetry,qa,config,diagnostic,eclipse,investor-reporting,otp}/ with the layout of the 49 Financial model (advi/49financial/{gold,platinum} is the live model; state/ is absent there, see S10). The orion/ prefix is not bulk-copied: its mode markers move with M17 and M18, and orion/jwt/current.json (B2) is never copied, read or printed. Keys for bronze and silver follow the F2 mapping table, which this plan does not read (not_read). Copy only: no source key is deleted.",
+   "order": 5,
+   "depends_on": [
+    "M02"
+   ],
+   "rollback": "stop the repoints (M06 to M39) and leave the copies in place; no delete is part of the rollback",
+   "proof": "per prefix: KeyCount and summed Size equal between opal-data-inf and advi/inflection/<layer>/ (list-objects-v2 with --query), plus ETag checks on a fixed sample; the copy log is kept in the deliverables folder",
+   "covers": [],
+   "evidence": "s3api list-objects-v2 --bucket opal-data-inf --delimiter / (20 CommonPrefixes); s3api list-objects-v2 --bucket opal-data-49financial --prefix advi/49financial/ --delimiter / (gold/, platinum/); s3api list-objects-v2 --bucket opal-data-inflection --delimiter / (irpt/, mdpf/ only)",
+   "claim": "held"
+  },
+  {
+   "id": "M06",
+   "function": "inf-bronze-complete-emitter",
+   "kind": "lambda",
+   "from": "env INF_S3_BUCKET=opal-data-inf; lists bronze/orion-api/<date>/ and writes bronze/orion-api/<date>/_BRONZE_COMPLETE.json (the marker R02, R03 and R04 match)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); env INF_S3_BUCKET repointed to opal-data-inflection; EventBridge rules R02 and R03 repointed in M20 and M21 | grant: inf-bronze-complete-emitter-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 6,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L12-inf-bronze-complete-emitter",
+    "INF-FN-06",
+    "INF-ROLE-09"
+   ],
+   "evidence": "lambda get-function-configuration inf-bronze-complete-emitter (env names and INF_S3_BUCKET value read live); INF-FN-06 (FB-k-2); infra/aws/lambda/inf-pipeline/inf-bronze-complete-emitter/lambda_function.py",
+   "claim": "measured"
+  },
+  {
+   "id": "M07",
+   "function": "inf-api-positions",
+   "kind": "lambda",
+   "from": "bucket in code (no env var; source infra/aws/lambda/inf-pipeline/inf-api-positions/pull_inflection_positions_daily.py); reads orion/jwt/current.json and silver/api_dims/household_rep_mapping/*; writes bronze/positions/*, silver/api_dims/positions_mv/*, silver/_silver_complete/<date>/positions_daily.json; rule inf-api-positions-daily ENABLED cron(22 11 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; the B2 read of orion/jwt/current.json stays on opal-data-inf (B2 out of the set, DEC-13) | grant: inf-api-positions-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 7,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L08-inf-api-positions",
+    "INF-FN-11",
+    "INF-ROLE-05"
+   ],
+   "evidence": "lambda get-function-configuration (environment names empty, read live); INF-FN-11 (FB-k-2); source path above (bucket constant, inferred from the grep of the function's folder)",
+   "claim": "measured"
+  },
+  {
+   "id": "M08",
+   "function": "inf-api-reps",
+   "kind": "lambda",
+   "from": "bucket in code (no env var; infra/aws/lambda/inf-pipeline/inf-api-reps/pull_inflection_representatives.py); reads orion/jwt/current.json; writes bronze/orion-api-v2/*, silver/api_dims/representatives/*, silver/_silver_complete/<date>/representatives.json; rule inf-api-reps-daily ENABLED cron(2 11 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-api-reps-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 8,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L09-inf-api-reps",
+    "INF-FN-12",
+    "INF-ROLE-06"
+   ],
+   "evidence": "lambda get-function-configuration (env empty, read live); INF-FN-12 (FB-k-2); source path above",
+   "claim": "measured"
+  },
+  {
+   "id": "M09",
+   "function": "inf-api-txn",
+   "kind": "lambda",
+   "from": "bucket in code (env holds only INF_PREFER_S3; infra/aws/lambda/inf-pipeline/inf-api-txn/pull_inflection_transactions_v2.py); reads orion/jwt/current.json; writes bronze/orion-api/*/transactions.csv, silver/transactions/*, silver/_silver_complete/*/transactions.json; rule inf-api-txn-daily ENABLED cron(32 11 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-api-txn-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 9,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L10-inf-api-txn",
+    "INF-FN-13",
+    "INF-ROLE-07"
+   ],
+   "evidence": "lambda get-function-configuration (live env names read); INF-FN-13 (FB-k-2); source path above",
+   "claim": "measured"
+  },
+  {
+   "id": "M10",
+   "function": "inf-api-assets-v2",
+   "kind": "lambda",
+   "from": "bucket in code (env empty, read live); reads silver/api_dims/household_rep_mapping/* and orion/jwt/current.json; writes bronze/assets/*, silver/assets_v2/*, silver/_silver_complete/<date>/assets_v2.json; rule inf-api-assets-v2-daily ENABLED cron(17 11 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-api-assets-v2-lambda-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 10,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L06-inf-api-assets-v2",
+    "INF-FN-14",
+    "INF-ROLE-03"
+   ],
+   "evidence": "lambda get-function-configuration (live); INF-FN-14 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M11",
+   "function": "inf-accounts-v2-daily",
+   "kind": "lambda",
+   "from": "bucket in code (env empty, read live); reads bronze/orion-api/*/household_rep_mapping.json and orion/jwt/current.json; writes bronze/orion-api/*/accounts_roster.json and silver/_silver_complete/*/accounts_v2.json; rule inf-accounts-v2-daily ENABLED cron(7 11 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-accounts-v2-daily-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 11,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L05-inf-accounts-v2-daily",
+    "INF-FN-15",
+    "INF-ROLE-02"
+   ],
+   "evidence": "lambda get-function-configuration (live); INF-FN-15 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M12",
+   "function": "inf-billing-daily",
+   "kind": "lambda",
+   "from": "bucket in code (env empty, read live; infra/aws/lambda/inf-pipeline/inf-billing-daily/orion_billing_dim.py); reads orion/jwt/current.json and bronze/orion-api/*/billing.csv; writes bronze/orion-api/*/billing.csv and silver/_silver_complete/*/billing.json; rule inf-billing-daily ENABLED cron(22 14 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-billing-daily-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 12,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L11-inf-billing-daily",
+    "INF-FN-16",
+    "INF-ROLE-08"
+   ],
+   "evidence": "lambda get-function-configuration (live); INF-FN-16 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M13",
+   "function": "inf-performance-daily",
+   "kind": "lambda",
+   "from": "bucket in code (env empty, read live; infra/aws/lambda/inf-pipeline/inf-performance-daily/pull_inflection_performance_dim.py); reads orion/jwt/current.json and bronze/orion-api/*/performance_dim.csv; writes silver/_silver_complete/*/performance.json; rule inf-performance-daily ENABLED cron(27 14 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-performance-daily-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 13,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L20-inf-performance-daily",
+    "INF-FN-17",
+    "INF-ROLE-21"
+   ],
+   "evidence": "lambda get-function-configuration (live); INF-FN-17 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M14",
+   "function": "inf-tax-daily",
+   "kind": "lambda",
+   "from": "bucket in code (env empty, read live; infra/aws/lambda/inf-pipeline/inf-tax-daily/orion_tax_dim.py); reads orion/jwt/current.json; writes bronze/orion-api/*/tax_realized.csv, tax_unrealized.csv and silver/_silver_complete/*/tax.json; rule inf-tax-daily ENABLED cron(42 13 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-tax-daily-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 14,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L21-inf-tax-daily",
+    "INF-FN-18",
+    "INF-ROLE-24"
+   ],
+   "evidence": "lambda get-function-configuration (live); INF-FN-18 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M15",
+   "function": "inf-unified-account-dim-daily",
+   "kind": "lambda",
+   "from": "bucket in code (env empty, read live; infra/aws/lambda/inf-pipeline/inf-unified-account-dim-daily/pull_unified_account_dim.py); reads orion/jwt/current.json; writes bronze/orion-api/*/unified_account_dim.csv and silver/_silver_complete/*/unified_account_dim.json; rule inf-unified-account-dim-daily ENABLED cron(27 13 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); bucket constant repointed in source; B2 read stays on opal-data-inf | grant: inf-unified-account-dim-daily-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 15,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L22-inf-unified-account-dim-daily",
+    "INF-FN-19",
+    "INF-ROLE-25"
+   ],
+   "evidence": "lambda get-function-configuration (live); INF-FN-19 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M16",
+   "function": "inf-api-eclipse",
+   "kind": "lambda",
+   "from": "env ECLIPSE_S3_BUCKET=opal-data-inf (ECLIPSE_BRONZE_PREFIX staging default bronze/eclipse_qa/); reads orion/jwt/current.json; writes bronze/eclipse_qa/*; rule inf-api-eclipse-daily ENABLED cron(18 11 * * ? *)",
+   "to": "opal-data-inflection/advi/inflection/bronze/ (same relative key); env ECLIPSE_S3_BUCKET repointed to opal-data-inflection; the production prefix (not read) is confirmed at the move | grant: inf-api-eclipse-role Allow on opal-data-inflection/advi/inflection/bronze/* (role must be admitted by M02 first)",
+   "order": 16,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/bronze/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L07-inf-api-eclipse",
+    "INF-FN-10",
+    "INF-ROLE-04"
+   ],
+   "evidence": "lambda get-function-configuration (env names and ECLIPSE_S3_BUCKET value read live); INF-FN-10 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M17",
+   "function": "inf-bronze-trigger and rule opal-inf-bronze-runner-cron",
+   "kind": "lambda",
+   "from": "env none (BRONZE_RUNNER_INSTANCE_ID only); writes orion/bronze-trigger-mode.json on opal-data-inf (mode marker put); rule opal-inf-bronze-runner-cron ENABLED cron(15 11 * * ? *); role inf-bronze-trigger-lambda-role (Allow scoped on opal-data-inf/orion/bronze-trigger-mode.json)",
+   "to": "mode marker moves to opal-data-inflection/advi/inflection/state/bronze-trigger-mode.json; the bronze runner (M19) reads the marker from the new key | grant: inf-bronze-trigger-lambda-role Allow on opal-data-inflection/advi/inflection/state/* (role must be admitted by M02 first)",
+   "order": 17,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/state/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L13-inf-bronze-trigger",
+    "INF-FN-23",
+    "INF-ROLE-11"
+   ],
+   "evidence": "lambda get-function-configuration inf-bronze-trigger (env names read live); events describe-rule opal-inf-bronze-runner-cron (ENABLED); INF-FN-23 (FB-k-2); infra/aws/lambda/inf-pipeline/inf-bronze-trigger/lambda_function.py",
+   "claim": "measured"
+  },
+  {
+   "id": "M18",
+   "function": "inf-jwt-trigger and rules opal-inf-jwt-fetch, opal-inf-export-schedule",
+   "kind": "lambda",
+   "from": "writes orion/jwt/trigger-mode.json (mode marker only) on opal-data-inf; the B2 credential object orion/jwt/current.json sits in the same prefix and is NOT read or printed; rules opal-inf-jwt-fetch cron(50 9 * * ? *) and opal-inf-export-schedule cron(0 21 * * ? *) ENABLED",
+   "to": "mode marker moves to opal-data-inflection/advi/inflection/state/jwt-trigger-mode.json; the credential object stays where it is (B2) | grant: inf-jwt-trigger-lambda-role Allow on opal-data-inflection/advi/inflection/state/* (role must be admitted by M02 first)",
+   "order": 18,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/state/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L23-inf-jwt-trigger",
+    "INF-FN-22",
+    "INF-ROLE-18"
+   ],
+   "evidence": "events describe-rule opal-inf-jwt-fetch and opal-inf-export-schedule (ENABLED, read live); INF-FN-22 (FB-k-2); the credential is never read (by rule)",
+   "claim": "measured"
+  },
+  {
+   "id": "M19",
+   "function": "bronze runner (S06 bronze-orchestrator) and exporter EC2 roles",
+   "kind": "script",
+   "from": "S06 runs on the bronze runner instance that L13 starts; reads orion/jwt/current.json (get_object at source line 129; contents never read); writes bronze/orion-api/<date>/... dynamic keys. Roles: inf-bronze-runner-ec2-role (ROLE-10, scoped Allow), inf-exporter-ec2-role (ROLE-13, scoped Allow), bd-exporter-ec2-role (ROLE-01, scoped and wildcard Allow). Instance-profile binding not resolved (not_read).",
+   "to": "S06 writes to the new home (dynamic keys re-derived from the F2 map); the runner's SSM and instance-profile grants are re-issued on opal-data-inflection; the B2 read stays on opal-data-inf",
+   "order": 19,
+   "depends_on": [
+    "M05",
+    "M02",
+    "M17"
+   ],
+   "rollback": "re-run the runner from the pre-move code key (copy retained in M05) and restore the pre-move instance profile policy from the saved document",
+   "proof": "one bronze run completes on the runner: bronze/orion-api/<date>/_BRONZE_COMPLETE.json lands under opal-data-inflection and the run's telemetry shows the new bucket",
+   "covers": [
+    "S06-bronze-orchestrator",
+    "INF-ROLE-01",
+    "INF-ROLE-10",
+    "INF-ROLE-13"
+   ],
+   "evidence": "FB-k-1 S06 row (inline read of the bronze orchestrator, measured); get-account-authorization-details role statements (live); instance profile not resolved",
+   "claim": "measured"
+  },
+  {
+   "id": "M20",
+   "function": "inf-assets-trigger and rule inf-assets-trigger-bronze-complete (R02)",
+   "kind": "rule",
+   "from": "Rule R02: S3 Object Created on opal-data-inf, key wildcard bronze/orion-api/*/_BRONZE_COMPLETE.json, ENABLED, target inf-assets-trigger (events describe-rule read live); target lambda inf-assets-trigger (legacy_touch False in FB-k-1; the rule makes it legacy-touch)",
+   "to": "rule EventPattern bucket name repointed to opal-data-inflection (EventBridge delivery enabled in M02); target unchanged",
+   "order": 20,
+   "depends_on": [
+    "M06",
+    "M02"
+   ],
+   "rollback": "Terraform revert of the rule pattern (opal-data-inf restored), safe-apply; the legacy marker is still written during the overlap only if M06 is not yet cut, so the rollback order is rule first, emitter second",
+   "proof": "a controlled _BRONZE_COMPLETE.json put under opal-data-inflection/advi/inflection/bronze/ yields TriggeredRules >= 1 (AWS/Events) and one invocation of inf-assets-trigger",
+   "covers": [
+    "R02-inf-assets-trigger-bronze-complete",
+    "INF-FN-21",
+    "L14-inf-assets-trigger"
+   ],
+   "evidence": "events describe-rule inf-assets-trigger-bronze-complete (live pattern read); FB-k-1 L14 and FB-k-2 INF-FN-21 (legacy_touch False in both inventories, although the rule's pattern names opal-data-inf: a disagreement this plan settles in favour of legacy)",
+   "claim": "measured"
+  },
+  {
+   "id": "M21",
+   "function": "inf-silver-chain and rule inf-silver-chain-bronze-complete (R03)",
+   "kind": "lambda",
+   "from": "Rule R03: S3 Object Created on opal-data-inf, the same bronze-complete wildcard, ENABLED, target inf-silver-chain; env INF_S3_BUCKET=opal-data-inf; reads bronze/orion-api/<date>/ and writes silver/api_dims/*, silver/api_dims/_chain_summary/",
+   "to": "env INF_S3_BUCKET repointed to opal-data-inflection; rule R03 repointed as in M20",
+   "order": 21,
+   "depends_on": [
+    "M06",
+    "M05",
+    "M02"
+   ],
+   "rollback": "Terraform revert of the rule pattern and env block (both in one revert), safe-apply",
+   "proof": "one chain run after the move writes silver/api_dims/_chain_summary/ under opal-data-inflection and the chain's CloudWatch log names the new bucket",
+   "covers": [
+    "R03-inf-silver-chain-bronze-complete",
+    "L15-inf-silver-chain",
+    "INF-FN-05",
+    "INF-ROLE-23"
+   ],
+   "evidence": "events describe-rule inf-silver-chain-bronze-complete (live); lambda get-function-configuration inf-silver-chain (INF_S3_BUCKET value read live); INF-FN-05 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M22",
+   "function": "opal-assets-ingest-mirror and rules opal-assets-ingest-mirror-inf-daily, opal-inf-assets-ingest-mirror-late-daily",
+   "kind": "lambda",
+   "from": "env MONOLITH_BUCKET=opal-data-assets; reads opal-data-inf bronze/ prefixes (assets, positions, transactions, performance and the others in FB-k-1 L04); writes opal-data-assets orion/inflection/bronze/ and eclipse/inflection/bronze/; rules ENABLED cron(5 13 * * ? *) and cron(5 17 * * ? *) (events describe-rule read live); role opal-assets-ingest-router-role (Allow scoped and wildcard on opal-data-inf, and admitted to the fan-in fence per the fence attachment list)",
+   "to": "source reads repointed to opal-data-inflection/advi/inflection/bronze/; the destination in opal-data-assets is unchanged (shared monolith, not a legacy home)",
+   "order": 22,
+   "depends_on": [
+    "M05",
+    "M02",
+    "M06"
+   ],
+   "rollback": "revert the source bucket for the mirror (Terraform, safe-apply); the destination copies stay",
+   "proof": "one mirror run writes orion/inflection/bronze/ objects in opal-data-assets whose source GET is recorded under opal-data-inflection (CloudTrail ReadOnly data event)",
+   "covers": [
+    "L04-opal-assets-ingest-mirror",
+    "INF-FN-27",
+    "INF-ROLE-37"
+   ],
+   "evidence": "lambda get-function-configuration opal-assets-ingest-mirror (MONOLITH_BUCKET read live); events describe-rule (both ENABLED); FB-k-1 L04 and FB-k-2 INF-FN-27",
+   "claim": "measured"
+  },
+  {
+   "id": "M23",
+   "function": "inf-silver-aggregator and its S3 notification (silver/_silver_complete/ + .json)",
+   "kind": "lambda",
+   "from": "S3 notification on opal-data-inf: prefix silver/_silver_complete/, suffix .json, target inf-silver-aggregator (get-bucket-notification-configuration read live); env INF_BUCKET=opal-data-inf, GOLD_TRIGGER_FUNCTION=inf-gold-trigger (lambda get-function-configuration read live); writes silver/_silver_complete/<date>/_AGGREGATOR_FIRED.json",
+   "to": "opal-data-inflection/advi/inflection/silver/ (same relative key); new S3 notification on opal-data-inflection with the same prefix and suffix, target inf-silver-aggregator, Lambda permission scoped to the new bucket ARN; env INF_BUCKET repointed; the legacy silver entry is removed in the same apply, after the silver writers M07 to M15 and M21 are cut | grant: inf-silver-aggregator-lambda-role Allow on opal-data-inflection/advi/inflection/silver/* (role must be admitted by M02 first)",
+   "order": 23,
+   "depends_on": [
+    "M07",
+    "M08",
+    "M09",
+    "M10",
+    "M11",
+    "M12",
+    "M13",
+    "M14",
+    "M15",
+    "M21",
+    "M02"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/silver/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L17-inf-silver-aggregator",
+    "INF-FN-03",
+    "INF-EDGE-05"
+   ],
+   "evidence": "get-bucket-notification-configuration opal-data-inf (silver entry read live); lambda get-function-configuration inf-silver-aggregator (live); get-policy inf-silver-aggregator (scoped to opal-data-inf); INF-FN-03 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M24",
+   "function": "inf-gold-trigger (and gold dispatch lock)",
+   "kind": "lambda",
+   "from": "invoked by inf-silver-aggregator; reads gold/trigger-mode.json and gold/trigger-pending.json; writes gold/trigger-pending.json and gold/dispatch-lock.json on opal-data-inf; env carries INF_GOLD_DISPATCH_RELEASE (value: RELEASED-BY-CTO-AND-COO-COSIGN, read live) and INF_GOLD_DISPATCH_HOLD (a refusal text printed only when the release is absent)",
+   "to": "opal-data-inflection/advi/inflection/gold/ (same relative key); dispatch lock and mode objects move to opal-data-inflection/advi/inflection/gold/; the release and hold variables are NOT changed by this move (their absence halts the chain by design) | grant: inf-gold-trigger-lambda-role Allow on opal-data-inflection/advi/inflection/gold/* (role must be admitted by M02 first)",
+   "order": 24,
+   "depends_on": [
+    "M23",
+    "M05"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/gold/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L16-inf-gold-trigger",
+    "INF-FN-04",
+    "INF-ROLE-17"
+   ],
+   "evidence": "lambda get-function-configuration inf-gold-trigger (env names and the two release values read live); FB-k-1 L16; FB-k-2 INF-FN-04",
+   "claim": "measured"
+  },
+  {
+   "id": "M25",
+   "function": "inf-gold-runner-ec2 and in-instance scripts S01 to S05 (orion-gold-dispatch.sh and the INF_D and INF_C chain)",
+   "kind": "script",
+   "from": "started by inf-gold-trigger (L16) and by L14 through SSM; S01 orion-gold-dispatch.sh copied from s3 code/gold/ on opal-data-inf; writes telemetry/inf-gold-layer-runner/status.json, gold/artifacts/<id>/<run date> (marker), removes gold/dispatch-lock.json; S02 INF_D_00 writes platinum/firm/clients_tab.json and the platinum filter files; S03 INF_C_01 reads silver/transactions/; S04 build canonical prices (dynamic keys, held); S05 run_c_chain (dynamic key). Roles: inf-gold-layer-ec2-role (ROLE-14, wildcard Allow on opal-data-inf:*), inf-gold-qa-runner-ec2-role (ROLE-16, scoped, wildcard and one Deny). Instance profile not resolved (not_read). Gold/meta/pull-complete.json is inferred (FB-k-1).",
+   "to": "all runner reads and writes repointed to opal-data-inflection/advi/inflection/{gold,platinum,state,code}/; code copies (code/gold, code/silver, code/bronze, code/manual_api) are re-homed in the new bucket and the SSM copy step is repointed; the EC2 role grants are re-issued on the new bucket and the wildcard is not carried",
+   "order": 25,
+   "depends_on": [
+    "M24",
+    "M23",
+    "M05",
+    "M02"
+   ],
+   "rollback": "re-point the SSM copy step back to the legacy code/ keys (kept in M05); re-issue the instance role policy from the saved document; the runner's telemetry status file is re-created by the next run",
+   "proof": "one gold dispatch completes: gold/artifacts/<id>/<run date> and telemetry/inf-gold-layer-runner/status.json land under opal-data-inflection; the release variable is still present (lambda get-function-configuration)",
+   "covers": [
+    "L32-inf-gold-runner-ec2",
+    "S01-orion-gold-dispatch-sh",
+    "S02-INF_D_00-portal_aggregates",
+    "S03-INF_C_01-canonical_nna",
+    "S04-INF_build_canonical_prices",
+    "S05-INF_run_c_chain",
+    "INF-ROLE-14",
+    "INF-ROLE-16"
+   ],
+   "evidence": "FB-k-1 rows L32, S01 to S05 (measured writes); FB-k-2 INF-ROLE-14 and INF-ROLE-16 (wildcard and Deny read live); lambda get-function-configuration inf-gold-trigger (the runner start path)",
+   "claim": "measured"
+  },
+  {
+   "id": "M26",
+   "function": "inf-nna-partition-checker",
+   "kind": "lambda",
+   "from": "env CANONICAL_BUCKET=opal-data-inf, CANONICAL_KEY=platinum/firm/advisor_nna_canonical.json, FIRM, METRIC_NAMESPACE (names read live); rule inf-nna-partition-check-trigger ENABLED cron(30 19 * * ? *); reads only, emits metrics",
+   "to": "opal-data-inflection/advi/inflection/platinum/ (same relative key); env CANONICAL_BUCKET repointed to opal-data-inflection; the key follows the served-key move (M33 and M34 for served keys) | grant: inf-nna-partition-checker-lambda-role Allow on opal-data-inflection/advi/inflection/platinum/* (role must be admitted by M02 first)",
+   "order": 26,
+   "depends_on": [
+    "M25"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/platinum/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L18-inf-nna-partition-checker",
+    "INF-FN-07",
+    "INF-ROLE-19"
+   ],
+   "evidence": "lambda get-function-configuration inf-nna-partition-checker (CANONICAL_BUCKET value read live); events describe-rule inf-nna-partition-check-trigger (ENABLED); INF-FN-07 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M27",
+   "function": "inf-otp-relay and rule inf-otp-state-change (R05), and the user policy inf-andrew-otp-write",
+   "kind": "lambda",
+   "from": "env INF_S3_BUCKET=opal-data-inf and OTP_TOKEN_SECRET (names read live); rule R05 S3 Object Created on otp/state.json ENABLED, target inf-otp-relay; reads and writes otp/state.json, writes otp/current.txt; SNS topic inf-otp-alert (publisher not identified); managed policy inf-andrew-otp-write (3 attachments, user-attached) grants PutObject, GetObject and DeleteObject on opal-data-inf/otp/*",
+   "to": "opal-data-inflection/advi/inflection/state/ (same relative key); env repointed to opal-data-inflection/advi/inflection/state/otp/; rule R05 pattern repointed; the user policy inf-andrew-otp-write is re-issued on the new prefix in the same change, so the operator keeps the same reach | grant: inf-otp-relay-lambda-role Allow on opal-data-inflection/advi/inflection/state/* (role must be admitted by M02 first)",
+   "order": 27,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "Terraform revert of the rule, env and user policy in one revert, safe-apply",
+   "proof": "a controlled otp/state.json put under the new prefix yields TriggeredRules >= 1 and one invocation of inf-otp-relay",
+   "covers": [
+    "L19-inf-otp-relay",
+    "INF-FN-09",
+    "R05-inf-otp-state-change",
+    "INF-ROLE-20",
+    "INF-SNS-01"
+   ],
+   "evidence": "lambda get-function-configuration inf-otp-relay (INF_S3_BUCKET value read live); events describe-rule inf-otp-state-change (ENABLED, live pattern); get-account-authorization-details (managed policy inf-andrew-otp-write, OTPRelay statement, read live)",
+   "claim": "measured"
+  },
+  {
+   "id": "M28",
+   "function": "inf-etf-ownership-daily",
+   "kind": "lambda",
+   "from": "env INF_BUCKET=opal-data-inf, ASSETS_BUCKET=opal-data-assets, ETFS_BUCKET=opal-data-etfs (read live); reads gold/canonical/holdings_* on opal-data-inf; writes opal-data-etfs daily/inflection/<date>.json (not legacy); rule inf-etf-ownership-daily-schedule ENABLED cron(0 15 * * ? *). FB-k-1 L24 says legacy_touch False and FB-k-2 INF-FN-20 says True: the live env settles it as legacy.",
+   "to": "opal-data-inflection/advi/inflection/gold/ (same relative key); INF_BUCKET repointed to opal-data-inflection; reads of gold/canonical/holdings_* follow the gold move (M25); the opal-data-etfs output is unchanged | grant: inf-etf-ownership-daily-role Allow on opal-data-inflection/advi/inflection/gold/* (role must be admitted by M02 first)",
+   "order": 28,
+   "depends_on": [
+    "M25"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/gold/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "L24-inf-etf-ownership-daily",
+    "INF-FN-20",
+    "INF-ROLE-12"
+   ],
+   "evidence": "lambda get-function-configuration inf-etf-ownership-daily (env names and buckets read live); scheduler inf-etf-ownership-daily-schedule (rule read live); FB-k-1 L24 vs FB-k-2 INF-FN-20 (disagreement noted)",
+   "claim": "measured"
+  },
+  {
+   "id": "M29",
+   "function": "inf-client-detail (on-demand API)",
+   "kind": "lambda",
+   "from": "env INPUT_BUCKET=opal-data-inf, FIRM_ID (names read live); assumes inf-gold-layer-lambda-role (wildcard Allow on opal-data-inf:*); invoked per its docstring (no route read); FB-k-2 INF-FN-08 says legacy_touch False, the live env says otherwise",
+   "to": "opal-data-inflection/advi/inflection/platinum/ (same relative key); INPUT_BUCKET repointed to opal-data-inflection; the reads follow M25 and M33 | grant: inf-gold-layer-lambda-role Allow on opal-data-inflection/advi/inflection/platinum/* (role must be admitted by M02 first)",
+   "order": 29,
+   "depends_on": [
+    "M25"
+   ],
+   "rollback": "revert the Terraform commit that changed this function (env block or code) and safe-apply the revert; the copied objects on opal-data-inflection are kept (copy-only, no delete)",
+   "proof": "one invocation on its own trigger after the move; the output object under opal-data-inflection/advi/inflection/platinum/ has a LastModified after the move time (s3api head-object); CloudTrail WriteOnly data event on opal-data-inflection by the function role (opal-organization-trail)",
+   "covers": [
+    "INF-FN-08"
+   ],
+   "evidence": "lambda get-function-configuration inf-client-detail (INPUT_BUCKET value read live); get-account-authorization-details (role inf-gold-layer-lambda-role, wildcard Allow, read live)",
+   "claim": "measured"
+  },
+  {
+   "id": "M30",
+   "function": "inf-portal-advisor-publisher (invoked by the publisher)",
+   "kind": "lambda",
+   "from": "env INPUT_BUCKET=opal-data-inf and OUTPUT_BUCKET=opal-data-inf, FIRM_ID, FIRM_NAME (read live); reads gold/canonical/, gold/views/account_team.parquet and gold/dimensions/advisor_assignments.parquet; writes platinum/advisors/{advisor_key}/{book,composition,summary,timeseries,top_holdings}.json (served keys)",
+   "to": "opal-data-inflection/advi/inflection/platinum/ (same relative key); INPUT and OUTPUT repointed to opal-data-inflection; the served keys it writes move under advi/inflection/platinum/advisors/ and are a served-output move (never-widen sign-off, CTO and COO, blast radius per key) | grant: inf-gold-layer-lambda-role Allow on opal-data-inflection/advi/inflection/platinum/* (role must be admitted by M02 first)",
+   "order": 30,
+   "depends_on": [
+    "M25",
+    "M03"
+   ],
+   "rollback": "Terraform revert of the two env values, safe-apply; the served keys are restored from the copies kept in M05 under a never-widen rollback record",
+   "proof": "one publish run writes platinum/advisors/*.json under opal-data-inflection and a head-object on book.json shows LastModified after the move time",
+   "covers": [
+    "L26-inf-portal-advisor-publisher",
+    "INF-FN-02"
+   ],
+   "evidence": "lambda get-function-configuration inf-portal-advisor-publisher (INPUT_BUCKET and OUTPUT_BUCKET values read live); repo source infra/aws/lambda/inf-portal-advisor-publisher/lambda_function.py:213-231 (platinum/advisors keys); FB-k-1 L26",
+   "claim": "measured"
+  },
+  {
+   "id": "M31",
+   "function": "inf-portal-publisher (bucket leg, cutover) with CloudFront invalidation",
+   "kind": "lambda",
+   "from": "env INPUT_BUCKET=opal-data-inf and OUTPUT_BUCKET=opal-data-inf, FIRM_ID, FIRM_NAME, ADVISOR_PUBLISHER_FUNCTION, CF_DISTRIBUTION_ID (names read live; the distribution is the portal distribution); reads gold/canonical/, gold/timeseries/client_performance.parquet, silver/accounts_dim/latest.parquet, gold/views/account_team.parquet, silver/aum_snapshot/; writes platinum/firm/snapshots/aua_by_*.json; the handler uses fixed keys (infra/aws/lambda/inf-portal-publisher/lambda_function.py:62-68)",
+   "to": "opal-data-inflection/advi/inflection/platinum/ (same relative key); INPUT and OUTPUT repointed to opal-data-inflection; the CloudFront invalidation permission on the function role is confirmed (not_read); the served-output move needs the never-widen sign-off | grant: inf-gold-layer-lambda-role Allow on opal-data-inflection/advi/inflection/platinum/* (role must be admitted by M02 first)",
+   "order": 31,
+   "depends_on": [
+    "M03",
+    "M04",
+    "M30",
+    "M25"
+   ],
+   "rollback": "Terraform revert of the two env values, safe-apply; the invalidation is re-issued by the next floor fire",
+   "proof": "the next floor fire (scheduler invocation, not the S3 event) writes platinum/firm/snapshots/aua_by_*.json under opal-data-inflection; the CloudFront invalidation is created (CloudTrail)",
+   "covers": [
+    "L25-inf-portal-publisher",
+    "INF-ROLE-15"
+   ],
+   "evidence": "lambda get-function-configuration inf-portal-publisher (live env names and bucket values); get-policy inf-portal-publisher (S3 invoke on opal-data-inf, read live); lambda source lines 50, 62-68, 83, 159-161",
+   "claim": "measured"
+  },
+  {
+   "id": "M32",
+   "function": "opal-inf-served-guard and rule opal-inf-served-guard-on-write (R06)",
+   "kind": "lambda",
+   "from": "env SERVED_BUCKET=opal-data-inf, SERVED_KEY=platinum/firm/header_metrics.json, QUARANTINE_PREFIX=_quarantine/served-guard/, RECHECK_QUEUE_URL, SNS_TOPIC_ARN, BASELINE_VERSIONS, COLLAPSE_RATIO, GRACE_SECONDS, REQUIRED_KEYS_JSON (names read live); rule R06 S3 Object Created on the served key, ENABLED, target the guard; SQS recheck queue; role opal-inf-served-guard (scoped and wildcard Allow on opal-data-inf)",
+   "to": "SERVED_BUCKET and the rule pattern repointed to opal-data-inflection; quarantine prefix moves to advi/inflection/state/_quarantine/served-guard/; the role is admitted by M02 (name matches *-inf-*, so it is already admitted)",
+   "order": 32,
+   "depends_on": [
+    "M31"
+   ],
+   "rollback": "Terraform revert of the rule pattern and env, safe-apply",
+   "proof": "a controlled put of the served key under opal-data-inflection yields TriggeredRules >= 1 and one invocation of the guard; the quarantine prefix is unchanged on a clean key",
+   "covers": [
+    "L30-opal-inf-served-guard",
+    "INF-FN-25",
+    "R06-opal-inf-served-guard-on-write",
+    "INF-ROLE-38"
+   ],
+   "evidence": "lambda get-function-configuration opal-inf-served-guard (SERVED_BUCKET value read live); events describe-rule opal-inf-served-guard-on-write (live pattern); INF-FN-25 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M33",
+   "function": "opal-inf-value-parity and rule opal-inf-value-parity-hourly",
+   "kind": "lambda",
+   "from": "env VP_SERVED_BUCKET=opal-data-inf, VP_SERVED_KEY, VP_ANCHOR_KEY_TPL, VP_SNS_TOPIC (names read live); rate(1 hour) rule ENABLED; reads platinum/firm/header_metrics.json and silver/api_dims/positions_mv; publishes to an SNS topic (name withheld); role opal-inf-value-parity (scoped Allow on opal-data-inf)",
+   "to": "VP_SERVED_BUCKET and the anchor and positions keys repointed to opal-data-inflection; the role is admitted by M02 (already admitted by name)",
+   "order": 33,
+   "depends_on": [
+    "M32",
+    "M27"
+   ],
+   "rollback": "Terraform revert of env, safe-apply",
+   "proof": "the next hourly run reads the served key from opal-data-inflection (CloudTrail ReadOnly data event by the role) and publishes its result",
+   "covers": [
+    "L31-opal-inf-value-parity",
+    "INF-FN-26",
+    "INF-ROLE-39"
+   ],
+   "evidence": "lambda get-function-configuration opal-inf-value-parity (VP_SERVED_BUCKET value read live); events describe-rule opal-inf-value-parity-hourly (ENABLED, rate(1 hour)); INF-FN-26 (FB-k-2)",
+   "claim": "measured"
+  },
+  {
+   "id": "M34",
+   "function": "shared-advisor-router and shared-advisor-router-response (Lambda@Edge) and firm-config.mjs",
+   "kind": "edge",
+   "from": "Lambda@Edge origin-request on CloudFront behaviours /api/scoped/advisor-intelligence/artifacts/* and artifacts/ (INF-EDGE-01) and origin-response on the same five behaviours (INF-EDGE-02), both built from infra/aws/lambda-edge/_shared/firm-config.mjs whose inflection entry (line 72) maps to opal-data-inf (FB-k-2 measured; the bucket line itself was not printed in this read). The public path is unchanged for the portal reader (INF-READER-01).",
+   "to": "firm-config inflection entry repointed to opal-data-inflection with the served prefix advi/inflection/platinum/; both edge functions redeployed from one commit (one map, two functions); the public path does not change, so the portal reader needs no change",
+   "order": 34,
+   "depends_on": [
+    "M31",
+    "M32"
+   ],
+   "rollback": "revert the firm-config commit and redeploy the previous Lambda@Edge version through the Terraform path (never update-function-code); the CloudFront distribution keeps serving from the previous version during propagation",
+   "proof": "the same public artifact path returns the same bytes before and after (a GET through the distribution, hash compared to the pre-move hash) and the edge function's origin is opal-data-inflection (CloudTrail ReadOnly data event for the edge role)",
+   "covers": [
+    "L33-shared-advisor-router",
+    "INF-EDGE-01",
+    "INF-EDGE-02",
+    "INF-REPO-01",
+    "INF-READER-01"
+   ],
+   "evidence": "repo infra/aws/lambda-edge/_shared/firm-config.mjs:52, 72-75 (inflection entry, grep read); lambda list-functions (shared-advisor-router and -response, nodejs20.x, read live); FB-k-2 INF-EDGE-01 and INF-EDGE-02",
+   "claim": "measured"
+  },
+  {
+   "id": "M35",
+   "function": "IRPT family 1: irpt-directory-search, irpt-status, irpt-holdings, irpt-narrative, irpt-export-render, irpt-directory-refresh",
+   "kind": "lambda",
+   "from": "env IRPT_DIRECTORY_BUCKET_MAP maps inflection to opal-data-inf (value read live for the six functions; the map also lists 49financial to opal-data-bd and cottonwood to opal-data-cot); reads investor-reporting/directory/* and platinum/inflection/ownership_m*; writes investor-reporting/directory/_refresh/* (irpt-directory-refresh); routes not traced per route (API routes not read)",
+   "to": "opal-data-inflection/advi/inflection/investor-reporting/ (same relative key); map entry repointed to opal-data-inflection; the directory prefix is copied in M05 and read from the new home; roles irpt-directory-role, irpt-status-role, irpt-holdings-role (already admitted), irpt-narrative-role, irpt-export-render-role, irpt-directory-refresh-role are re-issued on the new prefix; the roles that are not admitted by M02 are admitted first | grant: irpt-directory-role Allow on opal-data-inflection/advi/inflection/investor-reporting/* (role must be admitted by M02 first)",
+   "order": 35,
+   "depends_on": [
+    "M05",
+    "M02"
+   ],
+   "rollback": "revert the map entry in the IRPT Terraform, safe-apply; the directory copies stay",
+   "proof": "one directory search and one status call through the gateway return data from opal-data-inflection (CloudTrail ReadOnly data event by the role on investor-reporting/directory/)",
+   "covers": [
+    "INF-FN-29",
+    "INF-FN-30",
+    "INF-FN-31",
+    "INF-FN-32",
+    "INF-FN-33",
+    "INF-FN-34",
+    "INF-ROLE-26",
+    "INF-ROLE-27",
+    "INF-ROLE-28",
+    "INF-ROLE-29",
+    "INF-ROLE-31",
+    "INF-ROLE-33"
+   ],
+   "evidence": "lambda get-function-configuration for each of the six (IRPT_DIRECTORY_BUCKET_MAP value read live); FB-k-2 INF-FN-29 to 34 (API routes not traced); IRPT_BCKEND owns the bucket (PRD row 352)",
+   "claim": "measured"
+  },
+  {
+   "id": "M36",
+   "function": "IRPT family 2: irpt-performance-adapter, irpt-ycharts-generate",
+   "kind": "lambda",
+   "from": "env IRPT_DIRECTORY_BUCKET_MAP maps inflection to opal-data-inf (value read live); irpt-performance-adapter also reads the evidence bucket opal-data-ycharts (env IRPT_EVIDENCE_BUCKET, unchanged); irpt-performance-adapter-role is ADMITTED by the fence today (ArnNotLike entry) but its statement is scoped to irpt/inflection/gold/holdings_performance_daily/* on opal-data-inflection; irpt-ycharts-generate-role (scoped Allow on opal-data-inf)",
+   "to": "opal-data-inflection/advi/inflection/investor-reporting/ (same relative key); map entry repointed to opal-data-inflection; the performance adapter's reads of opal-data-inf follow M35 and the scoped exemption already in the new bucket policy; the evidence bucket is unchanged | grant: irpt-performance-adapter-role Allow on opal-data-inflection/advi/inflection/investor-reporting/* (role must be admitted by M02 first)",
+   "order": 36,
+   "depends_on": [
+    "M35"
+   ],
+   "rollback": "revert the map entries, safe-apply",
+   "proof": "one performance adapter run reads from opal-data-inflection (CloudTrail ReadOnly by the adapter role) and writes its output under the scoped prefix",
+   "covers": [
+    "INF-FN-35",
+    "INF-FN-36",
+    "INF-ROLE-32",
+    "INF-ROLE-34"
+   ],
+   "evidence": "lambda get-function-configuration irpt-performance-adapter and irpt-ycharts-generate (map values read live); bucket policy DenyScopedExemption1 statements (read live); FB-k-2 INF-FN-35 and 36",
+   "claim": "measured"
+  },
+  {
+   "id": "M37",
+   "function": "irpt-inf-holdings-performance-lambda (read leg) and rule irpt-inf-holdings-performance-daily",
+   "kind": "lambda",
+   "from": "scheduler irpt-inf-holdings-performance-daily ENABLED cron(0 14 ? * MON-FRI *), input source orion (FB-k-1 L03, held); role irpt-inf-holdings-role (INF-ROLE-30) writes opal-data-inflection irpt/inflection/gold/holdings/* and reads opal-data-inf investor-reporting/directory/* and silver/api_dims (scoped Allow on the legacy bucket); admitted by the fence by name (-inf- pattern)",
+   "to": "opal-data-inflection/advi/inflection/investor-reporting/ (same relative key); the read leg repointed to opal-data-inflection; the function already writes to the new home (INF-FN-39 has legacy_touch False) | grant: irpt-inf-holdings-role Allow on opal-data-inflection/advi/inflection/investor-reporting/* (role must be admitted by M02 first)",
+   "order": 37,
+   "depends_on": [
+    "M05"
+   ],
+   "rollback": "revert the role's read statement, safe-apply",
+   "proof": "one scheduled run reads its inputs from opal-data-inflection (CloudTrail) and writes irpt/inflection/gold/holdings/ as before",
+   "covers": [
+    "INF-FN-39",
+    "INF-ROLE-30",
+    "L03-irpt-inf-holdings-performance-lambda"
+   ],
+   "evidence": "scheduler get-schedule irpt-inf-holdings-performance-daily (ENABLED, read live); lambda list-functions (irpt-inf-holdings-performance-lambda, python3.12, read live); FB-k-2 INF-ROLE-30 and INF-FN-39",
+   "claim": "measured"
+  },
+  {
+   "id": "M38",
+   "function": "mdpf-feeder-trigger (WSC gate read)",
+   "kind": "lambda",
+   "from": "env INF_BUCKET=opal-data-inf, MDPF_BUCKET=opal-data-mdpf, BD_BUCKET=opal-data-bd (names and bucket values read live); reads gold/eclipse/<date>/_meta/gold_complete.json on opal-data-inf (head_object WSC gate); started by mdpf-feeder-backstop-daily (ENABLED) and, until M04, by the accelerator rule",
+   "to": "opal-data-inflection/advi/inflection/gold/ (same relative key); INF_BUCKET repointed to opal-data-inflection; the gold/eclipse prefix is copied in M05; the accelerator leg was removed in M04 | grant: mdpf-feeder-trigger-role Allow on opal-data-inflection/advi/inflection/gold/* (role must be admitted by M02 first)",
+   "order": 38,
+   "depends_on": [
+    "M04",
+    "M25"
+   ],
+   "rollback": "revert the env value, safe-apply; re-enable the accelerator rule only if Q9 says the backstop alone misses days",
+   "proof": "the next backstop fire reads gold_complete.json under opal-data-inflection and the trigger's log names the new bucket",
+   "covers": [
+    "L01-mdpf-feeder-trigger",
+    "INF-FN-24",
+    "INF-ROLE-36"
+   ],
+   "evidence": "lambda get-function-configuration mdpf-feeder-trigger (env names and values read live); scheduler mdpf-feeder-backstop-daily (ENABLED cron(52 12 * * ? *), read live); FB-k-1 L01",
+   "claim": "measured"
+  },
+  {
+   "id": "M39",
+   "function": "S07 build_mdpf_wsc_inflection_feeder (MDPF feeder dispatch, run through SSM on the runner) and instance role mdpf-daily-runner-ec2-role",
+   "kind": "script",
+   "from": "run by the MDPF feeder dispatch that L01 starts through SSM on the runner; the dispatch script in opal-data-mdpf was not read (not_read); reads gold/timeseries/client_performance.parquet on opal-data-inf (hardcoded key, bucket inferred from the row); role mdpf-daily-runner-ec2-role (ROLE-35, scoped and wildcard Allow on opal-data-inf, and a secretsmanager statement)",
+   "to": "the hardcoded legacy key is re-derived for opal-data-inflection/advi/inflection/gold/; the instance role is re-issued on the new prefix; the secretsmanager statement is outside this move and is not changed",
+   "order": 39,
+   "depends_on": [
+    "M38",
+    "M25"
+   ],
+   "rollback": "re-point the SSM document to the legacy key (copy retained in M05) and restore the role policy from the saved document",
+   "proof": "one MDPF feeder dispatch reads the Inflection gold key from opal-data-inflection (CloudTrail ReadOnly by the runner role)",
+   "covers": [
+    "S07-build_mdpf_wsc_inflection_feeder",
+    "INF-ROLE-35"
+   ],
+   "evidence": "FB-k-1 S07 row (hardcoded key, measured); FB-k-2 INF-ROLE-35 (read live via the account authorization dump)",
+   "claim": "measured"
+  },
+  {
+   "id": "M40",
+   "function": "leading-slash namespace on opal-data-inf ('/' prefix, 339 objects)",
+   "kind": "other",
+   "from": "339 objects whose keys begin with a slash: advisor-folder paths and client-id paths; one LastModified date for all 339 (2026-05-06); none modified since 2026-10-01; StorageClass STANDARD; no current writer named in either inventory and no repo key template with a leading slash found for the advisor publisher, which writes platinum/advisors/ (read in source). Reads not read.",
+   "to": "decide per key family: migrate to a corrected key under advi/inflection/ if a reader is confirmed, otherwise retire with the 45-day read record (no delete without Andrew's word)",
+   "order": 40,
+   "depends_on": [
+    "M05"
+   ],
+   "rollback": "no action until decided; the objects are not moved by this plan",
+   "proof": "the CloudTrail data-event record for the '/' prefix over the 45-day window (ReadOnly and WriteOnly) names zero readers and zero writers before any delete",
+   "covers": [],
+   "evidence": "s3api list-objects-v2 --bucket opal-data-inf --prefix / --max-items 2000 (339 keys, IsTruncated absent, read live); head of key listing (4 advisor folders and client-id paths; names and ids not printed)",
+   "claim": "measured"
+  },
+  {
+   "id": "M41",
+   "function": "CloudFront origin S3-opal-data-inf and bucket-policy statements AllowScopedAdvisorOAI and AllowCFDistributionGold",
+   "kind": "edge",
+   "from": "the portal distribution: 7 origins and 30 behaviours (FB-k-2, measured 2026-10-13T22:13Z; not re-read here); origin S3-opal-data-inf is defined and no behaviour targets it (0 of 30). Bucket policy of opal-data-inf: AllowScopedAdvisorOAI (Allow s3:GetObject on the whole bucket for an AWS principal) and AllowCFDistributionGold (Allow s3:GetObject on gold/* for a service principal with a StringEquals condition), read live.",
+   "to": "origin removed from the distribution after M34; both bucket-policy statements removed from opal-data-inf in the decommission reduction (M44), after the edge cutover proves zero reads",
+   "order": 41,
+   "depends_on": [
+    "M34",
+    "M35",
+    "M36",
+    "M31"
+   ],
+   "rollback": "re-add the origin and bucket-policy statements from the saved distribution config and bucket policy (Terraform revert, safe-apply)",
+   "proof": "the distribution config shows no origin on opal-data-inf; CloudTrail shows zero GetObject calls by the distribution's OAI principal for 45 days (window record)",
+   "covers": [
+    "INF-EDGE-03",
+    "INF-EDGE-04"
+   ],
+   "evidence": "s3api get-bucket-policy --bucket opal-data-inf (2 statements, read live); FB-k-2 INF-EDGE-03 and INF-EDGE-04 (distribution counts inherited, not re-read)",
+   "claim": "measured"
+  },
+  {
+   "id": "M42",
+   "function": "opal-portal-lambda-role: wildcard Allow on opal-data-inf",
+   "kind": "role",
+   "from": "managed or inline Allow s3 wildcard on opal-data-inf (opal-data-inf:*) held by opal-portal-lambda-role, assumed by 12 non-Inflection functions (opal-trending-topics-portal-publisher, opal-portal-rest-authorizer, opal-portal-fear-greed-fetcher, opal-news-ai-sentiment, opal-portal-volatility-fetcher, opal-portal-authorizer, opal-infrastructure-monitor, opal-session-analytics, opal-market-regime-classifier, finbert-batch-processor, opal-portal-data-proxy, opal-market-overview-tiered-generator). Read live via the account authorization dump; the function-to-role mapping read from list-functions.",
+   "to": "the opal-data-inf statement is removed from the role after the read record shows zero reads by its 12 assumed functions over the agreed window; the portal functions' own buckets are unchanged",
+   "order": 42,
+   "depends_on": [
+    "M41"
+   ],
+   "rollback": "re-attach the saved policy statement by Terraform revert, safe-apply",
+   "proof": "simulate-custom-policy for each of the 12 role sessions returns implicit deny on opal-data-inf after the change; CloudTrail ReadOnly data events by those roles on opal-data-inf are zero over the window",
+   "covers": [
+    "INF-ROLE-40"
+   ],
+   "evidence": "get-account-authorization-details --filter Role LocalManagedPolicy (role statements, read live); lambda list-functions (Role field, 12 functions mapped, read live)",
+   "claim": "measured"
+  },
+  {
+   "id": "M43",
+   "function": "inf-jwt-trigger and B2 readers (orion/jwt/current.json) - kept on purpose",
+   "kind": "other",
+   "from": "B2 credential object opal-data-inf/orion/jwt/current.json is read daily by the Inflection API Lambdas (inf-api-positions, inf-api-reps, inf-api-txn, inf-api-assets-v2, inf-accounts-v2-daily, inf-billing-daily, inf-performance-daily, inf-tax-daily, inf-unified-account-dim-daily, inf-api-eclipse) and the bronze orchestrator (S06). Keeping it means those roles keep a scoped Allow on opal-data-inf/orion/jwt/* after the move.",
+   "to": "B2 stays where it is by Andrew's ruling (DEC-13); the bucket is reduced to orion/jwt/ (the credential and the mode marker, if M18 keeps it there), with the 11 readers' grants scoped to that one key; the contents are never read or printed",
+   "order": 43,
+   "depends_on": [
+    "M16",
+    "M10",
+    "M09",
+    "M08",
+    "M07",
+    "M11",
+    "M12",
+    "M13",
+    "M14",
+    "M15",
+    "M19"
+   ],
+   "rollback": "restore the full grants on opal-data-inf from the saved role policies (Terraform revert)",
+   "proof": "the 11 readers' next runs read orion/jwt/current.json from opal-data-inf; the rest of the bucket shows zero reads and zero writes over the window",
+   "covers": [],
+   "evidence": "FB-k-2 INF-FN-10 to INF-FN-19 read the key (measured by the inventory); the object's existence in the listing (orion/ prefix, read live); contents never read (by rule)",
+   "claim": "held"
+  },
+  {
+   "id": "M44",
+   "function": "opal-data-inf decommission (reduction to the B2 credential)",
+   "kind": "other",
+   "from": "opal-data-inf: 20 top-level prefixes (1 of them the '/' namespace), 2 bucket-policy statements, 2 notification entries (silver and gold/meta), EventBridge delivery enabled, 1 CloudFront origin, 60 IAM roles with a statement on it (40 Allow, 20 deny-only), 21 Lambda environments naming it, 7 EventBridge rules naming it in the pattern (read live).",
+   "to": "after M04 to M43 have landed and the window record is clean: delete the 45-day set (every key except orion/jwt/current.json) only with Andrew's word; remove the remaining notification and policy statements; keep the bucket open for B2 alone, and name it out of the 45-day set",
+   "order": 44,
+   "depends_on": [
+    "M04",
+    "M23",
+    "M25",
+    "M31",
+    "M34",
+    "M35",
+    "M36",
+    "M37",
+    "M38",
+    "M39",
+    "M40",
+    "M41",
+    "M42",
+    "M43"
+   ],
+   "rollback": "the bucket is not deleted; a deleted key is recovered only from the copy in opal-data-inflection (M05) or the saved copies; no rollback of a delete is planned beyond that",
+   "proof": "the 45-day record (below) reads zero reads and zero writes on every key except orion/jwt/current.json; the bucket listing after the delete shows only orion/jwt/ objects",
+   "covers": [],
+   "evidence": "live reads of the same bucket in this record (prefixes, policies, notification, the 21 env names, 60 roles, 7 rules)",
+   "claim": "held"
+  }
+ ],
+ "decommission": {
+  "legacy_bucket": "opal-data-inf",
+  "window_days": 45,
+  "basis": "The 45-day quiet window starts at Inflection's cutover (the CTO sets the date, Q2; PRD CONTRACTS: the window counts only after each firm's cutover, ~03:xxZ). It counts reads and writes on every key of opal-data-inf EXCEPT orion/jwt/current.json (B2), which stays open by Andrew's ruling (DEC-13) and is named out of the 45-day set. The instrument is opal-organization-trail (logging true, read live) with ReadOnly and WriteOnly data events on opal-data-inf/ (read live); the CTO reads the record as the proof reader (FWD-6); the delete is Andrew's word only (DEC-17). The bucket is reduced, not deleted: it stays open for B2 alone.",
+  "claim": "measured"
+ },
+ "retire": [
+  {
+   "id": "R1",
+   "operation": "inf-canonical-prices-daily (EventBridge rule, DISABLED and held; target inf-gold-trigger)",
+   "consumers": 0,
+   "decision": "RECOMMEND delete with M24 (the gold cutover), keep DISABLED and held until then. Deciding: Andrew (a delete, DEC-17), on the CTO's recommendation."
+  },
+  {
+   "id": "R2",
+   "operation": "inf-gold-full-on-bronze-complete (EventBridge rule R04, DISABLED; bronze-complete pattern to inf-gold-trigger mode=full)",
+   "consumers": 0,
+   "decision": "RECOMMEND delete with M24. Deciding: Andrew, on the CTO's recommendation."
+  },
+  {
+   "id": "R3",
+   "operation": "inf-gold-incremental-daily (EventBridge rule, DISABLED, cron(0 18 * * ? *) to inf-gold-trigger)",
+   "consumers": 0,
+   "decision": "RECOMMEND delete with M24. Deciding: Andrew, on the CTO's recommendation."
+  },
+  {
+   "id": "R4",
+   "operation": "mdpf-feeder-accelerator (EventBridge rule R01: S3 Object Created on the Door 6 key, target mdpf-feeder-trigger)",
+   "consumers": 1,
+   "decision": "RETIRE in M04 (Andrew ruled Door 6 RETIRE with no successor marker, DEC-13). L01 continues from mdpf-feeder-backstop-daily. Deciding: Andrew, plus the CTO on Q9 (the latency of days whose input lands after the backstop)."
+  },
+  {
+   "id": "R5",
+   "operation": "Door 6 marker object gold/meta/pipeline-complete.json and its S3 notification entry (to inf-portal-publisher)",
+   "consumers": 1,
+   "decision": "RETIRE in M04, after M03's proof. The one consumer (the publisher) moves to inf-portal-publisher-floor. Deciding: Andrew (Door 6 ruling and the delete), with the CTO on the successor proof. This row disarms D1-W80-S1 only if the CTO accepts the named successor and its proof (see the surprise channel)."
+  },
+  {
+   "id": "R6",
+   "operation": "DenyInfGoldSentinelAbsolutely (identity Deny on the marker ARN inside opal-assets-one-way-fan-in-fence, attached to 13 roles)",
+   "consumers": 13,
+   "decision": "RETIRE in M04, step 5, only after the marker is gone. Deciding: CTO (identity-plane fence), with Andrew's Door 6 word. The resource-plane twin named in router_iam.tf is absent from the tree (surprise S6)."
+  },
+  {
+   "id": "R7",
+   "operation": "FIRMSEP-s3-direct-access-bypass (EventBridge rule, ENABLED; GetObject on opal-data-bd and opal-data-inf where the user agent is not CloudFront; target SNS opal-infrastructure-alerts)",
+   "consumers": 1,
+   "decision": "RECOMMEND keep through the 45-day window (it is a read signal for the window record), then delete at M44. It is not a new alert (the moratorium does not reach a retirement). Deciding: Andrew (delete), CTO recommends. Subscribers of the SNS topic are not read."
+  },
+  {
+   "id": "R8",
+   "operation": "opal-portal-lambda-role wildcard on opal-data-inf (12 non-Inflection functions assume the role)",
+   "consumers": 12,
+   "decision": "RETIRE the statement in M42 after a zero-read record. Deciding: the portal lane owner and the CTO; the functions are not Inflection's."
+  },
+  {
+   "id": "R9",
+   "operation": "CloudFront origin S3-opal-data-inf (defined, reached by 0 of 30 behaviours)",
+   "consumers": 0,
+   "decision": "RETIRE in M41. Deciding: CTO (distribution change). The 0-of-30 count is inherited from FB-k-2 and was not re-read."
+  },
+  {
+   "id": "R10",
+   "operation": "Bucket-policy statements AllowScopedAdvisorOAI (GetObject on the whole bucket) and AllowCFDistributionGold (GetObject on gold/*) on opal-data-inf",
+   "consumers": 0,
+   "decision": "RETIRE in M44 after M41. consumers counts the distribution readers measured (0 origin behaviours); the OAI principal's other readers were not read (not_read). Deciding: CTO, with Andrew's word for the reduction."
+  },
+  {
+   "id": "R11",
+   "operation": "inf-gold-freshness-guard (repo source, ABSENT live; reads the Door 6 key as SENTINEL_KEY; inventory row L27 says measured)",
+   "consumers": 0,
+   "decision": "RETIRE the repo source in M04 (absent live: lambda get-function-configuration ResourceNotFound). Deciding: CTO. The inventory row L27 should be corrected (surprise S5)."
+  },
+  {
+   "id": "R12",
+   "operation": "mdpf-daily-trigger (repo source, ABSENT live; reads the Door 6 key as INF_SENTINEL_KEY)",
+   "consumers": 0,
+   "decision": "RETIRE the repo source in M04 (absent live). Deciding: CTO."
+  },
+  {
+   "id": "R13",
+   "operation": "Legacy code/ prefix on opal-data-inf (code/gold, code/silver, code/bronze, code/manual_api, code/exporter), used by the gold runner copy step and S01",
+   "consumers": 2,
+   "decision": "RETIRE in M44 after M25 repoints the copy step. Deciding: CTO."
+  }
+ ],
+ "open_questions": [
+  "Q1 (before M03): does inf-portal-publisher parse the S3 event body? Its fixed-key constants (lines 62-68) suggest not, but the handler was not read in full. The one-time at() exercise must use the same payload the floor will send.",
+  "Q2 (window start, M44): the 45-day window counts after each firm's cutover (PRD CONTRACTS). The CTO sets the cutover date; the org trail's ReadOnly and WriteOnly data events on opal-data-inf/ are the instrument (trail logging true, read live 2026-10-14). Its query surface and retention were not read.",
+  "Q3 (M03 cron): the publisher floor must fire after the gold chain completes. Only one marker LastModified was read (2026-10-13T12:59:59Z). The distribution of marker times over the last 30 days decides the cron. The 49 Financial floor (advi-49f-gold-floor at 12:45Z) is a gold clock with no Inflection equivalent.",
+  "Q4 (M02): admitting the 35 non-matching Allow roles to the Inflection bucket is an identity-plane change to a Deny. The CTO decides between explicit ARNs (this plan's proposal) and a pattern change to role/inf-*.",
+  "Q5 (M05, M40): the F2 key map (3,127 opal-data-inf rows in the mapping table) was not read; the CTO decides the layout for bronze and silver keys and whether the 339 leading-slash keys are migrated or retired.",
+  "Q6 (M18, M43): does the mode marker orion/jwt/trigger-mode.json stay in the B2 prefix or move? B2 itself does not move.",
+  "Q7 (M04): who writes gold/meta/pipeline-complete.json? No inventory row names a writer (S01 and L32 list only dispatch lock, telemetry and artifacts). Until the writer is named, step (4) of M04 cannot be proven safe.",
+  "Q8 (M04): inf-gold-freshness-guard (L27) and mdpf-daily-trigger are ABSENT live. Confirm they are not invoked by any other path (no rule, schedule or resource policy; checked: no rule targets, no resource policy) before the marker delete.",
+  "Q9 (M04, R4): the accelerator covered days whose input lands after the 13:30Z floor. Retiring it changes the latency of those days unless the backstop fires after the marker. The count of such days over 30 days decides whether R4 retires.",
+  "Q10 (M30, M31, M34, M36): the served keys platinum/firm/* and platinum/advisors/* move; a served-key move needs never-widen sign-off from the CTO and COO with a blast radius and a per-key rollback.",
+  "Q11 (M19, M25, M39): EC2 instance-profile bindings for the bronze runner, the gold runner, the exporters and the MDPF runner were not resolved; each runner move needs its profile named.",
+  "Q12 (M35, M36): the IRPT lane (IRPT_BCKEND) owns opal-data-inflection and the IRPT Lambdas. Who executes the IRPT repoint, and under which order?",
+  "Q13 (M41): the CloudFront origin removal is a change to the portal distribution. Confirm the second distribution (not read) does not reference opal-data-inf.",
+  "Q14 (M01): the exec-summary generator writes 49financial destinations only (INF-FN-28). Whether Inflection needs an exec summary at all is a product question, not a move.",
+  "Q15 (M42): the 12 functions assuming opal-portal-lambda-role are outside Inflection. The owner of that role must confirm they do not read opal-data-inf before the statement is removed.",
+  "NO-MOVE L02 mdpf-gold-lambda (legacy_touch False in FB-k-1, held; its schedule mdpf-scheduled-floor is ENABLED cron(30 13 * * ? *), read live): no Inflection move; its held state is the MDPF lane's.",
+  "NO-MOVE L28 and L29 (EC2 launch monitor and retry launch, legacy_touch False): retained; not bucket operations.",
+  "NO-MOVE L34 (CloudFront distribution as a whole): the distribution stays; its origin change is M41.",
+  "NO-MOVE L35 (YangDataPipeline state machine) and L36 (globgrph ECS): not read (trigger not determined); not Inflection-legacy by the inventories.",
+  "NO-MOVE L37 and L38 (opal-data-bd notification rows, claim absent): an opal-data-bd fact, not an Inflection move; the bucket notification of opal-data-bd was not read in this plan.",
+  "NO-MOVE R07 (inf-gold-dispatch-release-changed, CloudTrail UpdateFunctionConfiguration on inf-gold-trigger to an SNS alarm): retained as the release audit; it names no bucket.",
+  "NO-MOVE R09 (opal-inf-ec2-state-change-monitor): retained; it names instance ids, not a bucket.",
+  "NO-MOVE INF-FN-37 and INF-FN-38 (irpt-49f-reporting-read-lambda, irpt-holdings-refresh-lambda; legacy_touch False): the first reads 49financial, the second's bundle map is 49financial and cottonwood and inflection to opal-data-inflection (already on the new home).",
+  "NO-MOVE INF-RULE-03 (inf-gold-dispatch-release-changed) and INF-SNS-02 (release alarm): retained with R07.",
+  "NO-MOVE INF-SNS-01 (inf-otp-alert topic): retained; the publisher of the topic was not identified (not_read).",
+  "NO-MOVE INF-EMAIL-01 (SES identities for the Inflection domain): not a bucket operation; addresses withheld.",
+  "NO-MOVE INF-ROLE-41, INF-ROLE-42, INF-ROLE-43, INF-ROLE-44 (roles already on opal-data-inflection or on the mdpf/irpt inflection prefixes): not legacy homes; no move.",
+  "NO-MOVE INF-FN-08 is now a move (M29): listed here only because the serving inventory says legacy_touch False and the live env says the opposite.",
+  "NO-MOVE INF-READER-01 (portal endpoint advisor-intelligence.ts): no change, because the public path is kept (M34).",
+  "NO-MOVE INF-REPO-01 is now a move (M34)."
+ ],
+ "not_read": [
+  "EC2 instance-profile bindings for the bronze runner, the gold runner, the exporters, the MDPF runner and the QA runner (roles ROLE-01, 10, 13, 14, 16, 35); the instance profile to role map was not read.",
+  "IRPT routes: the API route to function map (INF-FN-29 to 36 are 'not traced per route' in FB-k-2; not traced here).",
+  "The second CloudFront distribution (listed in FB-k-2, not inspected) and the Lambda@Edge code beyond the firm map.",
+  "SNS subscriptions on the three inflection-matched topics (names withheld) and the publisher of inf-otp-alert.",
+  "The 2 SES identities that name Inflection (addresses withheld, not printed).",
+  "The F2 mapping table (3,127 opal-data-inf rows; FB-k-1 denominator, not re-read).",
+  "The handler body of inf-portal-publisher beyond the key constants and the first S3 read (event parsing; CloudFront invalidation permission).",
+  "The object contents of orion/jwt/current.json (never read, by rule) and the B2 reader set beyond the 11 functions in the inventories.",
+  "Object-level listings under opal-data-inf beyond the depth-one prefix listing and the 339 leading-slash keys.",
+  "L35 YangDataPipeline trigger and L36 globgrph ECS services (FB-k-1 not_read items remain unread).",
+  "The opal-data-bd bucket notification configuration (L37 and L38 absent claims, not re-read).",
+  "CloudTrail trail query surface and retention for the 45-day record (the trail's selectors and logging status were read; the query tool was not).",
+  "IAM simulation: the fence's effect on each Inflection role was inferred from the ArnNotLike condition semantics; no simulate-custom-policy call was made in this plan.",
+  "The 30 CloudFront behaviours and 7 origins and the 13 fan-in attachments are inherited (FB-k-2) except the fence attachment count, which was read live.",
+  "The 26 SES identities and 17 SNS topics (FB-k-2 denominators; not re-read).",
+  "The gold dispatch script bodies for S04 and S05 (dynamic keys; held in FB-k-1).",
+  "The 169 repository files under data/ and the 200 under infra naming opal-data-inf (FB-k-1 denominators; not re-read; the code-level bucket evidence cited here is from 40 inf-pipeline files returned by the native grep, a capped set)."
+ ],
+ "claim": "measured"
+}

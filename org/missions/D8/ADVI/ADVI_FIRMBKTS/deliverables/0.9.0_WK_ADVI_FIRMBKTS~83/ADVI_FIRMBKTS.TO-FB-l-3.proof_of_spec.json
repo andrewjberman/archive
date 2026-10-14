@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-l-3.retirement-census",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R8.md",
+    "vintage_commit": "7ee8e70830",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-3.retirement-census.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-3.retirement-census.md",
+    "group": "OTHER",
+    "vintage_commit": "7ee8e70830"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~83",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/RETIRE_CENSUS.json",
+      "kind": "config_data",
+      "commit_or_etag": "a5f9b631c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in a5f9b631c2 on wk-ADVI_FIRMBKTS-83 (LOCAL); read-only census: no AWS write, no deploy, no terraform command",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/ADVI_FIRMBKTS.TO-FB-l-3.session.log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the session log of the read-only census; no AWS write",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/wk-firmbkts-83 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py census --file C:/dev/wk-firmbkts-83/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/RETIRE_CENSUS.json --min 10",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-83 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py census --file C:/dev/wk-firmbkts-83/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/RETIRE_CENSUS.json --min 10",
+      "expect": "^CENSUS: OK candidates=[0-9]+ zero=[0-9]+ first=.+$",
+      "output_evidence": "CENSUS: OK candidates=17 zero=2 first=C2 (rc 0 on run 1 and run 2)",
+      "denominator": "17 candidate rows (16 PLANINV rows plus mockadv); 2 zero-consumer rows (C2 and C3), each with scanned 2929; first_zero_consumer C2; 2 of 2 runs identical",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd C:/dev/wk-firmbkts-83 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-83 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-83 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-83 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing",
+      "denominator": "4 changed files (RETIRE_CENSUS.json, the session log, the instance, INVESTIGATION_v1.md); 0 outside the write surface",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "read-only census; the task order names no mutant and no code path under test",
+      "expected": "N/A",
+      "observed": "N/A: no mutant applied",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 checker (r8_checks.py census) on the same record file, outputs and return codes compared",
+      "observed": "run 1 and run 2 both printed 'CENSUS: OK candidates=17 zero=2 first=C2' with rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "RETIRE_CENSUS.md (the one-page table) not written", "reason": "standing worker rule: no report markdown files; the candidate table, the first zero-consumer case and the not_read list are in the worker's final message and in RETIRE_CENSUS.json"},
+    {"item": "opal-data-bd and opal-data-inf bucket policies not re-read today", "reason": "round 7 read them live; the bd statements were read again in Terraform (bd-pipeline/opal-data-bd.tf:94-102); recorded in not_read"},
+    {"item": "33 of 34 EventBridge Scheduler schedules not read by target today", "reason": "bounded sweep; the AWS name sweep over 2929 nodes is the coverage for the zero claims; recorded in not_read"},
+    {"item": "portal user rows and live user data", "reason": "not in the repository; user data is not read by rule; recorded in not_read as the mockadv user-row consumer"},
+    {"item": "deployed Lambda@Edge replica bytes", "reason": "the import graph was read in the repository, not the deployed artifacts; recorded in not_read"},
+    {"item": "status flip of the task order", "reason": "the task order says not to flip its status; the issuer closes it"}
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W83-S1: the Door 6 deny (router_iam.tf statement 3) is deployed in a managed policy on a live role; PLANINV row 6 said it was not read and retires with the key",
+    "ADVI_FIRMBKTS-D1-W83-S2: the portal distribution routes no behaviour to the cot or inf legacy origins; PLANINV row 11 said the behaviours must repoint",
+    "ADVI_FIRMBKTS-D1-W83-S3: the opal-data-bd bucket policy statements are declared in Terraform and drift-guarded; PLANINV row 10 said the legacy policies are declared in no Terraform",
+    "ADVI_FIRMBKTS-D1-W83-S4: the repository holds no portal user row carrying mockadv; the FB-l-3 order named the portal user rows as a consumer",
+    "ADVI_FIRMBKTS-D1-W83-S5: consumer liveness is undefined in the order; the FIRMSEP alarm gives C1 one configured consumer and 56 of 56 failed deliveries, so first_zero_consumer depends on the reading"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~83/ADVI_FIRMBKTS.TO-FB-l-3.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --corpus aws over the candidate names; comp-find (corpus all) per candidate name for repo denominators",
+      "result": "36 hits over 2929 aws nodes; mockadv 0 hits over 2929 aws nodes; repo sweeps over 79588 to 79590 files"
+    },
+    {
+      "tool": "aws (.tools/aws, read verbs only)",
+      "invocation": "aws events describe-rule and list-targets-by-rule; aws sns list-subscriptions-by-topic; aws cloudwatch get-metric-statistics; aws lambda get-function-configuration; aws s3api get-bucket-notification-configuration and get-bucket-policy; aws cloudfront list-distributions and get-distribution-config; aws iam list-role-policies, list-attached-role-policies, get-role-policy, get-policy, get-policy-version; aws scheduler get-schedule",
+      "result": "9 rules described (9 found, 1 ResourceNotFound); 8 Lambda configurations (all Active); 1 SNS subscription; 56 published and 56 failed in 30 days; 3 bucket notification configurations; 1 bucket policy; 1 distribution (7 origins, 30 behaviours); 1 managed fan-in policy (3 statements); 1 schedule"
+    },
+    {
+      "tool": "r8_checks.py census",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py census --file <record> --min 10",
+      "result": "CENSUS: OK candidates=17 zero=2 first=C2 (x2)"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root <worktree> --allow <deliverables folder> --allow <INVESTIGATION_v1.md>",
+      "result": "ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~83 <0.9.0_WK_ADVI_FIRMBKTS~83@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit a5f9b631c2 (RETIRE_CENSUS.json, LOCAL)"
+    }
+  ]
+}
