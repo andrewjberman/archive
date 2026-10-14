@@ -1,35 +1,34 @@
-# FB-m-1 readiness signal -- BLOCKED, no object chosen (2026-10-14)
+# FB-m-1 readiness signal -- the data frontier from content (2026-10-14)
 
-Machine record: `READINESS_SIGNAL.json` in this folder (`chosen: null`, `claim: measured`).
+Machine record: `READINESS_SIGNAL.json` in this folder (`claim: measured`, ruling CTO msg 5552). The guard is `_gold_ready()` in `infra/aws/lambda/inf-portal-publisher/lambda_function.py`, called once at the top of `lambda_handler`.
 
-## Result
+## The three dated inputs
 
-No object in `opal-data-inf` meets the order's criteria (chain-written, carries the gold date, single writer, survives the marker's retirement, not the two excluded sentinels) without conflicting with a governing rule. The order's STOP branch applies: no guard, no test file, no dispatch edit. The blocking row is `ADVI_FIRMBKTS-D1-W84-S1` in the investigation file.
+| input | key or prefix | date column | loader (base line) |
+|---|---|---|---|
+| client_perf | `gold/timeseries/client_performance.parquet` | `date` | `:178` (key `:62`) |
+| holdings | newest key under `gold/canonical/` containing `holdings_` | `date` | `:192` (prefix `:61`; key rule `:92-103`) |
+| canonical_nna | newest key under `gold/canonical/` containing `canonical_nna_` (the newest partition only) | `date` | `:186` (prefix `:60`; key rule `:106-114`) |
 
-## Candidates rejected
+Each frontier date is the MAXIMUM of the date column, read from content with `_load_parquet(key, columns=['date'])`. The date column contents were not read here (no parquet body under the bounds), so each claim is `inferred` from the loader code.
 
-| key | why it fails |
-|---|---|
-| `gold/meta/pipeline-complete.json` | the Door 6 marker being retired (excluded by the order) |
-| `gold/meta/pull-complete.json` | written before compute (`orion-gold-dispatch.sh:1879`) |
-| `gold/meta/pipeline-failed.json` | failure-only; a success does not clear it (last modified 2026-09-30) |
-| `gold/artifacts/header_metrics.json` | HeadObject 404 today; its `data_as_of` is holdings vintage, not run date |
-| `gold/eclipse/_meta/dispatch_eclipse_status.json` | meets the literal fields (`run_date`, `chain`, `chain_exit`; single writer `:2027`) but is a sidecar state object the MDPF remediation register classes as TRASH when read as a gate (`docs/architecture/MDPF_REMEDIATION_REGISTER.md:198`, `:226`); it is written after the best-effort eclipse steps, and the dispatch records the 2026-05-15 directive that eclipse must not gate portal updates (`:1988-1990`) |
-| `gold/perf_report.json` | one overwritten key written even on failure (`:1852-1856`), the same sidecar class |
-| `gold/artifacts/{id}/{RUN_DATE}` markers | written only under `SKIP_EXISTING` (`:741-743`) |
-| `gold/manifests/`, `gold/logs/` | no per-run chain manifest; logs upload on crash as well |
-| INF_D_10 output | the last step performs S3 reads only |
+Live object names at 13:2xZ: holdings newest `holdings_2026-10-14.parquet`; NNA newest `canonical_nna_2026-10-13.parquet`; `canonical_nna_2026-10-14.parquet` returns 404. Holdings and NNA therefore differ by name, so the rule predicts a HALT today (reason `frontier-split`). This is a prediction from names, not a measured halt; FB-m-2 tests it live.
 
-## Date the guard would check
+## Excluded
 
-`orion-gold-dispatch.sh:71`: `RUN_DATE=$(date -u +%Y-%m-%d)`, overridden by `--run-date` at `:1356`. The Lambda must use the UTC date.
+Undated dimensions: `accounts_dim` (`:63`, `:200`), `account_team` (`:64`, `:206`), `household_dim` (`:66`, `:226`). `aum_snapshot` (`:219`) is loaded but no output of the handler consumes it, so it is excluded too.
 
-## What the guard would do on each arm
+## How the served date is read
 
-Not implemented. The intended behaviour, once a signal is chosen: signal date equal to the expected date and ready, so the handler proceeds as today; any other date, an absent object, or a read error, so the handler prints one `READINESS HALT` line and returns `halted: True` with zero writes.
+The served date is the `data_as_of` field of `platinum/firm/snapshots/aua_by_architect.json`, `aua_by_state.json` and `aua_by_region.json`. The field is written by `_snapshot_response` (`:766`), fed by `date_str` (`:787`, the holdings maximum date, or `datetime.date.today()` at `:782` when holdings has no dated rows). One live copy (architect) reads `data_as_of` 2026-10-14. The served value is the minimum over the objects that exist. `aua_by_tax_status.json` is not read: it dates from 2026-06-30 and is no longer written.
 
-## Decision needed from the CTO
+## What the guard does on each arm
 
-1. A new run-dated object written by the chain (a dispatch edit, outside this order's paths).
-2. A data-frontier read in the publisher, as the register prescribes, which needs a calendar decision because the Lambda cannot import `lib/trading_calendar.py`.
-3. A ruling that the eclipse status is admissible despite the register line.
+- **(i) all three at D, D after served**: publish. The advisor fan-out, the three snapshot puts and the CloudFront invalidation run as today.
+- **(ii) one input behind (e.g. NNA at D-1)**: halt with `reason=frontier-split`. Zero S3 puts, zero Lambda invokes, zero CloudFront calls.
+- **(iii) all at D, served = D (same-day re-fire)**: halt with `reason=not-after-served`. Zero writes.
+- **(iv) no snapshot object exists**: publish once; the publish stamps `data_as_of`.
+
+A read error on any input or on a served object that is not a missing key halts (`reason=read-error`). The halt prints one line, `READINESS HALT: client_perf=<d> holdings=<d> canonical_nna=<d> served=<d|absent> reason=<r>`. A ready run prints `READINESS OK: ...`.
+
+Open items are in the surprise rows `ADVI_FIRMBKTS-D1-W84-S4` to `S7` (investigation file, this cell's coordinate).
