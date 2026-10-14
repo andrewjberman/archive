@@ -1,0 +1,114 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-f-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-f-2.repair-batch.md",
+  "group": "OTHER",
+  "vintage_commit": "6d46d2db81"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~2",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round5.md",
+  "vintage_commit": "6d46d2db81",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-f-2.repair-batch.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "8b3a91a08b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs. OPAL_GIT_READ_ROOT is removed; OPAL_CLOUD_READ_LOCAL stands in for the git copy too. Production reads (variable unset) are unchanged. Nothing is deployed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_cloudread.py",
+   "kind": "test",
+   "commit_or_etag": "8b3a91a08b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on mktemp state and stand-in directories. It uses only OPAL_CLOUD_READ_LOCAL and adds case 8. No S3 call and no real git ref is read."
+  },
+  {
+   "path_or_key": ".tools/portal-merge-forward.sh",
+   "kind": "script",
+   "commit_or_etag": "8b3a91a08b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local script. Its self-test fixture steps run through fx, which exits before any case on a failed step. The self-test runs against a mktemp origin and clone; nothing was pushed and the real portal DEV, PROD and main were not changed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPf2-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_cloudread.py expect: cases=8/8 ok=True",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_cloudread.py",
+   "output_evidence": "timeout 120, rc=0. Last line: OPEN-CALLS-CLOUDREAD-TEST cases=8/8 ok=True. The seven base cases read through OPAL_CLOUD_READ_LOCAL only; case 8 (a git copy newer than a stale cluster copy and a stale working-tree copy) reads the git row.",
+   "denominator": "8 of 8 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPf2-AC2",
+   "criterion_verbatim": "grep -c \"OPAL_GIT_READ_ROOT\" .tools/open-calls.py expect: ^0$",
+   "method": "command",
+   "invocation": "grep -c \"OPAL_GIT_READ_ROOT\" .tools/open-calls.py",
+   "output_evidence": "timeout 120. Output: 0. grep -c exits 1 when the count is 0 (no match), and the count is the verdict. The native Grep tool over .tools also returns No matches found.",
+   "denominator": "0 matching lines in .tools/open-calls.py",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPf2-AC3",
+   "criterion_verbatim": "grep -c \"SELFTEST ERROR: fixture step failed\" .tools/portal-merge-forward.sh expect: ^[1-9]",
+   "method": "command",
+   "invocation": "grep -c \"SELFTEST ERROR: fixture step failed\" .tools/portal-merge-forward.sh",
+   "output_evidence": "timeout 120, rc=0. Output: 1. The single line is the fx helper's error print. A negative control with an unwritable fixture path printed SELFTEST ERROR: fixture step failed: pmf_cat ... , exited rc=1, and graded 0 cases.",
+   "denominator": "1 matching line, the fx helper",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPf2-AC4",
+   "criterion_verbatim": "bash .tools/portal-merge-forward.sh --selftest expect: ok=True (a fourth criterion: this order edits a script whose 29 self-test cases must all stay green through the fx helper)",
+   "method": "test_suite",
+   "invocation": "bash .tools/portal-merge-forward.sh --selftest",
+   "output_evidence": "timeout 120, rc=0. Last line: MERGE-FORWARD-SELFTEST cases=29/29 ok=True. Zero SELFTEST FAIL and zero SELFTEST ERROR lines. The five sibling open-calls suites were also run and read ok=True: test_open_calls 19/19, approval 13/13, register 10/10, waiver 11/11, withdraw 7/7.",
+   "denominator": "29 of 29 cases pass",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the git stand-in: a copy of open-calls.py with the OPAL_CLOUD_READ_LOCAL git branch disabled (if False and local:), run under the unchanged cloud-read test; the original was restored and cmp-verified identical.",
+   "expected": "the two git-newer cases fail; the other cases pass",
+   "observed": "OPEN-CALLS-CLOUDREAD-TEST cases=6/8 ok=False; FAIL git newer than a stale cluster copy; FAIL git newer than a stale cluster copy and a stale working-tree copy. After the restore: cases=8/8 ok=True.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC4 were each run twice in this session: AC4 on the tree before the fx change on the rev-parse line and on the final tree; AC1 before the commit, on the final tree and after the mutant restore.",
+   "observed": "OPEN-CALLS-CLOUDREAD-TEST cases=8/8 ok=True (three reads); MERGE-FORWARD-SELFTEST cases=29/29 ok=True (two reads).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the OPAL_STATE_ROOT guard in _source_git (the git source is skipped when OPAL_STATE_ROOT is set and OPAL_CLOUD_READ_LOCAL is not)",
+   "reason": "the order names no such guard; without it test case 4 would read the real origin/box refs. Filed as NFRA_DEVPLN-W2-S12 (OBSERVATION, INERT); whether any other tool sets OPAL_STATE_ROOT in production is UNVERIFIED."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S14 -- the one-variable seam was two variables at round 4; this order removes OPAL_GIT_READ_ROOT (class OBSERVATION, INERT; resolved by BUILD item 1)",
+  "NFRA_DEVPLN-W2-S11 -- the merge-forward self-test fixture writes had no exit check; the fx helper and pmf_put/pmf_cat carry them (class OBSERVATION, INERT; resolved by BUILD item 3)",
+  "NFRA_DEVPLN-W2-S12 -- the one-variable seam needs a guard keyed on OPAL_STATE_ROOT so test case 4 stays hermetic; the order names no such guard (class OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~2/NFRA_DEVPLN.TO-DP-f-2.repair-batch.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check .tools/open-calls.py .tools/tests/test_open_calls_cloudread.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "bash -n",
+   "invocation": "bash -n .tools/portal-merge-forward.sh (also run by commit-gate.sh on the code commit 8b3a91a08b)",
+   "result": "OK: bash -n syntax-checked .tools/portal-merge-forward.sh"
+  }
+ ]
+}
