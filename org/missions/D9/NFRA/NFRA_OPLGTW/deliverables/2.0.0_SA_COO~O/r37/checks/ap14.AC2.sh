@@ -5,7 +5,8 @@
 # - W/AP14_SERVED.json, read on the host through the INSTALLED code (in-process, synthetic principals, no Graph call,
 #   no grant written), shows each cell live: pf-1 the data-grant family is 6 tools; bd-2 an unprofiled non-admin is
 #   denied blackdiamond_list_fees and an unprofiled master_admin is not; sh-1 list_shared_folder is listed and SAFE;
-#   tg-1 the Opal-users-only gate refuses a non-Opal sender; and objects_written 0.
+#   tg-1 the Opal-users-only gate refuses a non-Opal sender; and objects_written 0; and (A2, CTO msg 33850) the installed
+#   identity-scope check admits the Bloomberg principal on all 8 tools 0.0.3_BG_BBGTerminal measured denied.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z"; slug=nfra-oplgtw-gateway-release-r30
 entries=$(git ls-tree -r --name-only HEAD org/critical_paths/change_management/ | grep -c "_${slug}_deploy_completion\.md$")
@@ -25,6 +26,7 @@ ok = (b.get("installed_code") is True and b.get("data_grant_family_size") == 6
       and b.get("bd_unprofiled_standard_denied") is True and b.get("bd_unprofiled_master_admin_admitted") is True
       and b.get("list_shared_folder_listed") is True and b.get("list_shared_folder_safe") is True
       and b.get("opal_users_gate_refuses_non_opal") is True and b.get("objects_written") == 0
+      and b.get("bbg_identity_admitted_8") == 8
       and bool(d.get("ssm_command_id")))
 print("yes" if ok else "no")
 EOF

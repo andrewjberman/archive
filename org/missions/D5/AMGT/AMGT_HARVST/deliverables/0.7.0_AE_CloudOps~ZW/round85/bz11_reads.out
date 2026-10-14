@@ -1,0 +1,29 @@
+# HVST-bz-11 -- the close read for wsj and barrons, by 0.7.0_AE_CloudOps~ZW on site Z
+# Read at most once an hour. Read only: no sign-in, no mint, no refresh, no re-queue, no stop, no plant,
+# and no change to the task or any file under the state dir.
+#
+# START CONDITION, read: deliverables/0.7.0_AE_CloudOps~ZW/round85/bz10_t0.txt exists and holds
+#   T0=2026-10-14T00:08:31Z
+# which is the cut HVST-bz-10 wrote 32 seconds before Start-ScheduledTask (00:09:03Z), so no cycle that
+# was already running at the stop can be graded.
+#
+# invocation (LITERAL, extracted byte-exact from the order, 300 bytes):
+#   python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_W1/round85/bz11_close_read.py --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --t0-file org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round85/bz10_t0.txt
+
+## ===================== FIRST READ, 2026-10-14T00:40:20Z =====================
+  PUBLISHER=wsj VERDICT=WAITING
+  PUBLISHER=barrons VERDICT=WAITING
+  CLOSE=WAITING
+  (rc=0)
+
+CLOSE=WAITING, AND THAT IS THE EXPECTED ORGANIC WAIT, not a failure. A runner pass is bbg then wsj then
+barrons, and the runner started its bbg cycle at 00:09:04Z under the new pin; wsj's first cycle under the
+pin cannot begin until that bbg cycle ends. For scale: bbg's previous cycle ran 18:58:16Z to 23:53:59Z and
+was still unfinished when the operator stop ended it at 108 of 242 pairs.
+
+AC2, the instrument's own test (runs anywhere, not a site Z read): 10 passed in 2.06s, rc=0. Recorded
+because a WAITING verdict is only worth reading if the thing printing it is tested -- the 10 tests cover
+every verdict, the CLOSE line, the cut, a control showing the cut discriminates, and the t0 file.
+
+NOT DONE, deliberately: nothing was signed in, minted, refreshed, re-queued, stopped or planted; the task
+and every file under the state dir are untouched by this read.
