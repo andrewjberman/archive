@@ -24,7 +24,7 @@
   },
   {
    "path_or_key": "infra/aws/lambda/teams-chat-assist/registry_files.txt",
-   "kind": "manifest",
+   "kind": "config_data",
    "commit_or_etag": "ed6bce27a9",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "Commit ed6bce27a9 (LOCAL on wk-COMM_ASSIST-30). Twelve registry file names, one per line, after a three-line # header: exemptions.json, feeds.json, firm_pages.json, legacy_addresses.json, mail_parties.json, platinum_destinations.json, remediations.json, reporting_policies.json, resources.json, scopes.json, systems.json, tiers.json. Not packaged by build.sh. Not deployed.",
@@ -64,15 +64,15 @@
   }
  ],
  "controls": {
-  "file_count": {
-   "description": "zip file count of the package built by the base build.sh (git show c834c28a45:build.sh run from the worktree into a scratch folder) and by the edited build.sh",
-   "expected": "39 at the base, 34 after the change (39 - 17 catalog-glob files + 12 manifest files)",
-   "observed": "base build: 39 files; edited build at ed6bce27a9: 34 files; the twelve zip registry names equal the manifest names",
-   "status": "MEASURED"
+  "mutant": {
+   "description": "CAl2-AC1 run with the BASE build.sh (git show c834c28a45:infra/aws/lambda/teams-chat-assist/build.sh written over the worktree copy for the run, then the edited file restored byte-identical; the base packages all 17 registry files)",
+   "expected": "M2-BUILD ok=False with FAIL manifest_list, trace_equal, no_unreferenced and foreign_absent (the glob copy packages catalog_fork_keys.json and five unread registry files)",
+   "observed": "M2-BUILD ok=False arms=3 of 7; FAIL manifest_list (only in zip catalog_fork_keys.json, event_rules.json, key_rulings.json, name_rulings.json, root_map.json), FAIL trace_equal, FAIL no_unreferenced, FAIL foreign_absent (catalog_fork_keys.json is in the package); rc 0 is the wrapper's, the arm count is the verdict",
+   "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "AC2 check: the package built from CRLF, LF and worktree line endings compared by sha256",
-   "observed": "identical: 812abaf32af6 in all three",
+   "method": "CAl2-AC2 check: the package built from CRLF, LF and worktree line endings compared by sha256; the zip file count 39 at the base build, 34 at ed6bce27a9",
+   "observed": "identical: crlf_sha=lf_sha=worktree_sha=812abaf32af6, files=34; base build 39 files",
    "status": "STABLE"
   }
  },
