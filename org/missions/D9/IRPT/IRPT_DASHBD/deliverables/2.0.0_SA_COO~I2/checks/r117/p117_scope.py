@@ -11,9 +11,11 @@ account dimension), the Account groups of each response, and the three verdicts 
                 $type 'calculated-performance'; points = the descendants carrying a numeric `factor`; fee = the sum of numeric `feeAmount` over the descendants;
                 startv = the numeric `value` of the first descendant $type 'calculated-activity' with id 'startValue'.
   (a) ONE_GROUP_PER_ACCOUNT if the set of group ids equals the household's account ids and every group has perf and points >= 1; else FEWER_GROUPS (a subset), OTHER_GROUPS (not a subset).
-  (b) IGNORED if every account's perf is equal (within 1e-12) between the false and the true response; else NET_WHEN_FALSE if every account with fee > 0 has obs = perf_true - perf_false >= 0 and
-      |obs - fee/startv| <= max(1e-4, 0.25 * fee/startv) (and at least one such account); else DIFFERENT_UNTIED.
-  (c) ACCEPTED if the false call returned 2xx; REFUSED if every call was refused (non-2xx).
+  (b) IGNORED if every account's perf is equal (within 1e-12) between the false and the true response; else NET_WHEN_FALSE if every account with a fee (abs(fee) > 0; the source
+      sums fees NEGATIVE) and a positive startv has obs = perf_true - perf_false >= 0 and |obs - abs(fee)/startv| <= max(1e-4, 0.25 * abs(fee)/startv) (and at least one such
+      account); else DIFFERENT_UNTIED. (Amended round 118, issuer error on row W306-S1: the fee sign.)
+  (c) ACCEPTED if the false call returned 2xx; REFUSED if every call was answered 401 or 403 (the credential refused); REQUEST_REJECTED if every call was non-2xx and not all
+      401/403 (the body or path rejected: it says nothing about the credential); else NOT_RUN. (Amended round 117, issuer error on row W305-S1: a 400 was first read as REFUSED.)
 
 Usage: python -I <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
        python -I <this file> --selftest [<repo_root>]         the pure helpers on synthetic arms
@@ -36,7 +38,7 @@ DIM = P114.PRIV + "0.9.0_WK_IRPT_DASHBD~171/ACCOUNT_DIM_DRY_RUN.parquet"
 MAX_CALLS = 4
 A_VERDICTS = ("ONE_GROUP_PER_ACCOUNT", "FEWER_GROUPS", "OTHER_GROUPS", "REFUSED", "NOT_RUN")
 B_VERDICTS = ("IGNORED", "NET_WHEN_FALSE", "DIFFERENT_UNTIED", "NOT_RUN")
-C_VERDICTS = ("ACCEPTED", "REFUSED", "NOT_RUN")
+C_VERDICTS = ("ACCEPTED", "REFUSED", "REQUEST_REJECTED", "NOT_RUN")
 STORES = ("secretsmanager", "s3_copy", "none")
 
 
@@ -102,20 +104,24 @@ def verdict_a(grp, account_ids):
 
 
 def verdict_b(gf, gt):
+    """(verdict, accounts_compared, accounts_with_fee). A fee is a cost and the source records it as a NEGATIVE feeAmount sum (measured, round 118), so the fee MAGNITUDE
+    abs(fee) is what the gap is tied to; an account whose start value is not positive has no defined tie and is left out of the tie (it is still counted in accounts_with_fee)."""
     ids = sorted(set(gf) & set(gt))
     pairs = [(gf[i], gt[i]) for i in ids if gf[i]["perf"] is not None and gt[i]["perf"] is not None]
     if not pairs:
         return "NOT_RUN", 0, 0
     if all(abs(t["perf"] - f["perf"]) < 1e-12 for f, t in pairs):
-        return "IGNORED", len(pairs), sum(1 for f, _ in pairs if f["fee"] > 0)
-    fee_pairs = [(f, t) for f, t in pairs if f["fee"] > 0]
+        return "IGNORED", len(pairs), sum(1 for f, _ in pairs if abs(f["fee"]) > 0)
+    fee_pairs = [(f, t) for f, t in pairs if abs(f["fee"]) > 0]
     ties = 0
     for f, t in fee_pairs:
+        if f["startv"] is None or f["startv"] <= 0:
+            continue
         obs = t["perf"] - f["perf"]
-        if f["startv"] is None or f["startv"] <= 0 or obs < 0:
+        if obs < 0:
             return "DIFFERENT_UNTIED", len(pairs), len(fee_pairs)
-        exp = f["fee"] / f["startv"]
-        if abs(obs - exp) <= max(1e-4, 0.25 * abs(exp)):
+        exp = abs(f["fee"]) / f["startv"]
+        if abs(obs - exp) <= max(1e-4, 0.25 * exp):
             ties += 1
         else:
             return "DIFFERENT_UNTIED", len(pairs), len(fee_pairs)
@@ -168,7 +174,8 @@ def check(root):
     # (c)
     any_ok_false = any(c["ok"] and c["gross_of_fees_flag"] is False for c in calls)
     all_refused = all(not c["ok"] for c in calls)
-    exp_c = "ACCEPTED" if any_ok_false else ("REFUSED" if all_refused else "NOT_RUN")
+    all_auth = all(c["http_status"] in (401, 403) for c in calls)
+    exp_c = "ACCEPTED" if any_ok_false else (("REFUSED" if all_auth else "REQUEST_REJECTED") if all_refused else "NOT_RUN")
     need(rec["c_credential"]["verdict"] == exp_c, "c_credential.verdict differs from the recount (%s)" % exp_c)
     need(rec["c_credential"].get("claim") in P114.CLAIMS, "c claim")
     # (a)
@@ -217,6 +224,13 @@ def selftest():
     arm("b untied", verdict_b(gf, groups(bt_off))[0] == "DIFFERENT_UNTIED")
     arm("b not run", verdict_b(gf, {})[0] == "NOT_RUN")
     arm("key_of", key_of(12.0) == "12" and key_of(" 7 ") == "7" and key_of(None) is None)
+    bf_neg = {"calculations": [g(1, 0.010, -100.0, 100000.0), g(2, 0.020, -50.0, 50000.0)]}
+    bt_neg = {"calculations": [g(1, 0.011, -100.0, 100000.0), g(2, 0.021, -50.0, 50000.0)]}
+    arm("b negative fee sums tie by magnitude", verdict_b(groups(bf_neg), groups(bt_neg))[0] == "NET_WHEN_FALSE")
+    bf_zero = {"calculations": [g(1, 0.010, -100.0, 100000.0), g(2, 0.020, -50.0, 0.0)]}
+    bt_zero = {"calculations": [g(1, 0.011, -100.0, 100000.0), g(2, 0.025, -50.0, 0.0)]}
+    arm("b undefined start value left out of the tie", verdict_b(groups(bf_zero), groups(bt_zero))[0] == "NET_WHEN_FALSE")
+    arm("b a wrong direction is untied", verdict_b(groups(bf_neg), groups({"calculations": [g(1, 0.009, -100.0, 100000.0), g(2, 0.021, -50.0, 50000.0)]}))[0] == "DIFFERENT_UNTIED")
     for n, v in arms:
         print(("ok   " if v else "FAIL ") + n)
     return all(v for _, v in arms)
