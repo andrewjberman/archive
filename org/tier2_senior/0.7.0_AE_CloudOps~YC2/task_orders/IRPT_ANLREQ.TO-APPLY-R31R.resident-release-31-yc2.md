@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~YC2</issued_to>
     <date>2026-10-15</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -26,12 +26,12 @@ comp-adversary: RUN -- by reading the CTO half (msg 7890) and rows W144-S1 to S1
     Files: C:/dev/irpt-release-r31/ and the scripts under org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/.
   </objective>
 
-  <context>Load /cloud-ops first. This order is STAGED: the issuer flips it to pending only when (a) leg L (irpt-status) is closed and its V-L reads are green and (b) the issuer has read the queue depths at 0. The same shape as IRPT_ANLREQ.TO-APPLY-R29b (read it: org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_ANLREQ.TO-APPLY-R29b.resident-release-29-yc2.md and its outputs under deliverables/irpt_anlreq_r29/), with these differences: the old root is r29 (not r28); the host script, pre-read, install and rollback are the release-31 ones (AR-y-338, derived from release 29's; the build record is org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/r41/RESIDENT_R31_BUILD.json); and TWO added gates below (R0q, U6). You submit no request and sign in as nobody. Nothing in this order starts a job or a capture.
+  <context>Load /cloud-ops first. This order was STAGED and is now PENDING (flipped 2026-10-15 ~06:2xZ): (a) leg L (irpt-status) is CLOSED and its V-L reads are green (A_AFTER_R31L.txt, ledger irpt-status-r31-20261015 CLOSED), (a2) leg A (the api-root route 0bxt97o for commentary-pdf, pair addendum 1, CTO half signed msg 8088; A_AFTER_R31A.txt, ledger irpt-api-r31a-20261015 CLOSED) is closed, and (b) the issuer read commentary_ready at 0, 0 and 0 at 06:12:11Z (row IRPT_ANLREQ-D2-S117); your own R0q read inside this window is still the gate. The window order is L, A, R; the rollback order is R, then A, then L. The same shape as IRPT_ANLREQ.TO-APPLY-R29b (read it: org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_ANLREQ.TO-APPLY-R29b.resident-release-29-yc2.md and its outputs under deliverables/irpt_anlreq_r29/), with these differences: the old root is r29 (not r28); the host script, pre-read, install and rollback are the release-31 ones (AR-y-338, derived from release 29's; the build record is org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/r41/RESIDENT_R31_BUILD.json); and TWO added gates below (R0q, U6). You submit no request and sign in as nobody. Nothing in this order starts a job or a capture.
   Signed pair: COO half org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release31/NEVER_WIDEN_PAIR_ANLREQ_RELEASE31_COMMENTARY_CHAIN.md (git hash-object 8fb19a33566830e264dfa73ffa6897ba4d6f7c8f; commit 45df09bc80) and CTO half org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_ANLREQ_RELEASE31_COMMENTARY_CHAIN_CTO_HALF.md (CTO msg 7890). A different COO blob voids both halves: STOP. The CTO's added conditions bind: roll R back before L; U6 is a must; W1's removal is owed to the FWD-1 run's close.</context>
 
   <the_act>
     GO: both halves are signed. This order is staged until the issuer says pending. Start at step 1 and go on only while each step reads green. Otherwise tell 2.0.0_SA_COO~Y2 and wait.
-    1. Read the COO half and CTO half at HEAD; `git hash-object` of the COO half must print 8fb19a33566830e264dfa73ffa6897ba4d6f7c8f. `get-function irpt-status` CodeSha256 must be PcGK+EpSq0EelZP+2T8+PB6b+ZXB+q3BCjD9g4UNiLE= (read only; leg L closed). Anything else: STOP, report.
+    1. Read the COO half and CTO half at HEAD; `git hash-object` of the COO half must print 8fb19a33566830e264dfa73ffa6897ba4d6f7c8f. `get-function irpt-status` CodeSha256 must be PcGK+EpSq0EelZP+2T8+PB6b+ZXB+q3BCjD9g4UNiLE= (read only; leg L closed). Anything else: STOP, report. Also read (get-routes, the whole list, never a paged count) that the route GET /api/scoped/investor-reporting/analysis/requests/{requestId}/commentary-pdf exists (id 0bxt97o, target integrations/8ogp332, authorizer naqxlm); absent: STOP, report.
     2. **R0q (the CTO's condition; read, NEVER receive):** `sqs get-queue-attributes` for the queues outlook-global-commentary-draft-commentary-ready-queue and outlook-global-commentary-draft-analysis-ready-queue and their DLQs: ApproximateNumberOfMessages and ApproximateNumberOfMessagesNotVisible. The commentary_ready queue MUST read 0 and 0 (the stale 10-11 October message expires by retention between about 2026-10-15T02:06Z and 05:26Z). Any other value: STOP and report; install nothing; do NOT receive, purge or redrive the message. Write the five depths to org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_anlreq_r31/R31R_STATE.txt as exactly five lines of the form `R0Q <name> visible=<n> notvisible=<n>` with <name> one of `commentary_ready`, `analysis_ready`, `commentary_dlq`, `analysis_dlq`, `draft_queue` (the Lambda's own DLQ).
     3. **U6, before:** `secretsmanager describe-secret` for opal/ticketing/svc-irpt-packager: print LastAccessedDate (or NEVER) and LastChangedDate; NEVER get-secret-value. Write `U6 before=<value>` to R31R_STATE.txt.
     4. U2: put three files under ec2/investor-reporting-ycharts/resident/ in bucket opal-313476888478-lambda-artifacts, each key 404 before the put, each read back with sha256 equal; a different sha256 is a STOP (a rebuilt file is a new pair):
@@ -48,7 +48,7 @@ comp-adversary: RUN -- by reading the CTO half (msg 7890) and rows W144-S1 to S1
 
   <bounds>
     Host i-0167fd745ad906a66 and three new keys under ec2/investor-reporting-ycharts/resident/. No IAM, Terraform, Lambda, queue, data or portal change. No secret VALUE read (describe-secret only). No message is received from any queue, none purged, none redriven. Nothing is sent to Bloomberg. No request is submitted and no sign-in is attempted.
-    Rollback: the installer's own, on a failed start; afterwards the rollback script above on the issuer's word, and BEFORE leg L is rolled back if both must roll (the CTO's condition 1).
+    Rollback: the installer's own, on a failed start; afterwards the rollback script above on the issuer's word, and BEFORE leg A and leg L are rolled back if they must roll too (the CTO's condition 1 and addendum 1).
   </bounds>
 
   <proof_of_spec>
