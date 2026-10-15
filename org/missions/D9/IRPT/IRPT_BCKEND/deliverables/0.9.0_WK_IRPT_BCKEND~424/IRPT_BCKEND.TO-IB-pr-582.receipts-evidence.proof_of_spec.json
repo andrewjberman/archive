@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-582",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "5e4de60381156ab04d057ea7305c0958f31981e8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5e4de60381156ab04d057ea7305c0958f31981e8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-582.receipts-evidence.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~424",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "kind": "script",
+      "commit_or_etag": "381be2ca6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on worktree branch wk-IRPT_BCKEND-424; nothing deployed, published or run against a served prefix",
+      "artifact_covered_by": [
+        "IB219-1-AC1",
+        "IB219-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_receipts.py",
+      "kind": "test",
+      "commit_or_etag": "381be2ca6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on worktree branch wk-IRPT_BCKEND-424; the new test file, run offline only",
+      "artifact_covered_by": [
+        "IB219-1-AC1",
+        "IB219-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB219-1-AC1",
+      "criterion_verbatim": "the new tests (at least 8) and the existing tests named in the paths block pass",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-1-AC1",
+      "output_evidence": "OK: 42 passed | IB219-1-AC1 PASS (rc=0)",
+      "denominator": "42 passed by the check's own test set; a direct run of the four paths-block test files: 51 passed of 51",
+      "status": "PASS",
+      "expect": "IB219-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB219-1-AC2",
+      "criterion_verbatim": "with the ABSENT-AT-SOURCE-C blocks removed in memory the new tests fail on assertions",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-1-AC2",
+      "output_evidence": "OK: removing the block fails the new tests (2 block(s)) | IB219-1-AC2 PASS (rc=0)",
+      "denominator": "2 of 2 ABSENT-AT-SOURCE-C blocks removed in memory; 6 of 8 new tests failed on assertions or attribute access in the test body (direct scratch run)",
+      "status": "PASS",
+      "expect": "IB219-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB219-1-AC3",
+      "criterion_verbatim": "the record: the diff bounded to the grant; the named tests present; no typed object address; the six bound counters 0",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-1-AC3",
+      "output_evidence": "OK: the diff bounded, the named tests present, no typed address | IB219-1-AC3 PASS (rc=0)",
+      "denominator": "2 of 2 changed repository paths inside the grant; 6 of 6 named negative tests present; 6 of 6 bound counters 0",
+      "status": "PASS",
+      "expect": "IB219-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The difference control: every ABSENT-AT-SOURCE-C block removed in memory from the product file, then the new test file run.",
+      "expected": "the new tests fail on assertions; no import or collection error",
+      "observed": "6 of 8 new tests failed on assertions or attribute access in the test body; the 2 invariant tests passed; the module imported with the blocks removed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 printed its verdict before the product commit and again after it; the new test file was run unmodified on each pass.",
+      "observed": "AC1 printed OK: 42 passed on both runs; the new test file passed 8 of 8 on each unmodified run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the existing _Inputs stub in test_holdings_publish_gate.py",
+      "reason": "not edited (grant); its receipts() returns a fixed list and cannot show accumulation, so the new file runs the real VersionedInputs over an in-memory versioned bucket"
+    },
+    {
+      "item": "the sparse-checkout directories added locally",
+      "reason": "added for the import chain and never committed; they are not part of the change"
+    },
+    {
+      "item": "any deploy, publication, served-prefix run, sign-in or AWS write",
+      "reason": "LOCAL build only; the release of the changed producer is a later act under the never-widen pair"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W424-S1: the commit gate's client-data check did not run for commit 381be2ca6c (the hashed account-id list was absent on this device and the gate printed WARN)"
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-424 (the commits named in the record); the record and the criteria output are in the deliverables folder",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "one commit per step with explicit paths and a message file written by the Write tool",
+      "result": "commit 381be2ca6c: 3 files; the commit gate passed for 2 of 3 files; the client-data WARN is recorded as the surprise row above"
+    }
+  ]
+}

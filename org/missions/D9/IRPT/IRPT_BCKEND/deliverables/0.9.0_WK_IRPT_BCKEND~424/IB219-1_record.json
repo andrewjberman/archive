@@ -1,0 +1,33 @@
+{
+  "base_commit": "5e4de60381156ab04d057ea7305c0958f31981e8",
+  "changed_paths": [
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_receipts.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-582.receipts-evidence.md"
+  ],
+  "negative_tests": [
+    "evidence_reads_are_recorded_in_the_source_objects",
+    "source_set_revision_digest_covers_the_evidence_reads",
+    "no_evidence_read_leaves_source_objects_unchanged",
+    "recorded_evidence_keys_carry_the_pinned_version_ids",
+    "refused_run_publishes_nothing_extra",
+    "second_fire_records_its_own_evidence_reads"
+  ],
+  "tests_total": 51,
+  "tests_passed": 51,
+  "mutant_tests_failed": 6,
+  "notes": [
+    "The product change is one new block ABSENT-AT-SOURCE-C: a helper after the B block that re-takes inputs.receipts() when the evidence provider was called, and one call in run_firm after the B listing and before the A manifest record.",
+    "VersionedInputs.receipts() accumulates every pinned read (keyed by bucket and key, with version_id, byte_length and sha256); the re-take therefore carries the gate's prior-day reads into _source_objects and the irpt-source-objects revision row.",
+    "The existing _Inputs stub in test_holdings_publish_gate.py returns a fixed list and was not edited; the new file uses the real VersionedInputs over an in-memory versioned bucket and reads back through the real parquet round trip.",
+    "The mutant run removed the ABSENT-AT-SOURCE-C blocks in memory through a scratch runner: 6 of 8 new tests failed on assertions or on attribute access inside the test body; the two invariant tests stayed green.",
+    "Sparse directories added locally and never committed: infra/aws/lambda/investor-reporting, data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared, docs/contracts/investor-reporting, lib.",
+    "Offline only: no function was invoked, no sign-in was made, no AWS write, no row or figure written and no vendor request sent; the source reads were in-memory synthetic partitions."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
