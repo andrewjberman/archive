@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py",
       "kind": "script",
-      "commit_or_etag": "638daaaa76",
+      "commit_or_etag": "260dd20597",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "SmartX adapter module (five client tools, ctx-only). LOCAL on wk-NFRA_OPLGTW-107, not pushed; no deploy, no registration (the issuer's hookup).",
+      "deploy_evidence": "SmartX adapter module (five client tools, ctx-only). The firm map is BY NAME (protocol A2, CRO msg 34577): ctx.firm_roster() is {advisor_name: firm id or None}; the row filter keys on advisor_id. LOCAL on wk-NFRA_OPLGTW-107, not pushed; no deploy, no registration (the issuer's hookup).",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl5.py",
       "kind": "test",
-      "commit_or_etag": "638daaaa76",
+      "commit_or_etag": "260dd20597",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Eight named tests, a recording fake ctx. 8 of 8 pass at 638daaaa76 (checks/cl5.AC1.sh).",
+      "deploy_evidence": "Eight named tests on a name-keyed recording fake ctx. 8 of 8 pass at 260dd20597 (checks/cl5.AC1.sh RESULT PASS).",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -39,9 +39,9 @@
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~107/probe_smartx.py",
       "kind": "script",
-      "commit_or_etag": "638daaaa76",
+      "commit_or_etag": "260dd20597",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Read-only probe of the adapter against the real silver with the box credentials; prints one line of counts and booleans (checks/cl5.AC2.sh).",
+      "deploy_evidence": "Read-only probe of the adapter against the real silver with the box credentials; the ProbeCtx roster is built from data/mdpf/config/partner_roster.json by name (A2). Prints one line of counts and booleans (checks/cl5.AC2.sh RESULT PASS).",
       "artifact_covered_by": [
         "AC2"
       ]
@@ -49,9 +49,9 @@
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "638daaaa76",
+      "commit_or_etag": "260dd20597",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Surprise rows NFRA_OPLGTW-Z-W107-S7..S12 appended (S1..S6 inherited from the BLOCKED seat, unchanged). Gate: surprise-row-gate OK on the commit.",
+      "deploy_evidence": "Surprise rows NFRA_OPLGTW-Z-W107-S7..S13 on the channel (S1..S6 inherited, unchanged). S8 is answered by A2 (CRO msg 34577); its disarm is the issuer's. Gate: surprise-row-gate OK on 260dd20597.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -82,14 +82,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The account-number detector planted with one real full account number in a blob, then with an empty blob.",
+      "description": "The digit-run detector (8 or more digits) planted with one synthetic 8-digit string, then with an empty string.",
       "expected": "planted: count 1; empty: count 0",
-      "observed": "planted: 1; empty: 0 (control run in the worktree at 638daaaa76, read-only, numbers counted and not printed)",
+      "observed": "planted: 1; empty: 0 (synthetic string, no real account number used)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "same-input runs compared: the probe run directly and cl5.AC2.sh before the commit, and cl5.AC2.sh at 638daaaa76 (the only later change is errors=replace on two reads)",
-      "observed": "identical probe line in every run: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0",
+      "method": "same-input runs compared: the probe line before the commit (cl5.AC2.sh after the edits), and cl5.AC2.sh after the commit at 260dd20597 (the committed tree equals the tested tree)",
+      "observed": "identical probe line in both runs: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0",
       "status": "STABLE"
     }
   },
@@ -107,8 +107,8 @@
       "reason": "The contract refuses SmartX with vendor_no_transactions and no_fee_source; there is no table to read (zero reads)."
     },
     {
-      "item": "The advisor-id source for ctx.firm_roster() at the hookup",
-      "reason": "partner_roster.json carries no advisor_id; the probe joins the silver roster; the core's choice is open (surprise S8, ARMED, disarm 2.0.0_SA_COO~O)."
+      "item": "The name source for ctx.firm_roster() at the hookup",
+      "reason": "ctx.firm_roster() is {advisor_name: firm id or None} (protocol A2). The core serves it from a byte-equal copy of partner_roster.json under app/refs/ at the hookup; the core's wiring is the issuer's (surprise S8, answered by A2)."
     },
     {
       "item": "The contract's account_suffix and account_ref pin on resolve_account",
@@ -127,24 +127,25 @@
     "NFRA_OPLGTW-Z-W107-S9: the probe does not exercise principal admission (typed_opal_only); the stand-in principal is nominal",
     "NFRA_OPLGTW-Z-W107-S10: ctx has no prior-trading-day call; the weekend map fallback walks back through list_partitions",
     "NFRA_OPLGTW-Z-W107-S11: the naming gate REFUSED the canonical firm-id literals as hand-kept carriers (WARN window, not blocking)",
-    "NFRA_OPLGTW-Z-W107-S12: the order names the instance with an underscore; the flip gate resolves the order stem (hyphen), so the instance is written at the stem name"
+    "NFRA_OPLGTW-Z-W107-S12: the order names the instance with an underscore; the flip gate resolves the order stem (hyphen), so the instance is written at the stem name",
+    "NFRA_OPLGTW-Z-W107-S13: cl5.AC2.sh captures tr's status as 'probe rc', not the probe's exit code; the verdict rests on the probe's output line (OBSERVATION)"
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "pytest (gateway tests, offline)",
       "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_cl5.py -v -p no:cacheprovider",
-      "result": "8 passed (before the commit and at 638daaaa76)"
+      "result": "8 passed (before the commit and at 260dd20597)"
     },
     {
       "tool": "probe against the real silver",
       "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~107/probe_smartx.py",
-      "result": "one probe line, all four booleans as required, account_numbers_printed 0"
+      "result": "one probe line, all four booleans as required, account_numbers_printed 0 (before the commit and at 260dd20597)"
     },
     {
       "tool": "safe-commit gate chain (ruff, py_compile, ds-precommit, surprise-row-gate, naming-gate in WARN window)",
-      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_code.txt -- <four paths>",
-      "result": "committed 638daaaa76; surprise-row-gate OK (4 new rows); naming-gate 4 REFUSE verdicts did not block (S11)"
+      "invocation": "bash .tools/safe-commit.sh --author <serial> -F .scratch/msg_cl5_a2.txt -- <four paths>",
+      "result": "committed 260dd20597; surprise-row-gate OK (S13); to-pipeline-gate OK (no task order in the commit); naming-gate PASS 0 graded"
     },
     {
       "tool": "git sparse-checkout list",
