@@ -1,0 +1,26 @@
+worker 0.9.0_WK_AMGT_HARVST~141 on AMGT_HARVST.TO-HVST-ca-1, worktree C:/dev/wk-harvst-141, branch wk-AMGT_HARVST-141, cut from 65c913d949
+
+first act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_HARVST-141; test -d org && test -d .tools -> TREE-OK
+
+baseline, before the change: python -m pytest lib/opal_data_harvest -q --continue-on-collection-errors
+  -> 15 failed, 807 passed, 3 skipped, 1 error (collection: test_ad1_token_store.py, FileNotFoundError on
+     org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py; the worktree is sparse-checked-out without org/tier1_exec)
+AC2 at base: rc=2, "Interrupted: 1 error during collection"
+
+commit 9a3c64d343: auth.py, worker.py, test_ca1_profile_renew.py (code and tests)
+commit e7d61cb099: INVESTIGATION_v1.md rows AMGT_HARVST-D1-W141-S1 and -S2
+
+after the change: python -m pytest lib/opal_data_harvest -q --continue-on-collection-errors
+  -> 16 failed, 814 passed, 3 skipped, 1 error; failure set = base set plus one new failure,
+     test_ca1_profile_renew.py::test_a_renew_runs_once_for_each_unseeded_tab_publisher_and_never_for_another
+AC1: python -m pytest lib/opal_data_harvest/test_ca1_profile_renew.py -q -p no:cacheprovider --color=no
+  -> rc=1, "1 failed, 7 passed in 0.30s"; failing assertion: {'barrons', 'sa', 'wsj'} == {'barrons', 'wsj'}
+AC2: the literal invocation -> rc=2, collection error on test_ad1_token_store.py (see above)
+AC2 supplementary (NOT the verdict; test_ad1 removed from the list): rc=0, "100 passed, 4 subtests passed in 3.16s"
+
+AMENDMENT 1 (order file commit 1fe305bbf3, issuer 2.0.0_SA_COO~W1): the renew rule also requires publisher in verification.ACCOUNT_CHECKS.
+commit 9be3090d66: auth.py and test_ca1_profile_renew.py
+AC1 after amendment: python -m pytest lib/opal_data_harvest/test_ca1_profile_renew.py -q -p no:cacheprovider --color=no
+  -> rc=0, "8 passed in 0.21s"
+AC2 after amendment (sparse set now includes org/tier1_exec/4.0.0_SA_CRO/scripts): rc=0, "113 passed, 4 subtests passed in 3.39s"
+full suite after amendment: 1 failed, 842 passed, 3 skipped (the one failure is test_harvest_grammar.py::test_one_writer_for_both_channels, ModuleNotFoundError rest_fetch, present in the first base run too)
