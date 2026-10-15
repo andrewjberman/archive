@@ -1,0 +1,15 @@
+Session log -- 0.9.0_WK_AMGT_HARVST~145 on AMGT_HARVST.TO-HVST-cb-8 (worktree C:/dev/wk-harvst-145, branch wk-AMGT_HARVST-145)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_HARVST-145 ; test -d org && test -d .tools -> TREE-OK ; base HEAD 7866071911.
+2. Premises re-grounded: auth.py refresh inline test at lines 53-57 at base; sessions.py get() at lines 104-114 at base; verification.repair reads bundle at lines 107, 115, 116; publishers.py _ensure_session reads bundle at 371, 393, 406, 408 (406 and 408 on the non-tab branch only).
+3. Baseline AC2 (9 files): 144 passed, 4 subtests passed in 6.15s (rc 0).
+4. Baseline full suite (python -m pytest lib/opal_data_harvest -q): 1 failed, 850 passed, 3 skipped, 6 subtests passed in 92.62s (rc 1). The one failure is test_harvest_grammar.py::test_one_writer_for_both_channels, the known sparse-worktree case.
+5. Build: auth.py profile_is_store() added; SessionManager.refresh calls it. sessions.py imports auth; get() returns the profile envelope when nothing is stored and the predicate holds. test_cb8_profile_store_envelope.py added (9 tests).
+6. AC1: 9 passed in 0.13s (rc 0); rerun 9 passed in 0.29s (rc 0).
+7. AC2 after the change: 144 passed, 4 subtests passed in 4.62s (rc 0); rerun 144 passed, 4 subtests passed in 4.94s (rc 0).
+8. Full suite after the change: 1 failed, 859 passed, 3 skipped, 6 subtests passed in 92.37s (rc 1). The same known failure; +9 passed is the new file; no new failure.
+9. git diff --stat before commit: auth.py 19 lines (14 insertions, 5 deletions); sessions.py 10 insertions; no CR bytes in either file; no whole-file diff.
+10. Empty-bundle tells (section 1.c): verification.py:115-116 UNSAFE (bundle["user_agent"], bundle["all_cookies"]). auth.py:46 with storage.py:58 UNSAFE on the repair result (network_auth_corroborated False is refused by the vault save). publishers.py 371, 393, 406, 408 safe for a tab publisher with seed_from_bundle false. Nothing changed for the unsafe tells; rows filed.
+11. Surprise rows AMGT_HARVST-D1-W145-S1 and AMGT_HARVST-D1-W145-S2 appended to org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md (48 insertions, 0 deletions; the JSON array parses, 421 rows).
+12. Commits: 8197ac2173 (the two surprise rows, with the override line); 629d613093 (auth.py, sessions.py, test_cb8_profile_store_envelope.py).
+13. Nothing was run against a publisher, S3, Secrets Manager or any box; no browser was launched; no other file was edited; the order file was not edited (the issuer flips its status).
