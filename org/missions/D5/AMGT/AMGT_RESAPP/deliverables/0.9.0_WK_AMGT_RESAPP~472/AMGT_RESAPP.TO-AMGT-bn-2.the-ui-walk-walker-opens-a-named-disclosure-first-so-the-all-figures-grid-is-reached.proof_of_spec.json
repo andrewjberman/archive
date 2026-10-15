@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bn-2.the-ui-walk-walker-opens-a-named-disclosure-first-so-the-all-figures-grid-is-reached",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bn-2.the-ui-walk-walker-opens-a-named-disclosure-first-so-the-all-figures-grid-is-reached.md",
+    "group": "OTHER",
+    "vintage_commit": "9234de7c19d964e835df98686a32f3ec10e49332"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "9234de7c19d964e835df98686a32f3ec10e49332",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bn-2.the-ui-walk-walker-opens-a-named-disclosure-first-so-the-all-figures-grid-is-reached.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~472",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".claude/skills/ui-walk/open_first.mjs",
+      "kind": "script",
+      "commit_or_etag": "d92c3083cbb020af1b00f83604d0af2563a47367",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New pure module, no I/O. Exports orderSummaries(texts, openFirst): a permutation of the indices with matching summaries first. Checked by AC1 (arms A1-A7) and by the walk's own use in exploreScope (AC2).",
+      "introduces": ["orderSummaries"],
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": ".claude/skills/ui-walk/walk.mjs",
+      "kind": "script",
+      "commit_or_etag": "d92c3083cbb020af1b00f83604d0af2563a47367",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds the repeatable --open-first option (parsed beside the other options, usage comment updated) and rewrites the closed-summary loop of exploreScope() to use orderSummaries(), click by fresh text match, and log OPEN-FIRST opened or not found. Without --open-first the clicks are the same as before. Exercised by one real walk (AC2): OPEN-FIRST opened on SHOP CN-Model with 193 visible rows, DISARMED, walk void no.",
+      "introduces": ["--open-first", "orderSummaries"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": ".claude/skills/ui-walk/SKILL.md",
+      "kind": "doc",
+      "commit_or_etag": "d92c3083cbb020af1b00f83604d0af2563a47367",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One paragraph documenting --open-first and its two log lines, beside the --day paragraph.",
+      "introduces": ["--open-first"],
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `R107 WALKER OPEN-FIRST: YES (8 of 8 arms)`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-472 && node \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round107_prep/checks/r107_walker_open_first_check.mjs\" C:/dev/wk-resapp-472; echo \"exit=$?\"",
+      "output_evidence": "PASS A1 module exports orderSummaries -- exists / PASS A2 empty openFirst is the identity / PASS A3 All figures (index 26 of 28) moves first, the rest keep order / PASS A4 match is trimmed and case-insensitive / PASS A5 two entries keep the openFirst order / PASS A6 an entry that matches nothing changes nothing and does not throw / PASS A7 every match of one entry comes first, in original order / PASS A8 walk.mjs wires the flag, the helper and its log line / R107 WALKER OPEN-FIRST: YES (8 of 8 arms) / exit=0. Before the edit, the same command printed R107 WALKER OPEN-FIRST: NO (0 of 2 arms) with exit=1.",
+      "denominator": "8 of 8 arms PASS (A1-A8); exit 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "`exit=0`; a line `OPEN-FIRST \"All figures\": opened (N table row(s) visible inside it)` with N at least 5 (from the `SHOP CN-Model` scope); and in the last lines `OK: DISARMED` and `SUMMARY: ... walk void: no`",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-472 && MSYS_NO_PATHCONV=1 timeout 590 node \".claude/skills/ui-walk/walk.mjs\" --route /security-analysis --security \"SHOP CN\" --open-first \"All figures\" --max-minutes 8 > \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~472/walk_seam.txt\" 2>&1; echo \"exit=$?\"; grep -n \"OPEN-FIRST\" \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~472/walk_seam.txt\"; tail -4 \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~472/walk_seam.txt\"",
+      "output_evidence": "exit=0 / 22:21:35:44 OPEN-FIRST \"All figures\": opened (193 table row(s) visible inside it) (grep line 22 of walk_seam.txt; the SHOP CN-Model scope, after the Thesis, Exec Management and Peers scopes read not found) / tail: OK: DISARMED at 2026-10-15T21:36:56.678761Z / 21:36:56 SUMMARY: 6 unique finding(s) from 23 observations, 30 screenshot(s), 0 guard abort(s), 15 telemetry stubbed, 0 API issue(s), 4 console error(s), walk void: no",
+      "denominator": "193 table row(s) visible inside the opened All figures disclosure on SHOP CN-Model (N >= 5 required); 1 of 1 walk; walk void: no",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The unchanged tree is the mutant: no open_first.mjs and no --open-first in walk.mjs, so the cap order of the base walker stands. AC1 must not pass against it.",
+      "expected": "AC1 prints NO (0 of 2 arms) and exits 1 against the unchanged tree",
+      "observed": "FAIL A1 module exports orderSummaries -- open_first.mjs not found / FAIL A8 walk.mjs wires the flag, the helper and its log line / R107 WALKER OPEN-FIRST: NO (0 of 2 arms) / exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run on the committed tree at d92c3083cb in two separate invocations, same command",
+      "observed": "run 1: R107 WALKER OPEN-FIRST: YES (8 of 8 arms), exit 0; run 2: R107 WALKER OPEN-FIRST: YES (8 of 8 arms), exit 0. The walk AC2 is a single live run and is not repeated for determinism.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Screenshots and the walk's tmp/ui-walk output folder are not committed",
+      "reason": "Client data stays off the repository. The output is copied to C:/dev/ui-walk-evidence/bn-2/20261015T213451Z (outside the repository), per the order's step 5. Only the walker's text log (walk_seam.txt) is committed."
+    },
+    {
+      "item": "The Model-expanded shot (013) was read once at reduced display resolution for the one-line grid check",
+      "reason": "The order's step 6 is a read, not a criterion; the row count in AC2 comes from the walker's own log, not from the image. The visual read is recorded in the worker report as a judgment, with no verdict."
+    },
+    {
+      "item": "The task order's status flip",
+      "reason": "Per the order's section 5, the status flip is the issuer's (2.0.0_SA_COO~R1), not the worker's."
+    },
+    {
+      "item": "The walk's remaining tab grids and the other --security names",
+      "reason": "Out of this cell's bounds: one walk on SHOP CN, one open-first entry, as the order states."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W472-S1: the walker logs a fourth OPEN-FIRST form (not opened in <scope>) for an entry that matches a closed summary in a scope but is not expanded; the order named two forms. The one walk did not reach the fourth form."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~472/walk_seam.txt",
+  "compiler_tools": [
+    {
+      "tool": "r107_walker_open_first_check.mjs",
+      "invocation": "node \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round107_prep/checks/r107_walker_open_first_check.mjs\" C:/dev/wk-resapp-472",
+      "result": "before the edit: NO (0 of 2 arms), exit 1. After the edit: YES (8 of 8 arms), exit 0 (two runs)."
+    },
+    {
+      "tool": "node --check",
+      "invocation": "node --check .claude/skills/ui-walk/walk.mjs; node --check .claude/skills/ui-walk/open_first.mjs",
+      "result": "both syntax checks clean (no output, rc 0)"
+    },
+    {
+      "tool": "curl and ui_walker_account.py status",
+      "invocation": "curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/; python .claude/skills/ui-walk/ui_walker_account.py status",
+      "result": "200 at 21:34:40Z; status row PRESENT, armed=no, rc 0"
+    },
+    {
+      "tool": "ui-walk walk.mjs",
+      "invocation": "MSYS_NO_PATHCONV=1 timeout 590 node .claude/skills/ui-walk/walk.mjs --route /security-analysis --security \"SHOP CN\" --open-first \"All figures\" --max-minutes 8",
+      "result": "rc 0; ARMED at 21:34:53; LOGGED IN at /market; route /security-analysis; OPEN-FIRST All figures opened 193 rows on SHOP CN-Model; OK: DISARMED at 21:36:56; walk void: no"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~472 <0.9.0_WK_AMGT_RESAPP~472@opal.agent>\" -F .scratch/msg_a.txt -- <four paths>",
+      "result": "committed d92c3083cb on wk-AMGT_RESAPP-472 (LOCAL); surprise-row-gate OK, 1 new row"
+    }
+  ]
+}
