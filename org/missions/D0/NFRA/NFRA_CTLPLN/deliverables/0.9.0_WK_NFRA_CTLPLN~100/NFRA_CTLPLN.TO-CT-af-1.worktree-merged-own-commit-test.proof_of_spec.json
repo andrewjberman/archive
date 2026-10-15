@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-af-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-af-1.worktree-merged-own-commit-test.md",
+    "group": "OTHER",
+    "vintage_commit": "cb843928c1"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~100",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round16.md",
+    "vintage_commit": "cb843928c1",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-af-1.worktree-merged-own-commit-test.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/worktree_gc.py",
+      "kind": "script",
+      "commit_or_etag": "72da6a005c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "items 1-5 of CT-af-1: creation_point and own_commits (oldest reflog entry, fail closed); classify gives UNSTARTED for own=0 or own=unknown after the ACTIVE check and before CLEAN, MERGED and HELD; CLEAN and MERGED need own >= 1; check_removable() implements --check-removable (exit 0/1/2, removes nothing); SUMMARY carries UNSTARTED=; selftest fixtures carry an own commit merged into the trunk; read by CTaf1-AC1, CTaf1-AC2, CTaf1-AC3",
+      "artifact_covered_by": [
+        "CTaf1-AC1",
+        "CTaf1-AC2",
+        "CTaf1-AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_worktree_gc_own_commit.py",
+      "kind": "test",
+      "commit_or_etag": "12640b23f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "item 6 of CT-af-1: standard library, temporary repositories only, the running-process read stubbed in-process; arms (a)-(h) as the cell names them; one --go after every verdict; final line WORKTREE-GC-OWN-COMMIT arms=8/8 ok=True; read by CTaf1-AC1",
+      "artifact_covered_by": [
+        "CTaf1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f6d7e063bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended, NFRA_CTLPLN-W100-S1 (the dirty-merged choice) and NFRA_CTLPLN-W100-S2 (the ignored-file reading), 54 insertions and no deletion; no existing row edited; surprise-corpus failures=4 baseline=4 new=0"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaf1-AC1",
+      "criterion_verbatim": "python .tools/tests/test_worktree_gc_own_commit.py -- every arm passes, including the negative control at the issuance commit (base: the file does not exist); report the whole last line with its denominator. expect: ok=True",
+      "method": "command",
+      "invocation": "python .tools/tests/test_worktree_gc_own_commit.py",
+      "output_evidence": "WORKTREE-GC-OWN-COMMIT arms=8/8 ok=True (rc=0; run under timeout 240 from the worktree root at 12640b23f9; two runs compared with cmp, identical; arm (a) is the issuance-commit negative control: NOT-REMOVABLE UNSTARTED rc=1 and the directory kept after --go)",
+      "denominator": "8 of 8 arms passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaf1-AC2",
+      "criterion_verbatim": "python .tools/worktree_gc.py --selftest -- the tool's own self-test still passes with the own-commit fixtures (base: WORKTREE-GC-SELFTEST cases=3/3 ok=True, a control; the case count may grow); report the whole last line. expect: ok=True",
+      "method": "command",
+      "invocation": "python .tools/worktree_gc.py --selftest",
+      "output_evidence": "WORKTREE-GC-SELFTEST cases=3/3 ok=True (rc=0; run under timeout 240 from the worktree root at 72da6a005c; the same last line as the base control; the two merged fixtures now carry one own commit each and land in the trunk, the three cases are unchanged)",
+      "denominator": "3 of 3 cases passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaf1-AC3",
+      "criterion_verbatim": "python .tools/worktree_gc.py -- the dry run still reads the real repository and prints its SUMMARY line, now including the UNSTARTED count (base: FAIL as expected, the SUMMARY line has no UNSTARTED= field); report the whole SUMMARY line. expect: UNSTARTED=",
+      "method": "command",
+      "invocation": "python .tools/worktree_gc.py",
+      "output_evidence": "SUMMARY: CLEAN=0  MERGED=0  HELD=0  ESCALATE=0  ACTIVE=4  SKIP=0  PRUNABLE=0  UNSTARTED=0  (dry run: nothing removed) (rc=0; run under timeout 240 from the worktree root at 72da6a005c against the real repository, 4 linked worktrees, 4 classified; the UNSTARTED= field is present; nothing was removed or changed)",
+      "denominator": "4 of 4 linked worktrees classified",
+      "status": "PASS",
+      "expect": "UNSTARTED=",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "two runs of python .tools/tests/test_worktree_gc_own_commit.py from the worktree root at 12640b23f9, outputs compared byte for byte with cmp",
+      "observed": "identical output on both runs (rc=0 both): WORKTREE-GC-OWN-COMMIT arms=8/8 ok=True; cmp reported no difference",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the issuance-commit tool (cb843928c1:.tools/worktree_gc.py, read by git show into a scratch file) against the repaired tool at 72da6a005c, counted by grep -c for UNSTARTED and for check-removable; a textual control, not a run of the base tool",
+      "expected": "the base carries no UNSTARTED class and no --check-removable verb (count 0 and 0); the repaired tool carries both (count above 0)",
+      "observed": "base grep -c UNSTARTED = 0; base grep -c check-removable = 0; repaired grep -c UNSTARTED = 5; repaired grep -c check-removable = 3",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-af-1 from pending to complete",
+      "reason": "not done: the flip is the issuer's; the order file is outside this worker's <paths> and was not edited (the RULES of the order say so; the Proof section's flip sentence is read as the issuer's act)"
+    },
+    {
+      "item": "the MERGED class of --go (dirty merged worktrees are force-removed)",
+      "reason": "not changed and not resolved: the cell says leave it; the conflict with the CTO round-15 ruling is filed as NFRA_CTLPLN-W100-S1"
+    },
+    {
+      "item": "branch-creation forms the own-commit read does not read exactly",
+      "reason": "orphan branch (git worktree add --orphan): the oldest reflog entry is its first commit, so own undercounts by one; a branch with no reflog (core.logAllRefUpdates false) or an expired reflog reads empty and is UNSTARTED (fail closed); all three can only refuse a removal, never permit one; the forms read exactly are worktree add -b, git branch, checkout -b and worktree add of an existing branch (each writes branch: Created from <sha>)"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed: outside this cell's <paths>"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W100-S1: --go still force-removes a dirty MERGED worktree (own >= 1, merged, idle 24 h, Andrew's standing word) while --check-removable refuses the same worktree (CTO round-15 ruling 1); the cell applies the dirty test to --check-removable only; left unresolved, filed UNDER_INVESTIGATION with disarm_owner 1.0.0_SA_CTO.",
+    "NFRA_CTLPLN-W100-S2: check-removable refuses a non-cache IGNORED file, a stricter reading than the literal git status --porcelain (empty for a worktree holding an ignored file, and git worktree remove deletes that file without --force); filed UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~100/NFRA_CTLPLN.TO-CT-af-1.worktree-merged-own-commit-test.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~100, 2026-10-15; WIP commits 6c95cbb4c2, 72da6a005c, 12640b23f9; surprise commit f6d7e063bd on wk-NFRA_CTLPLN-100)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_worktree_gc_own_commit.py",
+      "result": "WORKTREE-GC-OWN-COMMIT arms=8/8 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/worktree_gc.py --selftest",
+      "result": "WORKTREE-GC-SELFTEST cases=3/3 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/worktree_gc.py",
+      "result": "SUMMARY: CLEAN=0  MERGED=0  HELD=0  ESCALATE=0  ACTIVE=4  SKIP=0  PRUNABLE=0  UNSTARTED=0  (dry run: nothing removed)"
+    }
+  ]
+}
