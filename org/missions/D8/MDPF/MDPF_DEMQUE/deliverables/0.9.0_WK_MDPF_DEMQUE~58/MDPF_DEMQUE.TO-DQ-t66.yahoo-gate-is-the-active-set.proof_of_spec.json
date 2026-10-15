@@ -82,11 +82,9 @@
       "criterion_verbatim": "DQ9-t66-AC2 -- on the REAL store index and the V2 set (read only): extend_frontier.py --plan shows excluded_active above 0, no V2 CUSIP in the day's securities, 1 to 380 symbols, excluded_p2 and excluded_p3 both 0; --plan-week over 10 days shows max_requests at most 380 (python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t66_real.py, expect GATE-REAL-OK)",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t66_real.py",
-      "output_evidence": "run from the worktree root C:/dev/wk-demque-58 under timeout 260 (rc=1):\nplan symbols=6 excluded_active=528 excluded_p2=0 excluded_p3=0\nGATE-REAL-BAD the securities list is not 1..380 entries equal to symbols\n--- the two real CLI lines, verbatim (extend_frontier.py --plan, then extend_frontier.py --plan-week --from 2026-10-19 --days 10; rc=0 each) ---\n{\"block_index\": 1, \"cells\": 9834, \"cycle_trading_days\": 5, \"end\": \"2026-10-15\", \"excluded_active\": 528, \"excluded_p2\": 0, \"excluded_p3\": 0, \"finish_date\": \"2026-10-15\", \"frontier\": \"2026-10-15\", \"need_class\": \"client\", \"order\": \"FWD-9 rank (rank.rank over the crosswalk and silver transactions, the inputs rank.py --probe reads)\", \"request_id\": \"STANDING-T1-EXTEND-2026-10-15\", \"slice_date\": \"2026-10-15\", \"start\": \"2020-07-06\", \"symbols\": 6, \"tiers\": {\"daily\": 5, \"daily_extra_not_landed\": 8, \"rolling\": 5, \"rolling_not_landed\": 387}, \"window_start\": \"2020-07-06\"}\n{\"assumed_landed\": null, \"cap\": 380, \"cycle_trading_days\": 5, \"daily_cap\": 400, \"days\": [{\"daily\": 5, \"date\": \"2026-10-19\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-20\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-21\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-22\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-23\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-26\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-27\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-28\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-29\", \"requests\": 6, \"rolling\": 1}, {\"daily\": 5, \"date\": \"2026-10-30\", \"requests\": 6, \"rolling\": 1}], \"excluded_active\": 528, \"excluded_p2\": 0, \"excluded_p3\": 0, \"max_lag_trading_days\": 5, \"max_requests\": 6, \"order\": \"FWD-9 rank (rank.rank over the crosswalk and silver transactions, the inputs rank.py --probe reads)\", \"reserve\": 20, \"rolling_names\": 5, \"tiers\": {\"daily\": 5, \"daily_extra_not_landed\": 8, \"rolling\": 5, \"rolling_not_landed\": 387}}",
-      "denominator": "the check's five clauses in order, 1 PASS of 5 reached: (1) excluded_active > 0: PASS, 528; (2) securities list 1..380 entries equal to symbols: FAIL, not evaluable from the --plan line because the CLI drops the securities list; (3) no V2 CUSIP in the securities: NOT REACHED; (4) excluded_p2 and excluded_p3 both 0: NOT REACHED (both 0 on the line); (5) --plan-week max_requests <= 380: NOT REACHED by the check (read from the line: 6 of 380 over 10 days).",
-      "status": "FAIL",
-      "status_reason": "The criterion cannot be met as written: the check reads a securities list from the --plan JSON line, which the CLI removes before printing (unchanged by this cell, the order names no change to the CLI output). Surprise row MDPF_DEMQUE-D1-W58-S1 (BLOCKING) carries it. The order stays open; the CTO or the issuer decides whether the --plan print changes.",
-      "expect": "GATE-REAL-OK",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-58 under timeout 260 (rc=0), after the issuer's amendment f2f36b699a (the check reads plan() in-process; surprise MDPF_DEMQUE-D1-W58-S1 ruled on by the coordinator):\nplan symbols=6 excluded_active=528 excluded_p2=0 excluded_p3=0\nweek max_requests=6 excluded_active=528\nGATE-REAL-OK",
+      "denominator": "the check's five clauses, 5 of 5 PASS: (1) excluded_active > 0: 528; (2) securities list of 1..380 entries equal to symbols: 6 entries, symbols 6; (3) no V2 active-set CUSIP among the day's securities: 0 of 6; (4) excluded_p2 and excluded_p3 both 0: 0 and 0; (5) --plan-week over 10 days max_requests <= 380: 6 of 380.",
+      "status": "PASS",
       "judgment": false
     }
   ],
@@ -105,16 +103,16 @@
   },
   "declared_exclusions": [
     {
-      "item": "the CLI --plan line carries no securities list, so the check's securities clause (DQ9-t66-AC2) cannot be graded from it",
-      "reason": "extend_frontier.py main() pops 'securities' before printing (unchanged by this cell). Surfaced as MDPF_DEMQUE-D1-W58-S1 (BLOCKING); the CLI print is not in the order's build list, so it is not changed here."
+      "item": "the CLI --plan line carries no securities list (extend_frontier.py main() pops it before printing; unchanged by this cell)",
+      "reason": "the criterion's securities clause is graded in-process from plan() by the issuer's amended check (commit f2f36b699a, ruling on MDPF_DEMQUE-D1-W58-S1). The CLI print is not in the order's build list, so it is not changed here."
     },
     {
       "item": "the Yahoo gate reaches client-class requests only: an active CUSIP in a non_client request still draws on Yahoo",
-      "reason": "demand_queue.gated() never gates a non_client request, and the order's test name pins the client scope. Surfaced as MDPF_DEMQUE-D1-W58-S2 (OBSERVATION) for the issuer's ruling."
+      "reason": "demand_queue.gated() never gates a non_client request, and the order's test name pins the client scope. Ruled by the coordinator on MDPF_DEMQUE-D1-W58-S2: the Yahoo gate stays client-class only, as DQ-t-52 designed; no change."
     },
     {
       "item": "the stored Yahoo rows of active names stop extending at the next apply, and lag_report omits them",
-      "reason": "the order does not verify that the Bloomberg leg serves every active name. Surfaced as MDPF_DEMQUE-D1-W58-S3 (OBSERVATION); unmeasured here."
+      "reason": "MDPF_DEMQUE-D1-W58-S3 (OBSERVATION), accepted by the coordinator with nothing to build: Bloomberg coverage of active names belongs to ADVI_COTBKF. Unmeasured here."
     },
     {
       "item": "the folder run python -m pytest data/mdpf/scripts/demque: 228 passed, 4 failed, rc=1",
