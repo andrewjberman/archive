@@ -21,14 +21,21 @@
       "kind": "doc",
       "commit_or_etag": "0b18dfcc6c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The reader and calendar record. Read-only work: no AWS call, no write, no vendor call, no secret read. Not pushed, not deployed. The official checker run on these bytes is FAIL on the foreign-firm-token guard."
+      "deploy_evidence": "The reader and calendar record, carried by 0b18dfcc6c. Read-only work: no AWS call, no write, no vendor call, no secret read. Not pushed, not deployed. The record needed no edit after the issuer's checker amendment at 0ee0142884; the official checker run on these bytes is PASS."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "0b18dfcc6c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Two rows appended as bytes: IRPT_DASHBD-D2-W402-S1 (BLOCKING, INERT) and IRPT_DASHBD-D2-W402-S2 (OBSERVATION, INERT). The prior content is byte-equal to HEAD (1079705 bytes)."
+      "deploy_evidence": "Rows IRPT_DASHBD-D2-W402-S1 (BLOCKING, INERT) and IRPT_DASHBD-D2-W402-S2 (OBSERVATION, INERT) appended as bytes by 0b18dfcc6c. The prior content is byte-equal to the parent (1079705 bytes)."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "45dc9c243a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_DASHBD-D2-W402-S3 (OBSERVATION, INERT) appended as bytes by 45dc9c243a. The prior content is byte-equal to its parent (1084796 bytes)."
     }
   ],
   "acceptance": [
@@ -37,23 +44,23 @@
       "criterion_verbatim": "DBC114-3-AC1 -- the record names exactly the three tables; each recorded reader file exists in the repo and names its table; a table with zero readers carries none_words and a claim of absent or inferred; reader_count equals the list; when the calendar comparison did not run the package is in fact absent now and a reason is given; the range is the stated one; no write is recorded. Base: FAIL (no record).",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r114/p114_bcw.py\" . DBC114-3-AC1",
-      "output_evidence": "Official run, from the worktree root, two runs identical: stdout 'foreign firm token in field paths' then 'DBC114-3-AC1 FAIL', rc 1. The guard is in no_identifiers, which runs before the table arms, so the official run stops there. Diagnostic only (scratch copy with the five foreign-named non-reader paths removed, ac_3 called in-process): 'ac_3 PASS', which covers the three-table set, each reader file's existence and table name, the zero-reader none_words and claim, reader_count equality, the package-absent reason (python -I import of pandas_market_calendars raises ModuleNotFoundError), the range and the calendar source.",
-      "denominator": "1 of 1 criterion FAIL (rc 1); 2 of 2 identical official runs; 3 of 3 tables named; 40 non-reader paths across the three tables, 5 carrying another firm's name in the file name (the failing arm); 6 reader entries (5 distinct files) checked by the diagnostic copy only",
-      "status": "FAIL",
-      "status_reason": "The record is written as the order asks and the reader, calendar and range arms pass on the diagnostic copy. The official checker fails on its foreign-firm-token guard, which refuses five non-reader paths that carry another firm's name in the file name. The record was not edited to clear the guard, and the checker is outside this order's grant. The order stays open; the question is carried as surprise row IRPT_DASHBD-D2-W402-S1.",
+      "output_evidence": "Run from the worktree root on the record at 0b18dfcc6c, with the checker as amended at 0ee0142884: stdout 'DBC114-3-AC1 PASS', rc 0, identical on two runs. --selftest prints 'SELFTEST PASS', rc 0. Before the amendment the same bytes printed 'foreign firm token in field paths' then 'DBC114-3-AC1 FAIL', rc 1, on the foreign-token guard alone; that row is IRPT_DASHBD-D2-W402-S1.",
+      "denominator": "1 of 1 criterion PASS (rc 0); 2 of 2 identical runs; 3 of 3 tables named; 40 non-reader paths across the three tables, none with a run of 8 or more digits; 6 reader entries (5 distinct files) checked for existence and table name",
+      "status": "PASS",
+      "status_reason": "PASS as written by the official checker on the record in this folder. The foreign-token guard that failed the first run was amended by the issuer (commit 0ee0142884, which exempts path, paths and file fields from that guard only); the criterion text, invocation and expected output are unchanged. The amendment also added paths to the 8-digit exemption list, which is recorded as IRPT_DASHBD-D2-W402-S3. The record was not edited.",
       "expect": "DBC114-3-AC1 PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The record with the five foreign-named non-reader paths removed (scratch copy, not committed), graded by ac_3 in-process",
-      "expected": "ac_3 PASS, which would show the guard is the only failing arm",
-      "observed": "ac_3 PASS",
+      "description": "The same record graded by the checker before the issuer's amendment (commit fdc993d676 era checker, i.e. the guard without the path exemption)",
+      "expected": "foreign-token guard FAIL, which shows the guard is what the amendment changed",
+      "observed": "foreign firm token in field paths; DBC114-3-AC1 FAIL, rc 1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the official checker run twice from the worktree root with the same arguments",
-      "observed": "two identical outputs, rc 1 each; last line DBC114-3-AC1 FAIL",
+      "method": "the official checker run twice from the worktree root with the same arguments, plus the checker's selftest",
+      "observed": "two identical outputs, rc 0 each; last line DBC114-3-AC1 PASS; selftest SELFTEST PASS, rc 0",
       "status": "STABLE"
     }
   },
@@ -64,11 +71,11 @@
     },
     {
       "item": "Any AWS call, S3 listing, DynamoDB read or secret read",
-      "reason": "The order grants none. The checker's S3 arm is not reached on the official run."
+      "reason": "The order grants none. The checker's S3 arm was not run by this worker; the checker's own S3 arm is not reached in the record's ac_3 path."
     },
     {
-      "item": "Reader and calendar arms on the official run",
-      "reason": "The foreign-token guard fires first, so those arms were graded only on the scratch diagnostic copy, which is not a deliverable."
+      "item": "Editing the record or the checker to clear the guard",
+      "reason": "Not done by this worker. The checker amendment is the issuer's, committed at 0ee0142884 on this branch."
     },
     {
       "item": "Indirect readers through a producer's prefetch",
@@ -76,14 +83,15 @@
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W402-S1: BLOCKING, INERT: the checker's foreign-firm-token guard refuses five non-reader paths that carry another firm's name in the file name; DBC114-3-AC1 fails on that arm alone (the diagnostic copy passes ac_3). The record and the checker were not edited.",
-    "IRPT_DASHBD-D2-W402-S2: OBSERVATION, INERT: the resume packet's 'no reader found' for account_return_daily is incomplete. Firm-generic readers exist for both returns and holdings gold, and none is bound to a Cottonwood prefix; the Cottonwood entry in the declaration is method-fields-only."
+    "IRPT_DASHBD-D2-W402-S1: BLOCKING, INERT: the checker's foreign-firm-token guard refused five non-reader paths that carry another firm's name in the file name; the issuer amended the guard at 0ee0142884 and the criterion now PASSES. Row left as filed for the issuer's drain disposition.",
+    "IRPT_DASHBD-D2-W402-S2: OBSERVATION, INERT: the resume packet's 'no reader found' for account_return_daily is incomplete. Firm-generic readers exist for both returns and holdings gold, and none is bound to a Cottonwood prefix; the Cottonwood entry in the declaration is method-fields-only.",
+    "IRPT_DASHBD-D2-W402-S3: OBSERVATION, INERT: the amended checker also exempts the paths field from the 8-digit rule, which the amendment's message does not describe. The record's non-reader paths hold no 8-digit run, so the criterion is unaffected."
   ],
   "compiler_tools": [
     {
-      "tool": "p114_bcw.py (DBC114-3-AC1)",
+      "tool": "p114_bcw.py (DBC114-3-AC1), amended at 0ee0142884",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r114/p114_bcw.py\" . DBC114-3-AC1",
-      "result": "FAIL, rc 1, foreign firm token in field paths"
+      "result": "PASS, rc 0; selftest SELFTEST PASS, rc 0"
     },
     {
       "tool": "lib/tests/test_nyse_fallback_equals_package.py",
