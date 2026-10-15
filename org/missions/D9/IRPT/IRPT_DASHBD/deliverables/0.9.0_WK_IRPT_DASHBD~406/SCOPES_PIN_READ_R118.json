@@ -76,18 +76,89 @@
       "cottonwood",
       "etfs",
       "inflection"
-    ]
+    ],
+    "changed_fields": {
+      "49financial": [
+        "aliases",
+        "product_live",
+        "tenant",
+        "tier_live"
+      ],
+      "cottonwood": [
+        "aliases",
+        "masters",
+        "restricted_prefix_hosts",
+        "tenant"
+      ],
+      "etfs": [
+        "note",
+        "tenancy"
+      ],
+      "inflection": [
+        "masters",
+        "tenant"
+      ]
+    }
   },
-  "channels": {
+  "derived": {
     "in_zip_tree": {
-      "blackdiamond_z09": "REFUSED: REFUSED: registry lookup('z09') failed: KeyError: 'z09'. A m",
-      "orion": "inflection",
-      "schwab_08335338": "49financial"
+      "blackdiamond_z09": {
+        "firm": "REFUSED: REFUSED: registry lookup('z09') failed: "
+      },
+      "orion": {
+        "firm": "inflection",
+        "holdings_performance_daily": "s3://opal-data-inflection/irpt/inflection/gold/holdings_performance_daily/date=2026-10-13/data.parquet",
+        "holdings_performance_manifest": "s3://opal-data-inflection/irpt/inflection/gold/holdings_performance_manifest/date=2026-10-13/data.parquet",
+        "name_daily": "irpt-inf-holdings-performance-daily",
+        "name_lambda": "irpt-inf-holdings-performance-lambda",
+        "name_policy": "irpt-inf-holdings-performance-policy",
+        "name_role": "irpt-inf-holdings-performance-role",
+        "positions_prefix": "orion/inflection/silver/fact_positions/"
+      },
+      "schwab_08335338": {
+        "balance_prefix": "schwab/08335338/silver/dim_balance/",
+        "firm": "49financial",
+        "holdings_performance_daily": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2026-10-13/data.parquet",
+        "holdings_performance_manifest": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2026-10-13/data.parquet",
+        "name_daily": "irpt-49f-holdings-performance-daily",
+        "name_lambda": "irpt-49f-holdings-performance-lambda",
+        "name_policy": "irpt-49f-holdings-performance-policy",
+        "name_role": "irpt-49f-holdings-performance-role",
+        "positions_prefix": "schwab/08335338/silver/dim_position/"
+      }
     },
     "with_repinned_members": {
-      "blackdiamond_z09": "cottonwood",
-      "orion": "inflection",
-      "schwab_08335338": "49financial"
+      "blackdiamond_z09": {
+        "firm": "cottonwood",
+        "holdings_performance_daily": "s3://opal-data-cottonwood/irpt/cottonwood/gold/holdings_performance_daily/date=2026-10-13/data.parquet",
+        "holdings_performance_manifest": "s3://opal-data-cottonwood/irpt/cottonwood/gold/holdings_performance_manifest/date=2026-10-13/data.parquet",
+        "name_daily": "irpt-cot-holdings-performance-daily",
+        "name_lambda": "irpt-cot-holdings-performance-lambda",
+        "name_policy": "irpt-cot-holdings-performance-policy",
+        "name_role": "irpt-cot-holdings-performance-role",
+        "positions_prefix": "blackdiamond/cottonwood/silver/fact_holdings/"
+      },
+      "orion": {
+        "firm": "inflection",
+        "holdings_performance_daily": "s3://opal-data-inflection/irpt/inflection/gold/holdings_performance_daily/date=2026-10-13/data.parquet",
+        "holdings_performance_manifest": "s3://opal-data-inflection/irpt/inflection/gold/holdings_performance_manifest/date=2026-10-13/data.parquet",
+        "name_daily": "irpt-inf-holdings-performance-daily",
+        "name_lambda": "irpt-inf-holdings-performance-lambda",
+        "name_policy": "irpt-inf-holdings-performance-policy",
+        "name_role": "irpt-inf-holdings-performance-role",
+        "positions_prefix": "orion/inflection/silver/fact_positions/"
+      },
+      "schwab_08335338": {
+        "balance_prefix": "schwab/08335338/silver/dim_balance/",
+        "firm": "49financial",
+        "holdings_performance_daily": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2026-10-13/data.parquet",
+        "holdings_performance_manifest": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2026-10-13/data.parquet",
+        "name_daily": "irpt-49f-holdings-performance-daily",
+        "name_lambda": "irpt-49f-holdings-performance-lambda",
+        "name_policy": "irpt-49f-holdings-performance-policy",
+        "name_role": "irpt-49f-holdings-performance-role",
+        "positions_prefix": "schwab/08335338/silver/dim_position/"
+      }
     }
   },
   "minimal_repin": [
@@ -98,7 +169,7 @@
     }
   ],
   "unchanged_for_other_channels": true,
-  "words": "Measured by the producer's own firm_scope() in two extracted trees: the live zip, and the same tree with only scopes.json replaced by the blob at the new pin (the latest commit touching scopes.json, on HEAD). minimal_repin is scopes.json alone: the derivation resolves blackdiamond_z09 to cottonwood with no other member replaced, so no second member was added and the other six members stay pinned (tiers.json already equals HEAD). The three added scope rows (z09, 4698, transcripts) carry no monolith_scopes, and no added row carries the spelling of the custody master used by the schwab channel or the orion monolith: orion resolves by the monolith rule to the single scope that carries it, inflection, in both trees, and the schwab channel resolves by a registry_key lookup that matches only long, short and alias spellings. So the added rows cannot change those two channels' derivation by the code paths the producer uses for them. The 49 Financial and Inflection rows changed between the pin and HEAD (scopes_diff.changed): the derivation for the two channels is measured unchanged, but other registry readers of the 49 Financial and Inflection functions were not read by this record. Reads: one HEAD and one GET of the shared zip by version id, plus repository git blobs; no write, no invoke, no vendor call, no secret read.",
+  "words": "Measured by the producer's own firm_scope() and resolved_prefix(), and by the builders' address() and name() for 2026-10-13, in two extracted trees: the live zip, and the same tree with only scopes.json replaced by the blob at the new pin (the latest commit touching scopes.json, equal to HEAD's blob). minimal_repin is scopes.json alone: the derivation resolves blackdiamond_z09 to cottonwood with no other member replaced, so no second member was added and the other six members stay pinned (tiers.json equals HEAD). The full derivation of the schwab channel (firm, positions and balance prefixes, both gold addresses, four names) and of orion (firm, positions prefix, both gold addresses, four names; orion declares no balance prefix) is identical in the two trees in every key; the 49 Financial and Inflection derivations are unchanged. The three added scope rows (z09, 4698, transcripts) carry no monolith_scopes, so orion still resolves by the monolith rule to the one scope carrying it, inflection; no added spelling collides with the custody master row or the orion monolith, because lookup() matches only key, long, short and aliases not marked lookup false. changed_fields (scopes_diff): 49financial aliases, product_live, tenant, tier_live; inflection masters, tenant; cottonwood aliases, masters, restricted_prefix_hosts, tenant; etfs note, tenancy. Which of them the producer or the builders read: aliases only through lookup() spellings, and every changed alias row is marked lookup false, so no spelling changes; the routed flag of the 49financial alias is read only by the routed-bucket helper that the firm registry and router rendering use, which address() and name() do not call. tenancy is read by address() through the tier home rule, but it changed only for etfs, which is not a channel. short and class, read by name() and firm_scope(), did not change for any of the three channels. tenant is read by the tenant registry and validation, not by firm_scope(), resolved_prefix(), address() or name(). masters is read by validation only. product_live, tier_live and restricted_prefix_hosts have no reader in the extracted zip tree, and note is free text. Other readers of those fields outside the zip tree were not read. Reads: one HEAD and one GET of the shared zip by version id, plus git blobs; no write, no invoke, no vendor call, no secret read.",
   "reads": {
     "vendor_calls": 0,
     "s3_writes": 0,
