@@ -32,8 +32,16 @@ try:
     ind_riv = sorted({r.get("ticker") for r in pm if r.get("role") == "rival" and r.get("group_id") == "IDVZ"})
     riv = pg.get("rivals") or []
     pg_ok = P.envelope_ok(pg) and len(riv) > 0
-    ck, cd = newest("canonical_shape")
-    crow = [r for r in rows(ck) if (r.get("fund_ticker") or r.get("fund_id")) == "INEQ"]
+    # A1 (issuer): a fund's latest report is in the NEWEST partition THAT HOLDS IT (a newer partition may hold other funds only; row Z-W101-S5), newest part of that partition
+    ckeys = []
+    for page in c.get_paginator("list_objects_v2").paginate(Bucket=BK, Prefix=RT + "canonical_shape/"):
+        ckeys += [o["Key"] for o in page.get("Contents", []) if o["Key"].endswith(".parquet")]
+    crow = []
+    for d_ in sorted({k.split("/")[-2] for k in ckeys}, reverse=True):
+        part = max([k for k in ckeys if k.split("/")[-2] == d_], key=lambda k: k.split("/")[-1])
+        crow = [r for r in rows(part) if (r.get("fund_ticker") or r.get("fund_id")) == "INEQ"]
+        if crow:
+            break
     ho = h.etfs_get_rival_fund_holdings(fund_ticker="INEQ")
     hl = ho.get("holdings") or []
     h_ok = P.envelope_ok(ho) and len(hl) == len(crow) and len(crow) > 0 and bool(ho.get("weight_unit")) and str(ho.get("report_date"))[:10] == str(crow[0].get("report_date"))[:10]
