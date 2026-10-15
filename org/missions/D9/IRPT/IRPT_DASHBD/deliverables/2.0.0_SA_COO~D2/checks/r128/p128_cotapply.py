@@ -106,8 +106,9 @@ def check_head(rec, packet_blob, coo_text, cto_text, ledger_exists):
          "one_change_at_a_time: the denominator (worktrees read) and zero markers naming this surface")
     need(rec["ledger_entry"] == LEDGER_SLUG and ledger_exists, "the ledger entry %s must exist" % LEDGER_SLUG)
     b = rec["before"]
-    need(isinstance(b, dict) and set(b) == {"function_exists", "role_exists", "schedule_exists", "artifact_exists", "gold_partitions", "gold_last_day"}, "before keys")
-    need(b["function_exists"] is False and b["role_exists"] is False and b["schedule_exists"] is False and b["artifact_exists"] is False, "before: all four must be recorded absent, as the packet's section 3")
+    need(isinstance(b, dict) and set(b) == {"function_exists", "role_exists", "schedule_exists", "artifact_exists", "artifact_version_id", "gold_partitions", "gold_last_day"}, "before keys")
+    need(b["function_exists"] is False and b["role_exists"] is False and b["schedule_exists"] is False and isinstance(b["artifact_exists"], bool), "before: the function, both roles and the schedule must be recorded absent, as the packet's section 3")
+    need((b["artifact_exists"] is False and b["artifact_version_id"] is None) or (b["artifact_exists"] is True and nes(b["artifact_version_id"])), "before: artifact_version_id must be null when the artifact is absent and a version id when it exists")
     need(b["gold_partitions"] == HISTORY_COUNT and b["gold_last_day"] == HISTORY_LAST, "before: the gold prefix must read %d partitions to %s" % (HISTORY_COUNT, HISTORY_LAST))
     bd = rec["build"]
     need(isinstance(bd, dict) and set(bd) == {"zip_sha256", "zip_sha256_b64", "members", "import_smoke_rc", "landed_version_id", "content_sha256", "built_equals_landed"}, "build keys")
@@ -115,6 +116,7 @@ def check_head(rec, packet_blob, coo_text, cto_text, ledger_exists):
     need(bd["zip_sha256_b64"] == BUILD_B64, "the build's sha256 must equal the packet's section 2 value %s, got %s" % (BUILD_B64, bd["zip_sha256_b64"]))
     need(isinstance(bd["members"], list) and len(bd["members"]) == 16 and "handler.py" in bd["members"], "the zip must hold 16 members incl. handler.py")
     need(bd["import_smoke_rc"] == 0 and nes(bd["landed_version_id"]) and bd["content_sha256"] == bd["zip_sha256"] and bd["built_equals_landed"] is True, "the import smoke, the landed version or the built-equals-landed record")
+    need(b["artifact_exists"] is False or bd["landed_version_id"] == b["artifact_version_id"], "a pre-existing artifact must be reused, never uploaded again (landed version differs from before.artifact_version_id)")
     p = rec["plan"]
     need(isinstance(p, dict) and set(p) == {"add", "change", "destroy", "addresses", "replan_no_changes"}, "plan keys")
     need(p["add"] == 7 and p["change"] == 0 and p["destroy"] == 0 and sorted(re.sub(r"^module\.[^.]+\.", "", str(a)) for a in p["addresses"]) == PLAN_ADDRESSES and p["replan_no_changes"] is True,
@@ -256,7 +258,7 @@ def selftest():
     zh = base64.b64decode(BUILD_B64).hex()
     good = {"claim": "measured", "gates": {"packet_blob": "blob1", "packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pin_is_ancestor": True,
             "one_change_at_a_time": {"worktrees_read": 9, "open_markers_naming_this_surface": 0}, "live_matches_packet": True}, "ledger_entry": LEDGER_SLUG,
-            "before": {"function_exists": False, "role_exists": False, "schedule_exists": False, "artifact_exists": False, "gold_partitions": HISTORY_COUNT, "gold_last_day": HISTORY_LAST},
+            "before": {"function_exists": False, "role_exists": False, "schedule_exists": False, "artifact_exists": False, "artifact_version_id": None, "gold_partitions": HISTORY_COUNT, "gold_last_day": HISTORY_LAST},
             "build": {"zip_sha256": zh, "zip_sha256_b64": BUILD_B64, "members": ["handler.py"] + ["m%d" % i for i in range(15)], "import_smoke_rc": 0, "landed_version_id": "v2", "content_sha256": zh,
                       "built_equals_landed": True},
             "plan": {"add": 7, "change": 0, "destroy": 0, "addresses": list(PLAN_ADDRESSES), "replan_no_changes": True}, "apply_finished_utc": "2026-10-16T01:00:00Z",
@@ -284,7 +286,8 @@ def selftest():
             ("code hash", lambda r: r["after"]["function"].update(code_sha256="x")), ("sids", lambda r: r["after"]["policy_sids"].pop()),
             ("schedule enabled", lambda r: r["after"]["schedule"].update(state="ENABLED")), ("build sha", lambda r: r["build"].update(zip_sha256_b64=b64_of_hex("00" * 32), zip_sha256="00" * 32, content_sha256="00" * 32)),
             ("members", lambda r: r["build"].update(members=["handler.py"])), ("smoke", lambda r: r["build"].update(import_smoke_rc=1)), ("not equal", lambda r: r["build"].update(built_equals_landed=False)),
-            ("before function", lambda r: r["before"].update(function_exists=True)), ("before count", lambda r: r["before"].update(gold_partitions=3324)),
+            ("before function", lambda r: r["before"].update(function_exists=True)), ("artifact version without artifact", lambda r: r["before"].update(artifact_version_id="v9")),
+            ("reuploaded over existing", lambda r: r["before"].update(artifact_exists=True, artifact_version_id="v9")), ("before count", lambda r: r["before"].update(gold_partitions=3324)),
             ("denominator", lambda r: r["gates"]["one_change_at_a_time"].update(worktrees_read=0)), ("marker", lambda r: r["gates"]["one_change_at_a_time"].update(open_markers_naming_this_surface=1)),
             ("ledger closed", lambda r: r.update(ledger_closed=True)), ("extra key", lambda r: r.update(z=1)), ("utc", lambda r: r.update(apply_finished_utc="soon")),
             ("layer arn", lambda r: r["after"]["function"].update(layer_arn="arn:aws:lambda:us-east-1:313476888478:layer:other:1")), ("pyarrow version", lambda r: r["event"].update(layer_pyarrow_version="14")),
@@ -302,6 +305,9 @@ def selftest():
     r["event"]["report"]["max_memory_used_mb"] = 800
     r["event"]["over_717_mb"] = True
     assert grade(r) is True
+    reuse = copy.deepcopy(good)
+    reuse["before"].update(artifact_exists=True, artifact_version_id="v2")
+    assert grade(reuse) is True
     assert grade(copy.deepcopy(good), blob="other") is False and grade(copy.deepcopy(good), ledger=False) is False
     assert grade(copy.deepcopy(good), c="DRAFT " + PACKET_SHA) is False and grade(copy.deepcopy(good), t="SIGNED deadbeef0000") is False
     print("selftest: two green and %d red record arms behave" % (len(arms) + 4))
