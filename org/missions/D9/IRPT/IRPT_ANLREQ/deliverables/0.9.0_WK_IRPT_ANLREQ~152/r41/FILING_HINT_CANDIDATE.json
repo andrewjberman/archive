@@ -1,0 +1,96 @@
+{
+  "cell": "AR-y-351",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-351",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~152",
+  "contract": "C-FILING-HINT, PRD v0.15 (org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md), Andrew's word in PRD ADDENDUM v0.12",
+  "prod_tip": "33ad65eef369face7ec7a9aa825ba7fb23f0fa28",
+  "prod_tip_read": "git -C portal fetch origin, then git -C portal rev-parse origin/PROD (permitted read; no push)",
+  "branch": "wk-IRPT_ANLREQ-152-portal (portal worktree C:/dev/wk-irpt-anlreq-152/portal)",
+  "candidate_branch": "cand/dell2/anlreq-filing-hint-did-you-mean (LOCAL only; never pushed)",
+  "commit": "a6b83f692084b2f599d0b6142aa61c75bb735a42",
+  "commit_subject": "feat(TicketCenter): C-FILING-HINT Did you mean with Use and Keep on the Analysis Request filing form",
+  "diff_stat_vs_prod": "git -C portal diff --stat origin/PROD a6b83f692084b2f599d0b6142aa61c75bb735a42 -> 4 files changed, 356 insertions(+), 16 deletions(-)",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/__tests__/filing-hint.test.tsx",
+    "src/pages/TicketCenter/analysisRequest.ts"
+  ],
+  "not_edited": "src/pages/InvestorReporting/** (prospect.ts imported, not edited), src/api/**",
+  "upload_body_held_at": {
+    "at_base_33ad65ee": [
+      "portal/src/pages/TicketCenter/TicketCenter.tsx:228-229 -- the form holds the FILE, not the body: analysisFile = { name, bytes, token } (useState; the token is the upload_token, minted at :250 as tv-<uuid> per chosen file)",
+      "portal/src/pages/TicketCenter/TicketCenter.tsx:359 and :409 -- the body is built per press by prepareUpload(analysisFile.name, analysisFile.bytes, options, analysisFile.token); it is not stored in state",
+      "portal/src/pages/TicketCenter/TicketCenter.tsx:363 (staff) and :413 (partner) -- the built body is handed to fileAndRequestAnalysis / fileAnalysisRequest as input.upload",
+      "portal/src/pages/TicketCenter/analysisRequest.ts:245 -- the first post: deps.ir.uploadAnalysisInput(input.upload, input.answers.firm)",
+      "portal/src/pages/TicketCenter/analysisRequest.ts:251 -- the RESOLVING re-post: the identical input.upload object"
+    ],
+    "at_candidate_a6b83f69": [
+      "portal/src/pages/TicketCenter/TicketCenter.tsx:236-237 -- acceptedHints (FilingHint[]) and keptHints (string[]), cleared in chooseAnalysisFile (:253) and after a filing (:387, :445)",
+      "portal/src/pages/TicketCenter/TicketCenter.tsx:369 (staff) and :424 (partner) -- correctedUpload(prepareUpload(...), accepted): the SAME upload_token and bytes, with the corrections of the accepted list; the upload itself when none was accepted",
+      "portal/src/pages/TicketCenter/TicketCenter.tsx:460-466 -- useHint: extends the accepted list and runs the same handler the File press runs, with the extended list",
+      "portal/src/pages/TicketCenter/analysisRequest.ts:163-166 -- correctedUpload -> withCorrections(upload, correctionsFor(accepted)) (prospect.ts:123, not edited)"
+    ]
+  },
+  "tests": {
+    "added": 1,
+    "added_file": "src/pages/TicketCenter/__tests__/filing-hint.test.tsx (7 cases, (a) to (g))",
+    "passed": 7,
+    "failed": 0,
+    "folders": {
+      "new_file": "bun test src/pages/TicketCenter/__tests__/filing-hint.test.tsx -- 7 pass, 0 fail, 45 expect() calls",
+      "src/pages/TicketCenter (whole folder, candidate)": "bun test src/pages/TicketCenter -- 128 pass, 0 fail across 24 files, 942 expect() calls"
+    }
+  },
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit)",
+    "rc": 0,
+    "note": "first run rc 2 with 7 errors, all in the new test file (toMatch / toHaveProperty are not in this bun's matcher types); rewritten as boolean checks; rerun rc 0"
+  },
+  "before_arm": {
+    "run": "the new test file against a scratch copy of origin/PROD TicketCenter (.scratch/prod351, git show of 33ad65ee; the same tsconfig alias; node_modules linked), no candidate change",
+    "result": "0 pass, 7 fail",
+    "predicted_by_order": "(a), (c), (e) FAIL",
+    "reasons": {
+      "(a)": "AR.filingHints is not a function",
+      "(b)": "AR.filingHints is not a function",
+      "(c)": "undefined is not an object (evaluating first.hints[0]) -- the PROD fileAnalysisRequest returns no hints",
+      "(d)": "no kept sentence in the PROD UploadFindings markup",
+      "(e)": "AR.filingHints is not a function",
+      "(f)": "AR.filingHints is not a function (its fixture calls it)",
+      "(g)": "AR.filingHints is not a function (its fixture calls it)"
+    },
+    "discrepancy": "(b), (d), (f), (g) also fail on the base for the missing feature; recorded as surprise IRPT_ANLREQ-D2-W152-S2"
+  },
+  "mutant": {
+    "check": "mutant_check.py (AC2): unmutated copy passes 7 of 7; mutant (filingHints also returns a hint per swap) fails 2 of 7: (b) and (f)",
+    "output": "MUTANT-FIRES control 7 of 7 pass; mutant 2 of 7 fail, including (b); control rc 0"
+  },
+  "what_a_person_sees": {
+    "hint": "Under the findings lines, after a File press the door has refused: 'Did you mean ACME1? (row 3: ACME)' with two buttons, 'Use ACME1' and 'Keep ACME'. Nothing else is offered for that symbol: no swap list, no proxy box, no code.",
+    "use": "Use ACME1 sends the same file again with the correction, through the same filing the File press runs. If the door accepts the corrected file the ticket is filed as the File press files it; if the door answers again, the new answer's hints replace the block. Up to 20 symbols can be corrected for one file; past that the block says so in words.",
+    "keep": "Keep ACME sends nothing. The block then shows, in words: 'ACME is kept as you typed it. The upload door does not accept an unknown symbol yet, so this file cannot be filed until ACME is replaced or removed in your file.' Its Use button is not offered after Keep.",
+    "scope_of_choice": "Nothing is replaced without the filer's click. Choosing a different file clears the accepted and kept choices.",
+    "staff_and_partner": "The same block shows on the staff form (after a firm is chosen) and on the partner form."
+  },
+  "claim": "The candidate shows the upload door's own TICKER_NOT_FOUND suggestion on the Ticket Center filing form, as Use or Keep, in TicketCenter files only; the swap list is never read and NAME_PROXY is never shown; Use re-posts the same upload with the accepted correction through the same handler as the File press; Keep sends nothing and says in words the file cannot be filed yet. Verified on the candidate by 7 of 7 cases, the mutant check, the scope check and a 128-test folder run. Local only: nothing pushed or landed.",
+  "not_read": [
+    "the live upload door's suggestion for a real unknown ticker (no live call; the issuer's rendered-page screenshot at close)",
+    "the rendered page itself in a browser (the tests render through renderToStaticMarkup; no dev server)",
+    "the backend Keep semantics (a kept unknown symbol filed as UNRESOLVED for the backend swap pass): the engine lane's door change, not in this cell; until it lands the door refuses a kept symbol and the form says so in words",
+    "the approval row for the candidate (the issuer registers it, class read from the pages touched: client-facing if a partner login can open the Ticket Center filing form)",
+    "the PROD promote (the DT, after the IB-pr-456 apply reads back)"
+  ],
+  "checks": {
+    "AR351-y-AC1": "PORTAL-TESTS-OK 7 new, 128 folder, 0 failed (rc 0)",
+    "AR351-y-AC2": "MUTANT-FIRES control 7 of 7 pass; mutant 2 of 7 fail, including (b); control rc 0",
+    "AR351-y-AC3": "SCOPE-OK 4 paths, all under src/pages/TicketCenter/ and named by the cell; InvestorReporting and src/api diff empty (rc 0)",
+    "AR351-y-AC4J": "judgment: output recorded, graded at L9 by 3.0.0_SA_CVO"
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W152-S1",
+    "IRPT_ANLREQ-D2-W152-S2",
+    "IRPT_ANLREQ-D2-W152-S3"
+  ],
+  "nothing_pushed": "no push of any branch; the portal candidate branch is local; the workspace branch is local"
+}
