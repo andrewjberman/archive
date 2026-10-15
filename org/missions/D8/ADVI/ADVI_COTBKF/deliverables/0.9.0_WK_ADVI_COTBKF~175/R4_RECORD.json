@@ -1,0 +1,84 @@
+{
+  "rule": "R4-name-household-fingerprint (ADVI_COTBKF TO-CB-ci-4). (a) name to household: keyed-hashed name tokens (lower case, alphanumeric, length >= 2, not all digits, stop list: the and of trust ira llc inc co lp ltd tod tenants joint fbo roth revocable living irrevocable custodian ttee jtwros acct account); a household hits at token overlap >= 0.6 (shared / shorter set) with its relationship_name, else its accounts' account_name; exactly one hit = unique, two or more = MULTI_HOUSEHOLD, none = NO_HOUSEHOLD. (b) client-line propagation for zero-hit accounts: the one household all MATCHED client-line siblings sit in, else none. (c) inside the household: candidates are the household's Black Diamond accounts no other matched Commonwealth account claims; R2 fingerprint per candidate (cusip else ticker, quantity within 0.001, cash excluded), PASS at >= 0.8. (d) window: gap in days = Black Diamond first-holdings date (first_transaction_date where no holdings) minus the Commonwealth account's last transaction date, over the 471 served matched pairs; band = narrowest symmetric band about the median holding >= 95%. (e) DETERMINISTIC = unique household, exactly one passing candidate, window_ok; CANDIDATE = unique household and a candidate scores >= 0.5 or is window_ok with the same registration class; else NONE. Guard: any wrong DETERMINISTIC in the control demotes every real DETERMINISTIC to CANDIDATE.",
+  "columns_present": {
+    "black_diamond_accounts": ["account_id", "account_name", "relationship_id", "relationship_name", "account_registration_type", "first_transaction_date"],
+    "black_diamond_accounts_not_used": ["account_display_name", "account_open_date", "account_type", "relationship_display_name", "client_city", "client_state", "client_zip"],
+    "black_diamond_holdings": ["date", "account_id", "asset_name", "ticker", "cusip", "units"],
+    "commonwealth_transactions": ["Account_Number", "Cusip", "Symbol", "Quantity", "Trade_Date", "Transaction_Type"],
+    "commonwealth_positions": ["AccountNumber", "Cusip", "Symbol", "Quantity"],
+    "commonwealth_document_index": ["account", "listing_fields: DisplayName (statement and transaction-report listings), ClientName (client letters), HouseholdName (household documents), Acct / Account / AccountNumber (fallback account key)"],
+    "commonwealth_account_links": ["old_account", "client_line"],
+    "served_crosswalk_csv": ["commonwealth_account", "status", "current_account"],
+    "reverse_match_v3_csv": ["account_key", "predecessor_key", "reason"]
+  },
+  "window": {
+    "band_days": 14,
+    "basis_pairs": 471,
+    "share_inside": 0.966,
+    "distribution": {
+      "bands": {"< -365": 0, "-365..-91": 0, "-90..-31": 2, "-30..-8": 409, "-7..7": 53, "8..30": 5, "31..90": 2, "91..365": 0, "> 365": 0},
+      "median": -14,
+      "lo": -28,
+      "hi": 0
+    }
+  },
+  "control": {
+    "matched": 471,
+    "reached_household": 358,
+    "household_correct": 353,
+    "deterministic": 341,
+    "det_right": 341,
+    "det_wrong": 0,
+    "candidate": 13,
+    "none": 117,
+    "guard_applied": false
+  },
+  "real": {
+    "unmatched": 1062,
+    "no_household": 836,
+    "multi_household": 0,
+    "via_name": 137,
+    "via_client_line": 89,
+    "deterministic": 11,
+    "candidate": 99,
+    "none": 952
+  },
+  "yield": {
+    "deterministic_active": 11,
+    "deterministic_among_219": 10,
+    "candidate_active": 98,
+    "candidate_among_219": 85
+  },
+  "denominators": {
+    "unmatched_active": 387,
+    "new_clients": 168,
+    "reachable": 219
+  },
+  "file": {
+    "path": "C:/dev/_cotbkf_match_20261015/R4_LINKS.csv",
+    "rows": 110,
+    "sha256": "9f8f8abb9eef1311c46b8f9590e71e16c96d42c0b3a2c93f0f5afdbfbad5973e"
+  },
+  "scratch_deleted": true,
+  "sources_read": [
+    "S3 opal-data-assets, silver, commonwealth/cottonwood, date=2026-06-23, read-only: transactions (15 trade_year partitions, 1,416,497 rows, column-projected), positions (1 part, 469 rows), crosswalk/crosswalk.csv (1,533 rows: 471 MATCHED, 1,062 not), document_index/document_index.parquet (11,119 rows), account_links/account_links.parquet (1,450 rows)",
+    "S3 opal-data-cot, read-only: gold/dimensions/accounts_dimension_latest.parquet (1,005 rows, 27 columns, read in full); gold/canonical/holdings/ (1,600,989 rows, column-projected by the crosswalk module's reader)",
+    "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/REVERSE_MATCH_V3.csv, local (860 rows, sha256 verified 0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f; 387 with no predecessor, 168 NEW_CLIENT_AFTER_MIGRATION, 219 reachable)",
+    "data/assets/scripts/silver/commonwealth_crosswalk.py, imported and not edited (readers, R2 constants, holdings_as_left, current_first_holdings, cusip_symbol_map, is_cash)",
+    "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/RESEARCH_20261015_COTTONWOOD_MATCHING_KEYS.copy.md (sections 3-5, for the comparison only)",
+    "NOT READ: the CRM zip and the restricted CRM prefix (open call d3cc), the imaging CLNT PDFs, any other bucket or prefix"
+  ],
+  "not_established": [
+    "The Commonwealth side has no registration column. The same-registration test uses a class derived from document-name tokens (IRA, TRUST, LLC, JOINT, else PLAIN) on both sides, the Black Diamond side from account_registration_type. Surprise ADVI_COTBKF-D1-W175-S1.",
+    "Household names are relationship_name for 221 of 225 households and account_name for 4. The window uses the first-holdings date, with first_transaction_date only where an account has no holdings.",
+    "The control household stage is 353 right and 5 wrong of 358 unique name routes, not the research's 138 right and 0 wrong over 462 pairs; 2 multi and 111 no hit. The cause is not established. Surprise ADVI_COTBKF-D1-W175-S2.",
+    "The real run's name routes reach 94 households (137 accounts) against the research's 59 households. Accounts with a document name: 269 of 1,062 unmatched (the research counted 232).",
+    "The client-line route reaches 89 accounts in 56 households. 34 of them touch a reachable account (the research counted 39). None reaches CANDIDATE: 87 of the 89 carry no document name, and no household account scores 0.8 with a window. Surprise ADVI_COTBKF-D1-W175-S3.",
+    "Of the 110 links, 1 DETERMINISTIC and 9 CANDIDATE point at accounts the reverse match holds as near matches awaiting a person; 4 CANDIDATE point at NEW_CLIENT_AFTER_MIGRATION accounts. These are counted in the yield as the rule states; none is an established false link. Surprise ADVI_COTBKF-D1-W175-S4.",
+    "Candidates exclude accounts claimed by any served matched Commonwealth account, and near-match accounts are not claimed, so they remain candidates.",
+    "The window is derived in-sample on the same 471 matched pairs that form the control; the control is therefore not a held-out test of the window.",
+    "Precision of the real-run links is not measured: no real-run link has a known answer. The control measures the rule on accounts already matched by R2.",
+    "The guard did not fire (0 wrong DETERMINISTIC in the control), so the real run's DETERMINISTIC links stand under the rule as stated.",
+    "No S3 write, delete or serve. The served crosswalk is unchanged. No name, name token or hash of one was printed, logged or written; the salt was per run and in memory only."
+  ]
+}

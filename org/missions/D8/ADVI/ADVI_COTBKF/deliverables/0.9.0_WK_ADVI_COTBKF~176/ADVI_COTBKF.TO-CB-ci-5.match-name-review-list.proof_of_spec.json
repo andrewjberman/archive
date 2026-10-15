@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ci-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-5.match-name-review-list.md",
+    "group": "OTHER",
+    "vintage_commit": "73e663123e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~176",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round87.md",
+    "vintage_commit": "73e663123e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-5.match-name-review-list.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_match_names.py",
+      "kind": "script",
+      "commit_or_etag": "eee317417b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "reads only: served crosswalk, transactions, document_index, Black Diamond accounts and holdings; reuses commonwealth_crosswalk by import; no S3 write; main writes REVIEW_KEY.csv under --out outside the repository"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_match_names.py",
+      "kind": "test",
+      "commit_or_etag": "eee317417b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 stub tests on made-up ids and tokens: python -m pytest 5 passed"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/REVIEW_LIST.csv",
+      "kind": "config_data",
+      "commit_or_etag": "c4cc6c05dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 one-to-one rows, eight columns, link ids and flags only; no name, token, hash of a name or account number"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/NAME_REVIEW_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "c4cc6c05dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the hits, list, denominators and files with recorded sha256 and row counts; counts only"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/NAME_REVIEW_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "c4cc6c05dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same counts as the record, with the not-established list"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c4cc6c05dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W176-S1 and ADVI_COTBKF-D1-W176-S2 appended; 54 lines added, 0 deleted"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB87ci5-AC1",
+      "criterion_verbatim": "`CB87ci5-AC1` -- the hits, the list, the corroboration spread and the 219 denominator are printed from the record.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/NAME_REVIEW_RECORD.json',encoding='utf-8'));h=d['hits'];l=d['list'];print('NAME-REVIEW exact=%d one_to_one=%d rows=%d in_219=%d two_plus=%d zero=%d reachable=%d'%(h['exact_name_pairs'],h['one_to_one'],l['rows'],l['in_219'],l['with_two']+l['with_three'],l['with_zero_corroborations'],d['denominators']['reachable']))\"",
+      "output_evidence": "NAME-REVIEW exact=28 one_to_one=14 rows=14 in_219=13 two_plus=9 zero=0 reachable=219 (timeout 120, rc 0)",
+      "denominator": "14 list rows of 28 exact-name pairs (14 one-to-one); 13 of 14 in the 219 reachable; 219 reachable of 387 unmatched active (168 new clients excluded); 1,062 unmatched Commonwealth accounts",
+      "status": "PASS",
+      "expect": "reachable=219"
+    },
+    {
+      "criterion_id": "CB87ci5-AC2",
+      "criterion_verbatim": "`CB87ci5-AC2` -- both files exist with the recorded checksums and row counts, the committed list has exactly the eight named columns (no name, no account number), the key file sits outside the repository, and the scratch is recorded deleted.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib,csv;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/NAME_REVIEW_RECORD.json',encoding='utf-8'));ok=[];[ok.append(hashlib.sha256(open(f['path'],'rb').read()).hexdigest()==f['sha256'] and sum(1 for _ in open(f['path'],encoding='utf-8'))-1==f['rows']) for f in d['files']];rows=list(csv.reader(open([f['path'] for f in d['files'] if f['name']=='REVIEW_LIST.csv'][0],encoding='utf-8')));print('REVIEW-FILES files=%d match=%s list_columns=%s key_outside_repo=%s scratch_deleted=%s'%(len(d['files']),all(ok),','.join(rows[0])=='link_id,date_window_ok,same_registration_class,holdings_candidate,already_claimed,corroborations,in_219,tier',all(not f['path'].startswith('org/') for f in d['files'] if f['name']=='REVIEW_KEY.csv'),d['scratch_deleted']))\"",
+      "output_evidence": "REVIEW-FILES files=2 match=True list_columns=True key_outside_repo=True scratch_deleted=True (timeout 120, rc 0)",
+      "denominator": "2 of 2 files read; 14 of 14 list rows; 14 of 14 key rows; 8 of 8 list columns; key outside the repository",
+      "status": "PASS",
+      "expect": "REVIEW-FILES files=2 match=True list_columns=True key_outside_repo=True scratch_deleted=True"
+    },
+    {
+      "criterion_id": "CB87ci5-AC3",
+      "criterion_verbatim": "`CB87ci5-AC3` -- the five rules hold on stubs.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_match_names.py -q",
+      "output_evidence": "5 passed in 0.47s (timeout 120, rc 0)",
+      "denominator": "5 of 5 stub tests passed",
+      "status": "PASS",
+      "expect": "5 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the stub tests assert the rules on made-up ids and tokens and carry their own negative assertions",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the committed build re-run from scratch with a fresh per-run salt; the list and key checksums compared with the first run",
+      "observed": "REVIEW_LIST.csv and REVIEW_KEY.csv sha256 identical across the two runs (list d694c1826226..., key c46b9dd0f7d6...); the salt does not reach the link ids or flags",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "REVIEW_KEY.csv (14 rows: link id, commonwealth account, bd account id) at C:/dev/_cotbkf_match_20261015/REVIEW_KEY.csv",
+      "reason": "outside the repository by the order; holds account ids; not committed; its checksum is recorded in NAME_REVIEW_RECORD.json files"
+    },
+    {
+      "item": "Post-commit account-id scan (test_cotbkf_no_account_ids.py) DENOMINATOR line",
+      "reason": "run after the final commit as the order requires; on dell1 its pinned account set is absent and the test fails closed (surprise ADVI_COTBKF-D1-W170-S3); reported in the worker report, not a scan result"
+    },
+    {
+      "item": "Same-name hits that are wrong (two real clients sharing a name)",
+      "reason": "no control on matched pairs was run in this cell; the list is a review candidate, not a claim of correctness"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W176-S1: the named Commonwealth tables carry no registration class, so same_registration_class is null on all 14 rows; the research 18-class figure is not reproduced; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W176-S2: document_index account strings join to the ledger only on the crosswalk normalize_account (738 accounts) and not on an exact string join (234); the worker joined on normalize_account; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/ADVI_COTBKF.TO-CB-ci-5.match-name-review-list.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commonwealth_match_names.py",
+      "invocation": "python data/assets/scripts/silver/commonwealth_match_names.py --out C:/dev/_cotbkf_match_20261015",
+      "result": "NAME-REVIEW exact_pairs=28 one_to_one=14 rows=14 in_219=13 new_client_pairs=4 corroborations 0/1/2/3=0/5/9/0 already_claimed=0 reachable=219 scratch_deleted=True (rc 0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_match_names.py -q",
+      "result": "5 passed"
+    }
+  ]
+}

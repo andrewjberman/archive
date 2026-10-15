@@ -90,6 +90,14 @@ def git(root, *a):
     return subprocess.run(["git", "-C", str(root)] + list(a), capture_output=True, text=True).stdout
 
 
+def expected_days():
+    """The 65 trading days from 2026-07-10 to 2026-10-14 less the three source-absent days, ascending (lib/trading_calendar)."""
+    import datetime as dt
+    sys.path.insert(0, str(Path(__file__).resolve().parents[9] / "lib"))
+    import trading_calendar as tc
+    return [d.isoformat() for d in tc.trading_days_between(dt.date(2026, 7, 10), dt.date(2026, 10, 14)) if d.isoformat() not in ABSENT]
+
+
 def b64_of_hex(h):
     return base64.b64encode(bytes.fromhex(h)).decode("ascii")
 
@@ -167,26 +175,35 @@ def check_tail(rec):
     need(nes(e["request_id"]), "dry_run.request_id")
     need(isinstance(e["layer_pyarrow_version"], str) and re.fullmatch(r"\d+\.\d+\.\d+", e["layer_pyarrow_version"]), "layer_pyarrow_version must be the layer zip's pyarrow version, e.g. 14.0.2")
     bf = rec["backfill"]
-    need(isinstance(bf, dict) and set(bf) == {"events", "final", "skipped", "counts"}, "backfill keys")
-    ev = bf["events"]
-    need(isinstance(ev, list) and len(ev) >= 1, "backfill.events must list at least the first real event")
-    for i, x in enumerate(ev):
-        need(isinstance(x, dict) and set(x) == {"payload", "invoked_utc", "status_code", "first_day", "chain_days", "max_memory_used_mb", "max_duration_ms", "request_ids"}, "backfill event %d keys" % i)
-        need(x["payload"] == {} and x["status_code"] == 200 and UTC.match(str(x["invoked_utc"])) and x["invoked_utc"] >= e["invoked_utc"], "backfill event %d: payload {}, 200, after the dry run" % i)
-        need(ISO_DAY.match(str(x["first_day"])) and is_int(x["chain_days"]) and 1 <= x["chain_days"] <= 10, "backfill event %d: first_day and chain_days (1 to 10)" % i)
-        need(is_int(x["max_memory_used_mb"]) and 0 < x["max_memory_used_mb"] <= 717 and isinstance(x["max_duration_ms"], (int, float)) and 0 < x["max_duration_ms"] < 900000, "backfill event %d: memory at most 717 MB and each invocation under 900 s" % i)
-        need(isinstance(x["request_ids"], list) and x["request_ids"] and all(nes(q) for q in x["request_ids"]), "backfill event %d: request_ids" % i)
-    need(ev[0]["first_day"] == "2026-07-10", "the first real event must build the floor day 2026-07-10 first")
+    need(isinstance(bf, dict) and set(bf) == {"day_list", "batches", "final", "skipped", "counts"}, "backfill keys")
+    want = expected_days()
+    need(bf["day_list"] == want and len(want) == MAX_FILLED, "backfill.day_list must be the %d trading days 2026-07-10 to %s less the three absent days, printed before the first event" % (MAX_FILLED, DRY_DAY))
+    order = [DRY_DAY] + [d for d in want if d != DRY_DAY]
+    bt = bf["batches"]
+    need(isinstance(bt, list) and bt, "backfill.batches must list at least the first batch")
+    seen, last_utc, last_obj = [], e["invoked_utc"], 0
+    for i, x in enumerate(bt):
+        need(isinstance(x, dict) and set(x) == {"days", "invoked_utc", "all_status_200", "all_chain_invoked_false", "objects_after", "max_memory_used_mb", "max_duration_ms",
+                                               "accounts_dropped_total", "households_no_rows_max", "request_ids"}, "backfill batch %d keys" % i)
+        need(isinstance(x["days"], list) and 1 <= len(x["days"]) <= 10 and all(ISO_DAY.match(str(d)) for d in x["days"]), "backfill batch %d: 1 to 10 days" % i)
+        need(x["all_status_200"] is True and x["all_chain_invoked_false"] is True, "backfill batch %d: every response 200 and none chained (a chaining response is a STOP)" % i)
+        need(UTC.match(str(x["invoked_utc"])) and x["invoked_utc"] >= last_utc, "backfill batch %d: invoked_utc in order and after the dry run" % i)
+        need(is_int(x["objects_after"]) and x["objects_after"] >= last_obj, "backfill batch %d: objects_after non-decreasing" % i)
+        need(is_int(x["max_memory_used_mb"]) and 0 < x["max_memory_used_mb"] <= 717 and isinstance(x["max_duration_ms"], (int, float)) and 0 < x["max_duration_ms"] < 900000, "backfill batch %d: memory at most 717 MB, each invocation under 900 s" % i)
+        need(is_int(x["accounts_dropped_total"]) and x["accounts_dropped_total"] >= 0 and is_int(x["households_no_rows_max"]) and x["households_no_rows_max"] >= 0, "backfill batch %d: the two counts" % i)
+        need(isinstance(x["request_ids"], list) and len(x["request_ids"]) == len(x["days"]) and all(nes(q) for q in x["request_ids"]), "backfill batch %d: one request id per day" % i)
+        seen += x["days"]
+        last_utc, last_obj = x["invoked_utc"], x["objects_after"]
+    need(seen == order[:len(seen)], "the events must run in the printed order, 2026-10-14 first, then 2026-07-10 upward; read %s" % seen[:3])
     fin = bf["final"]
-    need(isinstance(fin, dict) and set(fin) == {"response", "objects"} and fin["response"] == "NOTHING_OWED" and is_int(fin["objects"]) and 1 <= fin["objects"] <= MAX_FILLED,
-         "backfill.final: the last event reads NOTHING_OWED and the filled prefix holds 1 to %d objects" % MAX_FILLED)
     sk = bf["skipped"]
-    need(isinstance(sk, list) and all(isinstance(s, dict) and set(s) == {"day", "reason"} and ISO_DAY.match(str(s["day"])) and nes(s["reason"]) for s in sk), "backfill.skipped entries: {day, reason}")
-    allowed = set(ABSENT) | {"2026-07-10"}
-    need(all(s["day"] in allowed for s in sk), "a day skipped other than the three absent days and 2026-07-10 is a STOP condition: %s" % [s["day"] for s in sk if s["day"] not in allowed])
+    need(isinstance(sk, list) and all(isinstance(q, dict) and set(q) == {"day", "reason"} and nes(q["reason"]) for q in sk), "backfill.skipped entries: {day, reason}")
+    need(all(q["day"] == "2026-07-10" for q in sk), "a day skipped other than the floor day 2026-07-10 is a STOP condition: %s" % [q["day"] for q in sk if q["day"] != "2026-07-10"])
+    need(seen == order, "the record must cover all %d days" % MAX_FILLED)
+    need(isinstance(fin, dict) and set(fin) == {"objects"} and fin["objects"] == last_obj == MAX_FILLED - len(sk), "backfill.final.objects must equal the last batch's objects_after and %d less the skipped days" % MAX_FILLED)
     cn = bf["counts"]
     need(isinstance(cn, dict) and set(cn) == {"days_built", "accounts_dropped_total", "households_no_rows_max", "days_with_dropped_accounts"} and all(is_int(v) and v >= 0 for v in cn.values()), "backfill.counts: four non-negative integers (ids stay private)")
-    need(cn["days_built"] == fin["objects"], "counts.days_built must equal final.objects")
+    need(cn["days_built"] == fin["objects"] and cn["accounts_dropped_total"] == sum(x["accounts_dropped_total"] for x in bt) and cn["households_no_rows_max"] == max(x["households_no_rows_max"] for x in bt), "backfill.counts must equal the batches' sums and maximum")
     need(rec["ledger_closed"] is False, "the ledger must stay OPEN")
     need(rec["reads"] == {"vendor_calls": 0, "secret_reads": 0}, "reads block")
     need(not digit_runs(rec), "a run of 8 or more digits outside the exempt fields: %s" % digit_runs(rec)[:2])
@@ -300,10 +317,11 @@ def run(root, cid):
     if cid == "DBC139-3-AC1":
         days = sorted(k[len(FILLED_PREFIX) + 5:len(FILLED_PREFIX) + 15] for k, _ in lv["objects"] if k.endswith("/data.parquet"))
         need(len(lv["objects"]) == len(days) == rec["backfill"]["final"]["objects"], "the filled prefix holds %d objects (%d data.parquet), the record says %d" % (len(lv["objects"]), len(days), rec["backfill"]["final"]["objects"]))
-        need(all(ISO_DAY.match(d) for d in days) and "2026-07-10" <= days[0] and days[-1] <= DRY_DAY, "the filled days must lie in 2026-07-10 to %s: %s to %s" % (DRY_DAY, days[:1], days[-1:]))
+        skipped_days = {q["day"] for q in rec["backfill"]["skipped"]}
+        need(set(days) == set(rec["backfill"]["day_list"]) - skipped_days, "the filled days must equal the printed day list less the skipped days: extra %s, missing %s" % (sorted(set(days) - set(rec["backfill"]["day_list"]))[:3], sorted(set(rec["backfill"]["day_list"]) - skipped_days - set(days))[:3]))
         need(not (set(days) & set(ABSENT)), "a source-absent day was filled: %s" % sorted(set(days) & set(ABSENT)))
         first_put = min(t for _, t in lv["objects"]).strftime("%Y-%m-%dT%H:%M:%SZ")
-        need(first_put >= rec["backfill"]["events"][0]["invoked_utc"], "an object is older than the first real event: the dry run (or something else) wrote")
+        need(first_put >= rec["backfill"]["batches"][0]["invoked_utc"], "an object is older than the first real event: the dry run (or something else) wrote")
         need(lv["metas"] and all(m.get("households_claim") == "held" and ISO_DAY.match(m.get("households_as_of", "")) for m in lv["metas"].values()),
              "every sampled object must carry households_as_of and households_claim held in its schema metadata: %s" % lv["metas"])
         rp = rec["dry_run"]["report"]
@@ -324,6 +342,15 @@ def selftest():
     BUILD_B64, PACKET_SHA = b64_of_hex(zh), "cc" * 32
     try:
         claim = {"households_as_of": "2026-10-14", "households_claim": "held", "accounts_dropped": 3, "households_no_rows": 1}
+        want = expected_days()
+        order = [DRY_DAY] + [d for d in want if d != DRY_DAY]
+        chunks = [order[:1]] + [order[1 + k:11 + k] for k in range(0, len(order) - 1, 10)]
+        batches, done = [], 0
+        for n, ch in enumerate(chunks):
+            done += len(ch)
+            batches.append({"days": ch, "invoked_utc": "2026-10-16T01:%02d:00Z" % (10 + n), "all_status_200": True, "all_chain_invoked_false": True, "objects_after": done, "max_memory_used_mb": 650,
+                            "max_duration_ms": 30000, "accounts_dropped_total": 2, "households_no_rows_max": 1, "request_ids": ["q%d_%d" % (n, k) for k in range(len(ch))]})
+        BACKFILL = {"day_list": want, "batches": batches, "final": {"objects": done}, "skipped": [], "counts": {"days_built": done, "accounts_dropped_total": 2 * len(batches), "households_no_rows_max": 1, "days_with_dropped_accounts": 4}}
         good = {"claim": "measured", "gates": {"packet_blob": "blob1", "packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pin_is_ancestor": True,
                 "one_change_at_a_time": {"worktrees_read": 9, "open_markers_naming_this_surface": 0}, "live_matches_packet": True}, "ledger_entry": LEDGER_SLUG,
                 "before": {"function_exists": False, "role_exists": False, "schedule_exists": False, "artifact_exists": False, "artifact_version_id": None, "filled_objects": 0},
@@ -337,9 +364,7 @@ def selftest():
                                                                                    "contract": {"contract_version": "0.3.0", "method_version": 2}, "unreported_days": list(ABSENT),
                                                                                    "statement": "3 trading days not reported by the source (%s)" % ", ".join(ABSENT)}, **claim)},
                             "report": {"max_memory_used_mb": 640, "duration_ms": 21000.5, "memory_size_mb": 1024}, "objects_after": 0, "over_717_mb": False, "request_id": "abc", "layer_pyarrow_version": "14.0.2"},
-                "backfill": {"events": [{"payload": {}, "invoked_utc": "2026-10-16T01:10:00Z", "status_code": 200, "first_day": "2026-07-10", "chain_days": 10, "max_memory_used_mb": 650, "max_duration_ms": 30000,
-                                         "request_ids": ["r1", "r2"]}], "final": {"response": "NOTHING_OWED", "objects": 65},
-                             "skipped": [{"day": "2026-08-19", "reason": "REFUSED: no rows"}], "counts": {"days_built": 65, "accounts_dropped_total": 12, "households_no_rows_max": 1, "days_with_dropped_accounts": 4}},
+                "backfill": BACKFILL,
                 "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}}
         coo, cto = "SIGNED " + PACKET_SHA, "SIGNED " + PACKET_SHA[:12]
 
@@ -370,18 +395,24 @@ def selftest():
                 ("dry contract", lambda r: r["dry_run"]["returned"]["result"].update(contract={"contract_version": "0.4.0", "method_version": 2})),
                 ("dry memory over", lambda r: (r["dry_run"]["report"].update(max_memory_used_mb=800), r["dry_run"].update(over_717_mb=True))),
                 ("over flag", lambda r: r["dry_run"].update(over_717_mb=True)), ("dry before apply", lambda r: r["dry_run"].update(invoked_utc="2026-10-16T00:00:00Z")),
-                ("event payload", lambda r: r["backfill"]["events"][0].update(payload={"day": "2026-10-14"})), ("event first day", lambda r: r["backfill"]["events"][0].update(first_day="2026-07-13")),
-                ("event chain", lambda r: r["backfill"]["events"][0].update(chain_days=11)), ("event memory", lambda r: r["backfill"]["events"][0].update(max_memory_used_mb=718)),
-                ("event before dry", lambda r: r["backfill"]["events"][0].update(invoked_utc="2026-10-16T01:00:00Z")), ("no events", lambda r: r["backfill"].update(events=[])),
-                ("not finished", lambda r: r["backfill"]["final"].update(response="OWED")), ("too many objects", lambda r: r["backfill"]["final"].update(objects=66)),
-                ("skipped other day", lambda r: r["backfill"]["skipped"].append({"day": "2026-08-20", "reason": "x"})), ("built mismatch", lambda r: r["backfill"]["counts"].update(days_built=64)),
+                ("day list", lambda r: r["backfill"]["day_list"].pop()), ("day list incl absent", lambda r: r["backfill"]["day_list"].append("2026-08-19")),
+                ("batch status", lambda r: r["backfill"]["batches"][0].update(all_status_200=False)), ("batch chained", lambda r: r["backfill"]["batches"][0].update(all_chain_invoked_false=False)),
+                ("batch memory", lambda r: r["backfill"]["batches"][0].update(max_memory_used_mb=718)), ("batch too long", lambda r: r["backfill"]["batches"][0].update(max_duration_ms=900000)),
+                ("batch size", lambda r: r["backfill"]["batches"][1].update(days=r["backfill"]["batches"][1]["days"] * 2)), ("batch ids", lambda r: r["backfill"]["batches"][0]["request_ids"].pop()),
+                ("batch before dry", lambda r: r["backfill"]["batches"][0].update(invoked_utc="2026-10-16T01:00:00Z")), ("objects decrease", lambda r: r["backfill"]["batches"][2].update(objects_after=0)),
+                ("order", lambda r: r["backfill"]["batches"][0].update(days=["2026-07-10"])), ("no batches", lambda r: r["backfill"].update(batches=[])),
+                ("final objects", lambda r: r["backfill"]["final"].update(objects=66)), ("skipped other day", lambda r: r["backfill"]["skipped"].append({"day": "2026-07-13", "reason": "x"})),
+                ("built mismatch", lambda r: r["backfill"]["counts"].update(days_built=64)), ("counts sum", lambda r: r["backfill"]["counts"].update(accounts_dropped_total=1)),
                 ("counts negative", lambda r: r["backfill"]["counts"].update(accounts_dropped_total=-1)), ("digits", lambda r: r["dry_run"]["returned"]["result"].update(note="id 1234567890")))
         for name, f in arms:
             r = copy.deepcopy(good)
             f(r)
             assert grade(r) is False, "red arm %s passed" % name
         r = copy.deepcopy(good)
-        r["backfill"]["skipped"] = []
+        r["backfill"]["skipped"] = [{"day": "2026-07-10", "reason": "REFUSED: no rows"}]
+        r["backfill"]["final"]["objects"] -= 1
+        r["backfill"]["batches"][-1]["objects_after"] -= 1
+        r["backfill"]["counts"]["days_built"] -= 1
         assert grade(r) is True
         assert grade(copy.deepcopy(good), blob="other") is False and grade(copy.deepcopy(good), ledger=False) is False
         assert grade(copy.deepcopy(good), c="DRAFT " + PACKET_SHA) is False and grade(copy.deepcopy(good), t="SIGNED deadbeef0000") is False

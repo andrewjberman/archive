@@ -102,8 +102,10 @@ def ac3(r):
     e = r.get("exists_read") or {}
     if e.get("ran_on_runner") is not True or e.get("key_was_known_absent") is not True or e.get("answer") != "ABSENT":
         fail("exists_read must read ran_on_runner true, key_was_known_absent true and answer ABSENT (CTO half condition 3: a 403 is a STOP and a row)")
+    if e.get("tiers") != {"bronze": "ABSENT", "silver": "ABSENT"} or e.get("raw_status_printed") is not True or e.get("runner_stopped_within_30_min") is not True:
+        fail("exists_read must read tiers bronze and silver ABSENT, raw_status_printed true and runner_stopped_within_30_min true (CTO msg 8597)")
     k = r.get("counters") or {}
-    want = {"function_updates": 0, "lambda_invokes": 0, "other_iam_changes": 0, "schedule_changes": 0, "keys_written": 0, "existing_keys_changed": 0, "secrets_printed": 0}
+    want = {"instance_starts": 1, "function_updates": 0, "lambda_invokes": 0, "other_iam_changes": 0, "schedule_changes": 0, "keys_written": 0, "existing_keys_changed": 0, "secrets_printed": 0}
     for key, v in want.items():
         if k.get(key) != v:
             fail("counters.%s must read %s, read %r" % (key, v, k.get(key)))
