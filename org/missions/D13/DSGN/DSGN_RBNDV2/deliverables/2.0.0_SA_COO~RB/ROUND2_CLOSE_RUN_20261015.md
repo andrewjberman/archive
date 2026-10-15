@@ -20,7 +20,11 @@ proof-of-spec instance VALID when re-run by the COO from inside the worker workt
 - **The modal frame (`RB2M1-AC2`, `RB2M4-AC3`):** pressing the Fear & Greed title opens the CNN Fear & Greed Index modal as a white surface with a thin silver edge, an eyebrow title with the violet underline,
   a square close control top right, a hairline under the header and above the footer, and a quiet footer line with a Close button; the sections inside (status, composite, 90-day trend, key insights, component
   indicators) are on white and legible, the trend chart keeps its own colours, and the old dark content ground is gone.
-- **Not walked this run:** the RSI modal (its trigger is a chart bar, not a labelled control), the Market Regime modal, the account-menu popup (needs the user-menu press), `SessionTimeoutWarning` (a timed dialog),
+- **Second modal walked (addendum, ~10:55Z, walk `tmp/ui-walk/20261015T105240Z`, same walker, disarm REFUSED):** pressing the signal label "Multi-Asset Momentum" in the U.S. Regime panel opened the Market Regime modal
+  ("U.S. REGIME: MOMENTUM") in the same frame: white surface, thin silver edge, violet-underlined eyebrow, square close control, hairline rules, a quiet footer with a Close button; the status line, the 90-day trend chart (its tooltip keeps
+  its own violet) and the signal selector read on white. One observation for the grade: at the walker's 1440 x 900 viewport the surface is height-limited and its body scrolls, so the bottom row of the signal selector
+  (Momentum 48, Volatility 88, Correlation 51, Yield Curve 74) is half hidden above the footer until scrolled; that is the frame's `overflow-y-auto` body, not a clipped element, but it is the thing to look at in a real browser.
+- **Not walked this run:** the RSI modal (its trigger is a chart bar, not a labelled control), the account-menu popup (needs the user-menu press), `SessionTimeoutWarning` (a timed dialog),
   the autoFocus inputs of two PortfolioManagement modals, and every modal outside `/market`. Those are source-text and class-text verified only.
 - Still open on the page (FWD-5, round 3): the walker counts 288 text elements under 3:1 before the press and 305 with the modal open; the samples are the signal green `rgb(25, 210, 154)` at 1.96:1 on white.
   Two headline labels truncate.
