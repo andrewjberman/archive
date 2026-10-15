@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # OPLGTW OG-ng-1 AC1 (round-37 NAMING-S3PREFIX, CTO msgs 34368 and 34376): the naming gate grades an IAM s3:prefix condition value CONFORMANT only when it equals a legacy_addresses row key part COMMITTED AT HEAD for the committing project, with exactly one trailing "*".
 #   ac01 a registered prefix + exactly one trailing "*" on the registered bucket grades CONFORMANT;
-#   ac02 the same value WITHOUT the trailing "*" is not admitted by this clause (refused);
-#   ac03 each of these REFUSES: a mid-path "*", a bare "*", "**", a "?", a prefix one segment longer, one segment shorter, an unregistered prefix, an empty key part;
+#   ac02 the same value WITHOUT the trailing "*" is not admitted BY THIS CLAUSE (no IAM-PREFIX-ADMITTED line); the gate grades it as before (MX-c-9 may admit a bare registered key part for its own reader);
+#   ac03 each of these is not admitted by this clause: a mid-path "*", a bare "*", "**", a "?", a prefix one segment longer, one segment shorter, an unregistered prefix, an empty key part -- a tier-first shaped value (gold/ silver/ platinum/ ...) is REFUSED as before, a value the gate never grades (a bare "*", a non-tier-first prefix) stays ungraded and is NOT admitted either (A2);
 #   ac04 a row whose reader is ANOTHER project REFUSES; ac05 a row staged in the same commit or present only in the working tree REFUSES (HEAD only);
 #   ac06 the same string as a resource ARN or as a code literal is REFUSED (the clause fires for an s3:prefix condition value only);
 #   ac07 a registered prefix granted on a DIFFERENT bucket (the statement's Resource ARN) REFUSES;
