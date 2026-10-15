@@ -20,6 +20,7 @@ sys.path.insert(0, str(CHECK.parent))
 import p199_apply as PA  # noqa: E402
 import p199_cells as P  # noqa: E402
 import p199_serve as PS  # noqa: E402
+import p199_orion2 as PO  # noqa: E402
 
 P6 = P.P6
 P3 = PA.P3
@@ -109,8 +110,21 @@ SERVE = {
     "notes": ["synthetic"], **{k: 0 for k in P6.BOUND}}
 SERVE_PKT = "# never-widen packet\n" + "hop 2, hop 3, hop 4; blast radius; rollback; 49 Financial first; stop rule; opal_naming; COO half UNSIGNED. CTO half UNSIGNED.\n" + ("padding line\n" * 600)
 
+ORION2 = {
+    "base_commit": "a" * 40,
+    "raw_producer": {"claim": "measured", "statement": "the flat jsonl.gz positions objects are written by the raw producer function named on the cited line", "site": SITE,
+                     "evidence": ["the producer function is named at the cited line and writes the flat key", "the bucket holds many flat objects with this writer's key shape"]},
+    "parquet_census": {"feeds": {f: {"source_keys_total": 100, "jsonl_gz_days": 90, "parquet_only_days": 6 if f == "positions" else 2, "silently_dropped_days": 6 if f == "positions" else 2,
+                                     "denominator_note": "list of the source prefix, paginated to the end, all keys counted"} for f in PO.FEEDS}, "mirror_defect": None},
+    "mirror_defect": {"claim": "measured", "statement": "the mirror copies only flat jsonl.gz, so a day that landed as parquet only is silently dropped: a defect at the mirror"},
+    "cost": {f: {"requests": 320, "pacing": "one request per household with a pause between", "hours": 2.5, "claim": "inferred"} for f in PO.FEEDS},
+    "fold_design": {"schedule": "one 06:00 America/New_York schedule for the Orion feeds, trading-day frontier", "builder_names": "the schedule and function names come from lib/opal_naming.py name()",
+                    "trading_day_frontier": "the producer stamps the previous trading day by lib/trading_calendar.py", "covers_feeds": list(PO.FEEDS)},
+    "i2_feed": {"claim": "inferred", "statement": "the account-performance read of B-IN round 116 may add one Orion feed; it folds into the same pair"},
+    "notes": ["synthetic"], **{k: 0 for k in P6.BOUND}}
 
-def make_root(orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=None):
+
+def make_root(orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=None, o2=None):
     root = Path(tempfile.mkdtemp(prefix="c199_"))
     (root / "lib").mkdir()
     shutil.copy(REAL / "lib/trading_calendar.py", root / "lib/trading_calendar.py")
@@ -126,6 +140,7 @@ def make_root(orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=No
     w(root, PA.V3, pkt if pkt is not None else packet())
     w(root, PS.REC, serve or SERVE)
     w(root, PS.PKT, spkt if spkt is not None else SERVE_PKT)
+    w(root, PO.REC, o2 or ORION2)
     if ledger:
         w(root, "org/critical_paths/change_management/20261015_holdings_release.md", "ledger")
     git(root, "add", "-A")
@@ -148,9 +163,9 @@ for cid in P.CHECKS:
 shutil.rmtree(root, ignore_errors=True)
 
 
-def neg(label, cid, orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=None):
+def neg(label, cid, orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=None, o2=None):
     global bad
-    rt = make_root(orion, apply, pkt, ledger, serve, spkt)
+    rt = make_root(orion, apply, pkt, ledger, serve, spkt, o2)
     r = run(rt, cid)
     ok = r == cid + " FAIL"
     bad += 0 if ok else 1
@@ -231,5 +246,26 @@ neg("a packet with one half signed", "IB199-3-AC3", spkt=SERVE_PKT.replace("CTO 
 neg("one build slice only", "IB199-3-AC3", serve=ms(lambda o: o["build_slices"].pop()))
 neg("a build slice that is not LOCAL", "IB199-3-AC3", serve=ms(lambda o: o["build_slices"][0].update({"risk": "WORLD"})))
 neg("a counter above 0", "IB199-3-AC3", serve=ms(lambda o: o.update({"aws_writes_made": 1})))
+
+
+def m2(fn):
+    o = copy.deepcopy(ORION2)
+    fn(o)
+    return o
+
+
+neg("a measured producer with the wrong identifier", "IB199-4-AC1", o2=m2(lambda o: o["raw_producer"]["site"].update({"identifier": "nope_function"})))
+neg("a producer with one evidence line", "IB199-4-AC1", o2=m2(lambda o: o["raw_producer"].update({"evidence": ["only one line of evidence here"]})))
+neg("a census with dropped above parquet-only", "IB199-4-AC1", o2=m2(lambda o: o["parquet_census"]["feeds"]["transactions"].update({"silently_dropped_days": 9})))
+neg("a census missing a feed", "IB199-4-AC1", o2=m2(lambda o: o["parquet_census"]["feeds"].pop("performance")))
+neg("positions with no parquet-only gap days", "IB199-4-AC1", o2=m2(lambda o: o["parquet_census"]["feeds"]["positions"].update({"parquet_only_days": 1, "silently_dropped_days": 1})))
+neg("a cost with no pacing", "IB199-4-AC2", o2=m2(lambda o: o["cost"]["positions"].update({"pacing": ""})))
+neg("a cost feed missing", "IB199-4-AC2", o2=m2(lambda o: o["cost"].pop("transactions")))
+neg("builder names typed by hand", "IB199-4-AC2", o2=m2(lambda o: o["fold_design"].update({"builder_names": "the schedule is called orion-daily-6am and typed here"})))
+neg("a fold that omits a feed", "IB199-4-AC2", o2=m2(lambda o: o["fold_design"].update({"covers_feeds": ["positions"]})))
+neg("no ~I2 feed statement", "IB199-4-AC2", o2=m2(lambda o: o.update({"i2_feed": {}})))
+neg("no mirror defect statement", "IB199-4-AC3", o2=m2(lambda o: o.update({"mirror_defect": {}})))
+neg("a long digit run in the read", "IB199-4-AC3", o2=m2(lambda o: o.update({"notes": ["account 123456789012"]})))
+neg("a vendor request already sent", "IB199-4-AC3", o2=m2(lambda o: o.update({"vendor_requests_sent": 1})))
 print("CONTROL SUMMARY: %d unexpected" % bad)
 sys.exit(1 if bad else 0)
