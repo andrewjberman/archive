@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ak-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-3.signed-change-deploys-exactly-one-script.md",
+    "group": "OTHER",
+    "vintage_commit": "9b2702a5a5"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CT2",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round21.md",
+    "vintage_commit": "4d79c7c58c",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-3.signed-change-deploys-exactly-one-script.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/diag_sleeve_fix.py",
+      "kind": "s3_object",
+      "commit_or_etag": "c204fd9be3bbfc43346a14b4c71051af",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object: ETag c204fd9be3bbfc43346a14b4c71051af equals the repository md5 of data/black_diamond/scripts/gold/diag_sleeve_fix.py at blob 8d6f273a9e (commit 461e3f64ee), 4251 bytes, new VersionId ceImQVXASssU3IUCRXRjMkoA1XnifTf7 LastModified 2026-10-15T18:02:18Z; prior VersionId 3.yZFEuxxfxUOEMd.NRY7bZucaDccGX. (ETag 56cb170f95c0b112a36a0ee3973d5473, 4161 bytes) kept as the rollback. Deployed by the scheduled Opal box-sync push (actor 0.0.0_AB_MSTR), through the hook's pinned-entry step: audit row 2026-10-15T18:01:57Z PINNED-DEPLOY slug=ctlpln-r21-fwd5-one-script-20261015 s3=2f38575df72f pin=971327859b33.",
+      "artifact_covered_by": [
+        "CTak3-AC1",
+        "CTak3-AC2",
+        "CTak3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261015T1755Z_ctlpln-r21-fwd5-one-script-20261015_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "35ac3c0dd0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 ledger entry opened 2026-10-15T17:55:33Z and closed with L1, L2 and L3 proven (deploy_ledger.py close rc 0, sentinel removed); closing commit 35ac3c0dd0."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTak3-AC1",
+      "criterion_verbatim": "the script's S3 key holds exactly two versions after the push (base: 1); report the whole FWD5-POSITIVE line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py",
+      "output_evidence": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=0.0.0_AB_MSTR ok=True (rc=0; run as timeout 280 from the repository root at 35ac3c0dd0; base read before the deploy at 2026-10-15T17:5xZ: FWD5-PRE versions=1 differs=True others_differ=0 ok=True).",
+      "denominator": "2 exact-key versions of 1 page for code/gold/diag_sleeve_fix.py; base 1",
+      "status": "PASS",
+      "expect": "versions=2",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak3-AC2",
+      "criterion_verbatim": "no other key under s3://opal-data-bd/code/gold/ changed since the entry opened (base: the test does not exist); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py",
+      "output_evidence": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=0.0.0_AB_MSTR ok=True (rc=0; the test line before it: other_changed: 0 of 190 key(s) under code/gold/ (1 page(s), script key excluded) modified after 2026-10-15T17:55:33Z). The audit log holds exactly one PINNED-DEPLOY row since the entry opened, for this path.",
+      "denominator": "190 keys under code/gold/ counted client-side over 1 page, script key excluded; 0 modified after the entry opened",
+      "status": "PASS",
+      "expect": "other_changed=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak3-AC3",
+      "criterion_verbatim": "the deployed object's ETag equals the md5 of the committed script (base: the test does not exist); report the whole line, the actor evidence (the push's stderr line and the S3 VersionId time), and the ledger entry's final state.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py",
+      "output_evidence": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=0.0.0_AB_MSTR ok=True (rc=0). ETag c204fd9be3bbfc43346a14b4c71051af equals repo md5 c204fd9be3bbfc43346a14b4c71051af. ACTOR: the CloudOps seat did NOT make the push. Its two git push attempts of box/laptop (17:56Z, 17:57Z) were refused by the LD-0367/0368 shared-branch gate and no override was used (row NFRA_CTLPLN-S9132). The scheduled box-sync push of 0.0.0_AB_MSTR deployed: PINNED-DEPLOY audit row 2026-10-15T18:01:57Z, S3 VersionId time 2026-10-15T18:02:18Z. The push's stderr line was not captured by this seat (the push ran in the scheduled task). LEDGER: entry ctlpln-r21-fwd5-one-script-20261015 CLOSED, L1 L2 L3 proven, sentinel removed.",
+      "denominator": "1 object; 1 version added; 1 PINNED-DEPLOY row since the entry opened",
+      "status": "PASS",
+      "expect": "etag_equals_repo_md5=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same read test in --pre mode, run before the deploy (2026-10-15T17:5xZ) against the same key: the instrument must read the OPPOSITE of the post state while the key still held the old bytes.",
+      "expected": "before the deploy: versions=1 and differs=True; after: versions=2 and etag_equals_repo_md5=True",
+      "observed": "before: FWD5-PRE target=diag_sleeve_fix.py versions=1 repo_blob=8d6f273a9e repo_md5=c204fd9be3bbfc43346a14b4c71051af s3_etag=56cb170f95c0b112a36a0ee3973d5473 differs=True others_differ=0 ok=True; after: FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 ok=True; --pre after the deploy reads differs=False ok=False",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the default read test run twice on the final state (two runs of the same command, 2026-10-15T18:0xZ); compared on the last line",
+      "observed": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=0.0.0_AB_MSTR ok=True on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD step 5: the CloudOps seat's own push of box/laptop",
+      "reason": "Refused by the LD-0367/0368 shared-branch gate (only 0.0.0_AB_MSTR may push box/laptop); no override used, row NFRA_CTLPLN-S9132. The deploy happened on the next scheduled box-sync push instead."
+    },
+    {
+      "item": "the push's stderr line 'deploying 1 ledgered file(s)'",
+      "reason": "The deploy ran inside the scheduled box-sync task, whose stderr this seat cannot read; the actor is proven by the PINNED-DEPLOY audit row and the S3 VersionId time instead."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-S9132: the shared-branch push gate refuses a CloudOps push of box/laptop, which the order names as the act under test. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.7.0_AE_CloudOps~CT2/NFRA_CTLPLN.TO-CT-ak-3.signed-change-deploys-exactly-one-script.proof_of_spec.json (the session of 0.7.0_AE_CloudOps~CT2 on 2026-10-15)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py",
+      "result": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=0.0.0_AB_MSTR ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/deploy_ledger.py close --slug ctlpln-r21-fwd5-one-script-20261015",
+      "result": "OK: CLOSED deploy ledger, all 3 legs proven; sentinel removed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/deploy-ledger-names.py --rev HEAD (357 top-level deploy-scope scripts, pre-state)",
+      "result": "357 HELD, 0 LEDGERED before the entry opened"
+    }
+  ]
+}
