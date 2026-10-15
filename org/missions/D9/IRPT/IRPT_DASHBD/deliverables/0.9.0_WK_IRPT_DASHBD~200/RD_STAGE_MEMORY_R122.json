@@ -1,0 +1,48 @@
+{
+  "firm": "49financial",
+  "day": "2026-10-13",
+  "configured_memory_mb": 3008,
+  "threshold_fraction": 0.7,
+  "threshold_mb": 2105.6,
+  "accounts": 7640,
+  "households": 4012,
+  "rows": 4693967,
+  "read_inputs_seconds": 85.391,
+  "build_day_seconds": 68.767,
+  "day_seconds": 154.158,
+  "baseline_rss_mb": 120.7,
+  "peak_after_inputs_mb": 2587.3,
+  "peak_rss_mb": 4024.6,
+  "sampler": {
+    "interval_seconds": 0.25,
+    "samples": 583,
+    "method": "psutil.Process().memory_info().rss read by a daemon thread every 0.25 s over the measured section, plus direct readings at the start, at the end of filled_inputs and after filled_day_rows"
+  },
+  "verdict": "CHUNK",
+  "chunk_rule": {
+    "households_per_chunk": 1,
+    "basis": "The checker's arithmetic: per_household_mb = (4024.6 - 2587.3) / 4012 = 0.3583 MB; (2105.6 - 2587.3) / 0.3583 is negative, so the floor of 1 applies. The inputs alone exceed the line, so a household chunk cannot bring the peak under it; the split build must chunk the input reads (see words)."
+  },
+  "measured_on": {
+    "where": "local",
+    "words": "Measured on this box, a Windows workstation (dell2) with its local Python 3.14 install of boto3, psutil, pandas and pyarrow, reaching S3 over the workstation's ordinary network path to the us-east-1 endpoint. The process figures include the interpreter, pandas, pyarrow and boto3 (the baseline of 120.7 MB was taken before the reads); they are not subtracted. INFERENCE, not a measurement: a Lambda in us-east-1 reads the same prefixes over the in-region network, and I expect its memory peak to be of the same order as this process's, not lower, because the rows held in memory are the driver and this local peak is already above the function's 3008 MB allocation. The Lambda's own allocation behaviour was not measured here."
+  },
+  "words": "Measured LOCAL and read-only: the reporting-gold handler's filled_inputs and filled_day_rows for the 49 Financial filled_report_values stage, on the newest landed returns day 2026-10-13, with the account set run() derives (7640 accounts). A sampler thread read the process's resident memory every 0.25 seconds, 583 samples. The baseline was 120.7 MB; the highest sample at the end of filled_inputs was 2587.3 MB; the peak over the whole run was 4024.6 MB. The threshold is 0.7 times the configured 3008 MB, which is 2105.6 MB. The peak is over the line, so the verdict is CHUNK. The input reads alone are already over the line: the resident memory after them, before any household is built, is 2587.3 MB. The checker's chunk rule gives 1 household per chunk only as a floor, because the arithmetic is negative; a household chunk cannot lower the input reads that come before it. The input reads took 85.391 seconds and 600 S3 requests (590 GET, 10 LIST); the build of the day took 68.767 seconds for 4012 households and 4693967 rows. The split build must therefore chunk the INPUT READS, not only the household loop: the filled_inputs read of the returns, activity, realized-lot and class partitions must be split by account group, each group's read plus its share of the build must stay under 2105.6 MB, and the group size is not computed here because it needs a measurement at a smaller account set.",
+  "analysis": {
+    "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~200/stage_memory_r122.py",
+    "sha256": "f1606b8f095282fd11d9feb88ed0d8394d8c143533faad35a547628ae3b37d17",
+    "tracked": true
+  },
+  "reads": {
+    "s3_reads": 600,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
