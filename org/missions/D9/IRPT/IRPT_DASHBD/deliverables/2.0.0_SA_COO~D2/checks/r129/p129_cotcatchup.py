@@ -3,7 +3,7 @@
 per event, the schedule left DISABLED and the ledger left OPEN. Written BEFORE Act 2 has run, so that the order can be cut the moment the issuer has read Act 2's record; it grades
 nothing until its record exists.
 
-  DB-b-261 (0.7.0_AE_CloudOps~DB2)  DBD129-1-AC1 (the record: gates, the event list against a fresh silver recount, each event's result),
+  the Act 3 order (0.7.0_AE_CloudOps~DB2)  DBD129-1-AC1 (the record: gates, the event list against a fresh silver recount, each event's result),
                                     DBD129-2-AC1 (FRESH reads: every named day holds its two objects, history untouched, the function and schedule unchanged, the REPORT lines equal the record)
 
 Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
