@@ -27,7 +27,9 @@ SILVER_PREFIX = "blackdiamond/cottonwood/silver/fact_holdings/"
 CLAIMS = ("measured", "inferred", "held", "absent")
 TABLES = ("account_dim", "account_return_daily", "holdings_performance_daily")
 LONG_DIGITS = re.compile(r"\d{8,}")
-DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "keys", "prefix", "where", "date", "dates", "landing_utc", "landing_et", "newest_date", "name", "address")
+DIGIT_OK_KEYS = ("sha256", "path", "paths", "file", "key", "keys", "prefix", "where", "date", "dates", "landing_utc", "landing_et", "newest_date", "name", "address")
+# a repo FILE PATH may name another firm (an Inflection adapter is a repo file, not Inflection data); the guard is for data fields, so path fields are exempt
+FOREIGN_OK_KEYS = ("where", "prefix", "words", "basis_words", "note", "path", "paths", "file")
 FOREIGN = ("inflection", "orion", "schwab", "49financial", "opal-data-49financial", "opal-data-inflection")
 PACKET_HEADS = ("## Change set", "## Keys written", "## Both branches", "## Rollback", "## Questions for the CTO's half", "## Not in this packet")
 ET = None
@@ -64,7 +66,7 @@ def no_identifiers(rec):
         if isinstance(v, str):
             low = v.lower()
             for f in FOREIGN:
-                need(f not in low or k in ("where", "prefix", "words", "basis_words", "note"), "foreign firm token in field " + k)
+                need(f not in low or k in FOREIGN_OK_KEYS, "foreign firm token in field " + k)
             if k not in DIGIT_OK_KEYS:
                 need(not LONG_DIGITS.search(v), "a run of 8 or more digits in field " + k)
 
@@ -247,6 +249,13 @@ def selftest(root):
         refused = True
     need(refused, "no_identifiers negative arm: a long digit run in a words field passed")
     no_identifiers({"basis_words": "none", "path": "a/20261015/b"})
+    no_identifiers({"paths": ["data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_dim.py"]})
+    refused = False
+    try:
+        no_identifiers({"firm": "inflection"})
+    except Fail:
+        refused = True
+    need(refused, "no_identifiers negative arm: a foreign firm token in a data field passed")
     print("SELFTEST PASS")
 
 
