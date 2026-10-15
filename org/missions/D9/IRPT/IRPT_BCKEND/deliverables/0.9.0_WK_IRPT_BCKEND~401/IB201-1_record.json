@@ -1,0 +1,30 @@
+{
+  "base_commit": "b611ec274628b8dee7057e16726402db1960f82c",
+  "changed_paths": [
+    "docs/contracts/investor-reporting/v1/ExportBundle.schema.json",
+    "infra/aws/lambda/investor-reporting/_contracts/ExportBundle.schema.json",
+    "infra/aws/lambda/investor-reporting/export/tests/test_export_bundle_filled_report_contract.py"
+  ],
+  "arms_tested": ["new_bundle_validates", "old_bundle_validates_unchanged"],
+  "tests_total": 14,
+  "tests_passed": 14,
+  "mutant_tests_failed": 3,
+  "notes": [
+    "base_commit b611ec2746 is the worktree HEAD before the first commit of this order (the round-3 issuing commit).",
+    "Schema, both copies byte-equal (cmp): (1) filled_report_source added to the authorized_report_revisions item (required source_kind, client_id, key, version_id, sha256, size; additionalProperties false), the fields the IB-pr-555 freeze writes (bundle.py _FILLED_PIN_KEYS); (2) under AMENDMENT 1, ONE new top-level oneOf branch for a filled bundle: no narrative_packet_ref, analysis_report_ref, custody_report_ref or narrative_state, and every item requires filled_report_source and forbids performance_source; (3) x-contract-revision 1.1 to 1.2. Every existing oneOf branch is byte-for-byte unchanged.",
+    "The description of each addition quotes nothing and cites the signed pair by packet sha256; no quotation battery was found in the contract or gate folders to run against it.",
+    "Arm 1, new bundle validates: a bundle built by bundle.freeze from one well-formed filled item now validates against the packaged schema (test_new_bundle_with_filled_report_item_validates passes). The item-level tests pass: a well-formed item validates; the same item without sha256, or without version_id, is refused; an extra property and an unknown source_kind are refused; a malformed sha256 is refused. A filled bundle beside a retained revision, and a filled bundle carrying narrative_state, are refused.",
+    "Arm 2, old bundles unchanged: the portal wire fixture ExportBundle.valid.json (read only, PATH A shape), a PATH A shaped bundle and a PATH B shaped bundle all validate against the packaged schema.",
+    "Regression: test_export.py, test_packaged_contracts_match_docs.py and the new file: 44 of 44 pass (the check's regression set). The four failing tests in _contracts/tests/test_seam_paired.py fail at base too, with the base bytes served as well (surprise row IRPT_BCKEND-D2-W401-S2); left as they are.",
+    "Difference control: with the base bytes of both copies served in memory, the new file runs 14 tests: 3 fail on assertions (the arm-1 bundle test, the arm-1 item test, the revision test) and 11 pass. No collection or import error.",
+    "Looseness recorded, not changed (existing branches must stay byte-for-byte): a filled item beside narrative_packet_ref still validates through existing branch 1, which does not exclude filled pins. The freeze refuses that shape. Surprise row IRPT_BCKEND-D2-W401-S3 (OBSERVATION, INERT).",
+    "Not read: the export handler, the submit paths and the reporting route (outside the grant); the PRD itself.",
+    "Nothing was deployed, invoked, written to AWS, signed or sent. No sign-in, no vendor request, no client data. Probe and mutant scripts lived in C:/dev/_scratch401/, outside the repository."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

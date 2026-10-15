@@ -37,8 +37,8 @@ ALLOWED_PREFIXES = (
     "src/pages/InvestorReporting/render/",
 )
 EXPORT_TOKENS = (
-    (IR + "export/filledReportSource.ts", ("FILLED_REPORT", "export function filledReportSource")),
-    (IR + "export/submit.ts", ("FILLED_REPORT",)),
+    (IR + "export/filledReportSource.ts", ("filled_report", "export function filledReportSource")),
+    (IR + "export/submit.ts", ("filled_report_source",)),
     (IR + "export/ExportButton.tsx", ("clientId",)),
     (IR + "export/resolveBundle.ts", ("readReportAnswer", "filledReport")),
     (IR + "tabs/reporting/ReportingTab.tsx", ("buildFilledReportExportTarget",)),

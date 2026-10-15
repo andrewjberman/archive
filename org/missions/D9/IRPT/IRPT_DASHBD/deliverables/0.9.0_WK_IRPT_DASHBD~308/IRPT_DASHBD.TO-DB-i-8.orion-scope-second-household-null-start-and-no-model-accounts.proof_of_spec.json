@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-8",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "5d4d069ce1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-8.orion-scope-second-household-null-start-and-no-model-accounts.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~308",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~308/SECOND_HOUSEHOLD_PROBE_R120.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~308/SECOND_HOUSEHOLD_PROBE_R120.json",
+      "kind": "config_data",
+      "commit_or_etag": "90bda33216",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-8 record: script hash, household digest (not round 117's), six accounts (four FULL, one NO_START, one NO_MODEL), two listed calls (q3 then ytd, both HTTP 200, flag false), states per window (q3: five GROUP_WITH_SERIES and one NO_GROUP; ytd: the same counts), the four verdict fields (no_start_confirmed true, no_model_confirmed false, others_all_present true, claim_upgrade_allowed false), the credential verdict ACCEPTED, reads and basis words. Counts, digests and verdict words only; the two 2xx bodies are private files hashed in the record. No AWS write, no push, no deploy.",
+      "artifact_covered_by": [
+        "DBI120-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~308/second_household_probe.py",
+      "kind": "script",
+      "commit_or_etag": "ee9050798e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one probe script, hashed in the record (sha256 0942a4be197304f260a414975015eddaaac7b694a00720ca8a34f5c2c7740c21, unchanged since its commit). It POSTs the inner scope only, to the one Scope URL, exactly twice, with a six-second pace, no retry and a stop on any non-2xx; it reads the token through the estate's Secrets Manager loader only; it holds no AWS write call, names no other firm, and makes no other HTTP call. Not deployed; run only from the worktree.",
+      "artifact_covered_by": [
+        "DBI120-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "90bda33216",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended as bytes, IRPT_DASHBD-D2-W308-S1 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~I2): the client-data check of safe-commit found its hashed account-id list absent on this box. Form only; no client value.",
+      "artifact_covered_by": [
+        "DBI120-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI120-1-AC1",
+      "criterion_verbatim": "`DBI120-1-AC1` -- the record is complete and carries no identifier; the script is a tracked file hashed as recorded with no AWS write call and no other firm's name; the household, its account classes and the two chosen accounts equal the checker's recompute from the private dimension and the round-119 roster body; 1 or 2 calls are listed in the order q3 then ytd, each `ok` agreeing with its status, each 2xx a private file hashed as recorded, no call after a failed one; the states, the four verdict fields and the credential verdict equal the checker's recompute from the saved bodies; no write to AWS, no push, no deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r120/p120_second_hh.py\" . DBI120-1-AC1",
+      "output_evidence": "DBI120-1-AC1 PASS (rc=0), run from the worktree root after the basis words were filled in",
+      "denominator": "1 of 1 criterion PASS. Calls listed: 2 of 2 (q3 then ytd), calls_made and reads.vendor_calls both 2, each ok agreeing with its status (2 of 2, both HTTP 200), each 2xx a private file hashed as recorded (2 of 2). Household by the rule: 1 household of 11 candidates; 6 accounts in it (4 FULL, 1 NO_START, 1 NO_MODEL), matching the checker's recompute. States per window (q3 and ytd, 6 accounts each) equal the recount from the saved bodies. The prediction's parts did not all hold: the NO_START part held and the NO_MODEL part did not (it is GROUP_WITH_SERIES in q3); this is a recorded result, not a failed criterion, and claim_upgrade_allowed is false.",
+      "status": "PASS",
+      "expect": "DBI120-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the record under the worker scratch folder (not committed), with verdict.claim_upgrade_allowed changed from false to true and nothing else changed; the unmodified checker run on that copy.",
+      "expected": "DBI120-1-AC1 FAIL on the verdict recount",
+      "observed": "DBI120-1-AC1 FAIL: verdict.claim_upgrade_allowed differs from the recount (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice on the final tree (after the basis words were filled in); the two printed outputs compared with cmp.",
+      "observed": "identical output on both runs: DBI120-1-AC1 PASS; rc=0 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A third call, a retry, or a second household or window",
+      "reason": "Exactly two calls were made (q3 then ytd); both answered HTTP 200; no retry; no other household or window."
+    },
+    {
+      "item": "The S3 copy of the session token",
+      "reason": "Not used: the Secrets Manager read succeeded, so no fallback was taken."
+    },
+    {
+      "item": "Any AWS write, deploy, push, or change to served values",
+      "reason": "None made. The reads were the Secrets Manager token, the private dimension and the round-119 roster body, and the two Scope POST responses. The probe made no S3 read. Writes are the private folder and the repo deliverables and channel row."
+    },
+    {
+      "item": "The prediction's no-model part",
+      "reason": "A result, not a criterion failure: the no-model account is GROUP_WITH_SERIES in q3 and ytd, so the Q3 shortfall predicted by the round-119 inference did not recur here. Recorded in basis_words and in the record's verdict (no_model_confirmed false, claim_upgrade_allowed false)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W308-S1: the client-data check of safe-commit printed ABSENT for its hashed account-id list on this box, so the commit of the probe script was not checked for client account ids; the committed files carry no id. Form only."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "second_household_probe.py, the probe, run once from the worktree (two calls, both HTTP 200)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~308/second_household_probe.py C:/dev/wk-irpt-dashbd-308",
+      "result": "candidates 11; household of 6 accounts (4 FULL, 1 NO_START, 1 NO_MODEL); token from the Secrets Manager loader; call q3 HTTP 200, call ytd HTTP 200; states five GROUP_WITH_SERIES and one NO_GROUP in each window; no_start_confirmed true, no_model_confirmed false, others_all_present true, claim_upgrade_allowed false; credential ACCEPTED"
+    },
+    {
+      "tool": "p120_second_hh.py issuer checker, run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r120/p120_second_hh.py\" . DBI120-1-AC1",
+      "result": "rc=0; DBI120-1-AC1 PASS"
+    }
+  ]
+}
