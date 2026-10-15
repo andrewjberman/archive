@@ -9,6 +9,8 @@ It reuses the round-196 helpers (checks/r196/p196_cells.py, committed beside it)
     AC3  the proposed re-pull method writes only the two dates' keys under the Orion Inflection prefixes, with read-back and per-key rollback, executed false; notes, counters 0, no long digit run
 
   IB199-2  IB-pr-549  the holdings-producer release APPLIED under the signed pair IB-pr-532 packet v3, per-firm pins (see p199_apply.py)
+  IB199-3  IB-pr-551  hops 2-4 of the filled-report serve path as ONE never-widen pair: the design record and the packet (see p199_serve.py)
+  IB199-4  IB-pr-552  READ: the Orion raw producer, every day the mirror silently dropped, the re-pull cost per feed, the 6 AM ET fold design (see p199_orion2.py)
 """
 import json
 import re
@@ -21,6 +23,8 @@ sys.path.insert(0, str(HERE.parent / "r193"))
 sys.path.insert(0, str(HERE))
 import p196_cells as P6  # noqa: E402
 import p199_apply as PA  # noqa: E402
+import p199_serve as PS  # noqa: E402
+import p199_orion2 as PO  # noqa: E402
 
 D = P6.D
 REC = D + "0.9.0_WK_IRPT_BCKEND~394/IB199-1_orion_gap_read.json"
@@ -102,7 +106,7 @@ def c3():
     print("OK: the method writes only the two dates, read-back and rollback stated, counters 0")
 
 
-CHECKS = {"IB199-1-AC1": c1, "IB199-1-AC2": c2, "IB199-1-AC3": c3, **PA.CHECKS}
+CHECKS = {"IB199-1-AC1": c1, "IB199-1-AC2": c2, "IB199-1-AC3": c3, **PA.CHECKS, **PS.CHECKS, **PO.CHECKS}
 
 if __name__ == "__main__":
     if len(sys.argv) != 3 or sys.argv[2] not in CHECKS:

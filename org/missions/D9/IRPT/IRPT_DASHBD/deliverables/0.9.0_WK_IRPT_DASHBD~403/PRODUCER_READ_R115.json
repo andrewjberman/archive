@@ -1,0 +1,111 @@
+{
+  "claim": "measured",
+  "producer": {
+    "verdict": "AD_HOC",
+    "words": "Manifests 2026-09-25 and 2026-08-27 (manifest.json, read by GET): source_pipeline irpt-holdings-performance, declaration data/assets/scripts/gold/irpt_holdings_performance/sources.json, schema_version 1.1, no run identifier, and no partitions_read or span_trading_days key. HEAD emits schema 1.2 with those keys: SCHEMA_VERSION is 1.2 in the producer file at HEAD; git history shows 1.2 first at commit de3d423dce (2026-10-01), and f302ab14cd (2026-09-29) carries 1.1. No Lambda is the writer: lambda.tf defines two functions and schedule.tf fires them with event sources of the two other declared channels, none with the Cottonwood key blackdiamond_z09; no get-function was read because no function is named. The SSM dispatch in infra/aws/lambda/investor-reporting/holdings_refresh/refresh_dispatch.py runs holdings_snapshot.py, which has no reference to holdings_performance (Grep, 0 matches), and the MDPF runner dispatch folder has no holdings reference (Grep, 0 matches). Verdict AD_HOC is inferred: a manual run (the producer CLI with --source blackdiamond_z09 --upload, or a manual invoke of a function) of an emission-1.1 copy of the producer. A job outside this repo is not excluded, and no run log was read. Last run: the newest object in the gold daily table has LastModified 2026-09-29T10:54:20Z (partition dated 2026-08-12); partition 2026-09-25 has three object versions with LastModified 2026-09-29T10:51:57Z, 10:53:41Z and 10:53:50Z; the manifest carries no instant of its own.",
+    "code_path": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+    "claim": "inferred"
+  },
+  "manifests": {
+    "by_date": {
+      "2026-09-25": [
+        "account_value_is",
+        "accounts_restricted",
+        "accounts_with_prior_holdings",
+        "asof",
+        "calendar_source",
+        "cash_columns",
+        "complete",
+        "complete_means",
+        "computable_count",
+        "daily_address",
+        "declaration",
+        "firm_scope",
+        "implausible_band",
+        "landed",
+        "manifest_address",
+        "manifest_parquet_landed",
+        "method",
+        "not_computable_count",
+        "not_computable_reasons",
+        "prior_business_date",
+        "rows",
+        "rows_unique_per_account",
+        "schema_version",
+        "source_pipeline",
+        "status_census",
+        "table"
+      ],
+      "2026-08-27": [
+        "account_value_is",
+        "accounts_restricted",
+        "accounts_with_prior_holdings",
+        "asof",
+        "calendar_source",
+        "cash_columns",
+        "complete",
+        "complete_means",
+        "computable_count",
+        "daily_address",
+        "declaration",
+        "firm_scope",
+        "implausible_band",
+        "landed",
+        "manifest_address",
+        "manifest_parquet_landed",
+        "method",
+        "not_computable_count",
+        "not_computable_reasons",
+        "prior_business_date",
+        "rows",
+        "rows_unique_per_account",
+        "schema_version",
+        "source_pipeline",
+        "status_census",
+        "table"
+      ]
+    }
+  },
+  "date_0609": {
+    "prior_trading_day": "2026-06-08",
+    "prior_day_silver_present": false,
+    "rule_file": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+    "rule_words": "_frame_for (line 973) sets prev to the library prev_trading_day of the day (line 987) and reads the t-1 close from the partition or partitions that hold it under the declared partition_close. When that prior partition is absent it returns ABSENT with no base for the day. It links from an earlier close only when the source declares link_across_gaps true.",
+    "can_compute_words": "No. The rule needs the prior-day partition for the t-1 close. For 2026-06-09 that is 2026-06-08, which is not in the silver (the silver starts on 2026-06-09). The source declares link_across_gaps false, so the earlier-close branch is not taken, and the rule returns ABSENT with no base for 2026-06-09. The day's own partition is present; only the base is missing. Read from the code; the producer was not run.",
+    "claim": "measured"
+  },
+  "rewrite": {
+    "dates": {
+      "2026-09-23": {
+        "silver_latest_lm_utc": "2026-09-28T11:46:16Z",
+        "silver_versions": 1,
+        "gold_latest_lm_utc": "2026-09-29T10:51:56Z",
+        "gold_after_silver": true
+      },
+      "2026-09-24": {
+        "silver_latest_lm_utc": "2026-09-28T11:46:30Z",
+        "silver_versions": 1,
+        "gold_latest_lm_utc": "2026-09-29T10:51:58Z",
+        "gold_after_silver": true
+      },
+      "2026-09-25": {
+        "silver_latest_lm_utc": "2026-09-28T11:46:30Z",
+        "silver_versions": 1,
+        "gold_latest_lm_utc": "2026-09-29T10:53:50Z",
+        "gold_after_silver": true
+      }
+    },
+    "words": "Silver 2026-09-23, 2026-09-24 and 2026-09-25 each hold one object, and its single version is LastModified 2026-09-28 (about 11:46 UTC). The silver bucket is versioned (VersionIds are not null) with zero delete markers, so the 2026-09-28 write is the first version of each key in this history, not a rewrite of an earlier silver object. Gold: 2026-09-23 and 2026-09-24 each hold one version written 2026-09-29 (10:51:56Z and 10:51:58Z); 2026-09-25 holds three versions written 2026-09-29 at 10:51:57Z, 10:53:41Z and 10:53:50Z. The gold is written after the last silver write for all three dates, by about one day. A plain LIST gives only the newest LastModified per object: it shows gold after silver for each date, but it cannot show the two earlier writes of 2026-09-25 and cannot separate a rewrite from a first write. A version LIST separates them; for silver the LIST and the version LIST agree at one version per date, so the 2026-09-28 write is a first write."
+  },
+  "basis_words": "Repo reads: the producer file (_frame_for from line 973, prior-day rule at line 987, emit_day manifest fields from about line 1125), the blackdiamond_z09 entry of sources.json (partition_close OWN_DATE, link_across_gaps false), handler.py, lambda.tf, schedule.tf, refresh_dispatch.py, git log and show of the producer file, and Grep and comp-find on named folders. Calendar: lib/trading_calendar.py answered from its hardcoded NYSE fallback because pandas_market_calendars is absent from this interpreter; the prior trading day of 2026-06-09 and the 20-trading-day cut to 2026-08-27 are unaffected, and the manifests record calendar_source NYSE/pandas_market_calendars. S3 reads: 23 calls, all under the two Cottonwood gold prefixes, the Black Diamond silver prefix, and the two manifest objects: 12 LIST objects v2, 9 LIST object versions, 2 GET of manifest.json. One first attempt of the private read script stopped on a print error after one LIST and was rerun; its single LIST is counted. No write, no invoke, no get-function, no log-group read, no secret read, no vendor call. Private scripts are kept outside the worktree and not committed. The criterion checker, run by the order's invocation, made its own fresh S3 reads; this count does not include them.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "aws_writes": 0,
+    "s3_reads": 23
+  },
+  "pushed": false,
+  "deployed": false
+}
