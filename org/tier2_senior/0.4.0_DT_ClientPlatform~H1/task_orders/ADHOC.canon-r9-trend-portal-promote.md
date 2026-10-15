@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.4.0_DT_ClientPlatform~H1</issued_to>
 <date>2026-10-15</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P1 (Andrew-direct 2026-10-15 ~01:1xZ: "let's get that sorted for PROD now"; STAGED until the CTO rules on DEV and the issuer's GO names this order)</priority>
