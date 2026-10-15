@@ -1,0 +1,124 @@
+{
+  "cell": "AR-y-363",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-363",
+  "prod_tip": "e0b43076d9daf56f8eb4937137180e3cf4246e7f",
+  "prod_tip_note": "origin/PROD read after a permitted git fetch origin, 2026-10-15T22:04Z; the Use-only hint (469b a6b83f692084) and the Keep equal pair (f78ea50ef8) are NOT on PROD; this tree is built on PROD",
+  "portal_worktree": "C:/dev/wk-irpt-anlreq-160/portal (branch wk-IRPT_ANLREQ-160-portal)",
+  "candidate_branch": "cand/dell2/anlreq-filing-decision-tree (LOCAL, never pushed)",
+  "commit": "a168015bdd46d64cbf82e1b6c118cd06f304ed98",
+  "commit_subject": "feat(TicketCenter): C-FILING-DECISION-TREE for an unknown ticker, Yes / Replace / No (AR-y-363, PRD v0.19)",
+  "push_state": "LOCAL a168015b only; no push of any branch was run (ls-remote not run; no push command in this order)",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx (new)",
+    "src/pages/TicketCenter/__tests__/filing-hint.test.tsx (re-pinned)"
+  ],
+  "diffstat_from_prod": "5 files changed, 467 insertions(+), 106 deletions(-) (git -C portal diff --stat origin/PROD a168015b)",
+  "tests": {
+    "added": 8,
+    "added_file": "src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx, cases (a) to (h)",
+    "passed": 8,
+    "failed": 0,
+    "run": "timeout 120 bun test src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx -> 8 pass, 0 fail, 35 expect() calls",
+    "folders": "src/pages/TicketCenter: 136 pass, 0 fail, 985 expect() calls, 25 files (the PROD base folder had 128; 128 + 8 added = 136)"
+  },
+  "before_arm": {
+    "method": "the new test file run against origin/PROD's TicketCenter source (git show origin/PROD:<path> into .scratch/before_arm, the same test file, the same node_modules link; no change of the product tree)",
+    "result": "1 pass, 7 fail (rc 1); output kept in .scratch/before_arm_run.txt",
+    "per_case": {
+      "a": "FAIL: the tree's buttons are absent on PROD (no Yes/Replace/No); the 'Did you mean' line itself is present",
+      "b": "FAIL: no Yes button on PROD (the page offers Use)",
+      "c": "FAIL: no Replace button and no replacement input on PROD",
+      "d": "FAIL: no Replace button on PROD, so no empty-replacement check exists",
+      "e": "FAIL: no No button on PROD (Keep posts nothing there)",
+      "f": "FAIL: no suggestion-less tree item on PROD (filingHints drops a TICKER_NOT_FOUND without a suggestion)",
+      "g": "PASS on PROD: a TICKER_DATA_NOT_ENTITLED finding shows no tree button on PROD either; the case is a guard that holds on both arms",
+      "h": "FAIL: the mounted Replace press has no button on PROD"
+    },
+    "note": "The order predicted (a) to (f) and (h) FAIL on PROD; measured exactly that, and (g) is a guard that PROD already satisfies."
+  },
+  "repinned": [
+    {
+      "file": "src/pages/TicketCenter/__tests__/filing-hint.test.tsx",
+      "case": "header comment and describe title",
+      "before": "Use (re-posts the same upload) and Keep (sends nothing); the title named Use and Keep",
+      "now": "Yes (re-posts the same upload), Replace (new) and No (re-posts the equal pair); the title names Yes, Replace and No"
+    },
+    {
+      "file": "same", "case": "(a)",
+      "before": "filingHints returns only the suggestion-bearing finding (ACME1)",
+      "now": "filingHints also returns the suggestion-less TICKER_NOT_FOUND finding ZZZZ (row 4, suggestion null); still excludes TICKER_AMBIGUOUS and TICKER_DATA_NOT_ENTITLED"
+    },
+    {
+      "file": "same", "case": "(b)",
+      "before": "a finding that carries only swaps yields []",
+      "now": "a finding that carries only swaps yields one tree item with suggestion null; the swap SWP1 is still never read"
+    },
+    {
+      "file": "same", "case": "(c)",
+      "before": "Use re-posts the upload with a corrections list built from FilingHint objects; correctionsFor fixtures used {suggestion}",
+      "now": "Yes re-posts the upload; correctionsFor fixtures are FilingChoice objects {value, to, kind}; the same assertions: one correction for a repeated symbol, 20 for twenty-five"
+    },
+    {
+      "file": "same", "case": "(d)",
+      "before": "Keep posts nothing; the words 'ACME is kept as you typed it ... cannot be filed until ... replaced or removed in your file.'; the Keep handler source names no upload",
+      "now": "No re-posts the equal pair; the line reads exactly 'Opal Staff will manage the replacement.'; the page's chooseHint routes the press through withFilingChoice"
+    },
+    {
+      "file": "same", "case": "(e)",
+      "before": "html contains 'Use ACME1' and 'Keep ACME'",
+      "now": "html contains the buttons '>Yes</button>', '>Replace</button>', '>No</button>' and not 'Use ACME1' or 'Keep ACME'"
+    },
+    {
+      "file": "same", "case": "(g)",
+      "before": "UploadFindings props onUse and onKeep",
+      "now": "UploadFindings prop onChoose; the case's assertions (no SWP1, no swap word) are unchanged"
+    },
+    {
+      "file": "same", "case": "(f)",
+      "before": "no proxy word, no swap word, no NAME_PROXY in sources",
+      "now": "UNCHANGED"
+    }
+  ],
+  "what_a_person_sees": {
+    "branch_A_with_suggestion": "Under the finding, the line 'Did you mean ACME1? (row 3: ACME)' and three buttons, Yes, Replace, No. Yes: the same file is sent again with the correction ACME to ACME1. Replace: a button that reveals one input labelled 'Replacement ticker for ACME' and a Check button; Check sends the typed ticker, trimmed and upper-cased, as the correction; a blank input sends nothing and shows 'Type the ticker you meant.'. No: the same file is sent again with ACME to ACME; the item then reads 'Opal Staff will manage the replacement.' and has no buttons.",
+    "branch_A_without_suggestion": "Under the finding, the line 'ZZZZ was not found.' and two buttons, Replace and No. Replace and No behave as above; there is no Yes.",
+    "branch_B_other_findings": "A TICKER_DATA_NOT_ENTITLED or any other non-TICKER_NOT_FOUND finding shows only the door's own words (for example 'Ticker GAMA is not entitled for this firm.'). No button of the tree and no prompt appear, and the form asks the filer for no replacement.",
+    "limit": "Once twenty symbols are named for one file, the tree's buttons are hidden and the existing line 'No more than 20 corrections can be named for one file.' shows."
+  },
+  "claim": "The form's decision tree for an unknown ticker is Yes, Replace and No when the door suggests a ticker, and Replace and No when it does not; any other finding shows only the door's words. Each press re-posts the SAME upload (same upload_token and file) with one correction per typed symbol, last press standing, never a case-only pair, never another finding code, at most twenty. Nothing is sent without a press, and no word of the cell's forbidden list appears in any state rendered by the tree (cases a to h). Nothing was pushed or landed.",
+  "name_search": {
+    "method": "native Grep (free list) over the portal worktree, before the change, for the names Use, Keep, hint, correction, kept, onUse, onKeep, keptLine, keepHint, useHint, proxy; then over the folder for the tree names",
+    "src/pages/TicketCenter/__tests__": "hits in filing-hint.test.tsx (the only file that pins the Use/Keep/hint words; re-pinned as above); package-form-item.test.tsx and analysis-form-no-fee.test.tsx use 'kept' in an unrelated sense (the typed ETFs and the answers kept), not re-pinned; analysis-request.test.tsx and analysis-request-repost.test.tsx render UploadFindings with findings only and no hints, so they pin no tree word (both still pass)",
+    "src/pages/TicketCenter (source)": "the hint names live in analysisRequest.ts, AnalysisRequestParts.tsx and TicketCenter.tsx only",
+    "src (whole)": "keptLine, correctionsFor, correctedUpload, FilingHint, hintLine, filingHints and UploadFindings are referenced only inside src/pages/TicketCenter"
+  },
+  "decisions_beyond_the_cell": [
+    "The tree's parenthesis is '(row N: TYPED)', not '(<name>)': the door's suggestion carries no name (surprise row IRPT_ANLREQ-D2-W160-S1).",
+    "filingHints keeps the inherited gate proxyableFindings, which admits a finding only when the door's actions include NAME_PROXY (surprise row IRPT_ANLREQ-D2-W160-S2).",
+    "Replace refuses three inputs in words, sending nothing: a blank input ('Type the ticker you meant.'), a shape the door does not accept ('Type a ticker: letters, digits and . : _ / - only.', the shape of the door's own ticker value), and the same symbol or a case-only change ('Type a different ticker; the same symbol, or a change of case alone, is not sent.'). These three sentences are the worker's; the cell names only the first.",
+    "correctionsFor drops a case-only pair silently (the rule 'never a case-only pair'); a Yes whose suggestion differs only in case cannot reach it, because proxyableFindings already drops such a suggestion.",
+    "The tree's buttons are hidden at twenty symbols, as the existing Use gate was (useFull), and the existing 'No more than twenty' line is kept.",
+    "The Replace input is a component-local state (open, typed, refusal) inside UploadFindings; no new file was added."
+  ],
+  "not_read": [
+    "the live upload door's answer to an equal pair (no live call was made; until release r33 the contract's CORRECTIONS_INVALID refusal is expected, shown through the existing refusal path)",
+    "r33's words (the TICKER_DATA_NOT_ENTITLED unresolved text 'Opal Staff will manage the replacement.' is the cell's, not read)",
+    "the live door's actions for TICKER_NOT_FOUND (whether NAME_PROXY is present, which the inherited gate requires; surprise row IRPT_ANLREQ-D2-W160-S2)",
+    "the rendered page (no dev server, no browser; states are rendered with renderToStaticMarkup and the presses on a happy-dom document)",
+    "the CTO's ruling on what the submit may do with a kept row (the No choice is sent exactly as the cell says; the submit is unchanged)"
+  ],
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit, portal worktree), run once",
+    "rc": 0,
+    "role": "drain check, not a criterion",
+    "output": "no error lines (the captured output is in .scratch/typecheck.txt)"
+  },
+  "checkers": {
+    "portal_check.py": "PORTAL-TESTS-OK 8 new, 136 folder, 0 failed (rc 0)",
+    "mutant_check.py": "MUTANT-FIRES the Replace button removed: mutant rc=1 pass=3 fail=5; control rc=0 pass=8 fail=0 (rc 0)",
+    "scope_check.py": "SCOPE-OK 5 paths, all under src/pages/TicketCenter/; src/pages/InvestorReporting and src/api unchanged (rc 0)"
+  }
+}

@@ -126,6 +126,11 @@ def recompute(bodies, extract):
 
 
 def no_identifiers(rec):
+    """No run of 8 or more digits, except in a sha256 value or in a path or file field (the order names both as exempt)."""
+    rec = json.loads(json.dumps(rec))
+    for outer, inner in (("extract", "path"), ("script", "file")):
+        if isinstance(rec.get(outer), dict) and inner in rec[outer]:
+            rec[outer][inner] = ""
     text = re.sub(r"[0-9a-f]{64}", "", json.dumps(rec))
     for m in re.finditer(r"\d{8,}", text):
         need(False, "a run of 8 or more digits in the record: %s" % m.group(0)[:3])
@@ -168,6 +173,7 @@ def check(root, priv=PRIV, rec_rel=REC_REL):
     extract = json.loads(ep.read_bytes().decode("utf-8"))
     n_series, accounts = recompute(bodies, extract)
     need(rec.get("series_total") == n_series, "series_total: record %r recount %r" % (rec.get("series_total"), n_series))
+    need(rec.get("cause_claim") == "inferred", "cause_claim must read inferred (absent from a complete partition; the account status is not read)")
     need(rec.get("early_end_count") == len(accounts), "early_end_count: record %r recount %r" % (rec.get("early_end_count"), len(accounts)))
     need(rec.get("accounts") == accounts, "per-account rows differ from the recompute")
     counts = {v: sum(1 for a in accounts if a["verdict"] == v) for v in VERDICTS}
@@ -211,6 +217,13 @@ def selftest():
             pass
         else:
             raise Fail("selftest: an identifier-length run passed")
+        no_identifiers({"extract": {"path": "C:/dev/_x_20261009/IRPT/y.json"}, "script": {"file": "org/a_20261009/b.py"}})
+        try:
+            no_identifiers({"extract": {"path": "ok"}, "note": "acct 20261009"})
+        except Fail:
+            pass
+        else:
+            raise Fail("selftest: a note outside the exempt fields passed")
     print("selftest PASS")
 
 
