@@ -1,0 +1,58 @@
+ARM A1 PASS n=5 bad=0 :: no token and an unverifiable token -> 401 on a MDPF leaf (control)
+ARM A2 PASS n=50 bad=0 :: own-folder leaf passes: three partners on their folder, demo and no-firm on global, mockadv on its own name (control)
+ARM A3 FAIL n=100 bad=100 :: a partner reading any other folder (incl. global, _manifests, archive) -> 403
+  MISMATCH p49 /api/general/mdpf/inflection/aggregate-aua-timeseries.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/inflection/category-views-history.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/cottonwood/aggregate-aua-timeseries.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/cottonwood/category-views-history.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/global/aggregate-aua-timeseries.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/global/category-views-history.json expect=403 got=pass
+ARM A4 PASS n=39 bad=0 :: opal-capital and a Dev claim pass every folder under the prefix (control)
+ARM A5 FAIL n=6 bad=6 :: the demo tenant is refused every folder but global
+  MISMATCH demo /api/general/mdpf/49financial/aum-metrics.json expect=403 got=pass
+  MISMATCH demo /api/general/mdpf/inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH demo /api/general/mdpf/cottonwood/aum-metrics.json expect=403 got=pass
+  MISMATCH demo /api/general/mdpf/demo/aum-metrics.json expect=403 got=pass
+  MISMATCH demo /api/general/mdpf/_manifests/aum-metrics.json expect=403 got=pass
+  MISMATCH demo /api/general/mdpf/archive/aum-metrics.json expect=403 got=pass
+ARM A6 FAIL n=18 bad=18 :: a claim with no firm (absent, empty, null) is refused every folder but global
+  MISMATCH nofirm /api/general/mdpf/49financial/aum-metrics.json expect=403 got=pass
+  MISMATCH nofirm /api/general/mdpf/inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH nofirm /api/general/mdpf/cottonwood/aum-metrics.json expect=403 got=pass
+  MISMATCH nofirm /api/general/mdpf/demo/aum-metrics.json expect=403 got=pass
+  MISMATCH nofirm /api/general/mdpf/_manifests/aum-metrics.json expect=403 got=pass
+  MISMATCH nofirm /api/general/mdpf/archive/aum-metrics.json expect=403 got=pass
+ARM A7 FAIL n=48 bad=48 :: an unknown, prototype-key, non-string or case-variant firmId is refused every folder, global included; mockadv reads its own name only
+  MISMATCH proto /api/general/mdpf/global/aum-metrics.json expect=403 got=pass
+  MISMATCH proto /api/general/mdpf/49financial/aum-metrics.json expect=403 got=pass
+  MISMATCH proto /api/general/mdpf/inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH proto /api/general/mdpf/mockadv/aum-metrics.json expect=403 got=pass
+  MISMATCH proto /api/general/mdpf/__proto__/aum-metrics.json expect=403 got=pass
+  MISMATCH proto /api/general/mdpf/constructor/aum-metrics.json expect=403 got=pass
+ARM A8 FAIL n=6 bad=6 :: a partner-firm admin (role admin, firmRole admin, tier internal) is held to its own folder
+  MISMATCH p49admin /api/general/mdpf/global/aum-metrics.json expect=403 got=pass
+  MISMATCH p49admin /api/general/mdpf/cottonwood/aum-metrics.json expect=403 got=pass
+  MISMATCH p49admin /api/general/mdpf/inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH infadmin /api/general/mdpf/global/aum-metrics.json expect=403 got=pass
+  MISMATCH infadmin /api/general/mdpf/cottonwood/aum-metrics.json expect=403 got=pass
+  MISMATCH infadmin /api/general/mdpf/49financial/aum-metrics.json expect=403 got=pass
+ARM A9 FAIL n=15 bad=15 :: the bare prefix and the non-firm folders (_manifests, archive) are refused to every non-internal claim
+  MISMATCH p49 /api/general/mdpf expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/ expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf// expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/_manifests/2026-10-14/x.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/archive/aggregate_aua/x.json expect=403 got=pass
+  MISMATCH demo /api/general/mdpf expect=403 got=pass
+ARM A10 FAIL n=55 bad=55 :: path tricks as the 49financial claim (traversal, encoded and double-encoded, case, backslash, NUL, space, unicode slash, query): all 55 refused
+  MISMATCH p49 /api/general/mdpf/49financial/../inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/./inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/49financial/./../inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf//inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/49financial//../inflection/aum-metrics.json expect=403 got=pass
+  MISMATCH p49 /api/general/mdpf/49financial/%2e%2e/inflection/aum-metrics.json expect=403 got=pass
+ARM A11 PASS n=4 bad=0 :: own-folder leaf with a query string, and HEAD, keeps passing (control)
+ARM A12 FAIL n=1 bad=1 :: a denial is a 403 JSON body that echoes nothing, injects no header, logs one mdpf_scope_denied event, leaks no token
+  MISMATCH status 403 expect=403 got=pass
+ARM A14 PASS n=3 bad=0 :: an admitted request still carries the injected identity headers (control)
+ARM X1 PASS n=4 bad=0 :: real verify runs in the deployed bundle: wrong key, expired, alg none all 401; the fake Secrets Manager was asked for the JWT key (control)
+TOTAL 6 of 14
