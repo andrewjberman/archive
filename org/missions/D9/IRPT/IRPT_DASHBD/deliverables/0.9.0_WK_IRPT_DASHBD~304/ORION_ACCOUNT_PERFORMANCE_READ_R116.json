@@ -1,0 +1,193 @@
+{
+  "account_level_exists": "YES",
+  "pool_files_read": 85,
+  "endpoint_inventory": [
+    "/api/v1/Portfolio/Accounts",
+    "/api/v1/Portfolio/Accounts/NewPortfolio",
+    "/api/v1/Portfolio/Clients",
+    "/api/v1/Portfolio/Clients/{cid}/Assets/{date}",
+    "/api/v1/Portfolio/Clients/{clientId}/Assets/{MM-DD-YYYY}",
+    "/api/v1/Portfolio/Representatives",
+    "/api/v1/Reporting/Custom/28198/Generate/csv",
+    "/api/v1/Reporting/Custom/{REPORT_ID}/Generate/csv",
+    "/api/v1/Reporting/Envision/ExcelReports",
+    "/api/v1/Reporting/Envision/ExcelReports/Verbose/{query_id}",
+    "/api/v1/Reporting/Envision/ExcelReports/{query_id}/Generate",
+    "/api/v1/Reporting/Scope",
+    "/api/v1/Security/Token"
+  ],
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/v1/Reporting/Scope",
+    "host": "api.cloud.orionadvisor.com",
+    "claim": "inferred",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/tenants.py",
+        "line": 169,
+        "quote": "\"scope\": \"/api/v1/Reporting/Scope\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/tenants.py",
+        "line": 67,
+        "quote": "ORION_HOST = \"api.cloud.orionadvisor.com\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_live.py",
+        "line": 78,
+        "quote": "method=\"POST\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 3,
+        "quote": "POST /api/v1/Reporting/Scope on"
+      }
+    ]
+  },
+  "grain": {
+    "claim": "measured",
+    "words": "Household-entity scope (entity 5): the request names the one Orion household that holds exactly one account in the same mapping snapshot, with an Account grouping; the response is refused unless it holds exactly one Account group whose groupEntityId is the one mapped account id. The request carries one requested date range and returns one period performance per account with a daily breakdown series (one point per end date, compact form, not cumulative).",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_selected.py",
+        "line": 34,
+        "quote": "HOUSEHOLD_ENTITY = 5"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_selected.py",
+        "line": 89,
+        "quote": "\"entityIds\": [household]"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_selected.py",
+        "line": 97,
+        "quote": "\"grouping\": ACCOUNT_GROUPING"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_selected.py",
+        "line": 140,
+        "quote": "len(selected) != 1"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_account_mapping.py",
+        "line": 76,
+        "quote": "Reporting/Scope addresses a HOUSEHOLD"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/fixtures/orion_daily.json",
+        "line": 17,
+        "quote": "\"groupEntityId\""
+      }
+    ]
+  },
+  "fields": {
+    "claim": "measured",
+    "names": [
+      "performance",
+      "factor",
+      "startDate",
+      "endDate",
+      "feeAmount"
+    ],
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 43,
+        "quote": "series[].performance"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 44,
+        "quote": "series[].factor"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 90,
+        "quote": "point.get(\"startDate\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 95,
+        "quote": "point.get(\"feeAmount\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/fixtures/orion_daily.json",
+        "line": 105,
+        "quote": "\"feeAmount\""
+      }
+    ]
+  },
+  "gross_or_net": {
+    "answer": "UNDETERMINED",
+    "claim": "inferred",
+    "words": "The request sends calcGrossOfFees as False, a request-side parameter whose name reads as net of fees. The adapter declares fee_basis UNKNOWN and states the Scope response carries per-day feeAmount but declares no gross or net basis for the return, so the repo does not confirm the vendor's meaning and does not select a basis by any other parameter.",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_selected.py",
+        "line": 38,
+        "quote": "\"calcGrossOfFees\": False"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 209,
+        "quote": "result.fee_basis = \"UNKNOWN\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py",
+        "line": 214,
+        "quote": "declares no gross/net"
+      }
+    ]
+  },
+  "credential": {
+    "answer": "REACHES",
+    "secret_named_not_read": true,
+    "secret_name_as_code_names_it": "orion/jwt/current",
+    "claim": "inferred",
+    "words": "By the code: the transport loads its token through orion_session_jwt, which reads the Secrets Manager secret named by jwt_freshness SM_SECRET_ID and sends it as Authorization Session on the Scope POST. The inf-performance-daily pull reads the same estate token from the S3 copy at JWT_KEY and sends it with the same Session header scheme; jwt_freshness documents the S3 copy as the fallback for that token. The code does not show that the two stores hold the same value at call time, does not show Orion accepts the token on Scope without a call, and the route table's INF session_secret_id orion/credentials is not the secret the transport reads.",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_live.py",
+        "line": 40,
+        "quote": "from jwt_freshness import SM_SECRET_ID"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_live.py",
+        "line": 41,
+        "quote": "get_secret_value(SecretId=SM_SECRET_ID)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/orion_live.py",
+        "line": 81,
+        "quote": "req.add_header(\"Authorization\", \"Session \" + token)"
+      },
+      {
+        "file": "infra/aws/lambda/inf-pipeline/inf-performance-daily/jwt_freshness.py",
+        "line": 45,
+        "quote": "SM_SECRET_ID = \"orion/jwt/current\""
+      },
+      {
+        "file": "infra/aws/lambda/inf-pipeline/inf-performance-daily/pull_inflection_performance_dim.py",
+        "line": 57,
+        "quote": "JWT_KEY = \"orion/jwt/current.json\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/performance/tenants.py",
+        "line": 170,
+        "quote": "session_secret_id=\"orion/credentials\""
+      }
+    ]
+  },
+  "basis_words": "Files read (repo only; no vendor or AWS call; no secret value read): the investor-reporting performance directory (orion_adapter.py, orion_live.py, orion_selected.py, orion_account_mapping.py, tenants.py, authorization.py, entry.py, runtime and installed by import use, the fixtures by key structure and FIXTURE_MANIFEST.json); the 85 *.py files directly inside the inf-pipeline pool directories and the performance directory (the checker recount, 13 distinct /api/vN literals); the inf-performance-daily pull, its lambda_function.py and jwt_freshness.py; the inf-silver-chain build_performance builder; and the published route file docs/contracts/investor-reporting/v1/routes.json. How each section was decided: endpoint, grain and fields are read from the code that builds the Scope body and parses its response, and grain and fields are also measured by key structure in the daily fixture (two Account groups and one Household group, each Account group carrying a Period breakdown with a series). gross_or_net is UNDETERMINED because the request sends calcGrossOfFees False, whose name reads net, while the adapter records fee_basis UNKNOWN. credential is REACHES by code only: the transport sends the token read from the Secrets Manager secret named by SM_SECRET_ID as an Authorization Session header, and the pull reads the S3 copy of the same estate token; the code does not show the two stores agree at call time and no call was made. What the repo cannot show: a live Scope response beyond the captured fixture, the saved query body behind the Envision Performance Dim report (held in Orion), whether the performance route is deployed (no AWS call), and vendor acceptance of the token. Who calls it today: the Scope path is reached only through the declared HTTP route GET /api/scoped/investor-reporting/performance/{accountSetId}, served by irpt-performance-adapter, whose routes.json status is DECLARED; authorization.py binds the Inflection path to orion_selected with the Orion transport when the package carries them; no schedule in the files read invokes it. The inf-pipeline pull inf-performance-daily (EventBridge cron 13:40 UTC) calls the Envision ExcelReports endpoints, not Scope, and does NOT call Scope because its path inventory lacks it. Its Envision Performance Dim report is a per-account period return over one requested date range, not a daily series, and its header says stale since 2026-04-28.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "s3_reads": 0
+  },
+  "files_in_repo_private": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
