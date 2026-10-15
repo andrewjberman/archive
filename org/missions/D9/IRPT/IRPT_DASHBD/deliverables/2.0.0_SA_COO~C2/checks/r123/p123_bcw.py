@@ -73,7 +73,11 @@ def ac_1_1(root):
     key = builder_name(root)
     need(key == "irpt-cot-account-dim-lambda", "builder name unexpected: " + key)
     now = json.loads((root / SM).read_text(encoding="utf-8"))["functions"]
-    old = json.loads(git(root, "show", "%s:%s" % (BASE, SM)))["functions"]
+    mb = subprocess.run(["git", "-C", str(root), "merge-base", "HEAD", "box/dell2"], capture_output=True, text=True, timeout=60).stdout.strip()
+    old = json.loads(git(root, "show", "%s:%s" % (mb, SM)))["functions"] if mb else {}  # the shared branch as last merged in: the diff to it is the worker's own change
+    if not mb or key in old:  # the entry is already on the shared branch (after the drain): the parent of the commit that added it
+        added = git(root, "log", "-1", "--format=%H", "-S", '"%s"' % key, "--", SM).strip()
+        old = json.loads(git(root, "show", "%s:%s" % (added + "^" if added else "HEAD", SM)))["functions"]
     need(key in now, "source-map entry absent: " + key)
     need(set(now) - set(old) == {key}, "functions added are not exactly the one new entry")
     need(all(now[k] == old[k] for k in old), "an existing function entry changed")
@@ -93,7 +97,8 @@ def ac_1_1(root):
     need((root / SRC_DIR / "lambda_function.py").is_file(), "lambda_function.py absent in source_dir")
     need(e["tf_file"] == TF_ROOT + "/lambda.tf" and e["tf_resource"] == "module.irpt_account_dim.aws_lambda_function.this" and e["iam_role"] == "irpt-cot-account-dim-role" and e["pipeline"] == "investor-reporting",
          "tf_file, iam_role or pipeline wrong")
-    need(not any(k in e for k in ("artifact_s3_key", "artifact_sha256", "last_deployed_commit", "last_deployed_at", "deployed_code_sha256")), "a deploy field or artifact_s3_key is present: nothing is built, and the key stays out until the CVO rules (CTO msg 8187)")
+    need(e.get("artifact_s3_key") == "investor-reporting/%s.zip" % key, "artifact_s3_key is not the row key plus the pipeline prefix and .zip")
+    need(not any(k in e for k in ("artifact_sha256", "last_deployed_commit", "last_deployed_at", "deployed_code_sha256")), "a deploy field is present: nothing is built")
 
 
 def pytest(root, args, env_extra=None):
@@ -128,7 +133,7 @@ def structure(text):
     need(len(re.findall(r'source\s*=\s*"\.\./\.\./modules/opal_name"', text)) >= 5, "fewer than five opal_name builder modules")
     blocks = [blk for blk in re.split(r'(?m)^module\s+"', text)[1:] if re.search(r'source\s*=\s*"\.\./\.\./modules/opal_name"', blk)]
     for blk in blocks:
-        need(re.search(r'scope\s*=', blk) is not None, "an opal_name module without scope: " + blk.split('"')[0])
+        need(re.search(r'(?:^|[^A-Za-z0-9_])scope\s*=', blk) is not None, "an opal_name module without scope: " + blk.split('"')[0])
     for lab in re.findall(r'(?m)^(?:module|resource\s+"[a-z_]+"|data\s+"[a-z_]+")\s+"?([A-Za-z0-9_]+)"', text):
         need("cot" not in lab.split("_"), "a block label carries the firm token: " + lab)
     need(re.search(r'function\s*=\s*"account-dim"', text) is not None, "builder modules do not name the function account-dim")
