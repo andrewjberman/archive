@@ -1,0 +1,245 @@
+{
+  "base": "88740b81ad20fdb32db3a6f39f6d4fb6136526a8",
+  "cell": "AR-g-55",
+  "method": "Read of source in the worktree C:/dev/wk-irpt-anlreq-174 at base 88740b81ad. Paths are repo-relative. Files in the sparse checkout marked skip-worktree (infra/aws/lambda/ci, docs/contracts, org/surprise_channel) were read as base blobs with git show and are NOT cited, because the cite checker reads the disk. Every cite below was printed from the on-disk file before it was written down.",
+  "not_read": [
+    "The live system: no AWS call, no DynamoDB or S3 content, no deployed Lambda bytes, no served portal bundle. Nothing was run; the findings are static readings.",
+    "infra/aws/lambda/ci/lambda-source-map.json: skip-worktree in the sparse checkout (not on disk). Read as the base blob via git show 88740b81ad:infra/aws/lambda/ci/lambda-source-map.json into the worktree scratch. Its rows are used for the package list in q4 and are not cited, because the cite checker cannot open them.",
+    "docs/contracts/investor-reporting/v1/AnalysisUploadRequest.schema.json and AnalysisUploadResult.schema.json: skip-worktree (not on disk). Read as base blobs. The corrections item is closed (additionalProperties false, three required fields) and its two values carry only a pattern, so equal values pass the wire. Not cited.",
+    "org/surprise_channel/schemas/investigation_item.schema.json: skip-worktree; read as a base blob to format the rows only.",
+    "The task order names intake/composition_admission.py. That file does not exist at base; the module is ycharts/generate/composition_admission.py (found by a name search for composition_admission). Read and cited at that path.",
+    "ycharts/generate/tests/test_normalized_input.py: grepped for KEPT, kept and yfinance (zero matches), not read in full.",
+    "ycharts/research/tests/test_runner.py: only the test name and the holdings-read lines were read; the rest not read.",
+    "intake/yfinance_check.py and intake/resolution_broker.py beyond the adapter class: not read in full; the checker verdict is taken from security_resolution.py (_checker_verdict, CHECK_STATES) and its use at lines 305-349.",
+    "intake/custody_portfolio.py and intake/custody_interpreter.py: grepped for security_id, provider_receipt and analysis_dollars only; the custody lane is a separate plane and was not traced end to end.",
+    "holdings/snapshot.py: grepped for normalized, frozen, template, intake and provider_receipt (zero matches); read only at the security_aggregates docstring.",
+    "ycharts/generate/recipe.py beyond step_upload and holdings_csv: not read; its vendor echo is the one consumer after normalized_input.py and is named as fail-closed.",
+    "ycharts/generate/resident_worker.py and frozen_worker.py beyond the bind and prepare call sites and the refusal handler.",
+    "portal: TicketCenter.tsx, ProspectComposer.tsx and the wire adapters were not read by this order; the portal lines cited are the ones Y2 cited and I re-printed (analysisRequest.ts, prospect.ts).",
+    "The packaged bytes of irpt-status, irpt-ycharts-generate and the resident tarball were not built or diffed; the member lists come from the source-map rows (base blob) and build_resident_package.py.",
+    "ycharts/research/layout_overview.py: read at _holdings only, not the whole report path."
+  ],
+  "q1": {
+    "finding_flow": "Today a TICKER_NOT_FOUND finding starts at the provider check. The door collects the upload's symbols and calls the resolver (uploads.py:602); the resident session wires it to UploadTemplateResolver (resident_session.py:145), which returns the rows keyed by symbol (resolution_broker.py:146). SecurityResolver.check marks each symbol FOUND, NOT_FOUND, AMBIGUOUS or UNAVAILABLE and sends every still-NOT_FOUND symbol once, as one batch, to the yfinance checker (security_resolution.py:305-307, 315-349). A KEPT verdict becomes state KEPT, reason YFINANCE_HISTORY, provider_receipt None (security_resolution.py:334). The dict is passed as security_checks into freeze_template_portfolio (uploads.py:618). For each template row the freeze reads checks.get(symbol) (portfolio.py:476). A row is accepted only as a KEPT-by-history check (portfolio.py:486 via _kept_by_history, 376-385) or as a FOUND check with one candidate and a complete 64-hex receipt (portfolio.py:487-494). Any other state is turned into a finding and the loop continues. NOT_FOUND emits TICKER_NOT_FOUND through emit, whose severity defaults to ERROR, with actions REPLACE_FILE and NAME_PROXY and the file's own symbol as value (portfolio.py:440, 500-501). The continue at portfolio.py:518 skips the row. Any ERROR finding, or any template row missing from rows, returns NEEDS_CORRECTION with the findings and the template (portfolio.py:578-579). The door then answers NEEDS_CORRECTION with the findings, the plain words from the table (uploads.py:69-71, _with_correction_words at uploads.py:185-202) and the template (uploads.py:494-497 on the first pass; uploads.py:533-542 on a re-read; uploads.py:569-587 on the resolving path). The upload is stored as NEEDS_CORRECTION (uploads.py:581). The only accepted resolution today is a correction re-post: template_corrections accepts TICKER_NOT_FOUND with from_value and to_value differing (portfolio.py:364, 389-406), and the freeze replaces the symbol before the check (portfolio.py:446, 475). The page reads only the findings words (analysisRequest.ts:253-260). AMOUNT: for a TICKER_NOT_FOUND row the amount is never read. The loop continues at portfolio.py:518, before the amount parse at portfolio.py:519-520, so no dollars are computed and nothing is added to totals (portfolio.py:575 is not reached). No normalized document is frozen, because rows is shorter than template rows (portfolio.py:578). The amount survives only as the text template_reader wrote at template_reader.py:483, echoed inside the NEEDS_CORRECTION template. It is not priced, not stored as a holding, and in no total. A row whose amount is not a number is handled separately (portfolio.py:524).",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/intake/uploads.py", "line": 602, "text": "checks = self.resolve_template(principal, owner, symbols) if 0 < len(symbols) <= 200 else {}"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py", "line": 145, "text": "return UploadTemplateResolver(SecurityResolver(provider_check=port, identity=identity,"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/resolution_broker.py", "line": 146, "text": "return {row[\"symbol\"]: copy.deepcopy(row) for row in result[\"results\"]}"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 305, "text": "unknown = [symbol for symbol in unique if results[symbol][\"state\"] == \"NOT_FOUND\"]"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 334, "text": "result = dict(base, state=\"KEPT\", reason=\"YFINANCE_HISTORY\", candidates=[], provider_receipt=None,"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 440, "text": "def emit(code, row=None, column=None, actions=None, value=None, severity=\"ERROR\", description=None):"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 476, "text": "check = checks.get(symbol)"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 501, "text": "emit(\"TICKER_NOT_FOUND\", coordinate, \"A\", actions=[\"REPLACE_FILE\", \"NAME_PROXY\"], value=named)"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 518, "text": "continue"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 578, "text": "if any(f.get(\"severity\") == \"ERROR\" for f in findings) or len(rows) != len(template[\"rows\"]):"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/uploads.py", "line": 581, "text": "replacement = dict(row, state=NEEDS_CORRECTION, resolved_at=resolved_at,"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/template_reader.py", "line": 483, "text": "record[\"amount\"] = str(number)"},
+      {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 253, "text": "if (result.state === 'NEEDS_CORRECTION') {"}
+    ]
+  },
+  "q2": {
+    "client_action_proposal": "Reuse the correction shape the envelope already carries; add no action name and no wire member. The page re-posts the SAME upload_token and file_base64 with body.corrections holding one item {finding_code: TICKER_NOT_FOUND, from_value: <the file's symbol>, to_value: <the same symbol>} for Keep. The wire item is closed with three fields and only a pattern on the two values, so equal values pass the wire (AnalysisUploadRequest.schema.json, base blob, not cited). The server refuses equal values today (portfolio.py:401, pinned by test_y5_proxy_corrections.py:99), so the server change is: accept an equal pair only for finding_code TICKER_NOT_FOUND, and in the freeze turn a NOT_FOUND row named by such a pair into an UNRESOLVED row instead of a finding (today the NOT_FOUND branch at portfolio.py:500-501 emits and continues). A new action name is not needed and would be refused if it reached the status envelope (ops/status.py:75, 226-227). The Keep is disclosed per upload: each correction is recorded with approved_by = the posting principal (portfolio.py:593). The Use path is unchanged: to_value = the suggested symbol, same as today.",
+    "retained_row_shape": "A normalized row for a kept unresolved ticker, in the same dict the KEPT row uses (portfolio.py:562-564, 568-570): original = the template row (symbol, amount, cells) as today; security_id = the typed symbol, unchanged (provider_id equals the symbol, portfolio.py:481, as the KEPT row already does); analysis_dollars = the amount as text, for the USD basis only (portfolio.py:528, 563; weights need the notional at portfolio.py:538; SHARES needs a quote at portfolio.py:543-559 and keeps refusing SHARES_PRICE_UNAVAILABLE, pinned by test_kept_holding.py:225-230); price = null (the quote is None on USD, portfolio.py:563); provider_receipt_sha256 = null (portfolio.py:564, the KEPT value); resolution = UNRESOLVED (a NEW field, written nowhere today); method = a NEW value, for example KEPT_AS_TYPED (the existing KEPT_BY_HISTORY at portfolio.py:568 must NOT be reused, its words claim price history); price_source = null (today yfinance, portfolio.py:568); history = absent or null (today the checker rows and last_close, portfolio.py:569-570). The row must not enter the holdings totals (portfolio.py:575, 596-597) and counts as a row for the row-count check (portfolio.py:578). Its dollars therefore sit in the document only as a row, not in total_dollars or the notional reconciliation (portfolio.py:591).",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 401, "text": "or item[\"from_value\"].upper() == item[\"to_value\"].upper() or item[\"from_value\"].upper() in seen):"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 562, "text": "row = {\"original\": copy.deepcopy(original), \"security_id\": provider_id,"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 563, "text": "\"analysis_dollars\": _text(dollars), \"price\": copy.deepcopy(quote),"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 564, "text": "\"provider_receipt_sha256\": None if kept else check[\"provider_receipt\"][\"sha256\"]}"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 568, "text": "row.update(method=\"KEPT_BY_HISTORY\", price_source=\"yfinance\","},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 575, "text": "totals[provider_id] = totals.get(provider_id, Decimal(0)) + dollars"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 593, "text": "\"corrections\": [dict(c, approved_by=owner[\"principal_id\"]) for c in corrected],"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/status.py", "line": 75, "text": "ACTIONS = (\"RETRY\", \"RESUME\", \"RESYNC\", \"CORRECT\", \"WAIT\", \"NONE\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ops/status.py", "line": 226, "text": "if a.get(\"action\") not in ACTIONS:"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py", "line": 212, "text": "assert kept[\"provider_receipt_sha256\"] is None and kept[\"analysis_dollars\"] == \"1000\""},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py", "line": 225, "text": "def test_a_kept_shares_holding_is_still_refused_as_shares_price_unavailable():"}
+    ]
+  },
+  "q3": {
+    "consumers": [
+      {
+        "consumer": "verify_frozen_portfolio replay of a template document (the door's own freeze run again)",
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "must_change": true,
+        "reason": "For a template document the replay re-runs freeze_template_portfolio and demands equality with the stored document (portfolio.py:343-348). The UNRESOLVED row must come out of that same freeze, or every stored unresolved input fails TEMPLATE_REPLAY_MISMATCH on read. Changing the freeze is the change site; the replay itself needs no separate edit.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 344, "text": "rebuilt = freeze_template_portfolio(document[\"template\"], document[\"owner\"],"},
+          {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 347, "text": "if rebuilt.get(\"state\") != \"NORMALIZED\" or rebuilt[\"frozen\"][\"document\"] != document:"}
+        ]
+      },
+      {
+        "consumer": "CompositionAdmission.validate (the task order's intake/composition_admission.py is at this path)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/composition_admission.py",
+        "must_change": false,
+        "reason": "It checks the closed schema, the bindings and then verify_frozen_portfolio (line 60). It refuses no row by its receipt or its resolution, so it admits an UNRESOLVED row exactly when the replay admits it. No edit needed here.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/composition_admission.py", "line": 55, "text": "data = validate_bindings(frozen)"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/composition_admission.py", "line": 60, "text": "verify_frozen_portfolio({**resolved[\"input_ref\"], \"document\": resolved[\"document\"]})"}
+        ]
+      },
+      {
+        "consumer": "validate_bindings (retained composition binding: owner, source, upload_id)",
+        "file": "infra/aws/lambda/investor-reporting/reports/request_composition.py",
+        "must_change": false,
+        "reason": "It binds the owner, the source lane and the upload id (lines 26-79). It reads no row, no receipt, no amount, so it neither prices nor refuses an unresolved row.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/reports/request_composition.py", "line": 26, "text": "def validate_bindings(document):"},
+          {"file": "infra/aws/lambda/investor-reporting/reports/request_composition.py", "line": 76, "text": "if (normalized_owner != expected_owner"}
+        ]
+      },
+      {
+        "consumer": "prepare_normalized_upload, template branch (vendor holdings rows; the receipt for each row)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py",
+        "must_change": true,
+        "reason": "The template branch sends every holdings row to the vendor as a ticker and dollar value (line 58) and reads the provider receipt of every row's check (line 64). For a KEPT row, whose check has provider_receipt None, the subscript raises TypeError, which is not RecipeRefused, so the resident's handler (resident_worker.py:143) does not catch it. An UNRESOLVED row would be sent to the vendor as a ticker. The change: refuse or exclude UNRESOLVED here, before the upload, and turn the receipt read into a guarded refusal. Static reading only; not run.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "line": 58, "text": "rows = [{\"identifier\": row[\"security_id\"], \"quantity\": {\"units\": \"USD\", \"value\": row[\"dollars\"]}}"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "line": 64, "text": "_check_for(document[\"security_checks\"], row[\"security_id\"])[\"provider_receipt\"][\"sha256\"]}"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "line": 35, "text": "return security_checks[security_id]"}
+        ]
+      },
+      {
+        "consumer": "prepare_normalized_upload, canonical branch (CSV and custody lanes; no receipt check)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py",
+        "must_change": false,
+        "reason": "The canonical branch checks identity_kind, the namespace and the revision (lines 68-88) and never reads a provider receipt. An UNRESOLVED row placed in a CANONICAL_SECURITY document would be priced silently. No code path writes one today: the door writes UNRESOLVED only in the template freeze. The invariant needs a test, not an edit.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "line": 82, "text": "if (row.get(\"identity_kind\") != \"CANONICAL_SECURITY\" or \"security_id\" in row"}
+        ]
+      },
+      {
+        "consumer": "bind_normalized_upload (vendor echo must match each identity exactly)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py",
+        "must_change": false,
+        "reason": "After the vendor upload, each echoed security_id must be an exact key of the prepared rows, else RecipeRefused (lines 128-135). An unresolved symbol the vendor does not echo is refused, so it fails closed. The resident handler turns that refusal into an ATTENTION end (resident_worker.py:142-143).",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "line": 129, "text": "if (not isinstance(identity, str) or identity not in expected or identity in echoed"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 142, "text": "return bind_normalized_upload(frozen_input, upload)"}
+        ]
+      },
+      {
+        "consumer": "read_holdings (the research read of a served request's frozen rows)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py",
+        "must_change": true,
+        "reason": "It reads every composition row as ticker = security_id and amount = _row_amount, with no receipt, resolution or check test (lines 466-467). The basis becomes USD when every row has analysis_dollars (469), which an unresolved row has. This is the silent-pricing path: the client-typed dollars become a priced holding with no provider check. Refuse UNRESOLVED rows here (HoldingsUnreadable), before the rows list is built.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py", "line": 467, "text": "rows = [{\"ticker\": str(r[\"security_id\"]), \"amount\": _row_amount(r)} for r in document[\"rows\"]]"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py", "line": 469, "text": "basis = \"USD\" if all(r.get(\"analysis_dollars\") is not None for r in document[\"rows\"]) else str(document[\"basis\"])"}
+        ]
+      },
+      {
+        "consumer": "_read_stage of the research producer (copies ticker and amount into run.json)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+        "must_change": true,
+        "reason": "It keeps only ticker and amount (line 220) and drops every other field, so a row that read_holdings admits loses any marker and is indistinguishable from a priced holding in run.json. The refusal must sit in read_holdings; if a row is ever admitted, the marker must be carried here too.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 215, "text": "holdings = runner.read_holdings(stores[\"dynamodb\"], stores[\"s3\"], firm, request_id,"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 220, "text": "\"rows\": [{\"ticker\": r[\"ticker\"], \"amount\": r[\"amount\"]} for r in holdings[\"rows\"]]},"}
+        ]
+      },
+      {
+        "consumer": "_holdings of the layout (the report sink: run_doc amounts to weights)",
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+        "must_change": false,
+        "reason": "It turns every run_doc row's amount into a weight (amount / sum for USD) and cannot tell an unresolved row from a priced one. The sink prices whatever upstream gives it, so the refusal belongs in read_holdings, not here.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py", "line": 281, "text": "amounts = [float(r[\"amount\"]) for r in rows]"},
+          {"file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py", "line": 275, "text": "Weights: amount/sum for basis USD"}
+        ]
+      },
+      {
+        "consumer": "uploads.read_input and the NORMALIZED answer (the whole stored document goes to the page)",
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "must_change": false,
+        "reason": "The NORMALIZED answer returns the stored document as portfolio (line 629) after verify_frozen_portfolio (line 648). The page therefore receives the unresolved row's dollars at once. The door makes no price claim, but the page must not present an UNRESOLVED row as priced; that is a portal wording change for Y2.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/intake/uploads.py", "line": 629, "text": "\"input_ref\": loaded[\"input_ref\"], \"portfolio\": loaded[\"document\"]}"},
+          {"file": "infra/aws/lambda/investor-reporting/intake/uploads.py", "line": 648, "text": "document = verify_frozen_portfolio(frozen)"}
+        ]
+      },
+      {
+        "consumer": "ops/status.py (the status envelope vocabulary: actions and correction words)",
+        "file": "infra/aws/lambda/investor-reporting/ops/status.py",
+        "must_change": false,
+        "reason": "No security_id, provider_receipt or analysis_dollars token (grep, zero matches in this file). It holds the action enum and the words table. The minimal path adds no finding code, so it needs no edit; a new code with table words would need the literal copy at uploads.py:58 and its lock test to move with it.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/ops/status.py", "line": 86, "text": "CORRECTION_WORDS = {"},
+          {"file": "infra/aws/lambda/investor-reporting/ops/status.py", "line": 97, "text": "\"TICKER_NOT_FOUND\": ("}
+        ]
+      },
+      {
+        "consumer": "security_aggregates of the holdings snapshot (a separate plane, graph nodes)",
+        "file": "infra/aws/lambda/investor-reporting/holdings/snapshot.py",
+        "must_change": false,
+        "reason": "Grep for normalized, frozen, template, intake and provider_receipt returns zero matches. It reads HoldingsSnapshot nodes, not the frozen portfolio, so an upload's unresolved row does not reach it.",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/holdings/snapshot.py", "line": 248, "text": "security_aggregates -- one row per distinct `security_id`; a node with no `security_id` is"}
+        ]
+      },
+      {
+        "consumer": "the portal Ticket Center findings reader and the proxy and correction helpers (Y2's surface)",
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "must_change": true,
+        "reason": "The page reads only the findings words and the state (line 253-260). The NAME_PROXY gate (prospect.ts:94) and withCorrections (prospect.ts:127) refuse any code outside PROXY_FINDING_CODES. A Keep control must be added on Y2's portal candidate; no server reader is affected by it.",
+        "evidence": [
+          {"file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts", "line": 94, "text": "if (!actions.includes('NAME_PROXY')"},
+          {"file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts", "line": 127, "text": "if (!PROXY_FINDING_CODES.has(c.finding_code) || !TICKER_VALUE.test(c.from_value) || !TICKER_VALUE.test(c.to_value))"}
+        ]
+      }
+    ]
+  },
+  "q4": {
+    "packages": [
+      {
+        "name": "irpt-ycharts-generate (lambda-source-map row, zip irpt-ycharts-generate.zip; source_dir ycharts/generate; artifact 3+fMEJhQ8, deploy ledger irpt-ycg-r29-20261014)",
+        "members": ["intake/portfolio.py", "ycharts/generate/normalized_input.py"],
+        "owner_seat": "IRPT_YCDGEN (the source-map row's own owner; its deploy record was written by 2.0.0_SA_COO~G2). The intake files are 2.0.0_SA_COO~Y2's workstream, as the task order states."
+      },
+      {
+        "name": "irpt-status (lambda-source-map row, zip irpt-status.zip; source_dir ops; deploy ledger irpt-status-r31-20261015)",
+        "members": ["ops/status.py (only if a new finding code gains table words; not needed for the minimal path)"],
+        "owner_seat": "2.0.0_SA_COO~P (the status.py pin under IB-pr-275) and IRPT_BCKEND cell IB-s-16 (the row's build note)."
+      },
+      {
+        "name": "resident tarball (reports/build_resident_package.py, built from a backend PIN via git show; one release per PRD v0.15 item 3)",
+        "members": ["intake/portfolio.py", "ycharts/generate/normalized_input.py", "ycharts/research/runner.py", "ycharts/research/opal_producer.py (only if it carries a marker)", "intake/uploads.py (only if a new finding code is added)"],
+        "owner_seat": "The ENGINE lane of IRPT_ANLREQ (workstream ~G, the one resident release). The bindings block of the builder names built_by 2.0.0_SA_COO~P. The research modules have no lambda-source-map row: they ship only in this tarball."
+      }
+    ],
+    "change_set": [
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "change": "template_corrections (lines 389-406): accept from_value equal to to_value only when finding_code is TICKER_NOT_FOUND; keep every other refusal, including the case-only pair pinned at test_y5 line 99 unless the CTO rules it a Keep. freeze_template_portfolio (lines 409-601): in the NOT_FOUND branch (lines 500-501), when the symbol is named by such a pair and the check is NOT_FOUND, build an UNRESOLVED row with the retained_row_shape fields instead of emitting and continuing. Keep the amount parse (519-525) and the SHARES refusal (543-559). Exclude the row from totals (575, 596-597) and keep it in the row count (578). The Keep applies only in the NOT_FOUND branch: an equal pair on a FOUND symbol must not create a second row."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "change": "prepare_normalized_upload, template branch (lines 54-67): refuse with RecipeRefused any row whose resolution is UNRESOLVED, before the vendor upload (fail closed). Replace the bare subscript at line 64 with a guarded read, so a receipt-less KEPT row raises RecipeRefused instead of TypeError."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py", "change": "read_holdings (lines 443-476): raise HoldingsUnreadable for any document row whose resolution is UNRESOLVED, before the rows list is built at line 467. The report does not price an unresolved holding until C-SWAP resolves it."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "change": "No change for the minimal path, because read_holdings refuses first. If the CTO rules that UNRESOLVED rows may reach a run, this file must carry the marker (line 220 drops it)."},
+      {"file": "infra/aws/lambda/investor-reporting/intake/uploads.py", "change": "No change for the minimal path: corrections pass through (lines 245-251, 597, 620). If the Keep emits a NEW finding code, add it to SYMBOL_WORDS_CODES (line 164) so its own description shows; a NOTICE with its own description needs no table change."},
+      {"file": "infra/aws/lambda/investor-reporting/ops/status.py", "change": "No change for the minimal path. A new finding code with table words would also need the literal copy at intake/uploads.py (line 58) and the lock test intake/tests/test_correction_words.py (line 71)."},
+      {"file": "portal/src/pages/TicketCenter/analysisRequest.ts (and prospect.ts, AnalysisRequestParts.tsx, TicketCenter.tsx) on Y2's cand/ branch", "change": "PORTAL_ONLY, Y2's surface: add the Keep control that posts the same token with the equal pair for TICKER_NOT_FOUND; keep Use unchanged; never auto-select. Owned by 2.0.0_SA_COO~Y2; not built here."}
+    ],
+    "tests": [
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py", "line": 242, "text": "def test_not_kept_is_ticker_not_found_exactly_as_today():"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py", "line": 245, "text": "assert result[\"state\"] == \"NEEDS_CORRECTION\" and codes(result) == [\"TICKER_NOT_FOUND\"]"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_y5_proxy_corrections.py", "line": 99, "text": "[{\"finding_code\": \"TICKER_NOT_FOUND\", \"from_value\": \"TIMXX\", \"to_value\": \"timxx\"}],"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py", "line": 71, "text": "assert item[\"code\"] == \"TICKER_NOT_FOUND\" and item[\"actions\"] == [\"REPLACE_FILE\", \"NAME_PROXY\"]"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_deferred_resolution.py", "line": 155, "text": "assert \"TICKER_NOT_FOUND\" in {f[\"code\"] for f in answer[\"findings\"]}"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_runner.py", "line": 684, "text": "def test_the_holdings_read_takes_a_template_rows_analysis_dollars():"}
+    ],
+    "contract_for_y2": "REQUEST. POST analysis-input-upload with the SAME upload_token and file_base64 as the first post, plus body.corrections (at most 20 items, one per from_value). Use: {finding_code: TICKER_NOT_FOUND, from_value: <symbol as the finding value>, to_value: <suggested symbol>} (unchanged). Keep: {finding_code: TICKER_NOT_FOUND, from_value: <symbol>, to_value: <the same symbol>}. Keep is refused with CORRECTIONS_INVALID until the server change lands; the portal must not send it before then. The page must send only finding_code TICKER_NOT_FOUND for a Keep, and never a swap to a symbol the filer did not choose. RESPONSE. state NORMALIZED with input_id and portfolio, or NEEDS_CORRECTION with findings (each finding: code, row, column, value, actions, description). A kept row appears in portfolio.holdings only if the CTO rules it may (the recommendation excludes it from totals). A kept row carries resolution UNRESOLVED, security_id = the typed symbol, analysis_dollars = the typed amount (USD basis), price null, provider_receipt_sha256 null. The page must word it as NOT PRICED, pending C-SWAP. The analysis submit proceeds on input_id as today; the report boundary (read_holdings) refuses an UNRESOLVED row until C-SWAP files it resolved. Which of these the submit may do is the CTO's call, not this read's.",
+    "not_packaged_note": "ycharts/research/runner.py and opal_producer.py have no lambda-source-map row (checked by name over all rows of the base blob); they ship only in the resident tarball (reports/build_resident_package.py, DIRS lines 37-38)."
+  },
+  "recommendation": {
+    "smallest_safe_change": "No wire change and no new action. Server: accept an equal from_value and to_value pair only for finding_code TICKER_NOT_FOUND (intake/portfolio.py template_corrections), and in the freeze turn a NOT_FOUND row named by such a pair into an UNRESOLVED row (resolution UNRESOLVED, method a new KEPT_AS_TYPED value, price_source and history null, provider_receipt_sha256 null) that is excluded from totals and counted as a row. Consumers: ycharts/generate/normalized_input.py prepare_normalized_upload refuses an UNRESOLVED row before the vendor upload, and ycharts/research/runner.py read_holdings refuses it before the rows are built. Portal (Y2): the Keep posts the equal pair; the Use path is unchanged.",
+    "risk_note": "What it could widen. (1) An unpriced row reaching a report as priced: read_holdings must refuse, because opal_producer.py drops the marker at line 220 and layout_overview.py prices any row it receives at line 281; the existing KEPT_BY_HISTORY path already reaches these readers with a receipt-less row. (2) The Keep must apply only in the NOT_FOUND branch: an equal pair on a FOUND symbol would otherwise create a second, unpriced row beside a priced holding. (3) Equal-pair acceptance widens what an uploader can file: each Keep is audited through corrections with approved_by (portfolio.py:593), and the per-upload cap is 20 (portfolio.py:394). (4) If the UNRESOLVED dollars enter holdings totals, total_dollars and the notional reconciliation move (portfolio.py:575, 591, 596). (5) normalized_input.py line 64 already raises TypeError on a receipt-less KEPT row (static reading, not run), so the normalized_input edit must fix it in the same release. (6) A refusal that stops being a refusal: if read_holdings does not refuse, the report is priced at client-typed dollars with no provider check. (7) test_y5_proxy_corrections.py line 99 pins a case-only pair ('TIMXX' to 'timxx') as CORRECTIONS_INVALID; a comparison that ignores case would silently turn that refusal into a Keep, so the rule must compare the exact strings or the CTO must rule the case-only pair.",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 401, "text": "or item[\"from_value\"].upper() == item[\"to_value\"].upper() or item[\"from_value\"].upper() in seen):"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 394, "text": "if not isinstance(corrections, list) or not 1 <= len(corrections) <= MAX_CORRECTIONS:"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 575, "text": "totals[provider_id] = totals.get(provider_id, Decimal(0)) + dollars"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 596, "text": "\"total_dollars\": _text(sum(totals.values(), Decimal(0))),"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 593, "text": "\"corrections\": [dict(c, approved_by=owner[\"principal_id\"]) for c in corrected],"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py", "line": 64, "text": "_check_for(document[\"security_checks\"], row[\"security_id\"])[\"provider_receipt\"][\"sha256\"]}"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py", "line": 467, "text": "rows = [{\"ticker\": str(r[\"security_id\"]), \"amount\": _row_amount(r)} for r in document[\"rows\"]]"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py", "line": 220, "text": "\"rows\": [{\"ticker\": r[\"ticker\"], \"amount\": r[\"amount\"]} for r in holdings[\"rows\"]]},"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py", "line": 281, "text": "amounts = [float(r[\"amount\"]) for r in rows]"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_y5_proxy_corrections.py", "line": 99, "text": "[{\"finding_code\": \"TICKER_NOT_FOUND\", \"from_value\": \"TIMXX\", \"to_value\": \"timxx\"}],"},
+      {"file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py", "line": 37, "text": "DIRS = [\"_scope\", \"_ids\", \"_keys\", \"_authz\", \"_contracts\", \"intake\", \"ops\", \"reports\","}
+    ]
+  }
+}
