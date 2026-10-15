@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-238",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "bf61bc8845",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-238.balance-lag-read-2026-04-20-to-22-custodian-balance-against-positions.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~192",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~192/IRPT_DASHBD.TO-DB-b-238.balance-lag-read-2026-04-20-to-22-custodian-balance-against-positions.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~192/balance_lag_read_r120.py",
+      "kind": "script",
+      "commit_or_etag": "e1dbfeff48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tracked read-only analysis script at e1dbfeff48 (sha256 ec4c3e2b89d03f178a0414087b6da323534c799652de4fe01c5e8ed1a0caa1b9, the committed bytes; the script's own output and the record carry the same hash); run under python -I from the worktree root with GET only: the 49 Financial account_return_daily partitions of the six dates and their manifest, the dim_balance and dim_position partitions of 2026-04-20, 04-21 and 04-22 and of the five other dates' prior trading days; 33 GET calls, 0 writes; writes one counts-only private file and nothing else; no put, copy or delete call, no vendor call, no secret read",
+      "artifact_covered_by": [
+        "DB120-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~192/RD_BALANCE_LAG_R120.json",
+      "kind": "config_data",
+      "commit_or_etag": "e1dbfeff48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of step 7: counts, dates and words only; analysis.sha256 equals the committed script bytes at e1dbfeff48; reads s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0 and s3_reads 33; files_in_repo, served_values_changed, pushed and deployed all false; the record's six-count values equal the checker's own recount from the custodian sources at the checker run recorded in this instance",
+      "artifact_covered_by": [
+        "DB120-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB120-2-AC1",
+      "criterion_verbatim": "`DB120-2-AC1` -- `RD_BALANCE_LAG_R120.json` has exactly the form of step 7; `accounts_flagged` equals the flow-guard record's GRADED_DISAGREED rows of 2026-04-21 and the checker's own recount; the tolerance equals the manifest's; each of the three intervals' six counts EQUALS the checker's own recount from the custodian sources (read by the checker, GET only) to the unit and none exceeds its accounts; the five other dates have the right order, a prior date before the date and counts within their bounds; the analysis script is tracked, hashed as recorded, names no other firm's place and holds no write call; every claim is in the four-word set; zero writes, no push or deploy flags, and no run of 8 or more digits outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r120/p120_balance.py\" . DB120-2-AC1",
+      "output_evidence": "DB120-2-AC1 PASS (rc 0); the deciding line: OK: balance-lag read: 943 flagged accounts; 04-20 to 04-21 recounted: {'accounts': 929, 'balance_positions_agrees_position_mv': 927, 'position_mv_agrees_price_return': 10, 'balance_positions_agrees_price_return': 10, 'balance_total_agrees_balance_positions': 799, 'accounts_with_quantity_change': 929}; all three intervals equal the recount to the unit",
+      "denominator": "1 of 1 criterion PASS; 943 flagged accounts equal to the flow-guard record; 3 of 3 intervals equal the recount on all six counts (each interval's six counts equal the recount, none exceeds its accounts); 5 of 5 other dates in order with the prior date before the date; 33 GET reads, 0 writes",
+      "status": "PASS",
+      "status_reason": "PASS as written on the checker at the worktree HEAD after the record and script were committed at e1dbfeff48 (the checker requires the script to be tracked)",
+      "expect": "DB120-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test: the three interval arms (a missing balance leaves the account uncounted) and eleven red record arms (a count off the recount, accounts_flagged off, intervals out of order, other-date counts above their bound, a tolerance off the manifest, a long digit run, an untracked script, a write call, another firm's place, a hash mismatch, a push flag)",
+      "expected": "the self-test passes the green arm and refuses each red arm",
+      "observed": "selftest OK: interval arms, 1 green and 11 red record arms; selftest rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the checker compared on the criterion's OK line (the recount reads the same custodian sources twice)",
+      "observed": "two runs at the worktree HEAD printed byte-identical output (diff clean): the OK line with the same six counts for each of the three intervals, and DB120-2-AC1 PASS on both, rc 0 and rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Account identifiers, and every client value (balances, values, returns, quantities and positions) and every per-account cause",
+      "reason": "not recorded by design: client data lives only in the private evidence folder; the script, the record and this instance carry counts, dates, hashes and words only"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W192-S1",
+    "IRPT_DASHBD-D2-W192-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p120_balance.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r120/p120_balance.py\" . DB120-2-AC1",
+      "result": "PASS rc 0: DB120-2-AC1 PASS (the checker is the issuer's file at the worktree HEAD, read and not edited)"
+    },
+    {
+      "tool": "p120_balance.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r120/p120_balance.py\" --selftest .",
+      "result": "rc 0: selftest OK: interval arms, 1 green and 11 red record arms"
+    }
+  ]
+}
