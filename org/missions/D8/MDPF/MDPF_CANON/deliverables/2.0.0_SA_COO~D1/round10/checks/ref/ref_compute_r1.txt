@@ -1,0 +1,90 @@
+def _leg_present(x) -> bool:
+    """A leg value is PRESENT when it is a number (0.0 is a value); None and NaN are absence."""
+    return x is not None and x == x
+
+
+def _partitions(row: dict, key: str, cand: float) -> bool:
+    """True when the row, with leg `key` at `cand` and every other leg at its own value (0.0 when absent), still partitions the
+    SERVED Total (PRD override (d)): total - model_aua - (Client Supervised + ETF + ALT) - the Global All Equity TR allowance
+    is within TREND_IDENTITY_TOL. The Total is read, never recomposed. A row with no model_aua cannot be shown to partition."""
+    if row["model"] is None:
+        return False
+    v = dict(row["vals"])
+    v[key] = cand
+    cs = round(row["nm"] - v["div"] - v["growth"] - row["gaetr"], 2)
+    etf = round(v["div"] + v["growth"] + v["sma"], 2)
+    alt = 0.0 if row["tax"] is None else round(row["tax"], 2)
+    return abs(row["total"] - row["model"] - cs - etf - alt - row["gaetr"]) <= TREND_IDENTITY_TOL
+
+
+def _leg_carry(last: dict, key: str, raw, row: dict) -> tuple:
+    """(value, carried). The leg's own value when present (and it becomes the leg's last known value); else, for a leg named in
+    TREND_CARRY_LEGS that has had a value, its last known value ONLY IF the carried row still partitions the served Total
+    (carried=True); else 0.0 (absent: the leg has never had a value, or the Total does not contain it)."""
+    if _leg_present(raw):
+        last[key] = float(raw)
+        return float(raw), False
+    if key in TREND_CARRY_LEGS and key in last and _partitions(row, key, last[key]):
+        return last[key], True
+    return 0.0, False
+
+
+def compute_trend_groups(g: dict, smartx: dict) -> dict:
+    """Pure. `g` is one Global timeseries dict; `smartx` is {iso date: {"div": $, "growth": $, "gaetr": $}}.
+    Returns {"client_supervised_aua": [...], "etf_strategies_aua": [...], "alt_strategies_aua": [...],
+    "carried_dates": [...]}, every list aligned to g["dates"]. Never mutates `g`.
+    A Dividend, Growth or sma_additive_aua leg that is missing on a TOTAL-BEARING row carries its last known value when the
+    carried row still partitions the served Total (CN-r-1; PRD override (c) and (d)); the date joins carried_dates only when a
+    leg actually carried. The Global All Equity TR leg is a terminated SMArtX-only model and is never carried."""
+    dates = list(g.get("dates") or [])
+    n = len(dates)
+
+    def _col(v):
+        v = list(v or [])
+        return v + [None] * (n - len(v))
+
+    total, nm = _col(g.get("opal_aggregate_aua")), _col(g.get("non_model_aua"))
+    model = _col(g.get("model_aua"))
+    tax, sma = _col(g.get("tax_additive_aua")), _col(g.get(SMA_ADDITIVE_KEY))
+    bm = g.get("by_model") or {}
+    div_g = _col((bm.get("opal_div_sma") or {}).get("model_value"))
+    growth_g = _col((bm.get("opal_growth_sma") or {}).get("model_value"))
+    raw = {k: [None] * n for k in TREND_GROUP_KEYS}
+    last: dict = {}
+    leg_carried: set = set()
+    for i, d in enumerate(dates):
+        if total[i] is None or nm[i] is None:
+            continue
+        if d < TREND_SMARTX_UNTIL:
+            leg = smartx.get(d)
+            if leg is None:
+                continue
+            legs_raw = {"div": leg.get("div"), "growth": leg.get("growth"), "sma": sma[i]}
+            gaetr = leg.get("gaetr") if _leg_present(leg.get("gaetr")) else 0.0
+        else:
+            legs_raw = {"div": div_g[i], "growth": growth_g[i], "sma": sma[i]}
+            gaetr = 0.0
+        row = {"total": total[i], "model": model[i], "nm": nm[i], "tax": tax[i], "gaetr": gaetr,
+               "vals": {k: (float(v) if _leg_present(v) else 0.0) for k, v in legs_raw.items()}}
+        got = {k: _leg_carry(last, k, v, row) for k, v in legs_raw.items()}
+        div, growth, sma_v = (got[k][0] for k in ("div", "growth", "sma"))
+        if any(c for _, c in got.values()):
+            leg_carried.add(d)
+        raw["client_supervised_aua"][i] = round(nm[i] - div - growth - gaetr, 2)
+        raw["etf_strategies_aua"][i] = round(div + growth + sma_v, 2)
+        raw["alt_strategies_aua"][i] = None if tax[i] is None else round(tax[i], 2)
+    out: dict = {}
+    carried: set = set(leg_carried)
+    for k in TREND_GROUP_KEYS:
+        last_v, col = None, []
+        for i, d in enumerate(dates):
+            v = raw[k][i]
+            if v is not None:
+                last_v = v
+            elif last_v is not None:
+                v = last_v
+                carried.add(d)
+            col.append(v)
+        out[k] = col
+    out[TREND_CARRIED_KEY] = sorted(carried)
+    return out
