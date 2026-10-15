@@ -1,0 +1,32 @@
+LIB path=lib/trading_calendar.py weekday_closures_2026_2027=20 2026-01-01,2026-01-19,2026-02-16,2026-04-03,2026-05-25,2026-06-19,2026-07-03,2026-09-07,2026-11-26,2026-12-25,2027-01-01,2027-01-18,2027-02-15,2027-03-26,2027-05-31,2027-06-18,2027-07-05,2027-09-06,2027-11-25,2027-12-24
+EXCLUDED-LIBRARY-COPY path=infra/aws/lambda/bd-pipeline/bd-served-vintage-alarm/trading_calendar.py
+EXCLUDED-LIBRARY-COPY path=infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/trading_calendar.py
+EXCLUDED-LIBRARY-COPY path=infra/aws/lambda/opal-assets-absence-check/trading_calendar.py
+EXCLUDED-LIBRARY-COPY path=infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/trading_calendar.py
+SEARCHED root=infra/aws/lambda py_files=3854 pattern=NYSE_HOLIDAYS|is_trading_day prefilter_hits=19 library_copies_excluded=4 candidates=6
+INLINE path=infra/aws/lambda/bd-pipeline/bd-49f-freshness-probe/lambda_function.py set=NYSE_HOLIDAYS form=literal dates_2026_2027=20 SAME-2026-2027
+LOGIC LOGIC-OK path=infra/aws/lambda/bd-pipeline/bd-49f-freshness-probe/lambda_function.py reads weekday and NYSE_HOLIDAYS only
+VERDICT same path=infra/aws/lambda/bd-pipeline/bd-49f-freshness-probe/lambda_function.py
+INLINE path=infra/aws/lambda/cot-pipeline/bd-cot-freshness-probe/lambda_function.py set=NYSE_HOLIDAYS form=literal dates_2026_2027=20 SAME-2026-2027
+LOGIC LOGIC-OK path=infra/aws/lambda/cot-pipeline/bd-cot-freshness-probe/lambda_function.py reads weekday and NYSE_HOLIDAYS only
+VERDICT same path=infra/aws/lambda/cot-pipeline/bd-cot-freshness-probe/lambda_function.py
+INLINE path=infra/aws/lambda/inf-pipeline/inf-gold-freshness-guard/lambda_function.py set=MARKET_HOLIDAYS form=frozenset-wrapped-literal dates_2026_2027=10 DIFFERS-2026-2027 only_in_lambda=none only_in_lib=2027-01-01,2027-01-18,2027-02-15,2027-03-26,2027-05-31,2027-06-18,2027-07-05,2027-09-06,2027-11-25,2027-12-24
+LOGIC LOGIC-OK path=infra/aws/lambda/inf-pipeline/inf-gold-freshness-guard/lambda_function.py reads weekday and MARKET_HOLIDAYS only
+VERDICT differs path=infra/aws/lambda/inf-pipeline/inf-gold-freshness-guard/lambda_function.py
+INLINE path=infra/aws/lambda/mdpf-pipeline/mdpf-daily-trigger/lambda_function.py set=NYSE_HOLIDAYS form=literal dates_2026_2027=20 SAME-2026-2027
+LOGIC LOGIC-OK path=infra/aws/lambda/mdpf-pipeline/mdpf-daily-trigger/lambda_function.py reads weekday and NYSE_HOLIDAYS only
+VERDICT same path=infra/aws/lambda/mdpf-pipeline/mdpf-daily-trigger/lambda_function.py
+INLINE path=infra/aws/lambda/mdpf-pipeline/mdpf-freshness-checker/lambda_function.py set=NYSE_HOLIDAYS form=literal dates_2026_2027=20 SAME-2026-2027
+LOGIC LOGIC-OK path=infra/aws/lambda/mdpf-pipeline/mdpf-freshness-checker/lambda_function.py reads weekday and NYSE_HOLIDAYS only
+VERDICT same path=infra/aws/lambda/mdpf-pipeline/mdpf-freshness-checker/lambda_function.py
+INLINE path=infra/aws/lambda/opal-assets/opal-assets-daily-emitter/lambda_function.py set=NYSE_HOLIDAYS form=literal dates_2026_2027=20 SAME-2026-2027
+LOGIC LOGIC-OK path=infra/aws/lambda/opal-assets/opal-assets-daily-emitter/lambda_function.py reads weekday and NYSE_HOLIDAYS only
+VERDICT same path=infra/aws/lambda/opal-assets/opal-assets-daily-emitter/lambda_function.py
+INLINE-HOLIDAY-SETS found=6 same_2026_2027=5 differs_2026_2027=1 unreadable=0 ok=True
+
+READING
+- Six inline sets (line 25 found=6): five hold NYSE_HOLIDAYS (lines 7, 10, 16, 19, 22); inf-gold-freshness-guard holds MARKET_HOLIDAYS (line 13), not one of the two the cell named.
+- Differs 2026-2027: one, inf-gold-freshness-guard (line 13: 2026 matches; its 10 weekday 2027 closures are absent). Both mdpf functions are SAME (lines 16, 19).
+- Logic: all six LOGIC-OK (lines 8, 11, 14, 17, 20, 23); each is_trading_day tests only weekday and its set.
+- Routing: the mdpf files need no cell. The differing set sits in the INF Lambda (line 13 path), so its fix routes to that Lambda's owner through the CTO, not to MDPF; the missing 2027 closures mis-count 2027 trading days (surprise NFRA_CTLPLN-W98-S2).
+- Form: line 13 is a frozenset-wrapped literal, unwrapped by the tool (surprise NFRA_CTLPLN-W98-S3). Searched: native Grep over infra/aws/lambda for NYSE_HOLIDAYS and is_trading_day, then this tool's SEARCHED line (line 6, py_files=3854).
