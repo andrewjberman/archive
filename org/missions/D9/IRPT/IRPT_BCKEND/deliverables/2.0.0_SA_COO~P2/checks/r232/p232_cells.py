@@ -22,6 +22,9 @@ PACKET = D + "2.0.0_SA_COO~P2/NEVER_WIDEN_SIGNOFF_PACKET_SCOPE_FEED_IAM_PAIR.md"
 COO_HALF = D + "2.0.0_SA_COO~P2/NEVER_WIDEN_SCOPE_FEED_IAM_PAIR_COO_HALF.md"
 CTO_HALF = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SCOPE_FEED_IAM_PAIR_CTO_HALF.md"
 BLOB = "cea5395ee74000806a28ab8eca32156e0af94639"
+ADD_BLOB = "f22b13a9912f59ac20f1aa3848f9c22712df0df5"
+ADD_COO = D + "2.0.0_SA_COO~P2/NEVER_WIDEN_SCOPE_FEED_IAM_PAIR_ADDENDUM_1_COO_HALF.md"
+ADD_CTO = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SCOPE_FEED_IAM_PAIR_ADDENDUM_1_CTO_HALF.md"
 ADDRESS = "aws_iam_role_policy.inf_gold_layer_scope_feed"
 fail, load, is_int = P6.fail, P6.load, P6.is_int
 ALLOWED = ("put_bronze_feed_key", "put_silver_feed_key", "get_feed_key", "list_with_feed_prefix")
@@ -45,9 +48,15 @@ def ac1(r):
         t = text(rel)
         if BLOB[:10] not in t or "SIGNED" not in t.upper() and "GIVEN" not in t.upper():
             fail("both halves must read SIGNED or GIVEN at the packet blob %s: %s" % (BLOB[:10], rel))
+    for rel in (ADD_COO, ADD_CTO):
+        t = text(rel)
+        if ADD_BLOB[:10] not in t or "SIGNED" not in t.upper() and "GIVEN" not in t.upper():
+            fail("both addendum halves must read SIGNED or GIVEN at the addendum blob %s: %s" % (ADD_BLOB[:10], rel))
     g = r.get("gates") or {}
-    if g.get("packet_blob") != BLOB or g.get("both_halves_signed") is not True:
-        fail("gates.packet_blob must be %s and both_halves_signed true" % BLOB)
+    if g.get("packet_blob") != BLOB or g.get("addendum_blob") != ADD_BLOB or g.get("both_halves_signed") is not True:
+        fail("gates.packet_blob must be %s, gates.addendum_blob %s and both_halves_signed true" % (BLOB, ADD_BLOB))
+    if g.get("text_equals_committed") is not True or g.get("inline_policy_names_printed") is not True:
+        fail("gates.text_equals_committed and gates.inline_policy_names_printed must be true")
     p = g.get("plan") or {}
     if (p.get("add"), p.get("change"), p.get("destroy")) != (1, 0, 0) or p.get("addresses") != [ADDRESS]:
         fail("gates.plan must read add 1, change 0, destroy 0 at exactly [%s]" % ADDRESS)
@@ -93,8 +102,10 @@ def ac3(r):
     e = r.get("exists_read") or {}
     if e.get("ran_on_runner") is not True or e.get("key_was_known_absent") is not True or e.get("answer") != "ABSENT":
         fail("exists_read must read ran_on_runner true, key_was_known_absent true and answer ABSENT (CTO half condition 3: a 403 is a STOP and a row)")
+    if e.get("tiers") != {"bronze": "ABSENT", "silver": "ABSENT"} or e.get("raw_status_printed") is not True or e.get("runner_stopped_within_30_min") is not True:
+        fail("exists_read must read tiers bronze and silver ABSENT, raw_status_printed true and runner_stopped_within_30_min true (CTO msg 8597)")
     k = r.get("counters") or {}
-    want = {"function_updates": 0, "lambda_invokes": 0, "other_iam_changes": 0, "schedule_changes": 0, "keys_written": 0, "existing_keys_changed": 0, "secrets_printed": 0}
+    want = {"instance_starts": 1, "function_updates": 0, "lambda_invokes": 0, "other_iam_changes": 0, "schedule_changes": 0, "keys_written": 0, "existing_keys_changed": 0, "secrets_printed": 0}
     for key, v in want.items():
         if k.get(key) != v:
             fail("counters.%s must read %s, read %r" % (key, v, k.get(key)))

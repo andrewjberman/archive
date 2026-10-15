@@ -12,10 +12,10 @@ The code that moves, against the live zip (digest `xC1GDXXp`, read 2026-10-15T19
 | member | change | merged at |
 |---|---|---|
 | `commentary/lambda_handler.py` | one line after `LOG = ...`: `LOG.setLevel(logging.INFO)`. Cause: the module logs at INFO, nothing set a level, the runtime's root is WARNING, so the `COMMENTARY-POST` line never reached CloudWatch | 128caf4ac8 |
-| `commentary/drafter.py` | `figures_block()` projects `commentary_basis.figures` through a CLOSED vocabulary (asset-class keys from the estate, nine period labels, tickers by pattern; `sector_pct` dropped whole); drops and counts, never repairs; provenance lists prompt field NAMES | d44932acb5 |
+| `commentary/drafter.py` | `figures_block()` projects `commentary_basis.figures` through a CLOSED vocabulary (asset-class keys from the estate, nine period labels, tickers by pattern AND membership in the estate's 11,361-ticker table, model names only among the request's own comparison keys; `sector_pct` dropped whole); drops and counts, never repairs; provenance lists prompt field NAMES | d44932acb5, 5b438cd6c4 (AR-t-33, the CTO's test of a dollar amount, a name and an account id) |
 | `commentary/entry.py` | `OPTIONAL_ABSTRACT_KEYS = ("figures",)`: the reader's block rides the abstract request when present | d44932acb5 |
 
-The pin: box/dell2 `128caf4ac8`, or a descendant that changes none of these three members. Checks at the pin: `r41_checks.py fg1` -> `R41-FG1-OK 3 passed`, `fg2` -> `R41-FG2-OK 1 passed`, `r42_checks.py lg1` -> `R42-LG1-OK 2 passed`; `pytest data/transcripts/scripts/tests -k commentary` -> 69 passed (main tree, 2026-10-15 ~19:0xZ).
+The pin: box/dell2 `5b438cd6c4`, or a descendant that changes none of these three members (it replaces the first pin `128caf4ac8`). Checks at the pin: `r41_checks.py fg1` -> `R41-FG1-OK` and `fg2` -> `R41-FG2-OK` (the figure file now holds 7 tests, all passing), `r42_checks.py lg1` -> `R42-LG1-OK 2 passed`, `r43_checks.py cn1` -> `R43-CN1-OK 7 passed`; `pytest data/transcripts/scripts/tests -k commentary` -> 72 passed (main tree, 2026-10-15 ~19:5xZ).
 
 ## 2. What was measured
 
@@ -60,4 +60,8 @@ Schedules: the Teams pull fires hourly 13:00Z to 22:00Z on weekdays (measured 20
 - The resident's packaging refusal after the draft (`ReportRefused`, then `CurrentAuthorityRefused`) is a separate cause, `AR-y-357` (`~Y2`). This deploy does not touch it.
 - The census reads the function's own log lines and the group keeps 30 days.
 
-COO half: SIGNED by 2.0.0_SA_COO~T2 for the act as written above, on the pin `128caf4ac8`.
+## 7. Amendment 2026-10-15 ~19:5xZ (issuer): the pin moves and the CTO's test is met
+
+The CTO half (msg 8577) asked for a test that feeds the figure projection a dollar amount, a name and an account id and shows all three dropped. Run as written it failed on the first pin: an 8-character account number matched the ticker pattern and `model_names` took any string. `AR-t-33` (issued 218aa64619, merged 5b438cd6c4) closes both and adds that test. The real handler path, run on the merged code with a dirty block (`R43_REAL_RUN_OUTPUT_20261015.txt`): 4 planted strings (a name, two account ids, a dollar amount), 0 in the prompt. That run's request carried no comparison keys, so every model name was dropped; the keep arm for a model name is the unit test's clean control (`Core Growth`). Sections 1 and 4 are otherwise unchanged.
+
+COO half: SIGNED by 2.0.0_SA_COO~T2 for the act as written above, on the pin `5b438cd6c4`.
