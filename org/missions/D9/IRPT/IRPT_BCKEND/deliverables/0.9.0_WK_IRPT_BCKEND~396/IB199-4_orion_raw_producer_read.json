@@ -1,0 +1,108 @@
+{
+  "base_commit": "b0ec63516810a3d8c37caa1f70da9c51f528bd08",
+  "raw_producer": {
+    "claim": "measured",
+    "statement": "The flat bronze/positions/{date}.jsonl.gz key is written by data/inf/manual_api/pull_inflection_positions_daily.py:445, a command-line pull whose docstring names a run with --upload-bronze and which the repo holds on no schedule; the deployed Lambda inf-api-positions writes only the .parquet key. The same repo folder writes the flat transactions and performance keys. Liveness is separate: 94 flat positions keys are dated on or after 2026-07-10, the newest 2026-10-14 at 11:51:52 UTC, and no scheduled rule fires at that time and the bronze-runner orchestrator has no positions dim, so the live writer of the daily flat key is not located.",
+    "site": {
+      "path": "data/inf/manual_api/pull_inflection_positions_daily.py",
+      "line": 445,
+      "identifier": "bronze/positions/{snap_iso}.jsonl.gz"
+    },
+    "evidence": [
+      "data/inf/manual_api/pull_inflection_positions_daily.py:445 bronze_key = f\"bronze/positions/{snap_iso}.jsonl.gz\", put_object to S3_BUCKET opal-data-inf at line 447 (git show HEAD, base b0ec635168)",
+      "infra/aws/lambda/inf-pipeline/inf-api-positions/pull_inflection_positions_daily.py:437 bronze_key = f\"bronze/positions/{snap_iso}.parquet\": the deployed Lambda writes the other format for the same date",
+      "opal-data-inf bronze/positions LIST (denominator 4723 keys, read 2026-10-15): 2358 .jsonl.gz objects, 2259 of them with LastModified 2026-07-01",
+      "events list-rules over the 11 UTC hour: eight scheduled rules, none at 11:51 UTC; data/inf/scripts/bronze/orchestrator.py:95-105 holds no positions dim",
+      "git log -S on the positions writer: commit 94042ebf1d (2026-06-30, LEG-2 de-convert) changed the repo writer from parquet to gzip-JSONL"
+    ]
+  },
+  "parquet_census": {
+    "feeds": {
+      "positions": {
+        "source_keys_total": 4723,
+        "jsonl_gz_days": 2358,
+        "parquet_only_days": 7,
+        "silently_dropped_days": 7,
+        "denominator_note": "LIST of s3://opal-data-inf/bronze/positions/ (CLI-paginated, counted client-side): 4723 keys, 2358 .jsonl.gz and 2365 .parquet. A day is the ISO date in the key name; the 2365 distinct days equal the calendar span 2020-04-24 to 2026-10-14, so the feed keeps every calendar day. parquet_only_days = days with a .parquet and no .jsonl.gz: 2026-07-01, 2026-07-03, 2026-07-04, 2026-07-05, 2026-08-06, 2026-09-28, 2026-09-29. silently_dropped_days = those with no key under s3://opal-data-assets/orion/inflection/bronze/positions/ (LIST, 2358 keys): all seven."
+      },
+      "transactions": {
+        "source_keys_total": 196,
+        "jsonl_gz_days": 146,
+        "parquet_only_days": 0,
+        "silently_dropped_days": 0,
+        "denominator_note": "LIST of s3://opal-data-inf/bronze/transactions/ (CLI-paginated): 196 keys, 146 .jsonl.gz, 49 .parquet and one _meta/ window-coverage object, which is excluded from the day counts. No day has a .parquet and no .jsonl.gz. Seven trading days have no key in either format; that is a separate source-absent count, stated in notes."
+      },
+      "performance": {
+        "source_keys_total": 185,
+        "jsonl_gz_days": 134,
+        "parquet_only_days": 0,
+        "silently_dropped_days": 0,
+        "denominator_note": "LIST of s3://opal-data-inf/bronze/performance/ (CLI-paginated): 185 keys, 134 .jsonl.gz, 50 .parquet and one _meta/ window-coverage object, which is excluded from the day counts. No day has a .parquet and no .jsonl.gz. Twenty-two trading days have no key in either format; that is a separate source-absent count, stated in notes."
+      }
+    }
+  },
+  "mirror_defect": {
+    "claim": "measured",
+    "statement": "Not a defect to fix at the mirror. The mirror refuses .parquet by design: COERCED_SUFFIXES at lambda_function.py:77 and the _is_raw gate at :493 (ruling 16, header lines 19-30: a parquet is schema-coerced and its raw content is not recoverable), so widening the rule would launder coerced files into bronze. The seven positions days (2026-07-01, 2026-07-03, 2026-07-04, 2026-07-05, 2026-08-06, 2026-09-28, 2026-09-29) have no flat key to copy, so the mirror is not where they are lost. The one mirror-side gap is that coerced skips are counted per cycle at line 494 without naming the day; that is a denominator observation for the CTO, not a re-pull requirement."
+  },
+  "cost": {
+    "positions": {
+      "requests": 2240,
+      "pacing": "Code: AdaptiveRateLimiter (data/inf/scripts/bronze/rate_limiter.py) with safe_floor 2.0 req/s (line 112), +0.5 per clean batch up to an observed ceiling, -1.0 on 401/429/503/504, and throttle() sleeps 1/rate before each request (line 251-254); DEFAULT_RETRIES 3. The docstring's 0.5 req/s floor is stale (surprise row IRPT_BCKEND-D2-W396-S5).",
+      "hours": 0.311,
+      "claim": "inferred",
+      "days_basis": "7 parquet-only days, including 3 non-trading days the calendar-grain feed keeps. Requests = 320 households x 7 days, one per-client assets request per household per date, retries excluded.",
+      "notes": "Households: 320 distinct household_id values in the newest silver/api_dims/household_rep_mapping partition (snapshot_date 2026-10-14, 320 rows), counted in scratch, no id recorded. Hours = 2240 / 2.0 req/s / 3600 = 0.311 h at the floor rate; a learned rate above the floor shortens it, and the persisted rate state was not read. Upper bound on time, lower bound on requests."
+    },
+    "transactions": {
+      "requests": 0,
+      "pacing": "Same shared limiter (rate_limiter.py: floor 2.0 req/s, throttle before each request at data/inf/manual_api/pull_inflection_transactions_rest.py:229); DAILY_WINDOW_DAYS 7 at line 93 sets the incremental window per account.",
+      "hours": 0.0,
+      "claim": "inferred",
+      "days_basis": "0 silently dropped days, so 0 requests for the dropped-day definition.",
+      "requests_source_absent_trading_days": 6041,
+      "hours_source_absent_trading_days": 0.839,
+      "notes": "Seven trading days have no transactions object in either format (2026-07-01, 2026-07-13, 2026-07-14, 2026-07-15, 2026-08-06, 2026-09-28, 2026-09-29). Upper bound: 863 accounts (distinct account_id in the newest silver/api_dims/accounts_v2 partition, counted in scratch) x 7 dates = 6041 account-level requests, one per account per date; a 7-day window can cover several dates in one run, so the true count can be lower. Hours = 6041 / 2.0 / 3600 = 0.839. Transactions and performance are not counted from the Lambda handler (inf-api-txn), which has no throttle call in the read."
+    },
+    "performance": {
+      "requests": 0,
+      "pacing": "Same shared limiter (floor 2.0 req/s; throttle before each request at data/inf/manual_api/pull_inflection_performance_rest.py:222; _fetch_window at line 207; DEFAULT_RETRIES 3).",
+      "hours": 0.0,
+      "claim": "inferred",
+      "days_basis": "0 silently dropped days, so 0 requests for the dropped-day definition.",
+      "requests_source_absent_trading_days": 7040,
+      "hours_source_absent_trading_days": 0.978,
+      "notes": "Twenty-two trading days have no performance object in either format. Lower bound: 320 households x 22 dates = 7040 requests at one window per household per date; the sub-year windows of the full-history path would add requests. Hours = 7040 / 2.0 / 3600 = 0.978."
+    }
+  },
+  "fold_design": {
+    "schedule": "One EventBridge Scheduler schedule, cron(0 6 * * ? *) with timezone America/New_York (10:00 UTC in EDT, 11:00 UTC in EST), fires the Orion raw producer for the three Inflection feeds: the bronze-runner path (inf-bronze-trigger starts the inf-bronze-runner EC2, which runs orchestrator.py) extended with a positions dim, and the flat writers in data/inf/manual_api. It moves the three feeds off the 11:15-11:32 UTC rules (opal-inf-bronze-runner-cron, inf-api-positions-daily, inf-api-txn-daily) in one S2 release, never alongside them. The input JWT rule opal-inf-jwt-fetch fires at 09:50 UTC, before the 06:00 New York fire in both offsets. The other live rules (accounts, reps, assets, eclipse) are listed for the S2 release and not decided here.",
+    "builder_names": "Every schedule, rule and function name comes from lib/opal_naming.py name() output (CLAUDE.md rule 30): name(system, scope, function, kind) with a SCHEDULE cadence as the kind, and the same call for the function. No name is typed by hand. A grep of infra/logic/registry/event_rules.json finds the silver-chain rule and no raw-producer schedule, so the first builder call for this producer is expected to refuse; the refusal is a registry row to add, not a workaround.",
+    "trading_day_frontier": "The producer stamps the frontier with lib/trading_calendar.py expected_last_trading_day(now): today on a trading day, else the prior trading day. The pull date is the feed's calendar day (prev_trading_day(now) for the trading-day stamp), because the positions feed keeps every calendar day. On a non-trading day the 06:00 fire still runs: it pulls the calendar day it owes and stamps the frontier at the last trading day, and freshness is read as trading_days_behind against that stamp, never against a calendar day.",
+    "covers_feeds": ["positions", "transactions", "performance"]
+  },
+  "i2_feed": {
+    "claim": "absent",
+    "statement": "Not yet written. The round-116 B-IN read (checks/r116/p116_orion.py, record ORION_ACCOUNT_PERFORMANCE_READ_R116.json under 0.9.0_WK_IRPT_DASHBD~304) asks whether Orion exposes an account-level performance or return series; that record is not in this tree. If it does, that series is the one feed ~I2 may add, and the round-115 drain end says fact_performance carries only client, date and factor, so the account grain is a source the three feeds here do not hold."
+  },
+  "notes": [
+    "What each fact rests on: the raw-producer site is the repo line read at base b0ec635168; the census counts are LIST output over the two buckets read 2026-10-15 with the day rule in denominator_note; the trading-day flags and the source-absent counts come from lib/trading_calendar.py trading_days_between and is_trading_day (a local computation, no vendor call).",
+    "Raw producer: the flat positions writer is data/inf/manual_api/pull_inflection_positions_daily.py:445; the flat transactions and performance writers are pull_inflection_transactions_rest.py:585 and pull_inflection_performance_rest.py:639. Surprise row IRPT_BCKEND-D2-W396-S1 refines the premise of IRPT_BCKEND-D2-W394-S3.",
+    "Live writer not located: no scheduled rule fires at 11:51 UTC, the bronze-runner orchestrator has no positions dim, object metadata is empty; the daily flat key's writer is recorded as surprise row IRPT_BCKEND-D2-W396-S2 and was not identified.",
+    "Batch history: 2259 flat positions objects share LastModified 2026-07-01 (surprise row IRPT_BCKEND-D2-W396-S7); the per-day writer for the daily keys after 2026-07-10 is the same open question as S2.",
+    "The mirror's stop account does not reach 2026-09-28 and 2026-09-29, which fall after the 2026-08-14 restart (surprise row IRPT_BCKEND-D2-W396-S3). The mirror's header count of ten parquet-only dates was not re-derived; this read finds seven for positions and none for the other two feeds.",
+    "Source-absent days: transactions 7 and performance 22 trading days have no object in either format (surprise row IRPT_BCKEND-D2-W396-S4). The census definition reads them as zero dropped days; the cost block carries their request counts separately.",
+    "Pacing: the code floor is 2.0 req/s while the docstring says 0.5 (surprise row IRPT_BCKEND-D2-W396-S5). The stale clock text of the bronze-runner rule and trigger header is surprise row IRPT_BCKEND-D2-W396-S6.",
+    "Counts: 320 households (newest household_rep_mapping partition) and 863 accounts (newest accounts_v2 partition) were counted from a GET to scratch, which was removed; no id was recorded. The request counts are arithmetic from those counts and the day lists, not vendor measurements, so every cost claim is inferred.",
+    "Not read: the body of any bronze or silver object; the JWT object and every secret value; the persisted rate-limiter state in S3; the Lambda transactions handler's request loop beyond the throttle grep; the performance full-history window path; the accounts, reps, assets and eclipse rules beyond the S2 list; the log groups (14-day retention); the I2 round-116 record, which is absent from this tree.",
+    "rows_written counts warehouse data rows and is 0. The seven surprise rows IRPT_BCKEND-D2-W396-S1 to S7 are appended to the investigation channel and are not data rows.",
+    "No Orion API request was made, no Lambda was invoked, no AWS write, sign-in or secret read was made; the AWS calls were list, head, describe, get and filter reads under the worker identity.",
+    "The order file and the check were not edited, and its status was not flipped."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
