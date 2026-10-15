@@ -30,3 +30,10 @@ statement is destroyed by name. Client data (G2) never takes this exception (v3.
 1. The triggers of section 7, including 13 of 13 refused for a non-Opal principal with 0 reads on refusal paths.
 2. `news_search_articles` keeps its 14-day window cap (v3.1). If it is served through mcp.opalinvest.dev, the 60 s ALB
    limit applies as for the harvest search.
+
+## Re-pin (2026-10-15 ~04:0xZ)
+The ask was updated to `@d0264c30af`, sha256 `cdefc9a139a4662e...`. I read the diff against `@ad0d3da6f3`. It changes
+documentation only: A2's ruling text, typed_scope's measured +172 lines, the seam test run as evidence (not taken), and
+33/33 suites with `app.typed_scope` first in the import check. The release `ee23dd004c` is UNCHANGED. **This half now
+binds to the updated ask bytes, at the same release.**
+
