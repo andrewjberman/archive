@@ -171,7 +171,9 @@ def check_runs(rec, frontier, runs_rows, account_return_ids, parquet_sha):
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["firm"] == FIRM and rec["frontier_date"] == frontier[0] and rec["partitions_listed"] == frontier[1],
          "frontier: record %s/%s, recount %s/%s" % (rec.get("frontier_date"), rec.get("partitions_listed"), frontier[0], frontier[1]))
-    need(nes(rec["households_source"]), "households_source words")
+    need(nes(rec["households_source"]) and "dry run" in rec["households_source"].lower()
+         and "not applied" in rec["households_source"].lower(),
+         "households_source must say the gold account_dim is not applied and the frame is the adapter's dry run")
     runs = rec["runs"]
     need(isinstance(runs, list) and len(runs) == 2, "exactly two runs")
     need(runs[0]["as_of"] == frontier[0] and runs[1]["as_of"] > frontier[0] and ISO.match(runs[1]["as_of"]), "run 1 is at the frontier, run 2 after it")
@@ -264,7 +266,7 @@ def selftest(root):
                     value_text=vt, absent_kind=ak, absent_reason=ar, contract_version="0.5.3", schema_version="1.0")
     ids = {"m.ar1", "m.ar2"}
     frontier = ("2026-06-22", 3325)
-    rec = {"firm": FIRM, "frontier_date": "2026-06-22", "partitions_listed": 3325, "households_source": "account_dim household_id",
+    rec = {"firm": FIRM, "frontier_date": "2026-06-22", "partitions_listed": 3325, "households_source": "the gold account_dim is not applied; the frame is the adapter's own dry run",
            "runs": [{"as_of": "2026-06-22", "households": 5, "rows": 2, "measured_rows": 1, "text_rows": 0, "absent_rows": 1,
                      "private_parquet": {"path": PRIVATE_ROOT + "a.parquet", "sha256": "aa" * 32, "rows": 2}},
                     {"as_of": "2026-10-13", "households": 5, "rows": 2, "measured_rows": 0, "text_rows": 0, "absent_rows": 2,
@@ -296,6 +298,7 @@ def selftest(root):
     red(mut_rows=lambda rr: rr[0][0].update(value_number=None, absent_kind="SOURCE_BREAK", absent_reason="x"), why="run 1 with nothing measured")
     red(mut_rec=lambda rc: rc["runs"][1].update(as_of="2026-06-22"), why="run 2 not after the frontier")
     red(sh=["aa" * 32, "00" * 32], why="a parquet hash mismatch")
+    red(mut_rec=lambda rc: rc.update(households_source="account_dim household_id"), why="households_source without the dry run and not applied words")
     red(mut_rec=lambda rc: rc.update(pushed=True), why="a push flag")
     red(mut_rec=lambda rc: rc["runs"][0].update(households=0), why="no households")
     red(mut_rec=lambda rc: rc.update(households_source="ids 1234567890"), why="a digit run")
@@ -307,7 +310,7 @@ def selftest(root):
             raise Fail("RED: module clause did not fail: " + why)
         except Fail as e:
             need("RED" not in str(e), str(e))
-    print("selftest OK: 1 green and 10 red run arms, 4 red module arms")
+    print("selftest OK: 1 green and 11 red run arms, 4 red module arms")
 
 
 if __name__ == "__main__":

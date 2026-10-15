@@ -107,8 +107,8 @@ def c2():
     for w in ("NO_GROUP", "GROUP_NO_SERIES"):
         if w not in json.dumps(sf):
             fail("scope_feed_addendum must name the absent form %s" % w)
-    if sf.get("fee_basis") != "UNPROVEN":
-        fail("scope_feed_addendum.fee_basis stays UNPROVEN until a fee window ties it")
+    if sf.get("fee_basis") != "NET":
+        fail("scope_feed_addendum.fee_basis is NET (CTO msg 8049, B-IN round 119)")
     site_ok(sf.get("one_account_limit_site"), "scope_feed_addendum.one_account_limit_site")
     bl = r.get("blast_radius") or {}
     if not isinstance(bl.get("writes"), list) or not bl["writes"] or not isinstance(bl.get("reads"), list) or bl.get("new_iam") not in (True, False):
