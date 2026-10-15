@@ -1,0 +1,35 @@
+{
+  "base_commit": "f0069dd8ca46b7f06cd5ddae22c48ac2d8b2fd48",
+  "changed_paths": [
+    "infra/aws/lambda/investor-reporting/export/entry.py",
+    "infra/aws/lambda/investor-reporting/export/filled_reader_installed.py",
+    "infra/aws/lambda/investor-reporting/export/render.py",
+    "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_installed_reader_render.py"
+  ],
+  "negative_tests": [
+    "installed_reader_reads_pinned_version",
+    "render_pinned_filled_report_from_fixture",
+    "installed_reader_never_reads_current_object_for_a_pin",
+    "tampered_pinned_version_is_refused",
+    "missing_pinned_version_is_refused",
+    "entry_installs_filled_reader_when_absent_and_keeps_supplied_one"
+  ],
+  "tests_total": 6,
+  "tests_passed": 6,
+  "mutant_tests_failed": 6,
+  "notes": [
+    "Seam: the reader is composed by entry.py _with_filled_reader, called from _with_platinum_reader, which both compose legs (submit_export and _compose_for_async) run; the reader is filled_reader_installed.installed_filled_reader(ports, tenant). The render side is render.filled_render_package, which reads the pinned bytes through retained_export.filled_render_read (the one read, read_pinned_filled) and takes the accounts from _scope/filled_named_accounts.py.",
+    "Live caller: none in the five render modules (render.py, dispatch.py, download.py, package.py, handler.py). retained_export.filled_render_read has no caller outside the tests and nothing in export/ reads ports[filled_reader] yet; the submit-path wiring is IB-pr-566's files (submit_async.py, submit_service.py), not in this grant. Recorded as channel row IRPT_BCKEND-D2-W411-S2.",
+    "Address: lib/opal_naming.address() for the filled report at firm 49financial, partition client=<id>, object name from the reporting route's FILLED_OBJECT constant; the address was built locally (no AWS call). The first commit was refused by the naming gate on a module-level literal; the literal is now inline in the address call, as reporting/entry.py does.",
+    "Read: retained_export.py lines 314-489 (the pin, the one read and the render read), _scope/filled_named_accounts.py, reporting/entry.py _filled_uri and FILLED_OBJECT, entry.py _with_platinum_reader, render.py, the check file p207_cells.py and its helpers. Not read: the export role's IAM grant on the filled object (Terraform, not in grant), the packaged zip layout, submit_async.py and submit_service.py. Channel row IRPT_BCKEND-D2-W411-S1 records the fence question.",
+    "Tests: six offline tests over an in-memory S3 with object versions and synthetic ids and bytes; the pinned read is asserted to carry the VersionId on every call. Removal run (scratch copy, in memory, the four FILLED-REPORT-G blocks of entry.py, filled_reader_installed.py and render.py): 6 failed, 0 errors, rc 1.",
+    "The commit-time client-data check reads WARN (hashed account-id list absent on dell2), as the order states.",
+    "Counters: rows_written counts data rows written to a store; the surprise-channel rows filed for this order are channel records and are not store rows. No AWS call, sign-in, vendor request or figure was made or written."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
