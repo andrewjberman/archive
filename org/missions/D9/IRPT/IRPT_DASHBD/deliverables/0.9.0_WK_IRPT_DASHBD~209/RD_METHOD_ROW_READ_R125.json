@@ -1,0 +1,120 @@
+{
+  "firm": "49financial",
+  "served_versions": [
+    {
+      "method_version": 1,
+      "columns": [
+        "comparability_max_excluded_weight",
+        "day_count",
+        "fee_basis",
+        "firm",
+        "flow_convention",
+        "gips_alignment",
+        "guard_substitution",
+        "income_basis",
+        "large_flow_share",
+        "measured_at",
+        "method",
+        "method_version",
+        "plausibility_band_high",
+        "plausibility_band_low",
+        "schema_version",
+        "source_pipeline",
+        "tieout_tolerance_proposed",
+        "tolerance"
+      ],
+      "claim_columns_present": []
+    },
+    {
+      "method_version": 2,
+      "columns": [
+        "comparability_max_excluded_weight",
+        "day_count",
+        "fee_basis",
+        "firm",
+        "flow_convention",
+        "gips_alignment",
+        "guard_substitution",
+        "income_basis",
+        "large_flow_share",
+        "measured_at",
+        "method",
+        "method_version",
+        "plausibility_band_high",
+        "plausibility_band_low",
+        "schema_version",
+        "source_pipeline",
+        "tieout_tolerance",
+        "tieout_tolerance_proposed",
+        "tieout_tolerance_ruling",
+        "tolerance",
+        "value_basis",
+        "value_basis_ruling"
+      ],
+      "claim_columns_present": []
+    }
+  ],
+  "producer_claim_columns": [
+    "comparability_max_excluded_weight_claim",
+    "large_flow_share_claim",
+    "plausibility_band_high_claim",
+    "plausibility_band_low_claim",
+    "threshold_claims_source",
+    "tolerance_claim"
+  ],
+  "missing_in_newest": [
+    "comparability_max_excluded_weight_claim",
+    "large_flow_share_claim",
+    "plausibility_band_high_claim",
+    "plausibility_band_low_claim",
+    "threshold_claims_source",
+    "tolerance_claim"
+  ],
+  "call_sites": [
+    "data/assets/scripts/gold/irpt_reporting/account_return_daily.py::main"
+  ],
+  "scheduled_function_call_sites": [],
+  "terraform_files_naming_prefix": [
+    "infra/aws/terraform/investor-reporting/reporting-publish/iam.tf",
+    "infra/aws/terraform/investor-reporting/reporting-publish/locals.tf"
+  ],
+  "reporting_gold_write_list_has_prefix": false,
+  "who_may_write": {
+    "producer_function": "emit_method_row(s3, firm, thresholds, *, upload, tieout, winner, src) in data/assets/scripts/gold/irpt_reporting/account_return_daily.py. It is the only function that builds a dim_return_method row and the only one that carries the six claim columns: threshold_claims_of resolves the claims from the thresholds input, and served_thresholds writes them into the manifest.",
+    "entry_point": "account_return_daily.py main(), run as: python account_return_daily.py --method-row-only --thresholds-in <claims file> [--tieout N] [--upload] (without --upload it is a dry run). The branch calls emit_method_row(s3, firm, thresholds, upload=upload, tieout=args.tieout, src=src) and returns before any day partition. Before the branch, main runs the source declaration load, the classification load and one LIST of the custodian transactions prefix, so that LIST is part of the entry point. The full run (no flag) calls emit_method_row once more, after its day partitions. No scheduled function calls it.",
+    "grant_needed": "s3:PutObject on the two keys data.parquet and manifest.json under the 49 Financial gold dim_return_method prefix for one method_version partition (arn:aws:s3:::<49F gold bucket>/irpt/49financial/gold/dim_return_method/method_version=<N>/*), and s3:ListBucket with an s3:prefix condition on the custodian transactions prefix the source declaration names (the one LIST before the branch). The entry point as written issues no GetObject of the prefix; the reporting-gold iam.tf comment describes the emit as a single put_object, and that was not verified against the library. A writer principal must also carry the firm scope token in its role name, or the firm bucket's explicit Deny refuses it; this is stated by the publish role's iam.tf comment, and the bucket policy was not read.",
+    "options": [
+      {
+        "id": "A",
+        "words": "A seat runs the entry point for method_version 2 (the row the custodian entry names) with --upload, under a signed pair, after the prior v2 bytes are captured by a GET. It changes the served method_version=2 data.parquet and manifest.json: the six claim columns appear and measured_at moves, so served v2 values change and the act needs never-widen sign-off that names those two keys as the blast radius. It does NOT change the day partitions (the flag touches none) or method_version=1. Needs: the grant above on the v2 prefix and the CTO's sign-off."
+      },
+      {
+        "id": "B",
+        "words": "The scheduled reporting-gold function emits the method row: one emit_method_row call after its day loop, fed the thresholds object the handler already loads (load_thresholds) and the source entry it already holds. It changes the reporting-gold role, which gains a PutObject statement on the dim_return_method prefix (a new entry in irpt_rg_gold_write_arns and in the WriteTheFiveGoldPrefixesOnly statement), and every daily fire overwrites the served method row (measured_at moves each fire). It does NOT change the day partitions or the day logic, and it reverses the handler's stated design (its docstring keeps the method row out of its role). Needs: the role grant, a plan and apply under the Terraform gate, and the CTO's choice."
+      },
+      {
+        "id": "C",
+        "words": "No write. The CTO records that the served v1 and v2 rows predate the six claim columns (added to the producer by commit 91e3ec5a47, 2026-10-11, after v2 landed on 2026-10-03), so those columns are absent from the served rows, and the next method row the producer writes for the entry carries them. It changes no served value, no grant and no code. It does NOT satisfy the leg L7 expectation that threshold_claims_source is readable after a scheduled fire. Needs only a CTO ruling."
+      }
+    ],
+    "words": "A writer of the claims needs the emit path, not a new function: only emit_method_row writes the claim columns, and only the producer's main reaches it. The scheduled reporting-gold role cannot write the prefix by its write list. The entry point as written also needs a LIST grant on the custodian transactions prefix."
+  },
+  "words": "What is stale: the served 49 Financial dim_return_method rows are method_version 1 (2026-10-01, 18 columns) and method_version 2 (2026-10-03, 22 columns). Neither carries the six claim columns, so the newest row is missing all six. The cause is timing, measured in git: the claim columns were added to the producer by commit 91e3ec5a47 on 2026-10-11, after v2 was written; the other columns of the rows are not in question. The leg L7 expectation fails because no scheduled function reaches the writer: the reporting-gold handler has no call of emit_method_row, and its role's write list excludes the prefix by design. Who may write the claims: only emit_method_row, run from account_return_daily.py main through --method-row-only (or the full run), with the thresholds object that carries them. The CTO's decision is which option, A, B or C, to take, and whether to accept the stale v1 and v2 rows as they are; no grant is proposed here. The served manifest.json objects were not read, since they are outside this order's read list, so whether a served manifest carries threshold_claims is not measured.",
+  "analysis": {
+    "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~209/method_row_read_r125.py",
+    "sha256": "6e89474d3d94af78b9ef15d82d7226c6d27cce57df56d9cd743210ababa9577f",
+    "tracked": true
+  },
+  "reads": {
+    "s3_reads": 3,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
