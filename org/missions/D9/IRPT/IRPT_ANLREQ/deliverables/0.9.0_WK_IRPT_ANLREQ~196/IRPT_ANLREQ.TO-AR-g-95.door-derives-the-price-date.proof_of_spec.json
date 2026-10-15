@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-95",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-95.door-derives-the-price-date.md",
+    "group": "OTHER",
+    "vintage_commit": "6a02d627d4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R20_G.md",
+    "vintage_commit": "6a02d627d4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-95.door-derives-the-price-date.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~196",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "4bc49a99fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "validate_upload drops a sent price_date (lines 245-249) and the shape guard covers reference_notional only (line 259); offline, no deploy",
+      "artifact_covered_by": [
+        "AR95-g-AC1",
+        "AR95-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_price_date_ignored.py",
+      "kind": "test",
+      "commit_or_etag": "4bc49a99fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline file, five named tests, 5 passed, 10 subtests passed",
+      "artifact_covered_by": [
+        "AR95-g-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_price_date_default.py",
+      "kind": "test",
+      "commit_or_etag": "4bc49a99fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two existing tests changed to send no date or to expect the ignored date; module docstring sentence changed; 5 passed",
+      "artifact_covered_by": [
+        "AR95-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_uploads.py",
+      "kind": "test",
+      "commit_or_etag": "4bc49a99fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two existing tests drop price_date from the payload and answer with args[-1]; 17 passed, 11 subtests passed",
+      "artifact_covered_by": [
+        "AR95-g-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR95-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g95_checks.py g95",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g95_checks.py g95",
+      "output_evidence": "AR-G95-OK direct=10 named=5 passed=5 | direct cases 10, wrong none | named tests missing: none | new tests: 5 passed, 10 subtests passed in 2.82s | rc=0 (run under timeout 300 from the worktree root, after product commit 4bc49a99fb)",
+      "denominator": "10 direct cases, 0 wrong; 5 of 5 named tests present and passing (5 passed, 0 failed)",
+      "expect": "^AR-G95-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR95-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g95_checks.py regress",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g95_checks.py regress",
+      "output_evidence": "AR-G95-REGRESS-OK passed=156 | test_uploads.py: 17 passed | test_price_date_default.py: 5 passed | test_uploads_refusal_class.py: 6 passed | test_uploads_on_behalf.py: 4 passed | test_load_input_owner_typed.py: 8 passed | test_unresolved_keep.py: 6 passed | test_template_reader.py: 29 passed | test_y5_proxy_corrections.py: 16 passed | test_prospect_dates.py: 65 passed | rc=0 (run under timeout 590 from the worktree root, after product commit 4bc49a99fb)",
+      "denominator": "156 passed, 0 failed across 9 files, 0 files bad (need >= 156)",
+      "expect": "^AR-G95-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's own negative arms are the offline tests (a sent date dropped, odd values ignored, the guard standing, a dollars file untouched).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider <one file> (test_price_date_ignored.py, test_price_date_default.py, test_uploads.py); bash .tools/commit-gate.sh on the four .py files",
+      "result": "5 passed, 10 subtests passed; 5 passed, 3 subtests passed; 17 passed, 11 subtests passed; commit-gate rc=0 on 4 of 4 files"
+    }
+  ]
+}
