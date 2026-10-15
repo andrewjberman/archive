@@ -23,7 +23,7 @@ F = "data/inf/manual_api/"
 TO1 = "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-594.scope-feed-daily-factor.md"
 CELLS = {
     "1": dict(
-        slot=433, test=F + "test_scope_feed_daily_factor.py", min_tests=11, marker="SCOPE-FEED-B", rec="IB227-1_record.json",
+        slot=433, test=F + "test_scope_feed_daily_factor.py", min_tests=12, marker="SCOPE-FEED-B", rec="IB227-1_record.json",
         regress=[F + "test_pull_inflection_scope_account_returns.py", "data/inf/scripts/gold/tests/test_aor_resolution.py"],
         mutants=[F + "pull_inflection_scope_account_returns.py"],
         allowed=(F + "pull_inflection_scope_account_returns.py", F + "test_scope_feed_daily_factor.py", F + "test_pull_inflection_scope_account_returns.py", TO1),
@@ -31,7 +31,8 @@ CELLS = {
         named=("daily_factor_is_the_point_factor_and_the_return_column_is_gone", "the_summary_performance_is_never_stored",
                "series_ended_at_source_marks_days_after_the_last_point_absent", "series_end_reason_claim_is_measured",
                "calendar_days_include_weekends_in_the_window_and_the_rows", "scheduled_window_starts_after_the_newest_landed_day_and_is_capped",
-               "first_run_window_is_the_pull_date_only", "factor_chains_to_the_period_return_in_a_fixture", "existing_reason_classes_unchanged")),
+               "first_run_window_is_the_pull_date_only", "factor_chains_to_the_period_return_in_a_fixture", "existing_reason_classes_unchanged",
+               "from_date_window_emits_calendar_days_including_weekends")),
 }
 
 
