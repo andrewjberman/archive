@@ -135,6 +135,7 @@ def build(cell, variant=None):
     return root
 
 
+PERF_DAYS = ["2026-07-01", "2026-09-28"] + ["2026-05-%02d" % d for d in range(4, 24)]
 ORION = {
     "base_commit": "a" * 40,
     "live_writer": {"claim": "inferred", "statement": "the live daily flat writer is not in the repository; a runner on a host writes the flat key each morning",
@@ -143,12 +144,19 @@ ORION = {
                "cli_disposition": "the manual CLI is retired in the same pair and its docstring repointed to the scheduled function", "no_second_producer": True,
                "schedule_builder_output": "the schedule name is the output of lib/opal_naming.py name() for the SCHEDULE kind, never typed",
                "trading_day_frontier": "the producer stamps the previous trading day by lib/trading_calendar.py and holds by name on a non-trading day"},
-    "pair_a": {"days": [{"date": d, "trading_day": d not in ("2026-07-03", "2026-07-04", "2026-07-05")} for d in PO.DAYS],
-               "keys": [PO.KEYPFX + d + ".jsonl.gz" for d in PO.DAYS], "absent_beforehand_read_at_act": True, "through_b_code_path": True, "requests": 2240,
-               "pacing": "the shared limiter at its two requests per second floor", "read_back": "list each written key and compare its size and ETag with the response held in scratch",
+    "pair_a": {"feeds": {
+                   "positions": {"days": list(PO.DAYS), "keys": [PO.KEYPFX + d + ".jsonl.gz" for d in PO.DAYS], "requests": 2240, "pacing": "the shared limiter at its two requests per second floor"},
+                   "transactions": {"days": list(PO.TXN_DAYS), "keys": ["s3://opal-data-inf/bronze/transactions/" + d + ".jsonl.gz" for d in PO.TXN_DAYS], "requests": 2240,
+                                    "pacing": "the shared limiter at its two requests per second floor"},
+                   "performance": {"days": PERF_DAYS, "keys": ["s3://opal-data-inf/bronze/performance/" + d + ".jsonl.gz" for d in PERF_DAYS], "requests": 7040,
+                                   "pacing": "the shared limiter at its two requests per second floor"}},
+               "absent_beforehand_read_at_act": True, "through_b_code_path": True,
+               "read_back": "list each written key and compare its size and ETag with the response held in scratch",
                "rollback_per_key": "delete each created key by the version id its put returned after a HEAD showed it absent",
-               "non_trading_policy": "a non-trading day is pulled once and an empty vendor answer is recorded as such, never filled"},
-    "blast_radius": {"writes": ["seven flat positions keys in opal-data-inf bronze"], "reads": ["the vendor"], "new_iam": False, "served_values_changed": False, "other_dates_touched": False},
+               "absent_at_source_policy": "where the vendor returns nothing for a day the day is recorded ABSENT-AT-SOURCE with the response status and we never write an empty key"},
+    "scope_feed_addendum": {"statement": "the account feed joins pair (b) by addendum: each account-day carries Orion's return or ABSENT with NO_GROUP or GROUP_NO_SERIES, never zero",
+                            "fee_basis": "UNPROVEN", "one_account_limit_site": {"path": "cli/pull_positions.py", "line": 8, "identifier": "pull_positions"}},
+    "blast_radius": {"writes": ["flat keys for the absent trading days of three feeds in opal-data-inf bronze"], "reads": ["the vendor"], "new_iam": False, "served_values_changed": False, "other_dates_touched": False},
     "build_slices": [{"cell": "port the writer", "risk": "LOCAL", "files": ["cli/pull_positions.py"]}, {"cell": "the schedule declaration", "risk": "LOCAL", "files": ["infra/x.tf"]}],
     "notes": ["synthetic"], **{k: 0 for k in P6.BOUND}}
 ORION_PKT = "# never-widen packet\n" + "pair (a), pair (b); blast radius; rollback; stop rule; opal_naming; trading-day frontier; no shadow pipeline; COO half UNSIGNED. CTO half UNSIGNED.\n" + ("padding line\n" * 600)
@@ -219,9 +227,15 @@ for label, ac, rec, pkt in (
         ("schedule names typed", "AC1", mo(lambda o: o["pair_b"].update({"schedule_builder_output": "the schedule is called orion-6am, typed here"})), None),
         ("a wrong file identifier", "AC1", mo(lambda o: o["pair_b"]["files"][0].update({"identifier": "nope_function"})), None),
         ("no live-writer evidence", "AC1", mo(lambda o: o["live_writer"].update({"evidence": ["one line of evidence only here"]})), None),
-        ("six days only", "AC2", mo(lambda o: o["pair_a"].update({"days": o["pair_a"]["days"][:-1]})), None),
-        ("a key for another date", "AC2", mo(lambda o: o["pair_a"]["keys"].__setitem__(0, PO.KEYPFX + "2026-07-02.jsonl.gz")), None),
+        ("six positions days only", "AC2", mo(lambda o: o["pair_a"]["feeds"]["positions"].update({"days": o["pair_a"]["feeds"]["positions"]["days"][:-1]})), None),
+        ("performance with 21 days", "AC2", mo(lambda o: o["pair_a"]["feeds"]["performance"].update({"days": PERF_DAYS[:-1], "keys": o["pair_a"]["feeds"]["performance"]["keys"][:-1]})), None),
+        ("a feed missing", "AC2", mo(lambda o: o["pair_a"]["feeds"].pop("transactions")), None),
+        ("a key for another date", "AC2", mo(lambda o: o["pair_a"]["feeds"]["positions"]["keys"].__setitem__(0, PO.KEYPFX + "2026-07-02.jsonl.gz")), None),
+        ("a key under the wrong feed", "AC2", mo(lambda o: o["pair_a"]["feeds"]["transactions"]["keys"].__setitem__(0, PO.KEYPFX + "2026-07-01.jsonl.gz")), None),
         ("not through (b)'s path", "AC2", mo(lambda o: o["pair_a"].update({"through_b_code_path": False})), None),
+        ("no ABSENT-AT-SOURCE policy", "AC2", mo(lambda o: o["pair_a"].update({"absent_at_source_policy": "where the vendor returns nothing we write an empty key and move on quickly"})), None),
+        ("the scope feed without NO_GROUP", "AC2", mo(lambda o: o["scope_feed_addendum"].update({"statement": "the account feed joins pair (b) by addendum and carries GROUP_NO_SERIES or the return, never zero"})), None),
+        ("fee basis proven", "AC2", mo(lambda o: o["scope_feed_addendum"].update({"fee_basis": "PROVEN"})), None),
         ("other dates touched", "AC2", mo(lambda o: o["blast_radius"].update({"other_dates_touched": True})), None),
         ("a packet too short", "AC3", None, "# never-widen packet\nshort. COO half UNSIGNED. CTO half UNSIGNED.\n"),
         ("one half signed", "AC3", None, ORION_PKT.replace("CTO half UNSIGNED.", "CTO half signed.")),
