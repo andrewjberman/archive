@@ -1,0 +1,57 @@
+{
+  "cell": "AR-y-365",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-365",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~162",
+  "base_candidate_sha": "50db1eb4ad2b7063800c0757e30520462af4d2c3",
+  "commit": "7af732ee11f14e92403b2f6b2711558cba7f8d53",
+  "branch": "cand/dell2/anlreq-filing-notice (LOCAL, never pushed)",
+  "commit_subject": "feat(TicketCenter): show the door's not-covered NOTICE under a filed outcome (AR-y-365, IRPT_ANLREQ round 41)",
+  "files_changed": [
+    {"path": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "added": 19, "deleted": 0, "change": "new export FilingNotice (heading, one line per notice) and FILED_AS_GIVEN_HEADING"},
+    {"path": "src/pages/TicketCenter/TicketCenter.tsx", "added": 13, "deleted": 2, "change": "import FilingNotice; state filedNotices set from outcome.notices on success and cleared at the start of each filing; rendered under the partner banner and under the staff FilingSteps"},
+    {"path": "src/pages/TicketCenter/analysisRequest.ts", "added": 28, "deleted": 6, "change": "NOT_COVERED_NOTICE_CODE; notCoveredNoticeLines(portfolio) keyed on code; fileAnalysisRequest and fileAndRequestAnalysis carry notices on the filed outcome"},
+    {"path": "src/pages/TicketCenter/__tests__/filing-notice.test.tsx", "added": 151, "deleted": 0, "change": "new file, cases (a) to (f)"}
+  ],
+  "scope": "all four paths under src/pages/TicketCenter/; src/api and src/pages/InvestorReporting unchanged (scope_check.py SCOPE-OK)",
+  "tests": {
+    "passed": 6,
+    "failed": 0,
+    "new_file": "src/pages/TicketCenter/__tests__/filing-notice.test.tsx (bun test, 6 of 6)",
+    "folders": {
+      "src/pages/TicketCenter": {"passed": 148, "failed": 0, "files": 27, "baseline_before_change": {"passed": 142, "failed": 0, "files": 26}}
+    }
+  },
+  "before_arm": {
+    "run": "bun test src/pages/TicketCenter/__tests__/filing-notice.test.tsx on the candidate 50db1eb4, before any source change",
+    "result": "2 pass, 4 fail",
+    "failed": ["(a) heading and verbatim description", "(b) two lines in the door's order", "(e) no button and no input", "(f) own words, filer asked for nothing"],
+    "passed": ["(c) another code shows no heading", "(d) no portfolio shows no heading"],
+    "note": "The cell required (a), (b) and (f) to fail; (e) also fails before the change because its first assertion requires the heading to be present."
+  },
+  "mutant": {
+    "change": "FilingNotice guard swapped from lines.length === 0 to lines.length >= 0 (the notice never renders)",
+    "result": "MUTANT-FIRES: 2 pass, 4 fail; rc=1; file restored, sha256 verified"
+  },
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit), portal worktree",
+    "runs": [
+      {"rc": 2, "cause": "two TS2339 errors: toMatch is not on bun's Matchers type, in filing-notice.test.tsx lines 139 and 147; fixed by the .test() form the sibling test uses"},
+      {"rc": 0, "after": "the fix, same command, no diagnostics"}
+    ]
+  },
+  "reader": "WRITTEN, not imported: the composer's noticeDescriptions (prospect.ts:112) keeps every NOTICE severity regardless of code, so the code-exact rule could not be met by importing it. Filed as IRPT_ANLREQ-D2-W162-S1.",
+  "what_a_person_sees": "After a filing that the door answers as NORMALIZED with a TICKER_DATA_NOT_ENTITLED finding in its portfolio, the Ticket Center shows, under the filed outcome, the one sentence 'These holdings were filed as given.' and under it one bullet per such holding carrying the door's own description, exactly as the door wrote it. There is no button, no input and no prompt; nothing asks the filer for a replacement. A finding of any other code shows nothing new; a filing with no portfolio shows nothing new (no heading, no empty block). On the staff page the notice sits under the filing steps; on the partner page it sits under the filed banner.",
+  "claim": "On the candidate, a not-covered holding's NOTICE reaches the filer in the door's own words under one fixed heading, with no control, and other codes and the no-portfolio case are unchanged. The Investor Reporting composer and src/api are untouched.",
+  "not_read": [
+    "The live door's real NOTICE description text after r33 (no live call; the fixtures use a plausible sentence, not the door's wording).",
+    "The rendered Ticket Center page in a browser (no browser in the sparse worktree; the section is checked by renderToStaticMarkup and happy-dom presses, and the page wiring is checked by typecheck only).",
+    "Whether the door sends TICKER_DATA_NOT_ENTITLED with severity NOTICE: the reader keys on the code alone, as the cell specifies; the severity is not read."
+  ],
+  "checkers": {
+    "portal_check.py": "PORTAL-TESTS-OK 6 new, 148 folder, 0 failed (rc=0; two runs, identical line)",
+    "mutant_check.py": "MUTANT-FIRES mutant rc=1; restored sha256 241cdbd4f2054a0b matches; summary 2 pass | 4 fail",
+    "scope_check.py": "SCOPE-OK 4 paths, all under src/pages/TicketCenter/; src/api and src/pages/InvestorReporting unchanged"
+  },
+  "pushed": false,
+  "landed": false
+}

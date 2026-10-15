@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-am-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-am-3.hygiene-crossbox-merge-null-bus-id-fence-census-path-suite-sparse.md",
+    "group": "OTHER",
+    "vintage_commit": "4073337a9e"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~125",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round23.md",
+    "vintage_commit": "4073337a9e",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-am-3.hygiene-crossbox-merge-null-bus-id-fence-census-path-suite-sparse.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/crossbox-call.py",
+      "kind": "script",
+      "commit_or_etag": "02284ff0be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "merge() validates the whole merged result in memory (dump, then check_call on the exact text) and only then writes that text, so a refused merge writes nothing; a null bus_message_id from either copy stays null. Five merge_cases arms and the selftest's run_cases extension. Last changed in 02284ff0be; no deploy; run from the worktree root.",
+      "artifact_covered_by": [
+        "CTam3-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_crossbox_call.py",
+      "kind": "test",
+      "commit_or_etag": "02284ff0be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the writer-and-watcher case reads org/mcp/server.py and org/mcp/inbox-watch.sh; when either is absent from the worktree it prints a SKIP line naming the folder (counted ok, never failed); the pending probe skips the same way when org/ref is absent. Last changed in 02284ff0be; no deploy.",
+      "artifact_covered_by": [
+        "CTam3-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round23_hygiene_b.py",
+      "kind": "test",
+      "commit_or_etag": "596475473f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--merge runs crossbox-call.py merge_cases and prints HYGIENE-MERGE arms=<k>/<n> ok=<bool>; --sparse cuts a temporary sparse worktree with wk-provision.sh (outside the ajb_wk checkouts), runs the crossbox suite in it, removes the worktree, its portal and its temporary branch in a finally, and prints HYGIENE-SPARSE crossbox_cases=<pass>/<total> ok=<bool>. Last changed in 596475473f (suite timeout raised to 200 s); no deploy.",
+      "artifact_covered_by": [
+        "CTam3-AC1",
+        "CTam3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTam3-AC1",
+      "criterion_verbatim": "a null bus id merges and a refused merge writes nothing (base: the test does not exist); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round23_hygiene_b.py --merge",
+      "output_evidence": "HYGIENE-MERGE arms=5/5 ok=True (rc=0; run as timeout 280 from the worktree root on the committed state at fb1ffdefc9 and again at 596475473f; the arm lines before it: ok a-null-bus-id-merges-into-the-sending-copy, ok a-null-bus-id-on-the-receiving-copy-takes-the-reply-bus-id, ok a-merge-of-a-copy-that-fails-validation-writes-nothing, ok a-merged-result-the-validator-refuses-writes-nothing, ok a-conflicting-merge-is-refused-and-writes-nothing).",
+      "denominator": "5 merge arms run: 5 PASS, 0 FAIL, 0 SKIP (arms 1-2 null bus id merges in both directions; arms 3-5 refused merges write nothing, byte-identical in both copies)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTam3-AC2",
+      "criterion_verbatim": "the crossbox suite has no failing case in a sparse worktree (base: one case fails there; the main tree reads 71/71); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round23_hygiene_b.py --sparse",
+      "output_evidence": "HYGIENE-SPARSE crossbox_cases=69/70 ok=True (rc=0; run as timeout 280 from the worktree root on the committed state at 596475473f; the lines before it: HYGIENE-SPARSE-SET org/mcp present=False; skip writer and watcher comparison (7 checks) -- SKIPPED -- SKIP: org/mcp is not in this worktree's sparse set; absent: org/mcp/server.py, org/mcp/inbox-watch.sh; CROSSBOX-TEST cases=70/70 ok=True; the temporary worktree was removed (remove rc=0, branch -D rc=0)).",
+      "denominator": "70 cases in the suite run in the sparse worktree: 69 PASS, 1 SKIP (the 7-check writer and watcher case, org/mcp absent, printed reason), 0 FAIL",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of .tools/crossbox-call.py at 596475473f with the merged result WRITTEN before it is validated (.scratch/crossbox-call-mutant.py, uncommitted scratch) run through merge_cases by .scratch/mutant_run.py. The validator and write order are the only change.",
+      "expected": "arm 4 (a-merged-result-the-validator-refuses-writes-nothing) reads FAIL: the file is rewritten before the refusal",
+      "observed": "MUTANT-MERGE arms=4/5 ok=False; FAIL a-merged-result-the-validator-refuses-writes-nothing (the forced refusal arrives after the write). Arms 1, 2, 3 and 5 pass on the mutant.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the --merge and --sparse runs repeated on the committed state; compared on the last lines. A run made before the suite's bound was raised to 200 s read HYGIENE-SPARSE crossbox_cases=0/0 ok=False (the suite took about 105 s and the 120 s bound ended it); that run is not a result and is superseded by the two runs below.",
+      "observed": "HYGIENE-MERGE arms=5/5 ok=True on both runs at fb1ffdefc9 and 596475473f; HYGIENE-SPARSE crossbox_cases=69/70 ok=True on both runs at 596475473f (each run cut and removed its own temporary worktree; the temporary paths and branch serials differ between runs)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD item: W8-S7 (the fence census writing its own baseline)",
+      "reason": "Not in this cell: the census lives under infra/aws/terraform/shared-infra/tests/, an infra path the evidence law classes WORLD; the worker face carries it to its own cell with research."
+    },
+    {
+      "item": "W79-S2 done-when: the suite reads 50/50 on two boxes whose origin refs differ",
+      "reason": "Measured on one box only (this laptop, sparse and temporary worktrees); the second box was not available to this worker. The suite's denominator is 70 now, not the 50 the row states."
+    },
+    {
+      "item": "The full-worktree run of the writer-and-watcher case (7 checks) in a worktree that holds org/mcp",
+      "reason": "This worktree is sparse and does not hold org/mcp, so the case is skipped here with its printed reason; the main tree was not re-run from this worktree, so its count is not measured in this instance."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W125-S1: the S9121 premise (merge drops a null bus id and refuses after a copy is rewritten) does not reproduce at 4073337a9e; the merge keeps the null and validates before any write; the five arms pin the behaviour. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W125-S2: the W79-S2 failing case reads org/mcp (a folder outside the sparse set), not origin state: the suite reads 64/65 ok=False in a sparse worktree at the base, with one FileNotFoundError. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W125-S3: the order's literal provision invocation (n=125) would name this worktree's own branch wk-NFRA_CTLPLN-125; the test takes a distinct serial (125s<pid>) for its temporary worktree and removes only its own branches. The literal invocation was not run. UNDER_INVESTIGATION."
+  ],
+  "session_log": "the worker session of 0.9.0_WK_NFRA_CTLPLN~125 on 2026-10-15; the session's final message is the WORKER REPORT",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round23_hygiene_b.py --merge",
+      "result": "HYGIENE-MERGE arms=5/5 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round23_hygiene_b.py --sparse",
+      "result": "HYGIENE-SPARSE crossbox_cases=69/70 ok=True (the suite inside: CROSSBOX-TEST cases=70/70 ok=True with one SKIP line)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_crossbox_call.py",
+      "result": "CROSSBOX-TEST cases=70/70 ok=True (one SKIP line: org/mcp absent in this worktree)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/crossbox-call.py --selftest",
+      "result": "CROSSBOX-SELFTEST cases=40/40 ok=True"
+    }
+  ]
+}
