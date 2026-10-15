@@ -223,6 +223,8 @@ def build_store():
     f._p(*addr("account_return_daily", "2026-06-22"), tbl_bytes(returns("2026-06-22", ["OLD1", "OLD2"])))
     f._p(*addr("account_return_daily", "2026-07-10"), tbl_bytes(returns("2026-07-10", accts)))
     f._p(*addr("account_return_daily", "2026-07-13"), tbl_bytes(returns("2026-07-13", accts)))
+    for d_ in ("2026-07-10", "2026-07-13"):  # round 138 re-point: the guarded handler (round 135) reads each used partition's 0.3.0 manifest
+        b_, k_ = addr("account_return_daily", d_); f._p(b_, k_.replace("data.parquet", "manifest.json"), b'{"business_date": "x", "contract_version": "0.3.0", "method_version": 2}')
     f._p("opal-data-portal-v2", "json/benchmarks/model_portfolio_timeseries.json", b"{}")
     return f
 
