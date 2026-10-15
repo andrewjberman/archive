@@ -1,0 +1,18 @@
+{
+  "record": "IRPT_ANLREQ FWD-1 run: cross-library check of the minted login hash (closes the gap named in 0.9.0_WK_IRPT_ANLREQ~149 FWD1_DRIVER_RECORD.json 'bcryptjs=ABSENT' and ~148 FWD1_LOGIN_DRIVER_READ.json 'Cross-library compatibility is not exercised by this read')",
+  "by": "2.0.0_SA_COO~Y2",
+  "at": "2026-10-15T08:45Z",
+  "claim_words": {
+    "MEASURED": "this seat ran it in this session, in an empty scratch directory outside the repository",
+    "NOT_READ": "the bcryptjs version the portal auth handler actually ships (its package.json and node_modules are absent on this box); the two major versions below bracket the question"
+  },
+  "method": "Python bcrypt 5.0.0 hashed a random throwaway string at cost 12 (the same call as fwd1_mint.py: bcrypt.hashpw(raw, bcrypt.gensalt(12))); the hash and the string travelled only by environment variables between the two processes and were never printed, written or logged; node v24.19.0 ran compareSync from bcryptjs 2.4.3 and bcryptjs 3.0.2 (installed with npm into the scratch directory) on the right string and on the string with one character appended.",
+  "result": {
+    "hash_prefix_and_length": "$2b$12$, 60 characters",
+    "bcryptjs_2_4_3": {"right_password": true, "wrong_password": false},
+    "bcryptjs_3_0_2": {"right_password": true, "wrong_password": false}
+  },
+  "reads_as": "A hash written the way fwd1_mint.py writes it verifies under both bcryptjs major versions and refuses a wrong password, so the login side's compare (password.ts:25-26, bcryptjs) is not expected to refuse the minted row on the hash alone.",
+  "does_not_show": "that the live auth handler's own bcryptjs version behaves the same (NOT_READ above); that the minted row passes the handler's other conditions (status, role, origin gate), which AR-y-344 read from source and the run's R0 reads re-check; any live login.",
+  "removal": "the scratch directory sits under this session's scratchpad and holds no secret; no repository file other than this record was written."
+}

@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-244",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "58ab67f3ac",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-244.quantity-read-2026-04-21-what-moved-the-quantities-of-the-flagged-accounts.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~198",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~198/IRPT_DASHBD.TO-DB-b-244.quantity-read-2026-04-21-what-moved-the-quantities-of-the-flagged-accounts.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~198/qty_change_read_r121.py",
+      "kind": "script",
+      "commit_or_etag": "509e394202",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tracked read-only analysis script at 509e394202 (sha256 12dcfeabb2d96967f776b28a931d6d28b554f578795c2090d1af5a0b92e1d4ea, the committed bytes; the record's analysis block carries the same hash); run under python -I from the worktree root with GET only: the gold account_return_daily data.parquet of 2026-04-21 (address from lib/opal_naming.py), the custodian dim_position data.parquet of 2026-04-20 and 2026-04-21 and the custodian fact_trn data.parquet of 2026-04-21, bucket and prefixes read from sources.json; 4 GET calls, 0 writes; writes one counts-only private file and nothing else; no put, copy or delete call, no vendor call, no secret read; ruff clean at py39",
+      "artifact_covered_by": [
+        "DB121-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~198/RD_QTY_CHANGE_0421_R121.json",
+      "kind": "config_data",
+      "commit_or_etag": "509e394202",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of step 6: counts, dates and words only; analysis.sha256 equals the committed script bytes at 509e394202; reads s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0 and s3_reads 4; files_in_repo, served_values_changed, pushed and deployed all false; every step-3 number equals the checker's own recount from the custodian sources at the checker run recorded in this instance",
+      "artifact_covered_by": [
+        "DB121-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB121-3-AC1",
+      "criterion_verbatim": "`DB121-3-AC1` -- `RD_QTY_CHANGE_0421_R121.json` has exactly the form of step 6; `accounts_flagged` equals the flow-guard record's and the checker's recount; every number of step 3 EQUALS the checker's own recount from the custodian sources (read by the checker, GET only) to the unit, including the five top securities in order, the code counts and the rule words; `corporate_action_source` is well formed; the analysis script is tracked, hashed as recorded, names no other firm's place and holds no write call; zero writes, flags false, no long digit run outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_qty.py\" . DB121-3-AC1",
+      "output_evidence": "DB121-3-AC1 PASS (rc 0); the deciding line: OK: quantity read: 943 flagged, 1157 pairs changed over 35 securities and 937 accounts; top security share 0.9819; 2728 trn rows, 1145 changed pairs with a same-day row; every number equals the recount. A repeat run printed the identical line (diff clean, rc 0).",
+      "denominator": "1 of 1 criterion PASS; 943 flagged accounts equal to the flow-guard record and the recount; 5 of 5 top securities in order equal the recount; 8 of 8 by_code keys and their code_rules equal the recount; 4 GET reads, 0 writes",
+      "status": "PASS",
+      "status_reason": "PASS as written on the checker at the worktree HEAD after the script and record were committed at 509e394202 (the checker requires the script to be tracked)",
+      "expect": "DB121-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test: the counts, the rule lookup, one green and ten red record arms (a pairs count off the recount, a top-security count off, accounts_flagged off, a found corporate-action source without a where, a push flag, a long digit run, an extra key, a write count, a write call in the script, another firm's place in the script)",
+      "expected": "the self-test passes the green arm and refuses each red arm",
+      "observed": "selftest: the counts, the rule lookup, one green and ten red record arms behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the checker compared on the criterion's OK line (the recount reads the same custodian sources twice)",
+      "observed": "two runs at the worktree HEAD printed byte-identical output (diff clean): the OK line with the same counts, and DB121-3-AC1 PASS on both, rc 0 and rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Account identifiers, and every client value (balances, values, quantities, positions and every per-account cause)",
+      "reason": "not recorded by design: client data lives only in the private evidence folder; the script, the record and this instance carry counts, dates, public security identifiers, hashes and fund-name words only"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p121_qty.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_qty.py\" . DB121-3-AC1",
+      "result": "PASS rc 0: DB121-3-AC1 PASS (the checker is the issuer's file at the worktree HEAD, read and not edited)"
+    },
+    {
+      "tool": "p121_qty.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_qty.py\" --selftest .",
+      "result": "rc 0: selftest PASS"
+    }
+  ]
+}
