@@ -4,7 +4,7 @@
     {"file": "infra/aws/terraform/investor-reporting/account-return-daily/main.tf", "sha256": "72245428da82e06843715f89dee62536c952792af136891e7c764d24e0ab381b", "kind": "terraform"},
     {"file": "infra/aws/terraform/investor-reporting/account-return-daily/locals.tf", "sha256": "8414bb4980d4773eb6c717ab26e655cafc65b8dc1ae1e87ff53695859d215746", "kind": "terraform"},
     {"file": "infra/aws/terraform/investor-reporting/account-return-daily/lambda.tf", "sha256": "0b834163f2df4d517a43810b483966940ec273570ccd7361eef86e41f5a27141", "kind": "terraform"},
-    {"file": "infra/aws/terraform/investor-reporting/account-return-daily/iam.tf", "sha256": "cdafb357495cfbf1db032e465777ebdf1ec81936cffb484a3505f17ce3d7de51", "kind": "terraform"},
+    {"file": "infra/aws/terraform/investor-reporting/account-return-daily/iam.tf", "sha256": "a8172dac7efd93e55b4ed61e348b83e6ac32f0af6c7e41d4915ee752540971a7", "kind": "terraform"},
     {"file": "infra/aws/terraform/investor-reporting/account-return-daily/schedule.tf", "sha256": "0f8fd4e67d01f734a1d02efdbf7f96789683d4376214dac7a03846347af61c03", "kind": "terraform"}
   ],
   "names": [
@@ -60,13 +60,14 @@
       "ExecutionRoleAssumedByLambdaService",
       "InvokeTheAccountReturnDailyFunctionOnly",
       "ListSilverTablePrefixesOnly",
+      "ListTheOneAccountReturnDailyGoldPrefixOnly",
       "OwnLogStreamOnly",
       "ReadTwoBlackDiamondSilverTablesOnly",
       "SchedulerRoleAssumedBySchedulerService",
       "WriteTheOneAccountReturnDailyGoldPrefixOnly"
     ],
     "no_wildcard": true,
-    "words": "Seven statements, each with explicit actions and derived resources. Execution: list under a prefix condition, read of two silver tables, one put on one gold prefix, own log stream; the function's trust is lambda.amazonaws.com. Scheduler: one invoke of the one function; its trust is scheduler.amazonaws.com. No delete action and no all-resources grant. The handler's default path lists the gold prefix to find the newest landed day, and no statement grants that list; this is recorded as a surprise row, not granted here."
+    "words": "Eight statements, each with explicit actions and derived resources. Execution: list under a prefix condition on the silver bucket, read of two silver tables, list under a prefix condition on the one gold prefix account_return_daily (added by Amendment 1, commit d611d49b94, so the handler's default-path listing is granted), one put on that gold prefix, own log stream; the function's trust is lambda.amazonaws.com. Scheduler: one invoke of the one function; its trust is scheduler.amazonaws.com. No delete action and no all-resources grant."
   },
   "artifact": {
     "entry": "irpt-cot-account-return-daily-lambda",
@@ -82,7 +83,7 @@
     "buckets": "The gold bucket is the registry firm row's bucket field (locals.tf irpt_arc_gold_bucket), and the silver bucket is the declaration's bucket field (locals.tf irpt_arc_silver_bucket).",
     "prefixes": "The silver root is the declaration's monolith plus the derived firm plus the silver tier word (locals.tf irpt_arc_silver_root); the gold prefix is written inline in iam.tf from the address builder's constant segments, because Terraform cannot call lib/opal_naming.py."
   },
-  "words": "A new Terraform root, nothing planned, applied or deployed. Five opal_name calls name the function, the two roles, the execution policy and the schedule; the scheduler role policy is named with the scheduler role's builder name, since the five-name list has no separate name for it. One yang-lambda module: handler.lambda_handler, timeout 900 s (the Lambda ceiling; five days at the round-122 measured 154 s per day on the sibling function is about 770 s), memory 8192 MB (the sibling's measured 4,025 MB peak is 49 percent of it; this function is unmeasured), reserved concurrency 1, and no environment variables. Two silver tables are read and one gold prefix is written; no delete and no wildcard. The schedule is DISABLED. Open: the default-path gold list (surprise rows filed in the channel).",
+  "words": "A new Terraform root, nothing planned, applied or deployed. Five opal_name calls name the function, the two roles, the execution policy and the schedule; the scheduler role policy is named with the scheduler role's builder name, since the five-name list has no separate name for it. One yang-lambda module: handler.lambda_handler, timeout 900 s (the Lambda ceiling; five days at the round-122 measured 154 s per day on the sibling function is about 770 s), memory 8192 MB (the sibling's measured 4,025 MB peak is 49 percent of it; this function is unmeasured), reserved concurrency 1, and no environment variables. Two silver tables are read and one gold prefix is written; no delete and no wildcard. The schedule is DISABLED. The default-path gold list is granted by Amendment 1 (fifth execution statement); surprise row IRPT_DASHBD-D2-W206-S1 is resolved by it.",
   "claim": "inferred",
   "files_in_repo": false,
   "served_values_changed": false,
