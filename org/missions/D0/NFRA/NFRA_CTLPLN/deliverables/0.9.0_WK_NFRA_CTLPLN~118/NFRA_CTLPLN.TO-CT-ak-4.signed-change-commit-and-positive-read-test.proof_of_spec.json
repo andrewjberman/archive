@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ak-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-4.signed-change-commit-and-positive-read-test.md",
+    "group": "OTHER",
+    "vintage_commit": "4d79c7c58c"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~118",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round21.md",
+    "vintage_commit": "4d79c7c58c",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-4.signed-change-commit-and-positive-read-test.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_round21_fwd5_positive_read.py",
+      "kind": "test",
+      "commit_or_etag": "7b95bf924a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only: the aws() guard admits only s3api head-object, list-object-versions and list-objects-v2; every list is paginated by its token and counted client-side. The repository md5 is read from the HEAD blob. --docstring-only was replaced by --ast-identical (ruling on W118-S1). Committed at 7b95bf924a on wk-NFRA_CTLPLN-118; no deploy, no ledger entry, no push.",
+      "artifact_covered_by": [
+        "CTak4-AC1",
+        "CTak4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/diag_sleeve_fix.py",
+      "kind": "script",
+      "commit_or_etag": "461e3f64ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Comment-only signed change: six lines carry a trailing noqa comment for the ruff codes they already had (E402 on lines 3, 4, 7, 8, 9, 10; F401 on line 8). Blob 8d6f273a9e, sha256 971327859b33b43067db744f1a785c08a51b6b75581a1dc8d743ac0a1d83b9b7, md5 c204fd9be3bbfc43346a14b4c71051af, 4251 bytes. ast.dump identical to 387523b64e. Committed alone at 461e3f64ee by safe-commit; no deploy, no ledger entry.",
+      "artifact_covered_by": [
+        "CTak4-AC1",
+        "CTak4-AC2",
+        "CTak4-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTak4-AC1",
+      "criterion_verbatim": "before the deploy, exactly the target differs from S3 and no other top-level gold script does (base: the file is untracked and has no --pre flag); report the whole FWD5-PRE line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --pre",
+      "output_evidence": "FWD5-PRE target=diag_sleeve_fix.py versions=1 repo_blob=8d6f273a9e repo_md5=c204fd9be3bbfc43346a14b4c71051af s3_etag=56cb170f95c0b112a36a0ee3973d5473 differs=True others_differ=0 ok=True (rc=0; run as timeout 280 python .tools/tests/test_round21_fwd5_positive_read.py --pre from the worktree root on the committed state at 7b95bf924a). Preceding lines: 'versions: 1 exact-key version(s) of 1 page(s)'; 'others tally: EQUAL=68 (denominator 68)'.",
+      "denominator": "68 of 68 other top-level gold scripts EQUAL to S3, 0 differ, 0 skipped; target differs=True (repo md5 c204fd9b differs from the S3 ETag 56cb170f)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak4-AC2",
+      "criterion_verbatim": "the signed change is comment-only: the AST of the script is identical before and after (base: no such flag); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --ast-identical",
+      "output_evidence": "AST-IDENTICAL ast_identical=True (rc=0; run as timeout 280 from the worktree root on the committed state at 7b95bf924a). Preceding line: 'compared data/black_diamond/scripts/gold/diag_sleeve_fix.py: before=387523b64e (parent) at=461e3f64ee (last commit touching the file)'.",
+      "denominator": "1 of 1 comparison: the one commit that changed the script, against its parent",
+      "status": "PASS",
+      "expect": "ast_identical=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak4-AC3",
+      "criterion_verbatim": "the edited script still compiles (base: it compiles; a control); report the output.",
+      "method": "command",
+      "invocation": "python -m py_compile data/black_diamond/scripts/gold/diag_sleeve_fix.py && echo PARSE-OK",
+      "output_evidence": "PARSE-OK (rc=0; run from the worktree root on the committed blob 8d6f273a9e, commit 461e3f64ee).",
+      "denominator": "1 of 1 file compiled",
+      "status": "PASS",
+      "expect": "PARSE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The read test's --ast-identical instrument (ast.dump compare) run by .scratch/control_ac2.py (uncommitted scratch, not in any deliverable) on (a) the real pair 387523b64e vs 461e3f64ee and (b) the same pair with one code token changed in the new blob (opal-data-bd -> opal-data-bx).",
+      "expected": "(a) True (comments carry no AST); (b) False (a code-token change must not pass as comment-only)",
+      "observed": "(a) REAL comment-only pair: ast_identical=True; (b) MUTANT code-token pair: ast_identical=False",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the --ast-identical mode run twice on the committed state 7b95bf924a (no AWS call); compared on the whole output",
+      "observed": "both runs print 'AST-IDENTICAL ast_identical=True'",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W118-S1: the commit gate refuses the one-line docstring edit on seven ruff findings the unmodified file already carries (E402 x6, F401 numpy); the bare string on line 2 is not a module docstring by Python's definition. Disposition by the issuer's ruling: comment-only noqa commit (461e3f64ee) and --ast-identical in place of --docstring-only. BLOCKING, UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W118-S2: the ruled CTak4-AC2 order is committed on box/laptop at 9b2702a5a5 only; this branch cut earlier holds the pre-amendment order, so proof-of-spec-check grades the instance as INVALID (invocation-alignment[CTak4-AC2]). BLOCKING, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~118/NFRA_CTLPLN.TO-CT-ak-4.signed-change-commit-and-positive-read-test.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~118 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --pre",
+      "result": "FWD5-PRE target=diag_sleeve_fix.py versions=1 repo_blob=8d6f273a9e repo_md5=c204fd9be3bbfc43346a14b4c71051af s3_etag=56cb170f95c0b112a36a0ee3973d5473 differs=True others_differ=0 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --ast-identical",
+      "result": "AST-IDENTICAL ast_identical=True"
+    }
+  ]
+}
