@@ -1,0 +1,49 @@
+{
+ "base_commit": "e9c48c49b711bc7eb18723dad69f034547d6715f",
+ "read_date": "2026-10-15",
+ "method": "Run from the worktree root in this order. First, candidate: the committed IB-pr-595 transplant files for 49financial (holdings_snapshot.py and publication.py, checked against the sha256 values IB-pr-595's record names) were written into a detached worktree of the minting pin outside the repository (sparse checkout disabled there); the diff of commit 0a745b842b for holdings_snapshot.py (the three ABSENT-AT-SOURCE-D spans) was applied to the transplanted file with git apply after git apply --check; the result was verified by stripping every D span and comparing the rest with the transplant byte for byte, comparing the D spans with HEAD's, and testing for the one-date bypass and the CUSIP key; the two candidate files were written under deliverables/addendum/49financial/. Second, firm: the candidate bundle was built twice by the minting pin's safe_deploy_core build_bundle_payload (BUILD ONLY, no upload function called), the live bundle was read with s3api head-object and get-object (read only) and compared member by member with the candidate, and six offline test files were copied from HEAD and run with pytest on the candidate tree (the one-date bypass test was not run). Third, assemble wrote the record. Nothing was uploaded, minted, deployed, signed or written to AWS.",
+ "claim": "measured",
+ "firm": "49financial",
+ "minting_pin": "b1d354cfc9341168a3b4c316a344876ce0049b97",
+ "transplant_ref": {
+  "candidate_bundle_sha256": "d2eaf3056c1ddefd2a4a584098cb1a208558ec9238dd5f37cd0f8214ba4d7be6"
+ },
+ "live_bundle_sha256": "bce6e936c2748772e9bf978a9f98f2127933790d5623ecd35569c83aa78fbaa7",
+ "candidate_bundle_sha256": "32d6dfcb9bd8aa83188821264dc3fa008422ae1565933eb32411148f74b2409d",
+ "members_total": 46,
+ "members_equal_to_live": 44,
+ "cusip_port_present": true,
+ "changed_members": [
+  {
+   "repo_path": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+   "artifact": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~442/addendum/49financial/holdings_snapshot.py",
+   "sha256_candidate": "f88185cfef9493edc0861e0899d9e25f90ebb59f00b84197178fa52f86dbc0c4"
+  },
+  {
+   "repo_path": "infra/aws/lambda/investor-reporting/holdings/publication.py",
+   "artifact": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~442/addendum/49financial/publication.py",
+   "sha256_candidate": "cfe39832f9e9869dacc05e95055485f6d436800eda5eb9904d4ad54698182151"
+  }
+ ],
+ "d_spans": {
+  "count": 3,
+  "equal_to_head": true,
+  "diff_lines_outside_spans": 0
+ },
+ "tests": {
+  "passed": 96,
+  "failed": 0
+ },
+ "notes": [
+  "Facts and their basis: the transplant files are IB-pr-595's committed 49financial files, checked against the sha256 values in its record before use; the D spans are commit 0a745b842b's three insertions, applied by git apply after a clean git apply --check (3 hunks, 0 conflicts).",
+  "Measured here: 3 D spans in the candidate equal HEAD's three spans text for text; stripping them leaves the signed transplant byte for byte; 0 lines differ outside the spans; the one-date bypass is absent and cusip_key is present.",
+  "Not read and not run: no upload, mint, publish, deploy, sign-in or vendor call was made; the live bundle was read only with head-object and get-object; test_holdings_bypass_one_date.py was not run because it tests the bypass that is not shipped. Sparse directories: data/assets/scripts/gold/investor_reporting/ was added to the base worktree (local, never committed); the pin is a full checkout outside the repository.",
+  "Pin tree state: the minting pin's index had 36 entries whose line endings differ from its .gitattributes eol=lf rule, so git status lists them before any change; they are not bundle changes and the status comparison in this run was taken against that baseline, adding only the two candidate files."
+ ],
+ "functions_invoked": 0,
+ "sign_ins_made": 0,
+ "aws_writes_made": 0,
+ "rows_written": 0,
+ "figures_written": 0,
+ "vendor_requests_sent": 0
+}
