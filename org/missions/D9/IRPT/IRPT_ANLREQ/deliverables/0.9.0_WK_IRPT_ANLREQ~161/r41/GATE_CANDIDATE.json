@@ -1,0 +1,95 @@
+{
+  "cell": "AR-y-364",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-364",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~161",
+  "base_candidate_sha": "a168015bdd46d64cbf82e1b6c118cd06f304ed98",
+  "commit": "50db1eb4ad2b7063800c0757e30520462af4d2c3",
+  "branch": "cand/dell2/anlreq-filing-decision-tree-gate",
+  "branch_state": "LOCAL only; never pushed",
+  "files_changed": [
+    {"path": "src/pages/TicketCenter/analysisRequest.ts", "change": "modified", "insertions": 18, "deletions": 6, "what": "filingHints reads the finding code (exact TICKER_NOT_FOUND) and no longer starts from proxyableFindings; proxyableFindings import removed"},
+    {"path": "src/pages/TicketCenter/__tests__/filing-tree-gate.test.tsx", "change": "added", "insertions": 87, "deletions": 0, "what": "the six AR-y-364 cases (a) to (f)"},
+    {"path": "src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx", "change": "modified", "insertions": 53, "deletions": 0, "what": "re-pin: a post-r33 arm added beside each NAME_PROXY arm"},
+    {"path": "src/pages/TicketCenter/__tests__/filing-hint.test.tsx", "change": "modified", "insertions": 51, "deletions": 0, "what": "re-pin: a post-r33 arm added beside each NAME_PROXY arm"}
+  ],
+  "diff_stat": "git -C portal diff --stat a168015b cand/dell2/anlreq-filing-decision-tree-gate: 4 files changed, 209 insertions(+), 6 deletions(-)",
+  "prospect_ts": "UNTOUCHED: no diff under src/api or src/pages/InvestorReporting (scope_check.py)",
+  "tests": {
+    "passed": 142,
+    "failed": 0,
+    "folders": ["src/pages/TicketCenter"],
+    "new_file": {"path": "src/pages/TicketCenter/__tests__/filing-tree-gate.test.tsx", "passed": 6, "failed": 0},
+    "command": "bun test src/pages/TicketCenter (run from the portal worktree)",
+    "note": "142 is the whole folder after the change, the six new cases included; the folder had 136 cases before the change."
+  },
+  "before_arm": {
+    "run": "bun test src/pages/TicketCenter/__tests__/filing-tree-gate.test.tsx on a168015b with the new file and NO change to analysisRequest.ts",
+    "summary": "2 pass, 4 fail, Ran 6 tests across 1 file",
+    "passing": ["(a)", "(e)"],
+    "failing": ["(b)", "(c)", "(d)", "(f)"],
+    "why_each_fails": {
+      "(b)": "filingHints returns [] for a finding whose actions are ACCEPT_SUGGESTION, REPLACE_FILE, REPLACE_TICKER, FILE_UNRESOLVED (no NAME_PROXY)",
+      "(c)": "filingHints returns [] for REPLACE_FILE, REPLACE_TICKER, FILE_UNRESOLVED, so no Replace and No item renders",
+      "(d)": "filingHints returns [] for an absent actions member",
+      "(f)": "the same finding without NAME_PROXY yields no hint: withoutProxy.length is 0, expected 1"
+    }
+  },
+  "after_arm": {
+    "run": "bun test src/pages/TicketCenter/__tests__/filing-tree-gate.test.tsx on 50db1eb4",
+    "summary": "6 pass, 0 fail, Ran 6 tests across 1 file"
+  },
+  "repinned": [
+    {"file": "filing-decision-tree.test.tsx", "case": "(a) Did you mean and three buttons", "before": "pinned the NAME_PROXY arm only (suggested fixture)", "now": "both arms: the NAME_PROXY arm unchanged, plus the r33 arm (Did you mean ACME1, Yes / Replace / No)"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(b) Yes re-posts the same upload", "before": "pinned Yes through the NAME_PROXY arm only", "now": "plus the r33 arm: Yes gives { ACME -> ACME1, kind yes }"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(c) Replace then Check", "before": "pinned Replace through the NAME_PROXY arm only", "now": "plus the r33 arm: Replace and Check give { ACME -> ACME2, kind replace }"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(d) blank replacement refused", "before": "pinned the refusal through the NAME_PROXY arm only", "now": "plus the r33 arm: the same refusal, nothing sent"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(e) No gives the equal pair", "before": "pinned No through the NAME_PROXY arm only", "now": "plus the r33 arm: noChoice gives { ACME -> ACME, kind no } and the kept line shows"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(f) no suggestion gives Replace and No", "before": "pinned the NAME_PROXY arm only", "now": "plus the r33 arm: Replace and No only"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(g) TICKER_DATA_NOT_ENTITLED shows no tree", "before": "its fixture carried NAME_PROXY", "now": "plus the r33 arm: the same notice with actions REVIEW yields no hint"},
+    {"file": "filing-decision-tree.test.tsx", "case": "(h) no forbidden word in any state", "before": "states built from the NAME_PROXY arm", "now": "plus two post-r33 states (a suggested tree, a no-suggestion tree kept at ZZZZ), no forbidden word"},
+    {"file": "filing-hint.test.tsx", "case": "(a) filingHints returns the two items", "before": "pinned the NAME_PROXY fixtures only", "now": "plus the r33 arm: the same two items (toEqual the NAME_PROXY result)"},
+    {"file": "filing-hint.test.tsx", "case": "(b) swaps never shown as the suggestion", "before": "pinned the NAME_PROXY fixtures only", "now": "plus the r33 arm: suggestion null without a suggestion, ACME1 with one, SWP1 never carried"},
+    {"file": "filing-hint.test.tsx", "case": "(c) Yes re-posts the same upload", "before": "pinned the NAME_PROXY fixture only", "now": "plus the r33 arm: the same one correction on the re-post"},
+    {"file": "filing-hint.test.tsx", "case": "(e) the block for staff and partner", "before": "pinned the NAME_PROXY fixture only", "now": "plus the r33 arm: the same three buttons in both forms"},
+    {"file": "filing-hint.test.tsx", "case": "(f) no proxy input, no swap list at the form", "before": "pinned the NAME_PROXY fixture only", "now": "plus the r33 arm: swap list never shown"},
+    {"file": "filing-hint.test.tsx", "case": "(g) a kept symbol never replaced without a press", "before": "pinned the NAME_PROXY fixture only", "now": "plus the r33 arm: no correction sent without a press"},
+    {"file": "filing-hint.test.tsx", "case": "(d) No gives the equal pair", "before": "hand-built FilingHint, no NAME_PROXY fixture", "now": "unchanged: no fixture carries NAME_PROXY, so no arm was needed"}
+  ],
+  "typecheck": {"command": "bun run typecheck (in the portal worktree, bounded timeout 120)", "rc": 0, "output": "$ tsc -b --noEmit (no diagnostics printed)"},
+  "checks": {
+    "AR364-y-AC1": "PORTAL-TESTS-OK 6 new, 142 folder, 0 failed (rc 0; run twice, identical)",
+    "AR364-y-AC2": "MUTANT-FIRES 4 of 6 cases fail under the proxyableFindings gate (rc 0 from mutant_check; failing: b,c,d,f); portal file restored, sha256 verified",
+    "AR364-y-AC3": "SCOPE-OK 4 paths, all under src/pages/TicketCenter/; src/api and src/pages/InvestorReporting diff empty"
+  },
+  "notice_read": {
+    "question": "Where the Ticket Center form shows the findings of a NORMALIZED answer answer.portfolio.findings, and whether a TICKER_DATA_NOT_ENTITLED NOTICE would be visible to the filer today",
+    "answer": "It would NOT be visible. The Ticket Center never reads a NORMALIZED answer's portfolio member: zero .portfolio reads in portal/src/pages/TicketCenter outside __tests__. fileAnalysisRequest (analysisRequest.ts lines 376-395) checks state NORMALIZED and input_id, creates the ticket and returns { filed: true, ticket } (line 395); result.portfolio is not read. On the filed path the form shows stepLines (analysisRequest.ts lines 596-603: Upload done, Ticket filed, Analysis, record) and the notice set at TicketCenter.tsx lines 390-397, none of which carries a portfolio finding. The only reader is noticeDescriptions (prospect.ts line 112), called at ProspectComposer.tsx line 356 in the Investor Reporting composer, which shows the NOTICE words under its upload result.",
+    "bytes_read": [
+      "portal/src/pages/TicketCenter/analysisRequest.ts@50db1eb4 lines 347-397 (fileAnalysisRequest) and 596-603 (stepLines)",
+      "portal/src/pages/TicketCenter/TicketCenter.tsx@50db1eb4 lines 370-400 (filing path and setNotice) and 604-607 (UploadFindings)",
+      "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx@50db1eb4 lines 252-299 (UploadFindings: finding lines, then the tree)",
+      "portal/src/pages/InvestorReporting/contracts/wire/AnalysisUploadResult.ts@a168015b lines 12-30 (portfolio is an optional record)",
+      "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx@a168015b line 356",
+      "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts@a168015b lines 108-118 (noticeDescriptions: severity NOTICE only)"
+    ],
+    "smallest_change_not_made": "Carry noticeDescriptions(result.portfolio?.findings) (exported by prospect.ts line 112; import, no edit to prospect.ts) into the filed outcome in fileAnalysisRequest (a notices field on the filed variant, set at analysisRequest.ts line 395), and render those lines beside stepLines in TicketCenter.tsx near line 390. One field, one render; the composer is not touched."
+  },
+  "what_a_person_sees": {
+    "after_r33_TICKER_NOT_FOUND": "On a NEEDS_CORRECTION answer the form shows the message 'Review required: ... Nothing was filed.', the finding line, and under it the tree item: 'ACME was not found.' with Replace and No, or 'Did you mean ACME1? (row 3: ACME)' with Yes, Replace and No when the door sent a suggestion. Pressing No shows 'Opal Staff will manage the replacement.' This is established by the static renders and the mounted presses in the test files, not by a rendered page.",
+    "after_r33_other_codes": "A TICKER_DATA_NOT_ENTITLED finding on a NEEDS_CORRECTION answer shows its own description line and no button (case (e) and filing-decision-tree (g)).",
+    "NORMALIZED_NOTICE": "A NOTICE in portfolio.findings of a NORMALIZED answer shows nothing on the Ticket Center form; the ticket is filed with 'Upload: done.' and 'Ticket: <id> filed.' (see notice_read)."
+  },
+  "claim": "The tree is gated on the finding code TICKER_NOT_FOUND. It shows for that code under the pre-r33 NAME_PROXY list, under the r33 list with and without a suggestion, and under an absent actions member; it never shows for another code. prospect.ts is untouched. Nothing is pushed. The Ticket Center filer does not see a NORMALIZED NOTICE today.",
+  "not_read": [
+    "the live door: no live call; whether it sends NAME_PROXY today is not read",
+    "r33's real findings: message 8717 is not in this worktree; the post-r33 action list is taken from the cell text",
+    "the rendered page: all states are static renders (renderToStaticMarkup) or happy-dom presses; no browser",
+    "the workspace ` M portal` pointer: not committed",
+    "the Investor Reporting composer's behaviour after this change: not touched and not run"
+  ],
+  "not_done": [
+    "no push of any branch, no deploy, no live call",
+    "the notice fix in step 5 was not made (the cell says read only)"
+  ],
+  "rows_filed": ["IRPT_ANLREQ-D2-W161-S1", "IRPT_ANLREQ-D2-W161-S2"]
+}
