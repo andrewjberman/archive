@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ck-2",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ck-2.price-the-move-per-account.md",
+    "group": "OTHER",
+    "vintage_commit": "5d854766e7"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~178",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round89.md",
+    "vintage_commit": "5d854766e7",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ck-2.price-the-move-per-account.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~178/MOVE_PRICED_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "532ac27185",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The measured-state record, committed at 532ac27185: measured false, reason NO_DATA_DIR. No figure, no S3 object, no served value.",
+      "artifact_covered_by": ["CB89ck2-AC1", "CB89ck2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB89ck2-AC1",
+      "criterion_verbatim": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~178/MOVE_PRICED_RECORD.json',encoding='utf-8'));m=d['measured'];print('MOVE-PRICED measured=%s' % m + ((' active=%d blank_days=%d of_active=%d active_touched=%d interim_equal=%s'%(d['accounts']['active'],d['blank']['account_days_blanked'],d['blank']['of_which_active'],d['blank']['active_accounts_touched'],d['control']['interim_tables_equal_pre_change'])) if m else ' reason=%s'%d['reason']))\"  ->  ^MOVE-PRICED measured=(True active=\\d+ blank_days=\\d+ of_active=\\d+ active_touched=\\d+ interim_equal=True|False reason=NO_DATA_DIR)$",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~178/MOVE_PRICED_RECORD.json',encoding='utf-8'));m=d['measured'];print('MOVE-PRICED measured=%s' % m + ((' active=%d blank_days=%d of_active=%d active_touched=%d interim_equal=%s'%(d['accounts']['active'],d['blank']['account_days_blanked'],d['blank']['of_which_active'],d['blank']['active_accounts_touched'],d['control']['interim_tables_equal_pre_change'])) if m else ' reason=%s'%d['reason']))\"",
+      "output_evidence": "MOVE-PRICED measured=False reason=NO_DATA_DIR",
+      "denominator": "1 record; the cell states that no default run exists (CB-ck-1 real_run: data_dir_found false), so no figure is measured",
+      "status": "PASS",
+      "status_reason": "The printed line matches the expect pattern's NO_DATA_DIR branch: the cell states plainly that no data run exists, as the criterion allows."
+    },
+    {
+      "criterion_id": "CB89ck2-AC2",
+      "criterion_verbatim": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~178/MOVE_PRICED_RECORD.json',encoding='utf-8'));b=d.get('blank') or {};bands=sum((b.get('active_share_bands') or {}).values());ok=(not d['measured']) or (bands==d['accounts']['active'] and b['of_which_active']<=b['account_days_blanked'] and d['securities_held']['active_only']+d['securities_held']['inactive_only']+d['securities_held']['both']==d['securities_held']['total']);print('MOVE-PRICED-SUMS consistent=%s'%ok)\"  ->  MOVE-PRICED-SUMS consistent=True",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~178/MOVE_PRICED_RECORD.json',encoding='utf-8'));b=d.get('blank') or {};bands=sum((b.get('active_share_bands') or {}).values());ok=(not d['measured']) or (bands==d['accounts']['active'] and b['of_which_active']<=b['account_days_blanked'] and d['securities_held']['active_only']+d['securities_held']['inactive_only']+d['securities_held']['both']==d['securities_held']['total']);print('MOVE-PRICED-SUMS consistent=%s'%ok)\"",
+      "output_evidence": "MOVE-PRICED-SUMS consistent=True",
+      "denominator": "1 record; the sums are vacuous by construction when measured is false, and the check is short-circuited on that branch (the record states this)",
+      "status": "PASS",
+      "status_reason": "The printed line equals the expect line. The sums are not evidence of counts here because no counts exist; the record's not_established list says so."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; the measurement was not run, so no fault is seeded.",
+      "expected": "not applicable: the order names none",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "description": "The AC1 invocation run twice on the same record.",
+      "method": "the AC1 python -c invocation, twice",
+      "observed": "MOVE-PRICED measured=False reason=NO_DATA_DIR (both runs)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "CB-ck-2 items 2 and 3: the two builds (interim and blank) over a default run's data, and the counts", "reason": "NO_DATA_DIR: CB-ck-1 real_run reads data_dir_found false; both default run directories are absent on this box. Per the order's item 1 the cell stops and does not build a run itself."},
+    {"item": "CB-ck-2 item 3 control (interim tables equal the pre-change build)", "reason": "Needs a default run's data; not run."},
+    {"item": "CB-ck-2 item 4 record figures (accounts, interim and blank counts, grade changes, share bands, securities split)", "reason": "Not measured; the record carries nulls and states why."}
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~178/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -c (AC1 invocation)",
+      "invocation": "python -c \"...print('MOVE-PRICED measured=%s' ...)\" (the order's AC1 text)",
+      "result": "MOVE-PRICED measured=False reason=NO_DATA_DIR"
+    },
+    {
+      "tool": "python -c (AC2 invocation)",
+      "invocation": "python -c \"...print('MOVE-PRICED-SUMS consistent=%s'%ok)\" (the order's AC2 text)",
+      "result": "MOVE-PRICED-SUMS consistent=True"
+    }
+  ]
+}
