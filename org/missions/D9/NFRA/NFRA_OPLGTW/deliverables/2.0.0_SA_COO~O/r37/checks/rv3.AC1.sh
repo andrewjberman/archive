@@ -3,7 +3,7 @@
 #  - app/tools.py declares the ten tool functions as @mcp.tool() registrations;
 #  - tests/test_entitlement_admin.py passes whole (9 of 9), which includes the registry count pin at 105.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
-names="etfs_get_peer_group etfs_get_rival_fund_holdings etfs_who_holds etfs_get_security_reference etfs_get_coverage etfs_get_fund_trades etfs_get_fund_flows etfs_compare_peers etfs_get_research_notes etfs_get_rival_page_status"
+names="etfs_get_peer_group_members etfs_get_rival_fund_holdings etfs_who_holds etfs_get_security_reference etfs_get_coverage etfs_get_fund_trades etfs_get_fund_flows etfs_compare_peers etfs_get_research_notes etfs_get_rival_page_status"
 reg=0; for n in $names; do grep -qE "^def $n\(" "$GW/app/tools.py" && reg=$((reg+1)); done
 echo "tools registered in app/tools.py: $reg of 10"
 out=$(cd "$GW" && timeout 110 python -m pytest tests/test_entitlement_admin.py -q -p no:cacheprovider --color=no 2>&1 | tr -d ''); r0=$?
