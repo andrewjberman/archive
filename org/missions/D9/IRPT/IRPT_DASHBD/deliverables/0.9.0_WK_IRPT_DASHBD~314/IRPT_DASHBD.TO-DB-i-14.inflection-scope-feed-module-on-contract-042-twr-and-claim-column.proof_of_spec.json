@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-14",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json",
+    "group": "OTHER",
+    "vintage_commit": "db3101651a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "b73f58d17e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-14.inflection-scope-feed-module-on-contract-042-twr-and-claim-column.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~314",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~314/DB_I_14_RUN_R127.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_adapter.py",
+      "kind": "script",
+      "commit_or_etag": "b80bd23364",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure adapter (standard library only, no I/O) flipped to contract 0.4.2: a PRESENT Orion row writes return_basis TWR, the claim market_value_eod_claim is measured or inferred, an ABSENT row carries a null claim. VENDOR_REPORTED removed. Not deployed; no AWS, no network.",
+      "artifact_covered_by": ["DBI127-1-AC1", "DBI127-1-AC2", "DBI127-1-AC3"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_run.py",
+      "kind": "script",
+      "commit_or_etag": "b80bd23364",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Wrapper writes the claim as a declared column of the table; refuses with a count (1) and writes nothing when the contract file does not declare it; contract_version read from the file; claim_placement retired from the run record. Local writes under out_dir only; no AWS or network import.",
+      "artifact_covered_by": ["DBI127-1-AC1", "DBI127-1-AC2", "DBI127-1-AC3"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "kind": "test",
+      "commit_or_etag": "b80bd23364",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "35 tests pass under python -I -m pytest; validator is row_problems from test_account_return_contract_042.py; names test_mutant_weekend_compounding_is_caught.",
+      "artifact_covered_by": ["DBI127-1-AC3"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "kind": "test",
+      "commit_or_etag": "b80bd23364",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "28 tests pass under python -I -m pytest; the claim-in-the-table test, the copy-without-the-column refusal and the W311-S3 dropped-day line are in; names test_mutant_dropping_the_incomplete_day_rule_is_caught.",
+      "artifact_covered_by": ["DBI127-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~314/DB_I_14_RUN_R127.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-14 session record: the code commit, the three checker results with their determinism, the golden counts through the wrapper, the test counts and the mutant test names. Counts and words only; pushed and deployed both false.",
+      "artifact_covered_by": ["DBI127-1-AC1", "DBI127-1-AC2", "DBI127-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI127-1-AC1",
+      "criterion_verbatim": "the golden through the wrapper: 17 PRESENT rows (TWR, PRESENT, source orion, the claim measured on the window's last day and inferred otherwise) and 11 ABSENT rows in the table (claim null), the run record (contract_version read from the contract file, no claim_placement key, the claim counts, trading_days_unaccounted 0). Base: FAIL on trunk (the merged module writes VENDOR_REPORTED).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r127/p127_run042.py\" . DBI127-1-AC1",
+      "output_evidence": "DBI127-1-AC1 PASS",
+      "denominator": "1 of 1 criterion PASS. 28 of 28 (account, trading day) rows: 17 PRESENT and 11 ABSENT over 4 partitions, 7 accounts, 4 trading days; claim counts inferred 13 and measured 4; trading_days_unaccounted 0; claim_placement key absent. Deterministic over two runs.",
+      "status": "PASS",
+      "expect": "DBI127-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBI127-1-AC2",
+      "criterion_verbatim": "every written partition holds only its own date, its fields and types equal the contract's declared fields (the claim is one of them) and hash to schema_hash_with_optional, every row passes the 0.4.2 validator, the wrapper imports no AWS or network module, names no s3:// address and types no contract version, and nothing is written outside the output directory. Base: FAIL on trunk.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r127/p127_run042.py\" . DBI127-1-AC2",
+      "output_evidence": "DBI127-1-AC2 PASS",
+      "denominator": "1 of 1 criterion PASS. 4 partitions, each with 25 declared fields (19 columns and 6 optional) hashing to schema_hash_with_optional; 28 of 28 rows pass row_problems under the 0.4.2 contract; 0 forbidden imports; 0 s3:// literals; 0 typed contract versions; 1 output directory and no file outside it.",
+      "status": "PASS",
+      "expect": "DBI127-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DBI127-1-AC3",
+      "criterion_verbatim": "the repairs still hold (edge-day fixtures read 0 unaccounted, the five refusals carry a count and write nothing, the 299-day chain equals the source product to 1e-12), an account seen only on a dropped day is still counted (W311-S3), and the adapter and wrapper test files together pass at least 30 tests and name a mutant test. Base: FAIL on trunk (4 module tests are red).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r127/p127_run042.py\" . DBI127-1-AC3",
+      "output_evidence": "DBI127-1-AC3 PASS",
+      "denominator": "1 of 1 criterion PASS. Tests: adapter file 35 passed, wrapper file 28 passed, 63 in total against a floor of 30. Two mutant tests named (test_mutant_weekend_compounding_is_caught, test_mutant_dropping_the_incomplete_day_rule_is_caught). Base measured in a scratch copy of trunk: 1 failed in the adapter file and 3 failed in the wrapper file, 4 in total.",
+      "status": "PASS",
+      "expect": "DBI127-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two in-repo mutants, each a copy of a module with one rule replaced and run against the same fixtures: the adapter compounding loop with the product multiply replaced by an assignment, and the wrapper complete-day line replaced by a line that keeps every row.",
+      "expected": "each mutant's output differs from the real output (the compounded return by more than 1e-3; the PRESENT rows and their count by a difference)",
+      "observed": "test_mutant_weekend_compounding_is_caught and test_mutant_dropping_the_incomplete_day_rule_is_caught both pass in the test runs: the mutant rows differ from the real rows.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of the three checker criteria run twice on the same committed tree; the two whole outputs compared with cmp.",
+      "observed": "identical output on both runs for DBI127-1-AC1, DBI127-1-AC2 and DBI127-1-AC3; each run rc=0 and last line PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Landing the table and reading the real silver",
+      "reason": "Outside this cell: the order is fixtures only, with no AWS and no network. The wrapper is exercised on synthetic frames."
+    },
+    {
+      "item": "The commit-time client-data account-id scan of commit b80bd23364",
+      "reason": "The hashed account-id list was absent on this device, so the commit gate printed WARN and did not scan for account ids. The committed files hold synthetic values only: no run of 8 or more digits in the four files."
+    },
+    {
+      "item": "Pushing the code commit and the instance commit",
+      "reason": "Not in the order; both commits stay LOCAL on the worktree branch wk-IRPT_DASHBD-314."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "python -I -m pytest",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py  and  the same on test_inflection_scope_feed_run.py",
+      "result": "adapter file 35 passed; wrapper file 28 passed; rc 0 on both"
+    },
+    {
+      "tool": "p127_run042.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r127/p127_run042.py . <DBI127-1-AC1|AC2|AC3>",
+      "result": "all three PASS, rc 0; each output identical across two runs"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_DASHBD~314 <0.9.0_WK_IRPT_DASHBD~314@opal.agent>\" -F <msgfile> -- the four module files",
+      "result": "commit b80bd23364 on wk-IRPT_DASHBD-314 (LOCAL); commit-gate, naming, to-pipeline and surprise-row gates clean; client-data hashed list WARN (absent on this device)"
+    }
+  ]
+}
