@@ -179,6 +179,7 @@ def main():
                 present |= {str(i) for i in (part.get("accounts_with_positions") or ())}
     complete = evidence_complete(evidence, hs)
     classes = Counter()
+    acct_class = {}
     for acct in lost:
         if acct in exempt_ids:
             cls = CLASSES[0]
@@ -191,6 +192,7 @@ def main():
         else:
             cls = CLASSES[4]
         classes[cls] += 1
+        acct_class[acct] = cls
     classes_full = {k: classes.get(k, 0) for k in CLASSES}
     total, exempted = len(lost), len(exempt_ids)
     print("OK: lost_accounts total=%d exempted=%d remaining=%d classes=%s exempt_agrees_with_gate=%s evidence_complete=%s"
@@ -208,6 +210,49 @@ def main():
     print("OK: classified_security_lost total=%d served_placed_total=%d candidate_unclassified_total=%d served_unplaced_total=%d"
           % (len(lost_class), len(placed), len(now_unclassified), len(unplaced)))
     print("OK: served asset_class of the classified_security_lost securities (distinct, counts): %s" % dict(census))
+
+    # CONDITIONS DETAIL (AMENDMENT 1). account_lost trips on the lost accounts the gate does not close or exempt; each is
+    # mapped to source or join by its class (in_source_with_positions is join; closed_by_directory and exempted are source;
+    # evidence_incomplete and other are undetermined). classified_security_lost trips on the securities; each is join when
+    # the candidate-day custody positions still carry its identifier with a holding, source when they do not, and
+    # undetermined when its identifier namespace is not CUSIP, TICKER or ISIN or the partition is unreadable.
+    ACCT_CAUSE = {"in_source_with_positions": "join", "closed_by_directory": "source", "exempted_absent_at_source": "source",
+                  "evidence_incomplete": "undetermined", "other": "undetermined"}
+    tripped_accounts = lost_gate - exempt_ids
+    acct_cause = Counter(ACCT_CAUSE[acct_class[a]] for a in tripped_accounts)
+    custody_day = (snapshot.get("clocks") or {}).get("custody_as_of")
+    cust_frame = None
+    if custody_day:
+        cust_frame = hs._absent_partition(inputs, holdings_49f.SOURCE_BUCKET,
+                                          holdings_49f.SCHWAB_PREFIX + "dim_position/date=%s/data.parquet" % custody_day)
+    COLUMN = {"CUSIP": "cusip", "TICKER": "ticker_symbol", "ISIN": "isin"}
+    cells = ("market_value_settled_unsettled", "quantity_settled_unsettled")
+    sec_cause = Counter()
+    for key in lost_class:
+        ns, _sep, value = key.partition(":")
+        col = COLUMN.get(ns)
+        if col is None or cust_frame is None or col not in cust_frame.columns:
+            sec_cause["undetermined"] += 1
+            continue
+        rows = cust_frame[cust_frame[col].map(holdings_49f._text) == value]
+        held = any(hs._absent_row_present([r[c] for c in cells], null_present=True) for r in rows.to_dict("records"))
+        sec_cause["join" if held else "source"] += 1
+    acct_split = {k: acct_cause.get(k, 0) for k in ("source", "join", "undetermined")}
+    sec_split = {k: sec_cause.get(k, 0) for k in ("source", "join", "undetermined")}
+    conditions_detail = [
+        {"condition": "account_lost", "tripped": len(tripped_accounts), "denominator": len(served["account_ids"]),
+         "threshold": ("a served account the candidate does not carry, that the directory does not close and the absent_at_source "
+                       "exemption does not clear, raises account_lost unless the directory marks no closures"),
+         "value": "%d of %d served accounts is lost after the exemption" % (len(tripped_accounts), len(served["account_ids"])),
+         "cause_split": acct_split},
+        {"condition": "classified_security_lost", "tripped": len(lost_class), "denominator": len(placed),
+         "threshold": ("a security the candidate holds as unclassified while the served publication places it in a class "
+                       "raises classified_security_lost"),
+         "value": "%d of %d served placed securities is unclassified in the candidate" % (len(lost_class), len(placed)),
+         "cause_split": sec_split},
+    ]
+    print("OK: conditions_detail account_lost tripped=%d denominator=%d split=%s | classified_security_lost tripped=%d denominator=%d split=%s"
+          % (len(tripped_accounts), len(served["account_ids"]), acct_split, len(lost_class), len(placed), sec_split))
 
     # CONDITIONS REMAINING and their agreement with the counts.
     remaining_accounts = lost_gate - exempt_ids
@@ -235,6 +280,8 @@ def main():
         "Served asset classes of the classified_security_lost securities (distinct keys, counted only): %s." % (dict(census) or "none"),
         "Read calls through the wrapper: %s. Refused write-capable calls: %s." % (dict(s3.calls), dict(s3.refused) or "none"),
         "Sparse directories added locally (never committed): investor-reporting gold and silver scripts, the investor-reporting Lambda, the mdpf gold and silver scripts, the v2_portal shared package, the investor-reporting contracts, lib.",
+        "Account cause mapping (AMENDMENT 1): in_source_with_positions is join; exempted_absent_at_source and closed_by_directory are source; evidence_incomplete and other are undetermined. The tripped accounts are the lost accounts less the exempted and the closed ones, the gate's own sets, so the remaining count equals the tripped count while no closed account is lost.",
+        "Security cause (AMENDMENT 1): join when the candidate-day custody dim_position partition still carries the security identifier with a holding; source when it does not; undetermined when the identifier namespace is not CUSIP, TICKER or ISIN or the partition is unreadable. The prior day was not read.",
     ]
     record = {
         "firm_scope": "49financial",
@@ -244,6 +291,7 @@ def main():
         "classified_security_lost": {"total": len(lost_class), "served_placed_total": len(placed),
                                      "candidate_unclassified_total": len(now_unclassified), "reading": reading},
         "conditions_remaining": cond_with,
+        "conditions_detail": conditions_detail,
         "base_commit": base, "read_date": read_date, "method": method, "claim": "measured", "notes": notes,
         "functions_invoked": 0, "sign_ins_made": 0, "aws_writes_made": 0,
         "rows_written": 0, "figures_written": 0, "vendor_requests_sent": 0,
