@@ -59,7 +59,7 @@ def main() -> int:
     # (tool, call args, [(table label, catalog entity)], answered predicate per table)
     specs = [
         ("etfs_get_new_securities", (), [("new_securities", es.ENTITY_MDPF_NEW)]),
-        ("etfs_get_fund_bloomberg_profile", ("DIVZ",),
+        ("etfs_get_fund_bloomberg_characteristics", ("DIVZ",),
          [("fund_daily", es.ENTITY_BBG_FUND_DAILY), ("derived_summary", es.ENTITY_BBG_SUMMARY),
           ("sector_allocation", es.ENTITY_BBG_SECTOR), ("geo_allocation", es.ENTITY_BBG_GEO)]),
         ("etfs_get_fund_snapshot", ("PFDE",), [("snapshots", es.ENTITY_SNAPSHOTS)]),
