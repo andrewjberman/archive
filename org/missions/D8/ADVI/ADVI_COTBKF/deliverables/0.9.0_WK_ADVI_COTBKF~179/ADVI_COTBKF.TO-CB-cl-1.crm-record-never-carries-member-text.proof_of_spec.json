@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cl-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cl-1.crm-record-never-carries-member-text.md",
+    "group": "OTHER",
+    "vintage_commit": "502e2ca25b"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~179",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round90.md",
+    "vintage_commit": "502e2ca25b",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cl-1.crm-record-never-carries-member-text.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/cotbkf_crm_match_job.py",
+      "kind": "script",
+      "commit_or_etag": "afbd09f46e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "blob 44c23f5effd76f628ab94f35eea8b9d943e40a98 at HEAD; header_columns holds counts, role names and first_line_is_header; a headerless member is skipped; _write_record refuses a record that carries a hashed zip cell"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py",
+      "kind": "test",
+      "commit_or_etag": "afbd09f46e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "69 lines added, 0 removed; the five existing tests unchanged; six test_record_safety_ tests on stub zips with made-up canary cells"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~179/RECORD_SAFETY_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "module_blob 44c23f5effd76f628ab94f35eea8b9d943e40a98 equals git rev-parse HEAD:data/assets/scripts/silver/cotbkf_crm_match_job.py; canary_arm headerless_member_in_record false, refusal_on_injected_text true; no CRM value"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~179/RECORD_SAFETY_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same figures as RECORD_SAFETY_RECORD.json; no CRM value"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB90cl1-AC1",
+      "criterion_verbatim": "`CB90cl1-AC1` -- the six record-safety tests pass.",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q -k record_safety",
+      "output_evidence": "6 passed, 5 deselected in 0.64s (rc 0)",
+      "denominator": "6 passed of 6 selected by -k record_safety; 5 deselected (the existing tests)",
+      "status": "PASS",
+      "expect": "6 passed"
+    },
+    {
+      "criterion_id": "CB90cl1-AC2",
+      "criterion_verbatim": "`CB90cl1-AC2` -- the whole file, the five existing tests unchanged and the six new ones, passes.",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q",
+      "output_evidence": "11 passed in 0.60s (rc 0)",
+      "denominator": "11 passed of 11 tests in the file (5 existing, 6 new)",
+      "status": "PASS",
+      "expect": "11 passed"
+    },
+    {
+      "criterion_id": "CB90cl1-AC3",
+      "criterion_verbatim": "`CB90cl1-AC3` -- the record names the module at HEAD and its blob equals what is committed, no existing test was edited, and the canary arm reads as the tests found it.",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~179/RECORD_SAFETY_RECORD.json',encoding='utf-8'));b=subprocess.check_output(['git','rev-parse','HEAD:'+d['module_path']]).decode().strip();print('CRM-RECORD-SAFETY blob_equal=%s tests_unchanged=%s headerless_in_record=%s refusal=%s'%(b==d['module_blob'],d['existing_tests_unchanged'],d['canary_arm']['headerless_member_in_record'],d['canary_arm']['refusal_on_injected_text']))\"",
+      "output_evidence": "CRM-RECORD-SAFETY blob_equal=True tests_unchanged=True headerless_in_record=False refusal=True (rc 0)",
+      "denominator": "1 printed line of 4 compared fields (blob, tests unchanged, headerless in record, refusal)",
+      "status": "PASS",
+      "expect": "CRM-RECORD-SAFETY blob_equal=True tests_unchanged=True headerless_in_record=False refusal=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the canary arm of the tests is the control (test 1 injects a headerless canary; test 5 injects member text into the record and requires the refusal)",
+      "expected": "N/A",
+      "observed": "not run as a separate mutant; both arms pass in AC2",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run on the committed module and tests; the stub tests use fixed clocks and made-up cells",
+      "observed": "6 passed and 11 passed on the committed HEAD",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_cotbkf_no_account_ids.py (account-id scan)",
+      "reason": "FAILED CLOSED: AssertionError: account set absent (COTBKF_ACCOUNT_SET or default path): the test fails closed (rc 1). The order directs the report of the exact error and no search for the set."
+    },
+    {
+      "item": "real CRM zip and the job's live run",
+      "reason": "not run: the order forbids any S3 or AWS call and any run against a real client; every test uses a stub zip"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~179/ADVI_COTBKF.TO-CB-cl-1.crm-record-never-carries-member-text.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q -k record_safety",
+      "result": "6 passed, 5 deselected (rc 0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q",
+      "result": "11 passed (rc 0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests/test_cotbkf_no_account_ids.py -q -s",
+      "result": "1 failed: AssertionError: account set absent (COTBKF_ACCOUNT_SET or default path): the test fails closed (rc 1)"
+    }
+  ]
+}
