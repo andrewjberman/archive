@@ -1,0 +1,34 @@
+{
+  "base_commit": "96fc2248e422029eb4dd39a333f778f449616ccd",
+  "changed_paths": ["infra/aws/terraform/inf-pipeline/iam.tf"],
+  "naming_gate": {
+    "commit_accepted": true,
+    "refused": 0,
+    "literals_graded": 1,
+    "policy_name_source": "name()"
+  },
+  "evaluated_prefixes": [
+    "arn:aws:s3:::opal-data-assets/orion/inflection/bronze/scope_account_returns/*",
+    "arn:aws:s3:::opal-data-assets/orion/inflection/silver/scope_account_returns/*"
+  ],
+  "evaluated_by": "registry reading",
+  "module_arguments": {
+    "system": "orion",
+    "scope": "inflection",
+    "function": "scope-account-feed",
+    "kind": "policy"
+  },
+  "notes": [
+    "Commit 3c4d117b57 (iam.tf only) was accepted by the commit-time naming gate: NAMING-GATE PASS with 1 graded literal, the built policy name orion-inf-scope-account-feed-policy, CONFORMANT as IAM_POLICY, refused 0. The bare table-name literal and the lookup() keys graded no literal.",
+    "The evaluated prefixes come from IB234-1_registry_reading.py, which repeats the lookups the iam.tf locals make (systems.json by key, scopes.json by key, tiers.json FIRM homes by tier) and compares the composed ARN prefixes with lib/opal_naming.py address() output for both layers. Both layers were equal character for character. No terraform console, plan or init was run.",
+    "The table name scope_account_returns is the one value not read from the registry, as amendment 1 allows (it has no registry row). The policy name is the opal_name module output for orion, inflection, scope-account-feed, policy; the packet name scope-account-feed-assets-put is replaced by it. Actions, resources, Sids, the s3:prefix condition and the role reference are the packet's.",
+    "Not run, by design: no AWS call of any kind, no plan or apply, no write to a registry file. rows_written is zero as a count of data or registry rows; the three surprise-channel rows IRPT_BCKEND-D2-W439-S1 to S3 are the channel rows the order asks for and are listed in the worker report.",
+    "The client-data check printed WARN (hashed account-id list absent on this box), so that check did not run for the commit; the worker grepped its own 66 added lines for the account number used in the file and found none. This is recorded as surprise row IRPT_BCKEND-D2-W439-S1."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
