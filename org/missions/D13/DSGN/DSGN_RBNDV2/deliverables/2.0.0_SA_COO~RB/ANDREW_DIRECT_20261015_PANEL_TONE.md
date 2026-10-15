@@ -14,3 +14,29 @@ Yes: the page ground, the sidebar rail and the page wrapper all compute to `rgb(
 ## How the COO reads it
 
 One change, tried and reversible: panels and modals paint `#F8F8FD` in place of `#FFFFFF`, and the grounds nested inside a panel follow it so no inset boxes appear. Text colours, the action-fill white text and every other use of `--bg-surface` stay as they are. His next smoke test is the grade; the tone is one token (`--bg-panel`), so a different value is a one-line change.
+
+## 3. His third message (typed while the panel-tone order `RV-b-1` was in flight), VERBATIM
+
+> Another thing I notice is that the red/green canonical colors for positive/negative should be darker if there is a shared color for all those figures, so it stands out better on the light background
+
+### What the COO measured (live, build at `localhost:5174`, `feature/dsgn-rbndv2-light` @3509eae8)
+
+- **There is a shared pair:** `--success` and `--danger` in `portal/src/index.css` (`--success: var(--status-success)`, the Argon green `#2dce89`; `--danger: var(--status-danger)`, `#f5365c`), read as `hsl(var(--success))` and `hsl(var(--danger))` in 38 and 29 source files. They are not the only source: 298 literal sites (`#22c55e`, `#ef4444`, `text-green-*`, `text-red-*`) and the sentiment ramp also paint gains, losses and statuses.
+- **The signed figures on `/market`** (a figure such as `+2.31%` or `-10.73%`): 148 compute to `rgb(45, 205, 136)` and 128 to `rgb(251, 112, 132)`. Contrast on the planned panel tone #F8F8FD: the green 1.94 to 1, the red 2.56 to 1 (WCAG asks 4.5 to 1 for text), which is why they do not stand out.
+- **The darker pair the COO proposes for light surfaces only:** green `hsl(145 70% 26%)` = `#14713B` (5.74 to 1 on #F8F8FD, 5.10 on the #EAEAF7 ground) and red `hsl(352 75% 42%)` = `#BB1B30` (5.99 to 1, 5.32 on the ground).
+
+### How the COO reads it
+
+An instruction to darken the shared pair on the light background. Placed as `RV-g-1`, cut after `RV-b-1` merges (both write `portal/src/index.css`): the pair is re-set inside `[data-panel-surface="light"]` (tokens only; no component edit), so every `hsl(var(--success))` and `hsl(var(--danger))` figure in a panel, modal or popup darkens at once; the literal sites follow page by page in his walk. A dark band (the heat-table fields) is not a light surface and keeps its own colours.
+
+## 4. His fourth message, VERBATIM (after the COO proposed the darker pair #14713B and #BB1B30 for light surfaces)
+
+> rec approved keep going. I also think that the contained internal panels, not the general container space within the panels, but items like the internal containers which list out the 3 top stories or three top performers etc in market overview i think need that silvery hue to give contrast. I would recommend a strategy with using the silver hue to bring in contrast/depth when there are multiple layers of nesting.
+
+### How the COO reads it (one clause per item)
+
+1. "rec approved keep going": the darker positive and negative pair is approved as proposed (green `#14713B`, red `#BB1B30`, on light surfaces only): cell `RV-g-1`.
+2. The nested containers that hold items (the Trending Topics story rows, the Top and Bottom performer rows and their kind, NOT the panel's own general space) take a silver fill so they separate from the panel.
+3. A depth strategy: one silver step per layer of nesting, never a border. Ground `#EAEAF7` (page) -> panel `#F8F8FD` -> first nested container silver `#EEF1F6` -> a container nested inside that one a deeper silver `#E6EBF4`; hover on a nested container steps one silver deeper. Cell `RV-n-1`. This supersedes round 2's "inset cards become hairline sections" for CONTAINERS THAT HOLD ITEMS (the hairline sections inside a panel body stay); it also changes what `RV-b-1` sets for the five nested grounds (it sets them to the panel tone; `RV-n-1` sets them to the silver steps).
+4. Both cells write `portal/src/index.css`; they are cut after `RV-b-1` merges and run one after the other.
+

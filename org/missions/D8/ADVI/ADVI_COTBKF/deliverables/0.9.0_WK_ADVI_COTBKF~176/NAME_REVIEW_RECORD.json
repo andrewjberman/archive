@@ -1,0 +1,106 @@
+{
+  "columns_present": {
+    "black_diamond_accounts": [
+      "account_id",
+      "account_name",
+      "account_display_name",
+      "relationship_id",
+      "relationship_name",
+      "account_open_date",
+      "first_transaction_date",
+      "account_type",
+      "account_registration_type"
+    ],
+    "transactions": [
+      "Account_Number",
+      "Cusip",
+      "Symbol",
+      "Quantity",
+      "Trade_Date",
+      "Transaction_Type",
+      "Advisor_ID"
+    ],
+    "document_index_listing_fields_keys": [
+      "Account",
+      "AccountNumber",
+      "Acct",
+      "ClientName",
+      "DisplayName",
+      "DocName",
+      "DocType",
+      "DocumentName",
+      "DocumentType",
+      "FileName",
+      "Folder",
+      "FolderName",
+      "HouseholdName",
+      "Keyword",
+      "NumberOfPages",
+      "ReportID",
+      "ReportName",
+      "ReportSectionID",
+      "ReportVersionID",
+      "StmtDate",
+      "Year"
+    ]
+  },
+  "hits": {
+    "exact_name_pairs": 28,
+    "one_to_one": 14,
+    "one_to_many_commonwealth": 9,
+    "many_to_one_bd": 5,
+    "new_client_hits": 4
+  },
+  "list": {
+    "rows": 14,
+    "in_219": 13,
+    "with_zero_corroborations": 0,
+    "with_one": 5,
+    "with_two": 9,
+    "with_three": 0,
+    "already_claimed": 0
+  },
+  "date_basis": "Commonwealth: transactions Trade_Date, latest per account (last activity). Black Diamond: the account's first dated holdings line (holdings prefix; crosswalk current_first_holdings), accounts_dimension_latest account_open_date where it holds nothing. Window: 120 days, absolute difference, inclusive.",
+  "denominators": {
+    "unmatched_commonwealth": 1062,
+    "unmatched_active": 387,
+    "new_clients": 168,
+    "reachable": 219
+  },
+  "files": [
+    {
+      "name": "REVIEW_LIST.csv",
+      "path": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~176/REVIEW_LIST.csv",
+      "rows": 14,
+      "sha256": "d694c1826226c0222c10756ba12b42d774038daf73d77964299f705cd2e93f02"
+    },
+    {
+      "name": "REVIEW_KEY.csv",
+      "path": "C:/dev/_cotbkf_match_20261015/REVIEW_KEY.csv",
+      "rows": 14,
+      "sha256": "c46b9dd0f7d63de53eee5695d9bfbc6f8c15fdfa19114170d354b4d7c14561be"
+    }
+  ],
+  "scratch_deleted": true,
+  "sources_read": [
+    "served crosswalk s3://opal-data-assets/commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.csv: 1533 rows, 1062 NOT_MATCHED, 471 MATCHED",
+    "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/REVERSE_MATCH_V3.csv (sha256 pinned): 860 rows, 387 none, 168 NEW_CLIENT, 219 reachable",
+    "transactions silver s3://opal-data-assets/commonwealth/cottonwood/silver/transactions/date=2026-06-23: 14 parquet objects, 1416497 rows, 1533 accounts",
+    "document_index s3://opal-data-assets/commonwealth/cottonwood/silver/document_index/date=2026-06-23: 11119 rows; 21 distinct listing_fields keys; 738 of 1533 Commonwealth accounts have a document (normalized join; research 738 of 1,533); 752 accounts with a name in DisplayName, ClientName, HouseholdName",
+    "BD accounts gold/dimensions/accounts_dimension_latest.parquet: 1005 rows, 387 of 387 unmatched active keys found, columns account_id,account_name,account_display_name,relationship_id,relationship_name,account_open_date,first_transaction_date,account_type,account_registration_type",
+    "BD holdings gold/canonical/holdings/: 137 objects listed, 137 parquet read, 1600989 rows",
+    "unmatched Commonwealth accounts: 1062; carrying a name key: 269 (research: 232 carry a document name)"
+  ],
+  "not_established": [
+    "Commonwealth registration class: no class column in transactions and no class key among the 21 document_index listing_fields keys; same_registration_class is null on every row. The research's 18 class corroborations are not reproduced from the named tables.",
+    "transactions Position_Type (CASH, MARGIN) is a per-line position type, not a registration class; not used.",
+    "Positions file not read (outside the grant): holdings as it left are the transaction rebuild (holdings_as_left), not the 2026-06-23 positions.",
+    "Exact name only: recall is low (research control: 93 of 462 already-matched pairs agree on exact name), so absence from the list says nothing about a pair.",
+    "Two real clients sharing one name are not separable by name; no wrong-1:1 control was run on matched pairs.",
+    "STOP_TOKENS is a judgement; a different stop list moves the hit count.",
+    "Document name fields: DisplayName, ClientName, HouseholdName only; DocumentName, DocName and ReportName are document titles and are not used.",
+    "Black Diamond name fields: account_name and account_display_name only.",
+    "already_claimed is measured against the served crosswalk only.",
+    "No tax id or date of birth on either readable side; the restricted CRM prefix and zip were not read."
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ci-4",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-4.match-r4-household-fingerprint.md",
+    "group": "OTHER",
+    "vintage_commit": "73e663123e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~175",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round87.md",
+    "vintage_commit": "73e663123e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-4.match-r4-household-fingerprint.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_match_r4.py",
+      "kind": "script",
+      "commit_or_etag": "584e52f47f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rule R4 as functions on frames: name tokens and keyed hashes, household by name, client-line propagation, the R2 fingerprint per candidate, the derived window, the tier and the control guard; main() reads S3 read-only and writes one file to an outside folder; no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_match_r4.py",
+      "kind": "test",
+      "commit_or_etag": "584e52f47f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 stub tests on made-up ids and tokens, one per order rule; python -m pytest: 6 passed in 0.45s"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~175/R4_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "584e52f47f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the control, real run, yield, denominators, window and file checksum as counts; no name, token or hash and no account id"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~175/R4_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "584e52f47f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same figures in a table, with the four surprise rows referenced"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "584e52f47f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W175-S1 to S4 appended (104 lines added, 0 deleted; the surprise-row gate checked 4 new rows of 352)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB87ci4-AC1",
+      "criterion_verbatim": "`CB87ci4-AC1` -- the control, the guard, the real run, the yield over the 219 and the derived window are printed from the record.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~175/R4_RECORD.json',encoding='utf-8'));c=d['control'];r=d['real'];y=d['yield'];print('R4 control_det=%d right=%d wrong=%d guard=%s real_det=%d cand=%d via_name=%d via_line=%d det_219=%d cand_219=%d reachable=%d window_days=%s'%(c['deterministic'],c['det_right'],c['det_wrong'],c['guard_applied'],r['deterministic'],r['candidate'],r['via_name'],r['via_client_line'],y['deterministic_among_219'],y['candidate_among_219'],d['denominators']['reachable'],d['window']['band_days']))\"",
+      "output_evidence": "R4 control_det=341 right=341 wrong=0 guard=False real_det=11 cand=99 via_name=137 via_line=89 det_219=10 cand_219=85 reachable=219 window_days=14 (timeout 120, rc 0)",
+      "denominator": "reachable 219 of 387 unmatched active accounts (168 new clients excluded); control 471 matched accounts; real 1,062 unmatched accounts",
+      "status": "PASS",
+      "expect": "reachable=219"
+    },
+    {
+      "criterion_id": "CB87ci4-AC2",
+      "criterion_verbatim": "`CB87ci4-AC2` -- the outside links file has the recorded checksum, row count and exactly the named columns (none holds a name), and the value-bearing scratch is recorded deleted.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib,csv;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~175/R4_RECORD.json',encoding='utf-8'));f=d['file'];b=open(f['path'],'rb').read();rows=list(csv.reader(open(f['path'],encoding='utf-8')));print('R4-FILE sha256_match=%s rows_match=%s columns=%s outside_repo=%s scratch_deleted=%s'%(hashlib.sha256(b).hexdigest()==f['sha256'],len(rows)-1==f['rows'],','.join(rows[0])=='commonwealth_account,bd_account_id,tier,household_via,fingerprint_score,window_ok,candidates_in_household',not f['path'].startswith('org/'),d['scratch_deleted']))\"",
+      "output_evidence": "R4-FILE sha256_match=True rows_match=True columns=True outside_repo=True scratch_deleted=True (timeout 120, rc 0)",
+      "denominator": "110 of 110 linked rows in the outside file (11 DETERMINISTIC and 99 CANDIDATE); 7 of 7 named columns; the file is the one the committed code reproduces",
+      "status": "PASS",
+      "expect": "sha256_match=True rows_match=True columns=True outside_repo=True scratch_deleted=True"
+    },
+    {
+      "criterion_id": "CB87ci4-AC3",
+      "criterion_verbatim": "`CB87ci4-AC3` -- the six rules hold on stubs.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_match_r4.py -q",
+      "output_evidence": "6 passed in 0.45s (timeout 120, rc 0): multi-household name gets no link; unique household with one passing candidate in window is DETERMINISTIC; two passing candidates are CANDIDATE; name plus registration with a failing fingerprint is never DETERMINISTIC; split client-line siblings give no household; a wrong control DETERMINISTIC demotes every link",
+      "denominator": "6 of 6 tests passed",
+      "status": "PASS",
+      "expect": "6 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "guard disabled in a copy (the control-guard condition replaced by if False); the file restored byte-identical from a backup, then re-tested",
+      "expected": "the guard test fails, every other test passes",
+      "observed": "with the mutant: 1 failed, 5 passed (test_a_wrong_deterministic_in_the_control_demotes_every_real_link_to_candidate); the restored file cmp-identical to the backup; then 6 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the committed code run twice on fresh random salts (before and after the removal of one unused variable); the control and real summary lines and the outside file's sha256 compared",
+      "observed": "identical in both runs: control matched=471 reached_household=358 household_correct=353 deterministic=341 det_wrong=0; real unmatched=1062 via_name=137 via_client_line=89 deterministic=11 candidate=99; file sha256 9f8f8abb9eef1311c46b8f9590e71e16c96d42c0b3a2c93f0f5afdbfbad5973e reproduced",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "R4_LINKS.csv, the outside links file at C:/dev/_cotbkf_match_20261015/R4_LINKS.csv (110 rows)",
+      "reason": "outside the repository, so it cannot carry a git pin; its checksum, row count and columns are verified by CB87ci4-AC2, and the committed code reproduces it (sha256 9f8f8abb9eef1311c46b8f9590e71e16c96d42c0b3a2c93f0f5afdbfbad5973e)"
+    },
+    {
+      "item": "The CRM zip, the restricted CRM prefix and the imaging CLNT PDFs",
+      "reason": "not read: open call d3cc is Andrew's, and the order's grant forbids them"
+    },
+    {
+      "item": "Any S3 write, delete or serve; any wiring of R4 into the served crosswalk; any edit of commonwealth_crosswalk.py or REVERSE_MATCH_V3.csv",
+      "reason": "forbidden by the order; wiring a new rule into the served crosswalk is a later act under a never-widen pair"
+    },
+    {
+      "item": "The post-commit account-id scan (test_cotbkf_no_account_ids.py) DENOMINATOR line",
+      "reason": "run after the flip commit, as the order asks; its result (the DENOMINATOR line or the exact error) is in the worker report, not in this instance"
+    },
+    {
+      "item": "Precision of the real-run links",
+      "reason": "no real-run link has a known answer; the control measures the rule only on accounts already matched by R2, so the real-run tiers are the rule's output, not a measured precision"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W175-S1: the order's same-registration-type test has no Commonwealth registration field; R4 derives a class from name tokens on both sides; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W175-S2: the control reaches 358 unique households with 353 right and 5 wrong, not the research's 138 right and 0 wrong; the guard did not fire; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W175-S3: the client-line route reaches 89 accounts and yields no CANDIDATE, where the research expected a candidate tier; 34 accounts touch a reachable account against 39; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W175-S4: links land on near matches awaiting a person (1 DETERMINISTIC, 9 CANDIDATE) and on new-client accounts (4 CANDIDATE); OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~175/ADVI_COTBKF.TO-CB-ci-4.match-r4-household-fingerprint.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile data/assets/scripts/silver/commonwealth_match_r4.py",
+      "result": "rc 0 (COMPILE-OK)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_match_r4.py -q",
+      "result": "6 passed in 0.45s"
+    },
+    {
+      "tool": "commit-gate, surprise-row-gate, to-pipeline-gate (via safe-commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_COTBKF~175 <0.9.0_WK_ADVI_COTBKF~175@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 584e52f47f: commit-gate OK after the rename of two build_* helpers and the removal of one unused variable; surprise-row-gate OK (4 new rows of 352); missions-tree-check 0 violations"
+    }
+  ]
+}
