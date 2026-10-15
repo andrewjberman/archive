@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gt-12",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "956d3fca092d6424aa67e1832704ee22119ed691",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gt-12.g5cv-hookup.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "956d3fca092d6424aa67e1832704ee22119ed691"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~93",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "3532daff79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only; this order has no deploy. Six @mcp.tool() registrations after harvest_get_published_analysis. The release that carries them is NFRA_OPLGTW.TO-OG-ap-20 (the order's preflight).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "3532daff79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only; this order has no deploy. Six names added to NATIVE_TOOLS (read class, legacy); none added to DATA_GRANT_TOOLS.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/destructive_ops.py",
+      "kind": "script",
+      "commit_or_etag": "3532daff79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only; this order has no deploy. Six names added to SAFE_TOOLS (READ-ONLY).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py",
+      "kind": "test",
+      "commit_or_etag": "3532daff79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file; no deploy in this order. Registry count pin 89 -> 95.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_data_entitlement_family.py",
+      "kind": "test",
+      "commit_or_etag": "3532daff79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file; no deploy in this order. Non-data count pin 80 -> 86.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the six tools are registered and the registry count test passes at 95.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt12.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "tools registered in app/tools.py: 6 of 6\nentitlement-admin suite (the registry count pin is 95): passed 9 of 9, failed lines 0, rc 0\nRESULT: PASS\nexit=0",
+      "denominator": "tools registered: 6 of 6; entitlement-admin suite passed 9 of 9, failed lines 0",
+      "status": "PASS",
+      "expect": "(?s)tools registered in app/tools\\.py: 6 of 6.*entitlement-admin suite \\(the registry count pin is 95\\): passed 9 of 9, failed lines 0, rc 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the six names are classified read-class, none in DATA_GRANT_TOOLS, nothing outside the five files changed, and the non-data family test passes at 86.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gt12.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "classified: SAFE 6 of 6, NATIVE 6 of 6, in DATA_GRANT_TOOLS 0 (want 0); files outside this cell's five (and its records) 0 (want 0)\npytest rc=0; named tests passed 1 of 1; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "SAFE 6 of 6; NATIVE 6 of 6; DATA_GRANT_TOOLS 0 (want 0); files outside the five 0 (want 0) (committed diff 956d3fca09..3532daff79 names exactly the five app and test files); named tests passed 1 of 1",
+      "status": "PASS",
+      "expect": "(?s)classified: SAFE 6 of 6, NATIVE 6 of 6, in DATA_GRANT_TOOLS 0 \\(want 0\\); files outside this cell's five \\(and its records\\) 0 \\(want 0\\).*pytest rc=0; named tests passed 1 of 1; failed/error lines 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the governing order names no mutant for OG-gt-12; none was run by this worker",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "the order's section 4 names two invocations only (AC1, AC2); no mutant is named",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 were each run before the commit (working tree) and again after it (committed HEAD 3532daff79), with the exact invocation of the proof; the six-file pytest run was executed once per file",
+      "observed": "AC1 pre-commit and post-commit: 'tools registered in app/tools.py: 6 of 6', 'passed 9 of 9, failed lines 0, rc 0', RESULT: PASS, exit=0 -- identical. AC2 pre-commit and post-commit: 'SAFE 6 of 6, NATIVE 6 of 6, in DATA_GRANT_TOOLS 0', 'outside 0', 'passed 1 of 1', RESULT: PASS, exit=0 -- identical. The AC2 outside count is only meaningful post-commit; the post-commit read is the one that binds it.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml",
+      "reason": "NFRA_MCPINDEX's file, not in this order's paths; not written by this cell"
+    },
+    {
+      "item": "release, deploy, IAM, Terraform and grant write for the six tools",
+      "reason": "out of this cell by the order; the release is NFRA_OPLGTW.TO-OG-ap-20 (phase A grant) per the order's preflight"
+    },
+    {
+      "item": "app/etfs_ownership.py, app/etfs_funds.py, app/portal_mdpf.py (tool modules)",
+      "reason": "not in this order's paths; read only, to check registration arguments against signatures (step 2); no mismatch, so no BLOCKING row"
+    },
+    {
+      "item": "tests/test_data_entitlement_guard.py::test_ogz1_ac08 (failing, 1 of 12 in that file)",
+      "reason": "listed at tests/baseline/failing_ids_full.txt:7 and allowed by order step 3; a route-class set assertion, not a tool count; not repaired, as the order bounds"
+    },
+    {
+      "item": "app/refs/DATA_CATALOG.yaml catalog write and the portal gitlink shown modified in the worktree before this work",
+      "reason": "NFRA_MCPINDEX's file; the portal gitlink was already modified when this worker began and is not this cell's change, so it is not committed"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W93-S1: the order's Bounds forbid editing app/tools.py, data_entitlement.py, destructive_ops.py and the pinned-count tests, while step 1 and <paths> grant and direct the hookup edit of exactly those files; step 1 was applied as written (OBSERVATION, INERT)",
+    "NFRA_OPLGTW-Z-W93-S2: the issuer's hookup script is not idempotent; a re-run on the committed tree writes duplicate registrations before its test-pin assertion refuses (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O)"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~93/NFRA_OPLGTW.TO-OG-gt-12.g5cv-hookup.session.log",
+  "compiler_tools": [
+    {
+      "tool": "hookup_g5cv.py",
+      "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/hookup_g5cv.py infra/aws/ec2/opal-gateway (cwd: worktree root)",
+      "result": "'hookup applied: 6 tools', rc=0; five files changed, 56 insertions, 5 deletions"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "timeout 120 python -m pytest tests/<file>.py -q -p no:cacheprovider --color=no, run once per file for test_entitlement_admin, test_data_entitlement_family, test_data_entitlement_guard, test_og_et1, test_og_et2, test_og_pt5 (cwd infra/aws/ec2/opal-gateway)",
+      "result": "9 passed (admin); 4 passed (family); 11 passed + 1 failed (guard; FAILED tests/test_data_entitlement_guard.py::test_ogz1_ac08, baseline line 7); 5 passed (et1); 4 passed (et2); 4 passed (pt5). TOTAL 37 passed, 1 failed of 38, rc 1 for the guard file only"
+    }
+  ]
+}
