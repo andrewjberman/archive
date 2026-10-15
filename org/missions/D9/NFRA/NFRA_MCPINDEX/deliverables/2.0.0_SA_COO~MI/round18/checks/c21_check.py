@@ -11,6 +11,7 @@
 Exit 0 PASS, 1 FAIL, 9 no run."""
 import ast
 import collections
+import json
 import os
 import re
 import subprocess
@@ -24,6 +25,7 @@ CATALOG = os.environ.get("C21_CATALOG") or "infra/aws/ec2/opal-gateway/app/refs/
 SECTIONS = ("silver_datasets", "portal_datasets", "harvest_datasets")
 BUCKET = re.compile(r"^(opal-data-[a-z0-9-]+|dynamodb)$")
 MEMBERS = "workflows/atom_decomposition/tool_index/members.yaml"
+MAPF = "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/assets_group_map.json"
 
 
 def report(res):
@@ -78,7 +80,8 @@ def ac1():
         print("  ODD %s" % (o,))
     return report([("every row carries a valid bucket (%d of %d)" % (len(new) - len(bad), len(new)), len(new) > 0 and not bad),
                    ("rows differ from the base only in bucket, vendor, firm and the curated tags", not odd), ("no valid S3 bucket was changed", not moved),
-                   ("the row set equals the base's", sorted(new) == sorted(base) or set(base) <= set(new))])
+                   ("no row was added, and no ASSETS row was removed (RESEARCH's scope drop may remove others; removed %d)" % len(set(base) - set(new)),
+                    set(new) <= set(base) and not (set(base) - set(new)) & set(json.load(open(MAPF, encoding="utf-8"))["rows"]))])
 
 
 def primary_bucket(cat):
@@ -121,7 +124,7 @@ def ac2():
             n_decl += 1
             path, _sep, line = str(m["bucket_source"]).rpartition(":")
             try:
-                lines = open(path, encoding="utf-8", errors="replace").read().splitlines()
+                lines = open(os.path.join("infra", "aws", "ec2", "opal-gateway", path), encoding="utf-8", errors="replace").read().splitlines()   # bucket_source is relative to the gateway folder
                 n = int(line)
                 if not any(b in x for x in lines[max(0, n - 7):n + 6]):
                     source.append("%s: %s not near %s" % (t, b, m["bucket_source"]))
