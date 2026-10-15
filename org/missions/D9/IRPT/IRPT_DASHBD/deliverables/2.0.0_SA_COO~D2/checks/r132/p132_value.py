@@ -139,8 +139,8 @@ print(json.dumps({"landed": {"rows": landed.num_rows, "columns": landed.schema.n
 '''
 
 
-def fresh(root, loader_py):
-    r = subprocess.run([sys.executable, "-c", CHILD, str(Path(root).resolve()).replace("\\", "/"), DAY, loader_py], capture_output=True, text=True, timeout=900)
+def fresh(root, loader_py, day=DAY):
+    r = subprocess.run([sys.executable, "-c", CHILD, str(Path(root).resolve()).replace("\\", "/"), day, loader_py], capture_output=True, text=True, timeout=900)
     need(r.returncode == 0, "the re-derivation died (rc %s): %s" % (r.returncode, (r.stderr or r.stdout)[-400:].replace("\n", " | ")))
     return json.loads([ln for ln in r.stdout.splitlines() if ln.startswith("{")][-1])
 
