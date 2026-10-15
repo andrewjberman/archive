@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "ADVI_COTBKF.TO-CB-cj-3",
+  "firm": "COT",
+  "phase": "NON-BUILD-OTHER",
+  "risk_class": "WORLD",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cj-3.crm-match-withdrawal.md",
+    "group": "OTHER",
+    "vintage_commit": "1228c014f8"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CB1",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round88.md",
+    "vintage_commit": "1228c014f8",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cj-3.crm-match-withdrawal.md"
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D8/ADVI/ADVI_COTBKF/ledger/NEVER_WIDEN_R88_CRM_MATCH_GRANT_COO_HALF.md @85e152e5ca, sha256 472df1c92c5927d6c714d1ab5bb3f13096d2456b0662f2524f388be17ed3bbc3 -- the grant's pair; the withdrawal is its named rollback and removes only what the grant created.",
+    "cto_half": "org/missions/D8/ADVI/ADVI_COTBKF/ledger/NEVER_WIDEN_R88_CRM_MATCH_GRANT_CTO_HALF.md -- conditions C1 (AssumeRole list) and C2 (withdrawal absolute) are the ones this act discharges."
+  },
+  "rollback": "The withdrawal is itself the rollback of CB-cj-1. Re-granting would need a new signed pair; nothing is left to undo here: the role and policy are gone and the READ deny list is as before the grant. Not invoked beyond the one apply, which landed in a single pass.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "iam role cloudops-cot-crm-match-role (removed)",
+      "kind": "aws_resource",
+      "commit_or_etag": "terraform destroy of aws_iam_role.crm_match",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "KIND NOTE: a removed IAM object has no git ref or etag, so 'aws_resource' is used. After 'Apply complete! Resources: 0 added, 1 changed, 2 destroyed.', LIVE get-role on the role returned NoSuchEntity at 20:07:36Z, and get-role on the break-glass role returned an ARN in the same run (the positive control).",
+      "artifact_covered_by": ["CB88cj3-AC1"]
+    },
+    {
+      "path_or_key": "s3 bucket policy opal-data-cottonwood (the three CRM Deny statements)",
+      "kind": "aws_resource",
+      "commit_or_etag": "terraform id opal-data-cottonwood",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "get-bucket-policy read live after the apply: the READ deny's exception list is the console user and the break-glass role; the LIST deny's list is the same two; the WRITE deny names the break-glass role alone -- as before the grant. The carved whole-root re-plan reads No changes.",
+      "artifact_covered_by": ["CB88cj3-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB88cj3-AC1",
+      "criterion_verbatim": "timeout 60 python org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/round88/checks/crm_checks.py withdrawal --file org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB1/WITHDRAWAL_RECORD.json  ->  ^CRM-WITHDRAWAL: OK events=\\d+ bad=-$",
+      "method": "command",
+      "invocation": "timeout 60 python org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/round88/checks/crm_checks.py withdrawal --file org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB1/WITHDRAWAL_RECORD.json",
+      "output_evidence": "CRM-WITHDRAWAL: OK events=1 bad=-",
+      "denominator": "The checker grades the record's shape; the AssumeRole scan behind it is 255 account-wide events scanned, 1 kept, at two reads 15 minutes 41 seconds apart.",
+      "status": "PASS",
+      "status_reason": "The output line equals the expect pattern. The check reads the record's shape; the live facts it names were read separately from AWS, and the record's not_established list says what neither reads."
+    }
+  ],
+  "controls": {
+    "role_gone_with_positive_control": {
+      "description": "A NoSuchEntity answer is only meaningful beside a call that can return an ARN.",
+      "expected_landed": "get-role on the match role returns NoSuchEntity while get-role on the break-glass role returns an ARN.",
+      "expected_not_landed": "An ARN for the match role, or an error on the break-glass role (which would make the first read uninformative).",
+      "observed": "NoSuchEntity for the match role; an ARN for the break-glass role, same run.",
+      "status": "PASS"
+    },
+    "carved_plan_reads_exactly_0_add_1_change_2_destroy": {
+      "description": "AMENDMENT 1's STOP had to be capable of firing: an uncarved plan would also carry the unapplied TCKT_VNEXT exemption onto the cottonwood and inflection policies (seen at the grant).",
+      "expected_landed": "Plan: 0 to add, 1 to change, 2 to destroy; the one change is the role ARN leaving the READ deny; no inflection change.",
+      "expected_not_landed": "Any inflection or other statement change is the STOP; the grant-time un-carved plan is the positive control.",
+      "observed": "Plan: 0 to add, 1 to change, 2 to destroy; the policy diff is the one ARN removed from DenyRestrictedReadExceptReaders.",
+      "status": "PASS"
+    },
+    "assume_role_read_twice_across_the_lag": {
+      "description": "CloudTrail lags by up to about 15 minutes, so a single read straight after the delete could miss an AssumeRole event.",
+      "expected_landed": "A second read at least 15 minutes after the first returns the same kept set, or new events that are listed.",
+      "expected_not_landed": "A new session name or a later event would be a FINDING.",
+      "observed": "20:08:29Z: 154 scanned, 1 kept. 20:24:10Z (15m41s later): 255 scanned, 1 kept, the same event.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "check_restricted_prefix.py 'green' limb of step 3",
+      "reason": "The script aborts rc=1 on a statement-count assumption (row ADVI_COTBKF-D1-S3); its output is kept (wd_check.txt) and the three Deny statements were read live instead."
+    },
+    {
+      "item": "Reading JOB_RECORD.json",
+      "reason": "The file was not in the shared tree; the trigger rests on the issuer's message 6190 and AMENDMENT 3."
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-S3"
+  ],
+  "session_log": "",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open, close-leg L1-L4, close on advi-cotbkf-r88-crm-match-withdrawal",
+      "result": "Entry opened before the plan, all 4 legs closed with proof, CLOSED."
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply -input=false -lock-timeout=120s <saved carved plan>",
+      "result": "rc=0, 20:06:52Z-20:07:16Z; Apply complete! Resources: 0 added, 1 changed, 2 destroyed."
+    }
+  ]
+}
