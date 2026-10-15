@@ -1,0 +1,64 @@
+{
+  "firm": "49financial",
+  "files_changed": [
+    {
+      "file": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+      "sha256": "345274045636772b2c971648ab1ed4cbedda1d965b11236e8ca96480f7d64941",
+      "kind": "terraform"
+    },
+    {
+      "file": "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf",
+      "sha256": "b7a293c0578c98d6b93b8213c9945742de44d01a70ba968291cc6bc3a5e1e80e",
+      "kind": "terraform"
+    }
+  ],
+  "grants": [
+    {
+      "id": "write_filled",
+      "actions": ["s3:PutObject"],
+      "arns": ["arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/filled_report_values/*"],
+      "statement_ids": ["WriteTheFiveGoldPrefixesOnly"],
+      "words": "PutObject on the one filled_report_values gold prefix. The existing single write statement keeps its sid and its list; the list gains the sixth prefix, built from the module's TABLE constant."
+    },
+    {
+      "id": "read_model_series",
+      "actions": ["s3:GetObject"],
+      "arns": ["arn:aws:s3:::opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"],
+      "statement_ids": ["ReadTheServedModelSeriesObjectOnly"],
+      "words": "GetObject on the one served model-series object, bucket and key read from the adapter file constants. A new statement; no list is granted on the served bucket."
+    },
+    {
+      "id": "read_crosswalk",
+      "actions": ["s3:GetObject", "s3:ListBucket"],
+      "arns": [
+        "arn:aws:s3:::opal-data-49financial/advi/49financial/gold/household_crosswalk/*",
+        "arn:aws:s3:::opal-data-49financial"
+      ],
+      "statement_ids": ["ReadTheHouseholdCrosswalkOnly", "ListExactlyTheHouseholdCrosswalkPrefix"],
+      "words": "GetObject under the household_crosswalk prefix, and ListBucket on the firm gold bucket restricted by a StringLike condition on s3:prefix to that prefix only. Two new statements; no PutObject on the crosswalk.",
+      "list_prefix_pattern": "advi/49financial/gold/household_crosswalk/*"
+    }
+  ],
+  "expected_plan": {
+    "to_add": 0,
+    "to_change": 2,
+    "to_destroy": 0,
+    "resources": ["aws_iam_role_policy.irpt_reporting_gold", "module.irpt_reporting_gold.aws_lambda_function.this"],
+    "words": "The role policy changes because its policy document gains the three grants. The function changes because its code hash follows the bundle the applier builds at apply (built by 0.7.0_AE_CloudOps~DB2); this cell edits no function code. These are the order's expected counts, inferred, not planned."
+  },
+  "validated": {
+    "ran": false,
+    "words": "This box has no terraform binary, so terraform fmt and validate did not run; they are the applier's. Checked instead: the issuer checker's HCL clauses on the working tree (criterion AC1), the additive line counts after commit (AC2), and an ASCII scan of both files."
+  },
+  "derivations": {
+    "served_series": "The bucket and the key come from the SERVED_BUCKET and SERVED_KEY constants of model_series_windows.py, read by file() and regex() in locals.tf; neither value is typed in the Terraform.",
+    "crosswalk": "The prefix mirrors FirmAdapter.crosswalk_address() and crosswalk_prefix() in filled_report_values.py (segments advi, firm, gold, household_crosswalk); its bucket is the firm gold bucket that the irpt tables use, as the naming-builder recount confirmed.",
+    "filled_prefix": "The prefix is built from the module TABLE constant, mirrored as irpt_rg_gold_table_filled, joined to the firm and the irpt and gold segments exactly as the other gold prefixes are."
+  },
+  "words": "Three explicit grants added to the reporting-gold role as Terraform statements, each derived from the producers' constants or the naming builder. Nothing planned, applied or deployed; the plan and the apply are the applier's act under the signed pair.",
+  "claim": "inferred",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

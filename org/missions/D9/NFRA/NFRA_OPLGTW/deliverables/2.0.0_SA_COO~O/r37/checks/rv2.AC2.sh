@@ -29,10 +29,12 @@ try:
     tk_, td = newest("trade_schedule")
     trows = rows(tk_)
     fcol = "fund_ticker"
-    ind = [r for r in trows if r.get(fcol) == "INEQ"]
-    tr = h.etfs_get_fund_trades(fund_ticker="INEQ")
+    from collections import Counter
+    tf = Counter(r.get(fcol) for r in trows).most_common(1)[0][0]   # the fund with the most inferred trades: a NON-ZERO witness (A1, row Z-W101-S6)
+    ind = [r for r in trows if r.get(fcol) == tf]
+    tr = h.etfs_get_fund_trades(fund_ticker=tf)
     trl = tr.get("trades") or []
-    t_ok = P.envelope_ok(tr) and len(trl) == len(ind)
+    t_ok = P.envelope_ok(tr) and len(trl) == len(ind) and len(ind) > 0 and not tr.get("truncated")
     fl = h.etfs_get_fund_flows(fund_ticker="INEQ")
     f_ok = P.envelope_ok(fl)
     cb = h.etfs_compare_peers(home_ticker="IDVZ", period="YTD", axis="security")
@@ -47,7 +49,7 @@ try:
 
     hr.get_current_principal = lambda: SimpleNamespace(email="someone@example.com", tid="t", oid="o")
     non_opal = h.etfs_get_fund_flows(fund_ticker="INEQ").get("code") in ("typed_opal_only", "harvest_opal_only")
-    print("rival tools B: INEQ trades window rows %d vs independent %d; flows answered %s; compare_peers both sections %s; research notes AI-labelled %s; page status newest revision %s; non-Opal refused %s" % (len(trl), len(ind), f_ok, c_ok, r_ok, pg_ok, non_opal))
+    print("rival tools B: top-trade fund trades window rows %d vs independent %d; flows answered %s; compare_peers both sections %s; research notes AI-labelled %s; page status newest revision %s; non-Opal refused %s" % (len(trl), len(ind), f_ok, c_ok, r_ok, pg_ok, non_opal))
     ok = t_ok and f_ok and c_ok and r_ok and pg_ok and bad_ok and non_opal
 except Exception as e:
     print("probe error: %s: %s" % (type(e).__name__, str(e)[:160])); ok = False

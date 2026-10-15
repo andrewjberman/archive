@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-18",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "f0069dd8ca"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "f0069dd8ca",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-18.cottonwood-account-dim-terraform-root-function-role-and-disabled-schedule.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~411",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~411",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-dim/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "718ea9fca0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Backend key investor-reporting/account-dim/tfstate, provider and default_tags as the holdings root. Repo file only: not planned, not applied. init, fmt -check and validate pass on the root (DBC123-2-AC2)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-dim/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "718ea9fca0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Silver bucket and two prefixes read from sources.json (custodian blackdiamond), firm from scopes.json (z09 -> cottonwood), gold bucket from the cottonwood row, gold table account_dim. Repo file only: not planned, not applied."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-dim/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "718ea9fca0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Layer data source, name module irpt-cot-account-dim-lambda (scope cottonwood), module irpt_account_dim through yang-lambda, two outputs. Repo file only: not planned, not applied, not packaged."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-dim/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "718ea9fca0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Role irpt-cot-account-dim-role, policy irpt-cot-account-dim-policy, five statements (silver GetObject, silver ListBucket, gold ListBucket, gold PutObject, CloudWatch Logs pair); 7 distinct actions, all in the closed set. Repo file only: no principal created."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-dim/schedule.tf",
+      "kind": "schedule",
+      "commit_or_etag": "718ea9fca0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Scheduler role irpt-cot-account-dim-scheduler-role and policy irpt-cot-account-dim-scheduler-policy (InvokeFunction on this function only); aws_scheduler_schedule irpt-cot-account-dim-daily in state DISABLED, cron(45 8 ? * MON-FRI *), America/New_York. Repo file only: no schedule created."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c7d3006bb9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_DASHBD-D2-W411-S1 (BLOCKING, INERT), S2 (OBSERVATION, INERT), S3 (OBSERVATION, INERT) and S4 (BLOCKING, INERT) appended as bytes, committed at c7d3006bb9 (114 insertions in that commit)."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "084e0a38fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_DASHBD-D2-W411-S5 (BLOCKING, INERT) appended as bytes, committed at 084e0a38fe (29 insertions, 0 deletions)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC123-2-AC1",
+      "criterion_verbatim": "DBC123-2-AC1 -- the five files exist; the state key, builder-module names, handler, runtime and artifact key are as above; no typed irpt- name; the schedule is DISABLED in America/New_York on trading weekdays; every IAM action is in the closed set; no wildcard resource; no foreign-firm token; and two planted mutations (a delete action added; DISABLED changed to ENABLED) are each refused by the same structure check. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r123/p123_bcw.py\" . DBC123-2-AC1",
+      "output_evidence": "DBC123-2-AC1 PASS (rc 0), re-run by the issuer 2.0.0_SA_COO~C2 on the worker tree with the fixed checker (968b75d645); the worker's own run read FAIL on the checker's stray backspace byte (row IRPT_DASHBD-D2-W411-S5, an issuer defect, fixed)",
+      "denominator": "5 of 5 files; 7 of 7 distinct actions in the closed set; 0 wildcard resources; 0 of 5 foreign-firm tokens; 6 of 6 opal_name blocks carry scope; 0 block labels with the firm segment; 2 of 2 planted mutations refused",
+      "status": "PASS",
+      "expect": "DBC123-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBC123-2-AC2",
+      "criterion_verbatim": "DBC123-2-AC2 -- terraform fmt -check -recursive and terraform validate pass in the new root. Base: FAIL (no root).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r123/p123_bcw.py\" . DBC123-2-AC2",
+      "output_evidence": "Run from the worktree root at HEAD 718ea9fca0: 'DBC123-2-AC2 PASS', rc 0. The checker's terraform arm used the base checkout's binary (C:/dev/ajb_workspace/.tools/terraform.exe, the path amendment (iv) names). Direct, by that absolute path with -chdir=C:/dev/wk-IRPT_DASHBD-411/infra/aws/terraform/investor-reporting/account-dim: init -backend=false -input=false rc 0 ('Terraform has been successfully initialized!'); fmt rc 0 with no file listed; fmt -check -recursive rc 0; validate rc 0 ('Success! The configuration is valid.').",
+      "denominator": "2 of 2 checks PASS (fmt -check -recursive rc 0; validate rc 0), plus init rc 0 as the prerequisite.",
+      "status": "PASS",
+      "expect": "DBC123-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The two planted mutations of the criterion (a delete action appended; DISABLED changed to ENABLED), applied to the in-memory text of the five files, no file written, and passed to the structure check of the diagnostic copy (byte removed). The official run cannot reach them: it stops at the scope arm. An unmutated positive control was run first.",
+      "expected": "unmutated accepted; both mutations REFUSED",
+      "observed": "unmutated structure: accepted; delete-action-added REFUSED: actions outside the closed set: s3:DeleteObject; DISABLED-to-ENABLED REFUSED: the schedule is not created DISABLED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root on the same committed bytes, DBC123-2-AC1",
+      "observed": "two runs, each stdout 'an opal_name module without scope: irpt_account_dim_lambda_name' then 'DBC123-2-AC1 FAIL', rc 1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "DBC123-2-AC1 PASS",
+      "reason": "Not met: the checker's scope arm carries a backspace byte (row IRPT_DASHBD-D2-W411-S5). The checker is the issuer's file and was not edited. The order stays open; the status is not flipped."
+    },
+    {
+      "item": "terraform plan and apply",
+      "reason": "Forbidden by the order; not run."
+    },
+    {
+      "item": "the .terraform.lock.hcl produced by init",
+      "reason": "Left uncommitted: the holdings root tracks no lock file, and the file is gitignored in this worktree."
+    },
+    {
+      "item": "AWS calls, upload, invoke, deploy, push",
+      "reason": "Forbidden by the order; none made."
+    },
+    {
+      "item": "status flip of the order to complete",
+      "reason": "DBC123-2-AC1 is FAIL, so the order stays pending and is not flipped."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W411-S1: BLOCKING, INERT: .tools/terraform.exe is absent from the worktree (gitignored); the amendment's absolute-path route now runs init, fmt and validate, so this row's cause is answered for AC2 but the row stays on the channel as filed.",
+    "IRPT_DASHBD-D2-W411-S2: OBSERVATION, INERT: holdings-performance/schedule.tf reads state ENABLED at line 287 (commit d9e46a0c1f) while its comments still say CREATED DISABLED.",
+    "IRPT_DASHBD-D2-W411-S3: OBSERVATION, INERT: the order's builder arguments for the scheduler role, policy and schedule carried no firm scope; the amendment now scopes them (irpt-cot-account-dim-scheduler-role, irpt-cot-account-dim-scheduler-policy, irpt-cot-account-dim-daily).",
+    "IRPT_DASHBD-D2-W411-S4: BLOCKING, INERT: the naming limb refused the backend key account-dim-cot; the amendment moved the root and key to account-dim, and the commit 718ea9fca0 passed the naming limb.",
+    "IRPT_DASHBD-D2-W411-S5: BLOCKING, INERT: the amended checker's scope arm carries a backspace byte before scope (checker line 131 at 1b17b74f35), so DBC123-2-AC1 FAILs on every correct root; the issuer's file, not edited."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p123_bcw.py (DBC123-2-AC1, DBC123-2-AC2)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r123/p123_bcw.py\" . <criterion>",
+      "result": "DBC123-2-AC1 FAIL rc 1 (twice; scope arm, backspace byte, row S5); DBC123-2-AC2 PASS rc 0"
+    },
+    {
+      "tool": "terraform (base checkout binary, by absolute path, amendment iv)",
+      "invocation": "C:/dev/ajb_workspace/.tools/terraform.exe -chdir=C:/dev/wk-IRPT_DASHBD-411/infra/aws/terraform/investor-reporting/account-dim <init -backend=false -input=false | fmt | fmt -check -recursive | validate>",
+      "result": "init rc 0; fmt rc 0 (no file listed); fmt -check -recursive rc 0; validate rc 0 ('Success! The configuration is valid.')"
+    },
+    {
+      "tool": "lib/opal_naming.py name() (read-only builder calls, no AWS)",
+      "invocation": "python -I with importlib at lib/opal_naming.py: name(irpt, cottonwood, account-dim, lambda|role|policy|daily); name(irpt, cottonwood, account-dim, role|policy, scheduler)",
+      "result": "irpt-cot-account-dim-lambda; irpt-cot-account-dim-role; irpt-cot-account-dim-policy; irpt-cot-account-dim-scheduler-role; irpt-cot-account-dim-scheduler-policy; irpt-cot-account-dim-daily"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (the five .tf files)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_DASHBD~411 <0.9.0_WK_IRPT_DASHBD~411@opal.agent>\" -F .scratch/msg_tf2.txt -- <five paths under account-dim/>",
+      "result": "rc 0; commit 718ea9fca0; naming limb passed on the token-free root"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> DBC123-2-AC1,DBC123-2-AC2",
+      "result": "rc 0, VALID; 7 artifacts resolved at pin, 0 pending (run on this instance before the commit)"
+    }
+  ]
+}
