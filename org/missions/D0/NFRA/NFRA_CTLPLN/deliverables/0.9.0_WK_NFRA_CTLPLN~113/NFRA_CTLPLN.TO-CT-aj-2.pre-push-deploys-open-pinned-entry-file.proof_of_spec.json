@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aj-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-2.pre-push-deploys-open-pinned-entry-file.md",
+    "group": "OTHER",
+    "vintage_commit": "9cfc5f5fd8"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~113",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round20.md",
+    "vintage_commit": "9cfc5f5fd8",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-2.pre-push-deploys-open-pinned-entry-file.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/git-hooks/pre-push-safe-deploy.sh",
+      "kind": "script",
+      "commit_or_etag": "19564581c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pinned_entry_deploy() runs on this box's own box/<box> push after the box-diff logic, at both exits that reach it (empty box diff; after the ledger-gated deploy). It lists the deploy-scope scripts under data/ at the pushed tip that deploy-ledger-names.py --rev names with an OPEN pinned entry, scopes them with crossbox-deploy-check.py --list-deployable, reads each S3 object with one aws s3 cp, and deploys through safe-deploy.sh only the files whose S3 bytes differ from the pinned blob (a missing object counts as differing; an unreadable one is held and audited). Hook change only; safe-deploy.sh and safe_deploy_core.py are unchanged. Last changed in 19564581c6; no push, no deploy.",
+      "artifact_covered_by": [
+        "CTaj2-AC1",
+        "CTaj2-AC2",
+        "CTaj2-AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round20_pinned_entry_deploy.py",
+      "kind": "test",
+      "commit_or_etag": "25eb853127",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Builds temporary repositories (bare origin, CLOUD trunk with the pinned file and an OPEN or CLOSED entry, box/laptop branch) with the real pre-push hook and the real safe-deploy.sh; aws is a stub serving a local directory as the bucket; the deploy core is a test double that copies into that directory. Default arm: planted case. --negative: equal bytes, unpinned file, closed entry. Reuses the round-19 fixture helpers. Last changed in 25eb853127; no AWS call and no deploy.",
+      "artifact_covered_by": [
+        "CTaj2-AC1",
+        "CTaj2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaj2-AC1",
+      "criterion_verbatim": "the planted case (a pinned file on CLOUD, absent from the box diff, stale in the bucket) is deployed by the next push and the bucket sha equals the pin (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_pinned_entry_deploy.py",
+      "output_evidence": "PINNED-ENTRY-DEPLOY deployed=1 bucket_sha_equals_pin=True ok=True (rc=0; timeout 280 from the worktree root on the committed state at 224df301f7; the determinism run on the same state printed the identical line). Deciding push lines: 'deploy gate: refs/heads/box/laptop -- no deploy-scope file in this box's diff against origin/CLOUD' then 'deploy gate: refs/heads/box/laptop -- deploying data/inf/scripts/gold/pinned_fixture.py: pinned by OPEN entry pinned-fixture-entry, S3 51599e8b536f differs from the pin 2abcafbbfab5'.",
+      "denominator": "1 planted pinned file deployed of 1 planted (deployed=1); 1 of 1 bucket sha256 values equal the pinned blob sha256",
+      "status": "PASS",
+      "expect": "bucket_sha_equals_pin=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj2-AC2",
+      "criterion_verbatim": "an equal-bytes pin, an unpinned file and a closed entry each deploy nothing (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_pinned_entry_deploy.py --negative",
+      "output_evidence": "PINNED-ENTRY-ARM a-equal-bytes ok=True push_rc=0 deployed=0 held=0 s3_reads=1 bucket_sha_equals_pin=True; PINNED-ENTRY-ARM b-unpinned-file ok=True push_rc=0 deployed=0 held=1 s3_reads=1 bucket_sha_equals_pin=True; PINNED-ENTRY-ARM c-closed-entry ok=True push_rc=0 deployed=0 held=0 s3_reads=0 bucket_sha_equals_pin=False; PINNED-ENTRY-NEGATIVE arms=3/3 ok=True (rc=0; timeout 280 on the committed state at 224df301f7)",
+      "denominator": "3 arms run: 3 PASS, 0 FAIL; deployed 0 in each of the 3 arms; arms a and b each read S3 once, arm c read S3 zero times",
+      "status": "PASS",
+      "expect": "arms=3/3",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj2-AC3",
+      "criterion_verbatim": "the round-19 unsigned-push negative arm still holds (base: UNSIGNED-PUSH push_rc=0 deployed=0 held=1 ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_unsigned_push.py",
+      "output_evidence": "UNSIGNED-PUSH push_rc=0 deployed=0 held=1 ok=True (rc=0; timeout 280 on the committed state at 224df301f7; the same line on the baseline run before the hook edit)",
+      "denominator": "1 arm run: 1 PASS, 0 FAIL; deployed 0 and held 1 as the base control",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-fix hook (git show 9cfc5f5fd8:.tools/git-hooks/pre-push-safe-deploy.sh) placed in a scratch copy of the .tools tree (.scratch/mutant/.tools, uncommitted), with the same test file run from that copy against the same planted case.",
+      "expected": "the planted case deploys nothing: deployed=0, the bucket sha stays the stale one, ok=False, rc=1",
+      "observed": "PINNED-ENTRY-DEPLOY deployed=0 bucket_sha_equals_pin=False ok=False; the test exits rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the default arm run twice on the final committed state 224df301f7 (two runs of the same command); compared on the last line",
+      "observed": "PINNED-ENTRY-DEPLOY deployed=1 bucket_sha_equals_pin=True ok=True on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the S3 bucket and the deploy core",
+      "reason": "the order's design: the bucket is a local directory behind a stubbed aws, and the core is a test double (.tools/safe_deploy_core.py is one-writer on dell2 and is neither edited nor run). No real AWS call is made by the test; the real bucket key convention is an open surprise row (W113-S1)."
+    },
+    {
+      "item": "the sparse folder org/critical_paths/.open_deploys",
+      "reason": "absent from the worktree sparse set; added with git sparse-checkout add (rc=0) to read the pinned-entry shape, as the worker face prescribes (surprise row W113-S2)."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W113-S1: the pinned-entry step maps a deploy-scope path to its S3 object from the safe-deploy.sh header (opal-data-bd, opal-data-inf, opal-data-cot; code/<layer>/<name>), not from the core's PIPELINE_MAP, which was not read; the silver and bronze keys are unverified. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W113-S2: the worker sparse set omitted org/critical_paths/.open_deploys, which the order names as a read; added with git sparse-checkout add. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W113-S3: on a pinned-entry deploy the safe-deploy seat gate prints apply-who REFUSED for the worker serial; WARN only (ruling 106858), so the deploy proceeds. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~113/NFRA_CTLPLN.TO-CT-aj-2.pre-push-deploys-open-pinned-entry-file.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~113 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_pinned_entry_deploy.py",
+      "result": "PINNED-ENTRY-DEPLOY deployed=1 bucket_sha_equals_pin=True ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_pinned_entry_deploy.py --negative",
+      "result": "PINNED-ENTRY-NEGATIVE arms=3/3 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_unsigned_push.py",
+      "result": "UNSIGNED-PUSH push_rc=0 deployed=0 held=1 ok=True"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash -n .tools/git-hooks/pre-push-safe-deploy.sh",
+      "result": "rc=0"
+    }
+  ]
+}
