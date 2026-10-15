@@ -59,3 +59,31 @@ An instruction to darken the shared pair on the light background. Placed as `RV-
 1. "the same issue ... on the Top / Bottom Performers page": the second pair (original dark against light) shows the same loss of shaping: the Top Performers and Bottom Performers groups and their three rows each have an outline and a left accent bar in the original and none in the light version. `RV-o-1` already covers it: the two groups are `NestedCard` sections (the `data-accent` rule) and the performer rows are two of the five `border-transparent` class strings it swaps.
 2. "the asset class abbreviations (EQ FI CM) should have the same canonical red/green hex as the performance numbers": measured in the source: the performer row's badge (`PerformerCard`, `ExecutiveSummary.tsx` about line 681) colours its text and tint from a separate `color` variable (a lighter green or pink, from `getSentimentColor`-style code), while the number beside it reads the return-delta tokens (now #14713B and #BB1B30 on light surfaces). Item 4 of `RV-o-1` makes the badge read the same delta tokens: text `hsl(var(--delta-positive))` or `hsl(var(--delta-negative))`, its tint the same token at 0.19 alpha; a neutral return keeps its colour. The Trending Topics rank numbers (1, 2, 3) and the arrows beside them use the same lighter source; they are the same defect and are NOT part of this step (he named the asset-class abbreviations); proposed for his next word.
 
+## 7. His seventh message, VERBATIM (after `RV-o-1` was read live)
+
+> I like what you did there, lets also do it here: [Image #11]
+
+(The image is Andrew's own screenshot, `C:\Users\AndrewBerman\AppData\Local\Packages\Microsoft.ScreenSketch_8wekyb3d8bbwe\TempState\Snips\Screenshot 2026-10-15 184040.png`: the Global RSI modal on its Spotlight tab, light build. It is his file and is not copied into the repository.)
+
+### The COO's read
+
+"what you did there" = the two things `RV-o-1` did: a visible outline on the item containers, and the canonical red and green on a label. In the Spotlight tab each Hottest and Coldest card is `border-transparent` (set by `RV-y-1`; the original drew `border-white/10`), and the HOTTEST and COLDEST labels read a lighter `#22c55e` and `#ef4444` at 70 percent. `RV-r-1` gives each card the `--hairline` outline and makes the two labels read `--delta-positive` and `--delta-negative`. NOT in this step: the score and status words (67.2 Strong, 26.4 Oversold, 31.3 Weak): they follow the five-band RSI scale (`getRSIColor`), a different scale from the signed return figures; proposed for his word.
+
+## 8. His eighth message, VERBATIM (arrived while the seventh was being read; it answers open call `laptop-20261015T145235Z-002b`)
+
+> Also note how in that image, the tooltip helper icon is placed directly after the panel title text. that pattern should be implemented across the entire platform
+
+### The COO's read
+
+This answers `002b` (his earlier clause "The tooltips always need to appear to the left of the panel header title" had two readings): the help icon (the circled question mark) sits DIRECTLY AFTER the title text, as the Global RSI modal title already does (`RSIModal.tsx` title slot: `inline-flex items-center gap-2`, title then icon). `PanelHeader.tsx` is the platform's shared panel header and today puts the icon in the right-hand group with the actions; every panel that passes `helpText` to it moves with one edit (72 files carry `helpText` or a `HelperTip`; how many of them are panel titles that bypass `PanelHeader` is what the census measures). `RV-q-1` makes that edit (the icon inside the title element, so the 2px accent underline runs under title and icon, as in his image). Modal titles already follow the pattern (Global RSI, Market Regime, Fear and Greed). A census of title bars that draw their own help icon outside `PanelHeader` follows at the drain and goes to him as a list, not as a rider.
+
+## 9. His ninth message, VERBATIM (arrived while the eighth was being read)
+
+> [Image #12] Do this one too
+
+(The image is Andrew's own screenshot of the Trending Topic drilldown modal, light build, for the Apple topic: the BULLISH pill, the +0.539 score, three numbered insights, the SOURCE ARTICLES list with a signed score on each row. His file; not copied.)
+
+### The COO's read
+
+"this one" = the Trending Topic drilldown modal, "too" = the same two changes `RV-o-1` made (a visible outline on the item containers; the canonical red and green on the signed figures). Measured in `DrilldownModal` (`ExecutiveSummary.tsx`): the signed figures (the +0.539 topic score and the +0.70 / -0.96 score on each source-article row) read `getSentimentColor`, the lighter `hsl(162, 79%, 46%)` / `hsl(355, 83%, 60%)`, while the numbers in the panel read `--delta-positive` / `--delta-negative`; the BULLISH pill and the 1, 2, 3 circles read `PALETTE.green700` / `red600`; the source-article rows are `bg-white/[0.03]` with no outline. `RV-s-1` makes the figures, the pill and the circles read the delta tokens and gives each source-article row the `--hairline` outline. It changes only `DrilldownModal`: `getSentimentColor` is shared with the Trending Topics rank numbers and arrows, which stay as they are until he answers the question put to him in the last message. The lead image gradient and the three-bar accent on the insights keep their colours.
+
