@@ -23,9 +23,9 @@ const MINT = path.join(HERE, 'fwd1_mint.py')
 // The worktree root is eight levels above this folder (deliverables/<serial>/fwd1_driver); FWD1_PORTAL overrides.
 const PORTAL = process.env.FWD1_PORTAL || path.resolve(HERE, '../../../../../../../../portal')
 const PYTHON = process.env.FWD1_PYTHON || 'python'
-const EMAIL = 'fwd1-staff-r41a@opal.invalid'
+const EMAIL = 'fwd1-staff-r41b@opal.invalid'
 const FIRM_CHOICE_LABEL = 'Choose the firm this request is filed under'
-const TITLE = 'SYNTHETIC IRPT_ANLREQ FWD-1 run r41, do not action'
+const TITLE = 'SYNTHETIC IRPT_ANLREQ FWD-1 run r41b, do not action'
 const NEW_TICKET_LABEL = 'New Ticket'
 const SUBMIT_LABEL = 'File Analysis Request'
 const TABS = ['Open', 'In Progress', 'Completed']
@@ -320,6 +320,11 @@ function selftest() {
   check('a token outside the TO-RUN-FWD1 form is refused (exit 2)', wrongGo.status === 2)
   const badBase = spawnSync(process.execPath, [SELF, '--base', 'http://example.com', '--firm', '49financial', '--holdings', SELF, '--out', os.tmpdir(), '--go', 'IRPT_ANLREQ.TO-RUN-FWD1.x'], { encoding: 'utf8', timeout: 60000 })
   check('a non-localhost base is refused even with a token (exit 2)', badBase.status === 2)
+  // AR-y-359 (round 41b): the run address is the one constant the mint helper also holds (one address, both files); a driver
+  // carrying a different address (the retired producer address among them) fails here. An unreadable mint file fails the case.
+  const mintSrc = (() => { try { return fs.readFileSync(MINT, 'utf8') } catch (e) { return '' } })()
+  const mintEmail = (mintSrc.match(/^EMAIL = "([^"]+)"/m) || [])[1]
+  check('the run address equals the mint helper address (one address in both files)', mintEmail !== undefined && EMAIL === mintEmail)
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n)
   for (const [n, ok] of cases) console.log((ok ? 'case PASS ' : 'case FAIL ') + n)
   if (failed.length === 0) {

@@ -1,0 +1,94 @@
+{
+ "absent_days": [
+  "2026-08-19",
+  "2026-09-24",
+  "2026-09-25"
+ ],
+ "per_day": {
+  "2026-08-19": {
+   "alloc_present": true,
+   "txn_present": false,
+   "next_present_day": "2026-08-20",
+   "next_stats": {
+    "rows": 814,
+    "return_non_null": 783,
+    "day_quality": {
+     "MEASURED": 783,
+     "NOT_MEASURABLE": 31
+    }
+   },
+   "following_day": "2026-08-21",
+   "following_stats": {
+    "rows": 808,
+    "return_non_null": 779,
+    "day_quality": {
+     "MEASURED": 779,
+     "NOT_MEASURABLE": 29
+    }
+   },
+   "verdict_own": "ABSENT_DAY_RETURN_MISSING",
+   "verdict_next": "NEXT_DAY_RETURN_MEASURED"
+  },
+  "2026-09-24": {
+   "alloc_present": true,
+   "txn_present": false,
+   "next_present_day": "2026-09-28",
+   "next_stats": {
+    "rows": 845,
+    "return_non_null": 813,
+    "day_quality": {
+     "MEASURED": 813,
+     "NOT_MEASURABLE": 32
+    }
+   },
+   "following_day": "2026-09-29",
+   "following_stats": {
+    "rows": 845,
+    "return_non_null": 813,
+    "day_quality": {
+     "MEASURED": 813,
+     "NOT_MEASURABLE": 32
+    }
+   },
+   "verdict_own": "ABSENT_DAY_RETURN_MISSING",
+   "verdict_next": "NEXT_DAY_RETURN_MEASURED"
+  },
+  "2026-09-25": {
+   "alloc_present": true,
+   "txn_present": false,
+   "next_present_day": "2026-09-28",
+   "next_stats": {
+    "rows": 845,
+    "return_non_null": 813,
+    "day_quality": {
+     "MEASURED": 813,
+     "NOT_MEASURABLE": 32
+    }
+   },
+   "following_day": "2026-09-29",
+   "following_stats": {
+    "rows": 845,
+    "return_non_null": 813,
+    "day_quality": {
+     "MEASURED": 813,
+     "NOT_MEASURABLE": 32
+    }
+   },
+   "verdict_own": "ABSENT_DAY_RETURN_MISSING",
+   "verdict_next": "NEXT_DAY_RETURN_MEASURED"
+  }
+ },
+ "stored_return_rule": "The landing adapter measures a day's return from the previous trading day's market value over the day's own flows (derive over the previous trading day to the day). An absent day has account values (fact_allocations) but no flows (fact_transactions), so the presence hold wrote no partition for it and its own return is missing; the next present day is measured from the absent day's value, so its return is kept and the chain breaks only at the absent day.",
+ "sidecar": {
+  "prefix": "irpt/cottonwood/gold/account_return_daily_blank_reasons/",
+  "files": 1,
+  "columns": [
+   "business_date",
+   "account_id",
+   "blank_reason",
+   "exception_class"
+  ],
+  "landing_function_writes_it": false
+ },
+ "words": "Read by the issuer (a LOCAL read, GET and LIST only). Three trading days between 2026-07-10 and 2026-10-14 have no gold partition: 2026-08-19, 2026-09-24 and 2026-09-25. Each has a Black Diamond silver fact_allocations partition and no fact_transactions partition, so the landing's presence hold wrote nothing for them. For the day after each (2026-08-20, and 2026-09-28 for the two-day gap) the measured-return rate keeps pace with the following day's, so the next day's return is kept (INFERRED from that rate and the adapter's rule that it is measured from the absent day's value, not recomputed here; not lost); what is missing is the absent day's OWN return, and any report window that spans it cannot be bridged. The Commonwealth-era sidecar account_return_daily_blank_reasons exists for Cottonwood with the columns recorded; the landing function does not write it, so ABSENT_AT_SOURCE rows for the three days need a writer under a never-widen pair, not yet cut. This read writes nothing."
+}

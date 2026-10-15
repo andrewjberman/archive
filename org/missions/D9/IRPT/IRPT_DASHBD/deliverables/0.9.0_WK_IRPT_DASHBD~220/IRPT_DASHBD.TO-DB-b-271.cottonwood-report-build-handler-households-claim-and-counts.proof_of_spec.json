@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-271",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "deaac76f02"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "deaac76f02",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-271.cottonwood-report-build-handler-households-claim-and-counts.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~220",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~220/RUN_LOG_R138.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/handler.py",
+      "kind": "script",
+      "commit_or_etag": "9369b4ffd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Additive edit: households_claim() computes households_as_of, households_claim, accounts_dropped and households_no_rows after the rows exist and before the put; _parquet_bytes takes an optional claim for the schema metadata; the built-day line prints the two counts. LOCAL on wk-IRPT_DASHBD-220; no deploy, no AWS call, no push.",
+      "artifact_covered_by": [
+        "DB138-1-AC1",
+        "DB138-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_households_claim.py",
+      "kind": "test",
+      "commit_or_etag": "9369b4ffd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nine new tests on a fake S3 with synthetic ids (A1 to A3, H1, ZZ8, ZZ9; HH1, HH2, HH9); they name cottonwood and no other firm; 42 of 42 handler tests pass with the earlier 33.",
+      "artifact_covered_by": [
+        "DB138-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_reporting_gold_cot.py",
+      "kind": "test",
+      "commit_or_etag": "9369b4ffd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One earlier assertion moved from 2 to 3 GETs on returns data.parquet (the mandated re-read of the built day's own partition); recorded as IRPT_DASHBD-D2-W220-S1; the rest of the earlier tests are unchanged.",
+      "artifact_covered_by": [
+        "DB138-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~220/RD_COT_HOUSEHOLDS_CLAIM_FACTS_R138.json",
+      "kind": "doc",
+      "commit_or_etag": "9369b4ffd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Facts record: the claim location, the two claim keys, the two counts, the claim held and a words paragraph of 969 characters; the checker's facts clause reads true against the recount.",
+      "artifact_covered_by": [
+        "DB138-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~220/RUN_LOG_R138.json",
+      "kind": "doc",
+      "commit_or_etag": "89d824ff90",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Run log: the invocation, return code and deciding line of each criterion run, the selftest, pytest and ruff, with the denominator of each.",
+      "artifact_covered_by": [
+        "DB138-1-AC1",
+        "DB138-1-AC2",
+        "DB138-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB138-1-AC1",
+      "criterion_verbatim": "`DB138-1-AC1` -- the handler's source holds every round-137 clause and now holds the words `households_as_of`, `households_claim`, `accounts_dropped` and `households_no_rows`; the worker's own commits touch only the handler directory, the deliverables folder, the investigation file and task-order files.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r138/p138_households.py\" . DB138-1-AC1",
+      "output_evidence": "OK: static: every round-137 clause holds and the handler holds the claim words; 5 files changed, all in the grant\nDB138-1-AC1 PASS (rc 0)",
+      "denominator": "5 of 5 files changed by the worker's own commits (deaac76f02 excluded) are in the grant; the handler holds 4 of 4 claim words; every round-137 static clause holds",
+      "status": "PASS",
+      "expect": "DB138-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB138-1-AC2",
+      "criterion_verbatim": "`DB138-1-AC2` -- the checker stages the handler as packaged and runs it against a fake S3: every round-137 scenario still passes; the standard day's one object carries `households_as_of` (the newest `account_dim` date) and `households_claim` held in its parquet schema metadata with its columns unchanged, and its result states both plus `accounts_dropped` 0 and `households_no_rows` 1; a returns partition with two accounts outside every household counts 2 dropped; two `account_dim` partitions give the newer date; a dry run states the four keys and puts nothing; none of the fake account or household ids appears in the printed output or the result.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r138/p138_households.py\" . DB138-1-AC2",
+      "output_evidence": "OK: probe: every round-137 scenario passes; the day's one object carries households_as_of and households_claim held in its schema metadata with the columns unchanged; the result states the newest account_dim date, held, the dropped-account count and the no-rows household count; no id reaches the output\nDB138-1-AC2 PASS (rc 0; a second run's stdout byte-identical)",
+      "denominator": "the round-137 scenarios (all) plus the four round-138 scenarios: standard day (counts 0 and 1, one put, metadata held), two dropped accounts (2), two account_dim partitions (newer date), dry run (four keys, no put); 0 fake ids in the printed output or the result",
+      "status": "PASS",
+      "expect": "DB138-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB138-1-AC3",
+      "criterion_verbatim": "`DB138-1-AC3` -- the worker's tests pass under pytest and name cottonwood and no other firm; the probe passes again; the facts record has exactly the form of step 4.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r138/p138_households.py\" . DB138-1-AC3",
+      "output_evidence": "OK: 42 worker tests pass and name cottonwood only; the probe passes again; facts record equals the recount\nDB138-1-AC3 PASS (rc 0)",
+      "denominator": "42 of 42 handler tests pass (33 earlier, 9 new) under pytest; the facts record has 5 of 5 fields, claim_location exact, claim_keys exact, counts exact, claim held, words 969 characters",
+      "status": "PASS",
+      "expect": "DB138-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's --selftest runs its static, grant, households and facts clauses on synthetic red arms (a lost claim word, a moved column, a counted-wrong drop, an id leak, a dry run that puts, a facts field lost) and requires each red arm to fail.",
+      "expected": "every red arm fails its clause; the selftest passes only when all red arms fire",
+      "observed": "selftest: static (2 red arms), grant (2), households (14 red arms) and facts (7 red arms) clauses behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "DB138-1-AC2 run twice on the committed handler; stdout compared byte for byte",
+      "observed": "two runs, rc 0 each, stdout byte-identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Lambda runtime and the first real build against the Cottonwood bucket",
+      "reason": "Not in the order: LOCAL risk class; no deploy, no AWS call, no Terraform command. The claim is proven against a fake S3 only."
+    },
+    {
+      "item": "The report-build never-widen packet re-pin",
+      "reason": "The order says the packet is re-pinned after this order merges; this worker does not re-pin it."
+    },
+    {
+      "item": "How any page prints the claim households_claim",
+      "reason": "A reader's change and not made here: the handler writes the claim into the schema metadata only."
+    },
+    {
+      "item": "filled_report_values.py, the adapters, the Terraform roots, the source map, lib/, the registry, the contracts, the issuer's check files and the portal",
+      "reason": "Read-only for this cell: outside the grant. The workspace portal gitlink was never staged."
+    },
+    {
+      "item": "Push",
+      "reason": "Not in the order: every commit is LOCAL on wk-IRPT_DASHBD-220."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W220-S1: the mandated frv.read_partition re-read of the built day's own returns partition adds one GET, so one earlier exact-count assertion (test_the_returns_partition_before_the_floor_is_never_listed_or_opened) moves from 2 to 3 with a comment; no other earlier assertion moved; the row is OBSERVATION and INERT, disposition UNDER_INVESTIGATION."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p138_households.py (the issuer's checker, run at its own path in the worktree)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r138/p138_households.py . DB138-1-AC1 | DB138-1-AC2 | DB138-1-AC3",
+      "result": "AC1 PASS rc 0; AC2 PASS rc 0; AC3 PASS rc 0"
+    },
+    {
+      "tool": "pytest (the reporting-gold-cot tests folder)",
+      "invocation": "python -m pytest -q infra/aws/lambda/investor-reporting/reporting-gold-cot/tests -p no:cacheprovider",
+      "result": "42 passed rc 0"
+    },
+    {
+      "tool": "ruff (target py39)",
+      "invocation": "python -m ruff check --target-version py39 infra/aws/lambda/investor-reporting/reporting-gold-cot/handler.py infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_households_claim.py infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_reporting_gold_cot.py",
+      "result": "All checks passed! rc 0"
+    }
+  ]
+}
