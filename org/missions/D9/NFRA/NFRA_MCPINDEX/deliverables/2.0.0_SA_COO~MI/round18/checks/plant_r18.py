@@ -75,6 +75,11 @@ def good_catalog():
         else:
             b = "graph" if t["member"] == "c" else top
         t["bucket"] = b
+        sv = sorted({(rr["vendor"], rr["firm"]) for rr in rows.values() if rr.get("read_tool") == name and rr.get("bucket") in ("opal-data-assets", "opal-data-bd") and rr.get("vendor")})
+        if sv:
+            t["serves"] = [{"vendor": v, "firm": f} for v, f in sv]
+        else:
+            t.pop("serves", None)
         t["source_group"] = {"id": b, "name": b if b.startswith("opal-data-") else ("Microsoft 365" if b == "graph" else b), "kind": "bucket" if b.startswith("opal-data-") else ("graph" if b == "graph" else "store")}
     return cat
 
@@ -113,6 +118,10 @@ def main():
     only11 = variant("only11", lambda c: c["silver_datasets"].remove(rowof(c, "opal_data_assets_silver_schwab_08403355_dim_transaction")))
     extra = variant("extrarow", lambda c: c["silver_datasets"].append(dict(rowof(c, "opal_data_assets_silver_schwab_08403355_dim_asset"), entity="an_unexpected_row")))
     gapbad = variant("gapbad", lambda c: rowof(c, "opal_data_assets_silver_schwab_08403355_dim_asset").__setitem__("gap_owner", "NFRA_MCPINDEX"))
+    serves_t = next(t for t in good["tool_index"] if t.get("serves"))["tool"]
+    sv_wrong = variant("sv_wrong", lambda c: next(t for t in c["tool_index"] if t["tool"] == serves_t)["serves"].append({"vendor": "orion", "firm": "cottonwood"}))
+    sv_extra = variant("sv_extra", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles").__setitem__("serves", [{"vendor": "schwab", "firm": "49financial"}]))
+    sv_miss = variant("sv_miss", lambda c: next(t for t in c["tool_index"] if t["tool"] == serves_t).pop("serves"))
     reg_ok = {"labels": sorted({w[k] for w in MAP.values() for k in ("vendor", "firm")})}
 
     # the gateway trees for c23.AC3: good (the base code + the good catalog) and a leaking one
@@ -148,6 +157,8 @@ def main():
             ("c23.ac1 the registry holds no labels", "c23_check.py", "ac1", {"C23_CATALOG": gp, "C23_REG_OVERRIDE": json.dumps({"labels": []})}, 1),
             ("c23.ac2 good", "c23_check.py", "ac2", {"C23_CATALOG": gp}, 0), ("c23.ac2 only 11 new rows", "c23_check.py", "ac2", {"C23_CATALOG": only11}, 1),
             ("c23.ac2 an unexpected extra row", "c23_check.py", "ac2", {"C23_CATALOG": extra}, 1), ("c23.ac2 a wrong gap owner", "c23_check.py", "ac2", {"C23_CATALOG": gapbad}, 1),
+            ("c23.ac4 good", "c23_check.py", "ac4", {"C23_CATALOG": gp}, 0), ("c23.ac4 a serves pair added that no row has", "c23_check.py", "ac4", {"C23_CATALOG": sv_wrong}, 1),
+            ("c23.ac4 serves on a tool no assets row names", "c23_check.py", "ac4", {"C23_CATALOG": sv_extra}, 1), ("c23.ac4 serves missing", "c23_check.py", "ac4", {"C23_CATALOG": sv_miss}, 1),
             ("c23.ac3 good tree", "c23_check.py", "ac3", {"C23_GW": root}, 0), ("c23.ac3 a leaking discover rule", "c23_check.py", "ac3", {"C23_GW": os.path.join(leak, GW)}, 1)]
     # the base catalog file for the c21.ac1 base arm
     open(os.path.join(tmp, "base.yaml"), "wb").write(git_show(CATP))

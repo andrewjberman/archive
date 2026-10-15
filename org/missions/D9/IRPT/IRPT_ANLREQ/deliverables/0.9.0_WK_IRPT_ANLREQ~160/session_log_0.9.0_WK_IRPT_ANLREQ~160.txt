@@ -1,0 +1,22 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~160 on IRPT_ANLREQ.TO-AR-y-363 (cell AR-y-363, C-FILING-DECISION-TREE)
+Measured outputs only. Times are UTC.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-160; test -d org && test -d .tools -> TREE-OK.
+2. Portal: git fetch origin ran; origin/PROD = e0b43076d9daf56f8eb4937137180e3cf4246e7f (prod_tip). Portal worktree clean, on wk-IRPT_ANLREQ-160-portal.
+3. Keep candidate f78ea50ef8 read (git show --stat, git diff a6b83f692084 f78ea50ef8 for the three source files). It is NOT on PROD. Not cherry-picked: the tree differs (Yes/Replace/No, not Use/Keep), so the source was re-implemented from the cell.
+4. Before-arm: the new test file run against origin/PROD source in .scratch/before_arm: 1 pass, 7 fail, rc 1. Failing: (a) (b) (c) (d) (e) (f) (h). Passing: (g). Output: .scratch/before_arm_run.txt.
+5. Build: analysisRequest.ts, AnalysisRequestParts.tsx, TicketCenter.tsx changed; filing-decision-tree.test.tsx added; filing-hint.test.tsx re-pinned case by case.
+6. bun test src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx -> 8 pass, 0 fail, 35 expect() calls.
+7. bun test src/pages/TicketCenter/__tests__/filing-hint.test.tsx -> 7 pass, 0 fail.
+8. bun test src/pages/TicketCenter -> 136 pass, 0 fail, 985 expect() calls, 25 files.
+9. bun run typecheck -> rc 0, no error lines.
+10. Commit a168015bdd46d64cbf82e1b6c118cd06f304ed98 on wk-IRPT_ANLREQ-160-portal (LOCAL). The portal has no committer identity and no .tools; the commit was made with git -C <portal> commit --author <serial>, and the committer as the serial through GIT_COMMITTER_NAME and GIT_COMMITTER_EMAIL for that one command. Surprise row IRPT_ANLREQ-D2-W160-S3.
+11. Branch: git -C portal branch cand/dell2/anlreq-filing-decision-tree a168015bdd46d64cbf82e1b6c118cd06f304ed98 (LOCAL, never pushed).
+12. git -C portal diff --stat origin/PROD a168015bdd46d64cbf82e1b6c118cd06f304ed98 -> 5 files changed, 467 insertions(+), 106 deletions(-).
+13. Checkers, run twice each (determinism):
+    portal_check.py -> PORTAL-TESTS-OK 8 new, 136 folder, 0 failed (rc 0), both runs.
+    mutant_check.py -> MUTANT-FIRES the Replace button removed: mutant rc=1 pass=3 fail=5; control rc=0 pass=8 fail=0 (rc 0), both runs.
+    scope_check.py -> SCOPE-OK 5 paths, all under src/pages/TicketCenter/; src/api and src/pages/InvestorReporting unchanged (rc 0), both runs.
+14. Surprise rows filed in INVESTIGATION_v1.md (appended, no existing row edited): IRPT_ANLREQ-D2-W160-S1 (the name in the parenthesis), -S2 (the inherited NAME_PROXY gate), -S3 (committer identity).
+15. Incident during the row filing: a text-mode rewrite of INVESTIGATION_v1.md normalised 81 LF-only lines to CRLF (a 155-line diff with 81 deletions). The file was rebuilt from the HEAD bytes (git show HEAD:<path>) with only the new rows appended, so the diff is 74 insertions and 0 deletions. No row was edited.
+16. Push state: LOCAL only. No git push, no ls-remote, no deploy, no upload, no AWS call.
