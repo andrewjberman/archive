@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-250",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "160585df2a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-250.hop-1-function-memory-8192-in-the-reporting-gold-terraform.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~204",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3d65bed416",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-204: memory_size 3008 to 8192 on the module line, timeout 900 unchanged, and the header comment now records the change and this order; diff +4/-2; sha256 a20ea4a0a21c3a899d09a964f379f7f1d5ff13274e80960d40fc254fe369bf46; nothing planned, applied or deployed; no Terraform command run (no binary on this box)",
+      "artifact_covered_by": [
+        "DB123-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~204/RD_MEMORY_FACTS_R123.json",
+      "kind": "config_data",
+      "commit_or_etag": "6640b3cb24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the facts record: function irpt-49f-reporting-gold-lambda, memory 3008 to 8192 MB, lambda limit 10240 MB, timeout 900; measured peak 4024.6 MB from round 122's record, fraction 0.4913 of 8192, under the 0.7 line; expected plan 0 add / 2 change / 0 destroy on the two named resources, not planned here; validated.ran false; file hash as the lambda.tf row; flags files_in_repo, served_values_changed, pushed and deployed all false; claim inferred",
+      "artifact_covered_by": [
+        "DB123-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB123-1-AC1",
+      "criterion_verbatim": "`DB123-1-AC1` -- `lambda.tf` carries exactly one `memory_size` assignment equal to 8192 and exactly one `timeout` equal to 900; in the worker's own commits it gains between 1 and 6 lines and loses at most 3, and no other infra file changes. Base: FAIL (memory_size is 3008).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r123/p123_mem8192.py\" . DB123-1-AC1",
+      "output_evidence": "OK: lambda.tf carries memory_size = 8192 and timeout = 900; +4/-2 in the worker's own commits; no other infra file | DB123-1-AC1 PASS (rc 0); the second run printed the same two lines. Base run before the edit: FAIL: memory_size is 3008, not 8192 (rc 1).",
+      "denominator": "PASS: 1 of 1 criterion; memory_size assignments 1 of 1 equal 8192; timeout assignments 1 of 1 equal 900; own-commit lambda.tf change +4/-2 against the bounds gain 1 to 6 and loss at most 3; other infra files changed 0 of 0",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line reads DB123-1-AC1 PASS at rc 0 at HEAD 6640b3cb24; the lambda.tf bytes are those of 3d65bed416",
+      "expect": "DB123-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB123-1-AC2",
+      "criterion_verbatim": "`DB123-1-AC2` -- `RD_MEMORY_FACTS_R123.json` has exactly the form of step 3; the measured peak equals round 122's record, the fraction equals peak / 8192 within 0.0005 and is under 0.7; the plan is 0 / 2 / 0 on the two named resources; the file hashes as recorded; flags false; no long digit run. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r123/p123_mem8192.py\" . DB123-1-AC2",
+      "output_evidence": "OK: memory facts: 3008 to 8192 MB, the measured peak 4025 MB is 49.1 percent of the new memory (under the 70 percent line); plan 0/2/0 on the two resources | DB123-1-AC2 PASS (rc 0); the second run printed the same two lines. Base run before the record existed: FAIL: no .../0.9.0_WK_IRPT_DASHBD~204/RD_MEMORY_FACTS_R123.json (rc 1).",
+      "denominator": "PASS: 1 of 1 criterion; the record has 12 of 12 top-level keys of the exact form; 0 of 0 clauses failed (measured peak 4024.6 equals round 122's peak_rss_mb; fraction 0.4913 equals 4024.6 / 8192 within 0.0005; plan 0 / 2 / 0 on 2 of 2 named resources; files_changed 1 of 1 hash as recorded; 4 of 4 flags false)",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line reads DB123-1-AC2 PASS at rc 0 at HEAD 6640b3cb24; the record bytes are those of 6640b3cb24",
+      "expect": "DB123-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test (python -I checks/r123/p123_mem8192.py --selftest <worktree root>): the settings reader (a green arm, a missing timeout arm, a duplicate memory_size arm, a commented-out arm) and the facts clauses (one green and nine red records: memory block, measured peak, fraction, under-line, plan, a flag, a long digit run, a file hash)",
+      "expected": "the self-test passes every arm and prints selftest PASS, rc 0",
+      "observed": "selftest: the settings reader and one green and nine red facts arms behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of the two invocations was run twice from the worktree root under timeout 120 and the output compared",
+      "expected": "identical output and rc on both runs",
+      "observed": "DB123-1-AC1 and DB123-1-AC2 each printed the same two lines and rc 0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Lambda's own peak memory at 8192 MB",
+      "reason": "not measured: the 4024.6 MB peak was taken on a workstation (round 122's record) and the record states the Lambda figure only as an inference; no Lambda was run here"
+    },
+    {
+      "item": "The expected plan of 0 add / 2 change / 0 destroy",
+      "reason": "not planned: there is no Terraform binary on this box and no AWS call was made; the plan is the applier's act under the signed pair"
+    },
+    {
+      "item": "The bundle build and the hop-1 apply pair",
+      "reason": "another seat's act: the deploying lane builds the bundle through the source map entry and applies under the signed never-widen pair; this order edits one file and deploys nothing"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~204/IRPT_DASHBD.TO-DB-b-250.hop-1-function-memory-8192-in-the-reporting-gold-terraform.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "p123_mem8192.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r123/p123_mem8192.py\" . DB123-1-AC1 ; ... . DB123-1-AC2",
+      "result": "PASS rc 0 (AC1); PASS rc 0 (AC2); each run twice"
+    },
+    {
+      "tool": "p123_mem8192.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r123/p123_mem8192.py\" --selftest .",
+      "result": "rc 0: selftest PASS"
+    }
+  ]
+}
