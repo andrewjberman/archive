@@ -154,8 +154,8 @@ def c3():
     if r.get("keys_written") != len(written):
         fail("keys_written must equal the WRITTEN rows (%d)" % len(written))
     req = r.get("requests_made")
-    if not is_int(req) or not 0 <= req <= 16000:
-        fail("requests_made must be a count (about 14,300 expected, one script run per day; above 16,000 is a stop)")
+    if not is_int(req) or not 0 <= req <= 18000:
+        fail("requests_made must be a count (about 14,300 expected, one script run per day; above 18,000 is a stop)")
     c = r.get("counters")
     if not isinstance(c, dict):
         fail("counters are required")

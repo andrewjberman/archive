@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rv-3 AC2 (round-37 RIVAL-HOOKUP, FWD-22): the classification and the bound.
 #  - SAFE_TOOLS and NATIVE_TOOLS carry the ten tools names, and DATA_GRANT_TOOLS carries none;
+#  - (A2: the seven files this cell may touch, the two added for the tool rename)
 #  - the five files this cell may touch are the only files that differ from the base of this branch (no tool module, no other test);
 #  - the non-data family test passes at 96.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
@@ -21,7 +22,7 @@ EOF
 )
 grant=$(printf '%s' "$grant" | tr -d '\r')
 base=$(git merge-base HEAD box/sitez 2>/dev/null | tr -d '\r')
-outside=$(git diff --name-only "$base" HEAD | grep -vE "^$GW/(app/tools\.py|app/data_entitlement\.py|app/destructive_ops\.py|tests/test_entitlement_admin\.py|tests/test_data_entitlement_family\.py)$|^org/missions/D9/NFRA/NFRA_OPLGTW/(task-orders|deliverables|surprise-channel)/" | grep -c .)
+outside=$(git diff --name-only "$base" HEAD | grep -vE "^$GW/(app/tools\.py|app/data_entitlement\.py|app/destructive_ops\.py|app/etfs_rivals\.py|tests/test_og_rv1\.py|tests/test_entitlement_admin\.py|tests/test_data_entitlement_family\.py)$|^org/missions/D9/NFRA/NFRA_OPLGTW/(task-orders|deliverables|surprise-channel)/" | grep -c .)
 echo "classified: SAFE $safe of 10, NATIVE $nat of 10, in DATA_GRANT_TOOLS $grant (want 0); files outside this cell's five (and its records) $outside (want 0)"
 pytest_named tests/test_data_entitlement_family.py test_ogpf1_ac01; r0=$?
 restore_audit

@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "cell": "DB-c-21",
+  "to_id": "IRPT_DASHBD.TO-DB-c-21",
+  "round": 126,
+  "worker": "0.9.0_WK_IRPT_DASHBD~413",
+  "method_words": "silver_locations() takes one day argument; the read used the placeholder day 2000-01-03 and kept the prefix, as the checker does; no AWS call is made by that function. Every live read is a LIST (list_objects_v2 with a delimiter) or a GET of one parquet, through one read-only reader class. Two runs of the same read-only script were made; the reads block is the cumulative count of both runs.",
+  "silver": {
+    "fact_holdings": {
+      "partitions": 94,
+      "newest_date": "2026-10-14",
+      "read_utc": "2026-10-15T14:32:35Z"
+    },
+    "fact_allocations": {
+      "partitions": 145,
+      "newest_date": "2026-10-14",
+      "read_utc": "2026-10-15T14:32:35Z"
+    }
+  },
+  "gold": {
+    "holdings_performance_daily": {
+      "newest_date": "2026-10-14",
+      "rows": 1001,
+      "read_utc": "2026-10-15T14:32:36Z"
+    },
+    "account_dim": {
+      "newest_date": "2026-10-14",
+      "rows": 1004,
+      "households": 226,
+      "accounts_without_household": 37,
+      "read_utc": "2026-10-15T14:32:36Z"
+    },
+    "crosswalk": {
+      "holdings_account_column": "account_id",
+      "overlap": 1001,
+      "only_in_holdings": 0,
+      "only_in_account_dim": 3,
+      "read_utc": "2026-10-15T14:32:36Z"
+    }
+  },
+  "reporting_gold": {
+    "scheduled_for_cottonwood": false,
+    "evidence_files": [
+      "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "data/assets/scripts/gold/irpt_reporting/filled_report_values.py",
+      "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_report_reader.py",
+      "infra/aws/terraform/investor-reporting/reporting-gold/schedule.tf"
+    ],
+    "evidence_words": "The scheduled handler takes its firm from the first custody entry of its sources.json; that file holds one custody entry, keyed by a registry master that resolves to a firm other than cottonwood, and no cottonwood key. Its filled-report households call is the built-in firm adapter, which reads that firm's household crosswalk, not the Cottonwood account_dim. The schedule file fires only this handler and carries no cottonwood event.",
+    "next_run_source_partition": "2026-10-14",
+    "next_run_households": 226,
+    "output_prefix": null,
+    "output_object_count": 0,
+    "output_newest_key": null,
+    "absent_kinds_words": "Cottonwood holds no account_activity_daily gold table, no account_lot_realized gold table, no account_lot_unrealized_daily gold table and no account_class_daily gold table; the reader names each of the four as the absent form NO_SOURCE_YET until one exists.",
+    "read_utc": "2026-10-15T14:32:36Z"
+  },
+  "verdicts": {
+    "silver_to_gold_holdings": {
+      "verdict": "HOLDS",
+      "words": "Silver fact_holdings and the Cottonwood holdings_performance_daily gold both newest-land on 2026-10-14; the gold holds 1001 rows and 1001 distinct accounts. Row-level tie to silver was not compared; the verdict rests on the newest partition."
+    },
+    "silver_to_gold_account_dim": {
+      "verdict": "HOLDS",
+      "words": "Silver fact_allocations and fact_holdings both newest-land on 2026-10-14; the Cottonwood account_dim gold newest-lands on 2026-10-14 with 1004 rows. Its account set is the holdings set plus 3 accounts with no holding (only_in_account_dim 3)."
+    },
+    "gold_to_reporting_gold_households": {
+      "verdict": "BREAKS",
+      "words": "The Cottonwood reader's households() would take the 2026-10-14 account_dim partition and return 226 households, but the scheduled reporting-gold build never calls it for Cottonwood: its firm and households come from the built-in firm's crosswalk. The scheduled_for_cottonwood value is false."
+    },
+    "reporting_gold_output": {
+      "verdict": "BREAKS",
+      "words": "The scheduled build writes no Cottonwood filled report: output_prefix is null and a Cottonwood gold prefix has no writer in the build. The output object count is 0 by construction, not by a listing."
+    }
+  },
+  "reads": {
+    "s3_list_calls": 10,
+    "s3_get_calls": 6,
+    "writes": 0,
+    "invokes": 0
+  },
+  "claim": "measured",
+  "pushed": false,
+  "deployed": false
+}
