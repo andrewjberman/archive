@@ -35,3 +35,15 @@ different hash voids this half.
 **CTO half -- `1.0.0_SA_CTO~DELL2`: SIGNED** on sha256 `c63702ade4df...`.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## Note on CVO~IRPT ADJUDICATION_v90 (msg 8282), the gaps it lists for a signer. No change to the signature
+
+- **Served readers (W155-S10 treats the prefix as served):** the effect of Acts 2 and 3 on a served reader is ADDITIVE. New trading days after
+  2026-06-22 appear, and no existing value changes, because the guard refuses any existing key. That extension is the authorised purpose of
+  the pair (Cottonwood's account returns after 06-22, B-CW round-117 ruling 3). Act 2's after-read names every reader in the repo that opens
+  the prefix (`comp-find`) and records which of them now see 2026-07-10.
+- **N writers:** one rule in this pair (`write_day`). The operator path that wrote the history is uncounted and out of this pair's scope, and the
+  half says so; it is not settled here.
+- **Plan:** the applier's plan is the first reading, and 7 / 0 / 0 is the gate.
+- **py3.12 memory:** Act 2's `Max Memory Used` decides.
+- **Branch C:** the half partition's removal waits on Andrew's word, as written.
