@@ -1,101 +1,173 @@
 {
  "to_id": "NFRA_OPLGTW.TO-OG-ap-18",
  "phase": "A",
+ "cut": "v3 (A7: re-cut on OG-yr-1's release; A6: tests/test_og_gt8.py dropped)",
  "cut_by": "0.7.0_AE_CloudOps~Z",
- "cut": "v2 (A4/A5 re-cut)",
+ "base_sha": "bf7ffb62f4ae5af8298d3c24960c63d2965542d9",
+ "release_sha": "047f11aa991e5c7ed188876f07a8599447cf2849",
+ "release_branch": "rel-nfra-oplgtw-gt3",
+ "worktree": "C:/tmp/og-rel-gt3",
  "supersedes": {
-  "release_sha": "4275edccad2d48fe0183a783a120527bab6fb16b",
-  "why": "it could not start on the host -- harvest_identity.py indexed Path(__file__).parents[5] and /opt/opal-gateway/app/ has 4 parents (row Z-S126). Nothing was deployed; the ledger was never opened; A4 withdrew the GO and all three halves re-sign at the new release_sha."
+  "release_sha": "7521aee72528ca4d1d5ec811e11af74a0153faa2",
+  "why": "never signed. A6(3) held it back because OG-yr-1 deployed first on Andrew's 'live now', which moved the live ref from bacec95ccd to bf7ffb62f4; the three halves sign THIS release_sha."
  },
- "base_sha": "bacec95ccd6cafd2201f7433af24ae2748732355",
- "release_sha": "7521aee72528ca4d1d5ec811e11af74a0153faa2",
- "base_is": "EC2_MANIFEST deployed_commit, RE-READ at this cut (A4: it moves) and still bacec95ccd; md5 107 of 107 at the first cut",
- "release_branch": "rel-nfra-oplgtw-gt2",
- "worktree": "C:/tmp/og-rel-gt2",
- "source": {
-  "whole_at_pin": {
-   "pin": "b6075b276d",
-   "why_one_pin": "gt-8's app/harvest_identity.py and gt-9's app/harvest_press.py are byte-identical to trunk HEAD, and the other three modules and the five gt0-gt4 tests are unchanged since the first cut's pin -- verified blob by blob, so one pin covers the whole whole-file set",
-   "files": 12
-  },
-  "by_hunk": {
-   "0cda8e2505": [
-    "app/tools.py",
-    "app/destructive_ops.py",
-    "app/data_entitlement.py",
-    "tests/test_entitlement_admin.py",
-    "tests/test_data_entitlement_family.py"
-   ],
-   "43e5e0383e (gt-8)": [
-    "deploy-to-ec2.sh -- the lib/trading_calendar.py staging and `lib` in the tar"
-   ]
-  },
-  "files_total": 18,
-  "outside_the_gateway": 0
+ "prior_superseded": {
+  "release_sha": "4275edccad",
+  "why": "could not have started on the host -- parents[5] IndexError at 4-parent depth (row Z-S126)"
  },
- "excluded_and_verified_absent": [
-  "app/news_typed.py (rides OG-ap-19)",
-  "app/typed_scope.py",
-  "app/harvest_published.py",
-  "tests/test_og_gt5.py",
-  "tests/test_og_gt6.py",
-  "the gt-10 portal modules",
-  "the /yearinreview refresh (its own OG-yr-1)"
- ],
+ "base_is": {
+  "claim": "the host's RUNNING commit at the cut",
+  "read_three_ways": [
+   "EC2_MANIFEST services.opal-gateway.deployed_commit at HEAD = bf7ffb62f4, deployed 2026-10-14T23:04:51Z",
+   "the artifact's own git-ref S3 metadata on ec2/opal-gateway/opal-gateway-latest.tar.gz = bf7ffb62f4 -- the instrument that MOVES if another seat deploys, which the manifest alone would not show until it commits",
+   "one SSM md5 read of the host minutes earlier: 107 of 107 under app/ and deploy/ md5-EQUAL to bf7ffb62f4, 0 mismatch, 0 one-sided (W/YR_SERVED.json)"
+  ]
+ },
+ "take": {
+  "files": 17,
+  "v2_had": 18,
+  "dropped": {
+   "path": "tests/test_og_gt8.py",
+   "why": "A6 ruling 1 -- two of its three tests assert on app/news_typed.py, which rides OG-ap-19, so the suite cannot go green by construction while the harvest_identity half of each passes. Row Z-S130.",
+   "absent_from_this_tree": true,
+   "positive_control": "the same path DOES resolve at v2 7521aee725, so its absence here is the drop and not a bad read"
+  },
+  "whole": [
+   "app/harvest_typed.py",
+   "app/harvest_identity.py (gt-8 43e5e0383e, the safe calendar root)",
+   "app/harvest_press.py (gt-9 73804a2c4a)",
+   "app/harvest_figures.py",
+   "app/harvest_research.py",
+   "tests/test_og_gt0.py",
+   "tests/test_og_gt1.py",
+   "tests/test_og_gt2.py",
+   "tests/test_og_gt3.py",
+   "tests/test_og_gt4.py",
+   "tests/test_og_gt9.py (gt-9 73804a2c4a)"
+  ],
+  "by_hunk": [
+   "app/tools.py (the ten registrations)",
+   "app/destructive_ops.py (the ten into SAFE_TOOLS)",
+   "app/data_entitlement.py (the ten into NATIVE_TOOLS)",
+   "tests/test_entitlement_admin.py (registered_tool_names 65 -> 75)",
+   "tests/test_data_entitlement_family.py (non_data 56 -> 66)",
+   "deploy-to-ec2.sh (gt-8: lib/trading_calendar.py staged and lib added to the tar -- lib/ becomes a NEW artifact member)"
+  ],
+  "how_verified": "yr-1's three files and v2's eighteen are DISJOINT (intersection measured 0), so v2's content applies to the new base unchanged. Every one of the 17 taken files is BYTE-IDENTICAL to its v2 blob, checked md5 by md5 (17 of 17, 0 differing, 0 missing). yr-1's three files remain at the base's content, each equal to the HEAD blob."
+ },
+ "tests": {
+  "suites": 9,
+  "passed": 48,
+  "failed": 0,
+  "errors": 0,
+  "per_suite": {
+   "test_og_gt0": 5,
+   "test_og_gt1": 4,
+   "test_og_gt2": 5,
+   "test_og_gt3": 5,
+   "test_og_gt4": 7,
+   "test_og_gt9": 4,
+   "test_og_hv1": 5,
+   "test_entitlement_admin": 9,
+   "test_data_entitlement_family": 4
+  },
+  "arithmetic_cross_check": "v2 read 49 passed / 2 failed over ten suites; dropping tests/test_og_gt8.py removes its 1 passed and both of its failures, so 48/0 is exactly what the drop predicts -- the counts reconcile rather than merely looking clean",
+  "corroboration": "tests/test_yearinreview_view.py also run at this base: 12 passed, so the cut does not disturb yr-1"
+ },
  "host_shaped_import_check": {
-  "why": "A4 makes it a Phase A trigger because the A2 evidence ('imports cleanly in the release tree') is a property of a module AT A DEPTH: the checkout is 8 parents deep, the host is 4, and parents[5] is correct in one and fatal in the other.",
-  "how": "the release tree's app/ copied to C:/tmp/g1/app with lib/trading_calendar.py beside it at C:/tmp/g1/lib, then all five G1 modules AND app.tools imported in a FRESH interpreter whose sys.path is that root only",
-  "depth_proof": {
-   "probe_file": "C:/tmp/g1/app/harvest_identity.py",
-   "parents": 4,
-   "host_equivalent": "/opt/opal-gateway/app/harvest_identity.py",
-   "host_parents": 4,
-   "matched": true
+  "root": "C:/tmp/g3",
+  "modules": {
+   "harvest_typed": "ok",
+   "harvest_identity": "ok",
+   "harvest_press": "ok",
+   "harvest_figures": "ok",
+   "harvest_research": "ok",
+   "tools": "ok"
   },
-  "result": {
-   "app.harvest_typed": "OK",
-   "app.harvest_identity": "OK",
-   "app.harvest_press": "OK",
-   "app.harvest_figures": "OK",
-   "app.harvest_research": "OK",
-   "app.tools": "OK",
-   "of": "6 of 6"
+  "parents": {
+   "harvest_typed": 4,
+   "harvest_identity": 4,
+   "harvest_press": 4,
+   "harvest_figures": 4,
+   "harvest_research": 4,
+   "tools": 4
   },
-  "calendar_at_that_depth": {
-   "resolves": true,
-   "calendar_source": "NYSE/hardcoded-fallback-2024-2027",
-   "t1": "2026-10-13",
-   "trading_days_behind_t1_for_a_2026_10_09_stamp": 2,
-   "absent_reason": null,
-   "why_it_matters": "Phase B must see a NUMBER here rather than the absent reason; this is that number, measured before the deploy at the host's own depth"
+  "ok_count": 6,
+  "total": 6,
+  "calendar_resolves": true,
+  "calendar_source": "NYSE/hardcoded-fallback-2024-2027",
+  "t1_trading_day": "2026-10-14",
+  "correct_shape": {
+   "2026-10-09T12:00:00Z": {
+    "trading_days_behind_t1": 3,
+    "absent_reason": null
+   },
+   "2026-10-13T12:00:00Z": {
+    "trading_days_behind_t1": 1,
+    "absent_reason": null
+   },
+   "2026-10-14T12:00:00Z": {
+    "trading_days_behind_t1": 0,
+    "absent_reason": null
+   }
+  },
+  "lag_is_a_number_for_every_probe": true,
+  "wrong_shape_control": {
+   "stamp": "2026-10-09T12:00:00+00:00",
+   "trading_days_behind_t1": null,
+   "absent_reason": "the trading calendar cannot place 2026-10-09T12:00:00+00:00 (ValueError)"
+  },
+  "control_is_absent_as_expected": true
+ },
+ "host_shaped_import_check_notes": {
+  "why": "v1's evidence ('imports cleanly in the release tree') is a property of a module AT A DEPTH: a repo checkout is 8 parents deep and /opt/opal-gateway/app/<m>.py is 4, which is what made parents[5] fatal on the host and harmless in a checkout (row Z-S126, amendment A4).",
+  "depth_proof": "C:/tmp/g3/app/harvest_identity.py has exactly 4 parents, the same as /opt/opal-gateway/app/harvest_identity.py",
+  "first_two_runs_were_my_instrument_not_the_code": "Run 1 used python -I and read 5 of 6: app.tools failed ModuleNotFoundError: No module named 'anyio', because -I ignores the user site-packages that carries it. That is a DEPENDENCY absence, not a depth failure, and the host runs under its own venv with every dep -- so -I was dropped and the check read 6 of 6. Run 2 then read trading_days_behind_t1 = null with 'the trading calendar cannot place ... (ValueError)' for every probe, which LOOKED like a regression against v2's measured 2. It was my stamp SHAPE: _behind parses %Y-%m-%dT%H:%M:%SZ -- a LITERAL Z, which is what S3 LastModified renders -- and I passed +00:00. The corrected probes read 3, 1 and 0 trading days behind T-1 for 2026-10-09, 10-13 and 10-14, and the wrong-shape probe is KEPT as a control that comes back ABSENT, so the record can tell a wrong instrument from a real defect. v2's 2 against today's 3 for the same 2026-10-09 stamp is one trading day of clock movement: T-1 was 2026-10-13 then and reads 2026-10-14 now.",
+  "calendar_oracle": {
+   "md5": "3de6a337e268614698943b038248113b",
+   "which_copy": "the DEPLOY TREE's lib/trading_calendar.py, per A6(2) -- NOT trunk's 6596e52f",
+   "source": "NYSE/hardcoded-fallback-2024-2027"
   }
  },
- "the_artifact_lib_is_the_DEPLOY_TREE_copy": {
-  "md5_that_will_ship": "3de6a337e268614698943b038248113b",
-  "md5_at_repo_HEAD": "6596e52fa01f2bee1160863c4e39318a",
-  "reading": "gt-8's deploy hunk stages $WORKSPACE_ROOT/lib/trading_calendar.py, and WORKSPACE_ROOT is the DEPLOY TREE -- pinned at the base for every file this cut did not take. So the artifact carries the base's calendar (hardcoded NYSE fallback 2024-2027), not trunk's newer one (2010-2027, generated, and FAIL-CLOSED outside its covered years). Both cover the current frontier and the numeric lag above was measured against the copy that will actually ship. PHASE B MUST COMPARE THE HOST'S md5 AGAINST 3de6a337, NOT 6596e52f: the repo-HEAD copy is the wrong oracle and would read as a mismatch on a correct deploy."
- },
- "tests_in_the_release_tree": {
-  "tests/test_og_gt0.py": "5 passed",
-  "tests/test_og_gt1.py": "4 passed",
-  "tests/test_og_gt2.py": "5 passed",
-  "tests/test_og_gt3.py": "5 passed",
-  "tests/test_og_gt4.py": "7 passed",
-  "tests/test_og_gt9.py": "4 passed",
-  "tests/test_og_hv1.py": "5 passed",
-  "tests/test_entitlement_admin.py": "9 passed",
-  "tests/test_data_entitlement_family.py": "4 passed",
-  "tests/test_og_gt8.py": "2 failed, 1 passed -- BY CONSTRUCTION, see below",
-  "totals": "49 passed, 2 failed, 0 errors"
- },
- "the_two_failures_are_the_exclusion_A4_ordered": {
-  "tests": [
-   "test_oggt8_ac01",
-   "test_oggt8_ac02"
+ "cone": {
+  "paths": [
+   ".tools",
+   "data/transcripts/scripts/teams",
+   "infra/aws/ec2/opal-gateway",
+   "infra/logic",
+   "lib",
+   "org/modules/graph",
+   "org/standards",
+   "org/tier2_senior/0.7.0_AE_CloudOps~Z"
   ],
-  "cause": "both assert on TWO modules: harvest_identity AND news_typed. A4 keeps news_typed out of this release (it rides OG-ap-19), so its half reads {'import': 'ModuleNotFoundError', 'calendar': None} and the assertion fails. The harvest_identity half of each PASSES -- {'import': 'ok', 'calendar': True} with lib/ present and {'import': 'ok', 'calendar': False} without it -- which independently corroborates the host-shaped check above, using the cell's own test rather than my instrument.",
-  "not_a_defect_in_what_ships": true,
-  "the_issuer_s_call": "three routes: take news_typed too (contradicts A4 and widens the release), accept these two as unmeetable here and name them, or let tests/test_og_gt8.py ride OG-ap-19 with the module it covers. Filed as a row; this seat picked none of them."
+  "infra_logic_is_new": "row Z-S132, ruled by the issuer in msg 34290. Without it deploy-to-ec2.sh refuses at its naming step, which resolves two .env S3 roots through lib/opal_naming.py address() (LGIC R30). Proved at CUT time by W/gt3_naming_dryread.sh -- three arms, no upload.",
+  "org_standards_is_why_the_tests_run": "a sparse tree running tests needs every path the tests READ; without it the suites raise fixture errors",
+  "not_in_the_cone_and_it_shows": "org/missions/DIRECTIVES.yaml -- the commit-time naming gate prints 'NAMING ERROR lib/opal_naming.py or the registry cannot be loaded: FileNotFoundError ... DIRECTIVES.yaml' and grades NOTHING. Its own WARN window means it never blocks, so this is a gate reading VACUOUS rather than a refusal -- worth adding to the cone clause if the issuer wants that limb to actually grade."
  },
- "deployed": false
+ "naming_dry_read": {
+  "script": "W/gt3_naming_dryread.sh",
+  "span": "deploy-to-ec2.sh lines 94-107, located by anchor rather than a pinned line number",
+  "span_sha256_prefix": "96537219400bd907",
+  "result": "RESULT: PASS, exit 0",
+  "arms": {
+   "POSITIVE": "both roots resolve through the builder and both shape guards pass",
+   "NEGATIVE_IMPORT": "a WORKSPACE_ROOT with no lib/ refuses exit 1 and no root escapes -- and the refusal comes from the failing substitution under set -euo pipefail, NOT from the case guard",
+   "NEGATIVE_SHAPE": "a stub address() that exits 0 with a wrong-shaped root IS refused by the case guard"
+  },
+  "why_three_arms": "the first version of this check asserted the case guard would produce the import refusal and FAILED ITSELF. Under set -euo pipefail the failing command substitution aborts the script before the case runs, so the guard is UNREACHABLE for the registry failure its own comment describes ('fail closed ... if it is empty'). The fail-closed property holds; the mechanism is not the one the comment credits, and only the third arm proves the guard works at all."
+ },
+ "non_ascii": {
+  "file": "app/tools.py",
+  "chars_at_the_base": 7,
+  "chars_at_the_release": 7,
+  "chars_in_the_added_lines": 0,
+  "verdict": "PRE-EXISTING, not introduced -- same count, the same lines shifted by this cut's own insertion"
+ },
+ "deployed": false,
+ "note": "Phase A only. Nothing is deployed, no ledger is open, no IAM or Terraform change, no object written to any data bucket, no .env key. Three halves sign 047f11aa99: 1.0.0_SA_CTO~Z, 2.0.0_SA_COO~O, 3.0.0_SA_CVO~Z.",
+ "blocking_for_phase_b": {
+  "row": "NFRA_OPLGTW-Z-S133",
+  "class": "BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~O",
+  "what": "deploying from THIS tree moves the /yearinreview page's served md5 from 0d828b51 to 3bbd5ab2 -- identical content, 344 line terminators. The path carries .gitattributes eol=lf, so the blob is LF and every clean checkout materialises LF; yr-1 shipped from a tree whose WORKING COPY held the CRO's CRLF bytes, and the deploy tars the working copy. git reports the path CLEAN in both trees because eol=lf normalises on read. A later yr1.AC2 run would then read host-md5 != source and FAIL against a correct deploy. Two routes in the row; the issuer rules before Phase B."
+ }
 }

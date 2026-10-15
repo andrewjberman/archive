@@ -1,0 +1,70 @@
+{
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-17",
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~41",
+  "worktree": "C:/tmp/wk-mcpindex-r16-41",
+  "branch": "wk-NFRA_MCPINDEX-41",
+  "base_head_at_start": "32af6d6df5",
+  "steps": [
+    {
+      "step": 0,
+      "command": "python org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round16/checks/deployed_from_rows.py .scratch/deployed.json",
+      "result": "deployed tools written: 1"
+    },
+    {
+      "step": 1,
+      "command": "python workflows/atom_decomposition/tests/test_gen_silver_rows.py (before the change)",
+      "result": "Ran 32 tests, OK"
+    },
+    {
+      "step": 1,
+      "change": "gen_silver_rows.py: G5R_DEFAULT, G5R_FIELDS, load_g5r(path), apply_g5r(full, entity, rows), --g5r argument, main() applies the enrichment to each in-scope FULL row before split_row, prints the enriched count. Tests: class G5rEnrichmentTests (7 tests).",
+      "command": "python workflows/atom_decomposition/tests/test_gen_silver_rows.py (after the change)",
+      "result": "Ran 39 tests, OK"
+    },
+    {
+      "step": 2,
+      "command": "python workflows/atom_decomposition/gen_silver_rows.py --g2 .../0.9.0_WK_NFRA_MCPINDEX~38/G2_pinned.md --g4 .../G4_pinned.md --g5 .../G5_pinned.md --g6 .../G6_pinned.md --g3 .../G3_pinned.md --g2f .../G2f_pinned.md --out workflows/atom_decomposition/catalog_entries --deployed-tools .scratch/deployed.json",
+      "result": "mapped 8 in-scope contracts; g5r enrichment applied to 14 in-scope contracts (14 entities in the file); skipped 12; wrote 216 rows",
+      "git_status_after": "14 modified row files (13 opal_data_etfs_gold_* named in g5r_enrichment.json, plus opal_data_etfs_platinum_rivalfunds_page.yaml); no registry file; no untracked file"
+    },
+    {
+      "step": 3,
+      "criterion": "AC1",
+      "command": "timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round14/checks/c14.AC2.sh; echo exit=$?",
+      "result": "ROWS graded 216 of 216; failing fields: none / RESULT: PASS / exit=0"
+    },
+    {
+      "step": 3,
+      "criterion": "AC2",
+      "command": "timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round16/checks/c17.AC2.sh; echo exit=$?",
+      "result": "DENOMINATOR table rows 226; enriched 14; rows whose bytes differ from 0f40810fa2: 14 / CHECKS pass 15 of 15 / RESULT: PASS / exit=0",
+      "note": "The order expects table rows 216. The check counts every *.yaml in catalog_entries not prefixed need_ or harvest_: 226 names, all present at 0f40810fa2, 216 written by the generator, 10 other tracked rows untouched. Refused as written on that token; surprise NFRA_MCPINDEX-Z-W41-S1."
+    },
+    {
+      "step": 3,
+      "criterion": "AC3",
+      "command": "timeout 540 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round14/checks/c14.AC3.sh; echo exit=$?",
+      "result": "ARM D0..D4 each rows wrong 0 / ARMS pass 5 of 5; rows graded right 1080 of 1080 (client tools in play: 9) / RESULT: PASS / exit=0"
+    },
+    {
+      "step": "control-mutant",
+      "command": "python workflows/atom_decomposition/gen_silver_rows.py ... --out .scratch/mutant_rows --g5r .scratch/empty_g5r.json; C17_DIR=.scratch/mutant_rows python org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round16/checks/c17_check.py ac2",
+      "result": "g5r enrichment applied to 0 in-scope contracts; wrote 216 rows; check rc=1; CHECKS pass 0 of 15; RESULT: FAIL"
+    },
+    {
+      "step": "control-determinism",
+      "command": "the same generator command run twice into .scratch/det_a and .scratch/det_b, then compared byte for byte, and each compared with the worktree rows",
+      "result": "216 of 216 identical a==b; 216 of 216 identical to the committed worktree rows"
+    },
+    {
+      "step": "not-run",
+      "item": "round16/checks/plant_c17.py",
+      "reason": "the file states it is the issuer's cut-time control and is NOT given to the worker; the mutant control above is the worker's own."
+    }
+  ],
+  "commits": [
+    {"hash": "19b2afa2b5", "subject": "MX-c-17: the silver-row generator applies the G5r enrichment to the full row", "paths": "gen_silver_rows.py, tests/test_gen_silver_rows.py"},
+    {"hash": "bebd2a93e2", "subject": "MX-c-17: regenerate the 14 rival-fund rows with the G5r enrichment", "paths": "14 catalog_entries rows"}
+  ],
+  "task_order_status": "issued (not flipped: AC2 is FAIL as written)"
+}
