@@ -56,7 +56,7 @@
     },
     {
       "path_or_key": "infra/.gitignore",
-      "kind": "config",
+      "kind": "config_data",
       "commit_or_etag": "a3fe2e7707",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "item 3 (W95-S1): one rule for reached_roles_census.fresh_checkpoint.json appended after the last rule; git check-ignore -v matches it at infra/.gitignore:164 for the tests-folder path; the neighbour reached_roles_census.json is not ignored (check-ignore rc=1)",
@@ -108,10 +108,16 @@
     }
   ],
   "controls": {
-    "base_line_match": {
-      "description": "the last lines of the two existing suites equal the base controls named in the order",
-      "observed": "OPEN-CALL-ACT-ROOTS arms=8/8 ok=True and SAFE-COMMIT-DERIVATION cases=17/17 ok=True, both rc=0, identical to the base lines",
-      "status": "MATCHED"
+    "determinism": {
+      "method": "two runs of python .tools/tests/test_round15_batch.py from the worktree root at 56eb1742fd, outputs compared byte for byte with cmp",
+      "observed": "identical output on both runs (rc=0 both): ROUND15-BATCH arms=9/9 ok=True; cmp reported no difference",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the base infra/.gitignore at cd1e04765b (the state before the repair, read by git show) against the repaired file at a3fe2e7707, both searched for the checkpoint name; a textual control, not a git check-ignore run on the base",
+      "expected": "the base carries no rule naming reached_roles_census.fresh_checkpoint.json (count 0); the repaired file carries one (count 1)",
+      "observed": "base grep -c fresh_checkpoint = 0; repaired grep -c fresh_checkpoint = 1; the repaired file's check-ignore at HEAD matches at infra/.gitignore:164",
+      "status": "FIRED-AS-EXPECTED"
     }
   },
   "declared_exclusions": [
