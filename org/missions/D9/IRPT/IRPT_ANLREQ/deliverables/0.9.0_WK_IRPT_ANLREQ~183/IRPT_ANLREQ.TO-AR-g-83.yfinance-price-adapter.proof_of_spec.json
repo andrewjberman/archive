@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_yfinance.py",
       "kind": "script",
-      "commit_or_etag": "286cdf9f94",
+      "commit_or_etag": "497e911dab",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "new module, imported by nothing; top-level imports __future__, math, tr_level, typing only; default fetch imports yfinance inside itself only; no deploy, no host or IAM change",
+      "deploy_evidence": "new module, imported by nothing; top-level imports __future__, math, tr_level, typing only; default fetch imports yfinance inside itself only; s_t is the product of the split ratios since the previous usable row (amendment af96479526); no deploy, no host or IAM change",
       "artifact_covered_by": [
         "AR83-g-AC1",
         "AR83-g-AC2"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_yfinance.py",
       "kind": "test",
-      "commit_or_etag": "286cdf9f94",
+      "commit_or_etag": "497e911dab",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "11 offline tests with hand-computed values and fakes (no network); 11 passed",
+      "deploy_evidence": "12 offline tests with hand-computed values and fakes (no network); 12 passed, including the split on a dropped bad-Close row",
       "artifact_covered_by": [
         "AR83-g-AC1"
       ]
@@ -43,8 +43,8 @@
       "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g8x_checks.py g83",
       "method": "test_suite",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g8x_checks.py g83",
-      "output_evidence": "AR-G83-OK cases=10 tests=11 | checker lines: 'cases 10, wrong none' and 'worker tests: 11 passed in 0.15s' | rc=0",
-      "denominator": "10 of 10 direct cases correct (wrong none); 11 passed, 0 failed in test_price_adapter_yfinance.py (need >= 6)",
+      "output_evidence": "AR-G83-OK cases=11 tests=12 | checker lines: 'cases 11, wrong none' and 'worker tests: 12 passed in 0.15s' | rc=0",
+      "denominator": "11 of 11 direct cases correct (wrong none, including case 11: split on a dropped bad-Close row, [(D1, 100.0), (D3, 103.02)]); 12 passed, 0 failed in test_price_adapter_yfinance.py (need >= 6)",
       "expect": "^AR-G83-OK",
       "status": "PASS"
     },
@@ -61,7 +61,7 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The spec names no mutant; the order's own negative arms are the offline tests (a bad Close, a zero, NaN or missing split ratio, the window cut, a fetch error, the symbol normalisation).",
+      "description": "The spec names no mutant; the order's own negative arms are the offline tests (a bad Close, a zero, NaN or missing split ratio, a split on a dropped bad-Close row, the window cut, a fetch error, the symbol normalisation).",
       "expected": "N/A",
       "observed": "N/A",
       "status": "N/A-SPEC-NAMES-NONE"
@@ -73,7 +73,9 @@
     }
   },
   "surprises": [
-    "IRPT_ANLREQ-D2-W183-S1: the AR-g-83 contract applies the split ratio on the returned row only, so a 2-for-1 split dated on a dropped bad-Close row reads -49 percent where the true move is +2 percent; implemented literally as written, filed not corrected."
+    "IRPT_ANLREQ-D2-W183-S1: the AR-g-83 contract applied the split ratio on the returned row only, so a 2-for-1 split on a dropped bad-Close row read -49 percent where the true move is +2 percent; resolved in substance by the issuer's amendment af96479526, implemented at 497e911dab, row left UNDER_INVESTIGATION for the CVO.",
+    "IRPT_ANLREQ-D2-W183-S2: closing row for S1: the amended item 3 (s_t as the product of the split ratios since the previous usable row) is implemented at 497e911dab and checker case 11 passes.",
+    "IRPT_ANLREQ-D2-W183-S3: the owned-paths lane gate refused the amendment fix at dbb40402f8 because the order was complete at HEAD; the amended order was committed as pending first (9db088e4ad) and the fix then passed; no override used."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "declared_exclusions": [
@@ -86,24 +88,24 @@
       "reason": "A CloudOps host act named by the cell's iam_or_host_change, not a worker cell."
     },
     {
-      "item": "A split dated on a dropped row inside the spanning return",
-      "reason": "The contract formula is implemented as written; filed as IRPT_ANLREQ-D2-W183-S1 for the issuer and the CTO."
+      "item": "Infinite Dividends values",
+      "reason": "The contract says None, NaN and non-numbers count as 0.0 and is silent on infinity; the module counts any non-finite Dividends value as 0.0. The issuer ruled this judgment correct."
     },
     {
-      "item": "Infinite Dividends values",
-      "reason": "The contract says None, NaN and non-numbers count as 0.0 and is silent on infinity; the module counts any non-finite Dividends value as 0.0 (a judgment, stated in the module docstring)."
+      "item": "Bool Stock Splits values",
+      "reason": "The contract says a ratio that is not a finite number above zero counts as 1.0 and is silent on bools; the module counts a bool ratio as 1.0. The issuer ruled this judgment correct."
     }
   ],
   "compiler_tools": [
     {
       "tool": "python",
       "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_yfinance.py",
-      "result": "11 passed in 0.16s"
+      "result": "12 passed in 0.19s"
     },
     {
       "tool": "bash .tools/commit-gate.sh",
-      "invocation": "bash .tools/commit-gate.sh on price_adapter_yfinance.py, then on the product commit's two .py files",
-      "result": "pre-commit gate clean for 2 of 2 file(s) at 286cdf9f94"
+      "invocation": "bash .tools/commit-gate.sh on price_adapter_yfinance.py and on its test file, at the fix commit",
+      "result": "pre-commit gate clean for 2 of 2 file(s) at 497e911dab"
     }
   ]
 }
