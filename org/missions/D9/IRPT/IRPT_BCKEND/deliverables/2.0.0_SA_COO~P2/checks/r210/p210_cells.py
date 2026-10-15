@@ -157,6 +157,8 @@ def v1():
     if not is_int(sr.get("count")) or sr["count"] < 1 or not is_int(sr.get("distinct_dates")) or sr["distinct_dates"] < 1:
         fail("source_rows needs count and distinct_dates as counts of at least 1 (the dropped account's rows, ids private)")
     run = r.get("offline_run") or {}
+    if run.get("performed") is not True:
+        fail("offline_run.performed must be true: the validator was RUN offline on the account's rows (a record that did not run it is not graded)")
     if run.get("read_only") is not True or run.get("writes") != 0 or run.get("published") is not False:
         fail("offline_run must be read only: writes 0, published false")
     text(run.get("invocation"), 30, "offline_run.invocation (the command, without any account id)")
@@ -167,6 +169,8 @@ def v1():
 
 def v2():
     r = load(REC2)
+    if not is_int((r.get("source_rows") or {}).get("count")) or r["source_rows"]["count"] < 1 or (r.get("offline_run") or {}).get("performed") is not True:
+        fail("the offline run must have been performed on at least one source row before a condition is named or ruled out")
     fc = r.get("failing_condition") or {}
     run = r.get("offline_run") or {}
     if run.get("outcome") == "refused":
