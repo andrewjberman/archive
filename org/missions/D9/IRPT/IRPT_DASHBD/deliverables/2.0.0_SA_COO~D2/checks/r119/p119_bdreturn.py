@@ -157,13 +157,17 @@ def recompute_value(s3, key_col, value_col, account, day):
     t = pq.read_table(io.BytesIO(body), columns=[key_col, value_col]).to_pydict()
     vals = [v for k, v in zip(t[key_col], t[value_col]) if k == account]
     need(len(vals) >= 1, "the probed account is not in the silver partition of %s" % day)
-    return sum(float(v) for v in vals if v is not None)
+    # the silver repeats an account's row (about three accounts in four hold two IDENTICAL rows): identical copies are one value, never a sum;
+    # two different values for one account-day are a conflict the adapter must not have resolved by adding them
+    distinct = {float(v) for v in vals if v is not None}
+    need(len(distinct) == 1, "the silver holds %d different values for the probed account on %s: no single value to compare" % (len(distinct), day))
+    return distinct.pop()
 
 
 # ------------------------------------------------------------------------------------------------ the record clauses (pure)
 def check_record(rec, n, accounts, dq, table_sha, overlap, module_sha, tracked, seam_truth):
     exp = {"firm", "source_label", "method_version", "value_column", "account_key_column", "accounts", "account_basis", "window", "rows", "by_day_quality",
-           "private_parquet", "key_overlap", "seam", "unresolved_types", "analysis", "reads", "claim", "files_in_repo", "served_values_changed", "pushed",
+           "private_parquet", "key_overlap", "seam", "unresolved_types", "flow_rule", "analysis", "reads", "claim", "files_in_repo", "served_values_changed", "pushed",
            "deployed"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["firm"] == FIRM and rec["source_label"] == LABEL and is_int(rec["method_version"]), "firm, source_label or method_version")
@@ -189,6 +193,10 @@ def check_record(rec, n, accounts, dq, table_sha, overlap, module_sha, tracked, 
          "seam.first_derived_date")
     need(nes(sm["words"]) and "2026-06-22" in sm["words"] and "2026-06-23" in sm["words"], "the seam words must name 2026-06-22 and 2026-06-23")
     need(isinstance(rec["unresolved_types"], dict) and all(nes(a) and is_int(b) and b >= 0 for a, b in rec["unresolved_types"].items()), "unresolved_types form")
+    fr = rec["flow_rule"]
+    need(isinstance(fr, dict) and set(fr) == {"words", "census", "claim"} and nes(fr["words"]) and fr["claim"] in CLAIMS, "flow_rule form")
+    need(isinstance(fr["census"], dict) and set(fr["census"]) == {"Contribution", "Withdrawal", "None"} and all(is_int(b) and b >= 0 for b in fr["census"].values()),
+         "flow_rule.census must hold exactly Contribution, Withdrawal and None as counts")
     an = rec["analysis"]
     need(isinstance(an, dict) and an.get("file") == MODULE_REL and an.get("sha256") == module_sha and an.get("tracked") is True and tracked, "analysis block")
     rd = rec["reads"]
@@ -315,14 +323,15 @@ def selftest(root):
            "key_overlap": {"frame_accounts": 999, "derived_accounts": 2, "overlap": 2, "claim": "measured"},
            "seam": {"commonwealth_last_date": "2026-06-22", "bd_first_date": "2026-04-22", "bd_last_date": "2026-10-13", "first_derived_date": "2026-06-23",
                     "link_base_exists": True, "words": "Commonwealth to 2026-06-22, Black Diamond from 2026-06-23", "claim": "measured"},
-           "unresolved_types": {}, "analysis": {"file": MODULE_REL, "sha256": "cd" * 32, "tracked": True},
+           "unresolved_types": {}, "flow_rule": {"words": "the vendor's word, signed Market Value", "census": {"Contribution": 3, "Withdrawal": 2, "None": 40}, "claim": "measured"},
+           "analysis": {"file": MODULE_REL, "sha256": "cd" * 32, "tracked": True},
            "reads": {"s3_reads": 5, "s3_writes": 0, "dynamodb_writes": 0, "vendor_calls": 0, "secret_reads": 0}, "claim": "measured",
            "files_in_repo": False, "served_values_changed": False, "pushed": False, "deployed": False}
     need(check_record(rec, 4, 2, {"MEASURED": 2, "NOT_MEASURABLE": 2}, "ab" * 32, 2, "cd" * 32, True, seam), "record GREEN")
     for mut, why in ((lambda r: r["key_overlap"].update(overlap=0), "zero overlap"), (lambda r: r["seam"].update(words="no dates"), "seam words"),
                      (lambda r: r.update(source_label="x"), "label"), (lambda r: r["seam"].update(bd_first_date="2026-05-01"), "seam recount"),
                      (lambda r: r.update(pushed=True), "push flag"), (lambda r: r.update(account_basis="ids 1234567890"), "digit run"),
-                     (lambda r: r.update(accounts=3), "accounts")):
+                     (lambda r: r.update(accounts=3), "accounts"), (lambda r: r["flow_rule"]["census"].pop("None"), "a census without None")):
         r2 = json.loads(json.dumps(rec))
         mut(r2)
         try:
@@ -330,7 +339,7 @@ def selftest(root):
             raise Fail("RED: record clause did not fail: " + why)
         except Fail as e:
             need("RED" not in str(e), str(e))
-    print("selftest OK: 1 green and 9 red table arms, 4 red module arms, 1 green and 7 red record arms")
+    print("selftest OK: 1 green and 9 red table arms, 4 red module arms, 1 green and 8 red record arms")
 
 
 if __name__ == "__main__":
