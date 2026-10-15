@@ -1,0 +1,176 @@
+{
+  "base_commit": "e68eef74e63eb17be5e3358606e7409b6614ec33",
+  "dates": {
+    "2026-07-01": {
+      "trading_day": true,
+      "claim": "measured",
+      "empty_beforehand": {
+        "bronze_positions": 0,
+        "bronze_performance": 0,
+        "bronze_transactions": 0,
+        "silver_fact_positions": 0,
+        "silver_fact_performance": 0,
+        "silver_fact_transactions": 0
+      }
+    },
+    "2026-09-28": {
+      "trading_day": true,
+      "claim": "measured",
+      "empty_beforehand": {
+        "bronze_positions": 0,
+        "bronze_performance": 0,
+        "bronze_transactions": 0,
+        "silver_fact_positions": 0,
+        "silver_fact_performance": 0,
+        "silver_fact_transactions": 0
+      }
+    }
+  },
+  "census": {
+    "method": "aws s3api list-objects-v2 on opal-data-assets, paginated by the CLI and counted client-side; a key counts when it carries the ISO date (2026-07-01, 2026-09-28) or the compact date. Positive control in the same listings: the neighbouring trading days 2026-06-30 and 2026-09-25 each match one key per feed, and the day 2026-09-29 matches one silver fact_positions partition (a silver-only partition, catalog open item).",
+    "bronze_keys_listed": {
+      "positions": 2358,
+      "performance": 135,
+      "transactions": 147
+    },
+    "silver_partition_keys_listed": {
+      "fact_positions": 2360,
+      "fact_performance": 134,
+      "fact_transactions": 146
+    },
+    "matches_on_gap_dates": 0
+  },
+  "source_bucket_listing": {
+    "bucket": "opal-data-inf",
+    "prefixes": "bronze/positions, bronze/transactions, bronze/performance (LIST only, read 2026-10-15)",
+    "positions_keys": 4723,
+    "positions_jsonl_gz_keys": 2358,
+    "positions_parquet_keys": 2365,
+    "positions_keys_on_gap_dates": {"2026-07-01": "1 key, .parquet", "2026-09-28": "1 key, .parquet"},
+    "positions_jsonl_gz_on_gap_dates": 0,
+    "transactions_keys": 196,
+    "performance_keys": 185,
+    "transactions_and_performance_keys_on_gap_dates": 0
+  },
+  "pull_path": {
+    "stages": [
+      {
+        "kind": "vendor_pull",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/inf-pipeline/inf-api-positions/pull_inflection_positions_daily.py:188",
+        "identifier": "CLIENT_ASSETS_PATH",
+        "trigger": "EventBridge rule inf-api-positions-daily, cron(22 11 * * ? *), ENABLED (live describe). The Lambda loops every household id per date and calls the per-client assets path once per client per date."
+      },
+      {
+        "kind": "bronze_write",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/inf-pipeline/inf-api-positions/pull_inflection_positions_daily.py:437",
+        "identifier": "bronze/positions/{snap_iso}.parquet",
+        "trigger": "Same run as the vendor pull, once per date after the client loop; put_object to opal-data-inf at line 441. It writes a PARQUET object, which the mirror never copies (ruling 16)."
+      },
+      {
+        "kind": "bronze_write",
+        "claim": "absent",
+        "producer": "infra/aws/lambda/inf-pipeline/inf-silver-chain/convert_orion_api_to_silver.py:785",
+        "identifier": "POSITIONS_BRONZE_KEY_TPL",
+        "trigger": "No repo writer found of the flat bronze/positions/{date}.jsonl.gz key the mirror copies. The only repo reference is this reader template; a Grep of infra/aws/lambda found no writer. Any writer runs outside this repo and was not located."
+      },
+      {
+        "kind": "bronze_write",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:517",
+        "identifier": "copy_object",
+        "trigger": "EventBridge opal-assets-ingest-mirror-inf-daily cron(5 13 * * ? *) and opal-inf-assets-ingest-mirror-late-daily cron(5 17 * * ? *), both ENABLED with input firm inf (live describe). It copies only keys that pass _is_raw (line 493; COERCED_SUFFIXES at line 77 refuses .parquet) from opal-data-inf bronze into opal-data-assets bronze."
+      },
+      {
+        "kind": "trigger",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:460",
+        "identifier": "def lambda_handler",
+        "trigger": "The two schedules above call this handler with the payload firm inf; _select_rows (line 466) keeps the rows sourced from opal-data-inf. The poll enumerates the source window and raises on a conservation failure."
+      },
+      {
+        "kind": "silver_convert",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/mirror_conversion.py:419",
+        "identifier": "def convert_orion",
+        "trigger": "Runs once per bronze .jsonl.gz key: from run_event on an S3 object-created event (live notification silver-orion, prefix orion/inflection/bronze/, suffix .jsonl.gz), or from run_sweep at line 889 for each missing silver key. It skips a partition already present unless forced."
+      },
+      {
+        "kind": "silver_convert",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/mirror_conversion.py:863",
+        "identifier": "def run_sweep",
+        "trigger": "EventBridge opal-assets-silver-orion-sweep-daily, cron(0 16 * * ? *), ENABLED, input {\"mode\":\"sweep\"} (live describe). Expected keys come from the bronze listing (line 875), so a bronze key that never landed is never expected and never converted."
+      },
+      {
+        "kind": "trigger",
+        "claim": "measured",
+        "producer": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/lambda_function.py:22",
+        "identifier": "mc.lambda_entry",
+        "trigger": "The S3 object-created notification silver-orion on opal-data-assets (live get-bucket-notification-configuration) and the 16:00 UTC sweep both reach lambda_entry (mirror_conversion.py:955)."
+      },
+      {
+        "kind": "trigger",
+        "claim": "absent",
+        "producer": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_IRPT_DAILY_6AM_PULLS_FOLD_20261014.md:17",
+        "identifier": "S2:",
+        "trigger": "The 06:00 America/New_York fold (ruling 23eff24d0c, S2) does not cover this feed in live state. No rule of the 155 fires at 10:00 UTC (06:00 EDT) for an Orion stage; the Orion API rules fire 11:02 to 11:32 UTC and the mirror fires 13:05 and 17:05 UTC."
+      }
+    ]
+  },
+  "skip_cause": {
+    "claim": "inferred",
+    "statement": "On both gap dates the Inflection source bucket holds no flat .jsonl.gz positions object (only a .parquet), and no transactions or performance object at all, so the mirror had no .jsonl.gz object to copy. No artifact states why the producer wrote no .jsonl.gz for those days.",
+    "evidence": [
+      "opal-data-inf bronze/positions LIST (denominator 4723 keys): 2026-07-01 has 1 key, a .parquet; 2026-09-28 has 1 key, a .parquet; .jsonl.gz keys on either date: 0",
+      "opal-data-inf bronze/transactions LIST (denominator 196 keys) and bronze/performance LIST (denominator 185 keys): keys carrying 2026-07-01 or 2026-09-28: 0 and 0",
+      "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:77 COERCED_SUFFIXES = (\".parquet\",) and :493 if not _is_raw(key): the mirror copies no .parquet key (ruling 16)",
+      "meta conversions/20260928T130527Z-44056d14.json (GET; mode event): one converted unit, feed assets, rows_in 36103; no positions, transactions or performance unit for 2026-09-28",
+      "meta conversions/20260928T160043Z-cb627fe5.json (GET; mode sweep): set_identity_pre expected 4939, missing 0, alien 1; the expected set is built from the bronze listing (mirror_conversion.py:875), so the never-landed day is not expected",
+      "CloudWatch /aws/lambda/opal-assets-ingest-mirror and /aws/lambda/opal-assets-silver-orion (retentionInDays 14): 0 events in the 2026-07-01 and 2026-09-28 windows; the 2026-10-13 control window returns 28 and 15 events, so the empty windows read as expiry, not absence"
+    ]
+  },
+  "repull_method": {
+    "writes": [
+      "s3://opal-data-assets/orion/inflection/bronze/positions/2026-07-01.jsonl.gz",
+      "s3://opal-data-assets/orion/inflection/bronze/positions/2026-09-28.jsonl.gz",
+      "s3://opal-data-assets/orion/inflection/bronze/performance/2026-07-01.jsonl.gz",
+      "s3://opal-data-assets/orion/inflection/bronze/performance/2026-09-28.jsonl.gz",
+      "s3://opal-data-assets/orion/inflection/bronze/transactions/2026-07-01.jsonl.gz",
+      "s3://opal-data-assets/orion/inflection/bronze/transactions/2026-09-28.jsonl.gz",
+      "s3://opal-data-assets/orion/inflection/silver/fact_positions/date=2026-07-01/data.parquet",
+      "s3://opal-data-assets/orion/inflection/silver/fact_positions/date=2026-09-28/data.parquet",
+      "s3://opal-data-assets/orion/inflection/silver/fact_performance/date=2026-07-01/data.parquet",
+      "s3://opal-data-assets/orion/inflection/silver/fact_performance/date=2026-09-28/data.parquet",
+      "s3://opal-data-assets/orion/inflection/silver/fact_transactions/date=2026-07-01/data.parquet",
+      "s3://opal-data-assets/orion/inflection/silver/fact_transactions/date=2026-09-28/data.parquet"
+    ],
+    "writes_only_the_two_dates": true,
+    "executed": false,
+    "read_back": "Before each put, the bytes are checked against the vendor response held in scratch (size and MD5). After each put a GET reads the key back and compares size and ETag. Each silver partition is read back through the converter's own read path and its row count is compared with the bronze line count, before any further conversion.",
+    "rollback_per_key": "Each created key is removed by DeleteObject naming its VersionId, taken from the put response for that key, after a HEAD shows the key absent before the put (the expected-empty check of step 2). No key that existed before the run is touched.",
+    "vendor_calls_needed": 640
+  },
+  "notes": [
+    "Trading days: lib/trading_calendar.py is_trading_day returned True for 2026-07-01 and 2026-09-28 in this run; no WARN line was printed. The answer was not compared with the pandas_market_calendars library, which the calendar module names as its preferred source.",
+    "Census: list-objects-v2 counts on the six target prefixes, read 2026-10-15, with the date-form match and the neighbour positive control described in the census block. Counts only; no object body was opened under bronze or silver.",
+    "Source bucket: LIST only on opal-data-inf bronze/positions, bronze/transactions and bronze/performance (all three feeds, both gap dates). It is the Orion Inflection raw prefix, read by listing only.",
+    "Meta layer (opal-data-assets orion/inflection/meta/): LIST of the folder (523 keys: backfill-status.json and 522 conversion records); GET of backfill-status.json (updated_at 2026-10-14T16:00:46Z, frontier_date 2026-10-14, backfill_complete false) and GET of the two 2026-09-28 conversion records named in skip_cause. The earliest conversion record is dated 2026-07-15, so 2026-07-01 has no ledger record.",
+    "Schedules: EventBridge list-rules (155 rules; 10 under the opal-assets prefix), describe-rule and list-targets-by-rule on the sweep, the mirror rules and the four INF pull rules, and get-bucket-notification-configuration on opal-data-assets (12 Lambda notifications; silver-orion on orion/inflection/bronze/ with suffix .jsonl.gz). No schedule was created or changed.",
+    "Repo reads: named files and named folders only (Read, Grep on infra/aws/lambda, sed on five named files). A recursive repo search was denied by the comp-rail and was not repeated. The writer of the flat .jsonl.gz positions key was not located in this repo.",
+    "Stale text found: the mirror rule description names inf-api-txn-daily at 13:47Z and inf-api-positions names cron(50 12 * * ? *); both are recorded as surprise rows, not corrected.",
+    "6 AM fold: ruling 23eff24d0c S2 requires one 06:00 New York schedule per firm. No such schedule covers the Orion feed in live state (read as a negative over the 155 rules). The fold is not applied to this feed yet.",
+    "Re-pull and conversion: the converter fires per object-created event and converts only the key the event names (run_event, mirror_conversion.py:711). convert_orion (line 419) skips a partition already present unless forced. The 16:00 sweep converts only misses that the bronze listing expects. A re-pulled key for either gap date therefore converts only its own date, and no other date.",
+    "Re-pull seat: a later order cut by the IRPT_BCKEND issuer would run the re-pull, from a seat holding the write grant on opal-data-assets. This worker did not run it and holds no such grant. The vendor sign-in is the JWT object at key orion/jwt/current.json in opal-data-inf: named here, its value was not read, and no secret was read.",
+    "vendor_calls_needed = 640 counts only the positions per-client requests: 320 distinct household ids in the newest silver/api_dims/household_rep_mapping partition (counted; no id recorded) times 2 dates. The transactions and performance request counts were not read, so 640 is a lower bound.",
+    "Not read: the body of any bronze or silver object; the JWT value; the household ids (a count only); the transactions and performance pull code request counts; the INF raw producer outside this repo (not located); the other silver feeds; log events outside the four windows; the silver-only partition 2026-09-29 beyond the catalog's open item.",
+    "What each fact rests on: the trading-day, census and source-listing counts rest on LIST output read in this run. The pull stages rest on repo lines at HEAD and on live describe reads. The skip cause rests on the source LIST, the two conversion records and the mirror's copy rule; its cause is inferred, since no artifact states why the producer wrote no .jsonl.gz for these days. The method is proposed only and was not executed."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
