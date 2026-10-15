@@ -1,0 +1,23 @@
+{
+  "serial": "0.9.0_WK_NFRA_MCPINDEX~44",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-20",
+  "worktree": "C:/tmp/wk-r17-44",
+  "branch": "wk-NFRA_MCPINDEX-44",
+  "steps": [
+    {"step": "first act", "command": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK", "result": "wk-NFRA_MCPINDEX-44; TREE-OK"},
+    {"step": "premise", "command": "python -c \"import yaml\"; python --version", "result": "yaml OK 6.0.3; Python 3.14.8"},
+    {"step": "0 control", "command": "python workflows/atom_decomposition/tests/test_gen_silver_rows.py", "result": "Ran 39 tests; OK; rc=0"},
+    {"step": "1 parts 1-3", "command": "python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests", "result": "227 passed, 1 failed (test_merged_definition::test_condition_helpers_census_and_accessors, CensusAbsent: census directory outside the sparse cone; surprise NFRA_MCPINDEX-Z-W44-S2)"},
+    {"step": "1 gateway test", "command": "cd infra/aws/ec2/opal-gateway && PYTHONPATH=. python -m pytest -q -p no:cacheprovider tests/test_blackdiamond.py", "result": "4 passed; rc=0"},
+    {"step": "2 regenerate rows", "command": "python workflows/atom_decomposition/gen_silver_rows.py --g2 .../G2_pinned.md --g4 .../G4_pinned.md --g5 .../G5_pinned.md --g6 .../G6_pinned.md --g3 .../G3_pinned.md --g2f .../G2f_pinned.md --out workflows/atom_decomposition/catalog_entries --deployed-tools .../round17/deployed_ap20.json --firm-map .../round17/f1_firm_map.json", "result": "rc=0; wrote 216 rows; git status: exactly 7 catalog_entries rows modified (read_tool, tools, gap_owner only)"},
+    {"step": "3 emit (as written)", "command": "python workflows/atom_decomposition/emit_catalog_v02.py --overlay-ref 06cfb6db64", "result": "rc=2; EMIT REFUSED (census input): census directory absent: C:/tmp/wk-r17-44/org/tier0_utility/0.0.3_BG_BBGTerminal/refs/census -- NOTHING WRITTEN (surprise NFRA_MCPINDEX-Z-W44-S1)"},
+    {"step": "3 emit (declared census)", "command": "git archive HEAD org/tier0_utility/0.0.3_BG_BBGTerminal/refs/census | tar -x -C .scratch/census_src; python workflows/atom_decomposition/emit_catalog_v02.py --overlay-ref 06cfb6db64 --census-dir .scratch/census_src/org/tier0_utility/0.0.3_BG_BBGTerminal/refs/census", "result": "rc=0; HARVEST ROWS 78; SILVER 226; TOOL INDEX N=99 served tools; a=11 b=76 c=12; sum 99; no EMIT REFUSED"},
+    {"step": "3 channels provenance", "command": "compare channels of base 5d19e142e9 with the emitted catalog", "result": "channels differ only in census_ref file strings (30 occurrences of .scratch/census_src/); equal after the prefix is stripped (surprise NFRA_MCPINDEX-Z-W44-S3)"},
+    {"step": "4 AC1", "command": "timeout 290 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/r1.AC1.sh; echo exit=$?", "result": "RESULT: PASS; exit=0; DENOMINATOR table rows 294 (base 294); rows differing from 5d19e142e9 7"},
+    {"step": "4 AC2", "command": "timeout 290 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/r1.AC2.sh; echo exit=$?", "result": "RESULT: PASS; exit=0; PARTITION sum 99 of N=99; definitions located 99 of 99"},
+    {"step": "4 AC3", "command": "timeout 290 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/r1.AC3.sh; echo exit=$?", "result": "RESULT: FAIL; exit=1; CHECK FAIL top-level sections differ (built_at_git_head,channels,tool_index); the other six CHECK lines ok"},
+    {"step": "controls", "command": "gen_silver_rows.py (same inputs) with --tool-reads .scratch/empty_tool_reads.json --out .scratch/mut_rows; and again with --out .scratch/det_rows", "result": "both rc=0, 216 rows each; unrestricted run differs from the shipped rows in 8 rows (read_tool gained on rows the tools do not read); the deterministic rerun differs in 0 of 216 rows"},
+    {"step": "commit (i)", "command": "safe-commit.sh -F .scratch/msg_i.txt -- gen_silver_rows.py tests/test_tool_reads.py test_blackdiamond.py", "result": "committed d5c4fac491 (LOCAL)"},
+    {"step": "catalog commit", "command": "not run: DATA_CATALOG.yaml held uncommitted because its channels carry .scratch census paths (AC3 FAIL)", "result": "withheld; see NFRA_MCPINDEX-Z-W44-S3"}
+  ]
+}
