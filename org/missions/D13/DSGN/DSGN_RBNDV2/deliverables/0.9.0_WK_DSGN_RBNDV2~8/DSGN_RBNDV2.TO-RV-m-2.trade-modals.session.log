@@ -1,0 +1,15 @@
+SESSION LOG -- 0.9.0_WK_DSGN_RBNDV2~8 on DSGN_RBNDV2.TO-RV-m-2 (cell RV-m-2, FWD-3, C-MODAL: adopt ModalFrame in the TradeSubmission modals)
+Worktree: /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-8 (workspace branch wk-DSGN_RBNDV2-8); portal worktree /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-8/portal (branch wk-DSGN_RBNDV2-8-portal)
+
+1. Re-ground: git rev-parse --abbrev-ref HEAD printed wk-DSGN_RBNDV2-8; TREE-OK; ModalFrame.tsx present (RV-m-1 at 1b157a12 on the portal branch).
+2. Native Glob of the TradeSubmission folder for *Modal*/*Dialog* files: four files, the four listed. Each draws its own fixed inset-0 overlay, card and header close control, so the verdict for all four is ADOPTED; NOT-A-MODAL count 0.
+3. Read the four files in full before editing (no file is a popover, dropdown or drawer).
+4. Adoption, portal commit 13e028f4 (4 files): each file imports ModalFrame and renders <ModalFrame open onClose size title footer>. The header subtitle (submission id, or fund and id) and the status badge moved into children; the action buttons moved into footer; state, effects, handlers and props are unchanged. The three action modals wrap onClose in requestClose, which does nothing while isSubmitting (the header X was disabled then). Changed lines by numstat against adc70061: TradeDetailsModal 73, RejectModal 96, ExecuteModal 84, ApproveModal 82 (bound 160).
+5. Typecheck: bun x tsc --noEmit -p tsconfig.app.json, rc=0, 0 error TS lines.
+6. Tests written: rb-2-m2.adoption.test.ts (RB2M2-AC1) and rb-2-m2.bound.test.ts (RB2M2-AC2), committed in 13e028f4.
+7. RB2M2-AC1: bun test rb-2-m2.adoption.test.ts, rc=0, VERDICT: ADOPTION-OK, 1 pass, 14 expect() calls. Denominator printed: ADOPTED 4 + NOT-A-MODAL 0 = 4 of 4.
+8. RB2M2-AC2: bun test rb-2-m2.bound.test.ts, rc=1. The line bound holds for all four (73, 96, 84, 82). The token arm fails: onClick base 5, now 2 in TradeDetailsModal (the first file; the test stops at its first failing expect). Shell count (grep -o, word boundary) for the other three: RejectModal onClick 5 to 2, ExecuteModal 5 to 2, ApproveModal 5 to 2; useState 3/3, 2/2, 2/2 held; useEffect and onSubmit 0 at base and now.
+9. Positive control for the sweep: Grep for 'fixed inset-0' over the TradeSubmission folder returned no match in the working tree; the same pattern on the test folder returned rb-2-m2.adoption.test.ts (the grep works). No other own-overlay modal sits in the folder.
+10. Base-ref form: git show adc70061 from the workspace root is fatal (object absent; the commit is in the portal repository). The tests read the base from the portal root; surprise DSGN_RBNDV2-W8-S4.
+11. Surprise rows DSGN_RBNDV2-W8-S3 (BLOCKING: the onClick bound), W8-S4 (base-ref form), W8-S5 (close-guard divergence) appended; commit d3d938a895 on wk-DSGN_RBNDV2-8.
+12. Refusal clause applied: the bound arm was not weakened. RB2M2-AC2 is recorded FAIL; the order stays pending (no status flip).
