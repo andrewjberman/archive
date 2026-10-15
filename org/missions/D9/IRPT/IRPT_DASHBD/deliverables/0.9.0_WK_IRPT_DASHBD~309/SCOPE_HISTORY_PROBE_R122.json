@@ -1,5 +1,5 @@
 {
-  "basis_words": "Two calls, both HTTP 200, inner scope, calcGrossOfFees false, Daily compact breakdown, paced six seconds apart, no retry. Household A: 1.68 s and 0.42 MB; household B: 1.83 s and 1.15 MB. The longest call was about one percent of the 180 s timeout, so no call came near it. Series by account: A has 4 accounts with a series (points 686, 121, 121, 121) and 1 account with no group, whose roster accountStartDate is null; B has 5 accounts with a series (points 111, 111, 237, 78, 2228) and 1 account with no group, the same null-start shape. Points equal the inclusive calendar-day count from the account's own roster start to the end date for 7 of the 9 series, because the breakdown is basedOn Calendar, one point per calendar day, not per trading day. The two long series (686 and 2228 points) fall short of their calendar-day counts by 120 and 95 days, and their chains do not reproduce the summary performance. The chained factors reproduced the summary period return for 7 of 9 series and not for the two long ones. Trading-day completeness fails for all 9 series, whose point counts are about 1.2 to 1.5 times the trading-day count, so series_complete_all is false by the rule as written. The bound: 294 households times the slowest call (1.83 s) is a serial upper bound of about 9 minutes for one full run, and 294 times the largest body is about 337 MB of response. It assumes no parallelism and no retry; the rate-limit headroom is unmeasured.",
+  "basis_words": "The first cut's rules were wrong and the amendment corrects them. It graded completeness as points within one of the NYSE trading days and chained every series against the summary return, which assumed a trading-day series and an un-annualized summary. The compact Daily breakdown is basedOn Calendar, so each series has one point per calendar day, and Orion annualizes the summary over a year (annualize is on). Measured on the saved bodies with no new call: the series begin on the account's roster start day for all 9 series (0 days after the start for each), and all 9 are contiguous with no gap breaks and points equal to span days. The 7 series of up to a year chain to the summary within the 0.01 bp rule. The 2 series over a year (686 and 2228 points) annualize: the 365/span residual is within the 10 bp tolerance for both. Those 2 series end 120 and 95 calendar days before the end date; the other 7 end on the end date. So the earlier shortfall was a tail shortfall, not a start shortfall. Two accounts per household sit in no group: each has a null roster start date and no series. Calls, timings and bytes are as measured: two calls, both HTTP 200, 1.68 s and 1.83 s, 0.42 MB and 1.15 MB; the longest was about one percent of the 180 s timeout, and no retry was made. The bound: 294 households times the slowest call is a serial upper bound of about 9 minutes for one full run, and 294 times the largest body is about 337 MB. It assumes no parallelism and no retry; the rate-limit headroom is unmeasured.",
   "bound": {
     "bytes_max": 336737310,
     "households_in_universe": 294,
@@ -44,37 +44,48 @@
       "accounts": [
         {
           "account_sha256": "2f4d707285019a3128e47af6065e7f94c99ad5f67e8dbb2331195e19f280a9dc",
-          "chain_matches": false,
-          "complete": false,
           "points": 0,
           "state": "NO_GROUP"
         },
         {
           "account_sha256": "49a57aab5a13e0550685844e50e34a6a7f89e0b71af533f02050ed40ffdc74ab",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 121,
+          "span_days": 121,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "9fbb55aa1ca6da90db1c9914bc0960ad0d6a7b3eabe9a88c37580a6e31b5a0c0",
-          "chain_matches": false,
-          "complete": false,
+          "annualization_explains": true,
+          "annualized_residual_bp": 0.9,
+          "chain_cumulative_bp": 379.28,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 686,
+          "span_days": 686,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "b711ed9bc1eae835271290b5bfd60db028eb157e97b71d177bf9864b4ae31d46",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 121,
+          "span_days": 121,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "c8bcb9ad923c65e1fba3cb3ebe2d6389f73b86ad0f1f4fdc958162bc492d11e1",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 121,
+          "span_days": 121,
           "state": "GROUP_WITH_SERIES"
         }
       ],
@@ -85,43 +96,57 @@
       "accounts": [
         {
           "account_sha256": "2d71287dce714724e0a59fe239e20dded7debc212ad8648199491c5be5901ef7",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 111,
+          "span_days": 111,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "6de23857db0d5f415b6f5576f5514a0d3dd5daaccfd00f458959c278c1dfcb0a",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 111,
+          "span_days": 111,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "7e07ae1a0cd3da38f7e619aacacec577992e62944683b47726c201890e98d2a3",
-          "chain_matches": false,
-          "complete": false,
+          "annualization_explains": true,
+          "annualized_residual_bp": 6.2,
+          "chain_cumulative_bp": 5201.03,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 2228,
+          "span_days": 2228,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "8e5fabc4550b9c8521b119ede0270237fd4891a697330a2ef5fdea4dde53bf13",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 237,
+          "span_days": 237,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "9544361c04facd3eb23bf0d5b7c126114169a96183df5c40240cbdcbe5e875b2",
+          "chain_cumulative_bp": 0.0,
           "chain_matches": true,
-          "complete": false,
+          "contiguous": true,
+          "gap_breaks": 0,
           "points": 78,
+          "span_days": 78,
           "state": "GROUP_WITH_SERIES"
         },
         {
           "account_sha256": "d03e59748526d73618c46171c55d8d067777013738ef99f13b529687bf45e453",
-          "chain_matches": false,
-          "complete": false,
           "points": 0,
           "state": "NO_GROUP"
         }
@@ -140,13 +165,14 @@
   },
   "script": {
     "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~309/scope_history_probe.py",
-    "sha256": "a51a23622648b61808af1a0d48d9bb2baa904de33440a278513fd41d8afa06a4"
+    "sha256": "3ae87d9d5f71a0108a76347d4bb22166f98b984bf9cd64f153931a043e598f13"
   },
   "served_values_changed": false,
   "token_store_used": "secretsmanager",
   "verdict": {
     "all_accounts_with_series": false,
-    "chain_matches_all": false,
-    "series_complete_all": false
+    "long_series_annualization_explains_all": true,
+    "series_contiguous_all": true,
+    "short_series_chain_matches_all": true
   }
 }

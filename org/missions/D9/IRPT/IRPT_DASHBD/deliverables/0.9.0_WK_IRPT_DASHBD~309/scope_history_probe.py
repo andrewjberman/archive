@@ -6,13 +6,21 @@ calcGrossOfFees false and a Daily compact breakdown over the household's window:
 of its accounts in the round-119 roster to 2026-10-13. A 4xx or 5xx answer (or no answer) stops the run at once; a body
 over 64 MB stops it as oversize. The POST timeout is 180 seconds.
 
-Per account the run records the state (GROUP_WITH_SERIES, GROUP_NO_SERIES or NO_GROUP), the series points, whether the
-chained daily factors reproduce the group's period return, and whether the series length is within one trading day of the
-trading days from the account's own start. The record SCOPE_HISTORY_PROBE_R122.json holds digests, counts, verdict words
-and timings only. The raw bodies stay in the private folder. The token comes from the estate's own loader and is never
-printed, logged or written.
+Mode 1 (default, one live run): the two calls above, the saved 2xx bodies, the record.
+Mode 2 (--recompute): NO vendor call. It re-measures the saved private bodies (hist_A.json, hist_B.json, verified by the
+sha256 in the record) with the amended rules and rewrites the record; the calls, timings, bytes and the bound stay as measured.
 
-Usage: python -I <this file> <repo_root>
+Amended rules (issuer amendment 1 on the worker's rows S2 and S3): the compact breakdown is basedOn Calendar, so a series
+has one point per calendar day. Per account with a series: span_days (first to last endDate, inclusive), gap_breaks,
+contiguous (no gap and points equal span_days), chain_cumulative_bp (|prod(factor) - 1 - perf| x 1e4). Up to 365 days the
+summary is the cumulative return (chain_matches when chain_cumulative_bp <= 0.01). Over 365 days Orion annualizes the summary,
+so annualized_residual_bp = |prod(factor)^(365/span_days) - 1 - perf| x 1e4 and annualization_explains when it is at most 10.0.
+
+The record SCOPE_HISTORY_PROBE_R122.json holds digests, counts, verdict words and timings only. The raw bodies stay in the
+private folder. The token comes from the estate's own loader and is never printed, logged or written.
+
+Usage: python -I <this file> <repo_root>              (the two live calls)
+       python -I <this file> <repo_root> --recompute  (no vendor call; re-measures the saved bodies)
 """
 import copy
 import datetime as dt
@@ -42,7 +50,9 @@ PACE_S = 6
 TIMEOUT_S = 180
 MIN_REMAINING_S = 120
 MAX_BYTES = 64 * 1024 * 1024
-CHAIN_TOL = 1e-6
+ANNUAL_DAYS = 365
+ANNUAL_TOL_BP = 10.0
+CHAIN_TOL_BP = 0.01
 BASIS_PENDING = "PENDING"
 
 
@@ -87,13 +97,20 @@ def walk(node):
             yield from walk(v)
 
 
+def _day(s):
+    s = str(s)
+    if "/" in s:
+        return dt.datetime.strptime(s[:10], "%m/%d/%Y").date()
+    return dt.date.fromisoformat(s[:10])
+
+
 def group_series(body):
-    """{account id: (perf, [factors])} for the Account groups of one body; factors are the numeric factor values of the descendants."""
+    """{account id: (perf, [factors], [endDates])} for the Account groups of one body, in document order."""
     out = {}
     for g in walk(body):
         if g.get("$type") != "calculated-group" or g.get("grouping") != "Account":
             continue
-        perf, facs = None, []
+        perf, facs, ends = None, [], []
         for n in walk(g):
             if n is g:
                 continue
@@ -101,22 +118,24 @@ def group_series(body):
                 perf = float(n["performance"])
             if is_num(n.get("factor")):
                 facs.append(float(n["factor"]))
-        out[key_of(g.get("groupEntityId"))] = (perf, facs)
+                ends.append(n.get("endDate"))
+        out[key_of(g.get("groupEntityId"))] = (perf, facs, ends)
     return out
 
 
-def chain_ok(perf, facs):
+def series_measures(perf, facs, ends):
+    """(span_days, gap_breaks, contiguous, chain_cumulative_bp, annualized_residual_bp or None); None when the group has no series."""
     if perf is None or not facs:
-        return False
-    p = 1.0
+        return None
+    ds = [_day(e) for e in ends]
+    span = (ds[-1] - ds[0]).days + 1
+    gaps = sum(1 for a, b in zip(ds, ds[1:]) if (b - a).days > 1)
+    chain = 1.0
     for f in facs:
-        p *= f
-    return abs(p - 1.0 - perf) <= CHAIN_TOL
-
-
-def trading_days(start, end):
-    from lib import trading_calendar as tc
-    return len(tc.trading_days_between(dt.date.fromisoformat(start), dt.date.fromisoformat(end)))
+        chain *= f
+    cum = abs(chain - 1.0 - perf) * 1e4
+    ann = round(abs(chain ** (ANNUAL_DAYS / float(span)) - 1.0 - perf) * 1e4, 1) if span > ANNUAL_DAYS and chain > 0 else None
+    return span, gaps, (gaps == 0 and len(facs) == span), round(cum, 2), ann
 
 
 def classify(row):
@@ -223,7 +242,7 @@ def post(url, token, body):
 
 def run_calls(url, token, bodies):
     """Exactly the calls in CALL_ORDER; a non-2xx answer, no answer or an oversize body stops the run; no retry."""
-    calls, raws, timings = [], {}, {}
+    calls, raws = [], {}
     for i, lab in enumerate(CALL_ORDER):
         if i:
             time.sleep(PACE_S)
@@ -244,7 +263,6 @@ def run_calls(url, token, bodies):
             entry["response_bytes"] = len(raw)
             entry["response_file"] = {"path": path, "sha256": sha_bytes(raw)}
             raws[lab] = raw
-            timings[lab] = elapsed
         calls.append(entry)
         print("call household=%s http_status=%d ok=%s" % (lab, status, ok))
         if not ok:
@@ -253,42 +271,152 @@ def run_calls(url, token, bodies):
 
 
 def account_entries(body, accts, rows):
+    """One entry per account of a household, in order of account_sha256, under the amended rules."""
     gs = group_series(body)
     out = []
     for a in accts:
         if a not in gs:
-            out.append({"account_sha256": dig(a), "state": "NO_GROUP", "points": 0, "chain_matches": False, "complete": False})
+            out.append({"account_sha256": dig(a), "state": "NO_GROUP", "points": 0})
             continue
-        perf, facs = gs[a]
-        has = perf is not None and len(facs) >= 1
-        start = str(rows[a]["accountStartDate"])[:10] if a in rows and rows[a].get("accountStartDate") not in (None, "") else None
-        complete = False
-        if has and start:
-            n = trading_days(start, END)
-            complete = n - 1 <= len(facs) <= n + 1
-        out.append({"account_sha256": dig(a), "state": "GROUP_WITH_SERIES" if has else "GROUP_NO_SERIES",
-                    "points": len(facs), "chain_matches": chain_ok(perf, facs), "complete": complete})
+        perf, facs, ends = gs[a]
+        m = series_measures(perf, facs, ends)
+        if m is None:
+            out.append({"account_sha256": dig(a), "state": "GROUP_NO_SERIES", "points": len(facs)})
+            continue
+        span, gaps, contiguous, cum, ann = m
+        e = {"account_sha256": dig(a), "state": "GROUP_WITH_SERIES", "points": len(facs), "span_days": span,
+             "gap_breaks": gaps, "contiguous": contiguous, "chain_cumulative_bp": cum}
+        if span <= ANNUAL_DAYS:
+            e["chain_matches"] = cum <= CHAIN_TOL_BP
+        else:
+            e["annualized_residual_bp"] = ann
+            e["annualization_explains"] = ann is not None and ann <= ANNUAL_TOL_BP
+        out.append(e)
     out.sort(key=lambda e: e["account_sha256"])
     return out
 
 
-def main(argv):
-    root = Path(argv[0]).resolve() if argv else Path.cwd()
-    for d in MODULE_DIRS[:2]:
-        sys.path.insert(0, str(root / d))
-    for d in MODULE_DIRS[2:]:
-        sys.path.append(str(root / d))
-    sys.path.append(str(root))
+def verdict_of(allexp):
+    series = [e for e in allexp if e["state"] == "GROUP_WITH_SERIES"]
+    return {"all_accounts_with_series": all(e["state"] == "GROUP_WITH_SERIES" for e in allexp),
+            "series_contiguous_all": all(e["contiguous"] for e in series),
+            "short_series_chain_matches_all": all(e["chain_matches"] for e in series if "chain_matches" in e),
+            "long_series_annualization_explains_all": all(e["annualization_explains"] for e in series if "annualization_explains" in e)}
+
+
+def measure(hhs, windows, rows, raws):
+    """Households (for the record) and the verdict, from the saved 2xx bodies only."""
+    households, allexp = {}, []
+    for lab in CALL_ORDER:
+        if lab not in raws:
+            continue
+        raw_id, accts = hhs[lab]
+        body = json.loads(raws[lab].decode("utf-8"))
+        entries = account_entries(body, accts, rows)
+        households[lab] = {"household_sha256": dig(raw_id), "window_start_sha256": dig(windows[lab]), "accounts": entries}
+        allexp.extend(entries)
+    return households, verdict_of(allexp)
+
+
+def credential_of(calls):
+    if not calls:
+        return "REQUEST_REJECTED"
+    if any(c["ok"] for c in calls):
+        return "ACCEPTED"
+    if all(c["http_status"] in (401, 403) for c in calls):
+        return "REFUSED"
+    return "REQUEST_REJECTED"
+
+
+def bound_of(hh_list, rows, calls):
+    universe = sum(1 for accts in hh_list.values() if any(a in rows for a in accts))
+    ok = [c for c in calls if c["ok"] and "elapsed_s" in c]
+    if not ok:
+        return {"households_in_universe": universe, "requests": universe, "seconds_max": None, "bytes_max": None}
+    return {"households_in_universe": universe, "requests": universe,
+            "seconds_max": universe * max(float(c["elapsed_s"]) for c in ok),
+            "bytes_max": universe * max(int(c["response_bytes"]) for c in ok)}
+
+
+def start_offsets(hhs, rows, raws):
+    """Counts only, for basis_words: per series account, days from the roster start to the first point, and the span against the calendar days."""
+    rep = {}
+    for lab in CALL_ORDER:
+        if lab not in raws:
+            continue
+        raw_id, accts = hhs[lab]
+        gs = group_series(json.loads(raws[lab].decode("utf-8")))
+        rows_out = []
+        for a in accts:
+            if a not in gs or gs[a][0] is None or not gs[a][1]:
+                continue
+            perf, facs, ends = gs[a]
+            start = _day(rows[a]["accountStartDate"])
+            first = _day(ends[0])
+            span = series_measures(perf, facs, ends)[0]
+            cal = (dt.date.fromisoformat(END) - start).days + 1
+            rows_out.append({"offset_days": (first - start).days, "calendar_days_from_start": cal, "span_days": span, "points": len(facs)})
+        rep[lab] = rows_out
+    return rep
+
+
+def write_record(root, rec):
+    with open(root / REC_REL, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(rec, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+
+def script_entry():
+    return {"file": SCRIPT_REL, "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+
+
+def print_summary(hhs_meas, verdict, cred, store, ncalls):
+    for lab in CALL_ORDER:
+        if lab in hhs_meas:
+            print("accounts %s %s" % (lab, dict(Counter(e["state"] for e in hhs_meas[lab]["accounts"]))))
+    print("verdict %s" % json.dumps(verdict, sort_keys=True))
+    print("c_credential verdict=%s token_store_used=%s calls_made=%d" % (cred, store, ncalls))
+
+
+def recompute(root):
+    """No vendor call: re-measure the saved 2xx bodies with the amended rules; calls, timings, bytes and the bound are kept."""
+    rec = json.loads((root / REC_REL).read_text(encoding="utf-8"))
+    hh_list, hh_set, rows = load_world()
+    hhs, _, _ = pick_households(hh_list, hh_set, rows)
+    windows = {lab: window_start(hhs[lab][1], rows) for lab in CALL_ORDER}
+    raws = {}
+    for c in rec["calls"]:
+        if c["ok"]:
+            f = c["response_file"]
+            raw = Path(f["path"]).read_bytes()
+            if sha_bytes(raw) != f["sha256"] or len(raw) != c["response_bytes"]:
+                raise SystemExit("saved body differs from the record")
+            raws[c["household"]] = raw
+    households, verdict = measure(hhs, windows, rows, raws)
+    bound = bound_of(hh_list, rows, rec["calls"])
+    if bound != rec["bound"]:
+        raise SystemExit("bound differs from the stored bound (not rewritten)")
+    rec["script"] = script_entry()
+    rec["households"] = households
+    rec["verdict"] = verdict
+    rec["c_credential"] = {"verdict": credential_of(rec["calls"]), "claim": "measured"}
+    write_record(root, rec)
+    print("recomputed from saved bodies: %s" % ",".join(sorted(raws)))
+    print_summary(households, verdict, rec["c_credential"]["verdict"], rec["token_store_used"], len(rec["calls"]))
+    for lab, rows_out in start_offsets(hhs, rows, raws).items():
+        print("offsets %s %s" % (lab, json.dumps(rows_out, sort_keys=True)))
+
+
+def live(root):
     Path(PRIV).mkdir(parents=True, exist_ok=True)
     hh_list, hh_set, rows = load_world()
     hhs, ncand, cl_b = pick_households(hh_list, hh_set, rows)
-    windows, accts_of, bodies = {}, {}, {}
+    windows, bodies = {}, {}
     for lab in CALL_ORDER:
         raw_id, accts = hhs[lab]
-        accts_of[lab] = accts
         windows[lab] = window_start(accts, rows)
         bodies[lab] = build_body(raw_id, accts[0], windows[lab])
-    print("candidates_b %d accounts_a %d accounts_b %d" % (ncand, len(accts_of["A"]), len(accts_of["B"])))
+    print("candidates_b %d accounts_a %d accounts_b %d" % (ncand, len(hhs["A"][1]), len(hhs["B"][1])))
     print("b account classes %s" % dict(Counter(cl_b.values())))
     secret_reads = 1
     token = load_token()
@@ -304,51 +432,16 @@ def main(argv):
         else:
             calls, raws = run_calls(ENDPOINT, token, bodies)
     token = None
-    households, timings_ok, bytes_ok = {}, [], []
-    all_present, all_chain, all_complete = True, True, True
-    for c in calls:
-        lab = c["household"]
-        if not c["ok"] or lab not in raws:
-            continue
-        timings_ok.append(float(c["elapsed_s"]))
-        bytes_ok.append(int(c["response_bytes"]))
-        body = json.loads(raws[lab].decode("utf-8"))
-        raw_id, accts = hhs[lab]
-        entries = account_entries(body, accts, rows)
-        households[lab] = {"household_sha256": dig(raw_id), "window_start_sha256": dig(windows[lab]), "accounts": entries}
-        for e in entries:
-            if e["state"] == "GROUP_WITH_SERIES":
-                all_chain = all_chain and e["chain_matches"]
-                all_complete = all_complete and e["complete"]
-            else:
-                all_present = False
-    any_ok = bool(timings_ok)
-    if not calls:
-        cred = "REQUEST_REJECTED"
-    elif any_ok:
-        cred = "ACCEPTED"
-    elif all(c["http_status"] in (401, 403) for c in calls):
-        cred = "REFUSED"
-    else:
-        cred = "REQUEST_REJECTED"
-    if any_ok:
-        universe = sum(1 for accts in hh_list.values() if any(a in rows for a in accts))
-        bound = {"households_in_universe": universe, "requests": universe,
-                 "seconds_max": universe * max(timings_ok), "bytes_max": universe * max(bytes_ok)}
-    else:
-        universe = sum(1 for accts in hh_list.values() if any(a in rows for a in accts))
-        bound = {"households_in_universe": universe, "requests": universe, "seconds_max": None, "bytes_max": None}
+    households, verdict = measure(hhs, windows, rows, raws)
     rec = {
-        "script": {"file": SCRIPT_REL, "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()},
+        "script": script_entry(),
         "calls": calls,
         "calls_made": len(calls),
         "token_store_used": store,
         "households": households,
-        "verdict": {"all_accounts_with_series": all_present,
-                    "chain_matches_all": all_chain,
-                    "series_complete_all": all_complete},
-        "bound": bound,
-        "c_credential": {"verdict": cred, "claim": "measured"},
+        "verdict": verdict,
+        "bound": bound_of(hh_list, rows, calls),
+        "c_credential": {"verdict": credential_of(calls), "claim": "measured"},
         "basis_words": BASIS_PENDING,
         "reads": {"vendor_calls": len(calls), "s3_writes": 0, "dynamodb_writes": 0,
                   "secret_reads": secret_reads, "s3_reads": 0},
@@ -357,16 +450,21 @@ def main(argv):
         "pushed": False,
         "deployed": False,
     }
-    with open(root / REC_REL, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(rec, fh, indent=2, sort_keys=True)
-        fh.write("\n")
-    for lab in CALL_ORDER:
-        if lab in households:
-            states = Counter(e["state"] for e in households[lab]["accounts"])
-            print("states %s %s" % (lab, dict(states)))
-    print("verdict all_accounts_with_series=%s chain_matches_all=%s series_complete_all=%s" % (
-        rec["verdict"]["all_accounts_with_series"], rec["verdict"]["chain_matches_all"], rec["verdict"]["series_complete_all"]))
-    print("c_credential verdict=%s token_store_used=%s calls_made=%d" % (cred, store, len(calls)))
+    write_record(root, rec)
+    print_summary(households, verdict, rec["c_credential"]["verdict"], store, len(calls))
+
+
+def main(argv):
+    root = Path(argv[0]).resolve() if argv else Path.cwd()
+    for d in MODULE_DIRS[:2]:
+        sys.path.insert(0, str(root / d))
+    for d in MODULE_DIRS[2:]:
+        sys.path.append(str(root / d))
+    sys.path.append(str(root))
+    if "--recompute" in argv[1:]:
+        recompute(root)
+    else:
+        live(root)
 
 
 if __name__ == "__main__":
