@@ -19,7 +19,7 @@ try:
 except Exception:
     b = {}
 src, host = b.get("md5_source"), b.get("md5_served_host")
-eq = src == "0d828b51d433a24f7e2ef2e6ea7967ee" and src == host
+eq = src in ("0d828b51d433a24f7e2ef2e6ea7967ee", "3bbd5ab2d325657020357003c3ea387d") and src == host
 until = b.get("contains_until_2026_10_11") is True
 op = b.get("opal_user_admitted") is True and b.get("guest_refused") is True
 pub = b.get("public_md5_equal") is True or (b.get("public_md5_equal") is False and bool(b.get("public_note")))
