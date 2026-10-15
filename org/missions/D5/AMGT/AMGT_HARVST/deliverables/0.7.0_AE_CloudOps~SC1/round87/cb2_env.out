@@ -1,0 +1,16 @@
+HVST-cb-2 step 3 (ENV), 2026-10-15 ~20:22Z, dell1
+before: [Environment]::GetEnvironmentVariable('OPAL_HARVEST_PROFILE_ROOT','User') read EMPTY
+set: [Environment]::SetEnvironmentVariable('OPAL_HARVEST_PROFILE_ROOT','C:\dev\ajb_workspace\.runtime\opal-data-harvest\browser-profiles','User')
+the target directory exists and holds the sub-profiles barrons, bbg, sa, wsj
+
+READ 1, the registry (HKCU:\Environment): C:\dev\ajb_workspace\.runtime\opal-data-harvest\browser-profiles
+
+READ 2, a fresh process. TWO forms, because the order's literal form does not discriminate here:
+  (i) the order's literal form, `powershell -NoProfile -Command '$env:OPAL_HARVEST_PROFILE_ROOT'`, run from this seat's session: reads EMPTY.
+      That child INHERITS this session's environment block (made before the variable existed); it does not re-read the registry. Its control
+      (a name never set) also reads empty, so this form cannot tell "set" from "not set": it is NOT evidence either way.
+  (ii) the block a NEW process of this user is given: advapi32 OpenProcessToken + userenv CreateEnvironmentBlock(bInherit=FALSE), 42 variables:
+       OPAL_HARVEST_PROFILE_ROOT = C:\dev\ajb_workspace\.runtime\opal-data-harvest\browser-profiles
+       positive control USERNAME = Test (non-empty); negative control OPAL_NEVER_SET_ZZ = None
+READ 2 is satisfied by (ii). Whether the Task Scheduler builds the runner's environment from this block is read at the +3 minute read
+(the runner's profile directory is the one that must be in use: R3/R5 evidence), not assumed here.
