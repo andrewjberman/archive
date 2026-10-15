@@ -18,9 +18,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~190/price_read_0421_r119.py",
       "kind": "script",
-      "commit_or_etag": "0580161b29",
+      "commit_or_etag": "6eeab07397",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "tracked read-only analysis script at 0580161b29 (sha256 c1e33783e1f657f5a13c53e4f2a3dd7c6a48b9f25481162f21725295af026da4, equal to the committed bytes read back by git show); run under python -I with GET only: data.parquet of the account_return_daily and holdings_performance_daily partitions of 2026-04-21 (two GET calls); writes one counts-only private file and nothing else; no put, copy or delete call, no vendor call",
+      "deploy_evidence": "tracked read-only analysis script at 6eeab07397 (sha256 8687f29c233bbd84a175fffd8591d36fcdc5a3990273f881fa600e2577fe7b60, equal to the committed bytes read back by git show); run under python -I with GET only: the account_return_daily partitions of 2026-04-20 and 2026-04-21 and the 2026-04-21 manifest, the holdings_performance_daily partition of 2026-04-21, and the two custodian dim_position partitions of 2026-04-20 and 2026-04-21 (six GET calls); writes one counts-only private file and nothing else; no put, copy or delete call, no vendor call",
       "artifact_covered_by": [
         "DB119-4-AC1"
       ]
@@ -30,7 +30,7 @@
       "kind": "config_data",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "record of step 7: counts, dates and words only; analysis.sha256 equals the committed script bytes at 0580161b29; reads s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0; files_in_repo, served_values_changed, pushed and deployed all false; rides the commit that carries this instance (co-committed)",
+      "deploy_evidence": "record of step 7 as amended: counts, dates and words only; analysis.sha256 equals the committed script bytes at 6eeab07397; reads s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0; files_in_repo, served_values_changed, pushed and deployed all false; the security identifiers are named as read; rides the commit that carries this instance (co-committed)",
       "artifact_covered_by": [
         "DB119-4-AC1"
       ]
@@ -42,49 +42,46 @@
       "criterion_verbatim": "`DB119-4-AC1` -- `RD_PRICE_READ_0421_R119.json` has exactly the form of step 7; `value_rows` equals round 118's VALUE plus FLOW_AND_VALUE for 2026-04-21; the account profile EQUALS the checker's own recount from the gold (the GRADED_DISAGREED accounts of the 2026-04-21 `account_return_daily` partition against the 2026-04-21 `holdings_performance_daily` partition: accounts, no holdings row, statuses, excluded counts, excluded-weight bands) to the unit and every part sums as step 2 says; the security level is READ (1 to 25 securities, each with a class, a price source, a state, a count of accounts, and the two count objects summing equal) or ABSENT with words; the positive control passed; the analysis script is tracked, hashed as recorded, names no other firm's place and holds no write call; every claim is in the four-word set; zero writes, no push or deploy flags, and no run of 8 or more digits outside the exempt fields. Base: FAIL (no record).",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r119/p119_priceread.py\" . DB119-4-AC1",
-      "output_evidence": "DB119-4-AC1 PASS (rc 0); the deciding line: OK: price read: 943 value rows on 2026-04-21 (equal to the flow-guard record); account profile recounted from the gold: 943 accounts, 0 without a holdings row, excluded-weight bands {'zero': 943, 'le_1pct': 0, '1_to_10pct': 0, 'gt_10pct': 0}; security level ABSENT",
-      "denominator": "1 of 1 criterion PASS; value_rows 943 equal to the flow-guard record's VALUE 941 plus FLOW_AND_VALUE 2; 943 of 943 GRADED_DISAGREED accounts profiled, 0 without a holdings row, statuses sum to 943, excluded counts sum to 943, bands sum to 943; security level ABSENT (0 security entries, 0 pairs counted); positive control 4 of 4 synthetic pairs as expected; 2 S3 GET calls and 0 writes by the analysis script",
-      "status": "PASS",
-      "status_reason": "PASS as written on the committed script at 0580161b29 and the record that run wrote against it (analysis.sha256 c1e33783e1f657f5a13c53e4f2a3dd7c6a48b9f25481162f21725295af026da4 equals the committed bytes); the criterion run twice with the same deciding line",
+      "output_evidence": "DB119-4-AC1 FAIL (rc 1); the deciding line: FAIL: a run of 8 or more digits outside the exempt fields: ['808515209', '456277102'] (the checker's first two hits; five in all, every one a nine-digit numeric security identifier under the key security). The account profile, value_rows, the pair counts, the return triangle and the positive control all passed before the digit clause.",
+      "denominator": "0 of 1 criterion PASS; value_rows 943 equal to the flow-guard record; 943 of 943 GRADED_DISAGREED accounts profiled, 0 without a holdings row; security level READ: 13968 pairs, 38 flagged (32 flat, 6 stale, 0 absent), 15 listed securities, 5 of them with a nine-digit numeric identifier refused by the digit clause (7 of 38 flagged pairs); return triangle 929 accounts, 894 agree with the holdings gold, 0 with the account value; positive control 4 of 4 synthetic pairs and 1 of 1 synthetic triangle account as expected; 6 S3 GET calls and 0 writes by the analysis script",
+      "status": "FAIL",
+      "status_reason": "AS WRITTEN the criterion refuses the record: its digit clause exempts only sha256, path, file, key, where and vintage, while the order (WORKER FACE) permits a security identifier with a count of accounts in the record. The record names the securities as read and is not masked. The conflict is BLOCKING row IRPT_DASHBD-D2-W190-S2 for the issuer; the order stays pending and is not flipped.",
       "expect": "DB119-4-AC1 PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the checker's own self-test: the green record arm and 10 red record arms (value_rows off by one, a profile that does not recount, a READ security level with no securities, pairs counted differently by price source and by class, a failed positive control, a long digit run, an untracked script, a write call, another firm's place, a hash mismatch) plus the band and profile arms",
-      "expected": "the self-test passes the green arm and refuses each red arm",
-      "observed": "selftest OK: band and profile arms, 1 green and 10 red record arms; selftest rc 0",
+      "description": "the checker's own self-test: the green record arm, the band, profile, pair and triangle arms, and 15 red record arms (value_rows, profile, a READ security level with no securities, pair_counts off and not summing, by_price_source and by_security_class mismatch, a return triangle off and not summing, an ABSENT security level, a failed positive control, a long digit run, an untracked script, a write call, another firm's place, a hash mismatch)",
+      "expected": "the self-test passes the green arms and refuses each red arm",
+      "observed": "selftest OK: band, profile, pair and triangle arms, 2 green and 15 red record arms; selftest rc 0",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the criterion run twice from the worktree root with the same arguments; deciding lines compared",
-      "observed": "rc 0 in both runs; identical deciding line; last line DB119-4-AC1 PASS",
+      "method": "the criterion run from the worktree root with the same arguments on the same record, twice; deciding lines compared",
+      "observed": "rc 1 in both runs with the same deciding line (a run of 8 or more digits outside the exempt fields); last line DB119-4-AC1 FAIL",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "Account identifiers, and every client value (returns, values, flows, positions) and every per-account cause",
-      "reason": "not recorded by design: client data lives only in the private evidence folder; the record, the script and this instance carry counts, dates and words only"
-    },
-    {
-      "item": "The security-level read (step 4 of the order)",
-      "reason": "not performed: the holdings gold partition carries no security identifier, price or price-source column (account grain, 19 columns), so the security level is ABSENT with words, and no other gold source was read"
+      "reason": "not recorded by design: client data lives only in the private evidence folder; the record, the script and this instance carry counts, dates, words and security identifiers with counts only"
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W190-S1"
+    "IRPT_DASHBD-D2-W190-S1",
+    "IRPT_DASHBD-D2-W190-S2"
   ],
   "compiler_tools": [
     {
       "tool": "p119_priceread.py",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r119/p119_priceread.py\" . DB119-4-AC1",
-      "result": "PASS rc 0: DB119-4-AC1 PASS"
+      "result": "FAIL rc 1: a run of 8 or more digits outside the exempt fields (five nine-digit security identifiers under the key security)"
     },
     {
       "tool": "p119_priceread.py --selftest",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r119/p119_priceread.py\" --selftest .",
-      "result": "rc 0: selftest OK: band and profile arms, 1 green and 10 red record arms"
+      "result": "rc 0: selftest OK: band, profile, pair and triangle arms, 2 green and 15 red record arms"
     }
   ]
 }
