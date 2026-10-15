@@ -19,5 +19,17 @@ Seat: 2.0.0_SA_COO~RB. Direct acts (round-less, LOCAL); the COO's live read is t
 
 ## Open
 
-- Census (not yet done as a measurement): 16 other files draw a `HelpCircle` themselves outside `PanelHeader` (an earlier count by file name); which of them sit on a panel title is unmeasured. Goes to Andrew as a list at the next drain, not as a rider.
-- RV-s-1 (Trending Topic drilldown) in flight; call laptop-20261015T230503Z-bea4 (rank numbers and arrows) queued at Andrew.
+- Census: see the last section (read from source, output capped at 120 lines, so not a complete count).
+- RV-s-1 (Trending Topic drilldown): drained below. Call laptop-20261015T230503Z-bea4 (rank numbers and arrows) queued at Andrew.
+
+## RV-s-1 (worker ~30), drained and read live (2026-10-15 ~23:3xZ)
+
+- Worker report: RB10S1-AC1, AC2, AC3 PASS-by-output; portal 5d92f971, workspace head 4bd3348abe; no surprise rows.
+- Diff reviewed: ExecutiveSummary.tsx 19 lines inside DrilldownModal (three constants inkColor, inkTint, inkBar; pill, score, circles and bar on them; artInk and the hairline outline on each source-article row; `sentimentColor` deleted as unused) and the new test; non-ASCII bytes added 0; getSentimentColor, accentColor and the lead gradient untouched.
+- Portal merge 9db2045b into feature/dsgn-rbndv2-light; real tsc rc=0 with 0 diagnostic lines; tests 56 pass 0 fail in 39 files; eslint clean. Workspace merge 1d9526146d. Worktree 30 and its branches removed. Nothing pushed.
+- Live read (5174, a Bullish topic, score +0.688): pill and score rgb(20,113,59), pill tint rgba(20,113,59,0.125); the 1, 2, 3 circles rgb(20,113,59) on rgba(20,113,59,0.125); four source-article rows each with a 1px rgb(196,203,219) outline and a score rgb(20,113,59). A negative-sentiment topic was not opened; the red branch is read from source only.
+
+## Census of help icons outside PanelHeader (read from source, 2026-10-15 ~23:3xZ)
+
+A native Grep for `<HelpCircle` across `src/pages` (output capped at 120 lines with 3 lines of context, so the list below is what that page showed, not a denominator) returned these sites: MacroHeatmap, ModelTab, AlphaTab, AssetAllocationSummary, OptimizationSummaryHeader (two), ModelPortfolios (two), FactorBankTab, InflectionInsightsPanel, FeeEfficiencyPanel, DistributionTab (two), AdvisorPublicProfile, TaxCostBasisPanel (two), PartnerAnalytics, ModelTiltTimeSeriesView (two), SummaryMetricsTable (five shown). Every one I could see sits directly after the heading, label or column text it explains (Macroeconomic Indicators, the Model Portfolios chart titles, the FactorTilts and Optimization table headers, the factor-name cells). Not verified as a panel title: AssetAllocationSummary (line 355), OptimizationSummaryHeader (line 316), DistributionTab (lines 3206 and 3429) and PartnerAnalytics (line 1182). None draws the icon in a right-hand group the way PanelHeader did.
+
