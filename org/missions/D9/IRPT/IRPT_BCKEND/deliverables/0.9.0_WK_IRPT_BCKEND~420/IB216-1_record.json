@@ -1,0 +1,40 @@
+{
+ "base_commit": "476d0ed981904ef7708b21ecabbd7b98427a6694",
+ "changed_paths": [
+  "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+  "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_exemption.py",
+  "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_wiring.py",
+  "data/assets/scripts/gold/investor_reporting/tests/test_closed_at_source_exemption.py",
+  "infra/aws/lambda/investor-reporting/holdings/publication.py"
+ ],
+ "negative_tests": [
+  "evidence_49f_counts_accounts_and_positions_in_both_tables",
+  "evidence_cottonwood_reads_holdings_and_allocations",
+  "evidence_missing_prior_partition_fails_closed",
+  "loader_error_keeps_the_refusal",
+  "run_firm_publishes_with_the_account_still_listed",
+  "listed_account_has_the_not_reported_words_and_no_value",
+  "scope_and_unique_count_include_the_listed_account",
+  "published_manifest_carries_absent_at_source_never_closed",
+  "second_fire_exempts_again_with_the_same_since_date",
+  "reappearing_account_is_included_normally",
+  "no_exemption_leaves_nodes_and_manifest_unchanged",
+  "no_closed_names_remain"
+ ],
+ "tests_total": 14,
+ "tests_passed": 14,
+ "mutant_tests_failed": 11,
+ "notes": [
+  "Change 1 (rename, commit 738bf3d07f): holdings_snapshot.py CLOSED-AT-SOURCE-A markers and CLOSED_AT_SOURCE_* constants renamed to the absent form; the exemption test git-mv'd to test_absent_at_source_exemption.py; the TERMINATED path (closed_account_ids, closed_accounts, closed_accounts_not_refused) untouched; 46 existing gate and bypass tests passed after it.",
+  "Readers: source_evidence_for dispatches through _ABSENT_AT_SOURCE_SPECS keyed by the BUILDERS functions holdings_49f.build_49f_meshed and build_cot. 49 Financial reuses holdings_49f.SOURCE_BUCKET, SCHWAB_PREFIX, _text and the builder's opaque_id namespace (lookup of the registry long id); Cottonwood reuses COT_SILVER_ROOT, moved out of build_cot with the same string, and COT_NUMERIC_FACTS; no bucket or key prefix is typed inside the block.",
+  "Walk: _absent_walk reads the positions table account column only, from the prior day back one trading day via tcal.prev_trading_day, up to ABSENT_AT_SOURCE_WALK_DAYS (30); a row of any value counts as a position there, while the exemption rule counts zero as absent (see the surprise row IRPT_BCKEND-D2-W420-S2). The walk runs only when lost ids are passed; source_evidence_for takes lost_ids as a keyword argument added to the four-argument signature.",
+  "Listing: a PUBLISHED gate with account_lost_absent_at_source appends one ACCOUNT node per exempted id via _node (amount 0.0 USD, basis OBSERVED, denominator UNIQUE_CUSTODY_TOTAL 0.0, claim absent, join 0 of 0, display not_reported_display(first_absent_day or prior_day)), extends scope.account_ids and custody_totals.unique_account_count by the count added, and recomputes resolved_scope_fingerprint through resolved_scope_fingerprint, the same sha256 of the sorted ids joined with a pipe that build_snapshot now calls.",
+  "Not read or verified: live source partitions, the contract's display admission beyond the schema check in the test run, and any served byte; nothing was deployed, published, signed or written to AWS. Sparse directories added locally and never committed: infra/aws/lambda/investor-reporting, data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared, docs/contracts/investor-reporting."
+ ],
+ "functions_invoked": 0,
+ "sign_ins_made": 0,
+ "aws_writes_made": 0,
+ "rows_written": 0,
+ "figures_written": 0,
+ "vendor_requests_sent": 0
+}
