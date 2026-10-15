@@ -1,0 +1,98 @@
+{
+  "dates": {
+    "2026-07-01": {
+      "trading_day": true,
+      "partition_present": {
+        "fact_assets": true,
+        "fact_performance": false,
+        "fact_positions": false,
+        "fact_transactions": false
+      },
+      "bronze_present": {
+        "s3://opal-data-assets/orion/inflection/bronze/assets/": 1,
+        "s3://opal-data-assets/orion/inflection/bronze/performance/": 0,
+        "s3://opal-data-assets/orion/inflection/bronze/positions/": 0,
+        "s3://opal-data-assets/orion/inflection/bronze/transactions/": 0,
+        "s3://opal-data-assets/orion/inflection/meta/": 0
+      },
+      "nearest_before": "2026-06-30",
+      "nearest_after": "2026-07-02",
+      "claim": "measured"
+    },
+    "2026-09-28": {
+      "trading_day": true,
+      "partition_present": {
+        "fact_assets": true,
+        "fact_performance": false,
+        "fact_positions": false,
+        "fact_transactions": false
+      },
+      "bronze_present": {
+        "s3://opal-data-assets/orion/inflection/bronze/assets/": 1,
+        "s3://opal-data-assets/orion/inflection/bronze/performance/": 0,
+        "s3://opal-data-assets/orion/inflection/bronze/positions/": 0,
+        "s3://opal-data-assets/orion/inflection/bronze/transactions/": 0,
+        "s3://opal-data-assets/orion/inflection/meta/": 2
+      },
+      "nearest_before": "2026-09-27",
+      "nearest_after": "2026-09-29",
+      "claim": "measured"
+    }
+  },
+  "silver_tables": [
+    "fact_assets",
+    "fact_performance",
+    "fact_positions",
+    "fact_transactions"
+  ],
+  "bronze_checks": [
+    {
+      "prefix": "s3://opal-data-assets/orion/inflection/bronze/assets/",
+      "layer_words": "Bronze feed assets: one daily gzipped JSON-lines file per calendar day named by its ISO date. Counted by LIST of the prefix (recursive), keys carrying the ISO date. Each of the two gap dates has one file. Body not opened."
+    },
+    {
+      "prefix": "s3://opal-data-assets/orion/inflection/bronze/performance/",
+      "layer_words": "Bronze feed performance: one daily file per ISO date plus one coverage sidecar under a meta folder. Counted by LIST; neither gap date has a file. Body not opened."
+    },
+    {
+      "prefix": "s3://opal-data-assets/orion/inflection/bronze/positions/",
+      "layer_words": "Bronze feed positions: one daily file per ISO date (the feed the fact_positions silver converts). Counted by LIST; neither gap date has a file, and the file count is one less than the bronze assets count. Body not opened."
+    },
+    {
+      "prefix": "s3://opal-data-assets/orion/inflection/bronze/transactions/",
+      "layer_words": "Bronze feed transactions: one daily file per ISO date plus one coverage sidecar under a meta folder. Counted by LIST; neither gap date has a file. Body not opened."
+    },
+    {
+      "prefix": "s3://opal-data-assets/orion/inflection/meta/",
+      "layer_words": "Meta layer: a backfill status object, a conversions folder, and the conversion records in that folder. Conversion record names carry a compact timestamp; two records name the 2026-09-28 day by that timestamp and none names 2026-07-01. These records are not partitions of any silver table. Counted by LIST; no body opened."
+    }
+  ],
+  "bridge": {
+    "claim": "inferred",
+    "2026-07-01": {
+      "accounts_valued_before": 787,
+      "accounts_with_external_flow_in_gap": 56
+    },
+    "2026-09-28": {
+      "accounts_valued_before": 792,
+      "accounts_with_external_flow_in_gap": 12
+    }
+  },
+  "owner": {
+    "producer_file": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/mirror_conversion.py",
+    "schedule_words": "DESIRED (repo catalog entry workflows/atom_decomposition/catalog_entries/opal_data_assets_silver_orion_inflection_fact_positions.yaml): the silver converter lambda opal-assets-silver-orion is fired by an S3 object-created notification on the Orion bronze feeds (keys ending .jsonl.gz) and by a daily EventBridge sweep. Bronze lands from the opal-data-inf mirror, catalog-declared at 13:05 and 17:05 UTC daily. LIVE (one describe of the sweep rule opal-assets-silver-orion-sweep-daily): state ENABLED, schedule cron(0 16 * * ? *), i.e. every calendar day at 16:00 UTC, weekends included, sweep input mode sweep. The notification and the mirror schedule were not read live.",
+    "unrecorded_cause_words": "none found. The repo names no cause for the two missing silver days. The catalog entry records both dates as absent trading days (measured) and gives no reason. The converter source header describes a per-folder set-identity sweep from bronze to silver, and no bronze fact_positions feed file exists for either date (measured by LIST), while the bronze assets feed does carry a file for both dates. The repo does not say why the bronze positions files are absent."
+  },
+  "basis_words": "Listed: the Orion top-level prefixes (bronze, meta, silver) and the four silver tables with their partition names, by LIST under the round-108 grant check. The silver common-prefix LIST used the reader's own client after its grant check, because the reader has no common-prefix method; partition presence came from the reader's list_partitions. Bronze and meta were counted by recursive LIST, keys carrying the ISO date or the compact date; no object body was opened under bronze or meta. Bridge: the private positions cache was read by path for the prior trading day of each gap date, the newest fact_transactions partition was read through the reader (one LIST page, one GET), and flows_of was called read-only. Calendar: lib/trading_calendar is_trading_day printed a WARN that pandas_market_calendars is absent on this box, so it answered from the hardcoded NYSE fallback covering 2010 to 2027; both dates are weekdays outside that list. Owner: repo reads of the catalog entry and the converter source; one describe of the sweep rule. Not read: the eclipse prefixes (outside this order), the bodies of any object, the other silver feeds' contents. The checker was run three times (the main run, a determinism rerun, and one run on a mutated copy of this record); each run makes its own fresh LIST calls, and s3_reads counts them. Counts are the only figures recorded.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "s3_reads": 88
+  },
+  "files_in_repo_private": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
