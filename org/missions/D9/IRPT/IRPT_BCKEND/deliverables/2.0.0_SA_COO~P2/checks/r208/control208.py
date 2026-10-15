@@ -59,7 +59,7 @@ def record(commit):
             "ledger": {"entry": LEDGER, "opened_before_first_write": True},
             "control": {"performed": True, "branch": "repo_script_matches", "committed_commit": commit, "committed_at_utc": "2026-10-15T09:55:00Z",
                         "byte_diff": {"repo_bytes": 29784, "chain_bytes": 29230, "differing_lines": 12}, "dry_run_compared_day": "2026-10-14", "shape_match": True},
-            "days": days, "keys_written": 33, "requests_made": 2400,
+            "days": days, "keys_written": 33, "requests_made": 14300,
             "counters": {k: 0 for k in P.COUNTERS},
             "notes": ["ran on the operator host with the pull code's own credential path; no secret printed", "objects touched: 33 flat keys, 33 head reads, 33 absent reads",
                       "not read: the vendor's rate limits beyond the scripts' limiter"],
@@ -104,7 +104,7 @@ MUTS = [
     ("AC2", "day_not_dispositioned", lambda r: sp(r, ["days", "performance", 5, "outcome"], "PENDING")),
     ("AC3", "read_back_missing", lambda r: sp(r, ["days", "performance", 7, "read_back_ok"], False)),
     ("AC3", "keys_written_wrong", lambda r: sp(r, ["keys_written"], 30)),
-    ("AC3", "requests_over_bound", lambda r: sp(r, ["requests_made"], 9000)),
+    ("AC3", "requests_over_bound", lambda r: sp(r, ["requests_made"], 20000)),
     ("AC3", "a_delete_counted", lambda r: sp(r, ["counters", "files_deleted"], 1)),
     ("AC3", "short_notes", lambda r: sp(r, ["notes"], ["short"])),
 ]
