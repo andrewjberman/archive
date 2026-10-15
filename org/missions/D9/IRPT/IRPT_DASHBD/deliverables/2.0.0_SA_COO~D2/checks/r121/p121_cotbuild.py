@@ -88,6 +88,33 @@ def numstat(root, base, rel):
     return int(out[0]), int(out[1])
 
 
+def own_commits(root, author):
+    """The commits of this order's worker (author serial), oldest first, since the order was issued: the diff clauses read these commits only, never a whole-repo base..HEAD
+    (other seats commit to the same trunk). Round 122 ruling 3."""
+    base = base_commit(root)
+    out = git(root, "log", "--reverse", "--format=%H", "--author=" + author, base + "..HEAD").split()
+    need(out, "no commit by %s since the order was issued" % author)
+    return out
+
+
+def own_numstat(root, commits, rel):
+    add = dele = 0
+    for c in commits:
+        for ln in git(root, "show", "--numstat", "--format=", c, "--", rel).strip().splitlines():
+            parts = ln.split("	")
+            if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                add += int(parts[0])
+                dele += int(parts[1])
+    return add, dele
+
+
+def own_files(root, commits):
+    names = set()
+    for c in commits:
+        names |= set(git(root, "show", "--name-only", "--format=", c).split())
+    return names
+
+
 # ------------------------------------------------------------------------------------------------ the behaviour probe (runs in a child python)
 PROBE = r'''
 import io, json, sys, tempfile
@@ -299,14 +326,13 @@ def run(root, cid):
     if cid == "DB121-4-AC3":
         rec = load(root, REC_REL)
         check_facts(rec, lambda rel: hashlib.sha256((root / rel).read_bytes()).hexdigest(), lambda rel: (root / rel).is_file())
-        base = base_commit(root)
-        add, dele = numstat(root, base, ADAPTER_REL)
+        cs = own_commits(root, "0.9.0_WK_IRPT_DASHBD~199")
+        add, dele = own_numstat(root, cs, ADAPTER_REL)
         need(add >= 60 and dele <= 12, "the adapter change must be additive: %d added, %d deleted (needs >= 60 and <= 12)" % (add, dele))
-        a2, _d2 = numstat(root, base, TEST_REL)
+        a2, _d2 = own_numstat(root, cs, TEST_REL)
         need(a2 >= 50, "the test file gains %d lines (needs >= 50)" % a2)
-        changed = [f for f in git(root, "diff", "--name-only", base, "HEAD").split() if f.startswith(("data/", "infra/", "lib/", "org/standards/"))]
-        stray = [f for f in changed if f not in (ADAPTER_REL, TEST_REL)]
-        need(not stray, "files changed outside the adapter and its test: %s" % stray[:3])
+        stray = sorted(f for f in own_files(root, cs) if f.startswith(("data/", "infra/", "lib/", "org/standards/")) and f not in (ADAPTER_REL, TEST_REL))
+        need(not stray, "this worker's commits changed files outside the adapter and its test: %s" % stray[:3])
         print("OK: facts record valid, files hashed; the adapter gains %d lines and loses %d, its test file gains %d, nothing else under data/, infra/, lib/ or org/standards/ changes" % (add, dele, a2))
         return True
     raise Fail("unknown criterion %s" % cid)
