@@ -22,14 +22,15 @@ import p207_cells as P7  # noqa: E402
 G = "data/assets/scripts/gold/investor_reporting/"
 CELLS = {
     "1": dict(
-        slot=419, test=G + "tests/test_closed_at_source_exemption.py", min_tests=8, marker="CLOSED-AT-SOURCE-A", rec="IB215-1_record.json",
+        slot=419, test=G + "tests/test_closed_at_source_exemption.py", min_tests=9, marker="CLOSED-AT-SOURCE-A", rec="IB215-1_record.json",
         regress=[G + "tests/test_holdings_publish_gate.py", G + "tests/test_holdings_bypass_one_date.py", G + "tests/test_directory_exemption_source_marks.py"],
         mutants=[G + "holdings_snapshot.py"],
         allowed=(G + "holdings_snapshot.py", G + "tests/test_closed_at_source_exemption.py", G + "tests/test_holdings_publish_gate.py",
                  G + "tests/test_holdings_bypass_one_date.py", G + "tests/test_directory_exemption_source_marks.py"),
         required=(G + "holdings_snapshot.py", G + "tests/test_closed_at_source_exemption.py"), any_of=(G + "holdings_snapshot.py",),
         named=("exempts_when_both_days_have_no_positions_and_both_partitions_are_complete", "one_zero_day_still_refuses", "truncated_partition_never_exempts",
-               "present_in_either_table_refuses", "manifest_records_closed_at_source_with_dates", "terminated_path_unchanged", "other_conditions_still_refuse")),
+               "present_in_either_table_refuses", "manifest_records_absent_at_source_with_dates_never_closed", "terminated_path_unchanged", "other_conditions_still_refuse",
+               "served_snapshot_keeps_the_account_listed_with_the_not_reported_words")),
 }
 
 
