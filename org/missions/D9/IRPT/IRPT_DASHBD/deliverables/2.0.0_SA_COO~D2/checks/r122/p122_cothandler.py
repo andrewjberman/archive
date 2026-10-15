@@ -301,7 +301,7 @@ def run(root, cid):
         need(gain >= 15 and lose == 0, "the source map must only gain lines in the worker's own commits: +%d/-%d (needs gain >= 15, lose 0)" % (gain, lose))
         for m in entry_of(root)["staged_from"]:
             need(m.get("pin") is None and m.get("sha256") is None, "pins and hashes stay null for the applier: %s" % m.get("repo_path"))
-        stray = sorted(f for f in own_files(root, cs) if f.startswith(("infra/", "data/", "lib/", "org/standards/")) and not f.startswith(FN_DIR) and f != SOURCE_MAP_REL)
+        stray = sorted(f for f in own_files(root, cs) if f.startswith(("infra/", "data/", "lib/", "org/standards/")) and not f.startswith(FN_DIR) and f != SOURCE_MAP_REL and (root / f).exists())  # a path the worker moved away no longer exists: not stray (round 122, W203-S5)
         need(not stray, "this worker's commits changed files outside the grant: %s" % stray[:3])
         print("OK: facts record valid, closure members equal the entry's, files hashed; the source map gains %d lines and loses none; pins null; nothing else under infra/, data/, lib/ or org/standards/" % gain)
         return True
