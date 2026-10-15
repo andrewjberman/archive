@@ -1,0 +1,84 @@
+{
+  "cell": "AR-y-360",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-360",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~157",
+  "prod_tip": "e0b43076d9daf56f8eb4937137180e3cf4246e7f",
+  "branch": "wk-IRPT_ANLREQ-157-portal",
+  "candidate_branch": "cand/dell2/anlreq-no-price-date-t1",
+  "commit": "c22f450807712a41838621ba9a73c5851991509f",
+  "candidate_state": "LOCAL only: the branch is not pushed (no ls-remote hit for it on origin); not shipped before the resident door release r32 derives the price date",
+  "files_changed": [
+    "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+    "src/pages/InvestorReporting/tabs/analysis/tests/prospect-no-price-date.test.tsx (new)",
+    "src/pages/InvestorReporting/__tests__/dsgn-irptv1/s55.component-wiring.test.tsx"
+  ],
+  "diff_stat_origin_PROD_to_commit": "3 files changed, 152 insertions(+), 11 deletions(-)",
+  "price_date_sites_before": {
+    "search": "Grep -i 'priceDate|price_date|price date|Price date' over C:/dev/wk-irpt-anlreq-157/portal/src, run on origin/PROD e0b43076 before any edit",
+    "composer": [
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:152 const [priceDate, setPriceDate] = useState('')",
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:216 asOf: priceDate || null,",
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:219 deps list includes priceDate",
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:287 { declaredCurrency: usd, priceDate, referenceNotional: notional },",
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:455 label 'Price date for share quantities'",
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:456 <input type=\"date\" value={priceDate}",
+      "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:457 onChange sets priceDate"
+    ],
+    "shared_builder_unchanged": [
+      "src/pages/InvestorReporting/tabs/analysis/prospect.ts:7 priceDate: string (option, optional on the wire)",
+      "src/pages/InvestorReporting/tabs/analysis/prospect.ts:172 ...(options.priceDate ? { price_date: options.priceDate } : {})",
+      "src/pages/InvestorReporting/contracts/wire/AnalysisUploadRequest.ts:17 readonly price_date?: string | null"
+    ],
+    "ticket_center_unchanged": [
+      "src/pages/TicketCenter/TicketCenter.tsx:371 priceDate: '' (upload options)",
+      "src/pages/TicketCenter/TicketCenter.tsx:426 priceDate: '' (upload options)"
+    ],
+    "tests_passing_priceDate_empty_to_the_builder_unchanged": [
+      "src/pages/InvestorReporting/tabs/analysis/tests/prospect.test.tsx:11",
+      "src/pages/InvestorReporting/tabs/analysis/tests/prospect-suggested-swaps.test.tsx:39",
+      "src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-153.upload-proxy.test.tsx:48",
+      "src/pages/InvestorReporting/__tests__/dsgn-irptv1/s55.component-wiring.test.tsx:152",
+      "src/pages/InvestorReporting/__tests__/dsgn-irptv1/upload-press-did-you-mean.test.tsx:45"
+    ],
+    "fixture": [
+      "src/pages/InvestorReporting/fixtures/smoke/default.json:191 \"price_date\": null"
+    ]
+  },
+  "tests": {
+    "added": 6,
+    "added_names": "(a) no date input and no price-date label; (b) 'Prices are the T-1 close.' rendered; (c) Shares-column upload carries no price_date and the composer's upload options pass priceDate ''; (d) Ticket Center Needed-by date input kept and TicketCenter.tsx passes priceDate '' twice; (e) the shared builder still sends price_date when given; (f) no price date is asked for; every price is the T-1 close",
+    "passed": 6,
+    "failed": 0,
+    "passed_runs": "new file alone: 6 pass 0 fail on three runs (after the composer change, after the (c) rewrite, and twice more for determinism)",
+    "folders": "src/pages/InvestorReporting/tabs/analysis/tests + src/pages/TicketCenter + src/pages/InvestorReporting/__tests__/dsgn-irptv1 in one bun process: 532 pass, 22 fail, 554 ran (candidate, after the S55 re-pin); origin/PROD: 27 fail, of which 4 are the new file's cases by design; the other failing names are identical on both (22 pre-existing: ENOENT on docs/contracts/investor-reporting/v1/routes.json in the sparse worktree, and document-is-not-defined ordering in dom-env files)"
+  },
+  "before_arm": {
+    "run": "new file on origin/PROD e0b43076 composer, all other files as committed in the candidate",
+    "result": "2 pass, 4 fail",
+    "failed": ["(a) no date input and no price-date label", "(b) 'Prices are the T-1 close.'", "(c) Shares upload with no price_date (fails through its source assertion; see not_read)", "(f) scope-stating case"],
+    "passed": ["(d) Ticket Center Needed-by kept and priceDate '' passed", "(e) shared builder still sends price_date"],
+    "output": ".scratch/before_arm_final.txt (scratch, not committed)"
+  },
+  "repinned": [
+    {
+      "file": "src/pages/InvestorReporting/__tests__/dsgn-irptv1/s55.component-wiring.test.tsx",
+      "case": "ARM(d) positional useState seeds for the composer (the proxy re-post)",
+      "before": "seeds [11] uploadAttempt (expects null) and [16] proxies (expects an empty object)",
+      "now": "seeds [10] uploadAttempt (expects null) and [15] proxies (expects an empty object); the guards check each slot's own initial value",
+      "why": "removing the price-date state moved every later composer slot down by one; the test does not exercise the date input (recorded as collateral in surprise row IRPT_ANLREQ-D2-W157-S3)"
+    }
+  ],
+  "not_re_pinned": "No existing test named the composer's date input, its 'Price date' label, or sent a price_date from the composer (the search above). The five tests that pass priceDate '' to the shared builder are unchanged because the builder is unchanged.",
+  "what_a_person_sees": "On the prospect composer, where the 'Price date for share quantities' date box stood beside 'Reference notional for weights (USD)', the form now says in one sentence: 'Prices are the T-1 close.' There is no date box and no hint asking for a date. Uploading a holdings file with a Shares column sends no price date; the T-1 close is the price basis. The header's prospect card gets no as-of from the composer (asOf null).",
+  "claim": "The candidate removes the composer's price-date input and state, states T-1 in one sentence, sends no price_date from the composer, and leaves the Ticket Center, the shared option builder and the wire member untouched. Nothing is pushed or deployed, and the candidate is not shipped before the resident release r32 derives the date.",
+  "not_read": [
+    "The live door's answer to a Shares file with no price date: not called (no live call in this order). The issuer's earlier finding is that the live door answers PRICE_DATE_REQUIRED until r32 is applied.",
+    "The rendered page in a browser: only the server-rendered markup and the happy-dom run were read; the page's header as-of rendering for a null asOf was not read.",
+    "The folder run's 22 pre-existing failures were not fixed: they come from the sparse worktree (no docs/) and the dom-env ordering, and they are outside this cell."
+  ],
+  "typecheck": {
+    "command": "bun run typecheck (portal)",
+    "rc": 0,
+    "output": "tsc -b --noEmit (no errors); recorded as a drain check, not a criterion"
+  }
+}
