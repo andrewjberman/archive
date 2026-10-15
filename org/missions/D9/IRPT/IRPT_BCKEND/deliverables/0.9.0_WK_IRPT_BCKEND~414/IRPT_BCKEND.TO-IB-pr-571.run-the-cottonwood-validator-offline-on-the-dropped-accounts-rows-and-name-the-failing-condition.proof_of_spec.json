@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "firm": "COT",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-571",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-571.run-the-cottonwood-validator-offline-on-the-dropped-accounts-rows-and-name-the-failing-condition.md",
+  "group": "OTHER",
+  "vintage_commit": "bbdeae6f89b23308894c94e95b91951decfb9769"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "bbdeae6f89b23308894c94e95b91951decfb9769",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-571.run-the-cottonwood-validator-offline-on-the-dropped-accounts-rows-and-name-the-failing-condition.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~414",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~414/IB210-2_cot_validator_read.json",
+   "kind": "doc",
+   "commit_or_etag": "6acfe8ba05",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record, committed LOCAL on the worktree branch at 6acfe8ba05; the offline run was not performed (outcome not_run), the failing condition is not measured",
+   "artifact_covered_by": ["IB210-2-AC1", "IB210-2-AC2", "IB210-2-AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~414/IB210-2_criteria_output.txt",
+   "kind": "doc",
+   "commit_or_etag": "6acfe8ba05",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "verbatim output and exit codes of the three criteria, each under timeout 120, from the worktree root; a second run at the same tree is identical",
+   "artifact_covered_by": ["IB210-2-AC1", "IB210-2-AC2", "IB210-2-AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "6acfe8ba05",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two appended rows IRPT_BCKEND-D2-W414-S1 (BLOCKING) and S2 (OBSERVATION) at 6acfe8ba05; no existing row edited",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB210-2-AC1",
+   "criterion_verbatim": "AC1 the validator and the screen read in the code (file, line, identifier verified), the source rows counted, the offline run (read only, no write, no publish)",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . IB210-2-AC1",
+   "expect": "IB210-2-AC1 PASS",
+   "output_evidence": "FAIL: source_rows needs count and distinct_dates as counts of at least 1 (the dropped account's rows, ids private) | IB210-2-AC1 FAIL | rc=1",
+   "denominator": "source_rows count 0 of at least 1 required; the offline run was not performed (outcome not_run, the check requires refused or accepted); the validator and screen identifiers verified 2 of 2",
+   "status": "FAIL",
+   "status_reason": "The record has no offline run (outcome not_run) and no counted source rows, so the check's own AC1 conditions are unmet by the honest record; the order stays open. The blocker is row IRPT_BCKEND-D2-W414-S1 (the validator import chain is outside the granted sparse checkout)."
+  },
+  {
+   "criterion_id": "IB210-2-AC2",
+   "criterion_verbatim": "AC2 the failing condition named from the validator's own code (the line that raises it verified), the claim measured, the fix options read in the code",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . IB210-2-AC2",
+   "expect": "IB210-2-AC2 PASS",
+   "output_evidence": "OK: the failing condition named from the validator's own code, the fix options read in the code | IB210-2-AC2 PASS | rc=0",
+   "denominator": "fix_options 2 of 2 minimum, each site identifier verified; failing condition NOT measured: the record takes the check's accepted branch with claim absent (row IRPT_BCKEND-D2-W414-S2 records that the check passes this path); 0 of 1 measured condition",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB210-2-AC3",
+   "criterion_verbatim": "AC3 notes, the six counters 0, no long digit run (no account id)",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . IB210-2-AC3",
+   "expect": "IB210-2-AC3 PASS",
+   "output_evidence": "OK: notes, counters 0, no long digit run | IB210-2-AC3 PASS | rc=0",
+   "denominator": "notes 6 of at least 3 required; bound counters 0 of 6; long-digit scan over the record text 0 runs of 9 or more digits",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the spec: the order's criteria are file and identifier checks on a record, with no behaviour a removal control would exercise.",
+   "expected": "N/A: the spec names no mutant",
+   "observed": "N/A: no removal control was run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the three criteria run twice at the same tree (the first run recorded in IB210-2_criteria_output.txt, the second in a scratch file outside the worktree) and the two outputs compared",
+   "observed": "identical: AC1 FAIL rc=1, AC2 PASS rc=0, AC3 PASS rc=0 in both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W414-S1 -- the validator cannot be imported from the granted sparse checkout: holdings_snapshot.py imports ids, publication and currency_authority from infra/aws/lambda/investor-reporting, which is outside the data/ grant; the offline run is blocked; BLOCKING, disposition left to the issuer",
+  "IRPT_BCKEND-D2-W414-S2 -- the round-210 check's accepted branch (v2) passes a record whose offline run was not performed, while AC1 requires outcome refused or accepted; OBSERVATION, the check is the issuer's and is not edited here"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "rc recorded in the worker report"
+  }
+ ]
+}
