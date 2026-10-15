@@ -42,11 +42,11 @@ CELLS = {
         named=("submit_filled_report_through_handler_queues", "forged_pin_ignored_through_handler", "uncovered_account_refused_through_handler",
                "no_filled_reader_refused_unavailable")),
     "2": dict(
-        slot=411, test=X + "tests/test_filled_report_installed_reader_render.py", min_tests=5, marker="FILLED-REPORT-G", rec="IB207-2_record.json", regress=REGRESS,
+        slot=411, test=X + "tests/test_filled_report_installed_reader_render.py", min_tests=5, marker="FILLED-REPORT-G", rec="IB207-2_record.json", regress=REGRESS + ["infra/aws/lambda/ci/tests/test_source_map_filled_reader_installed.py"],
         mutants=[X + "entry.py", X + "filled_reader_installed.py", X + "render.py", X + "download.py", X + "dispatch.py"],
         allowed=(X + "entry.py", X + "filled_reader_installed.py", X + "render.py", X + "download.py", X + "dispatch.py", X + "package.py", X + "handler.py",
-                 X + "tests/test_filled_report_installed_reader_render.py", "infra/logic/registry/"),
-        required=(X + "tests/test_filled_report_installed_reader_render.py", X + "filled_reader_installed.py"), any_of=(X + "entry.py", X + "handler.py"),
+                 X + "tests/test_filled_report_installed_reader_render.py", "infra/logic/registry/", "infra/aws/lambda/ci/lambda-source-map.json", "infra/aws/lambda/ci/tests/test_source_map_filled_reader_installed.py"),
+        required=(X + "tests/test_filled_report_installed_reader_render.py", X + "filled_reader_installed.py", "infra/aws/lambda/ci/lambda-source-map.json", "infra/aws/lambda/ci/tests/test_source_map_filled_reader_installed.py"), any_of=(X + "entry.py", X + "handler.py"),
         named=("installed_reader_reads_pinned_version", "render_pinned_filled_report_from_fixture", "installed_reader_never_reads_current_object_for_a_pin")),
 }
 
