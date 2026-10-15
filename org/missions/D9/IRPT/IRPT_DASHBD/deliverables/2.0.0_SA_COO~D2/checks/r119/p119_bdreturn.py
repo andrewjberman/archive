@@ -157,7 +157,11 @@ def recompute_value(s3, key_col, value_col, account, day):
     t = pq.read_table(io.BytesIO(body), columns=[key_col, value_col]).to_pydict()
     vals = [v for k, v in zip(t[key_col], t[value_col]) if k == account]
     need(len(vals) >= 1, "the probed account is not in the silver partition of %s" % day)
-    return sum(float(v) for v in vals if v is not None)
+    # the silver repeats an account's row (about three accounts in four hold two IDENTICAL rows): identical copies are one value, never a sum;
+    # two different values for one account-day are a conflict the adapter must not have resolved by adding them
+    distinct = {float(v) for v in vals if v is not None}
+    need(len(distinct) == 1, "the silver holds %d different values for the probed account on %s: no single value to compare" % (len(distinct), day))
+    return distinct.pop()
 
 
 # ------------------------------------------------------------------------------------------------ the record clauses (pure)
