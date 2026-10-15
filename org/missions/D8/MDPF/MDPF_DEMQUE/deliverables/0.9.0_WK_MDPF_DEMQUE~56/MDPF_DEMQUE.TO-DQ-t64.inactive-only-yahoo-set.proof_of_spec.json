@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t64",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t64.inactive-only-yahoo-set.md",
+    "group": "OTHER",
+    "vintage_commit": "7fb4e17444"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "7fb4e17444",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t64.inactive-only-yahoo-set.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~56",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/inactive_set.py",
+      "kind": "script",
+      "commit_or_etag": "00a801ad33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: read only, no vendor call, no S3 write, no ledger, queue or pacer write, no timer, no deploy. The module imports the existing resolvers and edits none of them. Its --census mode ran to completion on the real inputs (AC2 PASS, INACTIVE-REAL-OK, rc=0) after the issuer's sparse-cone ruling; the census line and identities are in AC2.",
+      "artifact_covered_by": [
+        "DQ9-t64-AC1",
+        "DQ9-t64-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_inactive_set.py",
+      "kind": "test",
+      "commit_or_etag": "00a801ad33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: stub frames, no network, no S3; the three named tests PASSED by name at commit 00a801ad33 (run from the worktree root, under timeout 120).",
+      "artifact_covered_by": [
+        "DQ9-t64-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "00a801ad33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row MDPF_DEMQUE-D1-W56-S1 (BLOCKING) committed at 00a801ad33; row MDPF_DEMQUE-D1-W56-S2 (OBSERVATION) appended after it in the same append-only array, uncommitted at the time of this instance and committed with it. No existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t64-AC1",
+      "criterion_verbatim": "DQ9-t64-AC1 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_tests.py, expect INACTIVE-OK (the three named tests: test_the_inactive_set_is_the_held_cusips_not_in_the_active_set_and_a_blank_cusip_is_never_held; test_the_census_adds_up_classes_symbols_and_stored_against_the_inactive_total; test_nights_at_cap_is_the_ceiling_of_symbols_over_the_request_cap).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_tests.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-56 under timeout 120 (rc=0):\ntest_demque_inactive_set.py::test_the_inactive_set_is_the_held_cusips_not_in_the_active_set_and_a_blank_cusip_is_never_held PASSED [ 33%]\ntest_demque_inactive_set.py::test_the_census_adds_up_classes_symbols_and_stored_against_the_inactive_total PASSED [ 66%]\ntest_demque_inactive_set.py::test_nights_at_cap_is_the_ceiling_of_symbols_over_the_request_cap PASSED [100%]\n============================== 3 passed in 2.49s ==============================\nINACTIVE-OK",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "INACTIVE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t64-AC2",
+      "criterion_verbatim": "DQ9-t64-AC2 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_real.py, expect INACTIVE-REAL-OK (on the REAL S3 rank inputs and the price index, the V2 active set, read only: the census identities hold, request_cap == 380, nights_at_cap == ceil(with_symbol / 380), inactive_only > 0; the names file holds exactly inactive_only unique sorted entries none of which is in V2, carries no account key, and two runs are byte-identical).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_real.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-56 under timeout 260 (rc=0, 34.6 s wall for two censuses):\ncensus {\"active_held\": 2929, \"active_stored\": 477, \"class_p1\": 32, \"class_p2\": 1448, \"class_p3\": 225, \"held_total\": 4634, \"inactive_only\": 1705, \"inactive_stored\": 10, \"inactive_unstored\": 1695, \"nights_at_cap\": 1, \"no_symbol\": 1691, \"request_cap\": 380, \"requests_one_pass\": 14, \"with_symbol\": 14}\nINACTIVE-REAL-OK",
+      "denominator": "7 of 7 census arms (inactive_only > 0; held_total == active_held + inactive_only, 4634 == 2929 + 1705; class_p1 + class_p2 + class_p3 == inactive_only, 32 + 1448 + 225 == 1705; with_symbol + no_symbol == inactive_only, 14 + 1691 == 1705; inactive_stored + inactive_unstored == inactive_only, 10 + 1695 == 1705; requests_one_pass == with_symbol, 14 == 14, and request_cap == 380; nights_at_cap == ceil(14 / 380) == 1); 6 of 6 names-file arms (count == inactive_only; sorted and unique non-blank CUSIPs; exactly cusip, symbol, priority with priority in P1/P2/P3; none in the V2 active set; no key naming an account; the two runs byte-identical)",
+      "status": "PASS",
+      "expect": "INACTIVE-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check runs two censuses into two names files and compares them byte for byte; the check prints INACTIVE-REAL-OK only when they match",
+      "observed": "INACTIVE-REAL-OK includes the byte-identical arm across the two censuses of 2026-10-15",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the census symbol coverage: 14 of 1705 inactive-only securities carry a known symbol",
+      "reason": "a measured value, not a gap in this build: symbol_of is the stored index's yahoo_symbol overlaid by the requests folder's symbols, exactly as the order names. Widening the symbol source is outside this order (the order says do not invent a symbol source)."
+    },
+    {
+      "item": "the TO status flip to complete",
+      "reason": "carried in the status field of the order file only after both criteria PASS (see the instance's acceptance rows)"
+    },
+    {
+      "item": "any vendor call, S3 write, ledger, queue, pacer write, deploy, timer, or write into org/missions/.../requests/",
+      "reason": "order BOUNDS: none made; the new code has no write path to any of them"
+    },
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: do not merge box/dell1 (blocked by a foreign row); the issuer unions at the drain"
+    },
+    {
+      "item": "the client account-id hash check on commit 00a801ad33",
+      "reason": "safe-commit printed WARN: the hashed account-id list is ABSENT on this box, so the commit was not checked by it. The committed files carry no account key or account number: the census prints counts and CUSIPs only, and the surprise rows name no account"
+    },
+    {
+      "item": "the folder run's 4 failing tests (test_demque_bbg_backfill.py x2, test_demque_bbg_ledger_upload.py x2)",
+      "reason": "outside inactive_set.py and outside this order's grant: three are FileNotFoundError on integrations/bloomberg paths outside the sparse cone; the fourth is an assertion mismatch not diagnosed here. Recorded as surprise row MDPF_DEMQUE-D1-W56-S2 (OBSERVATION)."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W56-S1: the worktree's sparse checkout omitted data/assets/scripts/silver/ and data/etfs/ (tracked at HEAD), so the census could not import p1_coverage and the real AC2 run failed at import; the coordinator ruled it issuer provisioning and widened the cone; the row stays UNDER_INVESTIGATION (BLOCKING, resolved by the cone, not by this build)",
+    "MDPF_DEMQUE-D1-W56-S2: the folder run after the cone change is 221 passed, 4 failed; three fail on integrations/bloomberg paths outside the cone, one is an unexplained assertion in test_demque_bbg_ledger_upload.py; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~56/MDPF_DEMQUE.TO-DQ-t64.inactive-only-yahoo-set.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of inactive_set.py, test_demque_inactive_set.py and the investigation file (commit 00a801ad33); safe-commit of the first instance (commit d89ade551a)",
+      "result": "commit-gate All checks passed; surprise-row-gate OK (1 new row of 151 checked); to-pipeline-gate OK; missions-tree-check OK (0 violations); msg-verify MATCH; WARN client-data-check: hashed account-id list ABSENT, commit not checked for account ids"
+    },
+    {
+      "tool": "python -m ruff check --select F,E9 --target-version py39",
+      "invocation": "lint of inactive_set.py and test_demque_inactive_set.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "compile of the two new Python files",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole demque folder, run once from the worktree root after the cone change (timeout 120)",
+      "result": "rc=1: 4 failed, 221 passed in 14.43s; 225 collected; the 4 failures are outside inactive_set.py (surprise row MDPF_DEMQUE-D1-W56-S2)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_tests.py",
+      "invocation": "the AC1 check, timeout 120",
+      "result": "INACTIVE-OK (rc=0)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_real.py",
+      "invocation": "the AC2 check, timeout 260, after the cone change",
+      "result": "INACTIVE-REAL-OK (rc=0, 34.6 s)"
+    }
+  ]
+}
