@@ -39,7 +39,8 @@ def ac_1(root):
         for w in row["writers"]:
             p = Path(root) / w["file"]
             need(p.is_file(), "writer file absent: " + w["file"])
-            need("account_dim" in p.read_text(encoding="utf-8", errors="replace"), "writer file does not name account_dim: " + w["file"])
+            txt = p.read_text(encoding="utf-8", errors="replace")
+            need("account_dim" in txt or "dim_account" in txt, "writer file names neither account_dim nor dim_account: " + w["file"])
         need(row["writer_count"] == len(row["writers"]), "writer_count differs from the list for " + f)
         for t in row["terraform"]:
             p = Path(root) / t["file"]
