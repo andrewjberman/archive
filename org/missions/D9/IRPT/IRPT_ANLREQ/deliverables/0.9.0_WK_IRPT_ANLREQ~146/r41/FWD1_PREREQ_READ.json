@@ -1,0 +1,665 @@
+{
+  "base": "23271a44bdbf314d0814c7ed4d5e1c446f6bff93",
+  "q1": {
+    "rows": [
+      {
+        "place": "portal authorizer: JWT verified, sub passed through as the context email; no domain or regex test",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+          "line": 398,
+          "text": "email: decoded.sub,"
+        }
+      },
+      {
+        "place": "portal authorizer: tier 'internal' grants ALL; nothing tests the email",
+        "verdict": "not_constrained",
+        "evidence": {
+          "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+          "line": 301,
+          "text": "if (user.tier === 'internal') {"
+        }
+      },
+      {
+        "place": "portal authorizer: opal-users-v2 is scanned only for firm META rows, never looked up by email",
+        "verdict": "not_constrained",
+        "evidence": {
+          "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+          "line": 254,
+          "text": "FilterExpression: 'SK = :meta AND parentFirmId = :parent',"
+        }
+      },
+      {
+        "place": "user store read (canonical_profile_reads.get_user, email-index): lowercase-only test, the address is lowercase",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/lambda/investor-reporting/_scope/canonical_profile_reads.py",
+          "line": 36,
+          "text": "if not isinstance(value, str) or not value or value != value.strip().lower():"
+        }
+      },
+      {
+        "place": "ticket service _actor: email lowercased, no domain or regex test",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+          "line": 336,
+          "text": "return {\"email\": str(ctx.get(\"email\") or \"\").strip().lower(),"
+        }
+      },
+      {
+        "place": "ticket service principal_class: refuses only an empty or 'unknown' email",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+          "line": 346,
+          "text": "if not email or email == \"unknown\":"
+        }
+      },
+      {
+        "place": "ticket service principal_class: INTERNAL decided by firmId alone",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+          "line": 357,
+          "text": "if firm == INTERNAL_FIRM_ID:"
+        }
+      },
+      {
+        "place": "Investor Reporting verified_internal_subject (_authz/served.py): firmId opal-capital or userType Dev",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+          "line": 332,
+          "text": "trusted.get(\"x-firm-id\") == \"opal-capital\""
+        }
+      },
+      {
+        "place": "Investor Reporting InteractiveAccess.current (_scope/interactive_access.py): any verified internal subject is OPAL_GLOBAL, no roster",
+        "verdict": "admits",
+        "evidence": {
+          "file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+          "line": 83,
+          "text": "if subject is not None:"
+        }
+      },
+      {
+        "place": "Investor Reporting classify_principal roster branch (_scope/resolve.py; global.py and holdings call it): OPAL_GLOBAL only on the roster",
+        "verdict": "not_constrained",
+        "evidence": {
+          "file": "infra/aws/lambda/investor-reporting/_scope/resolve.py",
+          "line": 281,
+          "text": "if email.lower() in {str(x).lower() for x in (opal_principal_ids or ())}:"
+        }
+      },
+      {
+        "place": "auth-handler createUser suffix rule (db.ts): sets firm for @opalinvest.com when firmId is unset; refuses nothing",
+        "verdict": "not_constrained",
+        "evidence": {
+          "file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts",
+          "line": 212,
+          "text": "if (firmId === 'null' && user.email.endsWith('@opalinvest.com')) {"
+        }
+      },
+      {
+        "place": "ids._check_raw refuses an email-shaped RAW KEY at id mint; the hops mint the firm id (served.py opaque_firm) and no principal email was found as a mint argument in the code read",
+        "verdict": "not_constrained",
+        "evidence": {
+          "file": "infra/aws/lambda/investor-reporting/_ids/ids.py",
+          "line": 205,
+          "text": "if _EMAIL_SHAPED.search(text):"
+        }
+      },
+      {
+        "place": "live record, not source: the R29 sitting ran irpt-r29-iv-...@opal.invalid through the upload door and the analysis submit",
+        "verdict": "admits",
+        "evidence": {
+          "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/DOOR_DETAIL_R29.txt",
+          "line": 7,
+          "text": "D6 upload status=200 code=NORMALIZED ; analysis status=200 code=ANSWER admitted=True"
+        }
+      }
+    ],
+    "domain_rule_exists": true,
+    "invalid_domain_ok": "yes",
+    "searched": "Read: portal-authorizer/index.mjs (whole file); ticket_center/lambda_function.py (principal, scope and CREATE functions); investor-reporting _authz/served.py, _scope/interactive_access.py, _scope/resolve.py, _scope/canonical_profile_reads.py, intake/upload_entry.py, intake/uploads.py, ycharts/generate submission, acceptance, composition_admission, reports/request_composition.py; ids.py. Grep (native) over the three hops' trees and infra/aws/users for endsWith, regex, EMAIL and domain tests: the regex hits were keys.py EMAIL_RE (refuses an EMAIL-SHAPED key-body token, not a principal), ids.py _EMAIL_SHAPED (raw-key refusal) and poller.py (mail parsing). Zero allow-list or deny-list on the email or sub on the three hops. The one suffix rule is auth-handler db.ts createUser, which assigns a firm and refuses nothing."
+  },
+  "q2": {
+    "needs": {
+      "userType": "any value except the exact string 'service' (ticket_center principal_class, the SVC_MARKER test); the sitting used 'test-filer'",
+      "class": "INTERNAL when the verified firmId is 'opal-capital' (INTERNAL_FIRM_ID env default); the authorizer's firmId is the JWT claim",
+      "allowedFirmIds": "the JWT claim drives the authorizer context: 'ALL' when tier is 'internal' or userType is 'Dev' (computeAllowedFirms). Without it the context is the bare firm 'opal-capital' and CREATE refuses a partner firm. The PROFILE row attribute is optional: absent or empty means unscoped; a list of exact firm ids pins the row; the literal 'ALL' inside a list matches no firm",
+      "profile_scope": "a PROFILE row in opal-users-v2 found by email-index, exactly one, status exactly 'active'; no row or a status other than 'active' refuses CREATE with 403",
+      "other": "no role or permission flag is read by the CREATE row of MATRIX; 'role' and 'firmRole' are not read by principal_class. CREATE fires notify_dl_isolated, an SES send to the resolved DL (TICKET_DL_MAP '*' row)"
+    },
+    "functions": [
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 375,
+        "text": "def _firm_allowed(actor: dict, firm: str) -> bool:"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 378,
+        "text": "if allowed == \"ALL\":"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 380,
+        "text": "return firm in {f.strip() for f in allowed.split(\",\") if f.strip()}"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 440,
+        "text": "def _in_profile_scope(actor: dict, firm) -> bool:"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 442,
+        "text": "return scope is None or str(firm) in scope"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 185,
+        "text": "frozenset({SVC_TICKET_FORM, SVC_ANALYST_INTAKE, SVC_COMMENTARY, INTERNAL}),"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 388,
+        "text": "return _firm_allowed(actor, firm) and _in_profile_scope(actor, firm)"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 1371,
+        "text": "if req_firm == \"null\" or not _create_firm_allowed(pc, actor, req_firm):"
+      }
+    ],
+    "ticket_center_visibility": "the route /ticket-center is mounted under ProtectedRoute requireInternal (App.tsx), which refuses unless claims.firmId is 'opal-capital' (ProtectedRoute.tsx); a dev build admits listed partner firms through PARTNER_DEV_REACH_PATHS. A person logging in as opal-capital gets tier 'internal' from the real issuer (jwt.ts), so the page opens for them. The internal-only rule as stated in the order (Andrew's ADDENDUM v0.6) was not located in the worktree; the rule as code is the App.tsx comment cited here.",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 69,
+        "text": "INTERNAL_FIRM_ID = os.environ.get(\"INTERNAL_FIRM_ID\", \"opal-capital\")"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 357,
+        "text": "if firm == INTERNAL_FIRM_ID:"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 348,
+        "text": "if actor.get(\"userType\") == SVC_MARKER:"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 340,
+        "text": "\"allowedFirmIds\": str(ctx.get(\"allowedFirmIds\") or \"\")}"
+      },
+      {
+        "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+        "line": 394,
+        "text": "const allowedFirmIds = await computeAllowedFirms(decoded);"
+      },
+      {
+        "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+        "line": 407,
+        "text": "allowedFirmIds: allowedFirmIds,"
+      },
+      {
+        "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+        "line": 301,
+        "text": "if (user.tier === 'internal') {"
+      },
+      {
+        "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+        "line": 295,
+        "text": "if (user.userType === 'Dev') {"
+      },
+      {
+        "file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts",
+        "line": 168,
+        "text": "const tier = user.firmId === 'opal-capital' ? 'internal' : 'advisor';"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 402,
+        "text": "tbl.query(IndexName=USERS_EMAIL_INDEX,"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 409,
+        "text": "FIRM-SCOPE-NO-ROW"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 415,
+        "text": "if got.get(\"status\") != \"active\":"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 395,
+        "text": "the literal \"ALL\" in it is just an id that matches nothing"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 1383,
+        "text": "notify_dl_isolated(item)"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 1012,
+        "text": "send_raw_email(Source=EMAIL_FROM, Destinations=recipients,"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 112,
+        "text": "{\"name\": \"firm\", \"kind\": \"firm\", \"required\": True},"
+      },
+      {
+        "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+        "line": 143,
+        "text": "_FIRM_ID_RE = re.compile(r\"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$\")"
+      },
+      {
+        "file": "portal/src/App.tsx",
+        "line": 141,
+        "text": "path: '/ticket-center', label: 'Ticket Center', icon: Ticket },"
+      },
+      {
+        "file": "portal/src/App.tsx",
+        "line": 505,
+        "text": "<ProtectedRoute requireInternal={!isPartnerDevReach('/ticket-center')}>"
+      },
+      {
+        "file": "portal/src/App.tsx",
+        "line": 497,
+        "text": "D7 TO-F D7F-1: the board stays INTERNAL"
+      },
+      {
+        "file": "portal/src/components/ProtectedRoute.tsx",
+        "line": 119,
+        "text": "|| (requireInternal && claims?.firmId !== 'opal-capital')"
+      },
+      {
+        "file": "portal/src/lib/firmAccess.ts",
+        "line": 141,
+        "text": "export const PARTNER_DEV_REACH_PATHS: ReadonlySet<string> = new Set(['/ticket-center'])"
+      },
+      {
+        "file": "portal/src/contexts/AuthContext.tsx",
+        "line": 787,
+        "text": "return state.claims?.firmId === 'opal-capital'"
+      }
+    ],
+    "searched": "Grep for 'ADDENDUM v0.6' over org/missions/D7 and portal/src/pages/TicketCenter: no match. Read the principal, scope and CREATE functions of ticket_center/lambda_function.py; App.tsx, ProtectedRoute.tsx, firmAccess.ts, AuthContext.tsx in portal/src; the authorizer and auth-handler jwt.ts."
+  },
+  "q3": {
+    "door_checks_firm": "yes",
+    "door_requires_class": "OPAL_GLOBAL, from InteractiveAccess.current(): verified_internal_subject (firmId opal-capital or userType Dev), with no roster. The served boundary (Entry.handle) checks the selected firm for an internal caller that selects a firm other than its verified one: the PROFILE row must be 'active' and its allowedFirmIds list must name the firm; an absent or empty attribute is UNRESTRICTED; 'ALL' in the list refuses. Then uploads.py _allow requires authorize_current to return True (for OPAL_GLOBAL it does).",
+    "submit_requires_class": "OPAL_GLOBAL for a body carrying input_id (submission.py prospect_opal branch): owner schema_version 'prospect-owner-v1', advisor_id None, firm_id not 'global' or 'opal-capital', home_firm_id a non-empty string. The RequestComposition schema that also governs this is not in the worktree (see not_read).",
+    "owner_stored": "InteractiveAccess.prospect_owner row: firm_id = the selected firm (the data firm), principal_id = the verified lowercased email, home_firm_id = 'opal-capital' (verified x-firm-id), principal_class 'OPAL_GLOBAL', advisor_id None, schema_version 'prospect-owner-v1', ownership_fingerprint; allowedFirmIds is stripped from the stored owner.",
+    "firm_equality_check": "three checks, all on the one selected firm: (a) Entry.handle sets verified = selected and then firm_claims_match; (b) served _handle_prospect builds the owner with the same tenant as its data firm; (c) submission.py input_repository_owner and reports/request_composition.py compare the input owner's firm_id with the record owner's firm_id (SINGLE_INPUT_STORAGE_FIRM_REQUIRED, INPUT_STORAGE_FIRM_BINDING).",
+    "one_record_passes_all_three": "yes",
+    "extra_attribute": "none on the users row beyond the PROFILE row. Two JWT claims matter: tier 'internal' (or userType 'Dev') so the ticket CREATE hop resolves allowedFirmIds to 'ALL'; firmId 'opal-capital'. The row's allowedFirmIds is optional (absent means unrestricted at both readers); a one-element list pins it. The CREATE hop is source-derived only: no sitting exercised an INTERNAL principal's CREATE; the upload and submit hops were exercised live (R29 IV).",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/upload_entry.py",
+        "line": 46,
+        "text": "owner = scope.get(\"prospect_owner\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/upload_entry.py",
+        "line": 60,
+        "text": "return service.create(principal, owner, payload)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 304,
+        "text": "or self.authorize_current(principal, owner) is not True):"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 334,
+        "text": "def _internal_for_allowed_firm(principal, owner):"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 351,
+        "text": "self._allow(principal, owner)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 332,
+        "text": "trusted.get(\"x-firm-id\") == \"opal-capital\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1005,
+        "text": "def _handle_prospect(self, event, headers, operation, tenant, compute, basis):"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1026,
+        "text": "access = InteractiveAccess(lambda: request.headers, tenant,"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1031,
+        "text": "actor = access.current() if access else resolve_prospect_owner(headers, tenant)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1035,
+        "text": "\"prospect_owner\": owner,"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1234,
+        "text": "if selected is not None and selected != verified:"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1176,
+        "text": "raise ValueError(\"no users row for an internal caller\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1178,
+        "text": "raise ValueError(\"users row status is not exactly"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1179,
+        "text": "if \"allowedFirmIds\" not in row:"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1192,
+        "text": "raise ValueError(\"allowedFirmIds holds ALL\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1257,
+        "text": "caller_refused = listed is not None and selected not in listed"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1261,
+        "text": "verified = selected"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1239,
+        "text": "bucket_for(selected)  # Terraform's registry-derived tenant allow-list."
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+        "line": 88,
+        "text": "\"principal_class\": \"OPAL_GLOBAL\","
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+        "line": 90,
+        "text": "allowed = self._allowed_firm_ids(subject)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+        "line": 134,
+        "text": "owner = {k: v for k, v in actor.items() if k not in (\"ownership_fingerprint\", \"allowedFirmIds\")}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+        "line": 139,
+        "text": "owner.update(schema_version=\"prospect-owner-v1\", firm_id=firm)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+        "line": 132,
+        "text": "opal = owner.get(\"principal_class\") == \"OPAL_GLOBAL\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+        "line": 134,
+        "text": "prospect_opal = opal and \"input_id\" in browser"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+        "line": 138,
+        "text": "if (owner.get(\"schema_version\") != \"prospect-owner-v1\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+        "line": 141,
+        "text": "or not isinstance(owner.get(\"home_firm_id\"), str) or not owner[\"home_firm_id\"].strip()"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+        "line": 145,
+        "text": "raise SubmissionRefused(\"EXACT_PROSPECT_OWNER_REQUIRED\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+        "line": 104,
+        "text": "if owner.get(\"firm_id\") != resolved[\"owner\"].get(\"firm_id\"):"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py",
+        "line": 101,
+        "text": "tenant, principal = owner.get(\"firm_id\"), owner.get(\"principal_id\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/composition_admission.py",
+        "line": 36,
+        "text": "schema = json.loads((directory / \"RequestComposition.schema.json\").read_text(encoding=\"utf-8\"))"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/reports/request_composition.py",
+        "line": 34,
+        "text": "if input_owner[\"firm_id\"] != owner[\"firm_id\"]:"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/reports/request_composition.py",
+        "line": 41,
+        "text": "binding[\"home_firm_id\"] = owner[\"home_firm_id\"]"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+        "line": 1010,
+        "text": "firm_id = opaque_firm(tenant)  # canonical registry issuer"
+      }
+    ],
+    "searched": "Read the upload entry and uploads.py create and _allow; served.py Entry.handle, _internal_allowed_firms and _handle_prospect; interactive_access.py current and prospect_owner; submission.py, acceptance.py, composition_admission.py, reports/request_composition.py. No function found that checks the firm against the JWT allowedFirmIds for OPAL_GLOBAL on the door; the profile row check is the only firm narrowing."
+  },
+  "q4": {
+    "row_attributes": [
+      {
+        "name": "PK",
+        "value_or_form": "'USER#' + the lowercase address (sitting R29 and R30 ukey; the legacy email-as-id shape named in users/ARCHITECTURE.md)"
+      },
+      {
+        "name": "SK",
+        "value_or_form": "'PROFILE'"
+      },
+      {
+        "name": "email",
+        "value_or_form": "the lowercase address, e.g. fwd1-staff-r41a@opal.invalid (the EMAIL GSI key)"
+      },
+      {
+        "name": "firmId",
+        "value_or_form": "'opal-capital'"
+      },
+      {
+        "name": "status",
+        "value_or_form": "'active' (exact string; the ticket and Entry readers refuse any other value)"
+      },
+      {
+        "name": "name",
+        "value_or_form": "display text, e.g. 'IRPT_ANLREQ R41 synthetic staff'"
+      },
+      {
+        "name": "role",
+        "value_or_form": "'user' (not read by the ticket CREATE hop; admin would only add FIRM_OPERATIONS elsewhere)"
+      },
+      {
+        "name": "tier",
+        "value_or_form": "'internal' (R29 IV form; the JWT carries the same)"
+      },
+      {
+        "name": "userType",
+        "value_or_form": "'test-filer' (R29 IV form; any value except 'service')"
+      },
+      {
+        "name": "allowedFirmIds",
+        "value_or_form": "OMIT (R29 IV form, unrestricted at both readers) or the list ['<one firm id>'] to pin it"
+      },
+      {
+        "name": "createdAt / updatedAt / createdBy",
+        "value_or_form": "ISO time; createdBy the minting serial (R29, R30 pattern)"
+      },
+      {
+        "name": "exp / TTL",
+        "value_or_form": "no TTL attribute on the row. Expiry is the JWT exp (iat + 1140 s, base.LIFE); the row is removed by the sitting, not by TTL"
+      }
+    ],
+    "table": "opal-users-v2 (base.USERS); GSI email-index (USERS_EMAIL_INDEX default)",
+    "token_method": "RS256 JWT minted in process by pyjwt.encode with the PEM read from Secrets Manager secret 'opal/auth/jwt-private-key' (sitting_r28 KEY_SECRET). Claims: sub = the address, iss 'opal-portal-auth', aud 'opal-portal-api', firmId 'opal-capital', tier 'internal', role 'user', userType 'test-filer', name, iat, exp = iat + 1140. The sitting names no key slot: it signs with the current private key, and the authorizer verifies against current and previous slots (getJwtKeySlots, verifyWithSlots). Token held in memory only, never printed or written.",
+    "removal_and_absent_check": "before: ConsistentRead get_item absent and email-index Count 0. Write with ConditionExpression attribute_not_exists(PK). After max(exp)+5 s: delete_item with attribute_exists(PK). Then poll ConsistentRead and the email-index Count for up to 300 s; the record lines 'ABSENT GSI <addr>' and 'ABSENT CONSISTENT <addr>' (R29 DOOR_REMOVAL, R30 TICKET_REMOVAL).",
+    "evidence": [
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/sitting_r28.py",
+        "line": 36,
+        "text": "KEY_SECRET = \"opal/auth/jwt-private-key\""
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/sitting_r28.py",
+        "line": 38,
+        "text": "LIFE = 1140"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28/sitting_r28.py",
+        "line": 34,
+        "text": "USERS, PARTNER, TICKETS = \"opal-users-v2\", \"opal-partner-49financial\", \"opal-tickets\""
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/sitting_r29.py",
+        "line": 127,
+        "text": "return {\"PK\": {\"S\": \"USER#\" + ids[k][\"addr\"]}, \"SK\": {\"S\": \"PROFILE\"}}"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/sitting_r29.py",
+        "line": 115,
+        "text": "IV\": dict(addr=\"irpt-r29-iv-%s@opal.invalid\" % date, firm=\"opal-capital\""
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/sitting_r29.py",
+        "line": 206,
+        "text": "\"role\": {\"S\": \"user\"}, \"tier\": {\"S\": \"internal\"}, \"userType\": {\"S\": \"test-filer\"},"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/sitting_r29.py",
+        "line": 241,
+        "text": "\"firmId\": \"opal-capital\", \"tier\": \"internal\","
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/sitting_r29.py",
+        "line": 300,
+        "text": "st6a, b6a, raw6a = upload(\"D6a\", \"IV\", \"49financial\""
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/sitting_r29.py",
+        "line": 308,
+        "text": "st6b, b6b, _raw = call(\"D6b\", \"IV\", ANALYSIS % \"49financial\""
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/DOOR_DETAIL_R29.txt",
+        "line": 7,
+        "text": "D6 upload status=200 code=NORMALIZED ; analysis status=200 code=ANSWER admitted=True"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/DOOR_TRACE_R29.txt",
+        "line": 9,
+        "text": "IV users row written (attribute_not_exists) and read back PRESENT (status active, no allowedFirmIds)"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/DOOR_TRACE_R29.txt",
+        "line": 14,
+        "text": "token for IV minted (held in memory only)"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29/DOOR_REMOVAL_R29.txt",
+        "line": 7,
+        "text": "ABSENT GSI irpt-r29-iv-20261014@opal.invalid"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 149,
+        "text": "ids = {\"B\": dict(addr=\"irpt-r30-b-%s@opal.invalid\" % date, firm=\"49financial\"),"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 160,
+        "text": "return {\"PK\": {\"S\": \"USER#\" + ids[k][\"addr\"]}, \"SK\": {\"S\": \"PROFILE\"}}"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 166,
+        "text": "IndexName=\"email-index\", KeyConditionExpression=\"email = :e\","
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 231,
+        "text": "ddb.put_item(TableName=base.USERS, Item=item, ConditionExpression=\"attribute_not_exists(PK)\")"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 229,
+        "text": "\"allowedFirmIds\": {\"L\": [{\"S\": i[\"firm\"]}]},"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 237,
+        "text": "get_secret_value(SecretId=base.KEY_SECRET)[\"SecretString\"]"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 244,
+        "text": "\"role\": \"user\", \"tier\": \"advisor\", \"firmId\": i[\"firm\"], \"iat\": iat, \"exp\": iat + base.LIFE}"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 245,
+        "text": "tokens[k] = pyjwt.encode(claims, pem, algorithm=\"RS256\")"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 286,
+        "text": "wait = max(exps) + 5 - time.time()"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/sitting_r30.py",
+        "line": 292,
+        "text": "ddb.delete_item(TableName=base.USERS, Key=ukey(k), ConditionExpression=\"attribute_exists(PK)\")"
+      },
+      {
+        "file": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r30/TICKET_REMOVAL_R30.txt",
+        "line": 1,
+        "text": "ABSENT GSI irpt-r30-b-20261014@opal.invalid"
+      },
+      {
+        "file": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+        "line": 380,
+        "text": "const decoded = verifyWithSlots(jwt, token, slots, {"
+      },
+      {
+        "file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts",
+        "line": 168,
+        "text": "const tier = user.firmId === 'opal-capital' ? 'internal' : 'advisor';"
+      }
+    ],
+    "recommend": "MINT_AS_DESCRIBED",
+    "deciding_fact": "the address is admitted at every read in source and the R29 IV recipe (firmId opal-capital, tier internal, no allowedFirmIds) was accepted live at the upload door and the analysis submit for tenant 49financial (DOOR_DETAIL_R29 D6 line). The one hop with no live INTERNAL evidence is ticket CREATE, and it needs the JWT tier 'internal' that this recipe carries. Caveat for the run order: a successful CREATE sends SES mail to the DL.",
+    "searched": "Read sitting_r30.py (live, the users rows, the token, the removal), sitting_r29.py (the IV internal row and its token), sitting_r28.py (constants), and the R29 and R30 result and removal files. Nothing was minted, called or printed."
+  },
+  "not_read": "The live system: no AWS call, no portal, no token, no ticket written. The deployed bytes of the portal authorizer, the ticket Lambda and the investor-reporting Lambdas (CodeSha256 not compared). RequestComposition.schema.json: not in the worktree (Glob under infra/ and org/ empty). ADDENDUM v0.6: not in the worktree. The producer list and CTO msg 7767: messages, not in the worktree. The Ticket CREATE for an INTERNAL principal: never exercised in any sitting record. The Entry.handle narrowing for the staff firm 'inflection': the registry entry was not read."
+}
