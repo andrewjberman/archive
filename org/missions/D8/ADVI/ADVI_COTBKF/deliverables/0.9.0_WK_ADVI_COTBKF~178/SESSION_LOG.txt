@@ -1,0 +1,36 @@
+0.9.0_WK_ADVI_COTBKF~178 -- round 89 orders CB-ck-1 (executed) and CB-ck-2 (staged, not un-parked)
+worktree: C:/dev/wk-cotbkf-178  branch wk-ADVI_COTBKF-178  HEAD at start 5c1cd69c65
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-ADVI_COTBKF-178; test -d org && test -d .tools -> TREE-OK.
+2. Premise read: data/assets/scripts/silver/commonwealth_fwd3_serve.py imports commonwealth_daily_valuation (module level).
+   commonwealth_daily_valuation.py line 50 imports commonwealth_price_census, which lives in data/assets/scripts/analysis/.
+3. git sparse-checkout list: the cone is .tools, data/assets/scripts/silver, data/mdpf/scripts/demque, infra/logic/registry,
+   lib, org/devices, org/missions/D8/ADVI/ADVI_COTBKF, org/missions/D8/MDPF/MDPF_DEMQUE/ledger, org/ref, org/standards,
+   org/modules/graph. data/assets/scripts/analysis/ is outside it and absent from the worktree; HEAD tracks it.
+4. python -m pytest data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve.py -q -> collection ERROR,
+   ModuleNotFoundError: No module named 'commonwealth_price_census'. No module was copied and the sparse set was not widened.
+5. CB89ck1-AC1: pytest file not found (rc=4); the use_class test file was not created, since no code could be imported.
+6. CB89ck1-AC2: FileNotFoundError on USE_CLASS_SERVE_RECORD.json (rc=1); no record written.
+7. CB89ck1-AC3: rc=2 from pytest (1 error, collection); the wrapper printed FWD3-TESTS files=1 rc=2.
+8. Real-run check (CB-ck-1 item 6): C:/dev/ajb_workspace/.scratch/advi_cotbkf/ does not exist; the worktree's
+   .scratch/advi_cotbkf/fwd3 default does not exist either -> no default run data dir found (NO_DATA_DIR).
+9. The existing test test_the_served_tables_carry_the_porting_verdict_last (lines 326-332) asserts porting_verdict is the
+   last column; CB-ck-1 item 1 puts use_class last. Recorded as surprise row ADVI_COTBKF-D1-W178-S2.
+10. Surprise rows ADVI_COTBKF-D1-W178-S1 (sparse gap, BLOCKING) and -S2 (column order vs existing test, BLOCKING) appended to
+    org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md.
+11. CB-ck-2 is staged behind CB-ck-1 reading complete; CB-ck-1 is not complete, so CB-ck-2 was not started.
+12. No S3 access, no --apply, no serve, no vendor call. No account number, name or dollar value appears here.
+
+AMENDMENT 1 (2.0.0_SA_COO~C1, received while working): the sparse set now includes data/assets/scripts and lib; use_class sits
+immediately before porting_verdict, which stays last; the existing test is not edited. Rows S1 and S2 stay unedited.
+13. Sparse set re-read: data/assets/scripts present; commonwealth_price_census.py on disk; existing fwd3, porting and price-need tests: 54 passed.
+14. Build committed at 4fe97022a6 (module blob e239f460fb8bd24797ec357ba0f33375f81c5fc8): use_class in the three tables before porting_verdict;
+    --yahoo-active-policy interim|blank (default interim); apply refuses blank (call 3adb); manifest use_class block; FWD3-BUILD gains use_class_policy.
+15. Tests: 8 use_class tests (new file) PASS; byte-equal porting control appended to the existing file (15 added, 0 removed).
+    AC1 8 passed; AC2 blob_equal=True default=interim s3_writes=0 tests_unchanged=True; AC3 28 passed rc=0.
+16. Real run: NO_DATA_DIR (both default dirs absent). Account-id scan (after the build commit): fails closed, pinned set absent; not looked for.
+17. CB-ck-1 proof VALID (rc=0); order flipped to complete. CB-ck-2 un-parks now.
+18. CB-ck-2 (un-parked by CB-ck-1 reading complete): item 1 applies. CB-ck-1 real_run is NO_DATA_DIR, so the cell stops:
+    MOVE_PRICED_RECORD.json (measured false, reason NO_DATA_DIR, all counts null) committed at 532ac27185; no row filed; no build run.
+    AC1 MOVE-PRICED measured=False reason=NO_DATA_DIR; AC2 MOVE-PRICED-SUMS consistent=True (vacuous on this branch: no counts exist).
+    Proof instance VALID; order flipped to complete.
