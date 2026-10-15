@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aj-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-4.hygiene-named-commit-import-and-risk-reflex-map.md",
+    "group": "OTHER",
+    "vintage_commit": "9cfc5f5fd8"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~115",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round20.md",
+    "vintage_commit": "9cfc5f5fd8",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-4.hygiene-named-commit-import-and-risk-reflex-map.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_named_commit_deploy.py",
+      "kind": "test",
+      "commit_or_etag": "4ba9e42a90",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "W108-S2 fix: open_ledger() runs deploy_ledger.py with the real .tools on PYTHONPATH (git_bash_resolver imports from the real tree), and gives the temporary ledger root a zero-exit safe-commit.sh double for the open commit only (surprise NFRA_CTLPLN-W115-S1). Cases 1-8 run; the last line is NAMED-COMMIT-TEST cases=8/8 ok=True. Committed at 4ba9e42a90; no deploy; run from the worktree.",
+      "artifact_covered_by": [
+        "CTaj4-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round20_hygiene.py",
+      "kind": "test",
+      "commit_or_etag": "37459ebb8b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test, --map. Builds a temporary repository, stages a mapped portal .tsx and a mapped .py, runs the real org/modules/graph/comp_pulse.py diff at its own path, and counts the [HOLD|RISK] hit lines; an unmapped portal .tsx is printed as a control. Last line HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True. comp_pulse.py itself is unchanged (see declared_exclusions). Committed at 37459ebb8b; no deploy.",
+      "artifact_covered_by": [
+        "CTaj4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaj4-AC1",
+      "criterion_verbatim": "the named-commit deploy test runs through all 8 cases (base: it stops after case 7 with ModuleNotFoundError); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_named_commit_deploy.py",
+      "output_evidence": "NAMED-COMMIT-TEST cases=8/8 ok=True (rc=0; timeout 280 from the worktree root on the committed state at 4ba9e42a90; the lines before it: PASS case 1 through PASS case 8, with case 8 reporting safe-deploy.sh rc=0 carried=True survives_rerender=True unpublished_rc=1 no_sentinel_rc=1 and safe-apply.sh rc=0 carried=True survives_rerender=True unpublished_rc=8 no_sentinel_rc=8). The test file was run before the fix and stopped after case 7 with ModuleNotFoundError: No module named 'git_bash_resolver' (see controls.mutant).",
+      "denominator": "8 cases run: 8 PASS, 0 FAIL; ok=True with k == 8 and len(results) == 8",
+      "status": "PASS",
+      "expect": "cases=8/8",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj4-AC2",
+      "criterion_verbatim": "a staged portal .tsx is classed by the risk reflex's map (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --map",
+      "output_evidence": "HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True (rc=0; timeout 280 from the worktree root on the committed state at 37459ebb8b; repeat run identical). The classing lines the real comp-pulse diff printed for the staged set: '  [HOLD] .tools/deploy_ledger.py' and '  [RISK] portal/src/components/BenchmarkHeatmap.tsx' (DENOMINATOR: 2 file(s) checked against 1662 danger node(s)). Control, not required: staged portal/src/x.tsx with no map entry printed 'ANSWER STATE: PRESENT_WITH_ZERO_RESULTS' with rc=0. Base premise not borne out: the tracked map already classes the mapped portal .tsx at the cut (see surprise NFRA_CTLPLN-W115-S2).",
+      "denominator": "2 staged paths in the deciding run: 2 classed (1 portal .tsx, 1 .py); control: 1 unmapped portal .tsx checked, 0 classed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj4-AC3",
+      "criterion_verbatim": "the comp-pulse battery passes no fewer than 10 of 12 after the map change (base read 10/12 at the issuer's dry-run and 11/12 at the worker's: one arm, B1-PULSE-BUDGET-REACHED, is time-dependent; the denominator stays 12 and the count may be 10 to 12, never lower); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_comp_pulse_battery.py",
+      "output_evidence": "COMP-PULSE BATTERY: 11/12 PASS (denominator 12) (rc=1 from the battery's own FAIL arm; timeout 280 from the worktree root; re-run after the issuer's amendment cacfe9f285 gives the same last line; repeat runs on the committed state at 37459ebb8b gave the same line). The failing arm: '[FAIL] B1-PULSE-BUDGET-REACHED -- rc=0'. comp_pulse.py is unchanged by this cell, so the count is not moved by an edit here (surprise NFRA_CTLPLN-W115-S3).",
+      "denominator": "12 arms: 11 PASS, 1 FAIL (B1-PULSE-BUDGET-REACHED, time-dependent per the issuer's amendment cacfe9f285); k=11 is at least the floor of 10; the denominator is 12",
+      "status": "PASS",
+      "expect": "/12 PASS \\(denominator 12\\)",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants run this session. (a) The pre-fix named-commit test at the cut 9cfc5f5fd8 (the file as the order found it): case 8 cannot run. (b) The hygiene control: a staged portal .tsx with no map entry (portal/src/x.tsx) is not classed, so the classed count is not a constant.",
+      "expected": "(a) the last line is not cases=8/8 and the run stops in case 8's fixture; (b) the unmapped .tsx is not classed",
+      "observed": "(a) cases 1-7 PASS, then RuntimeError: deploy_ledger open failed rc=3 with ModuleNotFoundError: No module named 'git_bash_resolver' in the open child; after an import-only fix the open child failed with 'safe-commit.sh: No such file or directory' (rc=3), which is why the fixture double was added. (b) DENOMINATOR: 1 file(s) checked against 1662 danger node(s); ANSWER STATE: PRESENT_WITH_ZERO_RESULTS; rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of the three tests run twice more on the committed state (4ba9e42a90 for the named-commit test, 37459ebb8b for the hygiene test and the battery); compared on the last line",
+      "observed": "NAMED-COMMIT-TEST cases=8/8 ok=True on both runs; HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True on both runs; COMP-PULSE BATTERY: 11/12 PASS (denominator 12) on both runs and on the earlier run (three runs in all, one failing arm each time)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD item 2: the danger-map refresh in org/modules/graph/comp_pulse.py (so a staged portal/**/*.tsx is classed)",
+      "reason": "The premise does not hold. comp_pulse.py holds no class table: it loads the tracked map org/modules/graph/nerves-risk-edges.json, which is outside this order's <paths> and generated by nerves_lexical build. The tracked map already classes the mapped portal .tsx entries (12 of 14 portal .tsx nodes are HOLD or RISK), so the base count of 0 does not hold for them. An unmapped portal .tsx has no map node and cannot be classed without a generated-file write or an invented claim. comp_pulse.py is unchanged. Filed as NFRA_CTLPLN-W115-S2."
+    },
+    {
+      "item": "Uncommitted worktree state: the portal gitlink (M portal) and org/git-author-override-audit.laptop.log",
+      "reason": "Outside this order's <paths> and not committed, per the cell's rules."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W115-S1: the W108-S2 import fix was necessary but not sufficient; open() commits its two files through the temporary ledger root's safe-commit.sh, which the fixture does not provide; a zero-exit double was added for the open commit only. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W115-S2: the danger map is org/modules/graph/nerves-risk-edges.json, outside <paths>; the tracked map already classes the mapped portal .tsx entries; an unmapped portal .tsx reads as a clean zero (PRESENT_WITH_ZERO_RESULTS, rc=0). UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W115-S3: the comp-pulse battery reads 11/12 at this cut with one failing arm (B1-PULSE-BUDGET-REACHED), not the recorded 10/12 with two failing arms; comp_pulse.py is unchanged by this cell. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~115/NFRA_CTLPLN.TO-CT-aj-4.hygiene-named-commit-import-and-risk-reflex-map.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~115 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_named_commit_deploy.py",
+      "result": "NAMED-COMMIT-TEST cases=8/8 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --map",
+      "result": "HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_comp_pulse_battery.py",
+      "result": "COMP-PULSE BATTERY: 11/12 PASS (denominator 12)"
+    }
+  ]
+}
