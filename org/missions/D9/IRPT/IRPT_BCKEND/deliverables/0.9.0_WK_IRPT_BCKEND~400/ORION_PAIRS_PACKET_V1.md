@@ -4,7 +4,7 @@ Status: DESIGN ONLY. This packet proposes one never-widen pair with two halves. 
 
 ## 0. What the pair is, in one paragraph
 
-The Orion raw producer for the three Inflection feeds (positions, transactions, performance) is a manual command-line pull today. Its flat bronze keys, s3://opal-data-inf/bronze/<feed>/<date>.jsonl.gz, are the mirror's read contract and are cited here as existing keys, not as new addresses. Pair (b) ports the three manual writes into one scheduled handler that runs at 06:00 America/New_York, retires the manual CLI bronze writes and the three 11:15 to 11:32 UTC rules in the same release, and keeps the same key shape. Pair (a) then re-pulls every absent trading day of the three feeds through pair (b)'s code path: 7 positions days, 7 transactions days and 22 performance days, 36 keys in all. The Scope account feed joins pair (b) by addendum with its fee basis still UNPROVEN.
+The Orion raw producer for the three Inflection feeds (positions, transactions, performance) is a manual command-line pull today. Its flat bronze keys, s3://opal-data-inf/bronze/<feed>/<date>.jsonl.gz, are the mirror's read contract and are cited here as existing keys, not as new addresses. Pair (b) ports the three manual writes into one scheduled handler that runs at 06:00 America/New_York, retires the manual CLI bronze writes and the three 11:15 to 11:32 UTC rules in the same release, and keeps the same key shape. Pair (a) then re-pulls every absent trading day of the three feeds through pair (b)'s code path: 7 positions days, 7 transactions days and 22 performance days, 36 keys in all. The Scope account feed joins pair (b) by addendum with its fee basis NET (amendment 2 of the order, CTO msg 8049): the sample is one household with two fee-bearing accounts in Q3 2026, every Orion request of the feed keeps calcGrossOfFees false, and a missing account is ABSENT with NO_GROUP.
 
 ## 1. Change set
 
@@ -72,7 +72,7 @@ Before pair (b) is deployed, the releasing seat opens an entry in org/critical_p
 
 ## 11. What the packet does not measure, and what it does not touch
 
-It does not measure the vendor's answers for any day: no Orion request was made. It does not verify the request counts (households and accounts were counted in IB199-4). It does not identify the live writer of the daily flat keys; the search and its result are recorded in the design's live_writer block as absent. It does not touch the mirror, the silver chain beyond the existing positions convert, any portal page, any firm's bucket other than the Inflection feed's, or the Scope feed's served output. The fee basis of the Scope feed stays UNPROVEN until a fee window ties it. The round-116 account-performance read is not in this tree and is not inferred here.
+It does not measure the vendor's answers for any day: no Orion request was made. It does not verify the request counts (households and accounts were counted in IB199-4). It does not identify the live writer of the daily flat keys; the search and its result are recorded in the design's live_writer block as absent. It does not touch the mirror, the silver chain beyond the existing positions convert, any portal page, any firm's bucket other than the Inflection feed's, or the Scope feed's served output. The fee basis of the Scope feed is NET under amendment 2; the sample behind it is one household with two fee-bearing accounts in Q3 2026, so it is not proof for every account. The round-116 account-performance read is not in this tree and is not inferred here.
 
 ## 12. Signatures
 
