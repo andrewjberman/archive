@@ -27,3 +27,12 @@ PRD v2.23 @1fb9ac96ab (ADMITTED: ratified-text SIGNED by 3.0.0_SA_CVO @eb00bfa63
 ## Checks to dry-run at the base before the cut
 
 Per `/dispatch` Step 2: each cell's criteria run against the base commit and must read red where the cell is not built (controls green). The month-end oracle (spec table) is the CN-s-3 arm; "0 of 497" is the CN-s-4 arm. Not yet written.
+
+## Measured against the served Cottonwood object (2026-10-15 ~23:5xZ, read-only; carried into the CN-s-1 and CN-s-3 orders)
+
+Object `s3://opal-data-assets/portal/gold/mdpf/cottonwood/aggregate-aua-timeseries/2026-10-14.json`, 518,813 B, VersionId `ZddlHckHDbRRcROx6aaIZQH76Lm5xd3T`, written 2026-10-15T13:31:53Z; 497 dates, 89 total-bearing, first total 2026-06-09, `carried_dates` EMPTY, 12 absent-model-leg exceptions: all as the CRO spec states.
+
+- **Muni is $63,241,218.96, not "about $64M", and the residual holds a second account.** On 2026-10-14 `meta.income_non_model_residual.dollars_by_date` reads $64,990,553.26 for 2 accounts; `custom_residual_detail.by_date` splits it into `Opal_Muni_Income` $63,241,218.96 (1 account) and `Opal Hewitt Moderate Income` $1,749,334.30 (1 account), which sum to the residual exactly. Andrew named ONLY Muni (record 184xZ item 3: "Nothing wider is ruled"), so CN-s-1 moves the $63.24M account and leaves the Hewitt $1.75M in Other. The cell must move the account, never the residual's aggregate.
+- **A different Muni key already exists in `by_model`:** `opal_muni_sleeve` ("Opal Muni Sleeve", cohort_class `model`, $554,036.75 on 2026-10-14), already inside `model_aua`. The new "Opal Municipal Bonds" line is a SEPARATE, new key; the cell must not merge it with, rename, or double count the sleeve. Its criteria print both keys' dollars.
+- **The CRO oracle row for 2026-10-14 reproduces on today's object:** `model_aua` $205,096,738.85, Total (`partner_custody_total`) $553,717,240.91, Other (`non_model_aua`) $348,620,502.06; UST 18.23, ST 22.01, INT 82.03, LT 56.59, ULT 1.40 ($M), so Custom by difference is 24.83 (spec 24.8). After CN-s-1 the same date reads Custom about $88.07M and Other about $285.38M with the Total unchanged; the CN-s-3 oracle must be re-based for every date on which the account has a value (the account's first date is not yet read).
+- **Preconditions still open:** the Opal_Muni_Income account's first date, whether it exists before 2026-10-07 (the by-date detail printed starts 2026-10-07 in `count_by_date`), and the identity check against Happyland (the cell's act).

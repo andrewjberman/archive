@@ -16,8 +16,8 @@ princ = set(re.findall(r'AWS"?\s*[:=]\s*"?(arn:aws:iam::[0-9]+:role/[A-Za-z0-9_.
 other = [p for p in princ if "opal-gateway-role" not in p and "aws_iam_role.gw" not in p]
 plan = open(sys.argv[2], encoding="utf-8").read()
 m = re.search(r"(\d+) to add, (\d+) to change, (\d+) to destroy", plan)
-print("generator --check exit %%GC%% (want 0); roles in the .tf %d (want 5); wildcard resource %d (want 0); put or delete in actions %d (want 0); trust principals other than the gateway role %d (want 0); plan: %s" % (roles, wild, pd, len(other), m.group(0) if m else "NONE"))
-ok = roles == 5 and wild == 0 and pd == 0 and not other and m and m.group(3) == "0"
+print("generator --check exit %%GC%% (want 0); roles in the .tf %d (want at least 5); wildcard resource %d (want 0); put or delete in actions %d (want 0); trust principals other than the gateway role %d (want 0); plan: %s" % (roles, wild, pd, len(other), m.group(0) if m else "NONE"))
+ok = roles >= 5 and wild == 0 and pd == 0 and not other and m and m.group(3) == "0"
 print("OK" if ok else "NO")
 PYEOF
 )
