@@ -4,7 +4,10 @@
                             org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/assets_group_map.json (136) is a row carrying bucket, vendor and firm equal to the map;
                             no other row carries a vendor; vendor and firm values are inside the C-GROUP lists; the registry catalog_fork_keys.json holds every vendor and firm value in its `labels` list
   python c23_check.py ac2   the 12 Schwab dim_* rows (4 tables x masters 08242234, 08335338, 08403355): present, bucket opal-data-assets, vendor schwab, firm 49financial, read_tool null,
-                            gap_owner NFRA_OPLGTW, a key_template, not retired; the table rows number 228; against the catalog at BASE_REF every other table row differs only in bucket, vendor, firm
+                            gap_owner NFRA_OPLGTW, a key_template, not retired; the table rows number the base's plus 12 minus the rows removed (an ASSETS row is never removed: RESEARCH's scope drop may remove others);
+                            against the catalog at BASE_REF every other table row differs only in bucket, vendor, firm and the curated tags
+  python c23_check.py ac4   the `serves` field (PRD v0.17 C-GROUP item 2, amended by the CTO @5ba12d1de5): every tool_index entry that catalog rows of the opal-data-assets or opal-data-bd buckets name as read_tool carries
+                            `serves`, the sorted list of the DISTINCT {vendor, firm} pairs of those rows; an entry with no such row carries no `serves`; the list equals the row-derived set for every tool
   python c23_check.py ac3   the visibility difference control (vis_matrix.py, BASE tree against the NEW tree): each known firm sees its old rows plus exactly the firm-scoped rows whose firm it is; no row is
                             visible to another firm; multi, none and unresolved rows are visible to no firm principal; unknown and empty firm see nothing; opal-internal sees every row. Prints the pair
                             count and the newly-visible count per firm
@@ -94,6 +97,9 @@ def ac2():
                       and r.get("key_template") and r.get("retired") is False):
             bad.append(e)
     n_table = sum(1 for r in rows.values() if "contract" in r)
+    removed = sorted(set(base) - set(rows))
+    removed_assets = [e for e in removed if e in json.load(open(MAP, encoding="utf-8"))["rows"]]
+    base_table = sum(1 for r in base.values() if "contract" in r)
     odd = []
     for e, r in base.items():
         if e in rows:
@@ -101,11 +107,12 @@ def ac2():
             if diff - {"bucket", "vendor", "firm", "nl_tags", "nl_tags_basis"}:
                 odd.append((e, sorted(diff)))
     extra = sorted(set(rows) - set(base) - set(NEW12))
-    print("DENOMINATOR new rows present %d of 12; wrong %d; table rows %d; base rows changed outside bucket/vendor/firm %d; unexpected new rows %d" %
-          (12 - len(missing), len(bad), n_table, len(odd), len(extra)))
+    print("DENOMINATOR new rows present %d of 12; wrong %d; table rows %d (base %d + 12 - removed %d); base rows changed outside bucket/vendor/firm %d; unexpected new rows %d" %
+          (12 - len(missing), len(bad), n_table, base_table, len(removed), len(odd), len(extra)))
     for o in odd[:5]:
         print("  ODD %s" % (o,))
-    return report([("the 12 Schwab dim_* rows are present", not missing), ("each carries the expected fields", not bad), ("the table rows number 228", n_table == 228),
+    return report([("the 12 Schwab dim_* rows are present", not missing), ("each carries the expected fields", not bad), ("the table rows number the base's plus 12 minus the removed (%d)" % len(removed), n_table == base_table + 12 - len([e for e in removed if "contract" in base[e]])),
+                   ("no ASSETS row was removed (%d)" % len(removed_assets), not removed_assets),
                    ("every other row differs from the base only in bucket, vendor, firm and the curated tags", not odd), ("no other row was added", not extra)])
 
 
@@ -127,7 +134,8 @@ def ac3():
         return 9
     b, n = matrix(os.path.join(d, GW)), matrix(os.path.abspath(NEWGW))
     rows = table_rows(load(os.path.join(NEWGW, "app", "refs", "DATA_CATALOG.yaml")))
-    res = [("the silver row sets differ only by the 12 new rows", n["rows"] == b["rows"] + 12), ("opal-internal sees every row", len(n["opal-internal"]) == n["rows"]),
+    removed_silver = len(set(e for e in table_rows(base_cat()) if e not in rows))
+    res = [("the silver row sets differ only by the 12 new rows less the %d removed" % removed_silver, n["rows"] == b["rows"] + 12 - removed_silver), ("opal-internal sees every row", len(n["opal-internal"]) == n["rows"]),
            ("the unknown and the empty firm see nothing", not n["firm:nosuchfirm"] and not n["firm:"]), ("no error in either run", not n.get("errors") and not b.get("errors"))]
     leaks = 0
     newly = 0
@@ -145,11 +153,35 @@ def ac3():
     return report(res)
 
 
+def ac4():
+    cat = load(CATALOG)
+    rows = all_rows(cat)
+    pairs = {}
+    for r in rows.values():
+        if r.get("read_tool") and r.get("bucket") in ("opal-data-assets", "opal-data-bd") and r.get("vendor") and r.get("firm"):
+            pairs.setdefault(r["read_tool"], set()).add((r["vendor"], r["firm"]))
+    bad = []
+    n_with = 0
+    for e in cat.get("tool_index") or []:
+        t = e.get("tool")
+        want = [{"vendor": v, "firm": f} for v, f in sorted(pairs.get(t, ()))]
+        if want:
+            n_with += 1
+            if e.get("serves") != want:
+                bad.append("%s: %r != %r" % (t, e.get("serves"), want))
+        elif "serves" in e:
+            bad.append("%s: serves on a tool no assets or bd row names" % t)
+    print("DENOMINATOR tool_index entries %d; with assets or bd rows %d; serves wrong %d" % (len(cat.get("tool_index") or []), n_with, len(bad)))
+    for b in bad[:5]:
+        print("  BAD %s" % b)
+    return report([("every tool the assets and bd rows name carries serves equal to the row-derived pairs (%d of %d)" % (n_with - len([b for b in bad if "serves on" not in b]), n_with), n_with > 0 and not bad)])
+
+
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("ac1", "ac2", "ac3"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("ac1", "ac2", "ac3", "ac4"):
         print(__doc__)
         return 9
-    return {"ac1": ac1, "ac2": ac2, "ac3": ac3}[sys.argv[1]]()
+    return {"ac1": ac1, "ac2": ac2, "ac3": ac3, "ac4": ac4}[sys.argv[1]]()
 
 
 if __name__ == "__main__":
