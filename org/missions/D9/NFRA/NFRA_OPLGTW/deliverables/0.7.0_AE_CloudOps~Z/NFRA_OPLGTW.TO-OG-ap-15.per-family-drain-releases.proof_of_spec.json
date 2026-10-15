@@ -1,0 +1,189 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-15",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-14/yr1_live_and_ap18_v2_phase_a.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3bb7fb022e"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "a44f88128b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-15.per-family-drain-releases.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: each package is the source, built off trunk, with each family's ask.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap15.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)families named 5; expected set equal: yes.*families built per their route with fields: 5 of 5; ask names all five: yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "families named 5; expected set equal: yes\nfamilies built per their route with fields: 5 of 5; ask names all five: yes\nRESULT: PASS\nexit=0",
+   "denominator": "5 families named and the expected set equal; 5 of 5 built per their A1 route (full for schwab and etf, drain-only for blackdiamond, orion and eclipse) with every required field; the ask names all five.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: every family is released and graded on its own scheduled sweep, or refused with a file.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap15.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)families released and graded [1-5]; refused with a file [0-4]; of 5; defects 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "families released and graded 5; refused with a file 0; of 5; defects 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "5 of 5 families released and graded, 0 refused, 0 defects. Each family's own ledger is CLOSED and its sentinel gone at HEAD. Per family the grader checks five things: ledger closed, sentinel absent, live CodeSha256 == the built package, the sweep was the scheduled one, and dlq_drain present. This criterion read FAIL for most of this order's life and that was ACCURATE, not a broken grader: etf's `released` was deliberately null -- neither released-and-proven nor refused -- until its 23:30Z sweep actually ran.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "Every family is graded on its OWN next scheduled sweep, never an ad-hoc invoke (the order forbids one and CLAUDE.md calls success-of-upstream-only a defect). The sweep is identified by being the ONE invocation in its cron window, with the window's START-line count printed as the denominator, so a second invocation would be visible rather than assumed away.",
+   "observed": "schwab 12:15:49.668Z cron(15 12); blackdiamond 13:00:34.194Z cron(0 13); orion 16:00:42.862Z and eclipse 16:00:05.021Z cron(0 16); etf 23:30:14.490Z cron(30 23) -- 1 START line in the 23:00Z-01:1xZ window for etf. Each family's dlq_drain was then read from the SERVED status object, not from the function's own return value.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. The sharpest negative here is eclipse, which is the only non-zero drain and therefore the only family whose record could not have been produced by a no-op: 12 messages, 12 distinct keys, ONE signature (VendorDriftError on eclipse/portfolios_simple, extra=['defaultTradingEngineId']). A drain that reported 0 everywhere would be indistinguishable from a drain that never ran; eclipse's 12 proves the code path executes and attributes correctly, and the four zeroes are then honest zeroes rather than silence.",
+   "expected": "at least one family's drain record non-zero and attributed to its own family",
+   "observed": "eclipse drained 12 of 12 with one_signature true; schwab, blackdiamond, orion and etf each drained 0 of 0 with other_family_returned 0 and unattributed 0 -- and every record carries family = its own family, so no family drained another's messages.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-schwab",
+   "kind": "aws_resource",
+   "commit_or_etag": "U6l7D4fUe125WC53/GblkfHQKtDbpzRorHLLsvlbFmc=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "live CodeSha256 U6l7D4fUe125WC53... read from get-function-configuration equals this order's built package_sha256 for schwab; graded on its OWN scheduled sweep 2026-10-14T12:15:49.668Z (RequestId 53885c9e-cbf8-4bb7-9221-b565c0eb09ae), with the dlq_drain record read from the SERVED meta/backfill-status.json at layers.silver, never from the function's self-report",
+   "introduces": [
+    "dlq_drain"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-etf",
+   "kind": "aws_resource",
+   "commit_or_etag": "zNCf2GLiRNSpUYsdQUUPvwuAHtDZBlPevai0YqdzRh4=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "live CodeSha256 zNCf2GLiRNSpUYsd... read from get-function-configuration equals this order's built package_sha256 for etf; graded on its OWN scheduled sweep 2026-10-14T23:30:14.490Z (RequestId e65d4fbb-5d07-471f-88bd-dfc439d7c069), with the dlq_drain record read from the SERVED meta/backfill-status.json at layers.silver, never from the function's self-report",
+   "introduces": [
+    "dlq_drain"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-orion",
+   "kind": "aws_resource",
+   "commit_or_etag": "n7kVWHvtYBXn8xaNRsO0y5e7tVAH63i5LSYNJ9+dAo4=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "live CodeSha256 n7kVWHvtYBXn8xaN... read from get-function-configuration equals this order's built package_sha256 for orion; graded on its OWN scheduled sweep 2026-10-14T16:00:42.862Z (RequestId 04f1f69f-d69f-4eb0-8fc8-0ba8fa1555bb), with the dlq_drain record read from the SERVED meta/backfill-status.json at layers.silver, never from the function's self-report",
+   "introduces": [
+    "dlq_drain"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-eclipse",
+   "kind": "aws_resource",
+   "commit_or_etag": "clrUz/ikqSMgd5Edtx7gJFceLH2LSjow7c6Vfqtw64g=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "live CodeSha256 clrUz/ikqSMgd5Ed... read from get-function-configuration equals this order's built package_sha256 for eclipse; graded on its OWN scheduled sweep 2026-10-14T16:00:05.021Z (RequestId 1bd3a5f0-e995-4b01-b76a-f7a54f4422b2), with the dlq_drain record read from the SERVED meta/backfill-status.json at layers.silver, never from the function's self-report",
+   "introduces": [
+    "dlq_drain"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-blackdiamond",
+   "kind": "aws_resource",
+   "commit_or_etag": "bcvS/qYFMVxnAi/dLlExMB2RhEC2MJRNaLgqNaUCPp0=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "live CodeSha256 bcvS/qYFMVxnAi/d... read from get-function-configuration equals this order's built package_sha256 for blackdiamond; graded on its OWN scheduled sweep 2026-10-14T13:00:34.194Z (RequestId 887fcea4-41dc-4fe4-bfa7-236b0b00f913), with the dlq_drain record read from the SERVED meta/backfill-status.json at layers.silver, never from the function's self-report",
+   "introduces": [
+    "dlq_drain"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "26dc3fc8ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the etf entry's pin, date and deployed_code_sha256 brought onto this order's release; 234 of 235 sibling entries compared and unchanged by a brace-matched span edit",
+   "introduces": [
+    "58ee124eb785f9f73d0fec0482ccd79e131af841"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "aws lambda get-function-configuration (per family)",
+   "invocation": "CodeSha256, State, LastUpdateStatus read live for each of the five converters",
+   "result": "5 of 5 CodeSha256 equal to the built package_sha256; State Active; LastUpdateStatus Successful"
+  },
+  {
+   "tool": "aws logs filter-log-events (the sweep census)",
+   "invocation": "START RequestId lines in each family's cron window, epoch-millis bounds computed in UTC",
+   "result": "one START per family per window -- for etf, 1 line in 23:00Z-01:1xZ, the denominator printed, so an ad-hoc second run would have shown rather than hidden"
+  },
+  {
+   "tool": "aws s3api get-object (the SERVED record)",
+   "invocation": "{source}/{scope}/meta/backfill-status.json in opal-data-assets, per tree; s3api so timestamps are UTC",
+   "result": "etf: 4 of 4 trees present and written 2026-10-14T23:30:17+00:00, each carrying layers.silver.dlq_drain with family=etf; the key is at layers.silver and NOT at the top level, where it is absent"
+  },
+  {
+   "tool": "aws events list-rules / list-targets-by-rule",
+   "invocation": "opal-assets-silver-etf-sweep-daily",
+   "result": "cron(30 23 * * ? *), ENABLED, target function:opal-assets-silver-etf"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "close-leg + close per family ledger",
+   "result": "five ledgers CLOSED with every leg proven and every sentinel removed"
+  },
+  {
+   "tool": "the source-map span edit",
+   "invocation": "brace-matched edit of functions[\"opal-assets-silver-etf\"] only",
+   "result": "234 of 235 siblings compared and unchanged; the entry's key set unchanged; the file still parses"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S117: eclipse vendor drift -- the only non-zero drain, 12 messages in ONE signature, VendorDriftError on eclipse/portfolios_simple with extra=['defaultTradingEngineId']. ARMED and not mine to disarm; it is a vendor-side field appearing in a payload the schema does not admit, and it is the evidence that the drain path really runs.",
+  "NFRA_OPLGTW-Z-S118: orion's and eclipse's set-identity guards read FAIL on the same sweeps that produced their drain records (orion: expected 4997 landed 5001 missing 0 alien 4). The guard is NOT this criterion -- a drain record is -- and the row exists so that distinction is recorded rather than argued.",
+  "NFRA_OPLGTW-Z-S134: step 6's source-map update reached artifact_sha256 for four families but not their pin or date, and etf's entry carried the NEW artifact hash beside the OLD deployed hash, which reads as a deploy that half happened. etf is corrected here; the other four are terminal grades and eclipse's field is a live peer's act, so the issuer rules. Two routes in the row."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the set-identity guard verdicts on orion and eclipse",
+   "reason": "Both read FAIL on the sweeps this order grades, and that is DECLARED rather than smoothed over: this order's criterion is the per-family DLQ drain record, not the guard. Row Z-S118 carries the guards and they belong to whoever owns that drift, not to this release. Saying the families are 'released and graded' means exactly what AC2's five per-family checks measure, and nothing about those guards."
+  },
+  {
+   "item": "the three stale source-map pins (schwab, orion, blackdiamond)",
+   "reason": "Step 6 binds the entry update to each family's live grade, and for these three only artifact_sha256 was brought forward. Their grades are already terminal, so re-opening them is the issuer's call (row Z-S134). CLAUDE.md rule 4 is explicit that this map is not a deployed-vs-built control, so a stale pin misleads a reader without disarming a mechanism -- which is why it survived four closes unnoticed."
+  },
+  {
+   "item": "eclipse's artifact_sha256",
+   "reason": "It holds OG-ec-2's repo build (GxWRZhTM...) rather than this order's live value (clrUz/ik...). That is a LIVE PEER's in-flight work -- 0.7.0_AE_CloudOps~ZS committed 'eclipse converter artifact uploaded and stamped' at 19:21Z today and its row Z-S131 names both hashes -- so the field is not mine to move and was deliberately left alone."
+  }
+ ]
+}

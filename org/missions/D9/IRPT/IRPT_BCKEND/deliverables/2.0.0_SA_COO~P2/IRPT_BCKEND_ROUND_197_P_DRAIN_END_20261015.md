@@ -1,0 +1,28 @@
+# IRPT_BCKEND round 197, workstream ~P -- drain-end packet (L8 input)
+
+Issuer and drainer: 2.0.0_SA_COO~P2 on dell2, 2026-10-15 (clock ~01:5xZ). To: 3.0.0_SA_CVO. Four orders, issued in ONE issuance @70f82239a8 on the CTO's round-197 analysis (msg 7864): IB-pr-544 and IB-pr-547 `complete`; IB-pr-545 `cancelled` on a measured STOP; IB-pr-546 (packet v3) `cancelled`, NOT RUN, because its predecessor shows a STOP.
+`python .tools/round-close-check.py --project IRPT_BCKEND --round 197 --workstream "~P"` reads `verdict=MAY-CLOSE` (orders=4, 2 complete, 2 cancelled with reasons). I re-ran IB197-1, IB197-4 and IB197-2 AC1 to AC3 on the landed trees: IB197-1 and IB197-4 all PASS and VALID (IB197-4's instance read INVALID until I pinned its two artifact rows to the carrying commit c611043bc2); IB197-2 AC1 FAIL (the STOP, below), AC2 and AC3 PASS.
+Push state: LOCAL on `box/dell2`; `git ls-remote origin box/dell2` is read at send time. **Nothing was minted, uploaded, applied, deployed, signed or invoked by any seat, and no AWS write was made.**
+
+| order | what it did | landed | criteria |
+|---|---|---|---|
+| IB-pr-544 | pin 2 `5fad7eaaa8` (the closure-fix pin `b1d354cfc9` plus one commit reversing the CUSIP port `01e843ce2e` in `holdings_snapshot.py`) verified: bundle delta exactly `holdings_snapshot.py`; 34 of 34 `.py` closure members import under `python -I` per firm; closure == traced set, 46 of 46, 0 missing, 0 extra | @52dea9de8a | 3 of 3 PASS |
+| IB-pr-545 | the live-against-pin-2 differential on the BUILT bundles | @8e9becba9c | AC1 FAIL (a STOP), AC2 and AC3 PASS |
+| IB-pr-546 | packet v3 | not run | not run |
+| IB-pr-547 | READ why the port blanks 45 Cottonwood sub-class values | @8d520aa652 | 3 of 3 PASS |
+
+## What the CVO needs to know
+
+- **THE STOP (IB-pr-545, rows D2-W390-S1 and S2): at pin 2 the 49financial differential is 119 changed nodes, not 32.** 34 nodes carry the signed cash rule; 87 carry a change outside it (32 `asset_class` equity to unclassified, 32 basis TABLE to NONE, 24 non-rule groups in all). The 49financial BUILT gate is REFUSED on `classified_security_lost` while the live gate PUBLISHES at the same served state (latest_date 2026-10-12), so a release of pin 2 to 49financial would not publish.
+- **Measured cause:** the three live bundles are not the same code. The live 49financial `holdings_snapshot.py` (sha256 prefix 5651000b002f) names cusip on 12 lines; Cottonwood's (dfa017b824c1) and Inflection's (ff35d4fb0595) on 2. Reverting the port therefore moves 49financial, whose live bundle already carries CUSIP handling. Round 196 measured 49financial at 32 with the port in; the revert's effect on 49financial was not measured then.
+- **What reproduces:** Cottonwood 255 changed nodes, all the signed cash rule (`asset_class` fixed_income to cash), gate REFUSED live on `account_lost` and PUBLISHED built (the signed exemption repair); the 4 round-196 overdetermined nodes are cash-rule movers again, as the CTO expected. Inflection 841, all the signed cash rule, gate the same on both sides. No node added or removed, no account changed, no value beyond tolerance (largest delta 0.0), two runs one digest per firm, planted mutant flagged on all three.
+- **The READ (IB-pr-547):** all 45 blanked Cottonwood sub-class values share ONE rule site, `holdings_snapshot.py:993`: the port's CUSIP-keyed canonical lookup returns a row with no `sub_asset_class` (the 45 rows were last written by the scheduled writer `mdpf-secclass-clean-names-v2`); the prior path was the name-alias fallback. Three options for the port's own release: keep_prior_sub_class (the worker's recommendation), documented_correction, backfill_canonical_rows. Pin 2 carries no port, so the blank does not ship in the Cottonwood release.
+- **My recommendation to the CTO (round 198):** a PER-FIRM pin. Cottonwood and Inflection ship on pin 2 (signed scope 255 and 841, cash rule only). 49financial ships on the closure-fix pin `b1d354cfc9` (the round-196 built differential of 32 held there) or on its own measured pin; the CTO rules which. Then packet v3 names the pin per firm with each firm's built differential at one served state, both halves, then the apply under the business-date and manifest-anchor rules. The port's own release follows the CTO's option ruling.
+- **Issuer defects this round:** (a) my IB197-4 proof-instance expectation did not tell the worker that artifact rows must be pinned to the carrying commit; the instance read INVALID and I repaired it; (b) IB-pr-545's bound named S3 reads only while the classifier reads DynamoDB `get_item` (row D2-W392-S3); both are mine and inert. Worker `~390` ended on a spend-limit error after committing its record and before its proof instance, which a STOP does not need.
+- **Rows:** D2-S177 dispositions the workers' rows (D2-W392-S1 to S3, D2-W390-S1 and S2). STILL ARMED, carried unchanged: D2-W392-S2 (owner me; disarms when the CTO rules the port release's option), W349-S1, W361-S1, W348-S2, W368-S2 (owner me), D2-S158 (with the CTO).
+- **Not cut and why:** packet v3 and the apply (a STOP stands over the pin question); the daily-6-AM schedule release (CTO ruling 7834: after this release lands). Andrew's PROD execution ID for IB-pr-456 (open act f61b) is still unmet.
+- **Scratch awaiting Andrew's word (recursive deletes):** `C:/dev/_scratch384` to `_scratch387`, `_scratch389`, `_scratch390`, `_scratch392` (the workers', some with client-derived bundle extracts) and my `C:/dev/_scratchP2`; none is tracked.
+
+## Judgment criteria
+
+None this round (judgment=0). Every criterion is mechanical and was re-run by the issuer.
