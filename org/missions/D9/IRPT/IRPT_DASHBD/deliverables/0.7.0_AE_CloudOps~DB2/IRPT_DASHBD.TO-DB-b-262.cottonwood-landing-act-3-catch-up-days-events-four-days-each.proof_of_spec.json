@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-262",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "2c6ed37df3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-262.cottonwood-landing-act-3-catch-up-days-events-four-days-each.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DB2",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~DB2/COT_CATCHUP_RECORD.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~DB2/COT_CATCHUP_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "474ff2fdd1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record the checker reads: gates, 16 events (payload, invoked_utc, status 200, returned ok/days/held 0, REPORT values, request id), partitions_after; counts, dates, keys, hashes and words only",
+      "artifact_covered_by": [
+        "DBD129-1-AC1",
+        "DBD129-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/",
+      "kind": "s3_object",
+      "commit_or_etag": "65 new date partitions (2026-07-10 plus 64 days to 2026-10-14), 3390 in all",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "a fresh LIST after the last event: each of the 64 named days holds exactly data.parquet and manifest.json; the 3325 history partitions to 2026-06-22 are all present and none was written since Act 3 began",
+      "artifact_covered_by": [
+        "DBD129-1-AC1",
+        "DBD129-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:irpt-cot-account-return-daily-lambda",
+      "kind": "aws_resource",
+      "commit_or_etag": "fQFe4moIeMHspIjLxO2C04TobQW6cNZc7mfwstcMWzs=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "unchanged by this order (memory 1024, timeout 900, same CodeSha256); it executed the 16 events",
+      "artifact_covered_by": [
+        "DBD129-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/irpt-cot-account-return-daily-daily",
+      "kind": "aws_resource",
+      "commit_or_etag": "DISABLED cron(15 8 ? * MON-FRI *) America/New_York",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "unchanged and still DISABLED; the order enables nothing",
+      "artifact_covered_by": [
+        "DBD129-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBD129-1-AC1",
+      "criterion_verbatim": "`DBD129-1-AC1` -- the record has exactly the form above; its events name exactly the silver days after 2026-07-10 (a fresh recount of both tables) up to the last day named, in ascending order with no day skipped and no day at or before 2026-07-10, at most four days an event; every event is synchronous with nothing held, no function error, Max Memory Used at or under 717 MB and Duration under 700 s; Act 2's record passes; the ledger is the open one. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r129/p129_cotcatchup.py\" . DBD129-1-AC1",
+      "output_evidence": "OK: 64 catch-up days in 16 event(s) of at most 4, exactly the silver days after 2026-07-10 up to 2026-10-14, each event synchronous, nothing held, Max Memory Used under 717 MB; Act 2's record passes; ledger irpt-dashbd-cottonwood-account-return-daily-20261015 open | DBD129-1-AC1 PASS",
+      "denominator": "one arm over the committed record and fresh reads: a recount of both Black Diamond silver tables (the day list), a LIST of the gold prefix, the function, the schedule and the log group; 1 of 1 arms PASS",
+      "status": "PASS",
+      "expect": "DBD129-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBD129-2-AC1",
+      "criterion_verbatim": "`DBD129-2-AC1` -- FRESH reads by the checker: 2026-07-10 and every named day hold exactly their two objects; the history still reads 3,325 partitions to 2026-06-22; the function (memory 1024, timeout 900) and the schedule (DISABLED, the packet's cron and zone) are unchanged; a REPORT line in the log group equals each recorded event. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r129/p129_cotcatchup.py\" . DBD129-2-AC1",
+      "output_evidence": "OK: 64 named days plus 2026-07-10 each hold their two objects; history 3325 partitions to 2026-06-22 untouched; function and schedule unchanged (DISABLED); a REPORT line equals each of the 16 events | DBD129-2-AC1 PASS",
+      "denominator": "one arm over the committed record and fresh reads: a recount of both Black Diamond silver tables (the day list), a LIST of the gold prefix, the function, the schedule and the log group; 1 of 1 arms PASS",
+      "status": "PASS",
+      "expect": "DBD129-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminating control is the committed record with event 6's day 2026-08-20 replaced by 2026-08-19 (a day with no silver pair), run through the same checker.",
+      "expected": "DBD129-1-AC1 FAILS on the day list: the event names a day without both silver tables.",
+      "observed": "FAIL: event 6 names days without BOTH silver tables: ['2026-08-19'] (DBD129-1-AC1 FAIL); the record was restored from git and DBD129-1-AC1 read PASS again.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "both criteria run from the issuer's amended checker against the committed record; the silver recount, the gold LIST and the log reads are fresh each run.",
+      "observed": "same last line (PASS) for both criteria on every run after the checker's two amendments (the revision-3 packet sha, the held count); before them DBD129-1 could not pass any faithful record.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any event of more than four days, any day at or before 2026-07-10, any second invoke of an event",
+      "reason": "Bounds of the order; 16 invocations were made, one per event, none retried."
+    },
+    {
+      "item": "enabling the schedule, any change to the function, the roles or the schedule",
+      "reason": "Bounds of the order; the schedule stays DISABLED."
+    },
+    {
+      "item": "closing the ledger or its leg L5",
+      "reason": "Bounds of the order: the ledger stays OPEN for the issuer."
+    },
+    {
+      "item": "the days 2026-08-19, 2026-09-24 and 2026-09-25",
+      "reason": "No silver pair; the order does not name them and the handler would hold them."
+    },
+    {
+      "item": "any push",
+      "reason": "Bounds of the order: never push; commits are local on the worktree branch."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-S89: the stamp wrapper, the CLI retry and the worktree terraform finds of the preceding order; this order met the same CLI hazard and used --cli-read-timeout 0, so no retry occurred. The handler returns held as the count 0, which the issuer accepted (msg 8450); no new row."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p129_cotcatchup.py",
+      "invocation": "run with DBD129-1-AC1 and DBD129-2-AC1",
+      "result": "2 of 2 PASS on the amended checker."
+    },
+    {
+      "tool": "aws lambda invoke",
+      "invocation": "16 synchronous RequestResponse invocations with --cli-read-timeout 0 --cli-connect-timeout 60 --payload fileb://",
+      "result": "16 of 16 status 200, none retried; the first driver run stopped itself after event 0 on its own held-list comparison, the event had landed, and it was resumed from event 1 without re-invoking."
+    }
+  ]
+}
