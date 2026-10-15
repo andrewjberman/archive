@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
   IB213-1  IB-pr-574  the directory's TERMINATED mark: who writes it, its shape, the precedent, the guard's reading, and an OFFLINE guard run with the mark applied to the one account
     AC1  the mark's writer and shape read in the code (file, line, identifier verified), the guard's reading of it, and the precedent (the TERMINATED entries already in Cottonwood's directory, counted)
     AC2  the evidence the pair binds to: the one account, the zero-position source dates (trading days, at least three) and the first date it is accepted from
-    AC3  the offline guard run with the mark applied (performed, read only, no write, no publish): the account lists as closed and not refused, the candidate would publish, every other node unchanged (counted); the rollback; notes, counters 0, no long digit run
+    AC3  the offline guard run with the mark applied (performed, read only, no write, no publish): the account lists as closed and not refused, the candidate would publish, the candidate-against-served difference counted by kind (the dates differ, so amounts move; the acceptance causes only the one account's nodes leaving); the rollback; notes, counters 0, no long digit run
 """
 import datetime as dt
 import importlib.util
@@ -110,10 +110,27 @@ def c3():
     text(og.get("invocation"), 30, "offline_guard.invocation (the command, no account id)")
     if og.get("account_listed_as") != "closed_accounts_not_refused" or og.get("outcome") not in ("PUBLISHED", "WOULD_PUBLISH"):
         fail("with the mark applied the account must list as closed_accounts_not_refused and the outcome PUBLISHED or WOULD_PUBLISH")
-    if not is_int(og.get("nodes_changed_other_than_the_account")) or og["nodes_changed_other_than_the_account"] != 0:
-        fail("every other node must be unchanged: nodes_changed_other_than_the_account 0")
+    cs = og.get("candidate_vs_served") or {}
+    iso(cs.get("candidate_date"), "candidate_vs_served.candidate_date")
+    iso(cs.get("served_date"), "candidate_vs_served.served_date")
+    for k in ("amount_only_differences", "served_only_nodes", "candidate_only_nodes", "account_nodes_leaving"):
+        if not is_int(cs.get(k)) or cs[k] < 0:
+            fail("candidate_vs_served.%s must be a count" % k)
+    if cs["account_nodes_leaving"] < 1 or cs["account_nodes_leaving"] > cs["served_only_nodes"]:
+        fail("the account's own nodes (at least one) must be among the served-only nodes")
+    text(cs.get("reading"), 60, "candidate_vs_served.reading (the dates differ, so amounts move on most nodes; say what part of the difference the acceptance causes: the one account's nodes, and nothing else)")
     if not is_int(og.get("accounts_leaving")) or og["accounts_leaving"] != 1:
         fail("accounts_leaving must be 1")
+    dv = r.get("deployed_vs_head") or {}
+    for firm in ("cottonwood", "49financial"):
+        d = dv.get(firm)
+        if not isinstance(d, dict) or not re.fullmatch(r"[0-9a-f]{64}", str(d.get("deployed_sha256", ""))) or not isinstance(d.get("bundle_version_id"), str) or not d["bundle_version_id"]:
+            fail("deployed_vs_head.%s needs bundle_version_id and deployed_sha256 (the deployed holdings_snapshot.py)" % firm)
+        if not isinstance(d.get("equals_head"), bool) or not isinstance(d.get("v033_rule_in_deployed"), bool) or not is_int(d.get("marks_no_closures_occurrences")) or d["marks_no_closures_occurrences"] < 0:
+            fail("deployed_vs_head.%s needs equals_head and v033_rule_in_deployed booleans and marks_no_closures_occurrences as a count" % firm)
+        if d["equals_head"] and not d["v033_rule_in_deployed"]:
+            fail("deployed_vs_head.%s: a deployed file equal to HEAD carries the v0.33 rule" % firm)
+        text(d.get("statement"), 60, "deployed_vs_head.%s.statement" % firm)
     rb = r.get("rollback") or {}
     text(rb.get("statement"), 40, "rollback.statement (the prior accepted publication and how it returns)")
     notes = r.get("notes")
