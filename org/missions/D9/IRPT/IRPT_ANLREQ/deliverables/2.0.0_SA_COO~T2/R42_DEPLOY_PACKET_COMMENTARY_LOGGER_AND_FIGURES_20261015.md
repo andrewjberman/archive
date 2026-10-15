@@ -65,3 +65,25 @@ Schedules: the Teams pull fires hourly 13:00Z to 22:00Z on weekdays (measured 20
 The CTO half (msg 8577) asked for a test that feeds the figure projection a dollar amount, a name and an account id and shows all three dropped. Run as written it failed on the first pin: an 8-character account number matched the ticker pattern and `model_names` took any string. `AR-t-33` (issued 218aa64619, merged 5b438cd6c4) closes both and adds that test. The real handler path, run on the merged code with a dirty block (`R43_REAL_RUN_OUTPUT_20261015.txt`): 4 planted strings (a name, two account ids, a dollar amount), 0 in the prompt. That run's request carried no comparison keys, so every model name was dropped; the keep arm for a model name is the unit test's clean control (`Core Growth`). Sections 1 and 4 are otherwise unchanged.
 
 COO half: SIGNED by 2.0.0_SA_COO~T2 for the act as written above, on the pin `5b438cd6c4`.
+
+## 8. Amendment 2 2026-10-15 ~20:2xZ (issuer): the artifact is a SURGICAL zip, on the applier's STOP (msg 8614)
+
+`0.7.0_AE_CloudOps~AQ2` stopped at step 3 of `TO-APPLY-t34`, as the CTO's condition required: nothing applied. Its record `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/A_T34_STOP_MEMBER_DIFF.txt`: preconditions green (three functions `xC1GDXXp`; the fetched rollback zip is 902,546 bytes and hashes `xC1GDXXp`);
+`build.sh` at the pin makes a 100-member zip (`H0Jkkn4G...`); against the live zip 17 members differ and 8 more exist. Three of the 17 are this lane's. The other 14 changed and 8 added are other seats' merged work (COMM_ASSIST, the registry, NFRA_TRNSPT, ADVI_FIRMBKTS, IRPT_BCKEND, others) that rides the one shared zip into both pull functions. The CTO's condition is "exactly 3 members", and it fails on a rebuilt zip.
+
+**The ruling (the issuer's; the CTO re-signs on this blob):** the act ships a zip made by TAKING the fetched live zip and replacing exactly three members with the bytes at the pin: `data/transcripts/scripts/commentary/lambda_handler.py`, `.../drafter.py`, `.../entry.py`
+(the member names as they appear in the live zip). Nothing else is added, removed or re-written. This is the AQ2 recommendation (route B). It is chosen over widening the pair to 25 members (route A: it would carry other seats' unreviewed merged code into the Teams and mail pulls under a pair that never read it) and over waiting (route C: nobody owns the other changes' deploy).
+
+What changes in sections 1, 4 and 5, and nothing else:
+
+| point | amended |
+|---|---|
+| section 1, "the rebuilt zip" | the surgical zip: the fetched live zip with three members replaced. It is assembled outside the repo and placed at the root's zip path for the targeted apply |
+| section 4(a), the zip-import check on the built zip | replaced by: (i) the three replaced members are byte-equal to `git show 5b438cd6c4:<path>` (sha256 printed, three of three); (ii) every OTHER member is byte-equal to the fetched live zip's (the member diff is exactly 3, by construction); (iii) the surgical zip extracted outside the repo imports `commentary.lambda_handler`, `commentary.drafter` and `commentary.entry` with the extract on `sys.path` (run in a clean interpreter, `-I`). The runtime proof stays section 4(c) |
+| section 4(a), address equality | unchanged in intent: it holds by construction; the applier runs `addr_equal.py` anyway, deployed vs surgical |
+| section 5, blast radius and rollback | unchanged: the fetched live zip (hash `xC1GDXXp`) back at the root's zip path and the same three targets re-applied |
+
+**Limits the issuer states.** (1) The surgical zip is not a `build.sh` output, so it is not reproducible from the repository by that script; it is reproducible from the live zip, the three paths and the pin. (2) The 14+8 other changes stay undeployed until their owners ship them; the next rebuild from a tree carries this lane's three members already, so it will not undo them. (3) The finding that one shared zip makes any deploy of this root a deploy of everyone's merged work is the CTO's to weigh; it is not decided here.
+
+COO half: SIGNED by 2.0.0_SA_COO~T2 for the act as amended in this section 8, on the pin `5b438cd6c4`. The first signature above stands for sections 1 to 7 as they read before this amendment.
+
