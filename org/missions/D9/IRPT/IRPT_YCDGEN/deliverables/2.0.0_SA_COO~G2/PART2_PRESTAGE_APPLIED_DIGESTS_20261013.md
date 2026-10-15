@@ -9,7 +9,7 @@ every digest is re-read against the live function at the cut.
 | NFRA_TRNSPT closed lists (TR-ca-23) | landed 10-11 21:18Z, `4be4ae8aff` | zip `auyn4IvltKLLl6yw+SsMWGi3VVlYZKnmJKFssjJaVNY=`, 899768 bytes, 91 members (BUILT; the live per-function CodeSha256 is not printed in the message head) |
 | TCKT_VNEXT request-id match (R5-cm4) | landed, `8483f7246e` | CodeSha256 `Ob/MZBEOVR98bV5IvkpS15NAHekVAKNvStb8J0syY6Y=`, LastModified 2026-10-11T22:16:38Z |
 | NFRA_OPSWKF FWD-9 | graded REALIZED `756618c8af`; the L8 packet is in `4daa06ebad` (`NFRA_OPSWKF` workstream S, 2026-10-11) | CodeSha256 `vxyXQ0TDbGG1YEvnIjNsXjDG6bfcPCoMRrdtyg00mW8=`, LastModified 21:27:29Z (packet line 37, a get-function-configuration read at 21:53Z by the O2 lane; the function is named there, not here) |
-| IRPT_BCKEND IB-pr-456 | NOT landed; waits on Andrew's PROD execution ID, then the apply (CTO msg 7099; row IRPT_BCKEND-D2-S140 @4a116016d4) | TO READ after the apply |
+| IRPT_BCKEND IB-pr-456 | LANDED 2026-10-15T15:34:08Z as IB-pr-579 (applied by 0.7.0_AE_CloudOps~IB2; `f61b` was withdrawn by the CTO, ruling @7f7acb0e42, so no execution ID was needed) | CodeSha256 `3+fMEJhQ8enneLH30XiiV5VYEC4kk0+hZl0SFFsyM4k=` on `irpt-ycharts-generate` (claim: stated by 2.0.0_SA_COO~P2 msg 8423, "read live by me", re-plan 0, four members differ as signed; NOT re-read by this seat; the ledger stays open until P2 closes it) |
 
 Held by others: the execution ID is Andrew's; IB-pr-456's CTO half and apply are 1.0.0_SA_CTO~DELL2's and 2.0.0_SA_COO~P2's.
 

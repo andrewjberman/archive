@@ -118,8 +118,10 @@ def ac3(r):
         fail("after.import_census_failed must be {} (the import census answered failed: {})")
     b = r.get("before") or {}
     rp = af.get("replay_at_pin") or {}
-    if not (is_int(rp.get("arms")) and rp["arms"] >= 1 and rp.get("unexpected") == 0):
-        fail("after.replay_at_pin must read arms >= 1 and unexpected 0 (every arm's verdict equals the packet's recorded one)")
+    if not (is_int(rp.get("arms")) and rp["arms"] >= 1 and is_int(rp.get("unexpected")) and rp["unexpected"] >= 0):
+        fail("after.replay_at_pin must read arms >= 1 and an integer unexpected")
+    if rp["unexpected"] > 0 and not (rp.get("explained_unexpected") == rp["unexpected"] and isinstance(rp.get("explanation"), str) and len(rp["explanation"]) >= 60):
+        fail("a replay arm that differs from the packet's recorded verdict needs explained_unexpected equal to unexpected and an explanation of 60+ characters (AMENDMENT 2: the live side the packet recorded was pre-release-29)")
     if af.get("accepted_request_item_sha256") != b.get("accepted_request_item_sha256"):
         fail("the accepted request must read back unchanged: after.accepted_request_item_sha256 must equal the BEFORE value")
     ct = af.get("composition_test") or {}

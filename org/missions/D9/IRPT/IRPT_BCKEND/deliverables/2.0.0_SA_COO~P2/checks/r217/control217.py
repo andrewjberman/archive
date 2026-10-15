@@ -59,7 +59,7 @@ NEGS = [
     ("fifth_member", "AC2", mutate(["after", "changed_members"], sorted(P.MEMBERS) + ["generate_installed.py"])),
     ("sibling_moved", "AC2", mutate(["source_map_rows", "siblings_changed"], 1)),
     ("rolled_back", "AC2", mutate(["rollback_performed"], True)),
-    ("replay_arm_differs", "AC3", mutate(["after", "replay_at_pin", "unexpected"], 2)),
+    ("replay_arm_differs_unexplained", "AC3", mutate(["after", "replay_at_pin", "unexpected"], 2)),
     ("item_changed", "AC3", mutate(["after", "accepted_request_item_sha256"], "cd" * 32)),
     ("errors_in_window", "AC3", mutate(["health_proof", "errors_in_window"], 2)),
     ("table_written", "AC3", mutate(["counters", "table_writes"], 1)),
@@ -96,6 +96,11 @@ def expect(label, cid, root, want):
     print("%s %-12s %-26s -> %s %s" % ("POSITIVE" if want else "NEGATIVE", cid, label, r, "" if ok else "<-- UNEXPECTED"))
 
 
+EXPL = copy.deepcopy(GOOD)
+EXPL["after"]["replay_at_pin"] = {"arms": 17, "unexpected": 3, "explained_unexpected": 3, "explanation": "The packet recorded the live side before release 29; the live side now carries release 29's acting_principal_id pairing, so three arms read identical now."}
+root = build(EXPL)
+expect("explained_arms", "IB217-1-AC3", root, True)
+shutil.rmtree(root, ignore_errors=True)
 root = build(GOOD)
 for ac in ("AC1", "AC2", "AC3"):
     expect("clean", "IB217-1-" + ac, root, True)
