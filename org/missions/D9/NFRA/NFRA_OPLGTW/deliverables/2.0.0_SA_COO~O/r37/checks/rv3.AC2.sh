@@ -4,7 +4,7 @@
 #  - the five files this cell may touch are the only files that differ from the base of this branch (no tool module, no other test);
 #  - the non-data family test passes at 96.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
-names="etfs_get_peer_group etfs_get_rival_fund_holdings etfs_who_holds etfs_get_security_reference etfs_get_coverage etfs_get_fund_trades etfs_get_fund_flows etfs_compare_peers etfs_get_research_notes etfs_get_rival_page_status"
+names="etfs_get_peer_group_members etfs_get_rival_fund_holdings etfs_who_holds etfs_get_security_reference etfs_get_coverage etfs_get_fund_trades etfs_get_fund_flows etfs_compare_peers etfs_get_research_notes etfs_get_rival_page_status"
 safe=0; nat=0; grant=0
 for n in $names; do
   grep -q "\"$n\"" "$GW/app/destructive_ops.py" && safe=$((safe+1))
@@ -15,7 +15,7 @@ import re
 t = open("infra/aws/ec2/opal-gateway/app/data_entitlement.py", encoding="utf-8").read()
 m = re.search(r"DATA_GRANT_TOOLS\s*=\s*frozenset\(\{(.*?)\}\)", t, re.S)
 body = m.group(1) if m else ""
-names = "etfs_get_peer_group etfs_get_rival_fund_holdings etfs_who_holds etfs_get_security_reference etfs_get_coverage etfs_get_fund_trades etfs_get_fund_flows etfs_compare_peers etfs_get_research_notes etfs_get_rival_page_status".split()
+names = "etfs_get_peer_group_members etfs_get_rival_fund_holdings etfs_who_holds etfs_get_security_reference etfs_get_coverage etfs_get_fund_trades etfs_get_fund_flows etfs_compare_peers etfs_get_research_notes etfs_get_rival_page_status".split()
 print(sum(1 for n in names if ('"%s"' % n) in body))
 EOF
 )
