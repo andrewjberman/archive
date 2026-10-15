@@ -1,0 +1,28 @@
+0.9.0_WK_NFRA_OPLGTW~94 -- NFRA_OPLGTW.TO-OG-cp-1 (C-PERSON reader) -- session log
+worktree: C:/tmp/wk-oplgtw-94   branch: wk-NFRA_OPLGTW-94   cut HEAD: a8e22ed56d   code commit: d5d2fb29bd (LOCAL)
+
+first act: rev-parse HEAD=wk-NFRA_OPLGTW-94; test -d org && test -d .tools -> TREE-OK
+premises re-grounded: OG-bd-3 @42f31eea0a is an ancestor of HEAD; contract copies byte-equal (cmp, then cp to deploy/ and cmp again);
+  check scripts present at deliverables/2.0.0_SA_COO~O/r38/checks/cp1.AC{1,2}.sh; baseline present at tests/baseline/failing_ids_full.txt;
+  access_state POLICY_RECORD_TYPES was 5 entries; test_ogd1_ac03 pinned {POLICY: 5, RUNTIME: 6}.
+  IAM: schwab_access_state.tf AccessStateStrongRead grants dynamodb:GetItem with no condition (lines 96-99).
+  SECOND identity-scope call site found: integrations/base.py:156-161 (outside <paths>) -> surprise NFRA_OPLGTW-Z-W94-S1.
+
+edits (commit d5d2fb29bd): access_state.py (POLICY_RECORD_TYPES +person_access); data_entitlement.py (PERSON constants,
+  PersonAccess, parse_person_access, person_access, person_widens, person_denial, person_access_view, channel_of,
+  served-name helpers; tool_denial and visible_tools apply narrowing after the existing gates); tools.py (_run widens at
+  the identity-scope floor for an Opal principal, stamps person_record_rev in audit detail); both contract copies (+state_store.person_access,
+  +record type); test_access_state.py (POLICY 5 -> 6); tests/test_og_cp1.py (new, six named tests).
+
+run: python -m pytest tests/test_og_cp1.py -v   (cwd infra/aws/ec2/opal-gateway)
+  6 passed (AC01..AC06 each PASSED); with test_access_state.py: 13 passed, twice (run 1 9.04s, run 2 8.88s)
+run: python -m pytest tests/test_access_state.py -q -> 7 passed
+run: timeout 120 python -m pytest tests/test_og_bd2.py tests/test_og_bd3.py tests/test_data_entitlement_family.py
+     tests/test_data_entitlement_guard.py tests/test_entitlement_admin.py -q -> 1 failed, 30 passed
+     the one failure is tests/test_data_entitlement_guard.py::test_ogz1_ac08 (route-set comparison), listed in the baseline (line 7).
+
+mutant control (planted, reverted): the Opal-principal gate in person_widens removed on a backed-up copy;
+  pytest tests/test_og_cp1.py::test_ogcp1_ac05 -> FAILED (assert 3 is None); file restored, cmp byte-equal; ac05 1 passed.
+
+criterion AC1: timeout 120 bash .../r38/checks/cp1.AC1.sh; echo exit=$? -> RESULT: PASS, exit=0
+criterion AC2: timeout 120 bash .../r38/checks/cp1.AC2.sh; echo exit=$? -> RESULT: PASS, exit=0
