@@ -39,6 +39,8 @@ const POST_ALLOWED = [
   /^\/api\/scoped\/tickets$/,
   /^\/api\/scoped\/investor-reporting\/analysis$/,
   /^\/api\/scoped\/tickets\/[A-Za-z0-9_-]+\/report$/,
+  // AR-y-352 (round 40, ZZ13): the Ticket Center's firm chooser reads the Global firms by this read-shaped POST (writes nothing).
+  /^\/api\/scoped\/investor-reporting\/directory\/resolve$/,
 ]
 const STEPS = [
   'STEP-1 generate the password in memory (crypto.randomBytes 24, base64url); never written anywhere',
@@ -65,7 +67,7 @@ export function checkBase(base) {
   return null
 }
 
-// ---- the route guard: GET, HEAD, OPTIONS on the base origin; exactly seven POST shapes on the base origin ----------
+// ---- the route guard: GET, HEAD, OPTIONS on the base origin; exactly eight POST shapes on the base origin (the seven, plus AR-y-352's read-shaped directory resolve) ----------
 export function admit(method, url, base) {
   const m = String(method).toUpperCase()
   let u
@@ -280,6 +282,14 @@ function selftest() {
   check('refuse DELETE', !admit('DELETE', B + '/api/scoped/tickets', B))
   check('refuse POST to another host', !admit('POST', 'http://example.com/auth/login', B))
   check('refuse GET to another host', !admit('GET', 'http://example.com/', B))
+  // AR-y-352: the read-shaped directory resolve is admitted; its near-misses, the parent and a sibling are refused; the guard reads the path only
+  check('admit POST /api/scoped/investor-reporting/directory/resolve', admit('POST', B + '/api/scoped/investor-reporting/directory/resolve', B))
+  check('admit POST directory/resolve with a query suffix (the guard reads the path, as for the seven)', admit('POST', B + '/api/scoped/investor-reporting/directory/resolve?selected_tenant=global', B))
+  check('refuse POST directory/resolve/x', !admit('POST', B + '/api/scoped/investor-reporting/directory/resolve/x', B))
+  check('refuse POST directory/resolved', !admit('POST', B + '/api/scoped/investor-reporting/directory/resolved', B))
+  check('refuse POST directory (the parent)', !admit('POST', B + '/api/scoped/investor-reporting/directory', B))
+  check('refuse POST directory/resolve/ (trailing slash)', !admit('POST', B + '/api/scoped/investor-reporting/directory/resolve/', B))
+  check('refuse POST directory/browse (a sibling read is not a POST shape)', !admit('POST', B + '/api/scoped/investor-reporting/directory/browse', B))
   check('base refuses http://example.com', checkBase('http://example.com') !== null)
   check('base refuses https://localhost.evil.com', checkBase('https://localhost.evil.com') !== null)
   check('base refuses http://localhost:5174.evil', checkBase('http://localhost:5174.evil') !== null)
