@@ -1,0 +1,125 @@
+{
+  "script_path": "data/assets/scripts/silver/cotbkf_active_set_v2.py",
+  "script_blob": "867a2cf1daa21dc46432d523cf8cc29beca1b990",
+  "run_command": "python data/assets/scripts/silver/cotbkf_active_set_v2.py --out C:/dev/_cotbkf_rebuild_20261015",
+  "files": [
+    {
+      "name": "ACTIVE_COTTONWOOD_SET_V2.csv",
+      "path": "C:/dev/_cotbkf_rebuild_20261015/ACTIVE_COTTONWOOD_SET_V2.csv",
+      "rows": 41808,
+      "sha256": "ccd2f969803884695f6d6b597e3d48e77a4a01812634dfdf97e1c98bb3f07d5d",
+      "pinned_sha256": "5cef7ab0c9e10fe299cb757d4dba31792d069bad35f7250defa76e18773046ae",
+      "equal": false,
+      "pinned_rows": 41826,
+      "bytes": 3358613
+    },
+    {
+      "name": "REVERSE_MATCH_V3.csv",
+      "path": "C:/dev/_cotbkf_rebuild_20261015/REVERSE_MATCH_V3.csv",
+      "rows": 860,
+      "sha256": "0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f",
+      "pinned_sha256": "0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f",
+      "equal": true,
+      "pinned_rows": 860,
+      "bytes": 37843
+    }
+  ],
+  "out_dir": "C:/dev/_cotbkf_rebuild_20261015",
+  "repairs": [
+    "repair 1, commit 8cd4c0a81f: the Transaction_Type was stripped before lookup, so the trailing-space key csltfee was refused (164 rows); the type is read as stored",
+    "repair 2, commit 9f617f4fd9: the crosswalk candidate id is read before its parenthesised description; near_match 0 to 13 and AMBIGUOUS 0 to 27 on the counts",
+    "repair 3, commit 68ffc04bc9: a pair held on both sides emits one joined row and no side window; the first build gave 62,754 window rows, this gives 41,808"
+  ],
+  "diff_summary": {
+    "ACTIVE_COTTONWOOD_SET_V2.csv": {
+      "rows_rebuilt": 41808,
+      "rows_pinned": 41826,
+      "rows_in_both_multiset": 41487,
+      "rows_only_in_rebuilt": 321,
+      "rows_only_in_pinned": 339,
+      "paired_rows_columns_differing": {
+        "ticker": 285,
+        "held_to": 48
+      },
+      "accounts_with_any_difference": 263,
+      "accounts_rebuilt": 860,
+      "accounts_pinned": 860,
+      "only_in_pinned_by_side": {
+        "black_diamond": 289,
+        "both": 27,
+        "commonwealth": 23
+      },
+      "only_in_rebuilt_by_side": {
+        "black_diamond": 271,
+        "both": 29,
+        "commonwealth": 21
+      },
+      "only_in_pinned_by_basis": {
+        "not_established": 283,
+        "joined": 27,
+        "commonwealth_transactions": 23,
+        "black_diamond_holdings": 6
+      },
+      "only_in_rebuilt_by_basis": {
+        "not_established": 267,
+        "joined": 29,
+        "commonwealth_transactions": 21,
+        "black_diamond_holdings": 4
+      },
+      "header_equal": true,
+      "line_endings_CRLF_pinned": 0,
+      "line_endings_CRLF_rebuilt": 0
+    },
+    "REVERSE_MATCH_V3.csv": {
+      "rows_rebuilt": 860,
+      "rows_pinned": 860,
+      "sha256_equal": true
+    }
+  },
+  "sources_read": [
+    {
+      "prefix": "s3://opal-data-cot/silver/holdings/",
+      "listed_objects": 90,
+      "dated_on_or_before_snapshot": 88,
+      "read": 88,
+      "note": "read to 2026-10-12; 2026-10-13 and 2026-10-14 listed, not read"
+    },
+    {
+      "prefix": "s3://opal-data-cot/gold/canonical/holdings/",
+      "listed_objects": 137,
+      "dated_on_or_before_snapshot": 135,
+      "read": 135,
+      "note": "read to 2026-10-12; 2026-10-13 and 2026-10-14 listed, not read"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/transactions/date=2026-06-23/",
+      "listed_objects": 14,
+      "read": 14,
+      "rows": 1416497,
+      "note": "trade_year partitions 2013..2026, part-00000.parquet each"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.csv",
+      "listed_objects": 2,
+      "read": 1,
+      "rows": 1533,
+      "note": "get-object of the csv; the prefix also lists crosswalk.parquet, not read"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/account_links/date=2026-06-23/account_links.csv",
+      "listed_objects": null,
+      "read": 1,
+      "rows": 1450,
+      "note": "get-object of the csv; not listed by the build"
+    }
+  ],
+  "not_established": [
+    "V2 window file does not reproduce its pin; the cause is not measured to a rule (see repairs and diff_summary); the ticker of a not_established window is a hypothesis (the pinned key is ticker and name, the rebuild key is name), not measured",
+    "the round-85 script is lost; the rules are from the record, not from the code",
+    "the snapshot is pinned at 2026-10-12; later keys (2026-10-13, 2026-10-14) are listed and not read",
+    "joined span is the union of the pair windows (a choice; the record does not state it); joined pairs are presence-based (6,886 in the record)",
+    "the reverse match uses crosswalk_matched joins only; account_links joins are 0 in the set and are not exercised",
+    "held_to of a closed Black Diamond run is the last key date held; the record does not state the closing date",
+    "the diagnostics run outside the script (listing, schema reads, a type census and a candidate-token membership count) are reads of the same prefixes and are reported in the worker report, not in this record"
+  ]
+}
