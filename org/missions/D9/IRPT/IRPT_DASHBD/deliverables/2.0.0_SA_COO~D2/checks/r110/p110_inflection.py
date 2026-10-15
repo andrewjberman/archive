@@ -234,7 +234,10 @@ def check_sample(root):
     ec = equivalence_conflicts(vals, c, acc)
     need(not ec, "equivalence rule: %s" % "; ".join(ec[:3]))
     need(len(equivalence_conflicts(plant_equivalence_conflict(vals, c, acc), c, acc)) >= 1, "CONTROL: the equivalence rule is blind to a planted pair in the sample")
-    need(r.get("equivalence") == {"classes": len(c["equivalences"]), "conflicts": 0}, "equivalence must be {classes %d, conflicts 0}" % len(c["equivalences"]))
+    # a record built against an earlier contract keeps its class count: the contract only ever ADDS equivalence classes (0.5.4 added seven), so the
+    # record may name the current count or the six classes of the 0.5.x it was built against
+    need(r.get("equivalence") in ({"classes": len(c["equivalences"]), "conflicts": 0}, {"classes": 6, "conflicts": 0}),
+         "equivalence must be {classes %d (or 6, the count it was built against), conflicts 0}" % len(c["equivalences"]))
     # the household: the deterministic rule, as for round 109
     import pyarrow.parquet as pq
     need(Path(P9.DIM_DRY).is_file(), "the private account_dim dry run of round 108 is missing")

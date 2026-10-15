@@ -1,0 +1,110 @@
+{
+  "claim": "measured",
+  "firms": {
+    "49financial": {
+      "partition_count": 0,
+      "newest_date": null,
+      "writers": [
+        {
+          "file": "data/assets/scripts/gold/runners_49f/a00_runner.py",
+          "phrase": "49F live writer of the account dimension: put_object of data.parquet and manifest.json under the gold dimensions dim_account date=D prefix in the 49F gold bucket; the table is named dim_account in this file, so the literal token account_dim is absent from it"
+        }
+      ],
+      "writer_count": 1,
+      "terraform": [
+        {
+          "file": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+          "label": "resource \"aws_scheduler_schedule\" \"advi_49f_gold_floor\"",
+          "words": "The scheduled trigger: cron(45 12 * * ? *) with schedule_expression_timezone UTC, daily including weekends. No state attribute is set, so the provider default ENABLED applies (the file's own comment says the 2026-08-30 hold was lifted). The expression is the applied truth; the header comment's pin text is advisory. It invokes the dispatcher with a run_class production input."
+        },
+        {
+          "file": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+          "label": "resource \"aws_iam_role\" \"advi_49f_floor_scheduler\"",
+          "words": "Scheduler execution role advi-49f-floor-scheduler-role: lambda:InvokeFunction on the dispatcher and sqs:SendMessage on the dedicated floor dead-letter queue, nothing else."
+        },
+        {
+          "file": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+          "label": "module \"advi_49f_gold_dispatch\"",
+          "words": "The thin dispatcher Lambda advi-49f-gold-dispatch, role advi-49f-gold-dispatch-role. It starts the chain host if stopped, sends the SSM document advi-49f-chain-dispatch to that host, polls the invocation and reads the chain log under the chain log prefix. The document runs chain_49f_entrypoint.py --production, whose step a00_dim_account runs a00_runner.py --date D --upload. The writer's inputs are read from the 49F silver and meta prefixes in the monolith bucket (fact_acc, conversions) plus the advisor-fee-role silver and a smartx allocation-map silver, named as constants in a00_runner.py; none was row-read. The prefix written is gold/advi/dimensions/dim_account/date=D/ in the 49F gold bucket."
+        },
+        {
+          "file": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+          "label": "resource \"aws_ssm_document\" \"advi_49f_chain_dispatch\"",
+          "words": "The Command document that runs the chain on the host: sync of the code bundle, then python3 chain_49f_entrypoint.py --production (or --date with --upload for a declared backfill), then a log upload and a conditional self-halt."
+        },
+        {
+          "file": "infra/aws/terraform/bd-pipeline/iam.tf",
+          "label": "advi-49f-chain-access",
+          "words": "The chain's data-plane grants, a policy named advi-49f-chain-access on the chain host's EC2 role in the Black Diamond pipeline tree (the floor file's header names it). Not expanded here beyond the name."
+        }
+      ],
+      "none_words": "",
+      "claim": "measured",
+      "words": "Builder address LIST: 0 partitions under irpt/49financial/gold/account_dim/ in the 49F bucket, so the builder address is empty. The live 49F account dimension is written by a scheduled writer to a different prefix in the same bucket: gold/advi/dimensions/dim_account/ holds 571 date partitions, newest 2026-10-13 (LIST). The scheduled writer is the 49F chain step a00 (cron in the advi_49f_floor file). Its file names dim_account, not account_dim, so the literal account_dim token count in the writer file is 0 and the criterion's naming arm does not hold for it as written. The 49F gold roots present under the builder prefix are account_activity_daily, account_class_daily, account_lot_realized, account_lot_unrealized_daily, account_return_daily, dim_return_method, holdings, holdings_performance_comparison, holdings_performance_daily, holdings_performance_manifest, holdings_qa; no account_dim among them."
+    },
+    "inflection": {
+      "partition_count": 0,
+      "newest_date": null,
+      "writers": [
+        {
+          "file": "infra/aws/lambda/inf-pipeline/inf-unified-account-dim-daily/pull_unified_account_dim.py",
+          "phrase": "pulls the vendor unified account dimension export and writes it as the bronze CSV unified_account_dim.csv under the bronze vendor prefix for the date (put_object)"
+        },
+        {
+          "file": "infra/aws/lambda/inf-pipeline/inf-unified-account-dim-daily/lambda_function.py",
+          "phrase": "the scheduled handler: runs the bronze pull, then writes the silver-complete sentinel unified_account_dim.json for the date (put_object)"
+        }
+      ],
+      "writer_count": 2,
+      "terraform": [
+        {
+          "file": "infra/aws/terraform/inf-pipeline/inf-unified-account-dim-daily.tf",
+          "label": "resource \"aws_cloudwatch_event_rule\" \"inf_unified_account_dim_daily_schedule\"",
+          "words": "The schedule: cron(27 13 * * ? *) in UTC, state ENABLED. The file header still names a 12:40 slot; the applied expression is the truth. The execution role is inf-unified-account-dim-daily-role (resource aws_iam_role inf_unified_account_dim_daily). Its grants: put of the bronze unified_account_dim.csv and of the silver-complete sentinel on the ingest bucket, get of the vendor token object and its secret, and head/get on the bronze key. The vendor export is an external call made at run time; none was made here."
+        },
+        {
+          "file": "infra/aws/terraform/inf-pipeline/inf-unified-account-dim-daily.tf",
+          "label": "module \"inf_unified_account_dim_daily\"",
+          "words": "The Lambda inf-unified-account-dim-daily: python3.11, handler lambda_function.lambda_handler, timeout 900 s, memory 512 MB, the pandas-pyarrow-requests layer."
+        }
+      ],
+      "none_words": "",
+      "claim": "measured",
+      "words": "Builder address LIST: 0 partitions under irpt/inflection/gold/account_dim/, so no gold account dimension exists. The account dimension lands in bronze instead: the newest bronze date is 2026-10-14 and its unified_account_dim.csv is present (LIST, LastModified 2026-10-14T13:29:49Z). The silver convert of that bronze file is documented as running downstream in the gold-runner chain and is not in this repo (not read). The gold account_dim adapter inflection_account_dim.py builds the table but refuses upload (round 108). Gold roots present under the builder prefix: holdings, holdings_performance_daily, holdings_performance_manifest, holdings_qa."
+    },
+    "cottonwood": {
+      "partition_count": 0,
+      "newest_date": null,
+      "writers": [],
+      "writer_count": 0,
+      "terraform": [],
+      "none_words": "Searched for the token account_dim with comp-find over the named folders and native Grep over the worktree: data/assets/scripts (61 hits in 444 files; the first-party hits are the Cottonwood adapter, a sibling firm's adapter, their tests and the report reader; none writes a gold account_dim), infra/aws/terraform (31 hits in 761 files; none writes a Cottonwood account dimension), infra/aws/lambda (81 hits in 5768 files; none is a Cottonwood account writer), lib (0 hits in 790 files). The Cottonwood holdings-performance handler infra/aws/lambda/investor-reporting/holdings-performance/handler.py carries neither account_dim nor cottonwood. Searched also by native Grep for the builder prefix tokens across data and infra: no code names the Cottonwood gold account_dim prefix as a write target. Not read: the bodies of the Cottonwood bronze and silver conversion writers beyond their gold-output names, and the full handler body.",
+      "claim": "absent",
+      "words": "Measured absent in the repo: no scheduled or manual writer of the Cottonwood gold account_dim exists. The table has 0 partitions at the builder address in the Cottonwood bucket (LIST). Its gold roots present are account_return_daily, account_return_daily_blank_reasons, dim_return_method, holdings, holdings_performance_daily, holdings_performance_manifest, holdings_qa. The report reader's households() refuses when the gold account_dim holds no partition, which is the state the household report hits today. The only code for the table is the adapter cottonwood_account_dim.py, which builds and describes and writes nothing."
+    }
+  },
+  "cottonwood_adapter": {
+    "file": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_account_dim.py",
+    "upload_refused": true,
+    "words": "build_account_dim(holdings, roster) is pure over two pandas frames: holdings carries AccountID, Relationship ID and Market Value; roster carries AccountID, Relationship ID, Custodian, Account Type and Account Registration Type. It returns a pyarrow Table with ARROW_SCHEMA (16 fields; the schema hash is checked against org/standards/IRPT_DASHBD_ACCOUNT_DIM_CONTRACT.json). gold_address(as_of) takes an ISO date string and returns the opal_naming address() output for the Cottonwood gold account_dim date partition. emit_account_dim(table, as_of, upload=False) returns a dict with address, rows and landed false, and raises NotImplementedError when upload is true (round 103). Tests: data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_account_dim.py, offline on synthetic frames; not run in this cell. Missing for a scheduled run: an entry point that reads the two silver fact prefixes and calls build then emit; an upload path replacing the NotImplementedError arm, with a put of data.parquet and a manifest under the gold prefix; an execution role with read on the two silver prefixes and write on the one gold account_dim prefix; a schedule set after the silver landing (about 11:46 UTC on the day after the partition date, per the LIST)."
+  },
+  "cottonwood_inputs": {
+    "tables": [
+      "fact_allocations/",
+      "fact_holdings/"
+    ],
+    "words": "Prefixes under blackdiamond/cottonwood/silver/ in the monolith bucket (LIST only; no row read). fact_allocations/ is the roster surface by column names: 144 date partitions, oldest 2026-04-22, newest 2026-10-13; its newest data.parquet landed 2026-10-14T11:46:05Z. The last five partitions landed between 11:46:00 and 11:46:05 UTC on the calendar day after their partition date. Grain from the silver schema and the adapter's own tests: several allocation lines per account, and the adapter takes the first roster row per account. fact_holdings/ is the holdings surface by column names: 93 date partitions, oldest 2026-06-09, newest 2026-10-13; its newest data.parquet landed 2026-10-14T11:46:04Z; the last five landed between 11:46:03 and 11:46:13 UTC. Grain: several holding lines per account. The mapping of surface to table is inferred from column names, because no repo caller of the adapter exists to confirm it. The _s2 sibling prefixes are the second section of the same files and the adapter does not read them."
+  },
+  "verdict": "PATTERN_EXISTS_FOR_49F",
+  "words": "No Cottonwood gold account_dim writer exists in the repo, and the Cottonwood account_dim has 0 partitions (LIST). A scheduled 49 Financial account-dimension writer does exist and runs daily: the 49F chain step a00 writes gold/advi/dimensions/dim_account/date=D/ to the 49F gold bucket, 571 partitions, newest 2026-10-13. It is scheduled by aws_scheduler_schedule advi_49f_gold_floor at cron(45 12 * * ? *) UTC and reaches the code through an SSM document on a host. Two facts keep it from matching the criterion as written: it is not at the builder address, and its writer file names the table dim_account, not account_dim (literal token count 0), so the criterion's file-naming arm fails for it as measured. Branch 1, copy the 49 Financial pattern: the Cottonwood account_dim needs its adapter's NotImplementedError arm replaced by a scheduled runner, an entry point over the two silver fact prefixes, a Cottonwood-named execution role with read on those two prefixes and write on the one account_dim prefix, and a schedule after the 11:46 UTC landing. The 49F pattern is a host-run chain, so copying it means a host or a Lambda; the repo has neither wired for Cottonwood. Branch 2, add an account_dim emit to the Cottonwood holdings-performance function: that function is module irpt_holdings_performance_cot in lambda.tf, role irpt_holdings_performance_cot in iam.tf, reads fact_holdings only and writes two gold prefixes. It would need a read grant on fact_allocations for the roster surface, one more write grant on the Cottonwood account_dim prefix, and an emit path in its handler, which the handler lacks. Its schedule resource irpt_holdings_performance_cot is created DISABLED (schedule.tf, cron(15 8 ? * MON-FRI *) America/New_York) pending the catch-up after-read, so branch 2 also needs that enable decision. Not read: the full handler body, the 49F chain step bodies beyond a00, the bd-pipeline role body, the silver conversion code's gold outputs, and any runtime log or run record.",
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "aws_writes": 0,
+    "s3_reads": 31
+  },
+  "pushed": false,
+  "deployed": false
+}

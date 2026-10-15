@@ -1,0 +1,65 @@
+{
+  "firm": "cottonwood",
+  "source_label": "computed from Black Diamond values and flows",
+  "method_version": 2,
+  "value_column": "Account Market Value",
+  "account_key_column": "AccountID",
+  "accounts": 25,
+  "account_basis": "The 25 lowest sha256 keys of AccountID among the accounts that are both in the household frame (999 accounts) and in the newest fact_allocations partition (2026-10-13, 865 accounts, all 865 in the frame). Method row 2 (dim_return_method valuation_source custodian_reported: the vendor's own account value); row 3 (positions_based) is not used. A repeated row of an account-day carries the same value and counts once; no account-day conflicted. Row 2 value basis (EQUITY = net_mv_plus_cash + margin_balance): NOT MEASURED against Account Market Value, because the Black Diamond fact_allocations silver carries no margin balance column to compare with (Account Market Value and Cash Market Value are the account-level value columns read).",
+  "window": {
+    "first_date": "2026-07-10",
+    "last_date": "2026-10-13"
+  },
+  "rows": 1549,
+  "by_day_quality": {
+    "MEASURED": 1286,
+    "NOT_MEASURABLE": 263
+  },
+  "private_parquet": {
+    "path": "C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~188/cottonwood_bd_account_return_qa.parquet",
+    "sha256": "fa51775e3266e07ac47e788de71afe6fb34c238873b820527ff2e1658d0d5c2b",
+    "rows": 1549
+  },
+  "key_overlap": {
+    "frame_accounts": 999,
+    "derived_accounts": 25,
+    "overlap": 25,
+    "claim": "measured"
+  },
+  "seam": {
+    "commonwealth_last_date": "2026-06-22",
+    "bd_first_date": "2026-04-22",
+    "bd_last_date": "2026-10-13",
+    "first_derived_date": "2026-07-10",
+    "link_base_exists": true,
+    "words": "The Cottonwood account_return_daily gold frontier is 2026-06-22 (3325 partitions, 2013-04-03 to 2026-06-22). The Commonwealth silver is the source up to and including 2026-06-22, keyed by the custodian account number. This adapter is the source from 2026-06-23, keyed by the Black Diamond AccountID. The two keys are not joined here: the Commonwealth-to-Black-Diamond key map is another cell's READ. The Black Diamond fact_allocations silver runs 2026-04-22 to 2026-10-13 in 144 partitions, 111 non-empty and 33 empty (17 of the empty ones before 2026-06-22). The link-base partition 2026-06-22 exists but is EMPTY: no account has a value on it, and the empty partitions run through 2026-07-09. The Black Diamond source therefore does not carry the account grain on 2026-06-22 or 2026-06-23, and the chain is not joined at 2026-06-22 here. The first row the 25 accounts derive is 2026-07-10 (their first value, NOT_MEASURABLE); first_derived_date is that row, not 2026-06-23. The shared 2026-04-22 to 2026-06-22 window is populated in Black Diamond only before 2026-06-22 (44 non-empty partitions), which a later round can compare once the key map is known. The calendar is the hardcoded NYSE fallback of lib/trading_calendar.py (pandas_market_calendars absent).",
+    "claim": "measured"
+  },
+  "unresolved_types": {},
+  "flow_rule": {
+    "words": "F_t is the signed sum, over the transactions whose Trade Date d satisfies t-1 < d <= t (d mapped to the first trading day on or after it), of +abs(Market Value) where External Flow is Contribution and -abs(Market Value) where it is Withdrawal; None adds nothing; a Contribution or Withdrawal with a null Market Value makes its account day FLOW_UNRECONCILED. The vendor's word is used as it stands and no word is re-classified by Transaction Type. Census over the 108 fact_transactions partitions dated 2026-06-22 to 2026-10-14 (971,699 rows): External Flow Contribution 49,861 rows, Withdrawal 51,598, None 870,240, and no External Flow is null. Sign of Market Value per word: Contribution 49,848 positive, 13 zero, 0 negative, 0 null; Withdrawal 51,596 negative, 2 zero, 0 positive, 0 null; None 707,750 positive, 162,400 negative, 90 zero, 0 null. Row counts by (word | Transaction Type): Contribution with Buy 3,445, Cash Deposit 25,652, Management Fee 474, Transfer In 20,290; Withdrawal with Cash Withdrawal 27,294, Management Fee 14,813, Transfer Out 4,320, Expense 4,262, Sale 909; None with Buy 255,023, Dividend 284,172, Dividend Reinvestment 114,466, Sale 147,433, Interest 29,308, Journal 24,587, Expense 11,905, Capital Gains 1,808, Corporate Action 855, Return of Capital 348, Income 310, Transfer Out 25. For the 25 accounts, 7,703 signed rows fell inside the derivation window, 422 rows fell outside it, and no row had an unknown word, a null Market Value or an unplaced type. Buy, Sale, Expense and Management Fee rows that carry Contribution or Withdrawal are signed by that word and not re-classified; the CTO may rule differently on fees later.",
+    "census": {
+      "Contribution": 49861,
+      "Withdrawal": 51598,
+      "None": 870240
+    },
+    "claim": "measured"
+  },
+  "analysis": {
+    "file": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+    "sha256": "518de0d99d513e3fa63cd11a281783724d838c4e3174992d08ab912029d74eb1",
+    "tracked": true
+  },
+  "reads": {
+    "s3_reads": 933,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
