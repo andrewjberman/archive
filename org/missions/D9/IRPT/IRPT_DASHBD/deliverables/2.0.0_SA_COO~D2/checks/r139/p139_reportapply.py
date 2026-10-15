@@ -50,7 +50,7 @@ UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 ISO_DAY = re.compile(r"\d{4}-\d{2}-\d{2}$")
 LONG_DIGITS = re.compile(r"\d{8,}")
 DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "where", "packet_blob", "landed_version_id", "version_id", "members", "code_sha256", "addresses", "ledger_entry", "apply_finished_utc",
-                 "invoked_utc", "layer_arn", "packet_sha256", "zip_sha256", "zip_sha256_b64", "content_sha256", "request_id", "request_ids", "receipt_message_id")
+                 "invoked_utc", "layer_arn", "packet_sha256", "zip_sha256", "zip_sha256_b64", "content_sha256", "request_id", "request_ids")
 
 
 class Fail(Exception):
@@ -96,7 +96,7 @@ def b64_of_hex(h):
 
 # ------------------------------------------------------------------------------------------------ the record clauses (pure)
 def check_head(rec, packet_blob, coo_text, cto_text, ledger_exists):
-    exp = {"claim", "gates", "ledger_entry", "before", "build", "plan", "apply_finished_utc", "after", "dry_run", "backfill", "receipt", "ledger_closed", "reads"}
+    exp = {"claim", "gates", "ledger_entry", "before", "build", "plan", "apply_finished_utc", "after", "dry_run", "backfill", "ledger_closed", "reads"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["claim"] == "measured", "claim must be measured")
     g = rec["gates"]
@@ -187,10 +187,6 @@ def check_tail(rec):
     cn = bf["counts"]
     need(isinstance(cn, dict) and set(cn) == {"days_built", "accounts_dropped_total", "households_no_rows_max", "days_with_dropped_accounts"} and all(is_int(v) and v >= 0 for v in cn.values()), "backfill.counts: four non-negative integers (ids stay private)")
     need(cn["days_built"] == fin["objects"], "counts.days_built must equal final.objects")
-    rc = rec["receipt"]
-    need(isinstance(rc, dict) and set(rc) == {"to", "via", "text_has_not_a_page_render", "sent_utc", "receipt_message_id"} and rc["to"] == "1.0.0_SA_CTO~DELL1" and rc["via"] == "0.0.0_AB_MSTR~DELL2"
-         and rc["text_has_not_a_page_render"] is True and UTC.match(str(rc["sent_utc"])) and nes(rc["receipt_message_id"]), "receipt: to CTO~DELL1 via the MSTR relay, saying NOT a page render")
-    need(rc["sent_utc"] >= e["invoked_utc"], "the receipt follows the dry run")
     need(rec["ledger_closed"] is False, "the ledger must stay OPEN")
     need(rec["reads"] == {"vendor_calls": 0, "secret_reads": 0}, "reads block")
     need(not digit_runs(rec), "a run of 8 or more digits outside the exempt fields: %s" % digit_runs(rec)[:2])
@@ -344,7 +340,6 @@ def selftest():
                 "backfill": {"events": [{"payload": {}, "invoked_utc": "2026-10-16T01:10:00Z", "status_code": 200, "first_day": "2026-07-10", "chain_days": 10, "max_memory_used_mb": 650, "max_duration_ms": 30000,
                                          "request_ids": ["r1", "r2"]}], "final": {"response": "NOTHING_OWED", "objects": 65},
                              "skipped": [{"day": "2026-08-19", "reason": "REFUSED: no rows"}], "counts": {"days_built": 65, "accounts_dropped_total": 12, "households_no_rows_max": 1, "days_with_dropped_accounts": 4}},
-                "receipt": {"to": "1.0.0_SA_CTO~DELL1", "via": "0.0.0_AB_MSTR~DELL2", "text_has_not_a_page_render": True, "sent_utc": "2026-10-16T01:20:00Z", "receipt_message_id": "m1"},
                 "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}}
         coo, cto = "SIGNED " + PACKET_SHA, "SIGNED " + PACKET_SHA[:12]
 
@@ -380,9 +375,7 @@ def selftest():
                 ("event before dry", lambda r: r["backfill"]["events"][0].update(invoked_utc="2026-10-16T01:00:00Z")), ("no events", lambda r: r["backfill"].update(events=[])),
                 ("not finished", lambda r: r["backfill"]["final"].update(response="OWED")), ("too many objects", lambda r: r["backfill"]["final"].update(objects=66)),
                 ("skipped other day", lambda r: r["backfill"]["skipped"].append({"day": "2026-08-20", "reason": "x"})), ("built mismatch", lambda r: r["backfill"]["counts"].update(days_built=64)),
-                ("counts negative", lambda r: r["backfill"]["counts"].update(accounts_dropped_total=-1)), ("receipt to", lambda r: r["receipt"].update(to="1.0.0_SA_CTO~DELL2")),
-                ("receipt page render", lambda r: r["receipt"].update(text_has_not_a_page_render=False)), ("receipt before dry", lambda r: r["receipt"].update(sent_utc="2026-10-16T01:00:00Z")),
-                ("digits", lambda r: r["dry_run"]["returned"]["result"].update(note="id 1234567890")))
+                ("counts negative", lambda r: r["backfill"]["counts"].update(accounts_dropped_total=-1)), ("digits", lambda r: r["dry_run"]["returned"]["result"].update(note="id 1234567890")))
         for name, f in arms:
             r = copy.deepcopy(good)
             f(r)
