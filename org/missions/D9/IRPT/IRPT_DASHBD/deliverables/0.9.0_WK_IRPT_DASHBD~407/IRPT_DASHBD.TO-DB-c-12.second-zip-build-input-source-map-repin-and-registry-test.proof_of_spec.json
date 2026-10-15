@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-12.second-zip-build-input-source-map-repin-and-registry-test",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "0df19dc747",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-12.second-zip-build-input-source-map-repin-and-registry-test.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~407",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~407/DBC119_session.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "05e7ca7b87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed build input only. The order names no zip build, upload, Terraform or deploy act, and none was run; the source map's own pins and sha256 are the evidence of what it stages.",
+      "artifact_covered_by": [
+        "DBC119-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/holdings-performance/tests/test_zip_registry_resolves.py",
+      "kind": "test",
+      "commit_or_etag": "05e7ca7b87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A build-time test. Staged pins: 1 passed in 2.59s. With HP_REGISTRY_SCOPES_PIN=14b52ca13a467e4be0e47231fb6840611bbb134a: 1 failed in 1.96s, REFUSED: registry lookup('z09') failed: KeyError: 'z09'.",
+      "artifact_covered_by": [
+        "DBC119-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a613255c3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows, IRPT_DASHBD-D2-W407-S1 and IRPT_DASHBD-D2-W407-S2, committed at a613255c3f."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC119-1-AC1",
+      "criterion_verbatim": "DBC119-1-AC1 -- the source map equals the base (the commit this round was issued at) in everything except the `scopes.json` entry's `pin` and `sha256` in the two holdings-performance function entries, which are the new pin and sha256; the file's diff is exactly one pin line and one sha256 line per function; no file outside the source map and the test changed under `infra/aws`, `infra/logic` or the producer's folder. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r119/p119_bcw.py\" . DBC119-1-AC1",
+      "output_evidence": "DBC119-1-AC1 PASS (rc=0). git diff --numstat ad799ad40b 05e7ca7b87 -- infra/aws/lambda/ci/lambda-source-map.json: 4\t4\tinfra/aws/lambda/ci/lambda-source-map.json",
+      "denominator": "4 of 4 changed lines are the scopes.json pin and sha256 lines (numstat 4 4): 2 of 2 holdings-performance functions, one pin and one sha256 line each; 0 changed files outside the source map and the test under the checker's paths",
+      "status": "PASS",
+      "expect": "DBC119-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBC119-2-AC1",
+      "criterion_verbatim": "DBC119-2-AC1 -- the test file exists with a `test_` function; pytest passes on it with the staged pins; with `HP_REGISTRY_SCOPES_PIN` set to the old commit pytest FAILS. Base: FAIL (no test).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r119/p119_bcw.py\" . DBC119-2-AC1",
+      "output_evidence": "DBC119-2-AC1 PASS (rc=0). Staged pins: 1 passed in 2.59s. HP_REGISTRY_SCOPES_PIN=14b52ca13a467e4be0e47231fb6840611bbb134a: 1 failed in 1.96s, REFUSED: registry lookup('z09') failed: KeyError: 'z09'.",
+      "denominator": "2 of 2 pytest runs graded as the order requires (staged pins: 1 of 1 passed; old pin: 1 of 1 failed); 1 test_ function in 1 test file",
+      "status": "PASS",
+      "expect": "DBC119-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The planted negative control: the test is run with HP_REGISTRY_SCOPES_PIN set to the old scopes.json commit 14b52ca13a467e4be0e47231fb6840611bbb134a, so z09 has no row.",
+      "expected": "pytest FAILS, the producer refuses z09 in the staged tree",
+      "observed": "1 failed in 1.96s; REFUSED: registry lookup('z09') failed: KeyError: 'z09'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of the staged-pin test compared: the worker's own run, and the pytest run the DBC119-2-AC1 checker makes in its own subprocess.",
+      "observed": "Run 1: 1 passed in 2.59s. Run 2: the checker's pytest returned rc 0 and matched the passed count, so DBC119-2-AC1 PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Building, zipping, uploading, Terraform plan or apply, any AWS call, Lambda invoke or deploy, and any push",
+      "reason": "Forbidden by the order's bounds. DB-c-12 is the build input and its test only."
+    },
+    {
+      "item": "Materializing handler.py into the test's scratch tree",
+      "reason": "The order reads 'adds handler.py unneeded'. The test does not import handler.py, so it is not staged; the worker read the phrase as 'not needed'."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W407-S1: the build-time test types the three registered firm tokens as literals and the commit's naming gate printed 2 paths in domain with PASS 0 graded.",
+    "IRPT_DASHBD-D2-W407-S2: the test refuses when HP_ZIP_PATH and HP_REGISTRY_SCOPES_PIN are both set, a behaviour the order does not name."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit gates (to-pipeline-gate, surprise-row-gate, naming-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_DASHBD~407 <0.9.0_WK_IRPT_DASHBD~407@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "05e7ca7b87: to-pipeline-gate OK; surprise-row-gate OK; NAMING-GATE PASS 0 graded (2 paths in domain, see S1); msg-verify MATCH. a613255c3f: surprise-row-gate OK, 2 new row(s) of 577 total checked; rc=0"
+    }
+  ]
+}

@@ -177,7 +177,7 @@ def ending_value_probe(root, rows, as_of, member_id):
 
 # ------------------------------------------------------------------------------------------------ the contract clauses (pure)
 def check_contract(c, base_members_ok=True):
-    need(c.get("contract_version") in ("0.5.2", "0.5.3"), "contract_version is not 0.5.2 (or the later 0.5.3 that DB-b-232 lands)")
+    need(c.get("contract_version") in ("0.5.2", "0.5.3", "0.5.4"), "contract_version is not 0.5.2 (or a later 0.5.x the rounds after it land)")
     ids = [m["id"] for m in c["members"]]
     need(len(ids) == 117 and hashlib.sha256("\n".join(sorted(ids)).encode()).hexdigest() == MEMBER_IDS_SHA, "the member list changed")
     absent = [m["id"] for m in c["members"] if m.get("source") == "ABSENT"]
@@ -333,7 +333,7 @@ def selftest(root):
     red(lambda rs: [rs.remove(r) for r in list(rs) if r["household_ref"] == "H1" and r["member_id"] == "account.last4"], "a household with no account rows")
     # contract clauses: build a synthetic contract that passes, then break it
     base = json.loads((Path(root) / CONTRACT_REL).read_bytes().decode("utf-8")) if (Path(root) / CONTRACT_REL).is_file() else None
-    if base is not None and base.get("contract_version") in ("0.5.2", "0.5.3"):
+    if base is not None and base.get("contract_version") in ("0.5.2", "0.5.3", "0.5.4"):
         check_contract(base)
         b2 = json.loads(json.dumps(base))
         b2["gold_table"]["columns"] = COLUMNS[:-1]
