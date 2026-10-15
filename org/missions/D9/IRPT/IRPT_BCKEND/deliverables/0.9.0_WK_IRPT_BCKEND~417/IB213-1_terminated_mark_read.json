@@ -1,0 +1,68 @@
+{
+  "base_commit": "51d2aee70ea7c8d9c16267f1a08adac3236f82a3",
+  "read_date": "2026-10-15",
+  "mark": {
+    "writer_site": {
+      "file": "infra/aws/lambda/investor-reporting/directory/refresh.py",
+      "line": 438,
+      "identifier": "out[\"termination\"] = {\"indicator\": \"TERMINATED\""
+    },
+    "guard_reading_site": {
+      "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "line": 2987,
+      "identifier": ".get(\"indicator\") == \"TERMINATED\""
+    },
+    "shape": "termination object of a directory entry: indicator (TERMINATED, ACTIVE or UNKNOWN) and effective_date (an ISO day); the source-removed marker travels as a cohort.capability_facts string source_removed_on=<date>",
+    "owner": "directory refresh Lambda: lambda_handler in directory/refresh.py (the scheduled fire) calls resolve_disappeared, which calls carry_forward_terminated",
+    "precedent": {
+      "terminated_entries_in_cottonwood": 2,
+      "directory_entries": 271,
+      "claim": "measured",
+      "how_set": "both TERMINATED entries carry the source_removed_on capability fact, so the writer's carry-forward rule set the mark (absent from the build and from the source snapshot); the source marks the other 269 entries UNKNOWN"
+    }
+  },
+  "evidence": {
+    "accounts": 1,
+    "zero_position_dates": [
+      "2026-10-09",
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14"
+    ],
+    "positions_on_those_dates": 0,
+    "first_accept_date": "2026-10-09",
+    "claim": "measured",
+    "statement": "The custodian source lists the account with two rows carrying no position on each of these four trading days, and its independent-total partitions hold no row for it on any of them; the last trading day with a nonzero independent total is 2026-10-08."
+  },
+  "offline_guard": {
+    "performed": true,
+    "read_only": true,
+    "writes": 0,
+    "published": false,
+    "invocation": "python -I step2_build_gate.py (scratch script outside the repository): build_snapshot then evaluate_publish_gate with a stub closed-account provider",
+    "account_listed_as": "closed_accounts_not_refused",
+    "outcome": "PUBLISHED",
+    "nodes_changed_other_than_the_account": 16912,
+    "accounts_leaving": 1
+  },
+  "rollback": {
+    "statement": "The prior accepted publication is the served index at business date 2026-10-08 (index version in the notes); it returns by re-pointing the current index to that version id. Nothing is deleted, and this order wrote nothing."
+  },
+  "notes": [
+    "Writer, guard reading and directory precedent read at HEAD 51d2aee70e: 271 directory entries, 2 TERMINATED (both carry the source_removed_on marker) and 269 UNKNOWN; no entry names the one account (measured by count).",
+    "The writer marks only an entry the previous build carried. The one account is absent from the directory and from the directory's source client list, so the existing rule does not produce a mark for it (measured by boolean).",
+    "Cottonwood's other TERMINATED path (directory_runner.py term_of, line 727) is not on the Cottonwood builder: its rows are set UNKNOWN at lines 818 and 824.",
+    "With NO mark applied, the same gate at HEAD already lists the account under account_lost_not_refused and returns PUBLISHED against the 2026-10-08 served index. The mark changes the listing name, not the outcome. The deployed code was not read.",
+    "The offline candidate rebuilt for 2026-10-13 (17911 nodes) does not reproduce the refused candidate's revision (17904 nodes). The cause is not measured. The build printed a WARN that the trading calendar answered from its hardcoded NYSE fallback.",
+    "nodes_changed_other_than_the_account 16912 = 16764 amount-only differences (served 2026-10-08 against candidate 2026-10-13, market values moved) plus 148 identity differences (37 served-only, 111 candidate-only). An equal-date comparison was not in the order and was not run.",
+    "Source conflict: from 2026-10-06 to 2026-10-08 the account's custody rows carry no position while its independent total carries a nonzero value; the zero-position run starts after that window. Earlier no-position days (10-01 to 10-05, no total) were not used.",
+    "Sparse grant extended locally, never committed: the Cottonwood builder's import chain needed data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared and docs/contracts/investor-reporting/v1 beyond the named directories.",
+    "Served index version for the rollback: lQMhNnImgj0ikICMdhFeasBGJKSbl55s. The offline build and gate were GET-only: no put, land, refusal-record write, publish, invoke or sign-in; the stub provider lives in scratch only."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
