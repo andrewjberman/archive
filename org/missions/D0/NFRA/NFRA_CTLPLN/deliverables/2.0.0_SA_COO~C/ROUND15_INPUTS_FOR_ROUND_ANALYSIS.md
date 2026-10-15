@@ -1,6 +1,6 @@
 # NFRA_CTLPLN round 15 -- the issuer's inputs for the round-15 analysis (2.0.0_SA_COO~C, DRAFT 2026-10-15 ~04:4xZ)
 
-**Status:** CT-ae-2 and CT-ae-3 are merged and `complete`. CT-ae-1 is with worker ~97, not yet reported; its section is a placeholder and is filled at the drain. Nothing here is sent until every order of the round is terminal.
+**Status:** all three orders (CT-ae-1..3) are merged and `complete`; `round-close-check` reads MAY-CLOSE. Sent with `L8_PACKET_ROUND15.md` at the drain.
 
 ## A. CT-ae-2 -- `complete` (merge `833f1d7bb7`, flip `d531251edb`)
 
@@ -16,9 +16,13 @@
 - Files mode matches a roots-named row of any kind through its roots field (the act rule unchanged). An ENFORCE refusal of the naming stage unstages every path in `IN_SCOPE` (WARN unchanged). `infra/.gitignore` ignores the census checkpoint. The identity-root search found no remaining `simulate_policy` mention.
 - Carried: `NFRA_CTLPLN-W99-S1`. The placement-refusal branch of the naming stage (about `.tools/safe-commit.sh:1183-1188`) still unstages only the graded files, the same shape as `W93-S1`. INERT; the order named the ENFORCE branch only. A candidate for a later batch cell.
 
-## C. CT-ae-1 -- placeholder
+## C. CT-ae-1 -- `complete` (merge `a133dfa1e5`, flip `ee04570c0f`)
 
-Worker ~97 is running in a fresh worktree. Its earlier run was cut off and its worktree and branch were removed (see D), so it restarted from the issuance commit. Fill with: whether tree B survived and tree A died, whether `kill-maint.ps1` or `seat-boundary.ps1` changed, the criterion lines, the merge.
+- `KILL-MAINT-PLANTED cases=10/10 ok=True`, `STOP-AT-DESCENDANT cases=27/27 ok=True`; real seats 8 before and 8 after; proof instance VALID.
+- Tree A (control) died; tree B (a foreign `claude.exe` seat) survived a real `-Execute -OnlyPid`. **But the refusal was never reached for a seat** (row `W97-S1`): the held-tree guard SKIPped any tree holding a `claude.exe`, so the REFUSED line and the `KILL-MAINT-REFUSED` audit line were unreachable. The tree survived, but through the generic SKIP, not through `CT-ab-4`'s boundary.
+- Fix (`21ad9d0ca4`, `.tools/kill-maint.ps1`): judge the seat boundary first for a held tree; refuse-only. `seat-boundary.ps1` unchanged.
+- The recipe's literal planted shape cannot be built as written (row `W97-S2`); the test plants a `python.exe` root with a `cmd.exe` copy named `claude.exe`. A candidate question for the analysis: is that shape the one the real reaper meets?
+- The earlier cut-off run of this cell had been working on a related symptom (the classifier exempted planted roots that inherited the worker's worktree as their working directory); that run's uncommitted work was lost (see D2).
 
 ## D. Process facts for the analysis
 
