@@ -1,4 +1,4 @@
-"""IRPT_DASHBD round 129, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- the ACT 3 order of the signed Cottonwood landing pair (packet revision 2, sha256 a1b080c5fe06...): explicit
+"""IRPT_DASHBD round 129, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- the ACT 3 order of the signed Cottonwood landing pair (packet revision 2, sha256 31f8e1620b90...): explicit
 `days` events of at most 25 trading days each, naming ONLY days after 2026-07-10 that have BOTH Black Diamond silver tables, oldest first, one synchronous invocation and one after-read
 per event, the schedule left DISABLED and the ledger left OPEN. Written BEFORE Act 2 has run, so that the order can be cut the moment the issuer has read Act 2's record; it grades
 nothing until its record exists.
@@ -20,7 +20,7 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 REC_REL = D + "0.7.0_AE_CloudOps~DB2/COT_CATCHUP_RECORD.json"
 APPLY_REC_REL = D + "0.7.0_AE_CloudOps~DB2/COT_LANDING_APPLY_RECORD.json"
 PACKET_REL = D + "2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md"
-PACKET_SHA = "a1b080c5fe065f90f4ad356c95301e59437637e95ce40afade93726eeaa392df"
+PACKET_SHA = "31f8e1620b90bdf041729c623239d5c4c96ccd8781e7ce48af401e900dea06b7"
 LEDGER_SLUG = "irpt-dashbd-cottonwood-account-return-daily-20261015"
 FUNCTION = "irpt-cot-account-return-daily-lambda"
 LOG_GROUP = "/aws/lambda/" + FUNCTION
@@ -28,7 +28,8 @@ SILVER_BUCKET, SILVER_ROOT = "opal-data-assets", "blackdiamond/cottonwood/silver
 SILVER_TABLES = ("fact_allocations", "fact_transactions")
 GOLD_BUCKET, GOLD_PREFIX = "opal-data-cottonwood", "irpt/cottonwood/gold/account_return_daily/"
 HISTORY_COUNT, HISTORY_LAST, FIRST_DAY = 3325, "2026-06-22", "2026-07-10"
-MAX_DAYS, MEM_LINE_MB = 25, 717
+MAX_DAYS, MEM_LINE_MB = 4, 717  # the pair allows 25 days an event; Act 2 measured 118 s for one day in the Lambda against a 900 s timeout, so an event names at most 4
+DURATION_LINE_MS = 700000
 CRON, ZONE = "cron(15 8 ? * MON-FRI *)", "America/New_York"
 ISO = re.compile(r"\d{4}-\d{2}-\d{2}$")
 UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -89,10 +90,10 @@ def check_events(events, silver_days):
         need(all(d in silver_days for d in ds), "event %d names days without BOTH silver tables: %s" % (i, [d for d in ds if d not in silver_days][:3]))
         need(UTC.match(str(e["invoked_utc"])) and e["invocation_type"] == "RequestResponse" and e["status_code"] == 200 and e["function_error"] is None, "event %d must be synchronous, 200, no function error" % i)
         r = e["returned"]
-        need(isinstance(r, dict) and r.get("ok") is True and r.get("days") == ds and r.get("held") == [], "event %d: the returned body must be ok, the same days, nothing held: %s" % (i, r))
+        need(isinstance(r, dict) and r.get("ok") is True and r.get("days") == ds and (r.get("held") == [] or (is_int(r.get("held")) and r.get("held") == 0)), "event %d: the returned body must be ok, the same days, nothing held (an empty list or the count 0): %s" % (i, r))
         rp = e["report"]
         need(isinstance(rp, dict) and set(rp) == {"max_memory_used_mb", "duration_ms", "memory_size_mb"} and is_int(rp["max_memory_used_mb"]) and rp["max_memory_used_mb"] > 0 and rp["memory_size_mb"] == 1024
-             and isinstance(rp["duration_ms"], (int, float)) and 0 < rp["duration_ms"] < 900000, "event %d report: Max Memory Used (int MB), duration under 900 s, memory size 1024" % i)
+             and isinstance(rp["duration_ms"], (int, float)) and 0 < rp["duration_ms"] < DURATION_LINE_MS, "event %d report: Max Memory Used (int MB), duration under %d s, memory size 1024" % (i, DURATION_LINE_MS // 1000))
         need(e["over_threshold"] is (rp["max_memory_used_mb"] > MEM_LINE_MB) and e["over_threshold"] is False, "event %d: Max Memory Used %s is over %d MB; the order stops there, this record cannot pass" % (i, rp["max_memory_used_mb"], MEM_LINE_MB))
         need(nes(e["request_id"]), "event %d request_id" % i)
         named += ds
@@ -216,7 +217,7 @@ def selftest():
     silver = ["2026-07-10"] + ["2026-07-%02d" % d for d in range(13, 32) if d % 7 not in (0, 6)] + ["2026-08-%02d" % d for d in range(3, 32)]
     silver = sorted(set(silver))
     rest = [d for d in silver if d > FIRST_DAY]
-    chunks = [rest[i:i + 25] for i in range(0, len(rest), 25)]
+    chunks = [rest[i:i + MAX_DAYS] for i in range(0, len(rest), MAX_DAYS)]
 
     def ev(days, mem=640):
         return {"payload": {"days": days}, "invoked_utc": "2026-10-16T02:00:00Z", "invocation_type": "RequestResponse", "status_code": 200, "function_error": None,
@@ -232,15 +233,19 @@ def selftest():
         except Fail:
             return False
     assert grade(copy.deepcopy(good)) is True
+    count = copy.deepcopy(good)
+    count["events"][0]["returned"]["held"] = 0
+    assert grade(count) is True
     arms = (("packet", lambda r: r["gates"].update(packet_sha256="x")), ("act2", lambda r: r["gates"].update(act2_recorded_and_passing=False)),
             ("ledger closed", lambda r: r.update(ledger_closed=True)), ("extra key", lambda r: r.update(z=1)),
-            ("too many days", lambda r: r["events"][0]["payload"].update(days=rest[:26])),
+            ("too many days", lambda r: r["events"][0]["payload"].update(days=rest[:MAX_DAYS + 1])),
+            ("too slow", lambda r: r["events"][0]["report"].update(duration_ms=800000.0)),
             ("first day named", lambda r: r["events"][0]["payload"].update(days=[FIRST_DAY] + chunks[0][:-1])),
             ("history day named", lambda r: r["events"][0]["payload"].update(days=["2026-06-22"] + chunks[0])),
             ("unsorted", lambda r: r["events"][0]["payload"].update(days=list(reversed(chunks[0])))),
             ("no silver pair", lambda r: r["events"][0]["payload"].update(days=["2026-07-14"] + chunks[0][1:])),
             ("skipped day", lambda r: r["events"].pop(0)), ("async", lambda r: r["events"][0].update(invocation_type="Event")),
-            ("function error", lambda r: r["events"][0].update(function_error="Unhandled")), ("held", lambda r: r["events"][0]["returned"].update(held=[chunks[0][0]])),
+            ("function error", lambda r: r["events"][0].update(function_error="Unhandled")), ("held", lambda r: r["events"][0]["returned"].update(held=[chunks[0][0]])), ("held count", lambda r: r["events"][0]["returned"].update(held=1)), ("held false", lambda r: r["events"][0]["returned"].update(held=False)),
             ("over line", lambda r: r["events"][0].update(report={"max_memory_used_mb": 800, "duration_ms": 1.0, "memory_size_mb": 1024}, over_threshold=True)),
             ("memory size", lambda r: r["events"][0]["report"].update(memory_size_mb=8192)), ("status", lambda r: r["events"][0].update(status_code=500)),
             ("new_days", lambda r: r["partitions_after"].update(new_days=3)), ("history", lambda r: r["partitions_after"].update(history_partitions=3324)),
