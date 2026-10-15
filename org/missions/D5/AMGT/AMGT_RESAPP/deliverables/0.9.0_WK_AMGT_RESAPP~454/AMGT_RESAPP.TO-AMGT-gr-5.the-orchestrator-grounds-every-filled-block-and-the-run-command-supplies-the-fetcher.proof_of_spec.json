@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gr-5.the-orchestrator-grounds-every-filled-block-and-the-run-command-supplies-the-fetcher",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-5.the-orchestrator-grounds-every-filled-block-and-the-run-command-supplies-the-fetcher.md",
+    "group": "OTHER",
+    "vintage_commit": "d88fca1f84e52d81c1538892122897e8757e6a95"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "d88fca1f84e52d81c1538892122897e8757e6a95",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gr-5.the-orchestrator-grounds-every-filled-block-and-the-run-command-supplies-the-fetcher.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~454",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/orchestrate.py",
+      "kind": "script",
+      "commit_or_etag": "3bc81d3a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BlockContext gains fetch=None; build_document(..., fetch=None, ground=True) wraps fetch in a per-document cache, hands it to every builder context, validates drafts with require_grounding=False and grounds each filled draft (WEB_SEARCH against its first 8 cited urls, OPAL_SOURCE against its opal_inputs) through grounding.ground_block; GROUNDING_REASON is the stated text. Exercised by check_gr5_orchestrate.py (20 of 20) and the aifill pytest suite.",
+      "introduces": [
+        "self.fetch = fetch",
+        "GROUNDING_REASON",
+        "FETCH_CAP",
+        "_cached_fetch",
+        "_ground_block",
+        "_web_sources",
+        "_opal_sources",
+        "_kept_citations"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/run.py",
+      "kind": "script",
+      "commit_or_etag": "3bc81d3a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "default_fetch = sources.fetch_source (module attribute, read at call time); main(argv, client, fetch) passes fetch if given else default_fetch, and None with --no-model. Exercised by check arms run.main accepts a fetch argument and run --no-model fetches nothing, and by the GR-5 tests in test_orchestrate_grounding.py.",
+      "introduces": [
+        "default_fetch = sources.fetch_source",
+        "fetch: Optional[Any] = None"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_orchestrate_grounding.py",
+      "kind": "test",
+      "commit_or_etag": "3bc81d3a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, 31 tests, one per behaviour of the cell; run as PYTHONPATH=<worktree> python -m pytest -q -p no:cacheprovider lib/research/aifill/tests/test_orchestrate_grounding.py -> 31 passed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_contract_orchestrate.py",
+      "kind": "test",
+      "commit_or_etag": "3bc81d3a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One call changed: test_default_discovery_calls_build_block_of_the_named_module passes ground=False (its stub builder returns a filled block with no fetcher). Nothing else touched.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_store_run.py",
+      "kind": "test",
+      "commit_or_etag": "3bc81d3a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_good_doc passes ground=False (stub builders return OPAL_SOURCE blocks); the two monkeypatched validate_document stubs take **kwargs because the final check now passes require_grounding. Nothing else touched.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_text_blocks.py",
+      "kind": "test",
+      "commit_or_etag": "7643c28732",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: one call in test_document_with_a_silent_pack_and_empty_header_fills_the_three_blocks passes ground=False; one line changed (1 insertion, 1 deletion), nothing else in the file. Commit gate clean for 1 of 1 file.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3bc81d3a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended, AMGT_RESAPP-D1-W454-S1 (BLOCKING, the out-of-grant test; resolved by AMENDMENT 1 at 7643c28732) and AMGT_RESAPP-D1-W454-S2 (OBSERVATION, the two lambdas). Gate: surprise-row-gate OK, 2 new row(s) of 1170 total checked.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/wk-resapp-454 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr5_orchestrate.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\" -- expect the line AIFILL GR-5 ARMS: YES (N of N) with N equal to 20, no FAIL arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-454 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round106_aifill_prep/checks/check_gr5_orchestrate.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "AIFILL GR-5 ARMS: YES (20 of 20) / exit=0 -- the tail -4 window: ARM run --no-model fetches nothing PASS (0, []) / ARM orchestrate.py stays ASCII and does no network of its own PASS non-ASCII or a network import / AIFILL GR-5 ARMS: YES (20 of 20) / exit=0. Full run re-counted at HEAD 7643c28732: 20 lines matching PASS, 0 lines matching FAIL, check rc=0.",
+      "denominator": "20 of 20 GR-5 arms PASS (0 FAIL arm lines in the full run; base run before the change: 1 of 20)",
+      "status": "PASS",
+      "expect": "AIFILL GR-5 ARMS: YES \\(20 of 20\\)[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests | tail -3; echo \"exit=${PIPESTATUS[0]}\" -- expect the last non-empty line before exit= reads N passed (N at least 498) with no failed and no error in the last 3 lines; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-454 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "755 passed in 1.92s / exit=0",
+      "denominator": "755 passed, 0 failed, 0 errors of 755 (base before the change: 724 passed, 0 failed; the first seat's run at 3bc81d3a84 read 754 passed, 1 failed)",
+      "status": "PASS",
+      "expect": "[0-9]+ passed[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "orchestrate._ground_block replaced in-process by a pass-through (draft returned untouched) so no grounding runs; check_gr5_orchestrate.py run against the mutant (.scratch/mutant_gr5.py).",
+      "expected": "the GR-5 arms that exercise grounding turn FAIL",
+      "observed": "MUTANT FAIL arms: 13; MUTANT summary: AIFILL GR-5 ARMS: NO (7 of 20); MUTANT rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_gr5_orchestrate.py run twice on the same committed bytes, stdout compared with cmp (.scratch/gr5_run_a.txt, gr5_run_b.txt)",
+      "observed": "identical 27-line output on both runs; last line AIFILL GR-5 ARMS: YES (20 of 20)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-D1-W454-S1: lib/research/aifill/tests/test_text_blocks.py was outside this order's write grant and failed one test under the grounding step; the issuer's AMENDMENT 1 added it to the grant and the one-call ground=False change is committed at 7643c28732, so AC2 now reads 755 passed.",
+    "AMGT_RESAPP-D1-W454-S2: two monkeypatched validate_document stubs in test_store_run.py took one argument; changed to accept keyword arguments (inside the grant)."
+  ],
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~454 on AMGT_RESAPP.TO-AMGT-gr-5, re-seated on the slot. The first seat's code commit 3bc81d3a84 and instance 0398e43216 were inherited unchanged. AMENDMENT 1 applied: ground=False added to the one orchestrate.build_document call in test_text_blocks.py (commit 7643c28732, the only edit). Re-ran AC1 (20 of 20, 0 FAIL lines in the full run) and AC2 (755 passed, exit=0). Commit-gate clean for test_text_blocks.py. This instance re-committed over the first seat's. The status flip is the issuer's.",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/orchestrate.py lib/research/aifill/run.py lib/research/aifill/tests/test_orchestrate_grounding.py lib/research/aifill/tests/test_contract_orchestrate.py lib/research/aifill/tests/test_store_run.py",
+      "result": "pre-commit gate clean for 5 of 5 file(s), rc=0 (first seat, 3bc81d3a84)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/tests/test_text_blocks.py",
+      "result": "pre-commit gate clean for 1 of 1 file(s), rc=0 (AMENDMENT 1, 7643c28732)"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~454 <0.9.0_WK_AMGT_RESAPP~454@opal.agent>\" -F .scratch/msg_gr5_amend1.txt -- lib/research/aifill/tests/test_text_blocks.py",
+      "result": "committed 7643c28732 on wk-AMGT_RESAPP-454 (LOCAL), msg-verify MATCH len=575"
+    }
+  ]
+}

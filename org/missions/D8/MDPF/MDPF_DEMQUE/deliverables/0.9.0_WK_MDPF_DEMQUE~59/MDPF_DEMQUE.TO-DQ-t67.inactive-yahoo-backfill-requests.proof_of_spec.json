@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t67",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t67.inactive-yahoo-backfill-requests.md",
+    "group": "OTHER",
+    "vintage_commit": "5e62883899"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "5e62883899",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t67.inactive-yahoo-backfill-requests.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~59",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/inactive_request.py",
+      "kind": "script",
+      "commit_or_etag": "f687525f54",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: read only, no vendor call, no S3 write, no ledger, queue, price store or pacer write, no timer, no deploy. The module imports demand_queue, daily_draw and rank and edits none of them. Its --build run wrote the request files only under the worktree's .scratch/t67 folder (the real build, AC2) and printed one JSON line of counts.",
+      "artifact_covered_by": [
+        "DQ9-t67-AC1",
+        "DQ9-t67-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_inactive_request.py",
+      "kind": "test",
+      "commit_or_etag": "f687525f54",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: stub names, no network, no S3, no vendor call; the three named tests PASSED by name at commit f687525f54 (run from the worktree root under timeout 120; the AC1 check printed REQUEST-OK, rc=0).",
+      "artifact_covered_by": [
+        "DQ9-t67-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t67-AC1",
+      "criterion_verbatim": "DQ9-t67-AC1 -- the three named tests: test_the_backfill_requests_chunk_the_symbolled_names_in_rank_order_and_every_name_appears_once; test_every_request_validates_and_carries_the_floor_start_the_frontier_end_and_the_client_need_class; test_a_name_without_a_symbol_is_left_out_and_counted. Invocation python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t67_tests.py, expect REQUEST-OK.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t67_tests.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-59 under timeout 120 (rc=0):\ntest_demque_inactive_request.py::test_the_backfill_requests_chunk_the_symbolled_names_in_rank_order_and_every_name_appears_once PASSED [ 33%]\ntest_demque_inactive_request.py::test_every_request_validates_and_carries_the_floor_start_the_frontier_end_and_the_client_need_class PASSED [ 66%]\ntest_demque_inactive_request.py::test_a_name_without_a_symbol_is_left_out_and_counted PASSED [100%]\n============================== 3 passed in 0.80s ==============================\nREQUEST-OK",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "REQUEST-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t67-AC2",
+      "criterion_verbatim": "DQ9-t67-AC2 -- on the REAL inputs (S3 and the V2 set read only): the build line's counts add up, requests is the ceil of with_symbol over 300, every file validates with tier 2, need class client, start 2012-01-01 and a trading-day end on or before today, the union of the requests is exactly the symbolled names each once, none is in V2, no account key, two builds are byte-identical. Invocation python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t67_real.py, expect REQUEST-REAL-OK.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t67_real.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-59 under timeout 260 (rc=0):\nbuild {\"cells\": 4131918, \"max_chunk\": 300, \"names_in\": 1705, \"nights\": 3, \"requests\": 4, \"securities_total\": 1071, \"with_symbol\": 1071, \"without_symbol\": 634}\nREQUEST-REAL-OK\n\nThe same run's census (inactive_set.py --census, read only, run by hand into .scratch/t67): {\"active_held\": 2929, \"active_stored\": 477, \"class_p1\": 32, \"class_p2\": 1448, \"class_p3\": 225, \"held_total\": 4634, \"inactive_only\": 1705, \"inactive_stored\": 10, \"inactive_unstored\": 1695, \"nights_at_cap\": 3, \"no_symbol\": 634, \"request_cap\": 380, \"requests_one_pass\": 1071, \"tx_symbol_only\": 1057, \"with_symbol\": 1071}\nHand run of the build into .scratch/t67/a and .scratch/t67/b: the same build line; diff -r printed no difference (IDENTICAL); the second build into a folder that holds request files was REFUSED with rc=2 and nothing written.",
+      "denominator": "9 of 9 build arms (with_symbol + without_symbol == names_in, 1071 + 634 == 1705; securities_total == with_symbol, 1071 == 1071; requests == ceil(with_symbol / 300) == ceil(1071 / 300) == 4; 1 <= max_chunk <= 300, max_chunk 300; the 8 build keys are integers; the files are exactly YAHOO-INACTIVE-BACKFILL-01..04; each of the 4 files validates under demand_queue.validate with tier 2, need_class client, start 2012-01-01, fields [close], an end 2026-10-14 that is a trading day on or before today, and 1..300 securities each with a non-blank symbol; the union of the 1071 CUSIPs is the 1071 symbolled names each once, none in the V2 active set; no key naming an account; the two builds are byte-identical); 4 of 4 request files; 1071 of 1071 securities",
+      "status": "PASS",
+      "expect": "REQUEST-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "two builds of the same names file on the same day, into two folders, compared byte for byte (the AC2 check does this, and the hand run diffs the two folders)",
+      "observed": "REQUEST-REAL-OK includes the byte-identical arm; the hand diff -r of .scratch/t67/a and .scratch/t67/b printed no difference",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the folder run's 4 failing tests (test_demque_bbg_backfill.py x2, test_demque_bbg_ledger_upload.py x2); pytest data/mdpf/scripts/demque ran once: 4 failed, 227 passed, 231 collected",
+      "reason": "outside inactive_request.py and outside this order's grant: none of the four files imports inactive_request.py; the two backfill failures are FileNotFoundError on integrations/bloomberg paths absent from this worktree; the two ledger-upload failures are the assertion failure already recorded as MDPF_DEMQUE-D1-W56-S2 (OBSERVATION) in the investigation file. No new row filed: the same four failures, the same cause."
+    },
+    {
+      "item": "the vendor call, S3 write, ledger, queue, price store, pacer write, timer, deploy, and any write into org/missions/.../requests/ or ~/.opal/demque",
+      "reason": "order BOUNDS: none made; the new code has no write path to any of them. The real build wrote only under .scratch/t67 in the worktree."
+    },
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: do not merge box/dell1 (blocked by a foreign row); the issuer unions at the drain"
+    },
+    {
+      "item": "the client account-id hash check on commit f687525f54",
+      "reason": "safe-commit printed WARN: the hashed account-id list is ABSENT on this box (C:\\Users\\Test\\.opal\\account_id_hashes.txt), so the commit was not checked by it. The committed files carry no account key and no account number: the names file and the requests hold CUSIPs and symbols only, and the build line holds counts only."
+    },
+    {
+      "item": "the surprise channel: no row filed",
+      "reason": "no premise failed and no act was outside the order; the census symbol coverage (1071 of 1705 inactive-only names carry a symbol) matches the order's stated figure"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~59/MDPF_DEMQUE.TO-DQ-t67.inactive-yahoo-backfill-requests.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "compile of inactive_request.py and test_demque_inactive_request.py",
+      "result": "rc=0, no output"
+    },
+    {
+      "tool": "python -m ruff check --select F,E9 --target-version py39",
+      "invocation": "lint of inactive_request.py and test_demque_inactive_request.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "the whole demque folder, run once from the worktree root (timeout 600)",
+      "result": "rc=1: 4 failed, 227 passed in 19.08s; 231 collected; the 4 failures are outside inactive_request.py (declared exclusion; row MDPF_DEMQUE-D1-W56-S2)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of inactive_request.py and test_demque_inactive_request.py, commit f687525f54",
+      "result": "commit-gate All checks passed; risk-reflex REFLEX CLEAN (2 of 2 files); naming-gate PASS 0 graded; surprise-row-gate OK (no rows in the commit); to-pipeline-gate OK; msg-verify MATCH; WARN client-data-check: hashed account-id list ABSENT, commit not checked for account ids"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t67_tests.py",
+      "invocation": "the AC1 check, timeout 120",
+      "result": "REQUEST-OK (rc=0), 3 of 3 named tests PASSED"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t67_real.py",
+      "invocation": "the AC2 check, timeout 260",
+      "result": "REQUEST-REAL-OK (rc=0)"
+    }
+  ]
+}
