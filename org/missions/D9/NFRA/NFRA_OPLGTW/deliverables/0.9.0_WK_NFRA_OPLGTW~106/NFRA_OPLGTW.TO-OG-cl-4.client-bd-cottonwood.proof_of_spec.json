@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "genre": "BUILD",
+  "to_id": "NFRA_OPLGTW.TO-OG-cl-4",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "32b70d1b86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6fc29c2dbf",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-4.client-bd-cottonwood.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~106",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py",
+      "kind": "script",
+      "commit_or_etag": "22597d7af9d160c65fc161d2b7e2b0fa2c2b2657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only, LOCAL on wk-NFRA_OPLGTW-106. No deploy, no IAM, no release: the preflight declares comp-schedule and comp-iam not applicable. The module is not registered in app/tools.py; the issuer's hookup does that at the merge.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl4.py",
+      "kind": "test",
+      "commit_or_etag": "22597d7af9d160c65fc161d2b7e2b0fa2c2b2657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven named tests, run offline on a recording fake ctx: python -m pytest tests/test_og_cl4.py gives 7 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~106/probe_bdcottonwood.py",
+      "kind": "script",
+      "commit_or_etag": "22597d7af9d160c65fc161d2b7e2b0fa2c2b2657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Probe against the real silver with the box's credentials, read only. It builds its own ProbeCtx from the DATA_CATALOG silver rows (the core Ctx is OG-cl-1's). Prints one counts-and-booleans line.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "22597d7af9d160c65fc161d2b7e2b0fa2c2b2657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows NFRA_OPLGTW-Z-W106-S1 to S11 appended, each with its grounding. Rows are not edited after append.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass. Invocation: bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl4.AC1.sh; echo exit=$?",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 7 of 7; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "7 named tests (test_ogcl4_ac01 .. test_ogcl4_ac07): 7 passed of 7 named; 0 failed or error lines.",
+      "status": "PASS",
+      "status_reason": "The script's own pytest_named read reports 7 of 7 named tests passed and 0 failed or error lines, and its RESULT line is PASS with exit 0.",
+      "expect": "(?s)pytest rc=0; named tests passed 7 of 7; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the probe, re-run here against the real silver, prints the complete envelope, a count equal to an independent read, a zero-row fence negative arm and no account number.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "probe bdcottonwood: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0\nprobe rc 0; digit runs of 8 or more in the output 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 booleans True (envelope_ok, independent_count_equal, fence_negative_arm); account_numbers_printed 0 of 0 custodian numbers found in the adapter returns and refusal text (8 or more digits); 0 digit runs of 8 or more in the probe output.",
+      "status": "PASS",
+      "status_reason": "All three booleans are True, the printed count is 0, the probe exits 0, and the output carries no digit run of 8 or more.",
+      "expect": "(?s)probe bdcottonwood: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Fence mutant: the firm_segments equality check in _seg is removed. Before a test case named a segment list that disagrees with the firm, the named tests still passed 7 of 7, so the mutant survived and a gap was recorded. A case was added to test_ogcl4_ac06; with the mutant in place the named tests then give 1 failed, 6 passed. The adapter was restored and compared byte-identical (cmp).",
+      "status": "FIRED-AS-EXPECTED",
+      "expected": "at least one named test fails when the segment check is removed",
+      "observed": "1 failed, 6 passed; after restore, 7 passed"
+    },
+    "determinism": {
+      "description": "The AC1 script and the probe each run twice on the same tree.",
+      "status": "STABLE",
+      "method": "two runs of cl4.AC1.sh and two runs of probe_bdcottonwood.py, outputs compared",
+      "observed": "AC1: 'pytest rc=0; named tests passed 7 of 7; failed/error lines 0' on both runs. Probe: 'envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0' on both runs."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of the five client_* tools in app/tools.py and the pinned-count moves in app/data_entitlement.py and app/destructive_ops.py",
+      "reason": "Not in this cell's write set. The issuer registers every tool and re-pins the counts at the merge, in one commit (task order section 2). Expected registrations: client_resolve_account, client_get_holdings, client_get_transactions, client_get_allocation, client_get_fees, all routed to this adapter."
+    },
+    {
+      "item": "The task-order status flip to complete",
+      "reason": "The task order file is outside this cell's <paths> write grant. Surprise NFRA_OPLGTW-Z-W106-S9 records it; the issuer owns the flip."
+    },
+    {
+      "item": "The protocol file G2_ADAPTER_PROTOCOL.md (uncommitted amended copy)",
+      "reason": "Issuer's file, placed in this worktree by the issuer. Not committed by this cell."
+    },
+    {
+      "item": "Deploy, IAM, release and the Cottonwood read role gateway-cot-blackdiamond-read-role",
+      "reason": "Declared not applicable in the preflight (comp-schedule, comp-iam). The probe reads with the box's own credentials; no grant is written."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W106-S1: The contract's Cottonwood bullets name the _s2 twins as read sources, but each _s2 table holds the 5-row xlsx report header (c1 label, c2 value), not account rows.",
+    "NFRA_OPLGTW-Z-W106-S2: The model join finds no roster row for one strategy name that carries 514 of the 998 live assignment rows; the adapter answers those accounts with absent_reason model_not_in_roster.",
+    "NFRA_OPLGTW-Z-W106-S3: fact_model_assignment does not join to the z09 account id; the adapter joins it on the custodian Account Number, and masked numbers do not join.",
+    "NFRA_OPLGTW-Z-W106-S4: The adapter raises or returns refusal codes that the contract does not name, and the protocol carries no channel for an absent_reason on an answered body.",
+    "NFRA_OPLGTW-Z-W106-S5: For Cottonwood transactions the contract gives no behaviour for a requested window that starts before the newest partition's earliest trade date.",
+    "NFRA_OPLGTW-Z-W106-S6: The census tool spec and the contract disagree on the Cottonwood fee rows: the census adds an Account Fee column, the contract names Management Fee rows only.",
+    "NFRA_OPLGTW-Z-W106-S7: fact_holdings carries no Custodian column, so the holdings platform label is derived from fact_allocations for the same account.",
+    "NFRA_OPLGTW-Z-W106-S8: Holdings carry duplicate (AccountID, AssetID) rows; the adapter sums them per asset as the census instructs, and the cause is not traced.",
+    "NFRA_OPLGTW-Z-W106-S9: The status flip of this task order to complete is outside this cell's write grant: the task order file is not in <paths>.",
+    "NFRA_OPLGTW-Z-W106-S10: The live newest partitions are newer than the census figures the contract cites.",
+    "NFRA_OPLGTW-Z-W106-S11: The commit-time naming gate refuses four firm-name literals in the Cottonwood adapter as hand-kept carriers; the gate is in its warn window, so the commit is not blocked."
+  ],
+  "session_log": "L7 worker subagent 0.9.0_WK_NFRA_OPLGTW~106 in worktree C:/tmp/wk-oplgtw-106. No separate session log is committed; the evidence is the artifacts above, the three commands in compiler_tools, and the surprise rows.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_cl4.py -v",
+      "result": "7 passed (test_ogcl4_ac01 .. test_ogcl4_ac07)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py infra/aws/ec2/opal-gateway/tests/test_og_cl4.py <probe>",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~106 <0.9.0_WK_NFRA_OPLGTW~106@opal.agent>\" -F .scratch/msg_a.txt -- <four paths>",
+      "result": "committed 22597d7af9; surprise-row-gate OK (10 new rows at that commit, S11 included in the same commit); naming-gate WARN 4 graded (not blocking, see S11)"
+    }
+  ]
+}
