@@ -1,0 +1,68 @@
+{
+  "handler": {
+    "file": "infra/aws/lambda/investor-reporting/account-return-cot/handler.py",
+    "functions": ["lambda_handler", "owed_days", "newest_landed_day"],
+    "events": ["day", "days", "dry_run"],
+    "words": "One module at the bundle root. It puts the adapter directory on sys.path (the adapter finds lib/opal_naming.py by walking up from its own folder) and imports cottonwood_bd_account_return_daily and trading_calendar. lambda_handler(event, context=None, s3=None, reader=None) runs the adapter's run_day per day. An event {day} runs one day; {days} runs the listed days in the order given; no day key runs the days owed. {dry_run: true} passes upload=False. Every day is validated as a real ISO date and the event is size-checked before any write. More than 25 days raises SystemExit; a bad date raises ValueError. A held day is logged HOLD <day>: <reason> and counted. The return is ok, days, results and held."
+  },
+  "closure": {
+    "members": [
+      "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+      "lib/opal_naming.py",
+      "lib/trading_calendar.py",
+      "org/standards/NAMING_SCHEMA.json",
+      "infra/logic/registry/systems.json",
+      "infra/logic/registry/scopes.json",
+      "infra/logic/registry/tiers.json",
+      "infra/logic/registry/exemptions.json",
+      "infra/logic/registry/remediations.json",
+      "infra/logic/registry/resources.json",
+      "infra/logic/registry/reporting_policies.json",
+      "infra/logic/registry/legacy_addresses.json",
+      "infra/logic/registry/feeds.json",
+      "infra/logic/registry/platinum_destinations.json",
+      "infra/logic/registry/firm_pages.json"
+    ],
+    "staged_probe_ran": true,
+    "words": "Found by reading the adapter's imports and opal_naming's file reads (REGISTRY_FILES, the naming schema for key(), the repo-relative lib path), then running the checker's staged probe. The probe passed with all fifteen members. Negative arms on the same probe: without NAMING_SCHEMA.json the probe cannot run; without tiers.json it cannot run; without trading_calendar.py it cannot import. Without reporting_policies.json it still passes, because load_registry reads that file only when it is present; it is kept because the repo carries it and the runtime reads it. The adapter is the run-time core; opal_naming and trading_calendar are its imports; the naming schema is read by key(); the eleven registry files are every file load_registry reads. pyarrow is a package dependency of the adapter and is not a member."
+  },
+  "source_map": {
+    "file": "infra/aws/lambda/ci/lambda-source-map.json",
+    "entry": "irpt-cot-account-return-daily-lambda",
+    "pins_null": true,
+    "words": "One new entry under functions, inserted after the irpt-49f-reporting-gold-lambda entry, 121 added lines and no line lost. The entry carries source_dir, files (handler plus the fifteen members), staged_from (one object per member with pin and sha256 null and packaged_as equal to repo_path), the notes, pipeline investor-reporting, artifact_s3_key, and tf_file, tf_resource and iam_role as null with a note that the Terraform root is cut next round. The entry is NOT in a commit of this worker: the naming gate refused its source_dir literal, see the BLOCKING row IRPT_DASHBD-D2-W203-S3. The file on disk is the entry as written."
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/account-return-cot/tests/test_handler.py",
+    "new_tests": 11
+  },
+  "scheduling": {
+    "max_days_per_fire": 5,
+    "backfill_days_max": 25,
+    "scheduled_rule": "cron(15 8 ? * MON-FRI *) New York, created DISABLED by the next round's Terraform root (round-120 landing facts); nothing is created here.",
+    "words": "The first fire runs with no day key: it owes the trading days after the newest landed partition through T-1, at most five, and owes exactly T-1 when nothing has landed. The catch-up from the first non-empty fact_allocations date (2026-04-22) is run by explicit days events, each at most 25 days, so the scheduled fire stays within its five-day cap and the catch-up never runs by implication. The landing facts name the schedule as created DISABLED, with a hold when T-1 silver is absent; this cell does not set or change that. The next round's Terraform must set: timeout (sized for five days of run_day, measured in the next round), memory (sized for one adapter day's silver read), environment (none beyond the default region and no firm key), reserved concurrency of 1 so two fires never write the same gold partition, the handler as handler.lambda_handler, the bundle artifact investor-reporting/irpt-cot-account-return-daily-lambda.zip, and the IAM role with read on the two granted silver tables and put on the gold prefix only."
+  },
+  "files_changed": [
+    {
+      "file": "infra/aws/lambda/investor-reporting/account-return-cot/handler.py",
+      "sha256": "0434958d42a3393daedf9d152674720086d67ce4556dbfc0b8864813a2a3e106",
+      "kind": "new handler module"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/account-return-cot/tests/test_handler.py",
+      "sha256": "46857a74906244699c96a86ed0e3838c8f697670122961c4a0355af79351d18c",
+      "kind": "new pytest module with fake clients"
+    },
+    {
+      "file": "infra/aws/lambda/ci/lambda-source-map.json",
+      "sha256": "43e1739323ad08403bd9f4c236625263a9fdf6ad541768899fda18e5216e5cf8",
+      "kind": "one new source-map entry, lines added only"
+    }
+  ],
+  "words": "Round 122, B-49F, cell DB-b-249. The handler, the tests and the entry are written; the probe and the tests pass; the source-map entry is held uncommitted behind a naming-gate refusal of its source_dir literal (BLOCKING row IRPT_DASHBD-D2-W203-S3). The record carries no client value: every figure is a count, a date or a name of code.",
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
