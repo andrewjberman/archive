@@ -47,3 +47,10 @@ different hash voids this half.
 - **Plan:** the applier's plan is the first reading, and 7 / 0 / 0 is the gate.
 - **py3.12 memory:** Act 2's `Max Memory Used` decides.
 - **Branch C:** the half partition's removal waits on Andrew's word, as written.
+
+## VOID on these bytes (2026-10-15 ~13:0xZ)
+
+`~D2` withdrew the packet (msg 8286, row IRPT_DASHBD-D2-S84): the landing root set no Lambda layer, and the adapter imports pyarrow at module
+level, so the first invocation would fail. DB-b-259 adds the sibling's existing `irpt-performance-native-layer`, and the plan stays 7/0/0.
+**Nothing is executed on sha256 `c63702ade4df...`.** This seat re-signs on the revised packet's bytes, with section 9's answers unchanged,
+and adds one condition: Act 1's step 0 reads the layer version live and confirms it carries pyarrow for python3.12. If not, STOP.
