@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-594",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~433",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-594.scope-feed-daily-factor.md",
+    "group": "OTHER",
+    "vintage_commit": "2bd17b566fd89488f4af6ee2debd046a4bdab7f0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2bd17b566fd89488f4af6ee2debd046a4bdab7f0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-594.scope-feed-daily-factor.md"
+  },
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~433/IB227-1_criteria_output.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/inf/manual_api/pull_inflection_scope_account_returns.py",
+      "kind": "script",
+      "commit_or_etag": "77c8e46741",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the worker branch only. The SCOPE-FEED-B block adds the daily factor, SERIES_ENDED_AT_SOURCE, the calendar-day scheduled window and the non-trading-day universe. Nothing uploaded, scheduled, run against Orion or S3, or written to AWS.",
+      "artifact_covered_by": [
+        "IB227-1-AC1",
+        "IB227-1-AC2",
+        "IB227-1-AC3"
+      ],
+      "introduces": [
+        "SERIES_ENDED_REASON",
+        "landed_silver_days",
+        "scheduled_window_start"
+      ]
+    },
+    {
+      "path_or_key": "data/inf/manual_api/test_scope_feed_daily_factor.py",
+      "kind": "test",
+      "commit_or_etag": "77c8e46741",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Twelve offline tests: fake S3, fake transport, fake pacer; synthetic ids only; no network. Eleven fail on assertions with the block removed in memory; the first-run guard passes by design.",
+      "artifact_covered_by": [
+        "IB227-1-AC1",
+        "IB227-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/inf/manual_api/test_pull_inflection_scope_account_returns.py",
+      "kind": "test",
+      "commit_or_etag": "77c8e46741",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The return_value assertions renamed to daily_factor, with the expected values moved to the point factors; no other existing assertion changed. The 19 tests pass.",
+      "artifact_covered_by": [
+        "IB227-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB227-1-AC1",
+      "criterion_verbatim": "AC1 the new tests (at least 11) and the existing tests named in the paths block pass",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r227/p227_cells.py\" . IB227-1-AC1",
+      "output_evidence": "OK: 95 passed / IB227-1-AC1 PASS (rc=0)",
+      "denominator": "95 of 95 pass: 12 in test_scope_feed_daily_factor.py, 19 in test_pull_inflection_scope_account_returns.py and 64 in test_aor_resolution.py",
+      "status": "PASS",
+      "expect": "IB227-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB227-1-AC2",
+      "criterion_verbatim": "AC2 the difference control: with every SCOPE-FEED-B block removed in memory the new tests FAIL on assertions",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r227/p227_cells.py\" . IB227-1-AC2",
+      "output_evidence": "OK: removing the block fails the new tests (1 block(s)) / IB227-1-AC2 PASS (rc=0)",
+      "denominator": "1 SCOPE-FEED-B block removed in memory; own removal run: 11 of 12 new tests failed on assertions, 0 collection or error lines; the one passing test is the first-run guard",
+      "status": "PASS",
+      "expect": "IB227-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB227-1-AC3",
+      "criterion_verbatim": "AC3 the record: your own paths exactly as recorded and inside the grant, the named tests present, no typed object address, the six bound counters 0, no long digit run",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r227/p227_cells.py\" . IB227-1-AC3",
+      "output_evidence": "OK: the diff bounded, the named tests present, no typed address / IB227-1-AC3 PASS (rc=0)",
+      "denominator": "3 changed paths, all inside the grant; 9 of 9 named tests present; 6 of 6 bound counters 0",
+      "status": "PASS",
+      "expect": "IB227-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The SCOPE-FEED-B block removed in memory from pull_inflection_scope_account_returns.py by a runner that exec-s the stripped source under the module name the tests import; the new test file run against it. The file on disk is unchanged.",
+      "expected": "the new tests fail on assertions, not on import or collection",
+      "observed": "11 failed, 1 passed, 0 collection errors; every failure an AssertionError (the one passing test is the first-run guard)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the feed test files run on identical inputs in separate runs",
+      "observed": "12 passed with the block present, and 95 passed in the AC1 run on the committed tree; the removal run gave the same 11 of 12 on each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The upload of the script, the scheduled run, and any run against Orion or a served prefix",
+      "reason": "Later acts under the signed addendum (CloudOps). This grant is LOCAL: nothing is uploaded, scheduled, run, or written to AWS."
+    },
+    {
+      "item": "Calendar days for the --from-date backfill",
+      "reason": "The backfill keeps its trading-day rows because the existing from-date test pins them; channel row IRPT_BCKEND-D2-W433-S1 asks the issuer to rule."
+    },
+    {
+      "item": "The reading of the 10-day cap and the Monday pull date",
+      "reason": "Channel rows IRPT_BCKEND-D2-W433-S2 and S3: the build follows the order as written; the issuer rules any other reading."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W433-S1: OBSERVATION, INERT: the calendar-day rule would fail the existing --from-date test that pins trading-day rows; the rule is applied to the scheduled window only.",
+    "IRPT_BCKEND-D2-W433-S2: OBSERVATION, INERT: the 10-day cap is built as no earlier than pull minus 10 calendar days, an 11-day window inclusive; the other reading is one constant.",
+    "IRPT_BCKEND-D2-W433-S3: OBSERVATION, INERT: under the default T-1 pull date a Monday run pulls the Friday, so the weekend is carried by the Tuesday run, not the Monday run.",
+    "IRPT_BCKEND-D2-W433-S4: OBSERVATION, INERT: the Read of the order file returned the RECORD FACE section; the same observation as IRPT_BCKEND-D2-W432-S1.",
+    "IRPT_BCKEND-D2-W433-S5: OBSERVATION, INERT: the block redefines five SCOPE-FEED-A functions and suppresses ruff F811 per line; the A originals stay as shadowed code for the issuer to retire."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/inf/manual_api/test_scope_feed_daily_factor.py data/inf/manual_api/test_pull_inflection_scope_account_returns.py data/inf/scripts/gold/tests/test_aor_resolution.py -q",
+      "result": "95 passed"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "python -m ruff check --target-version py39 --no-cache data/inf/manual_api/pull_inflection_scope_account_returns.py data/inf/manual_api/test_scope_feed_daily_factor.py data/inf/manual_api/test_pull_inflection_scope_account_returns.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "proof-of-spec criteria checker",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r227/p227_cells.py\" . IB227-1-AC1 / AC2 / AC3",
+      "result": "IB227-1-AC1 PASS, IB227-1-AC2 PASS, IB227-1-AC3 PASS (rc=0 each)"
+    }
+  ]
+}
