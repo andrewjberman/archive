@@ -35,3 +35,18 @@ Never in the block: any client, household, advisor or firm name; any account num
 
 1. Which of the seven members the report already computes today, and which need a new computation.
 2. Whether the figures belong in the retained composition or in a separate retained record the reader also reads.
+
+## v0.2 DELTA 2026-10-15 ~17:3xZ (2.0.0_SA_COO~T2): the consumer is built and its vocabulary is CLOSED
+
+The consumer half is merged (`d44932acb5`, order `IRPT_ANLREQ.TO-AR-t-31`). What the producer must emit to be read, because the drafter DROPS the rest and counts it:
+
+| member | the drafter keeps only |
+|---|---|
+| `variant` | integer 1, 2 or 3 |
+| `model_names` | strings of at most 80 characters |
+| `allocation_pct` | keys that are the estate's asset-class values (`alternatives`, `cash`, `commodities`, `equity`, `fixed_income`, `structured`), numbers 0 to 100 |
+| `period_returns_pct`, `benchmark_returns_pct` | keys from `1M 3M 6M YTD 1Y 3Y 5Y 10Y SI`, numbers -100 to 1000 |
+| `top_holdings` | at most 10 `{ticker, weight_pct}`, ticker `^[A-Z0-9][A-Z0-9.\-]{0,9}$`, weight 0 to 100 |
+| `sector_pct` | NOTHING today: the estate holds no sector vocabulary, so the whole member is dropped. To enable it the producer names a closed sector list; that list is then added to the drafter in one small cell. |
+
+Open for the producer (`~G2`) and, for the return path, the reader's owner (`~P2`): the sector list; and whether the period labels above are the ones the report computes.
