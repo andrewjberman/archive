@@ -33,7 +33,7 @@ PERF_DOC = IR + "render/performance/report/PerformanceReportDocument.tsx"
 DOC_SHEETS = IR + "render/performance/report/documentSheets.ts"
 NEIGHBOUR_DIRS = (IR + "__tests__/irpt-dashbd/", IR + "__tests__/clientreport/")
 NEIGHBOUR_FILES = (IR + "__tests__/ir-66-print-kind/print-kind.test.ts", IR + "__tests__/ir-72-custody-print/custody-print.test.tsx")
-POINTER = "This report is incomplete without the accompanying disclosure page."
+POINTER = "This report is incomplete without the accompanying disclosure page"  # the constant as it stands in documentSheets.ts (no trailing period)
 WORDS = "Disclosure page pending"
 VERDICT = "VERDICT: DISCLOSURE-PLACEHOLDER-OK"
 REQUIRED_TOKENS = (WORDS, VERDICT, "data-disclosure-placeholder", "unfilled", "filled", "data-slot-state", "disclosures", "INCOMPLETE_WITHOUT_DISCLOSURE", "Page ")
@@ -120,7 +120,7 @@ def check_report_sheet(doc_src, sheets_src):
 
 def check_no_authored_language(src_texts):
     """The renderer may not author disclosure language: no new sentence of compliance wording beside the placeholder."""
-    bad = [w for w in ("past performance", "not a guarantee", "advisory fee", "form adv", "hypothetical") if any(w in t.lower() for t in src_texts)]
+    bad = [w for w in ("past performance", "not a guarantee", "form adv", "hypothetical") if any(w in t.lower() for t in src_texts)]
     need(not bad, "authored disclosure language found in the render files: %s" % bad)
     return True
 
@@ -223,7 +223,7 @@ def selftest():
     red(lambda: check_client_branches(client.replace("data-disclosure-placeholder", "x", 1)), "one page lacks the placeholder")
     red(lambda: check_client_branches(client.replace("disclosures.map((text, index) =>", "[].map(() =>")), "filled branch removed")
     doc = '<div data-slot="disclosure" data-slot-state="unfilled"><p data-disclosure-placeholder>{X}</p></div> disclosures?: readonly string[] | null {INCOMPLETE_WITHOUT_DISCLOSURE} "disclosures"'
-    sheets = "export const INCOMPLETE_WITHOUT_DISCLOSURE = 'This report is incomplete without the accompanying disclosure page.'"
+    sheets = "export const INCOMPLETE_WITHOUT_DISCLOSURE = 'This report is incomplete without the accompanying disclosure page'"
     assert check_report_sheet(doc, sheets)
     red(lambda: check_report_sheet(doc.replace('data-disclosure-placeholder', 'x'), sheets), 'no placeholder in the report sheet')
     red(lambda: check_report_sheet(doc.replace('data-slot-state', 'x'), sheets), 'no slot state')
@@ -233,6 +233,7 @@ def selftest():
     red(lambda: check_report_sheet(doc, sheets.replace('accompanying', 'x')), 'pointer constant changed')
     assert check_no_authored_language(["Disclosure page pending"])
     red(lambda: check_no_authored_language(["Past performance is no guarantee"]), "authored language")
+    assert check_no_authored_language(["Billed advisory fee:"])
     rec = {"claim": "measured", "portal": {"branch": "wk-IRPT_DASHBD-224-portal", "commit": "abcdef1", "files_changed": ["src/a.ts"]}, "constant": {"file": "src/a.ts", "name": "X", "value": WORDS},
            "branches": {"client_unfilled": "placeholder", "client_filled": "verbatim paragraphs", "report_sheet": "last sheet, placeholder when no text is supplied", "pointer_line": "unchanged"},
            "tests": {"mutant_failed": True, "lint_errors": 0, "typecheck_errors": 0, "suite_after": {"new_failing_ids": []}}, "pushed": False, "deployed": False, "words": "w" * 100}

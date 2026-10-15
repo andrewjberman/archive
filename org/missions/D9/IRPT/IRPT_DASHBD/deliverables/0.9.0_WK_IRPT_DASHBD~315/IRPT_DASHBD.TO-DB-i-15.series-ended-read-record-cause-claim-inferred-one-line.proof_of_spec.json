@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-15",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-15.series-ended-read-record-cause-claim-inferred-one-line.md",
+    "group": "OTHER",
+    "vintage_commit": "d5d026244d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "d5d026244d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-15.series-ended-read-record-cause-claim-inferred-one-line.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~315",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~313/SERIES_ENDED_CAUSE_R126.json",
+      "kind": "config_data",
+      "commit_or_etag": "580e8e6b38",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The round-126 series-ended read record with one added top-level key, cause_claim set to the string inferred. git show --stat of the commit: one file, one insertion, zero deletions. Written through json with indent=2 and sort_keys=True; the round-trip of the prior bytes was exact. Not deployed; no AWS call, vendor call, secret read or push.",
+      "artifact_covered_by": [
+        "DBI128-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI128-1-AC1",
+      "criterion_verbatim": "DBI128-1-AC1 -- the round-126 read record passes the round-126 check, which now also requires cause_claim to read inferred; and git diff of the record against its parent shows exactly one added line. Base: FAIL (the record carries no cause_claim).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r126/p126_cause.py\" . DBI126-1-AC1",
+      "output_evidence": "DBI126-1-AC1 PASS",
+      "denominator": "1 of 1 criterion PASS, rc=0, run from the worktree root after the record commit; the check's cause_claim limb reads inferred. Companion measure: git show --numstat of commit 580e8e6b38 on the record gives 1 insertion and 0 deletions, one file. Base run before the edit: rc=1, REASON cause_claim must read inferred, DBI126-1-AC1 FAIL.",
+      "status": "PASS",
+      "expect": "DBI126-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The record without the cause_claim key, run through the same unmodified checker before the edit.",
+      "expected": "rc=1 and DBI126-1-AC1 FAIL, with the reason naming cause_claim",
+      "observed": "rc=1; REASON cause_claim must read inferred; DBI126-1-AC1 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice on the final record, whole printed output compared with cmp.",
+      "observed": "two runs rc=0 each; the outputs are identical: DBI126-1-AC1 PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any edit to the script, the private extract, the saved bodies, the checker or any other key of the record",
+      "reason": "Outside the grant and the cell: the cell is one added key and touch nothing else. The check reads the private files and was not changed."
+    },
+    {
+      "item": "Any S3 read, vendor call, write, push or deploy",
+      "reason": "No such act was made. The worker ran only the local checker and a local JSON load and write."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~313/SERIES_ENDED_CAUSE_R126.json",
+  "compiler_tools": [
+    {
+      "tool": "p126_cause.py (issuer checker, DBI126-1-AC1), run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r126/p126_cause.py\" . DBI126-1-AC1",
+      "result": "rc=0; DBI126-1-AC1 PASS (after the record commit 580e8e6b38); rc=1 FAIL at base before the edit"
+    },
+    {
+      "tool": "proof-of-spec-check.py, run on this instance from the worktree",
+      "invocation": "python .tools/proof-of-spec-check.py \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~315/IRPT_DASHBD.TO-DB-i-15.series-ended-read-record-cause-claim-inferred-one-line.proof_of_spec.json\" DBI128-1-AC1",
+      "result": "rc=0; VALID, 0 violations, 1 of 1 acceptance row (DBI128-1-AC1), run from the worktree before the status flip"
+    }
+  ]
+}

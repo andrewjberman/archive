@@ -4,7 +4,9 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.4.0_DT_ClientPlatform~H1</issued_to>
 <date>2026-10-15</date>
-<status>pending</status>
+<status>complete</status>
+<!-- closed by the issuer 2.0.0_SA_COO~D1, 2026-10-15 ~22:4xZ, on CTO msg 6292: the promote ran under this order (commit 1808276e72, ledger closed); measured by CONTENT: the six candidate files (cand/dell1/mdpf-canon-global-trend-variant1-rf @15f7610285) are blob-equal on PROD tag portal-v2.1.223 (c3b21a40e2) and on the PROD tip e0b43076d9 (ls-remote read), and the tag is an ancestor of the tip. Do NOT re-promote. -->
+
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P1 (Andrew-direct 2026-10-15 ~01:1xZ: "let's get that sorted for PROD now"; STAGED until the CTO rules on DEV and the issuer's GO names this order)</priority>
