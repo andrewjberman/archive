@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-3",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "cf8ab92263"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "cf8ab92263",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-3.cottonwood-gold-table-readers-and-fallback-calendar-equality.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~402",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~402",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~402/READERS_AND_CALENDAR_R114.json",
+      "kind": "doc",
+      "commit_or_etag": "0b18dfcc6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The reader and calendar record. Read-only work: no AWS call, no write, no vendor call, no secret read. Not pushed, not deployed. The official checker run on these bytes is FAIL on the foreign-firm-token guard."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0b18dfcc6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended as bytes: IRPT_DASHBD-D2-W402-S1 (BLOCKING, INERT) and IRPT_DASHBD-D2-W402-S2 (OBSERVATION, INERT). The prior content is byte-equal to HEAD (1079705 bytes)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC114-3-AC1",
+      "criterion_verbatim": "DBC114-3-AC1 -- the record names exactly the three tables; each recorded reader file exists in the repo and names its table; a table with zero readers carries none_words and a claim of absent or inferred; reader_count equals the list; when the calendar comparison did not run the package is in fact absent now and a reason is given; the range is the stated one; no write is recorded. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r114/p114_bcw.py\" . DBC114-3-AC1",
+      "output_evidence": "Official run, from the worktree root, two runs identical: stdout 'foreign firm token in field paths' then 'DBC114-3-AC1 FAIL', rc 1. The guard is in no_identifiers, which runs before the table arms, so the official run stops there. Diagnostic only (scratch copy with the five foreign-named non-reader paths removed, ac_3 called in-process): 'ac_3 PASS', which covers the three-table set, each reader file's existence and table name, the zero-reader none_words and claim, reader_count equality, the package-absent reason (python -I import of pandas_market_calendars raises ModuleNotFoundError), the range and the calendar source.",
+      "denominator": "1 of 1 criterion FAIL (rc 1); 2 of 2 identical official runs; 3 of 3 tables named; 40 non-reader paths across the three tables, 5 carrying another firm's name in the file name (the failing arm); 6 reader entries (5 distinct files) checked by the diagnostic copy only",
+      "status": "FAIL",
+      "status_reason": "The record is written as the order asks and the reader, calendar and range arms pass on the diagnostic copy. The official checker fails on its foreign-firm-token guard, which refuses five non-reader paths that carry another firm's name in the file name. The record was not edited to clear the guard, and the checker is outside this order's grant. The order stays open; the question is carried as surprise row IRPT_DASHBD-D2-W402-S1.",
+      "expect": "DBC114-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The record with the five foreign-named non-reader paths removed (scratch copy, not committed), graded by ac_3 in-process",
+      "expected": "ac_3 PASS, which would show the guard is the only failing arm",
+      "observed": "ac_3 PASS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root with the same arguments",
+      "observed": "two identical outputs, rc 1 each; last line DBC114-3-AC1 FAIL",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Installing pandas_market_calendars",
+      "reason": "The order forbids an install. The package is absent, so the equality comparison did not run and calendar.ran is recorded false with the reason."
+    },
+    {
+      "item": "Any AWS call, S3 listing, DynamoDB read or secret read",
+      "reason": "The order grants none. The checker's S3 arm is not reached on the official run."
+    },
+    {
+      "item": "Reader and calendar arms on the official run",
+      "reason": "The foreign-token guard fires first, so those arms were graded only on the scratch diagnostic copy, which is not a deliverable."
+    },
+    {
+      "item": "Indirect readers through a producer's prefetch",
+      "reason": "Not counted as direct readers, since the file does not open the gold prefix itself. Named in basis_words of the record."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W402-S1: BLOCKING, INERT: the checker's foreign-firm-token guard refuses five non-reader paths that carry another firm's name in the file name; DBC114-3-AC1 fails on that arm alone (the diagnostic copy passes ac_3). The record and the checker were not edited.",
+    "IRPT_DASHBD-D2-W402-S2: OBSERVATION, INERT: the resume packet's 'no reader found' for account_return_daily is incomplete. Firm-generic readers exist for both returns and holdings gold, and none is bound to a Cottonwood prefix; the Cottonwood entry in the declaration is method-fields-only."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p114_bcw.py (DBC114-3-AC1)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r114/p114_bcw.py\" . DBC114-3-AC1",
+      "result": "FAIL, rc 1, foreign firm token in field paths"
+    },
+    {
+      "tool": "lib/tests/test_nyse_fallback_equals_package.py",
+      "invocation": "python -I lib/tests/test_nyse_fallback_equals_package.py (from the worktree root)",
+      "result": "NYSE-FALLBACK SKIPPED: pandas_market_calendars is not installed; years=18 first=2010 last=2027; rc 0; the comparison did not run"
+    },
+    {
+      "tool": "lib/trading_calendar.py calendar_source()",
+      "invocation": "python -I -c with sys.path at the worktree root, reading calendar_source(), FALLBACK_FIRST_YEAR and FALLBACK_LAST_YEAR",
+      "result": "NYSE/hardcoded-fallback-2010-2027; first 2010; last 2027"
+    },
+    {
+      "tool": "comp-find (per named folder, corpus all)",
+      "invocation": "comp-find '<table>' infra/aws/lambda/investor-reporting | lib/research/api | data/assets/scripts/gold --files --limit 20, and --all for the gold folder",
+      "result": "account_dim: 0 hits in the Lambda folder and the research API folder, 46 hits in 5 files in the gold folder; account_return_daily and holdings_performance_daily hit files read line by line"
+    }
+  ]
+}
