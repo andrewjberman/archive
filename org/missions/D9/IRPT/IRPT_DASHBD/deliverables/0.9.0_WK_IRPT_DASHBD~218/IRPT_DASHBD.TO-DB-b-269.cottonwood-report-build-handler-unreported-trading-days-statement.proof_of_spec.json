@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-269",
+ "firm": "COT",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "df7e654245",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-269.cottonwood-report-build-handler-unreported-trading-days-statement.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "group": "OTHER",
+  "vintage_commit": "df7e654245"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~218",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~218/IRPT_DASHBD.TO-DB-b-269.cottonwood-report-build-handler-unreported-trading-days-statement.proof_of_spec.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/handler.py",
+   "kind": "script",
+   "commit_or_etag": "7684330a79",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "additive: unreported_days, unreported_statement, unreported_windows and unreported_fields are pure; build_day adds unreported_days, statement and windows to the built day's result from the trading calendar (lib/trading_calendar trading_days_between) minus the present returns partitions kept at or after the floor; the absent day is never listed, read or written; one put_object, unchanged. LOCAL: committed on the worktree branch only; nothing planned, applied, uploaded or deployed",
+   "artifact_covered_by": [
+    "DB137-1-AC1",
+    "DB137-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_unreported_days.py",
+   "kind": "test",
+   "commit_or_etag": "7684330a79",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "seven new tests with fakes only: the 2026-08-19 span (all four windows, the absent day never listed, read or written), a day before the gap states none, a gap before a later quarter is not in quarter-to-date, two gaps state the count 2 and both dates in order, a complete run states none, a dry run states the gap and writes nothing, and the count word is always trading days; no network, no AWS call",
+   "artifact_covered_by": [
+    "DB137-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~218/RD_COT_UNREPORTED_FACTS_R137.json",
+   "kind": "config_data",
+   "commit_or_etag": "7684330a79",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the facts record: exactly the five keys of the order (rule, statement_form, windows, fills, words), the rule and statement form as the ruling words them, the four windows in order, fills never, and a words paragraph of one paragraph; a file in the repo; nothing is deployed",
+   "artifact_covered_by": [
+    "DB137-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB137-1-AC1",
+   "criterion_verbatim": "DB137-1-AC1 -- the handler's source holds every round-135 clause and now holds the words 'trading days not reported by the source'; the worker's own commits touch only the handler directory, the deliverables folder, the investigation file and task-order files.",
+   "method": "command",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r137/p137_unreported.py\" . DB137-1-AC1",
+   "output_evidence": "OK: static: every round-135 clause holds and the handler holds the statement's words; 3 files changed, all in the grant / DB137-1-AC1 PASS (rc 0)",
+   "denominator": "3 of 3 files changed by the worker's own commit 7684330a79 lie in the grant; the handler was changed",
+   "status": "PASS",
+   "status_reason": "PASS by output: the checker's own clause run at worktree HEAD over the worker's commit 7684330a79",
+   "expect": "DB137-1-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB137-1-AC2",
+   "criterion_verbatim": "DB137-1-AC2 -- the checker stages the handler as packaged and runs it against a fake S3: every round-135 scenario still passes; a gap on 2026-08-19 in the middle of a landed run gives unreported_days exactly [\"2026-08-19\"], the statement '1 trading days not reported by the source (2026-08-19)', the day in all four windows, no list, read or write of the absent day and one put at the right key; a day before the gap states none; a gap before a later quarter's start is not listed in the quarter-to-date window.",
+   "method": "command",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r137/p137_unreported.py\" . DB137-1-AC2",
+   "output_evidence": "OK: probe: every round-135 scenario passes; a day after a gap lists exactly the absent day, states '1 trading days not reported by the source (<date>)', names the windows that hold it, never lists, reads or writes the absent day and puts once; a day before the gap states none; a gap before a later window's start is not listed there / DB137-1-AC2 PASS (rc 0)",
+   "denominator": "3 of 3 probe scenarios checked (gap, clear, narrow) pass the round-137 clauses; the round-135 guard clauses pass on the same probe run",
+   "status": "PASS",
+   "status_reason": "PASS by output: the checker's probe run in a child interpreter over the staged handler at worktree HEAD 7684330a79",
+   "expect": "DB137-1-AC2 PASS"
+  },
+  {
+   "criterion_id": "DB137-1-AC3",
+   "criterion_verbatim": "DB137-1-AC3 -- the worker's tests pass under pytest and name cottonwood and no other firm; the probe passes again; the facts record has exactly the form of step 4.",
+   "method": "command",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r137/p137_unreported.py\" . DB137-1-AC3",
+   "output_evidence": "OK: 33 worker tests pass and name cottonwood only; the probe passes again; facts record equals the recount / DB137-1-AC3 PASS (rc 0)",
+   "denominator": "33 of 33 handler tests pass under pytest (26 earlier, 7 new in tests/test_unreported_days.py); the probe passes again; the facts record has the five keys of step 4",
+   "status": "PASS",
+   "status_reason": "PASS by output: the checker's own run at worktree HEAD 7684330a79 (its pytest run and its probe run)",
+   "expect": "DB137-1-AC3 PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the order names no mutant for this cell; its criteria are mechanical checks of the checker's probe and tests",
+   "expected": "N/A",
+   "observed": "N/A: no mutant named by the order",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "N/A-WITH-REASON: the order names no same-input comparison; the checker's probe runs in a child interpreter in each criterion run",
+   "observed": "the probe ran in the AC2 and AC3 runs; the criterion lines above are the measured output of the final run",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the Lambda runtime and the first real build of any day",
+   "reason": "the order is LOCAL: no plan, apply, deploy, S3 read or write, or AWS call; the probe and tests use fakes only"
+  },
+  {
+   "item": "how the served report prints the statement",
+   "reason": "that would change the report contract, which the order says is not made in this cell"
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest -q infra/aws/lambda/investor-reporting/reporting-gold-cot/tests -p no:cacheprovider",
+   "result": "33 passed in 2.14s"
+  },
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 handler.py tests/test_unreported_days.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_DASHBD~218 <0.9.0_WK_IRPT_DASHBD~218@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "committed 7684330a79 (handler, tests, facts record); msg-verify MATCH; the client-data-check list is ABSENT on this box (WARN), so the staged text was scanned for long digit runs and non-ASCII by hand"
+  }
+ ]
+}
