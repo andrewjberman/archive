@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-11",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "a48b6b1364",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-11.inflection-scope-feed-run-wrapper-silver-frames-to-contract-040-parquet.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~311",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~311/IRPT_DASHBD.TO-DB-i-11.session.log.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_run.py",
+      "kind": "script",
+      "commit_or_etag": "f8b243d417",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library, pyarrow and the sibling adapter only; writes under out_dir only; no AWS, network, clock or environment access. Not wired, scheduled or deployed; the real-silver run is a later cell.",
+      "artifact_covered_by": [
+        "DBI124-1-AC1",
+        "DBI124-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "kind": "test",
+      "commit_or_etag": "f8b243d417",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 synthetic tests passed under python -I -m pytest -q (rc 0); one test_mutant_ test. Temp-area writes only.",
+      "artifact_covered_by": [
+        "DBI124-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_adapter.py",
+      "kind": "script",
+      "commit_or_etag": "f8b243d417",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Round-123 adapter edited for the claim field on the end-of-day value and the 0.4.1 shape of ABSENT records; its rules, reason classes, manifest keys and refusals are unchanged. Pure, no I/O.",
+      "artifact_covered_by": [
+        "DBI124-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "kind": "test",
+      "commit_or_etag": "f8b243d417",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "25 synthetic tests passed under python -I -m pytest -q (rc 0), including the claim field both ways and the ABSENT shape; the round-123 mutant test still passes.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI124-1-AC1",
+      "criterion_verbatim": "`DBI124-1-AC1` -- the wrapper reproduces the checker's golden: rows with their `market_value_eod_claim`, partitions, ABSENT records in the 0.4.1 shape and the run record (including `contract_version`, `absent_placement`, `proposed_reason_classes` and the manifest's `reason_class_status`); an incomplete calendar day is dropped and counted; a repeated key is refused with nothing written. Base: FAIL (no wrapper).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r124/p124_run.py\" . DBI124-1-AC1",
+      "output_evidence": "DBI124-1-AC1 PASS (last line; rc=0)",
+      "denominator": "1 of 1 criterion; the golden is 17 rows, 11 ABSENT records, 4 partitions, the run record fields and the three proposed reason classes; the incomplete-day and repeated-key cases are checked in the same run",
+      "status": "PASS",
+      "expect": "DBI124-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBI124-1-AC2",
+      "criterion_verbatim": "`DBI124-1-AC2` -- every partition is `date=<business_date>` with only that date; the contract's 22 columns and types hash to its `schema_hash_with_optional` beside the one proposed `market_value_eod_claim` string column; each row passes `~D2`'s validator; the wrapper imports no AWS, network or socket module and names no `s3://` address; nothing is written outside the output directory. Base: FAIL (no wrapper).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r124/p124_run.py\" . DBI124-1-AC2",
+      "output_evidence": "DBI124-1-AC2 PASS (last line; rc=0)",
+      "denominator": "1 of 1 criterion; 4 partitions, each hashed over 22 fields to schema_hash_with_optional beside market_value_eod_claim; 17 rows through row_problems; the import and s3-name scan on the wrapper source",
+      "status": "PASS",
+      "expect": "DBI124-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DBI124-1-AC3",
+      "criterion_verbatim": "`DBI124-1-AC3` -- a 299-day window run through the wrapper chains to the source's product to 1e-12 with `carried_days` summing to 299, and your test file exists, names a `test_mutant_` test and passes with at least 8 tests. Base: FAIL (no wrapper).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r124/p124_run.py\" . DBI124-1-AC3",
+      "output_evidence": "DBI124-1-AC3 PASS (last line; rc=0)",
+      "denominator": "1 of 1 criterion; 215 trading-day rows from 299 calendar days; 13 wrapper tests passed (at least 8 required); 1 test_mutant_ test",
+      "status": "PASS",
+      "expect": "DBI124-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Replace the wrapper's complete-day line (kept = [row ... if row[\"day\"] not in incomplete_days]) with kept = list(all_rows). On a feed where one row of account 3002 on the weekend day 2026-08-08 is PENDING, the real wrapper drops that day and the mutant keeps account 3001's Monday window whole, so their row sets must differ.",
+      "expected": "The mutant's row set differs from the real wrapper's, and the mutant emits the 3001 Monday row that the real wrapper turns into an INCOMPLETE_WINDOW ABSENT record.",
+      "observed": "test_mutant_dropping_the_incomplete_day_rule_is_caught passed; the real and mutant row sets differ and 3001 2026-08-10 is in the mutant's rows only.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the synthetic clean world; run records, read-back rows and run_record.json bytes compared with ==",
+      "observed": "identical=True; 3 rows, 3 ABSENT records, 2 partitions and 4 files in each run (scratch probe, not committed)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The run on the real Scope silver and the landing of the table at addresses from lib/opal_naming.py",
+      "reason": "A later cell of the B-IN decomposition. This order is fixtures only, with no AWS and no network."
+    },
+    {
+      "item": "Contract 0.4.1 admitting absent_placement, row_status, the three reason classes and market_value_eod_claim",
+      "reason": "Not landed. The run record states BESIDE_TABLE and marks the three reason classes proposed; the claim column is proposed beside the 22 fields and left out of the hash."
+    },
+    {
+      "item": "Wiring of the wrapper into account_return_daily.py or any producer",
+      "reason": "Not in the cell and not in the grant; nothing imports the wrapper yet."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W311-S1: The complete-day drop can remove a trading day's row and its ABSENT record at the edge of the feed, because adapt() takes its domain from the kept rows; kept as written (ARMED, disarm owner 2.0.0_SA_COO~I2).",
+    "IRPT_DASHBD-D2-W311-S2: Rule 1 does not say whether the repeated-key COUNT counts keys or extra rows; the wrapper counts keys seen more than once.",
+    "IRPT_DASHBD-D2-W311-S3: The account counts in the run record come from the adapter's manifest over the kept rows, so an account whose every row was dropped leaves all three counts.",
+    "IRPT_DASHBD-D2-W311-S4: A duplicate or non-canonical dimension key collapses silently in the account map, the later one winning.",
+    "IRPT_DASHBD-D2-W311-S5: The silver partition key is not checked against the rows it names.",
+    "IRPT_DASHBD-D2-W311-S6: A rerun into the same out_dir leaves the earlier run's partitions and absent file in place; the wrapper removes nothing."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -I -m pytest (wrapper tests)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "result": "13 passed, rc 0"
+    },
+    {
+      "tool": "python -I -m pytest (adapter tests)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "result": "25 passed, rc 0"
+    },
+    {
+      "tool": "p124_run.py (round-124 checker)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r124/p124_run.py\" . DBI124-1-AC1|AC2|AC3",
+      "result": "DBI124-1-AC1 PASS; DBI124-1-AC2 PASS; DBI124-1-AC3 PASS (each rc 0)"
+    }
+  ]
+}
