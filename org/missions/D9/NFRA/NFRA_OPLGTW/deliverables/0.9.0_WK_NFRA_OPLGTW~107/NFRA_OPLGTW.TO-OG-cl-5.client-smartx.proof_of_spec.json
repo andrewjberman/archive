@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cl-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "b56fd6ef9d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-5.client-smartx.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b56fd6ef9d"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~107",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py",
+      "kind": "script",
+      "commit_or_etag": "638daaaa76",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SmartX adapter module (five client tools, ctx-only). LOCAL on wk-NFRA_OPLGTW-107, not pushed; no deploy, no registration (the issuer's hookup).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl5.py",
+      "kind": "test",
+      "commit_or_etag": "638daaaa76",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Eight named tests, a recording fake ctx. 8 of 8 pass at 638daaaa76 (checks/cl5.AC1.sh).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~107/probe_smartx.py",
+      "kind": "script",
+      "commit_or_etag": "638daaaa76",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only probe of the adapter against the real silver with the box credentials; prints one line of counts and booleans (checks/cl5.AC2.sh).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "638daaaa76",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows NFRA_OPLGTW-Z-W107-S7..S12 appended (S1..S6 inherited from the BLOCKED seat, unchanged). Gate: surprise-row-gate OK on the commit.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 8 of 8; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 named tests passed (test_ogcl5_ac01 .. test_ogcl5_ac08 in tests/test_og_cl5.py); failed/error lines 0",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 8 of 8; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the probe, re-run here against the real silver, prints the complete envelope, a count equal to an independent read, a zero-row fence negative arm and no account number.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "probe smartx: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0\nprobe rc 0; digit runs of 8 or more in the output 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 probe conditions true (envelope complete on a real answer; independent pyarrow count equals the denominator partition_rows; the other-firm request refused firm_not_served with zero keys read; account_numbers_printed 0 of the full account numbers in the newest non-empty account-map partition); 0 digit runs of 8 or more in the output",
+      "status": "PASS",
+      "expect": "(?s)probe smartx: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The account-number detector planted with one real full account number in a blob, then with an empty blob.",
+      "expected": "planted: count 1; empty: count 0",
+      "observed": "planted: 1; empty: 0 (control run in the worktree at 638daaaa76, read-only, numbers counted and not printed)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "same-input runs compared: the probe run directly and cl5.AC2.sh before the commit, and cl5.AC2.sh at 638daaaa76 (the only later change is errors=replace on two reads)",
+      "observed": "identical probe line in every run: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of the five tools in app/tools.py, app/data_entitlement.py and app/destructive_ops.py, and the pinned-count moves in the tool tests",
+      "reason": "The protocol and the order give them to the issuer's merge hookup (CUT BY WRITE SET); not in this cell's paths."
+    },
+    {
+      "item": "The core client_core.py Ctx, the app/refs copy of partner_roster.json, and the principal admission path",
+      "reason": "OG-cl-1's and the issuer's; the probe builds its own ProbeCtx (A1 item 2). Admission is not exercised here (surprise S9)."
+    },
+    {
+      "item": "The get_transactions and get_fees data reads",
+      "reason": "The contract refuses SmartX with vendor_no_transactions and no_fee_source; there is no table to read (zero reads)."
+    },
+    {
+      "item": "The advisor-id source for ctx.firm_roster() at the hookup",
+      "reason": "partner_roster.json carries no advisor_id; the probe joins the silver roster; the core's choice is open (surprise S8, ARMED, disarm 2.0.0_SA_COO~O)."
+    },
+    {
+      "item": "The contract's account_suffix and account_ref pin on resolve_account",
+      "reason": "Not in the protocol signature; resolve_account returns every candidate (surprise S7)."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W107-S1: the tests/ path was outside the sparse cone (A1 item 1 ruled; the cone now holds it)",
+    "NFRA_OPLGTW-Z-W107-S2: the roster path is data/mdpf/config/partner_roster.json; the adapter reads it only through ctx.firm_roster()",
+    "NFRA_OPLGTW-Z-W107-S3: the real Ctx is OG-cl-1's and on no ref; the probe writes its own ProbeCtx (A1 item 2)",
+    "NFRA_OPLGTW-Z-W107-S4: only 49financial has a SmartX firm id; the two-firm negative arm is synthetic in the tests",
+    "NFRA_OPLGTW-Z-W107-S5: a canonical firm outside FIRMS raises firm_not_served with zero reads (A1 item 3)",
+    "NFRA_OPLGTW-Z-W107-S6: the catalog carries 13 smartx/platform/silver rows; the census catalog_entry present:false is stale",
+    "NFRA_OPLGTW-Z-W107-S7: the protocol envelope lacks freshness_td and absent_reason; the adapter emits _freshness_td and _absent_reason",
+    "NFRA_OPLGTW-Z-W107-S8: partner_roster.json has no advisor_id; a byte-equal firm_roster maps no SmartX row (ARMED, disarm 2.0.0_SA_COO~O)",
+    "NFRA_OPLGTW-Z-W107-S9: the probe does not exercise principal admission (typed_opal_only); the stand-in principal is nominal",
+    "NFRA_OPLGTW-Z-W107-S10: ctx has no prior-trading-day call; the weekend map fallback walks back through list_partitions",
+    "NFRA_OPLGTW-Z-W107-S11: the naming gate REFUSED the canonical firm-id literals as hand-kept carriers (WARN window, not blocking)",
+    "NFRA_OPLGTW-Z-W107-S12: the order names the instance with an underscore; the flip gate resolves the order stem (hyphen), so the instance is written at the stem name"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (gateway tests, offline)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_cl5.py -v -p no:cacheprovider",
+      "result": "8 passed (before the commit and at 638daaaa76)"
+    },
+    {
+      "tool": "probe against the real silver",
+      "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~107/probe_smartx.py",
+      "result": "one probe line, all four booleans as required, account_numbers_printed 0"
+    },
+    {
+      "tool": "safe-commit gate chain (ruff, py_compile, ds-precommit, surprise-row-gate, naming-gate in WARN window)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_code.txt -- <four paths>",
+      "result": "committed 638daaaa76; surprise-row-gate OK (4 new rows); naming-gate 4 REFUSE verdicts did not block (S11)"
+    },
+    {
+      "tool": "git sparse-checkout list",
+      "invocation": "git sparse-checkout list",
+      "result": "tests, data/mdpf/config and the NFRA_OPLGTW tree are in the cone"
+    }
+  ]
+}
