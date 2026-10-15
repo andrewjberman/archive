@@ -17,6 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = "c4c106aea1"
 GW = "infra/aws/ec2/opal-gateway"
 CATP = GW + "/app/refs/DATA_CATALOG.yaml"
+DECLARED = {m["tool"]: m["bucket"] for m in yaml.safe_load(open("workflows/atom_decomposition/tool_index/members.yaml", encoding="ascii"))["members"] if m.get("bucket")}
 MAP = json.load(open("org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/assets_group_map.json", encoding="ascii"))["rows"]
 REGP = "infra/logic/registry/catalog_fork_keys.json"
 SECS = ("silver_datasets", "portal_datasets", "harvest_datasets")
@@ -72,6 +73,8 @@ def good_catalog():
             b = rows[str(t["index"])]["bucket"]
         elif name in by_tool:
             b = sorted(by_tool[name].items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        elif name in DECLARED:
+            b = DECLARED[name]
         else:
             b = "graph" if t["member"] == "c" else top
         t["bucket"] = b
@@ -86,6 +89,7 @@ def good_catalog():
 
 def run(script, ac, env):
     r = subprocess.run([sys.executable, os.path.join(HERE, script), ac], env=dict(os.environ, **env), capture_output=True, text=True, timeout=290)
+    run.last = (r.stdout or "")[-500:]
     return r.returncode
 
 
@@ -99,18 +103,28 @@ def main():
         fn(c)
         return dump(c, name + ".yaml")
 
+    # the MX-c-21 stage has none of the 12 new rows (MX-c-23 adds them): its good catalog is the good one without them
+    good21 = copy.deepcopy(good)
+    good21["silver_datasets"] = [r for r in good21["silver_datasets"] if r["entity"] in {x["entity"] for x in yaml.safe_load(git_show(CATP).decode("ascii"))["silver_datasets"]}]
+    gp21 = dump(good21, "good21.yaml")
+
+    def variant21(name, fn):
+        c = copy.deepcopy(good21)
+        fn(c)
+        return dump(c, name + ".yaml")
+
     def rowof(c, e):
         for s in SECS:
             for r in c[s]:
                 if r["entity"] == e:
                     return r
 
-    nobucket = variant("nobucket", lambda c: rowof(c, "harvest_article_sentiment").pop("bucket"))
-    dyn = variant("dynstr", lambda c: rowof(c, "dynamodb_dynamodb_opal_news_articles").__setitem__("bucket", "none (DynamoDB us-east-1)"))
-    toolbad = variant("toolbad", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles").__setitem__("bucket", "opal-data-assets"))
-    sgid = variant("sgid", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles")["source_group"].__setitem__("id", "x-store"))
-    sgkind = variant("sgkind", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles")["source_group"].__setitem__("kind", "store"))
-    moved = variant("moved", lambda c: rowof(c, "harvest_article_sentiment").__setitem__("bucket", "opal-data-news-v2"))
+    nobucket = variant21("nobucket", lambda c: rowof(c, "harvest_article_sentiment").pop("bucket"))
+    dyn = variant21("dynstr", lambda c: rowof(c, "dynamodb_dynamodb_opal_news_articles").__setitem__("bucket", "none (DynamoDB us-east-1)"))
+    toolbad = variant21("toolbad", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles").__setitem__("bucket", "opal-data-assets"))
+    sgid = variant21("sgid", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles")["source_group"].__setitem__("id", "x-store"))
+    sgkind = variant21("sgkind", lambda c: next(t for t in c["tool_index"] if t["tool"] == "harvest_search_articles")["source_group"].__setitem__("kind", "store"))
+    moved = variant21("moved", lambda c: rowof(c, "harvest_article_sentiment").__setitem__("bucket", "opal-data-news-v2"))
     victim = next(e for e in MAP if "schwab_08403355_fact" in e)
     wrongv = variant("wrongvendor", lambda c: rowof(c, victim).__setitem__("vendor", "orion"))
     stray = variant("stray", lambda c: rowof(c, "harvest_article_sentiment").__setitem__("vendor", "schwab"))
@@ -144,7 +158,7 @@ def main():
     regdir = os.path.join(tmp, "reg")
     os.makedirs(regdir)
 
-    arms = [("c21.ac1 good", "c21_check.py", "ac1", {"C21_CATALOG": gp}, 0), ("c21.ac2 good", "c21_check.py", "ac2", {"C21_CATALOG": gp}, 0),
+    arms = [("c21.ac1 good", "c21_check.py", "ac1", {"C21_CATALOG": gp21}, 0), ("c21.ac2 good", "c21_check.py", "ac2", {"C21_CATALOG": gp21}, 0),
             ("c21.ac1 base catalog", "c21_check.py", "ac1", {"C21_CATALOG": os.path.join(tmp, "base.yaml")}, 1),
             ("c21.ac1 a row without bucket", "c21_check.py", "ac1", {"C21_CATALOG": nobucket}, 1), ("c21.ac1 a 'none (DynamoDB...)' string", "c21_check.py", "ac1", {"C21_CATALOG": dyn}, 1),
             ("c21.ac1 a valid S3 bucket moved", "c21_check.py", "ac1", {"C21_CATALOG": moved}, 1),
@@ -171,6 +185,7 @@ def main():
         else:
             wrong += 1
             print("ARM WRONG: %s -> rc=%d want %d" % (label, rc, want))
+            print("   " + " | ".join(run.last.splitlines()[-6:]))
     print("PLANTED ARMS: ok %d, wrong %d" % (ok, wrong))
     shutil.rmtree(tmp, ignore_errors=True)
     return 0 if wrong == 0 else 1

@@ -1,0 +1,18 @@
+SESSION LOG -- 0.9.0_WK_ADVI_COTBKF~184 on ADVI_COTBKF.TO-CB-cp-1 (round 94). Stubs only: no S3, no AWS, no CRM value.
+
+1. Tree check: branch wk-ADVI_COTBKF-184; TREE-OK (org/ and .tools/ present).
+2. Baseline before the change: python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q -> 19 passed, rc 0.
+3. Module and tests changed; commit 275c698a5f (module: _load_grant(path=None) returns (grant, source); _checked_grant_path;
+   GrantPathRefused; run record keys grant_file and grant_sha256; main --grant PATH). Test file: six test_grant_path_* added.
+   git diff --numstat: module 58 added / 16 removed; test file 95 added / 0 removed.
+4. bash .tools/commit-gate.sh on the two .py files -> "pre-commit gate clean for 2 of 2 file(s)", rc 0.
+5. Acceptance, each under timeout 120:
+   AC1 -k grant_path -> "6 passed, 19 deselected in 0.48s", rc 0; repeat run -> identical.
+   AC2 whole file -> "25 passed in 0.59s", rc 0.
+   AC3 record check -> "CRM-GRANT-PATH blob_equal=True tests_unchanged=True cli_accepts_a_key=False argument=--grant refusals=4", rc 0.
+6. Account-id scan: env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests/test_cotbkf_no_account_ids.py -q -s
+   -> FAILED, rc 1: "AssertionError: account set absent (COTBKF_ACCOUNT_SET or default path): the test fails closed".
+   The pinned set was not sought, per the order.
+7. Commit 3edfb56831: the record (GRANT_PATH_RECORD.json and .md). Commit-gate on non-py files checked nothing (WARN, expected).
+8. Gate output at commit 275c698a5f: WARN client-data-check, hashed account-id list ABSENT on this box (not checked).
+   No gate refusal and no hook denial.
