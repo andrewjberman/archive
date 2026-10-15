@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-15</date>
-<status>pending</status>
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (CTO round-9 analysis item 2; STAGED until both halves of NEVER_WIDEN_PAIR_R10_CN_R_2.md are signed and the issuer's GO names the pin)</priority>
