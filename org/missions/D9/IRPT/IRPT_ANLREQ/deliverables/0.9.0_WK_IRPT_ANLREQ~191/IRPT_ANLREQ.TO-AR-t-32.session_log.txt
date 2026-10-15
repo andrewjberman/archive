@@ -1,0 +1,13 @@
+Session log -- 0.9.0_WK_IRPT_ANLREQ~191 on IRPT_ANLREQ.TO-AR-t-32 (AR-t-32, round 42, workstream T)
+Worktree: C:/dev/wk-irpt-anlreq-191, branch wk-IRPT_ANLREQ-191. Base: 169654b4a928c6cfb1d499e6b9adb33460ef12fa.
+
+1. Tree check: branch wk-IRPT_ANLREQ-191; org and .tools present (TREE-OK).
+2. Premise check: lambda_handler.py:57 is the LOG = logging.getLogger(__name__) line; no setLevel or basicConfig in the file at base; test_commentary_route_switch.py:47-52 is the _run helper with caplog.at_level.
+3. Base, full commentary suite (pytest data/transcripts/scripts/tests/test_commentary_*.py): 1 failed, 66 passed. The failure is test_commentary_composition_port.py::test_build_packages_keys_module (cp cannot stat data/transcripts/assets, absent in this sparse worktree). Filed as IRPT_ANLREQ-D2-W191-S1.
+4. Base, check: python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R42_CHECKS/r42_checks.py lg1 -> R42-LG1-FAIL absent: data/transcripts/scripts/tests/test_commentary_logging.py (rc 1).
+5. Edit: lambda_handler.py adds LOG.setLevel(logging.INFO) with a one-line comment directly after the LOG line. New file test_commentary_logging.py with the two named tests. Both use fakes from test_commentary_composition_port.py and test_commentary_route_switch.py (_ports, _sqs, _ready_body, Poster, _store). No caplog.at_level, no setLevel in either test; root level patched to WARNING through monkeypatch.
+6. Commit e23d8e221f (code + test). Commit ce546283e6 (surprise row IRPT_ANLREQ-D2-W191-S1 appended to INVESTIGATION_v1.md).
+7. New tests: python -m pytest data/transcripts/scripts/tests/test_commentary_logging.py -v -> 2 passed.
+8. Mutant control: the setLevel line removed from the working copy, same run -> 2 failed (both tests). Line restored; git diff HEAD on lambda_handler.py is empty.
+9. After the change: r42_checks.py lg1 -> R42-LG1-OK 2 passed in 0.13s (rc 0), run twice, both rc 0. Commentary suite -> 1 failed, 68 passed (the same pre-existing test_build_packages_keys_module).
+10. Nothing deployed. The packaged copy under infra/aws/lambda/transcripts-pull/dist/ is not touched.
