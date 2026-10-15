@@ -1,0 +1,105 @@
+{
+ "overlay_pin": "fa2502c5b116dba01a3f7b2522f5f0e6b107b821",
+ "firms": {
+  "49financial": {
+   "minting_pin": "b1d354cfc9341168a3b4c316a344876ce0049b97",
+   "live_bundle_sha256": "bce6e936c2748772e9bf978a9f98f2127933790d5623ecd35569c83aa78fbaa7",
+   "candidate_bundle_sha256": "9c78dab7e8a19fee71909ced6650dba6fabbbe14f16152870b35c699678d41d8",
+   "members_total": 46,
+   "members_equal_to_live": 44,
+   "changed_members": [
+    {
+     "repo_path": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+     "sha256_at_pin": "bfa62fd005b94e21d363a6fb7ac13d0cac7cf6fc15fa74dfde39a7e2bcdd60e4"
+    },
+    {
+     "repo_path": "infra/aws/lambda/investor-reporting/holdings/publication.py",
+     "sha256_at_pin": "cfe39832f9e9869dacc05e95055485f6d436800eda5eb9904d4ad54698182151"
+    }
+   ],
+   "overlay_tests": {
+    "passed": 104,
+    "failed": 0
+   },
+   "overlay_status_entries": 2,
+   "build_arms_identical_members": true,
+   "build_arms_identical_tar_bytes": true,
+   "live_version_equals_mint_record": true,
+   "unexpected_changed_members": 0,
+   "live_only_members": 0,
+   "sums_line_diff_equals_overlay": true
+  },
+  "cottonwood": {
+   "minting_pin": "5fad7eaaa8fb4c512190fa406b78c683c4b6ad1f",
+   "live_bundle_sha256": "02487ed99d1b2e6ae45b6a8845cdadd9191f4214d53abdfed53699d57669e135",
+   "candidate_bundle_sha256": "9c78dab7e8a19fee71909ced6650dba6fabbbe14f16152870b35c699678d41d8",
+   "members_total": 46,
+   "members_equal_to_live": 44,
+   "changed_members": [
+    {
+     "repo_path": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+     "sha256_at_pin": "bfa62fd005b94e21d363a6fb7ac13d0cac7cf6fc15fa74dfde39a7e2bcdd60e4"
+    },
+    {
+     "repo_path": "infra/aws/lambda/investor-reporting/holdings/publication.py",
+     "sha256_at_pin": "cfe39832f9e9869dacc05e95055485f6d436800eda5eb9904d4ad54698182151"
+    }
+   ],
+   "overlay_tests": {
+    "passed": 104,
+    "failed": 0
+   },
+   "overlay_status_entries": 2,
+   "build_arms_identical_members": true,
+   "build_arms_identical_tar_bytes": true,
+   "live_version_equals_mint_record": true,
+   "unexpected_changed_members": 0,
+   "live_only_members": 0,
+   "sums_line_diff_equals_overlay": true
+  },
+  "inflection": {
+   "minting_pin": "5fad7eaaa8fb4c512190fa406b78c683c4b6ad1f",
+   "live_bundle_sha256": "02487ed99d1b2e6ae45b6a8845cdadd9191f4214d53abdfed53699d57669e135",
+   "candidate_bundle_sha256": "9c78dab7e8a19fee71909ced6650dba6fabbbe14f16152870b35c699678d41d8",
+   "members_total": 46,
+   "members_equal_to_live": 44,
+   "changed_members": [
+    {
+     "repo_path": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+     "sha256_at_pin": "bfa62fd005b94e21d363a6fb7ac13d0cac7cf6fc15fa74dfde39a7e2bcdd60e4"
+    },
+    {
+     "repo_path": "infra/aws/lambda/investor-reporting/holdings/publication.py",
+     "sha256_at_pin": "cfe39832f9e9869dacc05e95055485f6d436800eda5eb9904d4ad54698182151"
+    }
+   ],
+   "overlay_tests": {
+    "passed": 104,
+    "failed": 0
+   },
+   "overlay_status_entries": 2,
+   "build_arms_identical_members": true,
+   "build_arms_identical_tar_bytes": true,
+   "live_version_equals_mint_record": true,
+   "unexpected_changed_members": 0,
+   "live_only_members": 0,
+   "sums_line_diff_equals_overlay": true
+  }
+ },
+ "base_commit": "fa2502c5b116dba01a3f7b2522f5f0e6b107b821",
+ "read_date": "2026-10-15",
+ "method": "Run from the base worktree root in this order. First, three full detached worktrees of the minting pins were made outside the repository (49financial at b1d354, Cottonwood and Inflection at 5fad7e), each with sparse checkout disabled in that worktree alone. Second, the firm phase ran once per firm in its own process (49financial, then cottonwood, then inflection): exactly two files, holdings_snapshot.py and publication.py, are overlaid from the overlay pin by git show; the firm bundle is built twice by the minting pin safe_deploy_core build_bundle_payload (arm A and arm B, no upload function called); the live bundle is read with s3api head-object and get-object (read only) and compared member by member with the candidate; six offline test files are copied from the overlay pin and run with pytest on the overlay tree. Third, the assemble phase wrote the record from the three firm fragments. Nothing was uploaded, minted, deployed or written to AWS.",
+ "claim": "measured",
+ "notes": [
+  "Facts and their basis: the overlay pin is the base HEAD; the ABSENT-AT-SOURCE A, B and C blocks in its holdings_snapshot.py are graded by the AC1 check at run time, not by this harness. Each firm bundle is built from its minting pin tree with only the two overlaid files changed; the live bundle is read with head-object and get-object (read only) and compared member by member.",
+  "Build arms: each firm candidate was built twice in process from its pin tree; build_arms_identical_members and build_arms_identical_tar_bytes are recorded per firm as booleans (tar bytes may differ by timestamp, the members may not). SHA256SUMS is the manifest member inside the bundle and is not a closure member; its line difference is recorded as equal to the overlay pair or not.",
+  "Not read and not run: no Lambda was invoked, no publish or mint function was called, no sign-in was made and no vendor was contacted. The live object version was compared with the IB-pr-549 mint record as a boolean only and the version identifier is not written. The pin worktrees are full detached checkouts outside the repository; the first 49financial firm attempt stopped at the overlay status check before any build or AWS call and was re-run after the two overlaid files were restored in that pin.",
+  "Counters: the six counters are zero because nothing was invoked, signed in, written to AWS, written as rows or figures, or sent to a vendor; the surprise rows filed in the channel are the only writes and are not counted here."
+ ],
+ "functions_invoked": 0,
+ "sign_ins_made": 0,
+ "aws_writes_made": 0,
+ "rows_written": 0,
+ "figures_written": 0,
+ "vendor_requests_sent": 0
+}
