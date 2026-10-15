@@ -178,6 +178,7 @@ def read_mode(data, manifest, pin=None):
     # R6 prior
     r6 = []
     restated = []
+    cells = []
     skipped = []
     for s in SCOPES:
         ts, pr = data[s]["ts"], data[s].get("prior")
@@ -200,8 +201,13 @@ def read_mode(data, manifest, pin=None):
                     r6.append((s, "moved on shared dates", k, len(moved)))
                 elif moved:
                     restated.append("%s.%s %d cell(s)" % (s, k, len(moved)))
+                    # CTO ruling (round-9 analysis item 3): every restated cell is PRINTED (scope, array, date, old, new), never silent
+                    for i in moved:
+                        cells.append("%s.%s %s %r -> %r" % (s, k, (ts.get("dates") or [None] * (i + 1))[i], pr[k][i], ts[k][i]))
     a.arm("R6", not r6 and not skipped, "against the prior dated object per scope: only the four new keys added, none dropped, opal_aggregate_aua, point_class, non_model_aua, model_aua equal on the shared dates except at most %d restated cells per array (restated: %s)%s%s" % (
         RESTATE_MAX, restated or "none", "" if not r6 else "; " + json.dumps(r6[:3]), "" if not skipped else "; NO PRIOR OBJECT for %s (not passed)" % skipped))
+    for line in cells:
+        print("      restated cell: %s" % line)
     # R7 category-views
     bad7 = {}
     for s in SCOPES:
