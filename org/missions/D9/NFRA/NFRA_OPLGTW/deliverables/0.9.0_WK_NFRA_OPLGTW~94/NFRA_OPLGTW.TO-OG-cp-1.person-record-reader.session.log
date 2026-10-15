@@ -1,0 +1,41 @@
+0.9.0_WK_NFRA_OPLGTW~94 -- NFRA_OPLGTW.TO-OG-cp-1 (C-PERSON reader) -- session log, re-seated cycle (addendum A2)
+worktree: C:/tmp/wk-oplgtw-94   branch: wk-NFRA_OPLGTW-94
+commits this cycle (LOCAL): a445101400 (A2 integration floor + test_ogcp1_ac07); 4ae8ef1eaa (surprise row NFRA_OPLGTW-Z-W94-S2)
+prior commits stand: d5d2fb29bd (reader, record kind, native widening, six tests); 191ae30250 (superseded proof instance)
+
+first act: rev-parse HEAD -> wk-NFRA_OPLGTW-94; test -d org && test -d .tools -> TREE-OK
+task order: <status> left at pending, as the merge sets it (the A2 record face reopened it to pending).
+
+edits (commit a445101400):
+  app/integrations/base.py run_integration_tool: at the second identity-scope floor (the _scope_check block), where
+    _scope_reason is set, data_entitlement.person_widens(tool, get_current_principal(), _is_opal_user(email)) runs as
+    tools._run does; a revision admits the call past this floor only; None keeps identity_scope_denied. The revision
+    rides the audit detail as person_record_rev=<n> on the ok path and on both error paths (auth, IntegrationError).
+    With no record the detail is "" as before, so the no-record answers are unchanged.
+  tests/test_og_cp1.py: test_ogcp1_ac07 added (planted served integration tool ycharts_freshness, channel ycharts);
+    module docstring AC1..AC7.
+
+runs (this cycle, after a445101400):
+  python -m pytest tests/test_og_cp1.py -v (cwd infra/aws/ec2/opal-gateway): 7 passed (ac01..ac07 each PASSED), 0.84s
+  python -m pytest tests/test_og_cp1.py tests/test_access_state.py -q: 14 passed, 7.85s (second run; first run was the -v run above)
+  python -m pytest tests/test_og_bd2.py tests/test_og_bd3.py tests/test_data_entitlement_family.py
+     tests/test_data_entitlement_guard.py tests/test_entitlement_admin.py -q: 1 failed, 30 passed (31 collected);
+     the one failure is test_ogz1_ac08, the baseline id.
+
+mutant control (this cycle, planted, restored): the Opal gate at the integration floor replaced by True on a
+  backed-up copy; pytest tests/test_og_cp1.py::test_ogcp1_ac07 -> 1 failed (E KeyError: 'code', at the non-Opal
+  assertion); restored by cp from the backup, cmp byte-equal; git diff stat shows the commit's 16 insertions, 6 deletions.
+
+criterion AC1: timeout 120 bash .../r38/checks/cp1.AC1.sh; echo exit=$? ->
+  pytest rc=0; named tests passed 7 of 7; failed/error lines 0
+  contract parity test_ogd1_ac03: rc=0; 1 passed: yes
+  bd2+bd3+family+guard+admin suites: failing ids not in the baseline: 0 (want 0)
+  RESULT: PASS  exit=0
+criterion AC2: timeout 120 bash .../r38/checks/cp1.AC2.sh; echo exit=$? ->
+  contract copies byte-equal: yes; person_access in record_types 1 time(s) (want 1)
+  person_access fields declared 8 of 8; missing []; tier field present: no
+  POLICY_RECORD_TYPES carries person_access: yes
+  RESULT: PASS  exit=0
+
+commit gate on a445101400: WARN client-data-check, hashed account-id list absent at the default path; the commit was not
+  checked for client account ids. Recorded as NFRA_OPLGTW-Z-W94-S2 (4ae8ef1eaa), ARMED, disarm 2.0.0_SA_COO~O.

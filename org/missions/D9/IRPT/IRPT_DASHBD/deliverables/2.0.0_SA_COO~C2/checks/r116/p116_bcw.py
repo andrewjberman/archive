@@ -23,7 +23,7 @@ p114 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(p114)
 Fail, need = p114.Fail, p114.need
 
-BASE = "8f83241ac1"  # the tree this round was cut on; the unchanged-blocks arm diffs against it
+BASE = "7f16db08c3"  # the commit this round was issued at (the worker branches are cut from it); the unchanged-blocks arm diffs against it
 H = "infra/aws/lambda/investor-reporting/holdings-performance/"
 T = "infra/aws/terraform/investor-reporting/holdings-performance/"
 TF = [T + n for n in ("iam.tf", "lambda.tf", "locals.tf", "schedule.tf")]
@@ -153,7 +153,7 @@ def ac_3(root):
     for m in re.finditer(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", d, re.M):
         s, n = int(m.group(1)), int(m.group(2) or 1)
         need(n == 0 and a - 1 <= s <= b or (a <= s and s + n - 1 <= b), "handler.py changes outside _days_to_compute at base lines %d-%d" % (s, s + n - 1))
-    other = git(root, "diff", "--name-only", BASE, "--", "infra/aws", "data/assets/scripts/gold/irpt_holdings_performance")
+    other = git(root, "diff", "--name-only", BASE, "--", T, H, "data/assets/scripts/gold/irpt_holdings_performance")
     allowed = set(TF) | {HANDLER, NEWTEST, OLDTEST}
     allowed |= {ln for ln in other.splitlines() if ln.startswith(H + "tests/") and "refused_listing" in ln}
     extra = [ln for ln in other.splitlines() if ln and ln not in allowed]

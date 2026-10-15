@@ -13,12 +13,17 @@ From: `0.7.0_AE_CloudOps~Z`. Phase A of `NFRA_OPLGTW.TO-OG-ap-19` at A1.
 
 ## 0. READ THIS FIRST: one file is outside the order's take-list, and without it nothing imports
 
-**`app/typed_scope.py`.** The order names it **nowhere** (0 mentions). `portal_models.py:33` does
+**RULED: amendment A2 `@68a7d83f97` takes route (a) -- `app/typed_scope.py` rides this release whole,
+and the cut `ee23dd004c` stands unchanged.** `ap19.AC1` now reads `outside the G3-G6 set 0 (want 0)` and
+**RESULT: PASS**; the COO half is signed at this `release_sha` (`@bcc91e7a86`). The paragraphs below are
+kept as the reason, because the halves still signing should see why the file is here.
+
+**`app/typed_scope.py`.** The order named it **nowhere** (0 mentions). `portal_models.py:33` does
 `from . import typed_scope as ts`, and all three taken modules reference it -- `portal_models` 3,
 `portal_macro` 3, `news_typed` 4. `app/tools.py` imports `portal_models` at start-up, so **the release
-as listed would not have let the service come back.**
+as originally listed would not have let the service come back.**
 
-I have taken the file, because a half should rule on a release that works rather than one that cannot
+I took the file, because a half should rule on a release that works rather than one that cannot
 start. It is one pure seam module, 8,093 bytes, introduced by `e6f3b2b1b7` (cell `OG-gt-6`, "the scope
 seam over harvest_typed"), and it imports only `harvest_read` and `harvest_typed` -- both already live,
 shipped by OG-ap-18 -- so taking it pulls in no further dependency.
@@ -41,7 +46,7 @@ caught it** -- the first run of the six suites read 4 errors and 2 failures, eve
 | `app/portal_models.py` | +~380 | whole, box/sitez -- the four G3 market/positioning readers |
 | `app/portal_macro.py` | +~376 | whole -- macro, valuation, security scan, pipeline freshness |
 | `app/news_typed.py` | +~586 | whole -- the five G6 news readers |
-| **`app/typed_scope.py`** | **+~200** | **whole -- OUTSIDE the order's list; see section 0** |
+| **`app/typed_scope.py`** | **+172** | **whole -- the seam; added by A2's ruling, see section 0** |
 | `tests/test_og_pt1.py` `pt2` `nw1` `gt10` | +~1,500 | whole, four files |
 | `app/tools.py` | +81 | by hunk, `4500d443a0` -- the thirteen registrations + the import line |
 | `app/destructive_ops.py` | +13 | by hunk -- the thirteen into `SAFE_TOOLS` |
@@ -51,6 +56,18 @@ caught it** -- the first run of the six suites read 4 errors and 2 failures, eve
 | `deploy-to-ec2.sh` | +1 -1 | by hunk -- the **three** `NEWS_*` `.env` keys only |
 | `infra/aws/terraform/.../news_read_iam.tf` | new | G6 grant, unchanged, merged `21073a6055` |
 | `infra/aws/terraform/.../portal_tiered_read_iam.tf` | new | G3 grant, my `530b3a3246` |
+
+**THE SEAM IS TWO FILES AND THIS RELEASE TAKES ONE** (A2). Cell `OG-gt-6` (`e6f3b2b1b7`) wrote
+`app/typed_scope.py` (172 lines) **and** `tests/test_og_gt6.py` (205 lines). A2 rules the test NOT
+required, and the release does not take it -- the cut `ee23dd004c` is signed at that sha and adding a
+file would move it and void a signed half, so the tree stands exactly as signed.
+
+**The seam's own suite was still RUN, as evidence rather than as a take:** `tests/test_og_gt6.py`
+checked out into the release worktree *uncommitted* reads **4 passed** against the very
+`typed_scope.py` this release ships, then removed, leaving the worktree byte-identical to
+`ee23dd004c`. So the module this release absorbs is covered by its author's own suite at 33 of 33 over
+seven suites, without the release carrying a file A2 did not ask for. `tests/` is not an artifact
+member either way, so nothing about the host changes on this point.
 
 **The two pins were re-derived against this base, not taken from trunk.** The base reads 75 and 66, so
 this release is **88 and 79**. Trunk HEAD reads **95 and 86** because work landed after the hookup, so
@@ -174,9 +191,13 @@ ships the same form, so a rollback from a clean tree is byte-stable for that pag
 | all thirteen served | an Opal stand-in principal's real call, enveloped answer | 13 of 13 |
 | all thirteen refused | a non-Opal principal, with a counter in place of the client | 13 of 13 `harvest_opal_only`, **0 reads on any refusal path** |
 
-In the release tree these already read: **29 of 29 tests pass** over six suites (pt1 4, pt2 5, nw1 5,
-gt10 2, entitlement_admin 9, data_entitlement_family 4), and the **host-shaped import check** reads 5 of
-5 modules importing at exactly **4 parents** -- the host's own depth, where OG-ap-18 v1's `parents[5]`
+In the release tree these already read: **33 of 33 tests pass** over seven suites (pt1 4, pt2 5, nw1 5,
+**gt6 4**, gt10 2, entitlement_admin 9, data_entitlement_family 4 -- gt6 run as evidence, not taken),
+and the **host-shaped import check** reads 5 of 5 modules importing at exactly **4 parents** -- and the
+five are named, because A2 asks for the seam to appear in the check explicitly: **`app.typed_scope`**,
+`app.portal_models`, `app.portal_macro`, `app.news_typed` and `app.tools`, each resolving at 4 parents,
+with `app.typed_scope` imported FIRST so a failure in the seam cannot be mistaken for a failure in the
+modules built on it -- the host's own depth, where OG-ap-18 v1's `parents[5]`
 was fatal -- with all thirteen tools in the registry the module itself builds, 0 missing, the tree's
 registry reading **69 = 56 + 13**, and `portal_models._calendar()` RESOLVING, which exercises OG-gt-10's
 fix (the portal modules find the staged calendar by search rather than a fixed index).
