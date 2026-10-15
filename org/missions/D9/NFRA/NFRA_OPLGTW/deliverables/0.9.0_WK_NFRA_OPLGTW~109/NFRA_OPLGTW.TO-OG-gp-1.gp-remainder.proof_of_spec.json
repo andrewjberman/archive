@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gp-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "32b70d1b86"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~109",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_served.py",
+      "kind": "script",
+      "commit_or_etag": "918f890f960a9e151445d68f184546c20d7d6118",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only on branch wk-NFRA_OPLGTW-109; not registered in app/tools.py (issuer hookup) and not deployed (no release in this cell).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gp1.py",
+      "kind": "test",
+      "commit_or_etag": "918f890f960a9e151445d68f184546c20d7d6118",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "named tests test_oggp1_ac01..ac04; 6 passed locally and through the AC1 script (4 of 4 named).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~109/CLASSIFICATION.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "32 of 32 assigned rows, one class each; read by AC1 and AC2.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~109/probe_built.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only probe on the real bucket with box credentials; prints one line per BUILT tool.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6fc29c2dbf",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gp-1.gp-remainder.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass. Named tests: test_oggp1_ac01 through test_oggp1_ac04.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gp1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests passed; 0 failed or error lines",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: every assigned row is classified exactly once (the keys equal the catalog's assigned set) and every BUILT tool answers an enveloped read of the real bucket and refuses a non-Opal principal with zero reads.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gp1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "classification: assigned 32 of 32, covered 6, built 1, deferred 25; set equal True; built tools defined 1 of 1\nprobe built: mdpf_get_model_composition answered True; non_opal_refused True; reads_on_refusal 0\nbuilt tools probed 1 (the worker's probe lines)\nRESULT: PASS\nexit=0",
+      "denominator": "assigned 32 of 32; covered 6, built 1, deferred 25; set equal True; built tools defined 1 of 1; probed 1 of 1",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed the admit_scope call (the Opal and principal admission) in mdpf_get_model_composition, then ran the refusal test test_oggp1_ac03 on a backup-restored copy.",
+      "expected": "test_oggp1_ac03 fails: a non-Opal caller must be refused before any read",
+      "observed": "FAILED tests/test_og_gp1.py::test_oggp1_ac03 - KeyError: 'code' (mutant run, 1 failed, 5 deselected); file restored byte-for-byte, git diff empty",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the named suite through the AC1 script compared (this run and the pre-commit run)",
+      "observed": "both runs: named tests passed 4 of 4; failed/error lines 0; RESULT: PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of mdpf_get_model_composition in app/tools.py and the pinned-count moves",
+      "reason": "the order's section 2: the issuer registers every tool and re-pins the counts at the merge, in one commit"
+    },
+    {
+      "item": "IAM read grant on opal-data-mdpf mdpf/feeds/model_composition/ for opal-gateway-role",
+      "reason": "no IAM change in bounds; the release order carries the never-widen ask (surprise NFRA_OPLGTW-Z-W109-S3)"
+    },
+    {
+      "item": "Catalog read_tool fields for the 6 COVERED rows and the BUILT row",
+      "reason": "DATA_CATALOG.yaml is not in this cell's write grant; the catalog lags the release by design"
+    },
+    {
+      "item": "Typed tools for the 25 DEFERRED rows",
+      "reason": "the CRO spec (G3 section 3.4, G4 section 3.3) proposes no tool for them, or they are client-PII, retired, denied, held, or outside this bucket"
+    },
+    {
+      "item": "Any release, deploy or never-widen grant",
+      "reason": "bounds: code, tests and probe only"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W109-S1: the model_composition catalog row says account-grain client data in business_meaning while its fork_keys say no account fork.",
+    "NFRA_OPLGTW-Z-W109-S2: four mdpf feed rows are retired=true while their prefixes still receive live objects.",
+    "NFRA_OPLGTW-Z-W109-S3: the gateway role has no read grant on the model_composition prefix; the tool answers only under a box identity until the release grant lands.",
+    "NFRA_OPLGTW-Z-W109-S4: two catalog rows declare the same two sentiment objects; one names news_market_mood, the other names none."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~109/ac_runs.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_gp1.py -v (from infra/aws/ec2/opal-gateway)",
+      "result": "6 passed"
+    },
+    {
+      "tool": "probe",
+      "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~109/probe_built.py",
+      "result": "probe built: mdpf_get_model_composition answered True; non_opal_refused True; reads_on_refusal 0"
+    },
+    {
+      "tool": "classification",
+      "invocation": "python .scratch/make_cls.py <CLASSIFICATION.json> (generator; the 32 keys recomputed by AC2)",
+      "result": "assigned 32 of 32, covered 6, built 1, deferred 25; set equal True"
+    }
+  ]
+}
