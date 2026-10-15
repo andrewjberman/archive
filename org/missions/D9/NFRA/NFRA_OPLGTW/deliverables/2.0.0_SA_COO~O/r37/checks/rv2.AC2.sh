@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OPLGTW rf2 AC2 (round-37 RIVAL-FUNDS, FWD-22 G5r): the rival tools called for real against opal-data-etfs.
+# OPLGTW rv2 AC2 (round-37 RIVAL-FUNDS, FWD-22 G5r): the rival tools called for real against opal-data-etfs.
 # The probe runs the tool functions against the REAL bucket with the box's credentials and an Opal stand-in principal, then re-derives a count independently (boto3 + pyarrow, no tool under test).
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 CK="$(dirname "$0")"; CK="$(cd "$CK" && pwd)"
