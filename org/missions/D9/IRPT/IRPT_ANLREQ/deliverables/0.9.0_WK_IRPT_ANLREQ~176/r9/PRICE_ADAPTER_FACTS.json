@@ -1,0 +1,594 @@
+{
+  "base": "ae430dba9b1e0675bb3f2267dd7058d5269998ec",
+  "cell": "AR-g-69",
+  "not_read": [
+    "infra/aws/lambda/ycharts-market-data-pull/ycharts_client.py (and the rest of that Lambda folder, ws2_*.py, lambda_function.py): tracked in git (git ls-files) but ABSENT from this sparse checkout; the only read of the probe client is the CRO's live download described in RESEARCH notes lines 110-111. Not cited as on-disk source.",
+    "infra/aws/ec2/investor-reporting-ycharts/ (ycharts_session.js, run-ycharts-session.sh): ABSENT on disk; the session capture library and its wire shape were not read.",
+    "The CTO price ruling ADDENDUM 1, 2 and 3 (PRD v0.14): no file of that name in the worktree; the TO's quotation is used as given and the Andrew-side record (ANDREW_DIRECT_20261014_173xZ) is cited for the trust-token phrase.",
+    "ycharts/session/resident_session.py Transport body and broker.py operation_transport body: only the lines cited were read; the session framing and the request-budget logic were not read.",
+    "lib/opal_data_harvest/test_ab1b_trust_token_and_backoff.py: header read only. It carries the phrase 'trust token' for a different publisher harvest; it contains no 'ycharts' string (count 0), so it is not the YCharts trust token.",
+    "No AWS call of any kind: the live IAM (aws iam list-role-policies on irpt-ycharts-runner-role, the second root's render_host inline policy named in iam.tf lines 29-41), the live secrets, the live host pydeps, and the live stores were NOT read. resident_can_call_today rests on the tracked IAM and the CRO's measured probe only.",
+    "The host's pydeps tree (/opt/investor-reporting-ycharts/pydeps, merged by install step cp -a $H/pydeps/. on the host): not in the tree; the presence of yfinance, pandas and pyarrow on the host is therefore 'not found' in tracked files.",
+    "data/mdpf/scripts/demque/price_store.py write_incremental and index bodies, tr_column.build arithmetic beyond the lines cited, and yahoo_pull.pull's frame handling beyond the cited lines: read for the columns and the formula only.",
+    "org/missions/D8/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~5/PRICE_STORE_CONTRACT.md: outside this sparse checkout (carried from the AR-g-54 compose read); not read.",
+    "The Bloomberg history WRITER, the ^SPXTR symbol mapping and the yield_curve_fred object: not searched in this read (carried as not-found by AR-g-54 and not re-measured here).",
+    "infra/aws/lambda/investor-reporting/ycharts/research/price_adapters.py: ABSENT (not built; the round-8 AR-g-61 cell that names it did not land). The adapter facts below are for the cells that would create it.",
+    "ycharts/research/tests/test_price_source.py and swap_replacement.py: present on disk and not read (the chain core's contract is taken from price_source.py lines 8-14, 85)."
+  ],
+  "q1": {
+    "pattern": "Two YCharts paths exist in source. (a) The resident host's own calls run through ycharts/session/resident_session.py, whose Transport reads the session secret on the EC2 runner (the 'EC2 crawl'). (b) The CRO's probe used the Lambda client of ycharts-market-data-pull (ycharts_client.py, source tracked but absent from this checkout) through its stored cookies, the 'Lambda REST' side. The phrase 'trust token' is not a secret name, a symbol or a file in the tracked infra: not found.",
+    "secret_name": "ycharts/credentials (the probe's WORKING secret, the legacy secret the market-data Lambda reads). The resident path reads ycharts/session/current (broker.py SESSION_SECRET_ID). The resident runner role names ycharts/login/credentials, ycharts/session/current and astn/kimi/api-key only. No secret named 'trust token' in source: not found.",
+    "endpoint_form": "GET /charts/fund_data.json, one security per call, query securities=id:<SYMBOL>,include:true,, plus zoom (max gives 5 years). The resident's own series calls use the sibling path /charts/general_data.json with the same securities form. The base URL (host) is not in the tree: not found, and not typed here.",
+    "call_shape": "Request: GET, one security, zoom=max. Response: JSON; the dated series is chart_data[0][0].raw_data, a list of [epoch_ms, level] pairs (the resident's benchmark answer has the same shape). Probe: HTTP 200, 0.10-0.23 s, about 35 KB, 1,256 daily points for DGRO and ^SPXTR over 2021-10-13 to 2026-10-14.",
+    "pacing": "Client spacing 2 s between calls (REQUEST_SPACING_S, measured safe by the CRO; the constant itself is in the absent client, so the value is the CRO's). A request for N symbols takes about 2.3 x N seconds. No vendor rate limit is confirmed ('Rate limits are unconfirmed'). YCharts allows one concurrent session: a human login evicts the automated one.",
+    "series_fields": "chart_data[0][0].raw_data: list of [epoch_ms (UTC midnight, milliseconds), level (a number; the vendor level, not a percent)], ascending. zoom=max returns 5 years, not full history. The last point is today's intraday value, so the caller must cut at T-1.",
+    "resident_can_call_today": "no, for the path the CRO measured: ycharts/credentials is NOT in the resident runner role's grants (iam.tf names three secrets; iam.tf line 11 says a fourth YCharts secret is a deliberate edit). Egress is open (instance.tf security group: egress all). The session path IS granted (ycharts/session/current read and write, iam.tf) but its stored bundle was measured not usable by the Lambda client (cookies field is a list) and its capture and probe schedules are DISABLED, so whether the resident broker can call today is UNKNOWN.",
+    "evidence": [
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 108,
+        "text": "the YCharts trust-token fallback, probed on Andrew's"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 110,
+        "text": "through the deployed `ycharts-market-data-pull` Lambda's own client"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 111,
+        "text": "That client reads stored session cookies and makes plain"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 120,
+        "text": "freshness GET `/indices/table_data` 200 in 0.47 s"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 119,
+        "text": "Its capture and probe schedules are both DISABLED"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 122,
+        "text": "Call (`GET /charts/fund_data.json`, zoom=max)"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 128,
+        "text": "One symbol per call.** Each call takes 0.1 to 0.5 s."
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 129,
+        "text": "the client's measured safe spacing is 2 s between calls"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 131,
+        "text": "`fund_data` takes one security, so it is N calls."
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 132,
+        "text": "zoom=max returned 5 years, not full history"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+        "line": 137,
+        "text": "The session in `ycharts/credentials` is three months old"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20261014_173xZ_YFINANCE_FOR_GAPS_ELSE_YCHARTS_TRUST_TOKEN.md",
+        "line": 8,
+        "text": "keep in mind we keep a long-term trust token"
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/YCHARTS_COVERAGE_WHAT_EXISTS_20261013.md",
+        "line": 37,
+        "text": "YCharts allows one concurrent session."
+      },
+      {
+        "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/YCHARTS_COVERAGE_WHAT_EXISTS_20261013.md",
+        "line": 38,
+        "text": "Rate limits are unconfirmed."
+      },
+      {
+        "file": "infra/aws/terraform/ycharts-pipeline/market-data-pull.tf",
+        "line": 38,
+        "text": "their SM secret ids as module constants (ycharts/credentials,"
+      },
+      {
+        "file": "infra/aws/terraform/ycharts-pipeline/market-data-pull.tf",
+        "line": 60,
+        "text": "ycharts/credentials (the YCharts session"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf",
+        "line": 10,
+        "text": "the LEGACY secret that `infra/aws/lambda/ycharts-market-data-pull/ycharts_client.py` reads"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf",
+        "line": 61,
+        "text": "ycharts/login/credentials-*"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf",
+        "line": 62,
+        "text": "ycharts/session/current-*"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf",
+        "line": 99,
+        "text": "Resource = [local.login_secret_arn, local.session_secret_arn, local.kimi_secret_arn]"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/ycharts/instance.tf",
+        "line": 106,
+        "text": "NOTE: ycharts/credentials is the LEGACY secret read by the market-data Lambda"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/ycharts/instance.tf",
+        "line": 44,
+        "text": "Egress-all so the browser can reach YCharts"
+      },
+      {
+        "file": "infra/aws/terraform/ycharts-pipeline/eventbridge.tf",
+        "line": 11,
+        "text": "the resident consumer on i-0167fd745ad906a66 is the one owner of ycharts/session/current"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py",
+        "line": 116,
+        "text": "raw = Transport(secret_id=SESSION_SECRET_ID, secrets=self.secrets_client)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/session/broker.py",
+        "line": 63,
+        "text": "SESSION_SECRET_ID = \"ycharts/session/current\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+        "line": 61,
+        "text": "BENCHMARK_CALL = \"benchmark_level_series\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+        "line": 62,
+        "text": "BENCHMARK_FIELD = \"$.chart_data[0][0].raw_data\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+        "line": 390,
+        "text": "return sorted((int(x), float(y)) for x, y in pts)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/tests/fixtures/kept/step=01_fixture_series.json",
+        "line": 24,
+        "text": "\"raw_data\": ["
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_runner.py",
+        "line": 899,
+        "text": "id:{security_id},include:true,,"
+      }
+    ]
+  },
+  "q2": {
+    "sources": [
+      {
+        "source": "demque (MDPF_DEMQUE per-CUSIP price store, prices.parquet under s3_root()/cusip=<CUSIP>/)",
+        "field_used": "total_return (the TR column built by tr_column.build beside as_traded_close); the store also keeps close_served, as_traded_close, cash, tr_source, flags",
+        "level_formula": "total_return is a DAILY fraction, not a level: r_t = total_return_t (null on the first row). level_t = level_(t-1) * (1 + r_t), level_0 = 100 at the first retained date.",
+        "basis_claim": "measured: read in code (tr_column.build computes TR_t = (P_t + D_t)/(P_(t-1)/s_t) - 1 and stores it as a fraction; tr_compare.daily_tr is the same formula). The stored column is a return, so it must be chained, never read as a level.",
+        "evidence": [
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 33,
+            "text": "PRICE_COLS = [\"date\", \"close_served\", \"as_traded_close\"]"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 34,
+            "text": "TR_COLS = [\"cash\", \"total_return\", \"tr_source\", \"flags\"]"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_column.py",
+            "line": 10,
+            "text": "TR_t = (P_t + D_t) / (P_{t-1} / s_t) - 1"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_column.py",
+            "line": 11,
+            "text": "The first row has no prior close, so its total_return is null"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_column.py",
+            "line": 110,
+            "text": "\"total_return\": pd.Series(tr, dtype=\"float64\").values,"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 51,
+            "text": "out = (close + d) / (prev / s) - 1.0"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 52,
+            "text": "return out.iloc[1:]"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 46,
+            "text": "return address(\"yahoo\", \"global\", \"silver\", \"price_history\", \"x\")"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 159,
+            "text": "base = \"cusip=%s\" % cusip"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 35,
+            "text": "OLD_INDEX_COLS = [\"cusip\", \"yahoo_symbol\""
+          },
+          {
+            "file": "infra/logic/registry/tiers.json",
+            "line": 28,
+            "text": "\"silver\": {\"home\": \"shared\", \"bucket\": \"opal-data-assets\""
+          },
+          {
+            "file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+            "line": 37,
+            "text": "[\"REQUEST_COMPOSITION\", \"ORIGINAL_HOLDINGS\"]"
+          },
+          {
+            "file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+            "line": 113,
+            "text": "Resource = local.resident_read_prefixes"
+          }
+        ]
+      },
+      {
+        "source": "bbg (the Opal ETFs' Bloomberg history, opal-data-etfs/bbg/<day>/history_topup.parquet, security = '<TICKER> US Equity')",
+        "field_used": "DAY_TO_DAY_TOT_RETURN_GROSS_DVDS, Bloomberg's daily total return in PERCENT. PX_LAST is the price and is NOT the total return; it is kept only for provenance.",
+        "level_formula": "r_t = DAY_TO_DAY_TOT_RETURN_GROSS_DVDS_t / 100 (a daily return, percent divided by 100). level_t = level_(t-1) * (1 + r_t), level_0 = 100.",
+        "basis_claim": "measured: read in code (tr_compare.py docstring line 12 and load line 118; tr_column.py _bloomberg_returns divides by 100). The column is a daily return, so it must be chained.",
+        "evidence": [
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 12,
+            "text": "DAY_TO_DAY_TOT_RETURN_GROSS_DVDS is Bloomberg's daily total return in PERCENT"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 118,
+            "text": "b_ret = (b[\"ret_pct\"] / 100.0).dropna()"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_column.py",
+            "line": 62,
+            "text": "b[\"ret_pct\"].astype(\"float64\").values / 100.0"
+          },
+          {
+            "file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+            "line": 140,
+            "text": "Resource = [\"arn:aws:s3:::opal-data-etfs/bbg/*\"]"
+          },
+          {
+            "file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+            "line": 136,
+            "text": "it is the shared market-data bucket, not a firm's."
+          }
+        ]
+      },
+      {
+        "source": "yfinance (Yahoo, live reader; the store's pull is yahoo_pull.py)",
+        "field_used": "Close (as-traded, auto_adjust=False) with the Dividends and Stock Splits action columns from history(period, auto_adjust=False, actions=True). Adj Close is NOT used by the estate (tr_compare docstring).",
+        "level_formula": "r_t = (P_t + D_t) / (P_(t-1) / s_t) - 1, with P the as-traded Close, D the cash on ex-date t (later splits undone per as_traded_dividends), s_t the split ratio on t. level_t = level_(t-1) * (1 + r_t), level_0 = 100; the first date has no r and is dropped.",
+        "basis_claim": "measured for the store path (tr_column.build runs tr_compare.daily_tr on yahoo_pull frames); inferred for a live yfinance reader, because no such reader exists in the tree yet and the Andrew rule (ANDREW_DIRECT_20261009_054xZ) says Yahoo must carry the dividend-inclusive total return per day.",
+        "evidence": [
+          {
+            "file": "data/mdpf/scripts/demque/yahoo_pull.py",
+            "line": 74,
+            "text": "auto_adjust=False, actions=True"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 13,
+            "text": "Yahoo's Adj Close is never used"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 56,
+            "text": "Yahoo serves dividends split-adjusted"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 36,
+            "text": "def daily_tr(close: pd.Series"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_column.py",
+            "line": 66,
+            "text": "def build(symbol: str, result, bbg=None, money_market: bool = False)"
+          },
+          {
+            "file": "org/tier1_exec/2.0.0_SA_COO~Q1/deliverables/ANDREW_DIRECT_20261009_054xZ_PRICES_ARE_TOTAL_RETURN_STORE_PRICE_DIVIDEND_TR_PER_DAY.md",
+            "line": 7,
+            "text": "must store the price value, any dividend/interest channel, and a total return"
+          },
+          {
+            "file": "org/tier1_exec/2.0.0_SA_COO~Q1/deliverables/ANDREW_DIRECT_20261009_054xZ_PRICES_ARE_TOTAL_RETURN_STORE_PRICE_DIVIDEND_TR_PER_DAY.md",
+            "line": 8,
+            "text": "they must be the dividend/interest-inclusive"
+          }
+        ]
+      },
+      {
+        "source": "ycharts (fallback; one symbol per call, the chart level)",
+        "field_used": "chart_data[0][0].raw_data [epoch_ms, level] of one fund_data answer",
+        "level_formula": "the served level L_t is a cumulative level, not a return: r_t = L_t / L_(t-1) - 1, then the same chain level_t = level_(t-1) * (1 + r_t), level_0 = 100.",
+        "basis_claim": "inferred: the source does not say whether the served fund_data level is dividend-inclusive. The only hint is the benchmark name ^SPXTR (a total-return index by its name), and no tracked line confirms the basis. Must be verified before the ycharts reader is trusted as total return.",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+            "line": 62,
+            "text": "BENCHMARK_FIELD = \"$.chart_data[0][0].raw_data\""
+          },
+          {
+            "file": "org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_20261014_ANALYSIS_REPORT_PRICE_COVERAGE.md",
+            "line": 128,
+            "text": "One symbol per call.** Each call takes 0.1 to 0.5 s."
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+            "line": 386,
+            "text": "def _series_points(value):"
+          }
+        ]
+      }
+    ],
+    "one_formula": "level_0 = 100 at the first retained trade date, and for each later date t level_t = level_(t-1) * (1 + r_t), where r_t is that source's DAILY total-return fraction: the stored total_return (demque), DAY_TO_DAY_TOT_RETURN_GROSS_DVDS / 100 (bbg), (P_t + D_t) / (P_(t-1) / s_t) - 1 from as-traded Close, Dividends and Stock Splits (yfinance), or L_t / L_(t-1) - 1 from a served cumulative level L (ycharts). A date with no r_t (the first row, a null total_return) is dropped and never seeds the level; accrual rows (tr_source accrual) are estimates and keep their flag; the output is ascending [date, level] pairs, so every source lands on the dividend-inclusive total-return footing Andrew's rule requires."
+  },
+  "q3": {
+    "python_version": "3.12. The resident host installs with /usr/bin/python3.12 (the r31 host install script runs the factory on it). Measured in the tracked r31 script.",
+    "yfinance_on_host": "not found in tracked files: no tracked requirements file or install step adds yfinance, the ycharts package does not import it, and the r31 release check expects yfinance_check.py ABSENT from the root (not in this release by design). The host's pydeps tree is not in the tree.",
+    "pandas_on_host": "not found in tracked files: no module under ycharts/ or reports/ imports pandas (grep of the research, session, generate and reports trees). The host pydeps are merged from /opt/investor-reporting-ycharts/pydeps on the host and are not in the tree.",
+    "pyarrow_on_host": "not found in tracked files, but REQUIRED by a live code path: layout_overview._read_characteristics imports pyarrow.parquet lazily (line 832). Presence on the host is unverified (the pydeps tree is not in the tree).",
+    "t1_source": "NOT in the tarball as tracked. build_resident_package.py ships lib/opal_naming.py only (line 90); lib/trading_calendar.py is not added. The r31 host install appends <root>/lib to sys.path and imports trading_calendar, which resolves only if the host's pydeps or prior release put it there (not in the tree). lib/trading_calendar.py itself provides prev_trading_day (line 191) and expected_last_trading_day (line 200), with the pandas_market_calendars import optional and a fail-closed fallback. Practical route: the caller computes the T-1 and passes it as resolve_prices(as_of=...), which takes it as a parameter; the calendar's shipping is a build-cell change, not a worker cell here.",
+    "evidence": [
+      {
+        "file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/resident_host_install_0485393f3a-r31.sh",
+        "line": 98,
+        "text": "/usr/bin/python3.12 resident_installed:build_resident_runtime"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/resident_host_install_0485393f3a-r31.sh",
+        "line": 45,
+        "text": "cp -a $H/pydeps/. \"$ROOT/\""
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/install_r31.sh",
+        "line": 69,
+        "text": "sys.path.append(\"/opt/investor-reporting-ycharts/pydeps\")"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/install_r31.sh",
+        "line": 90,
+        "text": "yfinance_check.py absent from the root"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+        "line": 832,
+        "text": "import pyarrow.parquet as pq"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py",
+        "line": 90,
+        "text": "add(\"lib/opal_naming.py\", \"lib/opal_naming.py\")"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/install_r31.sh",
+        "line": 84,
+        "text": "import trading_calendar"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~144/install_r31.sh",
+        "line": 80,
+        "text": "sys.path.append(os.path.join(root, \"lib\"))"
+      },
+      {
+        "file": "lib/trading_calendar.py",
+        "line": 191,
+        "text": "def prev_trading_day(date: object) -> dt.date:"
+      },
+      {
+        "file": "lib/trading_calendar.py",
+        "line": 200,
+        "text": "def expected_last_trading_day(now: object) -> dt.date:"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ops/manifests.py",
+        "line": 95,
+        "text": "NEVER#3 belongs to `lib/trading_calendar.py`, which is not in"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+        "line": 26,
+        "text": "== i-0167fd745ad906a66"
+      }
+    ]
+  },
+  "q4": {
+    "adapters": [
+      {
+        "name": "estate_bbg",
+        "reader_signature": "make_reader(s3, *, partitions=None) -> reader(symbol, start, end) returning [(date_str, level)], level from DAY_TO_DAY_TOT_RETURN_GROSS_DVDS / 100 chained by tr_level (base 100); the module exposes make_reader and no other public function",
+        "injected": [
+          "s3: a boto3-style client with list_objects_v2/get_object (fake in tests)",
+          "partitions: optional list of (day, DataFrame) pairs, the test seam tr_compare.load_bloomberg(frames=) already uses; None reads S3"
+        ],
+        "builds_on": "data/mdpf/scripts/demque/tr_compare.py load_bloomberg (union, later partition wins, frames seam) and tr_column.py _bloomberg_returns (percent / 100). NOT importable on the host: the package ships no data/mdpf tree (build_resident_package.py DIRS), so the logic is re-written inside the adapter module. Prior art on the resident read path: layout_overview.py _read_characteristics (S3 list then get, lazy pyarrow).",
+        "evidence": [
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 70,
+            "text": "def load_bloomberg(names=None, frames=None):"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_compare.py",
+            "line": 71,
+            "text": "for tests (no S3)"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/tr_column.py",
+            "line": 55,
+            "text": "def _bloomberg_returns(symbol: str, bbg) -> pd.Series:"
+          }
+        ]
+      },
+      {
+        "name": "demque",
+        "reader_signature": "make_reader(s3, *, s3_root=None, index_frame=None) -> reader(symbol, start, end) returning [(date_str, level)] from total_return chained by tr_level; symbol -> CUSIP through index/index.parquet yahoo_symbol",
+        "injected": [
+          "s3: a boto3-style client with get_object (fake in tests)",
+          "s3_root: optional string; default is lib/opal_naming.py address('yahoo','global','silver','price_history','x') rsplit, which IS shipped in the package",
+          "index_frame: optional DataFrame of the store index, the test seam"
+        ],
+        "builds_on": "data/mdpf/scripts/demque/price_store.py s3_root() (line 46) and the store's column contract (PRICE_COLS and TR_COLS, lines 33-34); lib/opal_naming.py address() (shipped). Its bucket resolves to opal-data-assets (tiers.json silver), which the resident role does NOT read today.",
+        "evidence": [
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 46,
+            "text": "return address(\"yahoo\", \"global\", \"silver\", \"price_history\", \"x\")"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/price_store.py",
+            "line": 295,
+            "text": "store.put(\"index/index.parquet\", _pq(df))"
+          }
+        ]
+      },
+      {
+        "name": "yfinance",
+        "reader_signature": "make_reader(*, fetch=None, yf=None) -> reader(symbol, start, end) returning [(date_str, level)]; one history(period/start-end, auto_adjust=False, actions=True) call per symbol; r_t by the daily_tr formula; chained by tr_level",
+        "injected": [
+          "fetch: callable(symbol) -> DataFrame with Close, Dividends, Stock Splits (default is the yahoo_pull _default_fetch shape; fakes in tests), the seam yahoo_pull.pull already has",
+          "yf: optional yfinance-like module with Ticker(symbol).history, for a fake when fetch is not given"
+        ],
+        "builds_on": "data/mdpf/scripts/demque/yahoo_pull.py _default_fetch (line 72-74) and pull(symbol, fetch) (the fetch seam), plus tr_compare.py daily_tr and as_traded_dividends. NOT importable on the host (no data/mdpf in the package); the formula is re-written. yfinance and pandas are not on the host (q3).",
+        "evidence": [
+          {
+            "file": "data/mdpf/scripts/demque/yahoo_pull.py",
+            "line": 72,
+            "text": "def _default_fetch(symbol: str) -> pd.DataFrame:"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/yahoo_pull.py",
+            "line": 107,
+            "text": "def pull(symbol: str, fetch"
+          },
+          {
+            "file": "data/mdpf/scripts/demque/yahoo_pull.py",
+            "line": 74,
+            "text": "auto_adjust=False, actions=True"
+          }
+        ]
+      },
+      {
+        "name": "ycharts",
+        "reader_signature": "make_reader(transport, *, spacing_s=2.0, sleep=None) -> reader(symbol, start, end) returning [(date_str, level)]; one /charts/fund_data.json call per symbol with zoom=max; reads chart_data[0][0].raw_data; the caller's as_of cuts T-1",
+        "injected": [
+          "transport: callable(path, params) -> parsed JSON, the session transport (fake in tests); the session secret is read inside the transport, so no secret reader is passed in",
+          "sleep: callable(seconds), default time.sleep, so the 2 s spacing is testable without waiting"
+        ],
+        "builds_on": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py acquire() and its Transport on SESSION_SECRET_ID (broker.py line 63); ycharts/research/layout_overview.py _series_points (line 386) and BENCHMARK_FIELD (line 62); price_source.py resolve_prices (the chain core that calls this reader). The probe's ycharts/credentials route is NOT granted to the runner and is not what this adapter should use.",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py",
+            "line": 115,
+            "text": "def acquire(self, *, request_budget=60, ttl=120):"
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py",
+            "line": 116,
+            "text": "raw = Transport(secret_id=SESSION_SECRET_ID, secrets=self.secrets_client)"
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py",
+            "line": 85,
+            "text": "def resolve_prices(symbols, start, end, readers, as_of):"
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py",
+            "line": 14,
+            "text": "CHAIN = (\"estate\", \"yfinance\", \"ycharts\")"
+          }
+        ]
+      }
+    ],
+    "cells": [
+      {
+        "id": "AR-g-80",
+        "summary": "Shared total-return level helper: tr_level.chain_levels(daily_returns, base=100) turns [(date, r_t)] into [[date, level]] by the one formula; stdlib only; the four adapters import it. No host, IAM or deploy change.",
+        "files": [
+          "infra/aws/lambda/investor-reporting/ycharts/research/tr_level.py",
+          "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_tr_level.py"
+        ],
+        "edges": [],
+        "iam_or_host_change": "none"
+      },
+      {
+        "id": "AR-g-81",
+        "summary": "estate_bbg adapter: make_reader(s3, *, partitions=None); union bbg/<day>/history_topup.parquet (later partition wins), DAY_TO_DAY_TOT_RETURN_GROSS_DVDS / 100 chained by tr_level; PX_LAST kept for provenance only.",
+        "files": [
+          "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_bbg.py",
+          "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_bbg.py"
+        ],
+        "edges": [
+          "AR-g-80"
+        ],
+        "iam_or_host_change": "IAM: none, the grant exists (resident.tf opal-data-etfs/bbg/* on the runner role). HOST: pandas and pyarrow must be in the host pydeps for read_parquet (CloudOps pair, not a worker cell)."
+      },
+      {
+        "id": "AR-g-82",
+        "summary": "demque adapter: make_reader(s3, *, s3_root=None, index_frame=None); symbol to CUSIP from index/index.parquet yahoo_symbol, then cusip=<CUSIP>/prices.parquet total_return chained by tr_level.",
+        "files": [
+          "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_demque.py",
+          "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_demque.py"
+        ],
+        "edges": [
+          "AR-g-80"
+        ],
+        "iam_or_host_change": "IAM: the runner role has NO grant on opal-data-assets (resident.tf reads only the reporting bucket's families). A read grant on yahoo/global/silver/price_history is an estate-wide shared read and needs CTO review (AR-g-62). HOST: pandas and pyarrow (CloudOps pair)."
+      },
+      {
+        "id": "AR-g-83",
+        "summary": "yfinance adapter: make_reader(*, fetch=None, yf=None); one history(auto_adjust=False, actions=True) per symbol; r_t by the daily_tr formula with split and dividend handling; chained by tr_level. Adj Close is not used.",
+        "files": [
+          "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_yfinance.py",
+          "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_yfinance.py"
+        ],
+        "edges": [
+          "AR-g-80"
+        ],
+        "iam_or_host_change": "HOST: yfinance and pandas are not on the host (q3); both must be added to the host pydeps (CloudOps pair, a host act). IAM: none (public internet egress is open)."
+      },
+      {
+        "id": "AR-g-84",
+        "summary": "ycharts adapter: make_reader(transport, *, spacing_s=2.0, sleep=None); one /charts/fund_data.json call per symbol with zoom=max, 2 s spacing, reads chart_data[0][0].raw_data, levels chained by tr_level (the served level is converted to r_t first). Uses the session transport on ycharts/session/current; the probe's ycharts/credentials route is not built.",
+        "files": [
+          "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py",
+          "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_ycharts.py"
+        ],
+        "edges": [
+          "AR-g-80"
+        ],
+        "iam_or_host_change": "IAM: none for the session path (granted). The ycharts/credentials route would need a new grant on the runner role, which iam.tf line 11 says is a deliberate edit (CTO decision). The session path's freshness is UNKNOWN until a live check, which is not this cell."
+      }
+    ]
+  }
+}
