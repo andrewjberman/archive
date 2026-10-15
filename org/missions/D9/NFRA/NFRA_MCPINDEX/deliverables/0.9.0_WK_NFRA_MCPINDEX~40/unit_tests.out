@@ -1,0 +1,23 @@
+........................................................................ [ 39%]
+........................................................................ [ 79%]
+....................................F.                                   [100%]
+================================== FAILURES ===================================
+____ EmittedCatalogTests.test_every_a_entry_links_only_served_catalog_rows ____
+
+self = <tests.test_tool_index_and_harvest.EmittedCatalogTests testMethod=test_every_a_entry_links_only_served_catalog_rows>
+
+    def test_every_a_entry_links_only_served_catalog_rows(self):
+        with open(validate.STAGED, encoding="ascii") as fh:
+            doc = yaml.safe_load(fh)
+        verdict = {a["entity"]: a["verdict_class"] for c in doc["channels"].values() for a in (c.get("artifacts") or [])}
+        for e in doc["tool_index"]:
+            if e["member"] != "a":
+                continue
+            for link in e["links"]:
+>               self.assertNotEqual(verdict.get(link), "deny", (e["tool"], link))
+E               AssertionError: 'deny' == 'deny' : ('gateway_query_catalog', 'ft.04.portfolios-aum-metrics')
+
+workflows\atom_decomposition\tests\test_tool_index_and_harvest.py:351: AssertionError
+=========================== short test summary info ===========================
+FAILED workflows/atom_decomposition/tests/test_tool_index_and_harvest.py::EmittedCatalogTests::test_every_a_entry_links_only_served_catalog_rows
+1 failed, 181 passed in 9.33s
