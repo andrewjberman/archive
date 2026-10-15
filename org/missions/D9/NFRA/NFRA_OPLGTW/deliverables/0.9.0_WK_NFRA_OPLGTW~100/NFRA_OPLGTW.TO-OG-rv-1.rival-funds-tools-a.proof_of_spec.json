@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-rv-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~100",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "c3b76c142b"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "5061929eb6",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rv-1.rival-funds-tools-a.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/etfs_rivals.py",
+   "kind": "script",
+   "commit_or_etag": "7da35708ea",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "built and held on the worker branch wk-NFRA_OPLGTW-100; the order forbids a release, deploy or IAM change (the release is OG-ap-22)",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_rv1.py",
+   "kind": "test",
+   "commit_or_etag": "7da35708ea",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "offline test file on the worker branch; 5 of 5 named tests PASS",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the tools are built, read the newest part per date, take a fund's latest report from canonical_shape, name the weight unit and refuse non-Opal before any read.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rv1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "named tests passed 5 of 5; failed/error lines 0",
+   "status": "PASS",
+   "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: against the real bucket the tools answer with the full envelope, a count equals an independent read, and a non-Opal principal is refused.",
+   "method": "live_read",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rv1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "rival tools A: peer group IDVZ rivals 5 vs independent 5; INEQ holdings 106 rows vs independent 106, report_date equal True; who_holds answered True; coverage from canonical_shape True; non-Opal refused True\nRESULT: PASS\nexit=0",
+   "denominator": "INEQ holdings 106 rows of 106 independent rows; IDVZ peer rivals 5 of 5 independent; five tools answered with the envelope; non-Opal refused True",
+   "status": "PASS",
+   "expect": "(?s)rival tools A: peer group IDVZ rivals (\\d+) vs independent \\1; INEQ holdings (\\d+) rows vs independent \\2, report_date equal True; who_holds answered True; coverage from canonical_shape True; non-Opal refused True.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Registration of the five tools in app/tools.py, app/data_entitlement.py, app/destructive_ops.py and the pinned-count tests",
+   "reason": "The order names these files outside its write set; the issuer registers every tool and re-pins the counts at the merge in OG-rv-3. Registrations expected: etfs_get_peer_group, etfs_get_rival_fund_holdings, etfs_who_holds, etfs_get_security_reference, etfs_get_coverage."
+  },
+  {
+   "item": "Release, deploy, IAM grant and host act for the rival prefixes",
+   "reason": "The order bounds forbid any release, deploy or grant write; the read grant rides OG-ap-20 and the release is OG-ap-22."
+  },
+  {
+   "item": "Rows of the catalog and the bucket write",
+   "reason": "The order forbids writing app/refs/DATA_CATALOG.yaml and any bucket; the tools read the committed catalog at call time."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W100-S1: the 50 KB envelope projection trims a 106-position holdings answer to 99 rows under the sixteen-field position row; the narrowed row returns 106; larger funds are unmeasured.",
+  "NFRA_OPLGTW-Z-W100-S2: binding rule 5 (never none for a missing identifier) is applied to who-holds only; holdings keeps the table's null for an empty identifier.",
+  "NFRA_OPLGTW-Z-W100-S3: the who-holds clause does not name the requested identifier column for a ticker query; every empty identifier column of a holder is labelled not_held_for_this_security.",
+  "NFRA_OPLGTW-Z-W100-S4: the catalog premise holds by content (blob e5096b5d6c identical at HEAD and at 1b18b94979) but 1b18b94979 is not an ancestor of the worker branch."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: 7da35708ea.",
+ "compiler_tools": [
+  {
+   "tool": "tests/test_og_rv1.py (pytest)",
+   "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_rv1.py -v -p no:cacheprovider --color=no",
+   "result": "5 passed, rc=0 (test_ogrv1_ac01 .. test_ogrv1_ac05 PASSED)"
+  },
+  {
+   "tool": "ruff (py39 target)",
+   "invocation": "python -m ruff check --target-version py39 infra/aws/ec2/opal-gateway/app/etfs_rivals.py infra/aws/ec2/opal-gateway/tests/test_og_rv1.py",
+   "result": "All checks passed!, rc=0"
+  },
+  {
+   "tool": "py_compile and commit gate",
+   "invocation": "bash .tools/safe-commit.sh (pre-commit gate on the two python files, surprise-row-gate on the investigation file)",
+   "result": "pre-commit gate clean for 2 of 3 file(s); surprise-row-gate OK: 4 new rows; committed 7da35708ea"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "In a scratch copy of the gateway only (.scratch/mut), the newest-part rule of app/etfs_rivals.py is broken: _newest() takes min instead of max over the part file names. The worktree module is untouched.",
+   "expected": "test_ogrv1_ac02 FAIL",
+   "observed": "3 failed, 2 passed: test_ogrv1_ac02 FAILED, test_ogrv1_ac03 FAILED, test_ogrv1_ac04 FAILED; test_ogrv1_ac01 PASSED, test_ogrv1_ac05 PASSED",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The named test file ran alone at HEAD 7da35708ea, and the AC1 script ran at HEAD; the live AC2 probe ran on the narrowed tree and again at HEAD.",
+   "observed": "test file: 5 of 5 PASS on each run; AC1 script: pytest rc=0, 5 of 5, RESULT PASS on each run; AC2 probe: 'INEQ holdings 106 rows vs independent 106' and RESULT PASS on each of its two runs.",
+   "status": "STABLE"
+  }
+ }
+}
