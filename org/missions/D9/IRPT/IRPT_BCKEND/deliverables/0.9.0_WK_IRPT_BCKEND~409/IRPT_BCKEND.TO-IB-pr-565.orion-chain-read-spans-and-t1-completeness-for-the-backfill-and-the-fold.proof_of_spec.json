@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-565",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-565.orion-chain-read-spans-and-t1-completeness-for-the-backfill-and-the-fold.md",
+    "group": "OTHER",
+    "vintage_commit": "ea49e51d58"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "ea49e51d58",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-565.orion-chain-read-spans-and-t1-completeness-for-the-backfill-and-the-fold.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~409",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~409/IB206-1_orion_chain_read.json",
+      "kind": "config_data",
+      "commit_or_etag": "f50073df45",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY record at base ea49e51d58: chain_invocation for the three pull steps (catalog rows at dispatch lines 293, 295, 297; repo CLI hashes; the transactions copy identical, the performance copy differs, the positions copy not located under code/gold, so its chain_copy_sha256 is null), silver_aggregator (live CodeSha256 matches the source-map artifact; source at infra/aws/lambda/inf-silver-aggregator), spans for the three feeds against lib/trading_calendar.py (29 absent trading days), t1_completeness (20 trading days per feed, 52 present flat objects, as-of stamp equal to its own day on every present row), data_ready_field found false, earliest_measured_complete inferred at 07:51 New York, trigger_moves_now false, notes, six counters 0.",
+      "artifact_covered_by": ["IB206-1-AC1", "IB206-1-AC2", "IB206-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~409/IB206-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "f50073df45",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: the verbatim output and exit code of the three criteria from the worktree root under timeout 120 with the order's relative invocation: IB206-1-AC1 FAIL exit 1 (positions chain_copy_sha256 not a sha256), IB206-1-AC2 PASS exit 0 (29 of 29 absent trading days recomputed), IB206-1-AC3 PASS exit 0. A second run gave the same lines.",
+      "artifact_covered_by": ["IB206-1-AC1", "IB206-1-AC2", "IB206-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f50073df45",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven rows appended, IRPT_BCKEND-D2-W409-S1 to S7, each with class and hazard_standing: S1 BLOCKING (positions chain copy outside the granted prefix), S2 OBSERVATION ARMED (performance chain copy differs from the repo CLI), S3 OBSERVATION (silver aggregator source is in the tree), S4 OBSERVATION (calendar fallback), S5 OBSERVATION (transactions day-list premise), S6 OBSERVATION (bronze _meta object), S7 OBSERVATION ARMED (as-of stamp equals its own day). The surprise-row gate read the seven rows OK.",
+      "artifact_covered_by": ["IB206-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB206-1-AC1",
+      "criterion_verbatim": "AC1 the chain's three steps against the manual_api scripts (the repo script's sha256 recomputed by the check), the control owed when neither holds, and the silver aggregator's source status (row W404-S5)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r206/p206_cells.py\" . IB206-1-AC1",
+      "output_evidence": "FAIL: positions: chain_copy_sha256 must be a sha256\nIB206-1-AC1 FAIL\nexit_code=1",
+      "denominator": "3 chain steps: transactions (copy identical to the repo CLI), performance (copy differs from the repo CLI), positions (chain copy not located under code/gold, not read); silver aggregator source status recorded; 2 of 3 steps carry a chain copy hash; 0 of 1 criterion PASS",
+      "status": "FAIL",
+      "status_reason": "The positions chain copy is in no code/gold object, and the grant names code/gold only, so its sha256 cannot be recorded without a read outside the grant. Row IRPT_BCKEND-D2-W409-S1 (BLOCKING) carries it to the issuer; the check cannot pass on any record without that hash."
+    },
+    {
+      "criterion_id": "IB206-1-AC2",
+      "criterion_verbatim": "AC2 the denominator recomputed per feed span against lib/trading_calendar.py (the partition and the missing days)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r206/p206_cells.py\" . IB206-1-AC2",
+      "output_evidence": "OK: the denominator recomputed per feed span, 29 absent trading days in all\nIB206-1-AC2 PASS\nexit_code=0",
+      "denominator": "3 feeds; trading days in span: positions 1627, transactions 108, performance 114; missing 0 + 7 + 22 = 29 absent trading days; partition flat + parquet-only + missing = span for each feed; 3 of 3 feeds PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB206-1-AC3",
+      "criterion_verbatim": "AC3 the T-1 completeness read over the last 20 trading days per feed (the as-of day recomputed against the calendar), the data-ready field, the earliest measured-complete time, the trigger not moving, notes and the six counters 0",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r206/p206_cells.py\" . IB206-1-AC3",
+      "output_evidence": "OK: the T-1 completeness read over 20 trading days per feed; the trigger does not move\nIB206-1-AC3 PASS\nexit_code=0",
+      "denominator": "3 feeds x 20 trading days = 60 rows: 52 present flat objects (positions 18, transactions 18, performance 16), 8 days without a flat key; as-of stamp equal to the prior trading day on 0 of 52; 6 notes; 6 counters at 0; 3 of 3 feeds PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order and its check name no mutant control for this cell.",
+      "expected": "not applicable: the order names no mutant",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the three criteria run from the worktree root under timeout 120, once before the instance was written and once after the record, criteria output and surprise rows were committed; the outputs were compared line by line",
+      "observed": "IB206-1-AC1 FAIL exit 1 and IB206-1-AC2 PASS exit 0 and IB206-1-AC3 PASS exit 0 on both runs, with identical output lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The positions chain copy's sha256 (IB206-1-AC1) was not recorded.",
+      "reason": "The only location the order names is code/gold, and no positions pull script is there; reading the other flattened prefixes would widen the granted reads. The issuer owns the grant (row IRPT_BCKEND-D2-W409-S1)."
+    },
+    {
+      "item": "No positive control between the performance chain copy and the repo CLI was run.",
+      "reason": "The order's control rule is not triggered by the check's test (every step invokes its manual_api script by name), and a byte comparison of one present day is a later act under a signed pair. Row IRPT_BCKEND-D2-W409-S2 carries the divergence."
+    },
+    {
+      "item": "No vendor request, no T-1 probe and no re-run through the chain were made.",
+      "reason": "The order is READ ONLY and forbids vendor requests; the probe and the backfill are later orders that the CTO ruling sequences."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W409-S1: the positions pull script has no object under code/gold, so its chain copy hash is outside the granted reads and IB206-1-AC1 cannot pass as written.",
+    "IRPT_BCKEND-D2-W409-S2: the performance chain copy in code/gold differs in bytes from the repo CLI it is said to run (29230 against 29784 bytes); the transactions copy is identical.",
+    "IRPT_BCKEND-D2-W409-S3: the silver aggregator's source is at infra/aws/lambda/inf-silver-aggregator and matches the live zip; the W404-S5 search covered only inf-pipeline.",
+    "IRPT_BCKEND-D2-W409-S4: lib/trading_calendar.py answered from the hardcoded NYSE fallback (pandas_market_calendars absent), so every trading-day count rests on that table.",
+    "IRPT_BCKEND-D2-W409-S5: the transactions feed's first key is 2026-05-12, so the six days W404-S1 counted as missing are out of span; in span transactions has 7 missing days.",
+    "IRPT_BCKEND-D2-W409-S6: bronze/transactions/ and bronze/performance/ each hold one _meta object beside the day keys.",
+    "IRPT_BCKEND-D2-W409-S7: the as-of stamp of all 52 present T-1 objects equals its own day; none equals the prior trading day, so the T-1 completeness claim stays inferred."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~409/IB206-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "p206_cells.py (round-206 check, unedited, read only)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r206/p206_cells.py\" . <IB206-1-AC1|IB206-1-AC2|IB206-1-AC3>",
+      "result": "AC1 FAIL exit 1 on the positions chain copy hash; AC2 PASS exit 0; AC3 PASS exit 0; identical on a second run"
+    }
+  ]
+}
