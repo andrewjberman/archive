@@ -1,0 +1,218 @@
+{
+  "base": "742646e9a46c63f3087e5e8d21287cebb0954169",
+  "pins": {
+    "lambda_source": "742646e9a46c63f3087e5e8d21287cebb0954169 (worktree HEAD; infra/aws/lambda/investor-reporting is skip-worktree here, read with git show)",
+    "portal_prod": "c3b21a40e29f690922f442c085129f9ba85ce334 (origin/PROD after git fetch origin PROD DEV)",
+    "portal_dev": "ad7c100b5cca9020f18a2957112361f4b9083272 (origin/DEV after git fetch origin PROD DEV)"
+  },
+  "q1": {
+    "handler": {
+      "file": "infra/aws/lambda/investor-reporting/directory/entry.py",
+      "line": 414,
+      "text": "def global_context(boundary, event):",
+      "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"
+    },
+    "returns_for_staff_global": "For an internal caller sending selectedTenant global to POST directory/resolve: a GLOBAL context envelope with context_kind GLOBAL, completeness COMPLETE, PARTIAL or UNAVAILABLE, and firms = one entry per key of IRPT_DIRECTORY_BUCKET_MAP, sorted (the issuer measured 49financial, cottonwood, inflection; not re-read live). Each firm is READY with its resolved scope, or UNAVAILABLE with a public reason. A refusal envelope (no data) when the map is empty (UNEXPECTED) or when the caller is not internal (FIRM_BINDING, served.py:1226-1227).",
+    "firms_null_not_failed_when": [
+      "DEV build: the read is in flight. loadAllowedFirms has not settled (TicketCenter.tsx:313-315), so firms is null and firmsFailed is false; the held-submit words are 'Your firms are still loading' (analysisRequest.ts:224) and the Firm line reads 'Loading firms...' (AnalysisRequestParts.tsx:122). No transport timeout was read, so a request that never settles stays here.",
+      "DEV build: the effect has not run because formShown is false (TicketCenter.tsx:303, 306-309): the form is closed or the request type is not analysis_request.",
+      "DEV build: firmsAsked is already true from an earlier showing whose read is still pending (TicketCenter.tsx:310-311). The reset at line 307 runs only when the form is closed and firms is still null, so a reopened form does not read again while the first read is pending.",
+      "origin/PROD build only: an internal caller never reads. The effect returns at TicketCenter.tsx:306 (if (!formShown || internal)), so firms stays null with firmsFailed false for the whole form session. This matches the symptom 'still loading' with no failure text."
+    ],
+    "firms_failed_when": [
+      "resolveDirectoryContext rejects: a well-formed refusal envelope raises IrRequestError (investor-reporting.ts:1097-1098), caught at TicketCenter.tsx:315, which sets firmsFailed true and the error FIRMS_NOT_LOADED.",
+      "An internal caller's answer is not a GLOBAL context: isGlobalContext is false (TicketCenter.tsx:105-106; directory-context.ts:11).",
+      "A GLOBAL context holds no READY firm (TicketCenter.tsx:107-109), for example when every mapped firm is UNAVAILABLE (directory/entry.py:449-451).",
+      "A READY firm fails the closed client parse in readDirectoryResolution (directory-context.ts:64-99): a tenant outside the allowed pattern or equal to global or opal-capital (line 69), a principal_class other than OPAL_GLOBAL or a registry_tenant that is not the tenant (line 82), or a completeness that disagrees with the firm states (line 98). The parse is reached through envelope.ts:188.",
+      "A partner answer without permittedFirms (TicketCenter.tsx:112), or resolveDirectoryContext absent (TicketCenter.tsx:101)."
+    ],
+    "firms_empty_when": [
+      "A partner (non-internal) caller whose permittedFirms holds no selectable firm (TicketCenter.tsx:113): firms is an empty list and the Firm line reads 'No firm is available to you' (AnalysisRequestParts.tsx:123), and the held submit says 'No firm is available to you, so this request cannot be filed.' (analysisRequest.ts:226).",
+      "Never for an internal caller: a GLOBAL answer with zero READY firms throws (TicketCenter.tsx:107-109) and lands in firmsFailed, not in an empty list, so a staff user sees 'could not be loaded' rather than 'No firm is available to you'."
+    ],
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 394, "text": "\"POST /api/scoped/investor-reporting/directory/resolve\":", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 395, "text": "\"resolve-scope\",", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 460, "text": "function_name=\"irpt-directory-search\",", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 471, "text": "global_context=global_context,", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 425, "text": "mapping = json.loads(os.environ.get(_loaders.DIRECTORY_BUCKET_ENV, \"{}\"))", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 427, "text": "return _entry.refuse(OPERATION_RESOLVE, None, \"UNEXPECTED\")", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 428, "text": "tenants = sorted(mapping)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 434, "text": "child[\"body\"] = json.dumps({\"selected_tenant\": tenant, \"account_ids\": []})", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 449, "text": "\"state\": \"READY\" if scope is not None else \"UNAVAILABLE\",", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 455, "text": "\"completeness\": \"COMPLETE\" if ready == len(outcomes) else", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1225, "text": "if selected == \"global\":", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1226, "text": "if not internal or self.global_context is None or operation != \"resolve-scope\":", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1231, "text": "return self.global_context(self, event)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1218, "text": "internal = subject is not None and not svc_custody", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 332, "text": "and (trusted.get(\"x-firm-id\") == \"opal-capital\"", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1195, "text": "def handle(self, event, context=None):", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 97, "text": "export async function loadAllowedFirms(", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 103, "text": "const resolved = await client.resolveDirectoryContext(", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 104, "text": "internal ? { tenant: 'bootstrap', selectedTenant: 'global', requested } : { tenant: 'bootstrap', requested })", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 106, "text": "if (!isGlobalContext(resolved)) throw new Error('The directory context is not the Global context')", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 109, "text": "if (ready.length === 0) throw new Error('The Global context holds no ready firm')", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 113, "text": "return resolved.permittedFirms.filter(f => f.selectable).map(f => ({ id: f.tenant, label: f.displayName }))", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 306, "text": "if (!formShown) {", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 310, "text": "if (firmsAsked.current) return", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 313, "text": "loadAllowedFirms(ir as unknown as Pick<InvestorReportingApi, 'resolveDirectoryContext'>, internal)", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 315, "text": ".catch(() => { setFirmsFailed(true); setError(FIRMS_NOT_LOADED) })", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 306, "text": "if (!formShown || internal) {", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/api/endpoints/investor-reporting.ts", "line": 1097, "text": "if (parsed.refused) {", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/api/endpoints/investor-reporting.ts", "line": 1098, "text": "throw new IrRequestError(", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/InvestorReporting/contracts/envelope.ts", "line": 188, "text": "'resolve-scope': (data) => ownedProjection('resolve-scope', () => readDirectoryResolution(data)),", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/InvestorReporting/contracts/directory-context.ts", "line": 11, "text": "export const isGlobalContext = (value: DirectoryResolution): value is DirectoryContext => 'contextKind' in value", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/InvestorReporting/contracts/directory-context.ts", "line": 69, "text": "['global', 'opal-capital'].includes(firm.tenant)", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/InvestorReporting/contracts/directory-context.ts", "line": 82, "text": "scope.principal_class !== 'OPAL_GLOBAL' || scope.registry_tenant !== firm.tenant", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/InvestorReporting/contracts/directory-context.ts", "line": 98, "text": "if (row.completeness !== expected) throw new Error('Invalid context completeness')", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 122, "text": "const words = firms === null ? (firmsFailed ? 'Firms not loaded' : 'Loading firms...')", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 123, "text": ": firms.length === 0 ? 'No firm is available to you'", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/analysisRequest.ts", "line": 224, "text": ": 'Your firms are still loading. Wait for them, then choose one.'", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/analysisRequest.ts", "line": 226, "text": "if (f.firms.length === 0) return 'No firm is available to you, so this request cannot be filed.'", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"}
+    ]
+  },
+  "q2": {
+    "refusal_site": {
+      "file": "infra/aws/lambda/investor-reporting/_authz/loaders.py",
+      "line": 67,
+      "text": "BLOCKED: no directory bucket declared for firm token in %s",
+      "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"
+    },
+    "staff_no_selected_tenant": "refused",
+    "staff_with_partner_firm": "loads",
+    "catalogue_loads_before_firm_chosen": "no",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/_authz/loaders.py", "line": 46, "text": "public_reason_code = \"FIRM_BINDING\"", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/loaders.py", "line": 65, "text": "if tenant not in mapping:", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/loaders.py", "line": 213, "text": "bucket = bucket_for(tenant)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 855, "text": "load_directory, load_ownership, load_policy = self.deps(tenant)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 856, "text": "opaque = self.opaque_firm_for(tenant)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1222, "text": "selected = selected_tenant(event)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1234, "text": "if selected is not None and selected != verified:", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1239, "text": "bucket_for(selected)  # Terraform's registry-derived tenant allow-list.", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1253, "text": "listed = self._internal_allowed_firms(trusted.get(\"x-user-email\", \"\"), seen)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1261, "text": "verified = selected", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1290, "text": "enforcer, ctx = self.enforcer_for(verified, principals)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1293, "text": "code = (\"FIRM_BINDING\" if isinstance(exc, _enforce.AuthzError)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1294, "text": "else self.public_reason_for(exc))", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 134, "text": "CLAIMED_FIRM_FIELDS = (\"firm_id\", \"firmId\", \"firm\", \"tenant\", \"tenant_id\", \"firm_token\")", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py", "line": 65, "text": "CATALOGUE_OPERATION = \"comparison-catalogue\"", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py", "line": 150, "text": "\"GET /api/scoped/investor-reporting/analysis/comparisons\":", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py", "line": 166, "text": "return _catalogue.build_catalogue(tenant=ctx.tenant, read_classifications=read_classifications)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py", "line": 163, "text": "if not isinstance(tenant, str) or not tenant.strip():", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py", "line": 164, "text": "raise CatalogueRefused(\"a tenant is required\")", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py", "line": 191, "text": "entries = [_model_entry(e) for e in _model_entries(templates_path) if _selectable(e, tenant)]", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "src/pages/InvestorReporting/tabs/analysis/comparisonCatalogue.ts", "line": 29, "text": "?selected_tenant=", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/InvestorReporting/tabs/analysis/comparisonCatalogue.ts", "line": 34, "text": "return null", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 324, "text": "const catalogueFirm = filingForm.firm.trim()", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 329, "text": "void fetchCatalogue(catalogueFirm || undefined).then(entries => { if (live && entries) setCatalogue(entries) })", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 99, "text": "if (firms === null) return ''", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 100, "text": "if (internal) return chosen !== null && firms.some(f => f.id === chosen) ? chosen : ''", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 178, "text": "{models === null && <p className=\"text-xs text-white/50\">The Opal model list is not loaded.</p>}", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"}
+    ]
+  },
+  "q3": {
+    "prod_has_staff_not_filing_sentence": true,
+    "prod_has_staff_firm_chooser": false,
+    "prod_catalogue_sends_selected_tenant": true,
+    "differences": [
+      {"ref": "c3b21a40e29f690922f442c085129f9ba85ce334", "file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 306, "text": "if (!formShown || internal) {", "repo": "portal"},
+      {"ref": "ad7c100b5cca9020f18a2957112361f4b9083272", "file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 306, "text": "if (!formShown) {", "repo": "portal"},
+      {"ref": "c3b21a40e29f690922f442c085129f9ba85ce334", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 92, "text": "export const STAFF_NOT_FILING_SENTENCE = 'Opal staff open requests from the queue rather than file them, so this form cannot be submitted from here.'", "repo": "portal"},
+      {"ref": "ad7c100b5cca9020f18a2957112361f4b9083272", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 114, "text": "export const FIRM_CHOICE_LABEL = 'Choose the firm this request is filed under'", "repo": "portal"},
+      {"ref": "c3b21a40e29f690922f442c085129f9ba85ce334", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 101, "text": "if (internal || firms === null) return ''", "repo": "portal"},
+      {"ref": "ad7c100b5cca9020f18a2957112361f4b9083272", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 100, "text": "if (internal) return chosen !== null && firms.some(f => f.id === chosen) ? chosen : ''", "repo": "portal"},
+      {"ref": "c3b21a40e29f690922f442c085129f9ba85ce334", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 111, "text": "return { ...form, firm: filingFirm(firms, own, internal) }", "repo": "portal"},
+      {"ref": "ad7c100b5cca9020f18a2957112361f4b9083272", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 110, "text": "return { ...form, firm: filingFirm(firms, own, internal, form.firm) }", "repo": "portal"},
+      {"ref": "c3b21a40e29f690922f442c085129f9ba85ce334", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 151, "text": "{staff && <p data-slot=\"staff-not-filing\" role=\"status\" className=\"text-xs text-white/80\">{STAFF_NOT_FILING_SENTENCE}</p>}", "repo": "portal"},
+      {"ref": "c3b21a40e29f690922f442c085129f9ba85ce334", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 155, "text": "{!staff && <FirmLine firms={firms} firmsFailed={firmsFailed} filing={filingFirm(firms, own ?? null, false)} />}", "repo": "portal"},
+      {"ref": "ad7c100b5cca9020f18a2957112361f4b9083272", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 156, "text": "{staff && firms !== null && firms.length > 0 ? (", "repo": "portal"},
+      {"ref": "ad7c100b5cca9020f18a2957112361f4b9083272", "file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 157, "text": "<select aria-label={FIRM_CHOICE_LABEL} value={form.firm} onChange={e => set('firm', e.target.value)}", "repo": "portal"}
+    ],
+    "differences_note": "Same on both refs (not differences): loadAllowedFirms body TicketCenter.tsx:97-114; the call at TicketCenter.tsx:313; the catch at :315; the catalogue call TicketCenter.tsx:329 (DEV) and AnalysisRequestParts.tsx:433 (PROD) / :453 (DEV); the held-submit words analysisRequest.ts:221-227; fetchCatalogue comparisonCatalogue.ts (byte-identical blobs). Excluded as no bearing on firms, catalogue or the held submit: the commentary_requested lines added on DEV in analysisRequest.ts (submissionBody and analysisBody, +4 lines).",
+    "searched": [
+      "Opal staff open requests from the queue rather than file them, so this form cannot be submitted from here",
+      "rather than file them (whole portal src, both refs, tests included)",
+      "STAFF_NOT_FILING_SENTENCE / staff-not-filing",
+      "FIRM_CHOICE_LABEL and 'Choose the firm this request is filed under'",
+      "loadAllowedFirms( call sites (non-test src)",
+      "if (!formShown (effect guard)",
+      "resolveDirectoryContext( and resolveScope( call sites (non-test src, both refs)",
+      "resolve-scope and directory/resolve (non-test src, origin/PROD)",
+      "selected_tenant (fetchCatalogue and the resolve body)",
+      "fetchCatalogue( call sites"
+    ],
+    "evidence": [
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 92, "text": "export const STAFF_NOT_FILING_SENTENCE = 'Opal staff open requests from the queue rather than file them, so this form cannot be submitted from here.'", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 151, "text": "{staff && <p data-slot=\"staff-not-filing\" role=\"status\" className=\"text-xs text-white/80\">{STAFF_NOT_FILING_SENTENCE}</p>}", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 100, "text": "export function filingFirm(firms: readonly AllowedFirm[] | null, own: string | null, internal: boolean): string {", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 101, "text": "if (internal || firms === null) return ''", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 98, "text": "export function filingFirm(firms: readonly AllowedFirm[] | null, own: string | null, internal: boolean, chosen: string | null = null): string {", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 157, "text": "<select aria-label={FIRM_CHOICE_LABEL} value={form.firm} onChange={e => set('firm', e.target.value)}", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 306, "text": "if (!formShown || internal) {", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 313, "text": "loadAllowedFirms(ir as unknown as Pick<InvestorReportingApi, 'resolveDirectoryContext'>, internal)", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 306, "text": "if (!formShown) {", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/TicketCenter/TicketCenter.tsx", "line": 329, "text": "void fetchCatalogue(catalogueFirm || undefined).then(entries => { if (live && entries) setCatalogue(entries) })", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 433, "text": "void fetchCatalogue(firm || undefined).then(entries => { if (live && entries) setCatalogue(entries) })", "repo": "portal", "ref": "c3b21a40e29f690922f442c085129f9ba85ce334"},
+      {"file": "src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 453, "text": "void fetchCatalogue(firm || undefined).then(entries => { if (live && entries) setCatalogue(entries) })", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"},
+      {"file": "src/pages/InvestorReporting/tabs/analysis/comparisonCatalogue.ts", "line": 29, "text": "?selected_tenant=", "repo": "portal", "ref": "ad7c100b5cca9020f18a2957112361f4b9083272"}
+    ]
+  },
+  "q4": {
+    "global_firms_for_minted_row": "ready_firms",
+    "depends_on": [
+      {
+        "attribute": "users row status (keyed by the verified x-user-email)",
+        "value_form": "exactly the string 'active'; any other value, or no row, is refused for an internal caller",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1177, "text": "if row.get(\"status\") != \"active\":", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1176, "text": "raise ValueError(\"no users row for an internal caller\")", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"}
+        ]
+      },
+      {
+        "attribute": "allowedFirmIds",
+        "value_form": "ABSENT, which means unrestricted for an internal caller (the minted row has none); if present, a non-empty list of firm ids and never the string or member ALL",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1179, "text": "if \"allowedFirmIds\" not in row:", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1180, "text": "return None", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"}
+        ]
+      },
+      {
+        "attribute": "firmId (the verified x-firm-id claim)",
+        "value_form": "exactly 'opal-capital' makes the caller internal (the other internal test is x-user-type 'Dev'); the minted row carries opal-capital",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 332, "text": "and (trusted.get(\"x-firm-id\") == \"opal-capital\"", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1218, "text": "internal = subject is not None and not svc_custody", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"}
+        ]
+      },
+      {
+        "attribute": "userType (minted value test-filer)",
+        "value_form": "no effect on the Global or the partner-firm read: the roster test runs before the client test, and no internal test reads userType except 'Dev'",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/_scope/resolve.py", "line": 281, "text": "if email.lower() in {str(x).lower() for x in (opal_principal_ids or ())}:", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+          {"file": "infra/aws/lambda/investor-reporting/_scope/resolve.py", "line": 284, "text": "if user_type == \"client\":", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"}
+        ]
+      },
+      {
+        "attribute": "principal roster (the verified email)",
+        "value_form": "no row attribute: for an internal subject the boundary puts the verified email on the roster, so the child principal class is OPAL_GLOBAL",
+        "evidence": [
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1288, "text": "principals = (frozenset([trusted[\"x-user-email\"]]) if subject is not None", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+          {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1234, "text": "if selected is not None and selected != verified:", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"}
+        ]
+      }
+    ],
+    "catalogue_loads_with_partner_firm": "yes",
+    "recommend": "RUN_AS_MINTED",
+    "recommend_line": "RECOMMEND: RUN_AS_MINTED",
+    "deciding_fact": "The users row keyed by the staff login email carries status exactly 'active' and no allowedFirmIds (served.py:1177-1180), so the boundary admits it as an unrestricted internal caller for both the Global firms read and a partner-firm catalogue read; firmId opal-capital (served.py:332) makes it internal. The per-firm READY outcome and the catalogue contents depend on the live directory artifacts, which were not read.",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1218, "text": "internal = subject is not None and not svc_custody", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1253, "text": "listed = self._internal_allowed_firms(trusted.get(\"x-user-email\", \"\"), seen)", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1261, "text": "verified = selected", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 434, "text": "child[\"body\"] = json.dumps({\"selected_tenant\": tenant, \"account_ids\": []})", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py", "line": 191, "text": "entries = [_model_entry(e) for e in _model_entries(templates_path) if _selectable(e, tenant)]", "ref": "742646e9a46c63f3087e5e8d21287cebb0954169"}
+    ]
+  },
+  "not_read": "NOT READ: (1) the live system: no AWS call was made. The Lambda configuration (IRPT_DIRECTORY_BUCKET_MAP keys, measured by the issuer), the deployed bytes of irpt-directory-search and irpt-ycharts-generate, the directory and ownership artifacts in the mapped buckets, and the users rows (including the FWD-1 minted row) were not read, so per-firm READY and the partner-firm catalogue content are source predictions. (2) The deployed PROD portal bundle: only origin/PROD source was read. (3) The edge validator that sets x-firm-id, x-user-email and x-user-type (aggregate_gate.mjs) was not read. (4) The guard and serve path after the wrapper (_authz/enforce.py:1001-1017 read; serve() not traced), the registry_tenant and directory_revision builders in the child scope, and the transport timeout in the portal client (a read that never settles is an open case, not a measured one). (5) The submit route (ycharts/generate submit_analysis) was not traced; this record covers the firms and catalogue reads only. (6) The FWD1_DRIVER_RECORD.json cited by the order (~149/r41) is not in this worktree, not in HEAD and not in the base checkout; the minted-row values are taken from the order's text. (7) The sparse checkout: infra/aws/lambda/investor-reporting is skip-worktree in this worktree; its files were read as blobs with git show 742646e9a4, and cite_check re-opens them the same way. The portal files are cited at pinned shas and re-opened from the portal repository with git show."
+}
