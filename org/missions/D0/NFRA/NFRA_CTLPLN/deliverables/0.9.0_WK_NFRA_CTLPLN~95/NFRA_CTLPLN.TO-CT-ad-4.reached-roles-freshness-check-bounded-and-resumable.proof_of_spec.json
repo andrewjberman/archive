@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ad-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ad-4.reached-roles-freshness-check-bounded-and-resumable.md",
+    "group": "OTHER",
+    "vintage_commit": "868b773335"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~95",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round14.md",
+    "vintage_commit": "868b773335",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ad-4.reached-roles-freshness-check-bounded-and-resumable.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py",
+      "kind": "script",
+      "commit_or_etag": "aee7121f42",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--check-fresh reads in slices of --budget and resumes from --checkpoint; the offline --from-file path reproduces the base ROLE-CENSUS line at aee7121f42 (CTad4-AC2)",
+      "artifact_covered_by": [
+        "CTad4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/test_check_fresh_bounded.py",
+      "kind": "test",
+      "commit_or_etag": "aee7121f42",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five arms on an injected fake source, no AWS call: CHECK-FRESH-BOUNDED arms=5/5 ok=True at aee7121f42 (CTad4-AC1)",
+      "artifact_covered_by": [
+        "CTad4-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTad4-AC1",
+      "criterion_verbatim": "every arm passes (base: the file does not exist); report the whole last line with its denominator",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/test_check_fresh_bounded.py",
+      "output_evidence": "CHECK-FRESH-BOUNDED arms=5/5 ok=True (rc=0; run under timeout 120 from the worktree root at aee7121f42; arms a, b, c, d, e each ok=True and AWS-STUB marker_absent=True)",
+      "denominator": "5 of 5 arms",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTad4-AC2",
+      "criterion_verbatim": "the offline re-derivation still prints the same LAST line (base: ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True, a control); report the whole last line",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
+      "output_evidence": "ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True (rc=0; run under timeout 120 from the worktree root at aee7121f42; identical to the base line)",
+      "denominator": "175 of 175 roles read (unread=0)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the committed check with the budget test removed from read_slice, run as a scratch copy (the committed file is unchanged): every budget and resume arm must fail",
+      "expected": "the test reports fewer than 5 of 5 arms",
+      "observed": "CHECK-FRESH-BOUNDED arms=0/5 ok=False (rc=1); arm a rc=0,0,0 with no PARTIAL line; arm d calls=1 read=12 in one call",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the test and the AC2 control each run on the committed state at two different times",
+      "expected": "identical last lines",
+      "observed": "CHECK-FRESH-BOUNDED arms=5/5 ok=True and ROLE-CENSUS ... ok=True on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-ad-4 from pending to complete",
+      "reason": "not done: the issuer flips it, and the order file is outside this worker's <paths>"
+    },
+    {
+      "item": "an ignore rule for reached_roles_census.fresh_checkpoint.json",
+      "reason": "not added: the ignore files are outside <paths>; filed as NFRA_CTLPLN-W95-S1"
+    },
+    {
+      "item": "Python 3.11",
+      "reason": "not installed on this box (python is 3.12.10); the test and AC2 ran on 3.12.10; filed as NFRA_CTLPLN-W95-S2"
+    },
+    {
+      "item": "any live --check-fresh or --live run against the account",
+      "reason": "forbidden by the cell: the live path is exercised only through the injected fake source; no AWS call and no network call"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W95-S1: the checkpoint name reached_roles_census.fresh_checkpoint.json is covered by no ignore rule; infra/.gitignore:41 covers __pycache__ only; not added, the ignore files are outside <paths>",
+    "NFRA_CTLPLN-W95-S2: the order names Python 3.11 but the box has python 3.12.10 and no 3.11 interpreter; the runs used 3.12.10"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~95/NFRA_CTLPLN.TO-CT-ad-4.reached-roles-freshness-check-bounded-and-resumable.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~95, 2026-10-14; code commit aee7121f42 on wk-NFRA_CTLPLN-95)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/test_check_fresh_bounded.py",
+      "result": "CHECK-FRESH-BOUNDED arms=5/5 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
+      "result": "ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R18-TR3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR3.ticket-attachment-routes-environment-and-s3-permission-terraform-source.md",
+  "group": "OTHER",
+  "vintage_commit": "482503129c"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~43",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R18.md",
+  "vintage_commit": "482503129c",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R18-TR3.ticket-attachment-routes-environment-and-s3-permission-terraform-source.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+   "kind": "terraform",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "source only, 59 insertions and 0 deletions against 5cb98dbac4: routes attachment_upload and attachment_open; environment TICKET_ATTACH_BUCKET_TEMPLATE opal-data-{firm} and TICKET_ATTACH_KEY_TEMPLATE portal/{firm}/state/ticket_attachments/trade-form/; three opal_name module calls (scope per served firm); locals ticket_attach_key_template and ticket_attach_arns (module-derived format() expressions); aws_iam_role_policy opal_ticket_api_attachments named opal-ticket-attachments-trade-form-policy with statement TicketAttachmentsTradeForm; no plan, no apply, terraform not installed",
+   "artifact_covered_by": ["R18TR3-AC1", "R18TR3-AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_tf3.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1 shape checker (AMENDMENT 2 form): routes; environment equal to ATTACH_ADDRESS.json; three module calls with exact scope; module-derived ARN expressions; registry buckets equal the record; one statement with exact actions and Resource = local.ticket_attach_arns; S3 tokens base plus two; Sid count base plus one; no base line removed or changed; run twice, identical output",
+   "artifact_covered_by": ["R18TR3-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_tf3.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 mutant: s3:DeleteObject added to the statement Action in a tempfile copy outside the worktree; checker prints TF-ATTACH-BAD rc 1; MUTANT-FIRES. Its search string follows the file's Action alignment",
+   "artifact_covered_by": ["R18TR3-AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/R18_TR3_RECORD.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the lines changed, the three buckets (module outputs), the three key prefixes, the two env names, the policy name and the not_read list for the release order and the laptop role request; not deployed"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R18TR3-AC1",
+   "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_tf3.py expect: ^TF-ATTACH-OK",
+   "method": "command",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_tf3.py",
+   "output_evidence": "TF-ATTACH-OK routes=2 env=2 resources=3 (run under timeout 120, rc=0; the same output on a second run, cmp identical). Base for the route, no-deletion and Sid checks: 5cb98dbac4, the parent of a8a40f308b",
+   "denominator": "4 of 4 checks: (a) 2 of 2 new route keys exact, 11 of 11 earlier route keys unchanged, 0 added beyond the two; (b) 2 of 2 environment variables equal to ATTACH_ADDRESS.json; (c) 3 of 3 module calls with exact scope, 3 of 3 registry buckets equal the record, 3 of 3 module-derived ARN expressions exact, 1 statement with 2 of 2 actions exact and Resource = local.ticket_attach_arns; (d) S3 tokens base plus 2, Sid count base plus 1, 0 base lines removed or changed",
+   "status": "PASS",
+   "expect": "^TF-ATTACH-OK"
+  },
+  {
+   "criterion_id": "R18TR3-AC2",
+   "criterion_verbatim": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_tf3.py expect: MUTANT-FIRES",
+   "method": "command",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_tf3.py",
+   "output_evidence": "MUTANT-FIRES checker rc=1: TF-ATTACH-BAD Action is ['s3:PutObject', 's3:GetObject', 's3:DeleteObject'], expected exactly ['s3:PutObject', 's3:GetObject'] (run under timeout 120, rc=0; the unmutated main.tf passed first)",
+   "denominator": "1 of 1 mutant fired, after a passing baseline",
+   "status": "PASS",
+   "expect": "MUTANT-FIRES"
+  },
+  {
+   "criterion_id": "R18TR3-AC3J",
+   "criterion_verbatim": "R18TR3-AC3J (judgment): the permission is the narrowest that serves a presigned put and get (two actions, three firm prefixes, no wildcard on the firm), the environment values are the builder's output, no bucket policy or CORS is written here, and nothing was planned or applied.",
+   "method": "manual_read_with_citation",
+   "invocation": "none: judgment criterion, output carried and no verdict. Read: git diff -- infra/aws/terraform/ticket-center/main.tf (against 5cb98dbac4) and deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json; naming gate: python .tools/naming-gate.py --diff .scratch/tr3_probe.diff --enforce",
+   "output_evidence": "Permission: one statement TicketAttachmentsTradeForm, Action [s3:PutObject, s3:GetObject], Resource local.ticket_attach_arns = three format() expressions over module.ticket_attach_<firm>.bucket, one per served firm, with the key prefix portal/<firm>/state/ticket_attachments/trade-form/*; no wildcard on the firm segment; no List, Delete or ACL action. Environment: TICKET_ATTACH_BUCKET_TEMPLATE opal-data-{firm} and TICKET_ATTACH_KEY_TEMPLATE portal/{firm}/state/ticket_attachments/trade-form/, equal to ATTACH_ADDRESS.json. No bucket policy and no CORS in the diff. No plan or apply run. Naming gate rc=0, NAMING-GATE: WARN 4 graded, no REFUSE (key template CONFORMANT as S3Key, policy name CONFORMANT as IAM_POLICY, env bucket template RAISE-EXISTING).",
+   "denominator": "3 of 3 served firms in the permission, each from its own module call; 2 of 2 environment values equal to the record; 0 bucket policy or CORS resources added; 0 plan or apply runs; 4 of 4 naming-gate verdicts without REFUSE",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment criterion, not self-graded: the L9 oracle is 3.0.0_SA_CVO, who reads the permission's narrowness against C-ATTACH and the no-policy bound",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 mutant: s3:DeleteObject added to the TicketAttachmentsTradeForm Action in a tempfile copy outside the worktree, checked by tf_shape_check_tf3.py",
+   "expected": "MUTANT-FIRES",
+   "observed": "MUTANT-FIRES checker rc=1: TF-ATTACH-BAD Action is ['s3:PutObject', 's3:GetObject', 's3:DeleteObject'], expected exactly ['s3:PutObject', 's3:GetObject']",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two runs of tf_shape_check_tf3.py compared byte for byte (cmp)",
+   "observed": "both runs rc=0 with TF-ATTACH-OK routes=2 env=2 resources=3; cmp identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "terraform fmt -check on main.tf",
+   "reason": "the terraform binary is not installed on this box; the order allows the check only if the binary is installed, so it was not run and is not claimed"
+  },
+  {
+   "item": "terraform plan and apply, the live role, its other statements, the live buckets, their policy and CORS",
+   "reason": "the order forbids any plan, apply, AWS or network call; the bucket policy and CORS are the laptop's role request (C-DEPLOY), and TO-R18-REL applies under safe-apply"
+  },
+  {
+   "item": "the Lambda handler that reads the templates and issues the presigned URLs (TO-R18-L2)",
+   "reason": "out of this cell's grant; the environment names and values are what this cell gives it"
+  }
+ ],
+ "surprises": [
+  "TCKT_VNEXT-D2-W43-S2: BLOCKING (the naming gate refused the TR3 source); answered by TO-R18-TR1 AMENDMENT 2 (table ticket_attachments) and TO-R18-TR3 AMENDMENT 2 (policy suffix, module-derived ARNs); the row is kept unedited."
+ ],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/TCKT_VNEXT.TO-R18-TR3.ticket-attachment-routes-environment-and-s3-permission-terraform-source.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/naming-gate.py --diff .scratch/tr3_probe.diff --enforce",
+   "result": "NAMING-GATE: WARN 4 graded, rc=0; no REFUSE"
+  },
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/tf_shape_check_tf3.py",
+   "result": "TF-ATTACH-OK routes=2 env=2 resources=3 rc=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-43/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/mutant_check_tf3.py",
+   "result": "MUTANT-FIRES checker rc=1: TF-ATTACH-BAD Action ... rc=0"
+  }
+ ]
+}

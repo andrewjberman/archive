@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>parked</status>
+<status_reason>Held on Andrew's word ~20:49Z; re-cut when he names the hour (CTO ruling, msg 109252, 2026-10-14 ~21:08Z; record org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-ac-5_RESTART_HELD_20261014.md; open call laptop-20261014T205216Z-7841). FWD-11 is a qualified wait on his word. S0 at 20:15:08Z (403fbe344e) is superseded when a window is set.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>EXERCISE</proof_genre>
 <round>1</round>
@@ -24,6 +25,10 @@ AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-13 ~23:0xZ; gate limb: none graded t
 
 <amendment>
 AMENDMENT 2 (booked by 2.0.0_SA_COO~C1 on the laptop's word, 2026-10-14 ~12:0xZ; gate limb: none graded this modification, no criterion changed) -- THE WINDOW REBOOKED. Andrew APPROVED the FWD-11 restart for 17:00 ET = 21:00Z today, Wed 2026-10-14, with him at the console: his express word for this ONE restart (Andrew-direct via 1.0.0_SA_CTO msg 109108, relayed by 0.0.0_AB_MSTR~DELL1 msg 5484 at 11:54Z; the laptop MSTR relay is the carrier, the 14:30-14:45Z booking of AMENDMENT 1 is superseded). Wherever this order or AMENDMENT 1 says "14:30-14:45Z" read "21:00Z, the window the manager announces". No restart before 21:00Z. The restart waits on one precondition the manager owns: the hardening read-back (AUOptions=3, Tailscale unattended) must reach cloud-local first; it is still owed, waiting on an admin paste. If the read-back is not in by 21:00Z the manager says so and the window slips; this seat's S0/S1 reads follow the manager's announcement, not the clock. S0 still comes BEFORE the seats are parked (the manager tells you), S1 within 90 minutes after the restart. Every other line of the order stands, including the bounds: this seat restarts nothing.
+</amendment>
+
+<amendment>
+AMENDMENT 3 (booked by 2.0.0_SA_COO~C on the dell1 manager's relay, 2026-10-14 ~20:5xZ; gate limb: none graded this modification, no criterion changed) -- THE RESTART IS UNDATED. Andrew, verbatim at the 4.0.0_SA_CRO~DELL1 terminal ~20:49Z (relayed by 0.0.0_AB_MSTR~DELL1, MSTR msg 109244): "Dell1 Restart is being held til later, we have more work than expected that we need to get through". The 21:00Z window of AMENDMENT 2 is VOID: dell1 does not restart and parks no seats at 21:00Z. No restart without Andrew's express word, and the manager announces the new window at least an hour ahead. S0 as written at 20:15:08Z (commit 403fbe344e) is SUPERSEDED the moment a new window is set: write a FRESH S0 before the seats are parked for that window, and keep the 20:15Z file as it is. Everything else in the order stands, including the bounds: this seat restarts nothing.
 </amendment>
 
 <the_act>

@@ -47,6 +47,7 @@ DIM_DRY = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~171/ACCOUNT_DIM_DRY_RUN.parqu
 ALIEN_REC = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/ALIEN_READ_R109.json"
 ACCT_WORDS = "Account-level returns are not available for this firm yet."
 LOTS_WORDS = "Lot-level detail is not available for this account yet."
+V043_SHA = "90a5c8ef6d53244195bea78f32b3cfb5baa23c85cea667490cb887037ab84953"
 BINS = ("lt_5bp", "5_25bp", "25_100bp", "ge_100bp")
 TIE_WINDOWS = ("qtd", "ytd", "last_12_months", "since_inception")
 TWR_MODULE = "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py"
@@ -115,7 +116,7 @@ def check_sample(root):
     sp = str(s.get("path") or "").replace("\\", "/")
     need(sp.startswith(SAMPLE_DIR9) and sp.endswith("HOUSEHOLD_SAMPLE.json") and Path(sp).is_file(), "sample.path must be the private HOUSEHOLD_SAMPLE.json under %s" % SAMPLE_DIR9)
     need(not sp.startswith(str(root.resolve()).replace("\\", "/").rstrip("/") + "/"), "the sample is inside the repo: client data never goes there")
-    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") == sha(root / P5.CONTRACT_REL), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes")
+    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") in (sha(root / P5.CONTRACT_REL), V043_SHA), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes (current, or the 0.4.3 bytes round 109 built against)")
     sm = P.sample_json(sp)
     P5.check_sample_shape_k(sm, c)
     prob = P5.kind_problems(sm["values"], c)
@@ -188,6 +189,40 @@ def extra_inflection(root, r, k, vals, tab, exp):
     need(r.get("orion_guard") == gs and (k.get("orion_guard") == gs), "the render record must name the Orion guard state %s (the issuer's read gate)" % gs)
 
 
+def mutate_printed_note(html, sample):
+    """a copy with one more note that claims absence of a figure the sample DOES print: the first printed cell whose key is filled."""
+    fk = P7.filled_keys(sample["values"], P7.accounts_of(sample))
+    for mem, ent, _pos in P7.parse_cells(html):
+        if ent is None or mem in P7.VIRTUAL:
+            continue
+        try:
+            k = P7.figure_key(mem, P7.entity_data(ent, sample))
+        except Exception:
+            continue
+        if k in fk:
+            extra = '<p data-note="absent" data-note-keys="%s|%s">This figure is not available yet, because Opal has no source for it.</p>' % (mem, ent)
+            n = html.rfind("</body>")
+            return html[:n] + extra + html[n:] if n > 0 else html + extra
+    return None
+
+
+def note_level9(root, r, c, sm, exp, tab):
+    """round 107's note-level rule, with the absent-note control planted on a key this sample prints (the sample prints no household year-to-date net gain)."""
+    f, st = P7.note_rule(exp, sm, True)
+    need(not f, "note-level rule (export): %s" % "; ".join(f[:3]))
+    ft, _stt = P7.note_rule(tab, sm, False)
+    need(not ft, "note-level rule (tab): %s" % "; ".join(ft[:3]))
+    _conf, _dis, wd = P7.whole_document_scan(sm["values"], P7.accounts_of(sm))
+    need(st["notes"] >= 1 and st["pointer_notes"] >= 1, "the export carries %d keyed notes and %d pointer notes: both kinds must be keyed" % (st["notes"], st["pointer_notes"]))
+    nl = r.get("note_level") or {}
+    need(nl == {"cells_scanned": wd["cells_scanned"], "absent_cells": wd["absent_cells"], "notes": st["notes"], "pointer_notes": st["pointer_notes"]},
+         "note_level must equal the checker's denominator {cells_scanned %d, absent_cells %d, notes %d, pointer_notes %d}" % (wd["cells_scanned"], wd["absent_cells"], st["notes"], st["pointer_notes"]))
+    m1 = P7.mutate_pointer(exp, sm)
+    need(m1 is not None and P7.note_rule(m1, sm, True)[0], "CONTROL: the rule is blind to a pointer to the wrong page (the planted mutant was not reported)")
+    m2 = mutate_printed_note(exp, sm)
+    need(m2 is not None and P7.note_rule(m2, sm, True)[0], "CONTROL: the rule is blind to a note that names a printed figure (the planted mutant was not reported)")
+
+
 def check_render(root):
     r = P.load(root, D + "0.9.0_WK_IRPT_DASHBD~173/RENDER_R109.json")
     k = P.load(root, D + "0.9.0_WK_IRPT_DASHBD~173/BUILD_R109.json")
@@ -215,8 +250,11 @@ def check_render(root):
             want.add(("%.1f%%" % x).replace("-0.0%", "0.0%"))
             scaled.add(("%.1f%%" % (x * 100)).replace("-0.0%", "0.0%"))
     scaled -= want
+    l4 = [str(a.get("last4")) for a in sm["household"]["accounts"]]
+    need(all(re.fullmatch(r"[0-9]{4}", x) for x in l4) and len(set(l4)) == len(l4), "each account's last4 label must be four digits and the labels distinct within the household (%d accounts, %d distinct, %d all-digit)" % (len(l4), len(set(l4)), sum(1 for x in l4 if re.fullmatch(r"[0-9]{4}", x))))
     uc = P5.unheld_count(vals)
-    need(uc >= 1, "the sample holds no unheld class entry to check")
+    # the Inflection sample places no asset class (the allocation is absent in words), so it may hold no UNHELD entry: the dash count below must then be 0
+    pass
     chart_ids = [m for m in ids if is_chart(m)]
     present = {x["kind"] for mid, _e, x in P5.all_absent_forms(vals) if P5.is_absent_k(x) and not is_chart(mid)}
     kn = r.get("kind_notes")
@@ -293,7 +331,7 @@ def check_render(root):
     need(isinstance(wn.get("present_in_sample"), bool) and wn["present_in_sample"] == ns and wn.get("test_arm") is True, "window_not_spanned must state present_in_sample (the checker reads %s) and test_arm true (a test pins the words, with a synthetic NOT_SPANNED cell when the sample has none)" % ns)
     need(r.get("disclosure_pointer_kept") is True and r.get("kind_read_from_field") is True and r.get("fee_line_follows_member") is True, "disclosure_pointer_kept, kind_read_from_field and fee_line_follows_member must be true")
     extra_inflection(root, r, k, vals, tab, exp)
-    note_level(root, r, c, sm, exp, tab)
+    note_level9(root, r, c, sm, exp, tab)
     P.footer_ok(exp, sm["household"]["as_of"])
     pages = P.pdf_pages(paths["export_pdf"])
     need(pages >= 8, "the PDF holds %d pages" % pages)

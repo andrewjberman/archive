@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-i-2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "16ae6ff02b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "16ae6ff02b",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-i-2.aua-trend-repair-colour-tooltip-note.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~24",
+  "declared_exclusions": [
+    {
+      "item": "Push of the portal branch wk-MDPF_CANON-24-portal, and any DEV or PROD write",
+      "reason": "Bounded out by the order (bounds 1 and 3): the branch stays LOCAL; the issuer registers the approval; the portal CONTRIBUTING-BOXES rule forbids a box push to DEV."
+    },
+    {
+      "item": "Browser render of the Global AUA Trend and the judgment read of the page",
+      "reason": "Bounded out by the order: no browser launch and no render by the worker. AC4 is graded at the round close by the CVO (L9)."
+    },
+    {
+      "item": "bun install, AWS writes, deploy, store writes",
+      "reason": "Bounded out by the order (bounds 3): the modules are linked; the data arm makes read-only gets only."
+    },
+    {
+      "item": "Issuer mutant runs (six mutants) and the selftest",
+      "reason": "Run by the issuer's fork per the preflight, not by the worker; this instance does not claim them."
+    },
+    {
+      "item": "Portal typecheck clean pass without a deliberate-error control",
+      "reason": "bun run typecheck (tsc -b --noEmit) returned rc=0 once; the portal CLAUDE.md typecheck law asks for a deliberate-error control before trusting a first clean pass in a session, and the worker did not run one (no extra edits outside the order's paths)."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/CategoryViewTree.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "71ed7393",
+      "artifact_covered_by": [
+        "AC1",
+        "AC4"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-24-portal (nested repo). Not pushed; no DEV or PROD write; no deploy.",
+      "introduces": [
+        "L1_COLOR 'Client - Opal Unsupervised' -> PALETTE.lime500"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/lib/trendGrouping.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "71ed7393",
+      "artifact_covered_by": [
+        "AC1",
+        "AC4"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-24-portal (nested repo). Not pushed; no DEV or PROD write; no deploy.",
+      "introduces": [
+        "presentTrendEntries",
+        "trendDetailNote"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/api/portal-proxy.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "71ed7393",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-24-portal (nested repo). Type-only change; no runtime change; no deploy.",
+      "introduces": [
+        "MdpfPerFirmTimeSeries.meta.by_model_fold (type only)"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "71ed7393",
+      "artifact_covered_by": [
+        "AC1",
+        "AC4"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-24-portal (nested repo). Not pushed; no DEV or PROD write; no deploy.",
+      "introduces": [
+        "renderTrendTooltip uses presentTrendEntries",
+        "data-trend-detail-note paragraph at Global only"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: ROUND 8 CN-I-2 BUILD: 13 of 13 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r8_cn_i_2.py\" build; echo \"exit=$?\"",
+      "output_evidence": "  C1 PASS CIEDE2000 reproduces the CVO's five published pairs (worst difference 0.032 of 0.06 allowed)\n  C2 PASS Client Unsupervised resolves to #84cc16 (the locked Ultra-Short Term hex is #f97316)\n  C3 PASS minimum CIEDE2000 from Client Unsupervised #84cc16 to the 10 other Trend colours: 20.59 vs model:Intermediate-Term (rule: at least 10)\n  C4 PASS CONTROL: the five locked model hexes and the Custom, ETF, Client Supervised and ALT colours are untouched (models True, tokens True)\n  T1 PASS null, undefined, '', NaN and Infinity drop; order kept (got Short Term,Long Term)\n  T2 PASS a measured zero (number or string), a negative and a numeric string stay (got Zero,ZeroStr,Neg,NumStr)\n  T3 PASS the input is not mutated, a new array comes back, an empty payload gives an empty array\n  T4 PASS a date with null Client chips lists no Client row (no $0 row for an absent series)\n  T5 PASS page imports presentTrendEntries (True); renderTrendTooltip buckets go through it (True); the raw filter is gone (True)\n  N1 PASS MdpfPerFirmTimeSeries.meta carries by_model_fold.per_model_detail_begins (True)\n  N2 PASS the note names the boundary date and says earlier model assets are in the Total; null on equal or later first period, a missing date or a non-ISO date (got \"Per-model detail begins May 15, 2026; earlier model assets are in the Total and are not broken out.\")\n  N3 PASS imports trendDetailNote (True), reads meta.by_model_fold.per_model_detail_begins (True), Global only (True), own element data-trend-detail-note (True)\n  N4 PASS STACK_SERIES holds 13 series (must be the thirteen CN-i-1 series), band-like labels: []\nROUND 8 CN-I-2 BUILD: 13 of 13 arms\nexit=0",
+      "denominator": "13 of 13 arms",
+      "status": "PASS",
+      "expect": "ROUND 8 CN-I-2 BUILD: 13 of 13 arms\\s+exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: ROUND 8 CN-I-2 DATA: 3 of 3 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r8_cn_i_2.py\" data; echo \"exit=$?\"",
+      "output_evidence": "  object 2026-10-13.json (496 dates)\n  D1 PASS valued 487 of 496 dates: EXACT 49; BEFORE-DETAIL 383 (gap = the whole model AUA, [dollar bounds elided: CLIENT DATA rule]); FOLD-OR-OTHER 55 (stack below the Total, [dollar bounds elided]; NOT claimed as fold-suppressed); FAIL 0 []; boundary 2026-05-15\n  D2 PASS the boundary is real: per_model_detail_begins 2026-05-15, first date with any model line 2026-05-15, dates before the boundary carrying a model line: 0\n  D3 PASS the served Total is model + non-model + SMA + tax on every valued date (0 identity breaks of 487; tolerance 0.02)\nROUND 8 CN-I-2 DATA: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms; 487 of 496 dates valued",
+      "status": "PASS",
+      "expect": "ROUND 8 CN-I-2 DATA: 3 of 3 arms\\s+exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: ROUND 8 CN-I-2 REGRESS: 2 of 2 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r8_cn_i_2.py\" regress; echo \"exit=$?\"",
+      "output_evidence": "  R-module PASS CN-i-1 module arms: 9 of 9\n  R-page PASS CN-i-1 page arms: 8 of 8\nROUND 8 CN-I-2 REGRESS: 2 of 2 arms\nexit=0",
+      "denominator": "2 of 2 arms (CN-i-1 module 9 of 9; page 8 of 8)",
+      "status": "PASS",
+      "expect": "ROUND 8 CN-I-2 REGRESS: 2 of 2 arms\\s+exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4: JUDGMENT -- the Global AUA Trend rendered at a stated portal commit is read by the CVO against PRD FWD-9 (3), (4) and (2) as ruled in v2.18 (Client Unsupervised not in the Ultra-Short Term orange, hover on dates C and D shows no Client row and no $0 row, the note 'Per-model detail begins May 15, 2026; earlier model assets are in the Total and are not broken out.' above the charts, no band for the earlier dates)",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE (judgment criterion; the worker does not render; graded at the round close by the CVO at L9)",
+      "output_evidence": "NO OUTPUT: judgment criterion. The worker did not render the page and records no verdict.",
+      "denominator": "N/A -- judgment criterion, graded at L9",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Worker ran no mutant: the face names none for the worker's cell; the preflight assigns the six mutants to the issuer's fork (2.0.0_SA_COO~D1), which this instance does not claim.",
+      "expected": "N/A for the worker (no mutant named in the worker face)",
+      "observed": "NOT RUN BY THE WORKER; the 13 of 13 build arm at this HEAD is the worker's only evidence of the reference state.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice from the worktree root, each stdout captured under .scratch (det_run1.txt, det_run2.txt) and compared with cmp",
+      "observed": "IDENTICAL: both runs rc=0, 14 lines, 'ROUND 8 CN-I-2 BUILD: 13 of 13 arms'",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "MDPF_CANON-D1-W24-S1: The face says read portal/CONTRIBUTING-BOXES.md before touching portal/; the file is absent at the candidate head 34cd12d2 and was read from 07f065e6 (read-only).",
+    "MDPF_CANON-D1-W24-S2: Face section 5.1 names git -C commit for the nested repo; CLAUDE rule 14a refuses a bare git commit, so the commit was made through safe-commit.sh run from the portal directory (commit 71ed7393).",
+    "MDPF_CANON-D1-W24-S3: The commit gates read none of the four .ts/.tsx portal files (commit-gate checked 0 of 4; risk-reflex PARTIAL_OR_BLIND on a stale danger map); ARMED, disarm owner 2.0.0_SA_COO~D1.",
+    "MDPF_CANON-D1-W24-S4: The face's text-white/60 class on the new note is the sibling paragraph's idiom and sits against the portal colour law's white-idiom rule; the rendered ground is left to AC4."
+  ],
+  "session_log": "0.9.0_WK_MDPF_CANON~24, round 8, cell CN-i-2, worktree C:/dev/wk-canon-r7-24 on branch wk-MDPF_CANON-24 (outer, cut from 16ae6ff02b); nested portal worktree C:/dev/wk-canon-r7-24/portal on branch wk-MDPF_CANON-24-portal (cut from the candidate cand/dell1/mdpf-canon-aua-trend-groups-and-as-of, head 34cd12d2). Four repairs made in the four named files (CRLF kept, 40 insertions and 3 deletions, 4 files). Portal commit 71ed7393 LOCAL, not pushed. AC1-AC3 run from the worktree root under timeout 120; AC4 not run (judgment). Clean typecheck bun run typecheck rc=0 at the worker's run; no deliberate-error control run. Provenance read guard printed OK. Four surprise rows filed in INVESTIGATION_v1.md.",
+  "compiler_tools": [
+    {
+      "tool": "r8_cn_i_2.py (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round7/checks/r8_cn_i_2.py build|data|regress",
+      "result": "build 13 of 13 arms exit=0; data 3 of 3 arms exit=0; regress 2 of 2 arms exit=0"
+    },
+    {
+      "tool": "node scripts/provenance-read-guard.mjs (portal)",
+      "invocation": "cd portal && node scripts/provenance-read-guard.mjs",
+      "result": "OK: no unlabeled reads (exit 0)"
+    },
+    {
+      "tool": "bun run typecheck (portal; tsc -b --noEmit)",
+      "invocation": "cd portal && timeout 120 bun run typecheck",
+      "result": "rc=0 (clean; no deliberate-error control run)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (portal commit 71ed7393)",
+      "invocation": "cd portal && bash ../.tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~24 <...>\" -F ../.scratch/cn_i_2_portal_msg.txt -- four paths",
+      "result": "committed 71ed7393, 4 files, 40 insertions, 3 deletions; commit-gate checked 0 of 4 (WARN, not evidence)"
+    }
+  ]
+}

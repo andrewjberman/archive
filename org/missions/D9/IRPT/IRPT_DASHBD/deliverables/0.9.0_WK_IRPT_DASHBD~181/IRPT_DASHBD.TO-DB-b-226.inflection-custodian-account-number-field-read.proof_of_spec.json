@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-226",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "643a83fd1a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "643a83fd1a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-226.inflection-custodian-account-number-field-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~181",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~181/RD_ACCOUNT_NUMBER_FIELD_R111.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~181/RD_ACCOUNT_NUMBER_FIELD_R111.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read record: answer field_found true naming fact_positions accountNumber (claim measured); 217 string columns as candidates with exactly the required keys; denominator 8 tables, 20 partitions, 980 accounts in scope; positive control passed; reads s3_writes, vendor_calls, secret_reads and dynamodb_writes all 0; counts, shares, names and words only; files_in_repo, served_values_changed, pushed and deployed all false.",
+      "artifact_covered_by": [
+        "DB111-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~181/RD_ACCOUNT_NUMBER_FIELD_R111_measure.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only measurement run with python -I; reads the two Inflection silver prefixes only through the round-108 InflectionSilverReader (GET-only), reads the private dry-run table locally, holds no write call and names no other firm; writes its detail to the private evidence folder, never to the repo; not deployed. The committed copy differs from the run copy only by statement splits made for the ruff commit gate (no logic change); the run that produced the record was not repeated.",
+      "artifact_covered_by": [
+        "DB111-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~181/RD_ACCOUNT_NUMBER_FIELD_R111_build.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Builds the repo record from the private measurement detail; reads no S3 and no vendor; writes only the record in this folder; counts, shares, names and generated words only; not deployed.",
+      "artifact_covered_by": [
+        "DB111-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two surprise rows appended as bytes: IRPT_DASHBD-D2-W181-S1 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D2) and IRPT_DASHBD-D2-W181-S2 (OBSERVATION, INERT); no existing row edited.",
+      "artifact_covered_by": [
+        "DB111-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB111-3-AC1",
+      "criterion_verbatim": "DB111-3-AC1 -- the record lists at least one candidate column with exactly the required keys, each share between 0 and 1, names only, a claim in the four-word set; each candidate's qualifies flag equals the checker's recomputation (keyed to the account, 2 or more partitions sampled, 95 percent of accounts with a digit run of 4 or more, stable and unique); answer.field_found agrees with the candidates (true names a qualifying candidate with claim measured or inferred; false has null table and column and no qualifying candidate); the denominator is printed and consistent with the candidates; a passed positive control that qualifies the synthetic number and refuses the synthetic fragment; zero writes, vendor calls and secret reads; the false flags; no run of 8 or more digits outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r111/p111_acctfield.py\" . DB111-3-AC1",
+      "output_evidence": "OK: 217 string column(s) examined over 8 table(s) and 20 partition(s); 3 qualify under the rule; the answer is fact_positions.accountNumber; the positive control passed; no value copied\nDB111-3-AC1 PASS",
+      "denominator": "1 of 1 criterion; 217 string columns examined over 8 of 8 tables (Orion 4 of 4, Eclipse 4 of 4) and 20 of 20 read partitions; 3 columns qualify (Orion fact_positions accountNumber, Orion fact_assets accountNumber, Eclipse fact_portfolios_simple accountNumber); positive control 2 of 2 arms",
+      "status": "PASS",
+      "expect": "DB111-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no separate mutant. The positive control of step 6 ran the same measure and the same qualifying rule over two in-memory columns: an 8-digit number unique and stable per account, and a repeated five-word fragment.",
+      "expected": "The number column qualifies and the fragment column does not.",
+      "observed": "number column qualifies; fragment column does not qualify (synthetic arms only, nothing copied from the data)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The issuer checker run twice on the committed record (once in the working tree before the instance, once after the record was built).",
+      "observed": "both runs print the same OK line and DB111-3-AC1 PASS with rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any read of the Orion master prefix or of any other firm's place, and any name of one",
+      "reason": "Not granted by the order; S3 reads went only through the round-108 GET-only reader, which refuses any path outside the two granted Inflection prefixes."
+    },
+    {
+      "item": "Stability sampling of fact_transactions and fact_performance, and of Eclipse tables other than fact_portfolios_simple",
+      "reason": "No column of those tables passed the account digit-run and uniqueness tests on the shape partition (fact_transactions and fact_performance are cumulative; the three keyless Eclipse tables carry no account key), so the stability rule does not reach them; fact_portfolios_simple is the one Eclipse table with an account key and was sampled."
+    },
+    {
+      "item": "Any account number, account or household id, name, text fragment or digit run from the silver or the dry-run table",
+      "reason": "Client-data bound of the order: counts, shares, names and generated words only in the repo; the detail stays in the private evidence folder."
+    },
+    {
+      "item": "Writes of any kind, vendor calls, secret reads, push and deploy",
+      "reason": "Refusal clause and bounds of the order; none made (reads.s3_writes 0, vendor_calls 0, secret_reads 0, dynamodb_writes 0, pushed false, deployed false)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W181-S1: the premise that the Orion accountNumber field carries text fragments and no number does not hold on the newest partition: one value per account for all 980 dry-run accounts, each with a digit run of 4 or more (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D2).",
+    "IRPT_DASHBD-D2-W181-S2: the stability clause names an Eclipse positions table, but no Eclipse silver table is named as positions; fact_portfolios_simple, the one account-keyed Eclipse table, was measured instead (OBSERVATION, INERT)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "RD_ACCOUNT_NUMBER_FIELD_R111_measure.py (python -I)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~181/RD_ACCOUNT_NUMBER_FIELD_R111_measure.py",
+      "result": "rc 0; 217 string columns over 8 tables and 20 partitions; 3 columns qualify; positive control number qualifies and fragment does not; 79 S3 reads in total across the session (LIST and GET through the GET-only reader), 0 writes, 0 vendor calls, 0 secret reads"
+    },
+    {
+      "tool": "p111_acctfield.py (check_record)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r111/p111_acctfield.py . DB111-3-AC1",
+      "result": "rc 0; OK line and DB111-3-AC1 PASS on the committed record; selftest 10 refusal arms and 2 passing arms"
+    }
+  ]
+}

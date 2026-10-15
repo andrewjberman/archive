@@ -1,0 +1,110 @@
+{
+  "answer": {
+    "holdings_date_means": "CLOSE_DATE",
+    "words": "A Black Diamond holdings partition dated D reflects D's own close: across the 79 weekday pairs in the window, the change of the four bond ETFs on D correlates with the same-date model series return at 0.5 to 0.9 for the 11 security-series pairs that reach 0.5, and every one of those 11 reads offset 0 (the offset-1 and offset -1 correlations stay below 0.2 in absolute value). The positive control, a planted one-day shift, reads offset 1, so the method can see a prior-day basis. The carriers name the partition day, so the label is not evidence of the pull.",
+    "claim": "measured"
+  },
+  "evidence": {
+    "date_carriers": [
+      {
+        "surface": "partition key date= (folder name) under blackdiamond/cottonwood/silver/fact_holdings/",
+        "carries": "the partition date D; 93 partitions dated 2026-06-09 through 2026-10-13, one object each",
+        "claim": "measured"
+      },
+      {
+        "surface": "column _source_as_of (string) in data.parquet",
+        "carries": "a business as-of date equal to the partition key on all 21,412 rows of the 2026-10-13 partition; it labels the file's day and is a load-side stamp, not a price date",
+        "claim": "measured"
+      },
+      {
+        "surface": "column _source_file (string) with the value HOLDINGS_DAILY_<date>.xlsx",
+        "carries": "the vendor file label; its date equals the partition key in the 2026-10-13 partition (one distinct value); the label is not a price date",
+        "claim": "measured"
+      },
+      {
+        "surface": "S3 object LastModified (object metadata of each data.parquet)",
+        "carries": "the day the object was written: the day after its partition date for 44 of the 86 window partitions and later for 42 (across the whole listing, 27 of the 49 later partitions were rewritten on 2026-07-14); a write stamp, not a business date and not the pull day for early partitions",
+        "claim": "measured"
+      },
+      {
+        "surface": "any price date or time column in the 26 columns of the 2026-10-13 partition",
+        "carries": "none: no price-date or time column exists in the file, so the close is carried by the partition key alone",
+        "claim": "measured"
+      },
+      {
+        "surface": "bronze or pull stamp for the Black Diamond holdings (outside the one granted prefix)",
+        "carries": "not read: the grant is one silver prefix, so whether a bronze pull stamp exists is unknown to this read",
+        "claim": "absent"
+      }
+    ],
+    "files_compared": 79,
+    "denominator": {
+      "dated_files": 86,
+      "scope_words": "all partitions of the one granted prefix dated 2026-06-16 through 2026-10-13 (the 120 calendar days back from 2026-10-14): 86 of the 93 listed partitions; 84 are weekdays; 79 weekday pairs have a weekday predecessor in the window and both days are trading days (the first window weekday has no in-window predecessor and is not paired)"
+    },
+    "offset_definition": "Offset 0 = the file dated D reflects D's own close (the series date is D); offset 1 = the file dated D reflects the previous trading day's close (the series date is the trading day before D); offset -1 = the next trading day after D (a check). For each security (BIV, VCIT, VCSH, VGSH; each held in at least 60 weekday partitions) and each of the four served model series, the Pearson correlation is taken over the pair dates between the security's percent change from the previous weekday's partition to D and the series' daily return at the offset date. A security-series pair counts as an offset estimate when its best absolute correlation over the three offsets is at least 0.5; the estimate is the offset with the highest signed correlation.",
+    "offset_distribution_days": {
+      "0": 11
+    },
+    "offset_estimates": 11,
+    "pair_correlations": [
+      {"security": "BIV", "series": "benchmark_ultra_short_term", "offset_0": 0.83, "offset_1": -0.06, "offset_-1": -0.07, "estimate": 0},
+      {"security": "BIV", "series": "benchmark_short_term", "offset_0": 0.91, "offset_1": -0.08, "offset_-1": -0.06, "estimate": 0},
+      {"security": "BIV", "series": "benchmark_intermediate_term", "offset_0": 0.57, "offset_1": -0.17, "offset_-1": -0.07, "estimate": 0},
+      {"security": "BIV", "series": "benchmark_long_term", "offset_0": 0.43, "offset_1": -0.18, "offset_-1": -0.08, "estimate": "below 0.5, not an estimate"},
+      {"security": "VCIT", "series": "benchmark_ultra_short_term", "offset_0": 0.78, "offset_1": -0.05, "offset_-1": -0.07, "estimate": 0},
+      {"security": "VCIT", "series": "benchmark_short_term", "offset_0": 0.89, "offset_1": -0.05, "offset_-1": -0.04, "estimate": 0},
+      {"security": "VCIT", "series": "benchmark_intermediate_term", "offset_0": 0.58, "offset_1": -0.15, "offset_-1": -0.05, "estimate": 0},
+      {"security": "VCIT", "series": "benchmark_long_term", "offset_0": 0.45, "offset_1": -0.16, "offset_-1": -0.05, "estimate": "below 0.5, not an estimate"},
+      {"security": "VCSH", "series": "benchmark_ultra_short_term", "offset_0": 0.81, "offset_1": -0.07, "offset_-1": -0.09, "estimate": 0},
+      {"security": "VCSH", "series": "benchmark_short_term", "offset_0": 0.76, "offset_1": -0.07, "offset_-1": -0.06, "estimate": 0},
+      {"security": "VCSH", "series": "benchmark_intermediate_term", "offset_0": 0.50, "offset_1": -0.16, "offset_-1": -0.07, "estimate": 0},
+      {"security": "VCSH", "series": "benchmark_long_term", "offset_0": 0.39, "offset_1": -0.18, "offset_-1": -0.07, "estimate": "below 0.5, not an estimate"},
+      {"security": "VGSH", "series": "benchmark_ultra_short_term", "offset_0": 0.78, "offset_1": -0.06, "offset_-1": -0.11, "estimate": 0},
+      {"security": "VGSH", "series": "benchmark_short_term", "offset_0": 0.64, "offset_1": -0.08, "offset_-1": -0.13, "estimate": 0},
+      {"security": "VGSH", "series": "benchmark_intermediate_term", "offset_0": 0.39, "offset_1": -0.20, "offset_-1": -0.13, "estimate": "below 0.5, not an estimate"},
+      {"security": "VGSH", "series": "benchmark_long_term", "offset_0": 0.30, "offset_1": -0.21, "offset_-1": -0.12, "estimate": "below 0.5, not an estimate"}
+    ],
+    "calendar_signature": {
+      "words": "Share of the nine named securities (BIV VCIT VCSH VGSH GLD VEA VUG QQQ IEMG) unchanged in price between consecutive existing partitions. Seven of the nine are present in both partitions of each pair; the other two are not in the file. Counts only; not checked and not used in the answer.",
+      "pairs": [
+        {"pair": "2026-06-12 to 2026-06-13", "present_in_both": 7, "unchanged": 0},
+        {"pair": "2026-06-13 to 2026-06-14", "present_in_both": 7, "unchanged": 7},
+        {"pair": "2026-06-14 to 2026-06-15", "present_in_both": 7, "unchanged": 0},
+        {"pair": "2026-06-18 to 2026-06-19", "present_in_both": 7, "unchanged": 0},
+        {"pair": "2026-06-19 to 2026-06-20", "present_in_both": 7, "unchanged": 7},
+        {"pair": "2026-06-20 to 2026-06-21", "present_in_both": 7, "unchanged": 7},
+        {"pair": "2026-06-21 to 2026-06-22", "present_in_both": 7, "unchanged": 0}
+      ]
+    },
+    "claim": "measured"
+  },
+  "positive_control": {
+    "description": "A synthetic copy of one comparison, the same 79 pair dates: the change planted on each date D is the return of the prior trading day of D in the first served series plus seeded noise at 10 percent of that series' spread, then run through the same offset method.",
+    "expected": "offset 1",
+    "observed": "offset 1: correlation 0.99 at offset 1, 0.01 at offset -1 and -0.09 at offset 0, over 79 dates",
+    "passed": true
+  },
+  "citation_today": {
+    "file": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx",
+    "line": 623,
+    "takes_date_from": "snapshot.businessAsOf, set by adaptHoldingsSnapshot (contracts/adapt.ts) from the wire clock wire.clocks.business_date",
+    "words": "The holdings footer prints a date with a fixed 5:00p ET clock. It passes the date alone to PanelFooter, whose formatPanelTimestamp builds the time through create5pmETDate, so the clock is a convention and no time is read from the file or the pull. HoldingsTreemap.tsx line 620 and AllocationBars.tsx line 305 carry the same footer pattern. The workspace portal holds the adapter at adapt.ts lines 1164, 1229 and 1233.",
+    "claim": "measured"
+  },
+  "consequence": {
+    "citation_must_change": false,
+    "words": "The date stands: the answer is CLOSE_DATE, so the holdings date is the close the holdings reflect. The 5:00p ET clock is still a constructed convention rather than a time read from the data; it is not changed by this read, and a later ruling on the clock would be a separate act."
+  },
+  "reads": {
+    "vendor_calls": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "secret_reads": 0,
+    "s3_reads": 92
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pd-6",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "9af1cee1ab5ce653315d967c469b020aa1387d63",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-6.claude-usage-statusline-enable.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pd-6.claude-usage-statusline-enable.md",
+    "group": "OTHER",
+    "vintage_commit": "85216c4ab956cdbec2fb79e6d471e77abedc1dc2"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~29/MP-pd-6_PRE_ACT_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "f47ff645b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pre-act record committed before the one live write; names the settings path (C:/Users/Opal Bloomberg/.claude/settings.json, outside the repository), sha256 3907626e58fdb40f61b85a9d62bccbd429e4ff08e3c56e299a67591579c5a348 before the write, no statusLine key present before, blast radius and rollback. No settings value.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~29/pd6_run.json",
+      "kind": "doc",
+      "commit_or_etag": "acbbab8b27",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run file read by AC1. The live write it records is OUTSIDE the repository: C:/Users/Opal Bloomberg/.claude/settings.json, keys_added=['statusLine'], prior keys 11 of 11 preserved, sha256 after 2657dc7dbc2fe30f6273610b8834959a3cf51b666814478f49b796481e6f7ba7; the statusLine refresh then wrote usage_snapshot.json (written_at 2026-10-14T19:58:38Z). The settings file and its backup are not committed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "run=read live_statusline_names_script=yes backup_keys_preserved=yes rollback_on_copy_equals_backup=yes snapshot=measured/ok or absent/ok blast_radius_stated=yes run_claims_rollback_proven=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pd/checks/pd6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "run=read live_statusline_names_script=yes backup_keys_preserved=yes rollback_on_copy_equals_backup=yes snapshot=measured/ok blast_radius_stated=yes run_claims_rollback_proven=yes\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 checks yes/ok (live statusLine names script; backup keys preserved; rollback on copy equals backup; snapshot measured/ok; blast radius stated; run claims rollback proven)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pd6.AC1.sh run twice on the same live files",
+      "observed": "RESULT: PASS on both runs; the same six yes/ok fields on both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Red arm: a copy of pd6_run.json with blast_radius set empty and rollback_bytes_equal false, passed to the checker through MP_PD6_RUN",
+      "expected": "RESULT: FAIL (blast_radius_stated=no and run_claims_rollback_proven=no)",
+      "observed": "run=read ... blast_radius_stated=no run_claims_rollback_proven=no; RESULT: FAIL; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The account email inside the snapshot's account member",
+      "reason": "Not copied into any file. The run file and this instance record only account_claim=measured and that an email was present."
+    },
+    {
+      "item": "The printed status-line text in a terminal",
+      "reason": "Not read from a terminal. Evidence that the command ran for a refresh is the snapshot file the command wrote after the settings write (written_at after the write time)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W29-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -I (inline JSON re-read and key check) and the backup-and-write script",
+      "invocation": "python -I <worktree>/.scratch/pd6/live_write.py (scratch, not committed)",
+      "result": "keys_added=['statusLine']; prior_keys_checked=11; prior_keys_preserved=11; WRITE-OK; rc=0"
+    },
+    {
+      "tool": "python -I rollback copy proof (scratch, not committed)",
+      "invocation": "python -I <worktree>/.scratch/pd6/rollback_copy_proof.py",
+      "result": "rollback_parsed_equal=True; rollback_bytes_equal=True; statusLine_in_rolled=False; rc=0"
+    },
+    {
+      "tool": "python .tools/claude-usage-statusline.py (smoke run, scratch config dir)",
+      "invocation": "echo '{}' | CLAUDE_CONFIG_DIR=<worktree>/.scratch/pd6/cfg_smoke python \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.tools/claude-usage-statusline.py\"",
+      "result": "usage n/a; exit=0; wrote usage_snapshot.json to the scratch config dir"
+    }
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md"
+}
