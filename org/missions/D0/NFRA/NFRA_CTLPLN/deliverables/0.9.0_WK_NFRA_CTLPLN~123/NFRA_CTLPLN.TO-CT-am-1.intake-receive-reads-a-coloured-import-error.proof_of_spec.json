@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-am-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-am-1.intake-receive-reads-a-coloured-import-error.md",
+    "group": "OTHER",
+    "vintage_commit": "4073337a9e"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~123",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round23.md",
+    "vintage_commit": "4073337a9e",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-am-1.intake-receive-reads-a-coloured-import-error.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_receive.py",
+      "kind": "script",
+      "commit_or_etag": "f63f3f99c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ANSI_RE and strip_ansi() remove CSI and OSC sequences; classify_import() applies MISSING_RE to the stripped text, with the grading rule unchanged; build_plain_env() pins PYTHON_COLORS=0 and NO_COLOR=1 and removes FORCE_COLOR; build_import_env() is passed to run_import()'s child, build_child_env() (the pip child) carries the same pins. Last changed in f63f3f99c7 (the work-in-progress commit that carried the change); no deploy; run from the worktree.",
+      "artifact_covered_by": [
+        "CTam1-AC1",
+        "CTam1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_receive.py",
+      "kind": "test",
+      "commit_or_etag": "3e46d5b4c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two cases added after case_classify_import_unit: case_coloured_missing_dependency_is_import_missing_dep and case_coloured_other_failure_stays_failed; the suite count grows from 30 to 32. Last changed in 3e46d5b4c6; no deploy.",
+      "artifact_covered_by": [
+        "CTam1-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round23_receive_color.py",
+      "kind": "test",
+      "commit_or_etag": "f63f3f99c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fifteen arms, standard library only, no network and no install: arms (a) to (b5) classify plain and coloured missing-dependency text and the ANSI strip; (c) and (d) keep coloured ImportError, SyntaxError and own-module errors failed; (e1) to (e5) read the pinned child environments through a patched subprocess.run, restored afterwards. Last changed in f63f3f99c7; no deploy.",
+      "artifact_covered_by": [
+        "CTam1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTam1-AC1",
+      "criterion_verbatim": "a coloured missing-dependency import error is classed `import_missing_dep` and every other failure stays `failed` (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round23_receive_color.py",
+      "output_evidence": "RECEIVE-COLOR arms=15/15 ok=True (rc=0; run as timeout 280 python .tools/tests/test_round23_receive_color.py from the worktree root on the committed state at 3e46d5b4c6; the test file last changed in f63f3f99c7). Arm lines: a_plain_missing_dep PASS, b1_colour_class_and_name PASS, b2_colour_bold_then_class PASS, b3_colour_traceback_lines PASS, b4_strip_leaves_plain_message PASS, b5_strip_removes_osc_title PASS, c1_colour_import_error_is_failed PASS, c2_colour_syntax_error_is_failed PASS, d1_colour_own_module_is_failed PASS, d2_colour_own_submodule_is_failed PASS, e1_import_env_pinned PASS, e2_pip_env_pinned PASS, e3_run_import_passes_pinned_env PASS, e4_run_import_still_classes_coloured_stderr PASS, e5_run_pip_passes_pinned_env PASS.",
+      "denominator": "15 arms run: 15 PASS, 0 FAIL, 0 ARM-ERROR; the base count is absent (the test did not exist)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTam1-AC2",
+      "criterion_verbatim": "the receiving tool's own suite passes with the two new cases (base: `INTAKE-RECEIVE-TEST cases=30/30 ok=True`; the count must grow); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_receive.py",
+      "output_evidence": "INTAKE-RECEIVE-TEST cases=32/32 ok=True (rc=0; run as timeout 280 python org/devices/intake/test_intake_receive.py from the worktree root on the committed state at 3e46d5b4c6; the base line before the change read cases=30/30 ok=True).",
+      "denominator": "32 cases run: 32 PASS, 0 FAIL (base 30; the count grew by the two coloured cases)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base intake_receive.py at 4073337a9e (before this change), loaded from a scratch copy and run through classify_import on the FORCE_COLOR=3 shape of the missing-dependency error with own modules [duckdb]: ModuleNotFoundError wrapped in ANSI codes around the class name and the quoted module name.",
+      "expected": "the base grades the coloured error failed, which reproduces the defect the cell names",
+      "observed": "('failed', None, \"\\x1b[1;35mModuleNotFoundError\\x1b[0m: No module named '\\x1b[35madbc_driver_duckdb\\x1b[0m'\"); the same arm in the new code returns import_missing_dep with adbc_driver_duckdb",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each suite run twice on a tree equal to its commit: AC1 once before commit 3e46d5b4c6 and once on the committed state; AC2 once before commit 3e46d5b4c6 and once on the committed state; the last line compared",
+      "observed": "RECEIVE-COLOR arms=15/15 ok=True on both AC1 runs; INTAKE-RECEIVE-TEST cases=32/32 ok=True on both AC2 runs (the pre-change base run read cases=30/30 ok=True)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W123-S1: the commit gate's client-data check printed WARN, this commit was NOT checked, on both CT-am-1 commits because the hashed account-id list is absent on this box; the row is filed as OBSERVATION, INERT, UNDER_INVESTIGATION (commit 770c09c037)."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~123/NFRA_CTLPLN.TO-CT-am-1.intake-receive-reads-a-coloured-import-error.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~123 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round23_receive_color.py",
+      "result": "RECEIVE-COLOR arms=15/15 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_receive.py",
+      "result": "INTAKE-RECEIVE-TEST cases=32/32 ok=True"
+    }
+  ]
+}
