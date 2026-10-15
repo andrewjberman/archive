@@ -30,9 +30,17 @@ one-file one.
 - the pin as stored: `0d828b51d433a24f7e2ef2e6ea7967ee` (48,235 bytes, 344 CRLFs);
 - **as git stores it in this release: `3bbd5ab2d325657020357003c3ea387d`** (47,891 bytes) -- this path
   carries `.gitattributes` `text=set, eol=lf`, so LF is the only form it can hold, and A2 grades this one;
-- what the HOST will receive: `0d828b51...`, the pin's exact bytes -- a clean checkout re-materialises
-  the CRLFs and the deploy tars the checked-out file. Measured by checking the file out and re-hashing,
-  not assumed.
+- what the HOST will receive: `0d828b51...`, the pin's exact bytes -- because the deploy tars THIS
+  WORKTREE's working copy, which holds the CRLF bytes as written here.
+  **CORRECTED AFTER THE FACT (row `NFRA_OPLGTW-Z-S133`, 2026-10-15T00:3xZ): the original sentence here
+  said "a clean checkout re-materialises the CRLFs", and that is FALSE.** Under `eol=lf` a clean
+  checkout materialises **LF** -- measured in the fresh `C:/tmp/og-rel-gt3` tree at this same commit:
+  on-disk `3bbd5ab2`, 47,891 bytes, 0 CRLF, while `C:/tmp/og-rel-yr2` reads `0d828b51`, 48,235 bytes,
+  344 CRLF from the SAME blob. What I had actually measured was a re-hash of a working copy that already
+  held CRLF, which cannot tell the two cases apart. The served form is therefore a property of the
+  DEPLOYING TREE, not of the release. The landed state is unaffected and needs no redeploy -- the host
+  does serve the CRO's bytes -- but the next release cut from a clean tree moves the page's md5, which
+  is why the row is ARMED and names the issuer.
 
 The content is identical to the pin either way: the committed blob equals the pin normalised to LF,
 byte for byte. The superseded pins `1db3d8d0aa` and `a0e00489b0` were never read. The page carries the
@@ -99,10 +107,14 @@ running base"), and it still holds with the gate change aboard.
 | the admitted arm | the served read: an Opal identity on the live roster state | 200 with the page |
 | the refused arm | the served read: a guest form and an outside domain | 403, no page bytes |
 
-**The md5 oracle here is `0d828b51`, not `3bbd5ab2`.** The host receives the checked-out file, and this
-path's `eol=lf` attribute means the blob and the checkout differ by exactly the 344 CRLFs. Comparing the
-host against the blob's md5 would read a correct deploy as a mismatch -- the same shape as OG-ap-18's
-`lib/` oracle, where the artifact carries the deploy tree's copy rather than the repo HEAD's.
+**The md5 oracle here is `0d828b51`, not `3bbd5ab2`.** The host receives this worktree's working copy,
+and this path's `eol=lf` attribute means the blob and that copy differ by exactly the 344 CRLFs.
+Comparing the host against the blob's md5 would read a correct deploy as a mismatch -- the same shape as
+OG-ap-18's `lib/` oracle, where the artifact carries the deploy tree's copy rather than the repo HEAD's.
+**And that is the whole problem, recorded late as row `NFRA_OPLGTW-Z-S133`: an oracle that is a property
+of one worktree is not reproducible.** A fresh checkout of this very commit yields `3bbd5ab2`, so a
+later release deployed from a clean tree ships the LF form and this oracle stops matching the host. The
+row carries the two routes; the issuer rules.
 
 Any trigger failing: redeploy the base and file an ARMED row naming `2.0.0_SA_COO~O`.
 
