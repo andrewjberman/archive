@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cl-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cl-3.near-match-review-packet.md",
+    "group": "OTHER",
+    "vintage_commit": "502e2ca25b"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~180",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round90.md",
+    "vintage_commit": "502e2ca25b",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cl-3.near-match-review-packet.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/cotbkf_review_packet.py",
+      "kind": "script",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "reads the outside folder named by --src, the sha256-pinned REVERSE_MATCH_V3.csv and the committed REVIEW_LIST.csv; writes the packet, page and record under --out-dir and the key under --out-key, which must lie outside the repository; imports link_id from commonwealth_match_names; no S3 call; function names carry no build_ prefix (commit-gate SILVER-ID rule)"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_review_packet.py",
+      "kind": "test",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 stub tests on made-up ids A1, B1, A2, B2, A3, B3 and made-up scores: python -m pytest 4 passed"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/NEAR_MATCH_REVIEW_PACKET.csv",
+      "kind": "config_data",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "118 rows, ten columns, link ids and bands and flags only; sorted by link_id; no account number, name, name token, raw score or hash other than link_id"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/NEAR_MATCH_REVIEW_PACKET.md",
+      "kind": "doc",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plain-English page for the person who confirms: the columns, the counts by routes and tier, the 219 and competing-pair counts, and the line that no link here is applied"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/REVIEW_PACKET_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "denominators, rows, consistency, the three files with recorded sha256, scratch_deleted true, not_established; counts only"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/REVIEW_PACKET_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record's counts with the not-established list"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1a73f3d847",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W180-S1, S2 and S3 appended; 76 lines added, 0 deleted"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB90cl3-AC1",
+      "criterion_verbatim": "`CB90cl3-AC1` -- the committed packet has exactly the ten columns, one row per distinct pair, ids only in the row, sorted.",
+      "method": "command",
+      "invocation": "python -c \"import csv,re;p='org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/NEAR_MATCH_REVIEW_PACKET.csv';r=list(csv.reader(open(p,encoding='utf-8')));cols='link_id,routes,r4_tier,r4_household_via,r4_window_ok,r4_fingerprint_band,name_corroborations,in_219,bd_account_state,competing_pairs';ids=[x[0] for x in r[1:]];ok=all(re.fullmatch('[0-9a-f]{12}',i) for i in ids);print('REVIEW-PACKET columns=%s rows=%d ids12hex=%s unique=%s sorted=%s'%(','.join(r[0])==cols,len(r)-1,ok,len(set(ids))==len(ids),ids==sorted(ids)))\"",
+      "output_evidence": "REVIEW-PACKET columns=True rows=118 ids12hex=True unique=True sorted=True (timeout 120, rc 0)",
+      "denominator": "118 rows of 118 distinct pairs (110 R4 rows and 14 name rows, overlap 6)",
+      "status": "PASS",
+      "expect": "REVIEW-PACKET columns=True rows=\\d+ ids12hex=True unique=True sorted=True"
+    },
+    {
+      "criterion_id": "CB90cl3-AC2",
+      "criterion_verbatim": "`CB90cl3-AC2` -- the three files carry the recorded checksums, the key sits outside the repository with one row per packet row, every link id resolves, and the value-bearing scratch is deleted.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib,csv;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/REVIEW_PACKET_RECORD.json',encoding='utf-8'));ok=all(hashlib.sha256(open(f['path'],'rb').read()).hexdigest()==f['sha256'] for f in d['files']);k=[f for f in d['files'] if f['name'].endswith('KEY.csv')][0];n=sum(1 for _ in open(k['path'],encoding='utf-8'))-1;print('REVIEW-PACKET-FILES files=%d sha_match=%s key_outside_repo=%s key_rows_eq_packet=%s unresolved=%d scratch_deleted=%s'%(len(d['files']),ok,not k['path'].startswith('org/'),n==d['rows']['total'],d['consistency']['unresolved_link_ids'],d['scratch_deleted']))\"",
+      "output_evidence": "REVIEW-PACKET-FILES files=3 sha_match=True key_outside_repo=True key_rows_eq_packet=True unresolved=0 scratch_deleted=True (timeout 120, rc 0)",
+      "denominator": "3 of 3 files read; 118 of 118 key rows; 0 of 118 packet link ids unresolved; scratch deleted (no value-bearing scratch was created in the worktree)",
+      "status": "PASS",
+      "expect": "REVIEW-PACKET-FILES files=3 sha_match=True key_outside_repo=True key_rows_eq_packet=True unresolved=0 scratch_deleted=True"
+    },
+    {
+      "criterion_id": "CB90cl3-AC3",
+      "criterion_verbatim": "`CB90cl3-AC3` -- the four packet rules hold on stubs.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_review_packet.py -q",
+      "output_evidence": "4 passed in 0.99s (timeout 120, rc 0)",
+      "denominator": "4 of 4 stub tests passed (both-routes single row; competing count; ten columns and no id column but link_id; fingerprint as a band)",
+      "status": "PASS",
+      "expect": "4 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the stub tests carry their own negative assertions (a pair found by both routes kept as two rows fails test 1; a score emitted as a number fails test 4)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the builder re-run into the same committed paths after the scratch was cleared; each output compared with commit 1a73f3d847 by git diff",
+      "observed": "rc 0; NEAR_MATCH_REVIEW_PACKET.csv, NEAR_MATCH_REVIEW_PACKET.md, REVIEW_PACKET_RECORD.json and the outside key byte-identical to the commit (git diff --quiet rc 0; outside key sha256 4bc9f0777168051b1a7b0bc895e1ab4ef4936964eceb6f7303338da3f215d9a3, equal to the recorded value)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "NEAR_MATCH_REVIEW_KEY.csv (118 rows: link id, commonwealth account, bd account id) at C:/dev/_cotbkf_match_20261015/NEAR_MATCH_REVIEW_KEY.csv",
+      "reason": "outside the repository by the order; holds account ids; not committed; its checksum is recorded in REVIEW_PACKET_RECORD.json files"
+    },
+    {
+      "item": "Post-commit account-id scan (test_cotbkf_no_account_ids.py) DENOMINATOR line",
+      "reason": "run after the final commit as the order requires; its result is reported in the worker report, not a scan result inside this instance"
+    },
+    {
+      "item": "Flag comparison for the name list beyond in_219 and corroborations (date_window_ok, same_registration_class, holdings_candidate, already_claimed)",
+      "reason": "the order fixes the packet to ten columns; the packet carries no column for those four flags, so they are not compared"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W180-S1: R3_LINKS.csv holds 90 rows (88 DETERMINISTIC, 2 AMBIGUOUS), not the 88 the order names; the 0-to-active premise holds; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W180-S2: R4_LINKS.csv writes household_via as 'via name' on all 110 rows; the packet reads the route word after the prefix (form only, no value change); OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W180-S3: one R4 link's Black Diamond account has no row in REVERSE_MATCH_V3, so the packet records its state as other with in_219 false; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180/ADVI_COTBKF.TO-CB-cl-3.near-match-review-packet.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "cotbkf_review_packet.py",
+      "invocation": "python data/assets/scripts/silver/cotbkf_review_packet.py --src C:/dev/_cotbkf_match_20261015 --out-key C:/dev/_cotbkf_match_20261015/NEAR_MATCH_REVIEW_KEY.csv --out-dir org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~180",
+      "result": "REVIEW-PACKET distinct=118 R4=104 NAME=8 R4+NAME=6 to_confirm=107 in_219=102 with_competing=44 r4_candidates_present=99/99 unresolved=0 flag_disagreements=0 scratch_deleted=True (rc 0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_review_packet.py -q",
+      "result": "4 passed"
+    }
+  ]
+}
