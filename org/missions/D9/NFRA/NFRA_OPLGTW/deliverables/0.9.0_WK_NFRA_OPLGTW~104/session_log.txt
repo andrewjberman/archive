@@ -1,0 +1,40 @@
+SESSION LOG -- 0.9.0_WK_NFRA_OPLGTW~104 on NFRA_OPLGTW.TO-OG-cl-2 (worktree C:/tmp/wk-oplgtw-104, branch wk-NFRA_OPLGTW-104)
+Code commit: 2e5ba0a888 (LOCAL on wk-NFRA_OPLGTW-104, not pushed)
+
+1. Premise re-ground (commands and verbatim results)
+   git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-104 ; test -d org && test -d .tools -> TREE-OK
+   git log --all --oneline -- infra/aws/ec2/opal-gateway/app/client_core.py -> (empty)
+   git ls-tree -r --name-only HEAD infra/aws/ec2/opal-gateway -> no client_* or core module on HEAD
+   aws s3api list-objects-v2 --bucket opal-data-bd --prefix silver/unrealized/ -> 77 keys, 76 dated, newest dated 2026-10-09.parquet
+   surprise rows NFRA_OPLGTW-Z-W104-S1 .. S5 appended to INVESTIGATION_v1.md (surprise-row-gate: 5 new rows, OK)
+
+2. Named tests (python -m pytest tests/test_og_cl2.py -v, run from the gateway root)
+   test_ogcl2_ac01 .. test_ogcl2_ac08 PASSED; test_ogcl2_ac06_two_firm_negative_arm PASSED
+   9 passed in 0.08s
+
+3. Probe runs (python probe_bd49f.py), three runs, each printed the same line:
+   probe bd49f: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0
+   stderr carried one trading-calendar fallback WARN (no digit run of 8 or more).
+
+4. Diagnostic (counts and codes only, not committed): resolve 2 candidates; holdings answered from the 2026-10-09 partition;
+   transactions answered from the 2026-10-15 partition; fees answered from the 2026-10-13 partition; allocation answered
+   from the 2026-10-09 partition with absent_reason no_model_assignment_49f. No call refused.
+
+5. Proof invocations (verbatim)
+   bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl2.AC1.sh; echo "exit=$?"
+     pytest rc=0; named tests passed 8 of 8; failed/error lines 0
+     RESULT: PASS
+     exit=0
+   bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl2.AC2.sh; echo "exit=$?"
+     probe bd49f: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0
+     probe rc 0; digit runs of 8 or more in the output 0 (want 0)
+     RESULT: PASS
+     exit=0
+
+6. Flip attempt 1 refused by the to-pipeline gate: no instance beside the order under the underscore name. The instance was renamed
+   to the gate convention (deliverables/*/<full-stem>.proof_of_spec.json, stem client-bd49f); its bytes are unchanged and it re-validated
+   (rc=0). Surprise row NFRA_OPLGTW-Z-W104-S6 records the naming mismatch.
+
+7. Commits
+   2e5ba0a888 cut-build(NFRA_OPLGTW OG-cl-2, 0.9.0_WK_NFRA_OPLGTW~104): the Black Diamond 49F client adapter, its named tests and its probe
+   The issuer's uncommitted G2_ADAPTER_PROTOCOL.md was left out of every commit, as the coordinator directed.
