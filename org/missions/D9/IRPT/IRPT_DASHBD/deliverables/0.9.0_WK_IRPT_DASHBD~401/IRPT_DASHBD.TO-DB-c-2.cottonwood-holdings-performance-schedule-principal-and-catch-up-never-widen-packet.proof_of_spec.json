@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-2",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "cf8ab92263"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "cf8ab92263",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-2.cottonwood-holdings-performance-schedule-principal-and-catch-up-never-widen-packet.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~401",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~401/PACKET_FACTS_R114.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~401/NEVER_WIDEN_PACKET_DB-c-2_R114.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The never-widen packet, unsigned, as text: the schedule, principal and catch-up keys are described and nothing is created.",
+      "artifact_covered_by": [
+        "DBC114-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~401/PACKET_FACTS_R114.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The facts record: builder names and arguments, the 39 keys, reads of zero writes; LIST reads only.",
+      "artifact_covered_by": [
+        "DBC114-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC114-2-AC1",
+      "criterion_verbatim": "DBC114-2-AC1 -- the facts record is complete; the schedule and principal names equal a fresh call of the builder with the recorded arguments (or the recorded refusal equals the builder's); the key dates equal DB-c-1's catch-up set and the keys equal the builder's addresses, three per date; no catch-up date already has a gold partition; the packet holds all six headings, is 4,000 characters or more and claims no signature; no write is recorded. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r114/p114_bcw.py\" . DBC114-2-AC1",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nDBC114-2-AC1 PASS",
+      "denominator": "2 of 2 names equal a fresh builder call (schedule irpt-cot-holdings-performance-daily, principal irpt-cot-holdings-performance-role; refusals empty on both); 13 of 13 key dates equal DB-c-1's catch-up set; 39 of 39 keys equal the builder's addresses, 3 per date; 0 of 13 catch-up dates have a holdings gold partition; packet 15,044 characters with 6 of 6 headings and no signature claim",
+      "status": "PASS",
+      "expect": "DBC114-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC2 checker was run against a scratch copy of the facts record with the first key's date altered from 2026-06-09 to 2026-06-08, the builder's libraries copied beside it.",
+      "expected": "DBC114-2-AC1 FAIL (keys differ from the builder's addresses)",
+      "observed": "keys differ from the builder's addresses (3 objects per date) / DBC114-2-AC1 FAIL; the unaltered record PASSes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 run three times on the same record; the checker's own LIST calls are its reads and are not counted in the record's reads block.",
+      "observed": "DBC114-2-AC1 PASS on each of the three runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS write, Terraform plan or apply, deploy, schedule or principal creation, catch-up producer run, vendor call or secret read",
+      "reason": "Outside the order: the schedule, principal and catch-up run are later acts under a never-widen pair; this cell writes the packet and the facts record only."
+    },
+    {
+      "item": "The meaning of the 06:00 New York fold and the bucket policies of the Cottonwood buckets",
+      "reason": "The order asks the CTO's half to rule on the fold; the policies were not read because a GET is outside the LIST and HEAD grant."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W401-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py at commit",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (1 new row of 509 total checked at 115e4f7706)"
+    }
+  ]
+}
