@@ -60,14 +60,15 @@ def build(cid, variant=None):
         changed -= set(c["any_of"])
     elif not set(c["any_of"]) & changed:
         changed.add(c["any_of"][0])
+    target = c["mutants"][0]
     for i, rel in enumerate(sorted(changed)):
+        i = 0 if rel == target else i + 1
         if variant == "no_block":
             wt(root, rel, "def other():\n    return 1\n\ndef fn_%d(x):\n    return x * 2\n" % i)
         elif variant == "import_error":
             wt(root, rel, "def other():\n    return 1\n\n# BEGIN %s\nHELPER = 3\n# END %s\nVALUE = HELPER\n\ndef fn_%d(x):\n    return x * 2\n" % (c["marker"], c["marker"], i))
         else:
             wt(root, rel, "def other():\n    return 1\n\n" + block(c["marker"], "fn_%d" % i) + ("\nADDR = 's3://opal-data-x/y'\n" if variant == "typed_address" else ""))
-    target = sorted(changed)[0]
     names = list(c["named"])
     if variant == "missing_named_test":
         names = names[:-1]
