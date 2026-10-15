@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ci-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-2.yahoo-readers-of-active-accounts.md",
+    "group": "OTHER",
+    "vintage_commit": "73e663123e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~173",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round87.md",
+    "vintage_commit": "73e663123e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-2.yahoo-readers-of-active-accounts.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~173/READERS_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "1089f59463",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "49 readers, 9 tokens, searched commit b773d5864a; counts sum to the list; 4 gaps; no account number, name or dollar value"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~173/READERS_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "1089f59463",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same table as the record, generated from it"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1089f59463",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W173-S1, -S2, -S3 appended (73 lines added, 0 deleted); the one allowed channel write"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB87ci2-AC1",
+      "criterion_verbatim": "`CB87ci2-AC1` -- the readers are counted by class, the counts sum to the list, and the tokens searched are listed. expect: counts_sum=True",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~173/READERS_RECORD.json',encoding='utf-8'));c=d['counts'];n=len(d['readers']);s=c['feeds_account_value']+c['ranks_or_reports']+c['feeds_other']+c['not_a_reader']+c['unread'];print('YAHOO-READERS readers=%d feeds_account_value=%d ranks=%d other=%d unread=%d gaps=%d counts_sum=%s tokens=%d'%(n,c['feeds_account_value'],c['ranks_or_reports'],c['feeds_other'],c['unread'],c['gaps'],s==n,len(d['tokens'])))\"",
+      "output_evidence": "YAHOO-READERS readers=49 feeds_account_value=4 ranks=15 other=3 unread=1 gaps=4 counts_sum=True tokens=9 (timeout 120, rc 0; run three times, identical)",
+      "denominator": "49 readers = 4 feeds_account_value + 15 ranks_or_reports + 3 feeds_other + 26 not_a_reader + 1 unread; 9 tokens listed",
+      "status": "PASS",
+      "expect": "counts_sum=True"
+    },
+    {
+      "criterion_id": "CB87ci2-AC2",
+      "criterion_verbatim": "`CB87ci2-AC2` -- every cited file exists and has at least the cited line, and the gaps count equals the account-value readers that do not filter on `use_class`. expect: unresolved=0 gaps_match=True",
+      "method": "command",
+      "invocation": "python -c \"import json,os;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~173/READERS_RECORD.json',encoding='utf-8'));root='C:/dev/ajb_workspace/';bad=[];[bad.append(r['file']) for r in d['readers'] if r['class'] in ('FEEDS_ACCOUNT_VALUE','RANKS_OR_REPORTS','FEEDS_OTHER') and not (os.path.isfile(root+r['file']) and len(open(root+r['file'],encoding='utf-8',errors='replace').read().splitlines())>=int(r['line']))];g=[x for x in d['readers'] if x['class']=='FEEDS_ACCOUNT_VALUE' and 'use_class' not in x['filters_on']];print('YAHOO-READERS-CITES unresolved=%d gaps_match=%s'%(len(bad),len(g)==d['counts']['gaps']==len(d['gaps'])))\"",
+      "output_evidence": "YAHOO-READERS-CITES unresolved=0 gaps_match=True (timeout 120, rc 0; run three times, identical)",
+      "denominator": "22 cited rows (4 feeds_account_value + 15 ranks_or_reports + 3 feeds_other), 0 unresolved; 4 gaps",
+      "status": "PASS",
+      "expect": "unresolved=0 gaps_match=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the criteria are a count and a resolution check over the record",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "both criterion commands run three times on the same record",
+      "observed": "identical in all three runs: readers 49, feeds_account_value 4, ranks_or_reports 15, feeds_other 3, unread 1, gaps 4; unresolved 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Opening the active-set file ACTIVE_COTTONWOOD_SET_V2.csv",
+      "reason": "the order forbids it: raw account numbers; the reader classes do not need it"
+    },
+    {
+      "item": "Any S3 or AWS call, vendor call, and any run of a script that writes",
+      "reason": "the order is a read: the search is over the checkout at a named commit"
+    },
+    {
+      "item": "Classifying the yahoo-token files of data/black_diamond, data/cot, data/inf and the lib and infra fetchers one by one",
+      "reason": "they read their own yfinance pulls and not the Yahoo store address; the record states this in not_established"
+    },
+    {
+      "item": "Transitive consumers of the valuation outputs",
+      "reason": "the order counts direct readers; the record states that downstream consumers are not classed"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W173-S1: the order's ARD mint path (silver files with ard in the name) is not in the checkout; the mint module is commonwealth_account_return_daily.py; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W173-S2: the literal token yahoo/global returns 0 hits because every reader builds the address with opal_naming.address(); a zero reads as absence and is out of corpus for address-built readers; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W173-S3: the as-traded valuation reads a ticker-keyed Yahoo Close cache with no use_class filter, outside the order's store-and-index definition; OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~C1"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~173/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CB87ci2-AC1,CB87ci2-AC2",
+      "result": "run after the record commit; see the report"
+    }
+  ]
+}
