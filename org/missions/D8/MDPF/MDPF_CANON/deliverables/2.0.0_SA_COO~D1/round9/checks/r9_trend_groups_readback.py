@@ -123,6 +123,45 @@ def absent_mode(data):
     return a.done()
 
 
+def r11_check(g):
+    """R11 leg presence (CTO condition C1, msg 5940; amended for CN-r-1, round 10). A leg (Dividend, Growth, sma_additive_aua)
+    absent on the newest dated row while it held a value on the previous dated row is Branch B UNLESS the producer CARRIED it:
+    the newest date is listed in carried_dates (CN-r-1 carries a missing leg's last known value and names the date).
+    Returns (ok, detail); a carried leg reads PASS and says so."""
+    dates = g.get("dates") or []
+    n = len(dates)
+    ndr = last_dated_idx(g, "9999-12-31")
+    prev = None
+    if ndr is not None:
+        for j in range(ndr - 1, -1, -1):
+            if (g.get("opal_aggregate_aua") or [None] * n)[j] is not None:
+                prev = j
+                break
+    bm = g.get("by_model") or {}
+
+    def _leg(name, i):
+        if i is None:
+            return None
+        if name == "sma_additive_aua":
+            arr = g.get(name) or []
+        else:
+            arr = (bm.get(name) or {}).get("model_value") or []
+        return i < len(arr) and arr[i] is not None
+
+    legs = ("opal_div_sma", "opal_growth_sma", "sma_additive_aua")
+    now = {nm: _leg(nm, ndr) for nm in legs}
+    before = {nm: _leg(nm, prev) for nm in legs}
+    absent = [nm for nm in legs if before[nm] and not now[nm]]
+    newest = dates[ndr] if ndr is not None else None
+    carried_here = newest is not None and newest in (g.get(CARRIED) or [])
+    lost = [] if carried_here else absent
+    detail = ("leg presence on the newest dated row %s vs the previous dated row %s: now %s, before %s; absent now but present before %s; "
+              "%s" % (newest, dates[prev] if prev is not None else None, now, before, absent,
+                      ("CARRIED by the producer (the date is in carried_dates): not Branch B" if absent and carried_here
+                       else "Branch B for CN-p-1/CN-r-1" if lost else "no leg lost")))
+    return ndr is not None and not lost, detail
+
+
 def read_mode(data, manifest, pin=None):
     a = Arms("R9 TREND-GROUPS READBACK")
     g = data["global"]["ts"]
@@ -231,32 +270,8 @@ def read_mode(data, manifest, pin=None):
     # R10 disjoint from the frontier cell: the CN-p-1 keys are not among the keys that CN-h-1/CN-l-1 move
     h1 = {"account_count_total", "account_count_total_raw", "count_provenance", "count_basis", "count_as_of"}
     a.arm("R10", not (set(NEW) & h1), "the CN-p-1 key set %s shares no top-level key with the CN-h-1 count fields %s (the leaf-by-leaf table of the pair, section 4)" % (sorted(NEW), sorted(h1)))
-    # R11 leg presence (CTO condition C1, msg 5940): a leg absent on the newest dated row while it held a value the day before is Branch B
-    ndr = last_dated_idx(g, "9999-12-31")
-    prev = None
-    if ndr is not None:
-        for j in range(ndr - 1, -1, -1):
-            if (g.get("opal_aggregate_aua") or [None] * n)[j] is not None:
-                prev = j
-                break
-    bm = g.get("by_model") or {}
-
-    def _leg(name, i):
-        if i is None:
-            return None
-        if name == "sma_additive_aua":
-            arr = g.get(name) or []
-        else:
-            arr = (bm.get(name) or {}).get("model_value") or []
-        return i < len(arr) and arr[i] is not None
-
-    legs = ("opal_div_sma", "opal_growth_sma", "sma_additive_aua")
-    now = {nm: _leg(nm, ndr) for nm in legs}
-    before = {nm: _leg(nm, prev) for nm in legs}
-    lost = [nm for nm in legs if before[nm] and not now[nm]]
-    a.arm("R11", ndr is not None and not lost,
-          "leg presence on the newest dated row %s vs the previous dated row %s: now %s, before %s; absent now but present before %s (Branch B for CN-p-1)" % (
-              dates[ndr] if ndr is not None else None, dates[prev] if prev is not None else None, now, before, lost))
+    ok11, detail11 = r11_check(g)
+    a.arm("R11", ok11, detail11)
     return a.done()
 
 
