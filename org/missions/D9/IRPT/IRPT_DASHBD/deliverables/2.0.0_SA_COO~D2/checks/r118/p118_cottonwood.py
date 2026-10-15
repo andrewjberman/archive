@@ -40,6 +40,11 @@ INFLECTION_SOURCES_SHA = "2b2b2c73ada31fc52249e0a876d091746546f6fd41fbf0f917f245
 FS_KEYS = {"input", "grain", "table", "field", "fold", "claim"}
 MIN_TESTS = 8
 ACCOUNT_RETURN = "IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json"
+# round 119 (DB-b-233): ten activity and net-gain members now source the account return contract THROUGH their value-summary counterparts;
+# they carry no firm_sources of their own, so the 36 members of this check exclude them
+REPAIRED_TEN = ("act.beginning_value.household", "act.beginning_value.account", "act.net_gain.household", "act.net_gain.account",
+                "act.ending_value.household", "act.ending_value.account", "hold.net_gain_last_12_months", "hold.net_gain_ytd", "hold.net_gain_qtd",
+                "hold.net_gain_since_inception")
 
 
 class Fail(Exception):
@@ -130,7 +135,7 @@ def check_contract(c, base_sha_of_052):
     need(base_sha_of_052 is None or lin["sha256"] == base_sha_of_052, "lineage sha256 is not the 0.5.2 bytes' hash")
     g = c.get("gold_table", {})
     need(g.get("table") == "filled_report_values" and isinstance(g.get("columns"), list) and len(g["columns"]) == 13, "gold_table block changed")
-    ar = [m for m in c["members"] if isinstance(m.get("source"), dict) and m["source"].get("contract", "").endswith(ACCOUNT_RETURN)]
+    ar = [m for m in c["members"] if isinstance(m.get("source"), dict) and m["source"].get("contract", "").endswith(ACCOUNT_RETURN) and m["id"] not in REPAIRED_TEN]
     need(len(ar) == 36, "expected 36 account-return members, found %d" % len(ar))
     for m in ar:
         fs = (m.get("firm_sources") or {}).get(FIRM)

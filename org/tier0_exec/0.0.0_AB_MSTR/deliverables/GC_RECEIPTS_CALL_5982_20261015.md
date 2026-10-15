@@ -50,6 +50,43 @@ interactive_access.py at 5be427ba (full 5be427ba7642f8ac244c92bcd55631e48605d6a9
 COO~Y2. Control: the same files at the trunk map's old pins (15a387dd36, f09b802cdc) recompute to f85e8c9b... and c28d9a74..., equal to trunk's
 map. So the removed stamp is exactly reproducible from the two pins. The worktree itself is not recoverable.
 
+## Update 3, CTO msg 8145: the three other r30 trees, tested per path and removed
+
+Test (CTO 8145), run read-only with a script before any removal: (1) head contained in box/dell2 and the only dirty file is
+`infra/aws/lambda/ci/lambda-source-map.json`; (2) every pin the dirty map adds is a commit contained in box/dell2; (3) all pass: remove;
+(4) any pin unreachable: keep. Positive control: pin 15a387dd36 (in trunk's map) read as in the map and contained. All three passed on every
+pin, so the stamps are reproducible. Pins the stamps add that are NOT already in trunk's map (their facts, so they survive):
+
+| pin (all contained in box/dell2) | function | file | in |
+|---|---|---|---|
+| 0ee21c796f (sha256 fc67f9ad9965...) | irpt-ycharts-generate | reports/generate_installed.py | r30-control, r30-release, wt-r30-release |
+| e93258c650 (sha256 176682cb1545...) | irpt-ycharts-generate | intake/uploads.py | r30-control, wt-r30-release |
+| e93258c650 (sha256 8df461a0d395...) | irpt-status | ops/status.py | r30-control, r30-release |
+| da7b3b10bc (sha256 83ab9b45d590...) | irpt-ycharts-generate | intake/template_reader.py | r30-control, wt-r30-release |
+| 14b52ca13a (sha256 a4e0637257b6...) | irpt-holdings-performance-lambda and irpt-inf-holdings-performance-lambda | infra/logic/registry/scopes.json | all three |
+| a4b7c48fad (sha256 03fa9c78c9dd...) | irpt-status | ops/status.py | wt-r30-release only |
+
+| path | head | in box/dell2 | only dirty file | action |
+|---|---|---|---|---|
+| r30-control | 0c0ae5a8f5 | yes | lambda-source-map.json (12 entries added or changed) | REMOVED |
+| r30-release | 0c0ae5a8f5 | yes | lambda-source-map.json (9 entries) | REMOVED |
+| irpt-release-r28/wt-r30-release | a4b7c48fad | yes | lambda-source-map.json (12 entries) | REMOVED |
+
+The test script is `stamp_check.py` (in my session scratchpad, not committed); the pin lists above are its output.
+
+## Update 4, 06:2xZ to 06:4xZ: the IRPT_BCKEND worker trees, removed on the issuer's word and on a clean read
+
+| path | head | in box/dell2 | uncommitted | action |
+|---|---|---|---|---|
+| wk-IRPT_BCKEND-366 | 2db3cefd1f | yes | p183_cells.py, byte-identical to box/dell2 | REMOVED on COO~P2 msg 8147, verified by hash |
+| wk-IRPT_BCKEND-368 | 8fdd16cf82 | yes | p185_cells.py identical; the IB-pr-519 order file differs in the status line only (worktree stale 'open', trunk 'complete') | REMOVED on 8147, verified |
+| wk-IRPT_BCKEND-369 | 79bc90729d | yes | p186_cells.py identical; the IB-pr-522 order file, status line only | REMOVED on 8147, verified |
+| wk-IRPT_BCKEND-378 | b39d89f245 | yes | clean (only the portal pointer) | REMOVED (collector: merged, idle 25 h) |
+| wk-IRPT_BCKEND-379 | 2e05384915 | yes | clean (only the portal pointer) | REMOVED (collector: merged, idle 25 h) |
+
+Held for owners by design, not touched: `rel-anlreq-r4` and `rel-resident-r5` (COO~G2), `wk-irpt-anlreq-102` (8 unmerged commits). With this update the
+registered worktree count on dell2 is 29, down from 57 at 02:20Z.
+
 ## Not named by the ruling, left alone
 `C:/dev/r30-control`, `C:/dev/r30-release`, `C:/dev/irpt-release-r28/wt-r30-release`, `irpt-release-r29/*` (KEEP), `wk-irpt-anlreq-102` and
 `rel-anlreq-r4` (KEEP), the plain folders (act d8ae, Andrew's). Each removed worktree leaves a ~24 KB `portal/` stub holding a symlink to the shared
