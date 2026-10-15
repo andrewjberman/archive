@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-15",
+  "phase": "INVESTIGATION",
+  "firm": "COT",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "65f9f953629719c8fd5861b7c130b103fde7e9e9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-15.account-dim-writer-pattern-read-three-firms-and-the-cottonwood-adapter.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-15.account-dim-writer-pattern-read-three-firms-and-the-cottonwood-adapter.md",
+    "group": "OTHER",
+    "vintage_commit": "65f9f953629719c8fd5861b7c130b103fde7e9e9"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~408",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~408/ACCOUNT_DIM_WRITER_PATTERN_R121.json",
+      "kind": "doc",
+      "commit_or_etag": "c88e005123f7c4a2cc1a29ef3d1d7f1723788ed8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three-firm writer-pattern record in the deliverables folder (counts, dates, labels, words); it is a record of a read, not a write, and nothing is deployed or pushed",
+      "artifact_covered_by": ["DBC121-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c88e005123f7c4a2cc1a29ef3d1d7f1723788ed8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended as bytes, IRPT_DASHBD-D2-W408-S1 and IRPT_DASHBD-D2-W408-S2, in the channel's fenced-json form; the gate passed at commit",
+      "artifact_covered_by": ["DBC121-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC121-1-AC1",
+      "criterion_verbatim": "the record is complete; each firm's partition_count and newest_date equal a fresh LIST of its builder address; every named writer file exists and names account_dim; writer_count equals the list; every named Terraform label appears in its file; a firm with no writer carries none_words and a claim of absent or inferred; the adapter is the known file and upload_refused equals what its source says; the adapter's inputs are recorded; a PATTERN_EXISTS_FOR_49F verdict has a 49 Financial writer with Terraform labels; no write is recorded. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r121/p121_bcw.py\" . DBC121-1-AC1",
+      "output_evidence": "writer file does not name account_dim: data/assets/scripts/gold/runners_49f/a00_runner.py\nDBC121-1-AC1 FAIL   (rc 1; the second run at the same commit printed the same two lines)",
+      "denominator": "1 of 1 criterion (DBC121-1-AC1); the checker stops at its first failing arm, so the decisive arm is the 49financial writer naming, 1 writer named, 1 failing; the arms the checker did not reach were measured by a worker diagnostic on the same record and all hold: inflection 2 of 2 writers name account_dim and 2 of 2 Terraform labels are in their files; cottonwood 0 writers with none_words and claim absent; adapter file present, upload_refused true and its source raises NotImplementedError; 2 input prefixes recorded; verdict PATTERN_EXISTS_FOR_49F with 1 49F writer and 5 Terraform entries; 0 vendor, write, secret or deploy calls; 31 S3 LIST requests by the worker",
+      "status": "FAIL",
+      "status_reason": "the checker's naming arm fails on the 49F writer a00_runner.py: its file names dim_account and contains no literal account_dim token, so the criterion does not hold as written; the record names the writer as measured and nothing was repaired or widened (surprise IRPT_DASHBD-D2-W408-S1)",
+      "expect": "DBC121-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant for a read cell; the checker's own negative arm (a missing writer naming account_dim) is the path this run exercised and it FAILED as measured",
+      "expected": "N/A: the order names none",
+      "observed": "N/A: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two runs of p121_bcw.py . DBC121-1-AC1 at the same commit c88e005123, each with a fresh LIST of the three builder addresses, outputs compared",
+      "observed": "run 1 and run 2 both rc 1 with the same two output lines, the decisive arm the same",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write, Terraform command, invoke, deploy, push, vendor call or secret read",
+      "reason": "the grant forbids every one of them in this cell; the record's reads block shows zero for each"
+    },
+    {
+      "item": "row-level reads of the Black Diamond silver fact prefixes and of any account_dim partition",
+      "reason": "no row data is read in this cell; grain is stated from the silver schema and the adapter's own tests and labelled as such"
+    },
+    {
+      "item": "the build cell that would copy the 49F pattern or add the Cottonwood emit",
+      "reason": "the order is the read; the build is cut after the read's ruling, and the order does not authorise it"
+    },
+    {
+      "item": "the Orion bronze pull and the 49F chain run logs",
+      "reason": "not read; the record names them under not-read"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W408-S1: the 49 Financial scheduled account_dim writer lives at gold/advi/dimensions/dim_account in the 49F bucket (571 partitions) and its writer file names dim_account with no literal account_dim token, so the criterion's naming arm fails for it as measured (a00_runner.py, advi_49f_floor.tf)",
+    "IRPT_DASHBD-D2-W408-S2: the CTO's branch-2 host, the Cottonwood holdings-performance function, is created DISABLED pending a catch-up after-read, its role reads the holdings silver only, and its handler carries no account_dim path (schedule.tf, iam.tf, handler.py)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~408/ACCOUNT_DIM_WRITER_PATTERN_R121.json",
+  "compiler_tools": [
+    {
+      "tool": "python (stdlib plus boto3, run with -I; LIST only, from a private script not committed)",
+      "invocation": "python -I list_account_dim.py and probe_bd_fact.py in the worker's private evidence folder",
+      "result": "31 S3 LIST requests; builder partition counts 0, 0, 0; 49F gold/advi dimension partitions 571 newest 2026-10-13; Cottonwood fact_allocations 144 and fact_holdings 93 partitions, newest 2026-10-13; no GET, no write"
+    },
+    {
+      "tool": "comp-find and native Grep and Read over the worktree paths",
+      "invocation": "comp-find 'account_dim' over data/assets/scripts, infra/aws/terraform, infra/aws/lambda and lib, one named folder each",
+      "result": "61 hits in 444 files, 31 hits in 761 files, 81 hits in 5768 files, 0 hits in 790 files; the denominators are printed in the record's none_words"
+    },
+    {
+      "tool": "python -I record guard (worker diagnostic, not committed)",
+      "invocation": "python -I over ACCOUNT_DIM_WRITER_PATTERN_R121.json: json parse, ASCII bytes, foreign-token and long-digit guards",
+      "result": "0 non-ASCII bytes; the one guard hit (a sibling firm token in none_words) was fixed before commit; no hit remains"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author 0.9.0_WK_IRPT_DASHBD~408 -F .scratch/msg_c15_record.txt -- <record> <investigation file>",
+      "result": "committed c88e005123 (LOCAL on wk-IRPT_DASHBD-408); message gate and naming gate PASS; to-pipeline gate OK"
+    }
+  ]
+}
