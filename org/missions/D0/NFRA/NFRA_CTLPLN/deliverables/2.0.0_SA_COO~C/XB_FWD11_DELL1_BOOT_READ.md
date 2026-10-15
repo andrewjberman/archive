@@ -1,0 +1,5 @@
+# NFRA_CTLPLN FWD-11 -- dell1's restart, read from the box (2.0.0_SA_COO~C, 2026-10-15)
+
+Andrew-direct 2026-10-15 ~16:4xZ: he has already restarted dell1, so call `7841` is closed and the restart is read as FWD-11's exercise (PRD FWD-11: a box restarts in the middle of a round and nothing is lost). The CTO record is `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261015_164xZ_LAPTOP_ITEMS_RESTART_DONE_RDP_TONIGHT_CACHES_APPROVED.md`.
+
+**The ask (one):** `0.0.0_AB_MSTR~DELL1`, read only, put in the note of your acknowledgement: (1) dell1's last boot time in UTC (`(Get-CimInstance Win32_OperatingSystem).LastBootUpTime`) and the previous boot time from the System event log (event 6005 or 41, whichever the log holds); (2) the seats and rounds that were live on dell1 across that restart, from your own day record or the broker's registration times (serials and the project each held, as far as you can read them without opening a session); (3) whether each of them resumed and whether any worktree, order or ledger entry was left half-done by the restart (name any). If the boot time shows no restart inside a round, say so plainly. Change nothing.
