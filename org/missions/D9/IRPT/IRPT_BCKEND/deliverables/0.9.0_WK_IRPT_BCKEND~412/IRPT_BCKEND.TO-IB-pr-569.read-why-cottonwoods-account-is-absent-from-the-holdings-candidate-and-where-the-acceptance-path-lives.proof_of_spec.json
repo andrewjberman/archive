@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-569",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-569.read-why-cottonwoods-account-is-absent-from-the-holdings-candidate-and-where-the-acceptance-path-lives.md",
+    "group": "OTHER",
+    "vintage_commit": "1713c505c1"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~412",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~412/IB209-1_s158_read.json",
+      "kind": "doc",
+      "commit_or_etag": "90929fab988da091d5ee2efa8eb5ad9003db3137",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only investigation record. Nothing was published, bypassed, invoked or written to AWS, so there is no deploy to verify."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~412/IB209-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "90929fab988da091d5ee2efa8eb5ad9003db3137",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output and exit codes of the three criteria, recorded in the same commit as the record."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB209-1-AC1",
+      "criterion_verbatim": "AC1 the served date, the refused candidate dates (trading days after it, recomputed against the calendar), the one condition account_lost with count 1, the lost account located against the source (two or more dates) and the directory mark",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r209/p209_cells.py\" . IB209-1-AC1",
+      "output_evidence": "OK: 3 refused candidate dates, one condition, the lost account located against the source / IB209-1-AC1 PASS / rc=0",
+      "denominator": "3 refused candidate dates, 3 per_candidate rows, 3 source partition checks",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB209-1-AC2",
+      "criterion_verbatim": "AC2 the cause with its claim and evidence, whether it clears, the acceptance path read in the code (every file and line verified by the check at HEAD) and the other firms' refusal state",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r209/p209_cells.py\" . IB209-1-AC2",
+      "output_evidence": "OK: the cause, whether it clears, the acceptance path read in the code, the other firms / IB209-1-AC2 PASS / rc=0",
+      "denominator": "3 acceptance mechanisms read at HEAD (1 guard, 3 override lines), 2 other firms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB209-1-AC3",
+      "criterion_verbatim": "AC3 notes, the six counters 0 and no long digit run (no account id)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r209/p209_cells.py\" . IB209-1-AC3",
+      "output_evidence": "OK: notes, counters 0, no long digit run / IB209-1-AC3 PASS / rc=0",
+      "denominator": "4 notes lines, 6 counters, 0 long digit runs",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutants for this read are the issuer's negatives in p209_cells.py, which the issuer ran at the dry run; the worker did not author or alter them.",
+      "expected": "Not applicable: the order names no mutant for the worker.",
+      "observed": "Not run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "No same-input pair was run: AC1 was run once against an absent record and once against the committed record, which is a change of input.",
+      "observed": "Not applicable to a read whose input is a live S3 state.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the publisher, any AWS write, and any signing or sending",
+      "reason": "The order is READ ONLY and its bounds forbid each of these."
+    },
+    {
+      "item": "Reading the candidate snapshot and the served parquet",
+      "reason": "Not needed for the refusal and lost-count facts; the cause is therefore inferred and the record says what would measure it."
+    },
+    {
+      "item": "Later dates for the self-clear question",
+      "reason": "Only dates through the refused records were read; self_clears is recorded as inferred."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W412-S1: the lost count differs between refusal records (9 on the 2026-10-09 candidate, 1 on the later ones); recorded per candidate under the amendment.",
+    "IRPT_BCKEND-D2-W412-S2: the worktree sparse grant lacked the publisher folder; added locally under amendment 1, never committed.",
+    "IRPT_BCKEND-D2-W412-S3: comp-find --corpus aws was BLOCKED in this session; the prefix was found by the canonical address and a read-only list.",
+    "IRPT_BCKEND-D2-W412-S4: the account-id mint module is outside the granted folder; read from the HEAD blob into scratch and used only for a membership test."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~412/IB209-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "aws s3api (read only, via .tools/aws)",
+      "invocation": "list-object-versions, get-object with --version-id, head-object and list-objects-v2 on the cottonwood, 49financial and inflection platinum current holdings keys and the source fact_holdings partitions",
+      "result": "3 refusal versions read; served date 2026-10-08 unchanged; lost account listed in source on 3 of 3 dates; directory 271 entries; other firms: 49financial record present, inflection absent"
+    },
+    {
+      "tool": "python -I p209_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r209/p209_cells.py\" . <criterion id>",
+      "result": "IB209-1-AC1, AC2 and AC3 PASS, rc 0 each"
+    }
+  ]
+}
