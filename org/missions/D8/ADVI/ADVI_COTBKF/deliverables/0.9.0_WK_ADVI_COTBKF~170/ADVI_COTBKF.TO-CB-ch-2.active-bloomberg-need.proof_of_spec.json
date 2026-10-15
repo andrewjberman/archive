@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ch-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-2.active-bloomberg-need.md",
+    "group": "OTHER",
+    "vintage_commit": "824588956e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~170",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round86.md",
+    "vintage_commit": "824588956e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-2.active-bloomberg-need.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/cotbkf_active_bbg_need.py",
+      "kind": "script",
+      "commit_or_etag": "a74648cb38",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "partition, cash rule, cut, rank and finish functions; shells out to b1_request.py --build --names (S3 read only); one run produced the record and the slices; no vendor call, no write outside the deliverables and the outside value folder"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_active_bbg_need.py",
+      "kind": "test",
+      "commit_or_etag": "a74648cb38",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 stub tests, made-up CUSIPs; python -m pytest: 3 passed in 0.06s"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_NEED_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "2d6ec692ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "need 3366 = 613 + 14 + 2739; cells_new 154024; 27 days; finish 2026-11-24; the builder's one JSON line verbatim; no account number, name or dollar"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_NEED_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "2d6ec692ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same figures as the record, in a table"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_ORDER.csv",
+      "kind": "config_data",
+      "commit_or_etag": "2d6ec692ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2,739 NEW CUSIPs ranked by value held then cells; columns cusip,rank,slice,cells,held_open; no dollar column"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/slices/ACTIVE_BBG_SLICE_01.json",
+      "kind": "config_data",
+      "commit_or_etag": "2d6ec692ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one of 27 request files (ADVI_COTBKF-ACTIVE-BBG-01 to -27, 154024 cells in all, largest 5856); NOT filed in the DEMQUE tree"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/slices/ACTIVE_BBG_SLICE_01.quote.json",
+      "kind": "config_data",
+      "commit_or_etag": "2d6ec692ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bbg_quote.quote output for slice 01 at the allowance 5858; the 27 quote files sit beside their slices"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "213c4e613b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W170-S1 (commit 10b049c7a2, the blocked first act), ADVI_COTBKF-D1-W170-S2 (commit 024db0a80d, AC2 cannot be met as written) and ADVI_COTBKF-D1-W170-S3 (commit 213c4e613b, the account-id scan cannot run); append-only, 27, 26 and 26 lines added"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB86ch2-AC1",
+      "criterion_verbatim": "`CB86ch2-AC1` -- the need, its partition against the two existing requests, its cells, its day rate and its finish date are printed from the record, and the partition sums. expect: partition_sums=True",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_NEED_RECORD.json',encoding='utf-8'));ok=d['in_b1']+d['in_failed14']+d['new_cusips']==d['need_cusips'];print('ACTIVE-BBG-NEED need=%d new=%d cells_new=%d cells_per_day=%d days_new=%d finish_new=%s partition_sums=%s'%(d['need_cusips'],d['new_cusips'],d['cells_new'],d['day_rate']['cells_per_day'],d['days_new'],d['finish_new'],ok))\"",
+      "output_evidence": "ACTIVE-BBG-NEED need=3366 new=2739 cells_new=154024 cells_per_day=5858 days_new=27 finish_new=2026-11-24 partition_sums=True (timeout 120, rc 0)",
+      "denominator": "3,366 need CUSIPs = 613 in B1 + 14 in failed-14 + 2,739 NEW; 0 unassigned",
+      "status": "PASS",
+      "expect": "partition_sums=True"
+    },
+    {
+      "criterion_id": "CB86ch2-AC2",
+      "criterion_verbatim": "`CB86ch2-AC2` (AMENDMENT 1, 2.0.0_SA_COO~C1: the glob was `ACTIVE_BBG_SLICE_*.json`, which also matched the `.quote.json` files item 5 places beside each slice; it now matches the slice files only) -- the slice files exist and match the record's count, no slice exceeds a day's cells, and the committed order file carries no dollar column.",
+      "method": "command",
+      "invocation": "python -c \"import json,glob,csv;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_NEED_RECORD.json',encoding='utf-8'));base='org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/';rows=list(csv.DictReader(open(base+'ACTIVE_BBG_ORDER.csv',encoding='utf-8')));s=d['slices'];fs=sorted(glob.glob(base+'slices/ACTIVE_BBG_SLICE_[0-9][0-9].json'));cusips=sum(len(json.load(open(f,encoding='utf-8'))['securities']) for f in fs);print('ACTIVE-BBG-SLICES files=%d count=%d max_cells=%d day=%d sum_cells=%d order_rows=%d slice_cusips=%d within_day=%s no_dollar_column=%s'%(len(fs),s['count'],s['max_cells'],d['day_rate']['cells_per_day'],s['sum_cells'],len(rows),cusips,s['max_cells']<=d['day_rate']['cells_per_day'],'value_held' not in rows[0]))\"",
+      "output_evidence": "ACTIVE-BBG-SLICES files=27 count=27 max_cells=5856 day=5858 sum_cells=154024 order_rows=2739 slice_cusips=2238 within_day=True no_dollar_column=True (timeout 120, rc 0). Note: slice_cusips counts securities entries (2238), not distinct CUSIPs (1732).",
+      "denominator": "27 of 27 slice files read; 154,024 of 154,024 cells within the 5,858-cell day (largest slice 5,856); 2,739 of 2,739 order rows, no dollar column",
+      "status": "PASS",
+      "expect": "within_day=True no_dollar_column=True"
+    },
+    {
+      "criterion_id": "CB86ch2-AC3",
+      "criterion_verbatim": "`CB86ch2-AC3` -- the partition, slice and ordering rules hold on stubs. expect: 3 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_bbg_need.py -q",
+      "output_evidence": "3 passed in 0.05s (timeout 120, rc 0): test_partition_sums, test_slices_never_exceed_day_and_never_split, test_rank_order_value_then_cells",
+      "denominator": "3 of 3 tests passed",
+      "status": "PASS",
+      "expect": "3 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the stub tests assert the rules on made-up CUSIPs and carry their own negative assertions",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the script run three times on the same inputs and the same day, each run's summary line compared",
+      "observed": "identical in all three runs: cells_new 154024, days_new 27, finish_new 2026-11-24, slices 27, max_cells 5856, not_priced 1006",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Yahoo pace count (DQ-t-64) and the third pace count at round close",
+      "reason": "owned by MDPF_DEMQUE DQ-t-64 and by the issuer at the round close; not part of this order"
+    },
+    {
+      "item": "Any vendor call, Bloomberg sign-in, queue draw, change to draw_hold, or file placed in the DEMQUE tree",
+      "reason": "forbidden by the order; the slices are filed by the issuer"
+    },
+    {
+      "item": "The post-commit account-id scan (test_cotbkf_no_account_ids.py) DENOMINATOR line",
+      "reason": "not run to a result on dell1: its account set is absent, the test fails closed (surprise ADVI_COTBKF-D1-W170-S3); the count-only substitute is recorded there, not a scan result"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W170-S1: the worktree's sparse-checkout cone omitted data/, so the write grant and the builder inputs were not carried; BLOCKING, first act stopped; the COO's ruling widened the cone and the order continued",
+    "ADVI_COTBKF-D1-W170-S2: CB86ch2-AC2 cannot be met as written: its glob matches the quote files item 5 places beside each slice (KeyError securities); BLOCKING, criterion stopped under the refusal clause",
+    "ADVI_COTBKF-D1-W170-S3: the post-commit account-id scan cannot run on dell1: its account set is absent, so the test fails closed (rc 1, no DENOMINATOR); OBSERVATION, INERT; a count-only substitute over 61 committed files against the 860 V2 account keys gave 0 hits"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ADVI_COTBKF.TO-CB-ch-2.active-bloomberg-need.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "cotbkf_active_bbg_need.py",
+      "invocation": "python data/assets/scripts/silver/cotbkf_active_bbg_need.py --holdings <local 2026-10-12 silver/holdings parquet> --scratch .scratch/cotbkf_run --deliverables <deliverables folder> --value-out C:/dev/_cotbkf_bbg_need_20261015/VALUE_HELD.csv --emptied-file .scratch/emptied.txt --baseline .scratch/baseline.json",
+      "result": "rc 0; need 3366, new 2739, in_b1 613, in_failed14 14, cells_new 154024, days_new 27, finish_new 2026-11-24, slices 27, max_cells 5856, not_priced 1006"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_bbg_need.py -q",
+      "result": "3 passed in 0.06s"
+    }
+  ]
+}
