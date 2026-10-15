@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-4",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "463b62f4da"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "463b62f4da",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-4.cottonwood-gold-producer-read-prior-day-input-and-rewrite-times.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~403",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~403",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~403/PRODUCER_READ_R115.json",
+      "kind": "doc",
+      "commit_or_etag": "89ec40ff5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The producer read record, carried by 89ec40ff5d. Read-only work: no AWS write, no invoke, no deploy, no push, no vendor call, no secret read. The record is unchanged since the commit (sha256 088e3ba4...)."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "89ec40ff5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_DASHBD-D2-W403-S1 (OBSERVATION, INERT), IRPT_DASHBD-D2-W403-S2 (OBSERVATION, ARMED, disarm owner 1.0.0_SA_CTO) and IRPT_DASHBD-D2-W403-S3 (OBSERVATION, INERT) appended as bytes by 89ec40ff5d. The file is ASCII."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC115-1-AC1",
+      "criterion_verbatim": "DBC115-1-AC1 -- the record is complete; the verdict is in the enum and, unless NOT_ESTABLISHED, its code_path exists in the repo; each recorded manifest key set equals a fresh read of that manifest and two manifests are given; the prior trading day equals the library calendar's and its silver presence equals a fresh LIST; for each of the three dates the silver and gold instants equal fresh reads, the version count equals a fresh count, and gold_after_silver is the comparison of the two instants; no write is recorded. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r115/p115_bcw.py\" . DBC115-1-AC1",
+      "output_evidence": "Run from the worktree root on the record at 89ec40ff5d, twice: stdout 'DBC115-1-AC1 PASS', rc 0 both runs (the stdout also carries the calendar WARN line). Mutant control: the same record with rewrite 2026-09-25 gold_after_silver set to false gives stdout 'gold_after_silver is not the comparison of the two instants for 2026-09-25', then 'DBC115-1-AC1 FAIL', rc 1; the original record was restored byte-equal (sha256 088e3ba4...) and graded PASS again.",
+      "denominator": "2 of 2 runs PASS (rc 0); 2 of 2 manifest key sets equal a fresh GET; 1 of 1 prior trading day and silver presence equal fresh reads; 3 of 3 rewrite dates with silver instant, gold instant, version count and gold_after_silver equal fresh reads; 1 of 1 mutant FAIL as expected",
+      "status": "PASS",
+      "expect": "DBC115-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same record with rewrite 2026-09-25 gold_after_silver set to false, graded by the official checker",
+      "expected": "gold_after_silver FAIL",
+      "observed": "gold_after_silver is not the comparison of the two instants for 2026-09-25; DBC115-1-AC1 FAIL, rc 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root with the same arguments",
+      "observed": "two runs, each stdout 'DBC115-1-AC1 PASS', rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the producer in any mode, or a re-run of any gold date",
+      "reason": "The order forbids it. The producer was read, not run."
+    },
+    {
+      "item": "get-function of a Lambda and a log-group describe",
+      "reason": "Not made: the verdict is AD_HOC, so no Lambda is named. The order allows one get-function only for a named function."
+    },
+    {
+      "item": "Verdict confirmation from a run log or the writer's identity",
+      "reason": "No run log was read; the AD_HOC verdict is inferred from the repo and the manifest and version evidence, and the record says so."
+    },
+    {
+      "item": "Installing pandas_market_calendars",
+      "reason": "The order grants no install. The library answered from its hardcoded fallback; the answers used are the same under both calendars."
+    },
+    {
+      "item": "Version history of gold and silver dates other than the three named",
+      "reason": "Outside the order's reads; the record covers the three dates the cell names."
+    },
+    {
+      "item": "Any write, push, deploy or vendor call",
+      "reason": "The order grants none; none was made."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W403-S1: OBSERVATION, INERT: the TO names handler.py as the scheduled wrapper of the Cottonwood gold producer, but the schedule that invokes it fires another declared channel, and no schedule or function in the repo names the Cottonwood source.",
+    "IRPT_DASHBD-D2-W403-S2: OBSERVATION, ARMED (disarm owner 1.0.0_SA_CTO): the Cottonwood gold manifests carry schema 1.1 and lack two keys that HEAD's producer writes, so the writer was an earlier copy of the producer, not HEAD's file.",
+    "IRPT_DASHBD-D2-W403-S3: OBSERVATION, INERT: this worktree's interpreter has no pandas_market_calendars, so the library calendar answers from its hardcoded NYSE fallback; the answers used here are the same under both."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p115_bcw.py (DBC115-1-AC1)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r115/p115_bcw.py\" . DBC115-1-AC1",
+      "result": "PASS, rc 0 on two runs; mutant FAIL rc 1; restored PASS rc 0"
+    },
+    {
+      "tool": "lib/trading_calendar.py prev_trading_day",
+      "invocation": "python -I -c with sys.path at the worktree root, prev_trading_day(2026-06-09)",
+      "result": "2026-06-08 (hardcoded fallback calendar; WARN printed)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (surprise-row-gate, to-pipeline-gate, naming-gate)",
+      "invocation": "bash .tools/safe-commit.sh ... -- record and investigation paths (commit 89ec40ff5d)",
+      "result": "surprise-row-gate OK: 3 new rows; to-pipeline-gate OK; msg-verify MATCH; rc 0"
+    }
+  ]
+}
