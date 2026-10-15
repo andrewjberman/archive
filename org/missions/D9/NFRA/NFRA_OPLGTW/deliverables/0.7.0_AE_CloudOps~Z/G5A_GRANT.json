@@ -1,0 +1,163 @@
+{
+ "policy_name": "gateway-global-etfs-read-policy",
+ "policy_name_builder": "lib/opal_naming.py name(\"gateway\", \"global\", \"etfs-read\", \"policy\")",
+ "bucket": "opal-data-etfs",
+ "role": "aws_iam_role.int_reader (gateway-global-internal-reader-role)",
+ "statements": [
+  {
+   "sid": "InternalReaderEtfsObjectRead",
+   "actions": [
+    "s3:GetObject"
+   ],
+   "resources": [
+    "arn:aws:s3:::opal-data-etfs/daily/*",
+    "arn:aws:s3:::opal-data-etfs/gold/book/*",
+    "arn:aws:s3:::opal-data-etfs/gold/holding/*",
+    "arn:aws:s3:::opal-data-etfs/platinum/etf_ownership_dashboard.json",
+    "arn:aws:s3:::opal-data-etfs/platinum/reports/*",
+    "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/*",
+    "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/platinum/page/*",
+    "arn:aws:s3:::opal-data-etfs/silver/holdings/*",
+    "arn:aws:s3:::opal-data-etfs/silver/netassets_daily.parquet"
+   ]
+  },
+  {
+   "sid": "InternalReaderEtfsListConfined",
+   "actions": [
+    "s3:ListBucket"
+   ],
+   "resources": [
+    "arn:aws:s3:::opal-data-etfs"
+   ],
+   "condition": {
+    "StringLike": {
+     "s3:prefix": [
+      "daily/*",
+      "gold/book/*",
+      "gold/holding/*",
+      "platinum/reports/*",
+      "rivalfunds/etfs/gold/*",
+      "rivalfunds/etfs/platinum/page/*",
+      "silver/holdings/*"
+     ]
+    }
+   },
+   "why": "the tools list a partner's folder and the report months; a ListBucket without the s3:prefix condition would be bucket-wide enumeration, a larger permission than reading the objects"
+  }
+ ],
+ "prefixes": [
+  "daily/",
+  "gold/book/",
+  "gold/holding/",
+  "platinum/etf_ownership_dashboard.json",
+  "platinum/reports/",
+  "rivalfunds/etfs/gold/",
+  "rivalfunds/etfs/platinum/page/",
+  "silver/holdings/",
+  "silver/netassets_daily.parquet"
+ ],
+ "address_kinds": {
+  "daily/": "prefix",
+  "gold/book/": "prefix",
+  "gold/holding/": "prefix",
+  "platinum/etf_ownership_dashboard.json": "object",
+  "platinum/reports/": "prefix",
+  "rivalfunds/etfs/gold/": "prefix",
+  "rivalfunds/etfs/platinum/page/": "prefix",
+  "silver/holdings/": "prefix",
+  "silver/netassets_daily.parquet": "object"
+ },
+ "objects_granted_exactly": [
+  "platinum/etf_ownership_dashboard.json",
+  "silver/netassets_daily.parquet"
+ ],
+ "object_vs_prefix_note": "a row addressing a single OBJECT gets its own ARN with NO trailing star and contributes no s3:prefix to the ListBucket condition. Appending a slash to such a row -- which this generator did in its first run -- yields <key>/* and matches NOTHING: an under-grant visible only as a runtime AccessDenied.",
+ "prefixes_before_collapse": [
+  "daily/",
+  "gold/book/",
+  "gold/holding/",
+  "platinum/etf_ownership_dashboard.json",
+  "platinum/reports/",
+  "rivalfunds/etfs/gold/",
+  "rivalfunds/etfs/platinum/page/",
+  "silver/holdings/",
+  "silver/netassets_daily.parquet"
+ ],
+ "prefixes_dropped_as_redundant": [],
+ "provenance": {
+  "daily/": [
+   "opal_data_etfs_gold_daily_partner_ownership (gold, prefix)"
+  ],
+  "gold/book/": [
+   "opal_data_etfs_gold_book (gold, prefix)"
+  ],
+  "gold/holding/": [
+   "opal_data_etfs_gold_holding (gold, prefix)"
+  ],
+  "platinum/etf_ownership_dashboard.json": [
+   "opal_data_etfs_platinum_etf_ownership_dashboard (platinum, object)"
+  ],
+  "platinum/reports/": [
+   "opal_data_etfs_platinum_monthly_ownership_report (platinum, prefix)"
+  ],
+  "rivalfunds/etfs/gold/": [
+   "opal_data_etfs_gold_buying_trend.key_template",
+   "opal_data_etfs_gold_buying_trend.prefix",
+   "opal_data_etfs_gold_canonical_shape.key_template",
+   "opal_data_etfs_gold_canonical_shape.prefix",
+   "opal_data_etfs_gold_corporate_actions.key_template",
+   "opal_data_etfs_gold_corporate_actions.prefix",
+   "opal_data_etfs_gold_flow_reconciliation.key_template",
+   "opal_data_etfs_gold_flow_reconciliation.prefix",
+   "opal_data_etfs_gold_holding_contribution.key_template",
+   "opal_data_etfs_gold_holding_contribution.prefix",
+   "opal_data_etfs_gold_holdings_coverage.key_template",
+   "opal_data_etfs_gold_holdings_coverage.prefix",
+   "opal_data_etfs_gold_input_census.key_template",
+   "opal_data_etfs_gold_input_census.prefix",
+   "opal_data_etfs_gold_peer_group_map.key_template",
+   "opal_data_etfs_gold_peer_group_map.prefix",
+   "opal_data_etfs_gold_research_hypotheses.key_template",
+   "opal_data_etfs_gold_research_hypotheses.prefix",
+   "opal_data_etfs_gold_security_market.key_template",
+   "opal_data_etfs_gold_security_market.prefix",
+   "opal_data_etfs_gold_security_names.key_template",
+   "opal_data_etfs_gold_security_names.prefix",
+   "opal_data_etfs_gold_security_universe.key_template",
+   "opal_data_etfs_gold_security_universe.prefix",
+   "opal_data_etfs_gold_trade_schedule.key_template",
+   "opal_data_etfs_gold_trade_schedule.prefix"
+  ],
+  "rivalfunds/etfs/platinum/page/": [
+   "opal_data_etfs_platinum_rivalfunds_page (platinum, prefix)",
+   "opal_data_etfs_platinum_rivalfunds_page.key_template",
+   "opal_data_etfs_platinum_rivalfunds_page.prefix"
+  ],
+  "silver/holdings/": [
+   "opal_data_etfs_silver_holdings (silver, prefix)"
+  ],
+  "silver/netassets_daily.parquet": [
+   "opal_data_etfs_silver_netassets_daily (silver, object)"
+  ]
+ },
+ "rivalfunds_prefixes_derived": [
+  "rivalfunds/etfs/gold/",
+  "rivalfunds/etfs/platinum/page/"
+ ],
+ "rivalfunds_note": "granted now under the CTO's one-ask ruling (msg 34198) although NO tool of this release reads them yet, so no second ask is needed later -- derived from the catalog rows whose address sits under rivalfunds/etfs/, never typed",
+ "firm_tokens_checked": [
+  "49financial",
+  "cottonwood",
+  "demo",
+  "inflection",
+  "mdpf"
+ ],
+ "denominator": {
+  "named_entities": 8,
+  "catalog_entities": 340,
+  "prefixes_before_collapse": 9,
+  "prefixes_granted": 9
+ },
+ "method": "yaml.safe_load over the COMMITTED catalog (git show HEAD:<path>), every mapping carrying an `entity` key collected at any depth, each named row's own `prefix` (or the first segment of key_template) kept, the rivalfunds prefixes derived from any opal_data_etfs_* row addressed under rivalfunds/etfs/, then collapsed to the minimal covering set with every drop asserted covered",
+ "no_grant_for": "mdpf_get_category_views reads platinum/mdpf/ of the PORTAL bucket, which the existing internal-reader policy already covers via platinum/* -- so it gets no statement here"
+}
