@@ -26,3 +26,8 @@ produced report's figures and a non-empty transcript source". Read-only; nothing
 - PRD C-KIMI (`org/missions/D9/NFRA/NFRA_TRNSPT/prd/NFRA_TRNSPT_PRD.md`) limits the model input to abstract fields. A report FIGURE (a return, a weight) is a client figure; which ones may go to the outside model is the contract's.
 - PRD C-SLICE draws precedents from the commentary gold (emails). The transcript source the ruling names is the Teams silver, a different corpus under C-WIPE-GATE and the hold/held-out rules.
 - Sent to `1.0.0_SA_CTO~DELL2` as one ask; no order is cut until it is answered.
+
+## Addendum 2026-10-15 ~15:2xZ: what the 91 Teams silver objects are (key names only, no content read)
+
+Listing of `teams/transcripts/silver/`, counted by first path segment: `research_meeting` 29, `chat_threads` 28, `monday_meeting` 17, `asset_management_ic` 9, `ocio_ic` 8 (sum 91).
+These are object counts, not row counts and not a count of rows clear of the held-out flag; the hold and held-out state is in the rows, which this read did not open.
