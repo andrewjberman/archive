@@ -158,7 +158,7 @@ def row_problems(c, row):
                 out.append("%s is null" % col["name"])
     for o in c["optional_columns"]:
         req = o.get("required_when")
-        if isinstance(req, dict) and all(row.get(k) == val for k, val in req.items()) and row.get(o["name"]) is None:
+        if isinstance(req, dict) and all(row.get(k) == val for k, val in req.items()) and row.get(o["name"]) is None and not (o.get("required_unless_absent") is True and absent):
             out.append("%s is required" % o["name"])
     claim = row.get("flow_claim")
     if not absent:
