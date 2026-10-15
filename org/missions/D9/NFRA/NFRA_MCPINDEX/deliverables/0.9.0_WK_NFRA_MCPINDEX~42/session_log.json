@@ -1,0 +1,69 @@
+{
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-18",
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~42",
+  "worktree": "C:/tmp/wk-r17-42",
+  "branch": "wk-NFRA_MCPINDEX-42",
+  "cut_from": "2d9d5c4503",
+  "steps": [
+    {
+      "step": "first act: branch and tree paths",
+      "command": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK",
+      "output": "wk-NFRA_MCPINDEX-42 / TREE-OK"
+    },
+    {
+      "step": "premise: catalog row count and empty nl_tags in the committed catalog",
+      "command": "python -c (yaml load of infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml, count rows and empty nl_tags)",
+      "output": "rows 304 empty 44 property-key 0 basis-key 0; by section harvest_datasets 32, silver_datasets 7, portal_datasets 5"
+    },
+    {
+      "step": "write derive_nl_tags.py, the infer_nl_tags helper, three call sites, tests",
+      "command": "Write / Edit on workflows/atom_decomposition/{derive_nl_tags.py,emit_catalog_v02.py,tests/test_derive_nl_tags.py}",
+      "output": "helper infer_nl_tags after unquote_carrier_spans; call sites: silver loop after unquote_carrier_spans, portal_datasets loop before dump, harvest_datasets loop before dump"
+    },
+    {
+      "step": "unit tests (step 1)",
+      "command": "timeout 120 python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests",
+      "output": "201 passed in 12.60s (rc=0)"
+    },
+    {
+      "step": "regenerate catalog in worktree, NOT committed (step 2)",
+      "command": "timeout 120 python workflows/atom_decomposition/emit_catalog_v02.py",
+      "output": "rc=0; SILVER DATASET ENTRIES 226 emitted (221 silver_datasets, 5 portal_datasets), 0 refused; NEED ENTRIES 35 emitted; HARVEST ROWS 78 emitted, 0 refused; TOOL INDEX N=93; 0 WARN lines; no EMIT REFUSED"
+    },
+    {
+      "step": "AC1",
+      "command": "timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/t1.AC1.sh; echo \"exit=$?\"",
+      "output": "DENOMINATOR rows 304; with a non-empty nl_tags 304 of 304 / RESULT: PASS / exit=0"
+    },
+    {
+      "step": "AC2",
+      "command": "timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/t1.AC2.sh; echo \"exit=$?\"",
+      "output": "DENOMINATOR base rows 304, new rows 304; empty in the base 44; marked inferred now 44 / RESULT: PASS / exit=0"
+    },
+    {
+      "step": "AC3",
+      "command": "timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/t1.AC3.sh; echo \"exit=$?\"",
+      "output": "DENOMINATOR inferred rows 44; bad 0 / RESULT: PASS / exit=0"
+    },
+    {
+      "step": "mutant control: derive module with TAG_CAP 4 via T1_DERIVE",
+      "command": "sed TAG_CAP=5 -> 4 into .scratch/mutant_cap4_derive_nl_tags.py; T1_DERIVE=.scratch/mutant_cap4_derive_nl_tags.py timeout 120 python t1_check.py ac3",
+      "output": "DENOMINATOR inferred rows 44; bad 44 / CHECK FAIL: derive_tags reproduces and satisfies the rules on 0 of 44 inferred rows / RESULT: FAIL (rc=1)"
+    },
+    {
+      "step": "determinism control: derive_tags over 304 rows under two hash seeds",
+      "command": "PYTHONHASHSEED=0 and PYTHONHASHSEED=4242 timeout 120 python .scratch/determinism_t1.py <worktree>",
+      "output": "rows 304 sha256 31475595db6265684d5d7cd11193b7f2cc45837c32978ed6df730cbe08bd6ef6 (both seeds, identical)"
+    },
+    {
+      "step": "unit test count for the new file",
+      "command": "timeout 120 python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests/test_derive_nl_tags.py",
+      "output": "12 passed in 0.06s (rc=0)"
+    }
+  ],
+  "not_done": [
+    "DATA_CATALOG.yaml was regenerated in the worktree and is not committed (the issuer regenerates and lands it at the drain).",
+    "The task-order status flip was not written: the file is outside the <paths> write grant (surprise row NFRA_MCPINDEX-Z-W42-S1).",
+    "The gateway suite was not run (the issuer runs it by failing-ID delta after the merge)."
+  ]
+}
