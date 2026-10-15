@@ -1,0 +1,182 @@
+{
+  "base": "5aefc342bfd984837f3320785a843ef2a2f71185",
+  "cell": "AR-g-53",
+  "not_read": [
+    "The live system: no AWS call. The deployed irpt-ycharts-generate-role, the opal-tickets table, the deployed ticket_center and resident bytes, and the instance i-0167fd745ad906a66 were not read. The worktree is the reference.",
+    "portal/src/pages/TicketCenter/analysisRequest.ts was read from the on-disk portal checkout. portal is a gitlink (git ls-files -s portal: 160000 e0b033253b) and git status shows ' M portal', so the on-disk bytes were not checked against the gitlink commit. Those cites are for the caller shape only.",
+    "The firm equality between the ticket's requester.firm and the accepted owner firm_id. interactive_access.py:87 sets firm_id from self.data_firm, which was not read. A firm check is NOT claimed as part of the rule.",
+    "The body of the resident_installed.py opal_stores factory beyond lines 262-285, and the body of resolve_owner (submission_service.py:109 is cited by line only).",
+    "The infra/logic registry for a name() row for the table opal-tickets was not searched. The generate.tf statement uses a literal table name, as generate.tf:197 does for opal-users-v2.",
+    "The ops/owned_report.py:76, ycharts/research/opal_packager.py:158 and resident_worker.py:240, 385 readers of the record ticket_id were cited by grep line only, not read in context.",
+    "No test was run. Test pins are cited by line and text only.",
+    "The ticket_center CREATE handler beyond lines 1343-1345 and 1373-1377, and the authorizer's firm resolution (_create_firm_allowed at lambda_function.py:383) were not read in full.",
+    "The ticket_center's 'PACKAGE' authorization path (package_ticket, lambda_function.py:1738-1743) was read by grep only."
+  ],
+  "q1": {
+    "can_read_today": "no",
+    "table": "opal-tickets (infra/aws/terraform/ticket-center/main.tf:48, aws_dynamodb_table.opal_tickets). The ticket service reads it through the TABLE_NAME env (lambda_function.py:65). No investor-reporting grant names it: grep 'opal-tickets|opal_tickets|ticket-api|svc-irpt-packager|ticketing' over infra/aws/terraform/investor-reporting found one hit, the packager secret at ycharts/resident.tf:171, and no DynamoDB grant.",
+    "key_shape": "hash key ticket_id (main.tf:50), no range key; GSI status-index on status / created_at (main.tf:65-68). The ticket_id value has the shape TCK-YYYYMMDD-hhhhhhhh (lambda_function.py:613). The exact GetItem a confirmation would make is the call the ticket service makes at lambda_function.py:1520, on the table opal-tickets: table.get_item(Key={'ticket_id': <client ticket_id>}).",
+    "type_marker": "ticket_type attribute, set by _new_item (lambda_function.py:617 '\"ticket_type\": ttype,'). The value 'analysis_request' is the TYPE_DEFINITIONS key at lambda_function.py:108.",
+    "owner_marker": "requester.email (a map: requester.email, requester.name, requester.firm). On the dashboard submit path it is the authorizer email (lambda_function.py:1296, requester = {'email': actor['email'], ...}); that path sets created_by=SVC_TICKET_FORM and source='dashboard_form:<firm>' (lambda_function.py:1299). The authorizer email is lower-cased (lambda_function.py:336). NOT the filer on a CREATE: there requester.email comes from the body (lambda_function.py:1373). The source prefix is reserved for the submit path (lambda_function.py:1344-1345).",
+    "role_evidence": [
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 63, "text": "resource \"aws_iam_role\" \"generate\" {"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 64, "text": "name        = \"${local.generate_function_name}-role\""},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 112, "text": "[\"dynamodb:GetItem\", \"dynamodb:PutItem\", \"dynamodb:UpdateItem\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 113, "text": "outputs.tables.jobs}\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 119, "text": "Action   = [\"dynamodb:GetItem\", \"dynamodb:PutItem\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 120, "text": "outputs.tables.requests}\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 196, "text": "Action   = [\"dynamodb:Query\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 197, "text": "table/opal-users-v2/index/email-index\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 202, "text": "Action   = [\"dynamodb:GetItem\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 203, "text": "table/opal-users-v2\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 210, "text": "table/opal-partner-${f.firm_id}\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 230, "text": "Action   = [\"dynamodb:Scan\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 231, "text": "table/etf-classifications\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 401, "text": "environment_variables = {"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 406, "text": "IRPT_REQUESTS_TABLE"}
+    ],
+    "evidence": [
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 45, "text": "State: DynamoDB TABLE_NAME (pk ticket_id; GSI status-index status/created_at)."},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 65, "text": "TABLE_NAME = os.environ[\"TABLE_NAME\"]"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 613, "text": "uuid.uuid4().hex[:8]"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 617, "text": "\"ticket_type\": ttype,"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 1520, "text": "_table.get_item(Key={\"ticket_id\": tid})"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 1296, "text": "requester = {\"email\": actor[\"email\"], \"name\": actor[\"name\"], \"firm\": firm}"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 1299, "text": "created_by=SVC_TICKET_FORM, source=SUBMIT_SOURCE_PREFIX + firm,"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 1344, "text": "if source.startswith(SUBMIT_SOURCE_PREFIX):"},
+      {"file": "infra/aws/terraform/ticket-center/main.tf", "line": 47, "text": "resource \"aws_dynamodb_table\" \"opal_tickets\" {"},
+      {"file": "infra/aws/terraform/ticket-center/main.tf", "line": 48, "text": "name         = \"opal-tickets\""},
+      {"file": "infra/aws/terraform/ticket-center/main.tf", "line": 50, "text": "hash_key     = \"ticket_id\""},
+      {"file": "infra/aws/terraform/ticket-center/main.tf", "line": 337, "text": "TABLE_NAME = aws_dynamodb_table.opal_tickets.name"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 171, "text": "opal/ticketing/svc-irpt-packager-??????"}
+    ]
+  },
+  "q2": {
+    "can_read_today": "no",
+    "table": "not found: no opal-tickets grant on the resident runner role. Its DynamoDB tables are irpt-jobs and irpt-requests only (resident.tf:55-58; ycharts/iam.tf:117-118).",
+    "key_shape": "not found as a grant. If opal-tickets were granted, the key would be the same hash key ticket_id (ticket-center main.tf:50).",
+    "type_marker": "not found in the runner grants. The marker would be ticket_type (lambda_function.py:617) if the table were read.",
+    "owner_marker": "not found in the runner grants. The marker would be requester.email (lambda_function.py:1296) on the submit path.",
+    "role_evidence": [
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf", "line": 68, "text": "resource \"aws_iam_role\" \"runner\" {"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf", "line": 69, "text": "name = \"irpt-ycharts-runner-role\""},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf", "line": 178, "text": "resource \"aws_iam_instance_profile\" \"runner\" {"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf", "line": 179, "text": "name = \"irpt-ycharts-runner-profile\""},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/instance.tf", "line": 62, "text": "resource \"aws_instance\" \"runner\" {"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/instance.tf", "line": 67, "text": "iam_instance_profile        = aws_iam_instance_profile.runner.name"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 2, "text": "ONE supervised process on i-0167fd745ad906a66 replaces the"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 61, "text": "resource \"aws_iam_role_policy\" \"runner_resident\" {"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 63, "text": "role = aws_iam_role.runner.id"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh", "line": 26, "text": "[[ \"$instance_id\" == i-0167fd745ad906a66 ]]"}
+    ],
+    "evidence": [
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 56, "text": "outputs.tables.jobs}\","},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 57, "text": "outputs.tables.requests}\","},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 85, "text": "\"dynamodb:ConditionCheckItem\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 86, "text": "Resource = local.resident_table_arns"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 91, "text": "Action   = [\"dynamodb:TransactWriteItems\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/iam.tf", "line": 117, "text": "Action   = [\"dynamodb:GetItem\", \"dynamodb:UpdateItem\"]"},
+      {"file": "infra/aws/terraform/investor-reporting/core/dynamodb.tf", "line": 29, "text": "name         = \"irpt-requests\""},
+      {"file": "infra/aws/terraform/investor-reporting/core/dynamodb.tf", "line": 61, "text": "name         = \"irpt-jobs\""},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 189, "text": "\"GET\":         frozenset({INTERNAL}),"},
+      {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "line": 204, "text": "\"PACKAGE\":     frozenset(),"},
+      {"file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py", "line": 252, "text": "call(\"GET\", f\"/api/scoped/tickets/{tid}\", SVC_INTAKE)[0], 403)"}
+    ]
+  },
+  "q3": {
+    "field": "ticket_confirmed (proposed name). A boolean, set true ONLY by the server when a GetItem on opal-tickets by the client's ticket_id passes the rule in q4.forgeability. Absent otherwise. It is never read from the client.",
+    "client_forbidden_evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py", "line": 16, "text": "PUBLIC_FIELDS = CUSTODY_FIELDS | {\"input_id\", \"ticket_id\", \"commentary_requested\"}"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py", "line": 51, "text": "if set(payload) - PUBLIC_FIELDS:"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py", "line": 52, "text": "raise SubmissionRefused(\"UNKNOWN_OR_SERVER_OWNED_FIELD\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 104, "text": "browser = validate_public_request(payload)"}
+    ],
+    "schema_evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 106, "text": "def accept(self, owner, browser, composition_ref, *, ingestion_revision, destination_revision,"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 133, "text": "\"owner\": owner, \"browser_sha256\": digest(browser),"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 136, "text": "if \"ticket_id\" in browser:"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 137, "text": "record[\"ticket_id\"] = browser[\"ticket_id\"]"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 145, "text": "prior = self.acceptance.accept("},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 148, "text": "acting_principal_id=principal[\"principal_id\"])"}
+    ],
+    "schema_note": "No JSON schema for the accepted record exists in the investor-reporting tree: grep 'acting_principal_id' (non-test) hits three .py files only (submission_service.py, acceptance.py, intake/uploads.py). The record is a dict built in DynamoAcceptance.accept (acceptance.py:129-137). A new key is admitted by adding it to that builder, after acceptance.py:137.",
+    "readers": [
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 168, "text": "OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\", \"fwd1-staff-r41a@opal.invalid\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 175, "text": "def producer_for(record):"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 177, "text": "only: the queue message is closed and carries no producer field, and nothing a client sends is consulted.\"\"\""},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 180, "text": "return \"OPAL\" if isinstance(principal_id, str) and principal_id in OPAL_PRODUCER_PRINCIPALS else \"YCHARTS\""},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 750, "text": "# R6: one producer per request, chosen here from the accepted principal and nowhere else."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 751, "text": "if producer_for(record) == \"OPAL\":"},
+      {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 274, "text": "if producer_for(record) != \"OPAL\":"},
+      {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 275, "text": "raise PermissionError(\"OPAL_PRINCIPAL_NOT_LISTED\")"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py", "line": 770, "text": "assert resident_worker.OPAL_PRODUCER_PRINCIPALS == ('andrew@opalinvest.com', 'fwd1-staff-r41a@opal.invalid')"},
+      {"file": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_r31_source.py", "line": 85, "text": "assert resident_worker.OPAL_PRODUCER_PRINCIPALS == (\"andrew@opalinvest.com\", NEW)"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_producer_actor.py", "line": 31, "text": "monkeypatch.setattr(resident_worker, \"OPAL_PRODUCER_PRINCIPALS\", (LISTED,))"},
+      {"file": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py", "line": 227, "text": "monkeypatch.setattr(resident_worker, \"OPAL_PRODUCER_PRINCIPALS\", (LISTED,))"}
+    ]
+  },
+  "q4": {
+    "A": {
+      "files": [
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 109, "text": "principal, owner = self.resolve_owner(browser, request, scope, event, ctx)"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 145, "text": "prior = self.acceptance.accept("},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 106, "text": "def accept(self, owner, browser, composition_ref, *, ingestion_revision, destination_revision,"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 137, "text": "record[\"ticket_id\"] = browser[\"ticket_id\"]"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 180, "text": "return \"OPAL\" if isinstance(principal_id, str) and principal_id in OPAL_PRODUCER_PRINCIPALS else \"YCHARTS\""},
+        {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 120, "text": "outputs.tables.requests}\"]"},
+        {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 406, "text": "IRPT_REQUESTS_TABLE"}
+      ],
+      "iam_diff": "--- a/infra/aws/terraform/investor-reporting/ycharts/generate.tf\n+++ b/infra/aws/terraform/investor-reporting/ycharts/generate.tf\n@@ after line 120 (inside aws_iam_role_policy.generate, statement list) @@\n+      {\n+        # AR-g-53 placement A: ONE GetItem by key on the ticket table, to CONFIRM a client ticket_id at acceptance.\n+        Sid      = \"ConfirmTicketByKeyAtAcceptance\"\n+        Effect   = \"Allow\"\n+        Action   = [\"dynamodb:GetItem\"]\n+        Resource = [\"arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/opal-tickets\"]\n+      },\n@@ environment_variables (after line 406), optional @@\n+    IRPT_TICKETS_TABLE             = \"opal-tickets\"\n(Not applied. The table name is a literal here, as generate.tf:197 is for opal-users-v2; a name() registry row would replace it if one exists, not checked.)",
+      "owner_seats": [
+        "IRPT_ANLREQ, investor-reporting ycharts/generate code (submission_service.py, acceptance.py, resident_worker.py producer_for), issued by 2.0.0_SA_COO~G2",
+        "TCKT_VNEXT, owns the opal-tickets table and ticket_center. A's rule relies on lambda_function.py:180, :1296, :1344-1345 being stable.",
+        "CloudOps, owns the IAM statement in ycharts/generate.tf (per the cell's ownership statement)"
+      ],
+      "pinning_tests": [
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ticket_binding.py", "line": 78, "text": "self.assertEqual(record[\"ticket_id\"], TICKET)"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_producer_actor.py", "line": 43, "text": "assert resident_worker.producer_for(record(ADVISOR, LISTED)) == \"OPAL\""},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py", "line": 772, "text": "assert resident_worker.producer_for({'owner': {'principal_id': 'svc-irpt-analysis@opalinvest.com'}}) == 'YCHARTS'"},
+        {"file": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_r31_source.py", "line": 76, "text": "def test_producer_for_the_new_address_is_opal_and_every_other_address_is_ycharts():"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py", "line": 149, "text": "monkeypatch.setattr(resident_worker, \"OPAL_PRODUCER_PRINCIPALS\", (actor,) if listed else (INVENTED_LISTED,))"}
+      ]
+    },
+    "B": {
+      "files": [
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 175, "text": "def producer_for(record):"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 751, "text": "if producer_for(record) == \"OPAL\":"},
+        {"file": "infra/aws/lambda/investor-reporting/reports/resident_installed.py", "line": 280, "text": "stores = {\"dynamodb\": dynamodb, \"s3\": s3,"},
+        {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 87, "text": "},"},
+        {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 61, "text": "resource \"aws_iam_role_policy\" \"runner_resident\" {"}
+      ],
+      "iam_diff": "--- a/infra/aws/terraform/investor-reporting/ycharts/resident.tf\n+++ b/infra/aws/terraform/investor-reporting/ycharts/resident.tf\n@@ after line 87 (inside aws_iam_role_policy.runner_resident, statement list) @@\n+      {\n+        # AR-g-53 placement B: ONE GetItem by key on the ticket table, from the resident host's runner role.\n+        Sid      = \"ConfirmTicketByKeyAtChoice\"\n+        Effect   = \"Allow\"\n+        Action   = [\"dynamodb:GetItem\"]\n+        Resource = [\"arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/opal-tickets\"]\n+      },\n(Not applied. The role is aws_iam_role.runner, ycharts/iam.tf:68-69; the grant is a CloudOps act.)",
+      "owner_seats": [
+        "IRPT_ANLREQ, resident code (resident_worker.py producer_for becomes a live read; resident_installed.py opal_stores)",
+        "CloudOps, owns the IAM statement in ycharts/resident.tf (per the cell)",
+        "TCKT_VNEXT, owns the opal-tickets table and ticket_center (per the cell)"
+      ],
+      "pinning_tests": [
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py", "line": 709, "text": "monkeypatch.setattr(resident_worker, 'OPAL_PRODUCER_PRINCIPALS', (actor,) if listed else (INVENTED_LISTED,))"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py", "line": 758, "text": "assert resident_worker.producer_for(r.record) == 'YCHARTS'"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py", "line": 786, "text": "assert resident_worker.producer_for({'owner': {'principal_id': INVENTED_LISTED}, **unflagged}) == 'OPAL'"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py", "line": 236, "text": "assert resident_worker.producer_for(r.record) == \"YCHARTS\""},
+        {"file": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_r31_source.py", "line": 110, "text": "assert resident_worker.producer_for({\"owner\": {\"principal_id\": \"andrew@opalinvest.com\"}}) == \"OPAL\""}
+      ]
+    },
+    "forgeability": "THE RULE the confirmation must check, all of it, on a GetItem by the client's ticket_id: (1) the item exists; (2) item.ticket_type == 'analysis_request' (lambda_function.py:617); (3) item.source starts with 'dashboard_form:' (lambda_function.py:1299, :1344-1345), the only path whose requester.email is server-derived (lambda_function.py:1296; a CREATE body cannot carry the prefix and its requester.email is body-supplied at lambda_function.py:1373); (4) lower(item.requester.email) == owner.principal_id, the session-verified subject (served.py:334; interactive_access.py:87). Clause (4) is the filer match: a staff user cannot name a real ticket filed by another person, because that ticket's requester.email differs from the caller's session email. Clause (3) is what stops a staff user naming a ticket that a svc CREATE stamped with the staff user's email. A ticket_id that fails any clause leaves ticket_confirmed absent, and producer_for returns YCHARTS (resident_worker.py:180 default). The firm equality is NOT in the rule (not read). LIMIT: the client's ticket_id is still forgeable for the OTHER readers of the record ticket_id (resident_worker.py:240, :385; ops/owned_report.py:76; ycharts/research/opal_packager.py:158). The confirmation fixes the producer choice only. The portal sends the ticket id it holds (portal/src/pages/TicketCenter/analysisRequest.ts:384 'ticket_id: input.ticketId,', on the on-disk checkout; see not_read)."
+  },
+  "recommendation": {
+    "shape": "A",
+    "deciding_fact": "A stamps the producer choice onto the accepted record at the one point where the verified owner and the client's ticket_id are both in hand (submission_service.py:109 gives owner; :145 is the accept call), so producer_for keeps reading only the accepted record, as its docstring requires (resident_worker.py:176-177). B makes the resident read live ticket state at choice time (resident_worker.py:751) under a grant the host does not hold (q2 can_read_today no). The prior read rejected A only for the principal-list variant (adding the staff principal to OPAL_PRODUCER_PRINCIPALS). The stamp variant adds no principal, so the CTO's branch 3 ('no human principal is added', CTO_DELL2_PIVOT_FIRST_ACTS_20261013.md:19-21) holds. Both placements need one GetItem on opal-tickets that does not exist today (generate.tf after :120 for A; resident.tf after :87 for B), so the grant is the shared gate, not the placement.",
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 176, "text": "Reads the accepted record's owner"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 161, "text": "No client-sent value selects, and no request runs both producers."},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 751, "text": "if producer_for(record) == \"OPAL\":"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 109, "text": "principal, owner = self.resolve_owner(browser, request, scope, event, ctx)"},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py", "line": 145, "text": "prior = self.acceptance.accept("},
+      {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py", "line": 136, "text": "if \"ticket_id\" in browser:"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/resident.tf", "line": 63, "text": "role = aws_iam_role.runner.id"},
+      {"file": "infra/aws/terraform/investor-reporting/ycharts/generate.tf", "line": 119, "text": "Action   = [\"dynamodb:GetItem\", \"dynamodb:PutItem\"]"},
+      {"file": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_DELL2_PIVOT_FIRST_ACTS_20261013.md", "line": 19, "text": "the release keys the Opal producer on the request carrying a `ticket_id` that the ticket"}
+    ]
+  }
+}

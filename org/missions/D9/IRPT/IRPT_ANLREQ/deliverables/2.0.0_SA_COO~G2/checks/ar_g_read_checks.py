@@ -3,6 +3,7 @@
     python ar_g_read_checks.py shape53 <record.json>   the C-SWITCH design record has every key, enum and evidence list
     python ar_g_read_checks.py shape54 <record.json>   the engine compose record has every key, enum and evidence list
     python ar_g_read_checks.py shape55 <record.json>   the door's unresolved-path record has every key and evidence list
+    python ar_g_read_checks.py shape69 <record.json>   the price-adapter facts record has every key and evidence list
     python ar_g_read_checks.py cite <record.json>      every {file, line, text} of the record re-opens and matches
 
 shape prints SHAPE-OK <n keys> / SHAPE-BAD <why>; cite prints CITES-OK <n> of <n> / CITES-BAD <file>:<line> (the denominator
@@ -217,6 +218,50 @@ def shape55(doc):
     return bad
 
 
+def shape69(doc):
+    bad = []
+    for k in ("base", "cell", "q1", "q2", "q3", "q4", "not_read"):
+        need(k in doc, "missing key " + k, bad)
+    if bad:
+        return bad
+    q1 = doc["q1"]
+    need(isinstance(q1, dict), "q1 must be an object", bad)
+    if isinstance(q1, dict):
+        for f in ("pattern", "secret_name", "endpoint_form", "call_shape", "pacing", "series_fields", "resident_can_call_today"):
+            need(nonempty_str(q1.get(f)), "q1.%s must be a non-empty string (say 'not found' plainly)" % f, bad)
+        cite_list(q1.get("evidence"), "q1.evidence", bad)
+    q2 = doc["q2"]
+    need(isinstance(q2, dict), "q2 must be an object", bad)
+    if isinstance(q2, dict):
+        rows = q2.get("sources")
+        need(isinstance(rows, list) and len(rows) >= 3, "q2.sources needs >= 3 rows (demque, bbg, yfinance)", bad)
+        for i, r in enumerate(rows if isinstance(rows, list) else []):
+            ok = isinstance(r, dict) and nonempty_str(r.get("source")) and nonempty_str(r.get("field_used"))                 and nonempty_str(r.get("level_formula")) and nonempty_str(r.get("basis_claim"))
+            need(ok, "q2.sources[%d] needs source, field_used, level_formula, basis_claim" % i, bad)
+            if isinstance(r, dict):
+                cite_list(r.get("evidence"), "q2.sources[%d].evidence" % i, bad)
+        need(nonempty_str(q2.get("one_formula")), "q2.one_formula must be a non-empty string", bad)
+    q3 = doc["q3"]
+    need(isinstance(q3, dict), "q3 must be an object", bad)
+    if isinstance(q3, dict):
+        for f in ("python_version", "yfinance_on_host", "pandas_on_host", "pyarrow_on_host", "t1_source"):
+            need(nonempty_str(q3.get(f)), "q3.%s must be a non-empty string (say 'not found' plainly)" % f, bad)
+        cite_list(q3.get("evidence"), "q3.evidence", bad)
+    q4 = doc["q4"]
+    need(isinstance(q4, dict) and isinstance(q4.get("adapters"), list) and len(q4["adapters"]) >= 4,
+         "q4.adapters needs >= 4 rows (estate_bbg, demque, yfinance, ycharts)", bad)
+    if isinstance(q4, dict) and isinstance(q4.get("adapters"), list):
+        for i, a in enumerate(q4["adapters"]):
+            ok = isinstance(a, dict) and nonempty_str(a.get("name")) and nonempty_str(a.get("reader_signature"))                 and isinstance(a.get("injected"), list) and nonempty_str(a.get("builds_on"))
+            need(ok, "q4.adapters[%d] needs name, reader_signature, injected (list), builds_on" % i, bad)
+        cs = q4.get("cells")
+        need(isinstance(cs, list) and len(cs) >= 1 and all(isinstance(c, dict) and nonempty_str(c.get("id"))
+                                                            and nonempty_str(c.get("summary")) and isinstance(c.get("files"), list)
+                                                            and c["files"] for c in cs), "q4.cells needs rows of id, summary, files", bad)
+    need(isinstance(doc["not_read"], list) and all(nonempty_str(x) for x in doc["not_read"]), "not_read must be a list of strings", bad)
+    return bad
+
+
 def cite_check(doc, root):
     cases = cites_of(doc)
     n = len(cases)
@@ -243,7 +288,7 @@ def cite_check(doc, root):
 
 def main(argv):
     if len(argv) != 3 or argv[1] == "":
-        print("usage: ar_g_read_checks.py shape53|shape54|shape55|cite <record.json>")
+        print("usage: ar_g_read_checks.py shape53|shape54|shape55|shape69|cite <record.json>")
         return 2
     mode, path = argv[1], argv[2]
     try:
@@ -252,8 +297,8 @@ def main(argv):
     except (OSError, ValueError) as exc:
         print(("SHAPE-BAD " if mode.startswith("shape") else "CITES-BAD ") + "cannot read %s: %s" % (path, type(exc).__name__))
         return 1
-    if mode in ("shape53", "shape54", "shape55"):
-        bad = {"shape53": shape53, "shape54": shape54, "shape55": shape55}[mode](doc)
+    if mode in ("shape53", "shape54", "shape55", "shape69"):
+        bad = {"shape53": shape53, "shape54": shape54, "shape55": shape55, "shape69": shape69}[mode](doc)
         if bad:
             print("SHAPE-BAD " + "; ".join(bad[:6]) + ("" if len(bad) <= 6 else " (+%d more)" % (len(bad) - 6)))
             return 1
@@ -275,7 +320,7 @@ def main(argv):
             return 1
         print("CITES-OK %d of %d" % (n, n))
         return 0
-    print("usage: ar_g_read_checks.py shape53|shape54|shape55|cite <record.json>")
+    print("usage: ar_g_read_checks.py shape53|shape54|shape55|shape69|cite <record.json>")
     return 2
 
 
