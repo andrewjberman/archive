@@ -1,0 +1,66 @@
+{
+  "base_commit": "bbdeae6f89b23308894c94e95b91951decfb9769",
+  "read_date": "2026-10-15",
+  "validator_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 348,
+    "identifier": "def validate_cot_actual_positions("
+  },
+  "screen_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 2266,
+    "identifier": "def cot_screen_accounts("
+  },
+  "source_rows": {
+    "count": 0,
+    "distinct_dates": 0
+  },
+  "offline_run": {
+    "read_only": true,
+    "writes": 0,
+    "published": false,
+    "invocation": "python -B import_probe.py (loads holdings_snapshot.py from the sparse worktree; no account id)",
+    "outcome": "not_run"
+  },
+  "failing_condition": {
+    "name": "",
+    "claim": "absent",
+    "statement": "No offline run was made, so no validator condition was measured for the dropped account; the cause stays as the S158 read left it, a candidate_filter at the COT account screen, inferred.",
+    "explanation": "Not named here. The validator raise sites are its REFUSED strings at lines 381 to 515, each checking one COT source property (vintage, currency authority, identity, number form, duplicate economics, account census, tie tolerance); which one fires for this account is not measured."
+  },
+  "fix_options": [
+    {
+      "option": "Correct the per-account input that cot_screen_accounts hands the validator, once a run measures which condition refuses the account",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 2284,
+        "identifier": "validate_cot_actual_positions(h, t, custody_as_of=custody_as_of, valuation_as_of=valuation_as_of,"
+      },
+      "effect": "If the refusal is an input-shape defect in the per-account call, the account passes the screen on its own rows and the publish gate sees no account_lost; the validator and its guard are unchanged."
+    },
+    {
+      "option": "A custodian-confirmed closure recorded as a TERMINATED mark in the directory, which the closed-account exclusion reads",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3051,
+        "identifier": "closed = closed_accounts() & gone"
+      },
+      "effect": "The publish gate lists the account under closed_accounts_not_refused instead of refusing with account_lost; the COT screen still drops the account, so the candidate does not regain it."
+    }
+  ],
+  "ids_private": true,
+  "notes": [
+    "The S158 read (IB209-1, worker 412) located the lost account in the fact_holdings source on three dates. This order did not re-derive that account identity, and no account id, count of accounts or value is recorded here.",
+    "Offline run not performed: holdings_snapshot.py imports ids, publication and currency_authority from infra/aws/lambda/investor-reporting, which lies outside the granted sparse checkout. The probe stopped with ModuleNotFoundError (rc=3). See row IRPT_BCKEND-D2-W414-S1 in INVESTIGATION_v1.md.",
+    "The validator body was read at lines 348 to 548 of holdings_snapshot.py and its raise sites are at lines 381 to 515. The failing condition is therefore not measured and is left absent; the cause stays inferred from S158.",
+    "source_rows count 0 means no rows were read, not that the account has none: the order step 1 identifies the account from the served snapshot and the candidate, which this order did not reach before the import blocker. AC1 fails on this record's own content.",
+    "Check AC2 passes this record through the accepted branch of v2 although no run was made. See row IRPT_BCKEND-D2-W414-S2 in INVESTIGATION_v1.md; the grader should weigh that.",
+    "Not read: any object in S3 in this order, the candidate snapshot, the directory. No AWS call was made, no function of the validator was called, and the six counters are 0."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
