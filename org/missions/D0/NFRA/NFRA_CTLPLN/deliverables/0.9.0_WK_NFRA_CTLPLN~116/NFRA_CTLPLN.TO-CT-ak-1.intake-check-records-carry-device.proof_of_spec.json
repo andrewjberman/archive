@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ak-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-1.intake-check-records-carry-device.md",
+    "group": "OTHER",
+    "vintage_commit": "57922ec762"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~116",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round21.md",
+    "vintage_commit": "57922ec762",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-1.intake-check-records-carry-device.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_check.py",
+      "kind": "script",
+      "commit_or_etag": "e248747cdf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fetch_device() imports intake_fetch.this_device() (one derivation, no copy); write_fetch_record() writes device beside fetched_by. The schema string stays intake-fetch/1. Last changed in e248747cdf; no deploy, no AWS write.",
+      "artifact_covered_by": [
+        "CTak1-AC1",
+        "CTak1-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round21_check_device.py",
+      "kind": "test",
+      "commit_or_etag": "aba5a33dab",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library only; temporary intake world; loopback-free (no network). Runs the check verb as a child process and intake_request.py downloads as a child process; the fetch-shaped record is written through the module's own writer. Last changed in aba5a33dab; unchanged since.",
+      "artifact_covered_by": [
+        "CTak1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTak1-AC1",
+      "criterion_verbatim": "a record written by the check step carries the device and the reader counts it for that device (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_check_device.py --device",
+      "output_evidence": "CHECK-DEVICE arms=6/6 ok=True (rc=0; timeout 280 from the worktree root on the committed state at 337498c20d; arm lines: ARM 1 PASS the check step reads verdict=checked; ARM 2 PASS the fetch-shaped record carries device=laptop and keeps schema intake-fetch/1; ARM 3 PASS downloads laptop 20261015 counted files=1 unattributed=0; ARM 4 PASS downloads dell1 files=0; ARM 5 PASS an unnamed box writes device null; ARM 6 PASS downloads laptop files=1 unattributed=1). Base control at aba5a33dab, before the fix: CHECK-DEVICE arms=1/6 ok=False (arms 2 to 6 FAIL).",
+      "denominator": "6 arms run: 6 PASS, 0 FAIL, 0 SKIP; ok counts passed of 6",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak1-AC2",
+      "criterion_verbatim": "the check suite still passes (base: INTAKE-CHECK-TEST cases=57/57 skipped=0 ok=True, a control; the count may grow); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_check.py",
+      "output_evidence": "INTAKE-CHECK-TEST cases=57/57 skipped=0 ok=True (rc=0; timeout 280 from the worktree root on the committed state at 337498c20d; the first run before the sparse add failed two cases on absent folders, see the report)",
+      "denominator": "57 cases run: 57 PASS, 0 skipped, 0 FAIL",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak1-AC3",
+      "criterion_verbatim": "the round-20 fetch-device suite still passes (base: FETCH-DEVICE arms=8/8 ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_fetch_device.py --device",
+      "output_evidence": "FETCH-DEVICE arms=8/8 ok=True (rc=0; timeout 280 from the worktree root on the committed state at 337498c20d)",
+      "denominator": "8 arms run: 8 PASS, 0 FAIL; ok counts passed of 8",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The unchanged base (aba5a33dab, before e248747cdf) run through the new test: write_fetch_record wrote no device key.",
+      "expected": "arms 2 to 6 FAIL: the record carries no device, and the reader counts it as unattributed",
+      "observed": "CHECK-DEVICE arms=1/6 ok=False; ARM 2 FAIL (no device key); ARM 3 FAIL (downloads laptop reports unattributed=1, files=0); ARM 5 FAIL (no device key on the unnamed box record); ARM 6 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the default --device run executed twice on the committed state at 337498c20d; the two outputs compared line by line",
+      "observed": "CHECK-DEVICE arms=6/6 ok=True on both runs; the arm lines are identical (diff empty)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W116-S1: the check verb of intake_check.py writes no fetch-shaped record; the only intake-fetch/1 writer in that module is write_fetch_record, used by selftest-unsigned and the tests. The device key was added there. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W116-S2: the check record (intake-check/1) carries no device key, and intake_request.py downloads reads only .fetch.json, so a check record is never counted for a box. Left as it is because the cell scopes the key to the fetch shape. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~116/NFRA_CTLPLN.TO-CT-ak-1.intake-check-records-carry-device.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~116 on 2026-10-15; sparse set extended by git sparse-checkout add org/tier1_exec/1.0.0_SA_CTO/deliverables docs/briefs, because test_intake_check.py reads the CTO signature files and the brief; the first AC2 run failed two cases on those absent folders and passed after the add; the order's <status> flip is the issuer's)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_check_device.py --device",
+      "result": "CHECK-DEVICE arms=6/6 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_check.py",
+      "result": "INTAKE-CHECK-TEST cases=57/57 skipped=0 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_fetch_device.py --device",
+      "result": "FETCH-DEVICE arms=8/8 ok=True"
+    }
+  ]
+}
