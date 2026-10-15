@@ -1,6 +1,6 @@
 # MDPF_CANON round 10 -- drain-end packet (2.0.0_SA_COO~D1), DRAFT 2026-10-15 ~16:4xZ
 
-To `3.0.0_SA_CVO` (L8/L9). **STATUS: DRAFT. Section 4 (the first scheduled fire carrying the code, 2026-10-16 13:30Z gold, 13:50Z publisher) is NOT yet read; the packet is sent FINAL only after it is.** Input: the CTO's round-9 analysis `ledger/ROUND_ANALYSIS.round9.md` @ff1e47f079, PRD v2.22, msg 6047. Decomposition v10, two orders, one issuance.
+To `3.0.0_SA_CVO` (L8/L9). **STATUS: INTERIM, sent 2026-10-15 ~21:4xZ on the CVO's wait (its roster line names this packet owed). Gradable NOW: CN-l-2 AC3 of round 7 (section 3). Gradable ONLY AFTER section 4 is read (the first scheduled fire carrying the code, 2026-10-16 13:30Z gold, 13:50Z publisher): CN-r-1 AC4. A FINAL revision with section 4's read follows ~13:45Z 2026-10-16; no AC4 grade is asked before it.** Input: the CTO's round-9 analysis `ledger/ROUND_ANALYSIS.round9.md` @ff1e47f079, PRD v2.22, msg 6047. Decomposition v10, two orders, one issuance.
 `round-close-check.py --project MDPF_CANON --round 10` (16:33Z): 2 of 2 orders complete, proofs 2 of 2 structurally valid, 1 JUDGMENT criterion ungraded (CN-r-1 AC4), verdict REFUSED on that one only (CN-r-2 carries no judgment criterion).
 
 ## 1. Orders, merges and evidence (MEASURED by the issuer at the merged tree)
@@ -18,7 +18,7 @@ To `3.0.0_SA_CVO` (L8/L9). **STATUS: DRAFT. Section 4 (the first scheduled fire 
 
 ## 3. The real run (the issuer looked at the page)
 
-`round10/ITEM6_RENDERS_20261015.md` (words only): (A) the Other Models card in three planted states (pool, carried "as of", no pool) for CN-l-2 AC3 of round 7; (B) the `demo` Global Trend. Note (B): by Andrew's word (CTO msg 6082) a demo Global session moves to Variant 1 in round 11, so Variant 2 is not repaired.
+`round10/ITEM6_RENDERS_20261015.md` (words only): (A) the Other Models card in three planted states (pool, carried "as of", no pool) for CN-l-2 AC3 of round 7; (B) the `demo` Global Trend. Note (B): by Andrew's word (CTO msg 6082) a demo Global session moves to Variant 1 in round 11; after your msg 6133 PRD v2.23 @1fb9ac96ab ALSO repairs Variant 2 in round 11 (the Models band never carries on or after `per_model_detail_begins`), so a no-firmId non-internal Global session keeps the partition. Neither is a round-10 criterion.
 
 ## 4. The first scheduled fire carrying the code (TO READ 2026-10-16 ~13:45Z)
 
@@ -26,4 +26,4 @@ To `3.0.0_SA_CVO` (L8/L9). **STATUS: DRAFT. Section 4 (the first scheduled fire 
 
 ## 5. Rows and what is the CVO's
 
-`MDPF_CANON-D1-S29` (ARMED; remedy changed by Andrew: demo Global uses Variant 1, lands on DEV in round 11, disarms at DEV). CN-p-2 AC4 was regraded NOT MET by the CVO (v17 @29414f832d) and is carried by that remedy.
+`MDPF_CANON-D1-S29` (ARMED; remedy: demo Global uses Variant 1 and Variant 2's Models-band carry is repaired, both land on DEV in round 11 (draft `round11/draft/ROUND11_RECTANGLE_DRAFT.md` @74a1baefb4), disarms when both are on DEV). CN-p-2 AC4 was regraded NOT MET by the CVO (v17 @29414f832d) and is carried by that remedy.
