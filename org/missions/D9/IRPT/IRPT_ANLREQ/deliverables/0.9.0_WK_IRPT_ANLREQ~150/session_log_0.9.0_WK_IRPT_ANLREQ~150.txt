@@ -1,0 +1,44 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~150 on IRPT_ANLREQ.TO-AR-y-348 (read only; no AWS call; no push)
+
+1. Tree check
+   git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-150
+   test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+   git rev-parse HEAD -> 742646e9a46c63f3087e5e8d21287cebb0954169 (the base)
+
+2. Sparse checkout observation
+   git ls-files -t infra/aws/lambda/investor-reporting -> S flag on the files (skip-worktree)
+   git sparse-checkout list -> no infra/aws entry
+   ls infra/aws/lambda/investor-reporting -> no such directory
+   Action: none on the worktree. Source read as git show 742646e9a4:<path> (see surprise row IRPT_ANLREQ-D2-W150-S1).
+
+3. Portal fetch (the one permitted network act)
+   git -C C:/dev/ajb_workspace/portal fetch origin PROD DEV
+   -> PROD -> FETCH_HEAD, DEV -> FETCH_HEAD, rc 0
+   git rev-parse origin/PROD origin/DEV DEV -> c3b21a40e29f690922f442c085129f9ba85ce334 / ad7c100b5cca9020f18a2957112361f4b9083272 / e578b378d332ad1505018be3801466dac7aeeade
+
+4. Searches (portal, both refs)
+   git grep "Opal staff open requests" origin/PROD -- src/pages -> AnalysisRequestParts.tsx:92 (definition); tests analysis-firm-c-firm.test.tsx:26,93; analysis-firm-choice.test.tsx:135
+   git grep "Opal staff open requests" origin/DEV -- src/pages -> tests only (analysis-firm-c-firm.test.tsx:27,103 with not.toContain; analysis-firm-choice.test.tsx:137 not.toContain)
+   git grep "rather than file them" origin/PROD and origin/DEV -> 3 files each, no non-test code hit on DEV
+   git grep "resolveDirectoryContext\(|resolveScope\(" origin/PROD -- src (non-test) -> investor-reporting.ts:1252,1257 and TicketCenter.tsx:103 only
+   git grep "resolve-scope|directory/resolve" origin/PROD -- src (non-test) -> investor-reporting.ts:116,179,236,901,916,1253,1259,1548,1730 (no page caller)
+
+5. Lambda source (git grep at 742646e9a4)
+   'directory/resolve' -> directory/entry.py:394-395 (route to resolve-scope), entry.py:460 (function_name irpt-directory-search)
+   'BLOCKED: no directory bucket declared' -> _authz/loaders.py:67
+   FIRM_BINDING sites -> _authz/served.py:1227, 1230, 1236, 1241, 1247, 1256, 1260, 1267, 1293; _authz/loaders.py:46
+   comparison-catalogue -> ycharts/generate/entry.py:65, 150-151, 184
+
+6. Citation check
+   python C:/dev/wk-irpt-anlreq-150/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~150/cite_check.py
+   -> CITES-OK 107 of 107 (rc 0), repeated -> CITES-OK 107 of 107 (rc 0)
+
+7. Shape check
+   python C:/dev/wk-irpt-anlreq-150/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~150/shape_check.py
+   -> SHAPE-OK base, not_read, pins, q1, q2, q3, q4 (rc 0), repeated -> same (rc 0)
+
+8. Commit gate on the two scripts
+   bash .tools/commit-gate.sh <shape_check.py> -> pre-commit gate clean for 1 of 1 file(s), rc 0
+   bash .tools/commit-gate.sh <cite_check.py> -> pre-commit gate clean for 1 of 1 file(s), rc 0
+
+9. Not done: no AWS call, no edit of any source file, no push, no merge, no checkout change.
