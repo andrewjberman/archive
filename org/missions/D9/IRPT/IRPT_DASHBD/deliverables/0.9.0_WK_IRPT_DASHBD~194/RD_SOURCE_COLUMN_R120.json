@@ -1,0 +1,42 @@
+{
+  "contract_version": "0.3.0",
+  "optional_column": {
+    "name": "source",
+    "type": "string",
+    "values": [
+      "orion",
+      "computed from Black Diamond values and flows",
+      "computed from custodian holdings"
+    ]
+  },
+  "hash_with_optional": "bc70ee2f2e0b54fd13e3b11fedae943003d4172199a561a4923c3e1a1ad59a27",
+  "emitters": [
+    {
+      "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "kind": "producer",
+      "schema_line": 281,
+      "must_add_at_landing": true,
+      "words": "Adds source (string, nullable) to ARROW_SCHEMA and to the COLUMNS list together, and writes the account-day's source word on every emitted row, at its own landing. Must NOT change the 19 existing fields, their types, or the 19-column schema_hash that every landed partition is checked against; a table written without source reads as having no source label. The return arithmetic (total_return_daily, return_basis, guard_state) is not touched."
+    },
+    {
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "kind": "adapter",
+      "schema_line": 108,
+      "must_add_at_landing": true,
+      "words": "Adds pa.field source (string, nullable) to its ARROW_SCHEMA beside the 19 fields and writes the word orion on every row it builds. Its schema_hash() reads ARROW_SCHEMA by default, so at landing the 19-column check must hash the 19 fields explicitly and a 20-field table is checked against schema_hash_with_optional. Must NOT change the 19 fields, their types or the 19-column hash for tables already landed. Its LABEL constant (OPAL_COMPUTED, defined at line 46 and not used elsewhere in the file) is not the source word and is left as it is."
+    },
+    {
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+      "kind": "adapter",
+      "schema_line": 101,
+      "must_add_at_landing": true,
+      "words": "Adds pa.field source (string, nullable) to its ARROW_SCHEMA beside the 19 fields and writes the word computed from Black Diamond values and flows on every row it builds. Its schema_hash() also reads ARROW_SCHEMA by default, so at landing the 19-column check must hash the 19 fields explicitly. Must NOT change the 19 fields, their types or the 19-column hash for tables already landed, and must keep the source_label schema-metadata key it already carries."
+    }
+  ],
+  "words": "Contract 0.3.0 declares source as an OPTIONAL nullable string column under optional_columns, with its own schema_hash_with_optional. The 19 columns, their types and the schema_hash over them are unchanged, so every landed partition and every 19-column check stays valid. The three emitters (the producer and the Inflection and Cottonwood adapters) each must add the column at their own landing; nothing is emitted, landed, pushed or deployed by this record. Until an emitter adopts it, its table carries no source column and a page states no source for it.",
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
