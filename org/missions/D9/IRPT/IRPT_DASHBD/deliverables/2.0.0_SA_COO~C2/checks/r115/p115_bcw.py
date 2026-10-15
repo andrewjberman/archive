@@ -122,9 +122,16 @@ def ac_2(root):
     gd = p114.list_dates(s3, gb, gp)
     asof = f["catch_up"]["as_of_date"]
     need(asof in sd, "the as-of date has no silver partition")
-    want_dates = sorted(d for d in sd if d <= asof and cal.is_trading_day(p114.iso(d)) and d not in gd)
+    all_dates = sorted(d for d in sd if d <= asof and cal.is_trading_day(p114.iso(d)) and d not in gd)
+    ex = f["catch_up"].get("excluded", [])
+    for e in ex:
+        # a date is excludable only when its prior trading day has no silver partition (the producer's rule has no base for it) and the packet says why
+        need(e["date"] in all_dates, "an excluded date is not a catch-up candidate: " + e["date"])
+        prior = cal.prev_trading_day(p114.iso(e["date"])).isoformat()
+        need(prior not in sd and e["reason"].strip() != "", "an excluded date needs a missing prior-day silver partition and a reason: " + e["date"])
+    want_dates = [d for d in all_dates if d not in [e["date"] for e in ex]]
     ks = f["keys_written"]
-    need(ks["dates"] == want_dates and f["catch_up"]["dates"] == want_dates, "catch-up dates differ from silver trading days to the as-of date minus gold")
+    need(ks["dates"] == want_dates and f["catch_up"]["dates"] == want_dates, "catch-up dates differ from silver trading days to the as-of date minus gold minus the excluded dates")
     want = []
     for d in want_dates:
         want.append(naming.address("irpt", "cottonwood", "gold", "holdings_performance_daily", "date=" + d, "data.parquet"))

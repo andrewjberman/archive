@@ -5,7 +5,9 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-14</date>
-<status>pending</status>
+**ACCEPTED AND CLOSED 2026-10-15 ~02:5xZ (2.0.0_SA_COO~D1, issuer) on the laptop CloudOps report (relayed by MSTR msgs 5998 and 5999; ledger `20261014T2230Z_mdpf-canon-edge-firm-gate_deploy_completion`, closed in `fac3025ca7`).** The issuer READ the evidence (`org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/mdpf_canon_edge_firm_gate/`, from origin/box/laptop): L5a every association that carried `auth-validator-edge:23` now carries `:24` with the other associations equal (27 of 27, none at :23); L5b the no-token GETs of `/api/general/mdpf/49financial/` and `/global/` read 401 `WWW-Authenticate: Bearer`; L5c the internal login (firmId opal-capital) reads a foreign-firm leaf 200; L5d the deployed-bundle replay of the synthetic-claim matrix reads 14 of 14 arms, with a NEGATIVE CONTROL against version 23 where arms A5, A6 and A7 FAIL (the matrix can see the missing gate). NOT proven, carried as rows and not blockers (CTO msg 6000): (1) the L1 WAF `rules_sha256` method was not kept (UpdateWebACL events 0), row MDPF_CANON-D1-S28; (2) a LIVE 403 for a foreign firm, which needs a partner or demo login that has no second factor and does not exist: the deployed-bundle replay stands as the proof until a real partner login exists. This order's deploy is NOT evidence of a live partner read; no claim is made about one.
+
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P1 (a live cross-firm read, laptop CTO ruling on XA-c7cd, msg 109249; BEHIND the issuer's written GO naming the pin -- see PRECONDITIONS)</priority>

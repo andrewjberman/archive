@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-3",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1cb46e909b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "3ddb11e9f7",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-3.inflection-qtd-gap-decomposition-five-differences-tested-alone.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~303",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~303/GAP_DECOMPOSITION_R115.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~303/gap_decomposition.py",
+      "kind": "script",
+      "commit_or_etag": "cb5f507fb7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Tracked read script for DB-i-3: imports the round-108 module and the GET-only reader, reads the newest fact_transactions and fact_performance partitions, writes one private parquet and the repo record, and prints counts and shares. Holds no S3 write call, no vendor call and no secret read; names no firm other than Inflection. Not deployed, not pushed.",
+      "artifact_covered_by": [
+        "DBI115-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~303/GAP_DECOMPOSITION_R115.json",
+      "kind": "config_data",
+      "commit_or_etag": "cb5f507fb7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-3 record: script and private variant table hashed as recorded, sample digests, the five differences, the seven tested variants with status and claim, explained shares per sampled household, the recount of households explaining half, basis words, reader reads (4 S3 reads, 0 writes). Counts, shares, paths, hashes and words only; files_in_repo_private, served_values_changed, pushed and deployed all false.",
+      "artifact_covered_by": [
+        "DBI115-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI115-1-AC1",
+      "criterion_verbatim": "DBI115-1-AC1 -- the record is complete and carries no identifier; the script is a tracked file hashed as recorded, with no write call and no other firm's name; the sample equals the checker's recompute from round 114's private variant file (every household at 100 bp or more plus the lowest-sha household of each other bin); the private table has exactly the four columns and one row per sampled household per variant, every null gap carrying a reason; the BASE absolute gap equals round 114's `all` gap for every sampled household (within 0.01 bp) and the IDENTITY variant equals BASE (within 0.01 bp); the differences map is exactly the five named; each tested variant's status agrees with its gaps (TESTED has at least one gap, NOT_TESTABLE has none); every explained share equals the checker's recompute from the signed gaps (null exactly where it is null) and the count of households with a single difference explaining half equals its recount; nothing is written to AWS; no push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r115/p115_gap.py\" . DBI115-1-AC1",
+      "output_evidence": "DBI115-1-AC1 PASS",
+      "denominator": "1 of 1 criterion PASS. Base against round 114 all gap: 0 of 12 sampled households differing. Identity against base: 0 of 12 differing. Private variant rows: 108 of 108 (12 households by 9 variants). Sample bins: 9 at 100 bp or more, 1 under 5, 1 at 5 to under 25, 1 at 25 to under 100.",
+      "status": "PASS",
+      "expect": "DBI115-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the record (with the tracked script and the round-114 record beside it) with one gross_fees explained share moved by 0.25 for one sampled household; the unmodified checker run on that copy.",
+      "expected": "DBI115-1-AC1 FAIL on the explained-share recount",
+      "observed": "DBI115-1-AC1 FAIL: explained_share.gross_fees differs from the recount (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice on the final tree; the two printed outputs compared with cmp.",
+      "observed": "identical output on both runs: DBI115-1-AC1 PASS; rc=0 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The settlement-date variant (settle_timing) and the income-accrual variant (income_accrual) as gaps",
+      "reason": "The newest transactions partition carries 36 columns and none is a settlement, ex-date, record-date, pay-date or accrual column; the order's rule makes both NOT_TESTABLE with null gaps and a reason. No accrual or settlement date was invented."
+    },
+    {
+      "item": "The year-to-date, last-12-month and since-inception windows",
+      "reason": "The order names the qtd window only."
+    },
+    {
+      "item": "Any tolerance ruling, any bridge, any change to the round-109 or round-114 records",
+      "reason": "The cell rules nothing; the CTO rules the tolerance."
+    },
+    {
+      "item": "Any write to AWS, any vendor call, any secret read, any push or deploy",
+      "reason": "Outside the grant. The reader's LIST and GET calls are the only S3 access (4 reads, recorded in the record)."
+    },
+    {
+      "item": "The private variant table and the per-household rows",
+      "reason": "Client data; kept under the private folder by design. The repo carries counts, digests, bp and shares only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W303-S1: the commit gate client account-id check did not run for the DB-i-3 commit, because the hashed account-id list is absent on this device; the gate says the commit was not checked for client account ids"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p115_gap.py issuer checker, run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r115/p115_gap.py\" . DBI115-1-AC1",
+      "result": "rc=0; DBI115-1-AC1 PASS (two runs, identical output)"
+    },
+    {
+      "tool": "scratch mutant of the record run through the same checker (copy in the worker scratch folder, removed after)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r115/p115_gap.py\" .scratch/mutant_root DBI115-1-AC1",
+      "result": "rc=1; DBI115-1-AC1 FAIL: explained_share.gross_fees differs from the recount"
+    }
+  ]
+}
