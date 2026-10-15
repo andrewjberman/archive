@@ -85,6 +85,33 @@ def numstat(root, base, rel):
     return int(out[0]), int(out[1])
 
 
+def own_commits(root, author):
+    """The commits of this order's worker (author serial), oldest first, since the order was issued: the diff clauses read these commits only, never a whole-repo base..HEAD
+    (other seats commit to the same trunk). Round 122 ruling 3."""
+    base = base_commit(root)
+    out = git(root, "log", "--reverse", "--format=%H", "--author=" + author, base + "..HEAD").split()
+    need(out, "no commit by %s since the order was issued" % author)
+    return out
+
+
+def own_numstat(root, commits, rel):
+    add = dele = 0
+    for c in commits:
+        for ln in git(root, "show", "--numstat", "--format=", c, "--", rel).strip().splitlines():
+            parts = ln.split("	")
+            if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                add += int(parts[0])
+                dele += int(parts[1])
+    return add, dele
+
+
+def own_files(root, commits):
+    names = set()
+    for c in commits:
+        names |= set(git(root, "show", "--name-only", "--format=", c).split())
+    return names
+
+
 def strip_comments(text):
     return "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("#"))
 
@@ -202,14 +229,14 @@ def run(root, cid):
         print("OK: iam.tf gains %d statements (%s); every action is explicit, no wildcard, one PutObject statement; the served series and crosswalk are derived" % (len(new), ", ".join(new)))
         return True
     if cid == "DB121-2-AC2":
-        base = base_commit(root)
-        ga, la = numstat(root, base, IAM_REL)
-        gb, lb = numstat(root, base, LOC_REL)
+        cs = own_commits(root, "0.9.0_WK_IRPT_DASHBD~197")
+        ga, la = own_numstat(root, cs, IAM_REL)
+        gb, lb = own_numstat(root, cs, LOC_REL)
         need(ga >= 12 and la <= 4, "iam.tf gains %d loses %d (needs gain >= 12, lose <= 4)" % (ga, la))
         need(gb >= 6 and lb <= 4, "locals.tf gains %d loses %d (needs gain >= 6, lose <= 4)" % (gb, lb))
-        other = [f for f in git(root, "diff", "--name-only", base, "HEAD", "--", "infra/aws/terraform/").split() if f not in (IAM_REL, LOC_REL)]
-        need(not other, "other Terraform files changed: %s" % other)
-        print("OK: additive: iam.tf +%d/-%d, locals.tf +%d/-%d, no other Terraform file" % (ga, la, gb, lb))
+        other = sorted(f for f in own_files(root, cs) if f.startswith("infra/aws/terraform/") and f not in (IAM_REL, LOC_REL))
+        need(not other, "this worker's commits changed other Terraform files: %s" % other)
+        print("OK: additive in the worker's own %d commits: iam.tf +%d/-%d, locals.tf +%d/-%d, no other Terraform file" % (len(cs), ga, la, gb, lb))
         return True
     if cid == "DB121-2-AC3":
         rec = load(root, REC_REL)

@@ -313,6 +313,17 @@ def g5r():
     return _G5R["rows"]
 
 
+_F1 = {}
+
+
+def f1_firm():
+    """{entity: firm} of the round 17 F1 map (round17/f1_firm_map.json under the issuer's deliverables), read once from the CURRENT worktree; {} when the file is absent."""
+    if not _F1:
+        p = os.path.join("org", "missions", "D9", "NFRA", "NFRA_MCPINDEX", "deliverables", "2.0.0_SA_COO~MI", "round17", "f1_firm_map.json")
+        _F1["rows"] = json.load(open(p, encoding="utf-8"))["rows"] if os.path.exists(p) else {}
+    return _F1["rows"]
+
+
 def expected_row(c, group, deployed=None):
     """(clean row, registry entry) the generator must produce for a contract (CTO msg 34160). The clean row holds no firm or product
     token in any whitespace-free string, key or value; every top-level field the sanitiser changed is restored from the registry
@@ -358,6 +369,9 @@ def expected_row(c, group, deployed=None):
         rules = full["never_sum_rules"]
         full["never_sum_rules"] = (rules if isinstance(rules, list) else []) + [enr["never_sum"]]
         full["nl_tags"] = list(full["nl_tags"]) + list(enr["nl_tags_add"])
+    fm = f1_firm().get(entity(cid))
+    if fm:    # round 17 (F1): the 24 firm-scoped rows whose registry firm value names ONE known firm carry `firm`; the clean row holds null, the registry restores it
+        full["firm"] = fm
     if why:
         full["retired_reason"] = why
     clean, restore = {}, {}
