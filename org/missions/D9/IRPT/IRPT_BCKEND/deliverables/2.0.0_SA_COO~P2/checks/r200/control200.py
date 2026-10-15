@@ -155,7 +155,7 @@ ORION = {
                "rollback_per_key": "delete each created key by the version id its put returned after a HEAD showed it absent",
                "absent_at_source_policy": "where the vendor returns nothing for a day the day is recorded ABSENT-AT-SOURCE with the response status and we never write an empty key"},
     "scope_feed_addendum": {"statement": "the account feed joins pair (b) by addendum: each account-day carries Orion's return or ABSENT with NO_GROUP or GROUP_NO_SERIES, never zero",
-                            "fee_basis": "UNPROVEN", "one_account_limit_site": {"path": "cli/pull_positions.py", "line": 8, "identifier": "pull_positions"}},
+                            "fee_basis": "NET", "one_account_limit_site": {"path": "cli/pull_positions.py", "line": 8, "identifier": "pull_positions"}},
     "blast_radius": {"writes": ["flat keys for the absent trading days of three feeds in opal-data-inf bronze"], "reads": ["the vendor"], "new_iam": False, "served_values_changed": False, "other_dates_touched": False},
     "build_slices": [{"cell": "port the writer", "risk": "LOCAL", "files": ["cli/pull_positions.py"]}, {"cell": "the schedule declaration", "risk": "LOCAL", "files": ["infra/x.tf"]}],
     "notes": ["synthetic"], **{k: 0 for k in P6.BOUND}}
@@ -235,7 +235,7 @@ for label, ac, rec, pkt in (
         ("not through (b)'s path", "AC2", mo(lambda o: o["pair_a"].update({"through_b_code_path": False})), None),
         ("no ABSENT-AT-SOURCE policy", "AC2", mo(lambda o: o["pair_a"].update({"absent_at_source_policy": "where the vendor returns nothing we write an empty key and move on quickly"})), None),
         ("the scope feed without NO_GROUP", "AC2", mo(lambda o: o["scope_feed_addendum"].update({"statement": "the account feed joins pair (b) by addendum and carries GROUP_NO_SERIES or the return, never zero"})), None),
-        ("fee basis proven", "AC2", mo(lambda o: o["scope_feed_addendum"].update({"fee_basis": "PROVEN"})), None),
+        ("fee basis UNPROVEN", "AC2", mo(lambda o: o["scope_feed_addendum"].update({"fee_basis": "UNPROVEN"})), None),
         ("other dates touched", "AC2", mo(lambda o: o["blast_radius"].update({"other_dates_touched": True})), None),
         ("a packet too short", "AC3", None, "# never-widen packet\nshort. COO half UNSIGNED. CTO half UNSIGNED.\n"),
         ("one half signed", "AC3", None, ORION_PKT.replace("CTO half UNSIGNED.", "CTO half signed.")),

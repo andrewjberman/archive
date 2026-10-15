@@ -1,0 +1,35 @@
+{
+  "base_commit": "e056f8fd97006cf33b1861e93001a36591e0237d",
+  "changed_paths": [
+    "infra/aws/lambda/investor-reporting/reporting/entry.py",
+    "infra/aws/lambda/investor-reporting/reporting/tests/test_reporting_entry.py",
+    "infra/aws/lambda/investor-reporting/reporting/tests/test_reporting_filled_report.py",
+    "infra/aws/terraform/investor-reporting/reporting-read/api.tf",
+    "infra/aws/terraform/investor-reporting/reporting-read/locals.tf"
+  ],
+  "tests_total": 33,
+  "tests_passed": 33,
+  "mutant_tests_failed": 12,
+  "negative_tests": ["uncovered_viewer", "client_id_is_claim", "nested_accounts_named", "other_firm"],
+  "notes": [
+    "AMENDMENT 1 applied (order commit d1a9a93041): test_reporting_entry.py line 74 pin changed from two keys to three keys by adding the filled route key mapped to reporting-filled-read; every other assertion in that file is unchanged. This is the one edit to an existing test.",
+    "entry.py: three FILLED-REPORT-B blocks. Block 1 holds the route key, the operation name and the object name beside SUMMARY_OBJECT. Block 2 holds _filled_uri, _fetch_filled, _by_row_keys, _filled_named_accounts, serve_filled_report and reporting_filled_read. Block 3 registers the route in ROUTES and the operation in OPERATIONS. OPERATIONS is a new module dict built beside ROUTES; the Entry now takes it. The existing operation mapping is unchanged.",
+    "The object address is built only by _naming.address with the object name filled_report.json. No object address is typed in any product file.",
+    "The filled report is served unchanged. The route refuses before any storage call when the scope is empty, when the client id is not an issued id, and when the body is not the two-key document (NOT_READY). It refuses OBJECT_NOT_COVERED with no bytes when any named account is outside the scope.",
+    "Named accounts are household.accounts[].account_id plus each by_row key that is an issued account id. A by_row key that is neither an issued id nor an asset class, or that holds six or more digits, is treated as a named account that cannot be covered.",
+    "The filled document carries no firm key (contract 0.5.1, document.filled_report.top_level_keys). The other-firm refusal therefore rests on account coverage and on the firm-keyed address, not on a firm field. Row IRPT_BCKEND-D2-W398-S2.",
+    "Asset-class keys are not enumerated in the contract, so the reader classifies a key as an account only by its issued id form. Row IRPT_BCKEND-D2-W398-S3.",
+    "api.tf: exactly one new aws_apigatewayv2_route resource (irpt_reporting_read_filled) beside the summary route, on the same integration and authorizer, with the route key from locals.tf irpt_rr_filled_route_key. No IAM statement was changed.",
+    "Tests: test_reporting_filled_report.py holds 12 tests; with test_reporting_entry.py and test_reporting_summary.py, 33 passed and 0 failed. Positive control before the build: the two existing files held 21 passed.",
+    "Difference control, run in memory by this worker: removing the three FILLED-REPORT-B blocks from entry.py fails 12 of 12 new tests on AttributeError inside test bodies, with no import or collection error.",
+    "Grant conflict: test_reporting_entry.py is in the amended paths block but not in the check's allowed set for IB200-2 (CELLS 2). The worker changed it as the amendment directs and did not edit the check. Row IRPT_BCKEND-D2-W398-S4 (BLOCKING) records the conflict; the AC3 result is in IB200-2_criteria_output.txt.",
+    "terraform validate was not run: no terraform binary was invoked and no plan or apply was run. The two HCL edits copy the pattern of the summary route and were checked by reading only.",
+    "Not read: the live IAM policy, the live API route table, the deployed reporting-read package and any live object. No AWS client was created; all storage is a fake."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
