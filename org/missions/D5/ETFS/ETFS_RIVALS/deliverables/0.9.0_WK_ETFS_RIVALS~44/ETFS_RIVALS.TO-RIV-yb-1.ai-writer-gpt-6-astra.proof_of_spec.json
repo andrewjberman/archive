@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-yb-1.ai-writer-gpt-6-astra",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "1af8b0dba8",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-yb-1.ai-writer-gpt-6-astra.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "1af8b0dba8"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~44",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/ai_accounts.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call, no Secrets Manager call",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/ai_client.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call, no Secrets Manager call",
+   "artifact_covered_by": ["AC2"]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_yb1_model.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "test commit; pins the prefix rule and the seat client token cap the check file does not",
+   "artifact_covered_by": ["AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "DEFAULT_MODEL is gpt-6-astra when the env var is unset and the env var still overrides it.",
+   "method": "command",
+   "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round31/checks/yb1_model_gpt6_astra_check.py -k ac1",
+   "output_evidence": ".                                                                        [100%]\n1 passed, 2 deselected in 0.79s\nrc=0 (base run of the same file: 3 failed)",
+   "denominator": "1 of 1 selected by -k ac1 (the check file holds 3 tests)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "both clients send temperature only for a gpt-5 model and omit it for gpt-6-astra; the rest of each request is unchanged (the difference control is gpt-5.4).",
+   "method": "command",
+   "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round31/checks/yb1_model_gpt6_astra_check.py -k ac2",
+   "output_evidence": "..                                                                       [100%]\n2 passed, 1 deselected in 1.06s\nrc=0",
+   "denominator": "2 of 2 selected by -k ac2 (the check file holds 3 tests; the third is AC1)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "J1",
+   "criterion_verbatim": "the CVO's read of the first 13:00Z sweep after the deploy, not yours: model_version reads gpt-6-astra on 26 of 26 rows and the Grounding FAIL count is no greater than 2 of 26.",
+   "method": "manual_read_with_citation",
+   "invocation": "none (judgment, graded by the CVO at L9 on the first live sweep after the deploy)",
+   "output_evidence": "No live sweep exists in this order: no deploy, no vendor call. Worker records no verdict.",
+   "denominator": "0 of 0",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment criterion: the CVO grades J1 on the first 13:00Z sweep after the deploy; the worker records output and no verdict"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "rivalfunds suite once at base (ai_accounts.py and ai_client.py restored to HEAD) and once after the edits; failing sets diffed",
+   "observed": "base: 56 failed, 992 passed, 7 skipped; after edits with test_r6ap1_ai_stage.py left at HEAD (outside the grant): 57 failed, 993 passed, 7 skipped; the 56 base failures are pre-existing (ETFS_RIVALS-D1-W44-S1); the one addition test_r6ap1_ai_stage.py::test_rest_client_request_shape is BLOCKING (ETFS_RIVALS-D1-W44-S3)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "none named by spec",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order status to complete",
+   "reason": "The order's section 5 leaves the status flip to the issuer; the worker does not flip it."
+  },
+  {
+   "item": "The first live 13:00Z sweep after the deploy (J1)",
+   "reason": "A WORLD act owned by the CVO after the deploy; no vendor call is made in this order."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-D1-W44-S1: the rivalfunds suite reads 56 failed at base (1af8b0dba8), outside RIV-yb-1's paths; the RIV-yb-1 change moves the failing set by zero.",
+  "ETFS_RIVALS-D1-W44-S2: the worktree is a sparse checkout and omits org/surprise_channel; the item schema was read from HEAD, not disk.",
+  "ETFS_RIVALS-D1-W44-S3: BLOCKING on the regression net -- test_r6ap1_ai_stage.py::test_rest_client_request_shape fails under RIV-yb-1 and that file is outside <paths>; left at HEAD, not overridden."
+ ],
+ "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,J1",
+   "result": "see the worker report"
+  }
+ ]
+}
