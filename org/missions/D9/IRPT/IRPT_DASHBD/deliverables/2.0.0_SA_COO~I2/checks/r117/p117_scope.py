@@ -13,7 +13,8 @@ account dimension), the Account groups of each response, and the three verdicts 
   (a) ONE_GROUP_PER_ACCOUNT if the set of group ids equals the household's account ids and every group has perf and points >= 1; else FEWER_GROUPS (a subset), OTHER_GROUPS (not a subset).
   (b) IGNORED if every account's perf is equal (within 1e-12) between the false and the true response; else NET_WHEN_FALSE if every account with fee > 0 has obs = perf_true - perf_false >= 0 and
       |obs - fee/startv| <= max(1e-4, 0.25 * fee/startv) (and at least one such account); else DIFFERENT_UNTIED.
-  (c) ACCEPTED if the false call returned 2xx; REFUSED if every call was refused (non-2xx).
+  (c) ACCEPTED if the false call returned 2xx; REFUSED if every call was answered 401 or 403 (the credential refused); REQUEST_REJECTED if every call was non-2xx and not all
+      401/403 (the body or path rejected: it says nothing about the credential); else NOT_RUN. (Amended round 117, issuer error on row W305-S1: a 400 was first read as REFUSED.)
 
 Usage: python -I <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
        python -I <this file> --selftest [<repo_root>]         the pure helpers on synthetic arms
@@ -36,7 +37,7 @@ DIM = P114.PRIV + "0.9.0_WK_IRPT_DASHBD~171/ACCOUNT_DIM_DRY_RUN.parquet"
 MAX_CALLS = 4
 A_VERDICTS = ("ONE_GROUP_PER_ACCOUNT", "FEWER_GROUPS", "OTHER_GROUPS", "REFUSED", "NOT_RUN")
 B_VERDICTS = ("IGNORED", "NET_WHEN_FALSE", "DIFFERENT_UNTIED", "NOT_RUN")
-C_VERDICTS = ("ACCEPTED", "REFUSED", "NOT_RUN")
+C_VERDICTS = ("ACCEPTED", "REFUSED", "REQUEST_REJECTED", "NOT_RUN")
 STORES = ("secretsmanager", "s3_copy", "none")
 
 
@@ -168,7 +169,8 @@ def check(root):
     # (c)
     any_ok_false = any(c["ok"] and c["gross_of_fees_flag"] is False for c in calls)
     all_refused = all(not c["ok"] for c in calls)
-    exp_c = "ACCEPTED" if any_ok_false else ("REFUSED" if all_refused else "NOT_RUN")
+    all_auth = all(c["http_status"] in (401, 403) for c in calls)
+    exp_c = "ACCEPTED" if any_ok_false else (("REFUSED" if all_auth else "REQUEST_REJECTED") if all_refused else "NOT_RUN")
     need(rec["c_credential"]["verdict"] == exp_c, "c_credential.verdict differs from the recount (%s)" % exp_c)
     need(rec["c_credential"].get("claim") in P114.CLAIMS, "c claim")
     # (a)
