@@ -1,0 +1,62 @@
+[
+  {
+    "step": "0 -- first act: branch and tree paths",
+    "invocation": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK",
+    "result": "wk-NFRA_MCPINDEX-43; TREE-OK"
+  },
+  {
+    "step": "0 -- deployed-tools file for the committed rows",
+    "invocation": "python org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round16/checks/deployed_from_rows.py .scratch/deployed.json",
+    "result": "deployed tools written: 13 (the order's text says 1); list of 13 names"
+  },
+  {
+    "step": "1 -- baseline before the edits",
+    "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/opal-gateway/tests/test_opal_discover.py infra/aws/ec2/opal-gateway/tests/test_portal_index.py (run from the gateway root); python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests; python workflows/atom_decomposition/tests/test_gen_silver_rows.py",
+    "result": "58 passed; 189 passed; Ran 39 tests OK"
+  },
+  {
+    "step": "1 -- parts (a) to (d) built; new tests",
+    "invocation": "python -m unittest workflows.atom_decomposition.tests.test_firm_field -v; python -m pytest -q -p no:cacheprovider tests/test_firm_catalog_visibility.py (gateway root)",
+    "result": "15 passed; 7 passed"
+  },
+  {
+    "step": "1 -- suites after the edits",
+    "invocation": "python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests; python workflows/atom_decomposition/tests/test_gen_silver_rows.py",
+    "result": "204 passed; Ran 39 tests OK"
+  },
+  {
+    "step": "2 -- control regeneration without --firm-map",
+    "invocation": "python workflows/atom_decomposition/gen_silver_rows.py --g2 .../G2_pinned.md --g4 .../G4_pinned.md --g5 .../G5_pinned.md --g6 .../G6_pinned.md --g3 .../G3_pinned.md --g2f .../G2f_pinned.md --out workflows/atom_decomposition/catalog_entries --deployed-tools .scratch/deployed.json --fork-registry-file infra/logic/registry/catalog_fork_keys.json",
+    "result": "wrote 216 rows; git diff on catalog_entries and the registry: zero lines"
+  },
+  {
+    "step": "2 -- regeneration with the firm map",
+    "invocation": "the same command with --firm-map org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/f1_firm_map.json",
+    "result": "firm map applied to 24 in-scope contracts (24 entities in the map); wrote 216 rows; 24 row files +firm: null (24 insertions); registry: 24 of 216 entries change, each only restore.firm added (structural check against HEAD)"
+  },
+  {
+    "step": "3 -- catalog regeneration in the worktree (not committed)",
+    "invocation": "python workflows/atom_decomposition/emit_catalog_v02.py",
+    "result": "SILVER DATASET ENTRIES 226 emitted, 0 refused; NEED ENTRIES 35; HARVEST ROWS 78, 0 refused; TOOL INDEX N=93; 0 EMIT REFUSED lines; DATA_CATALOG.yaml diff vs HEAD: 24 firm lines plus the generator header"
+  },
+  {
+    "step": "4 -- criterion AC1 (output saved; second run compared)",
+    "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/f1.AC1.sh; echo exit=$?",
+    "result": "RESULT: PASS exit=0; run 2 identical to run 1 (c19.AC1.out, c19.AC1.run2.out)"
+  },
+  {
+    "step": "4 -- criterion AC2 (output saved; second run compared)",
+    "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/f1.AC2.sh; echo exit=$?",
+    "result": "RESULT: PASS exit=0; DENOMINATOR silver rows 221 x principals 6 = 1326 pairs; newly visible 24 (expected 24); cross-firm leaks 0; run 2 identical (c19.AC2.out, c19.AC2.run2.out)"
+  },
+  {
+    "step": "4 -- criterion AC3",
+    "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round17/checks/f1.AC3.sh; echo exit=$?",
+    "result": "pytest rc=1: 1 failed, 64 passed; new tests collected: 7; RESULT: FAIL exit=1; the failing id is tests/test_opal_discover.py::test_gap_need_answers_with_its_owner_and_no_tool (line 868); see surprise NFRA_MCPINDEX-Z-W43-S2"
+  },
+  {
+    "step": "5 -- commits",
+    "invocation": ".tools/safe-commit.sh (i) code and tests; (ii) the 24 rows and the registry; (iii) this instance, the output files and the investigation rows",
+    "result": "(i) f4a78920d3; (ii) f0cda7cd7d; (iii) see the worker report. Status flip NOT made: AC3 FAIL."
+  }
+]
