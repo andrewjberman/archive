@@ -1,0 +1,33 @@
+{
+  "base_commit": "5e4de60381156ab04d057ea7305c0958f31981e8",
+  "changed_paths": [
+    "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+    "data/assets/scripts/gold/irpt_holdings_performance/tests/test_split_unkeyed.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-583.split-unkeyed.md"
+  ],
+  "negative_tests": [
+    "unkeyed_split_row_marks_the_day_ratio_absent_and_counts",
+    "blank_cusip_falls_back_to_ticker",
+    "no_key_at_all_never_skips_silently",
+    "keyed_rows_unchanged_when_no_unkeyed_row",
+    "manifest_counts_unkeyed_split_rows",
+    "unkeyed_row_does_not_adjust_a_keyed_security"
+  ],
+  "tests_total": 83,
+  "tests_passed": 83,
+  "mutant_tests_failed": 10,
+  "notes": [
+    "Premises re-grounded at base 5e4de60381: _split_ratios_for_day drops empty-chain split rows silently (secs filters falsy keys), the identifier chain already keys a blank cusip by ticker, and the per-day manifest is written by emit_day.",
+    "Sparse directories added locally and never committed: data/assets/scripts/gold/irpt_holdings_performance (the order's list), then data/assets/scripts/lib, which holdings_performance.py imports at module load for stream_parquet and trading_calendar. Collection then ran with no further import error.",
+    "Change confined to three SPLIT-ADJUST-B blocks: the per-day unkeyed count in _frame_for, the unkeyed merge in the manifest builder, and the module-level reason text. The ratio arithmetic, holdings_return and split_days are unchanged, and an unkeyed row stays out of the activity set as before.",
+    "Tests: 83 passed across test_split_unkeyed.py (10 new), test_split_adjust.py, test_holdings_performance.py and test_holdings_comparison.py; no existing assertion was edited.",
+    "Difference control run by hand with the three SPLIT-ADJUST-B blocks stripped in memory: 10 failed and 0 errors, all on assertions (None compared to a value). PYTHONPYCACHEPREFIX was set to a scratch directory, since a stale pyc otherwise hides the strip (channel row IRPT_BCKEND-D2-W425-S3).",
+    "The manifest is per day, not per run: the keys days_ratio_absent and unkeyed_split_rows are filed per day and a run total is a sum over the day manifests (channel row IRPT_BCKEND-D2-W425-S1)."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
