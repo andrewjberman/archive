@@ -1,0 +1,64 @@
+{
+  "handler": {
+    "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+    "functions_added": ["filled_population", "owed_filled_days", "run_filled_day", "invoke_next_day", "filled_day_event", "filled_day_key", "run_day_event"],
+    "event_key": "day",
+    "invocation_type": "Event",
+    "words": "Seven functions added to the reporting-gold handler; the five names the order requires are all present. run() takes chain=None, builds the oldest owed filled day with run_filled_day and invokes itself for the next owed day through invoke_next_day when a chain is given; it no longer calls filled_stage, which stays defined. lambda_handler routes an event carrying a day key (and no backfill key) to run_day_event, which builds only that day. The existing lines changed are the run() signature, the population block of run() (now filled_population), the filled-stage call (now owed_filled_days and run_filled_day) and the lambda_handler body."
+  },
+  "behavior": {
+    "oldest_first": true,
+    "noop_when_landed": true,
+    "chain_stops_when_none_owed": true,
+    "scheduled_runs_earlier_stages": true,
+    "day_event_skips_earlier_stages": true,
+    "words": "Verified by the new tests in test_filled_per_day.py (landed day is a no-op; oldest owed day is built first; no invoke when none is owed; chain links the next owed day; no earlier stage on a day event; chain None never invokes) and by the amended test test_stage_runs_after_the_class_and_lot_stages, which asserts the scheduled run runs the class and lots stages, then the owed and oldest filled day, and does not call filled_stage."
+  },
+  "iam": {
+    "file": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+    "statement_id": "InvokeOwnFunctionOnly",
+    "action": "lambda:InvokeFunction",
+    "resource_form": "The single resource is the function's own ARN, built in words as the lambda ARN prefix in the us-east-1 region, the caller account from the existing account data source, the function segment and the name from the builder module module.irpt_reporting_gold_lambda_name (the same construction the OwnLogStreamOnly statement uses for its log group). No literal name and no wildcard.",
+    "words": "One new statement is added to the reporting-gold role policy document, after OwnLogStreamOnly. It is the only statement carrying a lambda action. Nothing is applied; the grant takes effect only at the applier's apply under a signed pair."
+  },
+  "expected_plan": {
+    "to_add": 0,
+    "to_change": 2,
+    "to_destroy": 0,
+    "resources": ["aws_iam_role_policy.irpt_reporting_gold", "module.irpt_reporting_gold.aws_lambda_function.this"],
+    "words": "The expectation is the order's own (0 add, 2 change, 0 destroy on these two resources). Nothing was planned: this worker has no terraform binary and ran no plan. Inferred only."
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_per_day.py",
+    "new_tests": 15,
+    "dir_total": 120
+  },
+  "files_changed": [
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "sha256": "ad1a382500cbed27c786f75ed1b0d9b053e775fe4cdcc213acd59610dd100181",
+      "kind": "handler edited (additive; six existing lines changed or removed)"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_per_day.py",
+      "sha256": "358b195dbac7321a78b586302834e480d1d995b4c981a200694a73b28b7f988e",
+      "kind": "test added"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_report_values_stage.py",
+      "sha256": "818517c6f90bef155ad7ea0254c6fad3040751838aba7cee5dc2b6b45541c5c4",
+      "kind": "test updated"
+    },
+    {
+      "file": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+      "sha256": "a9b82429beeb0b5386b2ea53cb33de8b9f713c527e299de5fb9295b92fb1fb0b",
+      "kind": "terraform edited (one statement added)"
+    }
+  ],
+  "words": "Local build only. Amendment 1 (commit 82091e0b7f) put the one pinned test in the grant; that test is the only existing test changed, and every other test of its file is byte-identical. The handler directory passes 120 tests (105 earlier, 15 new). ruff (target py39) passes on the three Python files. locals.tf is unchanged.",
+  "claim": "inferred",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

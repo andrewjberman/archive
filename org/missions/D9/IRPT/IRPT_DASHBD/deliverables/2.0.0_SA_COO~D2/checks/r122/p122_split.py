@@ -25,6 +25,7 @@ AUTHOR = "0.9.0_WK_IRPT_DASHBD~201"
 HANDLER_REL = "infra/aws/lambda/investor-reporting/reporting-gold/handler.py"
 TESTS_DIR = "infra/aws/lambda/investor-reporting/reporting-gold/tests"
 NEW_TEST_REL = TESTS_DIR + "/test_filled_per_day.py"
+OLD_TEST_REL = TESTS_DIR + "/test_filled_report_values_stage.py"  # Amendment 1: the one pinned test is updated
 TF_DIR = "infra/aws/terraform/investor-reporting/reporting-gold/"
 IAM_REL = TF_DIR + "iam.tf"
 LOC_REL = TF_DIR + "locals.tf"
@@ -193,7 +194,7 @@ def check_facts(rec, sha_of, file_exists, has_line):
     for f in fc:
         need(set(f) == {"file", "sha256", "kind"} and nes(f["kind"]) and file_exists(f["file"]) and HEX64.match(str(f["sha256"])) and sha_of(f["file"]) == f["sha256"],
              "files_changed entry %s: hash or form" % f.get("file"))
-        need(f["file"] in (HANDLER_REL, NEW_TEST_REL, IAM_REL, LOC_REL), "a changed file outside the grant: %s" % f["file"])
+        need(f["file"] in (HANDLER_REL, NEW_TEST_REL, OLD_TEST_REL, IAM_REL, LOC_REL), "a changed file outside the grant: %s" % f["file"])
     need(rec["files_in_repo"] is False and rec["served_values_changed"] is False and rec["pushed"] is False and rec["deployed"] is False, "a flag is not false")
     need(not digit_runs(rec), "a run of 8 or more digits outside the exempt fields: %s" % digit_runs(rec)[:2])
     return True
@@ -233,7 +234,7 @@ def run(root, cid):
         cs = own_commits(root)
         add, dele = own_numstat(root, cs, HANDLER_REL)
         need(add >= 60 and dele <= 10, "the handler change must be additive in the worker's own commits: %d added, %d deleted (needs >= 60 and <= 10)" % (add, dele))
-        stray = sorted(f for f in own_files(root, cs) if f.startswith(("infra/", "data/", "lib/", "org/standards/")) and f not in (HANDLER_REL, NEW_TEST_REL, IAM_REL, LOC_REL))
+        stray = sorted(f for f in own_files(root, cs) if f.startswith(("infra/", "data/", "lib/", "org/standards/")) and f not in (HANDLER_REL, NEW_TEST_REL, OLD_TEST_REL, IAM_REL, LOC_REL))
         need(not stray, "this worker's commits changed files outside the grant: %s" % stray[:3])
         print("OK: facts record valid, files hashed; the handler gains %d lines and loses %d in the worker's own commits; nothing else under infra/, data/, lib/ or org/standards/" % (add, dele))
         return True
