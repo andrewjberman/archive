@@ -24,8 +24,8 @@
       "reason": "Bounded out by the order: no browser launch and no render by the worker; AC4 is graded at the round close by the CVO (L9)."
     },
     {
-      "item": "bun install, AWS contact, deploy, data writes",
-      "reason": "Bounded out by the order (bounds 4 and preflight): node_modules is linked; the checks read source text and run bun on the pure module only."
+      "item": "bun install, AWS contact, deploy, data writes, dev server start or stop",
+      "reason": "Bounded out by the order (bounds 4 and preflight): node_modules is linked; the checks read source text and run bun on the pure module only; the 5174 dev server is left alone."
     },
     {
       "item": "Issuer's mutant runs and the selftest (r9_cn_p_2.py selftest)",
@@ -33,28 +33,24 @@
     },
     {
       "item": "A deliberate-error control for the type check",
-      "reason": "tsc --noEmit returned rc=0 once at 0d83ee04; no deliberate-error control was run, so the clean pass is not separately proven as a sentinel."
-    },
-    {
-      "item": "Type check of the amendment-1 line at d0390f1a",
-      "reason": "tsc was not re-run after the one-statement amendment; the changed statement is a ternary between compositionFootnote(trendMode) (string or null) and null, and effectiveFirmId is already in scope on the page. The issuer runs the type check at the drain."
+      "reason": "tsc --noEmit was not run by the worker at 500af5e8 (repo-wide hygiene is not a criterion, bounds 8); the issuer runs the type check at the drain. Amendment 2 changes one call argument whose type is unchanged (rollBlendsIntoArchetypeSeries returns Record<string, TimeSeriesDataPoint[]>, the same type as inflectionByModel) and one module statement."
     }
   ],
   "artifacts_produced": [
     {
       "path_or_key": "portal/src/lib/trendGrouping.ts",
       "kind": "frontend_component",
-      "commit_or_etag": "0d83ee04",
+      "commit_or_etag": "500af5e8",
       "artifact_covered_by": [
         "AC1",
         "AC2",
         "AC3"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-27-portal (nested repo, commit 0d83ee04; unchanged by amendment 1). Not pushed; no DEV or PROD write; no deploy.",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-27-portal (nested repo, commit 500af5e8; amendment 2 on top of 0d83ee04 and d0390f1a). Not pushed; no DEV or PROD write; no deploy.",
       "introduces": [
         "trendModeFor",
-        "buildGlobalTrendRows",
+        "buildGlobalTrendRows (amendment 2: poolFirst; Variant 1 Custom rolls forward)",
         "globalTrendFootnote",
         "trendDetailNoteFor",
         "compositionFootnote",
@@ -70,7 +66,7 @@
         "AC3"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-27-portal (nested repo, commit 0d83ee04; unchanged by amendment 1). Type-only change; no runtime change; no deploy.",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-27-portal (nested repo, commit 0d83ee04; unchanged by amendments 1 and 2). Type-only change; no runtime change; no deploy.",
       "introduces": [
         "MdpfPerFirmTimeSeries.client_supervised_aua?",
         "etf_strategies_aua?",
@@ -81,7 +77,7 @@
     {
       "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
       "kind": "frontend_component",
-      "commit_or_etag": "d0390f1a",
+      "commit_or_etag": "500af5e8",
       "artifact_covered_by": [
         "AC1",
         "AC2",
@@ -89,11 +85,11 @@
         "AC4"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-27-portal (nested repo; first pass 0d83ee04, amendment 1 at d0390f1a: the compositionNote statement selects by effectiveFirmId === 'global'). Not pushed; no DEV or PROD write; no deploy.",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-27-portal (nested repo; first pass 0d83ee04, amendment 1 at d0390f1a, amendment 2 at 500af5e8: the inflectionCustom statement no longer rolls the blends). Not pushed; no DEV or PROD write; no deploy.",
       "introduces": [
         "Global Trend rows drive timeSeriesData",
         "Client Unsupervised and Global Other AUA retired",
-        "Variant 1 stitch (internal sessions only)",
+        "Variant 1 stitch (internal sessions only; unrolled Inflection blends as the Custom source)",
         "carried marking (tooltip label, bar opacity 0.55, legend entry)",
         "composition footnote scoped to the Global view (amendment 1)"
       ]
@@ -108,29 +104,29 @@
       "output_evidence": "  C1   PASS  control: the CN-i-1/CN-i-2 exports (groupCustomModelsSeries, presentTrendEntries, trendDetailNote, CUSTOM_MODELS_LABEL) stay exported\n  O1   PASS  all 9 period-end rows match the amended oracle to 0.05 $M (no mismatch)\n  O2   PASS  each row's groups sum to its Total within 0.15 $M, the oracle's own 1-dp rounding (off: [])\n  O3   PASS  ABSENT IS NOT ZERO and never back-filled: UST at 2024-12-31 is null, ETF there is the SMA history 5.8, ALT before 2026-09-30 is null\n  O4   PASS  the Total is a FIELD READ: it equals the served opal_aggregate_aua exactly, though the groups do not sum to it (123456789.123456)\n  O5   PASS  Client Supervised, ETF and ALT are read as served, with no arithmetic and no rounding (98765432.123456, 11111111.111111, 22222222.222222)\n  O6   PASS  Client Unsupervised and Other AUA are retired (no field); Custom is the served difference once the pool is held (66.9) and Inflection's own series inside the window (34.3)\nROUND 9 CN-P-2 ORACLE: 7 of 7 arms\nexit=0",
       "denominator": "7 of 7 arms",
       "status": "PASS",
-      "expect": "ROUND\\ 9\\ CN\\-P\\-2\\ ORACLE:\\ 7\\ of\\ 7\\ arms\\s+exit=0",
+      "expect": "ROUND 9 CN-P-2 ORACLE: 7 of 7 arms\\s+exit=0",
       "judgment": false
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "AC2: ROUND 9 CN-P-2 VARIANTS: 10 of 10 arms",
+      "criterion_verbatim": "AC2: ROUND 9 CN-P-2 VARIANTS: 12 of 12 arms",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round9/checks/r9_cn_p_2.py\" variants; echo \"exit=$?\"",
-      "output_evidence": "  V1   PASS  before 2026-05-15 a Variant 2 session draws one Models band (700) and no model line; Variant 1 draws 49F's lines and no band\n  V2   PASS  05-15 .. 07-19: Variant 2 suppresses Custom (and flags it); Variant 1 draws Inflection's own series (53)\n  V3   PASS  demo tenant (firmId demo, not opal-capital, not Dev): internal false -> variant2; only a literal true gives variant1; undefined, 'yes', 1 and null fail closed (['variant1', 'variant2', 'variant2', 'variant2', 'variant2', 'variant2'])\n  V4   PASS  a Variant 2 build with the stitch passed equals one without it: the single-firm series never reach a non-internal row\n  V5   PASS  the nine-style no-total dates take the last known value and name every carried group; a served date carries nothing (carried 05-30: ['Client Supervised', 'Custom Models', 'ETF Strategies', 'Intermediate Term', 'Long Term', 'Short Term', 'Ultra-Long Term', 'Ultra-Short Term', 'total'])\n  V6   PASS  roll FORWARD only: a carried date before a series' first value stays null; a null on a date not listed in carried_dates is not filled\n  V7   PASS  footnotes: Variant 2 inside the window only, exact text; none for Variant 1. 'Per-model detail begins' note: Variant 2 only. Composition steps: internal only (got models held at one firm are in the total and not broken out | [None, 'Per-model detail begins May 15, 2026; earlier model assets are in the Total and are not broken out.', None] | [\"Composition: Inflection's models enter the Total on May 15, 2026; Cottonwood enters on May 28, 2026 (estimated until July 20, 2026).\", None])\n  V8   PASS  a carried point carries class 'carried' (the estimate wins); the tooltip names a carried value (['carried', 'interpolated_estimate', 'measured', None] | ['Long Term (carried)', 'Long Term (carried)', 'Long Term', 'Long Term', 'Long Term'])\n  V9   PASS  the served object and the stitch are not mutated; one row per served date, in order\n  V10  PASS  a measured zero stays 0; a missing array (an older leaf) yields nulls and no carried rows, never 0\nROUND 9 CN-P-2 VARIANTS: 10 of 10 arms\nexit=0",
-      "denominator": "10 of 10 arms",
+      "output_evidence": "  V1   PASS  before 2026-05-15 a Variant 2 session draws one Models band (700) and no model line; Variant 1 draws 49F's lines and no band\n  V2   PASS  05-15 .. 07-19: Variant 2 suppresses Custom (and flags it); Variant 1 draws Inflection's own series (53)\n  V3   PASS  demo tenant (firmId demo, not opal-capital, not Dev): internal false -> variant2; only a literal true gives variant1; undefined, 'yes', 1 and null fail closed (['variant1', 'variant2', 'variant2', 'variant2', 'variant2', 'variant2'])\n  V4   PASS  a Variant 2 build with the stitch passed equals one without it: the single-firm series never reach a non-internal row\n  V5   PASS  the nine-style no-total dates take the last known value and name every carried group; a served date carries nothing (carried 05-30: ['Client Supervised', 'Custom Models', 'ETF Strategies', 'Intermediate Term', 'Long Term', 'Short Term', 'Ultra-Long Term', 'Ultra-Short Term', 'total'])\n  V6   PASS  roll FORWARD only: a carried date before a series' first value stays null; a null on a date not listed in carried_dates is not filled\n  V7   PASS  footnotes: Variant 2 inside the window only, exact text; none for Variant 1. 'Per-model detail begins' note: Variant 2 only. Composition steps: internal only (got models held at one firm are in the total and not broken out | [None, 'Per-model detail begins May 15, 2026; earlier model assets are in the Total and are not broken out.', None] | [\"Composition: Inflection's models enter the Total on May 15, 2026; Cottonwood enters on May 28, 2026 (estimated until July 20, 2026).\", None])\n  V8   PASS  a carried point carries class 'carried' (the estimate wins); the tooltip names a carried value (['carried', 'interpolated_estimate', 'measured', None] | ['Long Term (carried)', 'Long Term (carried)', 'Long Term', 'Long Term', 'Long Term'])\n  V9   PASS  the served object and the stitch are not mutated; one row per served date, in order\n  V10  PASS  a measured zero stays 0; a missing array (an older leaf) yields nulls and no carried group for it, never 0\n  V11  PASS  Variant 1: Custom Models carries its last known value on every date after its first (the carried 05-30, the pool-less 07-28 and 07-29, the no-model-AUA 08-04), not Inflection-only once the pool is served, never before the first value; only Custom is rolled and it is named in row.carried (got [None, None, 27, 27, 28, 40, 40, 40, 45, 45, 46])\n  V12  PASS  Variant 2 never rolls Custom (suppressed stays suppressed, flagged where model AUA exists); Variant 1 flags nothing and fills nothing before the first value (got [None, None, None, None, None, 40, None, None, 45, None, 46])\nROUND 9 CN-P-2 VARIANTS: 12 of 12 arms\nexit=0",
+      "denominator": "12 of 12 arms",
       "status": "PASS",
-      "expect": "ROUND\\ 9\\ CN\\-P\\-2\\ VARIANTS:\\ 10\\ of\\ 10\\ arms\\s+exit=0",
+      "expect": "ROUND 9 CN-P-2 VARIANTS: 12 of 12 arms\\s+exit=0",
       "judgment": false
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "AC3: ROUND 9 CN-P-2 WIRING: 9 of 9 arms",
+      "criterion_verbatim": "AC3: ROUND 9 CN-P-2 WIRING: 10 of 10 arms",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round9/checks/r9_cn_p_2.py\" wiring; echo \"exit=$?\"",
-      "output_evidence": "  W1   PASS  the page calls buildGlobalTrendRows and derives the mode as trendModeFor(internal) (the page's own isInternal() || isDev())\n  W2   PASS  the two single-firm reads (49financial, inflection) are enabled only when internal and the scope is global ([True, True])\n  W3   PASS  the as-of Client chips, Other AUA at Global and the old arithmetic are retired from the page (still present: none)\n  W4   PASS  the boundary note goes through trendDetailNoteFor(mode, ...); the footnotes through globalTrendFootnote and compositionFootnote with data-trend-footnote and data-trend-composition elements\n  W5   PASS  carried points: the tooltip label, the point class and the legend entry go through the module\n  W6   PASS  portal-proxy.ts types the four new optional fields: client_supervised_aua, etf_strategies_aua, alt_strategies_aua, carried_dates\n  W7   PASS  the module stays pure: exports buildGlobalTrendRows and imports nothing\n  C2   PASS  control: the approved edits are intact (lime Client Unsupervised, the Other Models 'as of' wiring)\n  W8   PASS  scope: only the three owned files (and a trendGrouping test) differ from the base; protected files byte-equal; every line of the owned files CRLF (extra: []; protected moved: []; mixed endings: [])\nROUND 9 CN-P-2 WIRING: 9 of 9 arms\nexit=0",
-      "denominator": "9 of 9 arms",
+      "output_evidence": "  W1   PASS  the page calls buildGlobalTrendRows and derives the mode as trendModeFor(internal) (the page's own isInternal() || isDev())\n  W2   PASS  the two single-firm reads (49financial, inflection) are enabled only when internal and the scope is global ([True, True])\n  W3   PASS  the as-of Client chips, Other AUA at Global and the old arithmetic are retired from the page (still present: none)\n  W4   PASS  the boundary note goes through trendDetailNoteFor(mode, ...); the footnotes through globalTrendFootnote and compositionFootnote with data-trend-footnote and data-trend-composition elements\n  W5   PASS  carried points: the tooltip label, the point class and the legend entry go through the module\n  W6   PASS  portal-proxy.ts types the four new optional fields: client_supervised_aua, etf_strategies_aua, alt_strategies_aua, carried_dates\n  W7   PASS  the module stays pure: exports buildGlobalTrendRows and imports nothing\n  W9   PASS  the stitch's Inflection Custom is the UNROLLED blends: the stitch memo groups the Inflection series with groupCustomModelsSeries and does not roll the blends into the archetypes first\n  C2   PASS  control: the approved edits are intact (lime Client Unsupervised, the Other Models 'as of' wiring)\n  W8   PASS  scope: only the three owned files (and a trendGrouping test) differ from the base; protected files byte-equal; every line of the owned files CRLF (extra: []; protected moved: []; mixed endings: [])\nROUND 9 CN-P-2 WIRING: 10 of 10 arms\nexit=0",
+      "denominator": "10 of 10 arms",
       "status": "PASS",
-      "expect": "ROUND\\ 9\\ CN\\-P\\-2\\ WIRING:\\ 9\\ of\\ 9\\ arms\\s+exit=0",
+      "expect": "ROUND 9 CN-P-2 WIRING: 10 of 10 arms\\s+exit=0",
       "judgment": false
     },
     {
@@ -153,32 +149,28 @@
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "the AC1 invocation run twice from the worktree root, each stdout compared in full",
-      "observed": "IDENTICAL: both runs rc=0, ROUND 9 CN-P-2 ORACLE: 7 of 7 arms (second run after amendment 1, portal d0390f1a)",
+      "method": "each AC1 to AC3 invocation run twice from the worktree root, each stdout compared in full",
+      "observed": "IDENTICAL for AC1, AC2 and AC3: all rc=0 and stdout identical (second run after amendment 2, portal 500af5e8)",
       "status": "STABLE"
     }
   },
   "surprises": [
     "MDPF_CANON-D1-W27-S1: step 9 names the show gates but not the period-end plottedKeys row filter, which read the retired hasGlobalEnterprise; changed to timeSeriesData.isPerFirm (the Non-Model show gate).",
-    "MDPF_CANON-D1-W27-S2: the Variant 1 composition footnote (step 11, unconditional) also renders on the per-firm views of an internal session because compositionFootnote returns text for every Variant 1 call; built literally, the scope is the issuer's call. RESOLVED by amendment 1 (item 13) at portal d0390f1a: the composition statement selects by effectiveFirmId === 'global'.",
-    "MDPF_CANON-D1-W27-S3: step 4 says 'the same mapping' for the Inflection series; the worker applied the SMA-cohort rule and no primary-label filter, so Inflection's Custom members survive into the fold."
+    "MDPF_CANON-D1-W27-S2: the Variant 1 composition footnote (step 11, unconditional) also renders on the per-firm views of an internal session; RESOLVED by amendment 1 (item 13) at portal d0390f1a.",
+    "MDPF_CANON-D1-W27-S3: step 4 says 'the same mapping' for the Inflection series; the worker applied the SMA-cohort rule and no primary-label filter, so Inflection's Custom members survive into the fold.",
+    "MDPF_CANON-D1-W27-S4: amendment 2 leaves the page comment at ModelPortfolios.tsx line 560 ('blends rolled first') inaccurate; the order bounds the page to one expression, so the comment is unchanged."
   ],
-  "session_log": "0.9.0_WK_MDPF_CANON~27, round 9, cell CN-p-2, re-seated on its own slot (amendment 1). Worktree C:/dev/wk-canon-r9-27 on outer branch wk-MDPF_CANON-27; nested portal C:/dev/wk-canon-r9-27/portal on branch wk-MDPF_CANON-27-portal. First pass: items 1 to 12 built, portal commit 0d83ee04. Amendment 1 (item 13): one statement in src/pages/ModelPortfolios.tsx changed to compositionFootnote(trendMode) only when effectiveFirmId === 'global', else null; the line was CRLF before and after (2614 CRLF, 0 bare LF); portal commit d0390f1a LOCAL via safe-commit-equivalent git commit in the nested repo with the worker author (portal diff vs 0d83ee04: 1 insertion, 1 deletion). AC1 to AC3 re-run under timeout 120 on the amended bytes (AC1 run twice, identical). AC4 not run (judgment). Surprise rows MDPF_CANON-D1-W27-S1 to S3 remain on file in INVESTIGATION_v1.md (existing rows, not edited).",
+  "session_log": "0.9.0_WK_MDPF_CANON~27, round 9, cell CN-p-2, re-seated on its own slot (amendment 2). Worktree C:/dev/wk-canon-r9-27 on outer branch wk-MDPF_CANON-27; nested portal C:/dev/wk-canon-r9-27/portal on branch wk-MDPF_CANON-27-portal. Amendment 2: trendGrouping.ts gained poolFirst (3 lines), the Inflection-stand-in condition, and the two-statement roll condition; ModelPortfolios.tsx inflectionCustom no longer wraps rollBlendsIntoArchetypeSeries (one line). Both files CRLF (0 bare LF). Portal commit 500af5e8 LOCAL (diff vs d0390f1a: 7 insertions, 3 deletions across 2 files). AC1 to AC3 run under timeout 120 on the amended bytes, each twice. AC4 not run (judgment). Surprise rows S1 to S4 on file in INVESTIGATION_v1.md.",
   "compiler_tools": [
     {
       "tool": "r9_cn_p_2.py (issuer's check, read-only)",
       "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round9/checks/r9_cn_p_2.py oracle|variants|wiring",
-      "result": "oracle 0 (7 of 7); variants 0 (10 of 10); wiring 0 (9 of 9) -- each exit 0 on the amended bytes at d0390f1a"
+      "result": "oracle rc=0 (7 of 7); variants rc=0 (12 of 12); wiring rc=0 (10 of 10) -- on the amended bytes at 500af5e8"
     },
     {
-      "tool": "tsc --noEmit -p tsconfig.app.json (portal)",
-      "invocation": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json (run in the portal worktree at 0d83ee04)",
-      "result": "rc=0 with no output at 0d83ee04 (first pass); NOT re-run at d0390f1a (see declared_exclusions)"
-    },
-    {
-      "tool": "git commit (nested portal repo, d0390f1a)",
-      "invocation": "git -C C:/dev/wk-canon-r9-27/portal commit --author \"0.9.0_WK_MDPF_CANON~27 <0.9.0_WK_MDPF_CANON~27@opal.agent>\" -F <msgfile> after git -C portal add -- src/pages/ModelPortfolios.tsx",
-      "result": "committed d0390f1a, 1 file changed, 1 insertion(+), 1 deletion(-); the commit-gate does not grade .ts or .tsx"
+      "tool": "git commit (nested portal repo, 500af5e8)",
+      "invocation": "git -C C:/dev/wk-canon-r9-27/portal commit --author \"0.9.0_WK_MDPF_CANON~27 <0.9.0_WK_MDPF_CANON~27@opal.agent>\" -F <msgfile> after git -C portal add -- src/lib/trendGrouping.ts src/pages/ModelPortfolios.tsx",
+      "result": "committed 500af5e8, 2 files changed, 7 insertions(+), 3 deletions(-); portal hook did not refuse"
     }
   ]
 }
