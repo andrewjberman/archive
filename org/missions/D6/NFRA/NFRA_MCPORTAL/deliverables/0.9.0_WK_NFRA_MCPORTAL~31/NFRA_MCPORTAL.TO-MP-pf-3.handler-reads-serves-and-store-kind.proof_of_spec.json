@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pf-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "068ea1969f05be632d7e331888a1c25544265480",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pf-3.handler-reads-serves-and-store-kind.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pf-3.handler-reads-serves-and-store-kind.md",
+    "group": "OTHER",
+    "vintage_commit": "068ea1969f05be632d7e331888a1c25544265480"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_gateway_breakdown.py",
+      "kind": "script",
+      "commit_or_etag": "994447aa53af57243bf3f202aef319780878d4af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Changed by MP-pf-3: _segment_fields_for returns each tool's serves pairs, the assembly lists a tool under every pair, _declared_source_groups and _group_ids_for_tools accept kind store, _KIND_ORDER puts store after bucket. Branch wk-NFRA_MCPORTAL-pe-31, LOCAL, not pushed, no deploy, no AWS call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_gateway_breakdown.py",
+      "kind": "test",
+      "commit_or_etag": "994447aa53af57243bf3f202aef319780878d4af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five tests added (the PF.7 names in pf3.AC1.sh). The six MP-pf-1 tests keep their names and assertions; their planting now uses serves (the _seg_row helper and the literal rows of test_tool_in_two_buckets_is_segmented_only_where_it_is_assets_or_bd). File reads 31 passed, 0 failed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "named tests PASSED 5 of 5.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "store and serves tests: ======================= 31 passed, 1 warning in 33.57s ========================; named tests PASSED 5 of 5\nRESULT: PASS\nexit=0",
+      "denominator": "named tests PASSED 5 of 5 (the five names in pf3.AC1.sh); tests/test_admin_gateway_breakdown.py reads 31 passed of 31 (26 before this order, plus 5 new)",
+      "status": "PASS",
+      "expect": "named tests PASSED 5 of 5.*RESULT: PASS.*exit=0",
+      "status_reason": "Run from C:/tmp/mp-pe-31 after the commit 994447aa53. The output reads named tests PASSED 5 of 5, RESULT: PASS, exit=0. Re-run for the determinism control: the same verdict."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "failed=0; seam test failures=0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "admin suite: 114 passed, 3 warnings in 57.57s; passed=114 failed=0; seam test failures=0\nRESULT: PASS\nexit=0",
+      "denominator": "114 passed of 114 admin-suite tests (tests/test_admin*.py and tests/test_owner_gate.py); 0 failed; seam test failures=0; the check requires at least 109 passed (the post-MP-pf-1 count the order names), and the 5 new tests take it to 114",
+      "status": "PASS",
+      "expect": "failed=0; seam test failures=0.*RESULT: PASS.*exit=0",
+      "status_reason": "Run from C:/tmp/mp-pe-31 after the commit 994447aa53. The output reads failed=0, seam test failures=0, RESULT: PASS, exit=0, 114 passed."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Red arm in a SCRATCH copy (.scratch/mutant/opal-gateway; the worktree app file was never written, its sha256 7b0d2151458a4dc7b126c38d00b4b9b6d5a54d4e5ed863fe14b0078b89caf7df checked before and after with sha256sum -c). The new behaviour is disabled: serves is ignored (every tool reads the unresolved pair) and a store element is malformed again. The five named tests were run by pytest node id.",
+      "expected": "at least one named test FAILS with the new behaviour disabled (RESULT: FAIL)",
+      "observed": "4 failed, 1 passed of the five named tests (pytest rc=1): test_declared_store_kind_makes_a_store_group, test_store_declaration_is_not_malformed, test_groups_are_ordered_bucket_store_integration_native_undeclared and test_tool_serving_two_pairs_is_listed_in_each_segment FAILED; test_missing_serves_reads_unresolved_pair PASSED, because the mutant returns the unresolved pair that test expects. RESULT: FAIL, named tests PASSED 1 of 5.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pf3.AC1.sh run twice on the same tree (994447aa53): once for the acceptance row, once more for this control",
+      "observed": "run 1: 31 passed, 1 warning in 33.57s; named tests PASSED 5 of 5; RESULT: PASS; exit=0. run 2: 31 passed, 1 warning in 35.54s; named tests PASSED 5 of 5; RESULT: PASS; exit=0. The same verdict on both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The catalog's serves lists and store source_group declarations (NFRA_MCPORTAL-Z-W31-S7)",
+      "reason": "The catalog is the issuer's, outside this order's write surface, and it declares neither yet. The real _compute run therefore shows no store, bucket or integration channel and no segments. The behaviour is proven by the planted tests only."
+    },
+    {
+      "item": "The task order's <status> flip to complete (NFRA_MCPORTAL-Z-W31-S8)",
+      "reason": "The order file is outside this worker's write grant, and the worker face carries no status tag. The flip is left for the issuer."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W31-S7: the catalog declares no serves list and no store source_group, so the store kind and the serves list read nothing from the real catalog (real _compute: 2 channels, no segments).",
+    "NFRA_MCPORTAL-Z-W31-S8: the task order's status flip is not made by the worker; the order file is outside the grant."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": "pf3.AC1.sh (named tests, via pytest on tests/test_admin_gateway_breakdown.py)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf3.AC1.sh; echo \"exit=$?\"",
+      "result": "named tests PASSED 5 of 5; RESULT: PASS; exit=0"
+    },
+    {
+      "tool": "pf3.AC2.sh (the gateway admin suite)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf3.AC2.sh; echo \"exit=$?\"",
+      "result": "114 passed, 0 failed; seam test failures=0; RESULT: PASS; exit=0"
+    },
+    {
+      "tool": "python .scratch/real_run.py (real _compute against the repository's own registry and catalog, offline scan stub and empty store; no plant)",
+      "invocation": "python C:/tmp/mp-pe-31/.scratch/real_run.py",
+      "result": "86 distinct tools; 2 channels: m365 (native, 11 tools), undeclared (undeclared, 75 tools); no channel carries segments; grant_store read"
+    },
+    {
+      "tool": "mutant arm (.scratch/mutant_patch.py on the scratch copy; pytest on the five named node ids)",
+      "invocation": "python .scratch/mutant_patch.py; python -m pytest <five node ids> -q -p no:cacheprovider --color=no -rf",
+      "result": "4 failed, 1 passed; rc=1; worktree app sha256 unchanged"
+    }
+  ]
+}
