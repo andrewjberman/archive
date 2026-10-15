@@ -19,6 +19,7 @@ sys.path.insert(0, str(CHECK.parent.parent / "r196"))
 sys.path.insert(0, str(CHECK.parent))
 import p199_apply as PA  # noqa: E402
 import p199_cells as P  # noqa: E402
+import p199_serve as PS  # noqa: E402
 
 P6 = P.P6
 P3 = PA.P3
@@ -87,7 +88,29 @@ APPLY = {
     "kernel_log_count": {"memory_read_done": True, "oom_count": 0}, "rollback_performed": False, "stop": None, "counters": dict(PA.APPLY_COUNTERS)}
 
 
-def make_root(orion=None, apply=None, pkt=None, ledger=True):
+SITE = {"path": "pull/pull_orion.py", "line": 4, "identifier": "pull_positions"}
+SERVE = {
+    "base_commit": "a" * 40,
+    "hops": {
+        "2": {"what": "the reporting-publish schedule writes a new platinum object, the filled report, beside series and summary", "exists_today": False, "risk": "SERVED",
+              "files": [SITE], "address_builder_output": "lib/opal_naming.py address() for client=<id>, kind report", "registry_row_needed": False},
+        "3": {"what": "a new GET route on the reporting-read lambda serves the object under the summary's scope check", "exists_today": False, "risk": "WORLD",
+              "files": [SITE], "path_template": PS.ROUTE},
+        "4": {"what": "the export bundle gains a filled-report source kind that pins the object version", "exists_today": False, "risk": "WORLD",
+              "files": [SITE], "source_kind": "filled_report"}},
+    "input_contract": {"document_shape": {"contract": PS.CONTRACT, "version": "0.5.1", "key": "document", "sha256_prefix": "0b515243b310"}, "claim": "inferred",
+                       "source": "the builder (IRPT_DASHBD ~D2, sole writer) lands one document per household; where it lands is not yet named"},
+    "scope_rule": "the route refuses unless the viewer's scope covers EVERY account the document names",
+    "blast_radius": {"writes": ["platinum report object per client"], "reads": ["the builder's document"], "new_iam": False, "served_values_changed": False, "existing_routes_changed": False},
+    "rollback_per_key": "delete exactly the report objects the publisher created, listed in the record, after a version-id read of each; remove the route by reverting its declaration",
+    "first_exercise": {"firm": "49financial", "order": "first"},
+    "build_slices": [{"cell": "publisher writes the report object", "risk": "LOCAL", "files": ["pull/pull_orion.py"]},
+                     {"cell": "route and scope check", "risk": "LOCAL", "files": ["pull/convert.py"]}],
+    "notes": ["synthetic"], **{k: 0 for k in P6.BOUND}}
+SERVE_PKT = "# never-widen packet\n" + "hop 2, hop 3, hop 4; blast radius; rollback; 49 Financial first; stop rule; opal_naming; COO half UNSIGNED. CTO half UNSIGNED.\n" + ("padding line\n" * 600)
+
+
+def make_root(orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=None):
     root = Path(tempfile.mkdtemp(prefix="c199_"))
     (root / "lib").mkdir()
     shutil.copy(REAL / "lib/trading_calendar.py", root / "lib/trading_calendar.py")
@@ -101,6 +124,8 @@ def make_root(orion=None, apply=None, pkt=None, ledger=True):
     w(root, P.REC, orion or ORION)
     w(root, PA.APPLY_REC, apply or APPLY)
     w(root, PA.V3, pkt if pkt is not None else packet())
+    w(root, PS.REC, serve or SERVE)
+    w(root, PS.PKT, spkt if spkt is not None else SERVE_PKT)
     if ledger:
         w(root, "org/critical_paths/change_management/20261015_holdings_release.md", "ledger")
     git(root, "add", "-A")
@@ -123,9 +148,9 @@ for cid in P.CHECKS:
 shutil.rmtree(root, ignore_errors=True)
 
 
-def neg(label, cid, orion=None, apply=None, pkt=None, ledger=True):
+def neg(label, cid, orion=None, apply=None, pkt=None, ledger=True, serve=None, spkt=None):
     global bad
-    rt = make_root(orion, apply, pkt, ledger)
+    rt = make_root(orion, apply, pkt, ledger, serve, spkt)
     r = run(rt, cid)
     ok = r == cid + " FAIL"
     bad += 0 if ok else 1
@@ -184,5 +209,27 @@ neg("the gap changed", "IB199-2-AC3", apply=ma(lambda a: a.update({"gap_2026_10_
 neg("a kernel count read with no count", "IB199-2-AC3", apply=ma(lambda a: a.update({"kernel_log_count": {"memory_read_done": True}})))
 neg("a rollback performed", "IB199-2-AC3", apply=ma(lambda a: a.update({"rollback_performed": True})))
 neg("a counter above its bound", "IB199-2-AC3", apply=ma(lambda a: a["counters"].update({"lambda_invokes": 1})))
+
+
+def ms(fn):
+    o = copy.deepcopy(SERVE)
+    fn(o)
+    return o
+
+
+neg("hop 4 missing", "IB199-3-AC1", serve=ms(lambda o: o["hops"].pop("4")))
+neg("a hop that exists today", "IB199-3-AC1", serve=ms(lambda o: o["hops"]["3"].update({"exists_today": True})))
+neg("a file site with the wrong identifier", "IB199-3-AC1", serve=ms(lambda o: o["hops"]["2"]["files"][0].update({"identifier": "nope_function"})))
+neg("a wrong route template", "IB199-3-AC1", serve=ms(lambda o: o["hops"]["3"].update({"path_template": "/api/other/report"})))
+neg("an address typed by hand", "IB199-3-AC1", serve=ms(lambda o: o["hops"]["2"].update({"address_builder_output": "s3://bucket/key"})))
+neg("the wrong contract version", "IB199-3-AC2", serve=ms(lambda o: o["input_contract"]["document_shape"].update({"version": "0.4.0"})))
+neg("no scope rule", "IB199-3-AC2", serve=ms(lambda o: o.update({"scope_rule": "the route serves the object"})))
+neg("existing routes changed", "IB199-3-AC2", serve=ms(lambda o: o["blast_radius"].update({"existing_routes_changed": True})))
+neg("first exercise on another firm", "IB199-3-AC2", serve=ms(lambda o: o["first_exercise"].update({"firm": "cottonwood"})))
+neg("a packet too short", "IB199-3-AC3", spkt="# never-widen packet\nshort. COO half UNSIGNED. CTO half UNSIGNED.\n")
+neg("a packet with one half signed", "IB199-3-AC3", spkt=SERVE_PKT.replace("CTO half UNSIGNED.", "CTO half signed."))
+neg("one build slice only", "IB199-3-AC3", serve=ms(lambda o: o["build_slices"].pop()))
+neg("a build slice that is not LOCAL", "IB199-3-AC3", serve=ms(lambda o: o["build_slices"][0].update({"risk": "WORLD"})))
+neg("a counter above 0", "IB199-3-AC3", serve=ms(lambda o: o.update({"aws_writes_made": 1})))
 print("CONTROL SUMMARY: %d unexpected" % bad)
 sys.exit(1 if bad else 0)

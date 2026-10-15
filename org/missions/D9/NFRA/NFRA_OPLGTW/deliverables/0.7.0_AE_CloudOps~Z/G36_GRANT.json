@@ -1,0 +1,106 @@
+{
+ "policy_name": "gateway-global-portal-tiered-read-policy",
+ "policy_name_builder": "lib/opal_naming.py name(\"gateway\", \"global\", \"portal-tiered-read\", \"policy\")",
+ "bucket": "opal-data-portal-v2",
+ "bucket_agreement": {
+  "code_PORTAL_BUCKET": "opal-data-portal-v2",
+  "naming_registry_scope_global": "opal-data-portal-v2",
+  "live_existing_policy": [
+   "opal-data-portal-v2"
+  ],
+  "all_three_equal": true
+ },
+ "role": "aws_iam_role.int_reader (gateway-global-internal-reader-role)",
+ "actions": [
+  "s3:GetObject"
+ ],
+ "resources": [
+  "arn:aws:s3:::opal-data-portal-v2/json-tiered/market-overview/*"
+ ],
+ "residue_prefixes": [
+  "json-tiered/market-overview/"
+ ],
+ "residue_before_collapse": [
+  "json-tiered/market-overview/",
+  "json-tiered/market-overview/summary/",
+  "json-tiered/market-overview/timeseries/"
+ ],
+ "residue_dropped_as_redundant": [
+  "json-tiered/market-overview/summary/",
+  "json-tiered/market-overview/timeseries/"
+ ],
+ "collapse_note": "every dropped prefix is covered by a kept one, asserted rather than eyeballed, so the collapse changes the DIFF and not the reach",
+ "already_covered_prefixes": [
+  "json/latest/",
+  "json/macro/",
+  "json/macro/timeseries/",
+  "json/market/",
+  "json/positioning/",
+  "json/security_scanner/",
+  "json/security_scanner/latest/",
+  "json/security_scanner/latest/universes/",
+  "json/valuation/"
+ ],
+ "existing_grant_prefixes": [
+  "json/",
+  "platinum/"
+ ],
+ "existing_grant_source_equals_world": true,
+ "wanted_prefixes_with_provenance": {
+  "json-tiered/market-overview/": [
+   "portal_models.SERVED_PREFIXES"
+  ],
+  "json-tiered/market-overview/summary/": [
+   "portal_models._RETURNS_KEY"
+  ],
+  "json-tiered/market-overview/timeseries/": [
+   "portal_models._SERIES_PREFIX"
+  ],
+  "json/latest/": [
+   "portal_macro.KEY_MANIFEST",
+   "portal_macro.SERVED"
+  ],
+  "json/macro/": [
+   "portal_macro.KEY_MACRO",
+   "portal_macro.KEY_VOLATILITY",
+   "portal_macro.KEY_YIELD_CURVE",
+   "portal_macro.SERVED"
+  ],
+  "json/macro/timeseries/": [
+   "portal_macro.PREFIX_SERIES"
+  ],
+  "json/market/": [
+   "portal_models.SERVED_PREFIXES",
+   "portal_models._REGIME_HISTORY_KEY",
+   "portal_models._REGIME_KEY"
+  ],
+  "json/positioning/": [
+   "portal_models.SERVED_PREFIXES",
+   "portal_models._AGGREGATE_KEY",
+   "portal_models._ALLOCATION_KEY",
+   "portal_models._ATTRIBUTION_KEY",
+   "portal_models._POSITIONING_KEY"
+  ],
+  "json/security_scanner/": [
+   "portal_macro.SERVED"
+  ],
+  "json/security_scanner/latest/": [
+   "portal_macro.KEY_FACTORS"
+  ],
+  "json/security_scanner/latest/universes/": [
+   "portal_macro.PREFIX_UNIVERSES"
+  ],
+  "json/valuation/": [
+   "portal_macro.KEY_RISK_PREMIUM",
+   "portal_macro.KEY_VALUATION",
+   "portal_macro.SERVED"
+  ]
+ },
+ "denominator": {
+  "prefixes_the_code_reads": 12,
+  "already_covered": 9,
+  "newly_granted_before_collapse": 3,
+  "newly_granted": 1
+ },
+ "method": "ast over app/portal_models.py and app/portal_macro.py (module-level str and str-tuple assignments only; no import, so no module-level code runs), minus the existing grant's own Resource list read BOTH from mcpmsp_internal_reader.tf and LIVE from IAM and required to agree"
+}
