@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-35",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round18-RESEARCH.md",
+    "vintage_commit": "5858411c5c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-35.curated-tags-h2.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5858411c5c"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~53",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~53/research_group_map_h2.json",
+      "kind": "config_data",
+      "commit_or_etag": "b3bc7da1b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Group-map data file of 11 hand-written nl_tags entries for the h2 slice, committed on wk-NFRA_MCPINDEX-53. No deploy: the ASSETS issuer's MX-r-15 emitter run (about 17:00Z 2026-10-16) reads it through --group-map and lands DATA_CATALOG.yaml; the catalog is not edited here.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line (slice h2: 11 entities assigned); all seven checks ok: exactly the 11 entities, each with only `nl_tags`, 4 to 6 tags each, each tag 2 to 5 lowercase words, no repeats, at least 3 tags per row that the derivation does not give, a tag grounded in the row's text -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI2/round18/checks/ct.h2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR slice h2: 11 entities assigned; file org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~53/research_group_map_h2.json\nCHECK ok : the rows object holds exactly the 11 assigned entities (missing 0, extra 0)\nCHECK ok : every entry is {\"nl_tags\": [strings]} for a row of the catalog (0 are not)\nCHECK ok : every row has 4 to 6 tags (0 do not)\nCHECK ok : every tag is 2 to 5 words of lowercase ASCII letters and digits (0 rows have a bad tag)\nCHECK ok : no row repeats a tag (0 do)\nCHECK ok : every row has at least 3 tags the derivation does not give (0 do not)\nCHECK ok : every row has a tag that shares a 4-letter word with the row's own text (0 do not)\nRESULT: PASS\nexit=0",
+      "denominator": "11 of 11 assigned entities; 7 of 7 checks ok (0 of 11 fail any check)",
+      "status": "PASS",
+      "expect": "DENOMINATOR slice h2: 11 entities assigned.*CHECK ok : every row has a tag that shares a 4-letter word.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "plant_ct.py (the planted-arm set named in the face): a good group-map file must pass and each planted defect (count, symbol, uppercase, one word, missing or extra entity, extra key, repeated tag, copied derived tags, ungrounded tags) must fail the check.",
+      "expected": "PLANTED N of N with every arm behaving as its label says, exit 0",
+      "observed": "PLANTED 12 of 12 (good file passes; 11 planted defects fail as labelled), exit=0. The face states 8 of 8; filed as NFRA_MCPINDEX-Z-W53-S1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "bash ct.h2.sh run twice, under PYTHONHASHSEED=0 and PYTHONHASHSEED=4242, stdout+stderr captured to .scratch/det_0.txt and .scratch/det_4242.txt, compared with cmp",
+      "observed": "both runs exit 0; the two captures are byte-identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The task-order status flip (<status>issued</status> to <status>complete</status> at NFRA_MCPINDEX.TO-MX-c-35.curated-tags-h2.md line 94)",
+      "reason": "Step 5.2 requires it, but the task-order file is not among the order's <paths> (lines 63-67), so the lane grant does not admit it. The criterion passes; the flip is left to the issuer. Surprise row NFRA_MCPINDEX-Z-W53-S2 (BLOCKING) records it."
+    },
+    {
+      "item": "infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml and the emitter run (MX-c-21 / MX-r-15)",
+      "reason": "Not in the order's <paths>; the order bounds item 1 forbids editing the catalog, the emitter or any row file. The ASSETS issuer runs the emitter with the four slice files."
+    },
+    {
+      "item": "The other slices (h1, h3, p1) and the ASSETS issuer's own 7 inferred rows",
+      "reason": "Other workers' or the issuer's cells; not in this order's cell."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W53-S1: the face states the planted-arm control as 8 of 8; plant_ct.py on the worktree runs 12 arms, all behaving (PLANTED 12 of 12, exit 0). OBSERVATION, INERT; the graded criterion is unaffected.",
+    "NFRA_MCPINDEX-Z-W53-S2: step 5.2 requires the <status>complete</status> flip on the task-order file, which is not among the order's <paths>; the flip is left to the issuer. BLOCKING, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~53/session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c \"import yaml\" (step 0, from the worktree root)",
+      "result": "yaml import ok"
+    },
+    {
+      "tool": "ct_check.py (via ct.h2.sh)",
+      "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI2/round18/checks/ct.h2.sh",
+      "result": "RESULT: PASS, exit=0; 11 of 11 entities, 7 of 7 checks ok (first run FAIL on one six-word tag, corrected to four words, then PASS)"
+    },
+    {
+      "tool": "plant_ct.py",
+      "invocation": "TMPDIR=C:/tmp/mi2-wk53/.scratch timeout 120 python org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI2/round18/checks/plant_ct.py",
+      "result": "PLANTED 12 of 12, exit=0"
+    }
+  ]
+}

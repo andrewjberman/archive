@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-21",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "257da358d8",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-21.c-group-bucket-on-every-row-and-tool.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "257da358d8"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~45",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/atom_decomposition/emit_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "e402680d0e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--group-map (item 2), bucket settle (item 1) and attach_tool_buckets / load_declared_buckets (item 3); the emit at HEAD gives TOOL INDEX N=99 with no EMIT REFUSED and GROUP-MAP rows applied 124 of 136.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/tool_index/members.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "e402680d0e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bucket and bucket_source on 59 members the rows do not name (kinds: graph 43, store 14 via kuzu/gateway/ycharts/portal-refresh, opal-data-* 2 via schwab/portal) plus a top-level buckets: list for the pending tool harvest_list; the diff is insertions only (131).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/tests/test_c_group.py",
+      "kind": "test",
+      "commit_or_etag": "e402680d0e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "22 tests, python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests/test_c_group.py gives 22 passed; the folder gives 250 passed.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "DENOMINATOR rows 304 (base 304); with a valid bucket 304; rows differing outside bucket/vendor/firm/nl_tags: 0; rows whose valid S3 bucket moved: 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c21.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR rows 304 (base 304); with a valid bucket 304\nrows differing outside bucket/vendor/firm/nl_tags: 0; rows whose valid S3 bucket moved: 0\nCHECK ok  : every row carries a valid bucket (304 of 304)\nCHECK ok  : rows differ from the base only in bucket, vendor, firm and the curated tags\nCHECK ok  : no valid S3 bucket was changed\nCHECK ok  : the row set equals the base's\nRESULT: PASS\nexit=0",
+      "denominator": "304 catalog rows (base 304); 304 with a valid bucket; 0 rows differ outside bucket/vendor/firm/nl_tags; 0 valid S3 buckets moved",
+      "status": "PASS",
+      "expect": "DENOMINATOR rows 304 \\(base 304\\); with a valid bucket 304[\\s\\S]*rows differing outside bucket/vendor/firm/nl_tags: 0; rows whose valid S3 bucket moved: 0[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "DENOMINATOR tool_index entries 99; malformed 0; kind wrong 0; bucket differs from its rows 0; declared S3 buckets unproved 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c21.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR tool_index entries 99; malformed 0; kind wrong 0; bucket differs from its rows 0; declared S3 buckets 5, unproved 5\n  harvest_get_article: unreadable app/harvest_read.py:26\n  news_for_security: unreadable app/harvest_read.py:26\n  opal_data_refresh_upload: unreadable app/integrations/opal_portal/integration.py:109\nkinds {'bucket': 42, 'graph': 43, 'store': 14}; buckets 11 distinct\nCHECK ok  : every tool_index entry carries bucket and a matching source_group (99 of 99)\nCHECK ok  : kind follows the bucket\nCHECK ok  : a tool the rows name has its primary row's bucket\nCHECK FAIL: every declared S3 bucket is named at its bucket_source line\nRESULT: FAIL\nexit=1",
+      "denominator": "99 tool_index entries; 0 malformed; 0 kind wrong; 0 bucket differs from its rows; 5 declared S3 buckets, 5 unproved from the repo root (6 proved when resolved from the gateway folder, the order's convention)",
+      "status": "FAIL",
+      "status_reason": "The declared-S3 sub-check fails on the path base, not on any bucket: c21_check resolves bucket_source from the repo root while the order defines it relative to infra/aws/ec2/opal-gateway (surprise NFRA_MCPINDEX-Z-W45-S1). The other four sub-checks pass. Refused per the order's rule; the order stays open.",
+      "expect": "DENOMINATOR tool_index entries 99; malformed 0; kind wrong 0; bucket differs from its rows 0; declared S3 buckets 5, unproved 0[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "tests in test_c_group.py at least 10; pytest rc=0 on the atom_decomposition folder -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c21.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "tests in test_c_group.py: 22\npytest rc=0: 250 passed in 10.58s\nCHECK ok  : the new test file holds at least 10 tests\nCHECK ok  : the atom_decomposition test folder passes\nRESULT: PASS\nexit=0",
+      "denominator": "22 tests in test_c_group.py (at least 10 required); 250 of 250 tests in workflows/atom_decomposition/tests pass",
+      "status": "PASS",
+      "expect": "tests in test_c_group.py: (1[0-9]|[2-9][0-9]|[0-9]{3,})[\\s\\S]*pytest rc=0: [\\s\\S]*passed[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A group map whose bucket for opal_data_assets_silver_49f_dim_account_xref (base valid S3 bucket opal-data-assets) is opal-data-etfs: the emitter must refuse it, naming the entity, and write nothing.",
+      "expected": "EMIT REFUSED (group map / bucket, MX-c-21) naming the entity; rc=2; DATA_CATALOG.yaml byte-identical to the prior emit.",
+      "observed": "EMIT REFUSED (group map / bucket, MX-c-21): 1 error(s) -- NOTHING WRITTEN: opal_data_assets_silver_49f_dim_account_xref: group map bucket 'opal-data-etfs' would move the row's valid S3 bucket 'opal-data-assets'; rc=2; cmp against the prior emit: identical.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input emitter runs with the issuer's assets_group_map.json at the final code, outputs compared byte for byte (md5sum)",
+      "observed": "md5 c32a570ef36623a16f9d4318d0fe767f on both runs; cmp reports identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Commit of infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml",
+      "reason": "The order says regenerate it in the worktree to grade the checks and do NOT commit it; it stays modified in the worktree and is not in the commit paths."
+    },
+    {
+      "item": "The issuer's planted arms (checks/plant_r18.py)",
+      "reason": "The order says the planted arms are NOT given to a worker; the worker did not read or run them. The mutant control above is the worker's own."
+    },
+    {
+      "item": "Flip of the order's status to complete",
+      "reason": "The order says the issuer flips the status; AC2 FAILs, so the order is open in any case."
+    },
+    {
+      "item": "Gateway deploy, push and the portal",
+      "reason": "Outside the order's bounds (no deploy, no push); the portal is not in this worktree."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W45-S1: c21_check.py resolves bucket_source from the repo root while the order defines it relative to infra/aws/ec2/opal-gateway; AC2's declared-S3 sub-check fails (5 unproved) under the documented convention.",
+    "NFRA_MCPINDEX-Z-W45-S2: harvest_list is a pending served tool with no members.yaml entry; its declared bucket sits in a new top-level buckets: list, which AC2 does not grade.",
+    "NFRA_MCPINDEX-Z-W45-S3: the two (a) tools whose index is a channel row take the catalog's top-level bucket; the order names no value for a channel row.",
+    "NFRA_MCPINDEX-Z-W45-S4: the tool index definition lines point at the deployed commit c4c106aea1, not HEAD; cited bucket_source lines were located by reading the worktree.",
+    "NFRA_MCPINDEX-Z-W45-S5: the order gives no rule for a write-only S3 target (copy_site_file_to_s3) or a contract-configured bucket (schwab_*, cited at deploy/NFRA_OPLGTW_CONTRACT.json:301)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~45/session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "workflows/atom_decomposition/emit_catalog_v02.py",
+      "invocation": "python workflows/atom_decomposition/emit_catalog_v02.py --group-map org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/assets_group_map.json",
+      "result": "rc=0; no EMIT REFUSED; the emit ends GROUP-MAP rows applied: 124 of 136 entities and GROUP-MAP unused: 12; TOOL INDEX N=99 served tools; a=11 b=76 c=12; sum 99."
+    },
+    {
+      "tool": "workflows/atom_decomposition/tests/test_c_group.py",
+      "invocation": "python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests",
+      "result": "250 passed in 9.63s (the control before the change gave 228 passed)."
+    }
+  ]
+}
