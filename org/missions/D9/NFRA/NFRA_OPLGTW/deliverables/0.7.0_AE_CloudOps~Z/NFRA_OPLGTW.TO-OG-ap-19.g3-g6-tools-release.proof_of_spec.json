@@ -1,0 +1,264 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-19",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-15/ap15_closed_ap18_live_and_ap19_phase_a.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3bb7fb022e"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "a44f88128b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-19.g3-g6-tools-release.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the re-cut carries exactly the G3 and G6 build on the live ref with thirteen registrations and the two grants as one policy each, no wildcard, the G3 one confined to its prefix.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap19.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)base [0-9a-f]+ is the live ref before this release: yes.*outside the G3-G6 set 0 \\(want 0\\); tools registered 13 of 13; SAFE 13 of 13; NATIVE 13 of 13.*grants: news_read_iam\\.tf policies 1 \\(want 1\\), wildcard resource 0 \\(want 0\\); portal_tiered_read_iam\\.tf policies 1 \\(want 1\\), wildcard resource 0 \\(want 0\\), only the json-tiered/market-overview prefix yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "base 047f11aa99 is the live ref before this release: yes (manifest ee23dd004c/047f11aa99); release ee23dd004c\nfiles differing 16; outside the G3-G6 set 0 (want 0); tools registered 13 of 13; SAFE 13 of 13; NATIVE 13 of 13\ngrants: news_read_iam.tf policies 1 (want 1), wildcard resource 0 (want 0); portal_tiered_read_iam.tf policies 1 (want 1), wildcard resource 0 (want 0), only the json-tiered/market-overview prefix yes\nRESULT: PASS\nexit=0",
+   "denominator": "16 files differing, 0 outside the G3-G6 set; 13 of 13 tools registered, 13 of 13 SAFE, 13 of 13 NATIVE; each grant exactly 1 aws_iam_role_policy with 0 wildcard resources, and the G3 one confined to json-tiered/market-overview. This criterion read FAIL on exactly one limb before amendment A2 -- app/typed_scope.py outside the allow-list -- and that FAIL was the finding, not a slip: the release cannot import without that file.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the release landed and closed, both policies are live, and the installed code serves all thirteen tools to an Opal principal and refuses a non-Opal one.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap19.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0.*landed=(?:current|superseded).*registry [0-9]+ -> [0-9]+ \\(\\+13\\); per-tool 13 of 13; policies live in IAM yes; NEWS_\\* key names present yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0\nrelease_sha=ee23dd004c; landed=current\nregistry 56 -> 69 (+13); per-tool 13 of 13; policies live in IAM yes; NEWS_* key names present yes\nRESULT: PASS\nexit=0",
+   "denominator": "6 of 6 ledger legs closed with proof and the sentinel removed; landed=current from the manifest at HEAD; registry 56 -> 69 (+13) on ONE named instrument; 13 of 13 tools on all three arms (served, refused, 0 reads on refusal); both policies live in IAM; 3 of 3 NEWS_* key names present where the pre-deploy read measured 0; 117 of 117 files md5-EQUAL across app/, deploy/ and lib/.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (judgment, 3.0.0_SA_CVO~Z): the first portal and news answers read as an analyst would want them (freshness in trading days, data_status on a quiet day, the 14-day news cap stated). Graded on a real call; never simulated here.",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT. The criterion carries judgment=\"true\" and names 3.0.0_SA_CVO~Z as its grader; a judgment criterion is graded at L9 and never self-graded, and the criterion's own text says \"never simulated here\".",
+   "output_evidence": "What this seat CAN say, and no more: all thirteen tools are live and answer in contract -- 13 of 13 returned all four envelope keys to an Opal principal and refused a non-Opal one with zero reads on any refusal path, and a numeric trading_days_behind_t1 appears where a tool states freshness, which is the mechanical half of the criterion's first clause. That is AC3's PRECONDITION and not AC3: whether the answers READ as an analyst would want them is a judgment about CONTENT on a real analyst's question, and the probes here were synthetic and argument-shaped (a 7-day window, the keyword \"inflation\", ticker AAPL) rather than chosen by a reader with something to find out. The three specifics the criterion names were NOT exercised as such: data_status on a quiet day was not sought, and the 14-day cap was read out of the module (WINDOW_CAP_DAYS = 14) rather than demonstrated by tripping it.",
+   "denominator": "0 of 3 named judgment specifics exercised by this seat; 13 of 13 tools proven to answer in contract, which is the criterion's precondition. The grader is 3.0.0_SA_CVO~Z.",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "A JUDGMENT criterion, graded at L9 and never self-graded (CLAUDE.md section 1, L9). It carries judgment=\"true\", names 3.0.0_SA_CVO~Z, and says \"Graded on a real call; never simulated here\". N/A-BY-CONSTRUCTION is the honest status for THIS instance: not unverifiable, not uncomputable, and not PASS -- simply not this seat's to compute. It is also the natural home for the CVO's ALB condition, which this seat could not close for the reason recorded in G36_SERVED.json: the endpoint needs a per-user delegated Bearer and this seat's own live client carries a tool catalogue predating the deploy."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The release was cut on a base read live THREE ways and the ask's bytes were checked against the sha256 the GO names, so the halves demonstrably cover these bytes. The two grants were applied ONE AT A TIME with an IAM read-back between them, and the second policy was proven ABSENT at the moment the first was read back, so the ordering is measured rather than asserted. The refusal arm uses TWO counters because the thirteen read two different stores.",
+   "observed": "ask sha256 prefix cdefc9a139a4 on disk == the GO's; HEAD == ee23dd004c, parent == live 047f11aa99 on both the manifest and the artifact's git-ref metadata; G6 applied 1-added then read back while G3 read NoSuchEntity; G3 applied 1-added then read back while the pre-existing policy read byte-identical to its pre-apply value; 117 of 117 parity; 13 of 13 on all three arms; reads_on_refusal 0 on BOTH counters.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Four negative arms stand in its place. (a) The refusal arm replaces the scope seam's S3 client AND the news path's DynamoDB client with counters that RAISE on any attribute access -- TWO counters, because one would have left the five news tools unguarded while still reporting a clean zero, which is a pass produced by not looking. (b) The G3 grant's resource list is DERIVED by AST and the generator REFUSES unless three independent readings of the bucket agree and unless the existing grant's Resource list is identical in the .tf and in live IAM -- a grant computed against a fiction would otherwise pass every static check and fail only at runtime. (c) The host-shaped import check runs at 4-parent depth, where OG-ap-18 v1's parents[5] was fatal, and it is what caught the missing seam. (d) The collapse of 3 residue prefixes to 1 is asserted rather than eyeballed: the generator refuses if any dropped prefix lacks a covering kept one.",
+   "expected": "0 reads on any refusal path across both stores; the generator refusing on a bucket or source/world disagreement; 5 of 5 modules importing at 4 parents",
+   "observed": "reads_on_refusal 0, S3 0 and DynamoDB 0, with guards installed on 4 named client attributes; all three bucket readings agreed on opal-data-portal-v2 and the existing grant matched between .tf and IAM, so the generator emitted; 5 of 5 imported at exactly 4 parents with all thirteen registered and 0 missing.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_models.py",
+   "kind": "script",
+   "commit_or_etag": "ee23dd004c985c46d479908db46d2ad9b4f3b1c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "host md5 equals the release blob inside the 117-of-117 parity read across app/, deploy/ and lib/, and the tool(s) it defines answered an Opal principal in contract through the installed code",
+   "introduces": [
+    "portal_get_market_returns",
+    "portal_get_market_regime"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_macro.py",
+   "kind": "script",
+   "commit_or_etag": "ee23dd004c985c46d479908db46d2ad9b4f3b1c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "host md5 equals the release blob inside the 117-of-117 parity read across app/, deploy/ and lib/, and the tool(s) it defines answered an Opal principal in contract through the installed code",
+   "introduces": [
+    "portal_get_macro",
+    "portal_get_valuation",
+    "portal_get_security_scan"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/news_typed.py",
+   "kind": "script",
+   "commit_or_etag": "ee23dd004c985c46d479908db46d2ad9b4f3b1c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "host md5 equals the release blob inside the 117-of-117 parity read across app/, deploy/ and lib/, and the tool(s) it defines answered an Opal principal in contract through the installed code",
+   "introduces": [
+    "news_search_articles",
+    "news_trending_topics",
+    "news_market_mood"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/typed_scope.py",
+   "kind": "script",
+   "commit_or_etag": "ee23dd004c985c46d479908db46d2ad9b4f3b1c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "host md5 equals the release blob inside the 117-of-117 parity read across app/, deploy/ and lib/, and the tool(s) it defines answered an Opal principal in contract through the installed code",
+   "introduces": [
+    "admit_scope"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/portal_tiered_read_iam.tf",
+   "kind": "iam",
+   "commit_or_etag": "ee23dd004c985c46d479908db46d2ad9b4f3b1c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "applied ALONE through safe-apply (1 added / 0 changed / 0 destroyed) and read back live from IAM: 1 statement, action exactly s3:GetObject, ONE resource, no wildcard; the pre-existing policy on the same role proven byte-identical before and after",
+   "introduces": [
+    "gateway-global-portal-tiered-read-policy"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/news_read_iam.tf",
+   "kind": "iam",
+   "commit_or_etag": "ee23dd004c985c46d479908db46d2ad9b4f3b1c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "applied ALONE and FIRST, read back live before the second policy was touched: 1 statement, actions exactly dynamodb:GetItem and dynamodb:Query, 4 resources, no wildcard",
+   "introduces": [
+    "NewsReadQueryGetItem"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "5a6a8660cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deployed_commit ee23dd004c, previous 047f11aa99, file_checksums recomputed from the RELEASE BLOBS -- exactly 2 of 10 moved (app/tools.py, app/destructive_ops.py, the only two in that key set this release touches) and 10 of 10 cross-check against the md5 the host reported, the writer refusing the write on any disagreement",
+   "introduces": [
+    "ee23dd004c985c46d479908db46d2ad9b4f3b1c8"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/G36_SERVED.json",
+   "kind": "config_data",
+   "commit_or_etag": "5a6a8660cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the order's named shape plus the GO's additions and the CVO condition, bounded explicitly",
+   "introduces": [
+    "reads_on_refusal",
+    "trading_days_behind_t1_numeric"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md",
+   "kind": "doc",
+   "commit_or_etag": "5a6a8660cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "7.2 names ee23dd004c live with 047f11aa99 as the rollback target and states that a binary rollback does NOT undo the two grants; rb.AC2 reads targets named 2, without guard 0, not in manifest history 0, RESULT: PASS",
+   "introduces": [
+    "the live release is `ee23dd004c`"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "the live-ref read across FOUR roots (step 1)",
+   "invocation": "g36_hostread.py over SSM, read-only; host md5 e36beffe3d064ba183845b94ee64cf5c == local",
+   "result": "113 of 113 under app/, deploy/ and lib/ md5-EQUAL to 047f11aa99, 0 mismatch, 0 one-sided; lib/ is in the walk for the first time because OG-ap-18 put it there, and an absent root is reported as None rather than 0 files"
+  },
+  {
+   "tool": "g36_grant_gen.py (the G3 grant, derived by AST)",
+   "invocation": "python W/g36_grant_gen.py <gateway> --live-policy <live read> --json W/G36_GRANT.json",
+   "result": "12 prefixes the code reads -> 9 already covered -> 3 residue -> 1 after an asserted collapse; three bucket readings agreed; the existing grant identical in .tf and IAM"
+  },
+  {
+   "tool": "terraform plan, targeted (step 3)",
+   "invocation": "terraform plan -target=<each policy> -lock=false -var market_update_s3_root=<address() output>",
+   "result": "2 to add, 0 to change, 0 to destroy, nothing else in the plan. The root needed init first: two modules were uninstalled, mine and one that was NOT mine, and the lock file did not move"
+  },
+  {
+   "tool": "safe-apply, twice, targeted and ALONE",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -target=<policy>",
+   "result": "each 1 added / 0 changed / 0 destroyed; APPLY-WHO ADMITTED and CROSSBOX-DEPLOY CLEAR both times. NOTE: run from inside the terraform root instead, its naming limb resolves infra/logic/registry/root_map.json against the CWD, cannot find it and REFUSES fail-closed -- it blocked exactly that way once and applied nothing"
+  },
+  {
+   "tool": "aws iam get-role-policy, per policy, between the applies",
+   "invocation": "--query PolicyDocument (the inner document, never the envelope)",
+   "result": "G6: 1 statement, 2 actions, 4 resources, no wildcard. G3: 1 statement, 1 action, 1 resource, no wildcard. The pre-existing internal-reader policy byte-identical before and after. Guarded against the envelope trap and against a vacuous zero-statement read"
+  },
+  {
+   "tool": "safe-ec2-deploy.sh (the landing act)",
+   "invocation": "DEPLOY_BASE_REF=047f11aa99 ... from C:/tmp/og-rel-g36",
+   "result": "rc=0 at 04:22:28Z-04:23:45Z; artifact opal-gateway-ee23dd004c.tar.gz (616K); SSM 54b35429-625f-4ec0-98f1-eb45112c03eb Success; 'OK: opal-gateway active'"
+  },
+  {
+   "tool": "g36_served_harness.py over SSM (the served read)",
+   "invocation": "/opt/opal-gateway/.venv/bin/python, pulled from S3 (Rule 12); command 146a498d-1ecb-46ae-85a9-ceab1e0caea7",
+   "result": "verdict PASS; host md5 1899403078944fae00771ca108589d03 == local; 13 of 13 on all three arms; registry 56 -> 69; typed_scope on the host; the three NEWS_* key names present"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (pre-act, 6 legs), close-leg x6 with proof, close",
+   "result": "CLOSED, all 6 legs proven, sentinel removed"
+  },
+  {
+   "tool": "g36_manifest_record.py + rb.AC2",
+   "invocation": "python W/g36_manifest_record.py, then the runbook grader",
+   "result": "2 of 10 checksums moved and 10 of 10 agree with the measured host md5s, 26 of 27 siblings unchanged; rb.AC2 PASS with targets named 2, without guard 0, not in manifest history 0"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S136: OG-ap-19 step 2's first commit was not this seat's to make -- infra/logic/** is lane PLATFORM_LOGIC_DOCS, permitted to 4.0.0_SA_CRO and its laptop lanes only, and legacy_addresses.json's own _about names the CRO as the registry's owner. safe-commit refused in block mode and I did NOT override, because that lane's doctrine says ENUMERATE over bless-the-override. The verified row was handed to 4.0.0_SA_CRO~Z, which committed it at bb0e3bd764, and my local edit was reversed so the shared tree carried no uncommittable change.",
+  "NFRA_OPLGTW-Z-S137: the take-list omitted app/typed_scope.py and the release could not import without it -- portal_models.py:33 imports it and app/tools.py imports portal_models at start-up. Caught by the order's own host-shaped import check. Ruled route (a) by amendment A2: the file rides and the cut stands.",
+  "NFRA_OPLGTW-Z-S138: resolves Z-S137 and records the judgment that followed the ruling -- A2 tolerated the seam's test either way, and I did NOT take it, because the COO half was already signed at ee23dd004c and adding any file moves the sha and voids the signature. The test was run as evidence and removed, with the tree verified byte-identical afterwards."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the CVO's ALB condition -- the AUTHENTICATED read of the thirteen through mcp.opalinvest.dev",
+   "reason": "What the condition turns on IS measured: every one of the thirteen runs far under the 60 s idle timeout (slowest news_for_security 7.29 s, the rest under 1 s, no 502/504), so the STOP arm has nothing to fire on. What was NOT done is the authenticated end-to-end call. The edge answers an unauthenticated POST /mcp with 401 and www-authenticate: Bearer, so it needs a per-user delegated token, and minting or sharing one is stop-the-line under the gateway's access policy. This seat holds a live authenticated connection to that endpoint -- whoami returns a real Opal identity through the ALB -- but its tool catalogue predates this deploy and cannot be refreshed without a client reconnect this seat cannot force. Owed by a client whose catalogue post-dates the deploy, naturally the CVO's own."
+  },
+  {
+   "item": "AC3's three named specifics",
+   "reason": "data_status on a quiet day was not sought, and the 14-day news cap was READ out of the module (WINDOW_CAP_DAYS = 14) rather than demonstrated by tripping it. The probes were synthetic and argument-shaped, not an analyst's question, so the precondition is proven and the judgment is not claimed."
+  },
+  {
+   "item": "the audit records the thirteen admitted reads would have written",
+   "reason": "audit.log_call -> _emit -> put_object whenever AUDIT_S3_BUCKET is set, and this order's BOUNDS say no object is written to any bucket, so the harness replaced the sink with an in-process recorder. The admission, the tools and the scope seam ran as installed."
+  },
+  {
+   "item": "tests/test_og_gt6.py, the seam's own suite",
+   "reason": "A2 ruled it not required and tolerated it either way, but the COO half was already signed at ee23dd004c and adding any file would move that sha. It was run as EVIDENCE (4 passed) and removed, with HEAD equal and git status empty verified afterwards -- so the coverage claim is earned without moving a signed artifact. Row Z-S138."
+  }
+ ]
+}
