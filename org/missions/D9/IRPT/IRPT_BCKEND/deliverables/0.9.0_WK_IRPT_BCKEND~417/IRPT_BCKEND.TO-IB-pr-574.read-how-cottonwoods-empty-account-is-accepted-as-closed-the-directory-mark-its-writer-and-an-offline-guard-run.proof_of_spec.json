@@ -18,25 +18,25 @@
   {
    "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~417/IB213-1_terminated_mark_read.json",
    "kind": "doc",
-   "commit_or_etag": "aee462c129",
+   "commit_or_etag": "52b17f59fb",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "the record, committed LOCAL on the worktree branch at aee462c129; the offline gate run performed read-only (writes 0, published false), outcome PUBLISHED with the account listed closed and not refused; nodes_changed 16912 recorded as measured",
+   "deploy_evidence": "the record, committed LOCAL on the worktree branch at 52b17f59fb; the offline gate run performed read-only (writes 0, published false), outcome PUBLISHED with the account listed closed and not refused; candidate_vs_served counted by kind (amount-only 16764, served-only 40 of which the account's 3 nodes, candidate-only 111); deployed_vs_head recorded for both live bundles",
    "artifact_covered_by": ["IB213-1-AC1", "IB213-1-AC2", "IB213-1-AC3"]
   },
   {
    "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~417/IB213-1_criteria_output.txt",
    "kind": "doc",
-   "commit_or_etag": "aee462c129",
+   "commit_or_etag": "52b17f59fb",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "verbatim output and exit codes of the three criteria, each under timeout 120, from the worktree root; a second run into scratch is identical (AC1 PASS, AC2 PASS, AC3 FAIL in both)",
+   "deploy_evidence": "verbatim output and exit codes of the three criteria, each under timeout 120, from the worktree root; a second run into scratch is identical (AC1 PASS, AC2 PASS, AC3 PASS in both)",
    "artifact_covered_by": ["IB213-1-AC1", "IB213-1-AC2", "IB213-1-AC3"]
   },
   {
    "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
    "kind": "doc",
-   "commit_or_etag": "aee462c129",
+   "commit_or_etag": "52b17f59fb",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "rows IRPT_BCKEND-D2-W417-S1 to S6 appended at aee462c129; no existing row edited",
+   "deploy_evidence": "rows IRPT_BCKEND-D2-W417-S1 to S6 appended at aee462c129 and row S7 at 52b17f59fb; no existing row edited",
    "artifact_covered_by": []
   }
  ],
@@ -67,10 +67,9 @@
    "method": "command",
    "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r213/p213_cells.py\" . IB213-1-AC3",
    "expect": "IB213-1-AC3 PASS",
-   "output_evidence": "FAIL: every other node must be unchanged: nodes_changed_other_than_the_account 0 | IB213-1-AC3 FAIL | rc=1",
-   "denominator": "nodes compared in both snapshots 17800; nodes differing other than the account 16912 (16764 amount-only, 148 identity: 37 served-only, 111 candidate-only); accounts leaving 1 of 1; outcome PUBLISHED with the account listed closed_accounts_not_refused 1",
-   "status": "FAIL",
-   "status_reason": "the record measures nodes_changed_other_than_the_account 16912 against the served 2026-10-08 index and the newest candidate 2026-10-13: market values moved and 148 nodes appear or disappear. An honest record cannot reach 0 under the order's own definition, so the check is the issuer's defect (surprise row IRPT_BCKEND-D2-W417-S6). The count was not altered to pass."
+   "output_evidence": "OK: the offline guard run lists the account closed and not refused, every other node unchanged | IB213-1-AC3 PASS | rc=0",
+   "denominator": "candidate-against-served by kind: amount-only 16764 of 17800 compared nodes; served-only 40 (the one account's 3 nodes among them); candidate-only 111; accounts leaving 1 of 1; outcome PUBLISHED with the account listed closed_accounts_not_refused 1; deployed_vs_head 2 of 2 bundles",
+   "status": "PASS"
   }
  ],
  "controls": {
@@ -82,7 +81,7 @@
   },
   "determinism": {
    "method": "the three criteria run twice at the same tree (the first run recorded in IB213-1_criteria_output.txt, the second in a scratch file outside the worktree) and the two outputs compared",
-   "observed": "identical: AC1 PASS rc=0, AC2 PASS rc=0, AC3 FAIL rc=1 in both runs",
+   "observed": "identical: AC1 PASS rc=0, AC2 PASS rc=0, AC3 PASS rc=0 in both runs",
    "status": "STABLE"
   }
  },
@@ -90,19 +89,16 @@
   {
    "item": "an equal-date comparison of the candidate and the served index (a candidate rebuilt at the served date 2026-10-08)",
    "reason": "the order names the newest candidate against the served index; an equal-date run was not in the order and was not performed"
-  },
-  {
-   "item": "the deployed Lambda bundle that ran the refusal recorded on 2026-10-14",
-   "reason": "the order reads HEAD only; the deployed code was not read, so the reason for the refusal stays open (row IRPT_BCKEND-D2-W417-S1)"
   }
  ],
  "surprises": [
-  "IRPT_BCKEND-D2-W417-S1 -- at HEAD the publish gate lists the one lost Cottonwood account as not refused and returns PUBLISHED with no mark applied; the order's premise fails; BLOCKING, ARMED",
+  "IRPT_BCKEND-D2-W417-S1 -- at HEAD the publish gate lists the one lost Cottonwood account as not refused and returns PUBLISHED with no mark applied; the deployed Cottonwood gate refuses it (see S7); the S1 finding stands per the issuer's amendment 2; BLOCKING, ARMED",
   "IRPT_BCKEND-D2-W417-S2 -- the offline rebuild of the refused 2026-10-13 candidate (17911 nodes) does not reproduce the refusal record's revision (17904 nodes); cause not measured; OBSERVATION",
   "IRPT_BCKEND-D2-W417-S3 -- the directory holds no TERMINATED mark for the one account and the writer's carry-forward rule cannot write one for it; OBSERVATION",
   "IRPT_BCKEND-D2-W417-S4 -- the custody and independent-total partitions disagree for one account on 2026-10-06 to 2026-10-08; OBSERVATION",
   "IRPT_BCKEND-D2-W417-S5 -- the Cottonwood builder's import chain needed five directories beyond the grant the order names; added locally, never committed; OBSERVATION",
-  "IRPT_BCKEND-D2-W417-S6 -- IB213-1-AC3 cannot pass on a truthful record: the newest candidate and the served index are at different dates; the check is the issuer's defect; BLOCKING"
+  "IRPT_BCKEND-D2-W417-S6 -- IB213-1-AC3 could not pass on a truthful record (candidate and served index at different dates); the check is the issuer's defect; resolved by amendment 1 (the record now counts by kind); BLOCKING",
+  "IRPT_BCKEND-D2-W417-S7 -- the live Cottonwood and 49 Financial holdings bundles match neither HEAD nor the IB-pr-549 pins; the deployed Cottonwood gate refuses the lost account where HEAD publishes; ARMED, disarm owner 1.0.0_SA_CTO~DELL2"
  ],
  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
  "compiler_tools": [
