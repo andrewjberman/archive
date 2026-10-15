@@ -1,0 +1,170 @@
+{
+  "firm": "cottonwood",
+  "adapter": {
+    "file": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+    "entry_points": [
+      {"function": "derive", "line": 373},
+      {"function": "derive_rows", "line": 315},
+      {"function": "to_table", "line": 351}
+    ],
+    "words": "derive(reader, accounts, start, end) at line 373 derives the rows of a window from the two Black Diamond silver tables read through CottonwoodBlackDiamondSilverReader (class at line 128; guard at line 142 refuses any bucket, root or table outside the grant; ALLOWED_TABLES at line 64 is fact_allocations and fact_transactions). derive_rows (line 315) builds one account's rows; to_table (line 351) returns the pyarrow table with the source_label schema metadata. The module writes nothing (docstring lines 29-31): a landing must add the write path. Measured at cee3478342; the tests were not run (no run was asked)."
+  },
+  "landing_shape": {
+    "kind": "lambda: a python3.12 Lambda invoked by an EventBridge Scheduler schedule, the same shape as the Cottonwood holdings-performance function. A daily derivation over one firm's two silver tables is a short pure-Python job with no long-running state, so a Lambda with the same zip, role and schedule pattern fits; an ECS task is not needed.",
+    "precedent": {
+      "file": "infra/aws/lambda/investor-reporting/holdings-performance/handler.py",
+      "line": 138,
+      "words": "lambda_handler at line 138 is the Cottonwood holdings-performance handler: the same firm and the same gold address rule through emit_day, the same trading-day target through _days_to_compute (line 101), and the same scheduler trigger (schedule.tf line 283). Unlike the adapter, it reads through its own declared sources and writes through emit_day; the adapter reads through a GET and LIST only reader and has no write method."
+    },
+    "words": "Kind lambda, with the holdings-performance function as the precedent (handler at line 138, the schedule resource at infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf line 283, the function module at lambda.tf line 113). The function name, roles and schedule come from the builders (names below); the precedent shows the Terraform shape only, and the adapter's own zip and source-map row must be added."
+  },
+  "names": [
+    {
+      "purpose": "the function (the Lambda that runs the landing)",
+      "builder_args": {"system": "irpt", "scope": "cottonwood", "function": "account-return-daily", "kind": "lambda"},
+      "name": "irpt-cot-account-return-daily-lambda"
+    },
+    {
+      "purpose": "the execution role of the function (the principal the bucket policy admits; matches role/*-cot-*)",
+      "builder_args": {"system": "irpt", "scope": "cottonwood", "function": "account-return-daily", "kind": "role", "qualifier": "execution"},
+      "name": "irpt-cot-account-return-daily-execution-role"
+    },
+    {
+      "purpose": "the execution role policy (the grants of the iam statements)",
+      "builder_args": {"system": "irpt", "scope": "cottonwood", "function": "account-return-daily", "kind": "policy", "qualifier": "execution"},
+      "name": "irpt-cot-account-return-daily-execution-policy"
+    },
+    {
+      "purpose": "the EventBridge Scheduler role (may invoke the one function only)",
+      "builder_args": {"system": "irpt", "scope": "cottonwood", "function": "account-return-daily", "kind": "role", "qualifier": "scheduler"},
+      "name": "irpt-cot-account-return-daily-scheduler-role"
+    },
+    {
+      "purpose": "the schedule (the daily trigger, 08:15 America/New_York on trading weekdays)",
+      "builder_args": {"system": "irpt", "scope": "cottonwood", "function": "account-return-daily", "kind": "daily"},
+      "name": "irpt-cot-account-return-daily-daily"
+    }
+  ],
+  "addresses": [
+    {
+      "purpose": "the Cottonwood gold partition the landing writes: data.parquet and manifest.json sit under this prefix (the partition address; the grant is the account_return_daily prefix)",
+      "builder_args": ["irpt", "cottonwood", "gold", "account_return_daily", "date=2026-10-13"],
+      "address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=2026-10-13"
+    },
+    {
+      "purpose": "the manifest.json object of that partition (the producer writes it beside data.parquet)",
+      "builder_args": ["irpt", "cottonwood", "gold", "account_return_daily", "date=2026-10-13", "manifest.json"],
+      "address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=2026-10-13/manifest.json"
+    },
+    {
+      "purpose": "the Black Diamond silver fact_allocations partition the landing reads (T-1)",
+      "builder_args": ["blackdiamond", "cottonwood", "silver", "fact_allocations", "date=2026-10-13"],
+      "address": "s3://opal-data-assets/blackdiamond/cottonwood/silver/fact_allocations/date=2026-10-13"
+    },
+    {
+      "purpose": "the Black Diamond silver fact_transactions partition the landing reads (T-1)",
+      "builder_args": ["blackdiamond", "cottonwood", "silver", "fact_transactions", "date=2026-10-13"],
+      "address": "s3://opal-data-assets/blackdiamond/cottonwood/silver/fact_transactions/date=2026-10-13"
+    },
+    {
+      "purpose": "the dim_return_method row for method_version 2 (the producer writes it; NOT inside the one-prefix grant; a decision for the issuer)",
+      "builder_args": ["irpt", "cottonwood", "gold", "dim_return_method", "method_version=2"],
+      "address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=2"
+    }
+  ],
+  "iam": [
+    {
+      "statement": "ReadBlackDiamondSilverTwoTablesOnly",
+      "actions": ["s3:GetObject"],
+      "resources": [
+        "arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/silver/fact_allocations/*",
+        "arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/silver/fact_transactions/*"
+      ],
+      "words": "Read of the two Black Diamond silver tables the adapter's reader admits (ALLOWED_TABLES, line 64), in the Cottonwood silver root only. No write, no other table, no other firm (the 49 Financial and Inflection silver are not reachable from this statement). Resource forms built from the address builder output above."
+    },
+    {
+      "statement": "ListBlackDiamondSilverPrefixOnly",
+      "actions": ["s3:ListBucket"],
+      "resources": ["arn:aws:s3:::opal-data-assets"],
+      "words": "ListBucket on the silver bucket, admitted only under a prefix condition (s3:prefix StringLike blackdiamond/cottonwood/silver/fact_allocations/* and blackdiamond/cottonwood/silver/fact_transactions/*), needed for the T-1 presence check and the partition listing (the reader's list_partitions, line 159). The condition is carried in this words field, not as a key."
+    },
+    {
+      "statement": "WriteOneCottonwoodGoldPrefix",
+      "actions": ["s3:PutObject"],
+      "resources": ["arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/*"],
+      "words": "Write of the ONE Cottonwood gold prefix the order names: account_return_daily, holding data.parquet and manifest.json of each landed day. No delete, no list of other prefixes, no write to dim_return_method (that row is outside this grant and is a decision, adapter_changes item 6). Mirrors the holdings-performance write statement shape (iam.tf line 314), with one table instead of two."
+    },
+    {
+      "statement": "OwnLogStreamOnly",
+      "actions": ["logs:CreateLogStream", "logs:PutLogEvents"],
+      "resources": ["arn:aws:logs:us-east-1:<account>:log-group:/aws/lambda/irpt-cot-account-return-daily-lambda:*"],
+      "words": "The function's own log group only, the same statement as the holdings-performance function (iam.tf line 342). The log group itself is created by the module (CreateLogGroup is not granted to the execution role)."
+    },
+    {
+      "statement": "SchedulerInvokesFunctionOnly",
+      "actions": ["lambda:InvokeFunction"],
+      "resources": ["arn:aws:lambda:us-east-1:<account>:function:irpt-cot-account-return-daily-lambda"],
+      "words": "On the EventBridge Scheduler role, not the execution role: the one invoke of the one function, the same shape as the holdings-performance scheduler policy (schedule.tf line 265). The scheduler trust is the shared scheduler.amazonaws.com assume document. The account is a placeholder here; the builder names are exact."
+    }
+  ],
+  "schedule": {
+    "cron": "cron(15 8 ? * MON-FRI *)",
+    "zone": "America/New_York",
+    "inputs": [
+      "blackdiamond/cottonwood/silver/fact_allocations/date=T (T = the target trading day, the day before the frontier)",
+      "blackdiamond/cottonwood/silver/fact_transactions/date=T"
+    ],
+    "frontier_rule": "Trading-day frontier: the target day T is the previous NYSE trading day before the frontier, resolved by lib/trading_calendar.py (expected_last_trading_day, then prev_trading_day), as the holdings handler resolves it (_days_to_compute, line 101). Before it writes, the landing checks that BOTH fact_allocations and fact_transactions partitions of T exist. If either is absent at fire time the fire HOLDS: it logs the absence, writes nothing, and never stamps a stale day. The round-115 ruling accepts 08:15 for this reason; the round-117 ruling keeps no separate log line because a failed fire already exits non-zero.",
+    "words": "Monday to Friday at 08:15 America/New_York, the fire time the CTO accepted for Cottonwood producers (round-115 ruling). Measured input: the Cottonwood Black Diamond silver lands at 07:46 New York on 15 of 15 trading days (round 114), so the 08:15 fire sees T-1 on a normal day. The schedule is created DISABLED and enabled after the catch-up's after-read; the holdings-performance cot schedule file carries state ENABLED against that ruling (row IRPT_DASHBD-D2-W195-S1)."
+  },
+  "adapter_changes": [
+    {
+      "change": "Emit the optional source column (contract 0.3.0, a minor bump, once it lands; the value is the words computed from Black Diamond values and flows) in ARROW_SCHEMA (line 101) and in derive_rows (line 315). The schema label stays as schema metadata.",
+      "why": "The return contract at HEAD is 0.2.0 with no source column (org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json, contract_version); the B-49F round-120 ruling 4 adds it, and the page must state the source as words. Contract 0.3.0 has not landed, so this change waits for it."
+    },
+    {
+      "change": "Add the write path the module lacks: a landing function that writes data.parquet and manifest.json under opal_naming.address(irpt, cottonwood, gold, account_return_daily, date=T), in the producer's emit_day pattern (account_return_daily.py lines 1876-1891), and returns the address.",
+      "why": "The adapter writes nothing by its own docstring (lines 29-31); a landed partition must exist at the builder address the one-prefix grant names."
+    },
+    {
+      "change": "Add the silver presence hold before derive: list the fact_allocations and fact_transactions partitions of T, and if either is absent log the absence and write nothing.",
+      "why": "The trading-day frontier rule of the round-115 ruling; derive() at line 373 has no presence check, and the holdings precedent resolves T by calendar only (line 101)."
+    },
+    {
+      "change": "Make the lib import root packaging-aware: _ROOT = Path(__file__).resolve().parents[6] (line 48) resolves lib/ only inside the repo tree. The zip must carry the import closure (lib/opal_naming.py, lib/trading_calendar.py and the registry they read), and a source-map row for the new function (infra/aws/lambda/ci/lambda-source-map.json, which holds the holdings-performance rows at lines 5701 to 6027) must name it.",
+      "why": "Without the closure the function cannot import the builders, so the names it writes would not be the builder names it was graded on."
+    },
+    {
+      "change": "Supply the manifest's thresholds and first_data_date, or write each as absent with its claim: build_manifest (account_return_daily.py lines 1855-1874) takes both, and the adapter has neither.",
+      "why": "A manifest that omits a value without its claim is a number a consumer cannot reject on (rule: a value must carry its claim)."
+    },
+    {
+      "change": "Decide the method row: either a second grant on irpt/cottonwood/gold/dim_return_method/ with the write of method_version=2 (producer lines 2014-2018), or a landing that carries no method row and says so in the manifest.",
+      "why": "Served rows point at method_version 2 (adapter line 56), and the one-prefix grant does not reach that row."
+    }
+  ],
+  "registry_rows_needed": [],
+  "expected_plan": {
+    "to_add": 7,
+    "to_change": 0,
+    "to_destroy": 0,
+    "resources": [
+      "aws_iam_role.irpt_account_return_daily_cot",
+      "aws_iam_role_policy.irpt_account_return_daily_cot",
+      "aws_iam_role.irpt_account_return_daily_cot_scheduler",
+      "aws_iam_role_policy.irpt_account_return_daily_cot_scheduler",
+      "aws_scheduler_schedule.irpt_account_return_daily_cot",
+      "module.irpt_account_return_daily_cot.aws_lambda_function.this",
+      "module.irpt_account_return_daily_cot.aws_cloudwatch_log_group.lambda"
+    ],
+    "words": "INFERRED, not measured: no terraform plan was run (the order forbids it). The counts come from the module shapes: the holdings-performance cot root (schedule.tf, iam.tf, lambda.tf) and modules/yang-lambda (main.tf line 23 aws_lambda_function.this, line 76 aws_cloudwatch_log_group.lambda). The function takes its own zip key (investor-reporting/irpt-cot-account-return-daily-lambda.zip), so no existing function or shared zip changes (to_change 0). The scheduler and execution roles are new; no destroy."
+  },
+  "blast_radius": "Additive only, if cut as recorded: one new Lambda function with its own zip key, one execution role and its policy, one scheduler role and its policy, one schedule created DISABLED, one log group, and writes ONLY under irpt/cottonwood/gold/account_return_daily/ in the Cottonwood gold bucket. It must not touch the 49 Financial or Inflection functions, roles or zips, the Cottonwood holdings-performance function or its schedule, any bucket policy, the registry, or any Black Diamond silver object (read-only). No served value changes until a reader consumes the prefix; round 114 measured that no served code reads a Cottonwood gold prefix.",
+  "rollback": "Per key: the schedule is disabled or deleted (one call); the function is deleted; the execution and scheduler roles and their policies are deleted; the log group is removed by the module. Gold: a partition the landing wrote is removed only by an explicit listed-key delete under irpt/cottonwood/gold/account_return_daily/date=... with Andrew's word (the CTO round-117 rollback note: a first write into empty prefixes is Andrew's delete); never a wildcard prefix delete.",
+  "words": "The packet must say: the landing is a Lambda (kind lambda) on the holdings-performance pattern; the names and the Cottonwood gold address are the builder output at cee3478342 and no builder refused; the adapter needs a write path, a silver presence hold, a packaging-aware import root, a source column once contract 0.3.0 lands, manifest values it does not yet carry, and a decision on the method row; the IAM is five statements with no wildcard action; the schedule is 08:15 New York Monday to Friday with the trading-day frontier. Not established from the repo: whether the function, roles or schedule exist in AWS now (no AWS call was allowed); the live schedule state (the holdings cot schedule file says ENABLED, row IRPT_DASHBD-D2-W195-S1); whether Black Diamond silver for T-1 has landed today; the plan itself (no terraform plan); whether the adapter tests pass at this commit (not run); the contract 0.3.0 text (not landed).",
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
