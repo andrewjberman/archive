@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-257",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "4a3e3c8f8e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-257.cottonwood-landing-root-memory-1024-pins-and-build-only-package.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~210",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-return-daily/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8d0b56b1b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "memory_size 1024 with timeout 900 and reserved concurrency 1; the sizing comment states the round-125 measurement; not planned, applied or deployed",
+      "artifact_covered_by": [
+        "DB126-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "805874f275",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "entry irpt-cot-account-return-daily-lambda: 15 pins on 15 distinct commits, 15 sha256 values, and tf_file, tf_resource and iam_role filled; read by the BUILD_ONLY run; nothing uploaded and no artifact field written",
+      "artifact_covered_by": [
+        "DB126-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~210/RD_COT_LANDING_FACTS_R126.json",
+      "kind": "config_data",
+      "commit_or_etag": "000a40d399",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the nine keys of the order's form; memory_mb 1024; members 16; the build_only_sha256 of the package; plan_expected 7/0/0 claimed inferred and not measured",
+      "artifact_covered_by": [
+        "DB126-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB126-1-AC1",
+      "criterion_verbatim": "DB126-1-AC1 -- lambda.tf carries memory_size = 1024 with timeout = 900 and reserved_concurrent_executions = 1 kept; against the order's first commit the only code line removed is memory_size = 8192 and the only one added is memory_size = 1024; the comment cites RD_COT_MEMORY_R125, states the measured peak and no longer says unmeasured; every other file of the root is byte-equal to the base.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r126/p126_landing.py\" . DB126-1-AC1",
+      "output_evidence": "OK: lambda.tf memory_size 1024 (measured peak 654.5 MB, record cited), timeout 900 and reserved concurrency 1 kept, the only code line changed is memory_size, 4 other root files byte-equal to the base | DB126-1-AC1 PASS (rc 0)",
+      "denominator": "PASS: 1 of 1 criterion; lambda.tf code lines differ from the base by exactly one removed line (memory_size = 8192) and one added line (memory_size = 1024); timeout 900 and reserved concurrency 1 present; 4 of 4 other root files byte-equal to the base",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line reads DB126-1-AC1 PASS at rc 0 at HEAD 000a40d399; the lambda.tf bytes are those of commit 8d0b56b1b3",
+      "expect": "DB126-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB126-1-AC2",
+      "criterion_verbatim": "DB126-1-AC2 -- in the source map every other function entry and top-level key is unchanged; in the entry only staged_from, tf_file, tf_resource, iam_role and the two notes differ; all 15 members keep their identity and gain a 40-hex pin that is an ancestor of HEAD and a 64-hex sha256 equal to the hash of git show of that pin and of the file at HEAD; the three Terraform fields equal the values of step 3.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r126/p126_landing.py\" . DB126-1-AC2",
+      "output_evidence": "OK: source-map entry irpt-cot-account-return-daily-lambda: 15 members pinned to ancestor commits with sha256 equal to git show and to HEAD, tf_file/tf_resource/iam_role filled (irpt-cot-account-return-daily-execution-role), no other entry or key changed | DB126-1-AC2 PASS (rc 0)",
+      "denominator": "PASS: 1 of 1 criterion; 15 of 15 members keep their identity, carry a 40-hex pin (15 distinct commits, each an ancestor of HEAD) and a 64-hex sha256 equal to git show at the pin and to HEAD; 3 of 3 Terraform fields equal the order's values; every other entry and top-level key unchanged",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line reads DB126-1-AC2 PASS at rc 0 at HEAD 000a40d399; the source-map bytes are those of commit 805874f275",
+      "expect": "DB126-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB126-1-AC3",
+      "criterion_verbatim": "DB126-1-AC3 -- the checker runs the build-only command itself: it exits 0 and prints its line; the zip holds exactly the entry's files (handler.py at its root, the 15 members at their repo paths) and every member's bytes equal its source at HEAD; the record has exactly the form of step 5, its five names equal the builder's, its build_only_sha256 equals the checker's own build and no run of 8 or more digits stands outside the exempt fields.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r126/p126_landing.py\" . DB126-1-AC3",
+      "output_evidence": "OK: build-only package of 16 members equals its sources byte for byte; the record's five names equal the builder's, memory 1024, build sha equals this run's, plan 7/0/0 inferred | DB126-1-AC3 PASS (rc 0)",
+      "denominator": "PASS: 1 of 1 criterion; the build-only run exited 0 and printed its line; the zip holds 16 of 16 declared members and every member's bytes equal HEAD; the record has 9 of 9 keys, 5 of 5 names equal the builder's, and its build_only_sha256 equals the checker's own build; no digit run of 8 or more outside the exempt fields",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line reads DB126-1-AC3 PASS at rc 0 at HEAD 000a40d399; the record bytes are those of commit 000a40d399",
+      "expect": "DB126-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test (python -I checks/r126/p126_landing.py --selftest from the worktree root): the memory clauses, the entry clauses with their red arms, the package clauses and the facts clauses",
+      "expected": "every arm behaves and the self-test prints selftest PASS, rc 0",
+      "observed": "selftest: memory, entry (11 red arms), package and facts clauses behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion invocation was run from the worktree root under timeout 120 (AC3 under timeout 300) on several runs across the cell's commits; AC3's build-only sha256 was compared with the record's value on each run",
+      "expected": "identical output and rc on each run; the AC3 build sha equal to the record's on each run",
+      "observed": "AC1 and AC2 printed the same line and rc 0 on every run; AC3 built the same sha256 on both checker runs and it equalled the record's build_only_sha256",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The terraform plan and apply of the landing root",
+      "reason": "not run: the order forbids Terraform commands and AWS calls; the seven-add plan_expected is INFERRED from the module shapes and is recorded as inferred"
+    },
+    {
+      "item": "The Lambda runtime's own memory peak on python3.12",
+      "reason": "not measured: RD_COT_MEMORY_R125 ran on a Windows box under Python 3.14; the comment states that the runtime was not measured"
+    },
+    {
+      "item": "Import-layer enforcement of the built package",
+      "reason": "not enforced: the builder printed an advisory because the source dir carries no BUILD_MANIFEST.json; the package is not declared as layer-checked"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W210-S1 -- OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~D2): the BUILD_ONLY build printed an advisory that layer imports are unenforced without a BUILD_MANIFEST.json; the build exited 0",
+    "IRPT_DASHBD-D2-W210-S2 -- OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~D2): the round-125 memory measurement ran under Python 3.14 on Windows, and the Lambda runtime python3.12 was not measured"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~210/IRPT_DASHBD.TO-DB-b-257.cottonwood-landing-root-memory-1024-pins-and-build-only-package.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "p126_landing.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r126/p126_landing.py\" . DB126-1-AC1 (and DB126-1-AC2, DB126-1-AC3, and --selftest)",
+      "result": "PASS rc 0 for AC1, AC2 and AC3 and selftest PASS rc 0, run at the worktree root at HEAD 000a40d399"
+    },
+    {
+      "tool": "build-and-upload.sh",
+      "invocation": "BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-cot-account-return-daily-lambda",
+      "result": "rc 0; printed one BUILD_ONLY line with the zip path and sha256; nothing uploaded and no source-map field written"
+    }
+  ]
+}
