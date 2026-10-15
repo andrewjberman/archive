@@ -81,6 +81,47 @@ from trunk: the cumulative diff adds exactly `person_access` -- the member in th
 No rival content, no third cell's content. The other commits a `base..trunk` listing shows against these
 paths are the same release-branch topology artifact noted above.
 
+## The REVERSE seam, which the forward check cannot ask about
+
+The seam enumeration asks what the taken files IMPORT. It cannot ask what imports THEM, and for this
+take-list that is the bigger number. Measured at the base:
+
+| whole-taken module | modules at the base that import it |
+|---|---|
+| `app/internal_role.py` | **8** -- `etfs_funds`, `etfs_ownership`, `portal_mdpf` (the three OG-ap-20 just put live), `harvest_read`, `portal_macro`, `portal_models`, `query_v0`, `news_typed` |
+| `app/access_state.py` | **9** -- `data_entitlement`, `download_routes`, `oauth_as`, `tenant_registry`, `asker_scope`, `account_ref`, `admin_grants`, `admin_refusals`, `admin_gateway_breakdown` |
+| `app/news_typed.py` | 1 -- `app/tools.py` |
+| `app/harvest_published.py` | 0 -- it is new |
+
+**Taking those first two WHOLE replaces modules that seventeen already-live modules depend on**, so their
+base-to-trunk diff is this release's real blast radius and belongs in the ask's `diff` section as such.
+Measured, so the statement is narrow rather than alarming:
+
+- **`internal_role.py`, +78/-1: no existing `def` or class changed or removed.** Six new names
+  (`_DDB_SERVICE`, `_LAMBDA_SERVICE`, `_default_dynamodb`, `_default_lambda`, `dynamodb_client`,
+  `lambda_client`). The single removed line is the module-level cache declaration
+  `_CACHE: dict = {}  # arn -> (s3 client, expiry epoch seconds)`, which the additions replace with a
+  cache that also holds dynamodb and lambda clients. So the eight base importers keep the behaviour they
+  have; what they gain is two client factories they do not call.
+- **`access_state.py`, +2/-1: one module-level constant extended**, `POLICY_RECORD_TYPES` gaining
+  `person_access`. That constant is read in exactly **three places, all inside `access_state.py` itself**
+  -- `RECORD_TYPES = POLICY_RECORD_TYPES + tuple(RUNTIME_KINDS)` (`:79`), a validation refusal
+  (`:129`), and a key check (`:186`). **No other module reads it.** So the extension's whole effect is
+  that `person_access` becomes an accepted record type inside access_state's own validation, which is
+  the person-access feature working as designed. It widens what a record may be CALLED, not what any tool
+  may reach.
+
+**And the invoke retarget is not a policy-side choice at all.** `app/harvest_published.py` already reads
+its Lambda client from the internal reader (`internal_role.lambda_client`, OG-gt-13), and
+`internal_role.lambda_client` **does not exist at the base** -- it arrives with this take. When the role
+cannot be assumed the tool answers `harvest_published_unavailable` with **zero invokes and no fallback**.
+So the terraform retarget is the grant catching up with code that already assumes that identity, and the
+NEW grant A2 names is the permission without which the tool cannot work at all. Refusal arms for the ask's
+section 2, read from the module: `harvest_bad_argument`, `harvest_published_unavailable` (also the
+role-unavailable arm), `404` for an absent security, and `admit_typed`'s own three
+(`principal_required`, `harvest_opal_only`, `harvest_prefix_not_served`), every one of them before any
+invoke.
+
 ## Seams
 
 Enumerated against the current base with `W/p21_seams.py`: **CLEAR**. Four modules opened, 3 distinct
