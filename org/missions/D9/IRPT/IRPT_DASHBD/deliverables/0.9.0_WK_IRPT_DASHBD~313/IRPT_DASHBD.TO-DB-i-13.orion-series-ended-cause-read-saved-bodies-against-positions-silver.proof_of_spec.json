@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-13",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-13.orion-series-ended-cause-read-saved-bodies-against-positions-silver.md",
+    "group": "OTHER",
+    "vintage_commit": "768ab85a86"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~313",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~313/series_ended_cause.py",
+      "kind": "script",
+      "commit_or_etag": "0361ddd49d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Tracked read script for DB-i-13: reads the two saved round-122 bodies from the private folder, reads fact_positions partitions through the GET-only InflectionSilverReader (120 reads: 117 GETs and LIST pages), writes the private extract and the repo record. Not deployed; no AWS write, vendor call, secret read or push. Plan mode makes no S3 call.",
+      "artifact_covered_by": [
+        "DBI126-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~313/SERIES_ENDED_CAUSE_R126.json",
+      "kind": "config_data",
+      "commit_or_etag": "0361ddd49d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-13 record: script, body and extract hashes, series and early-end counts, per-account counts and verdicts, verdict counts, basis words, reader reads. Counts, digests and words only; files_in_repo_private, served_values_changed, pushed and deployed all false. Its extract.path field carries the private folder name, which holds an 8-digit run (see the surprise row).",
+      "artifact_covered_by": [
+        "DBI126-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0361ddd49d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One surprise row IRPT_DASHBD-D2-W313-S1 (BLOCKING, UNDER_INVESTIGATION) appended as bytes, one fenced json block: the r126 checker's no-identifier limb refuses the record's extract path, which the order names as an exempt path field.",
+      "artifact_covered_by": [
+        "DBI126-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI126-1-AC1",
+      "criterion_verbatim": "DBI126-1-AC1: the record is complete and carries no identifier or date; the script is a tracked file hashed as recorded with no AWS write, vendor call or secret token, reading through InflectionSilverReader; the bodies' hashes equal the saved files'; the private extract's hash equals the recorded one; every early-ending account's fields and verdict, the series and early-ending counts and the verdict counts equal the checker's recompute from the saved bodies and the saved positions extract; no write, no push, no deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r126/p126_cause.py\" . DBI126-1-AC1",
+      "output_evidence": "REASON: a run of 8 or more digits in the record: 202 / DBI126-1-AC1 FAIL (rc=1)",
+      "denominator": "0 of 1 criterion PASS; the checker stops at the record's no-identifier limb, the first of its limbs after the record's read, so the later limbs (script, hashes, extract, recompute, verdict counts, no-write flags) are not reached by this run",
+      "status": "FAIL",
+      "status_reason": "The official checker stops at the record's no-identifier limb on the extract.path field, which the order names as exempt and the checker does not exempt. Surprise row IRPT_DASHBD-D2-W313-S1 (BLOCKING) carries it to the issuer; the record is not repaired.",
+      "expect": "DBI126-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The unmodified checker's own negative arms, run with --selftest before the record was written: a vendor-call script is refused and an 8-digit run is refused.",
+      "expected": "selftest PASS, both negative arms refused",
+      "observed": "selftest PASS (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice on the final tree, whole printed output compared with cmp.",
+      "observed": "two runs rc=1 each; the outputs are identical: REASON a run of 8 or more digits in the record: 202, DBI126-1-AC1 FAIL. A scratch diagnostic copy with only the extract.path field excluded from that scan (not the verdict) reads DBI126-1-AC1 PASS; it is listed under compiler_tools.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to AWS, any vendor call, any secret read, any push or deploy",
+      "reason": "Outside the grant and the cell. The reader's LIST and GET calls are the only S3 access; the record counts them (120 reads, zero writes)."
+    },
+    {
+      "item": "Any edit to the official checker or the no-identifier limb, and any change to the record's path to pass it",
+      "reason": "The order names the private folder as the extract path and the checker is an issuer check outside the grant. The criterion is reported FAIL as written; the issuer rules the exemption."
+    },
+    {
+      "item": "The order status flip to complete",
+      "reason": "DBI126-1-AC1 is FAIL, so the order stays pending by the proof rule; a valid instance is not a met order."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W313-S1: BLOCKING, UNDER_INVESTIGATION. The r126 checker's no-identifier limb scans the whole record for an 8-digit run; the order's extract.path (the private folder, which carries one) is exempt by the order's own text, not by the checker. DBI126-1-AC1 FAILs at that limb with every other limb unmeasured by the official run."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~313/SERIES_ENDED_CAUSE_R126.json",
+  "compiler_tools": [
+    {
+      "tool": "p126_cause.py (issuer checker, DBI126-1-AC1), run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r126/p126_cause.py\" . DBI126-1-AC1",
+      "result": "rc=1; REASON: a run of 8 or more digits in the record: 202; DBI126-1-AC1 FAIL"
+    },
+    {
+      "tool": "p126_cause.py --selftest, run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r126/p126_cause.py\" --selftest",
+      "result": "rc=0; selftest PASS"
+    },
+    {
+      "tool": "scratch diagnostic copy of the checker (extract.path excluded from the no-identifier scan; not a verdict)",
+      "invocation": "python -I .scratch/p126_diag_copy.py . DBI126-1-AC1",
+      "result": "rc=0; DBI126-1-AC1 PASS"
+    }
+  ]
+}
