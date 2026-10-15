@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e102b.c06-sorted-keys-ship",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4dda49c7e3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R25.md",
+    "vintage_commit": "3e1365fdaa",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e102b.c06-sorted-keys-ship.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/C_06.client_mix_timeseries.py",
+      "kind": "s3_object",
+      "commit_or_etag": "f884f28ddcaeda891dc67958210e88ad",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy on box/dell1 at 2026-10-15T06:47Z (object LastModified 06:47:09Z): `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py`, rc=0. Lines: '1 path(s) to deploy (1 script, 0 bundle-member)', 'DEPLOYED [bd] ...C_06.client_mix_timeseries.py', 'VERIFY OK comp-pipescript deployed ...', terminal 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified', three '[not shipped]' lines for the _shared modules. Pre-act ETag f847d8d105025ffbee94b1aa5092faf6 at VersionId jGO15I3AZTATLbGxE3_36dKm86wuggDK (the rollback handle, unused); post-act VersionId XlH0iTR4_djIN6jNxFooFLDpz0d.CJMa, 66,489 B. Output at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e102_safe_deploy.out.",
+      "artifact_covered_by": ["SC25-e102b-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC25-e102b-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/e102_shipped_check.py -- expect 'E102-SHIPPED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/e102_shipped_check.py",
+      "expect": "E102-SHIPPED ok=True",
+      "output_evidence": "E102-SHIPPED ok=True c06=f884f28d|f884f28d|MATCH control=MATCH dispatch=same d03=same d04=same mds_sorted=True, read after leg Q' (org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e102_ac1_post_legq.txt). Read right after the ship it was the same with mds_sorted=False (e102_ac1_post_ship.txt).",
+      "denominator": "1 moving key at its signed md5, control=MATCH, gold_dispatch.sh, D_03 and D_04 unchanged. The discriminator MOVED: the same check read at the cut by this seat read 'ok=False c06=f847d8d1|f884f28d|DIFF ... mds_sorted=False' (equal to the order's recorded base), and mds_sorted flipped to True only after leg Q'. WATCH SET measured by this seat: every key under code/gold/ in opal-data-bd, one list_object_versions page, pre=190 post=190 MOVED=['code/gold/C_06.client_mix_timeseries.py'] ADDED=0 GONE=0 (e102_census.py, E102_CODEGOLD_PRE/POST_20261015.json). Leg Q' Branch 1 (e102_branch1_run1.txt, e102_branch1_run2.txt): run 1 and run 2 each parsed EQUAL to the body saved from the VersionId read immediately before them; body md5 equals its own sorted-dump md5 on both; the other 29,604 snapshot keys: same key set and every ETag equal on both runs (2 keys, the two watermark files, took a new VersionId with an equal ETag); run 2's ETag 10d0a665b7bb9024e53c43cce88b177b equals run 1's. STOPS=0.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py",
+      "result": "OK -- gate PASS, 1 of 1 deployed and verified, one DEPLOYED line and three '[not shipped]' lines; seat-gates CROSSBOX-DEPLOY verdict CLEAR."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py open --leg V|P|D|Q ; close-leg V|P|D|Q ; close",
+      "result": "Entry secclass-e102-c06-sorted-keys-sc1-20261015 opened with 4 legs before the act; every leg closed with proof."
+    },
+    {
+      "tool": "lib/platinum_dest.py source()/list_target() + lib/s3_layout.py + boto3 list_object_versions",
+      "invocation": "e102_legp.py legp: every key derived in canonical mode, IsLatest only, pages and counts printed",
+      "result": "122 keys (mix daily summary 1, firm_mix_views_daily 1 + alias 1, platinum/firm/mix_summary 1, advisor mix_daily 59 + alias 59), 122 version pages plus 1 advisor listing page, 0 absent, 0 without a VersionId."
+    },
+    {
+      "tool": "e102_shipped_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R25_CHECKS/e102_shipped_check.py",
+      "result": "Run three times: at the cut ok=False (c06 DIFF), after the ship ok=True mds_sorted=False, after leg Q' ok=True mds_sorted=True, control=MATCH each time."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arms that could STOP the act or invalidate its evidence. (a) STEP-0 BASE: served C_06 ETag f847d8d1 at VersionId jGO15I3A...; anything else means another ship moved the key. (b) DIGEST: repo md5 f884f28d with b5f6b816a4 an ancestor of HEAD and an empty git status on the path. (c) 49F READ PROOF: a head-object of platinum/firm/mix_summary.json. (d) WINDOW, re-read in the SAME shell as the leg P read and the deploy and aborting them: runner stopped, 0 gold-layer-runner instances pending/running/stopping, gold/trigger-pending.json absent. (e) NAMED-SHIP SET: the deploy's member list must be exactly one DEPLOYED line. (f) WATCH SET: every key under code/gold/ pre and post, any key but C_06 moving is a STOP with a same-session restore by VersionId. (g) BRANCH 1 content arm: parsed-equal to the pre body, every other snapshot key ETag-equal, else restore the mix daily summary to the VersionId read immediately before the run. (h) boot-chain arm: the stop command first, NO-GOLD-PROCESS and no telemetry written since boot before the single.",
+      "expected": "(a) exact. (b) exact. (c) readable. (d) stopped, 0, absent. (e) one DEPLOYED. (f) MOVED = [C_06] only. (g) parsed-equal, 0 other ETag differences. (h) NO-GOLD-PROCESS and an empty telemetry list on both starts.",
+      "observed": "(a) exact on the 06:40Z read and the in-shell re-read at 06:46:15Z. (b) exact, status empty. (c) readable: VersionId 48PWPm6n, 25,121 B. (d) runner stopped, 0 instances, trigger-pending 404, re-read at 06:46:28Z before the ship. (e) one DEPLOYED line. (f) pre=190 post=190 MOVED=[C_06] ADDED=0 GONE=0. (g) run 1 and run 2: PARSED-EQUAL True, ETAG_DIFFERS(other)=0. (h) both starts: STOP-RC=0, ACTIVE=failed, NO-GOLD-PROCESS, no telemetry since boot, /tmp/gold_logs empty at the stop. WHAT FIRED: AC1's served-equals-repo AND differs-from-rollback test read ok=False at the cut and ok=True after the ship, and mds_sorted read False after the ship and True only after the runs, so a no-op ship or a no-op run would have read otherwise.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The shipped bytes were read at three independent places: the repo file's md5 locally in the same shell as the ship; the served object's head-object ETag and ContentLength after the ship; and the runner's own md5sum of /tmp/gold_layer_scripts/C_06.client_mix_timeseries.py printed inside both single commands. The mix daily summary's byte determinism is run 2's ETag against run 1's.",
+      "observed": "f884f28ddcaeda891dc67958210e88ad at all three code places. The pre-act ETag f847d8d1 differs, so the move is real. Mix daily summary: pre 6e8ac834c20881d36ce8356c09226286, run 1 10d0a665b7bb9024e53c43cce88b177b, run 2 10d0a665b7bb9024e53c43cce88b177b.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Leg G: the first scheduled fire after the ship (D_03 families and D_04's object, request Branch 2 and COO half condition 4).",
+      "reason": "Assigned to the ISSUER by the order ('LEG G is the issuer's'). Not measurable until a scheduled BD gold fire writes the D_03 and D_04 objects. This seat does not grade it. The baseline is leg P's file: org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E102_LEGP_20261014.json."
+    },
+    {
+      "item": "comp-adversary on the named-ship set.",
+      "reason": "The order's preflight declares it RUN by the issuer. This seat did not run it; the equivalent evidence here is the deploy's printed member list (one DEPLOYED, three [not shipped]) and the 190-key watch set."
+    },
+    {
+      "item": "A second runner start for run 2.",
+      "reason": "The order requires two C_06 singles and the runner halts after each single, so run 2 needed a second start under the same stop-first procedure. Amendment 4 (j) allows a second start only when the first yields no usable window; the order's own run 2 is the reading used here. Reported to the issuer, not hidden."
+    },
+    {
+      "item": "Flipping this order's <status> to complete.",
+      "reason": "The order instructs only staged -> pending after the GO (done). Completion is the issuer's call, with leg G."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/session_e102b_c06_sorted_keys_ship_0640-0715Z.md"
+}

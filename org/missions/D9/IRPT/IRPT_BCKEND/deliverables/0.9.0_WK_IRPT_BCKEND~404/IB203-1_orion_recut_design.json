@@ -1,0 +1,163 @@
+{
+  "base_commit": "519b5ccbfb76242583c41bd3ccbcc4041c0d73b8",
+  "pair_b": {
+    "files": [
+      {"path": "infra/aws/terraform/inf-pipeline/eventbridge.tf", "line": 69, "identifier": "cron(15 11 * * ? *)"},
+      {"path": "infra/aws/terraform/inf-pipeline/eventbridge.tf", "line": 132, "identifier": "inf_canonical_prices_daily"},
+      {"path": "infra/aws/terraform/inf-pipeline/lambdas.tf", "line": 138, "identifier": "INF_GOLD_DISPATCH_RELEASE"},
+      {"path": "infra/aws/terraform/inf-pipeline/lambdas.tf", "line": 295, "identifier": "GOLD_TRIGGER_FUNCTION"},
+      {"path": "data/inf/manual_api/pull_inflection_positions_daily.py", "line": 444, "identifier": "if args.upload_bronze:"},
+      {"path": "data/inf/manual_api/pull_inflection_transactions_rest.py", "line": 584, "identifier": "if args.upload:"},
+      {"path": "data/inf/manual_api/pull_inflection_performance_rest.py", "line": 638, "identifier": "if args.upload:"}
+    ],
+    "retiming": "Re-timing of inf-gold-trigger into the 06:00 America/New_York fold: a NEW EventBridge Scheduler schedule (irpt-inf-orion-gold-chain-daily, cron(0 6 * * ? *) with schedule_expression_timezone America/New_York, so EDT and EST both fire at 06:00 local) invokes the EXISTING inf-gold-trigger with mode full and source cron. The silver aggregator's direct dispatch of inf-gold-trigger (GOLD_TRIGGER_FUNCTION) is retired in the same window, so the gold chain has one door. opal-inf-bronze-runner-cron (cron(15 11 * * ? *)) is NOT changed: bronze and silver keep their 11:15Z start. No new function, no port.",
+    "new_function": false,
+    "port": false,
+    "silver_steps_chained": true,
+    "t1_completeness": {
+      "claim": "inferred",
+      "statement": "Not measured complete at 06:00 New York (10:00Z while EDT holds; 11:00Z after 2026-11-01). The earliest pull on record is the flat write at 07:39 EDT (11:39Z) on 2026-10-10 to 10-14, and every pull starts only after the 11:32Z trigger, not on a vendor-readiness signal; the earliest measured-complete time is therefore not established, and 06:00 is unproven, 1 h 39 min before the earliest pull.",
+      "evidence": [
+        "aws s3 ls of bronze/positions, bronze/transactions and bronze/performance on opal-data-inf, read 2026-10-15 (local EDT listing): flat .jsonl.gz writes 2026-10-10 to 10-14 between 07:39:45 and 07:56:39 EDT; 2026-10-14 positions 07:51:52, transactions 07:40:28, performance 07:48:57 (times and sizes only)",
+        "bronze/positions/2026-10-14.jsonl.gz (GET to scratch, read here): 37,008 rows, asOfDate 2026-10-14 on every row, maximum editedDate 2026-10-13, so T-1 edits were present in the 07:51 EDT pull; bronze/positions/2026-10-13.jsonl.gz: maximum editedDate 2026-10-10 (the prior trading day)",
+        "bronze/performance/2026-10-14.jsonl.gz (GET to scratch): 315 rows for each of 2026-10-12, 2026-10-13 and 2026-10-14; data/inf/manual_api/pull_inflection_performance_rest.py lines 113-117 state the most recent factors are PROVISIONAL and the pull re-pulls SETTLE_DAYS = 7 back, so T-1 performance is not settled at pull time",
+        "IB202-1 writer record (deliverables/0.9.0_WK_IRPT_BCKEND~403/IB202-1_flat_key_writer_read.json @14f2b2da5b): SSM SendCommand by inf-gold-trigger at 2026-10-14 11:32:57Z, chain log chain_full_20261014_113301, the pulls run after that send",
+        "CTO ruling data path org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_IRPT_DAILY_6AM_PULLS_FOLD_20261014.md (S2): the 06:00 America/New_York fold is Andrew's word; the ruling records no completeness measurement"
+      ]
+    },
+    "measurement_plan": "One-time read-only probe, sent by a LATER order and not by this one: at 06:00, 06:30 and 07:00 New York (10:00, 10:30 and 11:00Z while EDT holds), five client-assets requests per probe (15 vendor requests in all), comparing the row count and the maximum editedDate for those clients with the 07:39 EDT pull of the same day. T-1 is complete at 06:00 only if the 06:00 probe equals the 07:39 pull for every probed client; otherwise the earliest probe that equals it is the earliest measured-complete time.",
+    "cli_retirement": "Each manual CLI loses its bronze write and exits with a message that names the chain: pull_inflection_positions_daily.py (the --upload-bronze branch at line 444), pull_inflection_transactions_rest.py (the --upload branch at line 584) and pull_inflection_performance_rest.py (the --upload branch at line 638). The message reads that bronze is written only by the gold chain step INF_API_PULL_* run by inf-gold-trigger, and the CLI exits non-zero without writing. Its read paths are unchanged.",
+    "schedule_builder_output": "irpt-inf-orion-gold-chain-daily is the OUTPUT of lib/opal_naming.py name('irpt', 'inflection', 'orion-gold-chain', 'daily') (system irpt, scope inf, cadence daily); the builder refuses a clock time as a cadence, so the 06:00 America/New_York time lives in the schedule expression, not in the name. No new function name is created.",
+    "trading_day_frontier": "The 06:00 run takes its frontier from lib/trading_calendar.py expected_last_trading_day(now), which is T-1 on a trading day; freshness basis trading-day-frontier; a run on a non-trading day is not a failure."
+  },
+  "pair_a": {
+    "feeds": {
+      "positions": {
+        "days": ["2026-07-01", "2026-07-03", "2026-07-04", "2026-07-05", "2026-08-06", "2026-09-28", "2026-09-29"],
+        "keys": [
+          "s3://opal-data-inf/bronze/positions/2026-07-01.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-07-03.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-07-04.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-07-05.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-08-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-09-28.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-09-29.jsonl.gz"
+        ],
+        "requests": 2240,
+        "chain_step": "INF_API_PULL_POSITIONS_DAILY"
+      },
+      "transactions": {
+        "days": ["2026-07-01", "2026-07-13", "2026-07-14", "2026-07-15", "2026-08-06", "2026-09-28", "2026-09-29"],
+        "keys": [
+          "s3://opal-data-inf/bronze/transactions/2026-07-01.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-07-13.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-07-14.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-07-15.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-08-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-09-28.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-09-29.jsonl.gz"
+        ],
+        "requests": 871,
+        "chain_step": "INF_API_PULL_TXN"
+      },
+      "performance": {
+        "days": ["2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-07-01", "2026-07-02", "2026-07-06", "2026-07-07", "2026-07-09", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-21", "2026-07-22", "2026-07-23", "2026-08-06", "2026-09-28", "2026-09-29", "2026-09-30", "2026-10-13"],
+        "keys": [
+          "s3://opal-data-inf/bronze/performance/2026-05-04.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-05.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-07.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-08.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-11.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-01.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-02.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-07.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-09.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-13.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-14.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-15.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-21.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-22.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-23.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-08-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-09-28.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-09-29.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-09-30.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-10-13.jsonl.gz"
+        ],
+        "requests": 315,
+        "chain_step": "INF_API_PULL_PERF"
+      }
+    },
+    "absent_beforehand_read_at_act": true,
+    "through_chain_steps": true,
+    "read_back": "After each write, head-object each key and compare ContentLength with the local gzip size, ContentType with application/gzip, and the object's row count and asOfDate with the pull's own log line; any mismatch fails the act for that key and is recorded.",
+    "rollback_per_key": "Per key, the rollback removes that key's new version only, so the prior state (absent) returns; the bucket is versioned. A delete is Andrew's act and no key is deleted by the worker. No other key is touched.",
+    "absent_at_source_policy": "A key is read ABSENT before the act; when the vendor returns nothing for a day, the day is recorded ABSENT-AT-SOURCE with the response status and an empty key is never written; a tolerated pull failure in the chain is not a write."
+  },
+  "blast_radius": {
+    "writes": [
+      "s3://opal-data-inf/bronze/positions/<7 days listed in pair_a>.jsonl.gz (at the act only; none in this order)",
+      "s3://opal-data-inf/bronze/transactions/<7 days listed in pair_a>.jsonl.gz (at the act only; none in this order)",
+      "s3://opal-data-inf/bronze/performance/<22 days listed in pair_a>.jsonl.gz (at the act only; none in this order)",
+      "EventBridge Scheduler schedule irpt-inf-orion-gold-chain-daily and its execution role (at pair (b) landing only; none in this order)",
+      "Terraform files named in pair_b.files (at pair (b) landing only; none in this order)"
+    ],
+    "reads": [
+      "Orion API through the chain pull steps (estimated 2240 + 871 + 315 requests at the act; zero sent in this order)",
+      "s3://opal-data-inf/bronze/<feed>/ listings and HEAD of the 36 keys (reads only)",
+      "s3://opal-data-inf/code/gold/orion-gold-dispatch.sh (GET, read here; the catalog the gold trigger fetches at each dispatch)",
+      "infra/aws/terraform/inf-pipeline and the three manual CLIs (repository reads)"
+    ],
+    "new_iam": true,
+    "served_values_changed": false,
+    "other_dates_touched": false
+  },
+  "build_slices": [
+    {
+      "cell": "schedule-0600ny-fold",
+      "risk": "LOCAL",
+      "files": ["infra/aws/terraform/inf-pipeline/eventbridge.tf"],
+      "depends_on": []
+    },
+    {
+      "cell": "cli-bronze-write-retirement",
+      "risk": "LOCAL",
+      "files": [
+        "data/inf/manual_api/pull_inflection_positions_daily.py",
+        "data/inf/manual_api/pull_inflection_transactions_rest.py",
+        "data/inf/manual_api/pull_inflection_performance_rest.py"
+      ],
+      "depends_on": []
+    },
+    {
+      "cell": "aggregator-dispatch-retirement",
+      "risk": "LOCAL",
+      "files": ["infra/aws/terraform/inf-pipeline/lambdas.tf"],
+      "depends_on": ["schedule-0600ny-fold"]
+    }
+  ],
+  "notes": [
+    "Base: HEAD 519b5ccbfb at the start of this order (the commit the issuer cut the worktree from). Every repository fact below was read at this base; the writer facts were read at 14f2b2da5b in the IB202-1 record and re-read here only where stated.",
+    "First scheduled link: opal-inf-bronze-runner-cron, cron(15 11 * * ? *), ENABLED, eventbridge.tf line 69, targets inf-bronze-trigger, which starts the bronze runner. The gold trigger is reached by the silver aggregator's direct invoke (GOLD_TRIGGER_FUNCTION, lambdas.tf line 295). Its other doors are inf-canonical-prices-daily (DISABLED, eventbridge.tf line 156) and inf-gold-incremental-daily (DISABLED, eventbridge.tf line 256), both left as they are.",
+    "Release control: INF_GOLD_DISPATCH_RELEASE is set in lambdas.tf line 138 (release provenance recorded in lambdas.tf line 139). The retiming must not touch it. The handler's BLOCKED text (lambda_function.py) describes the hold as active; that text is stale against the Terraform value and is recorded as a surprise row.",
+    "Timezone: classic EventBridge rules are UTC-only; cron(15 11) fires at 07:15 EDT and 06:15 EST. A 06:00 New York fold that holds across the EDT to EST change on 2026-11-01 needs aws_scheduler_schedule with schedule_expression_timezone. Precedent in the tree: infra/aws/terraform/inf-pipeline/inf-portal-publisher-floor.tf lines 107-112 (schedule_expression_timezone and a per-schedule scheduler role).",
+    "Chain catalog: the rows for INF_API_PULL_POSITIONS_DAILY (line 293), INF_API_PULL_TXN (line 295) and INF_API_PULL_PERF (line 297) of orion-gold-dispatch.sh carry no {date} token and run with their default flags only. run_chain refuses --run-date for date-agnostic steps. A past-day re-run through these steps therefore needs a catalog change to an S3 object outside this repository. This is a BLOCKING surprise row; through_chain_steps is recorded true only on the condition that the catalog row carries the day argument at the act.",
+    "Tolerated failure: in the dispatch script the pull branch logs WARN and the chain proceeds when a pull fails or times out. A green chain can therefore leave a day's key absent. ABSENT-AT-SOURCE must be read from the key itself, never from the chain status.",
+    "Day sets as listed in the order, measured against the calendar: positions 7 listed; the NYSE calendar (lib/trading_calendar.py, pandas_market_calendars source) shows 4 trading days without a flat key (2026-07-01, 2026-08-06, 2026-09-28, 2026-09-29). 2026-07-03 (holiday), 2026-07-04 and 2026-07-05 (weekend) are not trading days and hold a .parquet key only. Transactions: 7 listed; the calendar shows 13 trading days without a flat key, including six days 2026-05-04 to 2026-05-11 that the order does not list. Performance: 22 listed and measured 22 (match). Recorded as surprise rows; the order's day lists are kept because the check requires 7, 7 and 22.",
+    "Counts: the calendar window is 2026-05-03 to 2026-10-14 (114 trading days from 2026-05-04), read with lib/trading_calendar.py trading_days_between. The bucket listings were read this session (s3 ls, all three prefixes). Keys on non-trading days exist for all three feeds (51, 45 and 42), so the feeds run on calendar days; this is recorded, not interpreted.",
+    "Requests: estimates from distinct identifiers in the 2026-10-14 objects (positions 320 clients per day, transactions 871 accounts, performance 315 clients). They are not measured against the household or account mapping tables, and the transactions and performance estimates assume one windowed call per identifier, which the scripts' windowing suggests and which is not verified. The act's read-back counts the real requests.",
+    "T-1 completeness: inferred, not measured (see pair_b.t1_completeness). The evidence is the listing times, the as-of fields of three objects read by GET, and the performance settle comment. No vendor request was made to test completeness.",
+    "Naming: irpt-inf-orion-gold-chain-daily is the builder's output; the builder refuses 0600 as a cadence and accepts daily. The removal of the silver aggregator's dispatch names no new resource.",
+    "Not read: the silver aggregator's source (no directory under infra/aws/lambda/inf-pipeline carries its name; only the artifact key inf-pipeline/inf-silver-aggregator.zip is named in lambdas.tf line 287); the bronze runner orchestrator; the body of the chain log beyond the pull and shutdown lines; CloudWatch logs; the household and account mapping tables; the dispatch script's repository copy (none exists in this tree).",
+    "Identity: all reads ran under the worker's own identity through the .tools/aws shim. No account number, role ARN, instance identifier, IP address or client identifier is written in this record; counts and timestamps only.",
+    "Nothing was built, changed, started, stopped, pulled, deployed, signed or sent. No vendor request, no AWS write, no function invocation, no sign-in. The only AWS calls were s3 ls and s3 cp (GET) reads."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

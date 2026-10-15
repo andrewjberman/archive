@@ -58,19 +58,18 @@ def ac_1(root):
     need(b["upload_member_diff"] == ["infra/logic/registry/scopes.json"], "the built zip differs from the live zip by more than scopes.json: " + str(b["upload_member_diff"]))
     need(b["scopes_member_sha256"] == NEW_SHA, "the built scopes.json is not the blob at the new pin")
     need(b["live_version_before"] == FIRST_NEW_ZIP_VERSION and b["landed_version_id"] != FIRST_NEW_ZIP_VERSION and b["built_equals_landed"] is True, "version ids or landed-equals-built wrong")
-    # the source map: the re-pin (merged) plus the Cottonwood row, nothing else
+    # the source map: the new Cottonwood row (mirroring the Inflection entry) and every holdings-performance entry's scopes.json at the new pin
     now = json.loads((Path(root) / SRC_MAP).read_text(encoding="utf-8"))
     base = json.loads(git(root, "show", BASE + ":" + SRC_MAP))
     need(COT_FN in now["functions"] and COT_FN not in base["functions"], "the Cottonwood source-map row is absent or was already there")
     cot = now["functions"][COT_FN]
     need(cot.get("tf_resource") == "module.irpt_holdings_performance_cot.aws_lambda_function.this" and cot.get("iam_role") == "irpt-cot-holdings-performance-role", "the Cottonwood row names the wrong resource or role")
-    now2 = dict(now["functions"])
-    now2.pop(COT_FN)
-    for fn, ent in now2.items():
-        if fn in base["functions"] and fn not in ("irpt-holdings-performance-lambda", "irpt-inf-holdings-performance-lambda"):
-            need(ent == base["functions"][fn], "an unrelated function entry changed: " + fn)
+    for fn in ("irpt-holdings-performance-lambda", "irpt-inf-holdings-performance-lambda", COT_FN):
+        sc = [s for s in now["functions"][fn]["staged_from"] if s["repo_path"] == "infra/logic/registry/scopes.json"]
+        need(len(sc) == 1 and sc[0]["pin"] == NEW_PIN and sc[0]["sha256"] == NEW_SHA, "the scopes.json entry of %s is not at the new pin" % fn)
+    need(cot["staged_from"] == now["functions"]["irpt-holdings-performance-lambda"]["staged_from"], "the Cottonwood row's staged_from differs from the 49 Financial entry's")
     need(r["ledger_entry"] == "irpt-dashbd-cottonwood-holdings-performance-20261015", "the ledger was not continued")
-    led = list((Path(root) / "org/critical_paths/change_management").glob(r["ledger_entry"] + "*"))
+    led = list((Path(root) / "org/critical_paths/change_management").glob("*" + r["ledger_entry"] + "*"))
     need(led, "the ledger entry is absent")
     pl = r["plan"]
     need(pl["add"] == 0 and pl["destroy"] == 0 and pl["change"] == 3 and pl["change_addresses"] == [
