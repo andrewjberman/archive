@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t64",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t64.inactive-only-yahoo-set.md",
+    "group": "OTHER",
+    "vintage_commit": "7fb4e17444"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "7fb4e17444",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t64.inactive-only-yahoo-set.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~56",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/inactive_set.py",
+      "kind": "script",
+      "commit_or_etag": "00a801ad33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: read only, no vendor call, no S3 write, no ledger, queue or pacer write, no timer, no deploy. The module imports the existing resolvers and edits none of them. Its --census mode did not run to completion in this worktree (AC2 BLOCKED: the import of p1_coverage needs data/assets/scripts/silver, outside the sparse checkout).",
+      "artifact_covered_by": [
+        "DQ9-t64-AC1",
+        "DQ9-t64-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_inactive_set.py",
+      "kind": "test",
+      "commit_or_etag": "00a801ad33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: stub frames, no network, no S3; the three named tests PASSED by name at commit 00a801ad33 (run from the worktree root, under timeout 120).",
+      "artifact_covered_by": [
+        "DQ9-t64-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "00a801ad33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row MDPF_DEMQUE-D1-W56-S1 (BLOCKING) appended at the end of the branch's copy, append-only (no existing row edited); surprise-row-gate OK (1 new row of 151 checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t64-AC1",
+      "criterion_verbatim": "DQ9-t64-AC1 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_tests.py, expect INACTIVE-OK (the three named tests: test_the_inactive_set_is_the_held_cusips_not_in_the_active_set_and_a_blank_cusip_is_never_held; test_the_census_adds_up_classes_symbols_and_stored_against_the_inactive_total; test_nights_at_cap_is_the_ceiling_of_symbols_over_the_request_cap).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_tests.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-56 under timeout 120 (rc=0):\ntest_demque_inactive_set.py::test_the_inactive_set_is_the_held_cusips_not_in_the_active_set_and_a_blank_cusip_is_never_held PASSED [ 33%]\ntest_demque_inactive_set.py::test_the_census_adds_up_classes_symbols_and_stored_against_the_inactive_total PASSED [ 66%]\ntest_demque_inactive_set.py::test_nights_at_cap_is_the_ceiling_of_symbols_over_the_request_cap PASSED [100%]\n============================== 3 passed in 2.49s ==============================\nINACTIVE-OK",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "INACTIVE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t64-AC2",
+      "criterion_verbatim": "DQ9-t64-AC2 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_real.py, expect INACTIVE-REAL-OK (on the REAL S3 rank inputs and the price index, the V2 active set, read only: the census identities hold, request_cap == 380, nights_at_cap == ceil(with_symbol / 380), inactive_only > 0; the names file holds exactly inactive_only unique sorted entries none of which is in V2, carries no account key, and two runs are byte-identical).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_real.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-56 under timeout 260 (rc=1, 0.96 s wall; no S3 read reached):\nINACTIVE-REAL-BAD census rc=1 ule>\nModuleNotFoundError: No module named 'commonwealth_signs'\nCause: p1_coverage imports card_a_slice, which inserts data/assets/scripts/silver into sys.path and imports commonwealth_signs; that folder is outside the worktree's sparse checkout (tracked at HEAD, absent on disk). No census line, no names file, no identity was measured.",
+      "denominator": "0 of the check's census and names-file arms measured (the check stopped at the first import, before its first census)",
+      "status": "FAIL",
+      "status_reason": "BLOCKING, surprise row MDPF_DEMQUE-D1-W56-S1: the census cannot import its symbol resolver (p1_coverage.request_symbols) in this worktree; the order's refusal route applies (no importable symbol resolver: stop with a BLOCKING row; no copy, no invented source). The sparse cone was not widened and no other checkout was put on sys.path.",
+      "expect": "INACTIVE-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check runs two censuses into two files and compares them byte for byte; not reached",
+      "observed": "not measured: AC2 did not run past the import, so no names file was written twice",
+      "status": "N/A-WITH-REASON"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real census run on the S3 inputs and the names file (DQ9-t64-AC2)",
+      "reason": "BLOCKED: the import chain needs data/assets/scripts/silver, which the worktree's sparse checkout excludes; the order's refusal route applies (surprise row MDPF_DEMQUE-D1-W56-S1). Not repaired: widening the cone would rebuild the tree outside this order's grant."
+    },
+    {
+      "item": "the TO status flip to complete",
+      "reason": "AC2 is FAIL; a valid instance is not a met order, so the order stays pending for the issuer"
+    },
+    {
+      "item": "any vendor call, S3 write, ledger, queue, pacer write, deploy, timer, or write into org/missions/.../requests/",
+      "reason": "order BOUNDS: none made; the new code has no write path to any of them"
+    },
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: do not merge box/dell1 (blocked by a foreign row); the issuer unions at the drain"
+    },
+    {
+      "item": "the client account-id hash check on commit 00a801ad33",
+      "reason": "safe-commit printed WARN: the hashed account-id list is ABSENT on this box, so the commit was not checked by it. The three committed files carry no account key or account number: the census prints counts and CUSIPs only, and the surprise row names no account"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W56-S1: the worktree's sparse checkout omits data/assets/scripts/silver/ and data/etfs/ (both tracked at HEAD), so the census cannot import p1_coverage (commonwealth_signs) and the real AC2 run fails at import; BLOCKING, not repaired"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~56/MDPF_DEMQUE.TO-DQ-t64.inactive-only-yahoo-set.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of inactive_set.py, test_demque_inactive_set.py and the investigation file (commit 00a801ad33)",
+      "result": "commit-gate All checks passed; surprise-row-gate OK (1 new row of 151 checked); to-pipeline-gate OK; missions-tree-check OK (0 violations); msg-verify MATCH; WARN client-data-check: hashed account-id list ABSENT, commit not checked for account ids"
+    },
+    {
+      "tool": "python -m ruff check --select F,E9 --target-version py39",
+      "invocation": "lint of inactive_set.py and test_demque_inactive_set.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "compile of the two new Python files",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque",
+      "invocation": "the whole demque folder, run once from the worktree root (timeout 120)",
+      "result": "rc=2, INTERRUPTED at collection: 16 errors in 3.03s (first-error lines: ModuleNotFoundError commonwealth_signs (6), data.etfs (9); FileNotFoundError in test_demque_land.py (1)); no test ran, so no folder pass count exists for this worktree"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_tests.py",
+      "invocation": "the AC1 check, timeout 120",
+      "result": "INACTIVE-OK (rc=0)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t64_real.py",
+      "invocation": "the AC2 check, timeout 260",
+      "result": "INACTIVE-REAL-BAD census rc=1, ModuleNotFoundError: No module named 'commonwealth_signs' (rc=1)"
+    }
+  ]
+}
