@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-r-2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ff1e47f079"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "922426e095",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-r-2.publisher-latest-json-read-grant.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~30",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/mdpf_egress_publisher.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a305d36bd9",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit a305d36bd9 on branch wk-MDPF_CANON-30 (LOCAL). git show --stat: 1 file, 24 insertions, 0 deletions. Adds aws_iam_role_policy.mdpf_egress_publisher_live_serve_read (s3:GetObject on platinum/mdpf/*) and module mdpf_publisher_live_serve_read_policy_name. Terraform source only; nothing applied; a CloudOps seat applies after the drain."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the added policy is PARSED from the real Terraform source: one resource attached to the publisher role, one statement, Allow, s3:GetObject only, exactly the resource arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*, no Condition, NotAction, NotResource or Principal; the name is the builder module's output; no count or for_each; ASCII added only. Expect: CN-R-2 STATEMENT: 5 of 5 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_2.py\" statement; echo \"exit=$?\"",
+      "output_evidence": "  S1  PASS the policy resource aws_iam_role_policy.mdpf_egress_publisher_live_serve_read exists, is attached to aws_iam_role.mdpf_egress_publisher, and holds exactly ONE statement (found True, role aws_iam_role.mdpf_egress_publisher.id, 1 statement(s))\n  S2  PASS the statement is Allow, s3:GetObject ONLY, on exactly arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*, with no Condition, NotAction, NotResource or Principal (got Effect Allow, Action ['s3:GetObject'], Resource arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*)\n  S3  PASS the policy name comes from the opal_name builder module mdpf_publisher_live_serve_read_policy_name (system mdpf, function publisher-live-serve-read, kind policy) and is never a typed literal (name = module.mdpf_publisher_live_serve_read_policy_name.name)\n  S4  PASS the resource carries only name, role and policy: not gated by count or for_each, so the plan adds it unconditionally (attributes ['name', 'policy', 'role'])\n  S5  PASS the added blocks are ASCII only and the file still carries exactly its 3 pre-existing non-ASCII characters (found 3 in the file, 635 bytes added)\nCN-R-2 STATEMENT: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms (S1-S5)",
+      "status": "PASS",
+      "expect": "CN-R-2 STATEMENT: 5 of 5 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: nothing else moved: the file minus the two added blocks equals the base (comments and blank lines ignored), the block inventory is the base plus the two, the 22 neighbouring files are byte-equal, and terraform fmt -check parses the file. Expect: CN-R-2 REST: 4 of 4 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_2.py\" rest; echo \"exit=$?\"",
+      "output_evidence": "  R1  PASS the file minus its two added blocks (comments and blank lines ignored) equals the base: sha256 dd0ed236596c (want dd0ed236596c...); a changed or removed existing line fails\n  R2  PASS the block inventory is the base plus at most the two added (unexpected [], missing [])\n  R3  PASS the 22 neighbouring files (every other file of infra/aws/terraform/opal-assets and of modules/opal_name, the generated CHANGELOG.json aside) are byte-equal to the base: digest 1fc14ba918c1 (want 1fc14ba918c1...)\n  F   PASS terraform fmt -check on the file: rc 0 (the real HCL parser reads it; a formatting or syntax defect fails)\nCN-R-2 REST: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms (R1, R2, R3, F)",
+      "status": "PASS",
+      "expect": "CN-R-2 REST: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the role's policy documents are EVALUATED with S3 object-level matching: GetObject on latest.json and on eight served keys is allowed; it stays DENIED on json/mdpf, platinum/etfs, the staging prefix and two other buckets; the existing Gold and Tax-control reads still hold; the write set is unchanged. Expect: CN-R-2 EVAL: 5 of 5 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_2.py\" eval; echo \"exit=$?\"",
+      "output_evidence": "  E1  PASS the role may s3:GetObject the pointer arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/_manifests/latest.json (the publisher's prior-rows read)\n  E2  PASS the role may s3:GetObject every served key it re-hashes in the unchanged branch (8 of 8 probed: category-views and aggregate-aua-timeseries of four scopes)\n  E3  PASS NEGATIVE CONTROL: GetObject stays DENIED where it must be (5 of 5: json/mdpf, platinum/etfs, platinum/_staging/mdpf, opal-data-mdpf, opal-data-bd)\n  E4  PASS CONTROL: the existing reads still hold (the gold read True, the Tax control read True)\n  E5  PASS CONTROL: the write set is unchanged (PutObject on platinum/mdpf and staging allowed True; PutObject on json/mdpf and the gold tree denied True; DeleteObject denied True)\nCN-R-2 EVAL: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms (E1-E5); E2 8 of 8 served keys; E3 5 of 5 denied keys",
+      "status": "PASS",
+      "expect": "CN-R-2 EVAL: 5 of 5 arms"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for CN-r-2; the issuer's selftest is not one of the order's invocations and is not run here.",
+      "expected": "N/A: the order names no mutant",
+      "observed": "No mutant arm run. The three criteria AC1-AC3 are read against the real Terraform source by the issuer check; no planted defect was introduced by this worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each issuer check arm (statement, rest, eval) run twice from the worktree root, stdout captured to .scratch/det_<arm>_1.txt and .scratch/det_<arm>_2.txt and compared with cmp.",
+      "observed": "IDENTICAL: statement 6 lines, rest 5 lines, eval 6 lines; each run rc=0; cmp identical for all three arms.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan, validate, apply, safe-apply; any aws, s3, lambda call or invoke",
+      "reason": "Bounded out by the order (bounds 1). The only terraform command run is terraform fmt -check on the one file. The criteria make no network call."
+    },
+    {
+      "item": "Status flip of the order to complete",
+      "reason": "Withheld. The <status> element is not in the worker face (lines 1-105); see surprise row MDPF_CANON-D1-W30-S2. The order is not edited beyond the worker face and no record face was read."
+    },
+    {
+      "item": "Edit of the other 22 files of infra/aws/terraform/opal-assets and of infra/aws/terraform/modules/opal_name",
+      "reason": "Outside the order's paths; criterion AC2 R3 confirms all 22 byte-equal to base."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W30-S1: CN-r-2 cannot start because infra/aws was absent from the sparse worktree; the issuer widened the sparse set and the row stays on file as filed, no new row for it.",
+    "MDPF_CANON-D1-W30-S2: the order names a <status> flip to complete, but the worker face (lines 1-105) carries no <status> element to flip; the flip is withheld."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~30/MDPF_CANON.TO-CN-r-2.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r10_cn_r_2.py (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_2.py statement|rest|eval",
+      "result": "statement 5 of 5 arms exit=0; rest 4 of 4 arms exit=0; eval 5 of 5 arms exit=0"
+    },
+    {
+      "tool": "terraform fmt -check",
+      "invocation": "terraform fmt -check infra/aws/terraform/opal-assets/mdpf_egress_publisher.tf",
+      "result": "exit=0, no file name printed"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~30 <0.9.0_WK_MDPF_CANON~30@opal.agent>\" -F .scratch/msg_product_cn_r_2.txt -- infra/aws/terraform/opal-assets/mdpf_egress_publisher.tf",
+      "result": "rc=0: committed a305d36bd9, 1 file, 24 insertions(+)"
+    }
+  ]
+}
