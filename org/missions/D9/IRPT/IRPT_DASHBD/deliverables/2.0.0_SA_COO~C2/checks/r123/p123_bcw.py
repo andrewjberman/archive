@@ -93,8 +93,7 @@ def ac_1_1(root):
     need((root / SRC_DIR / "lambda_function.py").is_file(), "lambda_function.py absent in source_dir")
     need(e["tf_file"] == TF_ROOT + "/lambda.tf" and e["iam_role"] == "irpt-cot-account-dim-role" and e["pipeline"] == "investor-reporting",
          "tf_file, iam_role or pipeline wrong")
-    need(e["artifact_s3_key"] == "investor-reporting/%s.zip" % key, "artifact_s3_key wrong")
-    need(not any(k in e for k in ("artifact_sha256", "last_deployed_commit", "last_deployed_at", "deployed_code_sha256")), "a deploy field is present: nothing is built")
+    need(not any(k in e for k in ("artifact_s3_key", "artifact_sha256", "last_deployed_commit", "last_deployed_at", "deployed_code_sha256")), "a deploy field or artifact_s3_key is present: nothing is built, and the key stays out until the CVO rules (CTO msg 8187)")
 
 
 def pytest(root, args, env_extra=None):
