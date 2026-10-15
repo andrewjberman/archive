@@ -1,0 +1,38 @@
+{
+  "base_commit": "941abbfa1d367a68c7b55092ec6acc8c93396094",
+  "changed_paths": [
+    "infra/aws/lambda/investor-reporting/export/entry.py",
+    "infra/aws/lambda/investor-reporting/export/retained_export.py",
+    "infra/aws/lambda/investor-reporting/export/submit_async.py",
+    "infra/aws/lambda/investor-reporting/export/submit_service.py",
+    "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_submit_handler.py"
+  ],
+  "negative_tests": [
+    "submit_filled_report_through_handler_queues",
+    "forged_pin_ignored_through_handler",
+    "uncovered_account_refused_through_handler",
+    "no_filled_reader_refused_unavailable"
+  ],
+  "tests_total": 8,
+  "tests_passed": 8,
+  "mutant_tests_failed": 7,
+  "notes": [
+    "Seam: submit_async.accept and the async leg take ports[filled_reader], called reader(client_id, version_id=None) and answering key, version_id and body. No composition installs it in this cell (IB-pr-567 installs it). With it absent a PATH C submit refuses FilledReportUnavailable, public DEPENDENCY_UNAVAILABLE, before any write.",
+    "Blocks: FILLED-REPORT-F in submit_async.py (accept early return to _accept_filled, _accept_filled, run passes pinned_filled), in submit_service.py (serve_submit keyword pinned_filled and its dispatch, _serve_filled), in retained_export.py (filled_reader_or_refuse, filled_covered_accounts, filled_as_of, filled_accept_read, filled_leg_read, filled_grant, filled_print_query) and three named refusals in entry.py reasons. Seven blocks sit in the three mutant files.",
+    "Grant: filled_grant is new in retained_export.py because platinum_grant reads performance_source and pins one account. accountSetId and reportId are FILLED-<client>, jobId is the export revision, account_ids are the covered accounts of the document.",
+    "Status business_date: the document household.as_of when it is a YYYY-MM-DD string, else null. The document is read once more through the pinned VersionId at accept.",
+    "Async leg: serves only the frozen item. Its VersionId is read back through filled_render_read (key, sha256 and size must be the frozen ones), coverage is re-judged on those bytes, and a body naming another client or a second source is refused. The current object is never read by the leg.",
+    "PATH A and PATH B code paths are unchanged outside the marked blocks. The PATH B control test passes with the blocks removed. The whole export tests directory ran 368 passed; the criteria set ran 53 passed.",
+    "Test file: 8 tests on synthetic ids and bytes, driving entry.submit_export and entry.lambda_handler with in-memory S3, invoker and reader doubles; boto3.client refuses any service other than s3.",
+    "Removal run (scratch script outside the repository, blocks removed in memory): 7 blocks removed, 7 failed and 1 passed (the PATH B control), no collection or import errors. Six of the seven failures are ExportSubmitRefused and one is PlatinumSeriesUnavailable, each raised out of the test body from the retained or PATH B path, not an assert statement.",
+    "Commit-time client-data check reads WARN on dell2 (expected by ruling).",
+    "Not done: no AWS call, sign-in, invocation, vendor request, render, deploy or portal print page was touched. The render cell's reading of the print kind filled-report and of the grant convention is unverified (channel rows D2-W410-S2 and S3).",
+    "The order status is not flipped: the worker face forbids editing the order file, which is outside the paths grant. Channel rows D2-W410-S1 to S3 were appended to INVESTIGATION_v1.md; rows_written counts data rows and is 0."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
