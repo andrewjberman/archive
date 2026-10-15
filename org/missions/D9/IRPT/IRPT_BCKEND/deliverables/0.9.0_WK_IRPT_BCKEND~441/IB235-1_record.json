@@ -1,0 +1,34 @@
+{
+  "base_commit": "e2700915d2195f8396d540796bc92a8a64c0c527",
+  "changed_paths": [
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_smartx_evidence.py"
+  ],
+  "negative_tests": [
+    "account_absent_one_day_is_not_exempt_even_with_a_smartx_row",
+    "account_with_positions_on_either_day_is_not_exempt_with_a_smartx_row",
+    "a_failed_or_empty_smartx_read_changes_no_decision_and_adds_no_evidence",
+    "the_floor_and_the_two_day_threshold_are_unchanged",
+    "smartx_present_account_absent_two_days_is_exempt_with_evidence",
+    "account_not_in_smartx_is_exempt_without_an_evidence_key",
+    "a_firm_with_no_smartx_reader_has_a_byte_unchanged_manifest",
+    "the_evidence_id_form_matches_the_custody_id_form"
+  ],
+  "tests_total": 77,
+  "tests_passed": 77,
+  "mutant_tests_failed": 6,
+  "notes": [
+    "SmartX read: holdings_snapshot._absent_smartx_map_ids reads the 49F account map partition at the snapshot overlay_as_of clock through the same VersionedInputs, pads account_number with _pad10 and keys it by opaque_id on the 49F long id. Three ABSENT-AT-SOURCE-D spans: the helper pair, the provider hook, the listing hook.",
+    "Not read or not run: no AWS call, no served prefix, nothing published or signed. The provider receives no cutoff, so the partition is the overlay_as_of that the build's _latest_date_partition pick returned, carried on the snapshot clocks, not a re-pick. No hashed account-id list was present at commit (WARN); the tests use synthetic ids only.",
+    "Sparse directories added locally, never committed: infra/aws/lambda/investor-reporting, data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared, docs/contracts/investor-reporting, lib, infra/logic/registry and org/standards. data/firm_registry.json was already present.",
+    "First absent day in the fixture: 2026-10-08, the prior trading day, with since_bound_reached false. The regress set is the five existing tests the cell names; run beside the nine new tests the result is 77 passed.",
+    "Difference control run in memory with the three D spans removed: 6 of the 9 new tests fail (assertion or missing name); the 3 negatives (one day absent, not in SmartX, failed or empty read) pass both ways, as designed.",
+    "negative_tests lists all eight named tests because the check requires all eight; the record template in the order names four of them. Filed as row IRPT_BCKEND-D2-W441-S3."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
