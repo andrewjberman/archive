@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IB206-1  IB-pr-565  the chain read, the per-feed spans and the T-1 completeness read (no date token on the chain; backfill once with the same pull code plus a date)
-    AC1  the chain's three pull steps against the manual_api scripts (invoked or byte-identical, hashes compared; the repo script's sha256 recomputed), the control owed when neither holds, and the silver aggregator's source status (row W404-S5)
+    AC1  the chain's three pull steps against the manual_api scripts (invoked or byte-identical, hashes compared; the repo script's sha256 recomputed), the control owed when a chain copy is not byte-identical to the repo script, and the silver aggregator's source status (row W404-S5)
     AC2  the denominator recomputed per feed span against lib/trading_calendar.py: trading days in the span, flat present, parquet only and missing partition the span; the missing days listed
     AC3  the T-1 completeness read from the last 20 trading days' pulls per feed (landing time, the as-of field and its day, recomputed against the calendar), the data-ready field, the earliest measured-complete time; the trigger does not move now; notes, counters 0
 """
@@ -80,9 +80,9 @@ def c1():
         if not isinstance(s.get("invokes_manual_api"), bool):
             fail("%s: invokes_manual_api must be a boolean" % feed)
         text(s.get("evidence"), 40, "%s evidence (the dispatch line number and the identifier on it)" % feed)
-        need = need or (not s["invokes_manual_api"] and not s["identical"])
+        need = need or not s["identical"]
     if ci.get("positive_control_needed") is not need:
-        fail("positive_control_needed must be %s (true when a step neither invokes the manual_api script nor runs a byte-identical copy)" % need)
+        fail("positive_control_needed must be %s (true when some step runs a copy that is not byte-identical to the repo script, whether or not the dispatch script invokes the script by name)" % need)
     text(ci.get("positive_control_plan"), 30, "positive_control_plan ('not needed: ..' when no step needs it)")
     text(ci.get("cli_retirement_scope"), 40, "cli_retirement_scope (only a bronze write the chain does not reach is retired)")
     sa = r.get("silver_aggregator")

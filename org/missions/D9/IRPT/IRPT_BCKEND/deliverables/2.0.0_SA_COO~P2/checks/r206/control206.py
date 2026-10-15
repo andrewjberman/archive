@@ -104,6 +104,8 @@ MUTS = [
     m("AC1", "control_flag_wrong", lambda r: (set_path(r, ["chain_invocation", "steps", "performance", "invokes_manual_api"], False),
                                               set_path(r, ["chain_invocation", "steps", "performance", "chain_copy_sha256"], "d" * 64),
                                               set_path(r, ["chain_invocation", "steps", "performance", "identical"], False))),
+    m("AC1", "invoked_but_not_identical_no_control", lambda r: (set_path(r, ["chain_invocation", "steps", "performance", "chain_copy_sha256"], "d" * 64),
+                                                                set_path(r, ["chain_invocation", "steps", "performance", "identical"], False))),
     m("AC1", "retirement_scope_short", lambda r: set_path(r, ["chain_invocation", "cli_retirement_scope"], "short")),
     m("AC1", "silver_in_repo_without_path", lambda r: set_path(r, ["silver_aggregator", "source_in_repo"], True)),
     m("AC1", "silver_digest_bad", lambda r: set_path(r, ["silver_aggregator", "code_sha256_b64"], "short")),
