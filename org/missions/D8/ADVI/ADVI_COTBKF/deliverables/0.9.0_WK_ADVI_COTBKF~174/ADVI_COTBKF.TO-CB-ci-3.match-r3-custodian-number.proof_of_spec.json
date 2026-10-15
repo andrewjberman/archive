@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ci-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-3.match-r3-custodian-number.md",
+    "group": "OTHER",
+    "vintage_commit": "73e663123e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~174",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round87.md",
+    "vintage_commit": "73e663123e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-3.match-r3-custodian-number.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_match_r3.py",
+      "kind": "script",
+      "commit_or_etag": "d8dcff515f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "R3 pure functions (custodian_frame, r3_links, attach_crosswalk, summarize) and main(): reads the Black Diamond silver fact_holdings (AccountID and Account Number, three most recent partitions, AMENDMENT 1) and the served crosswalk, read-only; writes R3_LINKS.csv to --out only; run gives 88 deterministic, 1 ambiguous, 86 new, 0 active, control 2 of 2; no S3 write, no served-crosswalk edit"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_match_r3.py",
+      "kind": "test",
+      "commit_or_etag": "c79d63616c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 stub tests (made-up ids A1, B1, B2, C7, C9, 0012ab, 12AB): equal number links; a number held by two account_ids is AMBIGUOUS and not linked; case and leading zeros normalize equal; python -m pytest: 3 passed"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~174/R3_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "8885540841",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "counts only: links_deterministic 88, links_ambiguous 1, new_links 86, new_links_active 0, new_links_among_219 0, control 2 of 2 agree, reachable 219; sources_read lists every S3 prefix with listed and read counts"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~174/R3_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "8885540841",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same counts in a table, with the research comparison (87 new in the research = 86 new plus 1 ambiguous)"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c79d63616c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one appended row ADVI_COTBKF-D1-W174-S1 (added lines only, 27 added, 0 deleted); the row is unedited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB87ci3-AC1",
+      "criterion_verbatim": "`CB87ci3-AC1` -- the R3 yield, its control and its denominator are printed from the record, and the reachable denominator reads 219.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~174/R3_RECORD.json',encoding='utf-8'));c=d['control'];print('R3 links=%d ambiguous=%d new=%d new_active=%d among_219=%d control_agree=%d/%d disagree=%d reachable=%d'%(d['links_deterministic'],d['links_ambiguous'],d['new_links'],d['new_links_active'],d['new_links_among_219'],c['agree'],c['already_matched'],c['disagree'],d['denominators']['reachable']))\"",
+      "output_evidence": "R3 links=88 ambiguous=1 new=86 new_active=0 among_219=0 control_agree=2/2 disagree=0 reachable=219 (timeout 120, rc 0)",
+      "denominator": "1,533 crosswalk accounts; 88 deterministic links; 2 of 2 already-matched agree; 387 unmatched active less 168 new clients = 219 reachable; 94 fact_holdings partitions listed, 3 read",
+      "status": "PASS",
+      "expect": "reachable=219"
+    },
+    {
+      "criterion_id": "CB87ci3-AC2",
+      "criterion_verbatim": "`CB87ci3-AC2` -- the outside links file exists with the recorded checksum and row count.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~174/R3_RECORD.json',encoding='utf-8'));f=d['file'];b=open(f['path'],'rb').read();n=sum(1 for _ in open(f['path'],encoding='utf-8'))-1;print('R3-FILE sha256_match=%s rows_match=%s outside_repo=%s'%(hashlib.sha256(b).hexdigest()==f['sha256'],n==f['rows'],not f['path'].startswith('org/')))\"",
+      "output_evidence": "R3-FILE sha256_match=True rows_match=True outside_repo=True (timeout 120, rc 0)",
+      "denominator": "1 of 1 outside links file (C:/dev/_cotbkf_match_20261015/R3_LINKS.csv: 90 data rows, 88 DETERMINISTIC and 2 AMBIGUOUS)",
+      "status": "PASS",
+      "expect": "R3-FILE sha256_match=True rows_match=True outside_repo=True"
+    },
+    {
+      "criterion_id": "CB87ci3-AC3",
+      "criterion_verbatim": "`CB87ci3-AC3` -- the equality, ambiguity and normalization rules hold on stubs.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_match_r3.py -q",
+      "output_evidence": "3 passed in 0.62s (timeout 120, rc 0)",
+      "denominator": "3 of 3 stub tests passed (equal number links; two-id custodian AMBIGUOUS and not linked; case and leading-zero normalization)",
+      "status": "PASS",
+      "expect": "3 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the three stub tests carry their own negative assertion (the two-id case asserts zero DETERMINISTIC rows)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the module run twice on the amended reads, before and after the registry-scope fix (commits 8885540841 and d8dcff515f): each summary line and the links file sha256 compared",
+      "observed": "identical in both runs: R3 links=88 ambiguous=1 new=86 new_active=0 among_219=0 control 2/2 reachable=219; links file sha256 aced77647ba8df05ff4f715cc658db9a3f164b5ae3980d4560225fc0203ac8cd",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Transactions and positions silver",
+      "reason": "listed only (14 and 1 objects), not read: the Commonwealth universe is the served crosswalk's 1,533 accounts, which is the union the crosswalk module builds from them"
+    },
+    {
+      "item": "The accounts dimension (current_locations accounts key)",
+      "reason": "read as schema only in the first run (1,005 rows, no custodian column); not needed by R3, which links on fact_holdings"
+    },
+    {
+      "item": "The CRM prefix and the CRM zip under any name",
+      "reason": "not granted and not read (open call d3cc is Andrew's)"
+    },
+    {
+      "item": "The post-commit account-id scan (test_cotbkf_no_account_ids.py) as a scan result",
+      "reason": "fails closed on this device: its account set is absent (AssertionError 'account set absent'); the test reports no DENOMINATOR here; the issuer runs a count-only substitute at the drain"
+    },
+    {
+      "item": "Wiring R3 into the served crosswalk",
+      "reason": "not in this order; a later act under a never-widen pair; no served file was edited"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W174-S1: the custodian column 'Account Number' is absent from the holdings parts that current_locations() names (0 of 137) and sits in the Black Diamond silver fact_holdings table; a cut-side defect ruled by 2.0.0_SA_COO~C1 as AMENDMENT 1, which grants that read; the row is unedited; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~174/ADVI_COTBKF.TO-CB-ci-3.match-r3-custodian-number.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commonwealth_match_r3.py",
+      "invocation": "python data/assets/scripts/silver/commonwealth_match_r3.py --out C:/dev/_cotbkf_match_20261015",
+      "result": "rc 0: HOLDINGS listed=94 partitions=94 chosen=date=2026-10-12,date=2026-10-13,date=2026-10-14 parquet_read=3 parts_with_custodian_column=3; CROSSWALK rows=1533; R3 links=88 ambiguous=1 new=86 new_active=0 among_219=0 control_agree=2/2 disagree=0 reachable=219"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_match_r3.py -q",
+      "result": "3 passed in 0.62s"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> CB87ci3-AC1,CB87ci3-AC2,CB87ci3-AC3",
+      "result": "rc 0, VALID (run before this instance's commit)"
+    }
+  ]
+}

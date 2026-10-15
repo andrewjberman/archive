@@ -1,0 +1,46 @@
+IB234-1 criteria output -- 0.9.0_WK_IRPT_BCKEND~438 on TO IRPT_BCKEND.TO-IB-pr-603 (cell IB-pr-603)
+base_commit: 48a8e266744cc2b28f5896bd3789b9322b245ebb (git rev-parse HEAD at first act, worktree wk-IRPT_BCKEND-438)
+run from the worktree root, each criterion under timeout 120, verbatim output and exit code
+
+STATUS: STOPPED BEFORE THE BUILD. Surprise row IRPT_BCKEND-D2-W438-S1 (BLOCKING): no registry row carries the table
+segment scope_account_returns, and the order requires every table, scope, bucket and prefix to come through a registry read.
+No change was made to infra/aws/terraform/inf-pipeline/iam.tf and no product commit was made.
+
+== IB234-1-AC1
+$ timeout 120 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r234/p234_cells.py" . IB234-1-AC1
+FAIL: infra/aws/terraform/inf-pipeline/iam.tf has no resource aws_iam_role_policy.inf_gold_layer_scope_feed
+IB234-1-AC1 FAIL
+rc=1
+
+== IB234-1-AC2
+$ timeout 120 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r234/p234_cells.py" . IB234-1-AC2
+FAIL: no org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~438/IB234-1_scope_feed_iam_hcl.json
+IB234-1-AC2 FAIL
+rc=1
+
+== IB234-1-AC3
+$ timeout 120 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r234/p234_cells.py" . IB234-1-AC3
+FAIL: no org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~438/IB234-1_scope_feed_iam_hcl.json
+IB234-1-AC3 FAIL
+rc=1
+
+== SUPPORTING PROBE (not a criterion; not committed as a diff)
+Question: would the commit-time naming gate refuse a hand-typed table segment held in a locals block?
+Probe diff, applied to HEAD iam.tf as a hunk after line 121 (kept in the worktree .scratch folder, gitignored):
+  +locals {
+  +  scope_feed_table = "scope_account_returns"
+  +}
+$ timeout 120 python .tools/naming-gate.py --diff .scratch/probe_table_literal.diff --enforce
+DENOMINATOR: 1 path(s) in this diff; declaration-tree domain = 1 MINUS EXCLUDED(org/, docs/, run-artifact dirs ^workflows/[^/]+/[^/]+/[0-9]{8}T[0-9]{6}Z-[0-9a-f]{7,40}/) 0 = 1 path(s) [of the excluded, 0 are run artifacts and 0 are org//docs/]
+COVERAGE: 0 path(s) in the declaration domain the gate could not see (extension outside its graded set and not .gitattributes); 1 seen
+NAMING PLACE-NOTICE placement step skipped: org/mcp/naming-place.enforce is absent (NAMING_PLACE_PREVIEW=1 runs it)
+NAMING-GATE: PASS 0 graded
+rc=0
+Reading: the gate grades no literal there, so the table-name ban rests on the order's rule and on AC1's resource-block scan, not on the gate.
+
+== SUPPORTING REGISTRY FACTS (read only)
+$ Grep infra/logic for scope_account_returns | account_returns | scope_account -> No files found
+$ timeout 120 python -c "import sys; sys.path.insert(0,'lib'); import opal_naming as on; ..."   (address() over both layers)
+s3://opal-data-assets/orion/inflection/bronze/scope_account_returns/date=2000-01-01/x
+s3://opal-data-assets/orion/inflection/silver/scope_account_returns/date=2000-01-01/x
+lookup('inflection') -> long inflection, bucket opal-data-inflection (the scope bucket; the FIRM bronze and silver home is opal-data-assets per tiers.json)

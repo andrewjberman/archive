@@ -1,0 +1,119 @@
+{
+  "script_path": "data/assets/scripts/silver/cotbkf_active_set_v2.py",
+  "script_blob": "edbddd5fe38712b1f0c3dc3f22389394c0729414",
+  "run_command": "python data/assets/scripts/silver/cotbkf_active_set_v2.py --out C:/dev/_cotbkf_rebuild_20261015",
+  "run_commit": "b65e3ecdbd",
+  "files": [
+    {
+      "name": "ACTIVE_COTTONWOOD_SET_V2.csv",
+      "path": "C:/dev/_cotbkf_rebuild_20261015/ACTIVE_COTTONWOOD_SET_V2.csv",
+      "rows": 41825,
+      "sha256": "d5999835cfb3d6bc344444c348e51a176b18b45d9cfea1664eba2fe172b1ff67",
+      "pinned_sha256": "5cef7ab0c9e10fe299cb757d4dba31792d069bad35f7250defa76e18773046ae",
+      "equal": false,
+      "pinned_rows": 41826,
+      "bytes": 3358650
+    },
+    {
+      "name": "REVERSE_MATCH_V3.csv",
+      "path": "C:/dev/_cotbkf_rebuild_20261015/REVERSE_MATCH_V3.csv",
+      "rows": 860,
+      "sha256": "0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f",
+      "pinned_sha256": "0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f",
+      "equal": true,
+      "pinned_rows": 860,
+      "bytes": 37843
+    }
+  ],
+  "out_dir": "C:/dev/_cotbkf_rebuild_20261015",
+  "repairs": [
+    "repair 1, commit 8cd4c0a81f: the Transaction_Type was stripped before lookup, refusing 164 rows of the trailing-space key csltfee; the type is read as stored",
+    "repair 2, commit 9f617f4fd9: the crosswalk candidate id is read before its parenthesised description; near_match 0 to 13 and AMBIGUOUS 0 to 27 on the counts",
+    "repair 3, commit 68ffc04bc9: a pair held on both sides emits one joined row and no side window; the window rows went 62,754 to 41,808",
+    "repair 4, commit 501c066bdb (amendment 1, target one): a row with no CUSIP is keyed by (ticker, name) and carries the key ticker; the not_established rows matched 551 of 834 under the name key and 831 of 834 under the (ticker, name) key on the dump",
+    "repair 5, commit 0b88fd292f (amendment 1, target two): a joined row ends where the Black Diamond side ends; the joined rows matched 6,860 of 6,886 under the union and 6,886 of 6,886 under the Black Diamond end on the dump",
+    "repair 6, commit b65e3ecdbd (amendment 1, target two, ticker): a null Symbol reads as the text None and a window takes the first symbol naming a security; the stored Symbol column has no nulls (measured), so this repair changed no pinned None ticker and the cause of the pinned None tickers is not established"
+  ],
+  "diff_summary": {
+    "ACTIVE_COTTONWOOD_SET_V2.csv": {
+      "rows_rebuilt": 41825,
+      "rows_pinned": 41826,
+      "rows_multiset_equal": 41793,
+      "rows_only_in_rebuilt": 32,
+      "rows_only_in_pinned": 33,
+      "only_in_pinned_by_basis": {
+        "black_diamond_holdings": 6,
+        "commonwealth_transactions": 23,
+        "not_established": 3,
+        "joined": 1
+      },
+      "only_in_rebuilt_by_basis": {
+        "not_established": 4,
+        "commonwealth_transactions": 21,
+        "joined": 3,
+        "black_diamond_holdings": 4
+      },
+      "paired_rows_by_key_order": 25,
+      "paired_rows_columns_differing": {
+        "ticker": 25
+      },
+      "pinned_ticker_text_None_rows": 737,
+      "rebuilt_ticker_text_None_rows": 714,
+      "order_note": "row order depends on PYTHONHASHSEED: three committed-script runs gave three window-file sha256 values; the multiset comparison above does not depend on order"
+    },
+    "REVERSE_MATCH_V3.csv": {
+      "rows_rebuilt": 860,
+      "rows_pinned": 860,
+      "sha256_equal": true
+    }
+  },
+  "cap": "three repairs after the first report, then amendment 1 (three repairs): six repairs in total; the cap is reached at repair 6",
+  "sources_read": [
+    {
+      "prefix": "s3://opal-data-cot/silver/holdings/",
+      "listed_objects": 90,
+      "dated_on_or_before_snapshot": 88,
+      "read": 88,
+      "note": "read to 2026-10-12; 2026-10-13 and 2026-10-14 listed, not read"
+    },
+    {
+      "prefix": "s3://opal-data-cot/gold/canonical/holdings/",
+      "listed_objects": 137,
+      "dated_on_or_before_snapshot": 135,
+      "read": 135,
+      "note": "read to 2026-10-12; 2026-10-13 and 2026-10-14 listed, not read"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/transactions/date=2026-06-23/",
+      "listed_objects": 14,
+      "read": 14,
+      "rows": 1416497,
+      "note": "trade_year partitions 2013..2026, part-00000.parquet each"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.csv",
+      "listed_objects": 2,
+      "read": 1,
+      "rows": 1533,
+      "note": "the prefix also lists crosswalk.parquet, not read"
+    },
+    {
+      "prefix": "s3://opal-data-assets/commonwealth/cottonwood/silver/account_links/date=2026-06-23/account_links.csv",
+      "listed_objects": null,
+      "read": 1,
+      "rows": 1450,
+      "note": "get-object of the csv; not listed by the build"
+    }
+  ],
+  "not_established": [
+    "the window file does not reproduce its pin: after six repairs 41,793 rows are equal, 33 are pinned-only and 32 rebuilt-only, and 25 paired rows differ on ticker only",
+    "the window row order is not deterministic: the output depends on PYTHONHASHSEED because the final sort has no tie-break; the pinned file orders its 61 tied groups by held_to and by window_basis (61 of 61 each); this fix is measured on the pinned file and not applied",
+    "the cause of the 17 pinned Commonwealth tickers that read the text None is not established: the stored Symbol column has no nulls (30,734 empty strings and 1,385,763 values, counts only)",
+    "the cause of the 4 Commonwealth ticker values that differ (for example punctuation in a symbol) is not established",
+    "the 2 extra joined pairs and the 2 window differences are not established to a rule",
+    "the round-85 script is lost; the rules are from the record, not from the code",
+    "the snapshot is pinned at 2026-10-12; later keys (2026-10-13, 2026-10-14) are listed and not read",
+    "the reverse match uses crosswalk_matched joins only; account_links joins are 0 in the set and are not exercised",
+    "diagnostic reads outside the script (listings, schema reads, a type census, a symbol storage census and candidate-token membership counts) are reads of the same prefixes; they are reported in the worker report, not in this record"
+  ]
+}

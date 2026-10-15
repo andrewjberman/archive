@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t65",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t65.inactive-symbols-from-transactions.md",
+    "group": "OTHER",
+    "vintage_commit": "270e1c6175"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "270e1c6175",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t65.inactive-symbols-from-transactions.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~57",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/inactive_set.py",
+      "kind": "script",
+      "commit_or_etag": "09d0d04621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: read only, no vendor call, no S3 write, no ledger, queue or pacer write, no timer, no deploy. The module adds tx_symbols, merge_symbols and load_tx_symbol_frame (a READ of the transactions' Cusip and Symbol columns) and a trailing tx_only argument to census; it edits no other script. The census run on the real inputs (AC2) is the evidence of the read path.",
+      "artifact_covered_by": [
+        "DQ9-t65-AC1",
+        "DQ9-t65-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_inactive_symbols.py",
+      "kind": "test",
+      "commit_or_etag": "09d0d04621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: stub frames, no network, no S3; the three named tests PASSED by name at commit 09d0d04621 (run from the worktree root C:/dev/wk-demque-57 under timeout 120, rc=0).",
+      "artifact_covered_by": [
+        "DQ9-t65-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "09d0d04621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row MDPF_DEMQUE-D1-W57-S1 (OBSERVATION) appended at the end of the fenced json array in the same commit 09d0d04621; no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t65-AC1",
+      "criterion_verbatim": "DQ9-t65-AC1 -- the three named tests: test_a_transaction_symbol_is_the_modal_non_blank_symbol_per_cusip_and_a_tie_takes_the_first_ascending; test_the_symbol_precedence_is_the_index_then_the_request_files_then_the_transactions; test_the_census_counts_the_names_whose_symbol_came_only_from_the_transactions (python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t65_tests.py, expect SYMBOLS-OK)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t65_tests.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-57 under timeout 120 (rc=0):\ntest_demque_inactive_symbols.py::test_a_transaction_symbol_is_the_modal_non_blank_symbol_per_cusip_and_a_tie_takes_the_first_ascending PASSED [ 33%]\ntest_demque_inactive_symbols.py::test_the_symbol_precedence_is_the_index_then_the_request_files_then_the_transactions PASSED [ 66%]\ntest_demque_inactive_symbols.py::test_the_census_counts_the_names_whose_symbol_came_only_from_the_transactions PASSED [100%]\n============================== 3 passed in 0.52s ==============================\nSYMBOLS-OK",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "SYMBOLS-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t65-AC2",
+      "criterion_verbatim": "DQ9-t65-AC2 -- on the REAL inputs (S3 and the V2 active set read only): every DQ-t-64 identity still holds, tx_symbol_only is above 0 and at most with_symbol, with_symbol is between 1,000 and inactive_only, the names file's non-null symbols number exactly with_symbol, no CUSIP of it is in V2, no account key, two runs are byte-identical (python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t65_real.py, expect SYMBOLS-REAL-OK)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t65_real.py",
+      "output_evidence": "run from the worktree root C:/dev/wk-demque-57 under timeout 260 (rc=0, two censuses):\ncensus {\"active_held\": 2929, \"active_stored\": 477, \"class_p1\": 32, \"class_p2\": 1448, \"class_p3\": 225, \"held_total\": 4634, \"inactive_only\": 1705, \"inactive_stored\": 10, \"inactive_unstored\": 1695, \"nights_at_cap\": 3, \"no_symbol\": 634, \"request_cap\": 380, \"requests_one_pass\": 1071, \"tx_symbol_only\": 1057, \"with_symbol\": 1071}\nSYMBOLS-REAL-OK",
+      "denominator": "census arms, all holding (the check's identities): held_total == active_held + inactive_only (4634 == 2929 + 1705); class_p1 + class_p2 + class_p3 == inactive_only (32 + 1448 + 225 == 1705); with_symbol + no_symbol == inactive_only (1071 + 634 == 1705); inactive_stored + inactive_unstored == inactive_only (10 + 1695 == 1705); requests_one_pass == with_symbol (1071); request_cap == 380; nights_at_cap == ceil(1071 / 380) == 3; 0 < tx_symbol_only (1057) <= with_symbol (1071); 1000 <= with_symbol (1071) <= inactive_only (1705). Names-file arms, all holding: entry count == inactive_only; sorted unique non-blank CUSIPs; exactly cusip, symbol, priority; non-null symbols == with_symbol; no CUSIP in the V2 active set; no key naming an account; two runs byte-identical. The check prints SYMBOLS-REAL-OK only when every arm holds (rc=0)",
+      "status": "PASS",
+      "expect": "SYMBOLS-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check runs two censuses into two names files and compares them byte for byte; it prints SYMBOLS-REAL-OK only when they match",
+      "observed": "SYMBOLS-REAL-OK includes the byte-identical arm across the two censuses of 2026-10-15",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the folder run: python -m pytest data/mdpf/scripts/demque (run once, then once more after the key change): 224 passed, 4 failed, rc=1",
+      "reason": "the four failures are test_demque_bbg_backfill.py x2 (FileNotFoundError on integrations/bloomberg, a sparse-cone omission) and test_demque_bbg_ledger_upload.py x2 (one FileNotFoundError on the same cone omission, one assertion mismatch); none imports inactive_set.py; recorded as MDPF_DEMQUE-D1-W56-S2 (OBSERVATION) by the prior worker and outside this order's grant. The DQ-t-64 file test_demque_inactive_set.py and the new test file pass (6 passed)."
+    },
+    {
+      "item": "the precedence of the symbol merge changes the chosen string where the stored index and a request file both carry a non-blank symbol and disagree (the index now wins; DQ-t-64 let the request file overwrite the index)",
+      "reason": "the order's build item 2 states the precedence (index, then request files, then transactions). The presence of a symbol is the union of the sources and is unchanged by the precedence, so with_symbol is unaffected; only the string of a disputed name may differ. Not measured here: the count of disputed names."
+    },
+    {
+      "item": "the census key tx_symbol_only is present only when tx_only is non-empty",
+      "reason": "build item 3 says the dict gains the key while the DQ-t-64 tests pass unedited; an always-present key fails the DQ-t-64 exact-dict assertion (test_demque_inactive_set.py:59). Recorded as MDPF_DEMQUE-D1-W57-S1 (OBSERVATION)."
+    },
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order BOUNDS: do not merge box/dell1 (blocked by a foreign row); the issuer unions at the drain"
+    },
+    {
+      "item": "the client account-id hash check on commit 09d0d04621",
+      "reason": "safe-commit printed WARN: the hashed account-id list is ABSENT on this box, so the commit was not checked by it. The committed files carry no account number and no key naming an account: the census prints counts and CUSIPs only, and the names file holds CUSIPs and symbols."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W57-S1: the order's build item 3 (the dict gains tx_symbol_only; the DQ-t-64 tests pass unedited) conflicts with the DQ-t-64 exact-dict assertion; the cell emits the key only when a transactions source is supplied; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~57/MDPF_DEMQUE.TO-DQ-t65.inactive-symbols-from-transactions.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of inactive_set.py, test_demque_inactive_symbols.py and the investigation file (commit 09d0d04621)",
+      "result": "commit-gate All checks passed; surprise-row-gate OK (1 new row of 153 checked); to-pipeline-gate OK; missions-tree-check OK (0 violations); msg-verify MATCH; WARN client-data-check: hashed account-id list ABSENT, commit not checked for account ids; WARN one-writer: the investigation file is the laptop's unsuffixed file written from dell1 (WARN until C-QUEUE)"
+    }
+  ]
+}
