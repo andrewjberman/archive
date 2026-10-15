@@ -17,9 +17,9 @@
     {
       "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
       "kind": "script",
-      "commit_or_etag": "4c9ad28697",
+      "commit_or_etag": "597e0537fa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "three ABSENT-AT-SOURCE-D spans, all added or changed inside spans: the SmartX reader raises or returns the unread category, the listing writes evidence unread and evidence_reason; HEAD with the spans stripped equals e2700915d2; nothing deployed, nothing run against a served prefix",
+      "deploy_evidence": "three ABSENT-AT-SOURCE-D spans, all added or changed inside spans: the SmartX reader returns the unread category on a failed, refused or missing map, the listing writes evidence unread and evidence_reason; the category covers a partition with no usable account number (a comment says so); HEAD with the spans stripped equals e2700915d2; nothing deployed, nothing run against a served prefix",
       "artifact_covered_by": [
         "IB238-1-AC1",
         "IB238-1-AC2"
@@ -37,11 +37,21 @@
       ]
     },
     {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "597e0537fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: one expected dict gains evidence unread and evidence_reason partition_missing_or_empty; no other assertion changed",
+      "artifact_covered_by": [
+        "IB238-1-AC1"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~443/IB238-1_record.json",
       "kind": "doc",
-      "commit_or_etag": "4c9ad28697",
+      "commit_or_etag": "597e0537fa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the record: base commit 6651c03188, the two changed paths, the ten named tests, counters at 0",
+      "deploy_evidence": "the record after AMENDMENT 1: base commit 6651c03188, the three changed paths (product, the new test file, the wiring test), the ten named tests, counters at 0",
       "artifact_covered_by": [
         "IB238-1-AC3"
       ]
@@ -49,9 +59,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~443/IB238-1_criteria_output.txt",
       "kind": "doc",
-      "commit_or_etag": "a78f48f76b",
+      "commit_or_etag": "184f068204",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the three criteria outputs and exit codes, run from the worktree root under timeout 120: AC1 FAIL (rc 1), AC2 PASS, AC3 PASS",
+      "deploy_evidence": "the three criteria outputs and exit codes, run from the worktree root under timeout 120 after commit 597e0537fa: AC1 PASS (79 of 79), AC2 PASS, AC3 PASS",
       "artifact_covered_by": [
         "IB238-1-AC1",
         "IB238-1-AC2",
@@ -72,14 +82,13 @@
   "acceptance": [
     {
       "criterion_id": "IB238-1-AC1",
-      "criterion_verbatim": "AC1 the new tests and the existing publish-gate, exemption, wiring, receipts and bypass tests pass (the order's criterion line: python p238_cells.py . IB238-1-AC1, expect IB238-1-AC1 PASS)",
+      "criterion_verbatim": "AC1 the new tests and the existing publish-gate, exemption, wiring, receipts and bypass tests pass (after AMENDMENT 1; the order's criterion line: python p238_cells.py . IB238-1-AC1, expect IB238-1-AC1 PASS)",
       "method": "command",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r238/p238_cells.py\" . IB238-1-AC1",
       "expect": "IB238-1-AC1 PASS",
-      "output_evidence": "FAILED data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_wiring.py::test_published_manifest_carries_absent_at_source_never_closed - AssertionError (1 failed, 78 passed in 7.72s); the check prints: FAIL: the tests do not all pass; IB238-1-AC1 FAIL; exit=1",
-      "denominator": "79 tests across the six AC1 files: 78 pass, 1 fails; the new file 11 of 11 pass",
-      "status": "FAIL",
-      "status_reason": "an existing test outside the replaced one fails because of the change: test_absent_at_source_wiring.py::test_published_manifest_carries_absent_at_source_never_closed asserts the base manifest entry (no evidence key) for a missing SmartX partition, which clause 1 of the order sets to unread. Refusal clause: STOP, row IRPT_BCKEND-D2-W443-S1 filed, nothing edited to satisfy the test."
+      "output_evidence": "OK: 79 passed; IB238-1-AC1 PASS; exit=0",
+      "denominator": "79 tests across the six AC1 files: 79 of 79 pass (the new file 11 of 11)",
+      "status": "PASS"
     },
     {
       "criterion_id": "IB238-1-AC2",
@@ -130,15 +139,15 @@
     }
   ],
   "surprises": [
-    "IRPT_BCKEND-D2-W443-S1: the order's missing-map arm (clause 1: an absent or empty SmartX partition sets unread) fails test_absent_at_source_wiring.py::test_published_manifest_carries_absent_at_source_never_closed, which asserts the base entry with no evidence key; the refusal clause applies and nothing was edited",
-    "IRPT_BCKEND-D2-W443-S2: a SmartX partition with rows but no usable account_number is classed partition_missing_or_empty; the order names no category for that case"
+    "IRPT_BCKEND-D2-W443-S1: the order's missing-map arm (clause 1: an absent or empty SmartX partition sets unread) fails test_absent_at_source_wiring.py::test_published_manifest_carries_absent_at_source_never_closed, which asserts the base entry with no evidence key. DISPOSITION (coordinator, relaying the CTO condition, AMENDMENT 1 of the order, committed at 3e70ac8405): the one expected dict gains evidence unread and evidence_reason partition_missing_or_empty; no other assertion changed; now 79 of 79 pass.",
+    "IRPT_BCKEND-D2-W443-S2: a SmartX partition with rows but no usable account_number is classed partition_missing_or_empty; the order names no category for that case. DISPOSITION (coordinator, accepted): keep the category; the code carries a comment on it."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~443/IB238-1_criteria_output.txt",
   "compiler_tools": [
     {
       "tool": "pytest (python -m pytest) and the check p238_cells.py",
       "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_smartx_evidence.py -q; python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r238/p238_cells.py\" . IB238-1-AC1 (and -AC2, -AC3)",
-      "result": "mutant run 9 failed, 2 passed, 0 errors; check AC1 FAIL (rc 1), AC2 PASS (rc 0), AC3 PASS (rc 0)"
+      "result": "mutant run 9 failed, 2 passed, 0 errors; check AC1 PASS (79 of 79), AC2 PASS (rc 0), AC3 PASS (rc 0)"
     }
   ]
 }
