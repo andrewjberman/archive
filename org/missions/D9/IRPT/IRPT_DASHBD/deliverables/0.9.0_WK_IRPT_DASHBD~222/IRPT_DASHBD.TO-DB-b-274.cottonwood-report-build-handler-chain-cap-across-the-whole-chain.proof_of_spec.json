@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-274",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "64ae091211",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-274.cottonwood-report-build-handler-chain-cap-across-the-whole-chain.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-274.cottonwood-report-build-handler-chain-cap-across-the-whole-chain.md",
+    "group": "OTHER",
+    "vintage_commit": "64ae091211"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~222",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/handler.py",
+      "kind": "script",
+      "commit_or_etag": "6c7a3de5aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: this order runs no deploy and no AWS call; the deployed function still holds the earlier code until a later code-update pair ships this handler.",
+      "introduces": ["chain_left"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_reporting_gold_cot.py",
+      "kind": "test",
+      "commit_or_etag": "6c7a3de5aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: a test file in the worktree branch; nothing is deployed."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~222/RD_COT_CHAIN_CAP_FACTS_R141.json",
+      "kind": "doc",
+      "commit_or_etag": "6c7a3de5aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: the facts record of the chain budget; no deploy."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6c7a3de5aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: two surprise rows appended, IRPT_DASHBD-D2-W222-S1 and IRPT_DASHBD-D2-W222-S2; no deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB141-1-AC1",
+      "criterion_verbatim": "the handler's source holds every round-138 clause and now holds the word `chain_left`; the worker's own commits touch only the handler directory, the deliverables folder, the investigation file and task-order files.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r141/p141_chaincap.py\" . DB141-1-AC1",
+      "output_evidence": "OK: static: every round-138 clause holds and the handler holds the budget word; 4 files changed, all in the grant\nDB141-1-AC1 PASS",
+      "denominator": "4 of 4 files changed by the worker's own commit 6c7a3de5aa are in the grant",
+      "status": "PASS",
+      "expect": "DB141-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB141-1-AC2",
+      "criterion_verbatim": "the checker stages the handler as packaged and drives it through a fake S3 and a fake lambda client: every round-138 scenario still passes; a whole chain from an empty event over 32 owed days builds exactly ten days, the oldest first, each self-invoke carrying `chain_left` one less than the hop before, and stops; a four-day backlog stops at four; an explicit day event is capped at ten days in all; a budget of zero builds the day and chains nothing; seven bad budgets refuse with zero calls; a dry run chains nothing and writes nothing.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r141/p141_chaincap.py\" . DB141-1-AC2",
+      "output_evidence": "OK: probe: every round-138 scenario passes; a whole chain from `{}` over 32 owed days builds exactly 10 days then stops, each self-invoke carries chain_left one less; a short backlog stops at its end; an explicit day event is capped; a budget of zero chains nothing; seven bad budgets refuse with zero calls; a dry run chains nothing\nDB141-1-AC2 PASS",
+      "denominator": "10 of 32 owed days built by the whole chain; 4 of 4 backlog days; 7 of 7 bad budgets refused with 0 calls",
+      "status": "PASS",
+      "expect": "DB141-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB141-1-AC3",
+      "criterion_verbatim": "the worker's tests pass under pytest and name cottonwood and no other firm; the probe passes again; the facts record has exactly the form of step 4.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r141/p141_chaincap.py\" . DB141-1-AC3",
+      "output_evidence": "OK: 56 worker tests pass and name cottonwood only; the probe passes again; facts record equals the recount\nDB141-1-AC3 PASS",
+      "denominator": "56 of 56 tests in infra/aws/lambda/investor-reporting/reporting-gold-cot/tests pass (42 earlier, 14 new cases)",
+      "status": "PASS",
+      "expect": "DB141-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the budget comparison relaxed from chain_left <= 0 to chain_left < 0, so a day built at 0 invokes once more with a budget of -1 and the chain runs one hop past the cap",
+      "expected": "DB141-1-AC2 FAIL",
+      "observed": "FAIL: the probe died (rc 1): REFUSED: chain_left -1 must be an integer from 0 to 9; the mutant was caught and the handler restored byte-identical",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the same criterion DB141-1-AC2 compared: the run after the edit and the run in the criteria pass",
+      "observed": "both runs exit 0 and print the same OK line for the probe",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the deployed Lambda function and the Lambda runtime",
+      "reason": "not in this order: no deploy, no AWS call, no Terraform command; the deployed function still holds the earlier code until a later code-update pair."
+    },
+    {
+      "item": "the reporting-gold schedule enable",
+      "reason": "the CTO's and the issuer's later acts, after the code-update pair; not this order."
+    },
+    {
+      "item": "a budget of zero with no context ARN as a tested arm",
+      "reason": "reading recorded as surprise row IRPT_DASHBD-D2-W222-S2; the order does not settle it and no test pins it."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W222-S1: the earlier scheduled-fire test pinned the exact chain payload; it now reads the day key only, per the order's refusal clause, and a new test pins the full payload",
+    "IRPT_DASHBD-D2-W222-S2: a budget of zero with an owed day and no context ARN keeps the present chain form; the order does not say which rule governs that case"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~222/IRPT_DASHBD.TO-DB-b-274.cottonwood-report-build-handler-chain-cap-across-the-whole-chain.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -I p141_chaincap.py (criteria DB141-1-AC1, AC2, AC3)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r141/p141_chaincap.py\" . <criterion id>",
+      "result": "AC1 PASS, AC2 PASS, AC3 PASS, each rc 0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reporting-gold-cot/tests -q",
+      "result": "56 passed (run in the worktree before the artifacts commit)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 infra/aws/lambda/investor-reporting/reporting-gold-cot/handler.py infra/aws/lambda/investor-reporting/reporting-gold-cot/tests/test_reporting_gold_cot.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
