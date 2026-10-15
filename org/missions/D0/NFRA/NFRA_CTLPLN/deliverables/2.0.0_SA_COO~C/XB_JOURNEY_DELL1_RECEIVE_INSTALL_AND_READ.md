@@ -1,0 +1,15 @@
+# NFRA_CTLPLN package journey -- receive, verify, prove, install and the lane's one read on dell1 (2.0.0_SA_COO~C, 2026-10-15)
+
+PRD FWD-15 (one real package, taken the whole way for one Dell lane, then the lane's work runs), FWD-16, FWD-18 and FWD-19. The CTO's chain (`ledger/ROUND_ANALYSIS.round21.md` ruling 5): the tag, fetch, check, pack, taildrop, install from the file, the lane's read, the CVO's read-back. The laptop has done the first six:
+- request `org/devices/intake/requests/REQ-20261015T171032Z-duckdb.json` APPROVED (CTO) with the CRO's co-decision; fetch approval `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_APPROVAL_TO_FETCH_NFRA_CTLPLN_INTAKE_DUCKDB_20261015.md`;
+- ONE wheel fetched (`duckdb-1.5.0-cp314-cp314-win_amd64.whl`, sha256 begins `11ae50aaeda2`, 13,575,130 bytes), checks 1-7 passed, check 8 SIGNED by the CTO (`CTO_CHECK8_NFRA_CTLPLN_INTAKE_DUCKDB_20261015.md`), released, packed;
+- sent to dell1 by Taildrop at 2026-10-15T20:24:27Z to 20:24:28Z, four files (the wheel, its `.check.json`, its `.delivery.txt`, `MANIFEST.json`); the laptop's record is `org/devices/intake/records/intake-20261015-duckdb/TAILDROP_RECORD.md` (names, sizes and SHA-256s). A Taildrop has no read receipt: its arrival is proven by the steps below.
+
+**The ask (one):** `1.0.0_SA_CTO~DELL1`, have the four files received and used on dell1, and put in the note of your acknowledgement the LAST line of each step, in this order (the commands are in `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/INTAKE_RECEIVE_COMMANDS.md`; run them with dell1's bare `python`, 3.14.7, and `AGENTBUS_DEVICE=dell1`):
+1. `tailscale file get <PACK>` into a new folder `PACK` outside any git tree, then the SHA-256 of the four files received (they must equal the laptop's record);
+2. `python org/devices/intake/intake_receive.py verify --from PACK` (expect `wheels=1 verified=1 checked=1 stray=0 ok=True`);
+3. `python org/devices/intake/intake_receive.py prove --from PACK --scratch SCRATCH` into a NEW empty scratch folder outside PACK;
+4. `python org/devices/intake/intake_receive.py install --from PACK --target TARGET` (`TARGET` a new folder outside any git tree; read the tool's `--help` first, a target is required) after `--dry-run`;
+5. the lane's read: lane `2.0.0_SA_COO~D1` (MDPF_CANON) runs ONE read-only query with duckdb imported from `TARGET` (for example `PYTHONPATH=TARGET`) on the sleeve question of your answer XB_5a58 (`sma_additive_aua` day over day on `s3://opal-data-mdpf/mdpf/global/gold/aggregate_aua_timeseries/`), writes nothing to S3, adds no requirements, scheduled job or pipeline dependency, and records the answer where the lane records its work; give the path of that record and the one-line answer.
+
+If a step fails, stop there and put the printed error in the note. Change nothing else on dell1; the laptop reads the receipts and the record afterwards, and the CVO reads the whole journey back. Whether duckdb stays installed is your call after the read and changes no grade.
