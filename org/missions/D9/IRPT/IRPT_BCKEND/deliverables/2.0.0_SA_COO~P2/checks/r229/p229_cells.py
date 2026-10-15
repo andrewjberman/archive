@@ -46,8 +46,10 @@ def ac1(r):
     if g.get("addendum_blob") != BLOB or g.get("both_halves_signed") is not True:
         fail("gates.addendum_blob must be %s and both_halves_signed true" % BLOB)
     b = g.get("builds_merged") or {}
-    if not (b.get("IB-pr-586") is True and b.get("IB-pr-594") is True):
-        fail("gates.builds_merged must read true for IB-pr-586 and IB-pr-594 (the CTO's addendum-2 condition 1: 594 gates both applies)")
+    if not (b.get("IB-pr-586") is True and b.get("IB-pr-594") is True and b.get("IB-pr-599") is True):
+        fail("gates.builds_merged must read true for IB-pr-586, IB-pr-594 and IB-pr-599 (the CTO's addendum-2 condition 1: 594 gates both applies; msg 8536 item 4: 599, a day's key only when the day is complete)")
+    if g.get("iam_order_complete") != "IB-pr-600":
+        fail("gates.iam_order_complete must read IB-pr-600 (the feed's IAM pair applied and its exists() read ABSENT on the runner, CTO half of the IAM pair, condition 3)")
     d = g.get("dispatch_object") or {}
     hex64(d.get("live_sha256"), "dispatch_object.live_sha256")
     if d.get("live_sha256") != d.get("repository_sha256") or d.get("equal") is not True:
@@ -84,9 +86,12 @@ def ac2(r):
         fail("the dispatch object must change by exactly one catalog row, its chain entries and no other line")
     if d.get("chain_entries_added") != d.get("chains_carrying_perf"):
         fail("chain_entries_added must equal chains_carrying_perf (every chain that carries the performance pull gets the entry)")
+    di = a.get("dry_run_import") or {}
+    if di.get("ran_on_runner") is not True or di.get("exit_code") != 0 or di.get("plan_only_line_seen") is not True:
+        fail("apply.dry_run_import must read ran_on_runner true, exit_code 0 and plan_only_line_seen true (the uploaded script run on the runner without --upload; CTO msg 8536 item 3)")
     if a.get("rollback_performed") is not False:
         fail("rollback_performed must be false for a landed apply (Branch B is reported, not graded as a pass)")
-    print("OK: uploads equal the repository; sidecar from address(); dispatch edited by one row")
+    print("OK: uploads equal the repository; sidecar from address(); dispatch edited by one row; the dry-run import ran on the runner")
 
 
 def ac3(r):
@@ -105,6 +110,8 @@ def ac3(r):
     g = r.get("gates") or {}
     if not (is_int(f.get("requests_made")) and 0 < f["requests_made"] <= g.get("request_bound", 0)):
         fail("first_run.requests_made must be within the stated bound (a higher count is a STOP and a row)")
+    if f.get("skipped_days") != 0:
+        fail("first_run.skipped_days must be 0 (a SKIPPED line means a household failed and a day was not written: a STOP and a row, then a rerun with --from-date)")
     if f.get("calc_gross_of_fees_false_on_every_request") is not True:
         fail("every request must have carried calcGrossOfFees false")
     if f.get("keys_outside_inflection_scope") != 0:
