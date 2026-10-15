@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-10",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "ba5fa73f5f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-10.inflection-scope-feed-adapter-to-account-return-daily-040.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~310",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~310/IRPT_DASHBD.TO-DB-i-10.session.log.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_adapter.py",
+      "kind": "script",
+      "commit_or_etag": "fc0d8a08b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure standard-library module (datetime only), no I/O; not wired, scheduled or deployed. The run on the real Scope feed rows is a later cell.",
+      "artifact_covered_by": [
+        "DBI123-1-AC1",
+        "DBI123-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "kind": "test",
+      "commit_or_etag": "fc0d8a08b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "22 synthetic tests, all passed under python -I -m pytest -q (rc 0); one test_mutant_ test. No real account, client value or household.",
+      "artifact_covered_by": [
+        "DBI123-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI123-1-AC1",
+      "criterion_verbatim": "`DBI123-1-AC1` -- the module reproduces the checker's golden: the trading-day compounding with its `carried_days`, an ABSENT trading day kept ABSENT, leading days skipped, the interior gap, `UNMAPPED_ACCOUNT` (no row, no source id), `SERIES_ENDED_AT_SOURCE` pass-through, the EOD value rule and `NO_EOD_VALUE`, and the manifest counts. Base: FAIL (no module).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r123/p123_adapter.py\" . DBI123-1-AC1",
+      "output_evidence": "DBI123-1-AC1 PASS (last line; rc=0)",
+      "denominator": "1 of 1 criterion; the golden is 17 expected rows and 11 expected absent records (the checker's expected())",
+      "status": "PASS",
+      "expect": "DBI123-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBI123-1-AC2",
+      "criterion_verbatim": "`DBI123-1-AC2` -- every output row has exactly the contract's columns and optional columns, passes `~D2`'s declarations-driven validator for contract 0.4.0, carries `source` `orion`, `flow_claim` `absent`, null flows and an int `source_account_id`; the validator is live (an Orion row with a null flow and no claim, and a claim beside both flows, are refused); the module refuses a gross-of-fees row and an unsorted calendar with `ValueError`. Base: FAIL (no module).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r123/p123_adapter.py\" . DBI123-1-AC2",
+      "output_evidence": "DBI123-1-AC2 PASS (last line; rc=0)",
+      "denominator": "1 of 1 criterion; each of the 17 golden rows checked against row_problems for contract 0.4.0 and the 22-key set",
+      "status": "PASS",
+      "expect": "DBI123-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DBI123-1-AC3",
+      "criterion_verbatim": "`DBI123-1-AC3` -- your test file exists, names a `test_mutant_` test, and passes under `python -I -m pytest -q` with at least 10 tests passed. Base: FAIL (no test file).",
+      "method": "test_suite",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r123/p123_adapter.py\" . DBI123-1-AC3",
+      "output_evidence": "DBI123-1-AC3 PASS (last line; rc=0). The checker runs python -I -m pytest -q on the test file: 22 passed (rc 0)",
+      "denominator": "22 tests passed of at least 10 required; 1 test_mutant_ test",
+      "status": "PASS",
+      "expect": "DBI123-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Replace the compounding multiplication product *= with an assignment; the Monday weekend case must differ from the real module.",
+      "expected": "The mutant's SYN-A 2026-08-10 total_return_daily differs from the real module's by more than 1e-3",
+      "observed": "real 0.012829, mutant 0.003000, absolute difference 0.009829; test_mutant_weekend_compounding_is_caught passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs: adapt() over the synthetic world, outputs compared with ==",
+      "observed": "identical=True; 9 rows and 9 absent records in each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The run of the adapter on the real Scope feed rows",
+      "reason": "A later cell of the B-IN decomposition; this order is offline and synthetic only."
+    },
+    {
+      "item": "Wiring of the adapter into account_return_daily.py or any gold producer",
+      "reason": "Not in the cell and not in the grant; nothing imports the module yet."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W310-S1: The spec writes None for holdings_price_return_reason beside a null holdings_price_return, but contract 0.4.0 defines that column as the reason the return is null; written as the spec says, not repaired (ARMED, disarm owner 2.0.0_SA_COO~I2).",
+    "IRPT_DASHBD-D2-W310-S2: The rules do not say what a repeated (account, day) feed row means; the module reads the last one given, silently.",
+    "IRPT_DASHBD-D2-W310-S3: The rules define min_day and max_day over the feed rows and are silent on an empty feed; the module returns an empty result with zero counts.",
+    "IRPT_DASHBD-D2-W310-S4: The rules do not say whether an account_map key with no feed account counts in accounts_mapped; the module counts feed accounts only."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -I -m pytest",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "result": "22 passed, rc 0"
+    },
+    {
+      "tool": "p123_adapter.py (round-123 checker)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r123/p123_adapter.py . DBI123-1-AC1|AC2|AC3",
+      "result": "DBI123-1-AC1 PASS; DBI123-1-AC2 PASS; DBI123-1-AC3 PASS (each rc 0)"
+    }
+  ]
+}
