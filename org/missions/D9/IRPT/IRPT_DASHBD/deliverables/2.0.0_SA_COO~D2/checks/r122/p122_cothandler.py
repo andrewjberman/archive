@@ -2,7 +2,7 @@
 round-121 adapter's `run_day` for the Cottonwood account return, its source-map entry and the zip closure it needs, tested LOCAL with fake clients. The Terraform root (function, roles,
 DISABLED schedule, builder names) and the pair are the next round; nothing is planned, applied, scheduled or deployed here.
 
-  DB-b-249 (~203) infra/aws/lambda/investor-reporting/account-return-cot/handler.py with lambda_handler(event, context=None, s3=None, reader=None), owed_days(newest_landed, today,
+  DB-b-249 (~203) infra/aws/lambda/investor-reporting/account-return-daily/handler.py with lambda_handler(event, context=None, s3=None, reader=None), owed_days(newest_landed, today,
                   max_days=MAX_DAYS_PER_FIRE) and newest_landed_day(s3, bucket, key_prefix); a new entry in infra/aws/lambda/ci/lambda-source-map.json; tests.
                                                                                            DB122-4-AC1 (tests and functions), AC2 (the STAGED closure probe),
                                                                                            AC3 (the facts and the change)
@@ -27,7 +27,7 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 REC_REL = D + "0.9.0_WK_IRPT_DASHBD~203/RD_CW_HANDLER_FACTS_R122.json"
 ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-249.cottonwood-landing-function-code-handler-source-map-closure.md"
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~203"
-FN_DIR = "infra/aws/lambda/investor-reporting/account-return-cot/"
+FN_DIR = "infra/aws/lambda/investor-reporting/account-return-daily/"
 HANDLER_REL = FN_DIR + "handler.py"
 TESTS_REL = FN_DIR + "tests/test_handler.py"
 SOURCE_MAP_REL = "infra/aws/lambda/ci/lambda-source-map.json"
