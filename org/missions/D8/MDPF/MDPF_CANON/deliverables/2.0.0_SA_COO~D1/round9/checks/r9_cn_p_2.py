@@ -4,8 +4,8 @@
 Issuer's check (2.0.0_SA_COO~D1). Read-only for every worker: never edit this file.
 
   python r9_cn_p_2.py oracle    the pure functions against the CRO spec's AMENDED period-end oracle ($M), Variant 1 (7 arms, 1 control)
-  python r9_cn_p_2.py variants  Variant 2, the demo-tenant case, the stitch OFF for a non-internal session, carried points, notes (10 arms)
-  python r9_cn_p_2.py wiring    the page, the types and the scope: tolerant source arms, whitespace-collapsed (9 arms, 2 controls)
+  python r9_cn_p_2.py variants  Variant 2, the demo-tenant case, the stitch OFF for a non-internal session, carried points, notes (12 arms)
+  python r9_cn_p_2.py wiring    the page, the types and the scope: tolerant source arms, whitespace-collapsed (10 arms, 2 controls)
   python r9_cn_p_2.py selftest  unpatched base red, reference green, one planted mutant per arm; issuer only
 
 The logic is exercised, not grepped: `bun` imports <src>/lib/trendGrouping.ts and calls the exported pure functions on fixtures that follow the
@@ -28,7 +28,7 @@ BASE_COMMIT = "f8c7d310dfef6ef5eb68a25f2244ae3245c7a2bf"   # scratch/canon-i3-ba
 OWNED = ("src/lib/trendGrouping.ts", "src/pages/ModelPortfolios.tsx", "src/api/portal-proxy.ts")
 OWNED_TEST_RE = re.compile(r"^src/lib/trendGrouping[A-Za-z0-9._-]*\.test\.ts$")
 PROTECTED = ("src/components/CategoryViewTree.tsx", "src/lib/otherModelsAsOf.ts", "src/api/endpoints/aum.ts")
-N_ORACLE, N_VARIANTS, N_WIRING = 7, 10, 9
+N_ORACLE, N_VARIANTS, N_WIRING = 7, 12, 10
 
 
 def root():
@@ -144,6 +144,36 @@ def boundary_fixture():
     return served, {"firm49": firm49, "inflectionCustom": infl}
 
 
+def custom_fixture():
+    """The measured Custom Models gap shape (real objects, 2026-10-13): the window before the pool is served (Inflection's series, one missing date
+    first, one carried date), then dates where the pool is served (difference) and dates where it is not (Inflection-only would understate)."""
+    dates = ["2026-05-14", "2026-05-15", "2026-05-29", "2026-05-30", "2026-06-01", "2026-07-20", "2026-07-28", "2026-07-29", "2026-08-03",
+             "2026-08-04", "2026-08-05"]
+    n = len(dates)
+    gone = 3                       # 2026-05-30 is a carried date: every served array is null
+
+    def keep(v, extra=()):
+        return [None if i == gone or i in extra else v for i in range(n)]
+    served = {
+        "dates": dates,
+        "total": [1000.0, 1100.0, 1101.0, None, 1102.0, 1140.0, 1144.0, 1143.0, 1145.0, 1146.0, 1146.5],
+        "modelAua": [500.0, 526.0, 527.0, None, 528.0, 540.0, 544.0, 543.0, 545.0, None, 546.0],
+        "primary": {k: [None, 100.0, 100.0, None, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0] for k in PRIMARY},
+        "otherModels": [None, None, None, None, None, 40.0, None, None, 45.0, None, 46.0],
+        "clientSupervised": keep(300.0, extra=(9,)),
+        "etfStrategies": keep(5.0),
+        "altStrategies": [None] * n,
+        "carriedDates": ["2026-05-30"],
+    }
+    stitch = {
+        "firm49": {k: [{"period": "2026-05-14", "aum": 100.0}] for k in PRIMARY},
+        # 2026-05-15 has NO Inflection point (before the first value); 07-20 and 07-28 are understated; 07-29 is missing
+        "inflectionCustom": [{"period": "2026-05-29", "aum": 27.0}, {"period": "2026-06-01", "aum": 28.0},
+                             {"period": "2026-07-20", "aum": 38.0}, {"period": "2026-07-28", "aum": 37.0}],
+    }
+    return served, stitch
+
+
 def build_fixtures():
     os_, ost = oracle_fixture()
     bs, bst = boundary_fixture()
@@ -160,7 +190,8 @@ def build_fixtures():
     # a measured zero in a served group
     zero = json.loads(json.dumps(bs))
     zero["clientSupervised"][4] = 0.0
-    return {"oracle": [os_, ost], "boundary": [bs, bst], "free": [fr, ost], "old": [old, bst], "zero": [zero, bst], "begins": BEGINS}
+    cs, cst = custom_fixture()
+    return {"oracle": [os_, ost], "boundary": [bs, bst], "free": [fr, ost], "old": [old, bst], "zero": [zero, bst], "custom": [cs, cst], "begins": BEGINS}
 
 
 # ---------------------------------------------------------------------------------------------- bun exercise
@@ -193,6 +224,8 @@ if (out.missing.length === 0) {
   out.b_v2_nostitch = safe(() => build('boundary', 'variant2', false))
   out.old_v1 = safe(() => build('old', 'variant1'))
   out.zero_v1 = safe(() => build('zero', 'variant1'))
+  out.c_v1 = safe(() => build('custom', 'variant1'))
+  out.c_v2 = safe(() => build('custom', 'variant2'))
   out.fn_v1 = safe(() => mod.globalTrendFootnote(build('boundary', 'variant1').rows, 'variant1'))
   out.fn_v2 = safe(() => mod.globalTrendFootnote(build('boundary', 'variant2').rows, 'variant2'))
   out.fn_v2_clean = safe(() => mod.globalTrendFootnote(build('oracle', 'variant2').rows.filter((r: any) => r.period >= '2026-07-20'), 'variant2'))
@@ -317,7 +350,7 @@ def oracle_arms(got, err):
 
 def variants_arms(got, err):
     miss = no_fn(got, err)
-    ids = ("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10")
+    ids = ("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12")
     arms = []
 
     def arm(i, ok, why):
@@ -386,8 +419,28 @@ def variants_arms(got, err):
     z, _ = rows_of(got, "zero_v1")
     o, _ = rows_of(got, "old_v1")
     ok10 = bool(z) and by_period(z)["2026-05-29"]["clientSupervised"] == 0.0 and P1["2026-06-02"]["altStrategies"] is None and bool(o) \
-        and all(r["clientSupervised"] is None and r["etfStrategies"] is None and r["altStrategies"] is None for r in o) and by_period(o)["2026-05-30"]["carried"] == []
-    arm("V10", ok10, "a measured zero stays 0; a missing array (an older leaf) yields nulls and no carried rows, never 0")
+        and all(r["clientSupervised"] is None and r["etfStrategies"] is None and r["altStrategies"] is None for r in o) \
+        and not {"Client Supervised", "ETF Strategies", "ALT Strategies"} & set(by_period(o)["2026-05-30"]["carried"])
+    arm("V10", ok10, "a measured zero stays 0; a missing array (an older leaf) yields nulls and no carried group for it, never 0")
+    # V11 / V12: Custom Models rolls forward (Variant 1), on the measured gap shape
+    cv1, ce1 = rows_of(got, "c_v1")
+    cv2, ce2 = rows_of(got, "c_v2")
+    if not cv1 or not cv2:
+        arm("V11", False, "buildGlobalTrendRows threw: %s %s" % (ce1, ce2))
+        arm("V12", False, "buildGlobalTrendRows threw: %s %s" % (ce1, ce2))
+        return arms
+    want1 = [None, None, 27.0, 27.0, 28.0, 40.0, 40.0, 40.0, 45.0, 45.0, 46.0]
+    have1 = [r["custom"] for r in cv1]
+    roll_only_custom = all(cv1[i]["carried"] == ["Custom Models"] for i in (6, 7, 9)) and "Custom Models" in cv1[3]["carried"]         and all(cv1[i]["carried"] == [] for i in (2, 4, 5, 8, 10)) and cv1[9]["clientSupervised"] is None
+    arm("V11", have1 == want1 and roll_only_custom,
+        "Variant 1: Custom Models carries its last known value on every date after its first (the carried 05-30, the pool-less 07-28 and 07-29, the no-model-AUA 08-04), "
+        "not Inflection-only once the pool is served, never before the first value; only Custom is rolled and it is named in row.carried (got %s)" % have1)
+    want2 = [None, None, None, None, None, 40.0, None, None, 45.0, None, 46.0]
+    have2 = [r["custom"] for r in cv2]
+    flags2 = [r["customSuppressed"] for r in cv2]
+    arm("V12", have2 == want2 and all("Custom Models" not in r["carried"] for r in cv2) and flags2[1] and flags2[6] and not flags2[9]
+        and not any(r["customSuppressed"] for r in cv1) and have1[:2] == [None, None],
+        "Variant 2 never rolls Custom (suppressed stays suppressed, flagged where model AUA exists); Variant 1 flags nothing and fills nothing before the first value (got %s)" % have2)
     return arms
 
 
@@ -435,6 +488,9 @@ def wiring_arms(src):
     arm("W7", fn_ok, "the module stays pure: exports buildGlobalTrendRows and imports nothing")
     # controls: the approved edits ride the row unchanged
     tree = read(os.path.join(src, "components", "CategoryViewTree.tsx"))
+    sm = re.search(r"const trendStitch\b.*?\}, \[internal", P)
+    arm("W9", sm is not None and "groupCustomModelsSeries(" in sm.group(0) and "rollBlendsIntoArchetypeSeries(" not in sm.group(0),
+        "the stitch's Inflection Custom is the UNROLLED blends: the stitch memo groups the Inflection series with groupCustomModelsSeries and does not roll the blends into the archetypes first")
     arm("C2", "'Client - Opal Unsupervised': PALETTE.lime500" in norm(tree) and "carriedAsOf" in full and "asOfLabel" in full,
         "control: the approved edits are intact (lime Client Unsupervised, the Other Models 'as of' wiring)")
     arms.append(scope_arm(src))
