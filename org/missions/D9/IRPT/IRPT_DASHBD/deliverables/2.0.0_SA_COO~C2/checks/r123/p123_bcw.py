@@ -33,7 +33,7 @@ SHARED = ("data/assets/scripts/gold/irpt_holdings_performance/holdings_performan
           "infra/logic/registry/exemptions.json", "infra/logic/registry/remediations.json",
           "infra/logic/registry/resources.json", "infra/logic/registry/reporting_policies.json")
 EXPECT_FILES = {"lambda_function.py", ADAPTER} | set(SHARED)
-TF_ROOT = "infra/aws/terraform/investor-reporting/account-dim-cot"
+TF_ROOT = "infra/aws/terraform/investor-reporting/account-dim"
 TF_FILES = ("main.tf", "locals.tf", "lambda.tf", "iam.tf", "schedule.tf")
 ALLOWED_ACTIONS = {"s3:GetObject", "s3:ListBucket", "s3:PutObject", "logs:CreateLogStream", "logs:PutLogEvents",
                    "logs:CreateLogGroup", "lambda:InvokeFunction", "sts:AssumeRole"}
@@ -91,7 +91,7 @@ def ac_1_1(root):
         need((staged[rp]["pin"], staged[rp]["sha256"]) == (hs["pin"], hs["sha256"]), "shared member drifted from the holdings entry: " + rp)
     need(staged[ADAPTER]["sha256"] == hashlib.sha256((root / ADAPTER).read_bytes()).hexdigest(), "adapter pin is not the working bytes")
     need((root / SRC_DIR / "lambda_function.py").is_file(), "lambda_function.py absent in source_dir")
-    need(e["tf_file"] == TF_ROOT + "/lambda.tf" and e["iam_role"] == "irpt-cot-account-dim-role" and e["pipeline"] == "investor-reporting",
+    need(e["tf_file"] == TF_ROOT + "/lambda.tf" and e["tf_resource"] == "module.irpt_account_dim.aws_lambda_function.this" and e["iam_role"] == "irpt-cot-account-dim-role" and e["pipeline"] == "investor-reporting",
          "tf_file, iam_role or pipeline wrong")
     need(not any(k in e for k in ("artifact_s3_key", "artifact_sha256", "last_deployed_commit", "last_deployed_at", "deployed_code_sha256")), "a deploy field or artifact_s3_key is present: nothing is built, and the key stays out until the CVO rules (CTO msg 8187)")
 
@@ -122,10 +122,15 @@ def tf_text(root):
 
 
 def structure(text):
-    need(re.search(r'key\s*=\s*"investor-reporting/account-dim-cot/tfstate"', text) is not None, "backend state key wrong")
+    need(re.search(r'key\s*=\s*"investor-reporting/account-dim/tfstate"', text) is not None, "backend state key wrong")
     for m in re.finditer(r'"(irpt-[a-z0-9-]+)"', text):
         need("irpt-performance-native" in m.group(1), "a typed irpt- name (names come from the opal_name module): " + m.group(1))
     need(len(re.findall(r'source\s*=\s*"\.\./\.\./modules/opal_name"', text)) >= 5, "fewer than five opal_name builder modules")
+    blocks = [blk for blk in re.split(r'(?m)^module\s+"', text)[1:] if re.search(r'source\s*=\s*"\.\./\.\./modules/opal_name"', blk)]
+    for blk in blocks:
+        need(re.search(r'scope\s*=', blk) is not None, "an opal_name module without scope: " + blk.split('"')[0])
+    for lab in re.findall(r'(?m)^(?:module|resource\s+"[a-z_]+"|data\s+"[a-z_]+")\s+"?([A-Za-z0-9_]+)"', text):
+        need("cot" not in lab.split("_"), "a block label carries the firm token: " + lab)
     need(re.search(r'function\s*=\s*"account-dim"', text) is not None, "builder modules do not name the function account-dim")
     need(re.search(r'handler\s*=\s*"lambda_function\.lambda_handler"', text) is not None, "handler wrong")
     need(re.search(r'runtime\s*=\s*"python3\.12"', text) is not None, "runtime wrong")
@@ -159,6 +164,9 @@ def ac_2_1(root):
 
 def terraform(root, *args):
     exe = Path(root) / ".tools" / "terraform.exe"
+    if not exe.is_file():  # a worker worktree has no gitignored binary: use the base checkout's (the repo's common git dir parent)
+        common = Path(git(root, "rev-parse", "--path-format=absolute", "--git-common-dir").strip())
+        exe = common.parent / ".tools" / "terraform.exe"
     need(exe.is_file(), "terraform.exe absent")
     r = subprocess.run([str(exe), "-chdir=" + str(Path(root) / TF_ROOT)] + list(args), capture_output=True, text=True, timeout=600)
     return r.returncode, r.stdout + r.stderr
