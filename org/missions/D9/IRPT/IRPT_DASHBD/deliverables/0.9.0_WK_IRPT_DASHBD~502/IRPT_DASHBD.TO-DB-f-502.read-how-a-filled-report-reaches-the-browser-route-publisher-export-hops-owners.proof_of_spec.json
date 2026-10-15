@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-502",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R114_F.md",
+    "vintage_commit": "b4e770b83d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-502.read-how-a-filled-report-reaches-the-browser-route-publisher-export-hops-owners.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~502",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~502/RD_REPORT_SERVE_PATH_R114.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~502/RD_REPORT_SERVE_PATH_R114.json",
+      "kind": "doc",
+      "commit_or_etag": "80db2bd042",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The serve-path record: route (entry.py line 92), publisher (handler.py line 192, schedule.tf lines 85 and 122), report object (absent), export path (run-export-render.sh line 29), six hops with owners and risk classes, the proposed route, and the all-zero reads block. Read only; nothing deployed, served or pushed.",
+      "artifact_covered_by": [
+        "DBF114-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF114-2-AC1",
+      "criterion_verbatim": "DBF114-2-AC1 -- RD_REPORT_SERVE_PATH_R114.json has exactly the form of step 7; each cited file exists and each cited line holds the token class its field names; hops has at least 4 entries numbered from 1, each with an owner, a risk class in the set and a boolean exists_today; report_object carries both booleans and words; every claim is in the four-word set; the reads block is all zero, the four flags are false and no run of 8 or more digits stands outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r114/p114_ship.py\" . DBF114-2-AC1",
+      "output_evidence": "DBF114-2-AC1 PASS (checker output, rc=0)",
+      "denominator": "1 of 1 criterion; 6 of 6 hops numbered 1-6 with owner, risk in the set and boolean exists_today; 3 of 3 cited lines hold their token class; reads block all zero; 4 of 4 flags false",
+      "status": "PASS",
+      "expect": "DBF114-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker run on a scratch copy of the record (.scratch/mut) with reads.s3_reads set to 1, the three cited files copied beside it.",
+      "expected": "DBF114-2-AC1 FAIL (reads block is not the all-zero form)",
+      "observed": "reason: reads block is not the all-zero form / DBF114-2-AC1 FAIL, rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The checker run on the committed record, twice more.",
+      "observed": "DBF114-2-AC1 PASS rc=0 on each of the two runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live AWS state of the read route, the publisher schedules and the render host",
+      "reason": "The order is a read of code with no AWS call; live state is recorded as not read, never guessed."
+    },
+    {
+      "item": "The two surprise rows in the channel (IRPT_DASHBD-F2-W502-S1 and -S2)",
+      "reason": "The surprise-row gate refuses the coordinate F2 in the ids the order names (the device register holds D1, D2 and Z). The rows were neither overridden nor renamed; they are not filed."
+    },
+    {
+      "item": "The portal reader and mount (DB-f-501) and the build of the proposed route",
+      "reason": "Outside this order's grant; the proposed route is recorded as a proposal only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-F2-W502-S1: NOT FILED -- the owner of the read route and of the platinum publisher is 2.0.0_SA_COO~P in the files (issuer of record), where the order names ~P2; the row is refused as a channel row until the id is ruled.",
+    "IRPT_DASHBD-F2-W502-S2: NOT FILED -- the export render host has no live host on the record: the dedicated host is not built and the existing render-capable instance is stopped; the row is refused as a channel row until the id is ruled."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p114_ship.py (criterion checker)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r114/p114_ship.py\" . DBF114-2-AC1",
+      "result": "DBF114-2-AC1 PASS rc=0"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "bash .tools/safe-commit.sh (row gate at commit) with the two rows drafted under IRPT_DASHBD-F2-W502-S1 and -S2",
+      "result": "BLOCKED: 2 violations on NEW rows -- the id carries the coordinate F2, which the device register does not hold (registered: D1, D2, Z). Commit aborted; the channel file was restored to its committed bytes."
+    }
+  ]
+}
