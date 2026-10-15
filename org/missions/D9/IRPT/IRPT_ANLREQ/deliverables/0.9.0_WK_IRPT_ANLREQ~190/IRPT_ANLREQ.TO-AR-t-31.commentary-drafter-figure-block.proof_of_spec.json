@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-t-31",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R41_T.md",
+    "vintage_commit": "ccf1e9611df44bd7f622d3e1908641a184ba7255",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-31.commentary-drafter-figure-block.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-31.commentary-drafter-figure-block.md",
+    "group": "T",
+    "vintage_commit": "ccf1e9611df44bd7f622d3e1908641a184ba7255"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~190",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/drafter.py",
+      "kind": "script",
+      "commit_or_etag": "c4a21921887c83efdafd4e46549c0455bcf001a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Not deployed: no Lambda package rebuilt, infra/aws/lambda/transcripts-pull/dist/ untouched."
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/entry.py",
+      "kind": "script",
+      "commit_or_etag": "c4a21921887c83efdafd4e46549c0455bcf001a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Not deployed.",
+      "artifact_covered_by": ["AR31-t-AC2"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_commentary_figures.py",
+      "kind": "test",
+      "commit_or_etag": "c4a21921887c83efdafd4e46549c0455bcf001a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Four tests; three drafter tests cannot import in this sparse worktree (surprise IRPT_ANLREQ-D2-W190-S1)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR31-t-AC1",
+      "criterion_verbatim": "AR31-t-AC1: the three drafter tests pass (whitelist, the planted-name and dollar control, provenance by name).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R41_CHECKS/r41_checks.py fg1",
+      "output_evidence": "R41-FG1-FAIL 3 failed, 1 deselected in 0.37s | E       ModuleNotFoundError: No module named 'data.transcripts.scripts.outlook' (drafter.py:18) | E       ModuleNotFoundError: No module named 'outlook' (drafter.py:22)",
+      "denominator": "0 of 3 named drafter tests pass (3 failed at import; 1 deselected, the seam test)",
+      "status": "FAIL",
+      "status_reason": "The three drafter tests cannot import data.transcripts.scripts.outlook in this sparse worktree: the package is tracked at HEAD but outside the sparse cone. BLOCKING surprise IRPT_ANLREQ-D2-W190-S1. The drafter logic was exercised only under a labeled stub harness, which is not criterion evidence.",
+      "expect": "R41-FG1-OK"
+    },
+    {
+      "criterion_id": "AR31-t-AC2",
+      "criterion_verbatim": "AR31-t-AC2: the seam test passes: entry.abstract_request carries the reader's figures block.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R41_CHECKS/r41_checks.py fg2",
+      "output_evidence": "R41-FG2-OK 1 passed, 3 deselected in 0.08s",
+      "denominator": "1 of 1 named seam test passes (1 passed, 3 deselected)",
+      "status": "PASS",
+      "expect": "R41-FG2-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-memory mutant of drafter.py (file untouched): the 0..100 and -100..1000 range rule is removed from _plain_number, so an out-of-range value passes.",
+      "expected": "The planted-name and dollar test fails, because the planted 1250000 value is kept under allocation_pct.",
+      "observed": "1 failed, 3 passed; FAILED test_prompt_carries_figures_block_and_no_planted_name_or_dollar (run via .scratch/mutant_run.py under the labeled outlook stub).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of test_commentary_figures.py under the labeled outlook stub (.scratch/stub_outlook_run.py), results compared",
+      "observed": "run 1: 4 passed in 0.09s; run 2: 4 passed in 0.09s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Real pytest run of the three drafter tests (AC1)",
+      "reason": "data/transcripts/scripts/outlook is outside the sparse cone of this worktree; the cone was not widened (outside the write grant). Surprise IRPT_ANLREQ-D2-W190-S1."
+    },
+    {
+      "item": "Edits to test_commentary_classification.py",
+      "reason": "Outside the write grant. Its exact-tuple assertion is kept green by OPTIONAL_ABSTRACT_KEYS. Surprise IRPT_ANLREQ-D2-W190-S2."
+    },
+    {
+      "item": "Lambda package rebuild and deploy",
+      "reason": "Not in scope: the order says nothing is deployed and dist/ is output, not this order's."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W190-S1: the outlook package drafter.py imports is tracked at HEAD but outside this worktree's sparse cone, so the drafter tests cannot import and AC1 cannot run here (BLOCKING).",
+    "IRPT_ANLREQ-D2-W190-S2: ABSTRACT_KEYS gaining figures would break an exact-tuple assertion in test_commentary_classification.py, outside the grant; figures is held in OPTIONAL_ABSTRACT_KEYS (OBSERVATION).",
+    "IRPT_ANLREQ-D2-W190-S3: the figure label charset admits name-shaped labels, so the closed charset alone does not keep a planted name out of the prompt (OBSERVATION)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~190/IRPT_ANLREQ.TO-AR-t-31.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39) via safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh ... -- drafter.py entry.py test_commentary_figures.py",
+      "result": "pre-commit gate clean for 3 of 3 file(s); commit c4a21921887c83efdafd4e46549c0455bcf001a2"
+    },
+    {
+      "tool": "r41_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R41_CHECKS/r41_checks.py fg1 ; ... fg2",
+      "result": "fg1: R41-FG1-FAIL 3 failed, 1 deselected, rc=1 ; fg2: R41-FG2-OK 1 passed, 3 deselected, rc=0"
+    },
+    {
+      "tool": "surprise-row-gate via safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh ... -- org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "3 new row(s) of 664 total checked; OK; commit bdc1bc8e6a40f39ea9b3ab1d977eaf03c6c2c8c7"
+    }
+  ]
+}
