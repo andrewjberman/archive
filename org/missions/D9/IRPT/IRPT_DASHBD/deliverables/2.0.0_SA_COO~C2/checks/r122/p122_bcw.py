@@ -73,7 +73,7 @@ def adapter_frozen_part(text):
 
 def ac_2(root):
     root = Path(root)
-    changed = [p for p in git(root, "diff", "--name-only", BASE, "HEAD", "--", *PRODUCT_DIRS).splitlines() if p.strip()]
+    changed = sorted({p for p in git(root, "log", "--first-parent", "--no-merges", "--name-only", "--format=", BASE + "..HEAD", "--", *PRODUCT_DIRS).splitlines() if p.strip()})  # the worker's own commits; a pull-merge of the shared branch adds none of its own
     need(changed, "no product file changed since the base")
     extra = sorted(set(changed) - ALLOWED)
     need(not extra, "product files outside the grant changed: " + ", ".join(extra))
