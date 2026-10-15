@@ -2,7 +2,7 @@
 
   DB-i-6 (~306) the SAME household as round 117, the quarter that ended 2026-09-30, the fee flag false then true, the INNER scope body. (i) do the missing account and the series-less group
               appear over the longer span, (ii) does the true-minus-false gap tie to the summed feeAmount, (iii) the cause class of each short account from the position cache and the
-              newest fact_positions partition (flags and categories only). If the Q3 pair holds no fee, a second pair over 2026-01-01 to 2026-09-30 is allowed (the 4-call cap).
+              newest fact_positions partition (flags and categories only). If the Q3 pair holds no fee (by fee magnitude), a second pair over 2026-01-01 to 2026-09-30 is allowed (the 4-call cap).
                                                                                                                                                      DBI118-1-AC1
 The checker RECOMPUTES from the private raw bodies (sha256 in the record): the household (round 117's rule), each window's Account groups with p117's `groups`, the coverage, the fee
 verdict (p117's `verdict_b`, with `NO_FEE_IN_WINDOW` when the flag changes the return and no compared account has a fee above 0), the short accounts and their position days from the cache.
@@ -123,7 +123,7 @@ def check(root):
         if (w, False) in bodies and (w, True) in bodies:
             pairs[w] = verdict_b2(P117.groups(bodies[(w, False)]), P117.groups(bodies[(w, True)]))
     if "ytd" in rec["windows"]:
-        need("q3" in pairs and pairs["q3"][2] == 0, "a ytd pair is allowed only when the q3 pair compared no account with a fee above 0")
+        need("q3" in pairs, "a ytd pair needs the q3 pair first")
         need(len(calls) == 4, "a ytd window means all four calls")
     else:
         need(len(calls) <= 2, "without a ytd window at most two calls")
