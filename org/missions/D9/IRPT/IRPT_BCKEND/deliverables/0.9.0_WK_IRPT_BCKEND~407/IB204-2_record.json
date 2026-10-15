@@ -1,0 +1,35 @@
+{
+  "base_commit": "71c9c81b676c33299a5eb5b1145b695f798d35fa",
+  "changed_paths": [
+    "infra/aws/lambda/investor-reporting/export/entry.py",
+    "infra/aws/lambda/investor-reporting/export/retained_export.py",
+    "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_freeze_scope.py",
+    "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_server_pin.py",
+    "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_source.py"
+  ],
+  "negative_tests": [
+    "overwritten_version_still_exports_pinned_bytes",
+    "forged_client_pin_ignored"
+  ],
+  "tests_total": 7,
+  "tests_passed": 7,
+  "mutant_tests_failed": 5,
+  "notes": [
+    "base_commit is HEAD before the first commit (71c9c81b67). Product commit 608495b0ed is LOCAL on the worker branch; the surprise rows and this record are in a later commit.",
+    "Server pin: retained_export.server_pinned_body reads the current object through the injected reader with no VersionId and takes the VersionId, sha256 and size from that read (FILLED-REPORT-E). Page-sent version_id, sha256 and size are replaced, never trusted, and not refused. An unknown member is refused with FilledReportSourceRefused, the same class as before, before any read.",
+    "Submit call site: entry.py submit_export drops the page version_id, sha256 and size from a filled_report source before _async.accept (FILLED-REPORT-E, _page_pins_dropped). Every other body, PATH A and PATH B included, is returned unchanged.",
+    "No submit path freezes a filled_report source: freeze_filled_report has no production caller, and submit_service.py and submit_async.py branch on retained and PATH B bodies only. Those two files are outside the grant and were not edited. Surprise row IRPT_BCKEND-D2-W407-S1.",
+    "No installed composition supplies a filled_report reader. The reader exists only as the test doubles. Surprise row IRPT_BCKEND-D2-W407-S2. A missing object, an object with no VersionId, or a reader error raises FilledReportUnavailable (class name only).",
+    "tests_total and tests_passed count the new file (7 tests). The whole export tests directory ran 360 passed from the worktree root, with the bytecode cache prefix outside the tree.",
+    "mutant_tests_failed: own in-memory removal of the 4 FILLED-REPORT-E blocks in retained_export.py and entry.py ran test_filled_report_server_pin.py, giving 5 failed and 2 passed. The failures are refusals raised inside test bodies, not import or collection errors.",
+    "Not read: the installed composition (submit_installed.py), the naming builder and the reporting route. No object address is typed in any product file. No bucket or key template is added.",
+    "The commit-time client-data check printed WARN (hashed account-id list absent), as the order expects on dell2. Scratch lives in C:/dev/_scratch407, outside the tree.",
+    "The counters are zero: no function invoked, no sign-in, no AWS write, no data row written, no figure written, no vendor request. The surprise rows appended to the investigation file are channel rows, not data rows."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
