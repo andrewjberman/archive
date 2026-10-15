@@ -1,0 +1,247 @@
+{
+  "base_commit": "8110ace2ee5b182e34ca44ad97241df8f527f777",
+  "live_writer": {
+    "claim": "absent",
+    "statement": "The live daily writer of the flat bronze keys was not located. Measured timing: flat transactions keys landed 11:39-11:43Z, performance 11:45-11:49Z and positions .jsonl.gz 11:48-11:56Z on 2026-10-10 to 2026-10-14, after the deployed positions parquet at 11:25-11:26Z; no trigger, log stream or instance was found in that window.",
+    "evidence": [
+      "EventBridge list-rules (155 rules, read 2026-10-15): no cron rule fires in 11:40-11:56 UTC; the nearest are opal-inf-bronze-runner-cron cron(15 11), inf-api-positions-daily cron(22 11) and inf-api-txn-daily cron(32 11); the one rate rule, opal-inf-value-parity-hourly rate(1 hour), targets the value-parity Lambda and its fire minute was not ruled out.",
+      "Lambda log groups read (2026-10-14 last events): inf-api-positions 11:25:55Z, inf-api-txn 11:32:32Z, inf-performance-daily 14:28:19Z, irpt-inf-holdings-performance-lambda 14:00:28Z; none falls in the flat-writer window.",
+      "head-object of bronze/positions/2026-10-14.jsonl.gz and of 2026-07-10 (read 2026-10-15): the Metadata map is empty; the bucket notification configuration holds two prefixes (gold/meta/ and silver/_silver_complete/), neither a bronze prefix.",
+      "Running EC2 instances (five, read 2026-10-15) carry no inflection tag; no local Windows scheduled task is inflection-named; CloudTrail lookup-events holds no S3 data events, so the principal cannot be named. The search is stated and the writer identity stays absent."
+    ]
+  },
+  "pair_b": {
+    "files": [
+      {
+        "path": "data/inf/manual_api/pull_inflection_positions_daily.py",
+        "line": 445,
+        "identifier": "bronze_key"
+      },
+      {
+        "path": "infra/aws/lambda/inf-pipeline/inf-api-positions/pull_inflection_positions_daily.py",
+        "line": 437,
+        "identifier": "bronze_key"
+      },
+      {
+        "path": "infra/aws/lambda/inf-pipeline/inf-api-positions/lambda_function.py",
+        "line": 65,
+        "identifier": "pull_main"
+      },
+      {
+        "path": "infra/aws/terraform/inf-pipeline/inf-api-positions.tf",
+        "line": 179,
+        "identifier": "inf_api_positions_schedule"
+      },
+      {
+        "path": "infra/aws/terraform/inf-pipeline/inf-api-positions.tf",
+        "line": 182,
+        "identifier": "schedule_expression"
+      },
+      {
+        "path": "infra/aws/terraform/inf-pipeline/inf-api-txn.tf",
+        "line": 169,
+        "identifier": "schedule_expression"
+      },
+      {
+        "path": "data/inf/manual_api/pull_inflection_transactions_rest.py",
+        "line": 585,
+        "identifier": "bronze_key"
+      },
+      {
+        "path": "data/inf/manual_api/pull_inflection_performance_rest.py",
+        "line": 639,
+        "identifier": "bronze_key"
+      }
+    ],
+    "port": "Port the positions, transactions and performance flat writes (each bronze_key put and its per-date loop, currently in three manual CLIs) into one scheduled handler in the inf-api-positions package, invoked once by the 06:00 New York schedule for the three feeds. The handler keeps the flat .jsonl.gz key shape the mirror reads (the deployed file's parquet write at line 437 becomes that shape), keeps the positions silver convert step after the positions write, and drops the parquet-only write path.",
+    "cli_disposition": "RETIRED in the same pair: the manual CLI bronze writes (positions line 445, transactions line 585, performance line 639) are removed, and each manual file exits with a message naming the scheduled handler. The rules inf-api-positions-daily (11:22 UTC), inf-api-txn-daily (11:32 UTC) and opal-inf-bronze-runner-cron (11:15 UTC) are disabled in the same release, never alongside the fold.",
+    "no_second_producer": true,
+    "schedule_builder_output": "Built by lib/opal_naming.py: name('orion','inflection','raw-producer','daily') returns orion-inf-raw-producer-daily (grade SCHEDULE CONFORMANT); name('orion','inflection','raw-producer','lambda') returns orion-inf-raw-producer-lambda (grade LAMBDA CONFORMANT). The schedule expression cron(0 6 * * ? *) with timezone America/New_York is not part of the name. Registry: no row is needed for either name; event_rules.json holds event-pattern rows only, and the builder does not refuse a cadence schedule.",
+    "trading_day_frontier": "The stamp is lib/trading_calendar.py expected_last_trading_day(now): today on a trading day, else the prior trading day. The pull date for the trading-day stamp is prev_trading_day(now). On a non-trading day the 06:00 fire still runs: it pulls the calendar day it owes and stamps the frontier at the last trading day; freshness is read as trading_days_behind against that stamp, never against a calendar day."
+  },
+  "pair_a": {
+    "feeds": {
+      "positions": {
+        "days": [
+          "2026-07-01",
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-08-06",
+          "2026-09-28",
+          "2026-09-29"
+        ],
+        "keys": [
+          "s3://opal-data-inf/bronze/positions/2026-07-01.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-07-03.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-07-04.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-07-05.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-08-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-09-28.jsonl.gz",
+          "s3://opal-data-inf/bronze/positions/2026-09-29.jsonl.gz"
+        ],
+        "requests": 2240,
+        "pacing": "one request in flight, paced by AdaptiveRateLimiter.throttle() (data/inf/scripts/bronze/rate_limiter.py:251-254) at the 2.0 req/s safe floor (rate_limiter.py:112), DEFAULT_RETRIES 3 with 0.5 s doubling backoff; 2240 = 320 households x 7 days, retries excluded"
+      },
+      "transactions": {
+        "days": [
+          "2026-07-01",
+          "2026-07-13",
+          "2026-07-14",
+          "2026-07-15",
+          "2026-08-06",
+          "2026-09-28",
+          "2026-09-29"
+        ],
+        "keys": [
+          "s3://opal-data-inf/bronze/transactions/2026-07-01.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-07-13.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-07-14.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-07-15.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-08-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-09-28.jsonl.gz",
+          "s3://opal-data-inf/bronze/transactions/2026-09-29.jsonl.gz"
+        ],
+        "requests": 6041,
+        "pacing": "one request in flight, paced by AdaptiveRateLimiter.throttle() (data/inf/scripts/bronze/rate_limiter.py:251-254) at the 2.0 req/s safe floor (rate_limiter.py:112), DEFAULT_RETRIES 3 with 0.5 s doubling backoff; 6041 is an upper bound (863 accounts x 7 dates), the true count can be lower"
+      },
+      "performance": {
+        "days": [
+          "2026-05-04",
+          "2026-05-05",
+          "2026-05-06",
+          "2026-05-07",
+          "2026-05-08",
+          "2026-05-11",
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-06",
+          "2026-07-07",
+          "2026-07-09",
+          "2026-07-13",
+          "2026-07-14",
+          "2026-07-15",
+          "2026-07-21",
+          "2026-07-22",
+          "2026-07-23",
+          "2026-08-06",
+          "2026-09-28",
+          "2026-09-29",
+          "2026-09-30",
+          "2026-10-13"
+        ],
+        "keys": [
+          "s3://opal-data-inf/bronze/performance/2026-05-04.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-05.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-07.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-08.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-05-11.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-01.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-02.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-07.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-09.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-13.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-14.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-15.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-21.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-22.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-07-23.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-08-06.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-09-28.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-09-29.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-09-30.jsonl.gz",
+          "s3://opal-data-inf/bronze/performance/2026-10-13.jsonl.gz"
+        ],
+        "requests": 7040,
+        "pacing": "one request in flight, paced by AdaptiveRateLimiter.throttle() (data/inf/scripts/bronze/rate_limiter.py:251-254) at the 2.0 req/s safe floor (rate_limiter.py:112), DEFAULT_RETRIES 3 with 0.5 s doubling backoff; 7040 = 320 households x 22 dates, a lower bound"
+      }
+    },
+    "absent_beforehand_read_at_act": true,
+    "through_b_code_path": true,
+    "read_back": "After each put, head-object the key and compare its ContentLength and ETag with the gzip body length and md5 recorded before the put; a mismatch stops the run and is recorded.",
+    "rollback_per_key": "Each key is new and written once; rollback per key is delete-object of that exact key if its read-back fails. No other key, date or prefix is listed, read for deletion or touched.",
+    "absent_at_source_policy": "A vendor response that holds no rows for a day is recorded ABSENT-AT-SOURCE with the response status in the run record; never write an empty key, and list the day for review."
+  },
+  "scope_feed_addendum": {
+    "statement": "Pair (b) adds the Scope account feed by addendum: each account-day carries Orion's return or ABSENT with NO_GROUP (no Orion group for the household) or GROUP_NO_SERIES (the group exists with no series), never zero. Every Orion request of the feed keeps calcGrossOfFees false, and the fee basis is NET (amendment 2). The one-account limit at orion_account_mapping.py line 84 is lifted by the pair; the attribution that replaces it is a build-slice decision recorded in the packet, not decided here.",
+    "fee_basis": "NET",
+    "fee_basis_note": "Sample (CTO msg 8049, B-IN round 119): one household with two fee-bearing accounts, Q3 2026. A sample of one household, not a proof for every account; every request of the feed keeps calcGrossOfFees false, and a missing account is ABSENT with NO_GROUP.",
+    "one_account_limit_site": {
+      "path": "infra/aws/lambda/investor-reporting/performance/orion_account_mapping.py",
+      "line": 84,
+      "identifier": "members != 1"
+    }
+  },
+  "blast_radius": {
+    "writes": [
+      "s3://opal-data-inf/bronze/positions/<7 dates in pair_a>.jsonl.gz (7 new keys)",
+      "s3://opal-data-inf/bronze/transactions/<7 dates in pair_a>.jsonl.gz (7 new keys)",
+      "s3://opal-data-inf/bronze/performance/<22 dates in pair_a>.jsonl.gz (22 new keys)",
+      "the new schedule orion-inf-raw-producer-daily and the new function orion-inf-raw-producer-lambda (created by the build, not by this design)"
+    ],
+    "reads": [
+      "the Orion API (per household and per account, per date; no request is made by this design)",
+      "silver/api_dims/household_rep_mapping and silver/api_dims/accounts_v2 partitions (the household and account lists)",
+      "orion/jwt/current.json (the session credential, read and never printed)",
+      "lib/trading_calendar.py (the calendar)"
+    ],
+    "new_iam": false,
+    "served_values_changed": false,
+    "other_dates_touched": false
+  },
+  "build_slices": [
+    {
+      "cell": "port-producer-into-scheduled-handler",
+      "risk": "LOCAL",
+      "files": [
+        "infra/aws/lambda/inf-pipeline/inf-api-positions/pull_inflection_positions_daily.py",
+        "infra/aws/lambda/inf-pipeline/inf-api-positions/lambda_function.py",
+        "data/inf/manual_api/pull_inflection_positions_daily.py",
+        "data/inf/manual_api/pull_inflection_transactions_rest.py",
+        "data/inf/manual_api/pull_inflection_performance_rest.py"
+      ],
+      "depends_on": []
+    },
+    {
+      "cell": "schedule-declaration",
+      "risk": "LOCAL",
+      "files": [
+        "infra/aws/terraform/inf-pipeline/inf-api-positions.tf",
+        "infra/aws/terraform/inf-pipeline/inf-api-txn.tf",
+        "infra/aws/terraform/inf-pipeline/eventbridge.tf"
+      ],
+      "depends_on": [
+        "port-producer-into-scheduled-handler"
+      ]
+    },
+    {
+      "cell": "scope-account-addendum",
+      "risk": "LOCAL",
+      "files": [
+        "infra/aws/lambda/investor-reporting/performance/orion_account_mapping.py"
+      ],
+      "depends_on": [
+        "port-producer-into-scheduled-handler"
+      ]
+    }
+  ],
+  "notes": [
+    "Grounding: the producer sites, the rule expressions and the rate limiter lines were read at base 8110ace2ee with Grep and Read; the day lists were computed read-only (LIST of the three opal-data-inf prefixes, and lib/trading_calendar.py trading_days_between over 2026-05-03 to 2026-10-14, 114 trading days).",
+    "Positions: 4723 keys, 7 parquet-only days, equal to the order's list. Transactions: the feed's first key is 2026-05-12; the order's seven days are its own span. Performance: 134 keys from 2026-05-03; 22 trading days lack a key in either format, the order's list.",
+    "Requests: 320 households and 863 accounts are the counts recorded in IB199-4 (deliverables 0.9.0_WK_IRPT_BCKEND~396); not re-counted here, no id is recorded. Request counts are arithmetic, not vendor measurements.",
+    "The mirror reads raw keys only: COERCED_SUFFIXES at lambda_function.py:77 refuses parquet and _is_raw at :347-349 gates it; the orion/inflection row at :100-118 maps bronze/ to orion/inflection/bronze/ (key_rulings.json rules the same prefix).",
+    "Naming: the existing rule inf-api-positions-daily grades OUT-OF-PATTERN (surprise row IRPT_BCKEND-D2-W400-S2); the new names above grade CONFORMANT. The flat keys are existing addresses (amendment 1), so no address() call is made for them.",
+    "The fold writes a new flat key each day from its first run; that is the pair's designed effect and is not the re-pull (a), which touches only the 36 keys in pair_a.",
+    "Not read: any body of an existing bronze or silver object; the JWT object and every secret value; the persisted rate-limiter state; the performance full-history window path; the accounts, reps, assets and eclipse rules beyond the list in IB199-4.",
+    "No Orion request was made, no Lambda was invoked, no AWS write, sign-in or secret read was made; AWS calls were list, head, describe, get and filter reads under the worker identity.",
+    "The order file and the check were not edited, and its status was not flipped."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
