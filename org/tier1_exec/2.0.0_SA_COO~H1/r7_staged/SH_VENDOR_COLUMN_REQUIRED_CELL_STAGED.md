@@ -41,4 +41,9 @@ The existing unnamed tests whose rows carry no `source` get one in the same edit
 ## Not mine
 
 The reader side (`read_sechist` mapping a point's vendor to the label the guard recognises) is 2.0.0_SA_COO~C1's and the CTO's split
-in msg 6255. This seat tells it the two exact strings so both halves agree.
+in msg 6255. This seat told it the two exact strings (msg to ~C1, 2026-10-15 ~21:26Z). Its reader half is issued as ADVI_COTBKF round 92,
+`TO-CB-cn-1` @df6ba01da2 (msg 6272, READ-acked here): exact-match `bloomberg` | `yahoo_finance`, no case folding; missing, null or any other
+string fails CLOSED to yahoo_finance, counted. It does not wait for this writer.
+
+OWED on landing: send 2.0.0_SA_COO~C1 the commit of this cell (its ask, msg 6272). The row D1-W181-S1 is disarmed by ~C1 with this seat's
+concurrence, after both halves landed and the first object under the prefix is read through them.
