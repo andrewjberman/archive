@@ -55,6 +55,21 @@ def ac2(r):
         fail("conditions_remaining must list the gate's condition names with every exemption applied")
     if (total - vals["exempted_absent_at_source"] > 0) != ("account_lost" in conds) or (n > 0) != ("classified_security_lost" in conds):
         fail("conditions_remaining must agree with the remaining lost accounts and the classified_security_lost count")
+    det = r.get("conditions_detail")
+    if not isinstance(det, list) or sorted(d.get("condition") for d in det if isinstance(d, dict)) != ["account_lost", "classified_security_lost"]:
+        fail("conditions_detail must hold exactly one entry for account_lost and one for classified_security_lost")
+    want = {"account_lost": total - vals["exempted_absent_at_source"], "classified_security_lost": n}
+    for d in det:
+        c = d["condition"]
+        trip = count(d.get("tripped"), c + ".tripped")
+        den = count(d.get("denominator"), c + ".denominator")
+        if trip != want[c] or trip > den:
+            fail("%s: tripped must equal the remaining count (%d) and not exceed the denominator (%d)" % (c, want[c], den))
+        P8.text(d.get("threshold"), 30, c + ".threshold")
+        P8.text(d.get("value"), 20, c + ".value")
+        cs = d.get("cause_split")
+        if not isinstance(cs, dict) or sorted(cs) != ["join", "source", "undetermined"] or sum(count(v, c + ".cause_split") for v in cs.values()) != trip:
+            fail("%s: cause_split must hold source, join and undetermined and sum to tripped" % c)
     print("OK: %d lost accounts, %d exempted, classes sum; %d classified securities lost" % (total, vals["exempted_absent_at_source"], n))
 
 
