@@ -50,8 +50,8 @@ def new_root(prefix):
 
 # ------------------------------------------------------------------ cell 1: the source map
 def fn_entry(with_shared, pin=None, sha=None, files_ok=True):
-    e = {"source_dir": "x", "files": ["entry.py"] + (["filled_named_accounts.py"] if with_shared and files_ok else []),
-         "staged_from": [{"repo_path": LAM + "reporting/entry.py", "pin": "a" * 40, "packaged_as": "entry.py", "sha256": "b" * 64}]}
+    e = {"source_dir": LAM + "reporting", "files": ["entry.py"] + (["filled_named_accounts.py"] if with_shared and files_ok else []),
+         "staged_from": [{"repo_path": LAM + "_authz/served.py", "pin": "a" * 40, "packaged_as": "served.py", "sha256": "b" * 64}]}
     if with_shared:
         e["staged_from"].append({"repo_path": P.SHARED, "pin": pin, "packaged_as": "filled_named_accounts.py", "sha256": sha})
     return e

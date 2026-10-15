@@ -45,7 +45,8 @@ FOREIGN = ("inflection", "cottonwood", "orion/", "eclipse/", "opal-data-inflecti
 WRITE_TOKENS = ("put_object", "upload_file", "upload_fileobj", "copy_object", "delete_object", "delete_objects", "put_item",
                 "delete_item", "update_item", "write_table", "write_to_dataset", ".to_parquet(", "s3 cp", "s3 sync", "s3 rm", "s3 mv")
 LONG_DIGITS = re.compile(r"\d{8,}")
-DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "where", "vintage")
+# `security` is a public security identifier (a CUSIP is nine digits): the order permits it in the record, with a count of accounts and never an account id
+DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "where", "vintage", "security")
 
 
 class Fail(Exception):
