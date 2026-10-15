@@ -1,5 +1,5 @@
 """IRPT_DASHBD round 133, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- DB-b-265, the COTTONWOOD REPORT-BUILD TERRAFORM ROOT and its source-map entry (CTO decision msg 8348; the handler is
-round 131's DB-b-263). A NEW root `infra/aws/terraform/investor-reporting/reporting-gold-cot/` that declares, in its own state, the firm-isolated function that runs the handler: one yang-lambda
+round 131's DB-b-263). A NEW root `infra/aws/terraform/investor-reporting/reporting-gold-iso/` that declares, in its own state, the firm-isolated function that runs the handler: one yang-lambda
 module (handler.lambda_handler, python3.12, timeout 900, memory 1024 from the issuer's local measurement, NO reserved concurrency because the chain invokes itself, the EXISTING native pyarrow
 layer through a read-only data source), an execution role and policy that read ONLY the two Cottonwood gold inputs, the one served model-series object and read back / write ONLY Cottonwood's
 filled_report_values prefix and invoke only the function itself, a scheduler role and policy, and ONE schedule created DISABLED. Every name from the builder, every firm-scoped value derived, never
@@ -29,8 +29,8 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 REC_REL = D + "0.9.0_WK_IRPT_DASHBD~216/RD_COT_REPORT_ROOT_FACTS_R133.json"
 ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-265.cottonwood-report-build-terraform-root-and-source-map-entry.md"
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~216"
-ROOT_DIR = "infra/aws/terraform/investor-reporting/reporting-gold-cot/"
-STATE_KEY = "investor-reporting/reporting-gold-cot/tfstate"
+ROOT_DIR = "infra/aws/terraform/investor-reporting/reporting-gold-iso/"
+STATE_KEY = "investor-reporting/reporting-gold-iso/tfstate"
 SOURCE_MAP_REL = "infra/aws/lambda/ci/lambda-source-map.json"
 ENTRY_KEY = "irpt-cot-reporting-gold-lambda"
 SOURCE_DIR = "infra/aws/lambda/investor-reporting/reporting-gold-cot"
@@ -190,7 +190,7 @@ def check_entry(base_map, new_map, head_blob, pin_blob, pin_ok, expect_role):
     e = new_map["functions"][ENTRY_KEY]
     need(e.get("pipeline") == "investor-reporting" and e.get("source_dir") == SOURCE_DIR and e.get("artifact_s3_key") == "investor-reporting/irpt-cot-reporting-gold-lambda.zip", "pipeline, source_dir or artifact_s3_key")
     need(e.get("files") == ["handler.py"] + CLOSURE, "files must be handler.py then the 18 closure members in the checker's order")
-    need(e.get("tf_file") == ROOT_DIR + "lambda.tf" and e.get("tf_resource") == "module.irpt_reporting_gold_cot.aws_lambda_function.this" and e.get("iam_role") == expect_role, "tf_file, tf_resource or iam_role")
+    need(e.get("tf_file") == ROOT_DIR + "lambda.tf" and e.get("tf_resource") == "module.irpt_reporting_gold_iso.aws_lambda_function.this" and e.get("iam_role") == expect_role, "tf_file, tf_resource or iam_role")
     sf = e.get("staged_from")
     need(isinstance(sf, list) and [s["repo_path"] for s in sf] == CLOSURE, "staged_from must list exactly the closure members in order")
     for s in sf:
@@ -242,8 +242,8 @@ def builder_names(root, text):
 
 
 def run_gate(root, names):
-    kinds = [("aws_lambda_function", "this"), ("aws_iam_role", "irpt_reporting_gold_cot_execution"), ("aws_iam_role_policy", "irpt_reporting_gold_cot_execution"),
-             ("aws_iam_role_policy", "irpt_reporting_gold_cot_scheduler"), ("aws_iam_role", "irpt_reporting_gold_cot_scheduler"), ("aws_scheduler_schedule", "irpt_reporting_gold_cot")]
+    kinds = [("aws_lambda_function", "this"), ("aws_iam_role", "irpt_reporting_gold_iso_execution"), ("aws_iam_role_policy", "irpt_reporting_gold_iso_execution"),
+             ("aws_iam_role_policy", "irpt_reporting_gold_iso_scheduler"), ("aws_iam_role", "irpt_reporting_gold_iso_scheduler"), ("aws_scheduler_schedule", "irpt_reporting_gold_iso")]
     changes = []
     for (t, n), nm in zip(kinds, names):
         key = "function_name" if t == "aws_lambda_function" else "name"
@@ -355,7 +355,7 @@ def selftest():
         stmt("ExecutionRoleAssumedByLambdaService", ["sts:AssumeRole"], ["arn:aws:iam:x"]), stmt("SchedulerRoleAssumedBySchedulerService", ["sts:AssumeRole"], ["arn:aws:iam:y"]),
         stmt("InvokeTheReportFunctionOnly", ["lambda:InvokeFunction"], ["arn:aws:lambda:x"])])
     mods = "".join('module "m%d" {\n  source = "../../modules/opal_name"\n}\n' % i for i in range(6))
-    lam = ('module "irpt_reporting_gold_cot" {\n  source = "../../modules/yang-lambda"\n  handler = "handler.lambda_handler"\n  timeout = 900\n  memory_size = 1024\n'
+    lam = ('module "irpt_reporting_gold_iso" {\n  source = "../../modules/yang-lambda"\n  handler = "handler.lambda_handler"\n  timeout = 900\n  memory_size = 1024\n'
            '  layers = [data.aws_lambda_layer_version.%s.arn]\n  artifact_key = file("lambda-source-map.json")\n}\n' % DATA_NAME)
     data = 'data "aws_lambda_layer_version" "%s" {\n  layer_name = "%s"\n}\n' % (DATA_NAME, LAYER_NAME)
     res = ('resource "aws_iam_role" "a" {}\nresource "aws_iam_role" "b" {}\nresource "aws_iam_role_policy" "c" {}\nresource "aws_iam_role_policy" "d" {}\n'
@@ -392,7 +392,7 @@ def selftest():
     staged = [{"repo_path": f, "pin": pins[f], "packaged_as": f, "sha256": sha(contents[f])} for f in CLOSURE]
     bmap = {"functions": {"other": {"x": 1}}}
     entry = {"pipeline": "investor-reporting", "source_dir": SOURCE_DIR, "artifact_s3_key": "investor-reporting/irpt-cot-reporting-gold-lambda.zip", "files": ["handler.py"] + CLOSURE,
-             "tf_file": ROOT_DIR + "lambda.tf", "tf_resource": "module.irpt_reporting_gold_cot.aws_lambda_function.this", "iam_role": "irpt-cot-reporting-gold-execution-role", "staged_from": staged}
+             "tf_file": ROOT_DIR + "lambda.tf", "tf_resource": "module.irpt_reporting_gold_iso.aws_lambda_function.this", "iam_role": "irpt-cot-reporting-gold-execution-role", "staged_from": staged}
     nmap = {"functions": {"other": {"x": 1}, ENTRY_KEY: entry}}
 
     def go(m, **kw):

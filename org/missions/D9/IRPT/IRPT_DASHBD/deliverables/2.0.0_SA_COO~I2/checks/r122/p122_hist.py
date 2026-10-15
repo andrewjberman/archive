@@ -9,8 +9,12 @@ The checker RECOMPUTES from the saved private bodies (sha256 in the record): the
 household's accounts in the round-119 roster body, as a sha256 of the ISO string), each account's group, series points, chain check and completeness, and the universe bound. It never
 calls the vendor. Call times are recorded by the worker (claim measured) and cannot be recomputed.
 
-  chain_matches: |prod(factor of the group's series points) - 1 - perf| <= 1e-6  (perf = the summary decimal fraction, factors = 1 + percent/100 per day, compact breakdown)
-  complete: points >= the number of NYSE trading days from the account's own accountStartDate (inclusive) to 2026-10-13 minus 1, and <= that number plus 1
+  Series basis (measured, round 122): the compact Daily breakdown is basedOn Calendar, so a series has one point per CALENDAR day and no gaps. Amended rules (issuer error on the first
+  cut, which graded completeness in trading days and chained every series against the summary): per account with a series,
+    span_days = days from the first point's endDate to the last's, inclusive; gap_breaks = consecutive endDates more than 1 day apart; contiguous = gap_breaks == 0 and points == span_days;
+    chain_cumulative_bp = |prod(factor) - 1 - perf| * 1e4; for span_days <= 365 the summary perf is the cumulative return and chain_matches = chain_cumulative_bp <= 0.01;
+    for span_days > 365 Orion ANNUALIZES the summary (annualize is on), so annualized_residual_bp = |prod(factor)^(365/span_days) - 1 - perf| * 1e4 is recorded (rounded to 0.1)
+    and annualization_explains = annualized_residual_bp <= 10.0 (a stated reading tolerance for the 365-day convention; the residuals themselves are the finding).
 
 Usage: python -I <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
        python -I <this file> --selftest [<repo_root>]         the pure helpers on synthetic arms
@@ -53,13 +57,21 @@ def walk(node):
             yield from walk(v)
 
 
+def _day(s):
+    import datetime as dt
+    s = str(s)
+    if "/" in s:
+        return dt.datetime.strptime(s[:10], "%m/%d/%Y").date()
+    return dt.date.fromisoformat(s[:10])
+
+
 def group_series(body):
-    """{account id: (perf, [factors])} for the Account groups of one body (factors = numeric `factor` of every descendant, in document order)."""
+    """{account id: (perf, [factors], [end dates])} for the Account groups of one body (document order)."""
     out = {}
     for g in walk(body):
         if g.get("$type") != "calculated-group" or g.get("grouping") != "Account":
             continue
-        perf, facs = None, []
+        perf, facs, ends = None, [], []
         for n in walk(g):
             if n is g:
                 continue
@@ -67,28 +79,24 @@ def group_series(body):
                 perf = float(n["performance"])
             if P117._num(n.get("factor")):
                 facs.append(float(n["factor"]))
-        out[P117.key_of(g.get("groupEntityId"))] = (perf, facs)
+                ends.append(n.get("endDate"))
+        out[P117.key_of(g.get("groupEntityId"))] = (perf, facs, ends)
     return out
 
 
-def chain_ok(perf, facs):
+def series_measures(perf, facs, ends):
+    """(span_days, gap_breaks, contiguous, chain_cumulative_bp, annualized_residual_bp or None) for one group's series; None when it has no series."""
     if perf is None or not facs:
-        return False
-    p = 1.0
+        return None
+    ds = [_day(e) for e in ends]
+    span = (ds[-1] - ds[0]).days + 1
+    gaps = sum(1 for a, b in zip(ds, ds[1:]) if (b - a).days > 1)
+    chain = 1.0
     for f in facs:
-        p *= f
-    return abs(p - 1.0 - perf) <= CHAIN_TOL
-
-
-def trading_days(start, end):
-    import datetime as dt
-    from lib import trading_calendar as tc
-    return len(tc.trading_days_between(dt.date.fromisoformat(start), dt.date.fromisoformat(end)))
-
-
-def complete_ok(points, start, end=END):
-    n = trading_days(start, end)
-    return n - 1 <= points <= n + 1
+        chain *= f
+    cum = abs(chain - 1.0 - perf) * 1e4
+    ann = round(abs(chain ** (365.0 / span) - 1.0 - perf) * 1e4, 1) if span > 365 and chain > 0 else None
+    return span, gaps, (gaps == 0 and len(facs) == span), round(cum, 2), ann
 
 
 def check(root):
@@ -115,7 +123,7 @@ def check(root):
     need(rec.get("token_store_used") in P117.STORES, "token_store_used")
     meas = rec.get("households", {})
     max_s, max_b, any_ok = 0.0, 0, False
-    all_present, all_chain, all_complete = True, True, True
+    allexp_holder = []
     for i, c in enumerate(calls):
         lab = ("A", "B")[i]
         need(c.get("household") == lab, "call %d must be household %s" % (i + 1, lab))
@@ -141,25 +149,34 @@ def check(root):
         exp = []
         for a in accts:
             if a not in gs:
-                exp.append({"account_sha256": P120.dig(a), "state": "NO_GROUP", "points": 0, "chain_matches": False, "complete": False})
+                exp.append({"account_sha256": P120.dig(a), "state": "NO_GROUP", "points": 0})
                 continue
-            perf, facs = gs[a]
-            has = perf is not None and len(facs) >= 1
-            start = str(rows[a]["accountStartDate"])[:10] if a in rows and rows[a].get("accountStartDate") not in (None, "") else None
-            exp.append({"account_sha256": P120.dig(a), "state": "GROUP_WITH_SERIES" if has else "GROUP_NO_SERIES", "points": len(facs),
-                        "chain_matches": chain_ok(perf, facs), "complete": bool(has and start and complete_ok(len(facs), start))})
+            perf, facs, ends = gs[a]
+            m = series_measures(perf, facs, ends)
+            if m is None:
+                exp.append({"account_sha256": P120.dig(a), "state": "GROUP_NO_SERIES", "points": len(facs)})
+                continue
+            span, gaps, contiguous, cum, ann = m
+            e = {"account_sha256": P120.dig(a), "state": "GROUP_WITH_SERIES", "points": len(facs), "span_days": span, "gap_breaks": gaps, "contiguous": contiguous,
+                 "chain_cumulative_bp": cum}
+            if span <= 365:
+                e["chain_matches"] = cum <= 0.01
+            else:
+                e["annualized_residual_bp"] = ann
+                e["annualization_explains"] = ann is not None and ann <= 10.0
+            exp.append(e)
         exp.sort(key=lambda e: e["account_sha256"])
         need(meas[lab].get("accounts") == exp, "household %s per-account measurements differ from the recount" % lab)
-        for e in exp:
-            if e["state"] == "GROUP_WITH_SERIES":
-                all_chain = all_chain and e["chain_matches"]
-                all_complete = all_complete and e["complete"]
-            else:
-                all_present = False
+        allexp = locals().get("allexp", []) + exp
+        allexp_holder.extend(exp)
     exp_c = "ACCEPTED" if any_ok else ("REFUSED" if all(c["http_status"] in (401, 403) for c in calls) else "REQUEST_REJECTED")
     need(rec.get("c_credential", {}).get("verdict") == exp_c, "c_credential differs from the recount (%s)" % exp_c)
-    v = rec.get("verdict", {})
-    need(v.get("all_accounts_with_series") is all_present and v.get("chain_matches_all") is all_chain and v.get("series_complete_all") is all_complete, "verdict differs from the recount")
+    series = [e for e in allexp_holder if e["state"] == "GROUP_WITH_SERIES"]
+    exp_v = {"all_accounts_with_series": all(e["state"] == "GROUP_WITH_SERIES" for e in allexp_holder),
+             "series_contiguous_all": all(e["contiguous"] for e in series),
+             "short_series_chain_matches_all": all(e["chain_matches"] for e in series if "chain_matches" in e),
+             "long_series_annualization_explains_all": all(e["annualization_explains"] for e in series if "annualization_explains" in e)}
+    need(rec.get("verdict") == exp_v, "verdict differs from the recount (%s)" % exp_v)
     # the universe bound
     if any_ok:
         hh_in_roster = sum(1 for accts in hh.values() if any(a in rows for a in accts))
@@ -177,12 +194,18 @@ def selftest():
 
     body = {"calculations": [{"$type": "calculated-group", "grouping": "Account", "groupEntityId": 7,
                               "calculations": [{"$type": "calculated-performance", "performance": 0.0302},
-                                               {"series": [{"factor": 1.01}, {"factor": 1.02}]}]}]}
+                                               {"series": [{"factor": 1.01, "endDate": "10/01/2026"}, {"factor": 1.02, "endDate": "10/02/2026"}]}]}]}
     gs = group_series(body)
-    arm("group_series", list(gs) == ["7"] and gs["7"][1] == [1.01, 1.02] and abs(gs["7"][0] - 0.0302) < 1e-12)
-    arm("chain ok", chain_ok(0.0302, [1.01, 1.02]))
-    arm("chain off", not chain_ok(0.04, [1.01, 1.02]) and not chain_ok(None, [1.01]) and not chain_ok(0.1, []))
-    arm("complete uses the calendar", trading_days("2026-10-01", "2026-10-13") == 9 and complete_ok(9, "2026-10-01") and not complete_ok(5, "2026-10-01"))
+    arm("group_series", list(gs) == ["7"] and gs["7"][1] == [1.01, 1.02] and gs["7"][2] == ["10/01/2026", "10/02/2026"])
+    m = series_measures(*gs["7"])
+    arm("short series: contiguous, chain exact", m[0] == 2 and m[1] == 0 and m[2] is True and m[3] <= 0.01 and m[4] is None)
+    gap = series_measures(0.0302, [1.01, 1.02], ["10/01/2026", "10/04/2026"])
+    arm("a gap breaks contiguity", gap[1] == 1 and gap[2] is False)
+    import datetime as _dt
+    days = [_dt.date.fromordinal(739000 + k).isoformat() for k in range(400)]
+    long_ = series_measures((1.0001 ** 400) ** (365.0 / 400) - 1.0, [1.0001] * 400, days)
+    arm("long series: summary is annualized, cumulative differs, annualized residual ~0", long_[0] == 400 and long_[3] > 0.01 and long_[4] is not None and long_[4] <= 0.1)
+    arm("none for no series", series_measures(None, [], []) is None)
     for n, v in arms:
         print(("ok   " if v else "FAIL ") + n)
     return all(v for _, v in arms)
