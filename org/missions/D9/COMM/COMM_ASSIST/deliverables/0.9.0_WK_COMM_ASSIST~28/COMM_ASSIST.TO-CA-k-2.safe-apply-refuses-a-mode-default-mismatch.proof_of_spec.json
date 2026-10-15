@@ -1,0 +1,131 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-k-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-k-2.safe-apply-refuses-a-mode-default-mismatch.md",
+  "group": "OTHER",
+  "vintage_commit": "cd1e04765b"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round19.md",
+  "vintage_commit": "cd1e04765b",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-k-2.safe-apply-refuses-a-mode-default-mismatch.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~28",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/ldo001-mode-default-check.py",
+   "kind": "script",
+   "commit_or_etag": "935a400f14",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New tool. Compares the trunk default of the variable chat_assist_ingress_mark_mode in the --tf file with INGRESS_MARK_MODE of the handler and ingress Lambda functions of module ldo_001 (names from lib/opal_naming.py name(), read-only through the .tools/aws shim, or the --live-json seam). Last line LDO001-MODE verdict=OK|REFUSED|NO-VERDICT default= live=; rc 0 only for OK. --tf is required. Not deployed; no apply was run.",
+   "artifact_covered_by": [
+    "CAk2-AC1"
+   ]
+  },
+  {
+   "path_or_key": ".tools/safe-apply.sh",
+   "kind": "script",
+   "commit_or_etag": "935a400f14",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ONE added hunk of 56 lines before the seat-gates block, no removed line (AC3 case 93 reads hunks=1 removed=0; bash -n rc 0). The block detects a covered apply (-target of module.ldo_001 or below, or no -target in a tree declaring module ldo_001), runs the check with --tf, prints [ldo001-mode], exits 10 with BLOCKED on a non-zero result, writes one LDO001_MODE_OVERRIDE audit line, and has the LDO001_MODE_LIVE_JSON and SAFE_LDO001_MODE_CHECK_ONLY seams. Not deployed.",
+   "artifact_covered_by": [
+    "CAk2-AC1",
+    "CAk2-AC2",
+    "CAk2-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAk2-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r19/checks/check_l2_gate.py\" expect: L2-GATE ok=True arms=13 of 13",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r19/checks/check_l2_gate.py\"",
+   "output_evidence": "(run from the worktree root at HEAD 935a400f14, rc 0; the later commit 18d58c9f58 touches only the investigation file) deciding line: L2-GATE ok=True arms=13 of 13. No failed-arm line printed. The check's own cleanup left no org/git-author-override-audit.l2chk.log.",
+   "denominator": "13 of 13 arms pass: mismatch-refuses, equal-ok, live-unreadable-no-verdict, tf-unparsable-no-verdict, functions-disagree-refuses, apply-mismatch-blocks-before-terraform, apply-match-passes-the-block, apply-two-token-target-below-the-module-blocks, apply-unscoped-in-a-tree-with-the-module-blocks, apply-of-another-target-never-runs-the-check, apply-in-a-tree-without-the-module-never-runs-the-check, apply-with-no-verdict-blocks, override-lets-the-apply-go-on-and-writes-an-audit-line",
+   "expect": "L2-GATE ok=True arms=13 of 13",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAk2-AC2",
+   "criterion_verbatim": "bash .tools/tests/test_safe_apply_scoped_gates.sh expect: RESULT: PASS",
+   "method": "test_suite",
+   "invocation": "bash .tools/tests/test_safe_apply_scoped_gates.sh",
+   "output_evidence": "(run from the worktree root at HEAD 935a400f14, rc 0) deciding line: RESULT: PASS. The six PASS lines: tagauthz_targeted_grades_own_plan, tagauthz_targeted_refuses_own_plan, tombstone_targeted_grades_own_plan, tombstone_targeted_refuses_own_plan, planfile_stages_read_given_planfile, unscoped_apply_unchanged. No FAIL line.",
+   "denominator": "6 of 6 PASS lines; 0 FAIL",
+   "expect": "RESULT: PASS",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAk2-AC3",
+   "criterion_verbatim": "python .tools/tests/test_apply_who_and_crossbox.py expect: APPLY-GATES-TEST cases=100/100 ok=True",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_apply_who_and_crossbox.py",
+   "output_evidence": "(run from the worktree root at HEAD 935a400f14, rc 0) deciding line: APPLY-GATES-TEST cases=100/100 ok=True. Case 93 (safe-apply.sh differs from the pre-block wrapper by ONE added hunk, no removed line, bash -n clean) printed PASS with hunks=1 removed=0.",
+   "denominator": "100 of 100 cases PASS; 0 FAIL",
+   "expect": "APPLY-GATES-TEST cases=100/100 ok=True",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the live INGRESS_MARK_MODE replaced by record (a JSON fixture through the --live-json seam) against the real trunk default enforce: a covered mismatch must refuse",
+   "expected": "LDO001-MODE verdict=REFUSED default=enforce live=record; rc 1",
+   "observed": "LDO001-MODE verdict=REFUSED default=enforce live=record; mutant rc=1 (run from the worktree root at HEAD 935a400f14 with .scratch/live_record_mutant.json)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "CAk2-AC1 run on the pre-fix working tree (the default-path version, before the --tf change) and again at HEAD 935a400f14 (--tf required), the L2-GATE lines compared",
+   "observed": "both runs read L2-GATE ok=True arms=13 of 13 (rc 0); the --tf change does not move the arms because every caller passes --tf",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a real terraform run and a real apply through safe-apply.sh",
+   "reason": "the apply is the act the gate protects; every safe-apply run in the criteria uses a stub terraform (SAFE_APPLY_TERRAFORM) and --dry-seat-gates, as the issuer check does"
+  },
+  {
+   "item": "the base-commit reading of CAk2-AC1 (the order's 2 of 13)",
+   "reason": "not re-measured by this worker: the base commit was not checked out; the issuer check owns that reading"
+  }
+ ],
+ "surprises": [
+  "COMM_ASSIST-W28-S1: the LGIC naming gate refused the hand-typed default --tf path (the literal transcripts) at commit attempt on cd1e04765b; no registry row carries a Terraform file path, so --tf was made required (commit 935a400f14). The order's optional [--tf PATH] bracket changed. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "COMM_ASSIST-W28-S2: the commit's Co-Authored-By line is Claude Haiku 5.5, not the Sonnet 5.5 the order's step 3 names. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "COMM_ASSIST-W28-S3: after a refused safe-commit, safe-apply.sh was still staged in the worktree index although the message said files unstaged. OBSERVATION, INERT, UNDER_INVESTIGATION."
+ ],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~28/COMM_ASSIST.TO-CA-k-2.safe-apply-refuses-a-mode-default-mismatch.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r19/checks/check_l2_gate.py\"",
+   "result": "L2-GATE ok=True arms=13 of 13; rc 0 at HEAD 935a400f14 (the later commit 18d58c9f58 touches only the investigation file)"
+  },
+  {
+   "tool": "live read (read-only, the one allowed read of the real tf)",
+   "invocation": "python .tools/ldo001-mode-default-check.py --tf infra/aws/terraform/transcripts/chat_assist.tf",
+   "result": "LDO001-MODE verdict=OK default=enforce live=enforce; rc 0 (read at HEAD 18d58c9f58)"
+  },
+  {
+   "tool": "usage check",
+   "invocation": "python .tools/ldo001-mode-default-check.py",
+   "result": "LDO001-MODE note: --tf PATH is required; LDO001-MODE verdict=NO-VERDICT default=- live=-; rc 2"
+  },
+  {
+   "tool": "ruff (py39)",
+   "invocation": "python -m ruff check --target-version py39 .tools/ldo001-mode-default-check.py",
+   "result": "All checks passed!; rc 0"
+  },
+  {
+   "tool": "commit gate",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_COMM_ASSIST~28 <0.9.0_WK_COMM_ASSIST~28@opal.agent>\" -F .scratch/commit_msg_ca_k2.txt -- .tools/ldo001-mode-default-check.py .tools/safe-apply.sh",
+   "result": "first attempt at cd1e04765b REFUSED by the naming limb (S1, rc 1); second attempt rc 0, commit 935a400f14, 2 files changed, 223 insertions(+), msg-verify MATCH"
+  }
+ ]
+}

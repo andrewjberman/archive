@@ -42,6 +42,12 @@ MUTANTS = (
     ("w_isinternal", ("W1",)),
     ("w_chipcall", ("W3",)),
     ("w_notyped", ("W6",)),
+    ("c_noroll", ("V11",)),
+    ("c_rollfirst", ("V11",)),
+    ("c_rollv2", ("V12",)),
+    ("c_rollall", ("V11", "V6")),
+    ("c_stitchall", ("V11",)),
+    ("w_stitchroll", ("W9",)),
 )
 
 
@@ -72,7 +78,7 @@ def helpers(mutant):
     elif mutant == "nosuppress":
         swap("else if (mode === 'variant2' && diff !== null) suppressed = true", "else if (mode === 'variant2' && diff !== null) custom = diff")
     elif mutant == "rollall":
-        swap("v[key] === null && carriedSet.has(period) && lastKnown", "v[key] === null && lastKnown")
+        swap("const rolls = carriedSet.has(period) || (stitchOn && key === CUSTOM_MODELS_LABEL)", "const rolls = true")
     elif mutant == "nocarried":
         swap("const carriedSet = new Set(served.carriedDates ?? [])", "const carriedSet = new Set<string>()")
     elif mutant == "footalways":
@@ -80,11 +86,21 @@ def helpers(mutant):
     elif mutant == "estimateloses":
         swap("if (existing === 'interpolated_estimate') return existing", "if (existing === 'interpolated_estimate' && carriedKeys.length === 0) return existing")
     elif mutant == "poolblind":
-        swap("if (readAt(served.otherModels, i) !== null) custom = diff\n      else if (stitchOn)", "if (stitchOn) custom = infCustom.get(period) ?? null\n      else if (readAt(served.otherModels, i) !== null) custom = diff\n      else if (stitchOn)")
+        swap("if (readAt(served.otherModels, i) !== null) custom = diff\n      else if (stitchOn && (poolFirst < 0 || i < poolFirst))", "if (stitchOn) custom = infCustom.get(period) ?? null\n      else if (readAt(served.otherModels, i) !== null) custom = diff\n      else if (stitchOn && (poolFirst < 0 || i < poolFirst))")
     elif mutant == "mutates":
         swap("const carriedSet = new Set(served.carriedDates ?? [])", "const carriedSet = new Set(served.carriedDates ?? [])\n  ;(served as any).seen = true")
     elif mutant == "compvisible":
         swap("return mode === 'variant1'\n    ?", "return mode !== 'zzz'\n    ?")
+    elif mutant == "c_noroll":
+        swap("const rolls = carriedSet.has(period) || (stitchOn && key === CUSTOM_MODELS_LABEL)", "const rolls = carriedSet.has(period)")
+    elif mutant == "c_rollfirst":
+        swap("const lastKnown: Record<string, Num> = {}" + chr(10), "const lastKnown: Record<string, Num> = { [CUSTOM_MODELS_LABEL]: 0 }" + chr(10))
+    elif mutant == "c_rollv2":
+        swap("(stitchOn && key === CUSTOM_MODELS_LABEL)", "(key === CUSTOM_MODELS_LABEL)")
+    elif mutant == "c_rollall":
+        swap("(stitchOn && key === CUSTOM_MODELS_LABEL)", "stitchOn")
+    elif mutant == "c_stitchall":
+        swap("(poolFirst < 0 || i < poolFirst)", "true")
     elif mutant == "retiredfield":
         swap("      customSuppressed: suppressed,", "      customSuppressed: suppressed,\n      clientUnsupervised: null,")
     return t
@@ -120,6 +136,7 @@ def patch_page(t, mutant):
     end = t.index("  const { data: scopeAumMetrics")
     gate = "internal" if mutant != "w_ungated" else "true"
     mode_arg = "internal" if mutant != "w_isinternal" else "isInternal()"
+    inf_arg = "inflectionByModel" if mutant != "w_stitchroll" else "rollBlendsIntoArchetypeSeries(inflectionByModel)"
     chip = "  const _chip = clientChipAt(null as never, null, null)\n" if mutant == "w_chipcall" else ""
     wiring = f"""  const {{ data: firm49Data }} = useQuery<MdpfPerFirmTimeSeries | null>({{
     queryKey: ['mdpf-per-firm-timeseries', '49financial'],
@@ -133,6 +150,11 @@ def patch_page(t, mutant):
     enabled: effectiveFirmId === 'global' && {gate},
     staleTime: 5 * 60 * 1000,
   }})
+  const trendStitch = useMemo(() => {{
+    if (!{gate}) return null
+    const inflectionByModel: Record<string, never[]> = {{}}
+    return {{ firm49: {{}}, inflectionCustom: groupCustomModelsSeries({inf_arg}, new Set(MODEL_ORDER)) }}
+  }}, [internal, firm49Data, inflectionData])
   const trendMode = trendModeFor({mode_arg})
 {chip}  const globalTrendRows = useMemo(() => (globalMdpfData ? buildGlobalTrendRows(null as never, null, trendMode, null) : []), [globalMdpfData, firm49Data, inflectionData, trendMode])
   const globalTrendFootnoteText = globalTrendFootnote(globalTrendRows, trendMode)

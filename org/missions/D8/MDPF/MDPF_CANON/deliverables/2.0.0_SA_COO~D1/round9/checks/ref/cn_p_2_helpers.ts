@@ -76,6 +76,9 @@ export function buildGlobalTrendRows(
   const infCustom = stitchOn ? indexByPeriod(stitch!.inflectionCustom) : new Map<string, Num>()
   const carriedSet = new Set(served.carriedDates ?? [])
   const lastKnown: Record<string, Num> = {}
+  // CN-p-2 amendment 2: the first index at which the fold's pooled line is served (-1: never). Inflection's own series stands in for Custom
+  // only BEFORE it; from then on it understates Custom (Cottonwood's members are outside it), so a date without the pool rolls forward instead.
+  const poolFirst = (served.otherModels ?? []).findIndex((x) => finiteOrNull(x) !== null)
   return served.dates.map((period, i) => {
     const pre = typeof detailBegins === 'string' && period < detailBegins
     const v: Record<string, Num> = { total: readAt(served.total, i) }
@@ -92,7 +95,7 @@ export function buildGlobalTrendRows(
     if (!pre) {
       const diff = customByDifference(modelAua, five)
       if (readAt(served.otherModels, i) !== null) custom = diff
-      else if (stitchOn) custom = infCustom.get(period) ?? null
+      else if (stitchOn && (poolFirst < 0 || i < poolFirst)) custom = infCustom.get(period) ?? null
       else if (mode === 'variant2' && diff !== null) suppressed = true
     }
     v[CUSTOM_MODELS_LABEL] = custom
@@ -101,7 +104,9 @@ export function buildGlobalTrendRows(
     v['ALT Strategies'] = readAt(served.altStrategies, i)
     const carried: string[] = []
     for (const key of Object.keys(v)) {
-      if (v[key] === null && carriedSet.has(period) && lastKnown[key] !== undefined && lastKnown[key] !== null) {
+      // Roll FORWARD: on a date the producer lists in carried_dates, and (Variant 1 only) Custom Models on ANY date after its first value.
+      const rolls = carriedSet.has(period) || (stitchOn && key === CUSTOM_MODELS_LABEL)
+      if (v[key] === null && rolls && lastKnown[key] !== undefined && lastKnown[key] !== null) {
         v[key] = lastKnown[key]
         carried.push(key)
       }
