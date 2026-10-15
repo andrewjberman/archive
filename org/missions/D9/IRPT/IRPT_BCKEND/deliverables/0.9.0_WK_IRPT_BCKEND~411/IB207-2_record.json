@@ -1,6 +1,8 @@
 {
   "base_commit": "f0069dd8ca46b7f06cd5ddae22c48ac2d8b2fd48",
   "changed_paths": [
+    "infra/aws/lambda/ci/lambda-source-map.json",
+    "infra/aws/lambda/ci/tests/test_source_map_filled_reader_installed.py",
     "infra/aws/lambda/investor-reporting/export/entry.py",
     "infra/aws/lambda/investor-reporting/export/filled_reader_installed.py",
     "infra/aws/lambda/investor-reporting/export/render.py",
@@ -11,18 +13,20 @@
     "render_pinned_filled_report_from_fixture",
     "installed_reader_never_reads_current_object_for_a_pin",
     "tampered_pinned_version_is_refused",
+    "render_refuses_a_filled_report_naming_an_uncovered_account",
     "missing_pinned_version_is_refused",
     "entry_installs_filled_reader_when_absent_and_keeps_supplied_one"
   ],
-  "tests_total": 6,
-  "tests_passed": 6,
-  "mutant_tests_failed": 6,
+  "tests_total": 7,
+  "tests_passed": 7,
+  "mutant_tests_failed": 7,
   "notes": [
-    "Seam: the reader is composed by entry.py _with_filled_reader, called from _with_platinum_reader, which both compose legs (submit_export and _compose_for_async) run; the reader is filled_reader_installed.installed_filled_reader(ports, tenant). The render side is render.filled_render_package, which reads the pinned bytes through retained_export.filled_render_read (the one read, read_pinned_filled) and takes the accounts from _scope/filled_named_accounts.py.",
-    "Live caller: none in the five render modules (render.py, dispatch.py, download.py, package.py, handler.py). retained_export.filled_render_read has no caller outside the tests and nothing in export/ reads ports[filled_reader] yet; the submit-path wiring is IB-pr-566's files (submit_async.py, submit_service.py), not in this grant. Recorded as channel row IRPT_BCKEND-D2-W411-S2.",
-    "Address: lib/opal_naming.address() for the filled report at firm 49financial, partition client=<id>, object name from the reporting route's FILLED_OBJECT constant; the address was built locally (no AWS call). The first commit was refused by the naming gate on a module-level literal; the literal is now inline in the address call, as reporting/entry.py does.",
-    "Read: retained_export.py lines 314-489 (the pin, the one read and the render read), _scope/filled_named_accounts.py, reporting/entry.py _filled_uri and FILLED_OBJECT, entry.py _with_platinum_reader, render.py, the check file p207_cells.py and its helpers. Not read: the export role's IAM grant on the filled object (Terraform, not in grant), the packaged zip layout, submit_async.py and submit_service.py. Channel row IRPT_BCKEND-D2-W411-S1 records the fence question.",
-    "Tests: six offline tests over an in-memory S3 with object versions and synthetic ids and bytes; the pinned read is asserted to carry the VersionId on every call. Removal run (scratch copy, in memory, the four FILLED-REPORT-G blocks of entry.py, filled_reader_installed.py and render.py): 6 failed, 0 errors, rc 1.",
+    "Amendment 1 (issuer, commit 9147052, items 5 and 6) is applied. Item 5: render.filled_render_package now CALLS retained_export.filled_render_read (the one pinned read) and retained_export.filled_covered_accounts (IB-pr-566's function); the parallel account logic is deleted. It takes permitted_account_ids and refuses a filled report naming an account outside them. Item 6: lambda-source-map.json irpt-export-render files gains exactly the name filled_reader_installed.py, and infra/aws/lambda/ci/tests/test_source_map_filled_reader_installed.py holds three offline tests.",
+    "Merge: box/dell2 was merged into this branch under the coordinator's permission (plain merge, merge commit 5ddebdbbf4 at box/dell2 b94eaf4114; the tip has since moved and was not merged). The one conflict, the append region of the IRPT_BCKEND channel file, was resolved by keeping both sides. The merge commit is excluded from the record because it is not a commit of this serial.",
+    "Seam: entry.py _with_filled_reader is called from _with_platinum_reader, which both compose legs run, and installs ports[filled_reader] when absent. The submit-path callers on box/dell2 (IB-pr-566, submit_async.py and submit_service.py) read the same reader signature; channel row IRPT_BCKEND-D2-W411-S4 records that the render seam now has a caller there.",
+    "Address: lib/opal_naming.address() for the filled report at firm 49financial, partition client=<id>, object name from the reporting route's FILLED_OBJECT constant; the address was built locally (no AWS call). The reader splits the address on the slash, with no literal scheme string in product code.",
+    "Read: retained_export.py (filled_render_read, filled_covered_accounts, read_pinned_filled, FilledReportUnavailable), entry.py _with_platinum_reader, render.py, the source-map structure of irpt-export-render, the amended order file and the check file p207_cells.py and its helpers. Not read: the export role's IAM grant on the filled object (Terraform, not in grant); channel rows S1 and S3 stay as recorded for the deploy legs.",
+    "Tests: seven offline tests over an in-memory S3 with object versions and synthetic ids and bytes; the pinned read is asserted to carry the VersionId on every call. Three source-map tests read the map with json and open. Removal run (scratch script outside the worktree, in memory, the four FILLED-REPORT-G blocks of entry.py, filled_reader_installed.py and render.py): 7 failed, 0 errors, rc 1.",
     "The commit-time client-data check reads WARN (hashed account-id list absent on dell2), as the order states.",
     "Counters: rows_written counts data rows written to a store; the surprise-channel rows filed for this order are channel records and are not store rows. No AWS call, sign-in, vendor request or figure was made or written."
   ],
