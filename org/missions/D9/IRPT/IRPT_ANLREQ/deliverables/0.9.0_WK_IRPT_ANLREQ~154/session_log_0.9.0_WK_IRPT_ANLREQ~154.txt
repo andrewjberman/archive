@@ -1,0 +1,39 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~154 on IRPT_ANLREQ.TO-AR-y-354 (cell AR-y-354, Keep posts the equal pair)
+Measured outputs only. Times are UTC from date -u.
+
+1. First act
+   git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-154 ; test -d org && test -d .tools -> TREE-OK
+   portal: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-154-portal ; HEAD a6b83f692084b2f599d0b6142aa61c75bb735a42 (the hint candidate)
+   Premise: the door read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~174/r8/DOOR_UNRESOLVED_READ.json is in this worktree (tracked); key q4.contract_for_y2 read; cmp against the workspace copy: SAME.
+
+2. Baseline at the hint candidate
+   timeout 120 bun test src/pages/TicketCenter/__tests__/filing-hint.test.tsx -> 7 pass, 0 fail, rc 0
+   timeout 120 bun test src/pages/TicketCenter -> 128 pass, 0 fail, 24 files, rc 0
+
+3. Change (portal commit f78ea50ef87d1749140f53f3c51e212f8b433401, branch wk-IRPT_ANLREQ-154-portal)
+   analysisRequest.ts, AnalysisRequestParts.tsx, TicketCenter.tsx, __tests__/filing-hint.test.tsx (case d re-pinned), __tests__/filing-hint-keep.test.tsx (new, cases a to g)
+   timeout 120 bun test filing-hint.test.tsx filing-hint-keep.test.tsx -> 14 pass, 0 fail, rc 0
+   timeout 120 bun test src/pages/TicketCenter -> 135 pass, 0 fail, 25 files, rc 0
+   timeout 580 bun run typecheck -> rc 0 (tsc -b --noEmit)
+   git branch cand/dell2/anlreq-filing-hint-keep-equal-pair f78ea50e (LOCAL)
+   git diff --stat a6b83f692084 f78ea50e -> 5 files, 274 insertions, 38 deletions
+
+4. Before-arm (base source a6b83f692084 copied with git archive into .scratch/before_arm, node_modules linked by junction, link removed by rmdir afterwards)
+   bun test filing-hint-keep.test.tsx -> 0 pass, 7 fail, rc 1
+   (a) TypeError keptHint missing; (b) TypeError keptHint missing; (c) chooseHint count 0 (expected 2);
+   (d) TypeError keptHint missing; (e) base builds the case-only pair acme to ACME; (f) base words 'does not accept an unknown symbol yet'; (g) TypeError keptHint missing
+
+5. Incident (own error, reverted)
+   A Write call with a path under C:/dev/wk-irpt-anlreq-174 created an empty directory chain (portal/src/pages/TicketCenter/__tests__) there; no file of this order was left in that tree. The chain was removed with rmdir (non-recursive); the directory no longer exists. The test file was rewritten at the worktree path C:/dev/wk-irpt-anlreq-154.
+
+6. Checkers (deliverable folder, committed with the workspace commit)
+   commit-gate.sh on portal_check.py, mutant_check.py, scope_check.py -> rc 0 each
+   python portal_check.py -> PORTAL-TESTS-OK 7 new, 135 folder, 0 failed ; rc 0 ; run 1 and run 2 identical
+   python scope_check.py -> SCOPE-OK 5 paths, all under src/pages/TicketCenter/; src/pages/InvestorReporting and src/api unchanged ; rc 0 ; run 1 and run 2 identical
+   python mutant_check.py -> control rc 0, 7 pass ; mutant rc 1, 2 pass, 5 fail ; MUTANT-FIRES rc 0 ; run 1 and run 2 identical ; scratch link and folder removed afterwards, target held 313 entries
+
+7. Surprise rows filed in the channel (append-only, no existing row edited)
+   IRPT_ANLREQ-D2-W154-S1 (Keep gated by the cap, OBSERVATION, INERT)
+   IRPT_ANLREQ-D2-W154-S2 (scratch copy needs a node_modules link, OBSERVATION, INERT)
+
+8. No push of any branch. No live call. No deploy, upload, apply or invoke.

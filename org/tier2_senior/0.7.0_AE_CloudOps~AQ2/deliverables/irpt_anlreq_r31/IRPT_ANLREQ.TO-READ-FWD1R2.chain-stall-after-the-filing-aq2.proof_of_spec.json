@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-FWD1R2.chain-stall-after-the-filing-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-FWD1R2.chain-stall-after-the-filing-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "6bf30a5e4f"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-FWD1R2.chain-stall-after-the-filing-aq2.md",
+  "vintage_commit": "6bf30a5e4f"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/A_READ_FWD1R2_STALL.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "nine fact lines C1 to C4, Q1 to Q3, H1, H2 and one verdict line, then the notes with each deviation named",
+   "artifact_covered_by": [
+    "RD2-AC1",
+    "RD2-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/journal_read_fwd1r2.sh",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the read-only journal script (redaction self-test 0 leaks in 9 cases); staged as one new object version XGcTxOk_... under the resident legs' artifacts prefix and streamed to bash by SSM command 69ce9802-bc0d-40a5-ba8e-aa0aacd8085e (Success, rc 0); no file written on the host",
+   "artifact_covered_by": [
+    "RD2-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RD2-AC1",
+   "invocation": "grep -c -E '^(C1 commentary_ref (PRESENT|ABSENT)|C2 report pdf (PRESENT|ABSENT)|C3 commentary draft (PRESENT|ABSENT)|C4 job outbox_state=|Q1 commentary_ready visible=|Q2 dlq commentary_ready visible=|Q3 in-flight message visible again at |H1 resident ActiveState=|H2 journal lines in the window )' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/A_READ_FWD1R2_STALL.txt",
+   "expect": "^9$",
+   "output_evidence": "9\nexit=0",
+   "denominator": "9 fact lines in the stated forms: three chain objects, the job, the commentary_ready queue, its DLQ, the in-flight inference, the resident state and the journal count",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(C1 commentary_ref (PRESENT|ABSENT)|C2 report pdf (PRESENT|ABSENT)|C3 commentary draft (PRESENT|ABSENT)|C4 job outbox_state=|Q1 commentary_ready visible=|Q2 dlq commentary_ready visible=|Q3 in-flight message visible again at |H1 resident ActiveState=|H2 journal lines in the window )' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/A_READ_FWD1R2_STALL.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "RD2-AC2",
+   "invocation": "grep -c -E '^VERDICT last step done: .+; first step not done: .+; evidence: .+$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/A_READ_FWD1R2_STALL.txt",
+   "expect": "^1$",
+   "output_evidence": "1\nexit=0",
+   "denominator": "1 verdict line naming the last step done (resident received commentary_ready) and the first not done (resident rendered the package)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^VERDICT last step done: .+; first step not done: .+; evidence: .+$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/A_READ_FWD1R2_STALL.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "a read order: keyed ConsistentReads, head-object by version, attributes-only queue reads and one read-only journal read; the queue and DLQ depths changed between reads (17:38Z to 17:57Z) and both reads are written with their times",
+   "observed": "the chain objects are immutable; the queue state moved on its own (redrive to the DLQ); the journal lines are a log",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "why ReportRefused",
+   "reason": "the journal prints code=- for the first two refusals; the resident source and the DLQ message were not read"
+  },
+  {
+   "item": "the redrive time and that the DLQ message is this request's",
+   "reason": "no receive is allowed; the DLQ read is a depth only (INFERRED)"
+  },
+  {
+   "item": "journal window end and the idle poll lines",
+   "reason": "the window end was extended from 17:45 to 18:10 and the 191 idle poll lines were counted, not shown (both named in the record's notes)"
+  },
+  {
+   "item": "journal lines name no request id",
+   "reason": "the three PACKAGE lines are attributed to this request by timing (INFERRED)"
+  },
+  {
+   "item": "other tenants' requests",
+   "reason": "only the 49financial request rows were opened"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S122"
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/A_READ_FWD1R2_STALL.txt",
+ "compiler_tools": [
+  {
+   "tool": "aws ssm send-command (AWS-RunShellScript) with a script streamed from the artifacts prefix; aws sqs get-queue-attributes; aws dynamodb get-item; aws s3api head-object",
+   "invocation": "one read-only script by SSM; attributes-only queue reads; keyed item reads; head-object by version",
+   "result": "SSM Success rc 0, 1801 bytes, 0 JWT shapes and 0 password, token or Bearer hits; nine fact lines and one verdict line"
+  }
+ ]
+}
