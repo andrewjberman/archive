@@ -1,0 +1,34 @@
+{
+  "base_commit": "3f7c8910898345e85873d3a1fac78e18e0e7cea1",
+  "changed_paths": [
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "data/assets/scripts/gold/investor_reporting/tests/test_closed_at_source_exemption.py"
+  ],
+  "negative_tests": [
+    "exempts_when_both_days_have_no_positions_and_both_partitions_are_complete",
+    "one_zero_day_still_refuses",
+    "truncated_partition_never_exempts",
+    "present_in_either_table_refuses",
+    "manifest_records_closed_at_source_with_dates",
+    "terminated_path_unchanged",
+    "other_conditions_still_refuse"
+  ],
+  "tests_total": 55,
+  "tests_passed": 55,
+  "mutant_tests_failed": 5,
+  "notes": [
+    "Gate integration: evaluate_publish_gate takes one optional argument closed_at_source_evidence (a callable, default None). It is called only when an account is lost; None changes nothing. The exemption runs inside the CLOSED-AT-SOURCE-A block, after the closed (TERMINATED) split and before account_lost is added.",
+    "Rule: closed_at_source_exempt is pure. It exempts a lost account only when it is in neither accounts_with_positions set of either table on either day, every partition is complete (candidate count at least 95 percent of the prior count, prior count above zero), and the prior partition is present. Any failure returns an empty exemption.",
+    "Manifest: closed_at_source_record writes a closed_at_source list (account_id, status, candidate_day, prior_day) into snapshot _manifest, the run manifest that run_firm returns beside the other manifest facts. A run with no exempted account adds no key. The published .manifest.json is written by holdings/publication.py, outside this grant; filed as channel row IRPT_BCKEND-D2-W419-S1.",
+    "Not built here: the loader that reads evidence from each firm's source partitions, and the caller that passes it. No run_firm caller passes a provider, so production gate behaviour is unchanged by this commit. The evidence carries its own candidate_day and prior_day labels; the loader chooses the prior trading day.",
+    "Counts: tests_total and tests_passed come from one combined run of the new file and the three existing publish-gate files (9 new and 46 existing). The combined run was repeated once more with the same result. The mutant count is the new file run with every CLOSED-AT-SOURCE-A block removed in a scratch copy; the product file was restored byte-identical afterwards.",
+    "Sparse directories added locally and never committed: data/assets/scripts/gold/investor_reporting, infra/aws/lambda/investor-reporting, data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared and docs/contracts/investor-reporting/v1.",
+    "Counters: rows_written counts data rows and is 0; the one channel row filed is a surprise row, not a data row. Nothing was run against a served prefix, signed, sent or written to AWS. Synthetic ids only (acc1 to acc3, TICKER AAA)."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
