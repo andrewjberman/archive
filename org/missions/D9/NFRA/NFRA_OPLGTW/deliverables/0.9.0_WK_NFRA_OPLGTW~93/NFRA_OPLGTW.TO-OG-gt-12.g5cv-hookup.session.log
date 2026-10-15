@@ -1,0 +1,34 @@
+NFRA_OPLGTW.TO-OG-gt-12 session log -- 0.9.0_WK_NFRA_OPLGTW~93 -- worktree C:/tmp/wk-oplgtw-93 -- branch wk-NFRA_OPLGTW-93
+Base HEAD (cut): 956d3fca09. Commit: 3532daff79 (LOCAL on wk-NFRA_OPLGTW-93).
+
+1. Identity and tree: `git rev-parse --abbrev-ref HEAD` -> wk-NFRA_OPLGTW-93; `test -d org && test -d .tools` -> TREE-OK.
+2. Premises: order paths present; r37/hookup_g5cv.py present; r37/checks/gt12.AC1.sh and gt12.AC2.sh present; trnspt/checks/_root.sh present;
+   app/etfs_ownership.py, app/etfs_funds.py, app/portal_mdpf.py present; anchors each count 1 (import line, harvest_get_published_analysis
+   line, NATIVE/SAFE tail, test pins 89 and 80). Pre-apply merge-base(HEAD, box/sitez) = HEAD.
+3. Step 1: `python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/hookup_g5cv.py infra/aws/ec2/opal-gateway` -> "hookup applied: 6 tools", rc=0.
+   Diff stat: 5 files, 56 insertions, 5 deletions.
+4. Step 2: registration arguments vs module signatures:
+   etfs_get_partner_ownership(firm, as_of, etf_ticker) = module (firm, as_of, etf_ticker)  match
+   etfs_get_ownership_rollup() = module ()                                                 match
+   etfs_get_monthly_report(month) = module (month)                                          match
+   etfs_get_fund_nav_history(fund_ticker, start, end) = module (fund_ticker, start, end)    match
+   etfs_get_fund_holdings(fund_ticker, as_of) = module (fund_ticker, as_of)                 match
+   mdpf_get_category_views(scope) = module (scope)                                          match
+   No mismatch; no BLOCKING row.
+5. Step 3 (cwd infra/aws/ec2/opal-gateway, `timeout 120 python -m pytest tests/<file>.py -q -p no:cacheprovider --color=no`):
+   test_entitlement_admin        : 9 passed, 0 failed, rc 0
+   test_data_entitlement_family  : 4 passed, 0 failed, rc 0
+   test_data_entitlement_guard   : 11 passed, 1 failed (FAILED tests/test_data_entitlement_guard.py::test_ogz1_ac08), rc 1
+   test_og_et1                   : 5 passed, 0 failed, rc 0
+   test_og_et2                   : 4 passed, 0 failed, rc 0
+   test_og_pt5                   : 4 passed, 0 failed, rc 0
+   TOTAL: 37 passed, 1 failed of 38. The one failure is test_ogz1_ac08, present at tests/baseline/failing_ids_full.txt:7.
+   Its assertion is the ROUTE_CLASS set comparison against ge.server.app.routes (57 == 57 routes; extra items '/{path:path}',
+   '/hx/teams/...'), a route-class check, not a tool-count check. Not repaired (out of bounds).
+6. Commit: `bash .tools/safe-commit.sh --author "0.9.0_WK_NFRA_OPLGTW~93 <...@opal.agent>" -F .scratch/gt12_commit_msg.txt --` five paths
+   -> "5 files changed, 56 insertions(+), 5 deletions(-)", msg-verify MATCH, rc=0. Commit-gate printed the expected non-ASCII WARN on
+   app/tools.py (7 lines, all pre-existing; 0 non-ASCII characters on the added lines) and the naming gate PASS 0 graded. Nothing overridden.
+   The risk-reflex printed HOLD lines on tools.py name collisions (other tools.py files in other trees); advisory, commit proceeded.
+7. Post-commit: `git diff --name-only 956d3fca09 HEAD` -> exactly the five app/test files. Checks AC1 and AC2 re-run post-commit: identical PASS output to pre-commit.
+8. Not touched: app/refs/DATA_CATALOG.yaml, the catalog, any deploy/IAM/Terraform, any tool module, the pinned-count tests beyond the two
+   pins in the order's own step list. The `portal` gitlink shows modified in the worktree status before my work began; not mine, not committed.
