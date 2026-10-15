@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-1",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "cf8ab92263"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "cf8ab92263",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-1.cottonwood-silver-landing-times-gold-frontier-and-catch-up-set.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~401",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~401/LANDING_AND_FRONTIER_R114.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~401/LANDING_AND_FRONTIER_R114.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The landing and frontier record: counts, dates, times and words only; LIST and LastModified reads; no write, no deploy.",
+      "artifact_covered_by": [
+        "DBC114-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC114-1-AC1",
+      "criterion_verbatim": "DBC114-1-AC1 -- the record is complete; the 15 dates are the library calendar's last 15 trading days to the recorded newest silver date; each landing_et and after_0600_et is recomputed from landing_utc; each landing_utc equals a fresh read of that partition's latest object time; partition_count equals a fresh LIST; the gold newest_date equals a fresh LIST; the catch-up set equals silver trading days minus gold partitions; the proposed time is later than the latest landing; no write is recorded. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r114/p114_bcw.py\" . DBC114-1-AC1",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nDBC114-1-AC1 PASS",
+      "denominator": "15 of 15 landing dates equal the library's last 15 trading days to the newest silver date 2026-10-13; 15 of 15 landing_et and after_0600_et recomputed from landing_utc; 15 of 15 landing_utc equal a fresh LIST of the partition; partition_count 93 equals a fresh LIST of 93 date partitions; gold holdings_performance_daily newest_date 2026-09-25 equals a fresh LIST of 75 partitions; catch-up 13 equals 18 silver partitions without holdings gold, of which 13 are trading days; proposed 08:15 is later than latest landing 07:46",
+      "status": "PASS",
+      "expect": "DBC114-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC1 checker was run against a scratch copy of the record with proposed_fire_time_et set to 07:30, below the latest landing 07:46.",
+      "expected": "DBC114-1-AC1 FAIL (proposed time does not clear the latest landing)",
+      "observed": "proposed fire time does not clear the latest landing / DBC114-1-AC1 FAIL; the unaltered record PASSes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times on the same record; the checker's own LIST calls are its reads and are not counted in the record's reads block.",
+      "observed": "DBC114-1-AC1 PASS on each of the three runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, deploy, Terraform apply, vendor call, secret read, or a producer run or catch-up day",
+      "reason": "Outside the order: the schedule, principal and catch-up run are a later WORLD act under a never-widen pair; this cell measures and records only."
+    },
+    {
+      "item": "The meaning of the 06:00 New York count",
+      "reason": "The order reports only the count at or after 06:00 and does not claim the fold's meaning."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W401-S1",
+    "IRPT_DASHBD-D2-W401-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py at commit",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (2 new rows of 508 total checked at ff30b5ea17)"
+    }
+  ]
+}
