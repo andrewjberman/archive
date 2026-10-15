@@ -1,0 +1,209 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-yr-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-14/yr1_live_and_ap18_v2_phase_a.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3bb7fb022e"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "a44f88128b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-yr-1.yearinreview-refresh-release.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the re-cut is exactly one file, byte-equal to the CRO's final page, on the live ref.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/yr1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)base [0-9a-f]+ is the live ref before this release: yes.*files differing 3 \\(want 3\\); they are the page, the view gate and its test file: yes; release page equals the CRO page at 947fc522a8 in LF form: yes.*the gate admits Opal users on an empty roster: yes; tests defined 3 of 3.*RESULT: PASS.*exit=0",
+   "output_evidence": "base bacec95ccd is the live ref before this release: yes (manifest bf7ffb62f4/bacec95ccd); release bf7ffb62f4\nfiles differing 3 (want 3); they are the page, the view gate and its test file: yes; release page equals the CRO page at 947fc522a8 in LF form: yes (md5 3bbd5ab2d325657020357003c3ea387d / 3bbd5ab2d325657020357003c3ea387d); the gate admits Opal users on an empty roster: yes; tests defined 3 of 3\nRESULT: PASS\nexit=0",
+   "denominator": "3 files differing between the release and the base, 0 outside the three the order names; the page graded in LF form (md5 3bbd5ab2d325657020357003c3ea387d) against the CRO pin 947fc522a8; 3 of 3 named tests defined. NOTE the criterion's own wording says ONE file -- it predates amendment A2, which added the gate change and its tests to the same release; the grader the issuer wrote reads three and the ask states the widening, so the text and the instrument disagree and the instrument is the one A2 updated.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the deploy landed and closed, and the installed host serves the page with the source's md5 and the data date.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/yr1.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0.*landed=(?:current|superseded).*served page: host md5 equals the source yes; carries the data date 2026-10-11 yes; an Opal user is admitted and a guest refused yes; public endpoint recorded yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0\nrelease_sha=bf7ffb62f4; landed=current\nserved page: host md5 equals the source yes; carries the data date 2026-10-11 yes; an Opal user is admitted and a guest refused yes; public endpoint recorded yes\nRESULT: PASS\nexit=0",
+   "denominator": "4 of 4 ledger legs closed with proof and the sentinel removed (1 of 1 CLOSED, sentinel 0); landed=current, read from the manifest's deployed_commit at HEAD; 107 of 107 files under app/ and deploy/ md5-EQUAL to the release with 0 mismatches and 0 one-sided paths; the served body's md5 equal to the source and to the page on disk; 3 of 3 gate arms behaving (1 admitted, 2 refused); 1 public endpoint read, recorded as gated with its reason.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The served-page oracle was measured three ways BEFORE the act and the three values kept apart: the pin as stored (0d828b51, CRLF), the blob git can hold (3bbd5ab2, LF, forced by this path's .gitattributes text=set eol=lf) and what a clean checkout re-materialises (0d828b51 again, which is what the deploy tars). The host was then compared against the checked-out form per A3.",
+   "observed": "md5 of the served RESPONSE BODY, the page on the host's disk and the release checkout all read 0d828b51d433a24f7e2ef2e6ea7967ee at 48,235 bytes with 344 CRLFs. The blob reads 3bbd5ab2 at 47,891 bytes -- a 344-byte delta exactly equal to the CRLF count, so the two forms differ by the line terminators and nothing else.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Three negative arms stand in its place, each built so a silent non-event cannot read as a pass: (a) the ADMITTED identity is deliberately NOT on the live roster, so a 200 cannot be the roster answering -- on the superseded gate that same identity was a 403; (b) the GUEST arm uses an @opalinvest address carrying #EXT#, which a domain-suffix implementation would admit, so it fails loudly if the predicate is ever weakened to a suffix test; (c) the R-56 rollback-target reads were paired with a negative control at d88cd32d0c~1, where app/data_entitlement.py is absent, so the three PRESENT verdicts are discriminating rather than a vacuous rc=0.",
+   "expected": "admitted-off-roster 200 with the page; #EXT# guest 403 with no page bytes; outside domain 403; and the control read ABSENT where the file does not exist",
+   "observed": "Opal identity off the roster (roster size 1, membership measured false) -> 200, 48,235 bytes, page title present, audit verdict ok. Guest -> 403, 42 bytes, no title, verdict denied/roster, and tools._is_opal_user(guest) reads False. Outside domain -> 403 likewise. Control at d88cd32d0c~1 -> ABSENT, while bacec95ccd carries all three guard files.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/static/yearinreview/index.html",
+   "kind": "frontend_component",
+   "commit_or_etag": "bf7ffb62f4ae5af8298d3c24960c63d2965542d9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the SERVED response body's md5 on the host is 0d828b51d433a24f7e2ef2e6ea7967ee, equal to the page on the host's disk and to the release checkout, and it carries \"until\": \"2026-10-11\" which the base's page does not",
+   "introduces": [
+    "\"until\": \"2026-10-11\""
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/yearinreview_view.py",
+   "kind": "script",
+   "commit_or_etag": "bf7ffb62f4ae5af8298d3c24960c63d2965542d9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "host md5 ce8bcd6adcbb63e71cf205555d86f125 == the release blob, inside the 107-of-107 parity read, and its behaviour exercised directly through the installed module in three arms",
+   "introduces": [
+    "return _is_opal_user(email) or (bool(roster) and email in roster)",
+    "Viewers: every Opal employee"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_yearinreview_view.py",
+   "kind": "test",
+   "commit_or_etag": "bf7ffb62f4ae5af8298d3c24960c63d2965542d9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "COMMITTED-NOT-DEPLOY-SCOPE is literal here and not a hedge: tests/ is outside the artifact's member list (app deploy requirements.txt identity_tool_allowlist.txt), so this file ships nowhere by design; 12 passed in the release tree.",
+   "introduces": [
+    "test_yr1_opal_admitted_on_empty_roster",
+    "test_yr1_guest_refused",
+    "test_yr1_outside_domain_refused"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "c4a06025de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deployed_commit bf7ffb62f4, previous bacec95ccd, file_checksums 10 of 10 recomputed from the RELEASE BLOBS and each cross-checked against the md5 the host reported for that path; the writer refuses on any disagreement",
+   "introduces": [
+    "bf7ffb62f4ae5af8298d3c24960c63d2965542d9"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/YR_SERVED.json",
+   "kind": "config_data",
+   "commit_or_etag": "c4a06025de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the seven keys the order names, plus the three arms, the registry count and the per-file host md5 map",
+   "introduces": [
+    "md5_served_host",
+    "opal_user_admitted"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md",
+   "kind": "doc",
+   "commit_or_etag": "c4a06025de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "section 7.2 now names bf7ffb62f4 live and bacec95ccd as the rollback target, with both R-56 conditions measured and a negative control beside them; one diff hunk, at 7.2",
+   "introduces": [
+    "the live release is `bf7ffb62f4`"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "safe-ec2-deploy.sh (the landing act)",
+   "invocation": "DEPLOY_BASE_REF=bacec95ccd6cafd2201f7433af24ae2748732355 bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh i-07dccb1615503ac99, from C:/tmp/og-rel-yr2",
+   "result": "rc=0 at 23:03:38Z-23:05:14Z; artifact opal-gateway-bf7ffb62f4.tar.gz (560K); SSM 768a6366-ab1a-4220-aea9-b8e7b2cfcda3 Success; 'OK: opal-gateway active'. The FIRST invocation at 22:58:39Z refused rc=1 before any build or upload (row Z-S132, the sparse cone)"
+  },
+  {
+   "tool": "the A1 guard, read at the act",
+   "invocation": "git rev-parse HEAD and HEAD^ in C:/tmp/og-rel-yr2, re-read AFTER the cone widening",
+   "result": "HEAD == bf7ffb62f4ae5af8298d3c24960c63d2965542d9 in full; HEAD^ == bacec95ccd6cafd2201f7433af24ae2748732355 == live deployed_commit"
+  },
+  {
+   "tool": "the wrapper's own stale-base guard (independent corroboration)",
+   "invocation": "safe-ec2-deploy's early and immediately-before-upload reads of the live ref from the artifact's git-ref S3 metadata",
+   "result": "declared base == live ref == bacec95ccd at BOTH checkpoints"
+  },
+  {
+   "tool": "yr_served_harness.py over SSM (Rule 12: local -> S3 -> the host pulls)",
+   "invocation": "aws ssm send-command AWS-RunShellScript -> aws s3 cp of the harness then /opt/opal-gateway/.venv/bin/python; command id 456e9148-655e-4e69-b3df-19c9bbdc9f84",
+   "result": "Success; the harness's md5 on the host 01edec3bee89d95fad39c61f5ff4a72e == the local file, so the bytes that ran are the bytes written; health 200 {\"ok\":true}; registry 46; 119 host files hashed"
+  },
+  {
+   "tool": "the tree parity diff",
+   "invocation": "the harness's per-file md5 map vs the release blobs over app/ and deploy/",
+   "result": "107 of 107 md5-EQUAL, 0 mismatch, 0 in-release-absent-on-host, 0 on-host-absent-in-release; dashboard/ 12 files recorded by provenance (mcportal@17dcbb28, built at deploy time) and not diffed"
+  },
+  {
+   "tool": "the .env key-name trigger",
+   "invocation": "the deploy's own ENV_KEYS_BEFORE / ENV_KEYS_AFTER lines, sorted and diffed",
+   "result": "54 keys before, 54 after, DELTA 0; YEARINREVIEW_VIEW_ALLOWED_EMAILS still present"
+  },
+  {
+   "tool": "the public endpoint read",
+   "invocation": "curl -sS -D - https://mcp.opalinvest.dev/yearinreview from site Z, no redirect follow",
+   "result": "302 Moved Temporarily, Server awselb/2.0, Location login.microsoftonline.com/<Opal tenant>/oauth2/v2.0/authorize, body 110 bytes md5 f366e0e18b589cb6f243bf43ce75e83c -- nginx's 302 page, not ours"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (pre-act), close-leg x4 with proof, close",
+   "result": "CLOSED, all 4 legs proven, sentinel removed; AC2 reads 'ledger CLOSED 1 of 1; sentinel at HEAD 0'"
+  },
+  {
+   "tool": "yr_manifest_record.py",
+   "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/yr_manifest_record.py",
+   "result": "span 9368 bytes parsing on its own; 10 checksums recomputed from the release blobs, 0 differing from the prior record and 10 of 10 agreeing with the MEASURED host md5s; 26 of 27 sibling services compared and unchanged; key set unchanged"
+  },
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "on each new .py before the commit",
+   "result": "clean; and the commit's own gate read 2 of 9 files graded (the two .py), which it prints rather than implies"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S132: the first deploy refused because a SPARSE release worktree cannot run deploy-to-ec2.sh -- the script resolves two .env S3 roots through lib/opal_naming.py address() (LGIC R30 forbids typing an address), address() loads all 7 files in infra/logic/registry/, and those were in the release commit but outside the cone. FileNotFoundError in Step 2/3, before any artifact was built or uploaded, so nothing was half-landed and the manifest was untouched. Fixed by widening the cone; HEAD did not move and the A1 guard and the page's checked-out md5 were both re-read afterwards. Same class as cloud-ops trap (4) for safe-apply, on the deploy path, which that trap does not name -- and `lib` was already in the cone, so the two roots are not interchangeable. Disposition UNDER_INVESTIGATION: the instance is resolved, the standing question (should release orders require infra/logic in the cone?) is the issuer's.",
+  "NFRA_OPLGTW-Z-S120 (pre-existing, not mine to disarm): runbook 7.2 still named 7c558b4e21 as live although bacec95ccd had been deployed by another seat at 15:43Z. This order's standing clause made me rewrite that paragraph, so the gap the row names is closed as a side effect -- but the row's disarm_owner is the mcportal applier and I have not touched its state."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the identity WALL itself",
+   "reason": "The three gate arms are driven through the installed handler with _viewer stubbed per arm -- the stand-in the order names in step 5. What that does NOT exercise is the ALB authenticate-oidc default action plus identity.py, which is what turns a browser into a verified email. That half is exercised here only by the unauthenticated public GET (302 to Entra), which proves the wall is in front of the route but not that it resolves a real identity correctly; this release changes neither, and a real Opal employee opening the page is the CRO's confirmation, requested by message."
+  },
+  {
+   "item": "the audit record the admitted read would have written",
+   "reason": "audit.log_call -> _emit -> put_object whenever AUDIT_S3_BUCKET is set, and this order's BOUNDS say no object is written to any bucket, so the harness replaced the sink with an in-process recorder. The verdicts are therefore MEASURED as what the sink would have received (ok / denied+roster) and NOT as objects in the audit bucket. Deliberate: the alternative was to breach the bound this very act is proving."
+  },
+  {
+   "item": "whether the harness upload itself is inside the no-object bound",
+   "reason": "Rule 12 forbids inlining a diagnostic script into an SSM command, so the harness reached the host as one object in the code-artifact store that the deploy had itself just written two objects to. I read the bound as being about data and served-output buckets, not the code-artifact store that is the deploy mechanism -- otherwise step 4's own deploy would breach it. Named rather than assumed; the issuer's to settle."
+  }
+ ]
+}
