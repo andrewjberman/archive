@@ -1,0 +1,259 @@
+"""IRPT_DASHBD round 119, workstream F-SHIP ~F2 (issuer 2.0.0_SA_COO~F2) -- FWD-3, asset-class performance and mix: the thread read and the pure view model.
+
+  DB-f-601 (~601) a READ of FWD-3's thread (the gold table, the served path, the portal's reuse, the hops with owners).      DBF119-2-AC1
+  DB-f-603 (~603) the same read for FWD-5, the transactions (record RD_FWD5_THREAD_R119.json, the same form).                  DBF119-3-AC1
+  DB-f-602 (~602) NEW portal files only: the class-window view model and its section component, on a document shaped as the
+                  account_class_daily contract's rows. Not mounted.            DBF119-1-AC1 (view model), AC2 (section), AC3 (bounds)
+
+The checker runs the named bun tests in the worker's portal worktree (<root>/portal) without colour; for the read it binds
+the record to the code it cites (a cited line must hold the token the record says it holds).
+
+Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
+       python <this file> --selftest                        the pure helpers on synthetic arms
+"""
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
+IR = "portal/src/pages/InvestorReporting/"
+CLASSES_DIR = "src/pages/InvestorReporting/tabs/reporting/classes/"
+T_MODEL = IR + "__tests__/irpt-dashbd/class-window-model.test.ts"
+T_SECTION = IR + "__tests__/irpt-dashbd/class-section.test.tsx"
+BASE_SHA = "e0e69da7766d87719571d7e6c0ccf59bf65fcae9"
+ALLOWED_FILES = (
+    "src/pages/InvestorReporting/__tests__/irpt-dashbd/class-window-model.test.ts",
+    "src/pages/InvestorReporting/__tests__/irpt-dashbd/class-section.test.tsx",
+)
+REC_REL = D + "0.9.0_WK_IRPT_DASHBD~601/RD_FWD3_THREAD_R119.json"
+REC5_REL = D + "0.9.0_WK_IRPT_DASHBD~603/RD_FWD5_THREAD_R119.json"
+CLAIMS = ("measured", "inferred", "held", "absent")
+RISKS = ("LOCAL", "SERVED", "WORLD")
+LONG_DIGITS = re.compile(r"\d{8,}")
+DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "where", "vintage", "path_template")
+MODEL_TITLE_WORDS = ("contribution", "mix", "sum", "unclassified", "window", "coverage", "sentence")
+SECTION_TITLE_WORDS = ("section", "table", "sentence", "absent", "unclassified", "not measured", "order")
+ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+class Fail(Exception):
+    pass
+
+
+def need(cond, msg):
+    if not cond:
+        raise Fail(msg)
+
+
+def titles_of(text):
+    return [m.group(2) for m in re.finditer(r"""\b(?:test|it)\(\s*(['"`])(.+?)\1""", text)]
+
+
+def missing_title_words(titles, words):
+    low = " | ".join(titles).lower()
+    return [w for w in words if w not in low]
+
+
+def bun_result(out):
+    out = ANSI.sub("", out)
+    fails = re.findall(r"^\s*(\d+) fail", out, re.M)
+    passes = re.findall(r"^\s*(\d+) pass", out, re.M)
+    return (int(passes[-1]) if passes else 0), (int(fails[-1]) if fails else -1)
+
+
+def read_text(root, rel):
+    p = Path(root) / rel
+    need(p.is_file(), "missing file " + rel)
+    return p.read_text(encoding="utf-8")
+
+
+def run_bun(root, test_rel):
+    bun = shutil.which("bun")
+    need(bun is not None, "bun not on PATH")
+    env = {k: v for k, v in os.environ.items() if k != "FORCE_COLOR"}
+    env["NO_COLOR"] = "1"
+    p = subprocess.run([bun, "test", test_rel[len("portal/"):]], cwd=str(Path(root) / "portal"), capture_output=True,
+                       text=True, timeout=100, env=env)
+    passes, fails = bun_result((p.stdout or "") + (p.stderr or ""))
+    need(p.returncode == 0 and fails == 0, "bun test %s rc=%s fail=%s" % (test_rel, p.returncode, fails))
+    return passes
+
+
+def ac_model(root):
+    mt = missing_title_words(titles_of(read_text(root, T_MODEL)), MODEL_TITLE_WORDS)
+    need(not mt, "model test titles lack " + repr(mt))
+    need(run_bun(root, T_MODEL) >= 10, "model tests pass fewer than 10")
+
+
+def ac_section(root):
+    mt = missing_title_words(titles_of(read_text(root, T_SECTION)), SECTION_TITLE_WORDS)
+    need(not mt, "section test titles lack " + repr(mt))
+    need(run_bun(root, T_SECTION) >= 6, "section tests pass fewer than 6")
+
+
+def changed_files(root):
+    p = subprocess.run(["git", "-C", str(Path(root) / "portal"), "diff", "--name-only", BASE_SHA + "..HEAD"],
+                       capture_output=True, text=True, timeout=60)
+    need(p.returncode == 0, "git diff rc=%s" % p.returncode)
+    return [x.strip() for x in p.stdout.splitlines() if x.strip()]
+
+
+def outside_allowed(files):
+    return [f for f in files if f not in ALLOWED_FILES and not f.startswith(CLASSES_DIR)]
+
+
+def ac_bounds(root):
+    files = changed_files(root)
+    need(any(f.startswith(CLASSES_DIR) for f in files), "no new file under the classes folder")
+    out = outside_allowed(files)
+    need(not out, "files changed outside the grant: " + repr(out))
+
+
+def digits_ok(obj, key=""):
+    if isinstance(obj, dict):
+        return all(digits_ok(v, k) for k, v in obj.items())
+    if isinstance(obj, list):
+        return all(digits_ok(v, key) for v in obj)
+    if isinstance(obj, str) and LONG_DIGITS.search(obj) and key not in DIGIT_OK_KEYS:
+        return False
+    return True
+
+
+def claim_ok(d):
+    return isinstance(d, dict) and d.get("claim") in CLAIMS
+
+
+def cites(root, d, tokens):
+    f, line = d.get("file"), d.get("line")
+    if not (isinstance(f, str) and isinstance(line, int) and not isinstance(line, bool)):
+        return False
+    p = Path(root) / f
+    if not p.is_file():
+        return False
+    lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    if not (1 <= line <= len(lines)):
+        return False
+    return any(t in lines[line - 1].lower() for t in tokens)
+
+
+def record_problems(root, rec):
+    pr = []
+    keys = ("as_of", "gold_table", "producer", "series_contract", "served_path", "portal_reuse", "proposed_shape", "hops",
+            "reads", "files_in_repo", "served_values_changed", "pushed", "deployed")
+    if not isinstance(rec, dict) or sorted(rec.keys()) != sorted(keys):
+        return ["top-level fields are not exactly " + repr(keys)]
+    if not (isinstance(rec["as_of"], str) and re.match(r"\d{4}-\d{2}-\d{2}$", rec["as_of"])):
+        pr.append("as_of not an ISO date")
+    g = rec["gold_table"]
+    if not (claim_ok(g) and isinstance(g.get("applied"), bool) and isinstance(g.get("words"), str) and g["words"]):
+        pr.append("gold_table form")
+    pd = rec["producer"]
+    if not claim_ok(pd):
+        pr.append("producer form")
+    elif not cites(root, pd, ("account_class_daily", "class_return_daily", "asset_class", "account_transaction", "transaction")):
+        pr.append("producer citation does not hold a class token")
+    sc = rec["series_contract"]
+    if not (claim_ok(sc) and isinstance(sc.get("carries_class_keys"), bool)):
+        pr.append("series_contract form")
+    sp = rec["served_path"]
+    if not (claim_ok(sp) and isinstance(sp.get("words"), str) and sp["words"]):
+        pr.append("served_path form")
+    elif not cites(root, sp, ("manifest", "series", "summary", "route", "publish", "class")):
+        pr.append("served_path citation does not hold a serve token")
+    pu = rec["portal_reuse"]
+    if not (claim_ok(pu) and isinstance(pu.get("words"), str) and pu["words"]):
+        pr.append("portal_reuse form")
+    elif not cites(root, pu, ("asset", "class", "order", "color", "transaction", "action", "filter", "sort", "export")):
+        pr.append("portal_reuse citation does not hold a class token")
+    ps = rec["proposed_shape"]
+    if not (isinstance(ps, dict) and isinstance(ps.get("words"), str) and ps["words"]
+            and isinstance(ps.get("fields"), list) and ps["fields"]):
+        pr.append("proposed_shape form")
+    hops = rec["hops"]
+    if not (isinstance(hops, list) and len(hops) >= 4):
+        pr.append("hops fewer than 4")
+    else:
+        for i, h in enumerate(hops):
+            ok = (isinstance(h, dict) and h.get("hop") == i + 1 and isinstance(h.get("what"), str) and h["what"]
+                  and isinstance(h.get("owner"), str) and h["owner"] and h.get("risk") in RISKS
+                  and isinstance(h.get("exists_today"), bool))
+            if not ok:
+                pr.append("hop %d form" % (i + 1))
+    if rec["reads"] != {"s3_reads": 0, "s3_writes": 0, "dynamodb_writes": 0, "vendor_calls": 0, "secret_reads": 0}:
+        pr.append("reads block is not the all-zero form")
+    for k in ("files_in_repo", "served_values_changed", "pushed", "deployed"):
+        if rec[k] is not False:
+            pr.append(k + " is not false")
+    if not digits_ok(rec):
+        pr.append("a run of 8 or more digits outside the exempt fields")
+    return pr
+
+
+def ac_read(root, rel=REC_REL):
+    p = Path(root) / rel
+    need(p.is_file(), "missing record " + rel)
+    pr = record_problems(root, json.loads(p.read_text(encoding="utf-8")))
+    need(not pr, "; ".join(pr))
+
+
+def ac_read5(root):
+    ac_read(root, REC5_REL)
+
+
+def selftest():
+    bad = 0
+    count = 0
+
+    def arm(name, got, want):
+        nonlocal bad, count
+        count += 1
+        if got != want:
+            bad += 1
+            print("SELFTEST FAIL %s: got %r want %r" % (name, got, want))
+
+    arm("titles", titles_of("test('a b', () => {})\nit(\"c\", () => {})"), ["a b", "c"])
+    arm("words-green", missing_title_words(["contribution mix sum unclassified window coverage sentence"], MODEL_TITLE_WORDS), [])
+    arm("words-red", missing_title_words(["only mix"], MODEL_TITLE_WORDS),
+        ["contribution", "sum", "unclassified", "window", "coverage", "sentence"])
+    arm("bun-ansi", bun_result("\x1b[32m 7 pass\x1b[0m\n\x1b[2m 0 fail\x1b[0m\n"), (7, 0))
+    arm("bun-red", bun_result("\n 7 pass\n 2 fail\n"), (7, 2))
+    arm("allowed-green", outside_allowed([CLASSES_DIR + "a.ts", ALLOWED_FILES[0]]), [])
+    arm("allowed-red", outside_allowed([CLASSES_DIR + "a.ts", "src/App.tsx"]), ["src/App.tsx"])
+    arm("digits-red", digits_ok({"words": "id 12345678901"}), False)
+    arm("digits-green", digits_ok({"sha256": "12345678901"}), True)
+    arm("form-red", record_problems(".", {"as_of": "x"})[0].startswith("top-level"), True)
+    print("selftest %s" % ("FAIL" if bad else "PASS (%d arms)" % count))
+    return 1 if bad else 0
+
+
+def main(argv):
+    if len(argv) == 2 and argv[1] == "--selftest":
+        return selftest()
+    if len(argv) != 3:
+        print(__doc__)
+        return 2
+    root, ac = argv[1], argv[2]
+    table = {"DBF119-1-AC1": ac_model, "DBF119-1-AC2": ac_section, "DBF119-1-AC3": ac_bounds, "DBF119-2-AC1": ac_read, "DBF119-3-AC1": ac_read5}
+    if ac not in table:
+        print("%s FAIL (unknown criterion)" % ac)
+        return 1
+    try:
+        table[ac](root)
+    except Fail as e:
+        print("reason: %s" % e)
+        print("%s FAIL" % ac)
+        return 1
+    except Exception as e:  # noqa: BLE001
+        print("reason: %s: %s" % (type(e).__name__, e))
+        print("%s FAIL" % ac)
+        return 1
+    print("%s PASS" % ac)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

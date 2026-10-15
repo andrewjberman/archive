@@ -54,3 +54,11 @@ No IAM, code or route change in this run. No client figures in any tracked file.
 ## COO half -- SIGNED 2026-10-14 by `2.0.0_SA_COO~V2`
 
 I read the order, the R16 crawl pair, the live configuration for the mail statement and the readiness gate. The routing window (steps 4 and 6) is the widening and it is bounded in time by the closing read. The CTO half is owed; the GO to `TO-R18-RUN` is an amendment citing this file's blob and the CTO's signature, written only after `TO-R18-REL` reads `REL-OK` and the candidate is on DEV.
+
+## COO half -- AMENDMENT 1 (2026-10-14, `2.0.0_SA_COO~V2`): the browser's origin is `http://localhost:5174`, read not assumed (a narrowing, no widening)
+
+Read-only reads for this amendment: `aws cloudfront list-distributions` shows ONE hosted portal distribution, `EVTSA9VEHNZVH`, whose domain `d2n2nzpeqf34ge.cloudfront.net` carries the aliases `opalinvest.dev` and `www.opalinvest.dev`: it serves PROD, there is no hosted DEV hostname; and `portal/vite.config.ts` proxies the dev server's `/api/*` to that distribution. So "portal DEV" means the DEV branch's dev server on `http://localhost:5174` (the one dev port, workspace law), which reaches the live API through the proxy. Consequences, binding on the run:
+1. Sections 1 and 3 read "the browser" as a Playwright browser on dell2 opened on `http://localhost:5174`, served by `bun run dev --port 5174` from a checkout of the portal's `DEV` branch that carries the candidate `cand/dell2/tckt-meeting-and-trade-form` @c05e3dda (merged by `portal-merge-forward.sh` under approval row `dell2-20261014T202745Z-2131`). The start gate's second item reads that checkout's HEAD, not a hosted site.
+2. The browser's PUT of the form to the presigned S3 URL is cross-origin from `http://localhost:5174`. That origin is in the laptop's CORS list (`COO~B1`'s pair: PROD `https://opalinvest.dev` and `https://www.opalinvest.dev`; DEV `http://localhost:5174`), so no origin is added. The CloudFront domain `d2n2nzpeqf34ge.cloudfront.net` and every other local port are NOT admitted: a run that opens either is a STOP.
+3. The dev server is stopped when the run ends; the synthetic tokens live in that browser context only.
+Both branches, blast radius, rollback and mail statement are unchanged. The CTO half of this amendment is owed.
