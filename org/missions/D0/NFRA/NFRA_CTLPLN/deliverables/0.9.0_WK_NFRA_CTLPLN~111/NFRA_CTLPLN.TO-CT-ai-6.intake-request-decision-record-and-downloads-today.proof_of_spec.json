@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ai-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-6.intake-request-decision-record-and-downloads-today.md",
+    "group": "OTHER",
+    "vintage_commit": "afebfdc81a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~111",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round19.md",
+    "vintage_commit": "afebfdc81a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-6.intake-request-decision-record-and-downloads-today.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_request.py",
+      "kind": "script",
+      "commit_or_etag": "e8b2dc8e33",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib, ASCII, 247 lines; subcommands file, decide, status, show, downloads over one JSON file per request under <root>/requests/. Status reads requirements.txt and the request records only; --device is accepted and changes nothing. Last changed in e8b2dc8e33; no deploy; run from the worktree. The real requests/ folder was never written.",
+      "artifact_covered_by": [
+        "CTai6-AC1",
+        "CTai6-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round19_intake_requests.py",
+      "kind": "test",
+      "commit_or_etag": "f188f567c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Default arms run the tool as separate processes in a temporary folder: file, approve and refuse, status for two devices, show by a second process, second decision refused, missing evidence refused. --downloads runs five arms over a fixture folder (two records on the day, one on another day, a zero day, a missing intake folder, a missing record folder). Last changed in f188f567c5; no deploy.",
+      "artifact_covered_by": [
+        "CTai6-AC1",
+        "CTai6-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTai6-AC1",
+      "criterion_verbatim": "a request is filed, one approved and one refused, status answers alike for two devices, and both decisions read back (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py",
+      "output_evidence": "INTAKE-REQUESTS arms=15/15 ok=True (rc=0; timeout 280 python .tools/tests/test_round19_intake_requests.py from the worktree root on the committed state, HEAD 7004c82a02; the tool at e8b2dc8e33, the test at f188f567c5; the run was repeated and its ARM lines are identical).",
+      "denominator": "15 arms run: 15 PASS, 0 FAIL; ok counts 15 of 15",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTai6-AC2",
+      "criterion_verbatim": "the downloads-today line is counted from fetch records, zero from a record folder, and a missing folder refused (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py --downloads",
+      "output_evidence": "INTAKE-DOWNLOADS arms=5/5 ok=True (rc=0; timeout 280 python .tools/tests/test_round19_intake_requests.py --downloads from the worktree root on the committed state, HEAD 7004c82a02; the run was repeated and its ARM lines are identical). The arm that counts reads DOWNLOADS-TODAY device=laptop day=20261015 requests=5 files=2 from the fixture.",
+      "denominator": "5 arms run: 5 PASS, 0 FAIL; ok counts 5 of 5",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of intake_request.py with the already-decided check removed (if rec.get(\"decisions\"): replaced by if False:), run on a temporary root with one request, one APPROVED decision and then a second REFUSED decision; the arm 'second decision on the same request refused' asserts rc != 0 and one kept decision.",
+      "expected": "the real tool refuses the second decision (rc 1, REFUSED already decided); the mutant accepts it (rc 0), which the arm would catch",
+      "observed": "real: rc=1 'REFUSED already decided: REQ-20261015T124957Z-pk'; mutant: rc=0 'DECIDED id=REQ-20261015T124958Z-pk verdict=REFUSED by=B'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of the two invocations run twice on the committed state at HEAD 7004c82a02; the ARM lines compared with diff after the arm numbers are stripped",
+      "observed": "default: INTAKE-REQUESTS arms=15/15 ok=True on both runs, arm lines identical; --downloads: INTAKE-DOWNLOADS arms=5/5 ok=True on both runs, arm lines identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real request folder org/devices/intake/requests/",
+      "reason": "BUILD item 3: no real request is filed and no real decision is made; the test runs in temporary folders only, and the real requests are the CRO's and the CTO's acts for the next round."
+    },
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-ai-6 and the uncommitted portal gitlink and org/git-author-override-audit.laptop.log",
+      "reason": "the flip is the issuer's (the order file is outside <paths>); the portal gitlink and the audit log are not committed by this worker."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W111-S1: fetch records (intake-fetch/1) carry no device key, so the downloads reader cannot attribute a record to a device; on the real folder it answers zero with a stderr NOTE. ARMED, disarm owner 2.0.0_SA_COO. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W111-S2: the sparse worktree has no org/ref/SEAT_ROLES.json, so safe-commit's author-seat check WARNs on every commit by this worker. INERT. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~111/NFRA_CTLPLN.TO-CT-ai-6.intake-request-decision-record-and-downloads-today.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~111 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py",
+      "result": "INTAKE-REQUESTS arms=15/15 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py --downloads",
+      "result": "INTAKE-DOWNLOADS arms=5/5 ok=True"
+    }
+  ]
+}

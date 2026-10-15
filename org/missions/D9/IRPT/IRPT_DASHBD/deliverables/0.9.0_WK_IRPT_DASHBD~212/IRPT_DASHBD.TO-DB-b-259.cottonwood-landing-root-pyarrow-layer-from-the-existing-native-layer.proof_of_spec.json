@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-259",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "e96bafa386",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-259.cottonwood-landing-root-pyarrow-layer-from-the-existing-native-layer.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~212",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~212/RD_COT_LAYER_FACTS_R127.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-return-daily/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "95cad5164c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no Terraform command was run; the data source and the layers line create no resource; the expected plan is 7 add / 0 change / 0 destroy and was not run by this order",
+      "artifact_covered_by": [
+        "DB127-1-AC1",
+        "DB127-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~212/RD_COT_LAYER_FACTS_R127.json",
+      "kind": "config_data",
+      "commit_or_etag": "95cad5164c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only record of live GET and LIST reads of irpt-performance-native-layer and irpt-cot-account-dim-lambda; no AWS write, no publish, no invoke",
+      "artifact_covered_by": [
+        "DB127-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB127-1-AC1",
+      "criterion_verbatim": "`DB127-1-AC1` -- against the order's first commit, `lambda.tf` gains exactly one read-only data source for `irpt-performance-native-layer` and one `layers = [data.aws_lambda_layer_version.irpt_performance_native.arn]` line, no other code line moves (comments excluded, spacing normalised), a comment names pyarrow and the layer, memory 1024 and timeout 900 stay, and every other root file is byte-equal to the base.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r127/p127_layer.py\" . DB127-1-AC1",
+      "output_evidence": "OK: lambda.tf gains one read-only data source for irpt-performance-native-layer and one layers line on the module call; no other code line moves; 4 other root files byte-equal to the base\nDB127-1-AC1 PASS",
+      "denominator": "2 of 2 new code lines present (1 data source block, 1 layers line on the module call); 0 other code lines moved; 4 of 4 other root files byte-equal to the base (the root holds 5 files); exit code 0",
+      "status": "PASS",
+      "expect": "DB127-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB127-1-AC2",
+      "criterion_verbatim": "`DB127-1-AC2` -- the checker reads the layer and the sibling function live: the layer's latest version lists python3.12, the sibling runs python3.12 on exactly that latest version, and the record has exactly the form of step 3 and equals those reads.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r127/p127_layer.py\" . DB127-1-AC2",
+      "output_evidence": "OK: layer irpt-performance-native-layer latest version 1, runtimes ['python3.12'], the sibling irpt-cot-account-dim-lambda runs python3.12 on that version; the record equals the live read\nDB127-1-AC2 PASS",
+      "denominator": "1 of 1 layer latest version read live (version 1); 1 of 1 sibling function configuration read live (python3.12, one layer ARN, ending in the latest version); 6 of 6 record keys present and equal to the live reads; exit code 0",
+      "status": "PASS",
+      "expect": "DB127-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB127-1-AC3",
+      "criterion_verbatim": "`DB127-1-AC3` -- the third-party imports of the bundle's python files (the source-map entry `irpt-cot-account-return-daily-lambda`, read by the checker) are exactly pyarrow plus the runtime's boto3 and botocore, and the layer's zip (downloaded by the checker) holds `python/pyarrow/__init__.py`.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r127/p127_layer.py\" . DB127-1-AC3",
+      "output_evidence": "OK: the bundle's third-party imports are ['pyarrow']; the layer zip (version 1, 4319 entries) holds python/pyarrow/__init__.py\nDB127-1-AC3 PASS",
+      "denominator": "1 of 1 import-time third-party name beyond the runtime's boto3 and botocore (pyarrow), read from the bundle's python files; 1 of 1 required zip path present in the layer's 4319 entries; exit code 0",
+      "status": "PASS",
+      "expect": "DB127-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "each of the three criteria was run once before the artifact commit and once again after it, with the same invocation",
+      "observed": "each run printed the same last line: DB127-1-AC1 PASS, DB127-1-AC2 PASS, DB127-1-AC3 PASS (rc 0 each time)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the checker's own --selftest, which applies deliberately wrong cases to the pure clauses: 7 HCL red arms (no layer, memory changed, timeout changed, wrong layer, extra code, no comment, wrong layers line), 3 import red arms, 8 facts red arms",
+      "expected": "every red arm raises and the selftest prints PASS with rc 0",
+      "observed": "selftest: hcl (7 red arms), imports (3 red arms) and facts (8 red arms) clauses behave; selftest PASS; rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan, terraform apply, any AWS write, any layer publish, any invoke of the landing function",
+      "reason": "bounds of the order: the cell is a read-only data source and a layers line; the plan is expected at 7 add / 0 change / 0 destroy and was not run"
+    },
+    {
+      "item": "the layer's pyarrow version compared against the version the adapter was measured with at round 125",
+      "reason": "not read by this order; the record words state that this is not proven"
+    },
+    {
+      "item": "a client-account-id scan by the commit gate",
+      "reason": "the hashed account-id list is absent on this box, so the gate's check ran as a WARN and did not check the commit; the manual scan of the staged diff and the record found no long digit run except the layer ARN's AWS account id in the exempt sibling_layer_arn field"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p127_layer.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r127/p127_layer.py\" . DB127-1-AC1",
+      "result": "DB127-1-AC1 PASS (rc 0)"
+    },
+    {
+      "tool": "p127_layer.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r127/p127_layer.py\" . DB127-1-AC2",
+      "result": "DB127-1-AC2 PASS (rc 0)"
+    },
+    {
+      "tool": "p127_layer.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r127/p127_layer.py\" . DB127-1-AC3",
+      "result": "DB127-1-AC3 PASS (rc 0)"
+    }
+  ]
+}
