@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-51",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-51.price-source-chain-core.md",
+    "group": "OTHER",
+    "vintage_commit": "5aefc342bf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R7_G.md",
+    "vintage_commit": "5aefc342bf",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-51.price-source-chain-core.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~170",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py",
+      "kind": "script",
+      "commit_or_etag": "5057b4dbfd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pure stdlib module (math, re); CHAIN, resolve_prices and the private helpers; no store read, no vendor call, no file, no print; imported by no module yet; not deployed, not pushed; the resident member list is the AR-g-6x cell",
+      "artifact_covered_by": ["AR51-g-AC1", "AR51-g-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_source.py",
+      "kind": "test",
+      "commit_or_etag": "5057b4dbfd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 offline tests with recording fake tiers; 15 passed, 0 failed (pytest, run at 5057b4dbfd)",
+      "artifact_covered_by": ["AR51-g-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "978429f66a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows IRPT_ANLREQ-D2-W170-S1, -S2, -S3 appended at the end; surprise-row-gate --check and the staged commit gate both OK, 3 new rows of 648",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR51-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g51_checks.py g51",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g51_checks.py g51",
+      "output_evidence": "AR-G51-OK cases=12 tests=15 | cases 12, wrong none, CHAIN ok | worker tests: 15 passed in 0.08s | rc=0 (run at the committed state 978429f66a, product commit 5057b4dbfd)",
+      "denominator": "12 of 12 resolve_prices cases correct (wrong none); 15 passed, 0 failed, need >= 8",
+      "expect": "^AR-G51-OK",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AR51-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g51_checks.py hygiene",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g51_checks.py hygiene",
+      "output_evidence": "AR-G51-HYGIENE-OK imports=math,re | rc=0 (run at the committed state 978429f66a, product commit 5057b4dbfd)",
+      "denominator": "0 non-ASCII bytes in price_source.py; imports math,re within 6 allowed names; 0 of 5 forbidden calls (open, print, exec, eval, __import__) present",
+      "expect": "^AR-G51-HYGIENE-OK",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order names no mutant control. The checker's case 9 is the one a relaxed positive-price bound would fail; that arm was run by the issuer before the cut and was not re-run here.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fake tiers, no clock, no network",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W170-S1",
+    "IRPT_ANLREQ-D2-W170-S2",
+    "IRPT_ANLREQ-D2-W170-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_source.py",
+      "result": "15 passed in 0.09s, rc=0"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/commit-gate.sh <file> for price_source.py and tests/test_price_source.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s), rc=0 (safe-commit 5057b4dbfd)"
+    }
+  ]
+}

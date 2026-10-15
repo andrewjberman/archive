@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-52",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-52.swap-replacement-rule-core.md",
+    "group": "OTHER",
+    "vintage_commit": "5aefc342bf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R7_G.md",
+    "vintage_commit": "5aefc342bf",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-52.swap-replacement-rule-core.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~171",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/swap_replacement.py",
+      "kind": "script",
+      "commit_or_etag": "011f9c1245",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new pure stdlib module choose_replacement (METHOD CLASS_LONGEST_YAHOO_HISTORY); imported by nothing yet; the adapter cell is the first importer; nothing deployed, no AWS, no model, no vendor call",
+      "artifact_covered_by": [
+        "AR52-g-AC1",
+        "AR52-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_replacement.py",
+      "kind": "test",
+      "commit_or_etag": "011f9c1245",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file with fakes only: 15 passed in 0.14s under the g52 checker",
+      "artifact_covered_by": [
+        "AR52-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR52-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g52_checks.py g52",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g52_checks.py g52",
+      "output_evidence": "AR-G52-OK cases=14 tests=15 | cases 14, wrong none | worker tests: 15 passed in 0.14s | rc=0",
+      "denominator": "cases 14 of 14 (wrong none); worker tests 15 passed, 0 failed (need >= 8) in test_swap_replacement.py",
+      "expect": "^AR-G52-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR52-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g52_checks.py hygiene",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g52_checks.py hygiene",
+      "output_evidence": "AR-G52-HYGIENE-OK imports= | rc=0",
+      "denominator": "1 of 1 module file (swap_replacement.py); 0 non-ASCII bytes; 0 imports outside {__future__, re, collections, typing} (0 imports); 0 calls to open, print, exec, eval, __import__",
+      "expect": "^AR-G52-HYGIENE-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "reversed history sort: candidates sorted ascending by history_days on a scratch copy of the module and tests, same checker run from the scratch root",
+      "expected": "AR-G52-FAIL (the checker must refuse the reversed pick)",
+      "observed": "AR-G52-FAIL wrong=['longest history in class wins', 'model proposal widens the pool', 'classify callable admits a proposal', 'noise never decides'] tests rc=1 passed=11 (4 cases wrong, 4 tests failed)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the module has no clock, RNG or I/O; its determinism is carried by the permutation tests (checker case 'deterministic over pool order', 120 orderings, one answer; test_the_answer_is_the_same_for_every_permutation_of_the_pool_and_the_proposals, 240 calls, one answer), not by a two-run compare",
+      "observed": "one distinct answer over all permutations in both tests",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W171-S1: the AR-g-52 contract is silent on an exception raised by classify and on a ticker on two pool rows with different classes (OBSERVATION, INERT); the module lets a classify exception propagate, no action taken"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the adapters that read etf-classifications, Yahoo history and the model proposals",
+      "reason": "the TO names the adapters as a later cell; this order makes no table read, vendor call or model call"
+    },
+    {
+      "item": "adding swap_replacement.py to the resident package member list",
+      "reason": "the TO names that as a step of the later single-release cell of this workstream; nothing is deployed here"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_replacement.py",
+      "result": "15 passed in 0.14s"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/ycharts/research/swap_replacement.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_replacement.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
