@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ch-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.md",
+    "group": "OTHER",
+    "vintage_commit": "824588956e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~169",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round86.md",
+    "vintage_commit": "824588956e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one new row ADVI_COTBKF-D1-W169-S1 appended with newline lf; numstat 26 added 0 deleted; no build artifact was produced"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB86ch1-AC1",
+      "criterion_verbatim": "the two rebuilt files, read from disk now and hashed now, equal the two committed pins (the pins are typed in this invocation, not read from your record).",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json',encoding='utf-8'));pins={'ACTIVE_COTTONWOOD_SET_V2.csv':'5cef7ab0c9e10fe299cb757d4dba31792d069bad35f7250defa76e18773046ae','REVERSE_MATCH_V3.csv':'0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f'};ok=[hashlib.sha256(open(f['path'],'rb').read()).hexdigest()==pins[f['name']] for f in d['files']];print('V2-REBUILD files=%d sha256_equal=%s'%(len(d['files']),all(ok) and len(ok)==2))\"",
+      "expect": "V2-REBUILD files=2 sha256_equal=True",
+      "output_evidence": "FileNotFoundError: [Errno 2] No such file or directory: 'org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json' (rc=1). No rebuild ran: data/assets/scripts/silver/ is absent from this sparse worktree (surprise ADVI_COTBKF-D1-W169-S1).",
+      "denominator": "0 of 2 rebuilt files hashed (no record, no files)",
+      "status": "FAIL",
+      "status_reason": "Blocked at the first act: data/assets/scripts/silver/ is not carried by this sparse worktree, so no rebuild ran and no record exists (surprise ADVI_COTBKF-D1-W169-S1). Not a hash mismatch."
+    },
+    {
+      "criterion_id": "CB86ch1-AC2",
+      "criterion_verbatim": "the script at HEAD is the script the record says produced the files: it is committed, and the run came from the commit.",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json',encoding='utf-8'));b=subprocess.check_output(['git','rev-parse','HEAD:'+d['script_path']]).decode().strip();print('V2-SCRIPT-COMMITTED blob_equal=%s'%(b==d['script_blob']))\"",
+      "expect": "V2-SCRIPT-COMMITTED blob_equal=True",
+      "output_evidence": "FileNotFoundError: [Errno 2] No such file or directory: 'org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json' (rc=1). No script was written or committed.",
+      "denominator": "0 of 1 script blob compared (no record)",
+      "status": "FAIL",
+      "status_reason": "Blocked at the first act: no record and no script exists in this worktree (surprise ADVI_COTBKF-D1-W169-S1)."
+    },
+    {
+      "criterion_id": "CB86ch1-AC3",
+      "criterion_verbatim": "the four window and definition rules hold on stubs.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py -q",
+      "expect": "4 passed",
+      "output_evidence": "no tests ran in 0.00s (rc=4): the test file path is absent from the sparse worktree (surprise ADVI_COTBKF-D1-W169-S1).",
+      "denominator": "0 of 4 stub rules run (no test file)",
+      "status": "FAIL",
+      "status_reason": "Blocked at the first act: the named path data/assets/scripts/silver/tests/ is not carried by this worktree. Not a rule failure; no test was written or run."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the spec names no mutant control; none run (no script or test exists to mutate)",
+      "expected": "n/a",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 invocations each run twice on the same bytes (no record present)",
+      "observed": "both rc=1 FileNotFoundError on the same path, twice",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "C:/dev/_cotbkf_rebuild_20261015/ (the two rebuilt CSVs)",
+      "reason": "outside the repository by design; not written because the build cannot run (no script). AC1 reads it through the record, which does not exist."
+    },
+    {
+      "item": "the account-id scan test_cotbkf_no_account_ids.py",
+      "reason": "the test path is absent from this worktree; invocation run after the last commit gave rc=4 no tests ran; DENOMINATOR reported in the worker report"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W169-S1: TO CB-ch-1 cannot start: worktree is sparse with no data/ pattern; the order paths data/assets/scripts/silver/ are committed at HEAD but not on disk. BLOCKING, stop at first act."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c (AC1, AC2 invocations verbatim from the order); python -m pytest (AC3 and the scan path)",
+      "result": "rc=1, rc=1, rc=4, rc=4 (all on missing paths)"
+    },
+    {
+      "tool": "git",
+      "invocation": "git sparse-checkout list; git ls-tree HEAD data/assets/scripts/; git rev-parse HEAD:data/assets/scripts/silver/commonwealth_signs.py",
+      "result": "worktree excludes data/; the path exists at HEAD (blob 054f8502aaaf867ab3adaf417263b4b8611e9ab6 for commonwealth_signs.py)"
+    }
+  ]
+}
