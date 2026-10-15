@@ -27,7 +27,8 @@ EARLIER_TESTS = ("data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_
 REC_REL = D + "0.9.0_WK_IRPT_DASHBD~219/RD_CONTRACT_040_FACTS_R137.json"
 ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-270.account-return-contract-040-flows-nullable-for-orion-and-source-account-id.md"
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~219"
-GRANT_FILES = {CONTRACT_REL, TEST_REL}
+GRANT_FILES = {CONTRACT_REL, TEST_REL, EARLIER_TESTS[0]}
+MAX_EARLIER_TEST_LINES = 8
 GRANT_PREFIXES = (D + "0.9.0_WK_IRPT_DASHBD~219/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/")
 FLOW = ("external_flow", "income_received")
 BASE_HASH = "1b25d37ba6cfcf5a7413373ccdca57e306b86614aff94472ca65ca0025484946"
@@ -211,6 +212,10 @@ def run(root, cid):
             together = together or {CONTRACT_REL, TEST_REL} <= files
             changed |= files
         check_grant(changed)
+        base = git(root, "log", "--diff-filter=A", "--format=%H", "--", ORDER_REL).split()[-1]
+        stat = git(root, "diff", "--numstat", base, "HEAD", "--", EARLIER_TESTS[0]).split()
+        edited = (int(stat[0]) + int(stat[1])) if len(stat) >= 2 else 0
+        need(edited <= MAX_EARLIER_TEST_LINES, "the earlier Cottonwood test may change by at most %d lines (its one hash assertion), not %d" % (MAX_EARLIER_TEST_LINES, edited))
         need(together, "the contract and its test must land in ONE commit (the ruling: 0.4.0 lands as one commit with its test)")
         print("OK: contract 0.4.0: the 19 columns and schema_hash are unchanged; the two flow columns are nullable only when %s; optional columns source, flow_claim, source_account_id carry hash %s; %d files changed, all in the grant"
               % (NULLABLE_WHEN, c["schema_hash_with_optional"][:12], len(changed)))
