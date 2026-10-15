@@ -1,4 +1,4 @@
-"""IRPT_DASHBD round 129, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- the ACT 3 order of the signed Cottonwood landing pair (packet revision 2, sha256 a1b080c5fe06...): explicit
+"""IRPT_DASHBD round 129, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- the ACT 3 order of the signed Cottonwood landing pair (packet revision 2, sha256 31f8e1620b90...): explicit
 `days` events of at most 25 trading days each, naming ONLY days after 2026-07-10 that have BOTH Black Diamond silver tables, oldest first, one synchronous invocation and one after-read
 per event, the schedule left DISABLED and the ledger left OPEN. Written BEFORE Act 2 has run, so that the order can be cut the moment the issuer has read Act 2's record; it grades
 nothing until its record exists.
@@ -20,7 +20,7 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 REC_REL = D + "0.7.0_AE_CloudOps~DB2/COT_CATCHUP_RECORD.json"
 APPLY_REC_REL = D + "0.7.0_AE_CloudOps~DB2/COT_LANDING_APPLY_RECORD.json"
 PACKET_REL = D + "2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md"
-PACKET_SHA = "a1b080c5fe065f90f4ad356c95301e59437637e95ce40afade93726eeaa392df"
+PACKET_SHA = "31f8e1620b90bdf041729c623239d5c4c96ccd8781e7ce48af401e900dea06b7"
 LEDGER_SLUG = "irpt-dashbd-cottonwood-account-return-daily-20261015"
 FUNCTION = "irpt-cot-account-return-daily-lambda"
 LOG_GROUP = "/aws/lambda/" + FUNCTION
