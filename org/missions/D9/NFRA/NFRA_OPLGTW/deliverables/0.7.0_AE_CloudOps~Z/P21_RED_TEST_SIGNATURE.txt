@@ -1,0 +1,35 @@
+[31mF[0m[31m                                                                        [100%][0m
+================================== FAILURES ===================================
+[31m[1m________ test_grant_writer_stages_the_contract_only_from_the_standard _________[0m
+
+tmp_path = WindowsPath('C:/Users/Opal Bloomberg/AppData/Local/Temp/og_test_proc_46816/pytest-of-Opal Bloomberg/pytest-0/test_grant_writer_stages_the_c0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000227E1A78770>
+
+    [0m[94mdef[39;49;00m[90m [39;49;00m[92mtest_grant_writer_stages_the_contract_only_from_the_standard[39;49;00m(tmp_path, monkeypatch):[90m[39;49;00m
+    [90m    [39;49;00m[33m"""NFRA_OPLGTW OG-rl-4 (row NFRA_MCPINDEX-Z-W19-S13): ONE source. The grant-writer's build_package.py must stage[39;49;00m
+    [33m    NFRA_OPLGTW_CONTRACT.json from org/standards, and from nowhere else: not from the shipped deploy/ copy and not from[39;49;00m
+    [33m    any other path. Fails (never skips) when the builder is absent or stages the contract from another source."""[39;49;00m[90m[39;49;00m
+        [94massert[39;49;00m _BUILD_PACKAGE.is_file(), [33m"[39;49;00m[33mbuild_package.py is not in this tree[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+        bp = _load_build_package()[90m[39;49;00m
+        [94massert[39;49;00m Path(bp.REPO_ROOT).resolve() == _REPO.resolve()[90m[39;49;00m
+        [90m# CLOUD's build_package.py reads the package from ONE git commit (the manifest's deployed_commit), through a[39;49;00m[90m[39;49;00m
+        [90m# `_Source`; the closure, the data-file derivation and the stage all take it (OG-gw-1, CTO ruling R1).[39;49;00m[90m[39;49;00m
+        src = bp._Source(bp.REPO_ROOT, bp._resolve_commit(bp.REPO_ROOT, bp.REPO_ROOT / bp.MANIFEST_REL))[90m[39;49;00m
+        staged_sources = [(Path(bp.REPO_ROOT) / p).resolve() [94mfor[39;49;00m p [95min[39;49;00m bp._derive_data_files(src, bp._derive_import_closure(src))[90m[39;49;00m
+                          [94mif[39;49;00m Path(p).name == [33m"[39;49;00m[33mNFRA_OPLGTW_CONTRACT.json[39;49;00m[33m"[39;49;00m][90m[39;49;00m
+        [94massert[39;49;00m staged_sources == [_STANDARD.resolve()], staged_sources[90m[39;49;00m
+        out = tmp_path / [33m"[39;49;00m[33mpkg.zip[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+        bp._stage(out, src, tmp_path / [33m"[39;49;00m[33mstaged[39;49;00m[33m"[39;49;00m)[90m[39;49;00m
+        [94mwith[39;49;00m zipfile.ZipFile(out) [94mas[39;49;00m zf:[90m[39;49;00m
+            members = [n [94mfor[39;49;00m n [95min[39;49;00m zf.namelist() [94mif[39;49;00m n.endswith([33m"[39;49;00m[33mNFRA_OPLGTW_CONTRACT.json[39;49;00m[33m"[39;49;00m)][90m[39;49;00m
+            [94massert[39;49;00m members == [[33m"[39;49;00m[33morg/standards/NFRA_OPLGTW_CONTRACT.json[39;49;00m[33m"[39;49;00m], members[90m[39;49;00m
+>           [94massert[39;49;00m zf.read(members[[94m0[39;49;00m]) == _STANDARD.read_bytes()[90m[39;49;00m
+[1m[31mE           assert b'{\n  "contr...on"\n  ]\n}\n' == b'{\n  "contr...on"\n  ]\n}\n'[0m
+[1m[31mE             [0m
+[1m[31mE             At index 7913 diff: [0m[33mb[39;49;00m[33m'[39;49;00m[33m\n[39;49;00m[33m'[39;49;00m[90m[39;49;00m != [0m[33mb[39;49;00m[33m'[39;49;00m[33m,[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31mE             Use -v to get more diff[0m
+
+[1m[31mtests\test_schwab_host_inputs.py[0m:168: AssertionError
+[36m[1m=========================== short test summary info ===========================[0m
+[31mFAILED[0m tests\test_schwab_host_inputs.py::[1mtest_grant_writer_stages_the_contract_only_from_the_standard[0m - assert b'{\n  "contr...on"\n  ]\n}\n' == b'{\n  "contr...on"\n  ]\n}\n'
+[31m[31m[1m1 failed[0m[31m in 7.59s[0m[0m
