@@ -28,19 +28,19 @@ The never-widen rule, pair (a) and pair (b) are as the V2 packet names them; the
 5. **The 06:00 fold does NOT move.** T-1 completeness at 06:00 New York is unmeasured and the stamp cannot measure it (section 2).
 6. **The day sets are recomputed per feed span** against `lib/trading_calendar.py` (the fallback table, 2010 to 2027; row W409-S4).
 
-## 2. Pair (b): the fold stays; a read-only probe comes first
+## 2. Pair (b): the trigger keeps its measured time
 
 The record: all 52 present T-1 flat objects (18 positions, 18 transactions, 16 performance) state an as-of date EQUAL to their own day,
 never the prior trading day (W409-S7), and the feeds carry no readiness field (the leading records hold per-row status columns only).
 So the pulled content cannot show that Orion's T-1 is complete at 06:00 New York. The latest landing among the present pulls is
 07:51 EDT (2026-10-14) and pulls land 07:39 to 07:56 EDT; **no earlier completeness time is measured, claim `inferred`**.
 
-**Therefore (b) is HELD:** `inf-gold-trigger`, the 11:15Z bronze cron, the aggregator's dispatch and the three CLIs' bronze writes do not change in
-this pair. Inflection keeps its measured time with that reason (the ruling @23eff24d0c allows a per-firm fold time when the input frontier
-requires it). What the pair authorises instead is the probe V2 section 9 designed, read-only on the vendor: at 06:00, 06:30 and 07:00 New York,
-five client-assets requests per probe (15 vendor requests in all), each compared with that day's 07:39 EDT pull. T-1 is complete at the earliest
-probe that equals the pull for every probed client; that time, and no earlier one, becomes the fold time in a later pair. The probe writes
-nothing to the bucket and uses the pull code's own client (requests counted in the read-back).
+**Therefore (b) is HELD, by the CTO's ruling (message 8193):** `inf-gold-trigger`, the 11:15Z bronze cron, the aggregator's dispatch and the three
+CLIs' bronze writes do not change in this pair. **Inflection's trigger keeps its current measured time (about 11:32Z, the chain's pulls landing
+07:39 to 07:56 EDT), recorded with this reason: T-1 completeness at 06:00 New York is unmeasurable from the 52 present objects.** The fold allows a
+per-firm time (ruling @23eff24d0c). Nothing waits on a probe: the read-only probe V2 section 9 designed (15 vendor requests at 06:00, 06:30 and
+07:00 New York) is NOT part of this pair, and if it is ever run it is a later act under its own pair. The aggregator's retirement (V2 section 1) is
+not part of this pair either; it is designable from source (section 1.4) when a pair moves the trigger.
 
 ## 3. Pair (a): the one-time backfill, per feed
 
@@ -61,10 +61,9 @@ the transactions and performance prefixes is not a day key and is excluded (W409
 
 **Performance days (22):** 2026-05-04 to 2026-05-08, 2026-05-11, 2026-07-01, 2026-07-02, 2026-07-06, 2026-07-07, 2026-07-09, 2026-07-13 to
 2026-07-15, 2026-07-21 to 2026-07-23, 2026-08-06, 2026-09-28 to 2026-09-30 and 2026-10-13.
-**QUESTION FOR THE CTO (the one ruling this packet needs): is the performance span's first day 2026-05-03 or 2026-05-12?** Its first key is 2026-05-03,
-a Sunday, which looks like a single early pull; the transactions feed starts 2026-05-12. If the six days 2026-05-04 to 2026-05-11 are out of span,
-performance has 16 days and the denominator is 27. By the span rule as written (first key = earliest day with any key) they are in. The act
-does not start until this is ruled.
+**RULED (CTO message 8193): the span rule is each feed's OWN first key.** Performance's first key is 2026-05-03, so every trading day after it is in
+its span, whatever another feed's start; the transactions feed's 2026-05-12 start does not bind performance. The 22 performance days stand and the
+denominator is 33.
 
 **Performance positive control (a later act, one present day).** Because the chain's performance copy is not the repository script, the packet shows
 that the repository script's request, output fields and file layout match what the chain writes for one PRESENT day (2026-10-14), by comparing the two
@@ -78,14 +77,14 @@ script's performance bronze write is retired with a message that names the chain
 transactions line 584, performance line 638).
 
 **Requests (estimate, not measured):** positions about 1,280 (320 clients a day, 4 days); transactions about 871 (one windowed call per account);
-performance about 315 (one windowed call per client); about 2,470 in all, plus 15 for the probe. The real counts come from the read-back.
+performance about 315 (one windowed call per client); about 2,470 in all. The real counts come from the read-back.
 
 ## 4. Blast radius, rollback and the stop rule (changes only)
 
-- **Writes at the act:** the 33 (or 27) bronze flat keys listed in section 3, each read ABSENT first. Nothing else is written: no schedule, no IAM
+- **Writes at the act:** the 33 bronze flat keys listed in section 3, each read ABSENT first. Nothing else is written: no schedule, no IAM
   principal, no Terraform change in this pair (V2's new Scheduler schedule and role are withdrawn with (b)). Served values changed: none. Other
   dates touched: none.
-- **Reads:** the Orion API through the same pull code (about 2,480 requests with the probe); the bucket listings and head reads of the keys.
+- **Reads:** the Orion API through the same pull code (about 2,470 requests); the bucket listings and head reads of the keys.
 - **Rollback, per key:** as V2 section 5: the new version is removed so the prior state (absent) returns; the bucket is versioned; a delete is
   Andrew's act; no other key is touched.
 - **Stop rule** (V2 section 10, plus): stop on a performance run before its control passes; on a key not read ABSENT first; on an empty key; on a
@@ -94,20 +93,19 @@ performance about 315 (one windowed call per client); about 2,470 in all, plus 1
 ## 5. Rows that bear on this packet
 
 W404-S3 (BLOCKING in V2): resolved by the one-time dated run of the same code; W404-S5: CLOSED (section 1.4); W404-S1, S2: resolved by the per-span
-recount (section 3, W409-S5); W404-S4 (the dispatch script exists only as an S3 object): ARMED, carried; W404-S6 (T-1 at 06:00 unmeasured): ARMED until
-the probe measures it; W404-S9 (tolerated pull failures): ARMED, carried, and the reason a key, not the chain, is the proof; W409-S1 (the grant widened by
+recount (section 3, W409-S5); W404-S4 (the dispatch script exists only as an S3 object): ARMED, carried; W404-S6 (T-1 at 06:00 unmeasured): carried ARMED, the trigger keeps its measured time with that reason; W404-S9 (tolerated pull failures): ARMED, carried, and the reason a key, not the chain, is the proof; W409-S1 (the grant widened by
 AMENDMENT 1), S2 (the performance copy differs), S4 (the calendar fallback), S6 (the `_meta` object), S7 (as-of equals its own day).
 
 ## 6. Signatures
 
 **COO half** (the change set, the blast radius, the order of the acts, the stop rule): 2.0.0_SA_COO~P2 -- UNSIGNED at these packet bytes; signed in a
-separate file bound to the sha256 of this file once the CTO has ruled the question in section 3. The sha256 is LEFT for the signer.
-**CTO half** (the never-widen scope, the span rule and the per-firm fold time): 1.0.0_SA_CTO -- UNSIGNED at these packet bytes; the sha256 is LEFT for the signer.
+separate file bound to the sha256 of this file (the question of section 3 is ruled). The sha256 is LEFT for the signer.
+**CTO half** (the never-widen scope, the span rule (each feed's own first key) and the per-firm trigger time): 1.0.0_SA_CTO -- UNSIGNED at these packet bytes; the sha256 is LEFT for the signer.
 Neither signature is implied by the presence of this file.
 
 ## 7. What this packet does not measure
 
-It does not measure Orion's T-1 completeness at 06:00 (section 2 is inferred; the probe measures it). It does not measure the request counts. It does
+It does not measure Orion's T-1 completeness at 06:00 (section 2 is inferred and no probe is part of this pair). It does not measure the request counts. It does
 not read the household or account mapping tables. It does not run the performance control, build, deploy or request anything from the vendor.
 
 -- 2.0.0_SA_COO~P2
