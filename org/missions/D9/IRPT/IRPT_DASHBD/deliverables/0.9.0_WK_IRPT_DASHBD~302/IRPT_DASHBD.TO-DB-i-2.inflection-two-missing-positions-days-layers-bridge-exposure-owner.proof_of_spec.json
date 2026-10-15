@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-2",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "group": "OTHER",
+    "vintage_commit": "1cb46e909b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "1cb46e909b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-2.inflection-two-missing-positions-days-layers-bridge-exposure-owner.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~302",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~302/IRPT_DASHBD.TO-DB-i-2.inflection-two-missing-positions-days-layers-bridge-exposure-owner.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~302/DATE_GAP_READ_R114.json",
+      "kind": "config_data",
+      "commit_or_etag": "315865cd02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of the DB-i-2 read at 315865cd02: counts, paths, dates and words only; reads s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0; pushed false, deployed false, served_values_changed false",
+      "artifact_covered_by": [
+        "DBI114-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "315865cd02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three appended rows IRPT_DASHBD-D2-W302-S1 to S3 at 315865cd02; the surprise-row gate printed OK for the 3 new rows; no existing row edited",
+      "artifact_covered_by": [
+        "DBI114-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI114-2-AC1",
+      "criterion_verbatim": "`DBI114-2-AC1` -- the record is complete and carries no identifier and no write is recorded; the checker re-LISTs the Orion silver prefix and finds `silver_tables` equal to it; for each of the two dates and each table a fresh LIST finds the recorded partition presence true or false exactly; `trading_day` equals `lib/trading_calendar.is_trading_day`; the bridge counts are integers with the flow count not above the valued count; the owner's producer file is a repo file and the schedule words are present; nothing is written to AWS; no push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r114/p114_bin.py\" . DBI114-2-AC1",
+      "output_evidence": "DBI114-2-AC1 PASS (rc 0); the last line of the run: DBI114-2-AC1 PASS",
+      "denominator": "1 of 1 criterion PASS; silver_tables 4 of 4 equal to a fresh LIST of the Orion silver prefix; partition presence 8 of 8 (2 dates x 4 silver tables) exact against a fresh LIST; trading_day 2 of 2 equal to lib/trading_calendar.is_trading_day; bridge counts 4 of 4 integers, flow count not above valued count in 2 of 2 dates; producer file a repo file in 1 of 1; schedule words present in 1 of 1",
+      "status": "PASS",
+      "expect": "DBI114-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the record in memory with the 2026-09-28 bridge flow count raised to one above its valued count, run through the checker's own check_2 (driver at the worker scratch folder, not committed)",
+      "expected": "the checker refuses the record at the bridge bound (DBI114-2-AC1 FAIL)",
+      "observed": "MUTANT REFUSED: 2026-09-28: flow accounts exceed valued accounts (rc 0 of the driver, which exits 0 only on a refusal)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker run twice from the worktree root with the same arguments; outputs compared",
+      "observed": "run 1: DBI114-2-AC1 PASS rc 0; run 2: DBI114-2-AC1 PASS rc 0; identical verdicts",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Account ids, household ids, client values, flow figures and any per-account row",
+      "reason": "not recorded by design: client data lives only in the private evidence folder; the record carries counts, dates, paths and words only"
+    },
+    {
+      "item": "Re-pull, back-fill, bridging or any write of the two missing days",
+      "reason": "the order repairs nothing and bridges nothing; whether a bridge is admissible is the CTO's ruling on the read"
+    },
+    {
+      "item": "Eclipse prefixes under the granted prefix list",
+      "reason": "outside this order: the cell names the Orion prefix only"
+    },
+    {
+      "item": "Live read of the bucket notification and the bronze mirror schedule",
+      "reason": "the order allows one describe of one named resource; the sweep rule was described and the other triggers are recorded as the repo's DESIRED words"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W302-S1: OBSERVATION, INERT: the round-108 reader has no method that lists the silver common prefixes, so the silver table list came from one LIST through the reader's client after its grant check (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W302-S2: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~I2): the two missing days are absent from fact_performance and fact_transactions silver and from the bronze positions, performance and transactions feeds, not only from fact_positions; no repo file records a cause (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W302-S3: OBSERVATION, INERT: lib/trading_calendar answered from the hardcoded NYSE fallback because pandas_market_calendars is absent on this box; both dates read as trading days from that fallback (UNDER_INVESTIGATION)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p114_bin.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r114/p114_bin.py\" . DBI114-2-AC1",
+      "result": "DBI114-2-AC1 PASS rc 0 (main run and determinism rerun)"
+    },
+    {
+      "tool": "p114_bin.py check_2 on a mutated in-memory record (negative control)",
+      "invocation": "python -I .scratch/mutant_driver.py .",
+      "result": "MUTANT REFUSED: 2026-09-28: flow accounts exceed valued accounts"
+    }
+  ]
+}
