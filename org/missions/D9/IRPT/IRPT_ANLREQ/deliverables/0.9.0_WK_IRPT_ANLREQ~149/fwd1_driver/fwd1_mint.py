@@ -19,7 +19,7 @@ import time
 
 REGION = "us-east-1"
 TABLE = "opal-users-v2"
-EMAIL = "fwd1-staff-r41a@opal.invalid"
+EMAIL = "fwd1-staff-r41b@opal.invalid"
 PK = "USER#" + EMAIL
 SK = "PROFILE"
 FIRM = "opal-capital"
