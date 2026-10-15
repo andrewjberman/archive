@@ -1,0 +1,37 @@
+{
+  "reads": [
+    "account_dim",
+    "account_return_daily",
+    "model_series"
+  ],
+  "writes": [
+    "filled_report_values"
+  ],
+  "floor_day": "2026-07-10",
+  "bundle_members": [
+    "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_report_reader.py",
+    "data/assets/scripts/gold/irpt_reporting/adapters/model_series_windows.py",
+    "data/assets/scripts/gold/irpt_reporting/filled_report_values.py",
+    "infra/logic/registry/exemptions.json",
+    "infra/logic/registry/feeds.json",
+    "infra/logic/registry/firm_pages.json",
+    "infra/logic/registry/legacy_addresses.json",
+    "infra/logic/registry/platinum_destinations.json",
+    "infra/logic/registry/remediations.json",
+    "infra/logic/registry/reporting_policies.json",
+    "infra/logic/registry/resources.json",
+    "infra/logic/registry/scopes.json",
+    "infra/logic/registry/systems.json",
+    "infra/logic/registry/tiers.json",
+    "lib/opal_naming.py",
+    "lib/trading_calendar.py",
+    "org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json",
+    "org/standards/NAMING_SCHEMA.json"
+  ],
+  "events": [
+    "day",
+    "dry_run",
+    "scheduled"
+  ],
+  "words": "The handler builds the Cottonwood filled_report_values partition of one day per invocation. An event naming a day builds that day; an empty event, the scheduled fire, builds the oldest trading day owed, which runs from the day after the newest landed filled partition (or from the floor when none has landed) through the newest account_return_daily day, at most ten days. It reads the Cottonwood account_dim for the households, the Cottonwood account_return_daily through a listing that keeps only partitions at or after the floor, and the one served model-series object. It writes one parquet object per day with one put_object call, skips a day whose partition already exists, refuses a day before the floor or a malformed day before any call, and chains the next owed day by one asynchronous self-invoke of its own ARN. The floor keeps the Commonwealth-era returns history out of the listing, so none of those partitions is opened. Not proven: memory and run time on the Lambda runtime, the plan, any deploy or IAM grant, and the join-key overlap between account_dim and the returns beyond the synthetic fixtures."
+}
