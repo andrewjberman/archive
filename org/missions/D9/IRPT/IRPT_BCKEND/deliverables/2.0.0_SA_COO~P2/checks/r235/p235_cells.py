@@ -3,9 +3,10 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 It reuses the round-196/200/201/207 helpers (committed beside r235).
 
-  IB235-1  IB-pr-604  the account the 49 Financial candidate drops on the join is kept (CTO ruling @334382c7f4 item 1, msg 8527), the guard unchanged
-    AC1  the new tests and the existing publish-gate, exemption and wiring tests pass
-    AC2  the difference control: with every ACCOUNT-JOIN-A block removed in memory the new tests FAIL on assertions
+  IB235-1  IB-pr-604  (RE-CUT 2026-10-15 ~21:1xZ, CTO ADDENDUM 1 @9fef489152, msg 8644) the absent_at_source exemption names `smartx_map_present` as the
+           evidence of an exempted account the candidate day's SmartX map shows; the two-consecutive-day threshold and the 95 percent floor unchanged
+    AC1  the new tests and the existing publish-gate, exemption, wiring, receipts and bypass tests pass
+    AC2  the difference control: with every ABSENT-AT-SOURCE-D block removed in memory the new tests FAIL on assertions
     AC3  the record: the diff bounded to the grant; the named tests present; no typed object address; counters
 """
 import sys
@@ -23,15 +24,17 @@ F = "data/assets/scripts/gold/investor_reporting/"
 TO1 = "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-604.account-join-49f.md"
 CELLS = {
     "1": dict(
-        slot=440, test=F + "tests/test_account_join.py", min_tests=6, marker="ACCOUNT-JOIN-A", rec="IB235-1_record.json",
+        slot=441, test=F + "tests/test_absent_at_source_smartx_evidence.py", min_tests=8, marker="ABSENT-AT-SOURCE-D", rec="IB235-1_record.json",
         regress=[F + "tests/test_holdings_publish_gate.py", F + "tests/test_absent_at_source_exemption.py", F + "tests/test_absent_at_source_wiring.py",
-                 F + "tests/test_holdings_bypass_one_date.py"],
+                 F + "tests/test_absent_at_source_receipts.py", F + "tests/test_holdings_bypass_one_date.py"],
         mutants=[F + "holdings_snapshot.py"],
-        allowed=(F + "holdings_snapshot.py", F + "tests/test_account_join.py", F + "tests/test_holdings_publish_gate.py",
-                 F + "tests/test_absent_at_source_exemption.py", F + "tests/test_absent_at_source_wiring.py", TO1),
-        required=(F + "holdings_snapshot.py", F + "tests/test_account_join.py"), any_of=(F + "holdings_snapshot.py",),
-        named=("account_dropped_on_the_join_key_is_kept", "closed_account_absent_from_source_is_not_a_false_fail",
-               "other_accounts_are_unchanged", "the_guard_threshold_is_unchanged", "the_build_prints_counts_only")),
+        allowed=(F + "holdings_snapshot.py", F + "tests/test_absent_at_source_smartx_evidence.py", F + "tests/test_absent_at_source_exemption.py",
+                 F + "tests/test_absent_at_source_wiring.py", F + "tests/test_absent_at_source_receipts.py", TO1),
+        required=(F + "holdings_snapshot.py", F + "tests/test_absent_at_source_smartx_evidence.py"), any_of=(F + "holdings_snapshot.py",),
+        named=("smartx_present_account_absent_two_days_is_exempt_with_evidence", "account_absent_one_day_is_not_exempt_even_with_a_smartx_row",
+               "account_with_positions_on_either_day_is_not_exempt_with_a_smartx_row", "account_not_in_smartx_is_exempt_without_an_evidence_key",
+               "a_failed_or_empty_smartx_read_changes_no_decision_and_adds_no_evidence", "a_firm_with_no_smartx_reader_has_a_byte_unchanged_manifest",
+               "the_evidence_id_form_matches_the_custody_id_form", "the_floor_and_the_two_day_threshold_are_unchanged")),
 }
 
 
