@@ -173,6 +173,7 @@ def check(root, priv=PRIV, rec_rel=REC_REL):
     extract = json.loads(ep.read_bytes().decode("utf-8"))
     n_series, accounts = recompute(bodies, extract)
     need(rec.get("series_total") == n_series, "series_total: record %r recount %r" % (rec.get("series_total"), n_series))
+    need(rec.get("cause_claim") == "inferred", "cause_claim must read inferred (absent from a complete partition; the account status is not read)")
     need(rec.get("early_end_count") == len(accounts), "early_end_count: record %r recount %r" % (rec.get("early_end_count"), len(accounts)))
     need(rec.get("accounts") == accounts, "per-account rows differ from the recompute")
     counts = {v: sum(1 for a in accounts if a["verdict"] == v) for v in VERDICTS}
