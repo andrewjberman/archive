@@ -105,31 +105,42 @@ def ac2_exemption(r):
         yn, ya = side(e.get("with"), f + ".with")
         ex = e.get("exemption_alone") or {}
         added_n, added_a = count(ex.get("nodes_added"), f + ".nodes_added"), count(ex.get("accounts_added"), f + ".accounts_added")
+        n_ex = count(e["with"].get("exempted_accounts"), f + ".with.exempted_accounts")
+        applied = e["with"].get("listing_applied")
+        if not isinstance(applied, bool):
+            fail("%s.with.listing_applied must be a boolean (the run lists only on a PUBLISHED gate that exempted an account)" % f)
         if yn != wn + added_n or ya != wa + added_a:
             fail("%s: the counts with must equal the counts without plus the exemption alone (nodes %d+%d vs %d, accounts %d+%d vs %d)" % (f, wn, added_n, yn, wa, added_a, ya))
         if ex.get("other_nodes_changed") != 0:
             fail("%s: other_nodes_changed must be 0 (the exemption alone adds the listed node and moves no other node)" % f)
         if ex.get("amount_added_usd") != 0:
             fail("%s: amount_added_usd must be 0 (the listed account shows no amount as current)" % f)
-        n_ex = count(e["with"].get("exempted_accounts"), f + ".with.exempted_accounts")
-        if added_a != n_ex or added_n != n_ex:
-            fail("%s: each exempted account adds exactly one account node (exempted %d, nodes added %d, accounts added %d)" % (f, n_ex, added_n, added_a))
-        if "account_lost" in e["with"]["conditions"] and n_ex > 0:
-            fail("%s: with the exemption an exempted account must not still refuse as account_lost" % f)
-        if n_ex > 0 and "account_lost" not in e["without"]["conditions"]:
-            fail("%s: an exemption that applied must have been an account_lost refusal without it" % f)
-        if n_ex == 0 and (added_n != 0 or e["with"]["conditions"] != e["without"]["conditions"]):
-            fail("%s: with no exempted account the two runs must be identical" % f)
+        if applied:
+            if e["with"]["outcome"] != "PUBLISHED" or added_a != n_ex or added_n != n_ex:
+                fail("%s: a listing applied means PUBLISHED and exactly one account node per exempted account (exempted %d, nodes added %d, accounts added %d)" % (f, n_ex, added_n, added_a))
+        else:
+            if added_n != 0 or added_a != 0:
+                fail("%s: with no listing applied the exemption alone adds no node (the gate lists only on PUBLISHED)" % f)
+            if n_ex > 0 and e["with"]["outcome"] != "REFUSED":
+                fail("%s: exempted accounts without a listing can only be a REFUSED gate (other conditions remain)" % f)
         if n_ex > 0:
+            listed = count(e["without"].get("listed_not_refused", 0), f + ".without.listed_not_refused")
+            if "account_lost" not in e["without"]["conditions"] and listed < n_ex:
+                fail("%s: an exemption that applied must have been an account_lost refusal, or a lost account listed as not refused, without it" % f)
             fad = e["with"].get("first_absent_day")
             if fad is not None:
                 iso(fad, f + ".with.first_absent_day")
             if not isinstance(e["with"].get("since_bound_reached"), bool):
                 fail("%s.with.since_bound_reached must be a boolean" % f)
             s2 = e.get("second_fire") or {}
-            if s2.get("exempt_again") is not True or s2.get("outcome_account_lost") is not False:
-                fail("%s: the second fire (the listed snapshot served, the same candidate) must exempt the account again and not refuse it as account_lost" % f)
-    print("OK: the exemption alone moves exactly its listed nodes; counts and conditions agree")
+            if s2.get("exempt_again") is not True:
+                fail("%s: the second fire (the served set plus the listed ids, the same candidate) must exempt the account again" % f)
+            if s2.get("outcome_account_lost") is not ("account_lost" in e["with"]["conditions"]):
+                fail("%s: the second fire may refuse as account_lost only where the first run still does (other lost accounts)" % f)
+        else:
+            if added_n != 0 or e["with"]["conditions"] != e["without"]["conditions"]:
+                fail("%s: with no exempted account the two runs must be identical" % f)
+    print("OK: the exemption alone moves exactly its listed nodes (none where the gate still refuses); counts and conditions agree")
 
 
 def ac1_split(r):

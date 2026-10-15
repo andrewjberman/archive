@@ -30,14 +30,30 @@ def firm(exempted=1):
     if not exempted:
         wo["outcome"] = "PUBLISHED"
     wi = {"outcome": "PUBLISHED", "conditions": [], "node_count": 1000 + exempted, "account_count": 50 + exempted, "exempted_accounts": exempted,
-          "first_absent_day": "2026-10-13", "since_bound_reached": False}
+          "first_absent_day": "2026-10-13", "since_bound_reached": False, "listing_applied": exempted > 0}
     return {"candidate_day": "2026-10-14", "served_day": "2026-10-12", "builder": "build_synthetic_builder", "without": wo, "with": wi,
             "exemption_alone": {"nodes_added": exempted, "accounts_added": exempted, "amount_added_usd": 0, "other_nodes_changed": 0},
             "second_fire": {"exempt_again": True, "outcome_account_lost": False}}
 
 
+def refused_firm():
+    f = firm()
+    f["without"]["conditions"] = ["account_lost", "classified_security_lost"]
+    f["with"].update(outcome="REFUSED", conditions=["account_lost", "classified_security_lost"], node_count=1000, account_count=50, listing_applied=False)
+    f["exemption_alone"].update(nodes_added=0, accounts_added=0)
+    f["second_fire"] = {"exempt_again": True, "outcome_account_lost": True}
+    return f
+
+
+def published_without_firm():
+    f = firm(4)
+    f["without"].update(outcome="PUBLISHED", conditions=[], listed_not_refused=4)
+    return f
+
+
 REC1 = {**BASE, "method": "Built the candidate of each firm from the live pinned inputs with the HEAD code, then gated it twice: WITHOUT the evidence provider and WITH it.",
-        "firms": {"49financial": firm(), "cottonwood": firm()}}
+        "firms": {"49financial": refused_firm(), "cottonwood": published_without_firm()}}
+REC1B = {**REC1, "firms": {"49financial": firm(), "cottonwood": firm()}}
 REC2 = {**BASE, "method": "Ran the producer's pure return over each split day of the channel BEFORE the adjustment (no split ratios) and AFTER it, same inputs.",
         "firm_scope": "49financial", "split_days": ["2026-04-21", "2026-05-08"],
         "totals": {"account_days_run": 1000, "account_days_changed": 80, "account_days_holding_a_split_security": 90, "securities_adjusted": 7, "securities_ratio_absent": 1,
@@ -53,11 +69,13 @@ def mut(rec, fn):
 
 NEG1 = [
     ("one_firm_only", "IB218-1-AC1", lambda r: r["firms"].pop("cottonwood")),
-    ("count_mismatch", "IB218-1-AC2", lambda r: r["firms"]["49financial"]["with"].update(node_count=5000)),
-    ("other_node_changed", "IB218-1-AC2", lambda r: r["firms"]["49financial"]["exemption_alone"].update(other_nodes_changed=3)),
+    ("count_mismatch", "IB218-1-AC2", lambda r: r["firms"]["cottonwood"]["with"].update(node_count=5000)),
+    ("other_node_changed", "IB218-1-AC2", lambda r: r["firms"]["cottonwood"]["exemption_alone"].update(other_nodes_changed=3)),
     ("amount_added", "IB218-1-AC2", lambda r: r["firms"]["cottonwood"]["exemption_alone"].update(amount_added_usd=12.5)),
-    ("still_account_lost", "IB218-1-AC2", lambda r: r["firms"]["cottonwood"]["with"].update(outcome="REFUSED", conditions=["account_lost"])),
+    ("node_without_listing", "IB218-1-AC2", lambda r: r["firms"]["49financial"]["exemption_alone"].update(nodes_added=1, accounts_added=1)),
+    ("listing_but_refused", "IB218-1-AC2", lambda r: r["firms"]["cottonwood"]["with"].update(outcome="REFUSED", conditions=["account_lost"])),
     ("no_second_fire", "IB218-1-AC2", lambda r: r["firms"]["49financial"]["second_fire"].update(exempt_again=False)),
+    ("second_fire_flag_wrong", "IB218-1-AC2", lambda r: r["firms"]["49financial"]["second_fire"].update(outcome_account_lost=False)),
     ("long_digits", "IB218-1-AC3", lambda r: r.update(notes=r["notes"] + ["an identifier 1234567890123 slipped into this line of notes"])),
     ("counter_nonzero", "IB218-1-AC3", lambda r: r.update(aws_writes_made=1)),
 ]
@@ -98,6 +116,9 @@ def expect(label, cid, root, want):
     print("%s %-12s %-22s -> %s %s" % ("POSITIVE" if want else "NEGATIVE", cid, label, r, "" if ok else "<-- UNEXPECTED"))
 
 
+root = build(REC1B, REC2)
+expect("both_listed", "IB218-1-AC2", root, True)
+shutil.rmtree(root, ignore_errors=True)
 root = build(REC1, REC2)
 for c in ("IB218-1", "IB218-2"):
     for ac in ("AC1", "AC2", "AC3"):
