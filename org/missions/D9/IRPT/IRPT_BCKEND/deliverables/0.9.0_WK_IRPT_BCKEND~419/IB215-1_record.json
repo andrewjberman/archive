@@ -1,0 +1,37 @@
+{
+  "base_commit": "3f7c8910898345e85873d3a1fac78e18e0e7cea1",
+  "changed_paths": [
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "data/assets/scripts/gold/investor_reporting/tests/test_closed_at_source_exemption.py"
+  ],
+  "negative_tests": [
+    "exempts_when_both_days_have_no_positions_and_both_partitions_are_complete",
+    "one_zero_day_still_refuses",
+    "truncated_partition_never_exempts",
+    "present_in_either_table_refuses",
+    "manifest_records_absent_at_source_with_dates_never_closed",
+    "served_snapshot_keeps_the_account_listed_with_the_not_reported_words",
+    "terminated_path_unchanged",
+    "other_conditions_still_refuse"
+  ],
+  "tests_total": 55,
+  "tests_passed": 55,
+  "mutant_tests_failed": 6,
+  "notes": [
+    "AMENDMENT 1 (msg 8290) applied: the exemption is recorded as absent_at_source, never as closed. The manifest entry carries absence_claim measured and closure_claim unknown, with candidate_day and prior_day. The gate listing key is account_lost_absent_at_source.",
+    "Gate integration: evaluate_publish_gate takes one optional argument absent_at_source_evidence (a callable, default None). It is called only when an account is lost; None changes nothing. The exemption runs inside the CLOSED-AT-SOURCE-A block, after the TERMINATED split and before account_lost is added.",
+    "Rule: absent_at_source_exempt is pure. It exempts a lost account only when it is in neither accounts_with_positions set of either table on either day, every partition is complete (candidate count at least 95 percent of the prior count, prior count above zero) and the prior partition is present. Any failure returns an empty exemption.",
+    "Manifest: absent_at_source_record writes an absent_at_source list into snapshot _manifest, the run manifest that run_firm returns. A run with no exempted account adds no key. The published .manifest.json is written by holdings/publication.py, outside this grant (channel row IRPT_BCKEND-D2-W419-S1).",
+    "AMENDMENT 2 (issuer): the household placement of the exempted account in the served snapshot and the published manifest move to IB-pr-577 (channel rows IRPT_BCKEND-D2-W419-S1 and S2). Built here: not_reported_display (the words Not reported by the custodian since <date>, earliest absent day) and the run-manifest record. The eighth named test grades those two and says so in its docstring.",
+    "Not built here: the loader that reads evidence from each firm's source partitions, and any caller that passes the provider. No run_firm caller passes a provider, so production gate behaviour is unchanged.",
+    "Counts: tests_total and tests_passed come from one combined run of the new file and the three existing publish-gate files (9 new, 46 existing), repeated once with the same result. The mutant count is the new file run with every CLOSED-AT-SOURCE-A block removed in a scratch copy (6 failed, 3 passed, all on assertions or missing names); the product file was restored byte-identical afterwards.",
+    "Sparse directories added locally and never committed: data/assets/scripts/gold/investor_reporting, infra/aws/lambda/investor-reporting, data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared and docs/contracts/investor-reporting/v1.",
+    "Counters: rows_written counts data rows and is 0; the two channel rows filed are surprise rows. Nothing was run against a served prefix, signed, sent or written to AWS. Synthetic ids only (acc1 to acc3, TICKER AAA)."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
