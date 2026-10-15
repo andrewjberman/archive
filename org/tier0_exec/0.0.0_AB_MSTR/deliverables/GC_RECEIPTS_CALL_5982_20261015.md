@@ -37,6 +37,19 @@ All three read as build-worktree source-map stamps, but I have not shown that no
 
 So the first table's three "HELD" lines now read: two removed, one kept.
 
+## Update 2, CTO msgs 8121, 8131, 8132: the third was removed, then the release was withdrawn; no loss
+
+| path | head | in box/dell2 | clean | action |
+|---|---|---|---|---|
+| irpt-release-r30/w131/release | 109f4671bb | yes | no: source-map stamp | REMOVED at ~05:58Z under the CTO's 05:57Z release (8121). The CTO withdrew it at 05:59Z (8131; COO~Y2 8129 said the stamp is the IB-pr-456 build input, not the R29c record). My removal had already finished, so it could not be stopped. |
+
+No loss, checked by recomputation at 06:0xZ. The stamp named uploads.py at 83eb798a (full 83eb798a0870a5e5fd6c46f31b38762accda6eee) and
+interactive_access.py at 5be427ba (full 5be427ba7642f8ac244c92bcd55631e48605d6a9). Both commits are contained in box/dell2. The sha256 of
+`infra/aws/lambda/investor-reporting/intake/uploads.py` at 83eb798a recomputes to 48f39329ea4c947d... and of
+`infra/aws/lambda/investor-reporting/_scope/interactive_access.py` at 5be427ba to d416e3755d587b14..., equal to the values quoted by the CTO and
+COO~Y2. Control: the same files at the trunk map's old pins (15a387dd36, f09b802cdc) recompute to f85e8c9b... and c28d9a74..., equal to trunk's
+map. So the removed stamp is exactly reproducible from the two pins. The worktree itself is not recoverable.
+
 ## Not named by the ruling, left alone
 `C:/dev/r30-control`, `C:/dev/r30-release`, `C:/dev/irpt-release-r28/wt-r30-release`, `irpt-release-r29/*` (KEEP), `wk-irpt-anlreq-102` and
 `rel-anlreq-r4` (KEEP), the plain folders (act d8ae, Andrew's). Each removed worktree leaves a ~24 KB `portal/` stub holding a symlink to the shared
