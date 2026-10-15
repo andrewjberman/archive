@@ -16,11 +16,35 @@
   },
   "artifacts_produced": [
     {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/etfs_funds.py",
+      "kind": "script",
+      "commit_or_etag": "ec34d06c89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The two Opal fund tools (etfs_get_fund_nav_history, etfs_get_fund_holdings), keys read from the DATA_CATALOG rows at call time; no bucket, prefix or key literal typed. Committed @ec34d06c89 on wk-NFRA_OPLGTW-85, LOCAL. No release, no deploy, no registration (the issuer registers at the merge).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_et2.py",
+      "kind": "test",
+      "commit_or_etag": "ec34d06c89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four offline tests test_oget2_ac01..ac04 over a synthetic catalog fixture and a recording fake S3 client. Committed @ec34d06c89, LOCAL.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "89e286474b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows NFRA_OPLGTW-Z-W85-S3, -S4 and -S5 appended in fenced json blocks (70 insertions, additions only). surprise-row-gate OK on commit 89e286474b. Committed LOCAL on wk-NFRA_OPLGTW-85.",
+      "artifact_covered_by": []
+    },
+    {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~85/naming_probe_first_act.diff",
       "kind": "doc",
       "commit_or_etag": "d0d6b52edd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The FIRST ACT staged S3 literal diff. naming-gate --enforce on it: NAMING-GATE: REFUSE 10 graded, rc=1 (bucket CONFORMANT; 9 key, prefix and s3:// literals REFUSE). Committed @d0d6b52edd on wk-NFRA_OPLGTW-85, LOCAL.",
+      "deploy_evidence": "The FIRST ACT staged S3 literal diff from the first run (the STOP). Superseded in the build by amendment A1: the module now types no such literal. Committed @d0d6b52edd, LOCAL.",
       "artifact_covered_by": []
     },
     {
@@ -28,15 +52,7 @@
       "kind": "doc",
       "commit_or_etag": "d0d6b52edd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "L7 session log of the STOP at the FIRST ACT. Committed @d0d6b52edd, LOCAL.",
-      "artifact_covered_by": []
-    },
-    {
-      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "kind": "doc",
-      "commit_or_etag": "2058d7de83",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Two new rows NFRA_OPLGTW-Z-W85-S1 (committed @cd3d99720e) and NFRA_OPLGTW-Z-W85-S2 (committed @2058d7de83), appended in fenced json blocks. surprise-row-gate OK on each commit.",
+      "deploy_evidence": "L7 session log of the first run's STOP at the FIRST ACT. Committed @d0d6b52edd, LOCAL. This re-seated build is recorded in this instance and in the commit messages.",
       "artifact_covered_by": []
     }
   ],
@@ -46,10 +62,10 @@
       "criterion_verbatim": "AC1: the two fund tools are built, read the newest part per date, name the weight unit and refuse non-Opal before any read.",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/et2.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "infra/aws/ec2/opal-gateway/tests/test_og_et2.py absent\nRESULT: FAIL\nexit=1",
-      "denominator": "0 of 4 named tests (test_oget2_ac01 .. test_oget2_ac04) runnable: the test module is absent at HEAD 7c411780ad and in this worktree",
-      "status": "FAIL",
-      "status_reason": "Run at base in the worktree (C:/tmp/wk-oplgtw-85). The module infra/aws/ec2/opal-gateway/app/etfs_funds.py and the test module were never built: the FIRST ACT naming gate refused the module's S3 literals and the order says STOP. Not met.",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests (test_oget2_ac01, test_oget2_ac02, test_oget2_ac03, test_oget2_ac04) passed; 0 failed or errored lines; run from the worktree root on wk-NFRA_OPLGTW-85 at ec34d06c89",
+      "status": "PASS",
+      "status_reason": "pytest rc=0 and named tests passed 4 of 4, with failed/error lines 0; the check printed RESULT: PASS and exit=0. The tests cover: the NAV series is one fund's rows, oldest first, inclusive, with inferred passed through and the two denominator counts (ac01); an unknown ticker is refused harvest_bad_argument with zero reads, and a 500-day window is clamped with limit_applied (ac02); holdings read the newest part per date, name pct_points, honour as_of, and fall back to silver only when gold lacks the date, saying so (ac03); a non-Opal and an absent principal are refused both tools with zero reads, and an over-cap object is refused harvest_over_cap (ac04).",
       "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
     },
     {
@@ -57,69 +73,72 @@
       "criterion_verbatim": "AC2: against the real bucket the NAV series for IDVZ equals an independent read of the consolidated file, an unknown ticker is refused, holdings answer with a weight unit, and a non-Opal principal is refused.",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/et2.AC2.sh; echo \"exit=$?\"",
-      "output_evidence": "probe error: ImportError: cannot import name 'etfs_funds' from 'app' (C:\\tmp\\wk-oplgtw-85\\infra\\aws\\ec2\\opal-gateway\\app\\__init__.py)\nRESULT: FAIL\nexit=1",
-      "denominator": "0 of 4 probe checks answered (NAV series, unknown-ticker refusal, holdings weight unit, non-Opal refusal): the module import failed before any S3 call",
-      "status": "FAIL",
-      "status_reason": "Run at base in the worktree. No live read was made: the probe cannot import etfs_funds, which was not built (FIRST ACT STOP). Not met.",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\netf funds: IDVZ nav series 31 rows vs independent 31, last nav equal True; unknown ticker refused True; holdings answered with a weight unit True (42 rows); non-Opal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "IDVZ NAV series: 31 of 31 independent rows, last nav equal; holdings: 42 IDVZ rows answered with pct_points; 1 unknown ticker refused; 1 non-Opal principal refused. Live reads: the box's own credentials, read only, INTERNAL_READER_ROLE_ARN unset. Served prefixes computed from the four catalog rows.",
+      "status": "PASS",
+      "status_reason": "The live probe against the real bucket printed the decisive line 'IDVZ nav series 31 rows vs independent 31, last nav equal True; unknown ticker refused True; holdings answered with a weight unit True (42 rows); non-Opal refused True', then RESULT: PASS and exit=0. The holdings answer came from the gold holding table at its newest date (as_of 2026-10-13), with no silver fallback. Measured on the same run: DIVZ, IDVZ, PFDE and PFOE each answered from the gold table with 31, 42, 68 and 25 rows, and the NAV history for DIVZ read 392 rows in file.",
       "expect": "(?s)etf funds: IDVZ nav series (\\d+) rows vs independent \\1, last nav equal True; unknown ticker refused True; holdings answered with a weight unit True \\([1-9]\\d* rows\\); non-Opal refused True.*RESULT: PASS.*exit=0"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "No mutant was run: the module the controls would mutate was never built (FIRST ACT STOP at the naming gate).",
-      "expected": "N/A: nothing built to mutate",
-      "observed": "not run; no module at infra/aws/ec2/opal-gateway/app/etfs_funds.py in worktree C:/tmp/wk-oplgtw-85",
+      "description": "The order names no mutant control for this cell.",
+      "expected": "N/A: no mutant named by the order",
+      "observed": "not run",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "N/A-WITH-REASON: the two criterion scripts were each run once at the base; no output was produced to compare",
-      "observed": "Both scripts ended RESULT: FAIL with exit=1 (AC1 and AC2). No stability measurement was made.",
-      "status": "N/A-WITH-REASON"
+      "method": "Each criterion ran twice on commit ec34d06c89: once as the check script directly and once as the verbatim invocation. AC2 is a read-only live probe.",
+      "observed": "AC1: both runs printed 'named tests passed 4 of 4' and RESULT: PASS. AC2: both runs printed 'IDVZ nav series 31 rows vs independent 31' and RESULT: PASS, with the same holdings count of 42.",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "app/etfs_funds.py (both tools) and tests/test_og_et2.py",
-      "reason": "Not built: the FIRST ACT naming-gate probe refused 9 of the module's S3 literals and the order says STOP and file a BLOCKING row (row NFRA_OPLGTW-Z-W85-S1)."
-    },
-    {
-      "item": "The live probe of AC2 against opal-data-etfs (GET only)",
-      "reason": "Not run: the probe imports the module, which does not exist. No AWS call was made by this worker."
-    },
-    {
       "item": "Registration of the two tools in app/tools.py, app/data_entitlement.py and app/destructive_ops.py, and the pinned-count moves",
-      "reason": "Not this cell's <paths>; the issuer registers every tool and re-pins the counts at the merge (face section 2)."
+      "reason": "Not this cell's <paths>. The issuer registers every tool and re-pins the counts at the merge. Expected registration: etfs_get_fund_nav_history and etfs_get_fund_holdings, each read-tier, Opal-internal, admitted through the typed scope; the pinned tool counts move by two."
     },
     {
-      "item": "app/refs/DATA_CATALOG.yaml and any IAM, Terraform or bucket write",
-      "reason": "Forbidden to this cell (face section 2); none written."
+      "item": "The internal reader role grant on opal-data-etfs (OG-et-3 and OG-ap-20)",
+      "reason": "No IAM, Terraform or grant write is in this cell. The probe read with the box's own credentials, which the issuer's note records as expected before the release grant lands."
+    },
+    {
+      "item": "app/refs/DATA_CATALOG.yaml",
+      "reason": "Forbidden to this cell (face section 2); not written. Its header comment is recorded as an observation (row S4)."
+    },
+    {
+      "item": "A ticker set read from the data",
+      "reason": "The four tickers are typed once in FUND_TICKERS. The order asks for them to be read from the data, but no catalog row of the four carries a ticker list and the list's object is outside the four rows; a read before the refusal would break the zero-read rule. Recorded as row S3."
     }
   ],
   "surprises": [
-    "NFRA_OPLGTW-Z-W85-S1: the naming gate at 7c411780ad refuses the S3 key, prefix and s3:// literals staged for etfs_funds (9 of 10 graded; the bucket literal is CONFORMANT), so FIRST ACT stops the build (BLOCKING, hazard INERT, disarm_owner 2.0.0_SA_COO~O).",
-    "NFRA_OPLGTW-Z-W85-S2: the same gate at 7c411780ad returns PASS on the sibling OG-pt-2 probe's bare keys under PREFIX_* and KEY_* names but REFUSEs the OG-et-2 key literals in a tuple and under *_KEY and *_PREFIX names, so the verdict is not fixed by key form alone (OBSERVATION, hazard INERT)."
+    "NFRA_OPLGTW-Z-W85-S1: the naming gate refused the S3 key, prefix and s3:// literals staged for etfs_funds in the first run (BLOCKING, hazard INERT, disarm_owner 2.0.0_SA_COO~O). Superseded in the build by amendment A1: the module types no key, prefix or bucket literal, and the naming gate passes it (PASS 0 graded). The row itself is not edited.",
+    "NFRA_OPLGTW-Z-W85-S2: the same gate returns different verdicts on bare key literals by their context (OBSERVATION, hazard INERT). Not exercised by the build, which types no key literal.",
+    "NFRA_OPLGTW-Z-W85-S3: the order says the four tickers are read from the data, but no catalog row of the four entities carries a ticker list, so FUND_TICKERS types them once (OBSERVATION, hazard INERT).",
+    "NFRA_OPLGTW-Z-W85-S4: the runtime catalog file's header comment reads v0.4 while its body carries version 0.5 (OBSERVATION, hazard INERT).",
+    "NFRA_OPLGTW-Z-W85-S5: trading_days_behind_t1 is measured from the UTC date, as the sibling tools do, so the figure can differ from a New York trading-day reading across the UTC midnight (OBSERVATION, hazard INERT)."
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~85/session.log.txt",
   "compiler_tools": [
     {
       "tool": ".tools/naming-gate.py",
-      "invocation": "python .tools/naming-gate.py --diff .scratch/first_act_literals.diff --enforce (committed copy: naming_probe_first_act.diff)",
-      "result": "NAMING-GATE: REFUSE 10 graded; line 2 opal-data-etfs CONFORMANT as S3_BUCKET; 9 literals REFUSE as NEW and OUT-OF-PATTERN as S3Key; rc=1"
+      "invocation": "python .tools/naming-gate.py --diff .scratch/et2_all.diff --enforce (the two new files, as added-line diffs)",
+      "result": "NAMING-GATE: PASS 0 graded; rc=0 (after the scope name was derived from the bucket instead of typed; before that fix the gate refused 1 hand-kept carrier)"
     },
     {
-      "tool": ".tools/naming-gate.py (sibling probe, control run)",
-      "invocation": "python .tools/naming-gate.py --diff org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~80/naming_probe_as_module.diff --enforce",
-      "result": "NAMING-GATE: PASS 1 graded; rc=0"
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/etfs_funds.py infra/aws/ec2/opal-gateway/tests/test_og_et2.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc=0"
     },
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~85 <...>\" -F <msgfile> -- <paths>",
-      "result": "rc=0 on cd3d99720e (row S1), 2058d7de83 (row S2), d0d6b52edd (deliverables); all LOCAL on wk-NFRA_OPLGTW-85"
+      "result": "rc=0 on ec34d06c89 (module and tests) and on 89e286474b (channel rows); both LOCAL on wk-NFRA_OPLGTW-85"
     },
     {
       "tool": ".tools/surprise-row-gate.py (commit-time limb)",
-      "invocation": "run by safe-commit on each row commit",
-      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (on 2058d7de83); the S1 commit passed the same limb"
+      "invocation": "run by safe-commit on the channel commit",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (on 89e286474b); 3 new rows of 628 total checked"
     }
   ]
 }
