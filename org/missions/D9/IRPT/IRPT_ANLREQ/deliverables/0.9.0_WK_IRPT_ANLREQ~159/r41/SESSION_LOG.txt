@@ -1,0 +1,18 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~159 on IRPT_ANLREQ.TO-AR-y-362 (base 35193dba68, branch wk-IRPT_ANLREQ-159)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-159 ; test -d org && test -d .tools -> TREE-OK ; HEAD 35193dba68.
+2. The door source is absent on disk (sparse worktree). Read at HEAD with git ls-tree and git show HEAD:<path>.
+3. Name searches (door tree = infra/aws/lambda/investor-reporting):
+   git grep -n -E 'TICKER_DATA_NOT_ENTITLED|TICKER_NOT_FOUND' HEAD -- <door tree>   (hits in intake/portfolio.py, intake/uploads.py, ops/status.py, tests)
+   git grep -n -i -E 'BREIT|SREIT|KPEC' HEAD -- <door tree>                       (BREIT hits in 9 files; no SREIT or KPEC)
+   git grep -c -i -E 'SREIT|KPEC' HEAD -- <door tree>                            (no output, rc=1)
+4. Classification read by line (git show HEAD:<file> | cat -n): portfolio.py 519-520, 530-533; security_resolution.py 184-190;
+   tests test_security_resolution.py 35-49 and 145-149; fixtures lookup_capture 02 and 04.
+   Result: no candidate is source-classified TICKER_DATA_NOT_ENTITLED for a bare ticker. BREIT is the least-sure fallback.
+5. Base integrity: sha256sum of the run 1 and 2 csv, fwd1_driver.mjs and fwd1_mint.py = the three pinned values; git diff --quiet 35193dba68 -- <three paths> rc=0.
+   Hashes only. Neither the driver nor the mint helper was run.
+6. Wrote fwd1_holdings_49financial_r41b.csv (84 bytes; sha256 31ca4926a56d976df4c26ca7dbf8ce94119d7d34b43724b46d5534e95f872d2e).
+7. Wrote csv_check.py, base_check.py, mutant_check.py, r41/RUN3_HOLDINGS.json.
+8. Ran the three checkers (timeout 120 each): csv_check CSV-OK rc=0 (twice, identical); base_check BASE-OK rc=0; mutant_check MUTANT-FIRES rc=0.
+9. Filed surprise row IRPT_ANLREQ-D2-W159-S1 (premise failure in step 1) on INVESTIGATION_v1.md, appended only.
+10. No live call, no network, no AWS call, no push, no browser, no run of the driver or mint helper.

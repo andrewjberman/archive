@@ -1,0 +1,97 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-362",
+  "cell": "AR-y-362",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~159",
+  "base_commit": "35193dba68",
+  "chosen_ticker": "BREIT",
+  "classification": "TICKER_NOT_FOUND",
+  "classification_basis": "Bare BREIT: the door's pinned securities_info capture (02_securities_info.json, 2026-09-23) has no row for BREIT, so the resolver states NOT_FOUND, and portfolio.py emits TICKER_NOT_FOUND on that state. The TICKER_DATA_NOT_ENTITLED emit (portfolio.py:533) needs a verified gated fund row that answers the bare ticker (classify_batch security_resolution.py:189-190 sets PROVIDER_ENTITLEMENT_UNVERIFIED for such a row). No fixture or test shows a gated row keyed to bare BREIT: the nine gated BREIT rows in fixture 04 are keyed BREIT.S, BREIT.L, BREIT.S-2, BREIT.D-2, BREIT.C, BREIT.D, BREIT.T, BREIT.T-2 and BREIT.I, and fixture 04 is a typeahead, not a securities_info receipt.",
+  "source_classifies_ticker_data_not_entitled": "NONE OF THE THREE. The premise of step 1 (one of BREIT, SREIT, KPEC is classified TICKER_DATA_NOT_ENTITLED by source) does not hold for a bare ticker. The choice below is the least-sure fallback the cell allows: BREIT is the only one of the three that a fixture names as entitlement-gated, and it is the only one with source hits at all.",
+  "least_sure": true,
+  "name_searches": [
+    "git grep -c -i -E 'SREIT|KPEC' HEAD -- infra/aws/lambda/investor-reporting  => no output, rc=1 (zero hits, door source, tests and fixtures)",
+    "git grep -c -i 'BREIT' HEAD -- infra/aws/lambda/investor-reporting  => 9 files (positive control: the name search does reach the door tree)"
+  ],
+  "evidence": [
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+      "lines": "519-520",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "519: elif state == \"NOT_FOUND\":   520: emit(\"TICKER_NOT_FOUND\", coordinate, \"A\", actions=[\"REPLACE_FILE\", \"NAME_PROXY\"], value=named)"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+      "lines": "530-533",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "530: elif reason == \"PROVIDER_ENTITLEMENT_UNVERIFIED\":   533: emit(\"TICKER_DATA_NOT_ENTITLED\", coordinate, \"A\", actions=[\"NAME_PROXY\"], value=named)"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py",
+      "lines": "184-185 and 189-190",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "184: elif not candidates:   185: result.update(state=\"NOT_FOUND\", reason=\"EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ\")   189: elif candidates[0][\"features_needed\"]:   190: result.update(reason=\"PROVIDER_ENTITLEMENT_UNVERIFIED\", candidates=copy.deepcopy(candidates))"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py",
+      "lines": "35-39",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "35: symbols = [\"AAPL\", \"ALPPL\", \"VNQ\", \"BREIT\", \"$:CASH\"]   39: assert [result[s][\"state\"] for s in symbols] == [\"FOUND\", \"NOT_FOUND\", \"FOUND\", \"NOT_FOUND\", \"FOUND\"]"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/02_securities_info.json",
+      "lines": "2-3 and the json array (ids at lines 13, 28, 43)",
+      "read_with": "git show HEAD:<file> | grep -n '\"id\"'",
+      "bytes": "path: /securities/securities_info?securities=AAPL%2CALPPL%2CVNQ%2CBREIT%2C%24%3ACASH ; the array carries ids AAPL, VNQ and $:CASH only, so BREIT has no row"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/04_suggest_BREIT.json",
+      "lines": "2-3, 22, 38, 150 and the 9 mf rows",
+      "read_with": "git show HEAD:<file> | grep -n -E 'display_security_id|features_needed'",
+      "bytes": "path: /search/suggest/main?q=BREIT ; mf display_security_id values BREIT.S, BREIT.L, BREIT.S-2, BREIT.D-2, BREIT.C, BREIT.D, BREIT.T, BREIT.T-2, BREIT.I, each with features_needed"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py",
+      "lines": "44-48",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "45: assert len(gated[\"json\"][\"mf\"]) == 9   46: assert all(x[\"features_needed\"] and x[\"search_id\"].startswith(\"M:\") for x in gated[\"json\"][\"mf\"])   47: # A typeahead response is not a successful complete securities_info response.   48: assert classify([\"BREIT\"], receipt([\"BREIT\"], gated[\"json\"]))[\"BREIT\"][\"state\"] == \"UNAVAILABLE\""
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py",
+      "lines": "145-149",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "145: gated, causes, funds = classify_full([\"AAPL\", \"BREIT.S\"], [row(), fund(\"BREIT.S\", features_needed=[\"evergreenFundData\"])])   149: assert gated[\"BREIT.S\"][\"state\"] == \"UNAVAILABLE\" and gated[\"BREIT.S\"][\"reason\"] == \"PROVIDER_ENTITLEMENT_UNVERIFIED\""
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+      "lines": "65-68",
+      "read_with": "git show HEAD:<file> | cat -n",
+      "bytes": "65: \"TICKER_DATA_NOT_ENTITLED\": (  66: \"This holding is a real fund, but our data provider does not cover funds of this kind, so it cannot be \"  67: \"analyzed as it is. Name a similar ticker to stand in for it (a proxy); the report will use that ticker and \"  68: \"say that it did.\"),"
+    }
+  ],
+  "the_other_two": [
+    {
+      "ticker": "SREIT",
+      "classification": "NOT_CLASSIFIED_BY_SOURCE",
+      "evidence": "git grep -c -i -E 'SREIT|KPEC' HEAD -- infra/aws/lambda/investor-reporting returns no output (rc=1). The name appears only in the PRD, the decomposition and task orders (IRPT_ANLREQ_PRD.md v0.15 item 3 and v0.17 item 3), never in the door's source, tests or fixtures. Chosen by name alone: not allowed."
+    },
+    {
+      "ticker": "KPEC",
+      "classification": "NOT_CLASSIFIED_BY_SOURCE",
+      "evidence": "Same grep as SREIT: no hit in infra/aws/lambda/investor-reporting. Named only in the PRD, decomposition and task orders. Chosen by name alone: not allowed."
+    }
+  ],
+  "csv_path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~159/fwd1_holdings_49financial_r41b.csv",
+  "csv_sha256": "31ca4926a56d976df4c26ca7dbf8ce94119d7d34b43724b46d5534e95f872d2e",
+  "csv_bytes": 84,
+  "rows": 3,
+  "rows_content": ["SPY,100,26000000", "AGG,200,32000000", "BREIT,50,5000000"],
+  "claim": "Run 3's holdings csv carries SPY and AGG byte-identical to the signed run 1 and 2 rows, plus BREIT at 50 dollars and 5000000 market value. BREIT is the least-sure choice: no source line classifies any of the three as TICKER_DATA_NOT_ENTITLED for a bare ticker. The source classifies bare BREIT as TICKER_NOT_FOUND from its pinned capture, and that is a class the PRD v0.17 item 1 also files UNRESOLVED. SREIT and KPEC have no source hit at all, so neither can be chosen on the evidence.",
+  "not_read": [
+    "The live door: the answer YCharts gives today for BREIT, and whether a bare-keyed gated fund row would appear at run time. Not called; no network, no AWS, no driver run.",
+    "The provider's entitlement at run time: which securities the account is entitled to price on the day run 3 runs.",
+    "The deployed bytes of irpt-ycharts-generate: the source read is HEAD 35193dba68 via git show, not the bytes in the Lambda.",
+    "The yfinance checker's answer for BREIT (KEPT or NOT_KEPT), which decides whether a bare BREIT stays NOT_FOUND or is kept.",
+    "SREIT and KPEC live: no answer read for either, and no source for either.",
+    "The resident r32 and r33 release, which carry the UNRESOLVED filing change in the door: not landed at this base, so this record reads the source as it stands at HEAD."
+  ]
+}
