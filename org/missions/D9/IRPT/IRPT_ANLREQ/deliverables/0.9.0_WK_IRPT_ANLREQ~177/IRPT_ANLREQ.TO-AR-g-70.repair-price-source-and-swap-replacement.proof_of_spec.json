@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-70",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-70.repair-price-source-and-swap-replacement.md",
+    "group": "OTHER",
+    "vintage_commit": "421dd68001"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R9_G.md",
+    "vintage_commit": "421dd68001",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-70.repair-price-source-and-swap-replacement.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~177",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py",
+      "kind": "script",
+      "commit_or_etag": "b88f8d90e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source only, no deploy: resolve_prices refuses PRICE_SYMBOLS for str, bytes or non-iterable symbols; PRICE_WINDOW for a non-real calendar date or start after end; an impossible reader date is dropped; import set math, re, datetime",
+      "artifact_covered_by": [
+        "AR70-g-AC1",
+        "AR70-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/swap_replacement.py",
+      "kind": "script",
+      "commit_or_etag": "1c059acec6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source only, no deploy: classify raise drops the proposal as NOT_CLASSIFIED with no message kept; a pool ticker with two classes is CLASS_AMBIGUOUS listed once and never a candidate; NO_CLASS early return unchanged from base (fix commit 1c059acec6)",
+      "artifact_covered_by": [
+        "AR70-g-AC1",
+        "AR70-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_source.py",
+      "kind": "test",
+      "commit_or_etag": "b88f8d90e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 new offline tests for items 1 and 2 (symbols refusal, accepted symbol containers, calendar-impossible dates and window order, impossible reader dates and leap day); module file total 39 passed with the swap tests",
+      "artifact_covered_by": [
+        "AR70-g-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_replacement.py",
+      "kind": "test",
+      "commit_or_etag": "b88f8d90e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 new offline tests for items 3 and 4 (classify raise, classify raise for one proposal, two-class pool ticker, ambiguous proposal dropped once, same-class repeat is one candidate); module file total 39 passed with the price tests",
+      "artifact_covered_by": [
+        "AR70-g-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "bcd20342ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one append-only row IRPT_ANLREQ-D2-W177-S1 (the NO_CLASS ambiguity question); surprise-row-gate rc 0",
+      "artifact_covered_by": [
+        "AR70-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR70-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g70_checks.py repair",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g70_checks.py repair",
+      "output_evidence": "AR-G70-OK cases=10 (run at bcd20342ba on C:/dev/wk-irpt-anlreq-177: 'cases 10, wrong none' then 'AR-G70-OK cases=10'; rc=0). Base run before the edits: AR-G70-FAIL RuntimeError (the classify error propagated), rc=1.",
+      "denominator": "10 of 10 cases pass, 0 wrong (price_source 6 cases, swap_replacement 4 cases)",
+      "expect": "^AR-G70-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR70-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g70_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g70_checks.py regress",
+      "output_evidence": "AR-G70-REGRESS-OK checks=4 (run at bcd20342ba: 'ar_g51_checks.py g51: AR-G51-OK cases=12 tests=19'; 'ar_g51_checks.py hygiene: AR-G51-HYGIENE-OK imports=datetime,math,re'; 'ar_g52_checks.py g52: AR-G52-OK cases=14 tests=20'; 'ar_g52_checks.py hygiene: AR-G52-HYGIENE-OK imports='; rc=0)",
+      "denominator": "4 of 4 round-7 checks print their OK line (g51, g51 hygiene, g52, g52 hygiene)",
+      "expect": "^AR-G70-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The base arm is the repair criterion itself: AC1 FAILed on the merged modules before any edit (AR-G70-FAIL RuntimeError, rc=1).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes, no clock, no network",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W177-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_source.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_replacement.py",
+      "result": "39 passed in 0.17s, rc=0"
+    }
+  ]
+}
