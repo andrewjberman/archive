@@ -2,7 +2,7 @@
 
     python ar_g8x_checks.py g81|g82|g83|g84       the adapter answers its direct cases with fakes, and its own new test file passes (6 or more)
     python ar_g8x_checks.py hygiene81|...|hygiene84   ASCII; top-level imports only the allowed standard library names and tr_level;
-                                                  nested imports only pandas, pyarrow, yfinance, io, json, time; no open/print/exec/eval
+                                                  nested imports only pandas, pyarrow, yfinance, io, json, time, opal_naming; no open/print/exec/eval
 
 Prints one RESULT line: AR-G8x-OK / AR-G8x-FAIL or AR-G8x-HYGIENE-OK / AR-G8x-HYGIENE-FAIL; rc 0 only on OK. ASCII only.
 """
@@ -17,7 +17,7 @@ R = "infra/aws/lambda/investor-reporting/ycharts/research/"
 MODS = {"81": ("price_adapter_bbg", "test_price_adapter_bbg"), "82": ("price_adapter_demque", "test_price_adapter_demque"),
         "83": ("price_adapter_yfinance", "test_price_adapter_yfinance"), "84": ("price_adapter_ycharts", "test_price_adapter_ycharts")}
 TOP_OK = {"__future__", "math", "re", "datetime", "time", "bisect", "collections", "typing", "sys", "os", "tr_level"}
-NESTED_OK = {"pandas", "pyarrow", "yfinance", "io", "json", "time"}
+NESTED_OK = {"pandas", "pyarrow", "yfinance", "io", "json", "time", "opal_naming"}
 D1, D2, D3, D4 = "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15"
 
 
@@ -133,6 +133,9 @@ def cases83(m):
     mixed = m.make_reader(fetch=lambda s: [row(D1, 50.0), row(D2, 50.0, div=0.5), row(D3, 51.0, split=2.0), row(D4, 51.51)])
     out["a served dividend dated before a later split is undone to as traded"] = levels_match(
         mixed("SPY", D1, D4), [(D1, 100.0), (D2, 101.0), (D3, 101.0 * 1.02), (D4, 101.0 * 1.02 * (51.51 / 51.0))])
+    gap = m.make_reader(fetch=lambda s: [row(D1, 50.0), row(D2, None, split=2.0), row(D3, 51.51)])
+    out["a split on a dropped bad-Close row still counts for the return across the gap"] = levels_match(
+        gap("SPY", D1, D4), [(D1, 100.0), (D3, 103.02)])
     zero = m.make_reader(fetch=lambda s: [row(D1, 100.0, split=0.0), row(D2, 110.0, split=float("nan")), row(D3, 99.0, split=None)])
     out["a zero, NaN or missing split ratio counts as 1"] = levels_match(zero("SPY", D1, D4), [(D1, 100.0), (D2, 110.0), (D3, 99.0)])
     bad = m.make_reader(fetch=lambda s: [row(D1, 100.0), row(D2, None), row(D3, -5.0), row(D4, 110.0)])
