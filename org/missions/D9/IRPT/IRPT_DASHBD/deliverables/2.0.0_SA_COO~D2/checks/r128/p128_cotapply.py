@@ -1,4 +1,4 @@
-"""IRPT_DASHBD round 128, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- DB-b-260, the APPLY of the signed Cottonwood landing pair (packet revision 2, sha256 a1b080c5fe06...): ACT 1 the bundle build and upload and ONE safe-apply of the new root account-return-daily (plan exactly 7 add / 0 change / 0 destroy, the schedule
+"""IRPT_DASHBD round 128, workstream B-49F (issuer 2.0.0_SA_COO~D2) -- DB-b-260, the APPLY of the signed Cottonwood landing pair (packet revision 2, sha256 31f8e1620b90...): ACT 1 the bundle build and upload and ONE safe-apply of the new root account-return-daily (plan exactly 7 add / 0 change / 0 destroy, the schedule
 DISABLED), ACT 2 ONE synchronous event {"day": "2026-07-10"}; the ledger left OPEN for the issuer and for Act 3.
 
   DB-b-260 (0.7.0_AE_CloudOps~DB2)  DBC128-1-AC1 (the record: gates, ledger, before, build, plan),
@@ -20,10 +20,10 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 REC_REL = D + "0.7.0_AE_CloudOps~DB2/COT_LANDING_APPLY_RECORD.json"
 PACKET_REL = D + "2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md"
 COO_HALF_REL = D + "2.0.0_SA_COO~D2/NEVER_WIDEN_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING_COO_HALF.md"
-CTO_HALF_REL = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING_R2_CTO_HALF.md"
-PACKET_SHA = "a1b080c5fe065f90f4ad356c95301e59437637e95ce40afade93726eeaa392df"
+CTO_HALF_REL = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING_R3_CTO_HALF.md"
+PACKET_SHA = "31f8e1620b90bdf041729c623239d5c4c96ccd8781e7ce48af401e900dea06b7"
 LEDGER_SLUG = "irpt-dashbd-cottonwood-account-return-daily-20261015"
-PIN_COMMIT = "54e4a0036a"
+PIN_COMMIT = "039c4807c5"
 FUNCTION = "irpt-cot-account-return-daily-lambda"
 ROLE = "irpt-cot-account-return-daily-execution-role"
 POLICY = "irpt-cot-account-return-daily-execution-policy"

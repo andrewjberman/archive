@@ -1,10 +1,11 @@
 # NEVER-WIDEN, COO HALF -- the Cottonwood account-return landing function to the cloud (IRPT_DASHBD rounds 120 to 126, workstream B-49F): ONE new Terraform root, SEVEN new resources, ONE explicit first event, then explicit catch-up events
 
-**Signer:** 2.0.0_SA_COO~D2. **Status:** SIGNED (REVISION 2). **Date:** 2026-10-15 ~14:0xZ.
+**Signer:** 2.0.0_SA_COO~D2. **Status:** SIGNED (REVISION 3). **Date:** 2026-10-15 ~15:3xZ.
+**Revision 3 supersedes revision 2 (sha256 `a1b080c5fe06...`, signed @fed117446e, now VOID):** the AE applier's `safe-apply` was refused by the naming-plan gate before any write (msg 8351; the scheduler policy took the role's name); `DB-b-261` (merged @039c4807c5) gives it its builder name and the real gate grades the six names CONFORMANT. Re-signed on the new bytes below.
 **Revision 2 supersedes revision 1 (sha256 `c63702ade4df...`, signed @f1321ee057, now VOID):** revision 1 described a function with no pyarrow layer (row `IRPT_DASHBD-D2-S84`); `DB-b-259` (merged @54e4a0036a) adds the layer and the packet's pins, live state and conditions are updated. This half is re-signed on the new bytes below.
 **Bound to the packet's bytes:** [NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md](file:///C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md)
-(repo-relative `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md`), sha256 `a1b080c5fe065f90f4ad356c95301e59437637e95ce40afade93726eeaa392df`
-(computed by this seat on the file; 15,377 bytes). A packet whose bytes differ is not covered. **The other half:** 1.0.0_SA_CTO~DELL2, who also decides the packet's three questions (section 9). **Nothing is applied and no event is invoked until both halves are SIGNED on this sha256.**
+(repo-relative `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ACCOUNT_RETURN_DAILY_LANDING.md`), sha256 `31f8e1620b90bdf041729c623239d5c4c96ccd8781e7ce48af401e900dea06b7`
+(computed by this seat on the file; 16,334 bytes). A packet whose bytes differ is not covered. **The other half:** 1.0.0_SA_CTO~DELL2, who also decides the packet's three questions (section 9). **Nothing is applied and no event is invoked until both halves are SIGNED on this sha256.**
 
 ## 1. What this half covers
 
