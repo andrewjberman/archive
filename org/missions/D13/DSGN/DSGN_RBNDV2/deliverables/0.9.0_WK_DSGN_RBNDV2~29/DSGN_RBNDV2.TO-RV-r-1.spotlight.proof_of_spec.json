@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_RBNDV2.TO-RV-r-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_RBNDV2/task-orders/DSGN_RBNDV2.TO-RV-r-1.spotlight.md",
+    "group": "OTHER",
+    "vintage_commit": "1edfa5cec8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_RBNDV2/decompositions/DSGN_RBNDV2_DECOMP_v8.md",
+    "vintage_commit": "e4d9f4b324",
+    "to_ref": "org/missions/D13/DSGN/DSGN_RBNDV2/task-orders/DSGN_RBNDV2.TO-RV-r-1.spotlight.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_RBNDV2~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/market-performance/RSIModal.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "c2e0802f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal branch wk-DSGN_RBNDV2-29-portal commit c2e0802f (base 4299f28a). Three edits in SpotlightCard and RankedSection only: the card root border token border-transparent becomes border-[hsl(var(--hairline))]; the SpotlightCard labelColor and the RankedSection Hottest and Coldest labels take text-[hsl(var(--delta-positive))] and text-[hsl(var(--delta-negative))] in place of text-[#22c55e]/70 and text-[#ef4444]/70. getRSIColor, getRSILabel, RankedRow and the other borders are unchanged, as the test arm (d) shows.",
+      "artifact_covered_by": [
+        "RB10R1-AC1",
+        "RB10R1-AC2",
+        "RB10R1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/__tests__/dsgn-rbndv2/rb-10-r1.spotlight.test.ts",
+      "kind": "test",
+      "commit_or_etag": "c2e0802f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test at the folder the grant names, commit c2e0802f. Reads RSIModal.tsx as text via join(process.cwd(), ...). Arms: SpotlightCard holds border-[hsl(var(--hairline))] and no border-transparent; no text-[#22c55e]/70 and no text-[#ef4444]/70 in the file; each of the two delta token classes occurs at least twice; RankedRow and getRSIColor equal their text at 4299f28a. Prints SPOTLIGHT #C4CBDB CANONICAL-LABELS and VERDICT: SPOTLIGHT-OUTLINES-OK only when every arm holds. Each test that runs git show takes 30000 as its third argument; execSync carries no timeout option.",
+      "artifact_covered_by": [
+        "RB10R1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_RBNDV2/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "499abc012d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row DSGN_RBNDV2-W29-S1 appended inside the fenced json array, commit 499abc012d. Existing rows not edited. Parsed with python -I json.loads: 77 rows, last id DSGN_RBNDV2-W29-S1, class OBSERVATION, hazard INERT."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "RB10R1-AC1",
+      "criterion_verbatim": "RB10R1-AC1 -- the new test prints VERDICT: SPOTLIGHT-OUTLINES-OK only when every arm holds, and its difference control fails on the base text.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-29/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_RBNDV2~29; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/__tests__/dsgn-rbndv2/rb-10-r1.spotlight.test.ts 2>&1 | tail -25",
+      "expect": "VERDICT: SPOTLIGHT-OUTLINES-OK",
+      "output_evidence": "src\\__tests__\\dsgn-rbndv2\\rb-10-r1.spotlight.test.ts: / SPOTLIGHT #C4CBDB CANONICAL-LABELS / VERDICT: SPOTLIGHT-OUTLINES-OK / DIFFERENCE-CONTROL 4299f28a base-failures 6 / 2 pass / 0 fail / 7 expect() calls / Ran 2 tests across 1 file. RC=0 (the run on portal commit c2e0802f).",
+      "denominator": "2 of 2 tests pass in 1 file; the difference control on 4299f28a:src/components/market-performance/RSIModal.tsx prints 6 failure messages (non-zero, so it fails there as required).",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "RB10R1-AC2",
+      "criterion_verbatim": "RB10R1-AC2 -- the application typecheck, which includes the design tests, exits 0: the printed line reads TSC-RC=0.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-29/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_RBNDV2~29; mkdir -p .scratch; timeout 300 /c/Users/AndrewBerman/.bun/bin/bun x tsc -p tsconfig.app.json --noEmit > .scratch/rb10r1-tsc.txt 2>&1; echo TSC-RC=$?",
+      "expect": "TSC-RC=0",
+      "output_evidence": "TSC-RC=0. The output file portal/.scratch/rb10r1-tsc.txt is empty (0 lines of diagnostics).",
+      "denominator": "1 of 1 typecheck run (tsconfig.app.json) exits 0 with 0 diagnostic lines.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "RB10R1-AC3",
+      "criterion_verbatim": "RB10R1-AC3 -- every test under src/__tests__/dsgn-rbndv2/, src/ui/components/panels/, src/ui/components/modal/ and src/components/market-performance/ passes: the summary line reads 0 fail.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-29/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_RBNDV2~29; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/__tests__/dsgn-rbndv2 src/ui/components/panels src/ui/components/modal src/components/market-performance 2>&1 | tail -6",
+      "expect": "0 fail",
+      "output_evidence": "VERDICT: SECTIONS-OK / 52 pass / 0 fail / 780 expect() calls / Ran 52 tests across 37 files. RC=0.",
+      "denominator": "52 of 52 tests pass across 37 files in the four named paths; 0 fail.",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The RB10R1-AC1 arms applied to the base RSIModal.tsx at 4299f28a via git show, which must FAIL so the test can fail.",
+      "expected": "The SpotlightCard hairline arm, the no-translucent-label arm and the delta-token count arm are false on the base text, because border-transparent and the #22c55e/70 and #ef4444/70 labels are present there.",
+      "observed": "DIFFERENCE-CONTROL 4299f28a base-failures 6; the test that runs the arms on the base text passes only because its expect(baseFails.length).toBeGreaterThan(0) holds.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The RB10R1 test run on the committed tree (portal c2e0802f) twice, with no source change between the runs; the VERDICT line and the expect() count compared.",
+      "observed": "Both runs on identical bytes: VERDICT: SPOTLIGHT-OUTLINES-OK, 2 pass, 0 fail, 7 expect() calls, RC=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Commit-gate validation of the .tsx and .ts files in portal commit c2e0802f.",
+      "reason": "commit-gate reported WARN: checked 0 of 2 file(s); it reads only .py, .sh, .tf and org/projects/*.json. The instruments for this commit are the test (AC1), tsc -p tsconfig.app.json (AC2) and the four-path test run (AC3)."
+    },
+    {
+      "item": "A browser render of the Global RSI modal Spotlight tab.",
+      "reason": "The order says do not start any server. The rendered colours are not read here; the criteria are static-text and typecheck criteria."
+    }
+  ],
+  "surprises": [
+    "DSGN_RBNDV2-W29-S1: the order names no commit tool for the portal repo, which has no .tools directory of its own; the portal commit c2e0802f was made with the root worktree's ../.tools/safe-commit.sh, and its risk-reflex and naming-gate fell back to workspace-root copies. Row OBSERVATION, hazard INERT, at commit 499abc012d."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_RBNDV2/deliverables/0.9.0_WK_DSGN_RBNDV2~29/DSGN_RBNDV2.TO-RV-r-1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "bun test (bun 1.3.9, bun:test)",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-29/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/__tests__/dsgn-rbndv2/rb-10-r1.spotlight.test.ts",
+      "result": "PASS on the committed tree c2e0802f (VERDICT: SPOTLIGHT-OUTLINES-OK, 2 pass, 0 fail, 7 expect() calls, rc=0)."
+    },
+    {
+      "tool": "tsc -p tsconfig.app.json --noEmit (portal typecheck, bun x tsc)",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-29/portal && bun x tsc -p tsconfig.app.json --noEmit",
+      "result": "rc=0 with 0 diagnostic lines on the committed tree c2e0802f."
+    }
+  ]
+}
