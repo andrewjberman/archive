@@ -123,6 +123,37 @@ def absent_mode(data):
     return a.done()
 
 
+def r5_check(g):
+    """R5 carried_dates (amended for CN-r-1, round 10): carried_dates contains EVERY date with no total, and any further date is a
+    total-bearing date on which a leg (Dividend, Growth, sma_additive_aua) is missing from the served series AFTER its first value
+    (the only dates CN-r-1 may add). A leg gap that was REFUSED adds no date and is not required here (the served object cannot tell a
+    refused gap from a carried one); an extra date with no leg gap is a defect. Equal to the no-total dates on a fire with no gap."""
+    dates = g.get("dates") or []
+    n = len(dates)
+    cd = g.get(CARRIED)
+    if not isinstance(cd, list):
+        return False, "carried_dates absent"
+    tot = g.get("opal_aggregate_aua") or [None] * n
+    bm = g.get("by_model") or {}
+    arrs = {"opal_div_sma": (bm.get("opal_div_sma") or {}).get("model_value") or [], "opal_growth_sma": (bm.get("opal_growth_sma") or {}).get("model_value") or [],
+            "sma_additive_aua": g.get("sma_additive_aua") or []}
+
+    def gap(i):
+        out = []
+        for nm, arr in arrs.items():
+            first = next((j for j, v in enumerate(arr) if v is not None), None)
+            if first is not None and i > first and (i >= len(arr) or arr[i] is None):
+                out.append(nm)
+        return out
+    nototal = [d for i, d in enumerate(dates) if tot[i] is None]
+    extra = [d for d in cd if d not in set(nototal)]
+    bad_extra = [d for d in extra if d not in dates or tot[dates.index(d)] is None or not gap(dates.index(d))]
+    missing = [d for d in nototal if d not in cd]
+    ok = not missing and not bad_extra
+    return ok, ("carried_dates = the %d no-total dates plus %d leg-gap date(s) %s%s%s" % (len(nototal), len(extra), extra,
+                "" if not missing else "; MISSING no-total dates %s" % missing, "" if not bad_extra else "; extra dates with no leg gap %s" % bad_extra))
+
+
 def r11_check(g):
     """R11 leg presence (CTO condition C1, msg 5940; amended for CN-r-1, round 10). A leg (Dividend, Growth, sma_additive_aua)
     absent on the newest dated row while it held a value on the previous dated row is Branch B UNLESS the producer CARRIED it:
@@ -212,8 +243,8 @@ def read_mode(data, manifest, pin=None):
             bad4.append((d, round(r, 2)))
     a.arm("R4", count > 0 and not bad4, "partition identity total - model_aua - (Client Sup + ETF + ALT, ALT null = 0 before 2026-09-30) on %d dated rows: residual within [0, 0.06M] before %s (the Global All Equity TR leg) and within 0.01 after; offending %s" % (count, GAETR_END, bad4[:3]))
     # R5 carried
-    nototal = [d for i, d in enumerate(dates) if (g.get("opal_aggregate_aua") or [None] * n)[i] is None]
-    a.arm("R5", cd == nototal if isinstance(cd, list) else False, "carried_dates equals the dates with no total (%d): %s" % (len(nototal), "equal" if cd == nototal else "got %s want %s" % (cd, nototal)))
+    ok5, detail5 = r5_check(g)
+    a.arm("R5", ok5, detail5)
     # R6 prior
     r6 = []
     restated = []
