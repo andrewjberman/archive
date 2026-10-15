@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ff1e47f079"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "922426e095",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-r-1.producer-carry-missing-trend-legs.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-r-1",
+  "assignee": "0.9.0_WK_MDPF_CANON~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "7606f9b678",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-29 (commit 7606f9b678). TREND_CARRY_LEGS and TREND_IDENTITY_TOL below SMARTX_LOOKBACK_DAYS; _leg_present, _partitions and _leg_carry above compute_trend_groups; compute_trend_groups carries each leg alone on its row where the carried row still partitions the served Total. 59 lines added, 9 replaced. No deploy, no AWS write by the worker."
+    },
+    {
+      "path_or_key": "data/mdpf/tests/canon/test_global_trend_groups.py",
+      "kind": "test",
+      "commit_or_etag": "7606f9b678",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-29 (commit 7606f9b678). The eight existing tests are unedited; six synthetic tests added (planted gap per leg, sleeve excluded by the Total, Dividend carried beside a refused sleeve, never before the first value, memory across 2026-05-18 with gaetr never carried, no model_aua carries nothing). 14 passed, 0 failed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cell_refs=CN-r-1: cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" pure; echo \"exit=$?\" -- expect: CN-R-1 PURE: 11 of 11 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" pure; echo \"exit=$?\"",
+      "output_evidence": "  M0 PASS: the grader accepts the expected arrays and rejects the planted base-behaviour mutant\n  P0 PASS: module imports; the CN-p-1 fixture still yields exactly its expected arrays\n  R1 PASS: gaps in Dividend 06-03, Growth 06-04, sleeve 06-05 where the Total contains them: client [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] etf [10.0, 12.0, 12.0, 12.0, 12.0, 12.0] carried ['2026-06-03', '2026-06-04', '2026-06-05']\n  R2 PASS: legs with a later first value: client [46.0, 46.0, 40.0, 40.0, 40.0, 40.0] etf [4.0, 4.0, 10.0, 12.0, 12.0, 12.0] carried []\n  R3 PASS: SMArtX legs + boundary + gaetr: client [49.0, 49.0, 49.0, 50.0, 50.0] etf [10.0, 10.0, 10.0, 10.0, 10.0] carried ['2026-05-15', '2026-05-18']\n  R4 PASS: total - model_aua - groups - allowance on every row of the four planted fixtures: max |residual| = 0.0000 (limit 0.011)\n  R5 PASS: inputs untouched True / True; carried_dates sorted and unique True\n  R6 PASS: newest row lacks the sleeve: Total contains it -> R11 PASS (carried); carried_dates withheld -> Branch B; Total excludes it -> Branch B\n  R7 PASS: the Total excludes the sleeve on 06-03 and 06-04: stays absent, not carried: client [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] etf [10.0, 12.0, 10.0, 10.0, 12.0, 12.0] carried []\n  R8 PASS: 06-04 Dividend gap (Total contains it) carries, sleeve gap (Total excludes it) does not: client [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] etf [10.0, 12.0, 12.0, 10.0, 12.0, 12.0] carried ['2026-06-04']\n  R9 PASS: no model_aua: nothing carries: client [40.0, 40.0, 46.0, 44.0, 40.0, 40.0] etf [10.0, 12.0, 6.0, 8.0, 10.0, 12.0] carried []\nCN-R-1 PURE: 11 of 11 arms\nexit=0",
+      "denominator": "11 of 11 arms",
+      "expect": "CN-R-1 PURE: 11 of 11 arms",
+      "status": "PASS",
+      "status_reason": "Measured under timeout 120 at the code commit 7606f9b678 in the worktree (the checker reads the worktree root). The 11 arms pass; M0 and P0 are the controls. Run twice; the two outputs are identical apart from the wall-clock WARN line."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cell_refs=CN-r-1: cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" seams; echo \"exit=$?\" -- expect: CN-R-1 SEAMS: 4 of 4 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" seams; echo \"exit=$?\"",
+      "output_evidence": "  S0 PASS: r9_cn_p_1.py pure: CN-P-1 PURE: 7 of 7 arms\n  S1 PASS: helpers present True, TREND_CARRY_LEGS ('div', 'growth', 'sma'), TREND_IDENTITY_TOL 0.011, behaviour (zero a value, never-had, carried where the Total contains it, absent where it does not, NaN, key gate, no model_aua, Dividend cancels) True\n  S2 PASS: data/mdpf/tests/canon/test_global_trend_groups.py: 14 passed, 0 failed (rc=0; needs >= 13)\n  S3 PASS: r9_cn_p_1.py seams: CN-P-1 SEAMS: 7 of 7 arms\nCN-R-1 SEAMS: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms",
+      "expect": "CN-R-1 SEAMS: 4 of 4 arms",
+      "status": "PASS",
+      "status_reason": "Measured under timeout 120 at the code commit 7606f9b678. S0 and S3 are the controls (the CN-p-1 pure and seams checks, 7 of 7 each); S2 is the worker's test file, 14 passed against the >= 13 the check requires."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cell_refs=CN-r-1: cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" oracle; echo \"exit=$?\" -- expect: CN-R-1 ORACLE: 11 of 11 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" oracle; echo \"exit=$?\"",
+      "output_evidence": "  O0 PASS: 497 dates, 9 with no total; SMArtX partition 2026-10-15; sma_additive_aua first value 2026-08-26 and MISSING after it on 7 total-bearing dates ['2026-08-31']..['2026-09-09']\n  O1 PASS: independent derivation vs the tree: 0 differing cells over 497 dates x 3 groups; carried_dates equal True\n  O2 PASS: 9 of 9 period ends within 0.05M of the amended oracle; max diff 0.00M\n  O3 PASS: 488 dated rows (denominator), max |model + groups + allowance - total| = 0.0000\n  O4 PASS: carried_dates == the 9 no-total dates True; groups on them equal the previous dated row True; ALT None before 2026-09-30 True\n  O6 PASS: readback R4 limits on 488 dated rows; offending []\n  O7 PASS: the 7 sleeve-less dates: refused by the derivation True; ETF = Dividend + Growth on all of them True; none is a carried date True\n  O8 PASS: readback R11 on the served object with the tree's groups: leg presence on the newest dated row 2026-10-14 vs the previous dated row 2026-10-13: now {'opal_div_sma': Tru\n  O5 PASS: Global keys changed outside the four keys and meta [], meta keys changed [], 49 Financial keys changed []\n  O9 PASS: Dividend deleted on 2026-10-12 (previous value from 2026-10-09): ETF = previous Dividend + Growth + sleeve True, the date is carried True, the residual is -0.0000, cells moved [494] (must be only that row)\n  Om PASS: planted mutant (ETF zero-filled): 497 cells differ (must flag)\nCN-R-1 ORACLE: 11 of 11 arms\nexit=0",
+      "denominator": "11 of 11 arms",
+      "expect": "CN-R-1 ORACLE: 11 of 11 arms",
+      "status": "PASS",
+      "status_reason": "Measured under timeout 120 at the code commit 7606f9b678. Read-only: one get of the served 2026-10-14 Global object, one get of the 49 Financial object and one SMArtX partition (2026-10-15). No write. O9 is the planted Dividend gap on a real row; Om is the planted mutant. The O8 detail is the check's own 110-character truncation, printed as is."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 is JUDGMENT, graded at the round close (never self-graded): /seams on the producer-to-served seam, grounded on the objects after the first scheduled run that carries the code, and the first-fire readback r9_trend_groups_readback.py (amended R11 in round10/checks/).",
+      "method": "manual_read_with_citation",
+      "invocation": "NOT RUN BY THE WORKER -- judgment criterion; graded at L9 at the round close (never self-graded).",
+      "output_evidence": "NOT EXERCISED BY THE WORKER. Judgment criterion; no output recorded here, per the order (section 4).",
+      "denominator": "0 of 0 (judgment, graded at the round close)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round close"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's grader plants a defect (a missing leg read as zero, nothing carried; ETF zero-filled in the comparator) and must reject it: PURE arm M0 and ORACLE arm Om.",
+      "expected": "Each planted mutant is rejected: M0 passes with the grader rejecting it; Om passes with the comparator flagging it.",
+      "observed": "M0 PASS: the grader accepts the expected arrays and rejects the planted base-behaviour mutant; Om PASS: planted mutant (ETF zero-filled): 497 cells differ (must flag)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 invocation (pure) run three times in the worktree at 7606f9b678; the stdout of the second and third runs compared line by line after removing the wall-clock WARN line.",
+      "observed": "12 of 12 lines identical across the two repeat runs (the third run's last line: CN-R-1 PURE: 11 of 11 arms, exit=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 judgment (/seams on the producer-to-served seam and the first-fire readback) is not run by the worker",
+      "reason": "JUDGMENT criterion, graded at L9 at the round close and never self-graded (order section 4)."
+    },
+    {
+      "item": "Deploy of the code and the first scheduled run that carries it",
+      "reason": "No AWS write (order bound 1). The deploy is CloudOps's, in its own window, after a never-widen pair."
+    },
+    {
+      "item": "The client-data-check of commit 7606f9b678 (account-id scan)",
+      "reason": "The gate printed WARN: the hashed account-id list is ABSENT on this box, so the commit was not checked for account ids (absent is not empty). The worker printed no account id and no firm level; the output above carries dates and counts only."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W29-S1: the first pass (6201e15fa8) ran on a sparse checkout without data/mdpf, so the CN-r-1 write surface was absent and no criterion ran. The issuer widened the sparse set; this pass ran on the widened tree and the row stays on file as filed. No new row was filed for it."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r10_cn_r_1.py pure (issuer check, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" pure; echo \"exit=$?\"",
+      "result": "CN-R-1 PURE: 11 of 11 arms, exit=0"
+    },
+    {
+      "tool": "r10_cn_r_1.py seams (issuer check, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" seams; echo \"exit=$?\"",
+      "result": "CN-R-1 SEAMS: 4 of 4 arms, exit=0"
+    },
+    {
+      "tool": "r10_cn_r_1.py oracle (issuer check, read-only gets of the served objects)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round10/checks/r10_cn_r_1.py\" oracle; echo \"exit=$?\"",
+      "result": "CN-R-1 ORACLE: 11 of 11 arms, exit=0"
+    },
+    {
+      "tool": "pytest (worker's canon test file)",
+      "invocation": "cd C:/dev/wk-canon-r10-29 && timeout 120 python -m pytest data/mdpf/tests/canon/test_global_trend_groups.py -q -p no:cacheprovider",
+      "result": "14 passed, rc=0"
+    }
+  ]
+}
