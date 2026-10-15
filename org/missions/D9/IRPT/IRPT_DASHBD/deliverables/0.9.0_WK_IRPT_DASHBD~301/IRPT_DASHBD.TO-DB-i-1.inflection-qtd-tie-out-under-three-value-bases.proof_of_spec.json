@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-1",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1cb46e909b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "1cb46e909b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-1.inflection-qtd-tie-out-under-three-value-bases.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~301",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~301/BASIS_VARIANTS_R114.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~301/tieout_basis_variants.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Tracked read script for DB-i-1: imports the round-109 module and the round-108 GET-only reader, reads the newest fact_transactions and fact_performance partitions, writes one private variant parquet and prints counts only. Not deployed; no S3 write, vendor, secret or push call; the criterion's token scan refuses it for the local write_table call (surprise row IRPT_DASHBD-D2-W301-S1).",
+      "artifact_covered_by": [
+        "DBI114-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~301/BASIS_VARIANTS_R114.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-1 record: script and variant file hashed as recorded, per-variant counts and bins, moved_down_a_bin, basis words, reader reads; counts, hashes and words only; files_in_repo_private, served_values_changed, pushed and deployed all false.",
+      "artifact_covered_by": [
+        "DBI114-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two surprise rows IRPT_DASHBD-D2-W301-S1 (BLOCKING, the token scan against the local parquet write) and IRPT_DASHBD-D2-W301-S2 (OBSERVATION, the axis reading) appended as bytes, one fenced json block each, UNDER_INVESTIGATION.",
+      "artifact_covered_by": [
+        "DBI114-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI114-1-AC1",
+      "criterion_verbatim": "DBI114-1-AC1 -- the record is complete and carries no identifier; the script is a tracked file hashed as recorded, with no write call and no other firm's name; the variant file is a private parquet hashed as recorded with exactly the four columns and one row per household per variant, every null gap carrying a reason; the checker recounts each variant's compared, not-comparable and bin counts from the variant file and finds them equal to the record; the CONTROL holds: the `all` variant equals round 109's QTD gaps household by household (within 0.01 bp, the same households null) and its bins equal round 109's; `moved_down_a_bin` equals the checker's recount; nothing is written to AWS; no push or deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r114/p114_bin.py\" . DBI114-1-AC1",
+      "output_evidence": "DBI114-1-AC1 FAIL: write token in script: write_table\nDBI114-1-AC1 FAIL",
+      "denominator": "1 of 1 criterion FAIL. Every other arm of the checker holds under a diagnostic run with the token list emptied (not a verdict): control 0 of 320 households differing; 960 of 960 variant rows; bins and moved_down_a_bin recounted equal.",
+      "status": "FAIL",
+      "expect": "DBI114-1-AC1 PASS",
+      "status_reason": "The checker's write-token scan refuses the script's one local parquet write (pyarrow table writer, the private variant file that step 3 of the order requires); no token renamed, no route around it. Surprise row IRPT_DASHBD-D2-W301-S1 is BLOCKING for the issuer's ruling; the criterion stays FAIL."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch harness: one comparable household's all-basis gap in a scratch copy of the variant file moved by 1 bp (bin unchanged), the record pointed at it, and the checker's check_1 run with the token scan disabled in the harness only; the scratch files removed after.",
+      "expected": "the control arm fails on the perturbed household",
+      "observed": "control: basis all differs from round 109 on 1 households (the checker's control arm raised; the scratch files were removed)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice on the final tree, whole printed output compared with cmp.",
+      "observed": "identical output on both runs: DBI114-1-AC1 FAIL: write token in script: write_table; DBI114-1-AC1 FAIL; rc=1 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to AWS, any vendor call, any secret read, any push or deploy",
+      "reason": "Outside the grant and the cell. The reader's GET and LIST calls are the only S3 access; the record counts them."
+    },
+    {
+      "item": "The year-to-date, last-12-month and since-inception windows",
+      "reason": "Not in this cell's scope: the order names the qtd window only. Those windows wait on DB-i-2 and the CTO's ruling on the two missing trading days."
+    },
+    {
+      "item": "The tolerance ruling and any change to the round-109 record or the gaps file",
+      "reason": "The CTO rules the tolerance; this cell rules nothing and never edits the control."
+    },
+    {
+      "item": "Criterion DBI114-1-AC1 as written",
+      "reason": "FAIL on the checker's write-token scan of the script, which contains the one local parquet write the order's step 3 requires. Not repaired and not routed around; surprise row IRPT_DASHBD-D2-W301-S1 is BLOCKING for the issuer's ruling."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W301-S1: BLOCKING. The checker of DBI114-1-AC1 refuses the script for the write token write_table, while step 3 of the order has the cell write the private variant parquet with the same local call; the criterion stays FAIL until the issuer rules the token list or the write path.",
+    "IRPT_DASHBD-D2-W301-S2: OBSERVATION. The order's performance axis, the sorted trading days in the cache, is not the cache's own date set: the cache is calendar-daily and lacks the two NYSE trading days; the tie-out takes the NYSE trading days of the range, and the qtd control is unaffected."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p114_bin.py (issuer checker, DBI114-1-AC1), run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r114/p114_bin.py\" . DBI114-1-AC1",
+      "result": "rc=1; DBI114-1-AC1 FAIL: write token in script: write_table; DBI114-1-AC1 FAIL"
+    },
+    {
+      "tool": "scratch mutant harness over the checker's check_1 (token scan disabled in the harness; not a verdict)",
+      "invocation": "python -I .scratch/mutant_control.py (worktree scratch, untracked; removed scratch parquet and record after the run)",
+      "result": "rc=0; mutant control: FIRED -- control: basis all differs from round 109 on 1 households"
+    }
+  ]
+}
