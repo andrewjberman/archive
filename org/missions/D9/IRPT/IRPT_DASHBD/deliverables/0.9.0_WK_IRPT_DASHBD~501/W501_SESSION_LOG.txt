@@ -1,0 +1,35 @@
+0.9.0_WK_IRPT_DASHBD~501 -- TO IRPT_DASHBD.TO-DB-f-501 (round 114, ~F2) -- session log (measured outputs, verbatim where short)
+
+1. Grounding: worktree branch wk-IRPT_DASHBD-501; TREE-OK (org/ and .tools/ present). Portal worktree branch wk-IRPT_DASHBD-501-portal, status clean at c81d54ff before work.
+2. Base suite (before any tracked edit; the new reader file was created after collection started):
+   command: bun test src/pages/InvestorReporting   (portal worktree, under a 900 s bound, output in .scratch/suite_before.txt)
+   result: 1300 pass, 20 fail, 1347 tests in 404 files, rc=1. The 20 failing names are recorded in .scratch/fails_before.txt (not in the repo).
+3. Commit 44949c59 (portal): reportRead.ts and report-read.test.tsx.
+   bun test src/pages/InvestorReporting/__tests__/irpt-dashbd/report-read.test.tsx -> 10 pass, 0 fail, 17 expect() calls, rc=0.
+4. Commit e690a17d (portal): ReportingTab.tsx (imports, reportFor, reportSelectionKey, the effect, the reporting-report branch) and report-tab-mount.test.tsx.
+   bun test src/pages/InvestorReporting/__tests__/irpt-dashbd/report-tab-mount.test.tsx -> 8 pass, 0 fail, rc=0.
+5. bun run typecheck (portal) -> tsc -b --noEmit, rc=0, no error lines.
+6. bun run lint (portal) -> rc=0, 0 errors, 351 warnings in total; ReportingTab.tsx carries 13 react-refresh "Fast refresh only works" warnings (the file carried 11 before; reportFor and reportSelectionKey are the two new exports the cell asks for).
+7. Full suite after: bun test src/pages/InvestorReporting -> 1317 pass, 21 fail, 1365 tests in 406 files, rc=1. The one new failing name:
+   "IVE135 -- the dashboard figure for a served account, the current figure otherwise > (g) wiring" (iv-e-135.dashboard-switch.test.ts:107 asserts the literal regular expression for "{dashboardServed ? (" in ReportingTab.tsx). Filed as BLOCKING row IRPT_DASHBD-D2-W501-S1; the cell stops on this point and the neighbour test was not edited.
+8. Checker p114_ship.py, invoked as written in this shell (the harness sets FORCE_COLOR):
+   DBF114-1-AC1 -> "reason: bun test ... rc=0 fail=-1" then "DBF114-1-AC1 FAIL" (rc=1)
+   DBF114-1-AC2 -> "reason: bun test ... rc=0 fail=-1" then "DBF114-1-AC2 FAIL" (rc=1)
+   The same two invocations with FORCE_COLOR unset (env -u FORCE_COLOR) -> "DBF114-1-AC1 PASS" (rc=0) and "DBF114-1-AC2 PASS" (rc=0). Row IRPT_DASHBD-D2-W501-S2 files the parse defect.
+9. Temporary mutant (determinism and control): in reportRead.ts the line "return isFilledReport(json) ?" was changed to "return true ?"; report-read.test.tsx -> 8 pass, 2 fail (the two unreadable arms), rc=1 (FIRED). Reverted with git checkout -- on the committed file; git status clean afterwards.
+10. Determinism: report-read.test.tsx run twice more -> 10 pass 0 fail each; report-tab-mount.test.tsx -> 8 pass 0 fail.
+11. Surprise rows appended as bytes to org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md: IRPT_DASHBD-D2-W501-S1 (BLOCKING), S2 (checker parse, ARMED), S3 (inert clause vs live read), S4 (firm id source), S5 (shape check vs window_status, ARMED).
+12. Not done: no push, no deploy, no AWS, no live request, no bun install, no package change. The order's status is not flipped: a BLOCKING row and a FAIL row are open.
+
+ROUND 2 -- after the issuer's amendment (order 081fbd6e90; checker amendment 4aaf4dbb29)
+
+13. Rows: the F2 rows stay in the channel (append-only). The rename-in-place was refused by the row gate as a deletion, so the device rows are NEW rows D2-W501-S1 to S6 (commit c87dafba62), in worker form (UNDER_INVESTIGATION; no adjudicates, no GRADUATED).
+14. Portal commit d3c37966: the report is the OUTER choice. The existing dashboard and body choice sits unchanged inside a fragment; the literal {dashboardServed ? ( is present. The reader's shape check also requires the account fields buildReportModel reads (first_data_date, last4 string or null, window_status with the four windows each MEASURED, NOT_SPANNED or BREAK), and a new arm pins a missing window_status as absent REPORT_UNREADABLE.
+15. Reader: 11 pass 0 fail (three runs stable). Mount: 8 pass 0 fail (two runs stable).
+16. Mutant (return true in place of the shape check): 8 pass, 3 fail (the three unreadable arms), rc=1; restored to the committed bytes (cmp against HEAD: identical).
+17. dsgn-irptv1 with FORCE_COLOR unset: 3 fail, all in the base list (IVE26-AC3, IVE48-AC1, IVE98); the same three names fail in the base run.
+18. Whole scope under the harness-default environment (FORCE_COLOR set, as the base run): 1319 pass, 20 fail, 27 skip, 1366 tests in 406 files; the normalized failing names are identical to the base run's 20 names (.scratch/suite_after3.clean.txt). Subset: yes (equal).
+19. Whole scope with FORCE_COLOR unset: 22 fail; the two extra are FE-s-90 CONTROL 2 and CONTROL 3 (row D2-W501-S6). Under the harness default FE-s-90 reads 4 pass 0 fail.
+20. Checker, repaired (081fbd6e90): FORCE_COLOR=1 -> DBF114-1-AC1 PASS rc=0 and DBF114-1-AC2 PASS rc=0; FORCE_COLOR unset -> the same PASS lines; harness default -> DBF114-1-AC1 PASS rc=0.
+21. Typecheck: bun run typecheck rc=0 (no error TS lines). Lint: rc=0, 0 errors, 351 warnings (ReportingTab.tsx carries 13 react-refresh warnings: the existing 11 plus reportFor and reportSelectionKey).
+22. Not done: no push, no deploy, no AWS, no live request. Rows are not dispositioned by the worker (the CVO does that). The portal gitlink and org/git-author-override-audit.dell2.log are modified in the worktree and not committed.
