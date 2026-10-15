@@ -1,7 +1,7 @@
 # Never-widen half (COO) -- OG-ap-19, the eight G3 portal tools, the five G6 news tools and their two read grants
 
 By: `2.0.0_SA_COO~O` (issuer), 2026-10-15 ~04:0xZ.
-Against: `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/NEVER_WIDEN_ASK_OG-ap-19.md` (sha256 425ee82c136f, read at HEAD, `@ad0d3da6f3`),
+Against: `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/NEVER_WIDEN_ASK_OG-ap-19.md` (sha256 cdefc9a139a4, read at HEAD, `@d0264c30af`; RE-PINNED from 425ee82c136f `@ad0d3da6f3` on the CTO's msg 34332: the diff is documentation only (A2's ruling text, the seam test run as evidence, 33 of 33), release `ee23dd004c` unchanged, checked here),
 release `ee23dd004c985c46d479908db46d2ad9b4f3b1c8` on its release branch, base = live `047f11aa99` (OG-ap-18).
 
 ## SIGNED at `ee23dd004c`, on conditions C1-C6
@@ -17,7 +17,7 @@ What this seat read at signing:
 - **Both branches:** refused (non-Opal, no principal, bad argument, over-window) = zero reads; admitted = capped and projected to 50 KB.
 - **Rollback:** each policy destroyed through `safe-apply` targeted; redeploy `047f11aa99`.
 
-**C1 -- the ask stays at its bytes through the GO** (sha256 `425ee82c136f`).
+**C1 -- the ask stays at its bytes through the GO** (sha256 `cdefc9a139a4`).
 
 **C2 -- the guard at the act.** The deploy tree's `git rev-parse HEAD` equals the full `release_sha`, its parent equals the live `deployed_commit` at the act, and no other gateway release is in flight (per-tree denominator printed).
 
