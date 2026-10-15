@@ -1,0 +1,75 @@
+{
+  "firm": "49financial",
+  "stage": {
+    "handler_file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+    "functions": ["filled_inputs", "filled_day_rows", "emit_filled", "filled_write", "filled_stage", "filled_households"],
+    "guarded_import": true,
+    "after_stages": ["returns", "class", "lots"],
+    "words": "The stage is one more guarded stage of the same invocation. The module is imported GUARDED beside the class and lot producers, and filled_stage is called in run() after catch_up_lots and in run_backfill after the lots stage. It reads the firm's gold history through the module's own gold readers, builds each household's rows with build_document and to_rows, and writes one data.parquet per owed trading day at the builder address. A failure is named as FILLED_SKIPPED and returned under filled_failed; it never raises into the earlier tables. The local CLI is not extended."
+  },
+  "files_changed": [
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "sha256": "6013683f1c91180119a01e4bd0118e4da5a784abd03123e60d5748959aab9f1b",
+      "kind": "handler"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_report_values_stage.py",
+      "sha256": "413281575e50565673f664db613d7ae7154bc64d584b418a79111b6596bae587",
+      "kind": "test"
+    },
+    {
+      "file": "infra/aws/lambda/ci/lambda-source-map.json",
+      "sha256": "4f9d212223a64567a114b5fc0880072e268076c81bad08add0d49d7625685243",
+      "kind": "source_map"
+    }
+  ],
+  "source_map": {
+    "file": "infra/aws/lambda/ci/lambda-source-map.json",
+    "entry": "irpt-49f-reporting-gold-lambda",
+    "member_added": "data/assets/scripts/gold/irpt_reporting/filled_report_values.py",
+    "pin": "null in the map for the three new members (the module, the model adapter and the contract JSON); the commit and sha256 are written by the applier at the apply, as the handler comments say for the earlier members",
+    "words": "Three members are added to the entry's files list and to its staged_from list, after account_activity_lots.py. The model adapter adapters/model_series_windows.py and the contract org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json are needed at run time (the model series reader and the members of the filled report). The module imports nothing beyond the standard library; its lib imports are made by the handler, which already packages lib/trading_calendar.py and lib/opal_naming.py."
+  },
+  "iam": {
+    "file": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+    "covers_new_prefix": false,
+    "statement_ids": ["WriteTheFiveGoldPrefixesOnly", "ReadTheSixGoldPrefixesOnly", "ListExactlyTheSixGoldPrefixes", "ReadTheClassTableByKeyOnly"],
+    "words": "The write statement WriteTheFiveGoldPrefixesOnly takes its ARNs from locals.tf irpt_rg_gold_write_arns: the returns, class, activity, realized and unrealized prefixes. The filled_report_values prefix is not among them, so the stage's PutObject is denied until the apply adds it. The stage also reads two surfaces that no statement grants: the served model series object, which the module's model adapter reads from the portal bucket, and the advi household crosswalk gold prefix that FirmAdapter.households reads. The read statements listed cover the firm's other gold prefixes and the class table, which the stage also reads. No Terraform file is changed by this cell; the apply order must add the three grants."
+  },
+  "schedule": {
+    "file": "infra/aws/terraform/investor-reporting/reporting-gold/schedule.tf",
+    "cron": "cron(41 7 ? * MON-FRI *)",
+    "after_inputs": true,
+    "trading_day_frontier": true,
+    "words": "The existing daily schedule, aws_scheduler_schedule.irpt_reporting_gold, fires Monday to Friday at 07:41 America/New_York, the chosen_cron of the fire-time record the locals read. The stage runs in that same invocation after the lots stage, so it follows its inputs. The handler's own select_days and class_owed_days bound the days by the trading-day frontier (lib/trading_calendar); a non-trading day owes nothing and writes nothing."
+  },
+  "expected_plan": {
+    "to_add": 0,
+    "to_change": 1,
+    "to_destroy": 0,
+    "resources": ["module.irpt_reporting_gold.aws_lambda_function.this"],
+    "words": "From the Terraform files as they stand, the apply plans one in-place change: the function's code, whose s3_object_version and source_code_hash follow the new artifact object (the yang-lambda module reads the artifact at plan time, so the bundle must be built and uploaded before the plan). Nothing is added and nothing is destroyed. The apply that lets the stage land also needs the three IAM grants named in iam.tf; those are not in this cell, and adding them would make aws_iam_role_policy.irpt_reporting_gold a second in-place change (to_change 2 at that point), which the packet must state."
+  },
+  "write_path": {
+    "table": "filled_report_values",
+    "address_form": "opal_naming.address(\"irpt\", firm, \"gold\", frv.TABLE, \"date=<business date>\", \"data.parquet\")",
+    "partition": "date=<business date>",
+    "existing_prefixes_written": []
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_report_values_stage.py",
+    "new_tests": 9,
+    "dir_total": 105
+  },
+  "names": {
+    "from_builders": true,
+    "words": "The partition address is opal_naming.address() output (ard.opal_naming), and the bucket and key are ard._split of that address; no bucket, prefix or firm token is typed in the handler. The table name is the module's own constant TABLE, the same way each producer names its table. No new registry name is minted by this cell."
+  },
+  "words": "The apply will redeploy the existing reporting-gold function with a bundle that carries the filled-report module. After that, each scheduled fire, after its returns, class and lot stages, will write one filled_report_values partition per owed trading day at the gold address, built from the firm's full gold history, the served model series and the household crosswalk. The apply will not change the schedule, the returns, class or lot tables, any prefix already written, or any other function, and it deletes nothing. Two grants the stage needs are not in the role today (the write prefix and two read surfaces); the packet must add them, and the stage cannot land until it does.",
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

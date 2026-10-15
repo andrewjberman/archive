@@ -128,7 +128,7 @@ def structure(text):
     need(len(re.findall(r'source\s*=\s*"\.\./\.\./modules/opal_name"', text)) >= 5, "fewer than five opal_name builder modules")
     blocks = [blk for blk in re.split(r'(?m)^module\s+"', text)[1:] if re.search(r'source\s*=\s*"\.\./\.\./modules/opal_name"', blk)]
     for blk in blocks:
-        need(re.search(r'scope\s*=', blk) is not None, "an opal_name module without scope: " + blk.split('"')[0])
+        need(re.search(r'(?:^|[^A-Za-z0-9_])scope\s*=', blk) is not None, "an opal_name module without scope: " + blk.split('"')[0])
     for lab in re.findall(r'(?m)^(?:module|resource\s+"[a-z_]+"|data\s+"[a-z_]+")\s+"?([A-Za-z0-9_]+)"', text):
         need("cot" not in lab.split("_"), "a block label carries the firm token: " + lab)
     need(re.search(r'function\s*=\s*"account-dim"', text) is not None, "builder modules do not name the function account-dim")

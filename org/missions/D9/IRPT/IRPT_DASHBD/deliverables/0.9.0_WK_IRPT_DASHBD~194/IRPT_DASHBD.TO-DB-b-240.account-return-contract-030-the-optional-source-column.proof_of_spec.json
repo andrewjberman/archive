@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-240",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "bf61bc8845",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-240.account-return-contract-030-the-optional-source-column.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~194",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~194/RD_SOURCE_COLUMN_R120.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "f5fec2bb6d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Contract 0.3.0 in the repo at f5fec2bb6d: optional_columns holds source; columns and schema_hash unchanged. Nothing served, deployed or read by a served path.",
+      "artifact_covered_by": [
+        "DB120-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~194/RD_SOURCE_COLUMN_R120.json",
+      "kind": "doc",
+      "commit_or_etag": "f5fec2bb6d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record of the optional column and its three emitters, in order, with their schema lines (281, 108, 101). files_in_repo, served_values_changed, pushed and deployed are all false.",
+      "artifact_covered_by": [
+        "DB120-4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f5fec2bb6d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One surprise row appended as bytes, IRPT_DASHBD-D2-W194-S1 (the supersedes shape), at f5fec2bb6d."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB120-4-AC1",
+      "criterion_verbatim": "DB120-4-AC1 -- the contract reads 0.3.0; its 19 `columns` and their `schema_hash` are unchanged (the checker recomputes the hash and hashes the column definitions); `optional_columns` holds exactly `source` (string, nullable, meaning, rule, since_schema_version, and the three required values); `schema_hash_with_optional` equals the recomputed hash over the 19 columns plus `source:string`; `supersedes` carries the 0.2.0 entry. Base: FAIL (version 0.2.0).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r120/p120_srccol.py\" . DB120-4-AC1",
+      "output_evidence": "OK: contract 0.3.0: the 19 columns and their hash are unchanged; the optional column `source` (string, nullable, words) carries its own hash bc70ee2f2e0b; supersedes holds 0.2.0\nDB120-4-AC1 PASS",
+      "denominator": "19 of 19 columns unchanged under the recomputed 0.2.0 hash (the method reproduces the base hash); 1 of 1 optional column (source); 2 of 2 supersedes entries (0.1.0 and 0.2.0)",
+      "status": "PASS",
+      "expect": "DB120-4-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB120-4-AC2",
+      "criterion_verbatim": "DB120-4-AC2 -- `RD_SOURCE_COLUMN_R120.json` has exactly the form of step 3; its `hash_with_optional` equals the contract's; it names the producer and the two adapters in order, each with a schema line that exists in its file and mentions the schema; the flags are false and no run of 8 or more digits stands outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r120/p120_srccol.py\" . DB120-4-AC2",
+      "output_evidence": "OK: the record names the three emitters (the producer and the Inflection and Cottonwood adapters) with a schema line that exists in each, and the hash equals the contract's\nDB120-4-AC2 PASS",
+      "denominator": "3 of 3 emitter entries in order (producer line 281, Inflection adapter line 108, Cottonwood adapter line 101); 4 of 4 flags false; 0 digit runs of 8 or more outside the exempt fields",
+      "status": "PASS",
+      "expect": "DB120-4-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 was run against a scratch copy of the contract, the record and the three emitter files (outside the repo) with the record's pushed flag set to true.",
+      "expected": "DB120-4-AC2 FAIL (a flag is not false)",
+      "observed": "FAIL: a flag is not false / DB120-4-AC2 FAIL rc=1; the unaltered record PASSes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run three times on the same worktree bytes.",
+      "observed": "AC1 PASS three times; AC2 PASS three times, identical last lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Adding the source column to any emitter (the producer and the two adapters) and any landing, emission or partition write",
+      "reason": "Outside the grant and the cell: the order says each emitter adopts the column at its own landing; this cell edits the contract and records the emitters only."
+    },
+    {
+      "item": "Any S3 or AWS read or write, push, deploy, vendor call or secret read",
+      "reason": "BOUNDS: none involved; the record flags pushed, deployed and served_values_changed are false."
+    },
+    {
+      "item": "The issuer's check files, the portal and every other contract",
+      "reason": "Outside the grant: read only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W194-S1: the TO says append an entry to supersedes, but the base supersedes is an object; it is now a two-element list (0.1.0 verbatim, then the 0.2.0 entry), and no other key moved."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p120_srccol.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r120/p120_srccol.py . DB120-4-AC1 and . DB120-4-AC2, and --selftest .",
+      "result": "DB120-4-AC1 PASS rc=0; DB120-4-AC2 PASS rc=0; selftest OK rc=0"
+    },
+    {
+      "tool": "surprise-corpus (safe-commit surprise gate)",
+      "invocation": "run by safe-commit.sh at commit f5fec2bb6d over the staged investigation file",
+      "result": "[surprise-corpus] SCOPE: act_documents=1 in-act findings=0 (new=0 malformed=0); OK: the act's documents are clean against the baseline"
+    }
+  ]
+}
