@@ -35,15 +35,15 @@ ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-27
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~223"
 GRANT_FILES = {CONTRACT_REL, TEST_REL, TEST040_REL, TEST041_REL}
 MAX_EARLIER_TEST_LINES = 14
-MAX_041_TEST_LINES = 60  # Amendment 1: the 0.4.1 test's validator and Orion fixtures move with the new required claim
+MAX_041_TEST_LINES = 120  # Amendment 1: the 0.4.1 test's validator and Orion fixtures move with the new required claim
 GRANT_PREFIXES = (D + "0.9.0_WK_IRPT_DASHBD~223/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/")
 COLS_SHA = "ae1a77b847a78b30270501595607f13bc092339bee43dc6ca2557169049f222d"
-ENUMS_041_SHA = "1879d19649ed8216e6e4b5336eac5e80855186b8e004e03cef2581709e689769"
+ENUMS_NO_RB_SHA = "e9f68d54c40ffa20bf4a125f7afe4bd553502a9ea5f5257bfcbbd4c7c021b122"
+SR3_SHA = "96646019800fe58d528d2436e2d58d36196203896a0155cd6ac0378e74a54c86"
 OPT5_SHA = "ba286fca11b0138b84889b4d696f056c99b7778be6049e9bda24fc6c929f108c"
 R24_041_SHA = "e21ee29c25e11c905db4dc6b70cea95cbe66dd1cb8a3d37c048d357fb1375df1"
 SUP4_SHA = "47d4f47b9f873c14dd5d49a2a47813c8b5fac8efd71fd15bc1da6cc3e74d9b6d"
-SRCREQ_SHA = "7b333b067b8bc7909f6cb8c39a6a587d15c321b88f274e237a46a4f2edefe739"
-SRCRULES_SHA = "ddf273e0920c23ae9ae03d0244eb9732c46a0061144e5ffc97fa88e9931cb002"
+PROVENANCE_KEYS = ["orion", "computed from Black Diamond values and flows", "computed from custodian holdings"]
 OPT_HASH_041 = "6816ef9295d214212be6ccb9ebf386a07cca38e1a4f3a5e56eac3f6c1385fce8"
 CLAIM_VALUES = ["measured", "inferred"]
 OPT_NAMES = p140.OPT_NAMES + ["market_value_eod_claim"]
@@ -68,10 +68,12 @@ def check_rule24(r):
     need(isinstance(v, dict) and set(v) == {"i_mece_over_a_declared_domain", "ii_same_grain", "iii_intent_coherence", "iv_state_coherence", "token_census", "token_census_finding"},
          "rule24_record.v042 must hold exactly the four postulates, token_census and token_census_finding")
     m = v["i_mece_over_a_declared_domain"]
-    need(isinstance(m, dict) and set(m) == {"market_value_eod_claim"}, "v042.i_mece must hold exactly market_value_eod_claim")
+    need(isinstance(m, dict) and set(m) == {"market_value_eod_claim", "return_basis"}, "v042.i_mece must hold exactly market_value_eod_claim and return_basis")
+    rb = m["return_basis"]
+    need(nes(rb) and len(rb) >= 120 and all(x in rb for x in ("VENDOR_REPORTED", "TWR", "NOT_MEASURABLE", "subtraction")), "v042.i_mece.return_basis must show the removal of VENDOR_REPORTED by subtraction from 0.4.1's domain, naming TWR and NOT_MEASURABLE")
     t = m["market_value_eod_claim"]
     need(nes(t) and len(t) >= 120 and all(x in t for x in CLAIM_VALUES) and "denominator" in t, "v042.i_mece.market_value_eod_claim must name both values, print its denominator (the PRESENT Orion rows) and be a real record (120+ characters)")
-    for k, words in (("ii_same_grain", ("ACCOUNT-DAY", "market_value_eod")), ("iii_intent_coherence", ("market_value_eod_claim", "flow_claim", "return_basis")), ("iv_state_coherence", ("measured", "inferred", "VENDOR_REPORTED"))):
+    for k, words in (("ii_same_grain", ("ACCOUNT-DAY", "market_value_eod")), ("iii_intent_coherence", ("market_value_eod_claim", "flow_claim", "return_basis", "provenance", "source")), ("iv_state_coherence", ("measured", "inferred", "VENDOR_REPORTED"))):
         need(nes(v[k]) and len(v[k]) >= 120 and all(w in v[k] for w in words), "v042.%s must be a real record naming %s" % (k, list(words)))
     c = v["token_census"]
     need(isinstance(c, dict) and set(c) == {"commit", "pathspecs", "denominator_files", "claim", "tokens"}, "token_census keys")
@@ -88,7 +90,8 @@ def check_contract(c):
     need(c.get("contract_version") == "0.4.2", "contract_version is not 0.4.2 (a patch bump)")
     need(sha(c["columns"]) == COLS_SHA and schema_hash(c["columns"]) == c["schema_hash"] == p140.BASE_HASH, "the 19 columns (all of them), their types or the schema_hash moved")
     e = c["enums"]
-    need(e.get("market_value_eod_claim") == CLAIM_VALUES and sha({k: v for k, v in e.items() if k != "market_value_eod_claim"}) == ENUMS_041_SHA, "enums: market_value_eod_claim %s and every earlier enum byte-identical" % CLAIM_VALUES)
+    need(e.get("market_value_eod_claim") == CLAIM_VALUES and sha({k: v for k, v in e.items() if k not in ("market_value_eod_claim", "return_basis")}) == ENUMS_NO_RB_SHA, "enums: market_value_eod_claim %s and every earlier enum but return_basis byte-identical" % CLAIM_VALUES)
+    need(e.get("return_basis") == ["TWR", "NOT_MEASURABLE"], "return_basis must be [TWR, NOT_MEASURABLE]: VENDOR_REPORTED leaves it (the CTO's ruling, msg 8673)")
     oc = c.get("optional_columns")
     need(isinstance(oc, list) and [o.get("name") for o in oc] == OPT_NAMES, "optional_columns must be exactly %s in order" % OPT_NAMES)
     need(sha(oc[:5]) == OPT5_SHA, "the five earlier optional columns changed")
@@ -103,7 +106,15 @@ def check_contract(c):
     sup = c.get("supersedes")
     need(isinstance(sup, list) and len(sup) == 5 and sha(sup[:4]) == SUP4_SHA, "supersedes must keep its first four entries byte-identical and add one")
     need(sup[4].get("contract_version") == "0.4.1" and sup[4].get("schema_hash") == p140.BASE_HASH and sup[4].get("schema_hash_with_optional") == OPT_HASH_041 and sup[4].get("changes"), "supersedes[4] must be the 0.4.1 entry with both hashes and its changes")
-    need(sha(c.get("served_day_rules")) == p140.SERVED_SHA and sha(c.get("source_requires")) == SRCREQ_SHA and sha(c.get("source_rules")) == SRCRULES_SHA, "served_day_rules, source_requires or source_rules changed")
+    need(sha(c.get("served_day_rules")) == p140.SERVED_SHA, "served_day_rules changed")
+    need("source_requires" not in c, "source_requires must be removed: Orion rows carry return_basis TWR and the provenance is read from source")
+    pv = c.get("source_provenance")
+    need(isinstance(pv, dict) and sorted(pv) == sorted(PROVENANCE_KEYS) and all(nes(v) for v in pv.values()), "source_provenance must map each of the three source values to words: %s" % PROVENANCE_KEYS)
+    need("vendor" in pv["orion"].lower() and "computed" in pv["orion"].lower() and "Opal" not in pv["orion"], "source_provenance.orion must say vendor-computed")
+    need("Opal" in pv[PROVENANCE_KEYS[1]] and "Opal" in pv[PROVENANCE_KEYS[2]], "the Black Diamond and holdings sources must say Opal-computed")
+    sr = (c.get("source_rules") or {}).get("orion")
+    need(isinstance(sr, dict) and set(sr) == {"flows", "business_date", "account_id", "return_basis"} and sha({k: sr[k] for k in ("flows", "business_date", "account_id")}) == SR3_SHA, "source_rules.orion keeps flows, business_date and account_id byte-identical and holds return_basis")
+    need(nes(sr["return_basis"]) and "TWR" in sr["return_basis"] and "MEASURED" in sr["return_basis"] and "source" in sr["return_basis"] and "VENDOR_REPORTED" not in sr["return_basis"], "source_rules.orion.return_basis must say Orion rows carry TWR, provenance is read from source, and how MEASURED reads; it names no VENDOR_REPORTED")
     check_rule24(c.get("rule24_record") or {})
     return True
 
@@ -111,6 +122,8 @@ def check_contract(c):
 def row_problems(c, row):
     """The 0.4.1 reference validator plus the one new rule, driven ONLY by the contract's declarations."""
     out = list(p140.row_problems(c, row))
+    if row.get("return_basis") not in c["enums"]["return_basis"]:
+        out.append("return_basis outside its values")
     claim = row.get("market_value_eod_claim")
     o = next(o for o in c["optional_columns"] if o["name"] == "market_value_eod_claim")
     if claim is not None and claim not in o["values"]:
@@ -131,7 +144,7 @@ def check_behaviour(c):
         x = base_row()
         x.update(kw)
         return x
-    orion = dict(source="orion", return_basis="VENDOR_REPORTED", external_flow=None, income_received=None, flow_claim="absent", source_account_id=7)
+    orion = dict(source="orion", return_basis="TWR", external_flow=None, income_received=None, flow_claim="absent", source_account_id=7)
     absent_kw = dict(row_status="ABSENT", market_value_eod=None, external_flow=None, income_received=None, total_return_daily=None, return_basis="NOT_MEASURABLE", day_quality="NOT_MEASURABLE",
                      guard_state="GUARD_NOT_REACHED", source="orion", reason_class="NO_FEED_ROW")
     good = [("a 0.3.0 Black Diamond row (no claim)", r()), ("a Black Diamond row carrying a measured claim", r(market_value_eod_claim="measured")),
@@ -140,7 +153,7 @@ def check_behaviour(c):
     bad = [("an Orion PRESENT row with no claim", r(**orion)), ("an Orion PRESENT row with a claim outside its values", r(market_value_eod_claim="guessed", **orion)),
            ("an ABSENT row carrying a claim (there is no value)", r(market_value_eod_claim="measured", **absent_kw)),
            ("a null-row_status Orion row with no claim", r(row_status=None, **orion)),
-           ("an Orion PRESENT row, claim inferred, labelled TWR (the 0.4.1 rule still holds)", r(market_value_eod_claim="inferred", **dict(orion, return_basis="TWR")))]
+           ("an Orion PRESENT row labelled VENDOR_REPORTED (it left the enum)", r(market_value_eod_claim="inferred", **dict(orion, return_basis="VENDOR_REPORTED")))]
     for label, row in good:
         p = row_problems(c, row)
         need(not p, "%s must validate: %s" % (label, p))
@@ -232,10 +245,9 @@ def selftest():
         if col["name"] in p140.FLOW:
             col["nullable_when"] = dict(p137c.NULLABLE_WHEN)
             col["nullable_when_absent"] = True
-    c = {"columns": cols, "enums": {"row_status": p140.ROW_STATUS, "reason_class": p140.REASONS, "return_basis": p140.RETURN_BASIS, "market_value_eod_claim": CLAIM_VALUES},
+    c = {"columns": cols, "enums": {"row_status": p140.ROW_STATUS, "reason_class": p140.REASONS, "return_basis": ["TWR", "NOT_MEASURABLE"], "market_value_eod_claim": CLAIM_VALUES},
          "optional_columns": [{"name": "source"}, {"name": "flow_claim", "values": ["absent"]}, {"name": "source_account_id", "required_when": {"reason_class": "UNMAPPED_ACCOUNT"}}, {"name": "row_status"},
-                              {"name": "reason_class"}, {"name": "market_value_eod_claim", "values": CLAIM_VALUES, "required_when": {"source": "orion"}, "required_unless_absent": True}],
-         "source_requires": {"orion": {"return_basis": "VENDOR_REPORTED"}}}
+                              {"name": "reason_class"}, {"name": "market_value_eod_claim", "values": CLAIM_VALUES, "required_when": {"source": "orion"}, "required_unless_absent": True}]}
     g, b = check_behaviour(c)
     assert (g, b) == (6, 5), (g, b)
     noreq = copy.deepcopy(c)
