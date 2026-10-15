@@ -62,6 +62,11 @@ CLAIMS = {"measured", "inferred", "absent"}
 
 
 def claim_ok(m) -> bool:
+    # MX-c-10 (round 12): a multi-index tool states its depth per link -- {claim: per-link, links: [claim, ...]} -- and it is a valid claim
+    # only when it names at least one link and EVERY link is itself a valid claim (a blank is never a claim)
+    if isinstance(m, dict) and m.get("claim") == "per-link":
+        links = m.get("links")
+        return isinstance(links, list) and bool(links) and all(claim_ok(x) for x in links)
     if not isinstance(m, dict) or m.get("claim") not in CLAIMS:
         return False
     if m["claim"] == "absent":
