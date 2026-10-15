@@ -4,7 +4,7 @@
 Runs with the box's own AWS credentials (INTERNAL_READER_ROLE_ARN is not used). Builds its own ProbeCtx
 (protocol A1 item 2): prefixes from the DATA_CATALOG rows, partitions by list_objects_v2, rows by pyarrow on the newest
 part, freshness through lib/trading_calendar.py, and the roster through ctx.firm_roster() built from the repo file
-data/mdpf/config/partner_roster.json plus the advisor_id to advisor_name pairs of the newest silver roster partition.
+data/mdpf/config/partner_roster.json: {advisor_name: firm_id} from partners[].aliases.advisor_name (protocol A2, by name).
 
 Asserts (AC2): (a) the envelope is complete on a real answer; (b) an independent boto3 + pyarrow read of the same
 partition gives the row count the tool reports in its denominator; (c) the fence negative arm: a request naming another
@@ -102,19 +102,14 @@ class ProbeCtx:
         return [SEG] if (vendor == VEND and firm in smx.FIRMS) else []
 
 
-def build_roster(ctx):
-    """{advisor_id: canonical firm id or None}: the file's advisor_name aliases joined to the silver roster's ids."""
+def build_roster():
+    """{advisor_name: canonical firm id}: the repo roster file's partners[].aliases.advisor_name (protocol A2).
+    A name the file does not carry is absent: the adapter drops it and counts it (no nearest-firm guess)."""
     cfg = json.loads(ROSTER_FILE.read_text(encoding="utf-8", errors="replace"))
-    name_to_firm = {}
+    roster = {}
     for p in cfg.get("partners", []):
         for name in (p.get("aliases") or {}).get("advisor_name", []):
-            name_to_firm[name] = p.get("firm_id")
-    prefix = ctx.prefix(VEND, SEG, LAY, smx.T_ROSTER)
-    part = ctx.newest_partition(prefix)
-    roster = {}
-    for r in ctx.read_rows(prefix, part):
-        if r.get("advisor_id"):
-            roster[r["advisor_id"]] = name_to_firm.get(r.get("advisor_name"))
+            roster[name] = p.get("firm_id")
     return roster
 
 
@@ -144,7 +139,7 @@ def run():
         doc = yaml.load(fh, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
     rows = [r for r in doc.get("silver_datasets", []) if isinstance(r, dict)]
     ctx = ProbeCtx(s3, rows)
-    ctx._roster = build_roster(ctx)
+    ctx._roster = build_roster()
 
     map_prefix = ctx.prefix(VEND, SEG, LAY, smx.T_MAP)
     full_numbers, cand, ans = set(), None, None
