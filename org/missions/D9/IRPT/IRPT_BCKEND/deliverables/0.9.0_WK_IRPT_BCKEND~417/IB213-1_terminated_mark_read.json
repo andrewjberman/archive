@@ -39,11 +39,37 @@
     "read_only": true,
     "writes": 0,
     "published": false,
-    "invocation": "python -I step2_build_gate.py (scratch script outside the repository): build_snapshot then evaluate_publish_gate with a stub closed-account provider",
+    "invocation": "python -I step6_offline.py (scratch script outside the repository): build_snapshot, then the HEAD evaluate_publish_gate with a stub closed-account provider",
     "account_listed_as": "closed_accounts_not_refused",
     "outcome": "PUBLISHED",
-    "nodes_changed_other_than_the_account": 16912,
+    "candidate_vs_served": {
+      "candidate_date": "2026-10-13",
+      "served_date": "2026-10-08",
+      "amount_only_differences": 16764,
+      "served_only_nodes": 40,
+      "candidate_only_nodes": 111,
+      "account_nodes_leaving": 3,
+      "reading": "The two dates differ by two trading days, so amounts move on 16764 of 17800 compared nodes and 148 nodes appear or disappear. The acceptance itself removes only the one account's 3 nodes; the rest of the difference comes from the dates and is not attributed to the acceptance."
+    },
     "accounts_leaving": 1
+  },
+  "deployed_vs_head": {
+    "cottonwood": {
+      "bundle_version_id": "oyIYMVdh_l2zCg5ZWvn3ISPPS6_9Q82_",
+      "deployed_sha256": "dfa017b824c1aba5c1107e53ef4811edaba93b2b7903c140208e41ab8866262a",
+      "equals_head": false,
+      "v033_rule_in_deployed": true,
+      "marks_no_closures_occurrences": 5,
+      "statement": "The deployed directory_marks_no_closures has no carried-forward exclusion, while HEAD ignores the pipeline's own TERMINATED marks. With the two carried entries present it returns False, so the deployed gate refuses the lost account (executed: REFUSED, account_lost 1) where HEAD lists it and publishes."
+    },
+    "49financial": {
+      "bundle_version_id": "UHOCIkWj3QiIzNucG1VjNnk_AufIg6oD",
+      "deployed_sha256": "5651000b002f50051d4f2c8176ac4d2cfe5dd9265d8c9d3784d0cd0f4f585ed1",
+      "equals_head": false,
+      "v033_rule_in_deployed": true,
+      "marks_no_closures_occurrences": 5,
+      "statement": "The deployed 49 Financial file is another version (3241 lines against HEAD 3290). Its evaluate_publish_gate equals HEAD, and its directory_marks_no_closures has the same no-carried-exclusion body as the Cottonwood bundle (AST comparison, not executed on the 49 Financial directory)."
+    }
   },
   "rollback": {
     "statement": "The prior accepted publication is the served index at business date 2026-10-08 (index version in the notes); it returns by re-pointing the current index to that version id. Nothing is deleted, and this order wrote nothing."
@@ -52,12 +78,13 @@
     "Writer, guard reading and directory precedent read at HEAD 51d2aee70e: 271 directory entries, 2 TERMINATED (both carry the source_removed_on marker) and 269 UNKNOWN; no entry names the one account (measured by count).",
     "The writer marks only an entry the previous build carried. The one account is absent from the directory and from the directory's source client list, so the existing rule does not produce a mark for it (measured by boolean).",
     "Cottonwood's other TERMINATED path (directory_runner.py term_of, line 727) is not on the Cottonwood builder: its rows are set UNKNOWN at lines 818 and 824.",
-    "With NO mark applied, the same gate at HEAD already lists the account under account_lost_not_refused and returns PUBLISHED against the 2026-10-08 served index. The mark changes the listing name, not the outcome. The deployed code was not read.",
+    "With NO mark applied, HEAD's gate lists the account under account_lost_not_refused and returns PUBLISHED against the 2026-10-08 served index. The deployed Cottonwood gate, run on the same candidate with the live directory, returns REFUSED with account_lost 1, which matches the 2026-10-14 refusal record. The difference is the marks_no_closures body (HEAD excludes carried-forward entries; the deployed file does not).",
+    "marks_no_closures_occurrences is the count of the substring marks_no_closures in each deployed file (5, the same as HEAD). The SHA256SUMS member of each live bundle agrees with the extracted holdings_snapshot.py.",
+    "Neither live file equals its IB-pr-549 pin: Cottonwood pin 5fad7eaaa8fb4c512190fa406b78c683c4b6ad1f has holdings_snapshot.py sha256 06de07d854b795e2689cc3a7f878a8a95347f7091fcc170da837f9f410bc6a0c; 49 Financial pin b1d354cfc9341168a3b4c316a344876ce0049b97 has 6c6eed906d890742e1243e2dfce294f4cd315c91fa9e63c3edb2e3ae42ac7b14.",
     "The offline candidate rebuilt for 2026-10-13 (17911 nodes) does not reproduce the refused candidate's revision (17904 nodes). The cause is not measured. The build printed a WARN that the trading calendar answered from its hardcoded NYSE fallback.",
-    "nodes_changed_other_than_the_account 16912 = 16764 amount-only differences (served 2026-10-08 against candidate 2026-10-13, market values moved) plus 148 identity differences (37 served-only, 111 candidate-only). An equal-date comparison was not in the order and was not run.",
     "Source conflict: from 2026-10-06 to 2026-10-08 the account's custody rows carry no position while its independent total carries a nonzero value; the zero-position run starts after that window. Earlier no-position days (10-01 to 10-05, no total) were not used.",
     "Sparse grant extended locally, never committed: the Cottonwood builder's import chain needed data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared and docs/contracts/investor-reporting/v1 beyond the named directories.",
-    "Served index version for the rollback: lQMhNnImgj0ikICMdhFeasBGJKSbl55s. The offline build and gate were GET-only: no put, land, refusal-record write, publish, invoke or sign-in; the stub provider lives in scratch only."
+    "Served index version for the rollback: lQMhNnImgj0ikICMdhFeasBGJKSbl55s. The offline build, the live bundle reads and the gates were GET-only: no put, land, refusal-record write, publish, invoke or sign-in; the stub provider lives in scratch only."
   ],
   "functions_invoked": 0,
   "sign_ins_made": 0,
