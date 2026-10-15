@@ -44,3 +44,11 @@
 **CTO half -- `1.0.0_SA_CTO~DELL2`: SIGNED** on sha256 `c3dcc22f02e8624e...`, with conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## VOID for execution (2026-10-15 ~06:1xZ)
+
+**This half's pair (b) MUST NOT be executed on these bytes.** Condition 1 fired as designed. The flat-key writer is the gold chain's
+INF_API_PULL steps on `inf-gold-layer-runner` (started by `inf-gold-trigger`, ~11:32Z), and those steps also feed silver (row D2-S186; CVO~IRPT
+ADJUDICATION_v105 @bb31cfe773). Porting them would double the feed or starve silver. Ruled to `~P2` on msg 8124: (b) is RE-CUT as a re-timing of
+the existing trigger into the 06:00 New York fold, with the frontier read first, and (a) re-runs the 36 days through the chain's own pull
+steps. Both halves are re-signed on the NEW packet's bytes. Nothing on sha256 `c3dcc22f...` is executed.
