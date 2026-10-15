@@ -139,6 +139,7 @@ def check_hcl(files, built_names, tables, artifact_key):
     inv = [s for s, b in st.items() if "lambda:InvokeFunction" in actions_of(b)]
     need(len(puts) == 1 and "account_return_daily" in st[puts[0]] + t[t.find(puts[0]):t.find(puts[0]) + 1], "exactly one PutObject statement is allowed, on the account_return_daily prefix")
     need(len(inv) == 1, "exactly one lambda:InvokeFunction statement is allowed (the scheduler's)")
+    need(len([x for x, b in st.items() if "s3:ListBucket" in actions_of(b)]) >= 2, "at least two s3:ListBucket statements are required: the silver tables and the gold account_return_daily prefix (the handler lists it for the newest landed day)")
     for s, b in st.items():
         acts = actions_of(b)
         need(acts and all("*" not in a for a in acts) and set(acts) <= ALLOWED_ACTIONS, "statement %s: explicit allowed actions only, found %s" % (s, acts))
@@ -247,11 +248,12 @@ def selftest():
           'data "aws_iam_policy_document" "p" {\n'
           '  statement {\n    sid = "R"\n    actions = ["s3:GetObject"]\n    resources = ["arn:aws:s3:::b/x/fact_allocations/*", "arn:aws:s3:::b/x/fact_transactions/*"]\n  }\n'
           '  statement {\n    sid = "L"\n    actions = ["s3:ListBucket"]\n    resources = ["arn:aws:s3:::b"]\n  }\n'
+          '  statement {\n    sid = "L2"\n    actions = ["s3:ListBucket"]\n    resources = ["arn:aws:s3:::g"]\n  }\n'
           '  statement {\n    sid = "W"\n    actions = ["s3:PutObject"]\n    resources = ["arn:aws:s3:::g/irpt/f/gold/account_return_daily/*"]\n  }\n'
           '  statement {\n    sid = "G"\n    actions = ["logs:CreateLogStream", "logs:PutLogEvents"]\n    resources = ["arn:aws:logs:x"]\n  }\n'
           '  statement {\n    sid = "I"\n    actions = ["lambda:InvokeFunction"]\n    resources = ["arn:aws:lambda:x"]\n  }\n}\n')
     h = check_hcl({"main.tf": tf}, names, ("fact_allocations", "fact_transactions"), "lambda-source-map.json")
-    assert h["module"] == "fn" and len(h["statements"]) == 5
+    assert h["module"] == "fn" and len(h["statements"]) == 6
 
     def bad(mut):
         try:

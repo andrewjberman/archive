@@ -2,7 +2,7 @@
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
-  IB209-1  IB-pr-569  Cottonwood's newest accepted holdings publication is 2026-10-08; later candidates were refused on ONE condition, account_lost count 1
+  IB209-1  IB-pr-569  Cottonwood's newest accepted holdings publication is 2026-10-08; later candidates were refused on ONE condition, account_lost (count 9 on the first candidate, 1 on the latest)
     AC1  the refusals: the served date, the refused candidate dates (trading days after it, recomputed against the calendar), the one condition, and where the account is lost (served yes, candidate no, the source partition per date)
     AC2  the cause, whether it clears on its own, and the acceptance path read in the publisher's code (file and line verified at HEAD), the owner and the other firms' refusal state
     AC3  notes, the six counters 0, no long digit run (no account id)
@@ -79,8 +79,16 @@ def c1():
         d = iso(x, "refused date")
         if not (served < d <= rd) or not cal.is_trading_day(d):
             fail("refused date %s must be a trading day after the served date and not after the read date" % x)
-    if rf.get("first_refused_candidate_date") != dates[0] or rf.get("condition") != "account_lost" or rf.get("lost_count") != 1:
-        fail("first_refused_candidate_date must be the first refused date; the one condition is account_lost with lost_count 1")
+    if rf.get("first_refused_candidate_date") != dates[0] or rf.get("condition") != "account_lost":
+        fail("first_refused_candidate_date must be the first refused date; the one condition is account_lost")
+    pc = rf.get("per_candidate")
+    if not isinstance(pc, list) or [x.get("candidate_date") for x in pc] != dates:
+        fail("refusals.per_candidate must hold one row per refused date, in order (the lost count differed between records: 9 on the first candidate, 1 later)")
+    for x in pc:
+        if not is_int(x.get("lost_count")) or x["lost_count"] < 1 or not is_int(x.get("closed_not_refused_count")) or x["closed_not_refused_count"] < 0:
+            fail("%s: lost_count (at least 1) and closed_not_refused_count as counts" % x.get("candidate_date"))
+    if pc[-1]["lost_count"] != 1 or rf.get("lost_count") != 1:
+        fail("the latest candidate's lost_count, and refusals.lost_count, must be 1 (row S158's residual account)")
     if not is_int(rf.get("refusal_records_read")) or rf["refusal_records_read"] < 1:
         fail("refusals.refusal_records_read must be a count of at least 1")
     la = r.get("lost_account") or {}
