@@ -1,0 +1,91 @@
+{
+  "base_commit": "a8b2b7254930c26242dc75f7cab197a72477533b",
+  "read_date": "2026-10-15",
+  "producer": {
+    "contribution_site": {
+      "file": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "line": 816,
+      "identifier": "g0.loc[earning, \"_p0\"] - 1.0"
+    },
+    "pure_core_site": {
+      "file": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "line": 743,
+      "identifier": "def holdings_return"
+    },
+    "partition_loader_site": {
+      "file": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "line": 973,
+      "identifier": "def _frame_for"
+    },
+    "declaration_site": {
+      "file": "data/assets/scripts/gold/irpt_holdings_performance/sources.json",
+      "line": 2,
+      "identifier": "\"schema_version\": \"1.2\""
+    },
+    "quantity_basis_statement": "The contribution is v * (p1 / p0 - 1) on the t-1 value v, where p0 is the t-1 price from price_of() on the t-1 positions and p1 is the day-t price looked up per identifier. Neither price is split-adjusted, so on a split day p1 is the post-split price and p1 / p0 is about 1 / N for an N-for-1 split: a holding whose value did not change reads as a loss of about (N - 1) / N."
+  },
+  "split_source": {
+    "49financial": {
+      "source_found": true,
+      "source_description": "declaration entry of the 49F custodian channel in the irpt_reporting sources file (key transactions_prefix, the entry keyed by the custody master), 572 date partitions 2024-07-08 to 2026-10-14, read by list and get",
+      "columns_present": ["tran_srcde", "tr_cd", "sb_cd"],
+      "split_days": ["2024-07-09", "2024-07-10", "2024-07-11", "2024-07-15", "2024-08-08", "2024-08-21", "2024-09-12", "2024-09-30", "2024-10-09", "2024-10-11", "2024-12-09", "2024-12-13", "2024-12-16", "2024-12-20", "2025-01-03", "2025-01-16", "2025-02-14", "2025-02-19", "2025-05-22", "2025-06-10", "2025-06-18", "2025-06-25", "2025-08-05", "2025-08-15", "2025-09-08", "2025-09-16", "2025-09-23", "2025-10-10", "2025-11-17", "2025-11-20", "2025-12-05", "2025-12-18", "2026-03-25", "2026-04-06", "2026-04-21", "2026-04-29", "2026-05-08", "2026-05-13", "2026-05-18", "2026-06-12", "2026-06-23", "2026-07-01", "2026-07-02", "2026-07-09", "2026-07-20", "2026-08-11", "2026-09-03"],
+      "split_rows": 1348,
+      "split_security_days": 76,
+      "measurable": 75,
+      "ratio_absent": 1,
+      "ratio_agrees_with_close": 58,
+      "ratio_disagrees_with_close": 17
+    },
+    "cottonwood": {
+      "source_found": false,
+      "claim": "absent",
+      "columns_present": [],
+      "source_description": "no declaration entry names a transactions prefix for the Black Diamond channel (the holdings sources file declares positions and balance only); the landed feed under the cottonwood silver fact_transactions prefix (125 date partitions at read time, 73 columns) carries none of tran_srcde, tr_cd or sb_cd in any partition; its split rows sit on Transaction Type and Sub Type",
+      "split_like_rows_by_text": 153,
+      "split_like_rows_by_text_basis": "measured on the first 124 partitions through 2026-10-14; Corporate Action Split 70 and Reverse Split 74; 9 Expense rows carry the word and are not splits"
+    },
+    "inflection": {
+      "source_found": false,
+      "claim": "absent",
+      "columns_present": [],
+      "source_description": "no declaration entry names a transactions prefix for the Orion channel (the holdings sources file declares positions only); the landed feed under the inflection silver fact_transactions prefix (146 date partitions, 36 columns, every partition read by footer schema) carries none of tran_srcde, tr_cd or sb_cd; its transaction type is transTypeId",
+      "split_like_rows_by_text": null,
+      "split_like_rows_by_text_basis": "not counted: the feed is about 4.63 GB and the keyed read cannot classify it; schema only"
+    }
+  },
+  "known_cusips_found_on_2026_04_21": 4,
+  "delta_projection": {
+    "account_days_affected": {
+      "49financial": 1291,
+      "cottonwood": 0,
+      "inflection": 0
+    },
+    "total_account_days_affected": 1291,
+    "graded_disagreed_on_2026_04_21": 985,
+    "claim": "inferred",
+    "statement": "49financial: 1291 distinct (account, day) pairs that held a split security at t-1 on one of the 47 split days, measured from the custodian split rows and the t-1 positions. On 2026-04-21, 985 distinct accounts held one of five split securities at t-1; the ruling states 920 and this read does not reproduce it. Cottonwood and Inflection are 0 because this keyed read cannot classify their feeds, not as measured zeros, so the total is a lower bound."
+  },
+  "design": {
+    "adjustment_formula": "On a split day t the t-1 price basis of a split security is divided by the custodian ratio r = q(t) / q(t-1), the median over accounts with no same-day activity in that security: the price contribution becomes v * (p1 / (p0 / r) - 1). A security-day with no measurable ratio is SPLIT_RATIO_ABSENT and is not graded.",
+    "new_inputs": [
+      "a per-(security, day) split ratio table the partition loader reads, keyed (tran_srcde, tr_cd, sb_cd) on the STK STOCK SPLIT rows of the 49financial transactions prefix",
+      "the t-1 and day-t positions partitions the ratio is measured from (quantity and closing price per account and security), already read by the loader for the price",
+      "a declared split key for cottonwood and inflection: their feeds carry no tran_srcde, tr_cd or sb_cd, so the split rows need a declared key on Transaction Type and Sub Type before a ratio can be read"
+    ],
+    "reason_codes": ["SPLIT_RATIO_ABSENT", "SPLIT_UNADJUSTED_COMPARISON"]
+  },
+  "notes": [
+    "Producer facts rest on HEAD a8b2b72549 read line by line: the contribution expression at line 816, the pure core def at line 743, the loader def at line 973 and the declaration schema line at line 2 of sources.json; each identifier is checked against its line by the check.",
+    "Counts rest on a full read of 572 49financial transaction partitions (3,349,750 rows; 1,348 STK rows, all carrying STOCK SPLIT in the source-code description and 36 in the detail text) and on the t-1 and day-t positions partitions of the 47 split days.",
+    "Tolerance: a measured ratio agrees with the close-price ratio when |r x close(t) / close(t-1) - 1| is at most 0.02, a 2 percent tolerance stated here and not tuned; 58 agree and 17 disagree. Same-day activity excludes an account and security pair with any non-split row on that day.",
+    "Calendar: lib/trading_calendar.py answered from its hardcoded NYSE fallback because pandas_market_calendars is absent on this box; all 47 split days are trading days under that fallback.",
+    "Not read: the Inflection feed values (schema on every partition, no body), the Commonwealth feed, positions outside the split days, and the guard's grading set behind the ruling's 920. The producer was not run and nothing was written, invoked or sent."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
