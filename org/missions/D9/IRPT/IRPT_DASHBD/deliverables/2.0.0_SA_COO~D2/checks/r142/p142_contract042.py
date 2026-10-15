@@ -35,6 +35,7 @@ ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-27
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~223"
 GRANT_FILES = {CONTRACT_REL, TEST_REL, TEST040_REL, TEST041_REL}
 MAX_EARLIER_TEST_LINES = 14
+MAX_041_TEST_LINES = 60  # Amendment 1: the 0.4.1 test's validator and Orion fixtures move with the new required claim
 GRANT_PREFIXES = (D + "0.9.0_WK_IRPT_DASHBD~223/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/")
 COLS_SHA = "ae1a77b847a78b30270501595607f13bc092339bee43dc6ca2557169049f222d"
 ENUMS_041_SHA = "1879d19649ed8216e6e4b5336eac5e80855186b8e004e03cef2581709e689769"
@@ -191,7 +192,8 @@ def run(root, cid):
         for rel in (TEST040_REL, TEST041_REL):
             stat = git(root, "diff", "--numstat", base, "HEAD", "--", rel).split()
             edited = (int(stat[0]) + int(stat[1])) if len(stat) >= 2 else 0
-            need(edited <= MAX_EARLIER_TEST_LINES, "%s may change by at most %d lines, not %d" % (rel.rsplit("/", 1)[-1], MAX_EARLIER_TEST_LINES, edited))
+            bound = MAX_041_TEST_LINES if rel == TEST041_REL else MAX_EARLIER_TEST_LINES
+            need(edited <= bound, "%s may change by at most %d lines, not %d" % (rel.rsplit("/", 1)[-1], bound, edited))
         print("OK: contract 0.4.2: the 19 columns, schema_hash, every enum and the five earlier optional columns unmoved; one new optional column market_value_eod_claim (measured | inferred) required on a PRESENT Orion row, hash %s; supersedes 0.4.1; the rule-24 record; %d files changed, all in the grant" %
               (c["schema_hash_with_optional"][:12], len(changed)))
         return True

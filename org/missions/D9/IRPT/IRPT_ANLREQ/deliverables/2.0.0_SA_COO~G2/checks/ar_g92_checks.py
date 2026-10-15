@@ -22,7 +22,7 @@ R31_TAR = "C:/dev/irpt-release-r31/irpt-resident-0485393f3a-r31.tar.gz"
 R31_TAR_SHA = "22193944345ce2dd52d2b732ce0ac8d569aa2359958601686239b7e1da8e6021"
 IR = "infra/aws/lambda/investor-reporting/"
 MAPS = "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/"
-CHANGED = sorted(["SHA256SUMS", "reports/resident_bindings.json", "intake/portfolio.py", "reports/build_resident_package.py",
+CHANGED = sorted(["SHA256SUMS", "reports/resident_bindings.json", "intake/portfolio.py", "intake/uploads.py", "reports/build_resident_package.py",
                   "reports/generate_installed.py", "reports/resident_installed.py", "ycharts/generate/acceptance.py",
                   "ycharts/generate/normalized_input.py", "ycharts/generate/prospect_submission.py", "ycharts/generate/resident_worker.py",
                   "ycharts/generate/submission_service.py", "ycharts/research/layout_overview.py", "ycharts/research/opal_producer.py",
