@@ -1,0 +1,56 @@
+{
+  "base_commit": "14f2b2da5b7b1c8dd55897a72dfa2f430fd1c500",
+  "writer": {
+    "claim": "measured",
+    "kind": "ec2_instance",
+    "name": "inf-gold-layer-runner",
+    "statement": "The inf-gold-layer-runner EC2 instance writes the daily flat keys. Its gold chain (orion-gold-dispatch.sh, chain:full) runs the three Orion pull steps that upload them; inf-gold-trigger starts the instance and sends the chain at about 11:32Z each day. It was started on each day 2026-10-09 to 2026-10-14 and was in state stopped when read on 2026-10-15, so it runs once per day and stops between runs.",
+    "evidence": [
+      "CloudTrail S3 data events, org trail (opal-data-inf write selector): PutObject 2026-10-14 at 11:40:28Z for bronze/transactions, 11:48:56Z for bronze/performance and 11:51:51Z for bronze/positions, each by the runner instance-profile role session; 3 of 3 flat-key writes in the window",
+      "Gold chain log chain_full_20261014_113301 (copy at s3 diagnostic/chain_logs on opal-data-inf): step INF_API_PULL_TXN runs pull_inflection_transactions_rest.py, INF_API_PULL_PERF runs pull_inflection_performance_rest.py and INF_API_PULL_POSITIONS_DAILY runs pull_inflection_positions_daily.py, each logging its flat key at the same second as the PutObject event",
+      "SSM AWS-RunShellScript sent 2026-10-14 at 11:32:57Z by inf-gold-trigger to the runner (status Success, exit 0); its output downloads s3 code/gold/orion-gold-dispatch.sh and starts chain:full in the background with the log named above",
+      "Dispatch script CHAIN_PULL in code/gold/orion-gold-dispatch.sh lists INF_API_PULL_TXN, INF_API_PULL_PERF and INF_API_PULL_POSITIONS_DAILY; the chain log collision check reads the code/manual_api and code/gold copies of the three pull scripts as identical",
+      "inf-silver-aggregator log: 'FIRED gold trigger' with payload mode full, source aggregator; inf-gold-trigger log: invoked 2026-10-14 at 11:32:35Z, StartInstances on the runner, then SSM SendCommand at 11:32:57Z"
+    ]
+  },
+  "searched": {
+    "cloudtrail": {
+      "window": "2026-10-10 to 2026-10-14",
+      "events_matching": 3,
+      "method": "describe-trails and get-event-selectors (org trail: S3 data events recorded for opal-data-inf, WriteOnly plus ReadOnly); then the org trail log files for delivery minutes 11:30 to 12:05Z on each day 2026-10-10 to 2026-10-14 (869 files) were read by GET and parsed for PutObject and CompleteMultipartUpload on bronze/positions, bronze/transactions and bronze/performance; events_matching counts the flat-gz writes in the window"
+    },
+    "s3_access_logs": {
+      "enabled": false,
+      "result": "get-bucket-logging on opal-data-inf returned an empty body with rc 0 (no LoggingEnabled element), so no server access logs exist to read; this is an empty-output reading and was not checked against a second bucket"
+    },
+    "lambda_functions_listed": 238,
+    "eventbridge_rules_listed": 155,
+    "ecs_clusters_listed": 1,
+    "glue_jobs_listed": 0,
+    "ec2_instances_listed": 33,
+    "ssm_associations_listed": 0
+  },
+  "object_metadata": {
+    "keys_examined": 4,
+    "findings": "Four flat keys read by head-object (positions, transactions and performance for 2026-10-14, positions for 2026-10-13): no user metadata, content type application/gzip, SSE AES256, bucket versioning Enabled with one version per key, no x-amz field naming a writer; last-modified seconds 11:51:52, 11:40:28, 11:48:57 and 2026-10-13 11:56:39 UTC"
+  },
+  "handover": "Not performed here (read only). For the release ledger: the flat-key writers are INF_API_PULL_TXN, INF_API_PULL_PERF and INF_API_PULL_POSITIONS_DAILY in the gold chain CHAIN_PULL of orion-gold-dispatch.sh, reached through inf-silver-aggregator, inf-gold-trigger, SSM and the runner's own dispatch auto-shutdown. Retire those three steps in the ledger on the scheduled handler's first enabled day, only after the handler has written the same keys, because the same pulls feed the silver transactions and performance steps; keep the dispatch object as the rollback; the manual CLIs retire in the same entry.",
+  "notes": [
+    "CloudTrail: data events for opal-data-inf are recorded only from 2026-10-13 20:30Z (a PutEventSelectors call by a named user on the org trail); the 2026-10-10 to 10-13 flat writes therefore have no PutObject event, while GET and HEAD events on the same keys exist for those days. events_matching counts the 2026-10-14 writes only. The CloudTrail files read are the org trail log files for delivery minutes 11:30 to 12:05Z; no write event after 12:05Z was read.",
+    "Lookup times were read from lookup-events output printed in local (-04:00) time and converted to UTC; the StartInstances events from inf-assets-trigger, inf-gold-trigger and inf-ec2-retry-launch were read per day for 2026-10-09 to 10-14 with the runner's instance identifier as the resource filter.",
+    "Stop: no StopInstances event for the runner in 2026-10-09 to 10-14; the stop is the runner's own shutdown (the dispatch script arms an auto-shutdown after the chain), so this is inferred from the script, not measured from a stop call.",
+    "SSM: the CloudTrail request parameters of the SendCommand read HIDDEN_DUE_TO_SECURITY_REASONS; the chain's steps were read from the chain log and the dispatch script, not from the command text. The command output was read by get of the invocation (status and output lines only).",
+    "EC2 user-data of the runner was read (decoded in scratch) and printed only for lines with no secret-shaped content: it installs a watchdog shutdown timer and does not name the pull scripts; no secret value was read or printed.",
+    "Not read: the inf-bronze-runner instance and the inf-bronze-trigger Lambda body (the scheduled rule opal-inf-bronze-runner-cron targets inf-bronze-trigger at 11:15Z and was not traced further); the full chain log body beyond the pull and shutdown lines; the Lambda code bodies (only names, descriptions and environment variable names were listed); CloudWatch logs of the other 34 name matches.",
+    "Enumeration: Lambda 238 listed, of which 35 match inf, orion, bronze or positions in name, description or environment variable names; EventBridge 155 rules listed, of which nine fire between 11:00 and 12:00Z (inf-accounts-v2-daily, inf-api-assets-v2-daily, inf-api-eclipse-daily, inf-api-positions-daily, inf-api-reps-daily, inf-api-txn-daily, news-api-845am, news-trending-analysis-daily, opal-inf-bronze-runner-cron); Scheduler 35 schedules; ECS 1 cluster; Glue 0 jobs; SSM 0 associations and 0 maintenance windows; CodeBuild 5 projects and Step Functions 1 state machine, none matching the words.",
+    "Object metadata: the head-object calls are read-only and the object versions were listed (one version per key read); no object was downloaded for this section.",
+    "rows_written counts client data rows; the surprise rows filed in INVESTIGATION_v1.md are not client data and are not counted here.",
+    "Identity: all reads ran under the worker's own identity; no account number, role ARN, instance identifier, IP address or version identifier is written in this record."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
