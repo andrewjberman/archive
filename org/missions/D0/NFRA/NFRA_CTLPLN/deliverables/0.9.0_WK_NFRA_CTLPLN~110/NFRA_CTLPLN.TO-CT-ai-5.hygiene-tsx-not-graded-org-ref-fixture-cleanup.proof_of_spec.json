@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ai-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-5.hygiene-tsx-not-graded-org-ref-fixture-cleanup.md",
+    "group": "OTHER",
+    "vintage_commit": "afebfdc81a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~110",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round19.md",
+    "vintage_commit": "afebfdc81a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-5.hygiene-tsx-not-graded-org-ref-fixture-cleanup.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/commit-gate.sh",
+      "kind": "script",
+      "commit_or_etag": "08591e1c06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Prints one line 'not graded: <N> .tsx' before the exec of commit_gate_runner.py when a .tsx is among its arguments; prints nothing otherwise. Adds no grade for .tsx. Last changed in 08591e1c06; no deploy; run from the worktree.",
+      "artifact_covered_by": [
+        "CTai5-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "08591e1c06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "After the comp-pulse risk reflex block (outside its command -v guard), prints 'not graded: <N> .tsx' when a staged path ends in .tsx; prints nothing otherwise. Last changed in 08591e1c06; no deploy.",
+      "artifact_covered_by": [
+        "CTai5-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/wk-provision.sh",
+      "kind": "script",
+      "commit_or_etag": "08591e1c06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cmd_provision base set adds org/ref (add_folder after org/standards). Last changed in 08591e1c06; no deploy.",
+      "artifact_covered_by": [
+        "CTai5-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_wk_sparse_provision.py",
+      "kind": "test",
+      "commit_or_etag": "08591e1c06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fixture build_repo carries org/ref/SEAT_ROLES.json; arm (a) asserts that file is provisioned. Arms 7/7 ok=True on the committed state (WK-SPARSE-PROVISION arms=7/7 ok=True). Last changed in 08591e1c06.",
+      "artifact_covered_by": [
+        "CTai5-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round19_hygiene.py",
+      "kind": "test",
+      "commit_or_etag": "93f41a99d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Flags --tsx, --org-ref and --cleanup; each prints one final line HYGIENE-<ITEM> <detail> ok=<True|False>. --tsx runs the real safe-commit.sh and commit-gate.sh from copies of the sparse set in a temporary repository; --org-ref runs the fixture provision from test_wk_sparse_provision.py; --cleanup runs test_round18_batch.py and counts r18_batch_* folders before and after. Last changed in 93f41a99d5; no deploy.",
+      "artifact_covered_by": [
+        "CTai5-AC1",
+        "CTai5-AC2",
+        "CTai5-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTai5-AC1",
+      "criterion_verbatim": "a staged portal `.tsx` file makes both hooks print `not graded: <N> .tsx`, and a commit with none prints no such line (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_hygiene.py --tsx",
+      "output_evidence": "HYGIENE-TSX tsx-commit rc=0 reflex_line=True commit-gate_line=True direct_gate_tsx_line=True; no-tsx-commit rc=0 line_printed=False direct_gate_no_tsx_line=False ok=True (rc=0; run as timeout 280 python .tools/tests/test_round19_hygiene.py --tsx from the worktree root on the committed state 3ce3847ff7; the second run on the same state printed the identical line). Base: the file did not exist; the base commit-gate.sh (afebfdc81a) printed no 'not graded' line in the control (see controls.mutant).",
+      "denominator": "3 of 3 tsx prints true (safe-commit reflex line, safe-commit commit-gate line, direct commit-gate line; each N=1) and 2 of 2 absences true (no-tsx safe-commit commit, direct commit-gate on notes.md); ok counts 5 of 5",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTai5-AC2",
+      "criterion_verbatim": "a worktree cut by `wk-provision.sh` holds `org/ref/` (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_hygiene.py --org-ref",
+      "output_evidence": "HYGIENE-ORG-REF provision rc=0 org/ref/SEAT_ROLES.json present=True sparse list has org/ref=True ok=True (rc=0; run as timeout 280 python .tools/tests/test_round19_hygiene.py --org-ref from the worktree root on the committed state 3ce3847ff7). Base: the worktree sparse list at afebfdc81a held .tools, infra/logic/registry, lib, org/devices, org/missions/D0/NFRA/NFRA_CTLPLN, org/modules/graph, org/standards and no org/ref.",
+      "denominator": "1 of 1 provisioned fixture worktree holds org/ref/SEAT_ROLES.json; 2 of 2 checks true (provision rc 0; org/ref in the sparse list)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTai5-AC3",
+      "criterion_verbatim": "running the round-18 batch test leaves no new `r18_batch_*` folder in Temp (base: the file does not exist, and the batch test leaves them); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_hygiene.py --cleanup",
+      "output_evidence": "HYGIENE-CLEANUP r18_batch_* folders before=4 after=4 new=0 batch rc=0 summary=ROUND18-BATCH arms=3/4 skipped=1 ok=True ok=True (rc=0; run as timeout 280 python .tools/tests/test_round19_hygiene.py --cleanup from the worktree root on the committed state 3ce3847ff7). The four older folders named in NFRA_CTLPLN-W105-S5 were not removed.",
+      "denominator": "r18_batch_* folders in Temp: 4 before, 4 after, 0 new; batch arms 3 PASS, 1 SKIP (arm d, WinError 1314), 0 FAIL of 4 run",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base commit-gate.sh (git show afebfdc81a:.tools/commit-gate.sh) copied into .scratch/mutant/.tools and run on a staged portal/src/Probe.tsx; the same run against the HEAD copy.",
+      "expected": "the base script prints no 'not graded' line; the HEAD script prints 'not graded: 1 .tsx'",
+      "observed": "base: 0 'not graded' lines; HEAD copy: 'not graded: 1 .tsx'. Both exited rc=1 at the runner import (no org/modules/graph in the mutant folder), after the echo; the exit code is a fixture artifact and is not part of the criterion.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the CTai5-AC1 invocation run twice on the committed state 3ce3847ff7; the printed lines compared",
+      "observed": "both runs: 'HYGIENE-TSX tsx-commit rc=0 reflex_line=True commit-gate_line=True direct_gate_tsx_line=True; no-tsx-commit rc=0 line_printed=False direct_gate_no_tsx_line=False ok=True' (identical)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W110-S1: no risk-reflex file map is held in .tools/safe-commit.sh; the reflex is one comp-pulse call and comp-pulse reads its map outside this order's paths, so the refresh was not made and the line is printed by safe-commit.sh itself. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W110-S2: the real safe-commit.sh and commit-gate.sh take their inputs from the toplevel of the repository they run in; a bare temporary repository fails the gate, so the fixture carries copies of the sparse set and the root config files. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W110-S3: the round-18 batch already removes only its own fixture folder in a finally, and a default run leaves no new r18_batch_* folder; test_round18_batch.py was not edited. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~110/NFRA_CTLPLN.TO-CT-ai-5.hygiene-tsx-not-graded-org-ref-fixture-cleanup.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~110 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_hygiene.py --tsx",
+      "result": "HYGIENE-TSX tsx-commit rc=0 reflex_line=True commit-gate_line=True direct_gate_tsx_line=True; no-tsx-commit rc=0 line_printed=False direct_gate_no_tsx_line=False ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_hygiene.py --org-ref",
+      "result": "HYGIENE-ORG-REF provision rc=0 org/ref/SEAT_ROLES.json present=True sparse list has org/ref=True ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_hygiene.py --cleanup",
+      "result": "HYGIENE-CLEANUP r18_batch_* folders before=4 after=4 new=0 batch rc=0 summary=ROUND18-BATCH arms=3/4 skipped=1 ok=True ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_wk_sparse_provision.py",
+      "result": "WK-SPARSE-PROVISION arms=7/7 ok=True"
+    }
+  ]
+}
