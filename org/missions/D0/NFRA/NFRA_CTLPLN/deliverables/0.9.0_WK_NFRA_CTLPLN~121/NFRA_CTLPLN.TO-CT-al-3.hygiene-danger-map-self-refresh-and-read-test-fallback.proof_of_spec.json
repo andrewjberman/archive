@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-al-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-al-3.hygiene-danger-map-self-refresh-and-read-test-fallback.md",
+    "group": "OTHER",
+    "vintage_commit": "54e8947a06"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~121",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round22.md",
+    "vintage_commit": "54e8947a06",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-al-3.hygiene-danger-map-self-refresh-and-read-test-fallback.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/comp_pulse.py",
+      "kind": "script",
+      "commit_or_etag": "545d6ec5a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Staleness is read from the map's embedded built_utc (RiskSource), never the file mtime. resolve_risk_map rebuilds a STALE map ONCE through rebuild_risk_map (child build, 120 s cap, lock file); a sparse tree never builds: it reads the main tree's map or prints BLIND: sparse worktree, no map. Last changed in 545d6ec5a9 (the vintage line is '<age>h old !! STALE' again). No deploy; run from the worktree.",
+      "artifact_covered_by": [
+        "CTal3-AC1",
+        "CTal3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/modules/graph/nerves_lexical.py",
+      "kind": "script",
+      "commit_or_etag": "263a061cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_refusal refuses a build in a sparse tree (core.sparseCheckout true) or where a corpus folder is absent, before the scan; the build writes built_utc into the map. Measured by the --sparse arm, sub-case (2): direct build rc=2 refused=True wrote_map=False. Last changed in 263a061cac; no deploy.",
+      "artifact_covered_by": [
+        "CTal3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/modules/graph/nerves-risk-edges.json",
+      "kind": "config_data",
+      "commit_or_etag": "309c8f6f2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rebuilt by nerves_lexical build in a non-sparse scratch tree (full git index, corpus folders, portal/ copied read-only): built_utc 2026-10-15T19:56:01Z, docs_scanned 2719, 2703 edges, 3461019 bytes, sha256 prefix 7dd4679f73b56f4a, copied byte for byte. Supersedes 60de573afc (built without portal/, portal nodes absent). Last changed in 309c8f6f2e; no deploy.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": ".tools/tests/test_round22_hygiene.py",
+      "kind": "test",
+      "commit_or_etag": "f279d5883a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--map-age: temporary maps only; an aged embedded time with a fresh mtime is STALE and rebuilt once; a fresh embedded time with a 30-day mtime is FRESH with no rebuild; no embedded time is STALE and rebuilt once. --sparse: a linked worktree made sparse in a temporary repository; the reflex builds nothing, reads the main map or reports BLIND, and a direct build is refused. Last changed in f279d5883a; no deploy.",
+      "artifact_covered_by": [
+        "CTal3-AC1",
+        "CTal3-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round20_hygiene.py",
+      "kind": "test",
+      "commit_or_etag": "263a061cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The --stale arm ages the copy's embedded built_utc 100 h back (the mtime is set back too). At 309c8f6f2e: --map reads HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True (rc 0); --stale reads HYGIENE-MAP SKIP map STALE age=100.0h (rc 0). Last changed in 263a061cac; no deploy.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": ".tools/tests/test_round21_fwd5_positive_read.py",
+      "kind": "test",
+      "commit_or_etag": "263a061cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "When the open sentinel is absent, the open time is read from the closed completion record under org/critical_paths/change_management/ (Date opened: 2026-10-15T17:55:33.789019+00:00); --since <UTC> overrides it. Read-only: head-object, list-object-versions and list-objects-v2 only. Last changed in 263a061cac; no deploy.",
+      "artifact_covered_by": [
+        "CTal3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e713f3987b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six rows NFRA_CTLPLN-W121-S1 to S6 appended (surprise-row-gate: 6 new rows of 445 checked, OK). Last changed in e713f3987b; no deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTal3-AC1",
+      "criterion_verbatim": "CTal3-AC1 -- the age comes from inside the map, the mtime is ignored, and an old map is rebuilt once by the reflex (base: the test does not exist); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round22_hygiene.py --map-age",
+      "output_evidence": "HYGIENE-MAPAGE inside_time=True mtime_ignored=True rebuild_once=True ok=True (rc=0; run as timeout 280 python .tools/tests/test_round22_hygiene.py --map-age from the worktree root on the committed code state at 309c8f6f2e; the line before it: map-age: aged embedded=100.0h mtime-fresh stale=True rebuilds=1 | fresh embedded=1.0h mtime-30d stale=False rebuilds=0 | no field stale=True rebuilds=1). Two runs gave the same line.",
+      "denominator": "4 checks of the map-age arm, 4 of 4 true: aged embedded time read from inside the file (100.0h with a fresh mtime) and stale, rebuilt once; fresh embedded time with a 30-day mtime read fresh with 0 rebuilds; no embedded time read stale and rebuilt once",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTal3-AC2",
+      "criterion_verbatim": "CTal3-AC2 -- a sparse worktree never builds a map and reads the main tree's or reports BLIND (base: the test does not exist); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round22_hygiene.py --sparse",
+      "output_evidence": "HYGIENE-SPARSE builds=0 reads_main_or_blind=True ok=True (rc=0; run as timeout 280 python .tools/tests/test_round22_hygiene.py --sparse from the worktree root on the committed code state at 309c8f6f2e; the lines before it: sparse (1) own absent -> main map read=True; (2) direct build rc=2 refused=True wrote_map=False; (3) main map absent -> blind=True; (4) own fresh map read=True builds=0). Two runs gave the same line.",
+      "denominator": "4 sub-cases, 4 of 4 hold: (1) own map absent -> the main tree's map read, (2) a direct build in the sparse tree refused and no map written, (3) no map anywhere -> BLIND, (4) own fresh map read with 0 builds; builds=0 counted as reflex child builds plus map files written by a direct build",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTal3-AC3",
+      "criterion_verbatim": "CTal3-AC3 -- after the ledger entry is closed the FWD-5 read test still counts the other keys changed since the open time (base: other_changed=-1 ok=False); report the whole FWD5-POSITIVE line (it reads S3 and takes about a minute).",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py",
+      "output_evidence": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=NONE-WRITTEN ok=True (rc=0; run as timeout 280 python .tools/tests/test_round21_fwd5_positive_read.py from the worktree root on the committed code state at 309c8f6f2e; the lines before it: open time: 2026-10-15T17:55:33.789019+00:00 from the closed completion record (sentinel absent); other_changed: 0 of 190 key(s) under code/gold/ (1 page(s), script key excluded) modified after 2026-10-15T17:55:33Z). audit_actor is reported, not graded (see surprise NFRA_CTLPLN-W121-S6).",
+      "denominator": "190 keys under code/gold/ listed on 1 page, 0 modified after the open time (script key excluded); versions=2 of the exact key",
+      "status": "PASS",
+      "expect": "other_changed=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The --sparse arm run against a scratch copy of the test and comp_pulse.py in which is_sparse_tree returns False (the sparse check removed). The mutant lives in a scratch folder outside the repository.",
+      "expected": "the arm reads ok=False: no main map is read, because the reflex treats the sparse worktree as an ordinary tree",
+      "observed": "HYGIENE-SPARSE builds=0 reads_main_or_blind=False ok=False (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the two arms run twice on the committed code state at 309c8f6f2e (same command, two runs); compared on the HYGIENE line",
+      "observed": "CTal3-AC1 run 1 and run 2: HYGIENE-MAPAGE inside_time=True mtime_ignored=True rebuild_once=True ok=True; CTal3-AC2 run 1 and run 2: HYGIENE-SPARSE builds=0 reads_main_or_blind=True ok=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD item 4: the --real sparse worktree option of --sparse",
+      "reason": "The order allows a real sparse worktree or a mock. --sparse builds its sparse linked worktree in a temporary repository (core.sparseCheckout true, no map of its own). The real worktree was not used because it carries no corpus folders and nothing could be built in it."
+    },
+    {
+      "item": "BUILD item 5: the staged .tsx for comp-pulse diff",
+      "reason": "The worktree holds no tracked .tsx (portal is a gitlink here). The reflex was run on one staged .py and one staged .tsx in a temporary repository (portal/src/components/BenchmarkHeatmap.tsx and .tools/deploy_ledger.py), the same way the round-20 --map arm stages them."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W121-S1: a sparse worktree reads its own fresh danger map before the main tree's map (the order's literal branch reads main or BLIND). Row in INVESTIGATION_v1.md, OBSERVATION, INERT.",
+    "NFRA_CTLPLN-W121-S2: the main checkout's danger map has no built_utc, so a sparse worktree without its own fresh map reads it as STALE until the main checkout is rebuilt. OBSERVATION, INERT.",
+    "NFRA_CTLPLN-W121-S3: the same corpus builds to different edge counts depending on the tree that builds it (2692, 2703, 3491). OBSERVATION, INERT.",
+    "NFRA_CTLPLN-W121-S4: build_refusal has no portal/ check, so a build without portal/ silently drops the portal .tsx danger nodes. OBSERVATION, INERT.",
+    "NFRA_CTLPLN-W121-S5: the order's single map rebuild became two; 60de573afc is superseded by 309c8f6f2e and not rewritten. OBSERVATION, INERT.",
+    "NFRA_CTLPLN-W121-S6: the FWD-5 read test reports audit_actor NONE-WRITTEN from the worktree audit copy; the PINNED-DEPLOY row sits in the main checkout's audit file. OBSERVATION, INERT."
+  ],
+  "session_log": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round22_hygiene.py --map-age",
+      "result": "HYGIENE-MAPAGE inside_time=True mtime_ignored=True rebuild_once=True ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round22_hygiene.py --sparse",
+      "result": "HYGIENE-SPARSE builds=0 reads_main_or_blind=True ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py",
+      "result": "FWD5-POSITIVE versions=2 etag_equals_repo_md5=True other_changed=0 audit_actor=NONE-WRITTEN ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --map",
+      "result": "HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --stale",
+      "result": "HYGIENE-MAP SKIP map STALE age=100.0h"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_comp_pulse_battery.py",
+      "result": "COMP-PULSE BATTERY: 11/12 PASS (denominator 12); the one FAIL is B1-PULSE-BUDGET-REACHED, which also fails at the cut"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/comp-pulse diff",
+      "invocation": "cd <scratch repo with staged portal/src/components/BenchmarkHeatmap.tsx and .tools/deploy_ledger.py> && bash <worktree>/.tools/comp-pulse diff",
+      "result": "danger map: 0.1h old; DENOMINATOR: 2 file(s) checked against 2703 danger node(s); [HOLD] .tools/deploy_ledger.py; [RISK] portal/src/components/BenchmarkHeatmap.tsx; rc=1"
+    }
+  ]
+}
