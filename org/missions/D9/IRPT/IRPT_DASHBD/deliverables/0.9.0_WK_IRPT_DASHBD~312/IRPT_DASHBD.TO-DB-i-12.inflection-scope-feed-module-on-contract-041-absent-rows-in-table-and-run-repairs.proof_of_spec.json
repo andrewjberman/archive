@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-12",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "4b660d82883ec3c513819ed53ac39abfe63ee350",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-12.inflection-scope-feed-module-on-contract-041-absent-rows-in-table-and-run-repairs.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-12.inflection-scope-feed-module-on-contract-041-absent-rows-in-table-and-run-repairs.md",
+    "group": "OTHER",
+    "vintage_commit": "3dde628d6ee6d737177f92e2ca27204dbd269926"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~312",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_adapter.py",
+      "kind": "script",
+      "commit_or_etag": "aa77747babe8cdff31ec808951fcb3fa85c54e52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local pure module on contract 0.4.1 (235 lines), imported by the wrapper and its own tests only; no served path, no deploy, no AWS call",
+      "artifact_covered_by": [
+        "DBI125-1-AC1",
+        "DBI125-1-AC2",
+        "DBI125-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_run.py",
+      "kind": "script",
+      "commit_or_etag": "aa77747babe8cdff31ec808951fcb3fa85c54e52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local run wrapper (173 lines) over fixtures; it reads the contract file and writes only under the output directory it is handed; no deploy, no AWS, no network",
+      "artifact_covered_by": [
+        "DBI125-1-AC1",
+        "DBI125-1-AC2",
+        "DBI125-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "kind": "test",
+      "commit_or_etag": "aa77747babe8cdff31ec808951fcb3fa85c54e52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the adapter test file, 35 tests passing under python -I -m pytest; it writes nothing outside pytest's temp area"
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "kind": "test",
+      "commit_or_etag": "aa77747babe8cdff31ec808951fcb3fa85c54e52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the wrapper test file, 27 tests passing under python -I -m pytest, with the mutant test test_mutant_dropping_the_incomplete_day_rule_is_caught; it writes only to pytest's temp area"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI125-1-AC1",
+      "criterion_verbatim": "the golden through the wrapper: 17 PRESENT rows (VENDOR_REPORTED, PRESENT) and 11 ABSENT rows in the table in the 0.4.1 shape (UNMAPPED_ACCOUNT with a null `account_id` and a `source_account_id`), the precedence, the claim wherever the contract puts it, the run record (`contract_version` read from the contract file, `trading_days_unaccounted` 0, no retired key), no `absent/` file. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r125/p125_run041.py\" . DBI125-1-AC1",
+      "output_evidence": "DBI125-1-AC1 PASS (rc=0). At base the same command printed: REASON: expected 28 rows (17 PRESENT + 11 ABSENT, 7 accounts x 4 trading days), got 17 / DBI125-1-AC1 FAIL (rc=1).",
+      "denominator": "1 invocation; golden table of 28 rows (17 PRESENT + 11 ABSENT) of 28 expected; 4 partitions; run record keys 10 of 10 checked",
+      "status": "PASS",
+      "expect": "DBI125-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBI125-1-AC2",
+      "criterion_verbatim": "every written partition holds only its own date, its field names and types equal the contract's declared fields and hash to `schema_hash_with_optional`, every row (PRESENT and ABSENT) passes the 0.4.1 validator, the wrapper imports no AWS or network module, names no `s3://` address and types no contract version, and nothing is written outside the output directory. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r125/p125_run041.py\" . DBI125-1-AC2",
+      "output_evidence": "DBI125-1-AC2 PASS (rc=0). At base the same command printed: REASON: expected 28 rows / DBI125-1-AC2 FAIL (rc=1).",
+      "denominator": "1 invocation; 28 of 28 written rows validated by the 0.4.1 validator; 4 of 4 partitions hold their own date and 24 of 24 declared fields each, hashing to schema_hash_with_optional",
+      "status": "PASS",
+      "expect": "DBI125-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DBI125-1-AC3",
+      "criterion_verbatim": "the repairs: a first or last calendar day incomplete leaves 0 trading days unaccounted and lists the dropped day; a duplicate or non-canonical dimension key, a partition whose rows name another pull date and a non-empty output directory are each refused with a count and nothing written; the 299-day chain still equals the source product to 1e-12; and the adapter and wrapper test files together pass at least 30 tests and name a mutant test. Base: FAIL on trunk (the merged module is stale against 0.4.1).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r125/p125_run041.py\" . DBI125-1-AC3",
+      "output_evidence": "DBI125-1-AC3 PASS (rc=0). Pytest under the same checker: adapter file 35 passed; wrapper file 27 passed. At base the same command printed: REASON: first day incomplete: expected 28 rows ... got 12 / DBI125-1-AC3 FAIL (rc=1).",
+      "denominator": "1 invocation; 62 tests passed of 62 collected (35 adapter + 27 wrapper), 0 failed; 2 calendar-day repairs (first, last) of 2; 4 refusals (dimension, non-canonical dimension, partition, non-empty directory) and the repeated key, each with a count and nothing written",
+      "status": "PASS",
+      "expect": "DBI125-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two mutants: the wrapper's complete-day line is replaced by one that keeps every row (test_mutant_dropping_the_incomplete_day_rule_is_caught); the adapter's product accumulation is replaced by an assignment (test_mutant_weekend_compounding_is_caught)",
+      "expected": "each mutant's output differs from the real output, so each mutant test's assertion holds",
+      "observed": "both mutant tests pass under pytest: adapter file 35 passed, wrapper file 27 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the golden world (the checker's run_world) into two scratch directories; the run_record.json bytes and every partition's data.parquet bytes compared",
+      "observed": "run_record.json sha256 b804616b8058903f0195fcb23abda8f74362133aaaa13e62932dd2d5708a41ca in both runs; the two output trees digest equal",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "landing the table on the real silver and reading the real silver",
+      "reason": "a later cell, per the order's bounds: no AWS and no network in this cell; fixtures only"
+    },
+    {
+      "item": "the round-123 and round-124 checkers (checks/r123, checks/r124) run against this module",
+      "reason": "they grade the retired 0.4.0 shape; on this module DBI124-1-AC1 raises TypeError on the ABSENT rows now in the table and DBI124-1-AC2 reports 'expected 17 rows'. The order names checks/r125 as governing where an older checker differs, so these are superseded, not repaired"
+    },
+    {
+      "item": "the dropped-row count named in step 6 of the order",
+      "reason": "step 8 lists the run record keys and names no dropped-row key; the record keeps the listed keys and the drop is visible through incomplete_days and calendar_days_incomplete. Filed as IRPT_DASHBD-D2-W312-S1"
+    },
+    {
+      "item": "files outside the grant (contract, contract test modules, lib, infra, issuer checks, portal)",
+      "reason": "read only, per the order's grant and bounds"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W312-S1: step 6 says the dropped rows are counted, but the step-8 run record names no dropped-row key; the record keeps the listed keys",
+    "IRPT_DASHBD-D2-W312-S2: an out_dir that exists as a regular file is outside the empty-directory refusal; refused with a count of 1, nothing written",
+    "IRPT_DASHBD-D2-W312-S3: a None or NaN dimension key cannot be tested with int(); counted as not canonical in the dimension refusal",
+    "IRPT_DASHBD-D2-W312-S4: the accounts parameter's ids are not stated to count in accounts_in_feed, accounts_mapped or accounts_unmapped; the adapter counts feed-row accounts only"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~312/session.log",
+  "compiler_tools": [
+    {
+      "tool": "python -I -m pytest -q",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider tests/test_inflection_scope_feed_adapter.py ; python -I -m pytest -q -p no:cacheprovider tests/test_inflection_scope_feed_run.py",
+      "result": "35 passed; 27 passed; rc 0 both"
+    },
+    {
+      "tool": "p125_run041.py (checks/r125)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r125/p125_run041.py\" . DBI125-1-AC1 (and AC2, AC3)",
+      "result": "DBI125-1-AC1 PASS; DBI125-1-AC2 PASS; DBI125-1-AC3 PASS; rc 0 each"
+    }
+  ]
+}
