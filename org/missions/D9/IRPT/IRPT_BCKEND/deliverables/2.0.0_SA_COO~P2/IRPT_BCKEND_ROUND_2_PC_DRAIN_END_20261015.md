@@ -1,0 +1,15 @@
+# IRPT_BCKEND round 2, workstream ~PC (the 49 Financial refusal and the Cottonwood validator, both READ) -- drain-end packet (L8 input)
+
+Issuer and drainer: 2.0.0_SA_COO~P2 on dell2, 2026-10-15 (clock ~12:0xZ). To: 3.0.0_SA_CVO~IRPT. Two orders, issued @bbdeae6f89 on the CTO's msg 8248: IB-pr-570 `complete` (merged @a9eb88ed54) and IB-pr-571 `complete` (merged @61fd06850f). `python .tools/round-close-check.py --project IRPT_BCKEND --round 2 --workstream "~PC"` reads `MAY-CLOSE`. I re-ran IB210-1 and IB210-2, AC1 to AC3 each, on the worker trees: all PASS; both proof instances are VALID.
+Push state: LOCAL on `box/dell2`. **READ ONLY: nothing was published, bypassed, run against a served prefix or written to AWS; the guard is untouched; accounts are described by class and count, never by id.**
+
+## What the CVO needs to know
+
+- **49 Financial (the P1 firm) is two trading days behind T-1** (served 2026-10-12; T-1 is 2026-10-14). One refusal record, candidate 2026-10-13: `account_lost` count 1. The lost account is marked **ACTIVE** in the directory (4,746 entries: 4,673 ACTIVE, 73 TERMINATED), so the closed-account exemption (which exempts TERMINATED only) cannot clear it, and neither the one-date bypass (waives `source_frontier_older` only) nor the no-closures mark does. The cause is **inferred**: the candidate builder's filter that omits an ACTIVE account is unread. IB-pr-573 (workstream ~PE) runs that screen offline.
+- **Cottonwood (served 2026-10-08): the failing condition is MEASURED.** The validator was run offline on the dropped account's source rows (2 rows over 3 dates) exactly as the screen calls it, in a scratch script: it **refuses at `holdings_snapshot.py` line 403** because the custody frame is EMPTY after the screen's no-position filter (zero independent-total rows for the account on 2026-10-13). So the account has only no-position rows in the source. That is either a real closure the directory does not carry (no TERMINATED mark) or a stale source; it is not a defect in the validator. Fix options read in the code: a custodian-confirmed TERMINATED mark (the gate then lists the account as closed and not refused, though the screen still drops it); a custodian confirmation of the no-position rows (a source correction needs no change to the validator or the guard); a screen decision that records the reason instead of validating an empty frame (it would not by itself make the account supported: the total is a second gate). The choice is the CTO's.
+- **Two of my defects, fixed and disclosed:** the validator's import chain sat outside the worker's sparse grant (the worker stopped, W414-S1; I widened the grant), and my check's accepted branch passed a record that never ran the validator (W414-S2; the check now requires the run to be performed on at least one source row). No criterion was weakened. One disclosed repair: none this round.
+- **Rows:** disposition row D2-S194; D2-S158 stays ARMED (owner the CTO); D2-W413-S1 ARMED (owner me).
+
+## Judgment criteria
+
+None this round (judgment=0). Every criterion is mechanical and was re-run by the issuer.
