@@ -1,0 +1,81 @@
+{
+  "base_commit": "bbdeae6f89b23308894c94e95b91951decfb9769",
+  "read_date": "2026-10-15",
+  "validator_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 348,
+    "identifier": "def validate_cot_actual_positions("
+  },
+  "screen_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 2266,
+    "identifier": "def cot_screen_accounts("
+  },
+  "source_rows": {
+    "count": 2,
+    "distinct_dates": 3
+  },
+  "offline_run": {
+    "performed": true,
+    "read_only": true,
+    "writes": 0,
+    "published": false,
+    "invocation": "python -B offline_run.py (scratch outside the repository; imports holdings_snapshot.py from the worktree and calls validate_cot_actual_positions with the arguments cot_screen_accounts uses for one account)",
+    "outcome": "refused"
+  },
+  "failing_condition": {
+    "name": "custody missing required actual fields/rows",
+    "claim": "measured",
+    "site": {
+      "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "line": 403,
+      "identifier": "raise ValueError(\"REFUSED: COT %s missing required actual fields/rows (including explicit currency)\""
+    },
+    "explanation": "Refuses the custody frame when it has duplicate columns, lacks a required field, or has no rows (the frame.empty test at line 402). The screen's no-position filter removed every source row of this account on the candidate date, so the custody frame is empty when the validator runs."
+  },
+  "fix_options": [
+    {
+      "option": "A screen decision on accounts whose only source rows carry no position: the screen records that reason instead of validating an empty frame",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 2281,
+        "identifier": "h = h.loc[~h[COT_NUMERIC_FACTS].isna().all(axis=1)]"
+      },
+      "effect": "Measured: this account has zero independent-total rows on 2026-10-13, so the screen change alone would not make it supported; the total is a second gate. The validator and the publish guard are unchanged."
+    },
+    {
+      "option": "A custodian-confirmed closure recorded as a TERMINATED mark in the directory, which the closed-account exclusion reads",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3051,
+        "identifier": "closed = closed_accounts() & gone"
+      },
+      "effect": "The publish gate lists the account under closed_accounts_not_refused instead of refusing with account_lost; the COT screen still drops the account, so the candidate does not regain it."
+    },
+    {
+      "option": "A custodian source confirmation of the no-position rows: if they are real no-position pairs the refusal is correct, if stale a source correction",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 2364,
+        "identifier": "absent = holdings[numeric].isna().all(axis=1)"
+      },
+      "effect": "The no-position rule at build_cot decides which rows are absent at the as-of date; a source correction changes the input the screen sees and needs no change to the validator or the guard."
+    }
+  ],
+  "ids_private": true,
+  "notes": [
+    "Dropped account identified by matching the latest refusal record's account_lost id against the source census of the candidate date; the id is held in scratch only and is not recorded here.",
+    "Source rows: 2 rows of the account on the candidate date 2026-10-13, all four COT numeric facts null on both; 2 rows on each of the 2026-10-08 and 2026-10-12 partitions; 3 distinct dates. Independent-total rows for the account on 2026-10-13: 0.",
+    "Offline run: validate_cot_actual_positions called from the repository file with the arguments cot_screen_accounts uses for one account. After the no-position filter the custody frame had 0 rows, so the custody refusal at line 403 fired (frame.empty at line 402).",
+    "Cross-check, read-only: cot_screen_accounts over the 1001 source accounts refused 138 (136 with the same custody reason, 2 repeated rows); the dropped account is refused for the custody reason, not accepted.",
+    "Sparse grant added locally and never committed, per amendment 1: infra/aws/lambda/investor-reporting (the import chain) and docs/contracts/investor-reporting/v1 (CurrencyAuthorities.json, read at call time). See row IRPT_BCKEND-D2-W414-S3.",
+    "functions_invoked 0 counts deployed AWS functions invoked; the local validator and screen calls are the order step 3 and are not AWS invocations. No AWS write, no publish, no sign-in; GET of existing objects only. See row IRPT_BCKEND-D2-W414-S4.",
+    "Not read: the served publication document and the candidate snapshot itself; the refusal condition does not depend on either."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

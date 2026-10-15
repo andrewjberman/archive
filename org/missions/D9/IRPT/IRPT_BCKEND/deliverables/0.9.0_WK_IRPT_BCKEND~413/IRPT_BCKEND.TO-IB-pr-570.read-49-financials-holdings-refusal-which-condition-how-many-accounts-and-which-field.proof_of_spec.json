@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-570",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-570.read-49-financials-holdings-refusal-which-condition-how-many-accounts-and-which-field.md",
+    "group": "OTHER",
+    "vintage_commit": "bbdeae6f89"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~413",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~413/IB210-1_49f_refusal_read.json",
+      "kind": "doc",
+      "commit_or_etag": "77ec61c8190ffba6caabc75fec182d765082d922",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only investigation record. Nothing was published, bypassed, invoked or written to AWS, so there is no deploy to verify."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~413/IB210-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "77ec61c8190ffba6caabc75fec182d765082d922",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output and exit codes of the three criteria, recorded in the same commit as the record."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB210-1-AC1",
+      "criterion_verbatim": "IB210-1-AC1: run p210_cells.py for AC1 from the worktree root; expect IB210-1-AC1 PASS (the served date, T-1, the refused candidate dates, the condition and count, the guard read at HEAD)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . IB210-1-AC1",
+      "output_evidence": "OK: 49 Financial 2 trading days behind T-1, 1 refused candidate dates, the guard read in the code / IB210-1-AC1 PASS / rc=0",
+      "denominator": "1 refused candidate date, 1 per_candidate row, 1 refusal record version, 2 trading days behind",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB210-1-AC2",
+      "criterion_verbatim": "IB210-1-AC2: run p210_cells.py for AC2 from the worktree root; expect IB210-1-AC2 PASS (the account or field class, the cause, the acceptance path at HEAD, the other firms)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . IB210-1-AC2",
+      "output_evidence": "OK: the account or field class, the cause, the acceptance path in the code, the other firms / IB210-1-AC2 PASS / rc=0",
+      "denominator": "5 acceptance mechanisms read at HEAD (1 guard, 4 override and source lines), 2 other firms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB210-1-AC3",
+      "criterion_verbatim": "IB210-1-AC3: run p210_cells.py for AC3 from the worktree root; expect IB210-1-AC3 PASS (notes, the counters at 0, no long digit run)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . IB210-1-AC3",
+      "output_evidence": "OK: notes, counters 0, no long digit run / IB210-1-AC3 PASS / rc=0",
+      "denominator": "4 notes lines, 6 counters, 0 long digit runs",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutants for this read are the issuer's negatives in p210_cells.py; the worker did not author or alter them.",
+      "expected": "Not applicable: the order names no mutant for the worker.",
+      "observed": "Not run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "No same-input pair was run: the criteria were run once against the committed record, and the live S3 state was read once per object.",
+      "observed": "Not applicable to a read whose input is a live S3 state.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the publisher, any AWS write, and any signing or sending",
+      "reason": "The order is READ ONLY and its bounds forbid each of these."
+    },
+    {
+      "item": "Reading the 49 Financial candidate snapshot and the served parquet",
+      "reason": "Not needed for the refusal and account facts; the cause is therefore inferred and the record says what would measure it."
+    },
+    {
+      "item": "Later dates for the self-clear question",
+      "reason": "Only the refusal record and the served manifest were read; no later-dated object was read."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W413-S1: the 49 Financial refused account is marked ACTIVE in the custodian directory, so the closed-account exemption cannot clear it; the omitting candidate filter is not read.",
+    "IRPT_BCKEND-D2-W413-S2: the publish gate's closed-account set is read from a legacy routed bucket; the canonical 49 Financial directory latest pointer returned NoSuchKey."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~413/IB210-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "aws s3api (read only, via .tools/aws)",
+      "invocation": "get-object and list-object-versions on the 49financial platinum current holdings keys and the directory pointer; head-object and get-object on the routed directory pointer; get-object on the cottonwood and inflection current manifests",
+      "result": "1 refusal version read; 49financial served 2026-10-12, T-1 2026-10-14, 2 trading days behind; cottonwood served 2026-10-08; inflection served 2026-10-13; no write"
+    },
+    {
+      "tool": "python -I p210_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r210/p210_cells.py\" . <criterion id>",
+      "result": "IB210-1-AC1, AC2 and AC3 PASS, rc 0 each"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "bbdeae6f89b23308894c94e95b91951decfb9769",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-570.read-49-financials-holdings-refusal-which-condition-how-many-accounts-and-which-field.md"
+  }
+}
