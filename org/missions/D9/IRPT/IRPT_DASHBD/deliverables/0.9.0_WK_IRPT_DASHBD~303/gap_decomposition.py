@@ -440,7 +440,8 @@ def main():
             "claim": "measured" if status[v] == STATUS_TESTED else "absent",
             "words": VARIANT_WORDS[v],
         } for v in TESTED},
-        "explained_share": {v: {s: shares[v][s] for s in sample} for v in TESTED},
+        "explained_share": {v: {s: (None if shares[v][s] is None else round(shares[v][s], 6)) for s in sample}
+                            for v in TESTED},
         "households_with_a_single_difference_explaining_half": n_half,
         "basis_words": basis_words,
         "reads": {"vendor_calls": 0, "s3_writes": 0, "dynamodb_writes": 0, "secret_reads": 0,
