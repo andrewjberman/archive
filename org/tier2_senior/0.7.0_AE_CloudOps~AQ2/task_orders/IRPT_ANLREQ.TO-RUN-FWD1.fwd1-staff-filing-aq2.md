@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-15</date>
-    <status>pending</status>
+    <status>superseded -- window 1 (run r41, 2026-10-15 16:03Z) failed safely at step 4 with nothing filed (RUN1-AC2 not met, row IRPT_ANLREQ-D2-S120); window 2 is IRPT_ANLREQ.TO-RUN-FWD1.fwd1-staff-filing-window2-aq2 under pair addendum 2</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>

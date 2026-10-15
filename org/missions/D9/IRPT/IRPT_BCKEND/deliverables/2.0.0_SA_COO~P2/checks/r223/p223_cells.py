@@ -30,7 +30,7 @@ TO1 = "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-586.sco
 TO2 = "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-587.orion-household-accounts.md"
 CELLS = {
     "1": dict(
-        slot=429, test=F + "test_pull_inflection_scope_account_returns.py", min_tests=16, marker="SCOPE-FEED-A", rec="IB223-1_record.json",
+        slot=429, test=F + "test_pull_inflection_scope_account_returns.py", min_tests=17, marker="SCOPE-FEED-A", rec="IB223-1_record.json",
         regress=["data/inf/scripts/gold/tests/test_aor_resolution.py"],
         mutants=[F + "pull_inflection_scope_account_returns.py"],
         allowed=(F + "pull_inflection_scope_account_returns.py", F + "test_pull_inflection_scope_account_returns.py", DISP, TO1),
@@ -40,7 +40,7 @@ CELLS = {
                "null_start_date_account_is_no_start_date_at_source_with_claim", "claim_promoted_to_measured_when_the_call_misses_a_null_start_account",
                "no_zero_and_no_fill_for_an_absent_account", "one_call_per_household_paced_no_retry", "prefixes_are_address_output_and_bronze_is_json_gz",
                "key_read_absent_first_and_never_overwritten", "catalog_row_and_chain_entries_present_and_tolerated",
-               "from_date_window_splits_series_into_per_day_rows_and_skips_existing_keys")),
+               "from_date_window_splits_series_into_per_day_rows_and_skips_existing_keys", "sidecar_addresses_used_when_builder_is_absent")),
     "2": dict(
         slot=430, test=L + "tests/test_orion_account_mapping_household.py", min_tests=8, marker="ORION-HOUSEHOLD-A", rec="IB223-2_record.json",
         regress=[L + "tests/test_orion_account_mapping.py"],

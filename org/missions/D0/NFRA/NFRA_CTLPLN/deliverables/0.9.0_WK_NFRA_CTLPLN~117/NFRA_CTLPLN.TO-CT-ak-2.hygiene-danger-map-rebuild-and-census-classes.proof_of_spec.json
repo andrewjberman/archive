@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ak-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-2.hygiene-danger-map-rebuild-and-census-classes.md",
+    "group": "OTHER",
+    "vintage_commit": "57922ec762"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~117",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round21.md",
+    "vintage_commit": "57922ec762",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-2.hygiene-danger-map-rebuild-and-census-classes.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/nerves-risk-edges.json",
+      "kind": "config_data",
+      "commit_or_etag": "c83dfa714c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rebuilt once in the worktree by python org/modules/graph/nerves_lexical.py build (local corpus, about 7 s, no network, no AWS). Result: 3491 nodes carry claims, docs_scanned 2709, total_claims 24203; file mtime 2026-10-15 16:28:57Z. The corpus folders org/critical_paths, org/tier0/ledger, docs/doctrine and docs/references were added to the sparse set first; a build without them emitted 51 nodes and was discarded. Last changed in c83dfa714c; no deploy.",
+      "artifact_covered_by": [
+        "CTak2-AC1",
+        "CTak2-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round20_hygiene.py",
+      "kind": "test",
+      "commit_or_etag": "73b271e9a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "When comp-pulse diff reports the danger map STALE (regex on the 'danger map: <h>h old !! STALE' line), the --map arm prints HYGIENE-MAP SKIP map STALE age=<h>h and exits 0. The new --stale arm runs comp-pulse on a copy of the tracked map with its mtime 100 h back and passes only when the SKIP prints. Last changed in 73b271e9a4; the tracked map is never written by the test.",
+      "artifact_covered_by": [
+        "CTak2-AC1",
+        "CTak2-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/fabric_value_census.py",
+      "kind": "test",
+      "commit_or_etag": "055ed9061c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven lines added to CLASS_BY_PATH: test_fabric_readers_dell.py:101 and :154 (FIXTURE), test_manager_on_every_box.py:266 (FIXTURE, a judgment, row NFRA_CTLPLN-W117-S4), lib/devices.py:84 (DISPLAY). The census reads unclassified=0 ok=True over 2150 files and 47 hits. Last changed in 055ed9061c; the four files the hits sit in are not edited.",
+      "artifact_covered_by": [
+        "CTak2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6341e45ebe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended, NFRA_CTLPLN-W117-S1 to S4, each OBSERVATION and INERT, disposition UNDER_INVESTIGATION. Passed surprise-row-gate at commit (4 new rows of 430 checked). Last changed in 6341e45ebe.",
+      "artifact_covered_by": [
+        "CTak2-AC1",
+        "CTak2-AC2",
+        "CTak2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTak2-AC1",
+      "criterion_verbatim": "with the rebuilt map a staged portal .tsx and a .py are classed (base: HYGIENE-MAP tsx_classed=0 py_classed=0 ok=False); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --map",
+      "output_evidence": "HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True (rc=0; run as timeout 280 python .tools/tests/test_round20_hygiene.py --map from the worktree root on the committed state at 6341e45ebe; run twice, identical last line). Deciding lines: STAGED portal/src/components/BenchmarkHeatmap.tsx, .tools/deploy_ledger.py -> comp-pulse diff rc=1; [HOLD] .tools/deploy_ledger.py; [RISK] portal/src/components/BenchmarkHeatmap.tsx. The base line was not reproduced: before any edit the same arm already read tsx_classed=1 py_classed=1 ok=True in this worktree, because the sparse checkout had just written the tracked map (mtime 0.1 h old). See surprise NFRA_CTLPLN-W117-S1.",
+      "denominator": "2 of 2 staged fixture paths classed (1 portal .tsx, 1 .py); control portal/src/x.tsx read as PRESENT_WITH_ZERO_RESULTS (not required); comp-pulse read 3491 danger nodes",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak2-AC2",
+      "criterion_verbatim": "the test prints a SKIP naming the map's age when the map is stale, and does not fail (base: the arm does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --stale",
+      "output_evidence": "HYGIENE-MAP SKIP map STALE age=100.0h (rc=0; run as timeout 280 python .tools/tests/test_round20_hygiene.py --stale from the worktree root on the committed state at 6341e45ebe; run twice, identical last line). The arm copies comp_pulse.py, _compbudget.py and the tracked map into a temporary tree and sets the copy's mtime 100 h back; comp-pulse reports 'danger map: 100.0h old  !! STALE', and the arm exits 0 with the SKIP line. A FAIL line is printed and rc=1 if comp-pulse does not report the copy STALE (not reached).",
+      "denominator": "1 aged copy of the tracked map (age 100.0 h against comp-pulse STALE_AFTER_HOURS 36); SKIP printed 1 of 1; FAIL 0",
+      "status": "PASS",
+      "expect": "SKIP",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak2-AC3",
+      "criterion_verbatim": "the census classifies every value it finds (base: unclassified=4 ok=False); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/fabric_value_census.py",
+      "output_evidence": "FABRIC-CENSUS files_scanned=2150 hits=47 enum_source=3 compares=0 display=27 fixture=17 unclassified=0 ok=True (rc=0; run as timeout 280 python .tools/tests/fabric_value_census.py from the worktree root on the committed state at 6341e45ebe; run twice, identical last line). Base at e4848abcad, before commit 055ed9061c, measured in the same worktree: FABRIC-CENSUS files_scanned=2150 hits=47 enum_source=3 compares=0 display=26 fixture=14 unclassified=4 ok=False rc=1.",
+      "denominator": "47 hits across 2150 scanned tracked files; 47 of 47 classified (enum_source 3, display 27, fixture 17, compares 0), 0 UNCLASSIFIED",
+      "status": "PASS",
+      "expect": "unclassified=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The census at its pre-edit state (commit e4848abcad, table without the four new entries) run at its own path in the worktree, before commit 055ed9061c; it should leave four hits UNCLASSIFIED.",
+      "expected": "unclassified=4 ok=False rc=1, with the four UNCLASSIFIED lines at test_fabric_readers_dell.py:101, test_fabric_readers_dell.py:154, test_manager_on_every_box.py:266 and lib/devices.py:84",
+      "observed": "FABRIC-CENSUS files_scanned=2150 hits=47 enum_source=3 compares=0 display=26 fixture=14 unclassified=4 ok=False (rc=1, .scratch/census_base.txt); the four UNCLASSIFIED lines are the four named",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three criteria each run twice on the committed state 6341e45ebe; the last lines are compared",
+      "observed": "AC1 HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True on both runs; AC2 HYGIENE-MAP SKIP map STALE age=100.0h on both runs; AC3 FABRIC-CENSUS ... unclassified=0 ok=True on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The portal gitlink and org/git-author-override-audit.laptop.log in the worktree",
+      "reason": "Both are outside this order's <paths> and were left uncommitted, as the cell requires."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W117-S1: the cut premises do not reproduce in this worktree; comp-pulse reads the danger map fresh by mtime and the hygiene --map arm reads ok=True before any edit. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W117-S2: a build from a sparse worktree emits a 51-node map with no warning when the corpus folders are absent; the 51-node output was not committed. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W117-S3: nothing in the diff path rebuilds the danger map, and the tracked map is still in git after the 2026-07-22 untrack ruling. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W117-S4: judgment, the retired two-box probe literal in test_manager_on_every_box.py:266 classed FIXTURE, not a box-list literal; a reviewer may overrule. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~117/NFRA_CTLPLN.TO-CT-ak-2.hygiene-danger-map-rebuild-and-census-classes.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~117 on 2026-10-15; the session's final message is the WORKER REPORT). Sparse set widened once by git sparse-checkout add org/critical_paths org/tier0/ledger docs/doctrine docs/references so the danger-map build reads its full corpus.",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/modules/graph/nerves_lexical.py build",
+      "result": "nerves-lexical: 3491 nodes carry claims -> org\\modules\\graph\\nerves-risk-edges.json (rc=0, about 7 s; the earlier run in the sparse set without the corpus folders emitted 51 nodes and was discarded)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --map",
+      "result": "HYGIENE-MAP tsx_classed=1 py_classed=1 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_hygiene.py --stale",
+      "result": "HYGIENE-MAP SKIP map STALE age=100.0h"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/fabric_value_census.py",
+      "result": "FABRIC-CENSUS files_scanned=2150 hits=47 enum_source=3 compares=0 display=27 fixture=17 unclassified=0 ok=True"
+    }
+  ]
+}
