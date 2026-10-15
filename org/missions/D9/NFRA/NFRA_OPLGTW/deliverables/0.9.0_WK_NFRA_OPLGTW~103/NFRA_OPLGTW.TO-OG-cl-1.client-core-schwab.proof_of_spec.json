@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cl-1",
+  "firm": "FABRIC",
+  "genre": "BUILD",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6fc29c2dbf",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-1.client-core-schwab.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "32b70d1b86"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~103",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_core.py",
+      "kind": "script",
+      "commit_or_etag": "5c8c1554e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only; no deploy, no release, no registration (the issuer's hookup registers the tools). Committed LOCAL on wk-NFRA_OPLGTW-103.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_role.py",
+      "kind": "script",
+      "commit_or_etag": "5c8c1554e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Vendor read-role client; reads no role variable at import; never reads the internal reader role (AC4 text check). LOCAL.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py",
+      "kind": "script",
+      "commit_or_etag": "5c8c1554e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Schwab adapter; dim_position, dim_balance and dim_transaction prefixes come from the catalog at call time and are absent there (surprise S2). LOCAL.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl1.py",
+      "kind": "test",
+      "commit_or_etag": "5c8c1554e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The twelve named tests, offline (recording fake context, Opal stand-in principal, fixed alias key); 12 of 12 pass. LOCAL.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~103/probe_schwab.py",
+      "kind": "script",
+      "commit_or_etag": "5c8c1554e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC2 probe; prints one line of counts and booleans. Run result: envelope_ok False, independent_count_equal False, fence_negative_arm False (alias key unavailable in the worker shell; no catalog row for the dim tables). LOCAL.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "5c8c1554e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Eight surprise rows NFRA_OPLGTW-Z-W103-S1..S8 appended in the fenced json form; seven BLOCKING or OBSERVATION rows on the premises, one on the naming gate. LOCAL.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass. The test file runs the twelve named tests of the cell (test_ogcl1_ac01 to test_ogcl1_ac12) through the order's invocation.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl1.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 12 of 12; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 12 of 12; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "12 of 12 named tests passed; 0 failed or error lines (pytest tests/test_og_cl1.py, offline)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the probe, re-run here against the real Schwab silver, prints a complete envelope, a position count equal to an independent read, a refused firm fence and no account number.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl1.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)probe schwab: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "probe schwab: envelope_ok False; independent_count_equal False; fence_negative_arm False; account_numbers_printed 0\nprobe rc 0; digit runs of 8 or more in the output 0 (want 0)\nRESULT: FAIL\nexit=1",
+      "denominator": "0 of 3 probe booleans True (envelope_ok, independent_count_equal, fence_negative_arm); account_numbers_printed 0; digit runs of 8 or more in the output 0",
+      "status": "FAIL",
+      "status_reason": "The probe stops at the alias key (SCHWAB_ACCOUNT_REF_SECRET_ID unset in the worker shell, surprise S3) and, with a process-local key, answers no_catalog_row for the Schwab dim_position table (surprise S2); the envelope, count and fence booleans are therefore False. The order stays open."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "pytest on tests/test_og_cl1.py run three times on 2026-10-15 (offline)",
+      "observed": "12 of 12 on each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W103-S1",
+    "NFRA_OPLGTW-Z-W103-S2",
+    "NFRA_OPLGTW-Z-W103-S3",
+    "NFRA_OPLGTW-Z-W103-S4",
+    "NFRA_OPLGTW-Z-W103-S5",
+    "NFRA_OPLGTW-Z-W103-S6",
+    "NFRA_OPLGTW-Z-W103-S7",
+    "NFRA_OPLGTW-Z-W103-S8"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (offline, the twelve named tests)",
+      "invocation": "python -m pytest tests/test_og_cl1.py -q -p no:cacheprovider",
+      "result": "12 passed"
+    },
+    {
+      "tool": "probe (real core and Schwab adapter, the box's credentials)",
+      "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~103/probe_schwab.py",
+      "result": "envelope_ok False; independent_count_equal False; fence_negative_arm False; account_numbers_printed 0"
+    },
+    {
+      "tool": "ruff (F rules)",
+      "invocation": "python -m ruff check --select F <the four new python files>",
+      "result": "All checks passed"
+    }
+  ]
+}
