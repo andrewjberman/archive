@@ -157,7 +157,9 @@ def ac_3(root):
     nt = note.read_text(encoding="utf-8")
     need(not p114.LONG_DIGITS.search(nt), "a run of 8 or more digits in the note")
     need(len(nt.splitlines()) <= 60, "the note is longer than 60 lines")
-    changed = sorted({p for p in git(root, "log", "--first-parent", "--no-merges", "--name-only", "--format=", BASE + "..HEAD").splitlines() if p.strip()})
+    mb = subprocess.run(["git", "-C", str(root), "merge-base", "HEAD", "box/dell2"], capture_output=True, text=True, timeout=60).stdout.strip()
+    base = mb if mb and mb != git(root, "rev-parse", "HEAD").strip() else BASE  # the branch point (or the last merge of the shared branch); after the drain, the issuance base
+    changed = sorted({p for p in git(root, "log", "--first-parent", "--no-merges", "--name-only", "--format=", base + "..HEAD").splitlines() if p.strip()})
     need(changed, "nothing changed since the base")
     extra = [p for p in changed if not any(p == a or (a.endswith("/") and p.startswith(a)) for a in ALLOWED)]
     need(not extra, "files outside the grant changed: " + ", ".join(extra[:5]))
