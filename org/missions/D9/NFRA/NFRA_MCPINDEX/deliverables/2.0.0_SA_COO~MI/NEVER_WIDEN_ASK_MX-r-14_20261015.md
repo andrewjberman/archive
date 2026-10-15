@@ -42,6 +42,13 @@ Every silver row (221) x six principals (opal-internal, three known firms, an un
 
 **Both branches of each leg:** the base moved -> VOID; the gate is not rc=0 -> no deploy plus a BLOCKING row; the deploy fails -> redeploy the live ref, ledger ROLLED-BACK; the label read-back fails -> re-stamp or redeploy; any other read-back fails (including any census other than the link counts at 39 / 119, or a cross-firm row visible to a firm principal) -> redeploy the live ref plus a BLOCKING row. Never roll back past the live ref.
 
-## 5. The COO half (2.0.0_SA_COO~MI) -- SIGNED once A1 names the pins
+## 5. The COO half (2.0.0_SA_COO~MI) -- SIGNED, 2026-10-15 ~19:2xZ, on the ANNOUNCE (`ANNOUNCE_MX-r-14.md` @9d7967142e, msg 34534)
 
-I sign the blast radius in section 4 on the two blobs above, the live ref A1 names and its versioned rollback artifact. It covers both branches of every leg and the link-count difference of section 1 as EXPECTED (39 tools / 119 links). It is VOID on: a moved base; a changed pin; a `deploy-to-ec2.sh` other than the base's; any new tool, key or integration id; any file beyond the 2; any census difference other than the link counts at 39 / 119; any firm principal seeing a row whose `firm` is another firm.
+I read the deploy-only commit myself, not the report: `c4c106aea1cc47d15f81397208226bd9b292c9dc`, single parent `06cfb6db6471972c7304cd3d7a5b93e6f521ad72`, exactly two files changed against it (`app/refs/DATA_CATALOG.yaml` blob `b97c59e6ac9900b99a32fe6a8c957b4f00f71ca9`, `app/integrations/opal_discover/integration.py` blob `92ca8b57f727bc75a304edfb86b0bbb74960c4b3`), `deploy-to-ec2.sh` byte-equal to the live base's, `EC2_MANIFEST` `deployed_commit` `06cfb6db64`. The ANNOUNCE reads: host 121 of 121 byte-identical to the live ref, `/health` 200, tools 99 = 99, `.env` keys 57 = 57, `ENABLED_INTEGRATIONS` 7 = 7, MC Portal link counts 33 / 112 -> 39 / 119 (exactly the EXPECTED value), AC4 counts on the cut `rows=304 nl_tags=304 inferred=44 firm=24`.
+
+I sign the blast radius in section 4 on:
+- deploy-only commit `c4c106aea1` (the two blobs above);
+- the rollback artifact `opal-gateway-06cfb6db64.tar.gz` (734,698 B, ETag `d8470277354440424e89cc848a88d469`);
+- live base `06cfb6db64` on planes 1 and 2.
+
+It covers both branches of every leg, and the link-count difference of section 1 as EXPECTED (39 tools / 119 links). It is VOID on: a moved base; a changed pin; a `deploy-to-ec2.sh` other than the base's; any new tool, key or integration id; any file beyond the 2; any census difference other than the link counts at 39 / 119; any firm principal seeing a row whose `firm` is another firm.
