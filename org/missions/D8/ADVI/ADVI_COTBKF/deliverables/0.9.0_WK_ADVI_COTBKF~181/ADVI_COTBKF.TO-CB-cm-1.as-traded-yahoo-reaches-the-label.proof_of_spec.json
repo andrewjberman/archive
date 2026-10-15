@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cm-1",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cm-1.as-traded-yahoo-reaches-the-label.md",
+    "group": "OTHER",
+    "vintage_commit": "5621d85218"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~181",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round91.md",
+    "vintage_commit": "5621d85218",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cm-1.as-traded-yahoo-reaches-the-label.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_as_traded_use_class.py",
+      "kind": "test",
+      "commit_or_etag": "6a4e0bd23b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, five as-traded tests on stubs, committed at 6a4e0bd23b. No served move, no S3 write, no production module change."
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~181/AS_TRADED_LABEL_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "6a4e0bd23b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record of the base result (5 of 5), production_change none, the reader list (14 lines) and the module blobs, committed at 6a4e0bd23b."
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~181/AS_TRADED_LABEL_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "6a4e0bd23b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Short note on the record, committed at 6a4e0bd23b."
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6a4e0bd23b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new appended row ADVI_COTBKF-D1-W181-S1 (27 lines added, 0 removed), committed at 6a4e0bd23b."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB91cm1-AC1",
+      "criterion_verbatim": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_as_traded_use_class.py -q -k as_traded -- expect 5 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_as_traded_use_class.py -q -k as_traded",
+      "output_evidence": "5 passed in 3.63s (run 1); 5 passed in 4.04s (run 2)",
+      "denominator": "5 of 5 as-traded tests pass, on the unmodified production modules",
+      "status": "PASS",
+      "status_reason": "The output equals the expect line: 5 passed, on two runs."
+    },
+    {
+      "criterion_id": "CB91cm1-AC2",
+      "criterion_verbatim": "python -c subprocess pytest over every test_commonwealth*fwd3*.py and test_commonwealth*valuation*.py -- expect rc=0",
+      "method": "test_suite",
+      "invocation": "python -c \"import subprocess,sys,glob;fs=sorted(glob.glob('data/assets/scripts/silver/tests/test_commonwealth*fwd3*.py'))+sorted(glob.glob('data/assets/scripts/silver/tests/test_commonwealth*valuation*.py'));r=subprocess.run([sys.executable,'-m','pytest']+fs+['-q'],capture_output=True,text=True);print('VALUATION-AND-FWD3-TESTS files=%d rc=%d last=%s'%(len(fs),r.returncode,r.stdout.strip().splitlines()[-1]))\"",
+      "output_evidence": "VALUATION-AND-FWD3-TESTS files=3 rc=0 last=40 passed in 3.09s (the raw line carries ANSI colour codes; rc=0 of the order invocation)",
+      "denominator": "3 test files, 40 tests, all pass",
+      "status": "PASS",
+      "status_reason": "rc=0 with 3 files and 40 passed; the existing test files are unchanged."
+    },
+    {
+      "criterion_id": "CB91cm1-AC3",
+      "criterion_verbatim": "python -c record check -- expect blobs_equal=True",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~181/AS_TRADED_LABEL_RECORD.json',encoding='utf-8'));ok=all(subprocess.check_output(['git','rev-parse','HEAD:data/assets/scripts/silver/'+k]).decode().strip()==v for k,v in d['module_blobs'].items());u=sum(1 for r in d['readers'] if r['kind']=='PRICE' and not r['labelled_in_served_tables']);print('AS-TRADED-LABEL blobs_equal=%s readers=%d unlabelled_price_readers=%d count_matches=%s base=%d/%d change=%s'%(ok,len(d['readers']),d['unlabelled_price_readers'],u==d['unlabelled_price_readers'],d['base_result']['tests_passing_at_base'],d['base_result']['tests_total'],d['production_change'][:40]))\"",
+      "output_evidence": "AS-TRADED-LABEL blobs_equal=True readers=14 unlabelled_price_readers=0 count_matches=True base=5/5 change=none",
+      "denominator": "14 reader lines (12 PRICE, 2 FACT); 0 PRICE readers unlabelled; 2 module blobs equal HEAD",
+      "status": "PASS",
+      "status_reason": "blobs_equal=True; the reader count matches the record's own list."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; the base result itself is the control: the five tests run on the unmodified modules, and the reader count is checked against the record's own list.",
+      "expected": "not applicable: the order names none",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "description": "The AC1 invocation run twice on the same tree.",
+      "method": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_as_traded_use_class.py -q -k as_traded, twice",
+      "observed": "5 passed in 3.63s; 5 passed in 4.04s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live S3 reads at dv L152, L1590 and L1602 (the store read, the store's cache-or-read, the split history)",
+      "reason": "No S3 by the order. The label chain they feed is tested on stubs; these reads themselves are UNTESTED in the record."
+    },
+    {
+      "item": "rederive() and chain() called end to end",
+      "reason": "Both need a full run directory. The tests replay the parquet read and the chain functions they call (apply_price_basis, security_day_prices, write_prices, value_days, use_labels, value_table) on stubs."
+    },
+    {
+      "item": "Whether the Yahoo cache holds any ticker of a V2-held security today",
+      "reason": "Not measured: no real cache read by the order."
+    },
+    {
+      "item": "read_sechist label gap",
+      "reason": "Origin of an operator-named series not established; outside the reader list. Filed as ADVI_COTBKF-D1-W181-S1, not resolved here."
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W181-S1: read_sechist labels its rows 'sechist', which the Yahoo use_class guard does not recognise; origin of an operator-named series not established."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~181/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_as_traded_use_class.py -q -k as_traded",
+      "result": "5 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve.py data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve_use_class.py data/assets/scripts/silver/tests/test_commonwealth_daily_valuation.py -q",
+      "result": "40 passed, rc 0"
+    }
+  ]
+}

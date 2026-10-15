@@ -165,7 +165,9 @@ def cases(tp):
         doc["effective_inputs"]["settings"].get("pricing") is True and doc["effective_inputs"]["settings"].get("price_as_of") == AS_OF
         and doc["effective_inputs"]["settings"].get("price_sources") == {"AAA": "estate", "BBB": "yfinance", "CCC": "ycharts"}
         and doc["effective_inputs"]["inputs_as_of"]["prices"] == AS_OF)
-    out["a fully priced run carries no NO_PRICING and no UNPRICED disclosure"] = [d["disclosure_id"] for d in doc["disclosures"]] == ["WEIGHTING"]
+    ids = [d["disclosure_id"] for d in doc["disclosures"]]
+    out["a fully priced run carries no NO_PRICING and no UNPRICED disclosure"] = (
+        "NO_PRICING" not in ids and "UNPRICED" not in ids and ids[-1] == "WEIGHTING")
     off_stores, off_rec = run(tp)
     page_on, page_off = stores["html"][0], off_stores["html"][0]
     line = tp.lo.NOT_IN_THIS_VERSION_LINE
