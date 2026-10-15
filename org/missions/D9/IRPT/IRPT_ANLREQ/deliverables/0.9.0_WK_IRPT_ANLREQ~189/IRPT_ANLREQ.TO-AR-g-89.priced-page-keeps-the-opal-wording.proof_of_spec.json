@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-89",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-89.priced-page-keeps-the-opal-wording.md",
+    "group": "OTHER",
+    "vintage_commit": "484dac2efe"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R16_G.md",
+    "vintage_commit": "484dac2efe",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-89.priced-page-keeps-the-opal-wording.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~189",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "8491efa0ca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "produce and produce_package pass False as the layout build's pricing argument (the Opal page wording, R8); compute_all keeps the real pricing flag so priced figures print; offline, no deploy",
+      "artifact_covered_by": [
+        "AR89-g-AC1",
+        "AR89-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_page_wording.py",
+      "kind": "test",
+      "commit_or_etag": "8491efa0ca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline tests: test_priced_page_names_no_vendor_and_no_time_budget, test_priced_package_page_names_no_vendor, test_priced_page_prints_the_figure_and_the_opal_credit, test_unavailable_lines_use_the_opal_wording; 4 passed on their own",
+      "artifact_covered_by": [
+        "AR89-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR89-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g89_checks.py g89",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g89_checks.py g89",
+      "output_evidence": "AR-G89-OK direct=6 named=4 passed=4 (direct cases 6, wrong none; named tests missing: none; new tests: 4 passed in 0.68s; rc=0; run under timeout 300 from the worktree root after commit 8491efa0ca)",
+      "denominator": "6 direct cases, 0 wrong; 4 of 4 named tests found and passed",
+      "expect": "^AR-G89-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR89-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g86_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g86_checks.py regress",
+      "output_evidence": "AR-G86-REGRESS-OK passed=163 (test_opal_producer.py 20; test_opal_packager.py 25; test_layout_overview.py 50; test_portfolio_series.py 10; test_price_source.py 19; test_swap_replacement.py 20; test_layout_commentary.py 9; test_held_data.py 10; rc=0; run under timeout 560 from the worktree root)",
+      "denominator": "163 passed across 8 test files, each run on its own",
+      "expect": "^AR-G86-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The layout's pricing flag restored to the real value (pricing=True passed to build in produce and produce_package), run through a scratch wrapper outside the product tree.",
+      "expected": "all four named tests fail: the page names YCharts, the Opal credit is absent, and the Sharpe line names YCharts",
+      "observed": "4 failed, 0 passed; the first run had the credit test at 'assert 0 == 3' (0 credits for 3 pages) and the unavailable-lines test named YCharts",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes with a fixed clock and fixed dates; no randomness in the page path",
+      "observed": "N/A -- the file ran on its own twice (4 passed each) and inside the AC1 check (4 passed)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the client-data check on commit 8491efa0ca",
+      "reason": "the hashed account-id list is ABSENT on this device, so the gate's client-data check did not run on this commit (WARN printed by safe-commit); the lines the commit adds hold no account-id-shaped string (122 added lines: 0 non-ASCII, 0 six-digit runs); the standing ARMED row IRPT_ANLREQ-D2-W187-S1 and its disposition IRPT_ANLREQ-D2-S125 cover the condition, and no new row was filed for it"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_page_wording.py",
+      "result": "4 passed"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <opal_producer.py> and <test_opal_producer_page_wording.py>",
+      "result": "All checks passed; pre-commit gate clean for 1 of 1 file(s) each"
+    }
+  ]
+}
