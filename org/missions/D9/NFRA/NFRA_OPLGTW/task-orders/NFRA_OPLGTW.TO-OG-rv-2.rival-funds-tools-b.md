@@ -1,12 +1,12 @@
-# NFRA_OPLGTW task order -- `OG-rf-2` -- G5r rival funds: trades, flows, peer comparison, research notes, page status
+# NFRA_OPLGTW task order -- `OG-rv-2` -- G5r rival funds: trades, flows, peer comparison, research notes, page status
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
 
 <decomp_ref>
 <decomp_doc>org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md</decomp_doc>
-<owned_cells>OG-rf-2</owned_cells>
+<owned_cells>OG-rv-2</owned_cells>
 </decomp_ref>
-<to_id>NFRA_OPLGTW.TO-OG-rf-2</to_id>
+<to_id>NFRA_OPLGTW.TO-OG-rv-2</to_id>
 <issued_to>0.9.0_WK_NFRA_OPLGTW~101</issued_to>
 <issued_by>2.0.0_SA_COO~O</issued_by>
 <placeholders>NONE</placeholders>
@@ -17,7 +17,7 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- the act is 1.0.0_SA_CTO~Z msg 34190 /
 EGRESS CLASS, declared: NONE beyond Opal's own AWS.
 </preflight>
 
-## 1. THE CELL -- `OG-rf-2` (decomposition addendum R3-T.70, workstream RIVAL-FUNDS, FWD-22 G5r)
+## 1. THE CELL -- `OG-rv-2` (decomposition addendum R3-T.70, workstream RIVAL-FUNDS, FWD-22 G5r)
 
 trades, flows, peer comparison, research notes, page status. Module `infra/aws/ec2/opal-gateway/app/etfs_rivals_flow.py`.
 
@@ -63,12 +63,12 @@ Catalog entities for this cell (all in the bucket `opal-data-etfs`, tables under
 - **`etfs_get_rival_page_status(page_day: str = None)`**: what the PUBLISHED rival page says. Lists the platinum page prefix of the day (`page_day`, else the newest date partition present), picks the newest revision folder's `manifest.json` (revisions are folders named by a UTC stamp), reads it (`read_json`; gzip-sniff as noted above) and returns `status`, `page_date`, `funds_total`, `funds_updated`, the page `checks`, and per fund `status`, `checks`, `latest_report`, `excluded`, `reason`. The manifest's per-fund `latest_report` is returned LABELLED `as_published` beside the gold value `as_in_canonical_shape` (read from `canonical_shape` newest part, the same fund) and the two are never merged into one field (Z-S124). `source_keys` names the manifest key.
 
 
-### Tests, `infra/aws/ec2/opal-gateway/tests/test_og_rf2.py` (a recording fake client with in-memory Parquet and a synthetic catalog; Opal stand-in principal)
+### Tests, `infra/aws/ec2/opal-gateway/tests/test_og_rv2.py` (a recording fake client with in-memory Parquet and a synthetic catalog; Opal stand-in principal)
 
-- `test_ogrf2_ac01`: `etfs_get_fund_trades` reads the NEWEST part per date, honours the window and the `action` filter, passes `claim` through, takes exactly one of fund and peer group (both or neither refused with zero reads), and a peer group expands to its funds from `peer_group_map`.
-- `test_ogrf2_ac02`: `etfs_get_fund_flows` returns one fund's window rows with `claim` and `trade_count`; `etfs_compare_peers` returns the `buying` and `contribution` sections filtered by `period` and `axis`, limited to the home fund and its group, and answers an empty section with `absent_reason` plus `available_periods` and `available_axes` for a value the part does not hold.
-- `test_ogrf2_ac03`: `etfs_get_research_notes` labels every row `ai_generated: true` with `model_version` and `grounding`; `etfs_get_rival_page_status` picks the NEWEST revision's manifest and returns `as_published` beside `as_in_canonical_shape` for each fund (a fake where they differ shows both, unmerged).
-- `test_ogrf2_ac04`: a non-Opal and an absent principal are refused all five tools with ZERO reads; an over-cap object is refused `harvest_over_cap`; a catalog row absent or retired gives `absent_reason` with zero reads.
+- `test_ogrv2_ac01`: `etfs_get_fund_trades` reads the NEWEST part per date, honours the window and the `action` filter, passes `claim` through, takes exactly one of fund and peer group (both or neither refused with zero reads), and a peer group expands to its funds from `peer_group_map`.
+- `test_ogrv2_ac02`: `etfs_get_fund_flows` returns one fund's window rows with `claim` and `trade_count`; `etfs_compare_peers` returns the `buying` and `contribution` sections filtered by `period` and `axis`, limited to the home fund and its group, and answers an empty section with `absent_reason` plus `available_periods` and `available_axes` for a value the part does not hold.
+- `test_ogrv2_ac03`: `etfs_get_research_notes` labels every row `ai_generated: true` with `model_version` and `grounding`; `etfs_get_rival_page_status` picks the NEWEST revision's manifest and returns `as_published` beside `as_in_canonical_shape` for each fund (a fake where they differ shows both, unmerged).
+- `test_ogrv2_ac04`: a non-Opal and an absent principal are refused all five tools with ZERO reads; an over-cap object is refused `harvest_over_cap`; a catalog row absent or retired gives `absent_reason` with zero reads.
 
 
 The live probe is the issuer's AC2. Run the same calls first, with `INTERNAL_READER_ROLE_ARN` unset (today the box credentials read the bucket; the gateway's internal reader role gets the read grant with OG-ap-20).
@@ -76,7 +76,7 @@ The live probe is the issuer's AC2. Run the same calls first, with `INTERNAL_REA
 ## 2. BOUNDS
 
 - Code, tests and your probe only. No release, no deploy, no IAM or Terraform change, no write to any bucket, no grant written.
-- `app/tools.py`, `app/data_entitlement.py`, `app/destructive_ops.py`, `app/etfs_funds.py`, `app/etfs_ownership.py` and the pinned-count tests are NOT yours: the issuer registers every tool and re-pins the counts at the merge, in one commit (`OG-rf-3`). Do not edit them; name the registrations you expect in your report.
+- `app/tools.py`, `app/data_entitlement.py`, `app/destructive_ops.py`, `app/etfs_funds.py`, `app/etfs_ownership.py` and the pinned-count tests are NOT yours: the issuer registers every tool and re-pins the counts at the merge, in one commit (`OG-rv-3`). Do not edit them; name the registrations you expect in your report.
 - Never: push, `git stash`, rebase, `checkout --` or `clean`; print a person's name or a full email address, or an object's text body into a report, a row or a log; write the catalog file; override a gate.
 - REFUSE a criterion you cannot meet as written. File a BLOCKING row and keep working.
 
@@ -89,7 +89,7 @@ infra/aws/ec2/opal-gateway/app/typed_scope.py
 infra/aws/ec2/opal-gateway/app/harvest_typed.py
 infra/aws/ec2/opal-gateway/app/harvest_read.py
 infra/aws/ec2/opal-gateway/app/internal_role.py
-infra/aws/ec2/opal-gateway/tests/test_og_rf2.py
+infra/aws/ec2/opal-gateway/tests/test_og_rv2.py
 org/tier1_exec/4.0.0_SA_CRO~Z/deliverables/GATEWAY_DATA_CONTRACTS_20261014/G5_etfs.md
 org/tier1_exec/4.0.0_SA_CRO~Z/deliverables/GATEWAY_DATA_CONTRACTS_20261014/G5r_rivalfunds_spec.md
 lib/trading_calendar.py
@@ -102,8 +102,8 @@ disarm_owner `2.0.0_SA_COO~O`; `surfaced_at` = `date -u +%FT%TZ`.
 ## 4. PROOF OF SPEC (literal; run from your worktree root after your commit)
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="OG-rf-2"><invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rf2.AC1.sh; echo "exit=$?"</invocation><expect>(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0</expect></criterion>
-  <criterion id="AC2" cell_refs="OG-rf-2"><invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rf2.AC2.sh; echo "exit=$?"</invocation><expect>(?s)rival tools B: INEQ trades window rows (\d+) vs independent \1; flows answered True; compare_peers both sections True; research notes AI-labelled True; page status newest revision True; non-Opal refused True.*RESULT: PASS.*exit=0</expect></criterion>
+  <criterion id="AC1" cell_refs="OG-rv-2"><invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rv2.AC1.sh; echo "exit=$?"</invocation><expect>(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0</expect></criterion>
+  <criterion id="AC2" cell_refs="OG-rv-2"><invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rv2.AC2.sh; echo "exit=$?"</invocation><expect>(?s)rival tools B: INEQ trades window rows (\d+) vs independent \1; flows answered True; compare_peers both sections True; research notes AI-labelled True; page status newest revision True; non-Opal refused True.*RESULT: PASS.*exit=0</expect></criterion>
 </proof_of_spec>
 
 - `AC1`: the tools are built, read the newest part per date, take a fund's latest report from canonical_shape, name the weight unit and refuse non-Opal before any read.
@@ -111,7 +111,7 @@ disarm_owner `2.0.0_SA_COO~O`; `surfaced_at` = `date -u +%FT%TZ`.
 
 ## 5. WHEN YOU ARE DONE
 
-Write the proof instance at `W/NFRA_OPLGTW.TO-OG-rf-2.rival-funds-tools-b.proof_of_spec.json`. Validate it after your last commit with
+Write the proof instance at `W/NFRA_OPLGTW.TO-OG-rv-2.rival-funds-tools-b.proof_of_spec.json`. Validate it after your last commit with
 `python .tools/proof-of-spec-check.py <instance> AC1,AC2 --governing-order <this order>`, flip the ONE `<status>` tag to
 `complete` only if both PASS, and report once. Your report names the tool registrations and the pinned-count moves you expect
 the issuer to make at the merge.
@@ -121,9 +121,9 @@ the issuer to make at the merge.
 **ISSUER NOTES:**
 - Round 37, workstream RIVAL-FUNDS (decomposition addendum R3-T.70; PRD v3.7+ ADMITTED, v3.10 current). CRO G5r spec @e1b9937129; CTO msgs 34190, 34198. The read grant for the rival prefixes rides OG-ap-20 (its ONE G5 ask); these tools release with OG-ap-22 after OG-ap-21.
 - Naming: the CRO's `etfs_get_fund_holdings` for rivals collides with OG-et-2's tool of that name (the four Opal funds); ruled here: the rival holdings tool is `etfs_get_rival_fund_holdings`. Every other tool keeps the CRO's name.
-- The issuer registers the tools and re-pins counts at the merge (CUT BY WRITE SET: hookups belong to no cell; `OG-rf-3`).
+- The issuer registers the tools and re-pins counts at the merge (CUT BY WRITE SET: hookups belong to no cell; `OG-rv-3`).
 - Pre-cut: AC1 and AC2 base FAIL as expected (module, tests and probe absent).
-- `OG-rf-1` is the sibling cell (disjoint write set); the modules may each carry their own six-line newest-part helper.
+- `OG-rv-1` is the sibling cell (disjoint write set); the modules may each carry their own six-line newest-part helper.
 
 <status>pending</status>
 <round>37</round>

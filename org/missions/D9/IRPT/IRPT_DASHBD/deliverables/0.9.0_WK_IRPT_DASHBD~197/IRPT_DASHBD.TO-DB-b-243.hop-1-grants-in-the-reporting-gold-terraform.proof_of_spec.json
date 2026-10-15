@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-243",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "58ab67f3ac",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-243.hop-1-grants-in-the-reporting-gold-terraform.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~197",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~197/RD_GRANTS_FACTS_R121.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "2299b8b651",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three new statements (ReadTheServedModelSeriesObjectOnly, ListExactlyTheHouseholdCrosswalkPrefix, ReadTheHouseholdCrosswalkOnly); the single PutObject statement keeps its sid and its list; diff +33/-1 against the issuing commit. Not planned, applied or deployed.",
+      "artifact_covered_by": [
+        "DB121-2-AC1",
+        "DB121-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "2299b8b651",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Filled table and prefix; served bucket and key read from model_series_windows.py by file() and regex(); crosswalk prefix; sixth element in the write list; diff +25/-0 against the issuing commit. Not planned, applied or deployed.",
+      "artifact_covered_by": [
+        "DB121-2-AC1",
+        "DB121-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~197/RD_GRANTS_FACTS_R121.json",
+      "kind": "config_data",
+      "commit_or_etag": "2299b8b651",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Facts record: two files hashed equal to their bytes at 2299b8b651; three grants; expected plan 0 add, 2 change, 0 destroy, inferred; validated.ran false; flags false.",
+      "artifact_covered_by": [
+        "DB121-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB121-2-AC1",
+      "criterion_verbatim": "DB121-2-AC1 -- iam.tf gains at least one new statement; every statement has an explicit actions list with no `*`; the actions of the new statements are only `s3:GetObject` and `s3:ListBucket`; exactly one `s3:PutObject` statement remains and it uses `irpt_rg_gold_write_arns`; `locals.tf` defines `irpt_rg_gold_table_filled` equal to the module's `TABLE` and the write list carries the filled prefix; the served series is read from `model_series_windows.py` and neither the served bucket name nor its key is typed; the crosswalk grant names `household_crosswalk`; no all-resources grant. Base: FAIL (nothing changed).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_grants.py\" . DB121-2-AC1",
+      "output_evidence": "OK: iam.tf gains 3 statements (ListExactlyTheHouseholdCrosswalkPrefix, ReadTheHouseholdCrosswalkOnly, ReadTheServedModelSeriesObjectOnly); every action is explicit, no wildcard, one PutObject statement; the served series and crosswalk are derived\nDB121-2-AC1 PASS",
+      "denominator": "3 new statements of 10 sid-carrying statements in iam.tf; 1 PutObject statement of 1 required; 0 of 10 statements carry a wildcard action",
+      "status": "PASS",
+      "expect": "DB121-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB121-2-AC2",
+      "criterion_verbatim": "DB121-2-AC2 -- the change is ADDITIVE against the commit that issued this order: `iam.tf` gains at least 12 lines and loses at most 4, `locals.tf` gains at least 6 and loses at most 4, and no other file under `infra/aws/terraform/` changes. Base: FAIL (no change).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_grants.py\" . DB121-2-AC2",
+      "output_evidence": "OK: additive: iam.tf +33/-1, locals.tf +25/-0, no other Terraform file\nDB121-2-AC2 PASS",
+      "denominator": "iam.tf +33 gained (minimum 12) and 1 lost (maximum 4); locals.tf +25 gained (minimum 6) and 0 lost (maximum 4); 2 changed Terraform files of 2 allowed, 0 others",
+      "status": "PASS",
+      "expect": "DB121-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB121-2-AC3",
+      "criterion_verbatim": "DB121-2-AC3 -- `RD_GRANTS_FACTS_R121.json` has exactly the form of step 4; its two files hash as recorded; each grant's actions and resolved ARNs EQUAL the checker's recount from `lib/opal_naming.py address()` (the filled prefix and the crosswalk prefix, bucket included) and the adapter's `SERVED_BUCKET` and `SERVED_KEY`; the crosswalk's list prefix pattern equals the recount; the expected plan is 0 / 2 / 0 on the two named resources; flags false; no long digit run outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_grants.py\" . DB121-2-AC3",
+      "output_evidence": "OK: grants facts: three grants, ARNs equal the recount from the builder and the module constants; plan 0/2/0 on the two resources\nDB121-2-AC3 PASS",
+      "denominator": "3 grants of 3 equal to the recount; 2 files of 2 hashed as recorded; 2 plan resources of 2; plan 0 add / 2 change / 0 destroy",
+      "status": "PASS",
+      "expect": "DB121-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The issuer checker carries its own seeded mutants: seven HCL arms and seven record arms, each asserted refused by --selftest.",
+      "expected": "selftest PASS: the seven HCL arms and seven record arms are refused as designed",
+      "observed": "selftest: 7 HCL arms and 7 record arms behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "DB121-2-AC1 run twice on the same tree; the two outputs compared byte for byte",
+      "observed": "run 1 rc 0, run 2 rc 0, outputs identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform fmt, terraform validate, terraform plan and terraform apply",
+      "reason": "No terraform binary on this box and no Terraform command by order; the applier runs them under the signed never-widen pair."
+    },
+    {
+      "item": "the optional rename of the single PutObject statement sid to WriteTheSixGoldPrefixesOnly",
+      "reason": "The issuer checker classes a renamed sid as a new statement that may only read or list, so AC1 failed on the rename; the original sid is kept. Row IRPT_DASHBD-D2-W197-S1."
+    },
+    {
+      "item": "aws_iam_role.irpt_reporting_gold description line",
+      "reason": "Left untouched: a change there would be an in-place update of the role, outside the expected plan of 0 add, 2 change, 0 destroy."
+    },
+    {
+      "item": "the reporting-gold Lambda source and its bundle",
+      "reason": "Outside the order's paths; the function's code hash follows the bundle the applier builds."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W197-S1: the order's optional sid rename fails the issuer checker's AC1 (a renamed sid reads as a new statement); the sid kept its original name (OBSERVATION, INERT)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p121_grants.py (issuer checker, criteria DB121-2-AC1, AC2, AC3 and --selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r121/p121_grants.py\" . <criterion id>; and --selftest .",
+      "result": "DB121-2-AC1 PASS; DB121-2-AC2 PASS; DB121-2-AC3 PASS; selftest PASS"
+    }
+  ]
+}
