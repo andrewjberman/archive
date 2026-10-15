@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-7",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "cca2e77e03",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-7.orion-account-record-read-missing-vs-present-account-flags.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~307",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~307/ACCOUNT_RECORD_READ_R119.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~307/ACCOUNT_RECORD_READ_R119.json",
+      "kind": "config_data",
+      "commit_or_etag": "e666798a70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-7 record: script hash, household digest (equal to round 117 and round 118), the three role digests, one GET listed (NewPortfolio with isActive true, HTTP 200, 3040 rows, id key id), the file path and sha256 of the private 2xx body, the presence flags of the three roles in that body, the two comparisons with their field names, counts and boolean values (none), the missing-account finding (found in GET 1), the credential verdict ACCEPTED, reads and basis words. Counts, digests, field names and verdict words only. No AWS write, no push, no deploy.",
+      "artifact_covered_by": [
+        "DBI119-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~307/account_record_read.py",
+      "kind": "script",
+      "commit_or_etag": "e666798a70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one probe script, hashed in the record. It makes at most three paced GETs of the two Portfolio account endpoints named by the order, with no retry and a stop on any non-2xx; it reads the token through the estate's Secrets Manager loader only; it holds no AWS write call, names no other firm, and writes no token. Run once from the worktree; the self-test was run offline before the run.",
+      "artifact_covered_by": [
+        "DBI119-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "8cb4a94c8c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended as bytes, IRPT_DASHBD-D2-W307-S1 (OBSERVATION, INERT): the GET's header names were re-cased by the request builder. Form only; no client value.",
+      "artifact_covered_by": [
+        "DBI119-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI119-1-AC1",
+      "criterion_verbatim": "`DBI119-1-AC1` -- the record is complete and carries no identifier; the script is a tracked file hashed as recorded with no AWS write call and no other firm's name; the household and the three role digests equal the checker's recompute from round 118's record and the private Q3 body; 1 to 3 gets are listed in the order above, each a 2xx saved as a private file hashed as recorded (a failed get only as the last), `gets_made` and `vendor_calls` equal to the count, and a later get only while the missing account was still not found; each get's presence flags equal the checker's recount from the saved body with the recorded id key; each comparison (path counts, relevant and exclusion-type path lists, boolean values, verdict) equals the checker's recompute from the records found in the saved bodies; `missing_account_found` and the credential verdict equal the recount; no write to AWS, no push, no deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r119/p119_acct.py\" . DBI119-1-AC1",
+      "output_evidence": "DBI119-1-AC1 PASS (rc=0; identical output on two runs, run from the worktree root at e666798a70 with the surprise row at 8cb4a94c8c)",
+      "denominator": "1 of 1 criterion PASS. GETs listed: 1 of 1 planned at most three; gets_made and reads.vendor_calls both 1; the one GET ok and its status 200 agree (1 of 1). Presence recount: GET 1 holds all three roles under the recorded id key id (3 of 3 flags equal the recount); no later GET was due because the missing account was found in GET 1. Comparisons recount-equal: missing_vs_present (7 differing paths, STATUS_OR_DATE_DIFFERS, no exclusion-type path, no boolean) and series_less_vs_present (18 differing paths, STATUS_OR_DATE_DIFFERS, no exclusion-type path, no boolean): 2 of 2. Credential ACCEPTED and missing_account_found true equal the recount (2 of 2). Script sha256, household digest and the three role digests equal the checker's recompute (the checker's script, household and role checks all pass; no separate count).",
+      "status": "PASS",
+      "expect": "DBI119-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the record under the worker scratch folder (not committed), with missing_account_found changed from true to false and nothing else changed; the unmodified checker run on that copy.",
+      "expected": "DBI119-1-AC1 FAIL on the missing_account_found recount",
+      "observed": "DBI119-1-AC1 FAIL: missing_account_found differs from the recount (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice from the worktree root; the two printed outputs compared.",
+      "observed": "identical output on both runs: DBI119-1-AC1 PASS; rc=0 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "GET 2 (isActive false) and GET 3 (the base roster)",
+      "reason": "Not made. The order makes each conditional on the missing account not yet being found; GET 1 found it, so the cap of three was not reached and no later GET was due."
+    },
+    {
+      "item": "A retry, a second household, a second window, or any other path or host",
+      "reason": "None made. One host, one path, one GET, no retry."
+    },
+    {
+      "item": "Any AWS write, deploy, push, or change to served values",
+      "reason": "None made. The reads were the Secrets Manager token (one load), the private dimension, the round-118 record and the private flag-false Q3 body; no S3 read was made, and the record's s3_reads is 0."
+    },
+    {
+      "item": "The client-data gate on this box",
+      "reason": "The commit gate printed WARN that the hashed account-id list is absent on this box, so the commits were not checked against it. The record, the script and this instance carry digests, counts, field names and verdict words only; no account, household or client id is written in any of them."
+    },
+    {
+      "item": "A verdict on the flag question beyond the recount",
+      "reason": "No judgment was drawn. The record names the differing field names and their verdict words under the order's rule; whether a field explains the omission is the issuer's reading. Disposition of the ARMED row IRPT_DASHBD-D2-S60 is not made here: that row is owned by 2.0.0_SA_COO~I2."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W307-S1: the one GET's header names were re-cased by the standard request builder (AppPath as Apppath, BrowserSessionId as Browsersessionid, User-Agent as User-agent), not as the estate pull sends them; the GET returned HTTP 200. Form only; not repaired, because the one GET is made and the order allows no second GET."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "account_record_read.py, the probe, run once from the worktree (one GET, HTTP 200)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~307/account_record_read.py .",
+      "result": "roles resolved (3 of 3) in a household of 5 accounts; token loaded through the estate loader; GET 1 newportfolio_active HTTP 200 with 3040 rows, id key id, presence true for all three roles; missing_account_found true; no further GET; credential ACCEPTED; the two comparisons printed as STATUS_OR_DATE_DIFFERS with no exclusion-type path"
+    },
+    {
+      "tool": "account_record_read.py --selftest (offline, no vendor call, no file write)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~307/account_record_read.py --selftest",
+      "result": "12 of 12 arms ok, rc=0"
+    },
+    {
+      "tool": "p119_acct.py issuer checker, run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r119/p119_acct.py\" . DBI119-1-AC1",
+      "result": "rc=0; DBI119-1-AC1 PASS on two runs, identical output"
+    },
+    {
+      "tool": "scratch mutant of the record through the same checker (scratch folder, not committed)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r119/p119_acct.py\" .scratch/mutant DBI119-1-AC1",
+      "result": "rc=1; DBI119-1-AC1 FAIL on the missing_account_found recount"
+    }
+  ]
+}
