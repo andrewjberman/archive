@@ -26,6 +26,10 @@
 6. **Surface E cap.** Unchanged in code (it follows the measured ceiling): 585, then 1,171, 2,343, 2,929 as the days complete. The CTO's ruling states this is as defined.
 7. **Quotes.** The frozen quotes stay as filed (the pessimistic dates); the restated finish dates are re-quoted with the observed rooms after the first step-up day, labelled `held` until measured.
 
+## Measured since the first draft: when the drawer fires
+
+The site Z ledger entry `mdpf-demque-zq-t34-close` (author `0.7.0_AE_CloudOps~ZQ`, device sitez measured) records the drawer task `mdpf-demque-drawer-daily` at **10:00 ET, `MSFT_TaskDailyTrigger` `DaysInterval` 1**. That is after the 7:00 AM ET production job and the about 9:00 AM research pull, so a trading-day room read at 10:00 sees both legs' spend if they have finished. Whether they have finished by 10:00 is NOT measured (a leg's run time is in site Z's logs, not here); it is the first read the CloudOps half takes.
+
 ## Criteria the cell would carry (three, mechanical)
 
 - AC1: named tests on stub ledgers: the steps do not compound; no step-up without a completed day; a vendor warning holds the step; an absent production line holds it.
