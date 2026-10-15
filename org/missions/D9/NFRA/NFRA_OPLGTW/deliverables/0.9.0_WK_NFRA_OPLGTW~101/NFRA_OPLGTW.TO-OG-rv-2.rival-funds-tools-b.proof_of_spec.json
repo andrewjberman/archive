@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-rv-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5061929eb6",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rv-2.rival-funds-tools-b.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c3b76c142b"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/etfs_rivals_flow.py",
+      "kind": "script",
+      "commit_or_etag": "53cf754da6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only on branch wk-NFRA_OPLGTW-101 (LOCAL). No release, no deploy, no IAM or Terraform change; the release is the later applier order NFRA_OPLGTW.TO-OG-ap-22.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_rv2.py",
+      "kind": "test",
+      "commit_or_etag": "53cf754da6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline tests on a synthetic catalog and a recording fake S3; no AWS call. Run by rv2.AC1.sh (4 of 4 named tests).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "142858b783",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six surprise rows NFRA_OPLGTW-Z-W101-S1..S6 appended (OBSERVATION, INERT); surprise-row-gate OK.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the tools are built, read the newest part per date, take a fund's latest report from canonical_shape, name the weight unit and refuse non-Opal before any read.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rv2.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0\n(second run, post-fix, identical)\npytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests (test_ogrv2_ac01..ac04), 0 failed or error lines",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the real bucket the tools answer with the full envelope, a count equals an independent read, and a non-Opal principal is refused.",
+      "method": "live_read",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rv2.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)rival tools B: INEQ trades window rows (\\d+) vs independent \\1; flows answered True; compare_peers both sections True; research notes AI-labelled True; page status newest revision True; non-Opal refused True.*RESULT: PASS.*exit=0",
+      "output_evidence": "rival tools B: INEQ trades window rows 0 vs independent 0; flows answered True; compare_peers both sections True; research notes AI-labelled True; page status newest revision True; non-Opal refused True\nRESULT: PASS\nexit=0\n(second run, identical)\nrival tools B: INEQ trades window rows 0 vs independent 0; flows answered True; compare_peers both sections True; research notes AI-labelled True; page status newest revision True; non-Opal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "6 sub-checks of the probe, 6 of 6 True (trades count, flows, compare_peers both sections, research notes, page status, non-Opal); the trades count is 0 of 0 independent rows (zero witness, see surprise S6)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The two criteria were run twice each after the final code commit (AC1 by rv2.AC1.sh; AC2 by rv2.AC2.sh against the live bucket). The unit suite was run before and after the peer-section budget fix.",
+      "observed": "AC1 PASS on both runs (4 of 4). AC2 PASS on both post-fix runs with identical output. A pre-fix AC2 run FAILED on compare_peers (nested sections nulled by the 50 KB projection), which the fix resolves; that failure is recorded as surprise S4.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The registrations of the five tools in app/tools.py, the grants in app/data_entitlement.py, the destructive_ops list and the pinned-count tests",
+      "reason": "Out of this cell's write set. The issuer registers the tools and re-pins the counts at the merge in one commit (OG-rv-3), per the order's section 2."
+    },
+    {
+      "item": "The release, the IAM read grant for the rival prefixes and any deploy",
+      "reason": "Out of scope by the order: the grant rides OG-ap-20 and the release is NFRA_OPLGTW.TO-OG-ap-22, not yet cut. The live probe ran with the box's own credentials, read only."
+    },
+    {
+      "item": "A non-zero live trade witness for INEQ",
+      "reason": "INEQ holds no inferred trade in the newest trade_schedule partition, so the AC2 count is 0 against 0; the non-empty trade path is witnessed by the unit fixtures only (surprise S6)."
+    },
+    {
+      "item": "Re-running the probe with INTERNAL_READER_ROLE_ARN set",
+      "reason": "The order's live probe runs with INTERNAL_READER_ROLE_ARN unset, as the order directs (the box credentials read the bucket). The internal reader role path is not exercised by this cell."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W101-S1: the platinum rivalfunds_page catalog row has a prefix and no key_template; the page manifest is found by listing that prefix and parsing its date= and revisions layout.",
+    "NFRA_OPLGTW-Z-W101-S2: gold trade_schedule has no claim column; the answer returns claim None per row and reports claim_in_rows false.",
+    "NFRA_OPLGTW-Z-W101-S3: the trade action vocabulary is entry, exit, add, trim and below_tolerance, not BUY and SELL; the filter is passed unmapped.",
+    "NFRA_OPLGTW-Z-W101-S4: the shared projection pops top-level lists only, so a nested peer section was nulled whole; each section is budgeted and input_manifest is returned as a byte count.",
+    "NFRA_OPLGTW-Z-W101-S5: the newest canonical_shape partition holds 11 of 13 funds; each fund's latest report is read from the newest partition that holds it, bounded at 30 partitions.",
+    "NFRA_OPLGTW-Z-W101-S6: the AC2 trade witness is 0 against 0 on the live newest partition, so the equality exercises no trade row against the real bucket."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (gateway unit suite, offline)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_rv2.py -q -p no:cacheprovider",
+      "result": "4 passed"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "bash .tools/safe-commit.sh ... -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "6 new row(s) of 671 total checked; OK: 1 file(s), all new rows carry their step-7/step-10 fields"
+    }
+  ]
+}
