@@ -1,0 +1,92 @@
+{
+  "as_of": "2026-10-15",
+  "route": {
+    "file": "infra/aws/lambda/investor-reporting/reporting/entry.py",
+    "line": 92,
+    "path_template": "/api/scoped/investor-reporting/reporting/client/{client_id}/summary",
+    "serves": [
+      "platinum/reporting/client=<id>/summary.json, the per-client summary (SUMMARY_OBJECT at line 93), returned only when the viewer's scope covers EVERY account the summary names (lines 332-345)",
+      "the companion account route GET /api/scoped/investor-reporting/reporting/{account_id}/{which} (ROUTE_KEY at line 90) serves series.json.gz and manifest.json (OBJECTS at line 88) for one covered account",
+      "declared in infra/aws/terraform/investor-reporting/reporting-read/api.tf (route resources at lines 24-37) and in the lambda ROUTES map (entry.py line 373); the live deployment is not read (no AWS call)"
+    ],
+    "claim": "measured"
+  },
+  "publisher": {
+    "file": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+    "line": 192,
+    "words": "The platinum objects are written by this Lambda. Line 192 computes each covered account's address with lib/opal_naming.py address() (TIER_PLATINUM, TABLE_PLATINUM, account=<id>), and lines 190-194 put the series.json.gz and manifest.json objects there. The client summary.json is written at line 371 through publisher.summary_address(), which is also the naming builder. Cadence: scheduled. infra/aws/terraform/investor-reporting/reporting-publish/schedule.tf sets two EventBridge cron rules at lines 85 and 122, cron(15 8 ? * MON-FRI *) and cron(45 8 ? * MON-FRI *) in America/New_York, state ENABLED in the file; the live state is not read. A fire with the event key (handler.py lines 24-26, 29-40) is the by-hand path.",
+    "claim": "measured"
+  },
+  "report_object": {
+    "exists_in_platinum": false,
+    "producer_exists": false,
+    "words": "No code publishes a filled report object to platinum. The platinum object kinds written are series.json.gz and manifest.json (publisher.py lines 36-37) and summary.json (publisher.py line 251). The filled-report shape, document.filled_report, is named in org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json, whose writer line 53 names the sample builder of the DB-b-175 cell and no other writer. The sample builders write a private folder only: deliverables/0.9.0_WK_IRPT_DASHBD~141/build_sample.py line 7 and deliverables/0.9.0_WK_IRPT_DASHBD~175/build_sample_inflection_r110.py line 25. comp-find for the token filled_report over infra, data, portal and lib returned 0 hits; denominator 0 of 12561 scanned files, with 1 unreadable and 1815 binary files not searched.",
+    "claim": "absent"
+  },
+  "hops": [
+    {
+      "hop": 1,
+      "what": "Build one household's filled report from gold and silver as document.filled_report, the contract's shape. Only the private-folder sample builders do it today (deliverables ~141 build_sample.py and ~175 build_sample_inflection_r110.py). No scheduled production builder exists.",
+      "owner": "2.0.0_SA_COO~D2",
+      "risk": "LOCAL",
+      "exists_today": true
+    },
+    {
+      "hop": 2,
+      "what": "Publish the filled report as a new platinum object, addressed by lib/opal_naming.py address() beside series.json.gz, manifest.json and summary.json, and written by the reporting-publish schedule (handler.py line 192 pattern). Not in the publisher today.",
+      "owner": "2.0.0_SA_COO~P",
+      "risk": "SERVED",
+      "exists_today": false
+    },
+    {
+      "hop": 3,
+      "what": "Serve it through a new route GET /api/scoped/investor-reporting/reporting/client/{client_id}/report on the irpt-49f-reporting-read lambda, under the summary's scope check (every account the document names must be covered; entry.py lines 332-345). Declared nowhere today.",
+      "owner": "2.0.0_SA_COO~P",
+      "risk": "WORLD",
+      "exists_today": false
+    },
+    {
+      "hop": 4,
+      "what": "Export bundle source: a filled-report source kind for the export. export/bundle.py and export/retained_export.py freeze only PATH A retained reports and PATH B performance_source series today, so the submit would have to pin the filled object's version. Not present today.",
+      "owner": "2.0.0_SA_COO~P",
+      "risk": "WORLD",
+      "exists_today": false
+    },
+    {
+      "hop": 5,
+      "what": "Export render host: infra/aws/ec2/investor-reporting-export/run-export-render.sh (line 29) and render_export.cjs print a print route from the frozen bundle. The print route has no filled-report template (portal render/ holds the performance, client-report and analysis documents). The host half names no live issuing seat in the files (its author is worker 0.9.0_WK_IRPT_BCKEND~4); the render host is stopped and starting it needs Andrew's per-use word (the host README).",
+      "owner": "UNOWNED",
+      "risk": "WORLD",
+      "exists_today": false
+    },
+    {
+      "hop": 6,
+      "what": "Portal: the reader dashboard/report/reportRead.ts (the DB-f-501 cell; absent at HEAD) asks the proposed route for one client's filled report; ReportingTab.tsx mounts it in the Performance tab; the export composer export/resolveBundle.ts carries the filled report ref. All LOCAL on the portal branch; the PROD promotion is a separate SERVED act.",
+      "owner": "2.0.0_SA_COO~F2",
+      "risk": "LOCAL",
+      "exists_today": false
+    }
+  ],
+  "export_path": {
+    "file": "infra/aws/ec2/investor-reporting-export/run-export-render.sh",
+    "line": 29,
+    "words": "The export document is built on a server host, not in the browser. Line 29 runs node render_export.cjs, which reads the frozen bundle from S3, opens the portal print route in Chromium and prints the PDF (the host README, line 27). The browser composes the bundle (portal export/resolveBundle.ts, composeExportBundle) and the server freezes it: PATH A carries a retained report by revision ref, PATH B carries a performance_source naming the platinum series (export/bundle.py line 191 reads those pins). Nothing in the export reads a filled report today.",
+    "reads_report_today": false,
+    "claim": "measured"
+  },
+  "proposed_route": {
+    "path_template": "/api/scoped/investor-reporting/reporting/client/{client_id}/report",
+    "words": "A sibling of the summary route in reporting/entry.py: a new ROUTES key beside SUMMARY_ROUTE_KEY (line 92) served by a new operation that reads one platinum object the publisher writes at the naming builder's address for client=<id>, a report kind and not summary.json. It refuses unless the viewer's scope covers EVERY account the document names (accounts and unpublished ids), using the same _summary_named_accounts and _check_covered pair the summary uses (entry.py lines 317-344). The route owner must add: the route in api.tf beside the summary route (lines 34-37; the permission at line 49 already covers /reporting/*), the route key in docs/contracts/investor-reporting/v1/routes.json, the object kind in publisher.py and handler.py, the platinum address from lib/opal_naming.py address() only, and an IAM read on the new key. Shipping it is a deploy (WORLD)."
+  },
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
