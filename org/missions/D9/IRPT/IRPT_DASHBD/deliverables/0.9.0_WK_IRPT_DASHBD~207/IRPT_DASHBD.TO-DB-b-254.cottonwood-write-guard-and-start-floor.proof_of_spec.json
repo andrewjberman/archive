@@ -21,7 +21,9 @@
       "commit_or_etag": "0b8fafd039a6184418935d61d197608d60f2e6c4",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LOCAL build: the no-overwrite guard in write_day; nothing is landed, deployed or pushed and no AWS call was made",
-      "artifact_covered_by": ["DB125-1-AC1"]
+      "artifact_covered_by": [
+        "DB125-1-AC1"
+      ]
     },
     {
       "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_bd_account_return_daily.py",
@@ -36,22 +38,26 @@
       "commit_or_etag": "d45196be74640a154aa9dd4d95b845508083fe7d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LOCAL build: FLOOR_DAY, _above_floor and the owed_days floor; the function is not deployed and the schedule is untouched",
-      "artifact_covered_by": ["DB125-1-AC2"]
+      "artifact_covered_by": [
+        "DB125-1-AC2"
+      ]
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/account-return-daily/tests/test_handler.py",
       "kind": "test",
-      "commit_or_etag": "d45196be74640a154aa9dd4d95b845508083fe7d",
+      "commit_or_etag": "d552c4964e",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL test file with fake clients only; one earlier test is red (row IRPT_DASHBD-D2-W207-S1)"
+      "deploy_evidence": "LOCAL test file with fake clients only; no deploy scope; amended by issuer Amendment 1 (commit 1bec1bfc83), the one superseded example"
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~207/RD_GUARD_FLOOR_FACTS_R125.json",
       "kind": "doc",
-      "commit_or_etag": "0b8fafd039a6184418935d61d197608d60f2e6c4",
+      "commit_or_etag": "d552c4964e",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "the facts record of the build; no deploy scope",
-      "artifact_covered_by": ["DB125-1-AC3"]
+      "artifact_covered_by": [
+        "DB125-1-AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -70,10 +76,9 @@
       "criterion_verbatim": "DB125-1-AC2 -- the checker's STAGED probe (the handler and the source-map entry's members copied to a directory with no repo checkout): `FLOOR_DAY` is 2026-07-10; `owed_days` after 2026-06-22 on 2026-07-15 owes 2026-07-10, 2026-07-13 and 2026-07-14, after 2026-07-10 owes 2026-07-13 and 2026-07-14, with nothing landed owes T-1 only when it is on or after the floor, owes nothing while T-1 is before it, and still caps at `MAX_DAYS_PER_FIRE`; events naming 2026-06-22, 2026-07-09, 2026-06-30 or a `days` list that includes such a day raise before any write (a dry run included); 2026-07-10 and 2026-07-14 write two objects; an existing partition raises with no put; the handler test file holds at least 15 tests and `pytest` on it passes. Base: FAIL (no floor).",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_guard.py\" . DB125-1-AC2",
-      "output_evidence": "FAIL: handler pytest: rc 1, 1 failed, 15 passed\nFAILED infra/aws/lambda/investor-reporting/account-return-daily/tests/test_handler.py::test_owed_days_three_examples - AssertionError: assert 3 == 5\nDB125-1-AC2 FAIL",
-      "denominator": "15 of 16 handler tests passed; 1 failed (test_owed_days_three_examples, an earlier test the floor contradicts); the staged probe clauses passed before the pytest step",
-      "status": "FAIL",
-      "status_reason": "The staged probe clauses pass. The handler pytest has one earlier test, test_owed_days_three_examples, whose assertion expects 5 owed days from 2026-06-01; the floor gives 3. The order forbids editing that assertion, so the handler suite stays one failure red and the order stays open. Filed as BLOCKING row IRPT_DASHBD-D2-W207-S1 for the issuer.",
+      "output_evidence": "OK: staged probe: FLOOR_DAY 2026-07-10; owed_days after 2026-06-22 starts at the floor and skips the gap, owes nothing while T-1 is before it; an event naming a day before the floor (including 2026-06-22) raises before any write; the floor day and later days write; an existing partition raises with no put; 16 handler tests pass\nDB125-1-AC2 PASS",
+      "denominator": "1 of 1 criterion run; 16 of 16 handler tests passed (the order requires at least 15)",
+      "status": "PASS",
       "expect": "DB125-1-AC2 PASS"
     },
     {
@@ -102,8 +107,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "test_owed_days_three_examples in the handler test file (assertion on 2026-06-01 expects 5 owed days)",
-      "reason": "not edited: the order allows only fake S3 objects to change among the earlier tests; the floor contradicts the assertion; filed as IRPT_DASHBD-D2-W207-S1 (BLOCKING)"
+      "item": "test_owed_days_three_examples in the handler test file: the one superseded example (2026-06-01 on 2026-07-15) was changed by issuer Amendment 1 (commit 1bec1bfc83) to the cap check on 2026-09-15",
+      "reason": "the floor contradicts the superseded example; the issuer amended that one example only; filed as IRPT_DASHBD-D2-W207-S1, resolved by IRPT_DASHBD-D2-W207-S3"
     },
     {
       "item": "AWS, Terraform, deploy, schedule, push and every served value",
@@ -119,20 +124,21 @@
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W207-S1: BLOCKING, ARMED (disarm owner 2.0.0_SA_COO~D2): the start floor contradicts the earlier handler test test_owed_days_three_examples (expects 5 from 2026-06-01, the floor gives 3); the assertion is not edited.",
-    "IRPT_DASHBD-D2-W207-S2: OBSERVATION, INERT: the handler test FakeS3 already had a list_objects_v2; the guard's undelimited LIST is answered by a branch on the absence of Delimiter."
+    "IRPT_DASHBD-D2-W207-S1: BLOCKING, ARMED (disarm owner 2.0.0_SA_COO~D2): the start floor contradicted one earlier handler example (2026-06-01 on 2026-07-15 owes five days; the floor gives three). Resolved by issuer Amendment 1 (commit 1bec1bfc83), which allowed that one example to change; resolved by row IRPT_DASHBD-D2-W207-S3.",
+    "IRPT_DASHBD-D2-W207-S2: OBSERVATION, INERT: the handler test FakeS3 already had a list_objects_v2; the guard undelimited LIST is answered by a branch on the absence of Delimiter.",
+    "IRPT_DASHBD-D2-W207-S3: OBSERVATION, INERT: resolves IRPT_DASHBD-D2-W207-S1 under Amendment 1 (commit 1bec1bfc83); the handler suite is 16 of 16 green at the worker commit."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~207/RD_GUARD_FLOOR_FACTS_R125.json",
   "compiler_tools": [
     {
       "tool": "python -I p125_guard.py (the issuer's checker)",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_guard.py . DB125-1-AC1 | DB125-1-AC2 | DB125-1-AC3",
-      "result": "DB125-1-AC1 PASS; DB125-1-AC2 FAIL (one earlier handler test); DB125-1-AC3 PASS"
+      "result": "DB125-1-AC1 PASS; DB125-1-AC2 PASS; DB125-1-AC3 PASS (at commit d552c4964e)"
     },
     {
       "tool": "pytest (adapter and handler test files)",
       "invocation": "python -m pytest -q --no-header -p no:cacheprovider <adapter test file> ; ... <handler test file>",
-      "result": "adapter 37 passed; handler 15 passed, 1 failed (test_owed_days_three_examples)"
+      "result": "adapter 37 passed; handler 16 passed"
     },
     {
       "tool": "ruff (target py39)",
