@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IB208-1  IB-pr-568  the one-time dated backfill of the absent flat bronze keys (positions 4, transactions 7, performance 22), by the same pull code the chain runs
-    AC1  the gates (the packet's sha256 and both halves signed on it, the ledger opened before the first write) and the performance positive control, committed BEFORE any performance day was written
+    AC1  the gates (the packet's sha256 and both halves signed on it, the ledger opened before the first write) and the performance positive control, committed AND graded by the CVO BEFORE any performance day was written
     AC2  the days: exactly the packet's lists (positions 4 trading days that hold a parquet key and no flat key), each read ABSENT first, each WRITTEN (version, size, row count, as-of) or ABSENT-AT-SOURCE (status, no key); none left over
     AC3  the read-back of every written key, the requests counted, and the eleven bound counters (no delete, no other write, no catalog or code-object change, no empty key, no secret printed)
 """
@@ -89,9 +89,14 @@ def c1():
         fail("branch repo_script_matches needs shape_match true")
     if c["branch"] == "chain_copy_runs_with_date" and (r.get("counters") or {}).get("s3_code_objects_changed") != 0:
         fail("the chain's copy must run with the date WITHOUT changing an S3 code object (else STOP and a new pair)")
+    adj = c.get("cvo_adjudication")
+    if not isinstance(adj, str) or not adj.startswith("org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/adjudications/ADJUDICATION_v") or not (P6.ROOT / adj).is_file():
+        fail("control.cvo_adjudication must name the CVO's adjudication file in the tree (the CVO grades the performance control before any performance day: CTO round-6 analysis)")
+    if not re.fullmatch(TS, str(c.get("cvo_graded_at_utc", ""))):
+        fail("control.cvo_graded_at_utc must be an ISO UTC time")
     first_perf = sorted(x["written_at_utc"] for x in (r.get("days") or {}).get("performance", []) if x.get("outcome") == "WRITTEN")
-    if first_perf and first_perf[0] <= c["committed_at_utc"]:
-        fail("a performance day was written at or before the control's commit time")
+    if first_perf and (first_perf[0] <= c["committed_at_utc"] or first_perf[0] <= c["cvo_graded_at_utc"]):
+        fail("a performance day was written at or before the control's commit time or the CVO's grade of it")
     print("OK: the gates, the ledger and the performance control committed before any performance write")
 
 

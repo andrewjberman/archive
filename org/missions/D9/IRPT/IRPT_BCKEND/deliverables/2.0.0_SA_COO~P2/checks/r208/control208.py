@@ -20,6 +20,7 @@ sys.path.insert(0, str(CHECK.parent))
 import p208_cells as P  # noqa: E402
 
 LEDGER = "org/critical_paths/change_management/20261015T1000Z_orion_backfill_33_days.md"
+ADJ = "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/adjudications/ADJUDICATION_v112.md"
 
 
 def git(root, *a):
@@ -36,6 +37,8 @@ def build():
     for rel in (P.COO_HALF, P.CTO_HALF):
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text("# half bound to sha256 %s\n" % P.PACKET_SHA, encoding="utf-8")
+    (root / ADJ).parent.mkdir(parents=True, exist_ok=True)
+    (root / ADJ).write_text("# adjudication", encoding="utf-8")
     (root / LEDGER).parent.mkdir(parents=True, exist_ok=True)
     (root / LEDGER).write_text("# ledger\n", encoding="utf-8")
     git(root, "add", "-A")
@@ -57,7 +60,7 @@ def record(commit):
             "performance": [day_row("performance", d, i) for i, d in enumerate(P.PERF)]}
     return {"gates": {"packet_sha256": P.PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "no_open_ledger_or_marker": True, "one_change_at_a_time": True},
             "ledger": {"entry": LEDGER, "opened_before_first_write": True},
-            "control": {"performed": True, "branch": "repo_script_matches", "committed_commit": commit, "committed_at_utc": "2026-10-15T09:55:00Z",
+            "control": {"performed": True, "branch": "repo_script_matches", "committed_commit": commit, "committed_at_utc": "2026-10-15T09:55:00Z", "cvo_adjudication": ADJ, "cvo_graded_at_utc": "2026-10-15T10:05:00Z",
                         "byte_diff": {"repo_bytes": 29784, "chain_bytes": 29230, "differing_lines": 12}, "dry_run_compared_day": "2026-10-14", "shape_match": True},
             "days": days, "keys_written": 33, "requests_made": 14300,
             "counters": {k: 0 for k in P.COUNTERS},
@@ -92,6 +95,8 @@ MUTS = [
     ("AC1", "control_not_performed", lambda r: sp(r, ["control", "performed"], False)),
     ("AC1", "control_commit_unknown", lambda r: sp(r, ["control", "committed_commit"], "a" * 40)),
     ("AC1", "control_after_a_performance_write", lambda r: sp(r, ["control", "committed_at_utc"], "2026-10-15T23:00:00Z")),
+    ("AC1", "cvo_adjudication_not_in_tree", lambda r: sp(r, ["control", "cvo_adjudication"], "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/adjudications/ADJUDICATION_v999.md")),
+    ("AC1", "performance_before_cvo_grade", lambda r: sp(r, ["control", "cvo_graded_at_utc"], "2026-10-15T23:30:00Z")),
     ("AC1", "branch_shape_mismatch", lambda r: sp(r, ["control", "shape_match"], False)),
     ("AC1", "code_object_changed_on_branch2", lambda r: (sp(r, ["control", "branch"], "chain_copy_runs_with_date"), sp(r, ["counters", "s3_code_objects_changed"], 1))),
     ("AC2", "short_positions", lambda r: r["days"]["positions"].pop()),
