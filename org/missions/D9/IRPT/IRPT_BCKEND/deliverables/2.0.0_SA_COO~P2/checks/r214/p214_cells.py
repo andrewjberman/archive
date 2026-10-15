@@ -109,6 +109,33 @@ def c2():
 
 def c3():
     r = load(REC)
+    of = r.get("other_files") or {}
+    want = ["2026-10-12", "2026-10-13", "2026-10-14"]
+    dp = of.get("dim_position")
+    if not isinstance(dp, list) or [x.get("day") for x in dp] != want:
+        fail("other_files.dim_position needs one row per day %s" % ", ".join(want))
+    for x in dp:
+        if not isinstance(x.get("partition_present"), bool) or not (x["partition_present"] is False or (is_int(x.get("account_positions")) and x["account_positions"] >= 0)):
+            fail("%s: dim_position needs partition_present and, when present, account_positions as a count" % x["day"])
+    ft = of.get("fact_trn")
+    if not isinstance(ft, list) or [x.get("day") for x in ft] != want:
+        fail("other_files.fact_trn needs one row per day %s" % ", ".join(want))
+    for x in ft:
+        codes = x.get("codes")
+        if not is_int(x.get("account_rows")) or x["account_rows"] < 0 or not isinstance(codes, list) or not all(isinstance(c, dict) and all(isinstance(c.get(k), str) and c[k] for k in ("tran_srcde", "tr_cd", "sb_cd")) and is_int(c.get("count")) for c in codes):
+            fail("%s: fact_trn needs account_rows and codes as [{tran_srcde, tr_cd, sb_cd, count}] (codes only, no ids)" % x.get("day"))
+        if x["account_rows"] != sum(c["count"] for c in codes):
+            fail("%s: account_rows must equal the sum of the code counts" % x["day"])
+    cl = of.get("classification")
+    if cl not in ("closed_at_source", "balance_file_gap", "undetermined"):
+        fail("other_files.classification must be closed_at_source, balance_file_gap or undetermined")
+    text(of.get("statement"), 60, "other_files.statement (the evidence in words: a closing or transfer-out code or no positions means closed at the source; positions still present means a balance-file gap)")
+    if cl == "balance_file_gap":
+        text(of.get("balance_writer_owner"), 20, "other_files.balance_writer_owner (name the dim_balance writer and its owner)")
+        if not any(x.get("partition_present") and x.get("account_positions", 0) > 0 for x in dp):
+            fail("a balance_file_gap needs positions still present in some dim_position day")
+    if cl == "closed_at_source" and not (any(c["tr_cd"] for x in ft for c in x["codes"]) or all((not x["partition_present"]) or x.get("account_positions") == 0 for x in dp)):
+        fail("closed_at_source needs a closing or transfer-out code in fact_trn, or no positions in dim_position")
     sc = r.get("self_clears") or {}
     if sc.get("claim") not in CLAIMS or not isinstance(sc.get("account_present_on_2026_10_14"), (bool, type(None))):
         fail("self_clears needs a claim and account_present_on_2026_10_14 (boolean, or null when the partition is absent)")
