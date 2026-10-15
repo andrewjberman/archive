@@ -1,0 +1,77 @@
+{
+ "order": "FB-l-5",
+ "act": 3,
+ "captured_at": "2026-10-15T13:07:25Z",
+ "bucket_notification_opal_data_inf": {
+  "LambdaFunctionConfigurations": [
+   {
+    "Id": "tf-s3-lambda-20260507183605613800000001",
+    "LambdaFunctionArn": "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-publisher",
+    "Events": [
+     "s3:ObjectCreated:*"
+    ],
+    "Filter": {
+     "Key": {
+      "FilterRules": [
+       {
+        "Name": "Prefix",
+        "Value": "gold/meta/"
+       },
+       {
+        "Name": "Suffix",
+        "Value": "pipeline-complete.json"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "Id": "tf-s3-lambda-20260507195529440700000002",
+    "LambdaFunctionArn": "arn:aws:lambda:us-east-1:313476888478:function:inf-silver-aggregator",
+    "Events": [
+     "s3:ObjectCreated:*"
+    ],
+    "Filter": {
+     "Key": {
+      "FilterRules": [
+       {
+        "Name": "Prefix",
+        "Value": "silver/_silver_complete/"
+       },
+       {
+        "Name": "Suffix",
+        "Value": ".json"
+       }
+      ]
+     }
+    }
+   }
+  ],
+  "EventBridgeConfiguration": {}
+ },
+ "bucket_notification_sha256": "a29167ad15694afb31bd5759a4d4b1e6cd870e2009c0139a9db820a3bb13b2c8",
+ "floor_schedule": {
+  "Name": "advi-inf-publish-daily",
+  "State": "DISABLED",
+  "ScheduleExpression": "cron(30 13 * * ? *)",
+  "ScheduleExpressionTimezone": "UTC",
+  "FlexibleTimeWindow": {
+   "Mode": "OFF"
+  },
+  "Target": {
+   "Arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-publisher",
+   "DeadLetterConfig": {
+    "Arn": "arn:aws:sqs:us-east-1:313476888478:advi-inf-publish-dlq"
+   },
+   "RetryPolicy": {
+    "MaximumEventAgeInSeconds": 3600,
+    "MaximumRetryAttempts": 1
+   },
+   "RoleArn": "arn:aws:iam::313476888478:role/advi-inf-publish-role"
+  }
+ },
+ "schedules_with_prefix": [
+  "advi-inf-publish-daily"
+ ],
+ "claim": "measured"
+}
