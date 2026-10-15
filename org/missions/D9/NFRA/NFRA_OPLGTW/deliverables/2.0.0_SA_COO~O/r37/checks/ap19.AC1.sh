@@ -11,7 +11,7 @@ read -r base rel <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],e
 git cat-file -e "${rel}^{commit}" || { echo "release_sha ${rel:-EMPTY} is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
 live=$dep; [ "$dep" = "$rel" ] && live=$prev
-ALLOW="^$GW/(app/(portal_models|portal_macro|news_typed)\.py|app/tools\.py|app/destructive_ops\.py|app/data_entitlement\.py|tests/test_og_(pt1|pt2|nw1|gt10)\.py|tests/test_entitlement_admin\.py|tests/test_data_entitlement_family\.py|deploy-to-ec2\.sh)$|^infra/aws/terraform/opal-gateway/(news_read_iam|portal_tiered_read_iam)\.tf$"
+ALLOW="^$GW/(app/(portal_models|portal_macro|news_typed|typed_scope)\.py|app/tools\.py|app/destructive_ops\.py|app/data_entitlement\.py|tests/test_og_(pt1|pt2|nw1|gt6|gt10)\.py|tests/test_entitlement_admin\.py|tests/test_data_entitlement_family\.py|deploy-to-ec2\.sh)$|^infra/aws/terraform/opal-gateway/(news_read_iam|portal_tiered_read_iam)\.tf$"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); outside=$(printf '%s\n' "$files" | grep -vE "$ALLOW" | grep -c .)
 reg=$(python - "$rel" <<'PYEOF'
 import subprocess, sys
