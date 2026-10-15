@@ -80,22 +80,25 @@ def choose(peak_mb):
     return None
 
 
-def newest_silver_day(root):
+def silver_days(root):
+    """The listed fact_allocations partitions. The second measured day must be one of them and after the first day; it is the newest at the
+    time of the measurement, and a later partition landing does not void the record (round 125: the first check read a moving target)."""
     sys.path.insert(0, str(Path(root) / "data/assets/scripts/gold/irpt_reporting/adapters"))
     import cottonwood_bd_account_return_daily as ad
     parts = [p for p in ad.CottonwoodBlackDiamondSilverReader().list_partitions("fact_allocations") if ISO.match(p)]
     need(parts, "no silver fact_allocations partition listed")
-    return parts[-1]
+    return parts
 
 
 # ------------------------------------------------------------------------------------------------ the record clauses (pure)
-def check_record(rec, newest_day, analysis_text, tracked, analysis_sha):
+def check_record(rec, listed_days, analysis_text, tracked, analysis_sha):
     exp = {"firm", "days", "baseline_rss_mb", "peak_rss_mb", "threshold_fraction", "sizes_mb", "chosen_memory_mb", "sampler", "measured_on", "words", "analysis", "reads", "claim",
            "files_in_repo", "served_values_changed", "pushed", "deployed"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["firm"] == "cottonwood" and nes(rec["words"]) and rec["claim"] in CLAIMS, "firm, words or claim")
     ds = rec["days"]
-    need(isinstance(ds, list) and len(ds) == 2 and [d.get("day") for d in ds] == [FIRST_DAY, newest_day], "days must be [%s, the newest silver day %s]" % (FIRST_DAY, newest_day))
+    need(isinstance(ds, list) and len(ds) == 2 and ds[0].get("day") == FIRST_DAY and ds[1].get("day") in listed_days and ds[1]["day"] > FIRST_DAY,
+         "days must be [%s, a listed silver partition after it]" % FIRST_DAY)
     for d in ds:
         need(set(d) == {"day", "accounts", "rows", "seconds", "peak_rss_mb", "held"} and is_int(d["accounts"]) and d["accounts"] >= 1 and is_int(d["rows"]) and d["rows"] >= d["accounts"]
              and is_num(d["seconds"]) and d["seconds"] > 0 and is_num(d["peak_rss_mb"]) and d["peak_rss_mb"] > 0 and d["held"] is False, "a days entry (a held or empty day measures nothing): %s" % d.get("day"))
@@ -131,7 +134,7 @@ def run(root, cid):
     text = ap.read_text(encoding="utf-8")
     sha = hashlib.sha256(ap.read_bytes()).hexdigest()
     if cid == "DB125-2-AC1":
-        check_record(rec, newest_silver_day(root), text, is_tracked(root, ANALYSIS_REL), sha)
+        check_record(rec, silver_days(root), text, is_tracked(root, ANALYSIS_REL), sha)
         print("OK: Cottonwood memory: days %s, peak %.0f MB (baseline %.0f); smallest standard size with the peak under 70 percent: %d MB; the slowest day took %.1f s" %
               (", ".join(d["day"] for d in rec["days"]), rec["peak_rss_mb"], rec["baseline_rss_mb"], rec["chosen_memory_mb"], max(d["seconds"] for d in rec["days"])))
         return True
@@ -156,9 +159,9 @@ def selftest():
             "claim": "measured", "files_in_repo": False, "served_values_changed": False, "pushed": False, "deployed": False}
     text = "import psutil, threading\nfrom x import lambda_handler\nCottonwoodBlackDiamondSilverReader\n{'dry_run': True}\n"
 
-    def grade(r, t=text, newest="2026-10-13"):
+    def grade(r, t=text, listed=("2026-07-10", "2026-10-13", "2026-10-14")):
         try:
-            return check_record(r, newest, t, True, "a" * 64)
+            return check_record(r, list(listed), t, True, "a" * 64)
         except Fail:
             return False
     assert grade(copy.deepcopy(good)) is True
@@ -171,7 +174,7 @@ def selftest():
         r = copy.deepcopy(good)
         f(r)
         assert grade(r) is False, "red arm %s passed" % name
-    assert grade(copy.deepcopy(good), newest="2026-10-12") is False and grade(copy.deepcopy(good), t=text + "s3.put_object()") is False
+    assert grade(copy.deepcopy(good), listed=("2026-07-10", "2026-10-12")) is False and grade(copy.deepcopy(good), listed=("2026-07-10", "2026-10-13", "2026-10-20")) is True and grade(copy.deepcopy(good), t=text + "s3.put_object()") is False
     assert grade(copy.deepcopy(good), t=text.replace("psutil", "x")) is False and grade(copy.deepcopy(good), t=text + "49financial") is False
     print("selftest: one green and fifteen red record arms and the size rule behave")
 
