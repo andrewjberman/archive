@@ -302,6 +302,17 @@ def fork_registry_rows(allc):
     return {hashed_id(cid): expected_row(c, g)[1] for cid, (g, c) in allc.items() if in_scope(c)}
 
 
+_G5R = {}
+
+
+def g5r():
+    """{entity: enrichment} of workflows/atom_decomposition/g5r_enrichment.json (PRD v0.16), read once from the CURRENT worktree; {} when the file is absent."""
+    if not _G5R:
+        p = os.path.join("workflows", "atom_decomposition", "g5r_enrichment.json")
+        _G5R["rows"] = json.load(open(p, encoding="utf-8"))["rows"] if os.path.exists(p) else {}
+    return _G5R["rows"]
+
+
 def expected_row(c, group, deployed=None):
     """(clean row, registry entry) the generator must produce for a contract (CTO msg 34160). The clean row holds no firm or product
     token in any whitespace-free string, key or value; every top-level field the sanitiser changed is restored from the registry
@@ -341,6 +352,12 @@ def expected_row(c, group, deployed=None):
         "retired": bool(why),
         "open_items": c["open_items"],
     }
+    enr = g5r().get(entity(cid))
+    if enr:   # PRD v0.16 (G5r): the rival-fund rows carry the newest-part rule, the claim and key notes, the identifier fill rates and tags
+        full["business_meaning"] = full["business_meaning"] + " " + enr["meaning_add"]
+        rules = full["never_sum_rules"]
+        full["never_sum_rules"] = (rules if isinstance(rules, list) else []) + [enr["never_sum"]]
+        full["nl_tags"] = list(full["nl_tags"]) + list(enr["nl_tags_add"])
     if why:
         full["retired_reason"] = why
     clean, restore = {}, {}
