@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COMM_ASSIST.TO-CA-l-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-l-2.package-only-the-registry-files-it-reads.md",
+  "group": "OTHER",
+  "vintage_commit": "c834c28a45"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round20.md",
+  "vintage_commit": "c834c28a45",
+  "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-l-2.package-only-the-registry-files-it-reads.md"
+ },
+ "assignee": "0.9.0_WK_COMM_ASSIST~30",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/teams-chat-assist/build.sh",
+   "kind": "script",
+   "commit_or_etag": "ed6bce27a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Commit ed6bce27a9 (LOCAL on wk-COMM_ASSIST-30), one cp line (the glob copy of infra/logic/registry/*.json) replaced by a loop over the manifest: REG variable, manifest-absent refusal, CR strip, refusal of a name with a path separator, refusal of a name absent from the registry, cp of each listed file. Nothing else in the file changed. Not deployed; no AWS call made.",
+   "artifact_covered_by": ["CAl2-AC1", "CAl2-AC2", "CAl2-AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/teams-chat-assist/registry_files.txt",
+   "kind": "manifest",
+   "commit_or_etag": "ed6bce27a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Commit ed6bce27a9 (LOCAL on wk-COMM_ASSIST-30). Twelve registry file names, one per line, after a three-line # header: exemptions.json, feeds.json, firm_pages.json, legacy_addresses.json, mail_parties.json, platinum_destinations.json, remediations.json, reporting_policies.json, resources.json, scopes.json, systems.json, tiers.json. Not packaged by build.sh. Not deployed.",
+   "artifact_covered_by": ["CAl2-AC1", "CAl2-AC2", "CAl2-AC3"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CAl2-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r20/checks/check_m2_build.py\" expect: M2-BUILD ok=True arms=7 of 7",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r20/checks/check_m2_build.py\"",
+   "output_evidence": "(run from the worktree root, wk-COMM_ASSIST-30, at HEAD ed6bce27a9, rc 0) NOTE trace opened=[exemptions.json, feeds.json, firm_pages.json, legacy_addresses.json, mail_parties.json, platinum_destinations.json, remediations.json, reporting_policies.json, resources.json, scopes.json, systems.json, tiers.json] static=[the same twelve] listed=[] import_errors={}; then M2-BUILD ok=True arms=7 of 7. The same check was not re-run at the base c834c28a45 by this worker; the order records that the base prints 3 of 7.",
+   "denominator": "7 of 7 arms pass, as printed by the check",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAl2-AC2",
+   "criterion_verbatim": "python infra/aws/lambda/teams-chat-assist/tests/test_build_reproducible.py expect: PACKAGE-REPRODUCIBLE ok=True",
+   "method": "command",
+   "invocation": "python infra/aws/lambda/teams-chat-assist/tests/test_build_reproducible.py",
+   "output_evidence": "(run from the worktree root at HEAD ed6bce27a9, rc 0) PACKAGE-REPRODUCIBLE ok=True crlf_sha=812abaf32af6 lf_sha=812abaf32af6 worktree_sha=812abaf32af6 files=34. The package's bytes are the same under CRLF, LF and the worktree's line endings; the file count is 34, down from 39 at the base.",
+   "denominator": "3 of 3 builds share one sha256 (crlf, lf, worktree); 34 files in the package",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CAl2-AC3",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "output_evidence": "(run from the worktree root at HEAD ed6bce27a9, rc 0) I2-REGRESSION ok=True passed=64 failed=0 reason=none. The assistant flow tests are a control that passes at the base; the code under them is untouched.",
+   "denominator": "64 of 64 in the assistant flow tests the invocation runs",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "file_count": {
+   "description": "zip file count of the package built by the base build.sh (git show c834c28a45:build.sh run from the worktree into a scratch folder) and by the edited build.sh",
+   "expected": "39 at the base, 34 after the change (39 - 17 catalog-glob files + 12 manifest files)",
+   "observed": "base build: 39 files; edited build at ed6bce27a9: 34 files; the twelve zip registry names equal the manifest names",
+   "status": "MEASURED"
+  },
+  "determinism": {
+   "method": "AC2 check: the package built from CRLF, LF and worktree line endings compared by sha256",
+   "observed": "identical: 812abaf32af6 in all three",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "deploy, apply, AWS calls, network",
+   "reason": "the order says this cell is code only; a later cell deploys it. No AWS call, apply or deploy was made; dist/ was removed and nothing built is committed"
+  },
+  {
+   "item": "the header comment of build.sh (lines 5-6) still names infra/logic/registry/*.json",
+   "reason": "the order says nothing else in build.sh changes; the comment is left as it was and is noted in the worker report, not edited"
+  },
+  {
+   "item": "refusal branches (absent manifest, path-separator name, absent registry file) of the new loop",
+   "reason": "no criterion of the order exercises them; they were not negative-tested by this worker (no scratch repo built, to keep the disk clear)"
+  },
+  {
+   "item": "check_m2_build.py and check_i2_regression.py and every other check file",
+   "reason": "the order says read the issuer check and do not edit it; none was edited"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~30/COMM_ASSIST.TO-CA-l-2.package-only-the-registry-files-it-reads.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r20/checks/check_m2_build.py\"",
+   "result": "M2-BUILD ok=True arms=7 of 7; rc 0"
+  },
+  {
+   "tool": "script (build reproducibility)",
+   "invocation": "python infra/aws/lambda/teams-chat-assist/tests/test_build_reproducible.py",
+   "result": "PACKAGE-REPRODUCIBLE ok=True crlf_sha=812abaf32af6 lf_sha=812abaf32af6 worktree_sha=812abaf32af6 files=34; rc 0"
+  },
+  {
+   "tool": "issuer check",
+   "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+   "result": "I2-REGRESSION ok=True passed=64 failed=0 reason=none; rc 0"
+  }
+ ]
+}
