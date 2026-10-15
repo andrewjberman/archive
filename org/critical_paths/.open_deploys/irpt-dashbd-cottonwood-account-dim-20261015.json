@@ -1,0 +1,80 @@
+{
+  "slug": "irpt-dashbd-cottonwood-account-dim-20261015",
+  "title": "IRPT_DASHBD TO-DB-c-20: APPLY the signed pair DB-c-19 (packet blob ed09e2768f, COO half @d405648eff, CTO half @055825367e): upload ONE artifact object investor-reporting/irpt-cot-account-dim-lambda.zip, ONE safe-apply creating 7 resources (function irpt-cot-account-dim-lambda, role irpt-cot-account-dim-role, its scheduler role, 2 policies, log group, schedule irpt-cot-account-dim-daily DISABLED), ONE invoke for 2026-10-13 writing ONE gold key irpt/cottonwood/gold/account_dim/date=2026-10-13/data.parquet in opal-data-cottonwood, after-read, then schedule ENABLED cron(45 8 ? * MON-FRI *) America/New_York",
+  "author": "0.7.0_AE_CloudOps~DB2",
+  "status": "OPEN",
+  "opened_at": "2026-10-15T09:19:55.932178+00:00",
+  "window_hours": 24.0,
+  "entry_path": "org/critical_paths/change_management/20261015T0919Z_irpt-dashbd-cottonwood-account-dim-20261015_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "verify",
+      "target": "gates + BEFORE reads: packet blob, halves, marker scan over every live worktree, bucket fence admits irpt-cot-account-dim-role, layer irpt-performance-native-layer exists, function/roles/schedule absent, account_dim prefix 0 objects, other gold prefixes listed",
+      "proof_required": "the printed reads",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "s3-prefix",
+      "target": "BUILD_ONLY zip + package test rc 0, then upload ONE new object investor-reporting/irpt-cot-account-dim-lambda.zip; new VersionId; built==landed",
+      "proof_required": "zip sha256, test rc, VersionId",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verify",
+      "target": "fmt -check, init, validate, saved plan: exactly 7 adds all irpt_account_dim, schedule DISABLED, 0 change, 0 destroy",
+      "proof_required": "plan line and addresses",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "activation",
+      "target": "ONE safe-apply on the saved plan; function irpt-cot-account-dim-lambda handler/runtime/role/layer, both roles, schedule DISABLED read back; replan No changes",
+      "proof_required": "apply line, read-backs, replan line",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "activation",
+      "target": "ONE invoke of irpt-cot-account-dim-lambda {date 2026-10-13}, no retry, writes ONE gold key",
+      "proof_required": "response and the key",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L6",
+      "kind": "verify",
+      "target": "after-read: exactly one key under account_dim, written in the window; parquet rows and schema hash equal the contract; silver unchanged; no other gold prefix moved by this act",
+      "proof_required": "LIST, row count, schema hash",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L7",
+      "kind": "activation",
+      "target": "ENABLE: account-dim schedule.tf one line DISABLED->ENABLED, plan 0/1/0, ONE safe-apply, schedule read back ENABLED cron(45 8 ? * MON-FRI *) America/New_York",
+      "proof_required": "plan line, apply line, get-schedule",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L8",
+      "kind": "verify",
+      "target": "FIRST SCHEDULED FIRE after the enable (next 08:45 New York weekday): T-1 key lands or a named hold; read by the issuer 2.0.0_SA_COO~C2",
+      "proof_required": "the issuer's read",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261015T091955Z OPENED by 0.7.0_AE_CloudOps~DB2 with 8 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell2"
+}
