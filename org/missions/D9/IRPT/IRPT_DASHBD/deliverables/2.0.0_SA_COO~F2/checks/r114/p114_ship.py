@@ -12,6 +12,7 @@ Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or 
        python <this file> --selftest                        the pure helpers on synthetic arms
 """
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -67,7 +68,11 @@ def missing_title_words(titles, words):
     return [w for w in words if w not in low]
 
 
+ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
 def bun_result(out):
+    out = ANSI.sub("", out)
     fails = re.findall(r"^\s*(\d+) fail", out, re.M)
     passes = re.findall(r"^\s*(\d+) pass", out, re.M)
     return (int(passes[-1]) if passes else 0), (int(fails[-1]) if fails else -1)
@@ -78,7 +83,9 @@ def run_bun(root, test_rel):
     need(bun is not None, "bun not on PATH")
     portal = Path(root) / "portal"
     rel = test_rel[len("portal/"):]
-    p = subprocess.run([bun, "test", rel], cwd=str(portal), capture_output=True, text=True, timeout=100)
+    env = {k: v for k, v in os.environ.items() if k != "FORCE_COLOR"}
+    env["NO_COLOR"] = "1"
+    p = subprocess.run([bun, "test", rel], cwd=str(portal), capture_output=True, text=True, timeout=100, env=env)
     out = (p.stdout or "") + (p.stderr or "")
     passes, fails = bun_result(out)
     need(p.returncode == 0 and fails == 0, "bun test %s rc=%s fail=%s" % (rel, p.returncode, fails))
@@ -232,6 +239,7 @@ def selftest():
     arm("title-words-red", missing_title_words(["only served"], READ_TITLE_WORDS), ["path", "refus", "throw", "unreadable", "tenant"])
     arm("bun-green", bun_result("\n 7 pass\n 0 fail\n"), (7, 0))
     arm("bun-red", bun_result("\n 7 pass\n 2 fail\n"), (7, 2))
+    arm("bun-ansi", bun_result("\x1b[32m 7 pass\x1b[0m\n\x1b[2m 0 fail\x1b[0m\n"), (7, 0))
     arm("bun-none", bun_result("nothing"), (0, -1))
     arm("allowed-green", outside_allowed(list(ALLOWED)), [])
     arm("allowed-red", outside_allowed([ALLOWED[0], "src/App.tsx"]), ["src/App.tsx"])
