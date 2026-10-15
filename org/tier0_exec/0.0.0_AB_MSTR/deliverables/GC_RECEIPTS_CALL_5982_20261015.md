@@ -27,6 +27,16 @@ msgs 8068, 8074, 8075 (site Z ruled XA-20261015T050145Z-7f22 (b) at 05:05Z). Rul
 
 All three read as build-worktree source-map stamps, but I have not shown that nothing in them is wanted. One ask to the CTO: say these three are throwaway and I remove them.
 
+## Update, CTO msg 8095 (row S185): two of the three held were ruled throwaway and removed
+
+| path | head | in box/dell2 | clean | action |
+|---|---|---|---|---|
+| irpt-release-r30/w131/control | 0c0ae5a8f5 | yes | no: source-map stamp; the CTO read its pins and shas already on trunk | REMOVED |
+| irpt-release-r31s/wt-control-d39886e4aa | d39886e4aa | yes | no: source-map stamp; the CTO read its pins and shas already on trunk | REMOVED |
+| irpt-release-r30/w131/release | 109f4671bb | yes | no | KEPT by the CTO: its stamp for irpt-ycharts-generate (pins 83eb798a, 5be427ba) is not on trunk; row IRPT_BCKEND-D2-S185, owner ~P2, held until ~P2 disarms |
+
+So the first table's three "HELD" lines now read: two removed, one kept.
+
 ## Not named by the ruling, left alone
 `C:/dev/r30-control`, `C:/dev/r30-release`, `C:/dev/irpt-release-r28/wt-r30-release`, `irpt-release-r29/*` (KEEP), `wk-irpt-anlreq-102` and
 `rel-anlreq-r4` (KEEP), the plain folders (act d8ae, Andrew's). Each removed worktree leaves a ~24 KB `portal/` stub holding a symlink to the shared

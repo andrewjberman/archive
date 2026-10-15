@@ -120,12 +120,13 @@ def frontier_date(root):
 
 # ------------------------------------------------------------------------------------------------ the contract clauses (pure)
 def check_contract(c, base_sha_of_052):
-    need(c.get("contract_version") == "0.5.3", "contract_version is not 0.5.3")
+    need(c.get("contract_version") in ("0.5.3", "0.5.4"), "contract_version is not 0.5.3 (or the later 0.5.4 of round 119)")
     ids = [m["id"] for m in c["members"]]
     need(len(ids) == 117 and hashlib.sha256("\n".join(sorted(ids)).encode()).hexdigest() ==
          "dce57d0221f5b51ed59edfbe09b53de674f42570347177f606dddce9c76d4eda", "the member list changed")
-    lin = c["lineage"][-1]
-    need(lin.get("contract_version") == "0.5.2" and HEX64.match(str(lin.get("sha256"))) and nes(lin.get("reason")), "lineage must end with the 0.5.2 entry")
+    lins = [x for x in c["lineage"] if x.get("contract_version") == "0.5.2"]
+    need(len(lins) == 1 and HEX64.match(str(lins[0].get("sha256"))) and nes(lins[0].get("reason")), "lineage must carry the 0.5.2 entry")
+    lin = lins[0]
     need(base_sha_of_052 is None or lin["sha256"] == base_sha_of_052, "lineage sha256 is not the 0.5.2 bytes' hash")
     g = c.get("gold_table", {})
     need(g.get("table") == "filled_report_values" and isinstance(g.get("columns"), list) and len(g["columns"]) == 13, "gold_table block changed")
