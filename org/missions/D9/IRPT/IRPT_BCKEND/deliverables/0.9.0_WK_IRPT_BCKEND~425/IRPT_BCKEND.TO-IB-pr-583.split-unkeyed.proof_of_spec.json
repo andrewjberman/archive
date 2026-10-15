@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-583",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~425",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-583.split-unkeyed.md",
+    "group": "OTHER",
+    "vintage_commit": "5e4de60381156ab04d057ea7305c0958f31981e8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5e4de60381156ab04d057ea7305c0958f31981e8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-583.split-unkeyed.md"
+  },
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~425/IB219-2_criteria_output.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "kind": "script",
+      "commit_or_etag": "5f38aa92b621f1694550cae943f0abb1d4dd64e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the worker branch only. Nothing deployed, no producer run, no served prefix read, no AWS call.",
+      "artifact_covered_by": [
+        "IB219-2-AC1",
+        "IB219-2-AC2"
+      ],
+      "introduces": [
+        "_split_unkeyed_attrs",
+        "_split_unkeyed_manifest",
+        "SPLIT_UNKEYED_REASON"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/tests/test_split_unkeyed.py",
+      "kind": "test",
+      "commit_or_etag": "5f38aa92b621f1694550cae943f0abb1d4dd64e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ten synthetic tests: the six named by the order, the no-key token case, the non-split keyless row case, the absent-partition case and the manifest JSON case.",
+      "artifact_covered_by": [
+        "IB219-2-AC1",
+        "IB219-2-AC2",
+        "IB219-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB219-2-AC1",
+      "criterion_verbatim": "AC1 the new tests (at least 9) and the existing tests named in the paths block pass",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-2-AC1",
+      "output_evidence": "OK: 83 passed / IB219-2-AC1 PASS (rc=0)",
+      "denominator": "83 of 83 pass: 10 new in test_split_unkeyed.py and 73 in test_split_adjust.py, test_holdings_performance.py and test_holdings_comparison.py",
+      "status": "PASS",
+      "expect": "IB219-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB219-2-AC2",
+      "criterion_verbatim": "AC2 with the SPLIT-ADJUST-B blocks removed the new tests fail on assertions",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-2-AC2",
+      "output_evidence": "OK: removing the block fails the new tests (3 block(s)) / IB219-2-AC2 PASS (rc=0)",
+      "denominator": "3 SPLIT-ADJUST-B blocks removed in memory; own removal run: 10 of 10 new tests failed on assertions, 0 errors, none at collection",
+      "status": "PASS",
+      "expect": "IB219-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB219-2-AC3",
+      "criterion_verbatim": "AC3 the record: your own paths exactly as recorded and inside the grant, the named tests present, no typed object address, the six bound counters 0, no long digit run",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-2-AC3",
+      "output_evidence": "OK: the diff bounded, the named tests present, no typed address / IB219-2-AC3 PASS (rc=0)",
+      "denominator": "6 of 6 named tests present; 2 of 2 changed paths outside the deliverables folder at the product commit, both inside the grant; 6 of 6 bound counters 0",
+      "status": "PASS",
+      "expect": "IB219-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The three SPLIT-ADJUST-B blocks removed in memory from holdings_performance.py by a runner that patches the loader's get_data, with PYTHONPYCACHEPREFIX set to a scratch directory; the new test file run against the stripped module. The file on disk is unchanged.",
+      "expected": "the new tests fail on assertions, not on import or collection",
+      "observed": "10 failed, 0 errors on the new file, each an AssertionError comparing None to the expected value; the product file on disk is unchanged",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the 83-test suite (new file plus the existing performance, split and comparison files) run twice on identical inputs",
+      "observed": "83 passed on each of two runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A producer dry run against the served 49F prefix, the served DELTA on split days and the never-widen pair",
+      "reason": "Later acts. The grant is LOCAL: nothing is run against a served prefix or written to AWS, and the unkeyed count's served effect is the CTO's to rule from the DELTA."
+    },
+    {
+      "item": "A run-level total of days_ratio_absent and unkeyed_split_rows",
+      "reason": "The producer writes one manifest per day and has no run-level manifest. The keys are per day; a run total is a sum over the day manifests (surprise IRPT_BCKEND-D2-W425-S1)."
+    },
+    {
+      "item": "The commit-time client account-id scan",
+      "reason": "The hashed account-id list is absent on this device, so the client-data check printed WARN and did not scan the commit. The new file uses synthetic identifiers only (SYN-prefixed cusips and tickers, accounts 0000000201 to 0000000205), typed by the worker."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W425-S1: OBSERVATION, INERT: the order's run-manifest totals premise; the producer has no run-level manifest, so the per-day keys are filed per day.",
+    "IRPT_BCKEND-D2-W425-S2: OBSERVATION, INERT: the manifest builder's return literal became a named block so the B merge could be hooked in; no A-block logic changed.",
+    "IRPT_BCKEND-D2-W425-S3: OBSERVATION, INERT: a hand-run strip without PYTHONPYCACHEPREFIX reads a stale pyc and reports green; the issuer's check sets the prefix, so the criterion is not affected."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/gold/irpt_holdings_performance/tests/test_split_unkeyed.py data/assets/scripts/gold/irpt_holdings_performance/tests/test_split_adjust.py data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_performance.py data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_comparison.py -q",
+      "result": "83 passed (run twice)"
+    },
+    {
+      "tool": "proof-of-spec criteria checker",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r219/p219_cells.py\" . IB219-2-AC1 / AC2 / AC3",
+      "result": "IB219-2-AC1 PASS, IB219-2-AC2 PASS, IB219-2-AC3 PASS (rc=0 each)"
+    }
+  ]
+}
