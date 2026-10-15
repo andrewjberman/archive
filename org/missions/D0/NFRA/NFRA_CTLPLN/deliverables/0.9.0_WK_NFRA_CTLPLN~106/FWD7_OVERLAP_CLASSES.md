@@ -3,11 +3,11 @@
 Read: `python .tools/placement-check.py` (unchanged), run in the worktree at HEAD + this commit.
 Denominator: 56 OVERLAP lines read; the read's own FINDINGS line counts 56 cross-box overlap(s) (agrees).
 
-Classes: SHARED = a rule file this test reads and checks (R1-R3 below); SPLIT = both projects name the same file, no rule; UNCLASSIFIED = no rule.
+Classes: SHARED = a rule file this test reads and checks (R1-R3 below); SPLIT = both projects name the same file, no rule (R4); NOT-SAME-FILE = one path is a strict directory-prefix parent of the other and the two are different files (R5, decided by the path-prefix relation); UNCLASSIFIED = no rule.
 
 | # | project A (box) | project B (box) | overlapping path | class | rule |
 |---|---|---|---|---|---|
-| 1 | NFRA_CTLPLN (laptop) | IRPT_BCKEND (dell2) | `.tools/tests/test_round18_batch.py` | UNCLASSIFIED | no rule: one project claims a directory that contains the other project's specific path |
+| 1 | NFRA_CTLPLN (laptop) | IRPT_BCKEND (dell2) | `.tools/tests/test_round18_batch.py` | NOT-SAME-FILE | R5 strict directory-prefix parent: '.tools/tests' is a directory claim over '.tools/tests/test_round18_batch.py', a different file (the two projects change different files) |
 | 2 | AMGT_HARVST (dell1) | NFRA_MCPMSP (sitez) | `org/critical_paths/.open_deploys/nfra-mcpmsp-r1-firm-role.json` | SHARED | R1 CLAUDE.md NEVER-2: a worker deploy's entry is its own file and sits on the worker's branch until the drain |
 | 3 | AMGT_HARVST (dell1) | NFRA_MCPORTAL (sitez) | `org/critical_paths/.open_deploys/nfra-mcportal-c17r2-release.json` | SHARED | R1 CLAUDE.md NEVER-2: a worker deploy's entry is its own file and sits on the worker's branch until the drain |
 | 4 | AMGT_HARVST (dell1) | IRPT_BCKEND (dell2) | `org/critical_paths/.open_deploys` | SHARED | R1 CLAUDE.md NEVER-2: a worker deploy's entry is its own file and sits on the worker's branch until the drain |
@@ -43,7 +43,7 @@ Classes: SHARED = a rule file this test reads and checks (R1-R3 below); SPLIT = 
 | 34 | ADVI_FIRMBKTS (dell1) | IRPT_ANLREQ (dell2) | `infra/aws/lambda/ci/lambda-source-map.json` | SHARED | R2 infra/aws/lambda/ci/lambda-source-map.json _description+_note: single source of truth, record-terraform-deploy.sh is the named updater |
 | 35 | ADVI_FIRMBKTS (dell1) | IRPT_BCKEND (dell2) | `infra/aws/lambda/ci` | SHARED | R2 infra/aws/lambda/ci/lambda-source-map.json _description+_note: single source of truth, record-terraform-deploy.sh is the named updater |
 | 36 | ADVI_FIRMBKTS (dell1) | IRPT_DASHBD (dell2) | `infra/aws/lambda/ci/lambda-source-map.json` | SHARED | R2 infra/aws/lambda/ci/lambda-source-map.json _description+_note: single source of truth, record-terraform-deploy.sh is the named updater |
-| 37 | ADVI_FIRMBKTS (dell1) | NFRA_MCPINDEX (sitez) | `infra/aws/lambda/bd-pipeline/bd-asset-dim-trigger` | UNCLASSIFIED | no rule: one project claims a directory that contains the other project's specific path |
+| 37 | ADVI_FIRMBKTS (dell1) | NFRA_MCPINDEX (sitez) | `infra/aws/lambda/bd-pipeline/bd-asset-dim-trigger` | NOT-SAME-FILE | R5 strict directory-prefix parent: 'infra/aws/lambda' is a directory claim over 'infra/aws/lambda/bd-pipeline/bd-asset-dim-trigger', a different file (the two projects change different files) |
 | 38 | ADVI_FIRMBKTS (dell1) | NFRA_OPLGTW (sitez) | `infra/aws/lambda/ci/lambda-source-map.json` | SHARED | R2 infra/aws/lambda/ci/lambda-source-map.json _description+_note: single source of truth, record-terraform-deploy.sh is the named updater |
 | 39 | MDPF_DEMQUE (dell1) | IRPT_BCKEND (dell2) | `org/critical_paths/.open_deploys` | SHARED | R1 CLAUDE.md NEVER-2: a worker deploy's entry is its own file and sits on the worker's branch until the drain |
 | 40 | MDPF_DEMQUE (dell1) | IRPT_DASHBD (dell2) | `org/critical_paths/.open_deploys` | SHARED | R1 CLAUDE.md NEVER-2: a worker deploy's entry is its own file and sits on the worker's branch until the drain |
@@ -66,4 +66,4 @@ Classes: SHARED = a rule file this test reads and checks (R1-R3 below); SPLIT = 
 
 Rules, checked present in their files at this read: R1 CLAUDE.md=True, R2 lambda-source-map.json=True, R2 lambda-source-map.json=True
 
-Summary: total=56 shared=53 split=1 unclassified=2
+Summary: total=56 shared=53 split=1 not_same_file=2 unclassified=0
