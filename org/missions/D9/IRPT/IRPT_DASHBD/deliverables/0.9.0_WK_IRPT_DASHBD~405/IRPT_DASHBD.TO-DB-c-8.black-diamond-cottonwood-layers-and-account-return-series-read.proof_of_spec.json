@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-8",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "f240990cfd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "f240990cfd",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-8.black-diamond-cottonwood-layers-and-account-return-series-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~405",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~405",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~405/BD_RETURNS_READ_R116.json",
+      "kind": "doc",
+      "commit_or_etag": "b1da365d2a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The Black Diamond Cottonwood layer, table and footer-column record, carried by b1da365d2a (LOCAL on wk-IRPT_DASHBD-405, not pushed). Read-only work: 128 S3 reads by the worker (LIST, HEAD, ranged footer GET under blackdiamond/cottonwood/ only), no write, no vendor call, no secret read, no deploy. Verdict ACCOUNT_VALUE_ONLY is the worker's judgment and is not graded here."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b1da365d2a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_DASHBD-D2-W405-S1 to S4 (all OBSERVATION, all INERT) appended as bytes by b1da365d2a; the surprise-row gate printed OK for 4 new rows of 544 total."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC116-4-AC1",
+      "criterion_verbatim": "DBC116-4-AC1 -- the record is complete; the recorded layers equal a fresh LIST of blackdiamond/cottonwood/; each layer's tables equal a fresh LIST; each table's partition count, newest date and column names equal a fresh read (the columns from a fresh footer read of the newest partition's first Parquet object); return_like_columns equals the pattern recomputed over the fresh columns; a verdict of ACCOUNT_RETURN_SERIES has at least one return-like column; no write is recorded. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r116/p116_bcw.py\" . DBC116-4-AC1",
+      "output_evidence": "Run from the worktree root on the record at b1da365d2a: stdout 'DBC116-4-AC1 PASS', rc 0, on two runs (identical). Base before the record existed: the checker reads the record and fails on its absence (no record).",
+      "denominator": "1 of 1 criterion PASS (rc 0); record holds 4 layers and 58 tables, of which 15 carry date partitions and were checked against a fresh footer read; 43 tables without date partitions carry partition_count 0 and columns []",
+      "status": "PASS",
+      "status_reason": "PASS as written by the official checker on the record at b1da365d2a. The record was not edited after the checker first ran; no checker amendment was needed.",
+      "expect": "DBC116-4-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was constructed; the checker's own arms were not altered, and the record is graded as written.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root with the same arguments",
+      "observed": "two identical outputs, rc 0 each; last line DBC116-4-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reading row data of any table, and reading the bronze raw workbooks and JSON contents",
+      "reason": "The order grants footer reads only (ranged GET of the Parquet tail). The workbook and JSON contents are named in basis_words and surprise row IRPT_DASHBD-D2-W405-S1 as not read."
+    },
+    {
+      "item": "Footer reads of partitions other than the newest per table",
+      "reason": "The order names the newest partition's first Parquet object only."
+    },
+    {
+      "item": "S3 reads made by the checker itself",
+      "reason": "The checker runs its own fresh LIST and footer reads as part of the criterion; the worker's s3_reads count (128) is its own reads only."
+    },
+    {
+      "item": "comp-find and graph tools",
+      "reason": "Not run. The repo reads were targeted native Grep and Read calls on the named reader files."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W405-S1: OBSERVATION, INERT: the bronze tables are raw Excel workbooks and JSON files with no date= partitions, so the footer method reads no columns there; the raw workbooks may hold a return column that silver dropped and were not read.",
+    "IRPT_DASHBD-D2-W405-S2: OBSERVATION, INERT: five silver _s2 twin tables carry only c1 and c2 as data columns beside the metadata, so their content is not named by the footer and the return-name test cannot see inside them.",
+    "IRPT_DASHBD-D2-W405-S3: OBSERVATION, INERT: the ACCOUNT_VALUE_ONLY definition says no return column, but the name pattern finds seven return-like columns, all dollar gain or loss at position or lot grain or a date; the verdict takes the account-grain reading.",
+    "IRPT_DASHBD-D2-W405-S4: OBSERVATION, INERT: the task order's step 2 has two texts (empty tables list for a layer holding objects directly, versus record every common prefix); the record follows the common-prefix text and the checker, because meta/ holds both direct objects and table folders."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p116_bcw.py (DBC116-4-AC1) and its helper p114_bcw.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r116/p116_bcw.py\" . DBC116-4-AC1",
+      "result": "PASS, rc 0, on two runs"
+    },
+    {
+      "tool": "worker private S3 read script (not committed; boto3 LIST, HEAD, ranged footer GET under blackdiamond/cottonwood/)",
+      "invocation": "python read_bd.py and python peek_bd.py, from the worker's private folder",
+      "result": "128 S3 reads in total (83 + 15 + 15 LIST, HEAD and ranged GET, plus 15 LIST pages of a peek); no write"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -67,3 +67,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r28
   </proof_of_spec>
 </task_order>
 # pipeline-override: an exercise order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-305 is the issuer's, as for TO-EXERCISE-R21.
+
+<!-- ISSUER NOTE 2026-10-15 (2.0.0_SA_COO~Y2): SUPERSEDED. Its criterion R28E-AC1 is a recorded FAIL (the upload door refused the D1 to D4 arms as NOT_AUTHORIZED); the same arms were re-run as an internal viewer under TO-EXERCISE-R28b (complete, VALID), which is the record that stands. R28E-AC2 and AC3 PASS. The FAIL row is kept, not edited. Gate limb: none stated. -->
