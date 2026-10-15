@@ -1,0 +1,52 @@
+{
+  "serial": "0.9.0_WK_IRPT_DASHBD~223",
+  "to_id": "IRPT_DASHBD.TO-DB-b-275",
+  "worktree": "C:/dev/wk-irpt-dashbd-223",
+  "base_head": "198f2591f091c57df02ef8238aa1f10cff7147bb",
+  "census_commit": "198f2591f091c57df02ef8238aa1f10cff7147bb",
+  "commits": [
+    {"hash": "f041f803b3", "subject": "contract 0.4.2, the new 0.4.2 test and the one-line 0.4.1 pin edit", "carries": ["org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json", "data/assets/scripts/gold/irpt_reporting/tests/test_account_return_contract_042.py", "data/assets/scripts/gold/irpt_reporting/tests/test_account_return_contract_041.py"]},
+    {"hash": "adc1232c20", "subject": "facts record and two surprise rows", "carries": ["org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~223/RD_CONTRACT_042_FACTS_R142.json", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md"]}
+  ],
+  "runs": [
+    {
+      "criterion": "DB142-1-AC1",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r142/p142_contract042.py . DB142-1-AC1",
+      "rc": 0,
+      "deciding_line": "OK: contract 0.4.2: the 19 columns, schema_hash, every enum and the five earlier optional columns unmoved; one new optional column market_value_eod_claim (measured | inferred) required on a PRESENT Orion row, hash 13bb195f137e; supersedes 0.4.1; the rule-24 record; 5 files changed, all in the grant",
+      "verdict": "DB142-1-AC1 PASS",
+      "denominator": "5 of 5 changed files in the grant; 19 of 19 columns; 8 of 8 earlier enums and 5 of 5 earlier optional columns byte-identical; the 0.4.1 test changed by 2 lines (bound 14), the 0.4.0 test by 0"
+    },
+    {
+      "criterion": "DB142-1-AC2",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r142/p142_contract042.py . DB142-1-AC2",
+      "rc": 0,
+      "deciding_line": "OK: behaviour: a validator driven only by the contract accepts 6 rows and rejects 5; the token census recounts 3 tokens over 920 files at 198f2591f0",
+      "verdict": "DB142-1-AC2 PASS",
+      "denominator": "6 of 6 good rows validate; 5 of 5 bad rows rejected; 3 of 3 census tokens recount exactly over 920 of 920 files at 198f2591f0"
+    },
+    {
+      "criterion": "DB142-1-AC3",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r142/p142_contract042.py . DB142-1-AC3",
+      "rc": 1,
+      "deciding_line": "FAIL: tests failed: ... 12 failed, 83 passed in 2.00s",
+      "verdict": "DB142-1-AC3 FAIL",
+      "denominator": "the new 0.4.2 file: 22 of 22 pass (the clause needs at least 8); the earlier contract-reading files: 83 of 95 pass, the 12 failures all in test_account_return_contract_041.py; the facts record equals the contract (check_facts True, measured separately)"
+    }
+  ],
+  "further_runs": [
+    {"invocation": "python -I <p142 checker> --selftest", "rc": 0, "output": "selftest PASS"},
+    {"invocation": "python -I <p142 checker> . DB142-1-AC2, run twice", "rc": 0, "output": "two runs, rc 0 each, stdout byte-identical"},
+    {"invocation": "python -I -m pytest -q test_account_return_contract_042.py", "rc": 0, "output": "22 passed"},
+    {"invocation": "python -I -m pytest -q test_account_return_contract_040.py", "rc": 0, "output": "12 passed"},
+    {"invocation": "python -I -m pytest -q test_account_return_contract_041.py", "rc": 1, "output": "12 failed, 19 passed; every failure reads that market_value_eod_claim is required on the row"},
+    {"invocation": "python -I -m pytest -q test_cottonwood_bd_account_return_daily.py test_cottonwood_report_reader.py", "rc": 0, "output": "52 passed"},
+    {"invocation": "ruff check --target-version py39 on the 040, 041 and 042 test files", "rc": 0, "output": "All checks passed!"},
+    {"invocation": "git grep -c -w -I -e TOKEN 198f2591f0 -- three pathspecs (measured, inferred, market_value_eod_claim)", "rc": 0, "output": "measured 187 files 1312 hits; inferred 66 files 195 hits; market_value_eod_claim 4 files 14 hits; denominator 920 files"}
+  ],
+  "not_done_on_purpose": [
+    "No edit to the 0.4.1 validator or its Orion fixtures: the order names only the version pin for that file; the twelve failures are surfaced in IRPT_DASHBD-D2-W223-S2.",
+    "No push, no deploy, no AWS call, no status flip (criterion DB142-1-AC3 is FAIL)."
+  ],
+  "client_data_scan": "Hand scan of every staged file and commit message for account or household identifiers, client values and long digit runs: none found; the commit gate's client-data list is absent on this box (WARN recorded by the gate)."
+}
