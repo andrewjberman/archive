@@ -1,0 +1,41 @@
+SESSION LOG -- 0.9.0_WK_DSGN_RBNDV2~1 on DSGN_RBNDV2.TO-RV-t-1 (verbatim outputs, ANSI stripped)
+Portal commit: 80d45ff8c22696b96cf91aaa7ee623cf814178b1 (branch wk-DSGN_RBNDV2-1-portal, LOCAL)
+Workspace commit (surprise rows): a5089f5c74581071e46aa538d9e391a26e826859 (branch wk-DSGN_RBNDV2-1, LOCAL)
+
+[1] first act
+  git rev-parse --abbrev-ref HEAD -> wk-DSGN_RBNDV2-1 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+  portal: git rev-parse --abbrev-ref HEAD -> wk-DSGN_RBNDV2-1-portal ; HEAD ad7c100b (order said feature/dsgn-rbndv2-light; row W1-S4)
+
+[2] generator check (scratch copy under .scratch/gen, not the worktree)
+  bun run run.ts (processBrand on design/brands/opal-capital.json, new canvas) -> wrote opal-capital.dark.css, .light.css, .css, .tailwind.ts in the COPY
+  generated --palette-canvas: 240 44.83% 94.31%  (the value applied to the four canvas lines)
+  committed theme file differs in structure from the generator output (row W1-S1)
+
+[3] RB1T-AC1 invocation, run 1 and run 2
+  $ timeout 180 bun test src/__tests__/dsgn-rbndv2/rb-1-t.tokens.test.ts 2>&1 | tail -25
+  VERDICT: TOKENS-OK
+   1 pass
+   0 fail
+   27 expect() calls
+  rc=0 (both runs)
+
+[4] RB1T-AC2 invocation, run 1 and run 2
+  $ timeout 180 bun test src/__tests__/dsgn-rbndv2/rb-1-t.canvas.test.ts 2>&1 | tail -25
+  VERDICT: CANVAS-SOURCE-OK
+   1 pass
+   0 fail
+   11 expect() calls
+  rc=0 (both runs)
+
+[5] difference controls
+  C1 AC2, base commit brand JSON and base theme (git show ad7c100b:design/...):
+     Expected: "#EAEAF7"  Received: "#F4F6FA"   -> 1 fail, rc=1, no VERDICT line
+  C2 AC2, new brand JSON, base theme only (RB1T_THEME_CSS):
+     Expected: not "220 37.5% 96.86%"   -> 0 pass, 1 fail, rc=1, no VERDICT line
+  C3 AC1, base src/index.css (RB1T_INDEX_CSS): 0 pass, 1 fail, rc=1, no VERDICT line
+  C4 AC1, src/index.css plus the appended line ".dark-band .text-white { color: red; }": 0 pass, 1 fail after 20 expect() calls (27 on a pass), rc=1, no VERDICT line
+
+[6] portal commit gate
+  commit-gate WARN: checked 0 of 5 file(s) -- NOTHING WAS CHECKED (.ts/.css/.json fall through the gate; not cited as validation)
+
+[7] proof-of-spec-check: see the instance and the check line recorded in the worker report
