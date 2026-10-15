@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-t-33",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R43_T.md",
+    "vintage_commit": "218aa64619eb2c519dadc0a7c8a0220993d203bf",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-33.figures-tickers-and-model-names-closed.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-33.figures-tickers-and-model-names-closed.md",
+    "group": "T",
+    "vintage_commit": "218aa64619eb2c519dadc0a7c8a0220993d203bf"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~192",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/drafter.py",
+      "kind": "script",
+      "commit_or_etag": "06275863db5dc8d58c2f5ddad759dd3688ae919b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-192 only (LOCAL). Not deployed: no Lambda package rebuilt, infra/aws/lambda/transcripts-pull/dist/ untouched.",
+      "artifact_covered_by": ["AR33-t-AC1"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_commentary_figures.py",
+      "kind": "test",
+      "commit_or_etag": "06275863db5dc8d58c2f5ddad759dd3688ae919b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-192 only (LOCAL). Seven tests in the file, run on the real tree."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR33-t-AC1",
+      "criterion_verbatim": "AR33-t-AC1 -- the three named tests pass together with the four existing figure tests (7 passed).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R43_CHECKS/r43_checks.py cn1",
+      "output_evidence": "R43-CN1-OK 7 passed in 0.11s (rc=0), run from the worktree at 06275863db. Verbose run: test_figures_whitelist_drops_unknown_members_and_bad_tickers PASSED; test_prompt_carries_figures_block_and_no_planted_name_or_dollar PASSED; test_provenance_lists_prompt_fields_by_name_only PASSED; test_abstract_request_carries_figures_from_basis PASSED; test_condition_dollar_name_and_account_id_are_all_dropped PASSED; test_tickers_must_be_in_the_estate_table PASSED; test_model_names_must_be_among_the_requests_comparison_keys PASSED.",
+      "denominator": "7 of 7 figure tests pass (the 4 existing + the 3 named)",
+      "status": "PASS",
+      "expect": "R43-CN1-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-memory mutants on the real tree (files untouched), via .scratch/mutant_check.py: MUTANT-A replaces ESTATE_TICKERS with a container that admits every ticker; MUTANT-B passes allowed_models=None to figures_block.",
+      "expected": "MUTANT-A fails the condition test and the table test; MUTANT-B fails the condition test and the comparison-key test.",
+      "observed": "MUTANT-A(no-table): condition FAILED, tickers FAILED, comparison-keys PASSED; MUTANT-B(no-keys): condition FAILED, tickers PASSED, comparison-keys FAILED; REAL: all three PASSED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "repeated runs of test_commentary_figures.py on the real tree at 06275863db (the file is unchanged between runs)",
+      "observed": "run 1: 7 passed in 0.14s; run 2: 7 passed in 0.12s; run 3 (r43_checks.py cn1): 7 passed in 0.11s, R43-CN1-OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Packaged copy under infra/aws/lambda/transcripts-pull/dist/",
+      "reason": "Build output, not this order's; nothing is deployed by this cell."
+    },
+    {
+      "item": "Client-data scan of the commit",
+      "reason": "The commit-time client-data check reported its hashed account-id list ABSENT on this box (WARN), so the commit was not checked against that list. The account-id strings in the new tests are invented fixtures (12345678, A1234567) that the rule drops by design."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W192-S1: the TO's bounds say leave the other four figure tests alone, but the model-name rule forces fixture edits beyond the ticker-only allowance (clean_block model names, ZZQ1->AAPL, ZZQ4->MSFT, test_provenance model_names count 2->1). Made and listed (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~192/IRPT_ANLREQ.TO-AR-t-33.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39) via safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_code.txt -- drafter.py test_commentary_figures.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s); commit 06275863db5dc8d58c2f5ddad759dd3688ae919b (LOCAL)"
+    },
+    {
+      "tool": "surprise-row-gate via safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_row.txt -- org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; commit 2e20b8a6585c8750d0b16faf30e468a865608b6d (LOCAL)"
+    },
+    {
+      "tool": "r43_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R43_CHECKS/r43_checks.py cn1",
+      "result": "R43-CN1-OK 7 passed in 0.11s, rc=0 (real tree, committed 06275863db). Baseline at 218aa64619 before the build: R43-CN1-FAIL missing (three test names), rc=1."
+    },
+    {
+      "tool": "pytest core commentary suite on the real tree",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_commentary_*.py -q",
+      "result": "72 passed (69 at base + 3 new), rc=0"
+    }
+  ]
+}

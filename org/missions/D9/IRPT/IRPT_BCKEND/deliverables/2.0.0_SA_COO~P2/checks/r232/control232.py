@@ -16,7 +16,7 @@ import p232_cells as P  # noqa: E402
 
 H64 = "ab" * 32
 GOOD = {
-    "gates": {"packet_blob": P.BLOB, "both_halves_signed": True,
+    "gates": {"packet_blob": P.BLOB, "addendum_blob": P.ADD_BLOB, "both_halves_signed": True, "text_equals_committed": True, "inline_policy_names_printed": True,
               "plan": {"add": 1, "change": 0, "destroy": 0, "addresses": [P.ADDRESS]},
               "arns": {"prefixes_printed": True, "equal_address_output": True},
               "one_change_at_a_time": True, "ledger_opened_before_apply": True},
@@ -25,8 +25,8 @@ GOOD = {
               "rollback_performed": False},
     "simulation": {"allowed": {k: "allowed" for k in P.ALLOWED}, "denied": {k: "implicitDeny" for k in P.DENIED},
                    "controls": {"inf_bucket_allowed": True, "unrelated_bucket_denied": True}},
-    "exists_read": {"ran_on_runner": True, "key_was_known_absent": True, "answer": "ABSENT"},
-    "counters": {"function_updates": 0, "lambda_invokes": 0, "other_iam_changes": 0, "schedule_changes": 0, "keys_written": 0,
+    "exists_read": {"ran_on_runner": True, "key_was_known_absent": True, "answer": "ABSENT", "tiers": {"bronze": "ABSENT", "silver": "ABSENT"}, "raw_status_printed": True, "runner_stopped_within_30_min": True},
+    "counters": {"instance_starts": 1, "function_updates": 0, "lambda_invokes": 0, "other_iam_changes": 0, "schedule_changes": 0, "keys_written": 0,
                  "existing_keys_changed": 0, "secrets_printed": 0},
 }
 
@@ -44,6 +44,9 @@ def mut(path, value):
 
 NEGS = [
     ("wrong_blob", "AC1", mut(["gates", "packet_blob"], "0" * 40)),
+    ("wrong_addendum_blob", "AC1", mut(["gates", "addendum_blob"], "0" * 40)),
+    ("text_not_committed", "AC1", mut(["gates", "text_equals_committed"], False)),
+    ("names_not_printed", "AC1", mut(["gates", "inline_policy_names_printed"], False)),
     ("plan_two_added", "AC1", mut(["gates", "plan", "add"], 2)),
     ("plan_other_address", "AC1", mut(["gates", "plan", "addresses"], [P.ADDRESS, "aws_iam_role_policy.other"])),
     ("arns_not_equal", "AC1", mut(["gates", "arns", "equal_address_output"], False)),
@@ -57,13 +60,16 @@ NEGS = [
     ("put_not_allowed", "AC3", mut(["simulation", "allowed", "put_silver_feed_key"], "implicitDeny")),
     ("exists_403", "AC3", mut(["exists_read", "answer"], "403")),
     ("exists_not_on_runner", "AC3", mut(["exists_read", "ran_on_runner"], False)),
+    ("silver_tier_403", "AC3", mut(["exists_read", "tiers", "silver"], "403")),
+    ("runner_left_running", "AC3", mut(["exists_read", "runner_stopped_within_30_min"], False)),
+    ("two_starts", "AC3", mut(["counters", "instance_starts"], 2)),
     ("key_written", "AC3", mut(["counters", "keys_written"], 1)),
 ]
 
 
 def build(rec):
     root = Path(tempfile.mkdtemp(prefix="c232_"))
-    for rel, txt in ((P.COO_HALF, "GIVEN blob " + P.BLOB[:10]), (P.CTO_HALF, "SIGNED blob " + P.BLOB[:10]), (P.PACKET, "packet")):
+    for rel, txt in ((P.COO_HALF, "GIVEN blob " + P.BLOB[:10]), (P.CTO_HALF, "SIGNED blob " + P.BLOB[:10]), (P.PACKET, "packet"), (P.ADD_COO, "GIVEN blob " + P.ADD_BLOB[:10]), (P.ADD_CTO, "SIGNED blob " + P.ADD_BLOB[:10])):
         f = root / rel
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(txt, encoding="utf-8")
