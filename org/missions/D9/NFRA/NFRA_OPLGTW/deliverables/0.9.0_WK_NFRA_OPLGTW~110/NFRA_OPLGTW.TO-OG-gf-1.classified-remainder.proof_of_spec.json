@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-gf-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gf-1.gf-wave-b-remainder.md",
+    "group": "OTHER",
+    "vintage_commit": "3bbdf8fbdc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "3bbdf8fbdc",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gf-1.gf-wave-b-remainder.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~110",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/etfs_silver.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only; no release, no deploy (order section 2)",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gf1.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file; runs offline against a recording fake",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~110/CLASSIFICATION.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "classification of the 15 assigned rows (AC2 input)",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~110/probe_built.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only probe of the BUILT rows against the real bucket; writes nothing",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass. (order section 4: pytest rc=0; named tests passed 3 of 3; failed/error lines 0.)",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gf1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 4; failed/error lines 0\nRESULT: FAIL\nexit=1",
+      "denominator": "3 of 4 named tests passed: the check names four (test_oggf1_ac01, ac02, ac03, ac04); ac04 is withdrawn by A1 and removed from the test file; pytest collected 5 items and passed 5 (ac03 parametrized over 3 tools)",
+      "status": "FAIL",
+      "status_reason": "The order expects 3 of 3 after the A1 withdrawal of test_oggf1_ac04. The check script (issuer's file, not edited) still names four tests, and its helper passes only when passed equals named. With ac04 removed pytest exits rc=0, the helper reads 3 of 4, and RESULT is FAIL. The criterion cannot read PASS as written. BLOCKING row NFRA_OPLGTW-Z-W110-S5. This supersedes the prior instance's ac04 red-by-design FAIL (row S2): the test is withdrawn, not red.",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: every assigned row is classified exactly once (the keys equal the catalog's assigned set) and every BUILT tool answers an enveloped read of the real bucket and refuses a non-Opal principal with zero reads.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/gf1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "classification: assigned 15 of 15, covered 0, built 6, deferred 9; set equal True; built tools defined 6 of 6\nprobe built: etfs_get_fund_bloomberg_characteristics [geo_allocation] answered True; non_opal_refused True; reads_on_refusal 0\nprobe built: etfs_get_fund_snapshot [snapshots] answered True; non_opal_refused True; reads_on_refusal 0\nbuilt tools probed 6 (the worker's probe lines)\nRESULT: PASS\nexit=0",
+      "denominator": "15 of 15 assigned rows classified (covered 0, built 6 rows over 3 distinct tools, deferred 9); 6 of 6 BUILT rows answered and refused non-Opal with zero reads; the probe's own denominator line reads 6 BUILT catalog rows over 3 tools",
+      "status": "PASS",
+      "expect": "(?s)classification: assigned 15 of 15, covered \\d+, built \\d+, deferred \\d+; set equal True; built tools defined (\\d+) of \\1.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "no mutant is named by the order's criteria; the named tests assert the envelope and refusal directly",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a single live read of the bucket per probe run; no same-input comparison is defined by the order",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "etfs_get_positioning extension (former test_oggf1_ac04)",
+      "reason": "WITHDRAWN by the issuer's A1 ruling (2026-10-15): the extension is registered in integration.py, which is NFRA_MCPINDEX's file and outside this order's paths; routed to 2.0.0_SA_COO~MI. The test is removed from tests/test_og_gf1.py in this cell."
+    },
+    {
+      "item": "registrations of etfs_get_new_securities, etfs_get_fund_bloomberg_characteristics and etfs_get_fund_snapshot in app/tools.py and app/data_entitlement.py, and the pinned-count moves",
+      "reason": "outside this cell's write surface (order section 2); the issuer registers at the merge"
+    },
+    {
+      "item": "DEFERRED rows (9): config universe, bbg characteristics, bbg issuer fill, bbg history top-up, rival Bloomberg and issuer silvers, history gaps, CSV twin, netassets silver",
+      "reason": "CRO spec proposes no tool, or the table is served through gold canonical_shape or superseded; one-line reason per row in CLASSIFICATION.json"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W110-S1: AC2 counts BUILT catalog rows (6) while the order specifies one probe line per BUILT tool (3); the probe prints one line per BUILT row.",
+    "NFRA_OPLGTW-Z-W110-S2: prior seat's record that AC1 is red by design on test_oggf1_ac04; superseded by the A1 withdrawal of that test in this cell.",
+    "NFRA_OPLGTW-Z-W110-S3: the gateway tree at b56fd6ef9d has no tests/ directory and the folder sat outside the sparse cone; the test file was written at the named path.",
+    "NFRA_OPLGTW-Z-W110-S4: the CRO spec proposes the name etfs_get_fund_nav_history for the snapshot table, a name the merged tool holds; the snapshot tool is etfs_get_fund_snapshot.",
+    "NFRA_OPLGTW-Z-W110-S5: gf1.AC1.sh names four tests and requires passed equal to four, so the A1 withdrawal of ac04 leaves AC1 at FAIL (3 of 4); BLOCKING, issuer disposition.",
+    "NFRA_OPLGTW-Z-W110-S6: A1 (3) states the AC2 check counts distinct tools; the check is unchanged and still counts BUILT rows (6); the probe prints six per-row lines.",
+    "NFRA_OPLGTW-Z-W110-S7: comp-find exits 49 ('Python was not found') on this device in the worker shell; no denominator was produced by it."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~110/probe_built.out.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_gf1.py -v -p no:cacheprovider (cwd infra/aws/ec2/opal-gateway)",
+      "result": "5 passed in 3.70s (test_oggf1_ac01, test_oggf1_ac02, test_oggf1_ac03 x3); exit 0"
+    },
+    {
+      "tool": "probe_built.py",
+      "invocation": "python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~110/probe_built.py",
+      "result": "probe denominator: 6 BUILT catalog rows over 3 tools; answered 6 of 6; non-Opal refusals with zero reads True; rc 0"
+    },
+    {
+      "tool": "naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff <rename diff> --enforce --staged-paths <staged list>",
+      "result": "NAMING-GATE: PASS 0 graded; rc 0. Positive control (old name in a new file): REFUSE 1 graded, rc 1."
+    }
+  ]
+}

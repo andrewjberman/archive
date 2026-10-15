@@ -1,0 +1,17 @@
+{
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-30",
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~50",
+  "worktree": "C:/tmp/mi2-wk50",
+  "branch": "wk-NFRA_MCPINDEX-50",
+  "steps": [
+    {"step": "first act: branch and TREE-OK", "invocation": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK", "result": "wk-NFRA_MCPINDEX-50; TREE-OK"},
+    {"step": "0 control: pytest before any edit", "invocation": "python -m pytest -q -p no:cacheprovider workflows/atom_decomposition/tests", "result": "228 passed, rc=0"},
+    {"step": "1a exclusions file and generator argument", "invocation": "edit gen_silver_rows.py (load_scope_exclusions, --scope-exclusions, skip in the entries loop, wrote count = len(entries)); write scope_exclusions.json", "result": "done"},
+    {"step": "1b tests", "invocation": "write tests/test_scope_exclusions.py; set IN_SCOPE 216 -> 214 in tests/test_gen_silver_rows.py", "result": "test_scope_exclusions.py 11 tests; full suite 239 passed, rc=0"},
+    {"step": "2 regenerate rows with pinned inputs", "invocation": "python workflows/atom_decomposition/gen_silver_rows.py --g2 ... --deployed-tools .../round17/deployed_ap20.json --firm-map .../round17/f1_firm_map.json --out workflows/atom_decomposition/catalog_entries", "result": "rc=0; excluded opal_data_portal_v2_platinum_advi_49financial_twins and _perfrp, both platinum/advi/49financial/; wrote 214 rows; git status under catalog_entries: 0 modified, 0 deleted before git rm"},
+    {"step": "2b remove the two advisor row files", "invocation": "git rm the two opal_data_portal_v2_platinum_advi_49financial_*.yaml", "result": "2 staged deletions"},
+    {"step": "3 regenerate the catalog", "invocation": "python workflows/atom_decomposition/emit_catalog_v02.py --overlay-ref 06cfb6db64", "result": "rc=0; SILVER 224 emitted 0 refused; HARVEST ROWS 78 emitted 0 refused; TOOL INDEX N=99 served tools; no EMIT REFUSED"},
+    {"step": "4 criteria", "invocation": "bash .../checks/c30.AC1.sh; bash .../checks/c30.AC2.sh", "result": "AC1 PASS exit=0 (catalog entities 302; generator wrote 214); AC2 PASS exit=0 (11 passed)"}
+  ],
+  "note": "DATA_CATALOG.yaml is regenerated in the worktree by step 3 and is NOT staged or committed (not in paths)."
+}
