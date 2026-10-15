@@ -1,0 +1,37 @@
+{
+  "to": "IRPT_BCKEND.TO-IB-pr-568",
+  "step": "4 (the performance positive control, before any performance day)",
+  "performed": true,
+  "branch": "repo_script_matches",
+  "byte_diff": {"repo_bytes": 29784, "chain_bytes": 29230, "differing_lines": 14},
+  "byte_diff_reading": "Folded line diff of data/inf/manual_api/pull_inflection_performance_rest.py against the chain copy s3://opal-data-inf/code/gold/pull_inflection_performance_rest.py (object last modified 2026-07-07). The only differing function is _load_inflection_client_ids: the chain copy derives the ids inline (digits only), the repository script delegates to _hh_universe.load_household_universe (a floor on the universe). No request, window, field, mode or write line differs.",
+  "client_universe_today": {"repository_loader": 320, "chain_copy_loader_logic_on_the_same_snapshot": 320, "snapshot_household_id_dtype": "Int64", "non_digit_rendered_ids": 0},
+  "dry_run": {
+    "invocation": "run_pull.py (scratch wrapper, persist_state no-op) pull_inflection_performance_rest.py --dry-run --pull-date 2026-10-14",
+    "mode": "incremental",
+    "prior_bronze_loaded": "bronze/performance/2026-10-12.jsonl.gz",
+    "clients": 320, "ok": 315, "incremental": 312, "escalated_to_full": 8, "empty": 5, "fail": 0,
+    "orion_requests": 386,
+    "s3_writes": 0,
+    "local_gzip_bytes": 4648849
+  },
+  "dry_run_compared_day": "2026-10-14",
+  "compared_against": "the chain's own bronze/performance/2026-10-14.jsonl.gz: head (size, content type) and the leading record only, by a ranged read of the first 64 KiB; field names and value types only, no value read or recorded",
+  "comparison": {
+    "chain_key_content_length": 4477797,
+    "chain_content_type": "application/gzip",
+    "field_names_equal": true,
+    "field_types_equal": true,
+    "first_record_fields": ["client_id", "date", "factor", "pull_date"],
+    "layout": "gzip, one JSON object per line, same four fields, pull_date equal to the key date on both",
+    "size_ratio_local_over_chain": 1.0382
+  },
+  "shape_match": true,
+  "observations": [
+    "The request made is the same code on both sides (the two scripts differ only in how the client ids are loaded, and both loaders give the same 320 ids on the current snapshot).",
+    "The dry-run file is 3.8 percent larger than the chain's key for the same pull date. The chain's key was written on 2026-10-14 and the dry run pulled on 2026-10-15, and the order restricts the chain key to its leading record, so row counts were not compared; this is stated, not resolved.",
+    "The incremental path loaded the 2026-10-12 partition as its prior because 2026-10-13 has no flat key (it is one of the 22 days to be backfilled); the backfill runs days in ascending order so each day's prior is the nearest earlier key."
+  ],
+  "writes": {"s3_objects": 0, "state_key": 0},
+  "claim": "measured"
+}
