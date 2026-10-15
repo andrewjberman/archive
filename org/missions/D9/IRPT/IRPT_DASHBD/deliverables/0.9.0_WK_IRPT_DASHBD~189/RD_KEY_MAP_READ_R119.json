@@ -1,0 +1,84 @@
+{
+  "tables_listed": 14,
+  "tables_with_partitions": 14,
+  "candidates": [
+    {
+      "table": "fact_allocations",
+      "partition_date": "2026-10-13",
+      "account_key_columns": ["AccountID"],
+      "custodian_number_columns": ["Original Account Number", "Account Number", "NFS Account Number"],
+      "claim": "measured"
+    },
+    {
+      "table": "fact_holdings",
+      "partition_date": "2026-10-13",
+      "account_key_columns": ["AccountID"],
+      "custodian_number_columns": ["Account Number"],
+      "claim": "measured"
+    },
+    {
+      "table": "fact_realized",
+      "partition_date": "2026-10-14",
+      "account_key_columns": ["AccountID"],
+      "custodian_number_columns": ["Account Number"],
+      "claim": "measured"
+    },
+    {
+      "table": "fact_transactions",
+      "partition_date": "2026-10-14",
+      "account_key_columns": ["AccountID"],
+      "custodian_number_columns": ["Contra Account Number", "Account Number", "Original Account Number", "Account Display Number"],
+      "claim": "measured"
+    },
+    {
+      "table": "fact_unrealized",
+      "partition_date": "2026-10-13",
+      "account_key_columns": ["AccountID"],
+      "custodian_number_columns": ["Account Number"],
+      "claim": "measured"
+    }
+  ],
+  "frontier": {
+    "date": "2026-06-22",
+    "account_ids": 12,
+    "claim": "measured"
+  },
+  "map": {
+    "exists": true,
+    "table": "fact_allocations",
+    "key_column": "AccountID",
+    "custodian_column": "NFS Account Number",
+    "normalization": "exact",
+    "partitions_read": ["2026-04-22", "2026-05-08", "2026-05-24", "2026-06-09", "2026-06-27", "2026-07-05", "2026-07-14", "2026-08-05", "2026-08-27", "2026-10-13"],
+    "coverage": {
+      "frontier_ids": 12,
+      "mapped": 5,
+      "unmapped": 7
+    },
+    "words": "A map exists in one candidate table, silver fact_allocations, and it is partial. The key AccountID and the column NFS Account Number are both populated on the same rows: 7,291 rows carry both over the ten partitions read, 954 distinct AccountID values, and no AccountID carries two NFS Account Number values in those partitions. Under the exact normalisation 5 of the 12 Commonwealth ids of the 2026-06-22 frontier partition appear in NFS Account Number over the ten partitions read; 7 do not. The normalisations strip_leading_zeros and zero_pad_10 give the same 5. The other candidate columns map fewer frontier ids: fact_allocations Account Number and Original Account Number 0; fact_holdings Account Number 2 (19 AccountID values carry more than one custodian value); fact_realized Account Number 1; fact_transactions Account Number 2, Account Display Number 2 and Contra Account Number 0 (the last with 14 AccountID values carrying more than one value); fact_unrealized Account Number 0. That the column holds the Commonwealth custodian number is inferred from the five exact matches; no document in the repo names it.",
+    "claim": "measured"
+  },
+  "history": {
+    "distinct_commonwealth_ids": 1533,
+    "partitions": 3325,
+    "claim": "measured"
+  },
+  "seam_words": "The seam is joined only in part. The Cottonwood account_return_daily history before 2026-06-23 holds 1,533 distinct Commonwealth ids over 3,325 date partitions (2013-04-03 to 2026-06-22). Over the ten fact_allocations partitions read, 563 of those 1,533 ids appear in the map column NFS Account Number, so the history joins through this map for 563 ids. The other 970 ids have no map row in the partitions read and are not stitched: they stay SOURCE_BREAK at the seam unless another partition or table carries them. The 134 fact_allocations partitions not read were not searched, so 563 is a floor for the map over the table, not its full coverage. At the frontier the same map covers 5 of 12 ids.",
+  "analysis": {
+    "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~189/key_map_read_r119.py",
+    "sha256": "194f534530b699fb1c08a2e399b540f37f7d7d1862095ca21828badee1999e4a",
+    "tracked": true
+  },
+  "reads": {
+    "s3_reads": 3459,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

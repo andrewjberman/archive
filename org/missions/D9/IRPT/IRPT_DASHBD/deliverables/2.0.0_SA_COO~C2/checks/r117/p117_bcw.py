@@ -37,6 +37,13 @@ READERS = ["data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "i
 REGION = "us-east-1"
 
 
+def clean(rec):
+    """The record carries hashes, slugs, keys and addresses, so the digit-run rule applies to the words fields only."""
+    for k, v in p114.walk(rec):
+        if isinstance(v, str) and k in ("words", "basis_words", "note"):
+            need(not p114.LONG_DIGITS.search(v), "a run of 8 or more digits in field " + k)
+
+
 def git(root, *args):
     r = subprocess.run(["git", "-C", str(root)] + list(args), capture_output=True, text=True, encoding="utf-8")
     need(r.returncode == 0, "git " + " ".join(args[:2]) + " failed: " + r.stderr[:120])
@@ -59,7 +66,7 @@ def split(uri):
 
 def ac_1(root):
     r = p114.load(root, REC)
-    p114.no_identifiers(r)
+    clean(r)
     g = r["gates"]
     need(git(root, "hash-object", PACKET) == BLOB == g["packet_blob"], "the packet blob is not the signed one")
     for half in (COO_HALF, CTO_HALF):
@@ -71,8 +78,7 @@ def ac_1(root):
     b = r["build"]
     need(b["upload_member_diff"] == ["handler.py"], "the built zip differs from the live zip by more than handler.py: " + str(b["upload_member_diff"]))
     need(b["built_equals_landed"] is True, "the landed zip is not the built zip")
-    led = Path(root) / "org/critical_paths/change_management" / (r["ledger_entry"] + ".md")
-    cands = [led] if led.is_file() else list((Path(root) / "org/critical_paths/change_management").glob(r["ledger_entry"] + "*"))
+    cands = list((Path(root) / "org/critical_paths/change_management").glob("*" + r["ledger_entry"] + "*"))
     need(len(cands) >= 1, "the ledger entry is absent: " + r["ledger_entry"])
     lt = cands[0].read_text(encoding="utf-8", errors="replace")
     need("shared zip" in lt.lower() or "shared-zip" in lt.lower(), "the ledger does not name the shared zip")
@@ -88,7 +94,7 @@ def ac_1(root):
 def ac_2(root):
     naming, cal = p114.lib(root)
     r = p114.load(root, REC)
-    p114.no_identifiers(r)
+    clean(r)
     c = r["catch_up"]
     dates = c["dates"]
     need(len(dates) >= 1 and dates == sorted(dates) and all(cal.is_trading_day(p114.iso(d)) for d in dates), "catch-up dates are not ascending trading days")

@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-561",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-561.rebuild-the-ib-pr-456-ycharts-generate-candidate-on-the-live-r29c-bytes.md",
+  "group": "OTHER",
+  "vintage_commit": "66a6cd8686"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "66a6cd8686",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-561.rebuild-the-ib-pr-456-ycharts-generate-candidate-on-the-live-r29c-bytes.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~405",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~405/IB203-2_ycharts_generate_rebuild.json",
+   "kind": "config_data",
+   "commit_or_etag": "d3e3940bfa",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only record: live CodeSha256 read and equal to the release 29 digest, candidate rebuilt locally in scratch and not uploaded; the candidate is not deployed and nothing is applied",
+   "artifact_covered_by": [
+    "IB203-2-AC1",
+    "IB203-2-AC2",
+    "IB203-2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~405/IB203-2_criteria_output.txt",
+   "kind": "doc",
+   "commit_or_etag": "d3e3940bfa",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "verbatim output and exit codes of the three criteria, and the negative controls run on the record in scratch",
+   "artifact_covered_by": [
+    "IB203-2-AC1",
+    "IB203-2-AC2",
+    "IB203-2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d3e3940bfa",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two appended rows IRPT_BCKEND-D2-W405-S1 and S2; no existing row edited; the appended text is a channel record, not a deploy",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB203-2-AC1",
+   "criterion_verbatim": "AC1 the live function and digest, the rebuilt candidate (not the stale `AHxuDf7h` build) with its moved members listed against their count and the member total",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r203/p203_cells.py\" . IB203-2-AC1",
+   "expect": "IB203-2-AC1 PASS",
+   "output_evidence": "OK: the live digest, the rebuilt candidate, the moved members with their denominator | IB203-2-AC1 PASS | rc=0",
+   "denominator": "moved_count 1 of total_members 106 (candidate and live zip each 106 members); live CodeSha256 matched 1 of 1",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB203-2-AC2",
+   "criterion_verbatim": "AC2 release 29's members `generate_installed.py`, `uploads.py`, `ordinary_viewer.py` and `interactive_access.py` are NOT moved, the three ENDPOINT members compared by hash with `changed` consistent, and `resign_needed` true exactly when one moved",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r203/p203_cells.py\" . IB203-2-AC2",
+   "expect": "IB203-2-AC2 PASS",
+   "output_evidence": "OK: no silent revert of release 29; ENDPOINT members compared by hash; re-sign exactly when one moved | IB203-2-AC2 PASS | rc=0",
+   "denominator": "release 29 members moved 0 of 4; ENDPOINT members changed 3 of 3; resign_needed true with endpoint_bytes_moved true",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB203-2-AC3",
+   "criterion_verbatim": "AC3 the pre-apply digest restated as the live one, notes, the six bound counters 0, no long digit run",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r203/p203_cells.py\" . IB203-2-AC3",
+   "expect": "IB203-2-AC3 PASS",
+   "output_evidence": "OK: the pre-apply digest restated, notes, counters 0 | IB203-2-AC3 PASS | rc=0",
+   "denominator": "bound counters 0 of 6; restated pre-apply digest equal to the live digest 1 of 1; notes present",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative controls on the record in scratch (checks unedited): m1 adds uploads.py to moved_members; m2 sets resign_needed false while ENDPOINT members moved; m3b sets submission.py changed false while its hashes differ. Each must FAIL; the unmutated record must PASS. A fourth variant with an internally consistent ENDPOINT set is not a defect the check should see and PASSes.",
+   "expected": "FAIL for m1, m2, m3b; PASS for the unmutated record",
+   "observed": "m1 rc=1 FAIL; m2 rc=1 FAIL; m3b rc=1 FAIL; unmutated rc=0 PASS; consistent variant rc=0 PASS",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "BUILD_ONLY run twice at the same base with TMPDIR in scratch; the two zips compared byte for byte",
+   "observed": "zips byte-identical on the second run; candidate sha256 MfxpvRhVHOXgxEubGlznMMN1E5CPHvSBqfXlk7FwbNM= on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W405-S1 -- composition_admission.py is the one member the rebuilt candidate moves; it is not a release 29 member and the R29c ledger does not list it; ARMED, disarm owner 2.0.0_SA_COO~P2",
+  "IRPT_BCKEND-D2-W405-S2 -- CTO messages 8116 and 8133 are not readable from the worktree and this face has no broker read; OBSERVATION, INERT"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see final report"
+  }
+ ]
+}

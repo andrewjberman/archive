@@ -1,0 +1,17 @@
+# IB-pr-456 ADDENDUM 1 -- `composition_admission.py` rides the `irpt-ycharts-generate` release; the corrected candidate; the COO half
+
+Author: 2.0.0_SA_COO~P2 on dell2, 2026-10-15 ~07:3xZ. For: 1.0.0_SA_CTO~DELL2 (the other half, per ruling `CTO_RULING_DELL2_IRPT_BCKEND_COMPOSITION_ADMISSION_RIDES_AND_ORION_BACKFILL_20261015.md`, item 1).
+Amends the IB-pr-456 pair (`deliverables/0.9.0_WK_IRPT_BCKEND~312/NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-456.md`, COO half `NEVER_WIDEN_IB_pr_456_COMMENTARY_REQUESTED_ENDPOINT_READ_AND_COO_HALF.md`). It changes no other line of that pair.
+
+## The addendum (one paragraph)
+
+The release candidate of `irpt-ycharts-generate` is REPLACED: the pair's `AHxuDf7h...` was built before release 29 leg L3 and is withdrawn; the candidate is CodeSha256 `3+fMEJhQ8enneLH30XiiV5VYEC4kk0+hZl0SFFsyM4k=`, built with the IB-pr-456 candidate map at `e7bb7e923a` (record `deliverables/0.9.0_WK_IRPT_BCKEND~408/IB205-1_ycharts_generate_rebuild_v2.json`, merged `c324a93684`), and the pre-apply (live) digest is restated as `5TRFZf6Grgd9V9jWBVu2QDPRVbgfWBjsuuw8rtf8hRA=`. Against the live package 4 of 106 members move: the three ENDPOINT members at the signed bytes (`commentary_requested` 3, 3 and 1; sha256 equal to the signed build's, so no ENDPOINT byte moved) and ONE member the pair did not name, **`composition_admission.py`** (cause commit `83eb798a08`, the IRPT_ANLREQ cause commit `cause(IRPT_ANLREQ.TO-AR-y-318)`; sha256 of the member `8d9b7aadc7c4db0b078737b155b4ec999d245d20c8bee83515c628639d0f64fd`; live is `50f5d11c...`). The change: on a refused composition, `validate` prints one log line `COMPOSITION-REFUSED step=<n> error_class=<class>` naming the failing step (1 canonical, 2 schema, 3 compose, 4 bindings, 5 portfolio) and the exception CLASS only, never the message or a value; the refusal it raises, `SubmissionRefused("CLOSED_COMPOSITION_REQUIRED")`, and every public result are unchanged. Release 29's four members (`generate_installed.py`, `uploads.py`, `ordinary_viewer.py`, `interactive_access.py`) are byte-identical to live; the companion typed refusal in `uploads.py` from the same commit does NOT ride (it is not in this candidate). Cause owner: `2.0.0_SA_COO~Y2`. Test, run in the apply's after-read on the candidate source at the pinned commit: `infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_composition_refusal_cause.py` (6 pass at `83eb798a08`; 5 fail on the base sources). **Blast radius added:** one stdout line per refused composition on the function's log group (the step number and a class name, no client value); no served byte and no response changes.
+
+## What this seat signs and what it does not
+
+- **COO half:** signs the addendum above as the blast radius of the `composition_admission.py` member, with the pair's conditions 1 to 4 unchanged and the ENDPOINT members unchanged from the signed build.
+- **Not signed here:** the apply. It waits on Andrew's act (call f61b); no apply order exists and none is cut by this file.
+- **After-read note:** the live package holds `commentary_requested` 0 times in the three ENDPOINT members (counted from the downloaded zip), so the BEFORE record of the pair is a request against a build that does not accept the member; the packet's after-read states which BEFORE record it needs, and that statement is the CTO's to word under the ruling's item 1.
+- **Not read:** the live event source mappings, routes, resource policies and environment values (unchanged by this addendum); the CTO half is not yet signed.
+
+-- 2.0.0_SA_COO~P2
