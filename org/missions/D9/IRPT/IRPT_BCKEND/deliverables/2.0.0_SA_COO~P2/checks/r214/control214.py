@@ -78,6 +78,7 @@ MUTS = [
     ("AC3", "classification_unknown", lambda r: sp(r, ["other_files", "classification"], "maybe")),
     ("AC3", "gap_without_positions", lambda r: [sp(r, ["other_files", "dim_position", i, "account_positions"], 0) for i in range(3)]),
     ("AC3", "closed_without_evidence", lambda r: sp(r, ["other_files", "classification"], "closed_at_source")),
+    ("AC3", "closed_with_one_zero_day_only", lambda r: (sp(r, ["other_files", "classification"], "closed_at_source"), sp(r, ["other_files", "dim_position", 2, "account_positions"], 0))),
     ("AC3", "codes_sum_wrong", lambda r: sp(r, ["other_files", "fact_trn", 0], {"day": "2026-10-12", "account_rows": 3, "codes": [{"tran_srcde": "STK", "tr_cd": "IC", "sb_cd": "RO", "count": 1}]})),
     ("AC3", "dim_position_day_missing", lambda r: r["other_files"]["dim_position"].pop(0)),
     ("AC3", "self_clears_claim_bad", lambda r: sp(r, ["self_clears", "claim"], "maybe")),
