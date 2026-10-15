@@ -17,9 +17,10 @@
     {
       "path_or_key": "data/transcripts/scripts/commentary/drafter.py",
       "kind": "script",
-      "commit_or_etag": "c4a21921887c83efdafd4e46549c0455bcf001a2",
+      "commit_or_etag": "633456fa6fd28935560dbfe12013022afa66fd50",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Not deployed: no Lambda package rebuilt, infra/aws/lambda/transcripts-pull/dist/ untouched."
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Not deployed: no Lambda package rebuilt, infra/aws/lambda/transcripts-pull/dist/ untouched.",
+      "artifact_covered_by": ["AR31-t-AC1"]
     },
     {
       "path_or_key": "data/transcripts/scripts/commentary/entry.py",
@@ -32,9 +33,9 @@
     {
       "path_or_key": "data/transcripts/scripts/tests/test_commentary_figures.py",
       "kind": "test",
-      "commit_or_etag": "c4a21921887c83efdafd4e46549c0455bcf001a2",
+      "commit_or_etag": "633456fa6fd28935560dbfe12013022afa66fd50",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Four tests; three drafter tests cannot import in this sparse worktree (surprise IRPT_ANLREQ-D2-W190-S1)."
+      "deploy_evidence": "Committed on wk-IRPT_ANLREQ-190 only. Four tests, all run on the real tree."
     }
   ],
   "acceptance": [
@@ -43,10 +44,9 @@
       "criterion_verbatim": "AR31-t-AC1: the three drafter tests pass (whitelist, the planted-name and dollar control, provenance by name).",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R41_CHECKS/r41_checks.py fg1",
-      "output_evidence": "R41-FG1-FAIL 3 failed, 1 deselected in 0.37s | E       ModuleNotFoundError: No module named 'data.transcripts.scripts.outlook' (drafter.py:18) | E       ModuleNotFoundError: No module named 'outlook' (drafter.py:22)",
-      "denominator": "0 of 3 named drafter tests pass (3 failed at import; 1 deselected, the seam test)",
-      "status": "FAIL",
-      "status_reason": "The three drafter tests cannot import data.transcripts.scripts.outlook in this sparse worktree: the package is tracked at HEAD but outside the sparse cone. BLOCKING surprise IRPT_ANLREQ-D2-W190-S1. The drafter logic was exercised only under a labeled stub harness, which is not criterion evidence.",
+      "output_evidence": "R41-FG1-OK 3 passed, 1 deselected in 0.13s",
+      "denominator": "3 of 3 named drafter tests pass (1 deselected, the seam test)",
+      "status": "PASS",
       "expect": "R41-FG1-OK"
     },
     {
@@ -54,7 +54,7 @@
       "criterion_verbatim": "AR31-t-AC2: the seam test passes: entry.abstract_request carries the reader's figures block.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R41_CHECKS/r41_checks.py fg2",
-      "output_evidence": "R41-FG2-OK 1 passed, 3 deselected in 0.08s",
+      "output_evidence": "R41-FG2-OK 1 passed, 3 deselected in 0.07s",
       "denominator": "1 of 1 named seam test passes (1 passed, 3 deselected)",
       "status": "PASS",
       "expect": "R41-FG2-OK"
@@ -62,21 +62,21 @@
   ],
   "controls": {
     "mutant": {
-      "description": "In-memory mutant of drafter.py (file untouched): the 0..100 and -100..1000 range rule is removed from _plain_number, so an out-of-range value passes.",
-      "expected": "The planted-name and dollar test fails, because the planted 1250000 value is kept under allocation_pct.",
-      "observed": "1 failed, 3 passed; FAILED test_prompt_carries_figures_block_and_no_planted_name_or_dollar (run via .scratch/mutant_run.py under the labeled outlook stub).",
+      "description": "In-memory mutant of drafter.py on the real tree (file untouched): the closed-vocabulary membership test is removed from _number_map_member, so any label passes.",
+      "expected": "The vocabulary arms of the whitelist test and the planted-name control fail.",
+      "observed": "2 failed, 2 passed; FAILED test_figures_whitelist_drops_unknown_members_and_bad_tickers (allocation_pct kept Smith Family Trust) and FAILED test_prompt_carries_figures_block_and_no_planted_name_or_dollar",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs of test_commentary_figures.py under the labeled outlook stub (.scratch/stub_outlook_run.py), results compared",
-      "observed": "run 1: 4 passed in 0.09s; run 2: 4 passed in 0.09s",
+      "method": "two same-input runs of test_commentary_figures.py on the real tree, results compared (content unchanged between the runs)",
+      "observed": "run 1: 4 passed in 0.11s; run 2: 4 passed in 0.11s",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "Real pytest run of the three drafter tests (AC1)",
-      "reason": "data/transcripts/scripts/outlook is outside the sparse cone of this worktree; the cone was not widened (outside the write grant). Surprise IRPT_ANLREQ-D2-W190-S1."
+      "item": "Existing commentary tests in four files (24 tests): composition_port, live_ports, ready_queue, route_switch",
+      "reason": "They need infra/aws (the _keys/keys.py module and infra Terraform files), which the sparse cone does not carry. Not in this order's surface; the core commentary suites pass 40 of 40. Surprise IRPT_ANLREQ-D2-W190-S4."
     },
     {
       "item": "Edits to test_commentary_classification.py",
@@ -88,26 +88,32 @@
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W190-S1: the outlook package drafter.py imports is tracked at HEAD but outside this worktree's sparse cone, so the drafter tests cannot import and AC1 cannot run here (BLOCKING).",
-    "IRPT_ANLREQ-D2-W190-S2: ABSTRACT_KEYS gaining figures would break an exact-tuple assertion in test_commentary_classification.py, outside the grant; figures is held in OPTIONAL_ABSTRACT_KEYS (OBSERVATION).",
-    "IRPT_ANLREQ-D2-W190-S3: the figure label charset admits name-shaped labels, so the closed charset alone does not keep a planted name out of the prompt (OBSERVATION)."
+    "IRPT_ANLREQ-D2-W190-S1: the outlook package drafter.py imports was outside the sparse cone; ruled by the issuer in AMENDMENT 1 (36a56617cb), cone widened, AC1 run on the real tree (BLOCKING, resolved).",
+    "IRPT_ANLREQ-D2-W190-S2: ABSTRACT_KEYS gaining figures would break an exact-tuple assertion in test_commentary_classification.py, outside the grant; figures held in OPTIONAL_ABSTRACT_KEYS, accepted by AMENDMENT 1 (OBSERVATION).",
+    "IRPT_ANLREQ-D2-W190-S3: the figure label charset admits name-shaped labels; ruled by AMENDMENT 1: closed vocabularies (allocation_pct = ALLOWED_CATEGORIES, period keys = PERIOD_LABELS), sector_pct dropped whole (OBSERVATION, cured in 633456fa6f).",
+    "IRPT_ANLREQ-D2-W190-S4: 24 existing commentary tests in four files stay red on infra/aws, which the sparse cone does not carry (OBSERVATION, not cured by this order)."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~190/IRPT_ANLREQ.TO-AR-t-31.session.log",
   "compiler_tools": [
     {
       "tool": "commit-gate (py_compile, ds-precommit, ruff py39) via safe-commit.sh",
-      "invocation": "bash .tools/safe-commit.sh ... -- drafter.py entry.py test_commentary_figures.py",
-      "result": "pre-commit gate clean for 3 of 3 file(s); commit c4a21921887c83efdafd4e46549c0455bcf001a2"
+      "invocation": "bash .tools/safe-commit.sh ... -- drafter.py test_commentary_figures.py",
+      "result": "pre-commit gate clean; commit 633456fa6fd28935560dbfe12013022afa66fd50"
     },
     {
       "tool": "r41_checks.py",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R41_CHECKS/r41_checks.py fg1 ; ... fg2",
-      "result": "fg1: R41-FG1-FAIL 3 failed, 1 deselected, rc=1 ; fg2: R41-FG2-OK 1 passed, 3 deselected, rc=0"
+      "result": "fg1: R41-FG1-OK 3 passed, 1 deselected, rc=0 ; fg2: R41-FG2-OK 1 passed, 3 deselected, rc=0 (real tree, committed 633456fa6f)"
+    },
+    {
+      "tool": "pytest core commentary suites on the real tree",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_commentary_drafter.py test_commentary_entry.py test_commentary_figures.py test_commentary_classification.py test_commentary_lambda.py test_commentary_seam.py test_commentary_ticket_client.py -q",
+      "result": "40 passed, rc=0"
     },
     {
       "tool": "surprise-row-gate via safe-commit.sh",
       "invocation": "bash .tools/safe-commit.sh ... -- org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "3 new row(s) of 664 total checked; OK; commit bdc1bc8e6a40f39ea9b3ab1d977eaf03c6c2c8c7"
+      "result": "row S4: 1 new row of 665 checked; OK; commit f7640731e9219c7ab046079ac3ea7cc4fd25c698"
     }
   ]
 }

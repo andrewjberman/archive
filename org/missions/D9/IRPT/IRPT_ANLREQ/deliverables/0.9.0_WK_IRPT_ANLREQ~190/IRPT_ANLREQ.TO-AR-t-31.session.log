@@ -1,17 +1,21 @@
 IRPT_ANLREQ.TO-AR-t-31 -- worker session log, 0.9.0_WK_IRPT_ANLREQ~190 (worktree C:/dev/wk-irpt-anlreq-190, branch wk-IRPT_ANLREQ-190, base ccf1e9611df44bd7f622d3e1908641a184ba7255)
 
+ROUND 1 (first cut)
 1. First act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-190; test -d org and test -d .tools -> TREE-OK.
-2. Premise re-ground: drafter.py and entry.py present. The sparse-checkout cone omits data/transcripts/scripts/outlook, which drafter.py imports (lines 15-22). Surprise IRPT_ANLREQ-D2-W190-S1 (BLOCKING) filed. The cone was not widened.
-3. Refusal clause check: no figures shape already present in entry.py or its tests at base (grep for figures and commentary_basis: only the basis read). No clash on the table shapes. The ABSTRACT_KEYS tuple conflict is filed as surprise IRPT_ANLREQ-D2-W190-S2; figures held in OPTIONAL_ABSTRACT_KEYS.
-4. Baseline: test_commentary_entry.py 8 passed (real). test_commentary_drafter.py collection error (outlook absent, real).
-5. Code: commit c4a21921887c83efdafd4e46549c0455bcf001a2 (drafter.py, entry.py, test_commentary_figures.py). Surprise rows: commit bdc1bc8e6a40f39ea9b3ab1d977eaf03c6c2c8c7 (INVESTIGATION_v1.md, rows S1 S2 S3).
-6. Real runs (worktree, timeout 120):
-   - r41_checks.py fg1 -> R41-FG1-FAIL 3 failed, 1 deselected in 0.37s; rc=1. Cause: ModuleNotFoundError data.transcripts.scripts.outlook at drafter.py:18, then 'outlook' at drafter.py:22.
-   - r41_checks.py fg2 -> R41-FG2-OK 1 passed, 3 deselected in 0.08s; rc=0.
-   - pytest test_commentary_entry.py -> 8 passed.
-   - pytest test_commentary_*.py (collection errors continued): 3 failed, 19 passed, 7 errors. Every collection error is the outlook absence (ModuleNotFoundError outlook or commentary, cascaded from drafter.py). Not triaged further.
-7. Sanity runs (NOT criterion evidence): .scratch/stub_outlook_run.py installs a labeled outlook stub and runs the figures test file: 4 passed in 0.12s; repeated: 4 passed in 0.09s twice (stable).
-   Mutant: .scratch/mutant_run.py removes the range rule from _plain_number in memory (drafter.py untouched): 1 failed, 3 passed; the failure is test_prompt_carries_figures_block_and_no_planted_name_or_dollar.
-   The stub also ran the existing drafter tests: 5 failed. All five trace to the stub (empty candidates, fake gold account rules), not to the figure change; not triaged to proof.
-8. Commit gates on code and rows: pre-commit gate clean for 3 of 3 files; surprise-row gate OK for 3 new rows.
-9. Proof: instance written, validated with proof-of-spec-check.py. AC1 FAIL (blocked by S1). AC2 PASS. The order stays open; no status flip.
+2. Premise re-ground: the sparse cone omitted data/transcripts/scripts/outlook, which drafter.py imports. Surprise IRPT_ANLREQ-D2-W190-S1 (BLOCKING) filed. The cone was not widened.
+3. ABSTRACT_KEYS conflict: surprise IRPT_ANLREQ-D2-W190-S2. figures held in OPTIONAL_ABSTRACT_KEYS.
+4. Code: commit c4a21921887c83efdafd4e46549c0455bcf001a2 (drafter.py, entry.py, test_commentary_figures.py). Rows S1-S3: commit bdc1bc8e6a40f39ea9b3ab1d977eaf03c6c2c8c7.
+5. Round-1 real run: AC1 blocked at import (outlook absent); AC2 PASS. Proof instance d593ac5141 VALID rc=0 with AC1 FAIL. Order left pending.
+
+AMENDMENT 1 (issuer, commit 36a56617cb) -- re-run
+6. Cone now includes data/transcripts/scripts/outlook (git sparse-checkout list). No stub is used anywhere in this evidence; the stub harness scripts were deleted.
+7. Label vocabulary (S3, closed): allocation_pct keys must be in ALLOWED_CATEGORIES (equity, fixed_income, cash, commodities, alternatives, structured); period_returns_pct and benchmark_returns_pct keys in PERIOD_LABELS (1M 3M 6M YTD 1Y 3Y 5Y 10Y SI); sector_pct dropped entirely and counted as figures.sector_pct. The charset rule is removed. Code commit 633456fa6fd28935560dbfe12013022afa66fd50. Test arms added to test_figures_whitelist_drops_unknown_members_and_bad_tickers.
+8. Surprise S4 filed (commit f7640731e9219c7ab046079ac3ea7cc4fd25c698): 24 existing commentary tests in four files need infra/aws, outside the cone.
+9. Real-tree runs (worktree, timeout 120):
+   - r41_checks.py fg1 -> R41-FG1-OK 3 passed, 1 deselected in 0.13s; rc=0.
+   - r41_checks.py fg2 -> R41-FG2-OK 1 passed, 3 deselected in 0.07s; rc=0.
+   - pytest test_commentary_figures.py -> 4 passed (twice, stable; 0.11s each).
+   - pytest core suites (drafter, entry, figures, classification, lambda, seam, ticket_client) -> 40 passed.
+   - pytest all test_commentary_*.py -> 24 failed, 43 passed; all 24 in composition_port, live_ports, ready_queue, route_switch (infra/aws, S4).
+10. Controls on the real tree: in-memory mutant removing the vocabulary membership test -> 2 failed, 2 passed (fires). Recorded in the instance.
+11. Proof instance rewritten for the real-tree evidence and validated with proof-of-spec-check.py (see the instance). Order flipped to complete only if both criteria PASS.
