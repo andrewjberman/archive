@@ -1,0 +1,134 @@
+{
+  "base_commit": "2a914408b824d91a77dd5d41a01394681137f4b4",
+  "hops": {
+    "2": {
+      "what": "Publish the filled report (document.filled_report, contract 0.5.1) as a NEW platinum object per client at the naming builder's address for client=<id> with the object name filled_report.json (proposed name): a new object-name constant beside SUMMARY_OBJECT, a new report_address() beside summary_address(), one put_object beside the summary put, and a registry family row beside CLIENT_SUMMARY. Nothing of this exists today.",
+      "exists_today": false,
+      "risk": "SERVED",
+      "files": [
+        {"path": "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py", "line": 251, "identifier": "SUMMARY_OBJECT"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py", "line": 313, "identifier": "summary_address"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py", "line": 320, "identifier": "naming.address"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py", "line": 192, "identifier": "opal_naming.address"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py", "line": 371, "identifier": "publisher.summary_address"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py", "line": 372, "identifier": "put_object"},
+        {"path": "infra/logic/registry/reporting_policies.json", "line": 51, "identifier": "CLIENT_SUMMARY"}
+      ],
+      "address_builder_output": "s3://opal-data-49financial/irpt/49financial/platinum/reporting/client=PLACEHOLDER/filled_report.json",
+      "address_builder_call": "lib/opal_naming.py address('irpt', '49financial', 'platinum', 'reporting', 'client=PLACEHOLDER', 'filled_report.json') run at HEAD by this worker; PLACEHOLDER is not a client identifier; the address is the builder's output, never typed",
+      "object_name_proposed": "filled_report.json",
+      "registry_row_needed": true
+    },
+    "3": {
+      "what": "A new GET route /api/scoped/investor-reporting/reporting/client/{client_id}/report on the irpt-49f-reporting-read lambda: a new ROUTES key beside SUMMARY_ROUTE_KEY, served by a new operation that reads the one filled-report object at the hop-2 address and returns its bytes unchanged, after the scope check over every account the document names. A new route resource and route-key local are declared beside the summary route; no existing route changes.",
+      "exists_today": false,
+      "risk": "WORLD",
+      "files": [
+        {"path": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 92, "identifier": "SUMMARY_ROUTE_KEY"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 317, "identifier": "_summary_named_accounts"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 332, "identifier": "serve_summary"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 344, "identifier": "_check_covered"},
+        {"path": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 373, "identifier": "ROUTES"},
+        {"path": "infra/aws/terraform/investor-reporting/reporting-read/api.tf", "line": 34, "identifier": "irpt_reporting_read_summary"},
+        {"path": "infra/aws/terraform/investor-reporting/reporting-read/locals.tf", "line": 75, "identifier": "irpt_rr_summary_route_key"}
+      ],
+      "path_template": "/api/scoped/investor-reporting/reporting/client/{client_id}/report"
+    },
+    "4": {
+      "what": "A filled-report source kind for the export: a body that pins the filled object by its VersionId and sha256 and is frozen by the submit the way the PATH B platinum series is frozen today (bundle.py platinum test at line 111, retained_export.py platinum_row at line 267 and freeze_platinum at line 279), so the render reads the pinned version. Nothing in the export reads a filled report today.",
+      "exists_today": false,
+      "risk": "WORLD",
+      "files": [
+        {"path": "infra/aws/lambda/investor-reporting/export/bundle.py", "line": 111, "identifier": "performance_source"},
+        {"path": "infra/aws/lambda/investor-reporting/export/bundle.py", "line": 191, "identifier": "performance_source"},
+        {"path": "infra/aws/lambda/investor-reporting/export/retained_export.py", "line": 267, "identifier": "platinum_row"},
+        {"path": "infra/aws/lambda/investor-reporting/export/retained_export.py", "line": 279, "identifier": "freeze_platinum"}
+      ],
+      "source_kind": "filled_report"
+    }
+  },
+  "input_contract": {
+    "document_shape": {
+      "contract": "org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json",
+      "version": "0.5.1",
+      "key": "document",
+      "sha256_prefix": "0b515243b310"
+    },
+    "source": "Who writes the document today: only the private-folder sample builders (deliverables 0.9.0_WK_IRPT_DASHBD~141 build_sample.py line 7 and ~175 build_sample_inflection_r110.py line 25), each writing HOUSEHOLD_SAMPLE.json into its own folder; the contract writer field (line 53) names the sample builder and no other writer. No production writer and no landing address for the document exists at HEAD, so the publisher has no input for it: the landing address is an open question for the CTO.",
+    "claim": "absent",
+    "sha256_basis": "0b515243b310 is the sha256 prefix of the contract file bytes, re-computed by this worker at HEAD (sha256sum of org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json); it is not the sha256 of the document key alone"
+  },
+  "scope_rule": "The new route refuses (AccountNotCovered, OBJECT_NOT_COVERED) unless the viewer's scope covers EVERY account the document names: each household.accounts entry account_id and every account key of each values by_row map, each checked with the same _check_covered the summary route uses (entry.py line 344). A client id in the request is a claim, never a grant. _summary_named_accounts (entry.py line 317) reads the summary's own firm, client_id and accounts keys, which the filled document does not carry, so the filled document needs a new named-account reader.",
+  "blast_radius": {
+    "writes": [
+      "irpt/49financial/platinum/reporting/client=<id>/filled_report.json: one new object per client, at the naming builder's address (never typed)",
+      "one new family row in infra/logic/registry/reporting_policies.json for the filled-report object (a registry row, not a served key)",
+      "one new API Gateway route resource GET /api/scoped/investor-reporting/reporting/client/{client_id}/report in infra/aws/terraform/investor-reporting/reporting-read/api.tf (no other route)",
+      "filled_report source-kind items in NEW export bundles only (no existing bundle is rewritten)"
+    ],
+    "reads": [
+      "the filled-report object at the hop-2 address, through the existing s3:GetObject grant on the whole platinum reporting prefix (locals.tf lines 46-47, iam.tf lines 75-76)",
+      "the directory pointer and ownership-map scope dependencies the shared boundary already reads on every request (iam.tf lines 80-84)"
+    ],
+    "new_iam": false,
+    "served_values_changed": false,
+    "existing_routes_changed": false
+  },
+  "rollback_per_key": "Per created object key irpt/49financial/platinum/reporting/client=<id>/filled_report.json: delete that key (no prior version exists at a new address) and switch the publisher's filled-report pass off so no further key is written. Per declared route GET .../client/{client_id}/report: remove its aws_apigatewayv2_route resource and its ROUTES key beside SUMMARY_ROUTE_KEY, then redeploy the previous reporting-read version; the account and summary routes are not touched. Per export source kind: refuse filled_report bodies by reverting the bundle.py branch; no existing bundle carries a pin of it.",
+  "first_exercise": {
+    "firm": "49financial",
+    "order": "first"
+  },
+  "build_slices": [
+    {
+      "cell": "IB-pr-551a publisher and registry row",
+      "risk": "LOCAL",
+      "files": [
+        "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py",
+        "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+        "infra/logic/registry/reporting_policies.json",
+        "infra/aws/lambda/investor-reporting/reporting-publish/test_filled_report.py (proposed new test file)"
+      ],
+      "depends_on": []
+    },
+    {
+      "cell": "IB-pr-551b route, scope check and route declaration",
+      "risk": "LOCAL",
+      "files": [
+        "infra/aws/lambda/investor-reporting/reporting/entry.py",
+        "infra/aws/terraform/investor-reporting/reporting-read/api.tf",
+        "infra/aws/terraform/investor-reporting/reporting-read/locals.tf",
+        "infra/aws/lambda/investor-reporting/reporting/test_filled_report_route.py (proposed new test file)"
+      ],
+      "depends_on": ["IB-pr-551a publisher and registry row"]
+    },
+    {
+      "cell": "IB-pr-551c export source kind",
+      "risk": "LOCAL",
+      "files": [
+        "infra/aws/lambda/investor-reporting/export/bundle.py",
+        "infra/aws/lambda/investor-reporting/export/retained_export.py",
+        "infra/aws/lambda/investor-reporting/export/test_filled_report_source.py (proposed new test file)"
+      ],
+      "depends_on": ["IB-pr-551b route, scope check and route declaration"]
+    }
+  ],
+  "notes": [
+    "Base: 2a914408b824d91a77dd5d41a01394681137f4b4 is the worktree HEAD before the first commit of this order. Every file site above was checked at that commit by the check, which reads git show HEAD for each path and identifier.",
+    "Read at the worktree: RD_REPORT_SERVE_PATH_R114.json in full; the contract (document, filled_report, writer line 53, lineage); entry.py lines 84-93, 165, 299-300, 317-345, 373-376; api.tf lines 24-55; locals.tf lines 44-48 and 72-76; iam.tf lines 56-92 and 148-170 by Grep and Read; handler.py lines 67, 180-199, 358-374; publisher.py lines 36-37, 251, 257, 313-320, 383; export bundle.py lines 104-121 and 189-212; retained_export.py lines 22-28, 204-300 by Grep; reporting_policies.json lines 35-53; scopes.json line 340 and the 49financial rows.",
+    "The hop-2 address is the builder's output: lib/opal_naming.py address() run at HEAD with the placeholder client id PLACEHOLDER and the proposed object name filled_report.json. The builder accepted the object name and refused nothing. The registry row need (registry_row_needed true) rests on reporting_policies.json, whose irpt-dashbd-served-reporting policy names three families (SERVED_MANIFEST, SERVED_SERIES, CLIENT_SUMMARY, lines 48-52), and on scopes.json line 340, which says that file closes the family set. It does not rest on a builder refusal.",
+    "new_iam false rests on: the API Gateway invoke grant at api.tf lines 44-50, whose source_arn ends in GET/api/scoped/investor-reporting/reporting/*, and the existing s3:GetObject grant on the whole platinum reporting prefix (locals.tf lines 46-47 and iam.tf lines 75-76). The order's remark that the route owner must add an IAM read on the new key is not borne out at HEAD: see the surprise rows.",
+    "The schedule (cron lines 85 and 122 of infra/aws/terraform/investor-reporting/reporting-publish/schedule.tf, both ENABLED in the file) is cited from RD_REPORT_SERVE_PATH_R114.json and was not re-read here. The live deployment, the live IAM policy, the live schedule state and the live objects were not read: no AWS call was made.",
+    "The source of the document is absent at HEAD: the contract writer field (line 53) names only the private-folder sample builders. The landing address the production publisher would read is named nowhere in the repository. This is the question for the CTO, filed as a surprise row.",
+    "The named-account reader premise (RD line 79) does not hold as written: _summary_named_accounts reads the summary's firm, client_id, accounts and unpublished_account_ids keys (entry.py lines 317-329), while the filled document nests its accounts under household.accounts and carries no firm or client_id key (contract document.filled_report.top_level_keys and household_fields). Filed as a surprise row.",
+    "Hop 5 (the render host) is outside this design. It is named in RD_REPORT_SERVE_PATH_R114.json as owner UNOWNED and is windowed in the packet under 0.7.0_AE_CloudOps~IB2, a later act under the same window.",
+    "The six bound counters are 0. rows_written counts data rows; the four surprise rows appended to the channel are channel rows, not data rows, and nothing wrote data. No function was invoked, no sign-in made, no AWS write made, no vendor request sent and no figure written.",
+    "The bucket name opal-data-49financial comes from the builder output and from scopes.json (the 49financial rows at lines 19 and 256), not from a typed address. The firm 49financial is the first exercise named by the order."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
