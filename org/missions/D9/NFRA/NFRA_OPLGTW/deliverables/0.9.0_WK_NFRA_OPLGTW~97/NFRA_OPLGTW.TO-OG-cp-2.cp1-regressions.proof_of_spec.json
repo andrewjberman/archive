@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cp-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "af1495fe17",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cp-2.cp1-regressions.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "8c84e01428"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~97",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_people_access.py",
+      "kind": "test",
+      "commit_or_etag": "255993c6c0",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_access_get_not_live_when_type_unknown monkeypatches app_mods.acs.POLICY_RECORD_TYPES to the closed set without person_access (asserted absent) before asserting the not-live answer; the file's other six tests are unchanged. Run alone: 7 passed. Covered by AC1 as a member of the four suites."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "255993c6c0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows: NFRA_OPLGTW-Z-W97-S1 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~O) and NFRA_OPLGTW-Z-W97-S2 (OBSERVATION, INERT). Gate: surprise-row-gate OK, 2 new rows of 653 checked."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "both tests pass and the four suites add no failing id beyond the baseline.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cp2.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)failing ids not in the baseline: 0 \\(want 0\\); the two named tests passed: 2 of 2.*RESULT: PASS.*exit=0",
+      "output_evidence": "3 failed, 27 passed, 1 warning in 14.39s; failing ids not in the baseline: 1 (want 0); the two named tests passed: 1 of 2\nRESULT: FAIL\nexit=1",
+      "denominator": "four suites 30 collected: 27 passed, 3 failed; the baseline ids test_printf_names_the_five_host_inputs_and_no_secret_value and test_values_that_can_hold_whitespace_are_rendered_quoted are in the baseline (not new); 1 failing id outside the baseline = test_grant_writer_stages_the_contract_only_from_the_standard; named tests 1 of 2 passed (test_access_get_not_live_when_type_unknown PASSED)",
+      "status": "FAIL"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the contract copies are byte-equal and declare `person_access` once.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cp2.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)contract copies byte-equal: yes; person_access in record_types 1 time\\(s\\) \\(want 1\\).*person_access fields declared 8 of 8; missing \\[\\]; tier field present: no.*RESULT: PASS.*exit=0",
+      "output_evidence": "contract copies byte-equal: yes; person_access in record_types 1 time(s) (want 1)\nperson_access fields declared 8 of 8; missing []; tier field present: no\nPOLICY_RECORD_TYPES carries person_access: yes\nRESULT: PASS\nexit=0",
+      "denominator": "contract copies 2 of 2 byte-equal (org/standards and deploy/, 11456 bytes each); person_access in record_types 1 of 1; person_access fields 8 of 8 declared; tier field absent; POLICY_RECORD_TYPES carries person_access (AST read)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the cell: OG-cp-2 repairs two tests and their premise; the order plants no spec-named mutant.",
+      "expected": "n/a",
+      "observed": "n/a: the order names no mutant to plant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "cp2.AC1.sh run twice at the same commit 255993c6c0; the two outputs compared",
+      "observed": "run 1 and run 2 both: 3 failed, 27 passed, 1 warning; failing ids not in the baseline: 1 (want 0); RESULT: FAIL, exit=1 -- identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_grant_writer_stages_the_contract_only_from_the_standard passes (AC1, named test 1)",
+      "reason": "Not achievable within paths. The staged member is the bytes of the manifest deployed_commit ee23dd004c, whose contract is 10747 bytes with no person_access; the working copies are 11456 bytes. No edit to the two working copies changes those bytes. Removing person_access would change values and break AC2; re-pointing the manifest is a release act outside paths. Surprise NFRA_OPLGTW-Z-W97-S1."
+    },
+    {
+      "item": "Re-serialising both contract copies to the packager's form (cell item 1, 'FIX the FILES')",
+      "reason": "build_package.py copies bytes verbatim from git show <deployed_commit>; it does not re-serialise JSON, so there is no packager form to match. AC2 already passes at HEAD. The contract files are unchanged."
+    },
+    {
+      "item": "Release, deploy, manifest edit, push",
+      "reason": "Outside the order's bounds (section 2: no release, no deploy, no app code change; never push)."
+    },
+    {
+      "item": "The client-data check on commit 255993c6c0",
+      "reason": "The commit gate printed WARN: the hashed account-id list is absent at C:\\Users\\Opal Bloomberg\\.opal\\account_id_hashes.txt on this device, so no client account id scan ran. Absent is not empty. The commit's two paths are a gateway test and the channel file. Same device condition as NFRA_OPLGTW-Z-W94-S2."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W97-S1: OG-cp-2 AC1 cannot be met as written. The staged contract member is the bytes at manifest deployed_commit ee23dd004c (no person_access), and build_package.py copies bytes without re-serialising, so re-serialising the working copies cannot make the member byte-equal. BLOCKING, ARMED, disarm 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W97-S2: the manifest deployed_commit ee23dd004c is not an ancestor of HEAD af1495fe17 (merge-base rc=1), so the packager's source commit lacks OG-cp-1 (d5d2fb29bd). OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~97/NFRA_OPLGTW.TO-OG-cp-2.cp1-regressions.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (Python 3.14, Windows)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cp2.AC1.sh, cwd the worktree root (the check cds to infra/aws/ec2/opal-gateway)",
+      "result": "at 255993c6c0, two runs: 3 failed, 27 passed; failing ids outside the baseline: 1; RESULT: FAIL both runs"
+    },
+    {
+      "tool": "safe-commit (.tools/safe-commit.sh, commit-gate, surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~97 <0.9.0_WK_NFRA_OPLGTW~97@opal.agent>\" -F .scratch/commit1.msg -- <test file> <channel file>",
+      "result": "landed 255993c6c0 (LOCAL on wk-NFRA_OPLGTW-97); surprise-row-gate OK (2 new rows of 653); client-data-check WARN (list absent)"
+    },
+    {
+      "tool": "comp-find and Glob (worktree-pathed)",
+      "invocation": "comp-find --name 'build_package.py' infra/aws/ec2/opal-gateway; Glob for build_package.py under the worktree",
+      "result": "comp-find over the gateway folder: 0 hits in 419 scanned files (the packager lives under infra/aws/lambda/mcportal, outside that scope); the Glob located it"
+    }
+  ]
+}
