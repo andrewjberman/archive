@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-84",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R12_G.md",
+    "vintage_commit": "ab568c7e80",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-84.ycharts-session-price-adapter.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-84.ycharts-session-price-adapter.md",
+    "group": "OTHER",
+    "vintage_commit": "ab568c7e80"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~184",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py",
+      "kind": "script",
+      "commit_or_etag": "7db75de9d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "make_reader(transport, spacing_s, sleep) over an injected transport; stdlib plus tr_level; no session import, no call at import; imported by nothing yet",
+      "artifact_covered_by": [
+        "AR84-g-AC1",
+        "AR84-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_ycharts.py",
+      "kind": "test",
+      "commit_or_etag": "7db75de9d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline tests with hand-computed values: 14 passed in 0.14s under the g84 check",
+      "artifact_covered_by": [
+        "AR84-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR84-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g8x_checks.py g84",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g8x_checks.py g84",
+      "output_evidence": "AR-G84-OK cases=8 tests=14 | cases 8, wrong none | worker tests: 14 passed in 0.14s | rc=0",
+      "denominator": "8 direct cases, 0 wrong; 14 passed, 0 failed (need >= 6) in test_price_adapter_ycharts.py",
+      "expect": "^AR-G84-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR84-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g8x_checks.py hygiene84",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g8x_checks.py hygiene84",
+      "output_evidence": "AR-G84-HYGIENE-OK top=__future__,datetime,math,time,tr_level,typing nested=none | rc=0",
+      "denominator": "1 module, 0 problems: ASCII bytes, top-level imports against the allowed set, nested imports, forbidden calls (open, print, exec, eval, __import__)",
+      "expect": "^AR-G84-HYGIENE-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's own negative arms are the tests (no call on blank, no sleep before the first call, malformed answer, transport error).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes; the module reads no clock, network or environment variable",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "production wiring of make_reader to the resident session transport",
+      "reason": "the cell says the production wiring is passed in later; this cell never calls the session and imports nothing from it"
+    },
+    {
+      "item": "any live YCharts call, deploy, AWS call, network call or install",
+      "reason": "bound by the order: offline only, no push"
+    },
+    {
+      "item": "the commit-gate client account-id check for commit 7db75de9d1",
+      "reason": "the hashed list is absent on this box; the gate did not grade the commit; filed as IRPT_ANLREQ-D2-W184-S1"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W184-S1: commit-gate client-data-check was absent on this box (the hashed account-id list is not at C:/Users/Test/.opal/account_id_hashes.txt), so commit 7db75de9d1 was not graded for client account ids"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_ycharts.py",
+      "result": "14 passed in 0.20s (rc 0)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py and the test file",
+      "result": "pre-commit gate clean for 1 of 1 file(s) each (rc 0)"
+    }
+  ]
+}

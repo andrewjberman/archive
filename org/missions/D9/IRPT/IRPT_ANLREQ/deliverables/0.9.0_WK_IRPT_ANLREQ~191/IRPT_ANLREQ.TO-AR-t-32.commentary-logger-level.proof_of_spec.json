@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-t-32",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-32.commentary-logger-level.md",
+    "group": "OTHER",
+    "vintage_commit": "169654b4a928c6cfb1d499e6b9adb33460ef12fa"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R42_T.md",
+    "vintage_commit": "169654b4a928c6cfb1d499e6b9adb33460ef12fa",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-32.commentary-logger-level.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~191",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/lambda_handler.py",
+      "kind": "script",
+      "commit_or_etag": "e23d8e221f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nothing deployed by this order. The change is one line, LOG.setLevel(logging.INFO) after the LOG line; git diff of the file at e23d8e221f^ to e23d8e221f shows that line and nothing else. The packaged copy under infra/aws/lambda/transcripts-pull/dist/ is build output and was not touched.",
+      "artifact_covered_by": ["AR32-t-AC1"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_commentary_logging.py",
+      "kind": "test",
+      "commit_or_etag": "e23d8e221f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A new test file of two fakes-only tests; no deploy. It is run by the lg1 check and by pytest on the commentary test files.",
+      "artifact_covered_by": ["AR32-t-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR32-t-AC1",
+      "criterion_verbatim": "AR32-t-AC1 -- both named tests pass. The check line: python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R42_CHECKS/r42_checks.py lg1 expects R42-LG1-OK.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R42_CHECKS/r42_checks.py lg1",
+      "output_evidence": "R42-LG1-OK 2 passed in 0.11s (rc 0). Base before the change, same invocation: R42-LG1-FAIL absent: data/transcripts/scripts/tests/test_commentary_logging.py (rc 1). The two tests: test_module_logger_emits_info_without_any_test_side_override PASSED, test_post_line_is_emitted_at_the_modules_own_level PASSED (pytest -v, 2 passed in 0.14s).",
+      "denominator": "2 of 2 named tests passed (the check requires >= 2 passed in the file, rc 0)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The LOG.setLevel(logging.INFO) line removed from lambda_handler.py in the working copy, the two new tests run, the line restored and git diff HEAD on the file confirmed empty.",
+      "expected": "both new tests fail, since the module logger then inherits the WARNING root level and drops INFO",
+      "observed": "FAILED test_module_logger_emits_info_without_any_test_side_override; FAILED test_post_line_is_emitted_at_the_modules_own_level; 2 failed in 0.16s (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of r42_checks.py lg1 compared, plus the commentary suite before and after",
+      "observed": "run 1 R42-LG1-OK 2 passed in 0.09s (rc 0); run 2 R42-LG1-OK 2 passed in 0.11s (rc 0). Commentary suite: 66 passed and 1 failed before the change, 68 passed and 1 failed after, the one failure being the same pre-existing test (see surprises).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The packaged copy under infra/aws/lambda/transcripts-pull/dist/ and any deploy of the commentary Lambda",
+      "reason": "Out of the order's paths; the order says it deploys nothing and the packaged copy is build output."
+    },
+    {
+      "item": "Green status of test_commentary_composition_port.py::test_build_packages_keys_module",
+      "reason": "Red at base 169654b4a9 in this sparse worktree: its build.sh cp step cannot stat data/transcripts/assets, which is tracked at HEAD but absent here. Nothing was stubbed or reconstructed; filed as IRPT_ANLREQ-D2-W191-S1."
+    },
+    {
+      "item": "test_commentary_route_switch.py",
+      "reason": "In the paths list, but the build does not change it: its _run helper keeps its caplog.at_level wrap. The new file reuses its fakes by import."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W191-S1: the sparse worktree lacks data/transcripts/assets, so test_build_packages_keys_module is red at base; BLOCKING row, not caused by this order and outside its paths."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~191/IRPT_ANLREQ.TO-AR-t-32.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r42_checks.py lg1",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R42_CHECKS/r42_checks.py lg1",
+      "result": "R42-LG1-OK 2 passed in 0.11s (rc 0)"
+    }
+  ]
+}

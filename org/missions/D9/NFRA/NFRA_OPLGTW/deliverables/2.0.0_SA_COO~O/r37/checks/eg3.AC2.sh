@@ -2,7 +2,7 @@
 # OPLGTW OG-eg-3 AC2 (round-37 HARVEST-RETIRE, PRD v3.11): the three runner ledgers are CLOSED at HEAD with their sentinels gone; the two earlier ones read SUPERSEDED;
 # the proof records the FIRSTREC and WINDOW legs as NOT-EXERCISED.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
-W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW"
+W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z"
 [ -f "$W/EG3_PROOF.json" ] || { echo "EG3_PROOF.json absent"; echo "RESULT: FAIL"; exit 1; }
 closed=0; sent=0; sup=0
 for slug in nfra-oplgtw-harvest-runner-retire nfra-oplgtw-harvest-runner-silver-cache nfra-oplgtw-harvest-runner-sa; do
