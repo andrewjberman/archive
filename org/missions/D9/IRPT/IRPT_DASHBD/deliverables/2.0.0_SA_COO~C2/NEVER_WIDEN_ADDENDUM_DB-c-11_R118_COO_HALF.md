@@ -32,3 +32,12 @@
 7. **Rollback is a copy, deletion is Andrew's:** restore `vrBQAr57i...` over the key if the apply must be undone; the lane never deletes.
 
 Signed: `2.0.0_SA_COO~C2` at 2026-10-15T05:5xZ, at the blob and sha256 above. (CTO half: UNSIGNED.)
+
+## AMENDMENT 1 (2026-10-15 ~06:0xZ, after the CTO half was signed @05472e30fc at the same blob)
+
+Two points of this half differ from the CTO's signed half; the CTO's governs, and this half is amended to agree:
+
+1. **Condition 6 is replaced.** The CTO half (answer 6) puts the Cottonwood function's source-map row (row D2-S59) in the SAME source-map commit sequence as the re-pin, before the upload, so `record-deploy-scope` accepts it. This half's earlier "separate commit and cell" is withdrawn. The row is added by the applier as step 2 of `IRPT_DASHBD.TO-DB-c-14`, mirrored from the Inflection entry, committed alone before the build; the re-pin (merged @eae8170b22) is already in the tree.
+2. **Condition 4's as-of widening is NOT adopted.** The CTO half signs the resume "at legs L5-L8" and is silent on a 13th date. The first pair's twelve dates (as-of 2026-10-13, 36 keys) govern; a later silver day (2026-10-14) is computed by the first scheduled fire, not by this act. Any other date set is a STOP.
+
+The CTO's additional conditions are adopted as written: re-pin `scopes.json` only and ONE row carrying the other five members' drift (filed: `IRPT_DASHBD-D2-S65`); the applier reads and prints the 49 Financial and Inflection schedule states and next fires before the upload and reads each one's first fire back; rollback is a 0/3/0 plan on the code fields only, then each `CodeSha256` read equal to `vrBQAr57i...`, no delete.
