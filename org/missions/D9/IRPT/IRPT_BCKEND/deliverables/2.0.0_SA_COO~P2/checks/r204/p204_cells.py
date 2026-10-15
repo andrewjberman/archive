@@ -56,12 +56,15 @@ def rec_path(c):
 
 
 def importing_functions():
-    """The map's functions that package one of the modules importing the shared reader."""
+    """The map's functions that package one of the modules importing the shared reader: a function whose source_dir is the
+    module's package directory and whose files list names the module, or any entry that names the module's repository path."""
     m = json.loads((P6.ROOT / MAP).read_text(encoding="utf-8"))
     out = []
     for name, e in sorted(m.get("functions", {}).items()):
         blob = json.dumps(e)
-        if any(x in blob for x in IMPORTERS):
+        sd, files = str(e.get("source_dir", "")), e.get("files") or []
+        by_dir = any(sd.endswith(LAMBDA + pkg.rsplit("/", 1)[0]) and pkg.rsplit("/", 1)[1] in files for pkg in IMPORTERS)
+        if by_dir or any(x in blob for x in IMPORTERS):
             out.append(name)
     return out, m
 
