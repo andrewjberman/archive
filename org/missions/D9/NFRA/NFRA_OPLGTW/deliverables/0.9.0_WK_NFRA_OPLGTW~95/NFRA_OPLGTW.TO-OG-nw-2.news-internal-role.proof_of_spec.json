@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-nw-2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6bfde76e07",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-nw-2.news-internal-role.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "6bfde76e07"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~95",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/internal_role.py",
+      "kind": "script",
+      "commit_or_etag": "d710d14824",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only; the order has no deploy. The release that carries it is the one this cell belongs to (Phase A of that release order).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/news_typed.py",
+      "kind": "script",
+      "commit_or_etag": "d710d14824",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only; the order has no deploy. The release that carries it is the one this cell belongs to (Phase A of that release order).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_nw2.py",
+      "kind": "test",
+      "commit_or_etag": "d710d14824",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file; offline; no deploy in this order."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the news client comes from the assumed internal role, the default path is unchanged when the env is unset, a failed assume refuses with zero reads, S3 behaviour is unchanged.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/nw2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nexisting internal-role and news suites: rc=0; 12 passed in 1.98s\nRESULT: PASS\nexit=0",
+      "denominator": "named tests test_ognw2_ac01..ac04 passed 4 of 4, failed/error lines 0; existing internal-role and news suites 12 passed of 12",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*existing internal-role and news suites: rc=0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "no module-scope AWS client and no fixed-depth parents index.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/nw2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "module-scope boto3 client constructions: 0 (want 0)\nparents[N>=3] in shipped app modules: 0 of 72 file(s) scanned (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "module-scope boto3 client constructions 0 (want 0) in 2 files; shipped app modules scanned 0 of 72 file(s) with parents[N>=3] (want 0)",
+      "status": "PASS",
+      "expect": "(?s)module-scope boto3 client constructions: 0 \\(want 0\\).*parents\\[N.=3\\] in shipped app modules: 0 of \\d+ file\\(s\\) scanned \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the governing order names no mutant for OG-nw-2; none was run by this worker",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "the order's section 4 names two invocations only (AC1, AC2); the issuer's ISSUER NOTES record the pre-cut base state: nw2.AC1 FAIL (test file absent), nw2.AC2 PASS at base (regression guard). nw2.AC2 was re-run here at base and read PASS; nw2.AC1 was not run at base.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "same-input reruns: nw2.AC1 and nw2.AC2 were each run twice, once on the working tree before the code commit and once after it",
+      "observed": "AC1 deciding lines identical both runs: 'pytest rc=0; named tests passed 4 of 4; failed/error lines 0' and 'existing internal-role and news suites: rc=0; 12 passed'; AC2 identical both runs: '0 (want 0)' and '0 of 72 file(s) scanned (want 0)'",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "news_market_mood",
+      "reason": "reads S3 only (the two portal singletons, which already use the internal role through _portal_client); it has no DynamoDB read, so it is not wrapped by the refusal decorator and is unchanged."
+    },
+    {
+      "item": "release, deploy, IAM and Terraform for the internal reader role grant and the instance-role statement destroy",
+      "reason": "out of this cell by the order (preflight: Phase A of the release order that carries this cell)."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W95-S1"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~95/NFRA_OPLGTW.TO-OG-nw-2.news-internal-role.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_nw2.py -v -p no:cacheprovider --color=no (cwd infra/aws/ec2/opal-gateway)",
+      "result": "4 passed in 0.75s (test_ognw2_ac01 .. ac04, each PASSED)"
+    }
+  ]
+}
