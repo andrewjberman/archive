@@ -7,8 +7,8 @@ else, and it holds no AWS, network or clock code. Every case below is SYNTHETIC:
 
   DBI124-1-AC1  the wrapper golden: the clean world's rows, partitions, ABSENT records and run record; an incomplete
                 calendar day is dropped and counted; a repeated (account, day) key is refused with nothing written.
-  DBI124-1-AC2  the written parquet: every partition is date=<business_date> and holds only that date; the column names and
-                types hash to the contract's schema_hash_with_optional; each row passes ~D2's validator; no AWS / network
+  DBI124-1-AC2  the written parquet: every partition is date=<business_date> and holds only that date; the contract's 22 columns
+                and types hash to its schema_hash_with_optional, beside the one proposed column market_value_eod_claim; each row passes ~D2's validator; no AWS / network
                 import; nothing is written outside the output directory.
   DBI124-1-AC3  a 299-calendar-day window (inside the 238-to-365 gap round 122 named): the chained rows equal the product
                 of the source's daily factors, to 1e-12, and carried_days sums to the window; the worker's own tests run
@@ -38,6 +38,7 @@ TOL = 1e-12
 FEED_COLS = ["pull_date", "day", "account_id", "household_id", "status", "reason_class", "reason_claim", "reason_cause",
              "daily_factor", "start_market_value", "end_market_value", "fee_basis", "fee_basis_note", "calc_gross_of_fees",
              "source", "data_last_updated"]
+EXTRA_COLUMN = "market_value_eod_claim"  # proposed, beside the contract's 22 fields, until 0.4.1 admits it (round-123 analysis item 2)
 FORBIDDEN_IMPORTS = {"boto3", "botocore", "requests", "urllib", "urllib3", "socket", "http", "ftplib", "smtplib"}
 
 
@@ -95,6 +96,20 @@ def absent_back(out):
     return pq.read_table(str(p)).to_pylist() if p.is_file() else []
 
 
+def absent_map(out):
+    """{(str(source_account_id), business_date): reason_class}, after checking the 0.4.1 shape of every ABSENT record."""
+    got = {}
+    for a in absent_back(out):
+        need(a.get("row_status") == "ABSENT", "an ABSENT record carries row_status %r" % a.get("row_status"))
+        need(a.get("source_account_id") is not None, "an ABSENT record has no source_account_id")
+        if a["reason_class"] == "UNMAPPED_ACCOUNT":
+            need(a.get("account_id") is None, "an UNMAPPED_ACCOUNT record must have account_id null")
+        else:
+            need(a.get("account_id") == str(a["source_account_id"]), "a mapped ABSENT record must carry the dimension account_id")
+        got[(str(a["source_account_id"]), a["business_date"])] = a["reason_class"]
+    return got
+
+
 def run_world(mod, rows, dim_ids, out, trading=None):
     return mod.run(silver_of(rows), dim_of(dim_ids), trading or P123.TRADING, FIRM, METHOD, str(out))
 
@@ -115,8 +130,10 @@ def grade_golden(mod):
             need(abs(r["total_return_daily"] - (factor - 1.0)) <= TOL and r["carried_days"] == carried and abs(r["market_value_eod"] - mv) <= TOL,
                  "row %s differs from the golden" % (key,))
             need(r["source_account_id"] == int(key[0]) and r["source"] == "orion" and r["flow_claim"] == "absent", "row %s source columns" % (key,))
+            claim = "measured" if key[1] == "2026-07-08" else "inferred"
+            need(r.get("market_value_eod_claim") == claim, "row %s market_value_eod_claim: got %r want %r" % (key, r.get("market_value_eod_claim"), claim))
         need(set(parts) == {"date=%s" % d for (_a, d) in want}, "partition names differ: %s" % sorted(parts))
-        ab = {(a["account_id"], a["business_date"]): a["reason_class"] for a in absent_back(out)}
+        ab = absent_map(out)
         need(ab == dict(exp_abs), "ABSENT records differ from the golden")
         need(isinstance(rec, dict), "run() must return the run record dict")
         for k, v in (("calendar_days_read", 7), ("calendar_days_incomplete", 0), ("rows", 17), ("accounts_in_feed", 7), ("accounts_mapped", 6),
@@ -127,6 +144,8 @@ def grade_golden(mod):
             want_by[r] = want_by.get(r, 0) + 1
         need(rec.get("absent_by_reason") == want_by, "run record absent_by_reason")
         need(rec.get("contract_version") == "0.4.0" and rec.get("absent_placement") == "BESIDE_TABLE", "run record must say which contract and where ABSENT sits (0.4.1 has not landed)")
+        stat = (rec.get("manifest") or {}).get("reason_class_status")
+        need(stat == {"NO_FEED_ROW": "proposed", "INCOMPLETE_WINDOW": "proposed", "NO_EOD_VALUE": "proposed"}, "manifest reason_class_status: got %r" % (stat,))
         proposed = sorted(set(want_by) & {"NO_FEED_ROW", "INCOMPLETE_WINDOW", "NO_EOD_VALUE"})
         need(rec.get("proposed_reason_classes") == proposed, "run record proposed_reason_classes: got %r want %r" % (rec.get("proposed_reason_classes"), proposed))
         on_disk = json.loads((out / "run_record.json").read_bytes().decode("ascii"))
@@ -142,7 +161,7 @@ def grade_golden(mod):
         got_rows, _p = read_back(out)
         need(rec.get("calendar_days_incomplete") == 1 and rec.get("calendar_days_read") == 7, "incomplete day not counted: %r" % rec.get("calendar_days_incomplete"))
         need(not any(r["business_date"] == "2026-07-07" for r in got_rows), "a row was written for the incomplete day")
-        ab = {(a["account_id"], a["business_date"]): a["reason_class"] for a in absent_back(out)}
+        ab = absent_map(out)
         need(all(ab.get((a, "2026-07-07")) in ("NO_FEED_ROW", "UNMAPPED_ACCOUNT") for a in ("1001", "1002", "1003", "1004", "1005", "1006", "1007")),
              "the incomplete day must be ABSENT NO_FEED_ROW (or UNMAPPED_ACCOUNT) for every account")
     # a repeated (account, day) key is refused and nothing is written.
@@ -172,8 +191,9 @@ def grade_written(mod, wrap_path, contract_mod):
         want_cols = {c["name"] for c in contract["columns"]} | {o["name"] for o in contract["optional_columns"]}
         for pname, (schema, recs) in parts.items():
             need(all("date=%s" % r["business_date"] == pname for r in recs), "partition %s holds another date" % pname)
-            need({f.name for f in schema} == want_cols, "partition %s columns differ from the contract" % pname)
-            lines = sorted("%s:%s" % (f.name, f.type) for f in schema)
+            need({f.name for f in schema} == want_cols | {EXTRA_COLUMN}, "partition %s columns differ from the contract plus %s" % (pname, EXTRA_COLUMN))
+            need(str(schema.field(EXTRA_COLUMN).type) == "string", "%s must be a string" % EXTRA_COLUMN)
+            lines = sorted("%s:%s" % (f.name, f.type) for f in schema if f.name != EXTRA_COLUMN)
             need(hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest() == contract["schema_hash_with_optional"], "schema hash of %s differs from schema_hash_with_optional" % pname)
         for r in rows:
             probs = contract_mod.row_problems(contract, r)
