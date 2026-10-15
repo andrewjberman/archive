@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-568",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-568.apply-orion-pairs-v3-pair-a-the-one-time-33-day-dated-backfill-of-the-absent-flat-bronze-keys.md",
+  "group": "OTHER",
+  "vintage_commit": "46bc11fc02"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-568.apply-orion-pairs-v3-pair-a-the-one-time-33-day-dated-backfill-of-the-absent-flat-bronze-keys.md",
+  "vintage_commit": "46bc11fc02"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-inf/bronze/{positions,transactions,performance}/<day>.jsonl.gz (33 keys: positions 4, transactions 7, performance 22)",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "33 flat bronze keys written once each by the chain's own pull code, each read NotFound first, one new key per write, head-object read back (length equals local gzip size, rows equal the log line) and re-read independently at the end, 33 of 33 with 0 mismatches; 16768 Orion requests, 0 throttle lines",
+   "artifact_covered_by": [
+    "IB208-1-AC2",
+    "IB208-1-AC3"
+   ],
+   "commit_or_etag": "33 VersionIds in IB208-1_orion_backfill_record.json"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB208-1_orion_backfill_record.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the criteria's record",
+   "artifact_covered_by": [
+    "IB208-1-AC1",
+    "IB208-1-AC2",
+    "IB208-1-AC3"
+   ],
+   "commit_or_etag": "6054c0a120"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB208-1-AC1",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r208/p208_cells.py\" . IB208-1-AC1",
+   "expect": "IB208-1-AC1 PASS",
+   "output_evidence": "OK: the gates, the ledger and the performance control committed before any performance write\nIB208-1-AC1 PASS\nexit=0 (run 2026-10-15 under timeout 120 from the repo root)",
+   "denominator": "1 packet hash, 2 halves, 1 ledger entry opened before the first write, 1 control commit and 1 CVO grade both before the first of 22 performance days",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r208/p208_cells.py\" . IB208-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "IB208-1-AC2",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r208/p208_cells.py\" . IB208-1-AC2",
+   "expect": "IB208-1-AC2 PASS",
+   "output_evidence": "OK: 33 days dispositioned, each read ABSENT first\nIB208-1-AC2 PASS\nexit=0 (run 2026-10-15 under timeout 120 from the repo root)",
+   "denominator": "33 day rows (4 positions with a parquet key, 7 transactions, 22 performance), 33 read ABSENT first, 33 WRITTEN, 0 ABSENT_AT_SOURCE",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r208/p208_cells.py\" . IB208-1-AC2",
+   "method": "command"
+  },
+  {
+   "criterion_id": "IB208-1-AC3",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r208/p208_cells.py\" . IB208-1-AC3",
+   "expect": "IB208-1-AC3 PASS",
+   "output_evidence": "OK: 33 written keys read back, 16768 requests, the counters 0\nIB208-1-AC3 PASS\nexit=0 (run 2026-10-15 under timeout 120 from the repo root)",
+   "denominator": "33 keys read back, 16768 requests against the 18,000 bound, 11 bound counters at 0",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r208/p208_cells.py\" . IB208-1-AC3",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (its comp-adversary arm ran twenty-three negatives on synthetic records).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "each key's head-object length is compared with the local gzip size and its row count with the script's own log line; a final independent head-object pass re-reads all 33",
+   "observed": "33 of 33 equal, 0 mismatches",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the silver and gold steps that read the 33 new keys",
+   "reason": "later acts by the CTO half (silver for the 33 days later, with its served DELTA stated); this order writes bronze keys only"
+  },
+  {
+   "item": "record values of any written key",
+   "reason": "counts and field names only by the order's bound; no value was read or recorded"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261015T0827Z_irpt-orion-33day-backfill-20261015_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open with four legs before the first write; close-leg L1 to L4; close at completion",
+   "result": "all four legs proven; ledger closed by this seat as the order says"
+  },
+  {
+   "tool": "scratch day runner do_day.py over a persist_state no-op wrapper",
+   "invocation": "one run per feed and day with an absent-first head-object, a before/after prefix list and a head-object read-back",
+   "result": "33 WRITTEN, 0 breach, 0 empty key, 0 throttle"
+  }
+ ]
+}
