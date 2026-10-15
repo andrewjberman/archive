@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ai-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-4.ssh-tailnet-laptop-side-read.md",
+    "group": "OTHER",
+    "vintage_commit": "afebfdc81a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~109",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round19.md",
+    "vintage_commit": "afebfdc81a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-4.ssh-tailnet-laptop-side-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_round19_fwd27_laptop_side.py",
+      "kind": "test",
+      "commit_or_etag": "b265d96511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs .tools/ssh-tailnet-verify.py for sitez, dell1 and dell2 from this laptop as a read (hostname by key; the tool's no-password probe). Login per box is the client default read by ssh -G. Last changed in b265d96511 (password_refused counts the verdict head). No push, no deploy, no write on any box.",
+      "artifact_covered_by": [
+        "CTai4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~109/FWD27_LAPTOP_SIDE_READ.md",
+      "kind": "record",
+      "commit_or_etag": "2c25aa6cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The printed tool lines verbatim with their time (2026-10-15T12:46:52Z to 12:47:09Z), and the table of FWD-27 arms this cell did not drive, each with its reason and owner.",
+      "artifact_covered_by": [
+        "CTai4-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTai4-AC1",
+      "criterion_verbatim": "key login by hostname answers on site Z, dell1 and dell2 from the laptop (base: the file does not exist); report the whole last line, including password_refused.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_fwd27_laptop_side.py",
+      "output_evidence": "run from the worktree root under timeout 280 on the committed state (test file at b265d96511), 2026-10-15T12:46:52Z, rc=1. Last line: FWD27-LAPTOP-SIDE boxes=3 key_ok=0 password_refused=3 ok=False. Box lines: BOX sitez 100.99.180.19 port22=OPEN key=DENIED password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive; BOX dell1 100.79.95.44 port22=OPEN key=DENIED password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive; BOX dell2 100.104.84.87 port22=OPEN key=DENIED password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive; SSH-VERIFY boxes=3 done=0 not_done=sitez,dell1,dell2. The login is the client default (ssh -G user AzureAD+AndrewBerman), refused on all three; a native ssh with login azuread\\andrewberman is also refused on dell1 (verbose: publickey offered, Permission denied). No login is recorded in the CT-u-2 proof record or CVO row 27.",
+      "denominator": "3 boxes read (sitez, dell1, dell2); key_ok=0 of 3; password_refused=3 of 3 (KBDINT-NO-PROMPT, measured)",
+      "status": "FAIL",
+      "expect": "key_ok=3",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTai4-AC2",
+      "criterion_verbatim": "the verify tool's own selftest still reads ok (base: SSH-VERIFY-SELFTEST cases=12/12 ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/ssh-tailnet-verify.py --selftest",
+      "output_evidence": "run from the worktree root under timeout 280 on the committed state, rc=0. Last line: SSH-VERIFY-SELFTEST cases=12/12 ok=True. The tool was not changed by this order (last changed in aa235a132c).",
+      "denominator": "12 of 12 selftest cases ok",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run for CTai4-AC1: no box in the register accepts a key login from this laptop, so there is no positive control to break. The tool's positive key path (key ANSWERED, password REFUSED, done=True) is covered by selftest case 1 under CTai4-AC2.",
+      "expected": "not applicable",
+      "observed": "not run",
+      "status": "NOT-RUN"
+    },
+    "determinism": {
+      "method": "the CTai4-AC1 command run twice: once at 2026-10-15T12:41:50Z on the test bytes of 8f8245a378 (before the one-line password_refused fix), once at 2026-10-15T12:46:52Z on the bytes of b265d96511 (after it); compared on the BOX lines and on the key verdicts",
+      "observed": "key=DENIED on sitez, dell1, dell2 in both runs; port22=OPEN and password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive on all three in both runs; the first run's last line read password_refused=0 (the fix counts the verdict head, so the second reads 3)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The key login from rc and from muse, the laptop as a target, a login from outside the tailnet, and password login off on each box",
+      "reason": "Not driven by this cell: rc and muse are Andrew's devices; the laptop as target needs a local administrator account (Andrew's one line); the off-tailnet arm needs an off-tailnet address (0.0.0_AB_MSTR); password login off is an elevated line per box (Andrew). Named with owners in FWD27_LAPTOP_SIDE_READ.md."
+    },
+    {
+      "item": "Any login name for sitez, dell1 or dell2 beyond the client default",
+      "reason": "The order names the CT-u-2 proof record and CVO row 27 as the login source; neither holds a per-box login. No other login was tried (no guessing); the cell reports FAIL rather than choose one."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W109-S1: the order's per-box login source (CT-u-2 proof record and CVO row 27) holds no login for sitez, dell1 or dell2, so the cell cannot pick one without guessing. BLOCKING, hazard INERT. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W109-S2: the key login that CVO row 27 measured as rc 0 with no user given is DENIED today on sitez, dell1 and dell2 (publickey offered, Permission denied). BLOCKING, hazard INERT. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~109/NFRA_CTLPLN.TO-CT-ai-4.ssh-tailnet-laptop-side-read.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~109 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_fwd27_laptop_side.py",
+      "result": "FWD27-LAPTOP-SIDE boxes=3 key_ok=0 password_refused=3 ok=False (rc=1)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/ssh-tailnet-verify.py --selftest",
+      "result": "SSH-VERIFY-SELFTEST cases=12/12 ok=True (rc=0)"
+    }
+  ]
+}
