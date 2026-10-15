@@ -17,11 +17,41 @@
   "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
   "artifacts_produced": [
     {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~309/SCOPE_HISTORY_PROBE_R122.json",
+      "kind": "config_data",
+      "commit_or_etag": "25427424b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-9 record: script hash, two listed calls (A then B, both HTTP 200, gross_of_fees_flag false), per household the account rows (5 for A, 6 for B; 9 with a series, 2 with no group), the three verdict fields (all_accounts_with_series false, chain_matches_all false, series_complete_all false), the credential verdict ACCEPTED, the bound (294 households, serial upper bound about 537 s, about 337 MB) and the basis words. Counts, digests and verdict words only; the two 2xx bodies are private files hashed in the record. No AWS write, no push, no deploy.",
+      "artifact_covered_by": [
+        "DBI122-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~309/scope_history_probe.py",
+      "kind": "script",
+      "commit_or_etag": "25427424b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one probe script, hashed in the record. It POSTs the inner scope only, to the one Scope URL, exactly twice (household A then B), six seconds apart, with a 180 second timeout and no retry; it reads the token through the estate's Secrets Manager loader only; it holds no AWS write call, names no other firm, and makes no other HTTP call. Not deployed; run only from the worktree.",
+      "artifact_covered_by": [
+        "DBI122-1-AC1"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "config_data",
-      "commit_or_etag": "2d42ab6cfc",
+      "commit_or_etag": "25427424b9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One row appended as bytes, IRPT_DASHBD-D2-W309-S1 (class BLOCKING, hazard INERT): the Orion loader modules that the probe template imports (orion_selected, orion_live) are tracked at HEAD but absent from this sparse worktree, so the probe could not start. Counts and form only; no client value.",
+      "deploy_evidence": "Three rows appended as bytes: IRPT_DASHBD-D2-W309-S1 (BLOCKING, INERT; filed at 2d42ab6cfc, the sparse-checkout premise), IRPT_DASHBD-D2-W309-S2 (OBSERVATION, INERT; the completeness rule assumes trading days, the breakdown is calendar-day) and IRPT_DASHBD-D2-W309-S3 (OBSERVATION, INERT; two long series short of their calendar count with the chain not reproduced). Form and counts only.",
+      "artifact_covered_by": [
+        "DBI122-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-9.orion-scope-history-probe-series-length-call-time-and-bound.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The status line flipped from pending to complete in this commit, one line, after DBI122-1-AC1 PASS by the unmodified checker. No other line of the order changed.",
       "artifact_covered_by": [
         "DBI122-1-AC1"
       ]
@@ -33,52 +63,58 @@
       "criterion_verbatim": "`DBI122-1-AC1` -- the record is complete and carries no identifier; the script is a tracked file hashed as recorded with no AWS write call and no other firm's name; the two households and their window-start hashes equal the checker's recompute; 1 or 2 calls are listed (A then B, no call after a failed one), each `ok` agreeing with its status, each 2xx a private file hashed as recorded whose size equals `response_bytes`; every account's state, points, chain check and completeness equal the checker's recompute from the saved bodies and the roster; the verdict fields, the credential verdict and the universe bound (requests, seconds_max, bytes_max) equal the recount; no write to AWS, no push, no deploy. Base: FAIL (no record).",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r122/p122_hist.py\" . DBI122-1-AC1",
-      "output_evidence": "DBI122-1-AC1 FAIL: record absent: org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~309/SCOPE_HISTORY_PROBE_R122.json ; DBI122-1-AC1 FAIL ; rc=1",
-      "denominator": "1 of 1 criterion FAIL. Vendor calls made: 0 of 2 permitted (the order's household A then household B). Calls listed in the record: none, because no record was written. Secret reads: 0. S3 writes 0, DynamoDB writes 0. The blocking cause is measured, not inferred: the probe template imports orion_selected and orion_live from infra/aws/lambda/investor-reporting/performance, and this worktree's sparse-checkout list omits infra/aws/lambda (the directory is absent on disk, 0 entries), while the same three modules are tracked at HEAD 5bdf4f810a (3 of 3 in the index). The required record is therefore unwritable without widening the sparse checkout or building the request elsewhere, which the order does not permit.",
-      "status": "FAIL",
-      "status_reason": "The probe cannot start in this worktree: the orion_selected and orion_live loader modules it imports are absent from the sparse checkout (surprise row IRPT_DASHBD-D2-W309-S1). No vendor call, no secret read and no record were made, so the record-based checks cannot pass; the order stays open for the issuer to route.",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback (the same fallback the checker reads). DBI122-1-AC1 PASS ; rc=0",
+      "denominator": "1 of 1 criterion PASS. Calls listed: 2 of 2 (household A then household B), calls_made and reads.vendor_calls both 2, each ok agreeing with its status (2 of 2, both HTTP 200), no call after a failed one, each 2xx a private file hashed as recorded and sized as response_bytes (2 of 2). Households and window starts: 2 of 2 equal the recount. Account rows: 11 of 11 (5 in A, 6 in B) equal the recount on state, points, chain check and completeness. Verdict fields (3 of 3), credential verdict (ACCEPTED) and the bound (294 households, requests 294, seconds_max and bytes_max) equal the recount. Negative control on the same checker: 1 mutant (the verdict series_complete_all changed in a scratch copy) returns FAIL.",
+      "status": "PASS",
       "expect": "DBI122-1-AC1 PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Negative arm, not a mutated copy: the criterion's required record is absent (its base state), so the unmodified checker must return FAIL on the absent record rather than PASS.",
-      "expected": "DBI122-1-AC1 FAIL (record absent)",
-      "observed": "DBI122-1-AC1 FAIL: record absent: org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~309/SCOPE_HISTORY_PROBE_R122.json ; rc=1",
+      "description": "Scratch copy of the record in the worker scratch folder (not committed), with verdict.series_complete_all changed from false to true and nothing else changed; the unmodified checker run on that copy.",
+      "expected": "DBI122-1-AC1 FAIL on the verdict recount",
+      "observed": "DBI122-1-AC1 FAIL: verdict differs from the recount ; rc=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "The unmodified checker run twice on the final tree at the same input, the two printed outputs compared with cmp.",
-      "observed": "identical output on both runs: DBI122-1-AC1 FAIL (record absent); rc=1 both runs",
+      "observed": "identical output on both runs: DBI122-1-AC1 PASS; rc=0 both runs",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "The two Scope calls, the private response files and the record SCOPE_HISTORY_PROBE_R122.json",
-      "reason": "Not made. The order builds the inner scope body with orion_selected.requests_for and reads the session token with orion_live, both under infra/aws/lambda/investor-reporting/performance, which this sparse worktree omits. Writing a request builder or a token reader of this worktree's own would be a route the order did not name, so the cell stopped before its first call (0 vendor calls, 0 secret reads)."
+      "item": "A third call, a retry, or a household or window other than the two the order names",
+      "reason": "Exactly two calls were made (household A then household B); both answered HTTP 200; no retry; no other household or window."
     },
     {
-      "item": "Widening the sparse checkout or extracting the modules from another tree to make the order executable",
-      "reason": "Not done: the order forbids rebuilding, extracting or reconstructing the tree to make an order executable. The row IRPT_DASHBD-D2-W309-S1 carries the measured premise failure for the issuer to route."
-    },
-    {
-      "item": "The probe script second-household style tracked file in this folder",
-      "reason": "Not written: it could not be run against the loaders it depends on, and an untested probe is not the criterion's artifact. The round-120 template at deliverables/0.9.0_WK_IRPT_DASHBD~308/second_household_probe.py is unchanged and was only read."
+      "item": "A token from any store other than the estate's own loader",
+      "reason": "Not used. The Secrets Manager read of the estate's loader succeeded (token_store_used secretsmanager), so no fallback was taken."
     },
     {
       "item": "Any AWS write, push, deploy, or change to served values",
-      "reason": "None made. The worktree has one commit from this cell (the surprise row) and this instance; nothing was pushed or deployed."
+      "reason": "None made. The reads were the Secrets Manager token, the private dimension and the round-119 roster body, and the two Scope POST responses. Writes are the private folder, the repo record and the surprise rows."
+    },
+    {
+      "item": "The trading-day completeness result",
+      "reason": "Not an exclusion from the criterion: the criterion grades the record against the recount under the rule as written. The rule fails for all 9 series (series_complete_all false), which is recorded as a measured result and filed as IRPT_DASHBD-D2-W309-S2 for the issuer to rule; the rule was not changed."
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W309-S1: the Orion loader modules orion_selected and orion_live are tracked at HEAD 5bdf4f810a but absent from this sparse worktree (sparse-checkout list omits infra/aws/lambda), so the probe could not start and no call was made. Form only."
+    "IRPT_DASHBD-D2-W309-S1: the Orion loader modules orion_selected and orion_live were absent from the sparse worktree, so the first attempt stopped before any call; the coordinator ruled the sparse set the issuer's omission and the modules were added to it. Form only.",
+    "IRPT_DASHBD-D2-W309-S2: the Scope breakdown is basedOn Calendar, so each series counts calendar days and the trading-day completeness rule fails for all 9 series. Form only.",
+    "IRPT_DASHBD-D2-W309-S3: two long-history series (686 and 2228 points) are short of their calendar-day count from the roster start and their chains do not reproduce the summary return; the other seven reproduce it. Form only."
   ],
   "compiler_tools": [
     {
-      "tool": "p122_hist.py, the issuer checker, run unmodified from the worktree root (twice, output compared)",
+      "tool": "scope_history_probe.py, the probe, run once from the worktree root (two calls, both HTTP 200)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~309/scope_history_probe.py <worktree root>",
+      "result": "calls A and B both HTTP 200; token from the Secrets Manager loader; states A and B as recorded; verdicts all false; credential ACCEPTED; record written"
+    },
+    {
+      "tool": "p122_hist.py, the issuer checker, run unmodified from the worktree root",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r122/p122_hist.py\" . DBI122-1-AC1",
-      "result": "rc=1 both runs; DBI122-1-AC1 FAIL (record absent); identical output"
+      "result": "rc=0; DBI122-1-AC1 PASS"
     }
   ]
 }
