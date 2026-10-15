@@ -334,13 +334,13 @@ def main(argv):
     sec_block = {
         "state": "READ",
         "words": ("The security grain exists in the custodian position silver that the producer declares in sources.json "
-                  "(entry %s): dim_position, one row per account and security per day. Its 2026-04-20 and 2026-04-21 partitions "
+                  "(entry " + src_name + "): dim_position, one row per account and security per day. Its 2026-04-20 and 2026-04-21 partitions "
                   "were read with the six declared columns. Pairs are the (account, security) pairs of the GRADED_DISAGREED "
                   "accounts held with positive quantity on both days; the security is the cusip, else the ticker. Classes by "
                   "precedence: absent (no closing price on 2026-04-21), stale (secprice_lstupdte before 2026-04-21), flat "
                   "(closing price equal to the previous day's), moved (the rest). The custodian position source carries no "
                   "security class: no class table was read, as the order grants no such read, so the class is the words "
-                  "%s." % CLASS_WORDS),
+                  + CLASS_WORDS + "."),
         "source": {"file": SOURCES_REL + " (entry " + src_name + ")",
                    "table": "dim_position, custodian position silver, partitions date=2026-04-20 and date=2026-04-21",
                    "words": "bucket and positions_prefix read from the declared entry; exactly two partitions read; no other prefix of the source touched"},
