@@ -1,0 +1,36 @@
+{
+  "base_commit": "71c9c81b676c33299a5eb5b1145b695f798d35fa",
+  "changed_paths": [
+    "infra/aws/lambda/ci/lambda-source-map.json",
+    "infra/aws/lambda/ci/tests/test_source_map_filled_named_accounts.py"
+  ],
+  "build_only_imports": [
+    {
+      "function": "irpt-49f-reporting-read-lambda",
+      "result": "PASS"
+    },
+    {
+      "function": "irpt-export-render",
+      "result": "PASS"
+    }
+  ],
+  "tests_total": 5,
+  "tests_passed": 5,
+  "mutant_tests_failed": 3,
+  "notes": [
+    "Importing set: computed from the map by packaged path (source_dir plus files entry ends with reporting/entry.py, export/retained_export.py or export/bundle.py): irpt-49f-reporting-read-lambda and irpt-export-render. irpt-ycharts-generate packages ycharts/generate/entry.py and is not an importer. The check's own selector (substring over json.dumps of each entry) returns 0 functions on this map, so its AC3 cannot pass; surprise rows IRPT_BCKEND-D2-W406-S1 to S3 are filed in INVESTIGATION_v1.md.",
+    "Map change: for irpt-49f-reporting-read-lambda and irpt-export-render, one staged_from entry appended (repo_path _scope/filled_named_accounts.py, pin 25bac3b7ea, packaged_as filled_named_accounts.py, sha256 of the bytes at the pin, verified against the worktree file) and filled_named_accounts.py appended to files. No other field changed; the file's line endings are LF and its key order is unchanged.",
+    "Build-only: for each function, BUILD_ONLY=1 TMPDIR=C:/dev/_scratch406/bo bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting <function>. Each build printed BUILD_ONLY with its sha256, staged every staged_from member with its sha256 verified, and returned rc 0. The script returns before aws s3 cp and head-object; no upload and no AWS call was made. The source map was untouched by the build.",
+    "Import: each built zip was extracted into a new empty scratch directory and imported under python -I with that directory placed on sys.path. Import OK: filled_named_accounts and entry (irpt-49f-reporting-read-lambda); filled_named_accounts, retained_export, bundle and entry (irpt-export-render). No function was invoked.",
+    "Mutant: the new test was run in memory with the BASE source-map bytes (git show 71c9c81b67:infra/aws/lambda/ci/lambda-source-map.json) served for the map path: 3 failed, 2 passed, pytest rc 1, no errors. The three failures are the assertions on the one-entry count and the pin and reachability checks for irpt-49f-reporting-read-lambda.",
+    "Tests: pytest on the new file at HEAD 5018cccc3e: 5 passed, rc 0. The test reads the map through open() of its repository path and checks each pin with git show and merge-base --is-ancestor.",
+    "Not read: the RECORD FACE of the order; the build outputs of functions other than the two named; any other lambda directory beyond the grep of investor-reporting for the shared reader's name.",
+    "rows_written 0 counts data rows; the three surprise-channel rows are the channel, not data rows. No client identifier appears in any tracked file; the client-data check printed WARN (hashed account-id list absent), the dell2 expected state."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
