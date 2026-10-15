@@ -122,6 +122,31 @@ role-unavailable arm), `404` for an absent security, and `admit_typed`'s own thr
 (`principal_required`, `harvest_opal_only`, `harvest_prefix_not_served`), every one of them before any
 invoke.
 
+## What step 3 is actually waiting for, traced once so nobody traces it twice
+
+The GO says the cut waits on MX-r-14. Measured 2026-10-15 ~16:4xZ-17:5xZ, so a later reader does not
+re-derive it:
+
+- `NFRA_MCPINDEX.TO-MX-r-14.round17-catalog-release.md` -- `issued_to 0.7.0_AE_CloudOps~MI`,
+  `<status>issued</status>`, ONE commit (`2d9d5c4503`, 09:30Z, its issuance). Its start condition:
+  MX-c-18 and MX-c-19 complete and drained, the regenerated catalog landed, **every NFRA_OPLGTW gateway
+  ledger ahead in the queue CLOSED**, and then *"the issuer continues you with an AMENDMENT (A1)... until
+  it arrives, do nothing."*
+- MX-c-18 `complete`, MX-c-19 `complete`. **OG-ap-20's ledger CLOSED** -- that is the NFRA_OPLGTW ledger
+  ahead in its queue, so this project satisfies that clause rather than blocking it.
+- **A1 has never been written**: 0 matches for the amendment pattern against a positive control of 1 in
+  this very order (OG-ap-21's own A2). The order carries one commit and no amendment.
+- `0.7.0_AE_CloudOps~MI` is **LIVE** and reads `IDLE: ... no open task order` -- holding exactly as
+  instructed, not stalled.
+- `2.0.0_SA_COO~O` is **LIVE** and its own working line reads `waiting CTO ruling, MI r-14, Z ap-21 ask`:
+  it holds this seat's ask and sits in the same wait.
+
+**So the single gate is `2.0.0_SA_COO~MI`'s A1 amendment on MX-r-14**, and three live seats queue behind
+it. **It is not a deadlock**, which is the thing worth checking and easy to assume: MX-r-14's clause names
+ledgers AHEAD of it in the gateway queue, and OG-ap-21 is BEHIND it. A cross-fabric nudge is not this
+seat's to send (it routes MSTR to MSTR); the ask that could move it went to this project's own issuer,
+offering either a nudge or a release to cut on `06cfb6db64` and accept a re-cut.
+
 ## The suites, run at trunk BEFORE the window, so no red gets diagnosed inside it
 
 | suite | at trunk | transferable to the cut? |
