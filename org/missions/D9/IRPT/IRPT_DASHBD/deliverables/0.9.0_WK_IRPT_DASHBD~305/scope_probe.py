@@ -23,11 +23,14 @@ START = "2026-10-01"
 END = "2026-10-13"
 MODULE_DIRS = ("infra/aws/lambda/investor-reporting/performance", "infra/aws/lambda/inf-pipeline/inf-performance-daily")
 MAX_CALLS = 4
-PACE_S = 6          # at least 5 seconds between calls
-RETRY_WAIT_S = 15   # a timeout or a 5xx is retried once per flag after 15 seconds
+PACE_S = 6          # at least 5 seconds between calls; amended round 117: no retry of any kind
 MIN_REMAINING_S = 120
 MAX_BYTES = 16 * 1024 * 1024
 CANON_ACCOUNT = "probe-household"
+# The two calls of the first run (round 117, wrapped body, both HTTP 400 -- the issuer's order omitted which part to
+# POST; amendment 1). They stay in the record as calls 1 and 2 and enter every verdict. Their bodies were not 2xx.
+PRIOR_CALLS = [{"gross_of_fees_flag": False, "http_status": 400, "ok": False},
+               {"gross_of_fees_flag": True, "http_status": 400, "ok": False}]
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -69,12 +72,14 @@ def build_bodies(household_id, first_account):
     import tenants
     mapping = {"firm_id": tenants._CANONICAL_INF, "canonical_account_id": CANON_ACCOUNT,
                "vendor_account_id": int(first_account), "vendor_household_id": int(household_id)}
-    false_body = orion_selected.requests_for(mapping, CANON_ACCOUNT, START, END)
-    option = false_body["scope"]["calculations"][0]["contextChange"]["performanceOption"]
+    wrapper = orion_selected.requests_for(mapping, CANON_ACCOUNT, START, END)
+    # Amendment 1 (round 117): POST the INNER scope, as orion_selected.calculate does (requests["scope"]).
+    false_body = wrapper["scope"]
+    option = false_body["calculations"][0]["contextChange"]["performanceOption"]
     if option.get("calcGrossOfFees") is not False:
         raise SystemExit("fee flag path does not hold calcGrossOfFees false")
     true_body = copy.deepcopy(false_body)
-    true_body["scope"]["calculations"][0]["contextChange"]["performanceOption"]["calcGrossOfFees"] = True
+    true_body["calculations"][0]["contextChange"]["performanceOption"]["calcGrossOfFees"] = True
     return false_body, true_body, tenants.route_for(tenants._LEGACY_SHORT_ID["INF"]).url("scope")
 
 
@@ -126,36 +131,25 @@ def post(url, token, body):
 
 
 def run_calls(url, token, false_body, true_body):
+    """Amended round 117: two calls, flag false then flag true, at least PACE_S apart, NO retry of any kind;
+    the run stops at the first answer that is not 2xx (a 4xx or 5xx is recorded and the cell stops)."""
     calls, raws = [], {}
-    stop = False
     for flag, body in ((False, false_body), (True, true_body)):
-        if stop:
+        if calls:
+            time.sleep(PACE_S)
+        status, raw = post(url, token, body)
+        ok = 200 <= status < 300
+        entry = {"gross_of_fees_flag": flag, "http_status": status, "ok": ok}
+        if ok and raw is not None:
+            # written at once, so an interrupted run cannot lose a response it already received
+            path = PRIV + ("scope_true.json" if flag else "scope_false.json")
+            with open(path, "wb") as fh:
+                fh.write(raw)
+            entry["response_file"] = {"path": path, "sha256": hashlib.sha256(raw).hexdigest()}
+            raws[flag] = raw
+        calls.append(entry)
+        if not ok:
             break
-        attempt = 0
-        while True:
-            if calls:
-                time.sleep(RETRY_WAIT_S if attempt else PACE_S)
-            status, raw = post(url, token, body)
-            ok = 200 <= status < 300
-            entry = {"gross_of_fees_flag": flag, "http_status": status, "ok": ok}
-            if ok and raw is not None:
-                # written at once, so an interrupted run cannot lose a response it already received
-                path = PRIV + ("scope_true.json" if flag else "scope_false.json")
-                with open(path, "wb") as fh:
-                    fh.write(raw)
-                entry["response_file"] = {"path": path, "sha256": hashlib.sha256(raw).hexdigest()}
-                raws[flag] = raw
-            calls.append(entry)
-            attempt += 1
-            if status in (401, 403):
-                stop = True
-                break
-            retryable = status == 0 or status >= 500
-            if retryable and attempt == 1:
-                continue
-            break
-    if len(calls) > MAX_CALLS:
-        raise SystemExit("call cap exceeded")
     return calls, raws
 
 
@@ -246,7 +240,8 @@ def verdicts(calls, raws, accounts):
     b = {"verdict": vb, "claim": "absent" if vb == "NOT_RUN" else "measured",
          "accounts_compared": ncmp, "accounts_with_fee": nfee}
     any_ok_false = any(c["ok"] and c["gross_of_fees_flag"] is False for c in calls)
-    vc = "ACCEPTED" if any_ok_false else ("REFUSED" if all_refused else "NOT_RUN")
+    all_auth = all(c["http_status"] in (401, 403) for c in calls)
+    vc = "ACCEPTED" if any_ok_false else (("REFUSED" if all_auth else "REQUEST_REJECTED") if all_refused else "NOT_RUN")
     c = {"verdict": vc, "claim": "absent" if vc == "NOT_RUN" else "measured"}
     return a, b, c
 
@@ -272,14 +267,12 @@ def main(argv):
             calls, raws = run_calls(url, token, false_body, true_body)
     token = None
     listed = calls
-    a, b, c = verdicts(calls, raws, accounts) if calls else (
-        {"verdict": "NOT_RUN", "claim": "absent", "account_groups_returned": 0, "groups_with_daily_series": 0},
-        {"verdict": "NOT_RUN", "claim": "absent", "accounts_compared": 0, "accounts_with_fee": 0},
-        {"verdict": "NOT_RUN", "claim": "absent"})
+    all_calls = PRIOR_CALLS + calls
+    a, b, c = verdicts(all_calls, raws, accounts)
     summary = {"household_sha256": hh_sha, "accounts_in_household": len(accounts), "token_store_used": store,
-               "reads": reads, "calls": listed, "a_multi_account": a, "b_fee_basis": b, "c_credential": c,
-               "script_run": "scope_probe.py"}
-    with open(PRIV + "probe_summary.json", "w", encoding="utf-8") as fh:
+               "reads": reads, "calls": all_calls, "a_multi_account": a, "b_fee_basis": b, "c_credential": c,
+               "script_run": "scope_probe.py (amended round 117: inner scope, two calls)"}
+    with open(PRIV + "probe_summary_calls_3_4.json", "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2, sort_keys=True)
     print("household_sha256 %s accounts_in_household %d token_store_used %s" % (hh_sha, len(accounts), store))
     for i, c_ in enumerate(listed, 1):
