@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ak-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-4.signed-change-commit-and-positive-read-test.md",
+    "group": "OTHER",
+    "vintage_commit": "4d79c7c58c"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~118",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round21.md",
+    "vintage_commit": "4d79c7c58c",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ak-4.signed-change-commit-and-positive-read-test.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_round21_fwd5_positive_read.py",
+      "kind": "test",
+      "commit_or_etag": "b27be9ad79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only: the aws() guard admits only s3api head-object, list-object-versions and list-objects-v2; every list is paginated by its token and counted client-side. The repository md5 is read from the HEAD blob. Committed at b27be9ad79 on wk-NFRA_CTLPLN-118 by safe-commit.sh; no deploy, no ledger entry, no push.",
+      "artifact_covered_by": [
+        "CTak4-AC1",
+        "CTak4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/diag_sleeve_fix.py",
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-worktree-blob-34dc02f95b",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "One docstring line edited in the worktree (line 2, now 'Hand-run only.'): 4176 bytes, sha256 8b816d98f1da631ce459a5d085d3f61bec6494d5fb1eee78158aa4de16abaa8a, md5 b610db367f4fafe86a2a47ce3e2ebd1b, blob 34dc02f95b. The commit is REFUSED by the commit gate's ruff step on seven findings the unmodified file already carries (row NFRA_CTLPLN-W118-S1); HEAD is still blob 0e4aec8d80 (md5 56cb170f95c0b112a36a0ee3973d5473). No deploy.",
+      "artifact_covered_by": [
+        "CTak4-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTak4-AC1",
+      "criterion_verbatim": "before the deploy, exactly the target differs from S3 and no other top-level gold script does (base: the file is untracked and has no --pre flag); report the whole FWD5-PRE line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --pre",
+      "output_evidence": "FWD5-PRE target=diag_sleeve_fix.py versions=1 repo_blob=0e4aec8d80 repo_md5=56cb170f95c0b112a36a0ee3973d5473 s3_etag=56cb170f95c0b112a36a0ee3973d5473 differs=False others_differ=0 ok=False (rc=1; run as timeout 280 python .tools/tests/test_round21_fwd5_positive_read.py --pre from the worktree root on the committed state at b27be9ad79, where HEAD still carries the unedited script). Preceding lines: 'versions: 1 exact-key version(s) of 1 page(s)'; 'others tally: EQUAL=68 (denominator 68)'.",
+      "denominator": "68 of 68 other top-level gold scripts EQUAL to S3, 0 differ, 0 skipped; target differs=False, so the target is NOT the one differing script",
+      "status": "FAIL",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak4-AC2",
+      "criterion_verbatim": "the signed change touches the module docstring only (base: no such flag); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --docstring-only",
+      "output_evidence": "ERROR: cannot read data/black_diamond/scripts/gold/diag_sleeve_fix.py at ed477c34c968972f30613851c1764a7a4afd35d2 or 064509d13ddb94b546fd6829d77c4cb5d68f5f3f (rc=1; no DOCSTRING-ONLY line printed). The instrument takes the last commit touching the file (064509d13d, the commit that added it) and its parent (ed477c34c9, which lacks the file); the signed change is not committed, so there is no pair to compare.",
+      "denominator": "0 of 1 comparison produced a verdict (the signed change has no commit)",
+      "status": "FAIL",
+      "expect": "docstring_only=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTak4-AC3",
+      "criterion_verbatim": "the edited script still compiles (base: it compiles; a control); report the output.",
+      "method": "command",
+      "invocation": "python -m py_compile data/black_diamond/scripts/gold/diag_sleeve_fix.py && echo PARSE-OK",
+      "output_evidence": "PARSE-OK (rc=0; run from the worktree root on the UNCOMMITTED one-line edit, blob 34dc02f95b). The base-compiles control was not separately run on the HEAD copy; the ruff control on the HEAD copy (Found 7 errors, default config) is in row NFRA_CTLPLN-W118-S1.",
+      "denominator": "1 of 1 file compiled",
+      "status": "PASS",
+      "expect": "PARSE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The read-only docstring instrument (strip_docstrings + ast.dump compare) run by .scratch/control_ac.py (uncommitted scratch, not in any deliverable) on (a) the HEAD blob with one code token changed (opal-data-bd -> opal-data-bx) and (b) the HEAD blob with the one-line docstring-text edit.",
+      "expected": "(a) returns False on both the strict and the broad compare (a code-token change must not pass as docstring-only)",
+      "observed": "(a) MUTANT code-token change strict_eq=False broad_eq=False; (b) DOCSTRING-TEXT-ONLY strict_eq=False broad_eq=True (the edited line 2 is a bare string statement, not a module docstring, by Python's definition: ast.get_docstring returns None)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the --docstring-only mode run twice on the committed state b27be9ad79 (no AWS call); compared on the whole output",
+      "observed": "both runs print the same ERROR line (identical bytes)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD step 1: the signed change to data/black_diamond/scripts/gold/diag_sleeve_fix.py is not committed",
+      "reason": "The commit gate refuses it (ruff, seven pre-existing findings; row NFRA_CTLPLN-W118-S1). The worker may not override and may not change code tokens. CTak4-AC1 and CTak4-AC2 therefore cannot pass on the committed state; the cell stays open for its issuer."
+    },
+    {
+      "item": "BUILD step 3 (CTak4-AC1 expectation): the post-edit target differing from S3",
+      "reason": "Follows from the exclusion above: HEAD still carries blob 0e4aec8d80, whose md5 equals the S3 ETag, so differs=False."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W118-S1: the commit gate refuses the one-line signed change on seven ruff findings (E402 x6, F401 numpy) that the unmodified file already carries; the bare string on line 2 is not a module docstring by Python's definition. BLOCKING, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~118/NFRA_CTLPLN.TO-CT-ak-4.signed-change-commit-and-positive-read-test.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~118 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --pre",
+      "result": "FWD5-PRE target=diag_sleeve_fix.py versions=1 repo_blob=0e4aec8d80 repo_md5=56cb170f95c0b112a36a0ee3973d5473 s3_etag=56cb170f95c0b112a36a0ee3973d5473 differs=False others_differ=0 ok=False"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_fwd5_positive_read.py --docstring-only",
+      "result": "ERROR: cannot read data/black_diamond/scripts/gold/diag_sleeve_fix.py at ed477c34c9 or 064509d13d (no DOCSTRING-ONLY line)"
+    }
+  ]
+}
