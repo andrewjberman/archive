@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-16",
+  "firm": "COT",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "2ee7fcf0ed",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-16.cottonwood-account-dim-producer-code-adapter-upload-and-lambda-entry-point.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "2ee7fcf0ed"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~409",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~409/DB_C16_SESSION.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_account_dim.py",
+      "kind": "script",
+      "commit_or_etag": "c1e843142c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file at c1e843142c; the upload path is written and tested offline only; nothing is built, uploaded or invoked",
+      "artifact_covered_by": ["DBC122-1-AC1", "DBC122-2-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_account_dim.py",
+      "kind": "test",
+      "commit_or_etag": "c1e843142c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file at c1e843142c; 11 tests pass offline with a fake s3 and a recording writer",
+      "artifact_covered_by": ["DBC122-1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/account-dim-cot/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "c1e843142c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file at c1e843142c; not zipped, not created as a function, not invoked; the one token hit is the mandated import (BLOCKING row IRPT_DASHBD-D2-W409-S1)",
+      "artifact_covered_by": ["DBC122-1-AC1", "DBC122-2-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/account-dim-cot/tests/test_lambda_function.py",
+      "kind": "test",
+      "commit_or_etag": "c1e843142c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file at c1e843142c; 6 tests pass offline with a dict-backed fake store and a recording writer; no AWS call",
+      "artifact_covered_by": ["DBC122-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC122-1-AC1",
+      "criterion_verbatim": "every named test exists in its file, and pytest passes on both test files. Base: FAIL (the named tests are absent).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r122/p122_bcw.py\" . DBC122-1-AC1",
+      "output_evidence": "DBC122-1-AC1 PASS (rc 0; second run rc 0 with the same line); pytest on the two files: 11 passed (adapter file) and 6 passed (lambda file), 17 passed together",
+      "denominator": "named tests present 11 of 11 (adapter 5 of 5, lambda 6 of 6); pytest 17 of 17 passed across both files",
+      "status": "PASS",
+      "expect": "DBC122-1-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DBC122-2-AC1",
+      "criterion_verbatim": "the bounds: the product files changed since the base are only the five in <paths>; lambda_function.py is ASCII, types no firm token, bucket name or silver prefix, and creates no boto3 client at import; the adapter's constants, schema and build_account_dim are byte-identical to the base; a planted control (the adapter's refusal line removed in a scratch copy) makes test_upload_refuses_a_non_empty_partition FAIL. Base: FAIL (the new file is absent).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r122/p122_bcw.py\" . DBC122-2-AC1",
+      "output_evidence": "lambda_function.py types a forbidden token: cottonwood / DBC122-2-AC1 FAIL (rc 1). Measured past that row with the token list emptied (measurement only): the rest of the arm PASSes, and the planted control gives 1 failed, DID NOT RAISE FileExistsError",
+      "denominator": "changed product files inside the grant 4 of 4; forbidden-token census of lambda_function.py 1 hit of 5 tokens (line 48, the mandated import); planted control 1 failed of 1 run",
+      "status": "FAIL",
+      "status_reason": "the order's mandated import line import cottonwood_account_dim as adapter types the token the checker refuses in lambda_function.py; the criterion cannot pass as written. Kept as written, not repaired; BLOCKING row IRPT_DASHBD-D2-W409-S1",
+      "expect": "DBC122-2-AC1 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "planted control named by DBC122-2-AC1: the adapter's raise FileExistsError line removed in a scratch copy of data/, lib/, infra/logic and org/standards; pytest -k test_upload_refuses_a_non_empty_partition on that copy",
+      "expected": "the refusal test FAILS on the scratch copy",
+      "observed": "1 failed, 10 deselected: DID NOT RAISE FileExistsError (rc 1); the unmodified copy gives 1 passed (rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of p122_bcw.py . DBC122-1-AC1 on the same commit, outputs compared",
+      "observed": "run 1 and run 2 both DBC122-1-AC1 PASS, rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS call, upload, build, zip, Terraform plan or apply, function creation, schedule, role, invoke, push or vendor call",
+      "reason": "the grant forbids every one of them; this cell is repo files only"
+    },
+    {
+      "item": "the mandated import line import cottonwood_account_dim as adapter kept as written",
+      "reason": "the checker token census refuses it; the criterion is reported FAIL with its measurement and not repaired by a route the order did not name (row IRPT_DASHBD-D2-W409-S1)"
+    },
+    {
+      "item": "conftest.py in account-dim-cot/tests",
+      "reason": "not needed by the tests as written; the grant allows it and it is not created"
+    },
+    {
+      "item": "the holdings-performance producer, sources.json, the registry, the contract, the source map and every Terraform file",
+      "reason": "read only; the grant forbids edits to them"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W409-S1: DBC122-2-AC1 FAILS as written: the mandated import import cottonwood_account_dim as adapter in lambda_function.py types the token the checker's FORBIDDEN_TOKENS refuses; every other bound measures PASS",
+    "IRPT_DASHBD-D2-W409-S2: the order's source entry blackdiamond_z09 cannot be typed in the lambda (the checker refuses z09), so the handler selects the one declared source whose custodian is the Black Diamond custodian, refusing unless exactly one matches",
+    "IRPT_DASHBD-D2-W409-S3: the silver resolution imports the holdings-performance producer, so the DB-c-17 package must carry its declaration, the registry tree, NAMING_SCHEMA.json and numpy and pandas"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -I -m pytest -q -p no:cacheprovider (stdlib run of the two test files at the worktree root)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_account_dim.py infra/aws/lambda/investor-reporting/account-dim-cot/tests/test_lambda_function.py",
+      "result": "17 passed in 0.65s (rc 0)"
+    },
+    {
+      "tool": "p122_bcw.py checker, the round-122 criteria checker (read only, run as shipped)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r122/p122_bcw.py\" . <criterion>",
+      "result": "DBC122-1-AC1 PASS (rc 0); DBC122-2-AC1 FAIL (rc 1) on the forbidden token cottonwood at lambda_function.py line 48"
+    },
+    {
+      "tool": "Grep over the worktree file, case-insensitive, for the five forbidden tokens",
+      "invocation": "Grep pattern (?i)cottonwood|z09|opal-data-assets|opal-data-cottonwood|blackdiamond/ on infra/aws/lambda/investor-reporting/account-dim-cot/lambda_function.py",
+      "result": "1 match: line 48 import cottonwood_account_dim as adapter"
+    },
+    {
+      "tool": "measurement-only copy of the checker arm (.scratch/measure_ac2_rest.py, not committed) and a planted-control scratch copy",
+      "invocation": "python -I .scratch/measure_ac2_rest.py <worktree root>; python -I -m pytest on the scratch copy with the refusal line replaced by pass",
+      "result": "REST-OF-AC2 PASS with the token list emptied; the planted control makes the refusal test fail (DID NOT RAISE)"
+    }
+  ]
+}

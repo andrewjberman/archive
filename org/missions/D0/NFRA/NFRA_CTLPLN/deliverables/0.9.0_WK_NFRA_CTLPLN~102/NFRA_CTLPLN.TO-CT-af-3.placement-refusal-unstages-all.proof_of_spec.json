@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-af-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-af-3.placement-refusal-unstages-all.md",
+    "group": "OTHER",
+    "vintage_commit": "cb843928c1"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~102",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round16.md",
+    "vintage_commit": "cb843928c1",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-af-3.placement-refusal-unstages-all.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "36d453eea0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build item 1 (W99-S1): the PLACEMENT refusal branch of the naming stage unstages every path in IN_SCOPE through the same loop as the ENFORCE branch (4 insertions, 1 deletion); the ENFORCE branch, the error text, the printed gate output and exit 1 are unchanged; bash -n clean; read by CTaf3-AC1 arms (a) and (b), and by CTaf3-AC2 and CTaf3-AC3 for the unchanged ENFORCE branch",
+      "artifact_covered_by": [
+        "CTaf3-AC1",
+        "CTaf3-AC2",
+        "CTaf3-AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_placement_unstage.py",
+      "kind": "test",
+      "commit_or_etag": "7eac4c0a1b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build item 2: new standard-library suite, four arms (a) placement refusal unstages both, base control keeps the .md, (b) placement file absent identical to base, (c) ENFORCE refusal unstages both, (d) clean pass keeps both; the naming stage is extracted from safe-commit.sh and from git show cb843928c1 with the derivation suite's helper; the gate is a stub with the live limb off; PLACEMENT-UNSTAGE arms=4/4 ok=True",
+      "artifact_covered_by": [
+        "CTaf3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2ea2adcafa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one row appended (NFRA_CTLPLN-W102-S1: the order's git show HEAD base moved with the WIP commit, base pinned to cb843928c1), no existing row edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaf3-AC1",
+      "criterion_verbatim": "python .tools/tests/test_placement_unstage.py expect: ok=True -- every arm passes, including the placement refusal that now unstages the .md (base: the file does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_placement_unstage.py",
+      "output_evidence": "PLACEMENT-UNSTAGE arms=4/4 ok=True (rc=0; run under timeout 300 from the worktree root at 7eac4c0a1b; arm a: new rc=1 still=[] | base rc=1 still=[fixture.md]; arm b: new and base rc=0 with identical staged sets; arm c: rc=1 still=[]; arm d: rc=0 both staged)",
+      "denominator": "4 of 4 arms passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaf3-AC2",
+      "criterion_verbatim": "python .tools/tests/test_round15_batch.py expect: ok=True -- the round-15 batch suite, whose arm 2 grades the ENFORCE refusal, still passes (base: ROUND15-BATCH arms=9/9 ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round15_batch.py",
+      "output_evidence": "ROUND15-BATCH arms=9/9 ok=True (rc=0; run under timeout 300 from the worktree root at 7eac4c0a1b; the same last line as the base control; arm 2a rc=1 still=[] and arm 2b rc=0 both staged)",
+      "denominator": "9 of 9 arms passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaf3-AC3",
+      "criterion_verbatim": "python .tools/tests/test_safe_commit_derivation.py expect: ok=True -- the derivation suite still passes (base: SAFE-COMMIT-DERIVATION cases=17/17 ok=True, a control, about 52 seconds); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_safe_commit_derivation.py",
+      "output_evidence": "SAFE-COMMIT-DERIVATION cases=17/17 ok=True (rc=0; run under timeout 300 from the worktree root at 7eac4c0a1b; the same last line as the base control; the ENFORCE check (S) rc=1 still=[] is unchanged)",
+      "denominator": "17 of 17 cases passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "two runs of python .tools/tests/test_placement_unstage.py from the worktree root at 7eac4c0a1b, outputs compared byte for byte with cmp",
+      "observed": "identical output on both runs (rc=0 both): PLACEMENT-UNSTAGE arms=4/4 ok=True; cmp reported no difference",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the base safe-commit.sh at cb843928c1 (the placement branch loops over NGATE_FILES only) against the repaired file at 36d453eea0, both run on the same placement fixture by arm (a) of the new suite; the base run is the control arm",
+      "expected": "the base keeps the .md staged after the placement refusal (still=[fixture.md]); the repaired script unstages it (still=[])",
+      "observed": "base rc=1 still=[org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~102/fixture.md]; repaired rc=1 still=[]",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-af-3 from pending to complete",
+      "reason": "not done: the cell's rules name the flip as the issuer's; the order file is outside this worker's <paths> and was not edited"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed: outside this cell's <paths>"
+    },
+    {
+      "item": "an empirical run of the placement-override path (naming-place-override line in the message)",
+      "reason": "not run: the BLIND clause asked for a read of the branch; the read is in the session log. IN_SCOPE is computed once at safe-commit.sh line 800, before the override appends the audit row to PATHSPEC, so the new loop cannot unstage the audit row; _np_unwind still removes that row on the refusal path"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W102-S1: the order's base copy named as git show HEAD:.tools/safe-commit.sh moves with the worker's WIP commit; the suite pins the base to the issuance commit cb843928c1 instead; UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~102/NFRA_CTLPLN.TO-CT-af-3.placement-refusal-unstages-all.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~102, 2026-10-15; WIP commit 36d453eea0, test commit 7eac4c0a1b, surprise commit 2ea2adcafa on wk-NFRA_CTLPLN-102)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_placement_unstage.py",
+      "result": "PLACEMENT-UNSTAGE arms=4/4 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round15_batch.py",
+      "result": "ROUND15-BATCH arms=9/9 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_safe_commit_derivation.py",
+      "result": "SAFE-COMMIT-DERIVATION cases=17/17 ok=True"
+    }
+  ]
+}

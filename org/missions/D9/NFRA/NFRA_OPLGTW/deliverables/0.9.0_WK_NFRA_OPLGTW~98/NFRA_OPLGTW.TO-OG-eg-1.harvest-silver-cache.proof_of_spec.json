@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-eg-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "ad2abec9c5",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-eg-1.harvest-silver-cache.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c3b76c142b"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~98",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/store.py",
+      "kind": "script",
+      "commit_or_etag": "39ae28559b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "silver_latest keeps its uncached scan inline, now counting its GETs; inside silver_cache() the cached fold GETs only unseen parts, with LRU cap, copy-on-read and rebuild on vanish; get_stats_snapshot and get_stats_reset. Not deployed; no S3 write. Graded by AC1 (equality, arithmetic, cap, default) and AC2 (regression).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/cycle_runner.py",
+      "kind": "script",
+      "commit_or_etag": "39ae28559b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The driver call runs inside store.silver_cache(); the cycle record gains integer s3_get_count and s3_get_bytes (snapshot at start, delta at end); RECORD_KEYS carries both in record order. No runner re-registration. Graded by AC1.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_eg1_silver_cache.py",
+      "kind": "test",
+      "commit_or_etag": "39ae28559b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five named offline tests (test_eg1_ac01..ac05) over a counting in-memory S3. Run: 5 passed. Negative controls: tie clause removed fails ac01; cap raised fails ac04.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9bec46bac0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows NFRA_OPLGTW-Z-W98-S1..S4 appended in their own commit; surprise-row-gate OK (4 new rows of 659 checked)."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~98/NFRA_OPLGTW.TO-OG-eg-1.harvest-silver-cache.session.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session trail: premises, base measurements, code and check runs, the measured GET counts, and the criteria output lines."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "`AC1`: the cached read equals the full scan exactly and costs the arithmetic above, the default is unchanged, the cache is bounded, and the cycle record counts its GETs.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/eg1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "named tests passed 5 of 5 (test_eg1_ac01..ac05); failed/error lines 0 after the run",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "`AC2`: the existing silver suites still pass, so the silver output is unchanged.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/eg1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "existing silver suites: rc=0; 84 passed in 4.32s\nRESULT: PASS\nexit=0",
+      "denominator": "84 passed of 84 collected across the six existing silver suites (rc=0)",
+      "status": "PASS",
+      "expect": "(?s)existing silver suites: rc=0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two negative controls on the committed code, each a monkeypatch of one store symbol run against the named test: (a) _cache_wins replaced by plain supersedes, run against test_eg1_ac01; (b) silver_cache max_entries forced to 99, run against test_eg1_ac04.",
+      "expected": "test_eg1_ac01 and test_eg1_ac04 both FAIL under their mutant",
+      "observed": "(a) ac01 FAILED: cached silver_latest diverged from the full scan at some step; (b) ac04 FAILED: the cache holds 3 entries, cap is 2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two further runs of eg1.AC1.sh after the first, output compared line for line",
+      "observed": "identical: pytest rc=0; named tests passed 5 of 5; failed/error lines 0 / RESULT: PASS / exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "S3 GETs made outside store.py: harvest_grammar.get_listing_bronze and other modules' own get_object calls on the cycle path",
+      "reason": "Cell E2 confines the counter to store.py. The gap is filed as NFRA_OPLGTW-Z-W98-S1 (ARMED, disarm owner 2.0.0_SA_COO~O); the covering change is the issuer's scope call."
+    },
+    {
+      "item": "A live cycle run, runner re-registration, release, deploy, and any S3 write to a real bucket",
+      "reason": "Cell section 2 bounds: tests use fakes; the live proof is the applier order OG-eg-2."
+    },
+    {
+      "item": "silver_latest callers outside the cycle context (publication_gold, filings, lusha, uploads, by-hand tools)",
+      "reason": "Cell E1: outside the context the scan is unchanged, so they neither benefit nor change. Not altered."
+    },
+    {
+      "item": "silver_append does not update the cache after its put",
+      "reason": "Cell E1: not needed, because the next listing picks the new part up. Exercised by the ac02 new-part sequence and the ac01 append steps."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W98-S1: the cycle record counts only the GETs store.py issues; get_listing_bronze and other cycle-path get_object calls are not counted (ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W98-S2: RECORD_KEYS had to carry the two new fields; test_br2_cycle_runner and test_bx3_failure_reason_kept pin that tuple, and both pass.",
+    "NFRA_OPLGTW-Z-W98-S3: the cached fold breaks an exact fetched_at and run_stamp tie by part key, because supersedes alone is fold-order dependent on that tie.",
+    "NFRA_OPLGTW-Z-W98-S4: the o3 tie-break mutant test needs the uncached supersedes text inside silver_latest, so the full scan stays inline."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~98/NFRA_OPLGTW.TO-OG-eg-1.harvest-silver-cache.session.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/harvest/store.py lib/opal_data_harvest/cycle_runner.py lib/opal_data_harvest/test_eg1_silver_cache.py",
+      "result": "rc 0; OK: pre-commit gate clean for 3 of 3 file(s); ruff py39 also clean on the three files"
+    },
+    {
+      "tool": "python -m pytest (full harvest sweep)",
+      "invocation": "python -m pytest lib/opal_data_harvest lib/research/harvest -q -p no:cacheprovider",
+      "result": "1346 passed, 3 skipped, rc 0 (1349 collected, the 5 new tests included)"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-eg-1.harvest-silver-cache.md",
+      "result": "rc 0 VALID (pre-commit run: governing-binding BOUND, acceptance rows 2, violations 0, surprises 4 of 4 resolved); re-run on the committed instance after the final commit"
+    }
+  ]
+}
