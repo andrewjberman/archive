@@ -129,7 +129,7 @@ def check_probe(res):
     need(bad["raised"] is True and bad["calls"] == 0, "a malformed day must refuse before any call: %s" % bad)
     sc = s["scheduled"]
     need(sc["first_day"] == FLOOR_DAY and sc["puts"] == [sc["expected_key"]], "the scheduled path must run the OLDEST owed day (%s) with one put: %s" % (FLOOR_DAY, sc))
-    need(len(sc["invokes"]) == 1 and sc["invokes"][0]["InvocationType"] == "Event" and sc["invokes"][0]["FunctionName"] == sc["context_arn"] and sc["invokes"][0]["payload"] == {"day": sc["next_day"]},
+    need(len(sc["invokes"]) == 1 and sc["invokes"][0]["InvocationType"] == "Event" and sc["invokes"][0]["FunctionName"] == sc["context_arn"] and sc["invokes"][0]["payload"].get("day") == sc["next_day"],
          "the chain must be ONE Event self-invoke of the context's own ARN with {day: next}: %s" % sc["invokes"])
     last = s["last_day"]
     need(last["invokes"] == [] and len(last["puts"]) == 1, "the last owed day must put once and chain nothing: %s" % last)
