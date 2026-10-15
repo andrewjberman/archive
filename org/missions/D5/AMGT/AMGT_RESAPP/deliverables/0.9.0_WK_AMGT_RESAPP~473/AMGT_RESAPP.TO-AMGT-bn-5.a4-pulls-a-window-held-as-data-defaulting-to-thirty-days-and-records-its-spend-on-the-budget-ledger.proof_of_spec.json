@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bn-5.a4-pulls-a-window-held-as-data-defaulting-to-thirty-days-and-records-its-spend-on-the-budget-ledger",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "3b3abb478a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8342f10684",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bn-5.a4-pulls-a-window-held-as-data-defaulting-to-thirty-days-and-records-its-spend-on-the-budget-ledger.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~473",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_pull.py",
+      "kind": "script",
+      "commit_or_etag": "d52f3b9c99cdcf7b99dd878e4919f28d491b64d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED. Adds read_pull_window / load_pull_window (the window file, fail closed to 30 with one logged reason), record_pull_budget (the shared ledger line, never raises), the --window-days option, the pull start taken from the pull window, the ranking trim to the last WINDOW_DAYS before the two-observation test and compute_price_axis, and the full pulled series handed to run_daily_window_step. Runs only on the terminal box by its own job; nothing here is deployed or scheduled by this order.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_window.json",
+      "kind": "config_data",
+      "commit_or_etag": "d52f3b9c99cdcf7b99dd878e4919f28d491b64d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. {steps: [30, 90, 365], step: 0}. Shipped at step 0 (30 days, today's behaviour). Read by price_axis_pull.py only; no other reader.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_price_axis_window.py",
+      "kind": "test",
+      "commit_or_etag": "d52f3b9c99cdcf7b99dd878e4919f28d491b64d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. 18 tests (W1 to W10 as the order names them, plus W6b and parametrised W3 cases). Every boundary stubbed: the Bloomberg client, the S3 client, the universe loader, the identity index, the generation writer, the persist step, the clock and the ledger module (a fake ledger inside a tmp repo root, never the real ledger). 18 passed.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d52f3b9c99cdcf7b99dd878e4919f28d491b64d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row, AMGT_RESAPP-D1-W473-S1 (class OBSERVATION, hazard INERT). The row gate passed at commit: 1 new row of 1188 checked."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line `<n> passed` with n at least 10 and no `failed`; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-473 && timeout 300 python -m pytest integrations/bloomberg/research/tests/test_price_axis_window.py -q 2>&1 | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "    return datetime.datetime.utcnow().strftime(\"%Y-%m-%dT%H:%MZ\")\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n18 passed, 70 warnings in 0.89s\nexit=0",
+      "denominator": "18 of 18 passed, 0 failed (order floor n >= 10). ANSI colour codes stripped from the captured tail; the text is otherwise verbatim.",
+      "status": "PASS",
+      "expect": "^(?!.*failed).*18 passed.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the final line `1 failed, 9 passed` where the one failure is `test_price_axis_pull_client_is_the_loopback_dapi_not_a_lambda` on `No module named 'blpapi'` (identical to the base); and exit=1",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-473 && timeout 300 python -m pytest integrations/bloomberg/research/tests/test_price_axis_pull.py integrations/bloomberg/research/tests/test_price_axis_total_return.py -q 2>&1 | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "integrations\\bloomberg\\mcp\\blp_client.py:33: ModuleNotFoundError\n=========================== short test summary info ===========================\nFAILED integrations/bloomberg/research/tests/test_price_axis_pull.py::test_price_axis_pull_client_is_the_loopback_dapi_not_a_lambda - ModuleNotFoundError: No module named 'blpapi'\n1 failed, 9 passed in 1.97s\nexit=1",
+      "denominator": "9 of 10 passed; 1 failed, which is the pre-existing blpapi import failure, identical to the base reading in the order's preflight. ANSI colour codes stripped from the captured tail.",
+      "status": "PASS",
+      "expect": "test_price_axis_pull_client_is_the_loopback_dapi_not_a_lambda.*No module named 'blpapi'.*1 failed, 9 passed.*exit=1",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant, so the planted discriminator is the ranking window: the ranking cutoff is changed from WINDOW_DAYS to the pull window in the worktree copy of price_axis_pull.py, which would let a wider pull change the 30-day products. W5, W6 and W6b are the tests that must catch it.",
+      "expected": "W5 (identical 30-day rows at pull windows 30, 90, 365), W6 (ranking gets the last 30 days) and W6b (a thin ticker is excluded from ranking) fail under the mutant.",
+      "observed": "Under the mutant, 3 of 3 tests failed (W5, W6, W6b). The file was restored from a saved copy and its sha256 (3bcdb088c7d4537d1a037589abde6c3817eefc7c458cd620a7e3460edcf6f953) matched before and after the mutant run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the same committed bytes (once at the first verification, once after the mutant was restored); both runs read 18 passed.",
+      "observed": "18 passed in both runs (0.85s and 0.79s, timing only). AC2 read 1 failed, 9 passed in its two runs, the same failing test both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live fire of price_axis_pull.py (the blp_client DAPI pull, the S3 persistence, the DynamoDB write, the ledger write on a real fire)",
+      "reason": "Out of bounds for this order: no vendor call, no AWS call, no network. blpapi is not installed on this box; every test stubs the client, the S3 client and the ledger."
+    },
+    {
+      "item": "The 90-day apply (step 1) and the 365-day step (step 2)",
+      "reason": "The shipped step is 0 by order. Step 1 is a later never-widen pair; step 2 waits on the CTO's read of a measured 90-day."
+    },
+    {
+      "item": "The pre-existing failing test test_price_axis_pull_client_is_the_loopback_dapi_not_a_lambda",
+      "reason": "Not fixed and not masked, per the order's bounds: blpapi must stay uninstalled on this box."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W473-S1: the budget batch_id's names= field has no stated unit in the order; implemented as names requested (len of the securities list), recorded as an OBSERVATION row for the issuer's disposition."
+  ],
+  "session_log": "No session-log file written. The record is the code commit d52f3b9c99 on branch wk-AMGT_RESAPP-473 (LOCAL), this instance, and the one channel row AMGT_RESAPP-D1-W473-S1.",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/price_axis_pull.py integrations/bloomberg/research/tests/test_price_axis_window.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 integrations/bloomberg/research/price_axis_pull.py integrations/bloomberg/research/tests/test_price_axis_window.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit d52f3b9c99)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~473 <0.9.0_WK_AMGT_RESAPP~473@opal.agent>\" -F .scratch/msg_code.txt -- integrations/bloomberg/research/price_axis_pull.py integrations/bloomberg/research/price_axis_window.json integrations/bloomberg/research/tests/test_price_axis_window.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0; commit-gate and surprise-row-gate OK; msg-verify MATCH; the one-writer gate reported a WARN that the channel file is the unsuffixed (laptop's) file written from dell1 (WARN until C-QUEUE), 0 blocked."
+    }
+  ]
+}

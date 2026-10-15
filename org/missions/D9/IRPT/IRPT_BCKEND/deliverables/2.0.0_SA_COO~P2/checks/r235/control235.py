@@ -72,10 +72,12 @@ def build(cid, variant=None):
     names = list(c["named"])
     if variant == "missing_named_test":
         names = names[:-1]
+    if variant == "few_tests":
+        names = names[:2]
     t = ("import importlib.util\n"
          "spec = importlib.util.spec_from_file_location('m_c207', r'%s')\n"
          "m = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(m)\n" % (root / target))
-    n_plain = c["min_tests"] - len(names) + (0 if variant != "few_tests" else -2)
+    n_plain = 0 if variant == "few_tests" else c["min_tests"] - len(names)
     t += "".join("def test_case_%d():\n    assert m.fn_0(%d) == %d\n" % (i, i, 2 * i) for i in range(max(n_plain, 0)))
     t += "".join("def test_%s():\n    assert m.fn_0(1) == 2\n" % n for n in names)
     if variant == "weak_tests":

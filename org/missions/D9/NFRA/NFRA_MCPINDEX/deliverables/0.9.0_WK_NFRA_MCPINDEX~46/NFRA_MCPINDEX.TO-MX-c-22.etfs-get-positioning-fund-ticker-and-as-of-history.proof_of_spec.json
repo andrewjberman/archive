@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-22",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "257da358d8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "257da358d8",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-22.etfs-get-positioning-fund-ticker-and-as-of-history.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~46",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py",
+      "kind": "script",
+      "commit_or_etag": "39ac85ab19",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "etfs_get_positioning(as_of: str = '', fund_ticker: str = ''); answer() takes fund_ticker (etfs_get_positioning only); _fund_answer (gate first, ticker check, served object restricted to one fund by content, history by _history_answer through etfs_funds' gold rows and helpers); _run passes fund_ticker only when given. Local; nothing deployed. The commit's risk-reflex warning cites the gateway's baked-image deploy ledger (r3), which is NFRA_OPLGTW's release, not this cell.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_positioning_extension.py",
+      "kind": "test",
+      "commit_or_etag": "39ac85ab19",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 tests, injected getter and a fake S3 over the real gold catalog rows: signature, byte-equal answer without fund_ticker, case-insensitive ticker, fund restriction, unknown ticker, a served block absent, history found, history absent with nearest earlier, fund absent from the date, history without the served object, history without a principal, firm refusal, bad as_of shape, undeclared argument, caveat on every fund answer.",
+      "artifact_covered_by": ["AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "DENOMINATOR cases 4 (internal empty, same day, other day, firm); every CHECK ok -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c22.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)DENOMINATOR cases 4 \\(internal empty, same day, other day, firm\\);.*CHECK ok  : firm.*CHECK ok  : internal-empty.*CHECK ok  : internal-other-day.*CHECK ok  : internal-same-day.*CHECK ok  : reads.*RESULT: PASS.*exit=0",
+      "output_evidence": "DENOMINATOR cases 4 (internal empty, same day, other day, firm); base reads 3, new reads 3\nCHECK ok  : firm\nCHECK ok  : internal-empty\nCHECK ok  : internal-other-day\nCHECK ok  : internal-same-day\nCHECK ok  : reads\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 cases byte-equal between the base tree (06cfb6db64, extracted) and this tree, plus the reads list (3 of 3 reads each)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "lines added to portal_index/integration.py with a typed S3 key or bucket literal: 0; new tests in test_positioning_extension.py at least 10 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c22.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)DENOMINATOR lines added to portal_index/integration\\.py: 95; with a typed S3 key or bucket literal: 0.*new tests in test_positioning_extension\\.py: 15.*CHECK ok  : the new test file holds at least 10 tests.*RESULT: PASS.*exit=0",
+      "output_evidence": "DENOMINATOR lines added to portal_index/integration.py: 95; with a typed S3 key or bucket literal: 0\nnew tests in test_positioning_extension.py: 15\nCHECK ok  : etfs_get_positioning(as_of: str = '', fund_ticker: str = '') in that order\nCHECK ok  : the added lines type no S3 key or bucket\nCHECK ok  : the new test file holds at least 10 tests\nRESULT: PASS\nexit=0",
+      "denominator": "0 of 95 added lines in integration.py carry a typed S3 key or bucket literal; 15 test functions in test_positioning_extension.py (threshold 10)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest rc=0 on test_positioning_extension.py, test_portal_index.py, test_opal_discover.py and test_og_et2.py -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c22.AC3.sh; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0: .*77 passed.*CHECK ok  : the four test files pass.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0: [32m[32m[1m77 passed[0m[32m in 14.98s[0m[0m\nCHECK ok  : the four test files pass\nRESULT: PASS\nexit=0",
+      "denominator": "77 passed, 0 failed of 77 tests across the four files (15 new, 62 existing)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The first AC3 run on the draft that looked the per-fund table up by its field name failed test_portal_index.py::test_module_holds_no_key_literal (76 passed, 1 failed): the field name is a fragment of a known portal key, which the guard flags.",
+      "expected": "AC3 passes only when no fund-table field name is a string constant in the module",
+      "observed": "after the rewrite (the table found by content), AC3 printed 77 passed, rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (the byte-equal difference control against base tree 06cfb6db64 for four existing inputs) and AC2 were each run on the final committed code with the same output on each run. AC3 was re-run literally on the committed code (the pytest run before the last args fix also passed 77). Step 0 asked for the three existing test files to pass before the edit; that run was NOT made before the edit. The four-file run after the edit includes them, and AC1 is the byte-equal control for the existing answer.",
+      "observed": "AC1 RESULT: PASS (base reads 3, new reads 3); AC2 RESULT: PASS (0 typed literals, 15 tests); AC3 77 passed on the committed code; step-0 pre-edit baseline NOT RUN",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The order says the issuer flips it; the file is outside <paths>."
+    },
+    {
+      "item": "The planted arms in deliverables/2.0.0_SA_COO~MI/round18/checks/plant_c22.py",
+      "reason": "Not among the three criteria in section 4; the issuer runs them on the merged tree. Not run by this worker."
+    },
+    {
+      "item": "Deploy, push, any AWS call, any grant, route, catalog row or other gateway file",
+      "reason": "Order bounds 1 and the cell's preflight (no AWS call in this cell). The gold book's catalog open_items statement on the gateway grant is recorded as NFRA_MCPINDEX-Z-W46-S1, not measured here."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W46-S1",
+    "NFRA_MCPINDEX-Z-W46-S2",
+    "NFRA_MCPINDEX-Z-W46-S3",
+    "NFRA_MCPINDEX-Z-W46-S4",
+    "NFRA_MCPINDEX-Z-W46-S5"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "c22.AC1.sh / c22.AC2.sh / c22.AC3.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round18/checks/c22.AC{1,2,3}.sh",
+      "result": "AC1 PASS exit=0; AC2 PASS exit=0; AC3 PASS exit=0 (run on the final code, after the restriction rewrite and the args fix)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the worker report"
+    }
+  ]
+}

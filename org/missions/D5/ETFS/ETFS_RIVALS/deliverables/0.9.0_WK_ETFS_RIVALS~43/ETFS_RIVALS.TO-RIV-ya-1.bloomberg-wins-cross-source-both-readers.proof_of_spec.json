@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-ya-1.bloomberg-wins-cross-source-both-readers",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1af8b0dba8",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-ya-1.bloomberg-wins-cross-source-both-readers.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-ya-1.bloomberg-wins-cross-source-both-readers.md",
+    "group": "OTHER",
+    "vintage_commit": "1af8b0dba8"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~43",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "91bb5f0e02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local cell (LOCAL class); no deploy in this order. The Lambda deploy goes under its own pair (a SERVED path) after the issuer's live-store DELTA = 0 read.",
+      "introduces": ["precedence_dropped"],
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/price_series.py",
+      "kind": "script",
+      "commit_or_etag": "91bb5f0e02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local cell; no deploy in this order.",
+      "introduces": ["def precedence_drop", "precedence_dropped"],
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_ya1_bloomberg_wins.py",
+      "kind": "test",
+      "commit_or_etag": "91bb5f0e02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local test file; no deploy in this order.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+      "kind": "doc",
+      "commit_or_etag": "91bb5f0e02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "surprise channel row ETFS_RIVALS-D1-W43-S1 appended; no deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the G5 reader: a Bloomberg split beats an inferred split of the same key and the drop is counted; a claim-less frame, an inferred-only store and an empty store read as before.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round31/checks/ya1_bloomberg_wins_check.py -k ac1",
+      "output_evidence": "2 passed, 2 deselected in 7.27s (rc=0; re-run literal at 91bb5f0e02; an earlier identical run read '2 passed, 2 deselected in 0.80s'). Base before the edit: the same file read '4 failed' (rc=1).",
+      "denominator": "2 passed of 2 selected by -k ac1 (4 collected in the check file)",
+      "status": "PASS",
+      "expect": "2 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the chart reader: a Bloomberg split beats an inferred split of the same ex_date whatever the ratios, counted per key; an inferred split alone applies; two MEASURED rows are never dropped.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round31/checks/ya1_bloomberg_wins_check.py -k ac2",
+      "output_evidence": "2 passed, 2 deselected in 1.52s (rc=0; re-run literal at 91bb5f0e02; an earlier identical run read '2 passed, 2 deselected in 1.00s'). Base: the same file's ac2 tests FAILED.",
+      "denominator": "2 passed of 2 selected by -k ac2 (4 collected in the check file)",
+      "status": "PASS",
+      "expect": "2 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- the round-30 union-reader check stays green (the control).",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round30/checks/xe3_union_reader_check.py",
+      "output_evidence": "5 passed in 6.29s (rc=0; re-run literal at 91bb5f0e02; an earlier identical run read '5 passed in 0.74s'; base read 5 passed).",
+      "denominator": "5 passed of 5 collected in the check file",
+      "status": "PASS",
+      "expect": "5 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check file run against the base code (HEAD 1af8b0dba8, before the edit) must FIRE: the AC1 and AC2 scenarios must fail.",
+      "expected": "AC1 and AC2 fail at the base; AC3 control passes at the base.",
+      "observed": "Before the edit: 4 failed in 2.67s (rc=1) for ya1_bloomberg_wins_check.py (KeyError precedence_dropped; split adjusted by both rows), and the round-30 control 5 passed (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of each literal invocation in the session, compared",
+      "observed": "ac1: 2 passed both runs; ac2: 2 passed both runs; round-30 control: 5 passed both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live-store DELTA = 0 read (today's 12 plain Bloomberg pulls, 0 inferred, through both readers)",
+      "reason": "The issuer's drain act per the order's section 1; no S3 read in a worker lane."
+    },
+    {
+      "item": "The Lambda deploy, any gateway release and any Terraform",
+      "reason": "Out of this order (J1 none for this LOCAL cell); the deploy is its own pair on a SERVED path."
+    },
+    {
+      "item": "The chart reader's pairing across the window edge",
+      "reason": "Recorded as surprise row ETFS_RIVALS-D1-W43-S1 (OBSERVATION, INERT): price_series.load windows the action frame by partition date, so a pair split across the window edge is not paired by the chart. The rule is applied as specified to the frame series() is handed."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-D1-W43-S1"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~43/RIV-ya-1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (the check file, literal order invocations, AC1-AC3)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider <check> -k ac1 (and -k ac2; and the round-30 control with no -k)",
+      "result": "2 passed (AC1), 2 passed (AC2), 5 passed (AC3); rc=0 each"
+    },
+    {
+      "tool": "pytest (the cell's own test file)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q rivalfunds/tests/test_riv_ya1_bloomberg_wins.py",
+      "result": "6 passed in 1.48s (rc=0)"
+    },
+    {
+      "tool": "pytest (the whole rivalfunds package suite, regression)",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q rivalfunds/tests",
+      "result": "56 failed, 998 passed, 7 skipped in 88.71s (rc=1). The base suite read 56 failed, 992 passed, 7 skipped; the 56 failing ids are identical before and after (set diff empty), all outside this cell."
+    }
+  ]
+}

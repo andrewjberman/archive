@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pf-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "8310672247",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pf-1.breakdown-segments-assets-bd-by-vendor-firm.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pf-1.breakdown-segments-assets-bd-by-vendor-firm.md",
+    "group": "OTHER",
+    "vintage_commit": "8310672247"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_gateway_breakdown.py",
+      "kind": "script",
+      "commit_or_etag": "43f62f5be7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds SEGMENTED_BUCKETS, UNRESOLVED, the helper _segment_fields_for (vendor and firm from the same tool_index row _declared_source_groups reads), one lazy read in the grouping loop, and the segments key in the assembly loop for opal-data-assets and opal-data-bd only. _group_ids_for_tools and the People view are unchanged. LOCAL on wk-NFRA_MCPORTAL-pe-31, not pushed, no deploy, no AWS call.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_gateway_breakdown.py",
+      "kind": "test",
+      "commit_or_etag": "43f62f5be7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six tests appended under the PF.1 heading, named exactly as pf1.AC1.sh names them. No existing assertion changed. The file now holds 26 tests.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "43f62f5be7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended: NFRA_MCPORTAL-Z-W31-S5 (OBSERVATION, INERT). Rows S1 to S4 are the issuer's and were not edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "named tests PASSED 6 of 6.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "segment tests: ======================= 26 passed, 1 warning in 36.23s ========================; named tests PASSED 6 of 6\nRESULT: PASS\nexit=0",
+      "denominator": "named tests PASSED 6 of 6 (the six names in pf1.AC1.sh); 26 of 26 tests in tests/test_admin_gateway_breakdown.py passed",
+      "status": "PASS",
+      "expect": "named tests PASSED 6 of 6.*RESULT: PASS.*exit=0",
+      "status_reason": "Run on the committed tree 43f62f5be7 from C:/tmp/mp-pe-31. The output reads named tests PASSED 6 of 6, RESULT: PASS, exit=0."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "failed=0; seam test failures=0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "admin suite: 109 passed, 3 warnings in 55.16s; passed=109 failed=0; seam test failures=0\nRESULT: PASS\nexit=0",
+      "denominator": "109 passed of 109 admin-suite tests (tests/test_admin*.py and tests/test_owner_gate.py): the 103 base plus the 6 pf-1 tests; 0 failed; seam test failures=0; the check requires at least 103 passed",
+      "status": "PASS",
+      "expect": "failed=0; seam test failures=0.*RESULT: PASS.*exit=0",
+      "status_reason": "Run on the committed tree 43f62f5be7 from C:/tmp/mp-pe-31. The output reads failed=0, seam test failures=0, RESULT: PASS, exit=0, 109 passed."
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pf1.AC1.sh and pf1.AC2.sh each run twice: once on the working tree before the commit, once on 43f62f5be7 (same bytes)",
+      "observed": "AC1 run 1: 26 passed, named tests PASSED 6 of 6, RESULT: PASS, exit=0; AC1 run 2: 26 passed, named tests PASSED 6 of 6, RESULT: PASS, exit=0. AC2 run 1: 109 passed, failed=0, seam test failures=0, RESULT: PASS, exit=0; AC2 run 2: 109 passed, failed=0, seam test failures=0, RESULT: PASS, exit=0.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Red arm: the one line that emits segments (if chan[kind] == bucket and cid in SEGMENTED_BUCKETS) replaced by 'if False' in the working file, then pf1.AC1.sh run, then the file restored from a backup and compared byte-for-byte to 43f62f5be7 (cmp identical; git diff empty)",
+      "expected": "RESULT: FAIL with named tests PASSED fewer than 6 of 6 (every test that expects segments fails)",
+      "observed": "segment tests: 5 failed, 21 passed; named tests PASSED 1 of 6; RESULT: FAIL; exit=1. Only test_bucket_without_vendor_firm_fields_has_no_segments passes under the mutant, as it must.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Existing assertions changed in tests/test_admin_gateway_breakdown.py",
+      "reason": "None. The exact-keys assertion at test_every_live_tool_in_exactly_one_channel (line 200) pins channels that hold no assets or bd bucket, so it is unchanged and passes. The six new tests are appended after the last existing test."
+    },
+    {
+      "item": "Live AWS and vendor calls",
+      "reason": "None made. The check scripts use the test fakes; the real-catalog run used a local scan stub that returns no items and a store stub that returns no record. No DynamoDB, no Graph, no deploy."
+    },
+    {
+      "item": "Value handling of a non-empty vendor or firm",
+      "reason": "The order says a field empty after strip reads unresolved and is silent on the stored value. The worker stores the stripped value. Stated as NFRA_MCPORTAL-Z-W31-S5 for the issuer to confirm or reverse; no criterion depends on it."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W31-S5: MP-pf-1 leaves open whether a non-empty vendor or firm is stored as read or stripped. Built as stripped, so ' Acme ' and 'Acme' merge into one segment. OBSERVATION, INERT; no criterion depends on it.",
+    "NFRA_MCPORTAL-Z-W31-S6: correction to S5's world_is. The tool_index block carries no vendor or firm; 'firm:' appears 273 times elsewhere in DATA_CATALOG.yaml as an owning-firm key on channel and silver rows. OBSERVATION, INERT."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pf1.AC1.sh (named tests, via pytest on tests/test_admin_gateway_breakdown.py)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf1.AC1.sh; echo \"exit=$?\"",
+      "result": "named tests PASSED 6 of 6; RESULT: PASS; exit=0"
+    },
+    {
+      "tool": "pf1.AC2.sh (the gateway admin suite)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pe/checks/pf1.AC2.sh; echo \"exit=$?\"",
+      "result": "109 passed, 0 failed; seam test failures=0; RESULT: PASS; exit=0"
+    },
+    {
+      "tool": "python .scratch/real_compute_pf1.py (real _compute() against the repository's own registry and DATA_CATALOG.yaml; no plant; local scan and store stubs; worktree-local, not committed)",
+      "invocation": "cd C:/tmp/mp-pe-31 && GW_ROOT=C:/tmp/mp-pe-31/infra/aws/ec2/opal-gateway python .scratch/real_compute_pf1.py",
+      "result": "2 channels: m365 (kind native, 11 tools, no segments key); undeclared (kind undeclared, 75 tools, no segments key). Channels carrying segments: none. grant_store status read (zero principals: the scan stub returns no items). grouping_basis ends '75 tool(s) declare no source.' The catalog's tool_index block (lines 1349-2478) carries no source_group and no vendor or firm, so no bucket channel exists and no segments are produced. The 273 'firm:' keys elsewhere in the catalog are owning-firm values on channel and silver rows, which the reader does not read (NFRA_MCPORTAL-Z-W31-S6)."
+    }
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md"
+}
