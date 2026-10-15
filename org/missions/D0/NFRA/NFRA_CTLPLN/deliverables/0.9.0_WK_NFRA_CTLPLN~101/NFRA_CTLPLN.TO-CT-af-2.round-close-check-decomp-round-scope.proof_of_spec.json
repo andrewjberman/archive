@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-af-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-af-2.round-close-check-decomp-round-scope.md",
+    "group": "OTHER",
+    "vintage_commit": "cb843928c1"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~101",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round16.md",
+    "vintage_commit": "cb843928c1",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-af-2.round-close-check-decomp-round-scope.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/round-close-check.py",
+      "kind": "script",
+      "commit_or_etag": "d7205c4365",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_orders scopes each order by the roundN of the decomposition its <decomp_doc> names (decomp_round(), constants DECOMP_DOC and DECOMP_ROUND), else by its <round> tag; the untagged seat-folder exemption tests that scoping round; the TREE orders counted by decomposition round line prints after the ORDERS scope line; read by CTaf2-AC1 (arms a-f), CTaf2-AC2 (selftest 30/30 unchanged) and CTaf2-AC3 (the real project, round 15)"
+    },
+    {
+      "path_or_key": ".tools/tests/test_round_close_decomp_round.py",
+      "kind": "test",
+      "commit_or_etag": "78c331334e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new test, six arms, standard library, temporary directories only, no AWS, no network; read by CTaf2-AC1 as ROUND-CLOSE-DECOMP-ROUND arms=6/6 ok=True; against the tool at cb843928c1 it reads arms=2/6 ok=False (the mutant control)"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cc612ea0d2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one row appended (NFRA_CTLPLN-W101-S1), 26 insertions and no deletion; no existing row edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaf2-AC1",
+      "criterion_verbatim": "python .tools/tests/test_round_close_decomp_round.py expect: ok=True -- every arm passes (base: the file does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round_close_decomp_round.py",
+      "output_evidence": "ROUND-CLOSE-DECOMP-ROUND arms=6/6 ok=True (rc=0; timeout 240 from the worktree root at HEAD cc612ea0d2; a repeat run is byte-identical by cmp)",
+      "denominator": "6 of 6 arms passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaf2-AC2",
+      "criterion_verbatim": "python .tools/round-close-check.py --selftest expect: ok=True -- the tool's own self-test still passes (base: ROUND-CLOSE-SELFTEST cases=30/30 ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/round-close-check.py --selftest",
+      "output_evidence": "ROUND-CLOSE-SELFTEST cases=30/30 ok=True (rc=0 from the worktree root at HEAD cc612ea0d2; the same last line as the base control)",
+      "denominator": "30 of 30 selftest cases passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaf2-AC3",
+      "criterion_verbatim": "python .tools/round-close-check.py --project NFRA_CTLPLN --round 15 expect: TREE orders counted by decomposition round: 3 -- on the real project the three round-15 orders are counted (base: FAIL as expected, the line does not exist and the check reads no CT-ae order); report the new line and the ROUND-CLOSE verdict line.",
+      "method": "command",
+      "invocation": "python .tools/round-close-check.py --project NFRA_CTLPLN --round 15",
+      "output_evidence": "  TREE orders counted by decomposition round: 3 (TO-CT-ae-1, TO-CT-ae-2, TO-CT-ae-3) ; ROUND-CLOSE project=NFRA_CTLPLN device=laptop reviewer=present orders=26 judgment=2 graded=2 ungraded=0 self_graded=0 verdict=MAY-CLOSE (rc=0 at HEAD cc612ea0d2; the base at cb843928c1 read orders=31 with no TREE line and zero TO-CT-ae mentions)",
+      "denominator": "3 of 3 round-15 decomposition-scoped tree orders counted",
+      "status": "PASS",
+      "expect": "TREE orders counted by decomposition round: 3",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the tool at cb843928c1 (the issuance base, before CT-af-2) run under the new test file at 78c331334e",
+      "expected": "the arms that depend on decomposition scoping fail, so the run reads ok=False below 6/6",
+      "observed": "ROUND-CLOSE-DECOMP-ROUND arms=2/6 ok=False (rc=1); arms a, c, e and f failed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the CTaf2-AC1 and CTaf2-AC3 invocations from the worktree root at HEAD cc612ea0d2, outputs compared byte for byte with cmp",
+      "observed": "identical output on both runs (rc=0 both); cmp reported no difference",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-af-2 from pending to complete",
+      "reason": "not done: the flip is the issuer's; the order file is outside this worker's <paths> and was not edited"
+    },
+    {
+      "item": "whether each of the 46 order re-scopings under the new rule is the right round for that order",
+      "reason": "not graded here: the BLIND clause asked for the count and the before and after round verdicts, which are in the report; every round verdict is MAY-CLOSE both before and after; the judgment about each re-scoped order belongs to the issuer and the CTO read"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W101-S1: the untagged seat-folder rule keys on the scoping round, so 8 untagged orders that name a decomposition roundN leave the every-round count (TO-APPLY-3, 4, 5, 6, 7, 8, 10 and TO-DELL-1); left as built, filed UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~101/NFRA_CTLPLN.TO-CT-af-2.round-close-check-decomp-round-scope.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round_close_decomp_round.py",
+      "result": "ROUND-CLOSE-DECOMP-ROUND arms=6/6 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/round-close-check.py --selftest",
+      "result": "ROUND-CLOSE-SELFTEST cases=30/30 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/round-close-check.py --project NFRA_CTLPLN --round 15",
+      "result": "TREE orders counted by decomposition round: 3 (TO-CT-ae-1, TO-CT-ae-2, TO-CT-ae-3); verdict=MAY-CLOSE"
+    }
+  ]
+}
