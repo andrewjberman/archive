@@ -65,8 +65,25 @@
     8. Close the ledger. If step 5's plan, step 6 or step 7 fails: ROLL BACK in session -- the fetched deployed zip back at the root's zip path, the same three targets re-applied, all three reading `xC1GDXXp` -- and say so.
   </the_act>
 
+  <amendment_1>
+    AMENDMENT 1 (issuer, 2026-10-15 ~20:2xZ), on your STOP (msg 8614; record `deliverables/A_T34_STOP_MEMBER_DIFF.txt`). Your steps 0 to 2 stand and are already done once (the gate-refused ledger is closed; open a NEW ledger). Steps 3 and 4 are REPLACED. Route B.
+    COO half AMENDED (packet section 8): `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~T2/R42_DEPLOY_PACKET_COMMENTARY_LOGGER_AND_FIGURES_20261015.md`, git blob `d416567b45` at commit `19c6142eed`.
+    CTO half, SIGNED on that blob (msg 8624): `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/1.0.0_SA_CTO~DELL2/R42_DEPLOY_COMMENTARY_LOGGER_AND_FIGURES_CTO_HALF_R3.md` @dfac94827f.
+    3'. ASSEMBLE the surgical zip outside the repo from the fetched live zip (step 2's, hash `xC1GDXXp`): copy it, then replace EXACTLY three members, named as they appear in the live zip, with the bytes of `git show 5b438cd6c4:<path>`:
+        `data/transcripts/scripts/commentary/lambda_handler.py`, `data/transcripts/scripts/commentary/drafter.py`, `data/transcripts/scripts/commentary/entry.py`.
+        Add nothing, remove nothing, re-write nothing else. Do NOT run `build.sh` for the artifact (its output is the 100-member zip you rejected). Print the surgical zip's base64 sha256 and member count (it equals the live zip's count).
+        RECORD THE SURGICAL ZIP'S SHA IN THE LEDGER (CTO condition).
+    4'. THE THREE PROOFS, printed BEFORE the plan (CTO condition); any miss = STOP, nothing applied:
+        (i)  the three replaced members are byte-equal to `git show 5b438cd6c4:<path>`: sha256 of each, three of three;
+        (ii) every OTHER member of the surgical zip is byte-equal to the live zip's: member count and the number that differ (must be exactly 3 differing members overall, the three above);
+        (iii) the surgical zip extracted outside the repo imports `commentary.lambda_handler`, `commentary.drafter` and `commentary.entry` in a clean interpreter (`python -I`, the extract's root on `sys.path`, working directory NOT the repo): print the import line for each.
+        Also run `python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R23_CHECKS/addr_equal.py <extracted deployed zip> <extracted surgical zip>`; it must print `ADDR-EQUAL-OK teams=14/14 mail=7/7 control=discriminates` (it holds by construction; a miss is a STOP).
+    Place the surgical zip at the root's zip path (`infra/aws/lambda/transcripts-pull/dist/transcripts-pull.zip`, gitignored output) for the targeted apply; the rollback artifact is the fetched live zip as before. Steps 5 to 8 stand, with "the built zip" read as "the surgical zip". The plan must still read 0 to add, 3 to change, 0 to destroy and only `source_code_hash`.
+    Add to your report: the three proofs' lines, the surgical zip's sha, and any member of the live zip that is NOT in your replacement list but whose bytes differ from what `build.sh` would put there (counts only; this is the finding for the CTO's per-function-zip design row).
+  </amendment_1>
+
   <bounds>
-    - Exactly the three function resources, code only. No environment value, IAM, schedule, queue, mapping, reader or secret.
+    - The artifact is the surgical zip of amendment_1, never a `build.sh` output. Exactly the three function resources, code only. No environment value, IAM, schedule, queue, mapping, reader or secret.
     - Never `aws lambda update-function-code`; never a bare `terraform apply`.
     - No transcript text, mail content, prompt text, draft text, bearer or address in any file or message.
     - No S3 delete. ONE commentary invoke (step 7(b)); no second without the issuer's word. No invoke of either pull.
