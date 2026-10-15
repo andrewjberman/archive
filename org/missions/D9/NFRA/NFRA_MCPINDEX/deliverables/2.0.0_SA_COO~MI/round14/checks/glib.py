@@ -401,9 +401,22 @@ def candidates(c):
     return out
 
 
+_READS = {}
+
+
+def tool_reads():
+    """{tool: [entity, ...]} of workflows/atom_decomposition/tool_reads_ap20.json (round 17, R1), read once from the CURRENT worktree; {} when absent.
+    A tool listed there is a read_tool candidate only for the entities it lists."""
+    if not _READS:
+        p = os.path.join("workflows", "atom_decomposition", "tool_reads_ap20.json")
+        _READS["tools"] = json.load(open(p, encoding="utf-8"))["tools"] if os.path.exists(p) else {}
+    return _READS["tools"]
+
+
 def expected_read_tool(c, deployed):
+    reads, ent = tool_reads(), entity(c["contract_id"])
     for t in candidates(c):
-        if t in deployed:
+        if t in deployed and (t not in reads or ent in reads[t]):
             return t
     return None
 
