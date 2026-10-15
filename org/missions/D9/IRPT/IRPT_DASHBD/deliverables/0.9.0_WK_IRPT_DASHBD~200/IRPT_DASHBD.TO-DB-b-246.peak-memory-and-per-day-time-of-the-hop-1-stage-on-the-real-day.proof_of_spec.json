@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-246",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "7d5697ef1a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-246.peak-memory-and-per-day-time-of-the-hop-1-stage-on-the-real-day.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~200",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ae3266e4ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-200; row IRPT_DASHBD-D2-W200-S1 (BLOCKING, INERT, UNDER_INVESTIGATION) appended as bytes, 28 lines added; the surprise-row gate graded the new row OK (1 new row of 636 checked); no existing row edited; nothing deployed, pushed or written to AWS",
+      "artifact_covered_by": [
+        "DB122-1-AC1",
+        "DB122-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB122-1-AC1",
+      "criterion_verbatim": "`DB122-1-AC1` -- `RD_STAGE_MEMORY_R122.json` has exactly the form of step 4; `day` equals the newest `account_return_daily` partition the checker lists; `configured_memory_mb` equals `lambda.tf`'s; the threshold, `day_seconds`, the verdict and (when CHUNK) the chunk rule equal the checker's arithmetic; the sampler took at least 10 samples at 1 s or less; zero writes, flags false, no long digit run. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_mem.py\" . DB122-1-AC1",
+      "output_evidence": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~200/RD_STAGE_MEMORY_R122.json | DB122-1-AC1 FAIL (rc 1); the second run of the same invocation returned the same two lines (rc 1)",
+      "denominator": "0 of 1 criterion clauses satisfied: the record is absent, so no clause is reached; the checker stops at its first clause, before any S3 call",
+      "status": "FAIL",
+      "status_reason": "FAIL by output: no record exists because the measurement did not run. The measurement needs the reporting-gold handler and lambda.tf, which the worktree does not carry on disk (sparse checkout excludes infra/aws; row IRPT_DASHBD-D2-W200-S1). The worker stopped and did not reconstruct the tree.",
+      "expect": "DB122-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB122-1-AC2",
+      "criterion_verbatim": "`DB122-1-AC2` -- the script is tracked, its hash equals the recorded one, it imports the handler, calls `filled_inputs` and `filled_day_rows`, samples `psutil` from a thread, names no other firm's place and holds no write call. Base: FAIL (no script).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_mem.py\" . DB122-1-AC2",
+      "output_evidence": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~200/RD_STAGE_MEMORY_R122.json | DB122-1-AC2 FAIL (rc 1); the second run of the same invocation returned the same two lines (rc 1)",
+      "denominator": "0 of 1 criterion clauses satisfied: the record is absent, so the checker stops at its first clause; the script (stage_memory_r122.py) was not written",
+      "status": "FAIL",
+      "status_reason": "FAIL by output: no script and no record. The script imports the handler of the worktree, which is absent on disk (row IRPT_DASHBD-D2-W200-S1), so the script was not written: a script that cannot import its handler would be a repair of the blocked criterion, which the order forbids.",
+      "expect": "DB122-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test (python -I checks/r122/p122_mem.py --selftest <worktree root>): the green record arms, the red record arms (verdict, chunk rule, threshold, marks, day seconds, sampler count, newest day, write flag, configured memory), the text arms (a missing stage call, a write call) and the chunk-rule arithmetic",
+      "expected": "the self-test passes every arm and prints selftest PASS, rc 0",
+      "observed": "selftest: two green and ten red record arms, two text arms, the chunk rule behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of the two invocations was run twice from the worktree root under timeout 120 and the output compared",
+      "expected": "identical output and rc on both runs",
+      "observed": "DB122-1-AC1 and DB122-1-AC2 each printed the same two lines and rc 1 on the first and the second run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Steps 2 to 4 of the cell: the script stage_memory_r122.py, the measurement of the stage's peak resident memory and per-day time on the newest returns day, and the record RD_STAGE_MEMORY_R122.json",
+      "reason": "not done: the handler (infra/aws/lambda/investor-reporting/reporting-gold/handler.py) and lambda.tf (infra/aws/terraform/investor-reporting/reporting-gold/lambda.tf) are tracked at 7d5697ef1a but absent on disk, because the worktree's sparse checkout excludes infra/aws. Materialising them would reconstruct the tree the order did not name, so the cell stopped (row IRPT_DASHBD-D2-W200-S1, BLOCKING)"
+    },
+    {
+      "item": "Every S3 read, including the newest returns-partition LIST the checker would make, and the population and newest-account reads of the stage",
+      "reason": "not done: no S3 call was made by this worker; the checker stops before its newest_returns_day call because no record exists. No write, deploy, push or vendor call was made"
+    },
+    {
+      "item": "The memory marks, the chunk rule and the verdict",
+      "reason": "not measured, so not stated: no baseline, after-inputs or peak resident memory exists for this worker's run"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W200-S1 -- BLOCKING, INERT: the worktree's sparse checkout excludes the reporting-gold handler and lambda.tf, so the cell stopped before any read; the file is left as written"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~200/IRPT_DASHBD.TO-DB-b-246.peak-memory-and-per-day-time-of-the-hop-1-stage-on-the-real-day.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "p122_mem.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_mem.py\" . DB122-1-AC1",
+      "result": "FAIL rc 1 (AC1); FAIL rc 1 (AC2)"
+    },
+    {
+      "tool": "p122_mem.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_mem.py\" --selftest .",
+      "result": "rc 0: selftest PASS"
+    }
+  ]
+}
