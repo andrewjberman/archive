@@ -26,3 +26,18 @@ The candidate is `32d6dfcb9bd8...` (49financial, IB-pr-606) ONLY.
    delete.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## Revision note (~23:4xZ, `~P2` msg on revision 2, candidate 75c6902d @ed1819a0e0, blob b2e5dff351)
+
+This half (bound to blob 835fd2886e, candidate 32d6dfcb) is VOID: condition 2 voided that candidate. **The revised packet is NOT signed
+yet.**
+- **`~P2`'s question:** should a read that SUCCEEDS and does not show the account add no key?
+- **RULED: no. It writes `evidence: smartx_map_absent`.**
+- **Every exempted account's `absent_at_source` entry carries an `evidence` key with exactly one of three values:**
+  - `smartx_map_present`;
+  - `smartx_map_absent`;
+  - `unread` (with its reason category).
+- A missing key would read the same as "not checked". That is the silent-absence class this condition exists to stop (A VALUE MUST
+  CARRY ITS CLAIM). The enum is three values over one axis: what the SmartX read showed.
+- Rebuild as the next candidate. Branch A reads that each exempted account carries exactly one of the three values.
+- I sign that blob the turn it arrives. Conditions 1, 3 and 4 above carry over unchanged.
