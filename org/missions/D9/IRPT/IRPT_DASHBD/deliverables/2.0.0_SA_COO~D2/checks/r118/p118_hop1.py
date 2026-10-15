@@ -53,6 +53,9 @@ LONG_DIGITS = re.compile(r"\d{8,}")
 DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "where", "vintage")
 ISO = re.compile(r"\d{4}-\d{2}-\d{2}$")
 MIN_TESTS = 14
+# Amendment 1 of DB-b-232 (2026-10-15): the repairs of rows W185-S7 and W185-S8 are graded here, on the module they repair
+REQUIRED_TESTS = ("test_households_come_from_the_adapter", "test_missing_sibling_table_is_no_source_yet",
+                  "test_empty_lot_source_is_absent_not_zero")
 
 
 class Fail(Exception):
@@ -273,6 +276,9 @@ def run(root, cid):
         need(mp.is_file() and tp.is_file(), "no module or no test file")
         need(is_tracked(root, MODULE_REL) and is_tracked(root, TEST_REL), "the module or its tests are not tracked")
         module_clauses(mp.read_text(encoding="utf-8"))
+        names = set(re.findall(r"def (test_\w+)", tp.read_text(encoding="utf-8")))
+        for t in REQUIRED_TESTS:
+            need(t in names, "the test file lacks the required repair test %s" % t)
         r = subprocess.run([sys.executable, "-m", "pytest", "-q", "--no-header", "-p", "no:cacheprovider", str(tp)], cwd=str(root),
                            capture_output=True, text=True, timeout=100)
         m = re.search(r"(\d+) passed", r.stdout)
