@@ -18,7 +18,8 @@ import r1_check as rc  # noqa: E402
 
 S = sys.argv[1]
 SRC = "workflows/atom_decomposition/catalog_entries"
-trial = os.path.join(S, "DATA_CATALOG.r1_trial.yaml")
+trial = os.path.join(S, "DATA_CATALOG.final_r17d.yaml")        # the catalog emitted against the synthetic shipped cut
+plain = os.path.join(S, "DATA_CATALOG.final_r17c.yaml")        # emitted against the plain release commit: definitions 97 of 99 on the shipped cut
 tmp = tempfile.mkdtemp(prefix="plant_r1_")
 
 
@@ -34,13 +35,18 @@ good = entries("good", list(rc.EXPECT))
 fifteen = entries("fifteen", [os.path.basename(p)[:-5] for p in glob.glob(os.path.join(S, "r1rows", "*.yaml"))
                               if yaml.safe_load(open(p, encoding="utf-8")) != yaml.safe_load(open(os.path.join(SRC, os.path.basename(p)), encoding="utf-8"))])
 six = entries("six", list(rc.EXPECT)[:-1])
+last = list(rc.EXPECT)[-1]       # the one row left as it is at the base (the rows folder already holds the 7 since MX-c-20 merged)
+with open(os.path.join(six, last + ".yaml"), "wb") as fh:
+    fh.write(rc.git_show(rc.BASE_REF, SRC + "/" + last + ".yaml"))
 other = entries("other", list(rc.EXPECT))
 o = os.path.join(other, "opal_data_etfs_gold_book.yaml")
 d = yaml.safe_load(open(o, encoding="utf-8"))
 d["nl_tags"] = list(d.get("nl_tags") or []) + ["an unrelated edit"]
 with open(o, "w", encoding="utf-8", newline="\n") as fh:
     yaml.safe_dump(d, fh, sort_keys=False)
-cur = rc.GW + "/app/refs/DATA_CATALOG.yaml"
+cur = os.path.join(tmp, "cat_base.yaml")       # the catalog at the base commit: no 7 rows named, tool index 93
+with open(cur, "wb") as fh:
+    fh.write(rc.git_show(rc.BASE_REF, rc.GW + "/app/refs/DATA_CATALOG.yaml"))
 # a catalog that drops the six pending members (tool index 93) and one that adds an unrelated row edit
 cat = yaml.safe_load(open(trial, encoding="ascii").read())
 cat_edit = yaml.safe_load(open(trial, encoding="ascii").read())
@@ -53,7 +59,8 @@ arms = [("good rows, ac1", "ac1", good, trial, 0), ("good catalog, ac2", "ac2", 
         ("the 15 contract-proposed rows (8 false readers), ac1", "ac1", fifteen, trial, 1), ("only 6 of the 7 rows, ac1", "ac1", six, trial, 1),
         ("an unrelated row edit (gold_book tags), ac1", "ac1", other, trial, 1),
         ("the current catalog (tool index 93), ac2", "ac2", good, cur, 1), ("the current catalog (no 7 rows), ac3", "ac3", good, cur, 1),
-        ("an unrelated edit in a catalog row, ac3", "ac3", good, edit_path, 1)]
+        ("an unrelated edit in a catalog row, ac3", "ac3", good, edit_path, 1),
+        ("a catalog emitted against the plain release commit (definitions 97 of 99 on the shipped cut), ac2", "ac2", good, plain, 1)]
 ok = wrong = 0
 for label, ac, ent, catalog, want in arms:
     r = subprocess.run([sys.executable, os.path.join(HERE, "r1_check.py"), ac], env=dict(os.environ, R1_ENTRIES=ent, R1_CATALOG=catalog), capture_output=True, text=True, timeout=290)

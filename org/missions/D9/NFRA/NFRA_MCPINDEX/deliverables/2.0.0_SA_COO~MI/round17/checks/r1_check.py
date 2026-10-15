@@ -4,7 +4,7 @@ after that release), run from the repo root.
   python r1_check.py ac1   the table rows (workflows/atom_decomposition/catalog_entries/*.yaml): the rows that name one of the six tools are EXACTLY the
                            rows the tools' modules read (EXPECT below); each has tools == [read_tool] and gap_owner null; every OTHER row's read_tool, tools
                            and gap_owner equal those at BASE_REF; no row differs from BASE_REF in any other field
-  python r1_check.py ac2   the tool index: the gateway tree AS RELEASED (git ref REF, ap-20) with the emitted catalog: c11_index.py exits 0 with PARTITION
+  python r1_check.py ac2   the tool index: the SHIPPED cut (git ref REF, ap-20, plus the discover module from HEAD) with the emitted catalog: c11_index.py exits 0 with PARTITION
                            sum N of N, N = 99, definitions located 99 of 99
   python r1_check.py ac3   the emitted catalog against the catalog at BASE_REF: only the 7 named rows, the tool_index section and built_at_git_head differ
                            (the 44 inferred tag rows and the 24 firm rows are intact), and the discover control c10_discover.py exits 0 on the released tree
@@ -103,6 +103,10 @@ def released_tree():
         sys.exit(9)
     root = os.path.join(d, GW)
     shutil.copyfile(CATALOG, os.path.join(root, "app", "refs", "DATA_CATALOG.yaml"))
+    # the SHIPPED cut: the release commit plus the discover module as it ships (HEAD), so the catalog's definition lines are graded on the shipped bytes (row Z-S118's lesson)
+    disc = "app/integrations/opal_discover/integration.py"
+    with open(os.path.join(root, disc), "wb") as fh:
+        fh.write(git_show("HEAD", GW + "/" + disc))
     sh = open(os.path.join(root, "deploy-to-ec2.sh"), encoding="utf-8").read()
     m = re.search(r'ENABLED_INTEGRATIONS="([^"]*)"', sh)
     return root, (m.group(1).replace(",", " ") if m else "")
