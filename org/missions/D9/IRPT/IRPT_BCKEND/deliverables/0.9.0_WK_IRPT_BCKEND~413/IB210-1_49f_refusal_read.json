@@ -1,0 +1,92 @@
+{
+  "base_commit": "bbdeae6f89b23308894c94e95b91951decfb9769",
+  "read_date": "2026-10-15",
+  "served": {
+    "firm": "49financial",
+    "business_date": "2026-10-12",
+    "t_minus_1": "2026-10-14",
+    "trading_days_behind": 2
+  },
+  "refusals": {
+    "refused_dates": ["2026-10-13"],
+    "refusal_records_read": 1,
+    "per_candidate": [
+      {
+        "candidate_date": "2026-10-13",
+        "conditions": [
+          {"condition": "account_lost", "count": 1}
+        ]
+      }
+    ]
+  },
+  "guard_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 3058,
+    "identifier": "add(\"account_lost\", gone - closed)"
+  },
+  "account_or_field": {
+    "claim": "measured",
+    "class": "custody account marked ACTIVE in the firm directory, not TERMINATED",
+    "statement": "One served 49Financial account is absent from the 2026-10-13 candidate. The custodian directory holds exactly one entry for it, marked ACTIVE, so the closed-account exemption cannot apply. No account id is recorded here."
+  },
+  "cause": {
+    "claim": "inferred",
+    "statement": "The account is served, listed in the directory as ACTIVE, and omitted from the candidate. The candidate filter that drops it was not read, so the cause is inferred rather than measured.",
+    "evidence": [
+      "Refusal record, one version (candidate 2026-10-13, served 2026-10-12): account_lost count 1 and listed.new_unclassified count 0.",
+      "Directory at the routed pointer, dated 2026-10-13: 4746 entries, 4673 ACTIVE and 73 TERMINATED, none carried forward; the lost account sits in one entry marked ACTIVE.",
+      "closed_account_ids (holdings_snapshot.py lines 2980 to 2989) exempts only TERMINATED entries, so evaluate_publish_gate adds account_lost at line 3058."
+    ]
+  },
+  "acceptance_path": {
+    "mechanisms": [
+      {
+        "name": "account_lost_condition",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3058,
+        "identifier": "add(\"account_lost\", gone - closed)"
+      },
+      {
+        "name": "closed_account_exclusion",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3051,
+        "identifier": "closed = closed_accounts() & gone"
+      },
+      {
+        "name": "terminated_mark_source",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 2987,
+        "identifier": "if (e.get(\"termination\") or {}).get(\"indicator\") == \"TERMINATED\":"
+      },
+      {
+        "name": "directory_no_closures_mark",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3055,
+        "identifier": "if marks_no_closures():"
+      },
+      {
+        "name": "one_date_bypass_source_frontier_only",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3191,
+        "identifier": "kept = [c for c in gate[\"conditions\"] if not (c[\"condition\"] == \"source_frontier_older\""
+      }
+    ],
+    "recommended_path": "Do not use the one-date bypass at line 3191 or the directory no-closures mark at line 3055: neither clears an account the directory marks ACTIVE. Read the 49Financial candidate builder to find the filter that omits the account, before any ruling. A TERMINATED mark needs custodian-confirmed closure, and any screen change belongs to the guard owner."
+  },
+  "other_firms": {
+    "cottonwood": {"served_business_date": "2026-10-08"},
+    "inflection": {"served_business_date": "2026-10-13"}
+  },
+  "notes": [
+    "Canonical prefix from lib/opal_naming.py address(): the 49Financial holdings current index and its publish_refusal.json were read by get-object and list-object-versions only. One refusal version exists.",
+    "The custodian directory was read at its routed pointer in the legacy bucket. Membership of the lost account was counted in scratch; only booleans and counts are kept in this record.",
+    "trading_calendar answered from the hardcoded NYSE fallback, since pandas_market_calendars is absent. The T-1 value 2026-10-14 is the fallback answer, not a live calendar read.",
+    "The producer was not run and no object was written. The downloaded refusal record and directory body were deleted from scratch after the read. Inflection served date is read from its manifest as 2026-10-13."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

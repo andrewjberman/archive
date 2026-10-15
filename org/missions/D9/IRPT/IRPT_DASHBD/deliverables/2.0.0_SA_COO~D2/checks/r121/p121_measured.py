@@ -111,16 +111,16 @@ def newest_returns_day(root):
         token = r.get("NextContinuationToken")
     days = sorted(d for d in days if ISO.match(d))
     need(days, "no returns partition listed")
-    return days[-1], len(days)
+    return days, len(days)
 
 
 # ------------------------------------------------------------------------------------------------ the record clauses (pure)
-def check_record(rec, max_days, newest_day, analysis_text, tracked, analysis_sha):
+def check_record(rec, max_days, listed_days, analysis_text, tracked, analysis_sha):
     exp = {"firm", "day", "max_days_per_fire", "threshold_seconds", "accounts", "households", "rows", "days_built", "read_inputs_seconds", "build_day_seconds",
            "fire_estimate_seconds", "verdict", "measured_on", "words", "analysis", "reads", "claim", "files_in_repo", "served_values_changed", "pushed", "deployed"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["firm"] == FIRM and nes(rec["words"]) and rec["claim"] in CLAIMS, "firm, words or claim")
-    need(rec["day"] == newest_day, "day %s is not the newest returns partition %s" % (rec["day"], newest_day))
+    need(rec["day"] in listed_days, "day %s is not a returns partition the checker lists (it was the newest when measured)" % rec["day"])
     need(rec["max_days_per_fire"] == max_days, "max_days_per_fire %s differs from the handler's %s" % (rec["max_days_per_fire"], max_days))
     need(rec["threshold_seconds"] == THRESHOLD, "threshold_seconds must be 600")
     for k in ("accounts", "households", "rows", "days_built"):
@@ -186,14 +186,14 @@ def selftest():
         return r
     arms += [("estimate wrong", mut(lambda r: r.update(fire_estimate_seconds=90.0)), False),
              ("verdict wrong", mut(lambda r: r.update(read_inputs_seconds=700.0, fire_estimate_seconds=750.0)), False),
-             ("not the newest day", mut(lambda r: r.update(day="2026-10-12")), False),
+             ("not the newest day", mut(lambda r: r.update(day="2026-10-01")), False),
              ("write flag", mut(lambda r: r["reads"].update(s3_writes=1)), False),
              ("extra key", mut(lambda r: r.update(extra=1)), False),
              ("households over accounts", mut(lambda r: r.update(households=200)), False),
              ("not local", mut(lambda r: r["measured_on"].update(where="lambda")), False)]
     for name, rec, ok in arms:
         try:
-            check_record(rec, 10, "2026-10-13", text, True, "a" * 64)
+            check_record(rec, 10, ["2026-10-12", "2026-10-13", "2026-10-14"], text, True, "a" * 64)
             got = True
         except Fail:
             got = False

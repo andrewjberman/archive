@@ -1,0 +1,100 @@
+{
+  "base_commit": "1713c505c19eab11b44b04141debbecdf958d089",
+  "read_date": "2026-10-15",
+  "served": {
+    "firm": "cottonwood",
+    "business_date": "2026-10-08"
+  },
+  "refusals": {
+    "refused_dates": ["2026-10-09", "2026-10-12", "2026-10-13"],
+    "first_refused_candidate_date": "2026-10-09",
+    "refusal_records_read": 3,
+    "condition": "account_lost",
+    "lost_count": 1,
+    "per_candidate": [
+      {"candidate_date": "2026-10-09", "lost_count": 9, "closed_not_refused_count": 8},
+      {"candidate_date": "2026-10-12", "lost_count": 1, "closed_not_refused_count": 0},
+      {"candidate_date": "2026-10-13", "lost_count": 1, "closed_not_refused_count": 0}
+    ]
+  },
+  "lost_account": {
+    "present_in_served": true,
+    "absent_in_candidates": true,
+    "claim": "inferred",
+    "source_partition_checks": [
+      {"date": "2026-10-08", "listed_in_source": true},
+      {"date": "2026-10-12", "listed_in_source": true},
+      {"date": "2026-10-13", "listed_in_source": true}
+    ],
+    "directory_mark": {
+      "found": false,
+      "class": "no_mark",
+      "note": "No directory entry carries the account, so neither a TERMINATED nor an UNKNOWN mark applies."
+    }
+  },
+  "cause": {
+    "class": "candidate_filter",
+    "claim": "inferred",
+    "statement": "The account is listed in the source on every date read yet is absent from the candidate. The only per-account source filter between them is the COT account screen, and its refusal reason is kept only in screen evidence, so the failing validator condition is not measured.",
+    "evidence": [
+      "The fact_holdings partition listed the account on 2026-10-08, 2026-10-12 and 2026-10-13 (3 of 3 read). The directory intersection at holdings_snapshot.py lines 2399 to 2437 is a counter, not a filter.",
+      "cot_screen_accounts at holdings_snapshot.py lines 2266 to 2294 refuses each source account that fails validate_cot_actual_positions, and build_cot applies it when no account list is passed (line 2328).",
+      "The directory latest pointer holds 271 entries: 2 TERMINATED and 269 UNKNOWN. The account has no entry, so the closed-account exclusion at line 3051 cannot apply."
+    ]
+  },
+  "self_clears": {
+    "claim": "inferred",
+    "statement": "The account is listed in source on 2026-10-12 and 2026-10-13 and is still refused, so the source alone does not bring it back. It stays absent while the per-account screen keeps refusing it; later dates were not read."
+  },
+  "acceptance_path": {
+    "guard": {
+      "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "line": 3058,
+      "identifier": "add(\"account_lost\", gone - closed)"
+    },
+    "override_mechanisms": [
+      {
+        "name": "closed_account_exclusion",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3051,
+        "identifier": "closed = closed_accounts() & gone"
+      },
+      {
+        "name": "directory_no_closures_mark",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3055,
+        "identifier": "if marks_no_closures():"
+      },
+      {
+        "name": "one_date_bypass_source_frontier_only",
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3191,
+        "identifier": "kept = [c for c in gate[\"conditions\"] if not (c[\"condition\"] == \"source_frontier_older\""
+      }
+    ],
+    "owner": "Named in the code only by the gate docstring, which cites Andrew-direct ruling at f8e7d992dd (PRD IRPT_BCKEND v0.31 and v0.32). Row S158 names 1.0.0_SA_CTO~DELL2 as the disarm owner.",
+    "recommended_path": "Do not use the one-date bypass: it waives only source_frontier_older and does not clear account_lost. Clear the refusal by a custodian-confirmed closure that sets a TERMINATED mark on the account in the directory, which closed_account_exclusion at line 3051 then lists as not refused, or by a decision of the owner to change the screen."
+  },
+  "other_firms": {
+    "49financial": {
+      "refusal_record_present": true,
+      "served_business_date": "2026-10-12"
+    },
+    "inflection": {
+      "refusal_record_present": false,
+      "served_business_date": "2026-10-13"
+    }
+  },
+  "notes": [
+    "Served date 2026-10-08 re-read from the cottonwood current manifest latest_date. Three versions of the publish_refusal.json object were read by list-object-versions and get-object --version-id, none written. The per-candidate counts come from those three records.",
+    "The lost account was located against the fact_holdings source partitions for three dates, read to scratch outside the tree and deleted after use. Only booleans and counts were kept. The directory latest pointer was read the same way.",
+    "Not read: the candidate snapshot itself, the served parquet, the fact_allocations totals, and the validator's refusal reason for the account. The cause is therefore inferred, and measuring it needs the screen evidence for the candidate date.",
+    "The publisher was read at the HEAD blob through the sparse grant (data/ added locally, not committed). The producer was not run, no object was written, and no account id or value is recorded in this file."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

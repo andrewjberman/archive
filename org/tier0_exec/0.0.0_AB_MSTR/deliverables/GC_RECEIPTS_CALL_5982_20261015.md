@@ -91,3 +91,11 @@ registered worktree count on dell2 is 29, down from 57 at 02:20Z.
 `C:/dev/r30-control`, `C:/dev/r30-release`, `C:/dev/irpt-release-r28/wt-r30-release`, `irpt-release-r29/*` (KEEP), `wk-irpt-anlreq-102` and
 `rel-anlreq-r4` (KEEP), the plain folders (act d8ae, Andrew's). Each removed worktree leaves a ~24 KB `portal/` stub holding a symlink to the shared
 portal `node_modules`; I did not remove the stubs, because a recursive delete could follow that link into the live checkout.
+
+## Update 5, CTO msg 8344 (14:4xZ): scratch worktree C:/dev/j7-promote-check, removed
+
+By `0.0.0_AB_MSTR~DELL2`. A portal-repo worktree made by `2.0.0_SA_COO~Y2` to measure the J7 cherry-pick. Read before removal: head c3b21a40e2 is
+contained in portal origin/PROD; the five staged files (the J7 commit 6f4e5f671f, on origin/DEV) equal that commit's blobs, same list and same content;
+the only ignored paths were `.tsbuild/` and a `node_modules` junction to the live portal. I unlinked the junction with a non-recursive rmdir
+(portal/node_modules read 313 entries before and after), then ran `git worktree remove --force`. The dir is gone and the worktree is off the list.
+Nothing was lost: the commit it applied is on origin/DEV, and Y2's record of the measurement is its own deliverable.

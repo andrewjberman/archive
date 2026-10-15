@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-573",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-573.run-49-financials-candidate-screen-offline-on-the-lost-active-accounts-rows-and-name-the-failing-condition.md",
+    "group": "OTHER",
+    "vintage_commit": "8d6cf63777"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~416",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~416/IB212-1_49f_screen_offline_read.json",
+      "kind": "doc",
+      "commit_or_etag": "51963781084e7d58e2138dec46fb781a17d00c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only investigation record. Nothing was published, bypassed, invoked or written to AWS, so there is no deploy to verify."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~416/IB212-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "51963781084e7d58e2138dec46fb781a17d00c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output and exit codes of the three criteria, recorded in the same commit as the record."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "51963781084e7d58e2138dec46fb781a17d00c52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows, IRPT_BCKEND-D2-W416-S1 and S2, validated by the surprise-row gate at commit (2 new rows, OK)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB212-1-AC1",
+      "criterion_verbatim": "IB212-1-AC1: the validator and screen sites verified at HEAD, the source rows counted, the offline run PERFORMED read only (a record that did not run it is not graded)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r212/p212_cells.py\" . IB212-1-AC1",
+      "output_evidence": "OK: the validator and the screen read in the code, 1 source rows, an offline read-only run / IB212-1-AC1 PASS / rc=0",
+      "denominator": "2 code sites verified at HEAD (validator_site and screen_site), 1 source row, 1 offline read-only run, 0 writes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB212-1-AC2",
+      "criterion_verbatim": "IB212-1-AC2: the failing condition named from the code (the line that raises it verified, a measured claim) or the acceptance said in words, the comparison with Cottonwood's condition and the fix options read in the code",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r212/p212_cells.py\" . IB212-1-AC2",
+      "output_evidence": "OK: the failing condition named from the validator's own code, the fix options read in the code / IB212-1-AC2 PASS / rc=0",
+      "denominator": "1 failing condition (account_lost) at 1 verified line, 1 Cottonwood comparison (not the same), 2 fix options each at a verified line",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB212-1-AC3",
+      "criterion_verbatim": "IB212-1-AC3: notes, the six counters 0 and no long digit run (no id)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r212/p212_cells.py\" . IB212-1-AC3",
+      "output_evidence": "OK: notes, counters 0, no long digit run / IB212-1-AC3 PASS / rc=0",
+      "denominator": "5 notes lines, 6 counters at 0, 0 long digit runs",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutants for this read are the issuer's negatives in p212_cells.py; the worker did not author or alter them.",
+      "expected": "Not applicable: the order names no mutant for the worker.",
+      "observed": "Not run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "No same-input pair was run: the offline gate ran once on the scratch key sets, and the live S3 partitions were read once per object.",
+      "observed": "Not applicable to a read whose input is a live S3 state.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the 49 Financial producer, any AWS write, publish, sign-in or vendor request",
+      "reason": "The order is READ ONLY and its bounds forbid each of these."
+    },
+    {
+      "item": "Reading the served gold parquet of the 2026-10-12 publication",
+      "reason": "The served account set was taken from the 2026-10-12 dim_balance keys; the gold parquet is the same key population and was not needed for the condition."
+    },
+    {
+      "item": "Re-reading the custodian directory body",
+      "reason": "The directory marks (the account is ACTIVE, 73 TERMINATED entries) are taken from the IB210-1 record; the closed set in the offline run is empty on that basis."
+    },
+    {
+      "item": "The Schwab cause of the account's absence from the 2026-10-13 partition",
+      "reason": "Not in the code or the source; the cause is inferred and the record says so."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W416-S1: the order's premise of a candidate-builder filter that omits the lost account does not hold; the account has no row on the 2026-10-13 partition and the builder loop has no per-account drop.",
+    "IRPT_BCKEND-D2-W416-S2: the Cottonwood validator record is on box/dell2 at 1eda0665e4 but not on this worker's base; the comparison was made from the branch ref."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~416/IB212-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "aws s3api (read only, via .tools/aws)",
+      "invocation": "list-objects-v2 on the 49F dim_balance prefix (delimiter /); get-object on the 2026-10-12 and 2026-10-13 dim_balance partitions to scratch",
+      "result": "date partitions listed; 2 partitions read; no write, no invoke"
+    },
+    {
+      "tool": "python -I offline_gate.py (scratch, outside the repository)",
+      "invocation": "python -I offline_gate.py, importing evaluate_publish_gate from holdings_snapshot.py at HEAD",
+      "result": "outcome REFUSED; account_lost count 1; the reconcile_difference line is a synthetic-candidate artifact and is not graded"
+    },
+    {
+      "tool": "git show box/dell2 (read only)",
+      "invocation": "git show of the Cottonwood validator record path from the box/dell2 ref to scratch",
+      "result": "record read, rc 0; not committed on the worker branch"
+    },
+    {
+      "tool": "python -I p212_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r212/p212_cells.py\" . <criterion id>",
+      "result": "IB212-1-AC1, AC2 and AC3 PASS, rc 0 each"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "8d6cf63777776e1609c6dbafbcbd881a68fbf729",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-573.run-49-financials-candidate-screen-offline-on-the-lost-active-accounts-rows-and-name-the-failing-condition.md"
+  }
+}

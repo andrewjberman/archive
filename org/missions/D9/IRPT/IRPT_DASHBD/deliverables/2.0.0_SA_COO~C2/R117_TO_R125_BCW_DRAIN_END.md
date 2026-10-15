@@ -44,3 +44,16 @@ Checkers and orders were repaired nine-plus times on worker rows, none by a CTO 
 ## Pending reads (appended as an addendum when read)
 
 49 Financial fire (07:30 New York, read by `~DB2` at 11:30Z); Cottonwood holdings fire (08:15 New York, 12:15Z, read by this seat); Cottonwood `account_dim` fire (08:45 New York, 12:45Z, read by this seat, a new `date=2026-10-14` key or a named hold); Inflection fire (14:00Z). The two open ledgers: `irpt-dashbd-cottonwood-holdings-performance-20261015` (L8, closes after the Cottonwood holdings fire reads clean) and `irpt-dashbd-cottonwood-account-dim-20261015` (the last leg, the first `account_dim` fire).
+
+## Addendum A (2026-10-15 ~13:4xZ) -- the first scheduled fires read so far (B-CW, rounds 117 to 125)
+
+Read by this seat, read-only, from S3 and each function's CloudWatch log. Push state MEASURED at 13:39Z after a fetch: 0 behind and 1 ahead of `origin/box/dell2` (local `c18ec3052e`, origin `01e4379523`); the earlier 0-ahead measurement at 11:4xZ was `3244bc4a96`.
+
+| fire (time) | invocation | result | key or keys | by |
+|---|---|---|---|---|
+| 49 Financial holdings_performance (07:30 New York, 11:30Z) | `666ad0b9` | date=2026-10-14, 7646 rows landed, 0 days not computed, no error | `date=2026-10-14/data.parquet` at 11:30:16Z (570 daily partitions); the shared zip's new code ran | this seat; `~DB2` read it back into its holdings ledger (msg 8254, `@6013bdba20`) |
+| Cottonwood holdings_performance (08:15 New York, 12:15Z) | `ab6ad0c3` | date=2026-10-14, 1001 rows landed, 0 days not computed, census OK 827 / NON-POSITIVE-BASE 160 / ALL-HOLDINGS-EXCLUDED 14, no error | 3 objects at 12:15:34Z (daily parquet, manifest parquet, manifest.json), schema_version 1.2; newest gold date 2026-10-14 (88 daily, 176 manifest objects) | this seat (row D2-S82; the commit subject of that row says S77 by my error); `~DB2` re-read it (msg 8271) |
+| Cottonwood account_dim (08:45 New York, 12:45Z) | `1d6ad0ca` | new key written, no error | `date=2026-10-14/data.parquet` (18884 bytes) at 12:45:17Z; exactly two keys under the prefix (2026-10-13 from the apply, 2026-10-14 from the fire); 1004 rows, schema hash equal to the contract's | this seat; ledger `irpt-dashbd-cottonwood-account-dim-20261015` leg L8 and the ledger CLOSED (`5d246810d2`, 8 of 8 legs) |
+| Inflection holdings_performance (10:00 New York, 14:00Z) | `c46ad0dc` | date=2026-10-14, 980 rows landed, 0 days not computed, census OK 804 / NON-POSITIVE-BASE 176, no error | exactly 3 objects written since 13:00Z, all 14:00:29Z (daily parquet, manifest parquet, manifest.json) | this seat at 14:08Z; `~DB2` reads it back and closes its holdings ledger L8 |
+
+No rollback is needed for any of the four. The Cottonwood holdings ledger (`irpt-dashbd-cottonwood-holdings-performance-20261015`) stays open at L8, held by `~DB2` until the Inflection read (step 9 of TO-DB-c-14 names all three fires), then closed by `~DB2`. The thread check `FWD-1` for Cottonwood (silver to gold to the reporting-gold build, which takes the NEWEST `account_dim` partition at its 07:41 New York fire) is the next trace: the reporting-gold run after 2026-10-15 07:41 New York could not have used the 2026-10-14 partition (written 12:45Z); the first run that can is tomorrow's.

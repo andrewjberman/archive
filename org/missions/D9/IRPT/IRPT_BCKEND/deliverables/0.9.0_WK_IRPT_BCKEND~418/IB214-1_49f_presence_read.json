@@ -1,0 +1,69 @@
+{
+  "base_commit": "5086b0b072eb58d7a7bfed3f22d3f02375f24038",
+  "read_date": "2026-10-15",
+  "partitions": [
+    {"day": "2026-10-08", "partition_present": true, "row_count": 7626, "account_present": true},
+    {"day": "2026-10-09", "partition_present": true, "row_count": 7634, "account_present": true},
+    {"day": "2026-10-12", "partition_present": true, "row_count": 7640, "account_present": true},
+    {"day": "2026-10-13", "partition_present": true, "row_count": 7646, "account_present": false},
+    {"day": "2026-10-14", "partition_present": true, "row_count": 7664, "account_present": false}
+  ],
+  "served_snapshot_day": "2026-10-12",
+  "candidate_day_refused": "2026-10-13",
+  "gap": {
+    "first_absent_day": "2026-10-13",
+    "claim": "measured"
+  },
+  "upstream_writer": {
+    "site": {
+      "file": "data/assets/scripts/silver/schwab_conversion.py",
+      "line": 570,
+      "identifier": "w.finalize()"
+    },
+    "name": "convert_object in schwab_conversion.py, run by the opal-assets-silver-schwab Lambda; owner is the AE PartnerETL ingest seat",
+    "run_2026_10_13": {
+      "status": "succeeded",
+      "claim": "inferred",
+      "row_counts": {"prior_day": 7640, "day": 7646, "next_day": 7664},
+      "truncation_signal": false,
+      "statement": "Lambda REPORT records for 2026-10-13 and 2026-10-14 UTC (35 and 32 invocations) show no error, traceback, timeout, refusal or truncation line; the 2026-10-13 object was written 2026-10-14 at 09:46 UTC in the same window as its sibling tables. No per-partition log line exists, so success is inferred, not read."
+    }
+  },
+  "other_files": {
+    "dim_position": [
+      {"day": "2026-10-12", "partition_present": true, "account_positions": 20},
+      {"day": "2026-10-13", "partition_present": true, "account_positions": 0},
+      {"day": "2026-10-14", "partition_present": true, "account_positions": 0}
+    ],
+    "fact_trn": [
+      {"day": "2026-10-12", "account_rows": 0, "codes": []},
+      {"day": "2026-10-13", "account_rows": 0, "codes": []},
+      {"day": "2026-10-14", "account_rows": 0, "codes": []}
+    ],
+    "classification": "closed_at_source",
+    "statement": "Closed at source by the CTO rule, clause (a): the account held 20 dim_position rows on 2026-10-12 and none on 2026-10-13 and 2026-10-14, the last two days, and fact_trn holds no row for it on the three days. Open caveat: the 509-row 2026-10-12 fact_trn partition (against 11906 on 2026-10-13) could hide a closing transaction for the account on the served day."
+  },
+  "self_clears": {
+    "claim": "measured",
+    "account_present_on_2026_10_14": false,
+    "statement": "The 2026-10-14 partition is present with 7664 rows and does not carry the lost account, counted in scratch from a get-object copy. The refusal does not clear on its own; the 2026-10-14 candidate would meet the same account_lost condition against the 2026-10-12 served set (inferred from the publish gate)."
+  },
+  "remedy": {
+    "path": "Acceptance as a one-account pair on the source's own evidence: the account is absent from the balance file and from dim_position on 2026-10-13 and 2026-10-14, so it is closed_at_source and no custodian contact is needed to accept it. The directory TERMINATED mark that the closed-account exclusion reads is a later act for its owner; the 509-row 2026-10-12 fact_trn caveat stays open.",
+    "partner_contact_needed": false
+  },
+  "notes": [
+    "Partition row counts for 2026-10-08, 10-09, 10-12, 10-13 and 10-14 read 7626, 7634, 7640, 7646 and 7664: rising, no partition absent, no truncation shape. The sibling dim_position and fact_trn partitions were written in the same 09:46 UTC window each day.",
+    "The lost account is present on 2026-10-08, 10-09 and 10-12, absent from the present 2026-10-13 partition and still absent on 2026-10-14. The 10-12 to 10-13 key difference is exactly one account; seven keys are new on 10-13.",
+    "The writer is data/assets/scripts/silver/schwab_conversion.py, line 570 w.finalize(). Under AMENDMENT 2 the silver folder is added to the sparse checkout locally, never committed, so criterion AC2 resolves it; the file is byte-identical from base 1ce448234b to HEAD.",
+    "Not read: the bronze custodian source for 2026-10-13, the directory body and the custodian reason for the gap. The cause of the absence stays inferred. The 2026-10-12 fact_trn partition has an odd size and is filed as surprise row IRPT_BCKEND-D2-W418-S2, kept open.",
+    "Amendment 1 read (other_files): the account's dim_position rows were 20 on 2026-10-12 and 0 on 2026-10-13 and 2026-10-14, and fact_trn held no row for it on the three days. The 2026-10-12 fact_trn partition holds 509 rows against 11906 on 2026-10-13.",
+    "Amendment 2 ruling: the classification is closed_at_source by rule (a), because no positions remain on the last two days. The 509-row 2026-10-12 fact_trn partition could hide a closing transaction, so that caveat stays open in the statement and in S2; surprise row S3 records the vanishing positions."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

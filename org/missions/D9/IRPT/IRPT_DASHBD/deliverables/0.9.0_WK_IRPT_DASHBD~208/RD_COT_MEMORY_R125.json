@@ -1,0 +1,53 @@
+{
+  "firm": "cottonwood",
+  "days": [
+    {
+      "day": "2026-07-10",
+      "accounts": 867,
+      "rows": 867,
+      "seconds": 22.149,
+      "peak_rss_mb": 654.5,
+      "held": false
+    },
+    {
+      "day": "2026-10-13",
+      "accounts": 865,
+      "rows": 865,
+      "seconds": 1.259,
+      "peak_rss_mb": 547.7,
+      "held": false
+    }
+  ],
+  "baseline_rss_mb": 52.2,
+  "peak_rss_mb": 654.5,
+  "threshold_fraction": 0.7,
+  "sizes_mb": [512, 1024, 1536, 2048, 3008, 4096, 6144, 8192, 10240],
+  "chosen_memory_mb": 1024,
+  "sampler": {
+    "interval_seconds": 0.1,
+    "samples": 212,
+    "method": "psutil.Process().memory_info().rss read by a daemon thread every 0.1 s over the measured section, plus a direct reading before and after each day"
+  },
+  "measured_on": {
+    "where": "local",
+    "words": "One run on this worker's Windows box with the Python 3.14 interpreter. The process holds the interpreter, pandas, pyarrow and boto3, which a Lambda also holds; nothing is subtracted, so the peak is the whole resident set. Lambda CPU scales with memory, so a smaller size runs the same work more slowly. INFERENCE, not measured: if the slower day (22.1 s here, of which many seconds are S3 reads that do not scale) were CPU-bound and its share of a vCPU fell with memory (a standard Lambda vCPU is 1769 MB), it would take at most about 40 s at 1024 MB, far below the 900 s timeout."
+  },
+  "words": "The peak is 654.5 MB, on the 2026-07-10 day; the newest silver day peaked at 547.7 MB. The 70 percent line of the 1024 MB size is 716.8 MB, and the peak is under it, so the smallest standard size that keeps the peak under 70 percent, at least 512 MB, is 1024 MB. That is 7168 MB below the 8192 MB that the Cottonwood function's Terraform root carries today, copied from a sibling function and never measured. The packet must set memory_size to 1024 in that root, and must not raise it without a new measurement.",
+  "analysis": {
+    "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~208/cot_memory_r125.py",
+    "sha256": "c55a25cace2908b5fcbd5c448481f7466d523d512f862ef0f6f97a3d3adea086",
+    "tracked": true
+  },
+  "reads": {
+    "s3_reads": 115,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "claim": "measured",
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-255",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "945f619bbd",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-255.cottonwood-function-memory-from-a-measurement.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~208",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~208/cot_memory_r125.py",
+      "kind": "script",
+      "commit_or_etag": "f3a375f86a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-208; imports the account-return handler of this worktree, calls lambda_handler in dry-run for two days through one real Cottonwood silver reader whose client refuses every operation but GetObject and ListObjectsV2, passes an s3 argument with no methods, and samples the resident set size from a daemon thread; nothing scheduled, deployed or written to AWS",
+      "artifact_covered_by": [
+        "DB125-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~208/RD_COT_MEMORY_R125.json",
+      "kind": "config_data",
+      "commit_or_etag": "f3a375f86a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: two day entries neither held (867 accounts and 867 rows on the first day, 865 and 865 on the newest day), baseline 52.2 MB, peak 654.5 MB, chosen size 1024 MB against the 8192 MB the root carries, sampler 212 samples at 0.1 s, 115 GET and LIST reads, zero writes; the sha256 of the script is the one the record states",
+      "artifact_covered_by": [
+        "DB125-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB125-2-AC1",
+      "criterion_verbatim": "`DB125-2-AC1` -- `RD_COT_MEMORY_R125.json` has exactly the form of step 4; the days are 2026-07-10 and the newest silver `fact_allocations` partition the checker lists, neither held, each with at least one account and one row; `peak_rss_mb` equals the larger day peak; `chosen_memory_mb` equals the smallest standard size at least 512 with the peak under 70 percent of it; the sampler took at least 10 samples at 1 s or less; zero writes, flags false, no long digit run. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_cotmem.py\" . DB125-2-AC1",
+      "output_evidence": "OK: Cottonwood memory: days 2026-07-10, 2026-10-13, peak 654 MB (baseline 52); smallest standard size with the peak under 70 percent: 1024 MB; the slowest day took 22.1 s | DB125-2-AC1 PASS (rc 0)",
+      "denominator": "PASS: 1 of 1 criterion; the record has 17 of 17 keys of the exact form; 2 of 2 day entries neither held; the larger day peak (654.5 MB) equals peak_rss_mb; the 70 percent line of 1024 MB is 716.8 MB and the peak is under it while the 512 MB line (358.4 MB) is not; the sampler took 212 samples at 0.1 s",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line DB125-2-AC1 PASS at rc 0 at HEAD f3a375f86a; the record bytes are those of f3a375f86a",
+      "expect": "DB125-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB125-2-AC2",
+      "criterion_verbatim": "`DB125-2-AC2` -- the script is tracked, its hash equals the recorded one, it samples `psutil` from a thread, calls the handler's `lambda_handler` with `dry_run`, uses the real silver reader, names no other firm's place and holds no write call. Base: FAIL (no script).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_cotmem.py\" . DB125-2-AC2",
+      "output_evidence": "OK: the script is tracked, hashed as recorded, runs the handler in dry-run with the real silver reader, samples memory from a thread and holds no write call | DB125-2-AC2 PASS (rc 0)",
+      "denominator": "PASS: 1 of 1 criterion; the script is tracked and its sha256 equals the one the record states; the thread, psutil, lambda_handler, dry_run and real-reader tokens are present; the checker's write-token list finds none",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line DB125-2-AC2 PASS at rc 0 at HEAD f3a375f86a; the script bytes are those whose sha256 the record states",
+      "expect": "DB125-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test (python -I checks/r125/p125_cotmem.py --selftest .): one green and fifteen red record arms, the size rule, the text arms (a missing psutil, another firm's place, a write call) and the held day arm",
+      "expected": "the self-test passes every arm and prints selftest PASS, rc 0",
+      "observed": "selftest: one green and fifteen red record arms and the size rule behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of the two criteria invocations was run twice from the worktree root under timeout 120 and the output compared; ruff at target py39 and a scan of the script for the other-firm, write and non-ASCII tokens were run once beside them",
+      "expected": "identical output and rc on both runs; ruff passes; the scans find nothing",
+      "observed": "DB125-2-AC1 and DB125-2-AC2 each printed the same line and rc 0 on both runs; ruff printed All checks passed!; the scans printed no match (rc 1)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Lambda's own peak memory and per-day time",
+      "reason": "not measured: the measurement ran on the workstation. The record gives the Lambda timeout implication only as an INFERENCE (the slower day's seconds scaled by the vCPU share at 1024 MB, at most about 40 s, far below 900 s)"
+    },
+    {
+      "item": "The account count of each day as the handler's own result field",
+      "reason": "the dry-run result carries no account count; the count is taken with the adapter's accounts_in_partition after the timed call, row IRPT_DASHBD-D2-W208-S1"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W208-S1 -- OBSERVATION, INERT: the handler's dry-run results carry no account count, so the count is taken by the adapter's accounts_in_partition after the timed call (one more GET per day, inside the sampled window)",
+    "IRPT_DASHBD-D2-W208-S2 -- OBSERVATION, INERT: the trading calendar answered from its hardcoded NYSE fallback on this box (pandas_market_calendars absent); both measured days fall inside its coverage"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~208/IRPT_DASHBD.TO-DB-b-255.cottonwood-function-memory-from-a-measurement.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "p125_cotmem.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_cotmem.py\" . DB125-2-AC1 and the same with DB125-2-AC2",
+      "result": "PASS rc 0 (AC1); PASS rc 0 (AC2), run at the worktree root after the artifacts commit f3a375f86a"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 --isolated <script>",
+      "result": "All checks passed! rc 0"
+    }
+  ]
+}

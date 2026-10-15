@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ai-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-3.unsigned-script-push-deploys-nothing.md",
+    "group": "OTHER",
+    "vintage_commit": "afebfdc81a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~108",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round19.md",
+    "vintage_commit": "afebfdc81a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ai-3.unsigned-script-push-deploys-nothing.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_round19_unsigned_push.py",
+      "kind": "test",
+      "commit_or_etag": "641adaa19a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs only in temporary repositories: a bare origin, a working repository with the real pre-push hook and the real safe-deploy.sh, and stub aws and python3 on a shadowing PATH that record argv and exit 0. It never pushes to a real remote and never deploys. Last changed in 641adaa19a; the file at HEAD 17b3199b12 is byte-identical to that commit.",
+      "artifact_covered_by": [
+        "CTai3-AC1",
+        "CTai3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTai3-AC1",
+      "criterion_verbatim": "the real hook, with every executor stubbed, lets the push through and deploys nothing for a script no open change names, and the script is held on a record (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_unsigned_push.py",
+      "output_evidence": "UNSIGNED-PUSH push_rc=0 deployed=0 held=1 ok=True (rc=0; timeout 280 from the worktree root on the committed state 17b3199b12; run twice, the same last line both times). Measured in each run: push rc=0, box/laptop landed on origin (ls-remote equal to the local tip), STUB-LOG lines=0, and the audit row 'HELD-DEPLOY  0.9.0_WK_NFRA_CTLPLN~108  ref=refs/heads/box/laptop  path=data/inf/scripts/gold/fixture_unsigned.py  reason=no-open-ledger-names-it'. Hook stderr: 'deploy gate: HELD-DEPLOY data/inf/scripts/gold/fixture_unsigned.py -- no OPEN change-management ledger names it; not deployed (the push goes through)'.",
+      "denominator": "1 deploy-scope script in the push: 1 held, 0 deployed, 0 stub deploy or aws calls recorded; 1 push of 1 ref",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTai3-AC2",
+      "criterion_verbatim": "the stub sees a call made through it, so deployed=0 above is a reading and not blindness (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_unsigned_push.py --stub-control",
+      "output_evidence": "STUB-CONTROL stub_saw=1 (rc=0; timeout 280 from the worktree root on the committed state 17b3199b12; run twice in total, the same last line). The same fixture is pushed first (push rc=0, held=1), then the python3 stub is called once by hand through the shadowing PATH with argv 'safe_deploy_core.py --stub-control'; the log is read back and holds one DEPLOY-EXEC line.",
+      "denominator": "1 hand call through the stub; the stub recorded 1 of 1",
+      "status": "PASS",
+      "expect": "stub_saw=1",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same test with the cell's literal fixture path, data/fixture/scripts/fixture_unsigned.py, which is outside the declared deploy-gated trees (safe_deploy_core.py CODE_TREES). Run on the working-tree copy before the path change (uncommitted at that time; the bytes differ only in the FIXTURE constant and the fixture directory).",
+      "expected": "held must be 1 for ok=True; the literal path cannot produce a HELD-DEPLOY row, so the check must read ok=False",
+      "observed": "UNSIGNED-PUSH push_rc=0 deployed=0 held=0 ok=False; the hook printed 'no deploy-scope file in this box's diff against origin/CLOUD; nothing to deploy' and wrote no audit row",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the default arm run twice on the committed state 17b3199b12 (two runs of the same command); compared on the last line and on the audit row",
+      "observed": "UNSIGNED-PUSH push_rc=0 deployed=0 held=1 ok=True on both runs; the audit rows differ only by timestamp and the temporary folder name",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD item 3: the signed-change arm (a script an open signed change names deploys only what it names)",
+      "reason": "It needs an open signed change from a CloudOps seat. The order places it outside this cell, so it was not run and no claim is made about it."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W108-S1: the cell's fixture path data/fixture/scripts/fixture_unsigned.py is not deploy-scope; the literal run wrote no HELD-DEPLOY row, so the test uses data/inf/scripts/gold/fixture_unsigned.py inside the temporary repository only. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W108-S2: test_named_commit_deploy.py prints PASS for cases 1 to 7, then raises ModuleNotFoundError git_bash_resolver in case 8's fixture setup (open_ledger); no NAMED-COMMIT-TEST line; rc=1. Not a control for CT-ai-3. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W108-S3: the real halt gate refuses a worker serial with no tracked non-terminal task order at HEAD (push rc=1, worker-no-order); the test commits one fixture order naming the serial, the serial and inbox unchanged. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~108/NFRA_CTLPLN.TO-CT-ai-3.unsigned-script-push-deploys-nothing.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~108 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_unsigned_push.py",
+      "result": "UNSIGNED-PUSH push_rc=0 deployed=0 held=1 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_unsigned_push.py --stub-control",
+      "result": "STUB-CONTROL stub_saw=1"
+    }
+  ]
+}

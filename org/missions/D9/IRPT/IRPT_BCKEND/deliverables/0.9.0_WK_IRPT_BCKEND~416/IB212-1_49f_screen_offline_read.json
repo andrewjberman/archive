@@ -1,0 +1,75 @@
+{
+  "base_commit": "8d6cf63777776e1609c6dbafbcbd881a68fbf729",
+  "read_date": "2026-10-15",
+  "validator_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "line": 3058,
+    "identifier": "add(\"account_lost\", gone - closed)"
+  },
+  "screen_site": {
+    "file": "data/assets/scripts/gold/investor_reporting/holdings_49f.py",
+    "line": 356,
+    "identifier": "for raw_account in sorted(balance.index):"
+  },
+  "source_rows": {
+    "count": 1,
+    "distinct_dates": 1
+  },
+  "offline_run": {
+    "performed": true,
+    "read_only": true,
+    "writes": 0,
+    "published": false,
+    "invocation": "python -I offline_gate.py (scratch outside the repository; imports evaluate_publish_gate from holdings_snapshot.py at HEAD and calls it on the 2026-10-13 candidate account keys against the 2026-10-12 served account keys)",
+    "outcome": "refused"
+  },
+  "failing_condition": {
+    "name": "account_lost",
+    "claim": "measured",
+    "site": {
+      "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "line": 3058,
+      "identifier": "add(\"account_lost\", gone - closed)"
+    },
+    "explanation": "Compares the served account set with the candidate account set. An account the served publication holds, the candidate does not, and that is not exempted as a TERMINATED closure, raises account_lost. The exemption reads only TERMINATED directory entries, and this account is marked ACTIVE."
+  },
+  "same_as_cottonwood": {
+    "same": false,
+    "claim": "measured",
+    "statement": "Not the same condition. Cottonwood IB-pr-571 (record at box/dell2 1eda0665e4, not on this base) is refused by the validator custody check at holdings_snapshot.py line 403 after the COT screen drops two no-position source rows. This account has no row on 2026-10-13 and is refused by the publish gate condition account_lost at line 3058."
+  },
+  "fix_options": [
+    {
+      "option": "Source correction: re-land the account's custody row in the 2026-10-13 dim_balance partition if the account is live at the custodian",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_49f.py",
+        "line": 356,
+        "identifier": "for raw_account in sorted(balance.index):"
+      },
+      "effect": "Measured: the account has one row on the 2026-10-12 partition and none on 2026-10-13. A correct row restores its ACCOUNT node and clears account_lost, with no change to the screen, the validator or the guard."
+    },
+    {
+      "option": "A custodian-confirmed closure recorded as a TERMINATED mark in the directory, which the closed-account exclusion reads",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 3051,
+        "identifier": "closed = closed_accounts() & gone"
+      },
+      "effect": "The gate lists the account under closed_accounts_not_refused instead of refusing with account_lost. The candidate does not regain the account, and the directory marks it ACTIVE today, so custodian confirmation comes first."
+    }
+  ],
+  "ids_private": true,
+  "notes": [
+    "Source rows: the account has one row on the 2026-10-12 dim_balance partition (the served date) and zero rows on the 2026-10-13 candidate partition. Read by get-object to scratch only; the row values are not recorded here.",
+    "The 49 Financial builder (build_49f_actual, holdings_49f.py) iterates the candidate partition keys at line 356. The account is not a key on 2026-10-13, so no per-account screen sees it. The only pre-node drop in that loop is the read refusal at lines 358 to 363, which did not fire for any account here.",
+    "Offline run: evaluate_publish_gate at holdings_snapshot.py HEAD, called as run_firm calls it, with the closed set empty and the no-closures mark False (the directory marks from the IB210-1 record). The candidate was synthetic ACCOUNT nodes only, so the reconcile_difference line it also printed is a harness artifact and not graded; account_lost count is 1, matching the refusal record.",
+    "Not read: the served gold parquet, the directory body (its marks are taken from the IB210-1 record), and the Schwab reason the account left the custody partition. The cause is inferred, not measured. The Cottonwood record was read by git show from box/dell2 only.",
+    "functions_invoked 0 counts deployed AWS functions invoked; the local gate call is offline in scratch. No AWS write, no publish, no sign-in; GET and list of existing objects only."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

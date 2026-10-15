@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aj-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-1.fetch-record-device-key-and-wrapper-refusal.md",
+    "group": "OTHER",
+    "vintage_commit": "9cfc5f5fd8"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~112",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round20.md",
+    "vintage_commit": "9cfc5f5fd8",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-1.fetch-record-device-key-and-wrapper-refusal.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_fetch.py",
+      "kind": "script",
+      "commit_or_etag": "8f5584d044",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "this_device() writes a device key into every new fetch record (this box from lib/devices.py, null when the box cannot be named; schema string unchanged). Checked by CTaj1-AC1 arms 2 and 7 at 708edbbf01. Last changed in 8f5584d044; no deploy; run from the worktree.",
+      "artifact_covered_by": [
+        "CTaj1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/intake_request.py",
+      "kind": "script",
+      "commit_or_etag": "8f5584d044",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "downloads counts a record for the device it names; a record with no device or a null device is counted under unattributed and the line is DOWNLOADS-TODAY device=D day=DAY requests=N files=K unattributed=U. Checked by CTaj1-AC1 arms 4-8 and CTaj1-AC3 at 708edbbf01. Last changed in 8f5584d044; no deploy.",
+      "artifact_covered_by": [
+        "CTaj1-AC1",
+        "CTaj1-AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round19_intake_requests.py",
+      "kind": "test",
+      "commit_or_etag": "8f5584d044",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The three DOWNLOADS-TODAY expectations gain unattributed=0 and nothing else changes. Default run INTAKE-REQUESTS arms=15/15 ok=True and --downloads run INTAKE-DOWNLOADS arms=5/5 ok=True at 708edbbf01. Last changed in 8f5584d044; no deploy.",
+      "artifact_covered_by": [
+        "CTaj1-AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round20_fetch_device.py",
+      "kind": "test",
+      "commit_or_etag": "2950637674",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--device runs one fetch through intake_fetch.py against a loopback stub (no network) and the downloads reader over a temporary intake folder; --wrapper runs kit_pip_no_egress.py wrap -- download six in a child with PIP_NO_INDEX=1 and a counting loopback listener. Last changed in 2950637674; no deploy.",
+      "artifact_covered_by": [
+        "CTaj1-AC1",
+        "CTaj1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~112/FWD18_LAPTOP_REFUSAL.md",
+      "kind": "doc",
+      "commit_or_etag": "2950637674",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one manual run of kit_pip_no_egress.py wrap -- download six with PIP_NO_INDEX=1: exit 3, stdout 0 bytes, the refusal line verbatim on stderr, and the route org/devices/intake/ named. Last changed in 2950637674; no deploy.",
+      "artifact_covered_by": [
+        "CTaj1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaj1-AC1",
+      "criterion_verbatim": "a fetch record carries its device and the reader counts per device, with old records unattributed (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_fetch_device.py --device",
+      "output_evidence": "FETCH-DEVICE arms=8/8 ok=True (rc=0; run as timeout 280 python .tools/tests/test_round20_fetch_device.py --device from the worktree root on the committed state at 708edbbf01). Arm lines: 1 PASS fetch through intake_fetch.py against the loopback stub, rc 0 outcome held; 2 PASS record carries device=laptop; 3 PASS schema intake-fetch/1 and fetched_by kept; 4 PASS downloads laptop 20261015 requests=4 files=1 unattributed=2; 5 PASS downloads dell1 requests=0 files=0 unattributed=2; 6 PASS downloads laptop on an empty day, unattributed=0; 7 PASS unnamed-box fetch writes device null; 8 PASS downloads laptop unattributed=3, files=1.",
+      "denominator": "8 arms run: 8 PASS, 0 FAIL; ok counts 8 of 8",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj1-AC2",
+      "criterion_verbatim": "the kit's refusal for a download is non-zero, makes no network request and names the intake route (base: the file does not exist); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round20_fetch_device.py --wrapper",
+      "output_evidence": "WRAPPER-REFUSAL rc=3 names_route=True ok=True (rc=0; run as timeout 280 python .tools/tests/test_round20_fetch_device.py --wrapper from the worktree root on the committed state at 708edbbf01). Arm lines: 1 PASS positive control, the counting listener sees one connection from this process; 2 PASS child exit code non-zero (rc=3); 3 PASS refusal text names org/devices/intake; 4 PASS zero connections to the counting listener (hits=0), PIP_NO_INDEX=1 in the child. Refusal line: REFUSED: this box does not download. Ask the laptop: org/devices/intake/ (request, check, Taildrop). No request was made.",
+      "denominator": "4 arms run: 4 PASS, 0 FAIL; the child exit code is 3, non-zero",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj1-AC3",
+      "criterion_verbatim": "the round-19 request, decision and downloads suite still passes (base: INTAKE-REQUESTS arms=15/15 ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py",
+      "output_evidence": "INTAKE-REQUESTS arms=15/15 ok=True (rc=0; run as timeout 280 python .tools/tests/test_round19_intake_requests.py from the worktree root on the committed state at 708edbbf01). The --downloads mode, run as well, prints INTAKE-DOWNLOADS arms=5/5 ok=True (rc=0).",
+      "denominator": "15 of 15 arms passed in the default run (the base count is 15); 5 of 5 in --downloads",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The round-20 test file, unchanged, run against the BASE code: intake_fetch.py and intake_request.py as at 9cfc5f5fd8, copied into a scratch tree under the worktree (.scratch/mut, which is git-ignored): python .scratch/mut/.tools/tests/test_round20_fetch_device.py --device.",
+      "expected": "--device fails on the base code: the fetch record has no device key and the reader prints no unattributed field.",
+      "observed": "FETCH-DEVICE arms=2/8 ok=False (rc=1). FAIL arms 2 (no device key), 4, 5, 6, 7, 8 (no unattributed field and no device on the record). PASS arms 1 and 3 are the fetch outcome and the schema, which the base code already met.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the --device run twice on the committed state at 2950637674 (the code is unchanged through 708edbbf01, which adds only investigation rows); the two outputs compared line for line",
+      "observed": "two runs: the arm lines are identical and both end FETCH-DEVICE arms=8/8 ok=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W112-S1: a null device is counted as unattributed, a case the order did not name (the order names only the absent key). UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W112-S2: PIP_NO_INDEX=1 is never read on the kit's refusal path, because wrap refuses before any pip process starts. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W112-S3: the worker's sparse checkout lacked org/surprise_channel/schemas; added with git sparse-checkout add to read the row schema. UNDER_INVESTIGATION.",
+    "NFRA_CTLPLN-W112-S4: intake_check.py writes intake-fetch/1 records with no device key (selftest), a second writer of the shape the reader must tell apart. UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~112/NFRA_CTLPLN.TO-CT-aj-1.fetch-record-device-key-and-wrapper-refusal.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~112 on 2026-10-15; its final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_fetch_device.py --device",
+      "result": "FETCH-DEVICE arms=8/8 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round20_fetch_device.py --wrapper",
+      "result": "WRAPPER-REFUSAL rc=3 names_route=True ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py",
+      "result": "INTAKE-REQUESTS arms=15/15 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_intake_requests.py --downloads",
+      "result": "INTAKE-DOWNLOADS arms=5/5 ok=True"
+    }
+  ]
+}

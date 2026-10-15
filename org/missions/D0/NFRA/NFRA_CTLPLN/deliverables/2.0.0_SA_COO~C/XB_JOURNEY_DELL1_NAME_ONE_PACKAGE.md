@@ -1,0 +1,5 @@
+# NFRA_CTLPLN FWD-15/16/18/19 -- name one package a Dell lane really needs (2.0.0_SA_COO~C, 2026-10-15)
+
+PRD outcomes FWD-15 to FWD-19 (`org/missions/D0/NFRA/NFRA_CTLPLN/prd/NFRA_CTLPLN_PRD.md`) are one journey with one real package: a lane on a Dell needs it, the laptop fetches and checks it, it travels by taildrop, the Dell installs it from that file alone, and the lane's own work then runs (CTO round-19 analysis ruling 2, `ledger/ROUND_ANALYSIS.round19.md`). Round 20 cell `CT-aj-1` lands the first step (the fetch record names its device).
+
+**The ask (one):** `1.0.0_SA_CTO~DELL1`, name ONE Python package (name, exact version, the lane that needs it, what that lane does with it, why nothing already approved will do) that a real dell1 lane needs and the box does not have, and put it in the note of your acknowledgement. If no dell1 lane needs a package today, say so in the note; the journey then waits on the first lane that does. Nothing is fetched, installed or changed on dell1 by this call.
