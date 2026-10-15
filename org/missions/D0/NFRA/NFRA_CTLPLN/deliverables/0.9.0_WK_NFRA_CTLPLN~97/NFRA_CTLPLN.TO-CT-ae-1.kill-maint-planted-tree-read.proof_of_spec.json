@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ae-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ae-1.kill-maint-planted-tree-read.md",
+    "group": "OTHER",
+    "vintage_commit": "cd1e04765b"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~97",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round15.md",
+    "vintage_commit": "cd1e04765b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ae-1.kill-maint-planted-tree-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/kill-maint.ps1",
+      "kind": "script",
+      "commit_or_etag": "21ad9d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "held-tree guard at :730-745 calls Test-SeatBoundary before the SKIP: a foreign claude.exe seat is REFUSED with the serial and a KILL-MAINT-REFUSED reason=seat-boundary audit line; a held tree with no foreign seat is still a SKIP; committed at 21ad9d0ca4 on wk-NFRA_CTLPLN-97; read by the S9118 planted test only, no deploy",
+      "artifact_covered_by": [
+        "CTae1-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_kill_maint_planted.ps1",
+      "kind": "test",
+      "commit_or_etag": "783e4f5030",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plants a python.exe root per tree via Win32_Process.Create (temp working directory); tree A control and tree B foreign seat (cmd.exe copy named claude.exe with serial 9.9.0_SA_TEST~PLANT); runs the real kill-maint.ps1 -Execute -OnlyPid; kills only its own PIDs; prints KILL-MAINT-PLANTED cases=10/10 ok=True at 783e4f5030",
+      "artifact_covered_by": [
+        "CTae1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "783e4f5030",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended at 783e4f5030: NFRA_CTLPLN-W97-S1 (held guard shadows the seat boundary; fixed at 21ad9d0ca4) and NFRA_CTLPLN-W97-S2 (literal planted shape not targetable); surprise-row-gate OK 2 new rows",
+      "artifact_covered_by": [
+        "CTae1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTae1-AC1",
+      "criterion_verbatim": "tree A dies, tree B survives, no planted process is left, and the real seats are untouched (base: the file does not exist); report the whole last line with its denominator",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_kill_maint_planted.ps1",
+      "output_evidence": "KILL-MAINT-PLANTED cases=10/10 ok=True (rc=0 at 783e4f5030 on wk-NFRA_CTLPLN-97; run from the worktree root under timeout 240). Arms: tree A planted, kill-maint names the root stopped, tree A dies, audit KILL-MAINT line; tree B planted, kill-maint REFUSED: seat boundary naming 9.9.0_SA_TEST~PLANT, audit KILL-MAINT-REFUSED reason=seat-boundary, tree B survives 4 of 4; no planted PID remains; REAL-SEATS claude.exe before=8 after=8 unchanged",
+      "denominator": "10 of 10 cases",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTae1-AC2",
+      "criterion_verbatim": "the existing fake-process battery still passes (base: `STOP-AT-DESCENDANT cases=27/27 ok=True`, a control); report the whole last line",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_stop_at_descendant.ps1",
+      "output_evidence": "STOP-AT-DESCENDANT cases=27/27 ok=True (rc=0 at 783e4f5030 on wk-NFRA_CTLPLN-97; run from the worktree root under timeout 240; 27 PASS lines, 0 FAIL)",
+      "denominator": "27 of 27 cases",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "kill-maint.ps1 at its base blob cd1e04765b (before the held-guard fix) run through the same planted test: tree B is SKIPped, not refused",
+      "expected": "cases=8/10 ok=False with tree B's REFUSED line and KILL-MAINT-REFUSED audit line absent, tree A still dying",
+      "observed": "pre-fix run: tree A dies (PASS); tree B planted and alive 4 of 4 (PASS); kill-maint line 'SKIP: PID 43028 python.exe its tree holds a session PID or a declared job'; REFUSED line FAIL; audit line FAIL; KILL-MAINT-PLANTED cases=8/10 ok=False",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the same test bytes run twice on the committed state: once before the commit that carried them, once after",
+      "expected": "identical verdict lines",
+      "observed": "KILL-MAINT-PLANTED cases=10/10 ok=True both runs; REAL-SEATS claude.exe before=8 after=8 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": ".tools/seat-boundary.ps1 (listed in <paths>)",
+      "reason": "not modified: no defect in it was found; the planted run exercised Test-SeatBoundary through kill-maint unchanged, and the fake-process battery AC2 passes 27/27"
+    },
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-ae-1 from pending to complete",
+      "reason": "not done: the order file is outside this worker's <paths> and the flip is the issuer's"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed, per the cell rules"
+    },
+    {
+      "item": "any AWS call, network call, push, or real claude.exe seat touched",
+      "reason": "none: the test starts only its own planted processes, kills only those by PID and by temp-folder image path, and reads the real claude.exe PIDs for a count"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W97-S1: kill-maint held-tree guard SKIPs a claude.exe seat before the seat boundary can refuse it; the REFUSED line and KILL-MAINT-REFUSED audit line were unreachable for seats; fixed at 21ad9d0ca4",
+    "NFRA_CTLPLN-W97-S2: the literal planted shape of the CT-ae-1 recipe is not targetable (a shell root hosting claude.exe is a session shell; a fresh root is under the Monitor cap; powershell.exe is name-denied; a powershell.exe copy named claude.exe exits under WMI); the test uses python.exe roots and a cmd.exe copy with -MonitorCapSeconds 0"
+  ],
+  "session_log": "the worker session of 0.9.0_WK_NFRA_CTLPLN~97, 2026-10-15 (UTC); branch wk-NFRA_CTLPLN-97; kill-maint fix 21ad9d0ca4; planted test and surprise rows 783e4f5030",
+  "compiler_tools": [
+    {
+      "tool": "powershell",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_kill_maint_planted.ps1",
+      "result": "KILL-MAINT-PLANTED cases=10/10 ok=True"
+    },
+    {
+      "tool": "powershell",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_stop_at_descendant.ps1",
+      "result": "STOP-AT-DESCENDANT cases=27/27 ok=True"
+    }
+  ]
+}
