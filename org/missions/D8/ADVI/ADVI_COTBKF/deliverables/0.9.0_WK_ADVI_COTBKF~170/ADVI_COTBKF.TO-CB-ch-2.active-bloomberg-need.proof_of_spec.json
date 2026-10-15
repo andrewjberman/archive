@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ch-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-2.active-bloomberg-need.md",
+    "group": "OTHER",
+    "vintage_commit": "824588956e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~170",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round86.md",
+    "vintage_commit": "824588956e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-2.active-bloomberg-need.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "10b049c7a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one channel write: row ADVI_COTBKF-D1-W170-S1 appended, git numstat 27 added 0 deleted; no other artifact was produced, because the order stopped at its first act"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB86ch2-AC1",
+      "criterion_verbatim": "`CB86ch2-AC1` -- the need, its partition against the two existing requests, its cells, its day rate and its finish date are printed from the record, and the partition sums. expect: partition_sums=True",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_NEED_RECORD.json',encoding='utf-8'));ok=d['in_b1']+d['in_failed14']+d['new_cusips']==d['need_cusips'];print('ACTIVE-BBG-NEED need=%d new=%d cells_new=%d cells_per_day=%d days_new=%d finish_new=%s partition_sums=%s'%(d['need_cusips'],d['new_cusips'],d['cells_new'],d['day_rate']['cells_per_day'],d['days_new'],d['finish_new'],ok))\"",
+      "output_evidence": "NOT RUN. The order stopped at its first act under the BLOCKING row ADVI_COTBKF-D1-W170-S1: the worktree does not carry data/, so no record was produced and the invocation has no input.",
+      "denominator": "0 of 1 record produced (ACTIVE_BBG_NEED_RECORD.json absent in this worktree)",
+      "status": "FAIL",
+      "status_reason": "BLOCKING ADVI_COTBKF-D1-W170-S1: the order was not executed; the record it reads was never produced",
+      "expect": "partition_sums=True"
+    },
+    {
+      "criterion_id": "CB86ch2-AC2",
+      "criterion_verbatim": "`CB86ch2-AC2` -- the slice files exist and match the record's count, no slice exceeds a day's cells, and the committed order file carries no dollar column. expect: within_day=True no_dollar_column=True",
+      "method": "command",
+      "invocation": "python -c \"import json,glob,csv;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ACTIVE_BBG_NEED_RECORD.json',encoding='utf-8'));base='org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/';rows=list(csv.DictReader(open(base+'ACTIVE_BBG_ORDER.csv',encoding='utf-8')));s=d['slices'];fs=sorted(glob.glob(base+'slices/ACTIVE_BBG_SLICE_*.json'));cusips=sum(len(json.load(open(f,encoding='utf-8'))['securities']) for f in fs);print('ACTIVE-BBG-SLICES files=%d count=%d max_cells=%d day=%d sum_cells=%d order_rows=%d slice_cusips=%d within_day=%s no_dollar_column=%s'%(len(fs),s['count'],s['max_cells'],d['day_rate']['cells_per_day'],s['sum_cells'],len(rows),cusips,s['max_cells']<=d['day_rate']['cells_per_day'],'value_held' not in rows[0]))\"",
+      "output_evidence": "NOT RUN. The order stopped at its first act under the BLOCKING row ADVI_COTBKF-D1-W170-S1: no slice files and no ACTIVE_BBG_ORDER.csv were produced.",
+      "denominator": "0 of 1 record and 0 slice files produced",
+      "status": "FAIL",
+      "status_reason": "BLOCKING ADVI_COTBKF-D1-W170-S1: the order was not executed; the record and slices it reads were never produced",
+      "expect": "within_day=True no_dollar_column=True"
+    },
+    {
+      "criterion_id": "CB86ch2-AC3",
+      "criterion_verbatim": "`CB86ch2-AC3` -- the partition, slice and ordering rules hold on stubs. expect: 3 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_bbg_need.py -q",
+      "output_evidence": "NOT RUN. The order stopped at its first act under the BLOCKING row ADVI_COTBKF-D1-W170-S1: the test file path data/assets/scripts/silver/tests/ is outside this worktree's sparse-checkout cone and does not exist on disk.",
+      "denominator": "0 of 3 tests run (test file absent in this worktree)",
+      "status": "FAIL",
+      "status_reason": "BLOCKING ADVI_COTBKF-D1-W170-S1: the test file was never written; its directory is outside the worktree's sparse-checkout cone",
+      "expect": "3 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control, and no build or test ran",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A with reason: no computation ran, so there were no two runs to compare",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Items 1-7 of the worker face: the names partition, the builder run, the day rate, the value ordering, the slices, the baseline prefix listings, the record and the script and its tests",
+      "reason": "BLOCKING row ADVI_COTBKF-D1-W170-S1: the worktree does not carry data/ (sparse-checkout cone omits it), so the write grant and the builder inputs are not present; the worker face forbids reconstructing the tree, so the order stopped at its first act"
+    },
+    {
+      "item": "The account-id scan data/assets/scripts/silver/tests/test_cotbkf_no_account_ids.py",
+      "reason": "not run: it is absent from this worktree (tracked at HEAD under data/, outside the cone), and the order stopped before any commit of build work"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W170-S1: the worktree's sparse-checkout cone omits data/, so the write grant data/assets/scripts/silver/ and the builder inputs data/mdpf/scripts/demque/ are tracked at HEAD but not carried; BLOCKING, order stopped before any build"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~170/ADVI_COTBKF.TO-CB-ch-2.active-bloomberg-need.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "git sparse-checkout",
+      "invocation": "git -C C:/dev/wk-cotbkf-170 sparse-checkout list",
+      "result": "cone: .tools, infra/logic/registry, lib, org/devices, org/missions/D8/ADVI/ADVI_COTBKF, org/modules/graph, org/ref, org/standards; no data/ entry; ls -d data: no such file"
+    }
+  ]
+}
