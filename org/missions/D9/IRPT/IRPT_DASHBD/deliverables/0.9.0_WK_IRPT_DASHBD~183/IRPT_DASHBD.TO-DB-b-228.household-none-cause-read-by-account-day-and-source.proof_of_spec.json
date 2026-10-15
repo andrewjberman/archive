@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-228",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c33edfe326"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "c33edfe326",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-228.household-none-cause-read-by-account-day-and-source.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~183",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~183/IRPT_DASHBD.TO-DB-b-228.household-none-cause-read-by-account-day-and-source.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~183/household_none_cause_r112.py",
+      "kind": "script",
+      "commit_or_etag": "85cb94a3a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tracked read-only analysis script at 85cb94a3a2 (sha256 c9779cfe87f59b26ba70d73e3c0ff22c5be7c9464fde1af2ba71ed2b1df7f859); run under python -I with LIST and GET only; writes one private JSON under the private evidence folder and nothing else",
+      "artifact_covered_by": [
+        "DB112-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~183/RD_HOUSEHOLD_NONE_CAUSE_R112.json",
+      "kind": "config_data",
+      "commit_or_etag": "85cb94a3a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of step 7 at 85cb94a3a2: counts, dates and words only; analysis.sha256 equals the script bytes; reads s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0",
+      "artifact_covered_by": [
+        "DB112-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB112-2-AC1",
+      "criterion_verbatim": "`DB112-2-AC1` -- `RD_HOUSEHOLD_NONE_CAUSE_R112.json` has exactly the form of step 7; per window `households_none` equals the checker's own recount from the private household table (the households whose window holds an ACCOUNT_MISSING day or a household no-row day, INSUFFICIENT_HISTORY households excluded) and the four kind counts are non-negative and sum to it; `top_dates` holds at most 10 ISO dates with integer counts; `unmeasured_account_days.by_day_quality` sums to `total`; `cause_by_source` names at least one cause with an existing producer path and an integer count; the denominator is printed; the positive control passed; every claim is in the four-word set; the analysis script is tracked, hashed as recorded, names no other firm's place and holds no write call; zero writes, no push or deploy flags, no household or account id and no run of 8 or more digits outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r112/p112_household.py\" . DB112-2-AC1",
+      "output_evidence": "DB112-2-AC1 PASS (rc 0); the deciding line: OK: the household-None cause read: qtd 195 households; ytd 1330 households; last_12_months 1320 households; since_inception 2563 households; unmeasured account days 56311; 5 cause(s) by source; positive control passed",
+      "denominator": "1 of 1 criterion PASS; households_none equal to the checker recount in 4 of 4 windows; by_kind partitions the households_none in 4 of 4 windows; unmeasured account-days 56311 over 45416 ACCOUNT_MISSING household days of 4013 households (6616 member accounts; 570 of 570 partitions read); rebuild equal to the private table on 0 of 1704799 household-days; positive control 3 of 3 households as expected",
+      "status": "PASS",
+      "status_reason": "PASS as written on the committed script and record at 85cb94a3a2; run three times with identical output; selftest rc 0",
+      "expect": "DB112-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the record with its by_kind counts raised so that they no longer sum to households_none (the selftest arm 'a record 2 whose kinds do not sum')",
+      "expected": "the checker refuses the record (DB112-2-AC1 FAIL)",
+      "observed": "selftest rc 0: the mutant was refused and every arm passed (SELFTEST OK)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion run twice more from the worktree root with the same arguments; outputs compared",
+      "observed": "rc 0 in all runs; outputs identical; last line DB112-2-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Household and account identifiers, and every client value (returns, values, flows)",
+      "reason": "not recorded by design: client data lives only in the private evidence folder; the record, the script and this instance carry counts, dates and words only"
+    },
+    {
+      "item": "The guard_state and return_basis values of the account rows",
+      "reason": "read and tallied for the worker's own diagnosis only; step 7 names day_quality alone for the record, so they are not carried into it"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W183-S1: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~D2): a household whose only table date is the as_of day has zero since_inception window days; round 111 counts it not comparable, the checker recount counts a figure over zero days (2,563 against 2,564 none) (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W183-S2: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~D2): the commit-time client-data check did not run on commit 85cb94a3a2 because the hashed account-id list is absent on dell2 (UNDER_INVESTIGATION)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p112_household.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r112/p112_household.py\" . DB112-2-AC1",
+      "result": "PASS rc 0: DB112-2-AC1 PASS"
+    },
+    {
+      "tool": "p112_household.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r112/p112_household.py\" --selftest .",
+      "result": "rc 0: SELFTEST OK, every arm including the refused mutants passed"
+    }
+  ]
+}
