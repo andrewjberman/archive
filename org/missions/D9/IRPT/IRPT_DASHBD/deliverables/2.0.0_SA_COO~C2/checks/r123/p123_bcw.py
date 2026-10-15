@@ -73,8 +73,11 @@ def ac_1_1(root):
     key = builder_name(root)
     need(key == "irpt-cot-account-dim-lambda", "builder name unexpected: " + key)
     now = json.loads((root / SM).read_text(encoding="utf-8"))["functions"]
-    added = git(root, "log", "-1", "--format=%H", "-S", '"%s"' % key, "--", SM).strip()  # the commit that added the entry; its parent is the state the worker saw
-    old = json.loads(git(root, "show", "%s:%s" % (added + "^" if added else "HEAD", SM)))["functions"]
+    mb = subprocess.run(["git", "-C", str(root), "merge-base", "HEAD", "box/dell2"], capture_output=True, text=True, timeout=60).stdout.strip()
+    old = json.loads(git(root, "show", "%s:%s" % (mb, SM)))["functions"] if mb else {}  # the shared branch as last merged in: the diff to it is the worker's own change
+    if not mb or key in old:  # the entry is already on the shared branch (after the drain): the parent of the commit that added it
+        added = git(root, "log", "-1", "--format=%H", "-S", '"%s"' % key, "--", SM).strip()
+        old = json.loads(git(root, "show", "%s:%s" % (added + "^" if added else "HEAD", SM)))["functions"]
     need(key in now, "source-map entry absent: " + key)
     need(set(now) - set(old) == {key}, "functions added are not exactly the one new entry")
     need(all(now[k] == old[k] for k in old), "an existing function entry changed")
