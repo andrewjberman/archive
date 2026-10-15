@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-566",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-566.freeze-filled-report-gets-its-submit-handler-caller-tested-through-the-real-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "941abbfa1d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "941abbfa1d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-566.freeze-filled-report-gets-its-submit-handler-caller-tested-through-the-real-handler.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~410",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/submit_async.py",
+      "kind": "script",
+      "commit_or_etag": "c1b48c458a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build on branch wk-IRPT_BCKEND-410 at the product commit c1b48c458a: accept takes a PATH C branch through _accept_filled (FILLED-REPORT-F) before the PATH A resolve, calls freeze_filled_report through ports[filled_reader], writes the BUILDING pointer and rides the frozen row on the marked event as pinned_filled; run passes pinned_filled on. Nothing deployed, invoked or written to AWS.",
+      "artifact_covered_by": ["IB207-1-AC1", "IB207-1-AC2", "IB207-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/submit_service.py",
+      "kind": "script",
+      "commit_or_etag": "c1b48c458a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at c1b48c458a: serve_submit takes pinned_filled and dispatches a filled_report body to _serve_filled (FILLED-REPORT-F), the twin of _serve_platinum, which serves only the frozen row, writes the grant and reads it back, builds the print query and answers QUEUED with the business date of the document or null.",
+      "artifact_covered_by": ["IB207-1-AC1", "IB207-1-AC2", "IB207-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/retained_export.py",
+      "kind": "script",
+      "commit_or_etag": "c1b48c458a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at c1b48c458a: FILLED-REPORT-F adds filled_reader_or_refuse (a missing reader is FilledReportUnavailable), filled_covered_accounts, filled_as_of, filled_accept_read, filled_leg_read (reads back the pinned VersionId only), filled_grant (new: the covered accounts, the report id as the account set stand-in) and filled_print_query.",
+      "artifact_covered_by": ["IB207-1-AC1", "IB207-1-AC2", "IB207-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/entry.py",
+      "kind": "script",
+      "commit_or_etag": "c1b48c458a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at c1b48c458a: three reasons entries inside FILLED-REPORT-F map FilledReportNotCovered to OBJECT_NOT_COVERED, FilledReportSourceRefused to INVALID_INPUT and FilledReportUnavailable to DEPENDENCY_UNAVAILABLE. No composition installs a filled reader.",
+      "artifact_covered_by": ["IB207-1-AC1", "IB207-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_submit_handler.py",
+      "kind": "test",
+      "commit_or_etag": "c1b48c458a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at c1b48c458a: eight tests through entry.submit_export and entry.lambda_handler, on synthetic ids and bytes, with in-memory S3, invoker and reader doubles; the four named tests are present by name; boto3.client refuses any service other than s3.",
+      "artifact_covered_by": ["IB207-1-AC1", "IB207-1-AC2", "IB207-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~410/IB207-1_record.json",
+      "kind": "doc",
+      "commit_or_etag": "c1b48c458a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The worker's record at c1b48c458a: base_commit 941abbfa1d, the five product paths, tests 8 of 8, mutant_tests_failed 7, the four named tests, and the six bound counters at 0.",
+      "artifact_covered_by": ["IB207-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~410/IB207-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "7e482f6901",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The verbatim output and exit code of IB207-1-AC1, AC2 and AC3 at 7e482f6901 (over product commit c1b48c458a): each PASS with exit 0, identical on a second run.",
+      "artifact_covered_by": ["IB207-1-AC1", "IB207-1-AC2", "IB207-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB207-1-AC1",
+      "criterion_verbatim": "AC1 the new tests (at least 6) and the existing filled-report and export tests pass",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . IB207-1-AC1",
+      "output_evidence": "$ python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . IB207-1-AC1\nOK: 53 passed\nIB207-1-AC1 PASS\nexit=0",
+      "denominator": "53 passed, 0 failed across the new file (8 tests) and the four regression files test_filled_report_server_pin.py, test_filled_report_source.py, test_filled_report_freeze_scope.py and test_export_bundle_filled_report_contract.py. The whole export tests directory also ran 368 passed.",
+      "expect": "IB207-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB207-1-AC2",
+      "criterion_verbatim": "AC2 with the FILLED-REPORT-F blocks removed the new tests fail on assertions",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . IB207-1-AC2",
+      "output_evidence": "$ python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . IB207-1-AC2\nOK: removing the block fails the new tests (7 block(s))\nIB207-1-AC2 PASS\nexit=0",
+      "denominator": "7 FILLED-REPORT-F blocks removed in memory (submit_async.py: 3; submit_service.py: 3; retained_export.py: 1). The worker's own removal run of the same blocks: 7 failed, 1 passed of 8 new tests (the PATH B control), no collection or import errors.",
+      "expect": "IB207-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB207-1-AC3",
+      "criterion_verbatim": "AC3 the record: your own paths exactly as recorded and inside the grant, the named tests present, no typed object address, the six bound counters 0, no long digit run",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . IB207-1-AC3",
+      "output_evidence": "$ python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . IB207-1-AC3\nOK: the diff bounded, the named tests present, no typed address\nIB207-1-AC3 PASS\nexit=0",
+      "denominator": "5 changed product paths of the worker's own commits since base 941abbfa1d (commit c1b48c458a), all inside the grant; the four named tests present by name; the six bound counters at 0.",
+      "expect": "IB207-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removing every FILLED-REPORT-F block in memory from submit_async.py, submit_service.py and retained_export.py must make the new test file fail on assertions.",
+      "expected": "the new test file fails, with no import or collection error",
+      "observed": "7 blocks removed (check AC2 run, PASS); the worker's own run of the same removal: 7 failed, 1 passed, no collection or import errors",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of each of the three criteria from the worktree root, output compared",
+      "observed": "IB207-1-AC1, AC2 and AC3 printed the same OK line, the same PASS line and exit 0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS call, sign-in, invocation, vendor request, deployment, render or signature was made; the submit and the async leg were exercised only through in-memory doubles.",
+      "reason": "This is a LOCAL build order: nothing is deployed, invoked, written to AWS or the served prefixes."
+    },
+    {
+      "item": "No composition installs a filled_report reader; a deployed PATH C submit refuses FilledReportUnavailable until the installed reader lands.",
+      "reason": "The installed reader is the next cell's (IB-pr-567) and sits outside this order's paths grant; the surprise is recorded as IRPT_BCKEND-D2-W410-S1 to S3 where relevant."
+    },
+    {
+      "item": "The order file, the check and the order status were not edited or flipped.",
+      "reason": "The worker face forbids editing the order and the check; the order file is outside the paths grant, and the status belongs to the issuer at drain."
+    },
+    {
+      "item": "The commit-time client-data check printed WARN (hashed account-id list absent) and did not check the commits against an account-id list.",
+      "reason": "The WARN is expected on dell2 by the order's ruling; the diff contains no account id, household id, client id, quantity, value or holding name."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W410-S1: the order names test_export_path_b_route.py as the mirror for driving entry.submit_export, but that file never calls the entry; the handler-level driver mirrored is test_submit_async.py.",
+    "IRPT_BCKEND-D2-W410-S2: the order names no print query kind for a filled export and no consumer in the export package defines one; the worker wrote kind filled-report, which the render cell must agree with.",
+    "IRPT_BCKEND-D2-W410-S3: a filled report has no server-issued account set; filled_grant pins the report id as accountSetId and reportId, with account_ids the covered accounts, and the render reader must read the grant with the same convention."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~410/IB207-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "p207_cells.py (round-207 check, unedited, read only; it reuses the round-196, round-200 and round-201 helpers committed beside it)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r207/p207_cells.py\" . <IB207-1-AC1|AC2|AC3>",
+      "result": "three PASS lines, exit 0 each, identical on a second run"
+    },
+    {
+      "tool": "the worker's own removal run (a scratch script outside the repository; it removes the FILLED-REPORT-F blocks in memory and runs the new test file with a fresh bytecode cache)",
+      "invocation": "python <scratch>/mutant_count.py <worktree root>",
+      "result": "7 blocks removed; 7 failed, 1 passed; no collection or import errors"
+    }
+  ]
+}
