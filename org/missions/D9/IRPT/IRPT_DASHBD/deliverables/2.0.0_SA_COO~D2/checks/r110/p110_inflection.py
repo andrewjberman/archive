@@ -39,6 +39,7 @@ accounts_of, whole_document_scan = P6.accounts_of, P6.whole_document_scan
 WINDOWS = ("qtd", "ytd", "last_12_months", "since_inception")
 CONTRACT_REL = P5.CONTRACT_REL
 SAMPLE_DIR10 = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~175/"
+V051_SHA = "0b515243b310bb95de8d9bebdb0f2725b70626307adcc9f4fb80298883692df4"  # the contract 0.5.1 bytes this round built against; a later contract keeps the record valid through the lineage
 OUT_R10 = PRIV + "fwd21_sample_r110/"
 CACHE = PRIV + "IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~174/work/positions_daily_cache.parquet"
 W175 = D + "0.9.0_WK_IRPT_DASHBD~175/"
@@ -218,7 +219,7 @@ def check_sample(root):
     sp = str(s.get("path") or "").replace("\\", "/")
     need(sp.startswith(SAMPLE_DIR10) and sp.endswith("HOUSEHOLD_SAMPLE.json") and Path(sp).is_file(), "sample.path must be the private HOUSEHOLD_SAMPLE.json under %s" % SAMPLE_DIR10)
     need(not sp.startswith(str(root.resolve()).replace("\\", "/").rstrip("/") + "/"), "the sample is inside the repo: client data never goes there")
-    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") == sha(root / CONTRACT_REL), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes")
+    need(s.get("sha256") == sha(sp) and s.get("contract_sha256") in (sha(root / CONTRACT_REL), V051_SHA), "sample.sha256 and sample.contract_sha256 must equal the sample bytes and the contract bytes (current, or the 0.5.1 bytes this round built against)")
     sm = P.sample_json(sp)
     P5.check_sample_shape_k(sm, c, "inflection")
     prob = P5.kind_problems(sm["values"], c, "inflection")
