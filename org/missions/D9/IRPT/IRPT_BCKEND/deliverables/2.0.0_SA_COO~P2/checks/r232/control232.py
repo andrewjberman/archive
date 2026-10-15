@@ -61,7 +61,7 @@ NEGS = [
     ("exists_403", "AC3", mut(["exists_read", "answer"], "403")),
     ("exists_not_on_runner", "AC3", mut(["exists_read", "ran_on_runner"], False)),
     ("silver_tier_403", "AC3", mut(["exists_read", "tiers", "silver"], "403")),
-    ("runner_left_running", "AC3", mut(["exists_read", "runner_stopped_within_30_min"], False)),
+    ("runner_left_running_no_row", "AC3", mut(["exists_read", "runner_stopped_within_30_min"], False)),
     ("two_starts", "AC3", mut(["counters", "instance_starts"], 2)),
     ("key_written", "AC3", mut(["counters", "keys_written"], 1)),
 ]
@@ -98,6 +98,15 @@ def expect(label, cid, root, want):
 root = build(GOOD)
 for ac in ("AC1", "AC2", "AC3"):
     expect("clean", "IB232-1-" + ac, root, True)
+shutil.rmtree(root, ignore_errors=True)
+LEFT = copy.deepcopy(GOOD)
+LEFT["exists_read"].update(runner_stopped_within_30_min=False, runner_row_filed=True, runner_stop_left_to_andrew=True)
+root = build(LEFT)
+expect("runner_left_row_filed", "IB232-1-AC3", root, True)
+shutil.rmtree(root, ignore_errors=True)
+LEFT["exists_read"].update(runner_stop_left_to_andrew=False)
+root = build(LEFT)
+expect("runner_left_not_andrews", "IB232-1-AC3", root, False)
 shutil.rmtree(root, ignore_errors=True)
 for label, ac, fn in NEGS:
     root = build(fn(GOOD))

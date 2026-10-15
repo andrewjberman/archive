@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ci-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-6.v2-script-deterministic.md",
+    "group": "OTHER",
+    "vintage_commit": "73e663123e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~169",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round87.md",
+    "vintage_commit": "73e663123e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-6.v2-script-deterministic.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/cotbkf_active_set_v2.py",
+      "kind": "script",
+      "commit_or_etag": "925acb1946",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the script with the total sort key at blob 3e1c727a2838be89573914fc769258379c04deda; read-only S3; writes two files to --out",
+      "artifact_covered_by": [
+        "CB87ci6-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py",
+      "kind": "test",
+      "commit_or_etag": "925acb1946",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five stub tests, no S3; the added test test_row_order_is_independent_of_input_order_and_hash_seed runs child processes under three hash seeds",
+      "artifact_covered_by": [
+        "CB87ci6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/DETERMINISM_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "092ed6334b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three seed runs (hashes, out dirs), deterministic, V3 equals its pin, V2 residual counts; no account value",
+      "artifact_covered_by": [
+        "CB87ci6-AC1",
+        "CB87ci6-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB87ci6-AC1",
+      "criterion_verbatim": "three runs under three hash seeds give one V2 hash and one V3 hash.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/DETERMINISM_RECORD.json',encoding='utf-8'));h=[(r['v2_sha256'],r['v3_sha256']) for r in d['runs']];print('V2-DETERMINISM runs=%d distinct_v2=%d distinct_v3=%d deterministic=%s'%(len(h),len(set(x[0] for x in h)),len(set(x[1] for x in h)),d['deterministic']))\"",
+      "expect": "V2-DETERMINISM runs=3 distinct_v2=1 distinct_v3=1 deterministic=True",
+      "output_evidence": "V2-DETERMINISM runs=3 distinct_v2=1 distinct_v3=1 deterministic=True (rc 0)",
+      "denominator": "3 of 3 runs (seeds 0, 1, 2) give one V2 hash (a266c8fbf5c348d5...) and one V3 hash (0783f088aecbf29e...)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB87ci6-AC2",
+      "criterion_verbatim": "the recorded hashes are the hashes of the files on disk now, V3 still equals its pin, and whether V2 equals its pin is printed (either answer passes).",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib,os;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/DETERMINISM_RECORD.json',encoding='utf-8'));h=lambda p:hashlib.sha256(open(p,'rb').read()).hexdigest();ok=[h(os.path.join(r['out_dir'],'ACTIVE_COTTONWOOD_SET_V2.csv'))==r['v2_sha256'] and h(os.path.join(r['out_dir'],'REVERSE_MATCH_V3.csv'))==r['v3_sha256'] for r in d['runs']];print('V2-RUN-FILES rehash_match=%s v3_equals_pin=%s v2_equals_pin=%s'%(all(ok) and len(ok)==3,d['v3_equals_pin'],d['v2_equals_pin']))\"",
+      "expect": "V2-RUN-FILES rehash_match=True v3_equals_pin=True",
+      "output_evidence": "V2-RUN-FILES rehash_match=True v3_equals_pin=True v2_equals_pin=False (rc 0)",
+      "denominator": "3 of 3 runs rehashed to the recorded hashes (6 of 6 files); V3 equals its pin; V2 equals its pin: no (printed, either answer passes)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB87ci6-AC3",
+      "criterion_verbatim": "the script at HEAD is the script the three runs came from.",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/DETERMINISM_RECORD.json',encoding='utf-8'));b=subprocess.check_output(['git','rev-parse','HEAD:'+d['script_path']]).decode().strip();print('V2-SCRIPT-COMMITTED blob_equal=%s'%(b==d['script_blob']))\"",
+      "expect": "V2-SCRIPT-COMMITTED blob_equal=True",
+      "output_evidence": "V2-SCRIPT-COMMITTED blob_equal=True (rc 0)",
+      "denominator": "1 of 1 script blob equal to the recorded blob (3e1c727a2838be89573914fc769258379c04deda)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the spec names no mutant control; none run",
+      "expected": "n/a",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the committed script run under PYTHONHASHSEED 0, 1 and 2 into seed0, seed1, seed2",
+      "observed": "one V2 hash a266c8fbf5c348d5... and one V3 hash 0783f088aecbf29e... across the three runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "C:/dev/_cotbkf_rebuild_20261015/seed0, seed1, seed2 (ACTIVE_COTTONWOOD_SET_V2.csv and REVERSE_MATCH_V3.csv)",
+      "reason": "outside the repository by design (raw account keys may not enter the tree); not git refs; hashes in DETERMINISM_RECORD.json and read back by CB87ci6-AC2"
+    },
+    {
+      "item": "the window and reverse-match files of the earlier round at C:/dev/_cotbkf_rebuild_20261015/ root",
+      "reason": "outside the repository; from earlier runs before the total key; not graded by this order; left in place"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W169-S2: BLOCKING, INERT. ACTIVE_COTTONWOOD_SET_V2.csv does not equal its pin: 41793 rows equal as a multiset, 33 pinned-only, 32 rebuilt-only, 25 paired rows differ on ticker. Stated as residual in DETERMINISM_RECORD.json; not repaired in this cell",
+    "ADVI_COTBKF-D1-W169-S4: OBSERVATION, INERT. Cause established: the row order depended on the hash seed. Resolved for determinism by the total sort key in this cell (925acb1946); the row stands unedited"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/ADVI_COTBKF.TO-CB-ci-6.v2-script-deterministic.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "PYTHONHASHSEED=0|1|2 python data/assets/scripts/silver/cotbkf_active_set_v2.py --out C:/dev/_cotbkf_rebuild_20261015/seed<k> (commit 925acb1946)",
+      "result": "three runs rc 0; V2 a266c8fbf5c348d5... on all three; V3 0783f088aecbf29e... on all three"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py -q",
+      "result": "5 passed"
+    }
+  ]
+}
