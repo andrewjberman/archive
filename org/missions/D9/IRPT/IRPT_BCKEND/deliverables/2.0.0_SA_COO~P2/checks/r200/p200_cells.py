@@ -42,7 +42,8 @@ CELLS = {
         slot=398, test=LAMBDA + "reporting/tests/test_reporting_filled_report.py", min_tests=10,
         regress=[LAMBDA + "reporting/tests/test_reporting_entry.py", LAMBDA + "reporting/tests/test_reporting_summary.py"],
         mutants=[LAMBDA + "reporting/entry.py"], marker="FILLED-REPORT-B",
-        allowed={LAMBDA + "reporting/entry.py", TF + "api.tf", TF + "locals.tf", LAMBDA + "reporting/tests/test_reporting_filled_report.py"},
+        allowed={LAMBDA + "reporting/entry.py", TF + "api.tf", TF + "locals.tf", LAMBDA + "reporting/tests/test_reporting_filled_report.py",
+                 LAMBDA + "reporting/tests/test_reporting_entry.py"},
         required={LAMBDA + "reporting/entry.py", TF + "api.tf", LAMBDA + "reporting/tests/test_reporting_filled_report.py"}),
     "3": dict(
         slot=399, test=LAMBDA + "export/tests/test_filled_report_source.py", min_tests=8,
