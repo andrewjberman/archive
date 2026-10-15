@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-et-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "a44f88128b",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-et-1.etfs-ownership-tools.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3bb7fb022e"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~84",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/etfs_ownership.py",
+      "kind": "script",
+      "commit_or_etag": "333e9b90fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only on the worker branch; no release, deploy, IAM or Terraform change (the release is NFRA_OPLGTW.TO-OG-ap-18). The module types no S3 key, prefix or bucket literal: the naming gate passes on its diff (0 graded, rc=0).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_et1.py",
+      "kind": "test",
+      "commit_or_etag": "333e9b90fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five named offline tests over a synthetic catalog and a recording fake client; 5 of 5 pass at the committed HEAD.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "333e9b90fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended (NFRA_OPLGTW-Z-W84-S2 .. S6); the earlier row S1 is untouched. The surprise-row gate checked the five new rows: OK."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three ownership tools are built, require one firm, sum nothing, take coverage from each partner's own csv and refuse non-Opal before any read.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/et1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests (test_oget1_ac01 .. test_oget1_ac05) passed; failed/error lines 0 of 5",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the real bucket the newest partner file matches an independent read, the firm-required refusals fire, the rollup's as-of sits in its object, the coverage equals each csv's own line and the verdict file is not read.",
+      "method": "live_read",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/et1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\netf ownership: partner file newest rows 4 vs independent 4; firm-required refusals True; rollup own as-of True; monthly coverage from each csv True, verdict not read True; non-Opal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "newest partner file: 4 rows against 4 independent (1 firm file of 4 rows, 49financial); firm-required refusals: 3 of 3 bad firms refused harvest_bad_argument; rollup: 1 source key, as-of in the object; monthly coverage: each csv of the newest month folder (3 partner csvs) equals its own coverage line; the verdict key read 0 of 1 (not read)",
+      "status": "PASS",
+      "expect": "(?s)etf ownership: partner file newest rows (\\d+) vs independent \\1; firm-required refusals True; rollup own as-of True; monthly coverage from each csv True, verdict not read True; non-Opal refused True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The five named tests were run twice at the committed HEAD (verbose and quiet); AC2 was run before the final scope-name edit and again after the commit.",
+      "observed": "5 of 5 named tests passed on both runs; AC2 printed the same verdict and counts on both runs (partner file 4 vs 4; RESULT PASS).",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of the three tools in app/tools.py and the re-pin of the pinned-count tests (app/data_entitlement.py, app/destructive_ops.py)",
+      "reason": "The order bounds these files out of this cell; the issuer registers every tool and re-pins the counts at the merge, in one commit. Expected: three tool names added to the registry and the pinned counts moved by three in the read-tool set."
+    },
+    {
+      "item": "Flip of the task order's one <status> tag from pending to complete",
+      "reason": "The task-order file is not in this order's <paths> write grant; the gap is filed as NFRA_OPLGTW-Z-W84-S6 (BLOCKING, status tag only). Both criteria PASS, so the flip is the issuer's act."
+    },
+    {
+      "item": "The release, the IAM grant on the bucket and the internal reader role",
+      "reason": "Out of this cell by the order: the grant is OG-et-3 and the release is OG-ap-20. The live probe read the bucket with the box's own credentials, read only, with INTERNAL_READER_ROLE_ARN unset."
+    },
+    {
+      "item": "The DATA_CATALOG file",
+      "reason": "Not written: app/refs/DATA_CATALOG.yaml is NFRA_MCPINDEX's alone. The module reads the three rows at call time from the loaded catalog."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W84-S1: The naming gate refuses two served-prefix literals of the OG-et-1 module as out-of-pattern S3 keys, so the cell stopped at its FIRST ACT (resolved in the code by amendment A1: no literal is typed; the templates come from the catalog rows).",
+    "NFRA_OPLGTW-Z-W84-S2: The order takes the partner segments from a listing AND refuses an unknown firm with zero reads; the segment set is taken from the catalog row's fork_keys firm values instead.",
+    "NFRA_OPLGTW-Z-W84-S3: The monthly report's newest-folder default must skip the non-month folders of the report root; a plain max over the names would select the corrections folder.",
+    "NFRA_OPLGTW-Z-W84-S4: The dashboard catalog row's open item asks for a ruling before a gateway tool returns the three-firm object whole; the rollup is Opal-only admitted, so the open item stays live at merge.",
+    "NFRA_OPLGTW-Z-W84-S5: The lag figures come from the hardcoded NYSE fallback calendar on this runtime (pandas_market_calendars absent); the fallback covers 2010 to 2027.",
+    "NFRA_OPLGTW-Z-W84-S6: BLOCKING for the status tag only: the task-order file is outside this worker's <paths> grant, so the pending-to-complete flip is left to the issuer."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python .tools/naming-gate.py --diff <diff of app/etfs_ownership.py> --enforce",
+      "invocation": "git diff --no-index --relative /dev/null infra/aws/ec2/opal-gateway/app/etfs_ownership.py > .scratch/naming_et1.diff; python .tools/naming-gate.py --diff .scratch/naming_et1.diff --enforce",
+      "result": "NAMING-GATE: PASS 0 graded (rc=0). The first run refused the hand-kept scope-name carrier and the scope name was then derived from the bucket."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39) on the two .py files",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/etfs_ownership.py infra/aws/ec2/opal-gateway/tests/test_og_et1.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); All checks passed! (rc=0)"
+    },
+    {
+      "tool": "python -m pytest tests/test_og_et1.py (gateway directory)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_et1.py -v -p no:cacheprovider --color=no",
+      "result": "5 passed (test_oget1_ac01 .. ac05)"
+    }
+  ]
+}
