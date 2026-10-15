@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-6",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "0057ad8e6e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-6.orion-scope-probe-two-q3-fee-tie-and-short-account-cause.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~306",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~306/SCOPE_PROBE2_R118.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~306/SCOPE_PROBE2_R118.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-6 record: script hash, household digest (equal to round 117), four listed calls (q3 false and true, then ytd false and true, all HTTP 200), coverage per window, the fee verdict with its pair and counts (ytd, NO_FEE_IN_WINDOW), the credential verdict ACCEPTED, the two short accounts with roles, position-day counts and cause classes, reads and basis words. Counts, digests, verdict words and categories only; the four 2xx bodies are private files hashed in the record. No AWS write, no push, no deploy.",
+      "artifact_covered_by": [
+        "DBI118-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~306/scope_probe2.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one probe script, hashed in the record. It POSTs the inner scope only, to the one Scope URL, with a 6-second pace, no retry and a stop on any non-2xx; it reads the token through the estate's Secrets Manager loader only; it holds no AWS write call, names no other firm, and makes no other HTTP call. Not deployed; run only from the worktree.",
+      "artifact_covered_by": [
+        "DBI118-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended as bytes, IRPT_DASHBD-D2-W306-S1 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~I2) and IRPT_DASHBD-D2-W306-S2 (OBSERVATION, INERT). Form only; no client value.",
+      "artifact_covered_by": [
+        "DBI118-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI118-1-AC1",
+      "criterion_verbatim": "`DBI118-1-AC1` -- the record is complete and carries no identifier; the script is a tracked file hashed as recorded with no AWS write call and no other firm's name; the household equals round 117's rule; 1 to 4 calls are listed (a ytd pair only after a `q3` pair that compared no account with a fee), each `ok` agreeing with its status, each 2xx response a private file hashed as recorded; the credential verdict, each window's coverage counts and short-account digests, the fee verdict with its pair and counts, the short-account list with its roles and `position_days_in_window` all equal the checker's recount from the saved bodies and the cache; the category fields are short strings; no write to AWS, no push, no deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r118/p118_scope2.py\" . DBI118-1-AC1",
+      "output_evidence": "DBI118-1-AC1 PASS (rc=0; identical output on two runs)",
+      "denominator": "1 of 1 criterion PASS. Calls listed: 4 of 4, with calls_made and reads.vendor_calls equal to the count, and each ok agreeing with its status (4 of 4). The record's credential, coverage (q3 and ytd), fee pair and short-account fields equal the checker's recount from the four saved bodies and the cache. Mutant (c_credential changed from ACCEPTED to REQUEST_REJECTED on a scratch copy) FAILs on the credential recount: 1 of 1 fired.",
+      "status": "PASS",
+      "expect": "DBI118-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the record, with c_credential.verdict changed from ACCEPTED to REQUEST_REJECTED and nothing else changed, under the worker scratch folder (not committed); the unmodified checker run on that copy.",
+      "expected": "DBI118-1-AC1 FAIL on the credential recount",
+      "observed": "DBI118-1-AC1 FAIL: c_credential differs from the recount (ACCEPTED) (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The unmodified checker run twice on the final tree; the two printed outputs compared with cmp.",
+      "observed": "identical output on both runs: DBI118-1-AC1 PASS; rc=0 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A fifth call, a retry, or a second household or window",
+      "reason": "The cap of four calls was used exactly: q3 false, q3 true, ytd false, ytd true. No retry was made; no other household was called. The ytd pair ran because the q3 pair compared no account with a fee above 0, as the order states."
+    },
+    {
+      "item": "The S3 copy of the session token",
+      "reason": "Not used: the Secrets Manager read succeeded, so no fallback was taken. The S3 route was not reached."
+    },
+    {
+      "item": "A fee verdict beyond the rule",
+      "reason": "The fee verdict is the rule's word, NO_FEE_IN_WINDOW for the ytd pair. The signed reading in the surprise rows is a count recorded for the issuer, not a verdict; the rule was not changed."
+    },
+    {
+      "item": "Any AWS write, deploy, push, or change to served values",
+      "reason": "None made. The reads were the Secrets Manager token, the private dimension and cache, and the GET-only reader on the newest fact_positions partition (category columns only). Writes are the private folder and the repo deliverables and channel rows."
+    },
+    {
+      "item": "Exploration reads before the probe run",
+      "reason": "Two exploration runs read the newest fact_positions partition through the same reader before the probe (14 reads, counted in reads.s3_reads, which is 18 in total). They read the household and category columns only; no vendor call was made in them."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W306-S1: the fee rule tests feeAmount above 0, but the vendor's feeAmount sums on the fee-bearing accounts are negative; the stated rule reads NO_FEE_IN_WINDOW while a signed reading ties the gap on 3 of 3 accounts with a start value. Form only; the rule was not changed.",
+    "IRPT_DASHBD-D2-W306-S2: two of the three ytd fee-bearing accounts carry a startValue of zero, so the tie is undefined for them; the rule has no branch for a zero start on a negative fee. Form only."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "scope_probe2.py, the probe, run once from the worktree (four calls, all HTTP 200)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~306/scope_probe2.py .",
+      "result": "household digest equal to round 117; token from the Secrets Manager loader; coverage q3 SHORT (4 groups, 3 with series), ytd SHORT (4 groups, 4 with series); fee pair ytd NO_FEE_IN_WINDOW; credential ACCEPTED; two short accounts, each with 87 position days in q3 and cause NOT_DETERMINED"
+    },
+    {
+      "tool": "p118_scope2.py issuer checker, run unmodified",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r118/p118_scope2.py\" . DBI118-1-AC1",
+      "result": "rc=0; DBI118-1-AC1 PASS; identical output on two runs"
+    },
+    {
+      "tool": "scratch mutant of the record through the same checker (scratch folder, not committed)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r118/p118_scope2.py\" .scratch/mutant DBI118-1-AC1",
+      "result": "rc=1; DBI118-1-AC1 FAIL on the c_credential recount"
+    },
+    {
+      "tool": "scratch counts over the saved bodies and the cache (fee sign classes, signed tie counts, start-value presence, position-day counts; counts only, scratch, not committed)",
+      "invocation": "python -I .scratch/*.py from the worktree (not committed)",
+      "result": "as recorded in the surprise rows and in basis_words; no value written"
+    }
+  ]
+}
