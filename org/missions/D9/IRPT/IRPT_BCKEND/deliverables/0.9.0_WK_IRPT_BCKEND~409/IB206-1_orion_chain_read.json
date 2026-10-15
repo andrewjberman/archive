@@ -7,10 +7,10 @@
         "step": "INF_API_PULL_POSITIONS_DAILY",
         "script": "pull_inflection_positions_daily.py",
         "invokes_manual_api": true,
-        "chain_copy_sha256": null,
+        "chain_copy_sha256": "8c3855bba3b03d45d3ef9602749c0907894a376807c166fca08c03b1f4ed60b8",
         "repo_cli_sha256": "8c3855bba3b03d45d3ef9602749c0907894a376807c166fca08c03b1f4ed60b8",
-        "identical": null,
-        "evidence": "orion-gold-dispatch.sh line 293 catalog row INF_API_PULL_POSITIONS_DAILY|pull_inflection_positions_daily.py|--upload-bronze; the pull branch runs it by name at line 718 (python3 gold_prof.py $SCRIPTS/$filename) and line 727 for the non-pull path; the chain copy is in no code/gold object, so its hash is not in this record (row IRPT_BCKEND-D2-W409-S1)"
+        "identical": true,
+        "evidence": "orion-gold-dispatch.sh line 293 catalog row INF_API_PULL_POSITIONS_DAILY|pull_inflection_positions_daily.py|--upload-bronze, run by name at line 718 (python3 gold_prof.py $SCRIPTS/$filename); the sync at line 545 reads the code/manual_api/ and code/bronze/ copies (AMENDMENT 1 reads), both byte-identical to the repo CLI; no code/gold copy exists"
       },
       "transactions": {
         "step": "INF_API_PULL_TXN",
@@ -32,7 +32,7 @@
       }
     },
     "positive_control_needed": false,
-    "positive_control_plan": "Not needed by the rule: every step invokes its manual_api script by catalog name. Not a clearance: the performance chain copy differs from the repo CLI (row IRPT_BCKEND-D2-W409-S2), so one present day's key shape and bytes must be compared before any dated run through the repo CLI, as a later act under a signed pair.",
+    "positive_control_plan": "Computed by the rule as written (true exactly when a step neither invokes its manual_api script nor runs an identical copy): positions and transactions are identical copies and performance invokes its script by name, so the rule gives false. Not a clearance: the performance chain copy differs from the repo CLI (row IRPT_BCKEND-D2-W409-S2), so the issuer should rule on it before any dated run through the repo CLI, as a later act under a signed pair.",
     "cli_retirement_scope": "Read from the three CLIs: positions --upload-bronze (put at line 444), transactions --upload (put at line 584) and performance --upload (put at line 638). The chain runs each at its catalog flags, so these puts write the keys the chain writes for the run date and are reached. The date-parameterised runs (positions --start, --end, --backfill-days; transactions and performance --pull-date) are the backfill route the ruling keeps. Retirement scope: none of the three puts is retired by this order."
   },
   "silver_aggregator": {
@@ -598,9 +598,9 @@
   },
   "trigger_moves_now": false,
   "notes": [
-    "Facts rest on: the dispatch object GET to scratch (2127 lines, catalog rows at lines 293, 295 and 297, the pull-branch run at line 718), the repo CLI hashes read in the worktree, the two chain pull copies GET to scratch, and the calendar module lib/trading_calendar.py in the worktree.",
-    "Objects read: three list-objects-v2 of the bronze prefixes (4723, 196 and 185 keys listed as the denominators), one list of the code/gold prefix, one GET of the dispatch object, two GETs of chain pull copies, one lambda get-function-configuration and one lambda get-function with the code zip downloaded, 52 head-object calls and 52 ranged GETs of the first 64 KiB of the T-1 flat keys, one leading record read per key.",
-    "Not read: the positions chain copy (no object under code/gold; the dispatch sync reads four prefixes and the grant names code/gold, so the other three prefixes were not read: row IRPT_BCKEND-D2-W409-S1), the bronze runner orchestrator, CloudWatch, the household and account tables, and every vendor endpoint. No secret value was read.",
+    "Facts rest on: the dispatch object GET to scratch (2127 lines, catalog rows at lines 293, 295 and 297, the pull-branch run at line 718), the repo CLI hashes read in the worktree, the chain pull copies GET to scratch, and the calendar module lib/trading_calendar.py in the worktree.",
+    "Objects read: three list-objects-v2 of the bronze prefixes (4723, 196 and 185 keys listed as the denominators), one list of the code/gold prefix, one list of the code/ prefix filtered to the positions pull script name (AMENDMENT 1), two GETs of the positions copies under code/manual_api and code/bronze, one GET of the dispatch object, two GETs of the transactions and performance chain copies, one lambda get-function-configuration and one lambda get-function with the code zip downloaded, 52 head-object calls and 52 ranged GETs of the first 64 KiB of the T-1 flat keys, one leading record read per key.",
+    "Not read: the bronze runner orchestrator, CloudWatch, the household and account tables, every other code/ object beyond the three pull scripts and the dispatch object, and every vendor endpoint. The positions copies were read under AMENDMENT 1 and are byte-equal to the repo CLI. No secret value was read.",
     "Calendar: lib/trading_calendar.py answered from the hardcoded NYSE fallback (pandas_market_calendars absent), so every trading-day count rests on the fallback table covering 2010 to 2027 (row IRPT_BCKEND-D2-W409-S4).",
     "As-of stamps: positions asOfDate, transactions pull_date, performance pull_date. The performance first record's date field holds the same date on every file, a factor date and not a stamp, so pull_date is the stamp for that feed. The stamp equals the file's own day on every present row.",
     "Scratch sits outside the worktree at C:/dev/_scratch409. Keys, bodies and client records were not copied into the tree; only counts, dates, timestamps, field names and hashes are written here. The surprise rows are the channel and are not counted in rows_written, which counts data rows."
