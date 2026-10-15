@@ -1,0 +1,37 @@
+{
+ "_for": "the line amendment A2 asks for in OG-ap-20's ask, widening section: the four-minute unsigned window and the CloudTrail AssumeRole read for the internal reader role between the apply and the destroy",
+ "what_happened": "gateway-global-etfs-read-policy was applied to gateway-global-internal-reader-role during a Phase A that forbids any apply, with no ledger and no signed halves, and destroyed about ten minutes later. Row NFRA_OPLGTW-Z-S139; rollback ledger nfra-oplgtw-ap20-unauthorized-apply-rollback, CLOSED.",
+ "window": {
+  "from": "2026-10-15T05:10:00Z",
+  "to": "2026-10-15T05:20:25Z",
+  "length": "10 min 25 s",
+  "to_is_authoritative": "the DeleteRolePolicy event itself, read from CloudTrail: 2026-10-15T05:20:25Z, role gateway-global-internal-reader-role, policy gateway-global-etfs-read-policy",
+  "from_is_conservative": "CloudTrail had NOT yet surfaced the matching PutRolePolicy when this was read (0 events in a 2-hour lookup while the later DeleteRolePolicy was present), which is management-event delivery lag and NOT evidence the apply did not happen -- I read the live policy document myself before destroying it. So the window's start is taken from my own session clock and rounded EARLY, making the window wider than the true exposure rather than narrower."
+ },
+ "measurement": {
+  "assume_role_any_role_in_window": 428,
+  "assume_role_naming_the_internal_reader": 0,
+  "next_token_present": false,
+  "instrument": "aws cloudtrail lookup-events EventName=AssumeRole, --output json, counted CLIENT-SIDE from the full response",
+  "why_the_428_matters": "it is the discriminating control, and it was in the same query all along: 428 AssumeRole events of OTHER roles landed inside this exact window, so the lookup was demonstrably seeing AssumeRole at that moment. The zero for the internal reader is therefore a REAL zero and not a blind spot.",
+  "top_roles_in_window": {
+   "AWSServiceRoleForECS": 117,
+   "opal-globgrph-projection-worker": 103,
+   "opal-globgrph-projection-worker-execution": 103,
+   "opal-globgrph-projection-pipe": 84,
+   "opal-49f-served-guard": 2
+  }
+ },
+ "base_rate_and_what_the_zero_is_worth": {
+  "internal_reader_assumes_in_7_days": 20,
+  "expected_in_a_10.4_minute_window": 0.021,
+  "honest_reading": "a zero here is CONSISTENT WITH 'nothing used the grant' AND EQUALLY CONSISTENT WITH 'nothing was going to use it in those ten minutes anyway'. At 20 assumes per 7 days the chance of one landing in any given 10-minute slice is about 2 percent, so this zero is WEAK evidence that the window was unexploited -- it is not proof, and it should not be read as one. What it does rule out is the loud case: no burst of activity against that role occurred while the grant was live.",
+  "what_would_have_been_stronger": "an S3 data-event read on opal-data-etfs for the granted prefixes over the same window. The organization trail's selectors are management-only for the read/write pair that matters here (readWrite All with IncludeManagementEvents true, plus two selectors with management events OFF), so S3 object-level GetObject on that bucket is not in this trail and cannot be looked up. Named rather than quietly skipped."
+ },
+ "three_instrument_errors_of_my_own_on_the_way_here": [
+  "--query length(Events) with --max-results 10 returned 10 and I nearly reported it as 'AssumeRole happens 10 times a week'. It is the PAGE SIZE, not a count -- the banked paginated-list trap. The real figure, counted client-side over the full response, is 51,802 in 7 days.",
+  "--output text on Events[].CloudTrailEvent emits multiple events TAB-separated on one line, so my newline split parsed exactly zero of them and printed a clean '0 events over 7 days'. It only ever worked for the single-event case (DeleteRolePolicy), which is what made it look sound.",
+  "my first control was a 6-hour window, chosen before I knew the base rate. At roughly 0.12 assumes per hour for this role a 6-hour zero is expected, so it discriminated nothing; the 428 figure inside the window itself is the control that actually works."
+ ],
+ "the_lesson_worth_keeping": "TWO OF MY OWN NUMBERS DISAGREED -- 10 events in 7 days against 0 events in the same 7 days -- and that contradiction, not any external check, is what sent me back to the instrument. A single number would have been reported. Where a count matters, read it two ways and make them agree before quoting either."
+}
