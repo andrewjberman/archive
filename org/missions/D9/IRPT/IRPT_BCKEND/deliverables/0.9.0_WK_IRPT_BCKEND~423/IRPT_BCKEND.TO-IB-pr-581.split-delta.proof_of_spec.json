@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-581",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-581.split-delta.md",
+    "group": "OTHER",
+    "vintage_commit": "28fa4f96cf958253b0f448e553101b2a964b91fa"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "28fa4f96cf958253b0f448e553101b2a964b91fa",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-581.split-delta.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~423",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~423/ib218_2_split_delta.py",
+      "kind": "script",
+      "commit_or_etag": "6408488687272e5066fabde0239572e67dcba5f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: run from the worktree root; reads the 49F positions, balance and transactions partitions through the producer's own readers (list_objects_v2, get_object); no put, delete, copy, invoke, publish, sign-in or vendor request; prints and writes counts only."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~423/IB218-2_split_delta.json",
+      "kind": "config_data",
+      "commit_or_etag": "6408488687272e5066fabde0239572e67dcba5f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: 47 per_day entries over the split days read from IB211-1; totals account_days_run 266455, account_days_changed 1291, account_days_holding_a_split_security 1293, securities_adjusted 63, securities_ratio_absent 13, at_or_below_minus_50pct 3 before and 2 after; six counters 0; no account id, security identifier or object key.",
+      "artifact_covered_by": [
+        "IB218-2-AC1",
+        "IB218-2-AC2",
+        "IB218-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~423/IB218-2_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "6408488687272e5066fabde0239572e67dcba5f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: the three criteria invocations run from the worktree root under timeout 120, each with its output and exit code recorded verbatim; rc 0 on all three.",
+      "artifact_covered_by": [
+        "IB218-2-AC1",
+        "IB218-2-AC2",
+        "IB218-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6408488687272e5066fabde0239572e67dcba5f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY: three rows IRPT_BCKEND-D2-W423-S1 to S3 appended inside the fenced json array; each grounding is a path at a commit or a named run log; the surprise-row gate passed (3 new rows of 1488 total checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB218-2-AC1",
+      "criterion_verbatim": "AC1 the identity and method (base commit, read date, the split days as trading days with 2026-04-21 among them, firm scope 49financial, both arms named)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r218/p218_cells.py\" . IB218-2-AC1",
+      "output_evidence": "OK: 47 split days, 2026-04-21 included\nIB218-2-AC1 PASS\nexit=0",
+      "denominator": "47 of 47 split days named by IB211-1 are trading days under lib/trading_calendar.py; 2026-04-21 among them; base_commit, read_date, firm_scope 49financial and both arms present in IB218-2_split_delta.json.",
+      "expect": "^IB218-2-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB218-2-AC2",
+      "criterion_verbatim": "AC2 the arithmetic (changed not above those holding a split security, not above those run; adjusted plus ratio-absent at least 1; returns at or below -50 percent do not rise; status moves; per-day changed counts sum to the total; 2026-04-21 present with at least one changed)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r218/p218_cells.py\" . IB218-2-AC2",
+      "output_evidence": "OK: 266455 account-days run, 1291 changed; -50 percent returns 3 before, 2 after\nIB218-2-AC2 PASS\nexit=0",
+      "denominator": "266455 account-days run over 47 of 47 split days (0 not computable); 1291 changed against 1293 holding a split security; 2026-04-21 changed 985 of 985 holding; adjusted 63 and ratio-absent 13 securities; -50 percent rows 3 before and 2 after; status_moves empty (0 status changes).",
+      "expect": "^IB218-2-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB218-2-AC3",
+      "criterion_verbatim": "AC3 notes of 30+ characters, the six counters 0, no long digit run (no id)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r218/p218_cells.py\" . IB218-2-AC3",
+      "output_evidence": "OK: notes, counters, no long digit run\nIB218-2-AC3 PASS\nexit=0",
+      "denominator": "8 of 8 notes lines of 30+ characters; 6 of 6 counters read 0; no long digit run in the record.",
+      "expect": "^IB218-2-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; the check's own control is not part of this order's grant and was not run by this worker.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of ib218_2_split_delta.py compared: a full 47-day run and a second full 47-day run on the same base commit; the per-day logs compared with diff (rc 0), and the totals compared by the record.",
+      "observed": "diff rc=0 over 50 log lines; totals account_days_changed 1291 and account_days_holding_a_split_security 1293 identical in both runs; cache 286 hit(s) and 184 miss(es) in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Cottonwood and Inflection channels were not read; their declarations carry no split_adjust, so the BEFORE and AFTER arms are identical for them by construction.",
+      "reason": "Outside the 49 Financial scope the order names (firm_scope 49financial)."
+    },
+    {
+      "item": "Positions partitions outside the 47 split days, and the basis of the ruling's 920 account-days on 2026-04-21, were not read.",
+      "reason": "Outside the order's inputs; no record the order names carries the 920 basis. The 920 is printed beside this run's 985 and not reconciled here."
+    },
+    {
+      "item": "Nothing was deployed, published, minted, written to AWS, signed or sent; the producer file and sources.json were not edited; the BEFORE arm is an in-memory copy with split_adjust removed.",
+      "reason": "READ ONLY per the order's bounds; the six counters in the record read 0."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W423-S1: the order fixes the record counter functions_invoked at 0, while the read-only run calls the producer's read path; the counter is recorded 0 with its write-surface meaning stated in the notes (OBSERVATION, INERT).",
+    "IRPT_BCKEND-D2-W423-S2: the CTO ruling's 920 account-days changed on 2026-04-21 does not reproduce; this run measures 985 changed against 985 holding a split security, the same 985 the READ counted (OBSERVATION, ARMED under 2.0.0_SA_COO~P2).",
+    "IRPT_BCKEND-D2-W423-S3: 1293 account-days hold a t-1 position on a split security, 1291 change under the adjustment; the READ's 1291 is the changed count, not the holding count (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~423/IB218-2_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "git",
+      "invocation": "git sparse-checkout add data/assets/scripts/gold/irpt_holdings_performance/ ; git sparse-checkout add data/assets/scripts/lib",
+      "result": "rc=0 each; the two folders are local to the worktree and never committed; HEAD 28fa4f96cf at the first act."
+    },
+    {
+      "tool": "python (boto3, pandas, numpy; read-only list and get through the producer's readers)",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~423/ib218_2_split_delta.py",
+      "result": "rc=0; 47 day rows; totals changed 1291 holding 1293; the run log is in the scratch directory outside the repository"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~423/IRPT_BCKEND.TO-IB-pr-581.split-delta.proof_of_spec.json IB218-2-AC1,IB218-2-AC2,IB218-2-AC3",
+      "result": "rc=0 VALID; structural=jsonschema; acceptance rows=3; violations=0; decomp_ref resolves at its vintage; surprises 3 of 3 resolve to channel rows"
+    }
+  ]
+}

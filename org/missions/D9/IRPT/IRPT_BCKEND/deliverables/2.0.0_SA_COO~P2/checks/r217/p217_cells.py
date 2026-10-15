@@ -2,10 +2,10 @@
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
-  IB217-1  IB-pr-579  the APPLY of the signed pair IB-pr-456 (+ ADDENDUM 1, reworded BEFORE record): irpt-ycharts-generate moved to the signed candidate by its Terraform path, with the applier's two refused bodies and one accepted request read before and after
+  IB217-1  IB-pr-579  the APPLY of the signed pair IB-pr-456 (+ ADDENDUM 1, reworded BEFORE record): irpt-ycharts-generate moved to the signed candidate by its Terraform path, with the BEFORE state read in the live zip bytes and one accepted request read before and after
     AC1  the gates: both halves signed, the packet sha256, no open marker or ledger naming the function, the start read equal to the signed live digest, the ledger entry naming the Branch B version, the BEFORE record
     AC2  the apply: the rebuilt digest equals the signed one, plan 1 change 0 destroy by safe-apply, the live function afterwards equals the built digest, re-plan 0, exactly the four members changed, the source-map rows of this function only, no rollback
-    AC3  the after-read: import census clean, the AFTER refusal differs from the BEFORE one, the accepted request unchanged, the composition test, the health proof, the bound counters
+    AC3  the after-read: import census clean, the replay at the pin has no unexpected arm, the accepted request unchanged, the composition test, the health proof, the bound counters
 """
 import json
 import re
@@ -82,8 +82,9 @@ def ac1(r):
     if not bv or bv not in (ROOT / led).read_text(encoding="utf-8"):
         fail("branch_b_version_id must be named and written in the ledger entry")
     b = r.get("before") or {}
-    if b.get("refusal_code") != "UNKNOWN_OR_SERVER_OWNED_FIELD" or b.get("twin_discriminates") is not True:
-        fail("before.refusal_code must read UNKNOWN_OR_SERVER_OWNED_FIELD and before.twin_discriminates true (the body reached validation before authorization; otherwise STOP)")
+    want0 = {"submission.py": 0, "acceptance.py": 0, "contracts/AnalysisSubmissionRequest.schema.json": 0}
+    if b.get("live_zip_commentary_requested") != want0:
+        fail("before.live_zip_commentary_requested must read 0 for each of %s (the live build is the BEFORE state)" % sorted(want0))
     if not re.fullmatch(r"[0-9a-f]{64}", str(b.get("accepted_request_item_sha256", ""))):
         fail("before.accepted_request_item_sha256 must be 64-hex (the sha256 of the item read, never its content)")
     print("OK: gates and BEFORE record met; ledger %s" % led)
@@ -116,8 +117,9 @@ def ac3(r):
     if af.get("import_census_failed") != {}:
         fail("after.import_census_failed must be {} (the import census answered failed: {})")
     b = r.get("before") or {}
-    if af.get("refusal_code") != "COMMENTARY_REQUESTED" or af.get("refusal_code") == b.get("refusal_code"):
-        fail("after.refusal_code must read COMMENTARY_REQUESTED and differ from the BEFORE refusal (the release took)")
+    rp = af.get("replay_at_pin") or {}
+    if not (is_int(rp.get("arms")) and rp["arms"] >= 1 and rp.get("unexpected") == 0):
+        fail("after.replay_at_pin must read arms >= 1 and unexpected 0 (every arm's verdict equals the packet's recorded one)")
     if af.get("accepted_request_item_sha256") != b.get("accepted_request_item_sha256"):
         fail("the accepted request must read back unchanged: after.accepted_request_item_sha256 must equal the BEFORE value")
     ct = af.get("composition_test") or {}
@@ -133,7 +135,7 @@ def ac3(r):
     if not (is_int(h.get("invocations_in_window")) and h["invocations_in_window"] >= 0 and h.get("errors_in_window") == 0):
         fail("health_proof.invocations_in_window must be an integer and errors_in_window must be 0")
     c = r.get("counters") or {}
-    want = {"function_updates": 1, "lambda_invokes": 3, "iam_changes": 0, "route_changes": 0, "env_changes": 0, "table_writes": 0, "figures_written": 0,
+    want = {"function_updates": 1, "lambda_invokes": 1, "iam_changes": 0, "route_changes": 0, "env_changes": 0, "table_writes": 0, "figures_written": 0,
             "files_deleted": 0, "sibling_functions_moved": 0, "vendor_requests_sent": 0, "jobs_queued": 0}
     for k, v in want.items():
         if c.get(k) != v:
