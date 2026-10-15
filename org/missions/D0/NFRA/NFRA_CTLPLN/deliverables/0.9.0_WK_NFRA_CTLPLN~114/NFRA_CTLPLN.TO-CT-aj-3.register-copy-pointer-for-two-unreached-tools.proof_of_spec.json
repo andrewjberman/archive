@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aj-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-3.register-copy-pointer-for-two-unreached-tools.md",
+    "group": "OTHER",
+    "vintage_commit": "9cfc5f5fd8"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~114",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round20.md",
+    "vintage_commit": "9cfc5f5fd8",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aj-3.register-copy-pointer-for-two-unreached-tools.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_box_lists_from_register.py",
+      "kind": "test",
+      "commit_or_etag": "8646885c9d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds --register (default: none, so the real register is read) which sets OPAL_DEVICE_REGISTER in this process before lib/devices.py loads, and prints one line BOXES-READ <sorted register box names> before the unchanged last line. Default run at 8646885c9d: rc=0, last line BOX-LISTS-FROM-REGISTER gate=derived status_report=derived ok=True. Last changed in 8646885c9d; no deploy.",
+      "artifact_covered_by": [
+        "CTaj3-AC1",
+        "CTaj3-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/fabric_value_census.py",
+      "kind": "test",
+      "commit_or_etag": "8646885c9d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds --register (default: the real register) and prints BOXES-READ <sorted register box names>. Read first, as the order asks: the census compares against the token site-z/sitez only and reads no box list, so BOXES-READ prints the register names it is given (the order's branch). The line-keyed FIXTURE entry for its own TOKEN line moved from :21 to :23 with two added imports; the classification is re-measured in the census run. The census exits 1 at base (ok=False, pre-existing unclassified hits; see the surprise row). Last changed in 8646885c9d; no deploy.",
+      "artifact_covered_by": [
+        "CTaj3-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round19_register.py",
+      "kind": "test",
+      "commit_or_etag": "8646885c9d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--fwd2 runs the two box-list tools with --register <the temporary register copy> and counts each reached when fixbox is on its BOXES-READ line; the not-reached list is empty; the real register sha1 is compared before and after (unchanged: ac653655cf47). Last changed in 8646885c9d; no deploy.",
+      "artifact_covered_by": [
+        "CTaj3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaj3-AC1",
+      "criterion_verbatim": "all eight listed tools name the fixture box (base: `tools=6/8 not_reached=2`); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round19_register.py --fwd2",
+      "output_evidence": "FWD2-BOX-ADDED tools=8/8 not_reached=0 named=8 ok=True (rc=0; timeout 280 from the worktree root on the committed state at 8646885c9d; the base run before this order's edits read FWD2-BOX-ADDED tools=6/8 not_reached=2 named=6 ok=True, with the two NOT-REACHED lines for the box-list test and the census). Eight NAMED lines: lib/devices.py names, to-pipeline-gate.py FABRIC_ENUM, placement-check.py box rows, crossbox-matrix.py, seat-list.py show --all, box-status-report-check.py BOXES, tests/test_box_lists_from_register.py --register, tests/fabric_value_census.py --register (its own exit is rc=1 at base, printed beside the line; reached on its BOXES-READ line). real register unchanged: True (sha1 ac653655cf47).",
+      "denominator": "8 listed tools, 8 NAMED, 0 MISS, 0 NOT-REACHED; named=8 of 8 (base: 6 of 8)",
+      "status": "PASS",
+      "expect": "tools=8/8",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaj3-AC2",
+      "criterion_verbatim": "the default run of the register-derived box-list test still reads ok (base: `BOX-LISTS-FROM-REGISTER gate=derived status_report=derived ok=True`, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_box_lists_from_register.py",
+      "output_evidence": "BOX-LISTS-FROM-REGISTER gate=derived status_report=derived ok=True (rc=0; timeout 280 from the worktree root on the committed state at 8646885c9d; the line before it: BOXES-READ dell1 dell2 laptop sitez).",
+      "denominator": "6 arms run: 6 PASS, 0 FAIL (gate FABRIC_ENUM derived; gate equals placement_values; gate holds no literal box list, 786 containers scanned; status report BOXES derived; BOXES equals names(); status report holds no literal box list, 45 containers scanned)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The census's BOXES-READ line on the REAL register at 8646885c9d (run with no --register argument, and with --register pointing at the real register): the reach check for fixbox must not be vacuous, so the real register must not name fixbox.",
+      "expected": "BOXES-READ does not contain fixbox on the real register; it contains fixbox only on the fixture copy",
+      "observed": "BOXES-READ dell1 dell2 laptop sitez (real register; no fixbox); the same line names fixbox when the test passes the fixture copy (AC1 run). census rc=1 ok=False unclassified=4 (pre-existing).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the committed state 8646885c9d (two runs of the same command); compared on the last line",
+      "observed": "FWD2-BOX-ADDED tools=8/8 not_reached=0 named=8 ok=True on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The --fwd2 reach rule for the census arm (boxes-read mode)",
+      "reason": "fabric_value_census.py exits 1 at base because of its own token verdict (ok=False, pre-existing unclassified hits in files this order does not name; see NFRA_CTLPLN-W114-S1). A boxes-read tool is REACHED on its BOXES-READ line alone, as the order states; the census exit code is printed on its NAMED line. The other six tools keep the rc==0 condition."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W114-S1: fabric_value_census.py is red at base (ok=False, unclassified=5; four of them in files outside this order's paths: test_fabric_readers_dell.py:101 and :154, test_manager_on_every_box.py:266, lib/devices.py:84). UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~114/NFRA_CTLPLN.TO-CT-aj-3.register-copy-pointer-for-two-unreached-tools.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~114 on 2026-10-15; the session's final message is the WORKER REPORT)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_register.py --fwd2",
+      "result": "FWD2-BOX-ADDED tools=8/8 not_reached=0 named=8 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_box_lists_from_register.py",
+      "result": "BOX-LISTS-FROM-REGISTER gate=derived status_report=derived ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/fabric_value_census.py",
+      "result": "FABRIC-CENSUS files_scanned=2144 hits=47 enum_source=3 compares=0 display=26 fixture=14 unclassified=4 ok=False (rc=1; pre-existing, see NFRA_CTLPLN-W114-S1)"
+    }
+  ]
+}
