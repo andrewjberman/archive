@@ -25,7 +25,7 @@
     {
       "path_or_key": "lib/opal_data_harvest/auth.py",
       "kind": "script",
-      "commit_or_etag": "9a3c64d343",
+      "commit_or_etag": "9be3090d66",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LOCAL cell on worktree branch wk-AMGT_HARVST-141; not deployed, not integrated (the sa scope question in AMGT_HARVST-D1-W141-S1 is open)",
       "artifact_covered_by": [
@@ -47,9 +47,9 @@
     {
       "path_or_key": "lib/opal_data_harvest/test_ca1_profile_renew.py",
       "kind": "test",
-      "commit_or_etag": "9a3c64d343",
+      "commit_or_etag": "9be3090d66",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL test file on worktree branch wk-AMGT_HARVST-141; run in the worktree, 1 failed and 7 passed (AC1)",
+      "deploy_evidence": "LOCAL test file on worktree branch wk-AMGT_HARVST-141; run in the worktree, 8 passed (AC1 after amendment 1: 8 passed)",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -69,10 +69,9 @@
       "method": "test_suite",
       "invocation": "python -m pytest lib/opal_data_harvest/test_ca1_profile_renew.py -q -p no:cacheprovider --color=no",
       "expect": "(?m)^\\d+ passed in",
-      "output_evidence": "rc=1. Deciding lines: \"1 failed, 7 passed in 0.30s\"; \"E       assert {'barrons', 'sa', 'wsj'} == {'barrons', 'wsj'}\"; \"Extra items in the left set: 'sa'\". The failing check is test (a)'s second assertion (expected == {wsj, barrons}); the first assertion (renew once for each tab, unseeded contract, zero for every other) holds for every registry publisher, sa included.",
-      "denominator": "7 of 8 tests passed in the file (a 1, b 1, c 3, d 2, e 1); test (a) fails",
-      "status": "FAIL",
-      "status_reason": "The contract-field rule, as the TO states it, also covers sa (transport tab, seed_from_bundle false); sa has no account check in verification.ACCOUNT_CHECKS, so the expected set is {barrons, sa, wsj}, not {barrons, wsj}. Recorded as AMGT_HARVST-D1-W141-S1 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~W1). The worker did not add a discriminator the spec does not state."
+      "output_evidence": "rc=0 (commit 9be3090d66)\n8 passed in 0.21s\nThe renew set is {wsj, barrons}: sa (tab, seed false, no account check) keeps the bundle refresh.",
+      "denominator": "8 of 8 tests passed (a 1, b 1, c 3, d 2, e 1)",
+      "status": "PASS"
     },
     {
       "criterion_id": "AC2",
@@ -80,22 +79,21 @@
       "method": "test_suite",
       "invocation": "python -m pytest lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_ad1_token_store.py lib/opal_data_harvest/test_ad2_no_sign_in.py lib/opal_data_harvest/test_bz9_refresh_once.py lib/opal_data_harvest/test_bz9b_refresh_publishers.py lib/opal_data_harvest/test_ab1b_trust_token_and_backoff.py lib/opal_data_harvest/test_ae5_challenge_path.py -q -p no:cacheprovider --color=no",
       "expect": "(?m)^\\d+ passed, 4 subtests passed in",
-      "output_evidence": "rc=2. \"ERROR lib/opal_data_harvest/test_ad1_token_store.py - FileNotFoundError: [Err...\"; \"Interrupted: 1 error during collection\"; \"1 error in 0.71s\". Cause: the worktree is sparse-checked-out without org/tier1_exec, so test_ad1 cannot load org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py. Supplementary, NOT the verdict: the same list without test_ad1_token_store.py gives rc=0, \"100 passed, 4 subtests passed in 3.16s\".",
-      "denominator": "0 of 7 test files collected (collection interrupted by test_ad1); supplementary run without test_ad1: 100 of 100 collected tests passed, 4 of 4 subtests passed",
-      "status": "FAIL",
-      "status_reason": "Literal invocation cannot collect test_ad1_token_store.py in this worktree (a path the order does not name and this worktree lacks). Recorded as AMGT_HARVST-D1-W141-S2 (BLOCKING, INERT). The worker did not widen the sparse checkout."
+      "output_evidence": "rc=0 (commit 9be3090d66)\n113 passed, 4 subtests passed in 3.39s\ntest_ad1_token_store.py collects and passes (the sparse set includes org/tier1_exec/4.0.0_SA_CRO/scripts, amendment 1).",
+      "denominator": "113 of 113 collected tests passed; 4 of 4 subtests passed (7 test files)",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
       "description": "MUTANT (e): SessionManager.refresh replaced by the bundle-only behaviour for wsj; arm (a) must fail on it",
       "expected": "arm (a) raises AssertionError on the mutant; mutant wsj renew count is 0, barrons count is 1",
-      "observed": "test_e_mutant_the_bundle_only_refresh_for_wsj_fails_arm_a PASSED: counts wsj 0, barrons 1, and check_arm_a raised AssertionError",
+      "observed": "test_e_mutant_the_bundle_only_refresh_for_wsj_fails_arm_a PASSED after amendment 1: counts wsj 0, barrons 1, and check_arm_a raised AssertionError",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two runs of lib/opal_data_harvest/test_ca1_profile_renew.py in the same worktree, same commit, same bytes, compared on the summary line and the failing assertion",
-      "observed": "run 2 and the final run both read \"1 failed, 7 passed\" with the identical failing assertion {'barrons', 'sa', 'wsj'} == {'barrons', 'wsj'}",
+      "method": "two runs of the ca-1 file at the same commit, same bytes, compared on the summary line and the verdict of each test",
+      "observed": "the literal AC1 run (8 passed in 0.21s) and the full-suite run of lib/opal_data_harvest both pass the 8 tests of the file; the same bytes at 9be3090d66",
       "status": "STABLE"
     }
   },
@@ -106,7 +104,7 @@
     },
     {
       "item": "A discriminator that keeps sa on its existing refresh path",
-      "reason": "Not stated by the TO; the TO's rule text and its expected set conflict on sa. Left to the COO's ruling under AMGT_HARVST-D1-W141-S1."
+      "reason": "Resolved by amendment 1 (ACCOUNT_CHECKS in the rule); sa stays on the bundle refresh until its own proof in round 87."
     },
     {
       "item": "Repair of the sparse worktree so that org/tier1_exec exists",
