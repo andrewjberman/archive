@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
       "kind": "script",
-      "commit_or_etag": "ec0e2621f7",
+      "commit_or_etag": "d44fbfaf40",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "template_corrections accepts an exact equal pair for TICKER_NOT_FOUND only; freeze_template_portfolio builds the UNRESOLVED row in the NOT_FOUND branch (kept_pairs, unresolved); offline, no deploy",
+      "deploy_evidence": "template_corrections accepts an exact equal pair for TICKER_NOT_FOUND only; freeze_template_portfolio builds the UNRESOLVED row in the NOT_FOUND branch (kept_pairs, unresolved); rounding residual counts the UNRESOLVED dollars (ruling); offline, no deploy",
       "artifact_covered_by": ["AR68-g-AC1", "AR68-g-AC2"]
     },
     {
@@ -42,9 +42,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_unresolved_keep.py",
       "kind": "test",
-      "commit_or_etag": "ec0e2621f7",
+      "commit_or_etag": "d44fbfaf40",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "five named offline tests; 5 passed",
+      "deploy_evidence": "five named offline tests plus test_weight_basis_residual_counts_the_unresolved_row; 6 passed in the file, 9 passed across the three new files",
       "artifact_covered_by": ["AR68-g-AC1"]
     },
     {
@@ -70,8 +70,8 @@
       "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g68_checks.py g68",
       "method": "test_suite",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g68_checks.py g68",
-      "output_evidence": "AR-G68-OK direct=6 named=8 passed=8 | direct cases 6, wrong none | named tests missing: none | new tests: 8 passed in 0.51s | rc=0",
-      "denominator": "6 of 6 direct cases; 8 of 8 named tests present; 8 passed, 0 failed across the three new files",
+      "output_evidence": "AR-G68-OK direct=6 named=8 passed=9 | direct cases 6, wrong none | named tests missing: none | new tests: 9 passed in 0.53s | rc=0",
+      "denominator": "6 of 6 direct cases; 8 of 8 named tests present; 9 passed, 0 failed across the three new files (the 8 named tests plus the residual test)",
       "expect": "^AR-G68-OK",
       "status": "PASS"
     },
@@ -80,11 +80,10 @@
       "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g68_checks.py regress",
       "method": "test_suite",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g68_checks.py regress",
-      "output_evidence": "existing tests: 1 error in 3.10s | AR-G68-REGRESS-FAIL rc=2 passed=0 (need >= 108) | rc=1",
-      "denominator": "0 of >= 108 passed: test_y5_proxy_corrections.py fails collection (docs/ absent in the sparse worktree). Measured separately on the other three files: 91 passed, 1 failed (test_runner.py::test_elements_record_an_opal_held_source_by_its_group, the IRPT_YCDGEN map absent), the same as base.",
+      "output_evidence": "AR-G68-REGRESS-OK passed=108 | existing tests: 108 passed in 4.44s | rc=0",
+      "denominator": "108 passed, 0 failed of the four existing files (test_kept_holding.py, test_y5_proxy_corrections.py, test_normalized_input.py, test_runner.py); need >= 108",
       "expect": "^AR-G68-REGRESS-OK",
-      "status": "FAIL",
-      "status_reason": "The regress guard cannot run in this worktree as written: docs/ is skip-worktree and an IRPT_YCDGEN map is absent. Row IRPT_ANLREQ-D2-W178-S1 (BLOCKING) carries the refusal. The check was not weakened and the tree was not rebuilt."
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -102,19 +101,20 @@
   },
   "declared_exclusions": [],
   "surprises": [
-    "IRPT_ANLREQ-D2-W178-S1: AR68-g-AC2 cannot PASS in this sparse worktree (docs/ absent; one runner test reads a missing IRPT_YCDGEN map); BLOCKING"
+    "IRPT_ANLREQ-D2-W178-S1: AR68-g-AC2 could not run in the sparse worktree (docs/ and an IRPT_YCDGEN map absent); BLOCKING; RESOLVED by the issuer's widening, closed by IRPT_ANLREQ-D2-W178-S2",
+    "IRPT_ANLREQ-D2-W178-S2: closing row for S1; resolved by the widening; DISMISSED_WITH_REASON"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "python",
-      "invocation": "python -m pytest -v (the three new test files)",
-      "result": "8 passed"
+      "invocation": "python -m pytest -q (kept_holding, normalized_input, runner, y5 corrections, on the widened worktree)",
+      "result": "108 passed"
     },
     {
       "tool": "python",
-      "invocation": "python -m pytest -q (kept_holding, normalized_input, runner; base-equal run after the edits)",
-      "result": "91 passed, 1 failed (the same failure as base)"
+      "invocation": "python -m pytest -v (the three new test files)",
+      "result": "9 passed"
     }
   ]
 }
