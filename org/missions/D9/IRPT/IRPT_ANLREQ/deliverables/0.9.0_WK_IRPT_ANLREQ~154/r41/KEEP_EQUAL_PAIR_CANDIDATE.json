@@ -1,0 +1,68 @@
+{
+  "cell": "AR-y-354",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-354",
+  "base_commit": "a6b83f692084b2f599d0b6142aa61c75bb735a42",
+  "base_note": "the hint candidate cand/dell2/anlreq-filing-hint-did-you-mean (AR-y-351), the parent of this candidate",
+  "branch": "wk-IRPT_ANLREQ-154-portal (the portal worktree branch, LOCAL)",
+  "candidate_branch": "cand/dell2/anlreq-filing-hint-keep-equal-pair (LOCAL, never pushed)",
+  "commit": "f78ea50ef87d1749140f53f3c51e212f8b433401",
+  "push_state": "LOCAL f78ea50e only; no push of any branch was run (no git push command in this order)",
+  "files_changed": [
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/__tests__/filing-hint.test.tsx",
+    "src/pages/TicketCenter/__tests__/filing-hint-keep.test.tsx"
+  ],
+  "diffstat_from_base": "5 files changed, 274 insertions(+), 38 deletions(-)",
+  "tests": {
+    "added": 7,
+    "added_file": "src/pages/TicketCenter/__tests__/filing-hint-keep.test.tsx (cases a to g)",
+    "passed": 135,
+    "failed": 0,
+    "folders": ["src/pages/TicketCenter (25 files, 135 tests; the base folder had 128, plus the 7 added)"],
+    "keep_file_result": "7 pass, 0 fail, 49 expect() calls",
+    "re_pinned": "filing-hint.test.tsx case (d): from 'Keep posts nothing' to 'Keep re-posts the same upload with the equal pair'; its header comment updated. Cases a, b, c, e, f, g of that file are unchanged and pass."
+  },
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit, portal worktree)",
+    "rc": 0,
+    "role": "drain check, not a criterion"
+  },
+  "before_arm": {
+    "method": "the new test file run against the base source a6b83f692084 (git archive into .scratch/before_arm, with the same node_modules link)",
+    "result": "0 pass, 7 fail (cases a to g all fail on the base source)",
+    "why": {
+      "a": "fails: keptHint is not exported at the base (TypeError); the base has no equal-pair builder",
+      "b": "fails: keptHint is not exported at the base (TypeError at the first Keep); the base correctionsFor keeps the first Use for a symbol, not the last click, and withFilingChoice is absent",
+      "c": "fails: the base page has no chooseHint routed from both presses (source count 0, not 2)",
+      "d": "fails: keptHint is not exported at the base (TypeError)",
+      "e": "fails on behaviour: the base correctionsFor builds the case-only pair acme to ACME",
+      "f": "fails on behaviour: the base keptLine says the file cannot be filed yet and carries the words 'does not accept an unknown symbol yet'",
+      "g": "fails: keptHint is not exported at the base (TypeError)"
+    },
+    "note": "The order predicted (a), (b), (f) FAIL. Measured: all seven fail. Five of them (a, b, c, d, g) fail on a missing export (keptHint) or a missing source route (chooseHint count 0, not 2), not on a measured base behaviour. Two (e, f) fail on measured base behaviour: the case-only pair acme to ACME is built, and the base words say the file cannot be filed yet. The base behaviour for Keep (it sent nothing) is covered by the re-pinned filing-hint case (d) and the page source check."
+  },
+  "what_a_person_sees": "Under each unknown ticker the form shows 'Did you mean ACME1? (row 3: ACME)' with two buttons, 'Use ACME1' and 'Keep ACME'. Keep is the filer's own press: the same file is sent again, with ACME kept as typed (the door is told the symbol maps to itself). If the door then files the file, the request is filed; if the door answers with more hints, those show. Once Keep is pressed the line reads: 'ACME is kept as you typed it. It is not priced here and goes to the backend with your request.' No swap is offered and no proxy input is shown. Keep is hidden once twenty symbols are named, as Use is. Until the door release (AR-g-68) is applied, the door refuses the equal pair with CORRECTIONS_INVALID and the form shows the server's own sentence, as for any other refusal.",
+  "contract_followed": [
+    "REQUEST. POST analysis-input-upload with the SAME upload_token and file_base64 as the first post, plus body.corrections (at most 20 items, one per from_value).",
+    "Keep: {finding_code: TICKER_NOT_FOUND, from_value: <symbol>, to_value: <the same symbol>}.",
+    "The page must send only finding_code TICKER_NOT_FOUND for a Keep, and never a swap to a symbol the filer did not choose.",
+    "Keep is refused with CORRECTIONS_INVALID until the server change lands; the portal must not send it before then.",
+    "The page must word it as NOT PRICED, pending C-SWAP. (Implemented as the cell's words: 'It is not priced here and goes to the backend with your request.' No label reads NOT PRICED; the cell fixed the sentence.)"
+  ],
+  "contract_source": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~174/r8/DOOR_UNRESOLVED_READ.json, key q4.contract_for_y2 (read in this worktree; identical to the copy in the workspace checkout)",
+  "claim": "The candidate changes Keep from sending nothing to re-posting the same upload with the equal pair for TICKER_NOT_FOUND, on the filer's click only, through the same filing path as Use; the corrections keep one per symbol with the last click standing, never a case-only pair, never another code, at most twenty. It is NOT for promotion before the door release AR-g-68 is applied: until then the server refuses the equal pair with CORRECTIONS_INVALID.",
+  "not_read": [
+    "the live door's answer to an equal pair (no live call was made; the answer is the contract's CORRECTIONS_INVALID until the release)",
+    "the rendered page (no dev server, no browser; the words and the buttons are checked by renderToStaticMarkup and by source reads)",
+    "the CTO's ruling on what the submit may do with a kept row (the contract names it the CTO's call; this candidate does not change the submit)",
+    "the server-side text of the CORRECTIONS_INVALID sentence (the form shows it through the existing refusal path)"
+  ],
+  "decisions_beyond_the_cell": [
+    "Keep is gated by the same !useFull test as Use (AnalysisRequestParts.tsx). Surprise row IRPT_ANLREQ-D2-W154-S1 files it.",
+    "correctionsFor and correctedUpload now take the filer's choices (Use or Keep) and apply the last click per symbol; the case-only guard applies to Use too, since the helper must never build a case-only pair.",
+    "A Keep is represented as the hint whose suggestion equals the typed symbol (keptHint, isKeptHint). A door suggestion equal to its typed value would be read as a Keep; the door does not send such a suggestion."
+  ],
+  "mutant_result": "scratch swap mutant (keptHint suggestion = value + X): control 7 of 7 pass (rc 0); mutant 2 pass, 5 fail (rc 1); MUTANT-FIRES"
+}

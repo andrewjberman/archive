@@ -1,0 +1,15 @@
+RIV-ya-1 worker session log -- 0.9.0_WK_ETFS_RIVALS~43 -- worktree C:/tmp/wk-riv-r31-43 -- branch wk-ETFS_RIVALS-43
+
+1. Identity and tree: `git rev-parse --abbrev-ref HEAD` -> wk-ETFS_RIVALS-43; `test -d org && test -d .tools` -> TREE-OK. HEAD at start 1af8b0dba8.
+2. Baseline, before any edit (timeout 120 each, from data/etfs/scripts):
+   - ya1_bloomberg_wins_check.py (all): 4 failed in 2.67s, rc=1.
+   - xe3_union_reader_check.py: 5 passed in 1.13s, rc=0.
+   - rivalfunds/tests full: 56 failed, 992 passed, 7 skipped in 141.96s; failing ids saved to .scratch/base_failed.txt (56 lines).
+3. Edits: price_series.py (precedence_drop, _precedence_rows, series() calls both and adds precedence_dropped per key);
+   gold_trade_schedule.py (load_actions applies precedence_drop after the void drop, before the union, sets df.attrs;
+   run_stage detail adds precedence_dropped).
+4. After edits: AC1 2 passed rc=0; AC2 2 passed rc=0; AC3 5 passed rc=0. New file test_riv_ya1_bloomberg_wins.py: 6 passed rc=0.
+5. Full suite after: 56 failed, 998 passed, 7 skipped in 88.71s, rc=1; failing ids diffed against .scratch/base_failed.txt: identical.
+6. Surprise row ETFS_RIVALS-D1-W43-S1 appended (chart reader windows the action frame by partition date); investigation array re-parsed: 43 rows.
+7. Commit: 91bb5f0e02 via safe-commit.sh (commit-gate, surprise-row-gate and one-writer OK; client-data-check WARN: hashed account-id list absent, not checked).
+8. Proof instance validated with proof-of-spec-check.py (see instance); instance commit follows.

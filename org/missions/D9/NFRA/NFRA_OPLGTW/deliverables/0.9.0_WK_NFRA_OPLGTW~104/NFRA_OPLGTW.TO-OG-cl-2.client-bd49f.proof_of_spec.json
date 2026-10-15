@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cl-2",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6fc29c2dbf",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-2.client-bd49f.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-2.client-bd49f.md",
+    "group": "OTHER",
+    "vintage_commit": "6fc29c2dbf"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~104",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "2e5ba0a888",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not deployed: the release is a later applier order (order preflight: comp-schedule and comp-iam DECLARED-NOT-APPLICABLE)",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl2.py",
+      "kind": "test",
+      "commit_or_etag": "2e5ba0a888",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a test file; it is run by the AC1 invocation and is not deployed",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~104/probe_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "2e5ba0a888",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only probe run by the AC2 invocation against the real silver; it is not deployed",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass (test_ogcl2_ac01 .. test_ogcl2_ac08, eight of eight).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 8 of 8; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 named tests (test_ogcl2_ac01 .. test_ogcl2_ac08); 0 failed or error lines",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 8 of 8; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the probe, re-run here against the real silver, prints the complete envelope, a count equal to an independent read, a zero-row fence negative arm and no account number.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "probe bd49f: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0\nprobe rc 0; digit runs of 8 or more in the output 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 checks: 3 of 3 boolean checks True (envelope, independent count, fence negative arm) and account_numbers_printed 0; 0 digit runs of 8 or more in the output",
+      "status": "PASS",
+      "expect": "(?s)probe bd49f: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant to fire; the discrimination it would test is covered by the named tests on a fake context",
+      "expected": "N/A: the order names no mutant",
+      "observed": "the order's acceptance names no mutant; no mutant was run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "three runs of probe_bd49f.py (the AC2 probe against the real silver), output lines compared",
+      "observed": "all three runs printed the identical line: probe bd49f: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "release, deploy, IAM and Terraform for the adapter",
+      "reason": "the order preflight declares comp-schedule and comp-iam not applicable; the release is a later applier order"
+    },
+    {
+      "item": "app/tools.py registrations, app/data_entitlement.py, app/destructive_ops.py and the pinned-count tests",
+      "reason": "the order names the issuer as owner of the registrations and the count moves, in one commit at the merge"
+    },
+    {
+      "item": "increment-versus-snapshot grain of the opal-data-bd tables (contract decision 8)",
+      "reason": "not measured in this cell; no tool sums or spans partitions, and each window answer says it reads one partition (window_partial true, grain_measured false)"
+    },
+    {
+      "item": "the core context (client_core.py, OG-cl-1)",
+      "reason": "not on this ref; the issuer ruled a probe-local ProbeCtx for AC2 (A1 2 of G2_ADAPTER_PROTOCOL.md)"
+    },
+    {
+      "item": "fee-type enum (surprise S4) and holdings quantity and cash sources (surprise S5)",
+      "reason": "issuer decisions; this cell returns fee_type as the source amount column and quantity and cash as null with claim absent"
+    },
+    {
+      "item": "naming-gate REFUSE verdicts (14) on firm-name and bd token strings in the adapter",
+      "reason": "the naming gate ran in its warn window (did not block the commit); the canonical firm strings are the contract's own, and the lookup() routing is the issuer's call"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W104-S1: the DATA_CATALOG rows of the live opal-data-bd tables carry the live bucket and prefix under *_silver_legacy entity names with FROZEN open_items; the adapter reads the structured fields (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W104-S2: app/client_core.py (the protocol's ctx) is absent on every ref; the issuer's A1 2 ruling resolves it with a probe-local ProbeCtx (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W104-S3: the non-dated silver/unrealized/unrealized_gain_loss.parquet sorts after every dated partition; the adapter admits dated names only (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W104-S4: the live silver/fees table has no fee-type column; fee_type is the source amount column name (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W104-S5: the live silver/unrealized table has no quantity or cash column; both are returned null with claim absent (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W104-S6: the order names the instance with an underscore stem, but the to-pipeline gate resolves deliverables/*/<full-stem>.proof_of_spec.json (hyphen); the instance is renamed to that convention (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~104/session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_cl2.py -v -p no:cacheprovider (from infra/aws/ec2/opal-gateway)",
+      "result": "9 collected; test_ogcl2_ac01 .. test_ogcl2_ac08 PASSED; test_ogcl2_ac06_two_firm_negative_arm PASSED"
+    },
+    {
+      "tool": "commit-gate and surprise-row-gate (safe-commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~104 <...@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit-gate: All checks passed; surprise-row-gate: 5 new rows OK; naming-gate: WARN 14 graded (warn window, not blocking)"
+    }
+  ]
+}

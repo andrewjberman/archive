@@ -1,0 +1,20 @@
+0.9.0_WK_IRPT_ANLREQ~158 -- TO-AR-y-361 (cell AR-y-361) session log, 2026-10-15
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-158 ; TREE-OK (org and .tools present).
+2. Portal worktree: wk-IRPT_ANLREQ-158-portal at c22f4508, clean.
+3. Baseline, before any change (bun test, bound 120s):
+   - prospect-no-price-date.test.tsx: 6 pass, 0 fail (rc 0)
+   - s55.component-wiring.test.tsx: 1 pass, 0 fail (rc 0)
+4. Test case (g) added to the new file. Before-arm run on c22f4508 (no source change):
+   - 6 pass, 1 fail; (g) fails: expect(received).toBe(expected), Expected "T-1 close", Received null (rc 1).
+5. Source change in ProspectComposer.tsx: PROSPECT_AS_OF = 'T-1 close'; asOf: PROSPECT_AS_OF in place of null.
+   - new file: 7 pass, 0 fail, 26 expect() calls (rc 0)
+   - s55: 1 pass, 0 fail (rc 0)
+6. Portal commit d06fed37531344ad6e8baf76fef3a0dbfb394b7f on wk-IRPT_ANLREQ-158-portal (LOCAL, not pushed); git diff --stat c22f4508 d06fed37: 2 files, 46 insertions(+), 2 deletions(-).
+7. Local branch cand/dell2/anlreq-no-price-date-t1-asof created at d06fed37 (not pushed).
+8. Checkers in the deliverable folder:
+   - asof_check.py (AC1): ASOF-TESTS-OK 8 passed, 0 failed (two runs, both rc 0)
+   - mutant_check.py (AC2): MUTANT-FIRES (bun test rc=1 on the mutant, 1 fail; candidate restored, sha256 verified); the failing case is (g). The first run stopped before any swap ("anchor found 0 times") because the checkout is CRLF; the anchor was then matched in the file's own line ending. Restoration checked: composer bytes equal the candidate copy.
+   - scope_check.py (AC3): SCOPE-OK 2 paths
+9. Surprise row IRPT_ANLREQ-D2-W158-S1 filed in INVESTIGATION_v1.md (the mutant ran by swap-and-restore in the portal path, because the new test imports its composer relative to itself).
+10. Not run, by grant: bun run typecheck (whole-portal, sparse worktree), any live call, any push, any deploy.

@@ -1,0 +1,5 @@
+# NFRA_CTLPLN package journey -- read the Python tag on dell1 before the duckdb fetch (2.0.0_SA_COO~C, 2026-10-15)
+
+The CTO approved duckdb==1.5.0 for lane 2.0.0_SA_COO~D1 and its fetch approval (org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_APPROVAL_TO_FETCH_NFRA_CTLPLN_INTAKE_DUCKDB_20261015.md) covers exactly ONE wheel, the cp312 or the cp314 one, whichever matches dell1's Python tag. The laptop fetches only that wheel, so the tag has to be read on dell1 first.
+
+**The ask (one):** `0.0.0_AB_MSTR~DELL1`, read only, put in the note of your acknowledgement, for the interpreter that lane 2.0.0_SA_COO~D1 (MDPF_CANON) runs its python work with on dell1: the full path, the output of `python --version`, the output of `python -c "import sys, sysconfig; print(sys.version_info[:3], sysconfig.get_platform(), sys.maxsize > 2**32)"`, and the first three lines of `python -m pip debug --verbose` under Compatible tags. If more than one python is installed, name each one the same way and say which the lane uses. Install nothing; change nothing.

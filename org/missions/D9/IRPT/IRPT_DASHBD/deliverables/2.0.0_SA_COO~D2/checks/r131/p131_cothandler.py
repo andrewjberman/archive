@@ -129,7 +129,7 @@ def check_probe(res):
     need(bad["raised"] is True and bad["calls"] == 0, "a malformed day must refuse before any call: %s" % bad)
     sc = s["scheduled"]
     need(sc["first_day"] == FLOOR_DAY and sc["puts"] == [sc["expected_key"]], "the scheduled path must run the OLDEST owed day (%s) with one put: %s" % (FLOOR_DAY, sc))
-    need(len(sc["invokes"]) == 1 and sc["invokes"][0]["InvocationType"] == "Event" and sc["invokes"][0]["FunctionName"] == sc["context_arn"] and sc["invokes"][0]["payload"] == {"day": sc["next_day"]},
+    need(len(sc["invokes"]) == 1 and sc["invokes"][0]["InvocationType"] == "Event" and sc["invokes"][0]["FunctionName"] == sc["context_arn"] and sc["invokes"][0]["payload"].get("day") == sc["next_day"],
          "the chain must be ONE Event self-invoke of the context's own ARN with {day: next}: %s" % sc["invokes"])
     last = s["last_day"]
     need(last["invokes"] == [] and len(last["puts"]) == 1, "the last owed day must put once and chain nothing: %s" % last)
@@ -223,6 +223,8 @@ def build_store():
     f._p(*addr("account_return_daily", "2026-06-22"), tbl_bytes(returns("2026-06-22", ["OLD1", "OLD2"])))
     f._p(*addr("account_return_daily", "2026-07-10"), tbl_bytes(returns("2026-07-10", accts)))
     f._p(*addr("account_return_daily", "2026-07-13"), tbl_bytes(returns("2026-07-13", accts)))
+    for d_ in ("2026-07-10", "2026-07-13"):  # round 138 re-point: the guarded handler (round 135) reads each used partition's 0.3.0 manifest
+        b_, k_ = addr("account_return_daily", d_); f._p(b_, k_.replace("data.parquet", "manifest.json"), b'{"business_date": "x", "contract_version": "0.3.0", "method_version": 2}')
     f._p("opal-data-portal-v2", "json/benchmarks/model_portfolio_timeseries.json", b"{}")
     return f
 

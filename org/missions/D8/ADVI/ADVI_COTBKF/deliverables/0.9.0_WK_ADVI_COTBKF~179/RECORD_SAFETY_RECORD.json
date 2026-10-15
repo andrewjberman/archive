@@ -1,0 +1,27 @@
+{
+  "module_path": "data/assets/scripts/silver/cotbkf_crm_match_job.py",
+  "module_blob": "44c23f5effd76f628ab94f35eea8b9d943e40a98",
+  "record_keys_changed": ["header_columns", "columns_used", "skipped_members"],
+  "new_tests": [
+    "test_record_safety_headerless_member_first_line_never_reaches_the_record",
+    "test_record_safety_header_member_carries_counts_and_role_names_only",
+    "test_record_safety_columns_used_names_roles_not_header_text",
+    "test_record_safety_member_name_is_truncated_and_sanitised",
+    "test_record_safety_write_record_refuses_a_record_that_carries_member_text",
+    "test_record_safety_headerless_member_first_line_is_read_as_data_or_skipped_never_recorded"
+  ],
+  "existing_tests_unchanged": true,
+  "canary_arm": {
+    "headerless_member_in_record": false,
+    "refusal_on_injected_text": true
+  },
+  "not_established": [
+    "No real CRM zip was read: the job was not run, and every test uses a stub zip with made-up cells.",
+    "The account-id scan (test_cotbkf_no_account_ids.py) did not run to a verdict: it failed closed because the pinned account set is absent on this box (AssertionError: account set absent). The set was not looked for.",
+    "A real CRM zip may hold a delimiter the stub does not; the structural change (counts and role names only) is the first control and the canary refusal is the backstop.",
+    "The canary set covers the first-line cells and the first 200 data cells of each member; a cell beyond the 200th is not canaried.",
+    "A cell of length 4 or more that equals a word in RECORD_VOCAB (the record's own vocabulary) is not canaried; the record writes those words by construction.",
+    "A headerless member is skipped because the job declares no schema for any member; no positional read exists in this module.",
+    "The naming gate printed a WARN (not a refusal that blocked) on the literal in the columns_used format string; it is recorded in the worker report, not overridden."
+  ]
+}

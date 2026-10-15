@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cj-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cj-2.crm-match-job.md",
+    "group": "OTHER",
+    "vintage_commit": "64a3690632"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~177",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round88.md",
+    "vintage_commit": "2aa74d2eda",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cj-2.crm-match-job.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/cotbkf_crm_match_job.py",
+      "kind": "script",
+      "commit_or_etag": "1cd15d4b99",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "reads the CRM zip in memory only (get_object into BytesIO, zipfile); reuses commonwealth_crosswalk and commonwealth_match_r3 by import; writes only the four-column links file and the run record; one assume_role, one head_object, no retry"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py",
+      "kind": "test",
+      "commit_or_etag": "1cd15d4b99",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 stub tests on made-up ids and tokens (A1, B1, H1, T1): python -m pytest 5 passed"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "76c57914c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row ADVI_COTBKF-D1-W177-S1 appended; 28 lines added, 0 deleted"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~177/JOB_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "456ff8b85d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one run: landed false, head_object 403 Forbidden, no read, no links file, rows 0; no CRM value in the file"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~177/JOB_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same figures as JOB_RECORD.json, written from the record; no CRM value"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB88cj2-AC1",
+      "criterion_verbatim": "`CB88cj2-AC1` -- the record names the one key, the output columns equal the allow-list exactly, the links file's header line equals it and its row count equals the record's, the tiers sum to the rows, the 219 splits into matched and unmatched, and the job wrote nothing else to disk. (With landed false the links file is absent and the check reads the record only.)",
+      "method": "command",
+      "invocation": "timeout 60 python org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/round88/checks/crm_checks.py job --file org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~177/JOB_RECORD.json --links C:/dev/_cotbkf_match_20261015/CRM_LINKS.csv",
+      "output_evidence": "CRM-JOB: OK landed=False rows=0 bad=-",
+      "denominator": "8 checks in the job() function of the checker, 0 BAD (rc 0, timeout 60); the record is the only input read because landed is false",
+      "status": "PASS",
+      "expect": "^CRM-JOB: OK landed=(True|False) rows=\\d+ bad=-$"
+    },
+    {
+      "criterion_id": "CB88cj2-AC2",
+      "criterion_verbatim": "`CB88cj2-AC2` -- the allow-list, the tiering, the no-ambiguous-deterministic rule, the nothing-else-written rule and the NOT_LANDED path hold on stubs.",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q",
+      "output_evidence": "5 passed in 0.45s (rc 0)",
+      "denominator": "5 passed of 5 tests in the file (allow-list refusal; pair DETERMINISTIC and household CANDIDATE; two-account ambiguity; nothing-else-written under a guarded open; NOT_LANDED path)",
+      "status": "PASS",
+      "expect": "5 passed"
+    },
+    {
+      "criterion_id": "CB88cj2-AC3",
+      "criterion_verbatim": "`CB88cj2-AC3` -- JUDGMENT, graded by `3.0.0_SA_CVO` at L9 and never self-graded: no CRM column value, name, personal identifier or sample row appears in any committed file, record, log line, message or exception text of this cell; the links carry only the four columns; DETERMINISTIC rests on a direct stable-key pair and nothing weaker; the record states what the job did not read.",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment criterion: output recorded, no verdict)",
+      "output_evidence": "the record JOB_RECORD.json: landed false, rows 0, output_columns the four names, counts 0, rules none, not_established lists the CloudTrail data event, the AssumeRole events, the name-based column choice and the bucket conflict; no CRM_LINKS.csv exists; the committed files carry no CRM value (the module and tests carry none; the run printed counts only)",
+      "denominator": "not applicable (judgment)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: graded by 3.0.0_SA_CVO at L9; the worker records the output and no verdict",
+      "expect": "judgment: recorded, no verdict"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the stub tests assert the rules on made-up ids and tokens",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: the job is one run by design (one assume_role, one head_object, at most one get_object)",
+      "observed": "the single run returned 403 on head_object; AC1 and AC2 re-run on the committed record and the committed module returned the same output",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "CRM_LINKS.csv at C:/dev/_cotbkf_match_20261015/CRM_LINKS.csv",
+      "reason": "not produced: the run landed false (head_object 403), so no links file was written; the checker reads the record only"
+    },
+    {
+      "item": "AC3 judgment row",
+      "reason": "judgment criterion, graded by 3.0.0_SA_CVO at L9; recorded with status UNVERIFIABLE-BY-INSTRUMENT and no verdict"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W177-S1: the grant's CRM bucket (opal-data-cottonwood) differs from opal_naming.address() for the same key (opal-data-assets); the job used the grant's bucket; OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~C1"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~177/ADVI_COTBKF.TO-CB-cj-2.crm-match-job.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "cotbkf_crm_match_job.py",
+      "invocation": "python data/assets/scripts/silver/cotbkf_crm_match_job.py --role-arn arn:aws:iam::313476888478:role/cloudops-cot-crm-match-role --out C:/dev/_cotbkf_match_20261015 --record org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~177/JOB_RECORD.json",
+      "result": "PREP holdings_partitions=3 cw_accounts=1533 reachable=219; CRM-JOB-RUN landed=False rows=0 deterministic=0 candidate=0 ambiguous=0 (rc 0; the one run, refused at head_object 403)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_crm_match_job.py -q",
+      "result": "5 passed"
+    }
+  ]
+}
