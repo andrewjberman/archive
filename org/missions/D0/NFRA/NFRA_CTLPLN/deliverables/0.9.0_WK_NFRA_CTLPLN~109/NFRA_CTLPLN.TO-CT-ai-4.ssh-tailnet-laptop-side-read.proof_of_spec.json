@@ -26,7 +26,7 @@
     },
     {
       "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~109/FWD27_LAPTOP_SIDE_READ.md",
-      "kind": "record",
+      "kind": "doc",
       "commit_or_etag": "2c25aa6cac",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "The printed tool lines verbatim with their time (2026-10-15T12:46:52Z to 12:47:09Z), and the table of FWD-27 arms this cell did not drive, each with its reason and owner.",
@@ -44,6 +44,7 @@
       "output_evidence": "run from the worktree root under timeout 280 on the committed state (test file at b265d96511), 2026-10-15T12:46:52Z, rc=1. Last line: FWD27-LAPTOP-SIDE boxes=3 key_ok=0 password_refused=3 ok=False. Box lines: BOX sitez 100.99.180.19 port22=OPEN key=DENIED password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive; BOX dell1 100.79.95.44 port22=OPEN key=DENIED password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive; BOX dell2 100.104.84.87 port22=OPEN key=DENIED password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive; SSH-VERIFY boxes=3 done=0 not_done=sitez,dell1,dell2. The login is the client default (ssh -G user AzureAD+AndrewBerman), refused on all three; a native ssh with login azuread\\andrewberman is also refused on dell1 (verbose: publickey offered, Permission denied). No login is recorded in the CT-u-2 proof record or CVO row 27.",
       "denominator": "3 boxes read (sitez, dell1, dell2); key_ok=0 of 3; password_refused=3 of 3 (KBDINT-NO-PROMPT, measured)",
       "status": "FAIL",
+      "status_reason": "key_ok=0 of 3: key login is DENIED on sitez, dell1 and dell2 for the client default login; no per-box login is recorded in the CT-u-2 proof record or CVO row 27 (surprise rows NFRA_CTLPLN-W109-S1 and NFRA_CTLPLN-W109-S2). The cell did not guess a login. The order stays open on this row.",
       "expect": "key_ok=3",
       "judgment": false
     },
@@ -61,10 +62,10 @@
   ],
   "controls": {
     "mutant": {
-      "description": "No mutant was run for CTai4-AC1: no box in the register accepts a key login from this laptop, so there is no positive control to break. The tool's positive key path (key ANSWERED, password REFUSED, done=True) is covered by selftest case 1 under CTai4-AC2.",
-      "expected": "not applicable",
-      "observed": "not run",
-      "status": "NOT-RUN"
+      "description": "Positive control for CTai4-AC1 (scratch only, not committed): the test file copied to .scratch/ctrl/.tools/tests/ beside a stub .scratch/ctrl/.tools/ssh-tailnet-verify.py that prints key=ANSWERED:<box> for sitez, dell1 and dell2. The test's pass logic must read ok=True when every box answers key login. The real tool was not changed.",
+      "expected": "FWD27-LAPTOP-SIDE boxes=3 key_ok=3 ok=True (rc 0)",
+      "observed": "FWD27-LAPTOP-SIDE boxes=3 key_ok=3 password_refused=3 ok=True (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "the CTai4-AC1 command run twice: once at 2026-10-15T12:41:50Z on the test bytes of 8f8245a378 (before the one-line password_refused fix), once at 2026-10-15T12:46:52Z on the bytes of b265d96511 (after it); compared on the BOX lines and on the key verdicts",
