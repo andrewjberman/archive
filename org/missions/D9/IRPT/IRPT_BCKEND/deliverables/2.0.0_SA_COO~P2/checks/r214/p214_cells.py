@@ -134,8 +134,9 @@ def c3():
         text(of.get("balance_writer_owner"), 20, "other_files.balance_writer_owner (name the dim_balance writer and its owner)")
         if not any(x.get("partition_present") and x.get("account_positions", 0) > 0 for x in dp):
             fail("a balance_file_gap needs positions still present in some dim_position day")
-    if cl == "closed_at_source" and not (any(c["tr_cd"] for x in ft for c in x["codes"]) or all((not x["partition_present"]) or x.get("account_positions") == 0 for x in dp)):
-        fail("closed_at_source needs a closing or transfer-out code in fact_trn, or no positions in dim_position")
+    last_two_zero = all(x["partition_present"] and x.get("account_positions") == 0 for x in dp[-2:])
+    if cl == "closed_at_source" and not (any(c["tr_cd"] for x in ft for c in x["codes"]) or last_two_zero):
+        fail("closed_at_source needs a closing or transfer-out code in fact_trn, or no positions in dim_position on the last two days (2026-10-13 and 2026-10-14)")
     sc = r.get("self_clears") or {}
     if sc.get("claim") not in CLAIMS or not isinstance(sc.get("account_present_on_2026_10_14"), (bool, type(None))):
         fail("self_clears needs a claim and account_present_on_2026_10_14 (boolean, or null when the partition is absent)")
