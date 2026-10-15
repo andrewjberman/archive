@@ -75,7 +75,7 @@ org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~419/
 </decomp_ref>
 
 <proof_of_spec>
-Criterion ids: IB215-1-AC1, IB215-1-AC2, IB215-1-AC3. The instance goes at `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~419/IB215-1.proof_of_spec.json`.
+Criterion ids: IB215-1-AC1, IB215-1-AC2, IB215-1-AC3. The instance goes at `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~419/IRPT_BCKEND.TO-IB-pr-576.exemption-absent-at-source.proof_of_spec.json`.
 Record in it the order's own relative invocation for each criterion. Validate it with `python .tools/proof-of-spec-check.py <instance>` BEFORE you report.
 </proof_of_spec>
 
