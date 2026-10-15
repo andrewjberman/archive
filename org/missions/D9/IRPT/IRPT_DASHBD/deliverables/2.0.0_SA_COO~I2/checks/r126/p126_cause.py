@@ -126,6 +126,11 @@ def recompute(bodies, extract):
 
 
 def no_identifiers(rec):
+    """No run of 8 or more digits, except in a sha256 value or in a path or file field (the order names both as exempt)."""
+    rec = json.loads(json.dumps(rec))
+    for outer, inner in (("extract", "path"), ("script", "file")):
+        if isinstance(rec.get(outer), dict) and inner in rec[outer]:
+            rec[outer][inner] = ""
     text = re.sub(r"[0-9a-f]{64}", "", json.dumps(rec))
     for m in re.finditer(r"\d{8,}", text):
         need(False, "a run of 8 or more digits in the record: %s" % m.group(0)[:3])
@@ -211,6 +216,13 @@ def selftest():
             pass
         else:
             raise Fail("selftest: an identifier-length run passed")
+        no_identifiers({"extract": {"path": "C:/dev/_x_20261009/IRPT/y.json"}, "script": {"file": "org/a_20261009/b.py"}})
+        try:
+            no_identifiers({"extract": {"path": "ok"}, "note": "acct 20261009"})
+        except Fail:
+            pass
+        else:
+            raise Fail("selftest: a note outside the exempt fields passed")
     print("selftest PASS")
 
 
