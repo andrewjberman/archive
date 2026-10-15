@@ -2,7 +2,7 @@
 # OPLGTW OG-eg-3 AC1 (round-37 HARVEST-RETIRE, PRD v3.11): the site Z harvest runner is retired -- the live task is Disabled, no cycle_runner process runs,
 # the STOP file is present, and the five pin worktrees are still LOCKED (the rollback source).
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
-W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZW"
+W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z"
 [ -f "$W/EG3_BEFORE.json" ] || { echo "EG3_BEFORE.json absent"; echo "RESULT: FAIL"; exit 1; }
 live=$(powershell.exe -NoProfile -Command "\$s = (Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle').State; 'STATE=' + \$s; \$n = @(Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -match 'lib\.opal_data_harvest\.cycle_runner' }).Count; 'PROCS=' + \$n" | tr -d '\r')
 state=$(printf '%s\n' "$live" | sed -n 's/^STATE=//p'); procs=$(printf '%s\n' "$live" | sed -n 's/^PROCS=//p')
