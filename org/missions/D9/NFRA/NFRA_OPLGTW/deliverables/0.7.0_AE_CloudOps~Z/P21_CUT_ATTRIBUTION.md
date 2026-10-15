@@ -122,6 +122,45 @@ role-unavailable arm), `404` for an absent security, and `admit_typed`'s own thr
 (`principal_required`, `harvest_opal_only`, `harvest_prefix_not_served`), every one of them before any
 invoke.
 
+## The suites, run at trunk BEFORE the window, so no red gets diagnosed inside it
+
+| suite | at trunk | transferable to the cut? |
+|---|---|---|
+| `test_og_cp1` | 7 passed | **yes** -- behaviour, not counts |
+| `test_og_nw2` | 4 passed | yes |
+| `test_og_gt5` | 4 passed | yes |
+| `test_og_gt13` | 4 passed | yes |
+| `test_access_state` | 7 passed | yes |
+| `test_admin_people_access` | 7 passed | yes |
+| `test_og_hv1` | 5 passed | yes |
+| `test_entitlement_admin` | 9 passed | **NO** -- it asserts the registered pin, and trunk's 105 agrees with trunk's registry. In the cut it must be 95 against 76 decorators |
+| `test_data_entitlement_family` | 4 passed | **NO** -- same, the non-data pin, 96 at trunk against 86 in the cut |
+
+51 tests pass at trunk, 0 fail. For the seven behavioural suites that means **there is no pre-existing red
+to diagnose inside the ledger window**, which is the whole point of running them now. For the two pin
+suites a trunk green proves only internal consistency AT TRUNK and says nothing about the cut; they are
+the ones the three numbers above govern.
+
+### The pre-declared RED, with the signature that tells it apart from a real one
+
+`tests/test_schwab_host_inputs.py::test_grant_writer_stages_the_contract_only_from_the_standard` fails at
+trunk, as the order says it will. Its exact signature, captured so a DIFFERENT red cannot be mistaken for
+the expected one in Phase B:
+
+```
+assert zf.read(members[0]) == _STANDARD.read_bytes()
+E  assert b'{\n  "contr...on"\n  ]\n}\n' == b'{\n  "contr...on"\n  ]\n}\n'
+E    At index 7913 diff: b'\n' != b','
+tests\test_schwab_host_inputs.py:168: AssertionError
+```
+
+That is the `person_access` addition and nothing else: the package stages the contract from
+`deployed_commit`, where index 7913 still ends the `tenant_firm` entry with a newline, while the standard
+on disk has a comma there because `person_access` follows. **The staged bytes are the deployed commit's;
+the compared bytes are the working tree's.** It turns GREEN in Phase B when the release IS the deployed
+commit, because the two then resolve to the same bytes. A red at any other offset, or with any other
+assertion, is NOT this one and must be read on its own.
+
 ## Seams
 
 Enumerated against the current base with `W/p21_seams.py`: **CLEAR**. Four modules opened, 3 distinct
