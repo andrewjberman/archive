@@ -26,6 +26,9 @@ import p207_cells as P7  # noqa: E402
 G = "data/assets/scripts/gold/investor_reporting/"
 PUB = "infra/aws/lambda/investor-reporting/holdings/publication.py"
 H = "data/assets/scripts/gold/irpt_holdings_performance/"
+# The order files themselves: a worker that flips its own status leaves the order in its commits (AMENDMENT of the check, issuer ruling).
+TO1 = "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-577.wire-absent-at-source.md"
+TO2 = "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-578.split-adjust-49f.md"
 CELLS = {
     "1": dict(
         slot=420, test=G + "tests/test_absent_at_source_wiring.py", min_tests=14, marker="ABSENT-AT-SOURCE-B", rec="IB216-1_record.json",
@@ -34,7 +37,7 @@ CELLS = {
         mutants=[G + "holdings_snapshot.py", PUB],
         allowed=(G + "holdings_snapshot.py", PUB, G + "tests/test_absent_at_source_wiring.py", G + "tests/test_absent_at_source_exemption.py",
                  G + "tests/test_closed_at_source_exemption.py", G + "tests/test_holdings_publish_gate.py", G + "tests/test_holdings_bypass_one_date.py",
-                 "infra/aws/lambda/investor-reporting/holdings/tests/test_publication.py"),
+                 "infra/aws/lambda/investor-reporting/holdings/tests/test_publication.py", TO1),
         required=(G + "holdings_snapshot.py", PUB, G + "tests/test_absent_at_source_wiring.py"), any_of=(G + "holdings_snapshot.py",),
         named=("evidence_49f_counts_accounts_and_positions_in_both_tables", "evidence_cottonwood_reads_holdings_and_allocations",
                "evidence_missing_prior_partition_fails_closed", "loader_error_keeps_the_refusal", "run_firm_publishes_with_the_account_still_listed",
@@ -45,7 +48,7 @@ CELLS = {
         slot=421, test=H + "tests/test_split_adjust.py", min_tests=10, marker="SPLIT-ADJUST-A", rec="IB216-2_record.json",
         regress=[H + "tests/test_holdings_performance.py", H + "tests/test_holdings_comparison.py"],
         mutants=[H + "holdings_performance.py"],
-        allowed=(H + "holdings_performance.py", H + "sources.json", H + "tests/test_split_adjust.py", H + "tests/test_holdings_performance.py"),
+        allowed=(H + "holdings_performance.py", H + "sources.json", H + "tests/test_split_adjust.py", H + "tests/test_holdings_performance.py", TO2),
         required=(H + "holdings_performance.py", H + "tests/test_split_adjust.py"), any_of=(H + "holdings_performance.py",),
         named=("split_day_unchanged_holding_reads_zero_return", "ratio_is_the_median_over_accounts_without_other_activity",
                "unclean_ratio_is_split_ratio_absent_and_not_graded", "no_split_day_is_identical_to_the_unadjusted_return",
