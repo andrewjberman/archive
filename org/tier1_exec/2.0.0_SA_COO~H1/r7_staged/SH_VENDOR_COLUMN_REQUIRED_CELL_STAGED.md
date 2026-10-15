@@ -28,7 +28,12 @@ staged, not cut. It enters the next rectangle on the round-6 analysis's ENRICHME
    and whose later days are Bloomberg carries both.
 4. Docstring: "bloomberg" | "yahoo_finance".
 
-## Criteria (at most three, mechanical; each FAILS at the base, to be dry-run before the cut)
+## Criteria (at most three, mechanical)
+
+Dry-run at the base 2026-10-15 ~22:4xZ with `R3_CHECKS/r3_named_tests.py WRITER <test file> <name>` (control: the existing
+`test_three_values_per_day` reads WRITER-TESTS-OK): AC1 `test_source_required_closed_vocabulary` and AC2 `test_mixed_vendor_roundtrip` read
+WRITER-TESTS-BAD (the tests do not exist yet, so they FAIL at the base). AC3 PASSES at the base by construction: it is a keep-green guard on the three
+r3 tests, not a fail-at-base criterion; the cut says so, or drops it. Re-run all three at the cut, at HEAD.
 
 - AC1: a test that a priced row with source missing, None, "yahoo", "sechist" or "Bloomberg" is refused, with the switch off.
 - AC2: a test that a mixed security (3 days yahoo_finance, 2 days bloomberg) round-trips through `write_series` to a fake store with
