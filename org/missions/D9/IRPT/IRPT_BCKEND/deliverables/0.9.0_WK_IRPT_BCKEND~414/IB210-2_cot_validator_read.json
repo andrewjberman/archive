@@ -12,31 +12,36 @@
     "identifier": "def cot_screen_accounts("
   },
   "source_rows": {
-    "count": 0,
-    "distinct_dates": 0
+    "count": 2,
+    "distinct_dates": 3
   },
   "offline_run": {
+    "performed": true,
     "read_only": true,
     "writes": 0,
     "published": false,
-    "invocation": "python -B import_probe.py (loads holdings_snapshot.py from the sparse worktree; no account id)",
-    "outcome": "not_run"
+    "invocation": "python -B offline_run.py (scratch outside the repository; imports holdings_snapshot.py from the worktree and calls validate_cot_actual_positions with the arguments cot_screen_accounts uses for one account)",
+    "outcome": "refused"
   },
   "failing_condition": {
-    "name": "",
-    "claim": "absent",
-    "statement": "No offline run was made, so no validator condition was measured for the dropped account; the cause stays as the S158 read left it, a candidate_filter at the COT account screen, inferred.",
-    "explanation": "Not named here. The validator raise sites are its REFUSED strings at lines 381 to 515, each checking one COT source property (vintage, currency authority, identity, number form, duplicate economics, account census, tie tolerance); which one fires for this account is not measured."
+    "name": "custody missing required actual fields/rows",
+    "claim": "measured",
+    "site": {
+      "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "line": 403,
+      "identifier": "raise ValueError(\"REFUSED: COT %s missing required actual fields/rows (including explicit currency)\""
+    },
+    "explanation": "Refuses the custody frame when it has duplicate columns, lacks a required field, or has no rows (the frame.empty test at line 402). The screen's no-position filter removed every source row of this account on the candidate date, so the custody frame is empty when the validator runs."
   },
   "fix_options": [
     {
-      "option": "Correct the per-account input that cot_screen_accounts hands the validator, once a run measures which condition refuses the account",
+      "option": "A screen decision on accounts whose only source rows carry no position: the screen records that reason instead of validating an empty frame",
       "site": {
         "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
-        "line": 2284,
-        "identifier": "validate_cot_actual_positions(h, t, custody_as_of=custody_as_of, valuation_as_of=valuation_as_of,"
+        "line": 2281,
+        "identifier": "h = h.loc[~h[COT_NUMERIC_FACTS].isna().all(axis=1)]"
       },
-      "effect": "If the refusal is an input-shape defect in the per-account call, the account passes the screen on its own rows and the publish gate sees no account_lost; the validator and its guard are unchanged."
+      "effect": "Measured: this account has zero independent-total rows on 2026-10-13, so the screen change alone would not make it supported; the total is a second gate. The validator and the publish guard are unchanged."
     },
     {
       "option": "A custodian-confirmed closure recorded as a TERMINATED mark in the directory, which the closed-account exclusion reads",
@@ -46,16 +51,26 @@
         "identifier": "closed = closed_accounts() & gone"
       },
       "effect": "The publish gate lists the account under closed_accounts_not_refused instead of refusing with account_lost; the COT screen still drops the account, so the candidate does not regain it."
+    },
+    {
+      "option": "A custodian source confirmation of the no-position rows: if they are real no-position pairs the refusal is correct, if stale a source correction",
+      "site": {
+        "file": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+        "line": 2364,
+        "identifier": "absent = holdings[numeric].isna().all(axis=1)"
+      },
+      "effect": "The no-position rule at build_cot decides which rows are absent at the as-of date; a source correction changes the input the screen sees and needs no change to the validator or the guard."
     }
   ],
   "ids_private": true,
   "notes": [
-    "The S158 read (IB209-1, worker 412) located the lost account in the fact_holdings source on three dates. This order did not re-derive that account identity, and no account id, count of accounts or value is recorded here.",
-    "Offline run not performed: holdings_snapshot.py imports ids, publication and currency_authority from infra/aws/lambda/investor-reporting, which lies outside the granted sparse checkout. The probe stopped with ModuleNotFoundError (rc=3). See row IRPT_BCKEND-D2-W414-S1 in INVESTIGATION_v1.md.",
-    "The validator body was read at lines 348 to 548 of holdings_snapshot.py and its raise sites are at lines 381 to 515. The failing condition is therefore not measured and is left absent; the cause stays inferred from S158.",
-    "source_rows count 0 means no rows were read, not that the account has none: the order step 1 identifies the account from the served snapshot and the candidate, which this order did not reach before the import blocker. AC1 fails on this record's own content.",
-    "Check AC2 passes this record through the accepted branch of v2 although no run was made. See row IRPT_BCKEND-D2-W414-S2 in INVESTIGATION_v1.md; the grader should weigh that.",
-    "Not read: any object in S3 in this order, the candidate snapshot, the directory. No AWS call was made, no function of the validator was called, and the six counters are 0."
+    "Dropped account identified by matching the latest refusal record's account_lost id against the source census of the candidate date; the id is held in scratch only and is not recorded here.",
+    "Source rows: 2 rows of the account on the candidate date 2026-10-13, all four COT numeric facts null on both; 2 rows on each of the 2026-10-08 and 2026-10-12 partitions; 3 distinct dates. Independent-total rows for the account on 2026-10-13: 0.",
+    "Offline run: validate_cot_actual_positions called from the repository file with the arguments cot_screen_accounts uses for one account. After the no-position filter the custody frame had 0 rows, so the custody refusal at line 403 fired (frame.empty at line 402).",
+    "Cross-check, read-only: cot_screen_accounts over the 1001 source accounts refused 138 (136 with the same custody reason, 2 repeated rows); the dropped account is refused for the custody reason, not accepted.",
+    "Sparse grant added locally and never committed, per amendment 1: infra/aws/lambda/investor-reporting (the import chain) and docs/contracts/investor-reporting/v1 (CurrencyAuthorities.json, read at call time). See row IRPT_BCKEND-D2-W414-S3.",
+    "functions_invoked 0 counts deployed AWS functions invoked; the local validator and screen calls are the order step 3 and are not AWS invocations. No AWS write, no publish, no sign-in; GET of existing objects only. See row IRPT_BCKEND-D2-W414-S4.",
+    "Not read: the served publication document and the candidate snapshot itself; the refusal condition does not depend on either."
   ],
   "functions_invoked": 0,
   "sign_ins_made": 0,
