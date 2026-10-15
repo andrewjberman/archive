@@ -1,0 +1,16 @@
+# Round 9 findings for the L10 slug and the CTO's round-9 analysis -- DRAFT (issuer 2.0.0_SA_COO~Q1, 2026-10-15 ~20:2xZ)
+
+**Status:** a running list, not the slug. The slug goes to `1.0.0_SA_CTO` once every task order of round 9 is terminal (`TO-DQ-t34`, AC2 on the 2026-10-17 site Z fire, is the one still open) and the ARMED rows are dispositioned. Each item names the measurement it rests on; nothing here is built.
+
+| # | finding | measured at | candidate cell for round 10 |
+|---|---|---|---|
+| 1 | Bloomberg history may draw on trading days (Andrew, CTO msg 6164). One gate in `standing_drawer.run` stops a trading day; the task already fires daily; room = ceiling less the day's budget-ledger spend; the held reserve (7,322) exceeds the measured ceiling (5,858); the ledgers live at site Z. | `deliverables/2.0.0_SA_COO~Q1/TRADING_DAY_DRAW_DESIGN_20261015.md` @5062c19915 | `DQ-t-69` code; `DQ-t-70` CloudOps (WORLD); restate finish dates from the first trading-day draw |
+| 2 | The standing Yahoo extension is 6 symbols a day after the gate swap (528 of 538 stored names are V2-held and left out), so their stored prices stop at their present `valid_to` until Bloomberg replaces them (35 drawing days, 2027-01-30 on the non-trading-day rule; about 11-20 if trading days draw). | `extend_frontier.py --plan` 2026-10-15; CTO ruling amendment 4 | none: ADVI_COTBKF's read of `use_class` (C3) and its Bloomberg need |
+| 3 | 634 of the 1,705 securities outside V2 have no symbol in any source read (index, request files, Cottonwood transactions). | `inactive_set.py --census` @b3b9b93e2b | a symbol source for them, or a decision that they stay unpriced (the 10-13 quota rule bars Bloomberg for them) |
+| 4 | The Yahoo gate reaches client-class requests only; an active CUSIP in a non-client request (scanner, TR comparison) still draws on Yahoo. Ruled no change (worker row `W58-S2`). | `test_demque_yahoo_gate.py`; row W58-S2 | none unless the CTO widens the rule |
+| 5 | The first wired Yahoo run (10-14): three money-market symbols fail on `period='max'` every night; `BRK-B` and `BRKB` cost two requests for one security; ~80 requests a night went unused (319 of 400). | `ROUND9_WIRED_RUN_RECEIPT_20261014.md` | covered in part by `DQ-t-62`; the unused budget is now the backfill's |
+| 6 | The sparse worktree cone lacked three folders the demque tests import (`data/assets/scripts/silver`, `data/etfs`, `data/cot/scripts/gold`) and four tests need `integrations/`; two workers lost a pass to it. | worker rows W56-S1, W56-S2, W57-S1 | `wk-provision.sh` base set for MDPF_DEMQUE orders (an issuer note, not a product cell) |
+| 7 | `extend_frontier.py --plan` pops `securities` before printing, so a CLI criterion cannot grade the request's securities; the issuer's check read it in-process. | row W58-S1, amendment `4db7e177eb` | none (record) |
+| 8 | Order of the Bloomberg queue (CTO amendment 2): B1, failed-14, porting test, 27 active slices, then the seven ETFS_RIVALS requests; RIVALS starts after the active need on today's rule. | `standing_drawer.py --open` read-back @b2c7756c7a | none; re-date when `99be` takes effect |
+
+**Open at the date of this draft:** the 22:30 ET run (02:30Z 10-16) is the window for ledger leg L3 of `mdpf-demque-inactive-yahoo-20261015`; `TO-DQ-t34` AC2 waits on the 10-17 fire and its receipt on 10-18.
