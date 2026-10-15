@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-15</date>
-    <status>pending</status>
+    <status>superseded -- window 2 ran once (2026-10-15 17:00Z, ledger closed): the filing was accepted live; RUN2-AC1 and RUN2-AC3 pass, RUN2-AC2 (4 of 4 attachments) did not hold (the resident registry gap, AR-y-357); window 3 follows resident release r32 under a new pair addendum</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>

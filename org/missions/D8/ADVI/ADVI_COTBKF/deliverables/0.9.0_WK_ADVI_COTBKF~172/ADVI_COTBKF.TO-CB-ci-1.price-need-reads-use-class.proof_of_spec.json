@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ci-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-1.price-need-reads-use-class.md",
+    "group": "OTHER",
+    "vintage_commit": "73e663123e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~172",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round87.md",
+    "vintage_commit": "73e663123e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ci-1.price-need-reads-use-class.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_price_need.py",
+      "kind": "script",
+      "commit_or_etag": "4ee1575acf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code only; a read-only ranking script, not run against S3 or a real data dir by this worker (order BOUNDS)"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_price_need.py",
+      "kind": "test",
+      "commit_or_etag": "4ee1575acf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code only; 5 tests added, 0 removed (git diff --numstat 73e663123e -- this file: 66 0)"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~172/USE_CLASS_READ_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "9ee9b7926c2f5538e5040236b7d049332044ae7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record; commit_or_etag is the git blob of the file, committed in the flip commit carrying this instance"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~172/USE_CLASS_READ_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "5e7e4e18fc8d1c3f6e2fdd65648102e16b7538d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the short record; commit_or_etag is the git blob of the file, committed in the flip commit carrying this instance"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB87ci1-AC1",
+      "criterion_verbatim": "the five use_class tests pass. invocation: python -m pytest data/assets/scripts/silver/tests/test_commonwealth_price_need.py -q -k use_class  expect: 5 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_price_need.py -q -k use_class",
+      "output_evidence": "5 passed, 11 deselected in 0.69s (rc 0)",
+      "denominator": "5 of 5 use_class tests passed (11 deselected)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB87ci1-AC2",
+      "criterion_verbatim": "the whole test file, the 11 existing tests and the 5 new ones, passes with the existing tests unchanged. expect: PRICE-NEED-TESTS rc=0",
+      "method": "test_suite",
+      "invocation": "python -c \"import subprocess,sys;r=subprocess.run([sys.executable,'-m','pytest','data/assets/scripts/silver/tests/test_commonwealth_price_need.py','-q'],capture_output=True,text=True);print('PRICE-NEED-TESTS rc=%d last=%s'%(r.returncode,r.stdout.strip().splitlines()[-1]))\"",
+      "output_evidence": "PRICE-NEED-TESTS rc=0 last=16 passed in 0.75s",
+      "denominator": "16 of 16 tests in the file passed (11 existing unchanged + 5 new)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB87ci1-AC3",
+      "criterion_verbatim": "the record names the module at HEAD, its blob equals what is committed, and it reports the active CUSIP count read from the pinned file and the tests-unchanged flag. expect: blob_equal=True",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~172/USE_CLASS_READ_RECORD.json',encoding='utf-8'));b=subprocess.check_output(['git','rev-parse','HEAD:'+d['module_path']]).decode().strip();print('USE-CLASS-RECORD blob_equal=%s active_cusips=%d tests_unchanged=%s'%(b==d['module_blob'],d['active_cusips'],d['existing_tests_unchanged']))\"",
+      "output_evidence": "USE-CLASS-RECORD blob_equal=True active_cusips=3368 tests_unchanged=True (rc 0)",
+      "denominator": "1 of 1 module blob equal to HEAD (23fb24d68f39034537f5dc41788f96cc0fd177dc); 3368 active CUSIPs read from the pinned file",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control for this cell",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the rank is a deterministic sort on (covered, tier, score, cusip) and the record is a fixed read; no two-run comparison was named",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_cotbkf_no_account_ids.py passing on this box",
+      "reason": "fails closed: the pinned account set is absent on this box (AssertionError: account set absent (COTBKF_ACCOUNT_SET or default path)); the order says report the error and do not look for the set; the issuer runs a count-only substitute at the drain"
+    },
+    {
+      "item": "the CLASSES branch against the real index, and the real index's row values",
+      "reason": "item 6 read the schema only; the index carries no use_class column today, so NO_COLUMN is the live state; no row or class value was read"
+    },
+    {
+      "item": "a real run of commonwealth_price_need.py against a default run's data dir",
+      "reason": "order BOUNDS: no write into the repository from a real data dir and no S3 write; the USE-CLASS-INDEX line is therefore not produced on real data by this worker"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W172-S1: item 6 read the index footer with pyarrow read_schema over the same s3:// address, not an s3api get-object; schema only, no whole-object download, no write"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~172/ADVI_COTBKF.TO-CB-ci-1.price-need-reads-use-class.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_price_need.py -q -k use_class",
+      "result": "5 passed, 11 deselected"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_price_need.py -q",
+      "result": "16 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests/test_cotbkf_no_account_ids.py -q -s",
+      "result": "1 failed: account set absent on this box (fails closed; reported, not a criterion)"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CB87ci1-AC1,CB87ci1-AC2,CB87ci1-AC3",
+      "result": "VALID (rc=0): 3 acceptance rows, 0 violations"
+    }
+  ]
+}

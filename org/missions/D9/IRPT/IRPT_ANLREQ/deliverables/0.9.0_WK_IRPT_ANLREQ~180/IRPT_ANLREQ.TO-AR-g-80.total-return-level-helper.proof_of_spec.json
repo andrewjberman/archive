@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-80",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-80.total-return-level-helper.md",
+    "group": "OTHER",
+    "vintage_commit": "4a5c5d1e1b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R11_G.md",
+    "vintage_commit": "4a5c5d1e1b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-80.total-return-level-helper.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~180",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tr_level.py",
+      "kind": "script",
+      "commit_or_etag": "b514be729c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pure stdlib module (imports __future__, datetime, math, re, typing); chain_levels at line 80, returns_from_levels at line 97; nothing deployed, no AWS call, no network",
+      "artifact_covered_by": [
+        "AR80-g-AC1",
+        "AR80-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_tr_level.py",
+      "kind": "test",
+      "commit_or_etag": "b514be729c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 offline tests, hand-computed values: 11 passed in 0.13s",
+      "artifact_covered_by": [
+        "AR80-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR80-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g80_checks.py g80",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g80_checks.py g80",
+      "output_evidence": "AR-G80-OK cases=10 tests=11 (run from the worktree root, rc=0: 'cases 10, wrong none'; 'worker tests: 11 passed in 0.13s'; second run byte-identical)",
+      "denominator": "cases 10 of 10 right, wrong none; worker tests 11 passed, 0 failed (need >= 6)",
+      "expect": "^AR-G80-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR80-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g80_checks.py hygiene",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g80_checks.py hygiene",
+      "output_evidence": "AR-G80-HYGIENE-OK imports=__future__,datetime,math,re,typing (rc=0; second run byte-identical)",
+      "denominator": "1 module, 0 non-ASCII bytes, 0 imports outside the allowed set, 0 calls to open/print/exec/eval/__import__",
+      "expect": "^AR-G80-HYGIENE-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scratch additive mutant of chain_levels (level = level + base*r instead of compounding; .scratch/tr_level_mutant.py, not committed) run through the checker's cases() function",
+      "expected": "at least one of the ten cases wrong (the checker sees the additive mutant)",
+      "observed": "2 of 10 wrong: 'chain from base' and 'sorted, repeat keeps later'; the green module gives 10 of 10 right. The record's three-case figure is not reproduced; see surprise IRPT_ANLREQ-D2-W180-S1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the g80 and hygiene modes, outputs compared byte for byte",
+      "observed": "g80 run 1 and run 2 identical; hygiene run 1 and run 2 identical",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W180-S1: the cut's record says the checker feeds a mutant arm (additive fails three cases); ar_g80_checks.py has no mutant arm, and an additive mutant fails two of ten cases"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g80_checks.py g80 ; ... hygiene ; python -m pytest -q infra/aws/lambda/investor-reporting/ycharts/research/tests/test_tr_level.py",
+      "result": "g80: AR-G80-OK cases=10 tests=11; hygiene: AR-G80-HYGIENE-OK; pytest 11 passed"
+    }
+  ]
+}

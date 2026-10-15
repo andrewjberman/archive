@@ -1,0 +1,184 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-eg-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-15/eg3_harvest_runner_retired.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "532d1e68bb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "6fc29c2dbf",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-eg-3.harvest-runner-retire.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the live task is Disabled, no cycle_runner process runs, the STOP file is in place and the five pin worktrees are still locked.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/eg3.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)task state Disabled; cycle_runner processes 0; STOP file present yes; pins locked 5 of 5.*RESULT: PASS.*exit=0",
+   "output_evidence": "task state Disabled; cycle_runner processes 0; STOP file present yes; pins locked 5 of 5\nRESULT: PASS\nexit=0",
+   "denominator": "task state read from Get-ScheduledTask; cycle_runner processes 0 -- and this seat's own first census of that population was WRONG, matching any command line containing the token and so counting the probe's own bash wrapper (floor 1, exit condition 0, row Z-S152). The number above was re-taken with a filter a wrapper cannot satisfy (pythonw/python AND -m lib.opal_data_harvest.cycle_runner), against a denominator of 720-739 processes, with an any-python positive control of 47-50 so the zero is absence and not a dead filter. Pins 5 of 5 from the WHOLE 52-record porcelain list, never a positional cut.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the three ledgers are closed with their sentinels gone, the two earlier ledgers read SUPERSEDED, and the proof records FIRSTREC and WINDOW as NOT-EXERCISED.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/eg3.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)ledgers closed 3 of 3; sentinels at HEAD 0; superseded closes 2 of 2; proof legs not-exercised yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "ledgers closed 3 of 3; sentinels at HEAD 0; superseded closes 2 of 2; proof legs not-exercised yes\nRESULT: PASS\nexit=0",
+   "denominator": "3 of 3 ledgers closed and 0 of 3 sentinels left at HEAD; 2 of 2 superseded closes found, read from the last leg proof of each entry because deploy_ledger.py writes its own fixed close line and the order's 'say so in each close line' can only land there; FIRSTREC and WINDOW recorded NOT-EXERCISED rather than passed -- this seat ran neither eg2.AC2.sh nor sa1.AC2.sh and claims neither passes.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "Every state this act changed was read back on the instrument that owns it, and every state it must NOT change was compared field by field against the step-1 read rather than eyeballed. The stop was gated on the runner's own exit, not a clock.",
+   "observed": "State Running -> Disabled with Settings.Enabled false and the task still registered; arguments (412 chars), working_directory (64) and execute (38) byte-equal before and after; runner_processes 1 -> 0 of 720 with an any-python control of 50; STOP file present at 305 bytes and left in place; pins 5 of 5 locked; 3 ledgers closed and 0 sentinels at HEAD.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. THREE negative arms stand in its place, and one of them caught a real defect in this seat's own instrument. (a) the process census carries an any-python positive control, so a zero cannot be a dead filter. (b) the loose token filter was re-run AFTER the probe was stopped, which is the control that proved the two it had been counting were its own. (c) the stop predicate was read out of the module (exists()-only, passed down to the backfill driver) instead of inferred from the file's name.",
+   "expected": "the control reads non-zero where the target reads zero; the loose filter drops to 0 once the censor is gone; the predicate is existence, not content",
+   "observed": "any-python 47-50 against runner 0; the loose filter read 2 with the waiter armed (both rows created at 18:22:29Z, the second it was armed) and 0 of 732 after it was stopped, while the real runner PID 37428 was already absent; stop_requested is bool(args.stop_file and Path(args.stop_file).exists()).",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/EG3_BEFORE.json",
+   "kind": "config_data",
+   "commit_or_etag": "9e71fa7215",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the step-1 read-only before-state, taken from Export-ScheduledTask and a Win32_Process census with its denominator printed; eg3.AC1 reads stop_file out of this file and tests it on disk",
+   "introduces": [
+    "runner_processes",
+    "stop_file"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/EG3_PROOF.json",
+   "kind": "config_data",
+   "commit_or_etag": "9e71fa7215",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the step-7 record; eg3.AC2 reads firstrec_not_exercised and window_not_exercised out of it, and its stopped_at/disabled_at/state/runner_processes/pins_locked are the read-back the order asks to be carried to dell1",
+   "introduces": [
+    "firstrec_not_exercised",
+    "window_not_exercised",
+    "disabled_at"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261015T1810Z_nfra-oplgtw-harvest-runner-retire_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "9e71fa7215",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "this act's own ledger, opened entry-and-sentinel-first BEFORE the STOP file and closed with all four legs proven; eg3.AC2 reads it as 1 of the 3 closed ledgers with 0 sentinels at HEAD",
+   "introduces": [
+    "LEG ledgers-superseded closed"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261015T0742Z_nfra-oplgtw-harvest-runner-silver-cache_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "9e71fa7215",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "OG-eg-2's ledger, closed SUPERSEDED with its FIRSTREC leg recorded NOT-EXERCISED; the SUPERSEDED wording sits in the leg proof because deploy_ledger.py writes its own fixed close line, and eg3.AC2 counts it there",
+   "introduces": [
+    "CLOSED SUPERSEDED BY NFRA_OPLGTW.TO-OG-eg-3"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261014T2209Z_nfra-oplgtw-harvest-runner-sa_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "9e71fa7215",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "OG-sa-1's ledger, closed SUPERSEDED with its WINDOW leg recorded NOT-EXERCISED, same shape",
+   "introduces": [
+    "CLOSED SUPERSEDED BY NFRA_OPLGTW.TO-OG-eg-3"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "9e71fa7215",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the two rows this act surfaced: the order's false premise about post-outage capture, and this seat's own self-matching process census",
+   "introduces": [
+    "NFRA_OPLGTW-Z-S151",
+    "NFRA_OPLGTW-Z-S152"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "the step-1 before-read",
+   "invocation": "Export-ScheduledTask XML + Get-ScheduledTask State + Get-CimInstance Win32_Process",
+   "result": "State Running, 1 cycle_runner of 712 processes, PID 37428 created 07:47:40Z -- the creation time that later explained why the 14:02Z Python outage had not stopped it"
+  },
+  {
+   "tool": "the stop predicate, read rather than assumed",
+   "invocation": "native Grep over lib/opal_data_harvest/cycle_runner.py",
+   "result": "stop_requested is bool(args.stop_file and Path(args.stop_file).exists()) -- existence only, content never read -- and the stop file is passed down to the backfill driver, which is why the end lands on a JOB boundary"
+  },
+  {
+   "tool": "the pin lock census",
+   "invocation": "git worktree list --porcelain, parsed WHOLE on blank-line boundaries",
+   "result": "52 records; all five named pins carry a locked line with its reason; 5 of 5"
+  },
+  {
+   "tool": "the deploy ledger",
+   "invocation": ".tools/deploy_ledger.py open / close-leg x4 / close, three slugs",
+   "result": "nfra-oplgtw-harvest-runner-retire opened entry-and-sentinel-first BEFORE the STOP file and closed with 4 legs proven; silver-cache and sa closed SUPERSEDED"
+  },
+  {
+   "tool": "the criteria",
+   "invocation": "bash .../r37/checks/eg3.AC1.sh and eg3.AC2.sh",
+   "result": "both RESULT: PASS, exit 0"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S151: the order's premise that site Z stored new 0 for every publisher since the 14:02Z Python outage is FALSE for sa -- 'JOB sa ... status=new_articles stored=2' at 18:25:18Z and 'CYCLE sa ... asked 242 new 3' at 18:33:06Z. The live process started 07:47:40Z and kept the standard library it had loaded; the outage broke new LAUNCHES only. The retire stands on its own authority, but the sa baseline dell1 will be compared against is new 3 over 7 of 242 pairs, not zero.",
+  "NFRA_OPLGTW-Z-S152: this seat's own exit-waiter matched any command line containing the token cycle_runner, and its own bash wrapper carried that token, so the census included the censor -- floor 1, exit condition 0. Left armed it would have reported RUNNER-STILL-UP-AFTER-2H and obliged a FALSE ARMED row about a runner that had exited cleanly 100 minutes earlier. A census must exclude the censor."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the live scheduled task and the STOP file are not artifacts_produced rows",
+   "reason": "Deliberate, and said here so it does not read as an omission. The checker resolves every artifact row against git except s3_object, ddb_rows and aws_resource, and a Windows scheduled task is none of those -- claiming one of those kinds to buy a skip would be a false kind. The task's state change and the STOP file are what AC1 grades directly (task state Disabled, STOP file present yes) and what EG3_PROOF.json records; they are acts read on their own instrument, not files this seat authored."
+  },
+  {
+   "item": "FIRSTREC (OG-eg-2) and WINDOW (OG-sa-1) are not proven, and are not claimed to be",
+   "reason": "Both wanted evidence from a future site Z cycle: the first post-restart cycle record carrying s3_get_count/s3_get_bytes, and an SA bronze object newer than the re-registration for BA, BABA and COST. The runner is retired and site Z will not run another cycle, so neither can ever be produced here. Closed SUPERSEDED under the CTO's ruling with each leg recorded NOT-EXERCISED; this seat ran neither eg2.AC2.sh nor sa1.AC2.sh. The E1/E2 GET-bytes proof is owed on dell1 at pin 39ae28559b."
+  },
+  {
+   "item": "the exact instant the runner process exited",
+   "reason": "Not recorded by any instrument on this box, so EG3_PROOF.json bounds it instead of inventing it: present at 18:13:30Z, last log line 18:33:06Z, absent at 18:53:36Z. stopped_at is set to the runner's own 'no further cycle' line, which is the moment it DECIDED to end, and the field says so rather than implying a measured exit."
+  }
+ ]
+}

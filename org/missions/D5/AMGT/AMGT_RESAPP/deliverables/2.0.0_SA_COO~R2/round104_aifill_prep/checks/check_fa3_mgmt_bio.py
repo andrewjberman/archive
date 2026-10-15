@@ -17,7 +17,7 @@ def main():
     from lib.research.aifill import contract
 
     arms = L.Arms("FA-3")
-    BIO_TEXT = "Christophe Fouquet joined ASML in 2008 and is President and CEO."
+    BIO_TEXT = "Christophe Fouquet has served as chief executive since April 2024. His mandate runs to the end of the decade."
 
     def opal_case():
         inputs = L.served_inputs()
