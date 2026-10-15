@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-pt-5",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~92",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cd23ff4f60"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "cd23ff4f60",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pt-5.mdpf-category-views-by-row.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_mdpf.py",
+      "kind": "script",
+      "commit_or_etag": "6b381d604e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only (order section 2: no release, no deploy, no IAM, no Terraform, no bucket write, no registration in app/tools.py). Committed @6b381d604e on wk-NFRA_OPLGTW-92, LOCAL. Defines the top-level tool mdpf_get_category_views(scope). Reads one object per call through typed_scope (one get_object, no list). The bucket, prefix and key template come from the entity's DATA_CATALOG row at call time; the module types no S3 literal for this table.",
+      "introduces": [
+        "mdpf_get_category_views"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pt5.py",
+      "kind": "test",
+      "commit_or_etag": "6b381d604e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline tests with a recording fake bucket, a stand-in principal, a recording audit sink, the clock pinned to 2026-10-14, and a SYNTHETIC catalog YAML loaded through catalog_gate.load_catalog. Committed @6b381d604e. Named tests: test_ogpt5_ac01, test_ogpt5_ac02, test_ogpt5_ac03, test_ogpt5_ac04.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6b381d604e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows NFRA_OPLGTW-Z-W92-S1..S5 appended @6b381d604e as fenced json blocks (the gate's new-row check passed on that commit).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the tool is built, reuses the existing firm gate, proves the two-firm negative arm, and refuses bad scopes before any read.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests (test_ogpt5_ac01, test_ogpt5_ac02, test_ogpt5_ac03, test_ogpt5_ac04) passed; failed or error lines 0. The two-firm negative arm is test_ogpt5_ac02 (one refusal, zero S3 calls, one audit record; then the same principal served for its own scope).",
+      "status": "PASS",
+      "status_reason": "Re-run at HEAD 6b381d604e from the worktree root (timeout 120, rc 0): pytest rc=0, named tests passed 4 of 4, RESULT: PASS, exit=0. Re-run after the scope-derivation change and again after the commit; the determinism pair is byte-identical.",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: against the real portal bucket a bad scope reads nothing, a non-Opal principal is refused, and an admitted read equals an independent read (or the gate's own refusal is returned).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/pt5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "category views: bad scopes refused True; global served False with its own as-of inside the object False; non-Opal refused True\nRESULT: PASS\nexit=0",
+      "denominator": "Three probe arms against the real catalog and the real bucket, box credentials, read only: bad scopes refused 3 of 3 (not-a-firm, empty, ../global; each harvest_bad_argument); global read: the gate's own refusal returned (served False, guard_denied True), the admitted-read arm not exercised; non-Opal refused 1 of 1 (typed_opal_only).",
+      "status": "PASS",
+      "status_reason": "Re-run at HEAD 6b381d604e from the worktree root (timeout 120, rc 0). The global arm is served False because the gate's principal comes from the request email, which the probe does not set; the gate's own refusal is returned, which the criterion accepts. Recorded as surprise row NFRA_OPLGTW-Z-W92-S4. The row's real-catalog entity resolves (entity found once, retired false).",
+      "expect": "(?s)category views: bad scopes refused True; global served (True|False) with its own as-of inside the object (True|False); non-Opal refused True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control for this cell; none was designed or run.",
+      "expected": "N/A: the criteria name no mutant.",
+      "observed": "Not run: no mutant was applied to the module. The two-firm negative arm and the bad-scope refusals are asserted in test_ogpt5_ac02 and test_ogpt5_ac03 and passed at 6b381d604e.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The four-test file tests/test_og_pt5.py run twice on the same HEAD with -v and -p no:cacheprovider; the timing suffix and the progress percentages stripped; the two outputs compared with cmp.",
+      "observed": "Run 1 rc=0 and run 2 rc=0; the two outputs are byte-identical (4 PASSED in each).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registration of mdpf_get_category_views in app/tools.py, the data_entitlement and destructive_ops tables, and the pinned tool counts",
+      "reason": "Order section 2: the issuer registers every tool and re-pins the counts at the merge, in one commit. Expected registration: the tool name mdpf_get_category_views, with one tool added to the pinned count of the gateway's typed harvest and portal tools (the issuer's count, not measured here)."
+    },
+    {
+      "item": "A live admitted read of the global object with the box credentials",
+      "reason": "The gate reads its principal from the request email, which the probe does not set; the probe's served arm is therefore the gate's own refusal, which the criterion accepts. Not forced by the worker (surprise row NFRA_OPLGTW-Z-W92-S4)."
+    },
+    {
+      "item": "Edits to app/refs/DATA_CATALOG.yaml, app/graphql_plumbing/catalog_gate.py, app/integrations/portal_index/integration.py and the probe file under the issuer's checks directory",
+      "reason": "Order section 2 and section 1: NFRA_MCPINDEX's alone, the gate's own module, and the issuer's check file. None edited."
+    },
+    {
+      "item": "The task-order status flip to complete",
+      "reason": "Made only after both criteria PASS against the committed bytes; see the session_log for the measured order of operations."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W92-S1: the category-views entity row sits under silver_datasets and is not indexed by the gate loader, so the firm verdict is the per-scope aggregate-AUA row's verdict (ARMED, disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W92-S2: the row's top-level freshness_field names the scope key while its contract names the as-of field as_of; the tool reads the contract's field (INERT).",
+    "NFRA_OPLGTW-Z-W92-S3: the order names app/catalog_gate.py, which is at app/graphql_plumbing/catalog_gate.py at HEAD; read, not edited (INERT).",
+    "NFRA_OPLGTW-Z-W92-S4: the gate reads the request email while the admission reads the request principal; the probe sets only the second, so the global arm is the gate's refusal (INERT).",
+    "NFRA_OPLGTW-Z-W92-S5: the typed admission refuses non-Opal addresses before the firm gate runs, so the two-firm arm is reached only with an Opal-domain address whose gate identity is a firm (INERT).",
+    "NFRA_OPLGTW-Z-W92-S6: the order names the instance file ...mdpf-category-views-tool.proof_of_spec.json, but the pipeline gate finds an instance only by the order file's stem (...mdpf-category-views-by-row.proof_of_spec.json); the instance is written at the stem name (INERT)."
+  ],
+  "session_log": "L7 worker 0.9.0_WK_NFRA_OPLGTW~92 on wk-NFRA_OPLGTW-92 (worktree C:/tmp/wk-oplgtw-92), cut at cd23ff4f60. First act: branch wk-NFRA_OPLGTW-92 and TREE-OK. Re-grounded the order's premises against the worktree: the entity row is under silver_datasets, not channels; the gate module is at app/graphql_plumbing/catalog_gate.py; the row's as-of field is under contract.freshness. Wrote app/portal_mdpf.py and tests/test_og_pt5.py. Ran the four named tests (4 passed); ruff py39 clean; commit-gate clean. The first commit attempt was refused by the naming limb on hand-kept firm-name literals in SCOPES; the scope set is now the catalog row's own fork_keys firm values, and the commit landed as 6b381d604e with the five surprise rows. Re-ran AC1 and AC2 on the committed bytes (both PASS) and the determinism pair (identical). Validation and the status flip follow in a later commit on this branch. The instance was first written at the order's named path; the flip was refused by the pipeline gate, which finds the instance by the order file's stem, so the instance was renamed to the stem name (row S6). proof-of-spec-check.py rc=0 VALID at the stem name.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~92 <0.9.0_WK_NFRA_OPLGTW~92@opal.agent>\" -F .scratch/commit1.msg -- infra/aws/ec2/opal-gateway/app/portal_mdpf.py infra/aws/ec2/opal-gateway/tests/test_og_pt5.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "First attempt refused by the naming limb (LGIC_ENFORCE, three hand-kept firm-name literals at portal_mdpf.py:46), files left unstaged; the scope set was then derived from the catalog row. Second attempt rc=0: commit-gate OK 2 of 3, surprise-row-gate OK 5 new rows, to-pipeline-gate OK, missions-tree-check OK; landed 6b381d604e."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/portal_mdpf.py infra/aws/ec2/opal-gateway/tests/test_og_pt5.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); no unguarded strict-utf8 log reads."
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 --no-cache infra/aws/ec2/opal-gateway/app/portal_mdpf.py infra/aws/ec2/opal-gateway/tests/test_og_pt5.py",
+      "result": "All checks passed! (after removing one unused import from the test file)."
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_pt5.py -v -p no:cacheprovider --color=no",
+      "result": "4 passed at 6b381d604e; byte-identical across two runs."
+    }
+  ]
+}
