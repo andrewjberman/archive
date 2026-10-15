@@ -3,7 +3,7 @@
 **Author:** `2.0.0_SA_COO~CA`, 2026-10-15 (laptop). **Root:** `infra/aws/terraform/transcripts/`. **Counterparts owed:** a CTO half (`1.0.0_SA_CTO`) and a CVO half (`3.0.0_SA_CVO~L`), each signed on the same pin. **Authority:** the CTO's round-18 analysis, ruling 2 (`ledger/ROUND_ANALYSIS.round18.md` @5e4395ae5c, msg 109267); PRD v0.10 FWD-4 (the draft loop) and FWD-13 (an alert for each mail); round-19 decomposition, cell CA-k-4 and AMENDMENT 1.
 
 **PIN:** `93a3f55d25` (box/laptop, the trunk after CA-k-1 `2d0a8f5027`, CA-k-2 `d128627a96` and CA-k-3 merged; CA-k-3 changes no packaged path)
-Everything below that is measured was read at the PIN `93a3f55d25`, by `git diff --numstat 0774100edc..93a3f55d25` over the packaged paths (the issuer's re-read at ~02:5xZ on 2026-10-15; the foreign registry file grew from +4736 at `d128627a96` to +4954 at the pin because other seats merged rows in between, which is why the pin is fixed and the equivalence check reads the 17 probes at it). The two packaged files change only in CA-k-1 (`41cd03765f`).
+Everything below that is measured was read at the PIN `93a3f55d25`, by `git diff --numstat 0774100edc..93a3f55d25` over the packaged paths (the issuer's re-read at ~01:3xZ on 2026-10-15; the foreign registry file grew from +4736 at `d128627a96` to +4954 at the pin because other seats merged rows in between, which is why the pin is fixed and the equivalence check reads the 17 probes at it). The two packaged files change only in CA-k-1 (`41cd03765f`).
 
 ## The act
 
