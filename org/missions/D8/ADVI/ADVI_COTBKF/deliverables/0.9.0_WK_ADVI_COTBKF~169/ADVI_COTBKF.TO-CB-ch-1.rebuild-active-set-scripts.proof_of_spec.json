@@ -15,11 +15,35 @@
   },
   "artifacts_produced": [
     {
-      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "path_or_key": "data/assets/scripts/silver/cotbkf_active_set_v2.py",
+      "kind": "script",
+      "commit_or_etag": "68ffc04bc9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the one new row ADVI_COTBKF-D1-W169-S1 appended with newline lf; numstat 26 added 0 deleted; no build artifact was produced"
+      "deploy_evidence": "the build script at blob 867a2cf1daa21dc46432d523cf8cc29beca1b990; read-only S3; writes two files to --out",
+      "artifact_covered_by": [
+        "CB86ch1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py",
+      "kind": "test",
+      "commit_or_etag": "4665b8007a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four stub-frame tests, no S3",
+      "artifact_covered_by": [
+        "CB86ch1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "5677eae7d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the build record: hashes, counts, repairs, diff counts; no account value",
+      "artifact_covered_by": [
+        "CB86ch1-AC1",
+        "CB86ch1-AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -29,10 +53,10 @@
       "method": "command",
       "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json',encoding='utf-8'));pins={'ACTIVE_COTTONWOOD_SET_V2.csv':'5cef7ab0c9e10fe299cb757d4dba31792d069bad35f7250defa76e18773046ae','REVERSE_MATCH_V3.csv':'0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f'};ok=[hashlib.sha256(open(f['path'],'rb').read()).hexdigest()==pins[f['name']] for f in d['files']];print('V2-REBUILD files=%d sha256_equal=%s'%(len(d['files']),all(ok) and len(ok)==2))\"",
       "expect": "V2-REBUILD files=2 sha256_equal=True",
-      "output_evidence": "FileNotFoundError: [Errno 2] No such file or directory: 'org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json' (rc=1). No rebuild ran: data/assets/scripts/silver/ is absent from this sparse worktree (surprise ADVI_COTBKF-D1-W169-S1).",
-      "denominator": "0 of 2 rebuilt files hashed (no record, no files)",
+      "output_evidence": "V2-REBUILD files=2 sha256_equal=False (rc 0). REVERSE_MATCH_V3.csv equal to its pin (860 rows); ACTIVE_COTTONWOOD_SET_V2.csv 41808 rows against the pinned 41826, sha256 differs.",
+      "denominator": "1 of 2 rebuilt files equal to its pin; 41487 of 41826 pinned window rows reproduced exactly; 860 of 860 reverse-match rows",
       "status": "FAIL",
-      "status_reason": "Blocked at the first act: data/assets/scripts/silver/ is not carried by this sparse worktree, so no rebuild ran and no record exists (surprise ADVI_COTBKF-D1-W169-S1). Not a hash mismatch."
+      "status_reason": "The window file does not reproduce its pin after the three allowed repairs. Per the order it is not forced and not edited; see surprise ADVI_COTBKF-D1-W169-S2 and REBUILD_RECORD.json diff_summary."
     },
     {
       "criterion_id": "CB86ch1-AC2",
@@ -40,10 +64,9 @@
       "method": "command",
       "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json',encoding='utf-8'));b=subprocess.check_output(['git','rev-parse','HEAD:'+d['script_path']]).decode().strip();print('V2-SCRIPT-COMMITTED blob_equal=%s'%(b==d['script_blob']))\"",
       "expect": "V2-SCRIPT-COMMITTED blob_equal=True",
-      "output_evidence": "FileNotFoundError: [Errno 2] No such file or directory: 'org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json' (rc=1). No script was written or committed.",
-      "denominator": "0 of 1 script blob compared (no record)",
-      "status": "FAIL",
-      "status_reason": "Blocked at the first act: no record and no script exists in this worktree (surprise ADVI_COTBKF-D1-W169-S1)."
+      "output_evidence": "V2-SCRIPT-COMMITTED blob_equal=True (rc 0)",
+      "denominator": "1 of 1 script blob equal to the record (867a2cf1daa21dc46432d523cf8cc29beca1b990)",
+      "status": "PASS"
     },
     {
       "criterion_id": "CB86ch1-AC3",
@@ -51,49 +74,54 @@
       "method": "test_suite",
       "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py -q",
       "expect": "4 passed",
-      "output_evidence": "no tests ran in 0.00s (rc=4): the test file path is absent from the sparse worktree (surprise ADVI_COTBKF-D1-W169-S1).",
-      "denominator": "0 of 4 stub rules run (no test file)",
-      "status": "FAIL",
-      "status_reason": "Blocked at the first act: the named path data/assets/scripts/silver/tests/ is not carried by this worktree. Not a rule failure; no test was written or run."
+      "output_evidence": "4 passed in 0.09s (rc 0)",
+      "denominator": "4 of 4 stub tests passed",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the spec names no mutant control; none run (no script or test exists to mutate)",
+      "description": "the spec names no mutant control; none run",
       "expected": "n/a",
       "observed": "not run",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "AC1 and AC2 invocations each run twice on the same bytes (no record present)",
-      "observed": "both rc=1 FileNotFoundError on the same path, twice",
+      "method": "AC1 hash comparison of the two outside files, recomputed on the same bytes",
+      "observed": "sha256_equal=False on the window file and True on the reverse match, recomputed",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "C:/dev/_cotbkf_rebuild_20261015/ (the two rebuilt CSVs)",
-      "reason": "outside the repository by design; not written because the build cannot run (no script). AC1 reads it through the record, which does not exist."
+      "item": "C:/dev/_cotbkf_rebuild_20261015/ACTIVE_COTTONWOOD_SET_V2.csv",
+      "reason": "outside the repository by design (raw account keys may not enter the tree); not a git ref; rows, bytes and sha256 in REBUILD_RECORD.json and read back by CB86ch1-AC1"
+    },
+    {
+      "item": "C:/dev/_cotbkf_rebuild_20261015/REVERSE_MATCH_V3.csv",
+      "reason": "outside the repository by design; not a git ref; read back by CB86ch1-AC1"
     },
     {
       "item": "the account-id scan test_cotbkf_no_account_ids.py",
-      "reason": "the test path is absent from this worktree; invocation run after the last commit gave rc=4 no tests ran; DENOMINATOR reported in the worker report"
+      "reason": "run after the last commit as the order directs; its DENOMINATOR line is in the worker report, not in this instance"
     }
   ],
   "surprises": [
-    "ADVI_COTBKF-D1-W169-S1: TO CB-ch-1 cannot start: worktree is sparse with no data/ pattern; the order paths data/assets/scripts/silver/ are committed at HEAD but not on disk. BLOCKING, stop at first act."
+    "ADVI_COTBKF-D1-W169-S1: the first act found data/ absent from the sparse worktree; LIFTED by the coordinator sparse widening (ruling on this row); row stands unedited",
+    "ADVI_COTBKF-D1-W169-S2: BLOCKING, INERT. ACTIVE_COTTONWOOD_SET_V2.csv does not reproduce its pin after three repairs (41808 rows against 41826); REVERSE_MATCH_V3.csv does reproduce",
+    "ADVI_COTBKF-D1-W169-S3: OBSERVATION, INERT. The silver and gold listings now hold two later dated keys each (2026-10-13, 2026-10-14); the build pins the snapshot at 2026-10-12"
   ],
   "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "python",
-      "invocation": "python -c (AC1, AC2 invocations verbatim from the order); python -m pytest (AC3 and the scan path)",
-      "result": "rc=1, rc=1, rc=4, rc=4 (all on missing paths)"
+      "invocation": "python data/assets/scripts/silver/cotbkf_active_set_v2.py --out C:/dev/_cotbkf_rebuild_20261015 (runs from commits 4665b8007a, 8cd4c0a81f, 9f617f4fd9 and 68ffc04bc9)",
+      "result": "run 1 refused 164 rows (type strip); run 2 near 0 and AMBIGUOUS 0; run 3 V3 sha256 equal to pin, V2 41808 rows not equal"
     },
     {
-      "tool": "git",
-      "invocation": "git sparse-checkout list; git ls-tree HEAD data/assets/scripts/; git rev-parse HEAD:data/assets/scripts/silver/commonwealth_signs.py",
-      "result": "worktree excludes data/; the path exists at HEAD (blob 054f8502aaaf867ab3adaf417263b4b8611e9ab6 for commonwealth_signs.py)"
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py -q",
+      "result": "4 passed"
     }
   ]
 }
