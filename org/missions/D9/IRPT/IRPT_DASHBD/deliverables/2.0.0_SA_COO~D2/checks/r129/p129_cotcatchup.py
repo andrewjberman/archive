@@ -28,7 +28,8 @@ SILVER_BUCKET, SILVER_ROOT = "opal-data-assets", "blackdiamond/cottonwood/silver
 SILVER_TABLES = ("fact_allocations", "fact_transactions")
 GOLD_BUCKET, GOLD_PREFIX = "opal-data-cottonwood", "irpt/cottonwood/gold/account_return_daily/"
 HISTORY_COUNT, HISTORY_LAST, FIRST_DAY = 3325, "2026-06-22", "2026-07-10"
-MAX_DAYS, MEM_LINE_MB = 25, 717
+MAX_DAYS, MEM_LINE_MB = 4, 717  # the pair allows 25 days an event; Act 2 measured 118 s for one day in the Lambda against a 900 s timeout, so an event names at most 4
+DURATION_LINE_MS = 700000
 CRON, ZONE = "cron(15 8 ? * MON-FRI *)", "America/New_York"
 ISO = re.compile(r"\d{4}-\d{2}-\d{2}$")
 UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -92,7 +93,7 @@ def check_events(events, silver_days):
         need(isinstance(r, dict) and r.get("ok") is True and r.get("days") == ds and r.get("held") == [], "event %d: the returned body must be ok, the same days, nothing held: %s" % (i, r))
         rp = e["report"]
         need(isinstance(rp, dict) and set(rp) == {"max_memory_used_mb", "duration_ms", "memory_size_mb"} and is_int(rp["max_memory_used_mb"]) and rp["max_memory_used_mb"] > 0 and rp["memory_size_mb"] == 1024
-             and isinstance(rp["duration_ms"], (int, float)) and 0 < rp["duration_ms"] < 900000, "event %d report: Max Memory Used (int MB), duration under 900 s, memory size 1024" % i)
+             and isinstance(rp["duration_ms"], (int, float)) and 0 < rp["duration_ms"] < DURATION_LINE_MS, "event %d report: Max Memory Used (int MB), duration under %d s, memory size 1024" % (i, DURATION_LINE_MS // 1000))
         need(e["over_threshold"] is (rp["max_memory_used_mb"] > MEM_LINE_MB) and e["over_threshold"] is False, "event %d: Max Memory Used %s is over %d MB; the order stops there, this record cannot pass" % (i, rp["max_memory_used_mb"], MEM_LINE_MB))
         need(nes(e["request_id"]), "event %d request_id" % i)
         named += ds
@@ -216,7 +217,7 @@ def selftest():
     silver = ["2026-07-10"] + ["2026-07-%02d" % d for d in range(13, 32) if d % 7 not in (0, 6)] + ["2026-08-%02d" % d for d in range(3, 32)]
     silver = sorted(set(silver))
     rest = [d for d in silver if d > FIRST_DAY]
-    chunks = [rest[i:i + 25] for i in range(0, len(rest), 25)]
+    chunks = [rest[i:i + MAX_DAYS] for i in range(0, len(rest), MAX_DAYS)]
 
     def ev(days, mem=640):
         return {"payload": {"days": days}, "invoked_utc": "2026-10-16T02:00:00Z", "invocation_type": "RequestResponse", "status_code": 200, "function_error": None,
@@ -234,7 +235,8 @@ def selftest():
     assert grade(copy.deepcopy(good)) is True
     arms = (("packet", lambda r: r["gates"].update(packet_sha256="x")), ("act2", lambda r: r["gates"].update(act2_recorded_and_passing=False)),
             ("ledger closed", lambda r: r.update(ledger_closed=True)), ("extra key", lambda r: r.update(z=1)),
-            ("too many days", lambda r: r["events"][0]["payload"].update(days=rest[:26])),
+            ("too many days", lambda r: r["events"][0]["payload"].update(days=rest[:MAX_DAYS + 1])),
+            ("too slow", lambda r: r["events"][0]["report"].update(duration_ms=800000.0)),
             ("first day named", lambda r: r["events"][0]["payload"].update(days=[FIRST_DAY] + chunks[0][:-1])),
             ("history day named", lambda r: r["events"][0]["payload"].update(days=["2026-06-22"] + chunks[0])),
             ("unsorted", lambda r: r["events"][0]["payload"].update(days=list(reversed(chunks[0])))),

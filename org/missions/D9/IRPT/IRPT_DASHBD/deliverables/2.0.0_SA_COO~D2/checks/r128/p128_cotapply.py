@@ -136,10 +136,14 @@ def check_tail(rec):
     e = rec["event"]
     ek = {"payload", "invoked_utc", "invocation_type", "status_code", "function_error", "returned", "report", "partition", "over_717_mb", "request_id", "layer_pyarrow_version"}
     need(isinstance(e, dict) and set(e) == ek, "event keys differ: %s" % sorted(set(e) ^ ek) if isinstance(e, dict) else "event")
-    need(e["payload"] == {"day": FIRST_DAY} and e["invocation_type"] == "RequestResponse" and e["status_code"] == 200 and e["function_error"] is None, "the event must be {day: %s}, synchronous, 200, no function error" % FIRST_DAY)
+    need(e["payload"] == {"day": FIRST_DAY} and e["invocation_type"] == "RequestResponse" and e["status_code"] in (200, None) and e["function_error"] is None,
+         "the event must be {day: %s}, synchronous, 200 (or a lost client response, status null), no function error" % FIRST_DAY)
     need(UTC.match(str(e["invoked_utc"])) and e["invoked_utc"] >= rec["apply_finished_utc"], "invoked_utc must be an ISO UTC instant not before the apply finished")
     r = e["returned"]
-    need(isinstance(r, dict) and r.get("ok") is True and r.get("days") == [FIRST_DAY] and r.get("held") == [], "the returned body must be ok, days [%s], nothing held: %s" % (FIRST_DAY, r))
+    if e["status_code"] is None:
+        need(r is None, "a lost client response (status null) records no returned body; the checker reads the Lambda side instead")
+    else:
+        need(isinstance(r, dict) and r.get("ok") is True and r.get("days") == [FIRST_DAY] and r.get("held") == [], "the returned body must be ok, days [%s], nothing held: %s" % (FIRST_DAY, r))
     rp = e["report"]
     need(isinstance(rp, dict) and set(rp) == {"max_memory_used_mb", "duration_ms", "memory_size_mb"} and is_int(rp["max_memory_used_mb"]) and rp["max_memory_used_mb"] > 0 and rp["memory_size_mb"] == 1024
          and isinstance(rp["duration_ms"], (int, float)) and 0 < rp["duration_ms"] < 900000, "report: Max Memory Used (int MB), duration under 900 s, memory size 1024")
@@ -155,6 +159,21 @@ def check_tail(rec):
 
 
 # ------------------------------------------------------------------------------------------------ the live reads
+def filter_events(logs, **kw):
+    """All events of filter_log_events: a page may be empty and still carry a nextToken, so the loop follows the token (capped at 100 pages)."""
+    out, tok = [], None
+    for _ in range(100):
+        a = dict(kw)
+        if tok:
+            a["nextToken"] = tok
+        r = logs.filter_log_events(**a)
+        out += r.get("events", [])
+        tok = r.get("nextToken")
+        if not tok:
+            break
+    return out
+
+
 def live(root):
     import boto3
     lam, iam, s3 = boto3.client("lambda", region_name="us-east-1"), boto3.client("iam"), boto3.client("s3")
@@ -176,10 +195,26 @@ def live(root):
             break
         token = r.get("NextContinuationToken")
     reports = []
-    for ev in logs.filter_log_events(logGroupName=LOG_GROUP, filterPattern="REPORT").get("events", []):
+    for ev in filter_events(logs, logGroupName=LOG_GROUP, filterPattern="REPORT"):
         m = re.search(r"Duration: ([\d.]+) ms.*?Memory Size: (\d+) MB\s+Max Memory Used: (\d+) MB", ev["message"], re.S)
         if m:
             reports.append((float(m.group(1)), int(m.group(2)), int(m.group(3))))
+    req_lines, inv, err = [], None, None
+    rid = None
+    try:
+        rid = load(root, REC_REL)["event"]["request_id"]
+    except Exception:  # noqa: BLE001  (no record yet: the record clauses fail first)
+        rid = None
+    if rid:
+        for ev in filter_events(logs, logGroupName=LOG_GROUP, filterPattern='"%s"' % rid):
+            req_lines.append(ev["message"])
+        cw = boto3.client("cloudwatch", region_name="us-east-1")
+        import datetime as _dt
+        inv_t = _dt.datetime.strptime(load(root, REC_REL)["event"]["invoked_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=_dt.timezone.utc)
+        kw = {"Namespace": "AWS/Lambda", "Dimensions": [{"Name": "FunctionName", "Value": FUNCTION}], "StartTime": inv_t - _dt.timedelta(minutes=2),
+              "EndTime": inv_t + _dt.timedelta(minutes=30), "Period": 60, "Statistics": ["Sum"]}
+        inv = sum(d["Sum"] for d in cw.get_metric_statistics(MetricName="Invocations", **kw)["Datapoints"])
+        err = sum(d["Sum"] for d in cw.get_metric_statistics(MetricName="Errors", **kw)["Datapoints"])
     put = [s for s in sts if "s3:PutObject" in (s["Action"] if isinstance(s["Action"], list) else [s["Action"]])]
     put_res = put[0]["Resource"] if len(put) == 1 else None
     layers = [x["Arn"] for x in cfg.get("Layers", [])]
@@ -197,7 +232,7 @@ def live(root):
                 names = [n for n in z.namelist() if re.fullmatch(r"python/pyarrow-[^/]*\.dist-info/METADATA", n)]
         m = re.fullmatch(r"python/pyarrow-(\d+\.\d+\.\d+)\.dist-info/METADATA", names[0]) if names else None
         pyarrow_version = m.group(1) if m else None
-    return {"layers": layers, "pyarrow_version": pyarrow_version, "memory": cfg["MemorySize"], "timeout": cfg["Timeout"], "code_sha256": cfg["CodeSha256"], "handler": cfg["Handler"], "runtime": cfg["Runtime"], "role": cfg["Role"], "env": cfg.get("Environment"),
+    return {"request_lines": req_lines, "invocations": inv, "errors": err, "layers": layers, "pyarrow_version": pyarrow_version, "memory": cfg["MemorySize"], "timeout": cfg["Timeout"], "code_sha256": cfg["CodeSha256"], "handler": cfg["Handler"], "runtime": cfg["Runtime"], "role": cfg["Role"], "env": cfg.get("Environment"),
             "concurrency": conc, "sids": sorted(s.get("Sid", "") for s in sts), "put_resources": put_res, "n_put": len(put),
             "schedule": {"state": sc["State"], "cron": sc["ScheduleExpression"], "zone": sc.get("ScheduleExpressionTimezone")}, "artifact_version": ver.get("VersionId"),
             "objects": objs, "reports": reports}
@@ -243,6 +278,10 @@ def run(root, cid):
         need(not touched, "history keys modified after the apply finished: %d" % len(touched))
         newer = sorted({k[len(GOLD_PREFIX) + 5:len(GOLD_PREFIX) + 15] for k, _ in lv["objects"]} - days)
         need(newer and newer[0] == FIRST_DAY and all(d >= FIRST_DAY for d in newer), "partitions after history must start at %s: %s" % (FIRST_DAY, newer[:3]))
+        if rec["event"]["status_code"] is None:
+            bad = [ln for ln in lv["request_lines"] if re.search(r"ERROR|Traceback|Task timed out|OutOfMemory|Runtime\.", ln)]
+            need(lv["invocations"] == 1 and lv["errors"] == 0, "the client response was lost, so the Lambda side must show exactly 1 invocation and 0 errors in the window: invocations %s errors %s" % (lv["invocations"], lv["errors"]))
+            need(lv["request_lines"] and any(ln.startswith("REPORT") for ln in lv["request_lines"]) and not bad, "the request %s must have a REPORT line and no error line in the log group (bad lines: %d)" % (rec["event"]["request_id"], len(bad)))
         rp = rec["event"]["report"]
         match = [r for r in lv["reports"] if r[2] == rp["max_memory_used_mb"] and abs(r[0] - rp["duration_ms"]) < 1.0 and r[1] == 1024]
         need(match, "no REPORT line in the log group equals the record (Max Memory Used %s, duration %s)" % (rp["max_memory_used_mb"], rp["duration_ms"]))
@@ -293,7 +332,8 @@ def selftest():
             ("layer arn", lambda r: r["after"]["function"].update(layer_arn="arn:aws:lambda:us-east-1:313476888478:layer:other:1")), ("pyarrow version", lambda r: r["event"].update(layer_pyarrow_version="14")),
             ("payload", lambda r: r["event"].update(payload={"day": "2026-06-22"})), ("payload days", lambda r: r["event"].update(payload={"days": [FIRST_DAY]})),
             ("async", lambda r: r["event"].update(invocation_type="Event")), ("function error", lambda r: r["event"].update(function_error="Unhandled")),
-            ("held", lambda r: r["event"]["returned"].update(held=[FIRST_DAY])), ("status", lambda r: r["event"].update(status_code=500)),
+            ("held", lambda r: r["event"]["returned"].update(held=[FIRST_DAY])), ("status", lambda r: r["event"].update(status_code=500)), ("lost client response but a body", lambda r: r["event"].update(status_code=None)),
+            ("status 200 but no body", lambda r: r["event"].update(returned=None)),
             ("memory size", lambda r: r["event"]["report"].update(memory_size_mb=8192)), ("over flag", lambda r: r["event"].update(over_717_mb=True)),
             ("objects", lambda r: r["event"]["partition"].update(objects=["data.parquet"])), ("invoked before apply", lambda r: r["event"].update(invoked_utc="2026-10-16T00:00:00Z")),
             ("digits", lambda r: r["event"]["returned"].update(note="id 1234567890")))
@@ -305,6 +345,9 @@ def selftest():
     r["event"]["report"]["max_memory_used_mb"] = 800
     r["event"]["over_717_mb"] = True
     assert grade(r) is True
+    lost = copy.deepcopy(good)
+    lost["event"].update(status_code=None, returned=None)
+    assert grade(lost) is True
     reuse = copy.deepcopy(good)
     reuse["before"].update(artifact_exists=True, artifact_version_id="v2")
     assert grade(reuse) is True
