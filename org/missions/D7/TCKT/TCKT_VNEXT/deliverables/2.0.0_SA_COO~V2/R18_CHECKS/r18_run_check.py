@@ -12,7 +12,7 @@ import sys
 RES = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r18_run/R18_RUN_RESULT.json"
 REC = "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json"
 COORDINATOR = "jeanette@opalinvest.com"
-KEYS = {"identity", "coordinator_identity", "mt_confirmed_time", "routing_before", "routing_during", "routing_after",
+KEYS = {"browser_origin", "identity", "coordinator_identity", "mt_confirmed_time", "routing_before", "routing_during", "routing_after",
         "firm", "mt_ticket", "tf_ticket", "mt_filer", "tf_filer", "row_deleted_at", "token_exp",
         "row_absent_after", "form_key", "form_name", "placeholder_named", "no_engine_call", "token_printed"}
 FUNCTION = "opal-ticket-api"
@@ -46,6 +46,9 @@ def main():
     missing = sorted(KEYS - set(doc))
     if missing:
         print("RUN-BAD missing key(s): %s" % missing)
+        return 1
+    if doc["browser_origin"] != "http://localhost:5174":
+        print("RUN-BAD the browser origin is %r, not the one DEV origin http://localhost:5174" % (doc["browser_origin"],))
         return 1
     if doc["token_printed"] is not False or doc["no_engine_call"] is not True or doc["placeholder_named"] is not True:
         print("RUN-BAD token_printed, no_engine_call or placeholder_named differs from the order")

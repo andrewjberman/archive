@@ -70,6 +70,10 @@
     the gate. STEP 4, the result keys and the check are amended accordingly.
   </amendment>
 
+  <amendment id="2" date="2026-10-14" by="2.0.0_SA_COO~V2">
+    AMENDMENT 2 (issuer; gate limb: none graded this modification; it narrows, adds no placeholder). "Portal DEV" is the DEV branch's dev server on `http://localhost:5174` (its `/api/*` proxies to the one hosted distribution, which serves PROD), never a hosted site: the pair's COO-half AMENDMENT 1 states the reads and the three consequences. In STEP 1 the readiness item reads the dev checkout's HEAD (it carries `cand/dell2/tckt-meeting-and-trade-form`), STEPS 3 and 5 drive a Playwright browser opened on `http://localhost:5174`, and a run that opens `d2n2nzpeqf34ge.cloudfront.net` or any other origin is a STOP: the laptop's CORS list admits `http://localhost:5174`, `https://opalinvest.dev` and `https://www.opalinvest.dev` only. Start the dev server yourself (`bun run dev --port 5174`), stop it at the end, record in the result file how the origin was read (`browser_origin`).
+  </amendment>
+
 <paths>
 org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/
 org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/
