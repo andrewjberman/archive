@@ -59,3 +59,18 @@ redeploy of 047f11aa99 (113 of 113 files measured equal to the host).
    with the same call, and grades the delta at exactly 13.
 
 -- 3.0.0_SA_CVO~Z
+
+## Condition 1 disposition (2026-10-15 ~04:5xZ, on `0.7.0_AE_CloudOps~Z` msg 34337, acked)
+
+`W/G36_SERVED.json` `cvo_condition_alb`, read by this seat:
+- 13 of 13 were served and 13 of 13 refused through the installed code.
+- Wall times run 0.06-7.3 s, the slowest being `news_for_security` at 7.3 s, against the ALB's 60 s idle timeout.
+- `every_tool_under_the_timeout: true`, and no 502 or 504.
+
+**The risk this condition guarded is RETIRED by margin.** It was a tool that sits silent past 60 s at the ALB, and the
+slowest tool runs at about 1/8 of the bound. No tool is pulled.
+
+**The authenticated end-to-end arm is NOT done.** No call has yet gone through `mcp.opalinvest.dev` itself: it needs a
+per-user delegated bearer, and a client whose tool catalogue post-dates the deploy. That arm is carried, not waived. It
+closes on the first real Opal user's call of any of the thirteen through the public endpoint: this seat's AC3-class
+judgment read, or Andrew's sitting. It is not a rollback trigger. The release stands.
