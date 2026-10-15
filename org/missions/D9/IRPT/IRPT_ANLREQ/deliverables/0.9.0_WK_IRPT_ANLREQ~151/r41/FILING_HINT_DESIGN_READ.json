@@ -1,0 +1,623 @@
+{
+  "base": "9c0e408601b619f78981da49f59517bd094fedb3",
+  "base_note": "The branch start sha (outer repo HEAD of wk-IRPT_ANLREQ-151). The nested portal is read at its own worktree HEAD e578b378d332ad1505018be3801466dac7aeeade (clean). infra/ and docs/contracts/ are skip-worktree and were read as base blobs with git show.",
+  "q1": {
+    "page_holds_rows": "no",
+    "page_holds_rows_note": "The response body does carry parsed rows on the NEEDS_CORRECTION answer (template.rows, uploads.py:494-497), and the client returns the wire unchanged (investor-reporting.ts:1210-1212). The Ticket Center keeps only state, ids, reason and the findings as words (analysisRequest.ts:253-261); no template or preview identifier is read in TicketCenter non-test files. The rows per record carry row, symbol, amount, basis and cells A and B only (template_reader.py:451-452): no CUSIP, no ISIN, no name, no quantity column.",
+    "response_members": [
+      "upload_id",
+      "state",
+      "input_id",
+      "input_ref",
+      "portfolio",
+      "reason",
+      "row",
+      "preview",
+      "currency_evidence",
+      "reconciliation",
+      "findings",
+      "findings_total",
+      "template"
+    ],
+    "unresolved_finding_codes": [
+      {
+        "code": "TICKER_NOT_FOUND",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 69,
+            "text": "\"TICKER_NOT_FOUND\": ("
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+            "line": 501,
+            "text": "emit(\"TICKER_NOT_FOUND\", coordinate, \"A\", actions=[\"REPLACE_FILE\", \"NAME_PROXY\"], value=named)"
+          }
+        ]
+      },
+      {
+        "code": "TICKER_DATA_NOT_ENTITLED",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 65,
+            "text": "\"TICKER_DATA_NOT_ENTITLED\": ("
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+            "line": 514,
+            "text": "emit(\"TICKER_DATA_NOT_ENTITLED\", coordinate, \"A\", actions=[\"NAME_PROXY\"], value=named)"
+          }
+        ]
+      },
+      {
+        "code": "TICKER_AMBIGUOUS",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 123,
+            "text": "\"TICKER_AMBIGUOUS\": ("
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+            "line": 516,
+            "text": "emit(\"TICKER_AMBIGUOUS\" if state == \"AMBIGUOUS\""
+          }
+        ]
+      },
+      {
+        "code": "TICKER_CHECK_UNAVAILABLE",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 129,
+            "text": "\"TICKER_CHECK_UNAVAILABLE\": ("
+          }
+        ]
+      },
+      {
+        "code": "TICKER_CHECK_FAILED",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 126,
+            "text": "\"TICKER_CHECK_FAILED\": ("
+          }
+        ]
+      },
+      {
+        "code": "TICKER_NOT_CHECKED",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 134,
+            "text": "\"TICKER_NOT_CHECKED\": ("
+          }
+        ]
+      },
+      {
+        "code": "TICKER_KEPT_BY_HISTORY",
+        "evidence": [
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "line": 132,
+            "text": "\"TICKER_KEPT_BY_HISTORY\": ("
+          },
+          {
+            "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+            "line": 571,
+            "text": "emit(\"TICKER_KEPT_BY_HISTORY\", coordinate, \"A\", actions=[\"REVIEW\"]"
+          }
+        ]
+      }
+    ],
+    "absent_codes_searched": "Literal UNRESOLVED, UNKNOWN, NOT_FOUND and SECURITY searched in intake/uploads.py, portfolio.py, template_reader.py, upload_suggestions.py and the portal TicketCenter folder: no finding code of those names is emitted. NOT_FOUND appears as a public refusal reason (uploads.py:50) and as a provider state (security_resolution.py:16), not as a holdings finding. SECURITY appears only as refusal and mismatch names in custody code paths.",
+    "evidence": [
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 228,
+        "text": "const [analysisFile, setAnalysisFile] = useState"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 242,
+        "text": "const chooseAnalysisFile = async (file: File | null) => {"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 250,
+        "text": "setAnalysisFile({ name: file.name, bytes, token:"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 359,
+        "text": "const upload = prepareUpload("
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 363,
+        "text": "const outcome = await fileAndRequestAnalysis("
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 245,
+        "text": "let result = await deps.ir.uploadAnalysisInput(input.upload"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 253,
+        "text": "if (result.state === 'NEEDS_CORRECTION') {"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 260,
+        "text": "findings: parts.lines, details: parts.details,"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 118,
+        "text": "findings: string[]; details: string[] }"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 95,
+        "text": "export function findingParts(findings"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 102,
+        "text": "parts.lines.push((row"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "line": 212,
+        "text": "Holdings file (.csv or .xlsx, up to 1 MB)"
+      },
+      {
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 233,
+        "text": "{ operation: 'analysis-input-upload', method: 'POST'"
+      },
+      {
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 1212,
+        "text": "'analysis-input-upload', { body: { ...req }"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisUploadResult.schema.json",
+        "line": 107,
+        "text": "\"preview\": {"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisUploadResult.schema.json",
+        "line": 131,
+        "text": "\"template\": {"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisUploadResult.schema.json",
+        "line": 116,
+        "text": "\"findings\": {"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisUploadResult.schema.json",
+        "line": 93,
+        "text": "\"portfolio\": {"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 494,
+        "text": "return {\"upload_id\": normalization[\"upload_id\"], \"input_id\": None, \"state\": NEEDS_CORRECTION,"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 497,
+        "text": "\"findings_total\": len(template[\"findings\"]), \"template\": template}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 569,
+        "text": "outcome = {\"state\": NEEDS_CORRECTION, \"reason\": code, \"findings\": [finding(code)]}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 69,
+        "text": "\"TICKER_NOT_FOUND\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 65,
+        "text": "\"TICKER_DATA_NOT_ENTITLED\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 123,
+        "text": "\"TICKER_AMBIGUOUS\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 129,
+        "text": "\"TICKER_CHECK_UNAVAILABLE\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 126,
+        "text": "\"TICKER_CHECK_FAILED\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 134,
+        "text": "\"TICKER_NOT_CHECKED\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 132,
+        "text": "\"TICKER_KEPT_BY_HISTORY\": ("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 50,
+        "text": "public_reason_code = \"NOT_FOUND\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "line": 440,
+        "text": "def emit(code, row=None, column=None, actions=None, value=None, severity=\"ERROR\", description=None):"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "line": 501,
+        "text": "emit(\"TICKER_NOT_FOUND\", coordinate, \"A\", actions=[\"REPLACE_FILE\", \"NAME_PROXY\"], value=named)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "line": 514,
+        "text": "emit(\"TICKER_DATA_NOT_ENTITLED\", coordinate, \"A\", actions=[\"NAME_PROXY\"], value=named)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "line": 516,
+        "text": "emit(\"TICKER_AMBIGUOUS\" if state == \"AMBIGUOUS\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "line": 571,
+        "text": "emit(\"TICKER_KEPT_BY_HISTORY\", coordinate, \"A\", actions=[\"REVIEW\"]"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+        "line": 578,
+        "text": "if any(f.get(\"severity\") == \"ERROR\" for f in findings)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+        "line": 420,
+        "text": "result[\"headers\"] = {col: cell(col, 1) for col in (\"A\", \"B\")}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+        "line": 451,
+        "text": "record = {\"row\": row, \"symbol\": symbol, \"amount\": None,"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+        "line": 452,
+        "text": "\"basis\": basis, \"cells\": {\"A\": a, \"B\": b}}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py",
+        "line": 16,
+        "text": "STATES = frozenset({\"FOUND\", \"NOT_FOUND\", \"AMBIGUOUS\", \"UNAVAILABLE\"})"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 597,
+        "text": "replace = {c[\"from_value\"]: c[\"to_value\"] for c in options.get(\"corrections\") or []}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "line": 580,
+        "text": "findings, _counts = self.suggest(principal, owner, findings, outcome[\"template\"])"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py",
+        "line": 19,
+        "text": "SOURCE = \"KIMI_CHECK_PROVIDER_VERIFIED\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py",
+        "line": 26,
+        "text": "def suggest_for(findings, template, *, advisory, verify"
+      }
+    ]
+  },
+  "q2": {
+    "entry_members": [
+      "key",
+      "label",
+      "ticker",
+      "name_source"
+    ],
+    "universe": "Two sources only (comparison_catalogue.py:184-200): (a) the Opal model catalogue, 5 entries in ycharts/generate/templates.json, all model_portfolio and all VERIFIED and GRANTED, selectable per tenant (comparison_catalogue.py:136-144); (b) etf-classifications tickers that carry a NAME, read live from DynamoDB (not readable from source). It is not the holdings universe: a ticker neither names is served verbatim only by entry_for_ticker, not listed.",
+    "entry_has_cusip_or_isin": "no",
+    "exact_id_match_possible": "no",
+    "exact_id_match_note": "The catalogue serves key, label, ticker and name_source (schema required list, ComparisonCatalogue.schema.json:29). CUSIP-namespaced classification rows are dropped at read (comparison_catalogue.py:116). The model entries carry a candidate namespace (OPAL or YCHARTS) and vendor_id server-side only, never served (comparison_catalogue.py:147-149). The upload carries no identifier column either (template_reader.py:420), so an exact CUSIP or ISIN match is impossible from the catalogue alone and from the uploaded file.",
+    "evidence": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py",
+        "line": 65,
+        "text": "CATALOGUE_OPERATION = \"comparison-catalogue\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py",
+        "line": 166,
+        "text": "return _catalogue.build_catalogue(tenant=ctx.tenant, read_classifications=read_classifications)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 184,
+        "text": "def build_catalogue(tenant=None, read_classifications=None, templates_path=None):"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 45,
+        "text": "NAME_SOURCE_MODEL = \"model_catalogue\""
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 148,
+        "text": "return {\"key\": str(entry[\"key\"]), \"label\": str(entry[\"label\"]), \"ticker\": None,"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 159,
+        "text": "return {\"key\": ticker, \"label\": ticker, \"ticker\": ticker, \"name_source\": NAME_SOURCE_VERBATIM}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 116,
+        "text": "if (item.get(\"identifier_namespace\") or {}).get(\"S\") == \"CUSIP\":"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 191,
+        "text": "entries = [_model_entry(e) for e in _model_entries(templates_path) if _selectable(e, tenant)]"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 199,
+        "text": "entries.append(_ticker_entry(ticker, name))"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+        "line": 164,
+        "text": "raise CatalogueRefused(\"a tenant is required\")"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/generate/templates.json",
+        "line": 96,
+        "text": "\"comparison_catalog\""
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/ComparisonCatalogue.schema.json",
+        "line": 16,
+        "text": "\"additionalProperties\": false"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/ComparisonCatalogue.schema.json",
+        "line": 29,
+        "text": "\"required\": [\"key\", \"label\", \"ticker\", \"name_source\"],"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/contracts/comparison-catalogue.ts",
+        "line": 9,
+        "text": "export type CatalogueEntry = ComparisonCatalogueWire['entries'][number]"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/comparisonCatalogue.ts",
+        "line": 20,
+        "text": "export const COMPARISON_CATALOGUE_PATH"
+      },
+      {
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 249,
+        "text": "{ operation: 'comparison-catalogue', method: 'GET'"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/comparisonCatalogue.ts",
+        "line": 65,
+        "text": "Did you mean ${near.join(', ')}?"
+      }
+    ]
+  },
+  "q3": {
+    "per_holding_ui_exists": "no",
+    "per_holding_ui_exists_note": "For the ANALYSIS filing form: no per-holding row list. The only editable per-security rows in the Ticket Center are the TRADE request form (TradeRequestParts.tsx, securitiesFromRows), which is not the analysis filing and carries no upload.",
+    "override_member_exists": "no",
+    "override_member_scope": "On the submit (AnalysisSubmissionRequest) there is no per-holding member: additionalProperties is false and the members are request_id, client_id, account_ids, snapshot_id, variant, comparison_keys, report_title, input_id, prepared_for, ticket_id, commentary_requested. The only per-ticker override channel is the UPLOAD request's corrections[] (from_value, to_value, finding_code), template lane only (AnalysisUploadRequest.schema.json:65-96), which is not on the submit.",
+    "how_acceptance_reaches_backend": "Not through the submit body and not by rewriting the file in the page. An accepted suggestion re-posts the SAME upload (same upload_token and file_base64) to POST /analysis/inputs with corrections:[{finding_code:'TICKER_NOT_FOUND', from_value:<file symbol>, to_value:<suggested symbol>}] (withCorrections in tabs/analysis/prospect.ts; the door replaces the symbol before the provider check, uploads.py:597-600). The next revision returns the new input_id, which the existing submit already carries (analysisBody, analysisRequest.ts:382). No new wire member is needed for the accept path.",
+    "evidence": [
+      {
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "line": 222,
+        "text": "export function UploadFindings("
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TradeRequestParts.tsx",
+        "line": 74,
+        "text": "export function securitiesFromRows(rows: readonly SecurityRow[])"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "line": 228,
+        "text": "{findings.map((line, i) => <li key={i}>{line}</li>)}"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 575,
+        "text": "{uploadReport && <UploadFindings message={uploadReport.message} findings={uploadReport.findings}"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 324,
+        "text": "const catalogueFirm = filingForm.firm.trim()"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 329,
+        "text": "void fetchCatalogue(catalogueFirm || undefined)"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 370,
+        "text": "export function analysisBody(input: {"
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 382,
+        "text": "input_id: input.inputId,"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json",
+        "line": 7,
+        "text": "\"additionalProperties\": false,"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json",
+        "line": 89,
+        "text": "\"commentary_requested\": {"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisUploadRequest.schema.json",
+        "line": 65,
+        "text": "\"corrections\": {"
+      },
+      {
+        "file": "docs/contracts/investor-reporting/v1/AnalysisUploadRequest.schema.json",
+        "line": 87,
+        "text": "\"from_value\": {"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+        "line": 509,
+        "text": "Did you mean {f.suggestion}?"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+        "line": 285,
+        "text": "const body = corrections && uploadAttempt ? withCorrections(uploadAttempt, corrections)"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+        "line": 123,
+        "text": "export function withCorrections(body"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+        "line": 88,
+        "text": "export function proxyableFindings(findings: unknown)"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+        "line": 97,
+        "text": "const suggestion = actions.includes('ACCEPT_SUGGESTION')"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+        "line": 73,
+        "text": "export function swapSuggestions("
+      },
+      {
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 1210,
+        "text": "uploadAnalysisInput(req: AnalysisUploadRequestWire, selectedTenant?: string): Promise<AnalysisUploadResultWire> {"
+      }
+    ]
+  },
+  "q4": {
+    "change_set": [
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "function": "findingParts / FileOutcome / fileAnalysisRequest",
+        "change": "PORTAL_ONLY. Keep the structured finding (code, row, value, suggestion) beside the words, instead of lines only; add an optional corrections argument to the upload re-post (withCorrections on the same upload_token)."
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+        "function": "proxyableFindings / withCorrections",
+        "change": "PORTAL_ONLY reuse. Read finding.suggestion (prospect.ts:97) and never read finding.suggestions (swaps, swapSuggestions); no swap is offered at the form."
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "function": "UploadFindings",
+        "change": "PORTAL_ONLY. Render 'Did you mean <symbol> (<name>)?' per TICKER_NOT_FOUND finding with a Use button and a Keep button. Name from the already-loaded catalogue (comparisonLabel) when the symbol is an entry; no entry means the symbol alone. Nothing auto-fills; the filer's click sets the choice."
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "function": "chooseAnalysisFile / handleFile (fileAndRequestAnalysis call) / uploadReport state",
+        "change": "PORTAL_ONLY. Hold the chosen corrections in state beside analysisFile; a Use click re-posts via the same token; a Keep click leaves the finding as typed (see points_not_met). The catalogue is already loaded at TicketCenter.tsx:329 for the chosen firm."
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/portfolio.py and infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "function": "portfolio.py emit TICKER_NOT_FOUND (severity ERROR, line 440/501) and _freeze_template (uploads.py:597-600, 578-584)",
+        "change": "BACKEND. Only for the Keep clause: a kept unknown symbol must not block the upload. Without it, Keep yields NEEDS_CORRECTION again and nothing files. Not a wire change if Keep is expressed as a correction whose to_value equals from_value, but the producer semantics change."
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py (or ProspectComposer reuse)",
+        "function": "suggest_for (Y-4 provider-verified suggestion)",
+        "change": "DECISION FOR THE CTO, not a change set item: the existing suggestion is provider-verified at upload (SOURCE KIMI_CHECK_PROVIDER_VERIFIED), not catalogue-based CUSIP/ISIN/edit-distance/name. Using it is PORTAL_ONLY; following the addendum words literally is a new catalogue-ranking function (portal-only, weak: 5 models and named ETFs)."
+      }
+    ],
+    "tests_to_add": [
+      "portal/src/pages/TicketCenter/__tests__/analysis-filing-hint-did-you-mean.test.tsx (the Did you mean line and Use button render for a TICKER_NOT_FOUND finding with a row; no line for other codes; no swap offered)",
+      "portal/src/pages/TicketCenter/__tests__/analysis-filing-hint-accept-reposts.test.tsx (Use re-posts the SAME upload_token with corrections[{finding_code, from_value, to_value}]; nothing replaced without the click)",
+      "portal/src/pages/TicketCenter/__tests__/analysis-filing-hint-keep-as-typed.test.tsx (Keep files as typed; expected to FAIL until the BACKEND Keep semantics land)",
+      "portal/src/pages/TicketCenter/__tests__/analysis-filing-hint-staff-catalogue.test.tsx (staff filer: the catalogue read carries selected_tenant after a firm is chosen; none before)"
+    ],
+    "points_not_met": [
+      {
+        "point": "1: closest entry by exact CUSIP or ISIN match first",
+        "why": "Not possible: the uploaded file carries only a ticker in A and an amount in B (template_reader.py:420, 451-452), and the served catalogue carries no identifier (comparison_catalogue.py:116, 147-159; ComparisonCatalogue.schema.json:29)."
+      },
+      {
+        "point": "1: 'a holding whose symbol is not in the served catalogue'",
+        "why": "Ill-defined as a trigger: the catalogue is 5 model entries plus named etf-classifications tickers (comparison_catalogue.py:184-200), not the holdings universe, so membership would flag nearly every stock holding. The trigger must be the server's TICKER_NOT_FOUND finding instead."
+      },
+      {
+        "point": "2: a kept unknown symbol files as typed and goes to the backend",
+        "why": "Not met from what exists: TICKER_NOT_FOUND is severity ERROR (portfolio.py:440, 501) and any ERROR keeps the upload at NEEDS_CORRECTION with nothing filed (portfolio.py:578; uploads.py:569-584). The only accepted resolution today is a correction re-post. This needs a BACKEND change."
+      },
+      {
+        "point": "4: suggestion reads only the served catalogue, no vendor call at filing",
+        "why": "Conflicts with the existing mechanism: the Y-4 suggestion calls the provider during the upload (upload_suggestions.py:19, 26; uploads.py:578-580). The catalogue has no ticker-to-typo signal beyond names. The form itself makes no new call (TicketCenter.tsx:329 reads the catalogue already loaded)."
+      },
+      {
+        "point": "2 and 1: the form must hold per-holding rows to show a suggestion per row",
+        "why": "Not held today: the page holds the file bytes and the findings words only (TicketCenter.tsx:228; analysisRequest.ts:253-261). The suggestion can be attached to the finding, which carries row and value, not to a row list."
+      }
+    ],
+    "recommend": "BACKEND_AND_PORTAL",
+    "deciding_fact": "The upload door refuses an unknown ticker: TICKER_NOT_FOUND is severity ERROR (portfolio.py:440, 501) and any ERROR keeps the upload at NEEDS_CORRECTION with nothing filed (portfolio.py:578). So 'keep as typed files' cannot be met portal-only; the accept path (Did you mean, then a corrections re-post on the same token) needs no backend or wire change and is portal-only.",
+    "evidence": [
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 116,
+        "text": "export type FileOutcome ="
+      },
+      {
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 238,
+        "text": "export async function fileAnalysisRequest("
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+        "line": 24,
+        "text": "export function uploadState("
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py",
+        "line": 26,
+        "text": "def suggest_for(findings, template, *, advisory, verify"
+      }
+    ]
+  },
+  "not_read": "The live system: no AWS, no network, no deployed Lambda bytes, no served portal bundle. The live etf-classifications table (the named ETF count) and the routes.json route row were not read. The stored upload revisions and the provider (Kimi, yfinance) behaviour were not read. Test suites were not run. ProspectComposer tests and the wire adapters beyond the upload client were not read. Backend files were read as base blobs (skip-worktree), not from disk. The portal was read at e578b378."
+}
