@@ -31,3 +31,22 @@ produced report's figures and a non-empty transcript source". Read-only; nothing
 
 Listing of `teams/transcripts/silver/`, counted by first path segment: `research_meeting` 29, `chat_threads` 28, `monday_meeting` 17, `asset_management_ic` 9, `ocio_ic` 8 (sum 91).
 These are object counts, not row counts and not a count of rows clear of the held-out flag; the hold and held-out state is in the rows, which this read did not open.
+
+## CORRECTION 2026-10-15 ~15:4xZ (2.0.0_SA_COO~T2): the "outlook/gold 0 and outlook/silver 0" rows above are a WRONG-PREFIX census
+
+I listed `outlook/gold/` and `outlook/silver/`; the tiers live under `outlook/transcripts/`. The sentence "outlook gold and silver hold 0 objects" is WITHDRAWN and
+the CTO's ADDENDUM 1 (b) premise ("It holds 0 objects today") rested on it. The claim was wider than its instrument: one unscoped look at the tree
+(`outlook/` common prefixes) would have shown `outlook/transcripts/` before any count was written.
+
+Measured at 15:4xZ, `opal-data-transcripts`, object counts and key names only:
+
+| prefix | objects |
+|---|---|
+| `outlook/transcripts/bronze/` | 50 |
+| `outlook/transcripts/silver/` | 12 |
+| `outlook/transcripts/gold/` | 6 (`analysis_commentary/date=2025-11-26, 2025-12-24, 2025-12-30, 2026-05-19, 2026-06-28, 2026-06-29`, 3,630 bytes each, written 2026-10-09 06:42Z) |
+| `outlook/transcripts/state/` | 37 |
+
+What stands: the code read (`lambda_handler.py:282` wires `"gold_rows": lambda: []`, so the drafter reads no gold today) and the Teams counts. What this changes: the
+first cell of the lane is no longer "why none land" but "why the Lambda reads none of the 6 that exist, and whether any row in them is clear of the held-out flag".
+The rows were not opened.
