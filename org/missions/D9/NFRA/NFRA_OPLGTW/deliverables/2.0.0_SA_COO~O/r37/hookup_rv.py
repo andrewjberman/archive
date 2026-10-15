@@ -7,7 +7,7 @@ GW = sys.argv[1].rstrip("/")
 APP, TESTS = GW + "/app/", GW + "/tests/"
 # (module alias, tool name, signature, call args, audit args, doc)
 TOOLS = [
-    ("_rv1", "etfs_get_peer_group", "home_ticker: str", "home_ticker", '{"home_ticker": (home_ticker or "")[:8]}',
+    ("_rv1", "etfs_get_peer_group_members", "home_ticker: str", "home_ticker", '{"home_ticker": (home_ticker or "")[:8]}',
      "The peer group of one Opal home fund (IDVZ or PFOE): its rivals, from the rival-funds peer map; DIVZ and PFDE have none."),
     ("_rv1", "etfs_get_rival_fund_holdings", "fund_ticker: str, as_of: str = None", "fund_ticker, as_of",
      '{"fund_ticker": (fund_ticker or "")[:8], "as_of": as_of}',
