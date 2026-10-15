@@ -53,6 +53,9 @@ LONG_DIGITS = re.compile(r"\d{8,}")
 DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "where", "vintage")
 ISO = re.compile(r"\d{4}-\d{2}-\d{2}$")
 MIN_TESTS = 14
+# Amendment 1 of DB-b-232 (2026-10-15): the repairs of rows W185-S7 and W185-S8 are graded here, on the module they repair
+REQUIRED_TESTS = ("test_households_come_from_the_adapter", "test_missing_sibling_table_is_no_source_yet",
+                  "test_empty_lot_source_is_absent_not_zero")
 
 
 class Fail(Exception):
@@ -174,7 +177,7 @@ def ending_value_probe(root, rows, as_of, member_id):
 
 # ------------------------------------------------------------------------------------------------ the contract clauses (pure)
 def check_contract(c, base_members_ok=True):
-    need(c.get("contract_version") in ("0.5.2", "0.5.3"), "contract_version is not 0.5.2 (or the later 0.5.3 that DB-b-232 lands)")
+    need(c.get("contract_version") in ("0.5.2", "0.5.3", "0.5.4"), "contract_version is not 0.5.2 (or a later 0.5.x the rounds after it land)")
     ids = [m["id"] for m in c["members"]]
     need(len(ids) == 117 and hashlib.sha256("\n".join(sorted(ids)).encode()).hexdigest() == MEMBER_IDS_SHA, "the member list changed")
     absent = [m["id"] for m in c["members"] if m.get("source") == "ABSENT"]
@@ -273,6 +276,9 @@ def run(root, cid):
         need(mp.is_file() and tp.is_file(), "no module or no test file")
         need(is_tracked(root, MODULE_REL) and is_tracked(root, TEST_REL), "the module or its tests are not tracked")
         module_clauses(mp.read_text(encoding="utf-8"))
+        names = set(re.findall(r"def (test_\w+)", tp.read_text(encoding="utf-8")))
+        for t in REQUIRED_TESTS:
+            need(t in names, "the test file lacks the required repair test %s" % t)
         r = subprocess.run([sys.executable, "-m", "pytest", "-q", "--no-header", "-p", "no:cacheprovider", str(tp)], cwd=str(root),
                            capture_output=True, text=True, timeout=100)
         m = re.search(r"(\d+) passed", r.stdout)
@@ -327,7 +333,7 @@ def selftest(root):
     red(lambda rs: [rs.remove(r) for r in list(rs) if r["household_ref"] == "H1" and r["member_id"] == "account.last4"], "a household with no account rows")
     # contract clauses: build a synthetic contract that passes, then break it
     base = json.loads((Path(root) / CONTRACT_REL).read_bytes().decode("utf-8")) if (Path(root) / CONTRACT_REL).is_file() else None
-    if base is not None and base.get("contract_version") in ("0.5.2", "0.5.3"):
+    if base is not None and base.get("contract_version") in ("0.5.2", "0.5.3", "0.5.4"):
         check_contract(base)
         b2 = json.loads(json.dumps(base))
         b2["gold_table"]["columns"] = COLUMNS[:-1]

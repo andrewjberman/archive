@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ae-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ae-2.inline-holiday-sets-measure.md",
+    "group": "OTHER",
+    "vintage_commit": "cd1e04765b"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~98",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round15.md",
+    "vintage_commit": "cd1e04765b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ae-2.inline-holiday-sets-measure.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/measure_inline_holiday_sets.py",
+      "kind": "script",
+      "commit_or_etag": "a781351eda",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measure of the NYSE_HOLIDAYS and is_trading_day definitions in infra/aws/lambda against lib/trading_calendar.py for 2026-2027; stdlib only, reads files only, no AWS, no network, never imports a Lambda module; run at a781351eda prints INLINE-HOLIDAY-SETS found=6 same_2026_2027=5 differs_2026_2027=1 unreadable=0 ok=True",
+      "artifact_covered_by": [
+        "CTae2-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_measure_inline_holiday_sets.py",
+      "kind": "test",
+      "commit_or_etag": "a781351eda",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five arms in temporary directories (same set reads SAME, dropped 2026 date reads DIFFERS with the date named, non-literal set reads UNREADABLE with arithmetic closed, extra condition in is_trading_day reads LOGIC-DIFFERS, empty file set prints found=0 ok=False); run at a781351eda prints MEASURE-INLINE-HOLIDAYS arms=5/5 ok=True",
+      "artifact_covered_by": [
+        "CTae2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~98/INLINE_HOLIDAY_SETS_MEASURE_20261014.txt",
+      "kind": "doc",
+      "commit_or_etag": "339622de5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-time measurement output of the real tree plus a READING section; the output lines match the tool's stdout at the committed tree (re-run identical); six inline sets found, five SAME and one DIFFERS for 2026-2027 (inf-gold-freshness-guard, 2027 closures absent)",
+      "artifact_covered_by": [
+        "CTae2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTae2-AC1",
+      "criterion_verbatim": "every arm of the tool's test passes (base: the file does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_measure_inline_holiday_sets.py",
+      "output_evidence": "MEASURE-INLINE-HOLIDAYS arms=5/5 ok=True (rc=0; run under timeout 120 from the worktree root at the committed tree; ARM PASS same-set-reads-same, ARM PASS dropped-2026-date-differs-named, ARM PASS non-literal-unreadable-arithmetic-closes, ARM PASS extra-condition-logic-differs, ARM PASS empty-file-set-found-0-not-ok)",
+      "denominator": "5 of 5 arms",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTae2-AC2",
+      "criterion_verbatim": "the tool reads the real library and the real Lambda files and prints its last line (base: the file does not exist); report the whole last line, including found= and differs_2026_2027=.",
+      "method": "command",
+      "invocation": "python .tools/measure_inline_holiday_sets.py",
+      "output_evidence": "INLINE-HOLIDAY-SETS found=6 same_2026_2027=5 differs_2026_2027=1 unreadable=0 ok=True (rc=0; run under timeout 120 from the worktree root at the committed tree; the differing set is inf-gold-freshness-guard MARKET_HOLIDAYS, whose 2027 closures are absent)",
+      "denominator": "6 inline sets found; 5 same, 1 differs, 0 unreadable (n == a + b + c)",
+      "status": "PASS",
+      "expect": "INLINE-HOLIDAY-SETS found=",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a fixture set that drops one 2026 date must read DIFFERS-2026-2027 with that date named in only_in_lib; the test's dropped-2026-date arm is this mutant",
+      "expected": "DIFFERS-2026-2027 with the dropped date named in only_in_lib, and the arm PASSes",
+      "observed": "ARM PASS dropped-2026-date-differs-named",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the real-tree measure was run twice at the committed tree (a781351eda code, 339622de5e deliverable) and the two stdout captures were compared byte for byte; the head of the committed deliverable was compared against the same output",
+      "expected": "identical stdout across runs and identical to the deliverable head",
+      "observed": "two runs identical (cmp); deliverable head matches the run (25 lines); last line INLINE-HOLIDAY-SETS found=6 same_2026_2027=5 differs_2026_2027=1 unreadable=0 ok=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of NFRA_CTLPLN.TO-CT-ae-2 from pending to complete",
+      "reason": "not done here: the issuer owns the flip and the order file is outside this worker's <paths>"
+    },
+    {
+      "item": "any edit to a Lambda file, to lib/trading_calendar.py, to any vendored trading_calendar.py copy, or to any Terraform",
+      "reason": "not done: this cell only measures (CTO round-14 ruling 2); a fix rides the owning function's next deploy and is cut later"
+    },
+    {
+      "item": "any AWS call, network call, pip install or push",
+      "reason": "none in this order"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed by this worker"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W98-S1: the tree holds six inline holiday sets (four further Lambdas beyond the two the cell names), not two",
+    "NFRA_CTLPLN-W98-S2: inf-gold-freshness-guard holds 2026 closures only; its 2027 closures are absent, so it differs for 2027",
+    "NFRA_CTLPLN-W98-S3: the cell's literal_eval read does not cover the frozenset-wrapped literal in inf-gold-freshness-guard; the tool unwraps one call"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~98/NFRA_CTLPLN.TO-CT-ae-2.inline-holiday-sets-measure.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~98, 2026-10-14; code commit a781351eda, deliverable commit 339622de5e, surprise rows commit ed74b1982d, on wk-NFRA_CTLPLN-98)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_measure_inline_holiday_sets.py",
+      "result": "MEASURE-INLINE-HOLIDAYS arms=5/5 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/measure_inline_holiday_sets.py",
+      "result": "INLINE-HOLIDAY-SETS found=6 same_2026_2027=5 differs_2026_2027=1 unreadable=0 ok=True"
+    }
+  ]
+}

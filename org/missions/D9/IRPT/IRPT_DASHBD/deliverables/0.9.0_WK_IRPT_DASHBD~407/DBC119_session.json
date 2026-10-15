@@ -1,0 +1,60 @@
+{
+  "serial": "0.9.0_WK_IRPT_DASHBD~407",
+  "to_id": "IRPT_DASHBD.TO-DB-c-12.second-zip-build-input-source-map-repin-and-registry-test",
+  "worktree": "C:/dev/wk-IRPT_DASHBD-407",
+  "branch": "wk-IRPT_DASHBD-407",
+  "entries": [
+    {
+      "step": "tree check",
+      "command": "git rev-parse --abbrev-ref HEAD && test -d org && test -d .tools && echo TREE-OK",
+      "result": "wk-IRPT_DASHBD-407 / TREE-OK"
+    },
+    {
+      "step": "sha256 gate before the edit",
+      "command": "git show 69679b90e3dc52b670d33fddd96d06be1deaac90:infra/logic/registry/scopes.json | sha256sum",
+      "result": "6ce64167c26588521fded21330dc59e0109450e9a01c92e0f6ca9aa90b53cfae (equals the order's sha256)"
+    },
+    {
+      "step": "re-pin",
+      "command": "python -I .scratch/repin.py infra/aws/lambda/ci/lambda-source-map.json",
+      "result": "OK: 4 lines rewritten (lines 5757, 5759, 5868, 5870); git diff --numstat reads 4 4"
+    },
+    {
+      "step": "negative control, old pin, pytest",
+      "command": "HP_REGISTRY_SCOPES_PIN=14b52ca13a467e4be0e47231fb6840611bbb134a python -m pytest <worktree>/infra/aws/lambda/investor-reporting/holdings-performance/tests/test_zip_registry_resolves.py -q",
+      "rc": 1,
+      "result": "1 failed in 1.96s; Failed: producer firm_scope() refused in the staged tree (rc=1): REFUSED: registry lookup('z09') failed: KeyError: 'z09'"
+    },
+    {
+      "step": "staged pins, pytest",
+      "command": "python -m pytest <worktree>/infra/aws/lambda/investor-reporting/holdings-performance/tests/test_zip_registry_resolves.py -q",
+      "rc": 0,
+      "result": "1 passed in 2.59s"
+    },
+    {
+      "step": "commit 1 (source map and test)",
+      "command": "bash .tools/safe-commit.sh -F .scratch/msg_commit1.txt -- <source map> <test>",
+      "result": "05e7ca7b87; 2 files changed, 127 insertions(+), 4 deletions(-); msg-verify MATCH"
+    },
+    {
+      "step": "criterion DBC119-1-AC1",
+      "command": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r119/p119_bcw.py\" . DBC119-1-AC1",
+      "rc": 0,
+      "result": "DBC119-1-AC1 PASS"
+    },
+    {
+      "step": "criterion DBC119-2-AC1",
+      "command": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r119/p119_bcw.py\" . DBC119-2-AC1",
+      "rc": 0,
+      "result": "DBC119-2-AC1 PASS"
+    },
+    {
+      "step": "surprise rows",
+      "command": "python -I .scratch/append_rows.py <INVESTIGATION_v1.md> (bytes appended); bash .tools/safe-commit.sh -F .scratch/msg_rows.txt -- <INVESTIGATION_v1.md>",
+      "result": "IRPT_DASHBD-D2-W407-S1, IRPT_DASHBD-D2-W407-S2 appended; commit a613255c3f; surprise-row-gate OK: 2 new row(s) of 577 total checked"
+    }
+  ],
+  "not_done": [
+    "No build, zip, upload, Terraform plan or apply, AWS call, invoke, deploy or push (forbidden by the order)."
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-558",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-558.export-freeze-on-the-shared-named-account-reader.md",
+    "group": "OTHER",
+    "vintage_commit": "37b3a966f3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "37b3a966f3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-558.export-freeze-on-the-shared-named-account-reader.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~402",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/filled_named_accounts.py",
+      "kind": "script",
+      "commit_or_etag": "25bac3b7eaacd98d33457d4b83f6e062aad6917b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build on branch wk-IRPT_BCKEND-402 at the product commit 25bac3b7ea: the shared reader defined once, its logic inside FILLED-REPORT-D. Nothing deployed, invoked or written to AWS.",
+      "artifact_covered_by": ["IB201-2-AC1", "IB201-2-AC2", "IB201-2-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting/entry.py",
+      "kind": "script",
+      "commit_or_etag": "25bac3b7eaacd98d33457d4b83f6e062aad6917b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at 25bac3b7ea: the inline reader is deleted; serve_filled_report imports the shared reader by name and keeps every route message and class. Nothing deployed.",
+      "artifact_covered_by": ["IB201-2-AC1", "IB201-2-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/retained_export.py",
+      "kind": "script",
+      "commit_or_etag": "25bac3b7eaacd98d33457d4b83f6e062aad6917b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at 25bac3b7ea: freeze_filled_report calls the same reader inside FILLED-REPORT-D and refuses a named account outside the permitted set. Nothing deployed.",
+      "artifact_covered_by": ["IB201-2-AC1", "IB201-2-AC2", "IB201-2-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_freeze_scope.py",
+      "kind": "test",
+      "commit_or_etag": "25bac3b7eaacd98d33457d4b83f6e062aad6917b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at 25bac3b7ea: seven tests on synthetic ids, including export_freeze_refuses_uncovered_account; the stub-only tests run offline. Nothing deployed.",
+      "artifact_covered_by": ["IB201-2-AC1", "IB201-2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~402/IB201-2_record.json",
+      "kind": "doc",
+      "commit_or_etag": "25bac3b7eaacd98d33457d4b83f6e062aad6917b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The worker's record at 25bac3b7ea: base_commit 37b3a966f3, the four product paths, tests 57 of 57, the negative test by name, and the six bound counters at 0.",
+      "artifact_covered_by": ["IB201-2-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~402/IB201-2_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "b72d9f9f2a610da174ea01b7502dd85486e852b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The verbatim output and exit code of IB201-2-AC1, AC2 and AC3 at b72d9f9f2a: all three PASS (exit 0), byte-identical on a second run.",
+      "artifact_covered_by": ["IB201-2-AC1", "IB201-2-AC2", "IB201-2-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB201-2-AC1",
+      "criterion_verbatim": "AC1 the new tests (at least 6) and the existing route, entry and export tests pass -- cell IB-pr-558",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . IB201-2-AC1",
+      "output_evidence": "$ python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . IB201-2-AC1\nOK: 57 passed\nIB201-2-AC1 PASS\nexit=0",
+      "denominator": "57 passed of 57 collected across the new file (7 tests) and the four regression files test_filled_report_source.py, test_retained_export.py, test_reporting_filled_report.py and test_reporting_entry.py.",
+      "expect": "IB201-2-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB201-2-AC2",
+      "criterion_verbatim": "AC2 the difference control: with every FILLED-REPORT-D block removed in memory the new tests FAIL on assertions -- cell IB-pr-558",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . IB201-2-AC2",
+      "output_evidence": "$ python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . IB201-2-AC2\nOK: removing the block fails the new tests (2 block(s))\nIB201-2-AC2 PASS\nexit=0",
+      "denominator": "2 FILLED-REPORT-D blocks removed in memory (shared module and retained_export.py). The worker's own removal run: 4 failed, 3 passed of 7 new tests, 0 errors.",
+      "expect": "IB201-2-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB201-2-AC3",
+      "criterion_verbatim": "AC3 the record: the diff bounded; the reader defined exactly once in the shared module and imported by entry.py and by the export freeze; the inline copy gone; the negative test by name; counters -- cell IB-pr-558",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . IB201-2-AC3",
+      "output_evidence": "$ python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . IB201-2-AC3\nOK: one shared reader, imported by the route and the freeze, the negative test\nIB201-2-AC3 PASS\nexit=0",
+      "denominator": "4 changed product paths of the worker's own commits since base 37b3a966f3, all inside the grant; the reader defined once (1 of 1 definitions); both importers present; the negative test named export_freeze_refuses_uncovered_account; six bound counters at 0.",
+      "expect": "IB201-2-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removing every FILLED-REPORT-D block in memory from the shared module and the freeze must make the new tests fail on assertions.",
+      "expected": "the new test file fails on assertions, with no import or collection error",
+      "observed": "2 blocks removed (check AC2 run); the worker's own scratch run of the same removal: 4 failed, 3 passed, no errors",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of each of the three criteria from the worktree root, output compared",
+      "observed": "IB201-2-AC1, IB201-2-AC2 and IB201-2-AC3 printed the same OK line, the same PASS line and exit 0 on both runs; the two outputs are byte-identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS call, sign-in, invocation, vendor request or deployment was made; the route and the freeze were exercised only through in-memory stubs.",
+      "reason": "This is a LOCAL build order: nothing is deployed, invoked, written to AWS or the served prefixes."
+    },
+    {
+      "item": "Whether the export package build and the reporting-read build include the new _scope file was not verified; infra/aws/lambda/ci/lambda-source-map.json was read by grep only and was not edited.",
+      "reason": "The source map is outside this order's paths; the gap is recorded as surprise row IRPT_BCKEND-D2-W402-S3 for the deploy leg."
+    },
+    {
+      "item": "bundle.py was not edited; the freeze that scopes is freeze_filled_report in retained_export.py.",
+      "reason": "The order lists bundle.py as possibly touched only where the freeze scopes, and the freeze is in retained_export.py."
+    },
+    {
+      "item": "The freeze now also refuses a filled report that is not the two-key contract (FilledReportUnavailable), as the route already does; the freeze previously accepted such a document.",
+      "reason": "The shared reader is the route's rule and the CTO ruled one rule for both paths; the change narrows the freeze and does not widen it. Stated so the difference is not read as an accident."
+    },
+    {
+      "item": "The existing route and export test files outside the five named in AC1 were not run.",
+      "reason": "AC1 names the new file and the four regression files; the other tests of the packages were not part of the grant's criteria."
+    },
+    {
+      "item": "The order file, the check and the order status were not edited or flipped.",
+      "reason": "The worker face forbids both; the status flip belongs to the issuer."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W402-S1: the order says retained_export.py already puts the _scope directory on sys.path; at base it does not (lines 47-51 put _HERE, _render_identity and _ids), so the freeze's marked block appends it.",
+    "IRPT_BCKEND-D2-W402-S2: AC3 reads the worker's own commits since base, so the criteria output cannot precede the product commit; the output is committed after it and the artifact rows name the commit that carries each file.",
+    "IRPT_BCKEND-D2-W402-S3: infra/aws/lambda/ci/lambda-source-map.json lists the _scope files one by one and does not list the new shared reader that the route and the freeze now import by name (ARMED; disarm owner 2.0.0_SA_COO~P2)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~402/IB201-2_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "p201_cells.py (round-201 check, unedited, read only; it reuses the round-196 and round-200 helpers committed beside it)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r201/p201_cells.py\" . <IB201-2-AC1|AC2|AC3>",
+      "result": "three PASS lines, exit 0 each, byte-identical on a second run"
+    },
+    {
+      "tool": "the worker's own removal run (a scratch script outside the repository, using the check's in-memory runner; it removes the FILLED-REPORT-D blocks and runs the new test file)",
+      "invocation": "python <scratch>/mutant_count.py <worktree root>",
+      "result": "2 blocks removed; 4 failed, 3 passed; no collection or import errors"
+    }
+  ]
+}

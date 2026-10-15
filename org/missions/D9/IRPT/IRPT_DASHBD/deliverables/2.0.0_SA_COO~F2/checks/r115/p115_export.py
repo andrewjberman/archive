@@ -5,7 +5,8 @@
                   Portal branch only, inert until a route serves a report.
   DBF115-1-AC1  the export side (source builder, submit, button, preview, bundle resolution, the tab's export target)
   DBF115-1-AC2  the print side (print entry reads the report, the document renders it, the reader takes a version)
-  DBF115-1-AC3  bounds: the portal diff from the round-114 head touches only the granted paths
+  DBF115-1-AC3  bounds: the portal diff from the round-114 head touches only the granted paths and the issuer's one hookup (index.tsx);
+                graded at the candidate head that is registered (CTO round-116 analysis, ruling 1)
 
 The checker runs the named bun tests in the worker's portal worktree (<root>/portal) without colour, and reads the files for the
 tokens the cell names.
@@ -25,6 +26,7 @@ T_EXPORT = IR + "__tests__/irpt-dashbd/export-filled-report.test.tsx"
 T_PRINT = IR + "__tests__/irpt-dashbd/print-filled-report.test.tsx"
 BASE_SHA = "d3c379663faceca7f4907366e0943d2b19022b6e"
 ALLOWED_FILES = (
+    "src/pages/InvestorReporting/index.tsx",
     "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
     "src/pages/InvestorReporting/dashboard/report/reportRead.ts",
     "src/pages/InvestorReporting/__tests__/irpt-dashbd/export-filled-report.test.tsx",
@@ -35,8 +37,8 @@ ALLOWED_PREFIXES = (
     "src/pages/InvestorReporting/render/",
 )
 EXPORT_TOKENS = (
-    (IR + "export/filledReportSource.ts", ("FILLED_REPORT", "export function filledReportSource")),
-    (IR + "export/submit.ts", ("FILLED_REPORT",)),
+    (IR + "export/filledReportSource.ts", ("filled_report", "export function filledReportSource")),
+    (IR + "export/submit.ts", ("filled_report_source",)),
     (IR + "export/ExportButton.tsx", ("clientId",)),
     (IR + "export/resolveBundle.ts", ("readReportAnswer", "filledReport")),
     (IR + "tabs/reporting/ReportingTab.tsx", ("buildFilledReportExportTarget",)),
@@ -168,6 +170,8 @@ def selftest():
     arm("bun-none", bun_result("nothing"), (0, -1))
     arm("allowed-green", outside_allowed(["src/pages/InvestorReporting/export/submit.ts", ALLOWED_FILES[0]]), [])
     arm("allowed-red", outside_allowed(["src/pages/InvestorReporting/export/submit.ts", "src/App.tsx"]), ["src/App.tsx"])
+    arm("allowed-index-hookup", outside_allowed(["src/pages/InvestorReporting/index.tsx"]), [])
+    arm("allowed-other-index", outside_allowed(["src/pages/InvestorReporting/tabs/index.tsx"]), ["src/pages/InvestorReporting/tabs/index.tsx"])
     arm("allowed-render", outside_allowed(["src/pages/InvestorReporting/render/PrintEntry.tsx"]), [])
     arm("allowed-dashboard-other", outside_allowed(["src/pages/InvestorReporting/dashboard/reportingRead.ts"]),
         ["src/pages/InvestorReporting/dashboard/reportingRead.ts"])

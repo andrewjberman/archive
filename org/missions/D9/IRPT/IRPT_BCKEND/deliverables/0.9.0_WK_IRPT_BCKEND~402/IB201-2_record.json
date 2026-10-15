@@ -1,0 +1,31 @@
+{
+  "base_commit": "37b3a966f3f63aaade7bd00f1869eb34aeb60cf6",
+  "changed_paths": [
+    "infra/aws/lambda/investor-reporting/_scope/filled_named_accounts.py",
+    "infra/aws/lambda/investor-reporting/export/retained_export.py",
+    "infra/aws/lambda/investor-reporting/export/tests/test_filled_report_freeze_scope.py",
+    "infra/aws/lambda/investor-reporting/reporting/entry.py"
+  ],
+  "negative_tests": ["export_freeze_refuses_uncovered_account"],
+  "tests_total": 57,
+  "tests_passed": 57,
+  "mutant_tests_failed": 4,
+  "notes": [
+    "base_commit is the worktree HEAD before the first worker commit (37b3a966f3, the issuer's cut). changed_paths is the four product paths of the worker's own commits; the deliverables folder and the surprise channel are excluded by the check.",
+    "tests_total 57 and tests_passed 57 are the AC1 run: pytest over the new file test_filled_report_freeze_scope.py (7 tests, including export_freeze_refuses_uncovered_account) and the four regression files test_filled_report_source.py, test_retained_export.py, test_reporting_filled_report.py and test_reporting_entry.py. Read: the output of the run, not a verification against live state.",
+    "The reader is _scope/filled_named_accounts.py: filled_named_accounts(document, is_issued_account). The predicate is called as is_issued_account('account', key), so _ids.is_issued is passed unchanged. Its two refusals are FilledDocumentRefused (not the two-key contract) and NoAccountNamed (no account named); the route maps them to ReportingNotReady and AccountNotCovered with the same messages as before; the freeze maps them to FilledReportUnavailable and FilledReportNotCovered.",
+    "Route: reporting/entry.py deletes the inline _by_row_keys and _filled_named_accounts and calls the shared reader inside serve_filled_report (import by name in the body). The route's tests were not edited: test_reporting_filled_report.py reaches no moved private name (it uses the route's public names only).",
+    "Freeze: export/retained_export.py freeze_filled_report calls the same reader inside its FILLED-REPORT-D block, after the existing household list. A document that is not the two-key contract is now refused by the freeze (FilledReportUnavailable), as the route refuses it; the freeze previously accepted such a document. This narrows the freeze, it does not widen it. bundle.py was not edited.",
+    "Premise not as the order states: the order says retained_export.py already puts the _scope directory on sys.path. At base it does not (lines 47-51 put _HERE, _render_identity and _ids). The freeze's marked block appends the _scope directory itself; no module-level line of retained_export.py changed.",
+    "Not verified: whether the export package build and the reporting-read build include the new _scope file. infra/aws/lambda/ci/lambda-source-map.json lists the investor-reporting _scope files by repo_path, one entry each, and does not list the new file. Not edited (outside grant). Surprise row IRPT_BCKEND-D2-W402-S3.",
+    "Difference control, worker's own run (a scratch script outside the repository, using the check's in-memory runner): 2 FILLED-REPORT-D blocks removed in memory; 4 failed, 3 passed, no collection or import errors. The check's AC2 reports PASS on the same removal.",
+    "Not read: the AWS plane, the deployed bytes of any lambda, and the other route and export tests beyond the five files named above. No AWS client was built: the route and freeze were exercised through an in-memory S3 stub and a store stub.",
+    "Counters: no function invoked, no sign-in, no AWS write, no row or figure written, no vendor request sent. Nothing deployed."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

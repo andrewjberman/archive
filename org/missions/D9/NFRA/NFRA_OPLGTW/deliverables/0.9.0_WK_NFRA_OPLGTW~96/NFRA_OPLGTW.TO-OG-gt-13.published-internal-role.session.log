@@ -1,0 +1,34 @@
+NFRA_OPLGTW.TO-OG-gt-13 -- session log of 0.9.0_WK_NFRA_OPLGTW~96 (worktree C:/tmp/wk-oplgtw-96, branch wk-NFRA_OPLGTW-96)
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-96 ; test -d org && test -d .tools -> TREE-OK
+
+Premises re-grounded at HEAD 8d9dbbad72 (cut): internal_role.py had s3_client and dynamodb_client; harvest_published.py
+_invoke built a default boto3 lambda client; tests/test_og_gt13.py absent; the check scripts gt13.AC1.sh and gt13.AC2.sh
+present under the issuer's r37/checks; the existing suites test_mcpmsp_internal_role.py, test_internal_role_routing.py,
+test_og_gt5.py present.
+
+Code commit: 9ba48749c7 build(NFRA_OPLGTW.TO-OG-gt-13, 0.9.0_WK_NFRA_OPLGTW~96) (LOCAL on wk-NFRA_OPLGTW-96), 3 files:
+  infra/aws/ec2/opal-gateway/app/internal_role.py      (lambda_client added; s3_client and dynamodb_client unchanged)
+  infra/aws/ec2/opal-gateway/app/harvest_published.py  (_invoke prefers the internal role; InternalRoleUnavailable -> unavailable refusal)
+  infra/aws/ec2/opal-gateway/tests/test_og_gt13.py     (test_oggt13_ac01 .. ac04)
+
+Direct run, cwd infra/aws/ec2/opal-gateway: python -m pytest tests/test_og_gt13.py -v -p no:cacheprovider --color=no
+  tests\test_og_gt13.py::test_oggt13_ac01 PASSED
+  tests\test_og_gt13.py::test_oggt13_ac02 PASSED
+  tests\test_og_gt13.py::test_oggt13_ac03 PASSED
+  tests\test_og_gt13.py::test_oggt13_ac04 PASSED
+  4 passed in 1.07s  (rc=0)
+
+AC1 -- timeout 120 bash .../r37/checks/gt13.AC1.sh; echo exit=$?   (run at the working tree, then again on the commit)
+  pytest rc=0; named tests passed 4 of 4; failed/error lines 0
+  existing internal-role and published-analysis suites: rc=0; 11 passed in 1.79s
+  RESULT: PASS
+  exit=0
+
+AC2 -- timeout 120 bash .../r37/checks/gt13.AC2.sh; echo exit=$?   (run twice)
+  module-scope boto3 client constructions: 0 (want 0)
+  parents[N>=3] in shipped app modules: 0 of 72 file(s) scanned (want 0)
+  RESULT: PASS
+  exit=0
+
+Determinism: AC1 deciding lines identical on both runs (4 of 4; 11 passed); AC2 identical on both runs (0 (want 0); 0 of 72).
