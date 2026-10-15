@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-247",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "7d5697ef1a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-247.per-day-self-invoke-split-of-the-hop-1-filled-stage.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~201",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~201/IRPT_DASHBD.TO-DB-b-247.per-day-self-invoke-split-of-the-hop-1-filled-stage.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "66b0a5a021",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-201; seven functions added (filled_population, owed_filled_days, run_filled_day, invoke_next_day, filled_day_event, filled_day_key, run_day_event); run() builds the oldest owed filled day and invokes itself for the next one (InvocationType Event); the shared filled_stage stays defined and is no longer called by run(); 116 lines added and 6 existing lines changed or removed (the order allows 10); nothing planned, deployed or scheduled",
+      "artifact_covered_by": [
+        "DB122-2-AC1",
+        "DB122-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_per_day.py",
+      "kind": "test",
+      "commit_or_etag": "66b0a5a021",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-201; 15 new tests (fake S3 and Lambda clients, no network) covering the landed no-op, oldest first, chain stop when none owed, chain link, Event invocation, day payload, client error returned, malformed day refused, day event runs no earlier stage, chain None never invokes, run no longer calls filled_stage",
+      "artifact_covered_by": [
+        "DB122-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_filled_report_values_stage.py",
+      "kind": "test",
+      "commit_or_etag": "66b0a5a021",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-201; Amendment 1 (issuer commit 82091e0b7f) put this file in the grant for one change: only test_stage_runs_after_the_class_and_lot_stages changed (17 lines added, 3 removed; the diff is one method), now asserting the owed and oldest filled day and no call to filled_stage; every other test is byte-identical",
+      "artifact_covered_by": [
+        "DB122-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "66b0a5a021",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-201; one statement InvokeOwnFunctionOnly added (10 lines added, none deleted): actions exactly lambda:InvokeFunction; resource is the function's own ARN built from module.irpt_reporting_gold_lambda_name.name; no wildcard; the only statement with a lambda action; no terraform command run, no plan, no apply",
+      "artifact_covered_by": [
+        "DB122-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~201/RD_SPLIT_FACTS_R122.json",
+      "kind": "config_data",
+      "commit_or_etag": "940ec59113",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the facts record: handler block (seven functions, event key day, invocation type Event), behavior block (five arms true), iam block, expected_plan block (0 add, 2 change, 0 destroy; inferred), tests block (15 new, 120 in the directory), files_changed with four entries whose sha256 match the bytes at 66b0a5a021 and at 940ec59113, flags files_in_repo, served_values_changed, pushed and deployed all false, claim inferred",
+      "artifact_covered_by": [
+        "DB122-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1a0fc0c2bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows appended as bytes: IRPT_DASHBD-D2-W201-S1 (BLOCKING, sparse checkout, committed at 67c4202df1), IRPT_DASHBD-D2-W201-S2 (OBSERVATION, resolves S1, committed at 88e486a113), IRPT_DASHBD-D2-W201-S3 (BLOCKING, step 2 against the 105-test clause, committed at b492636e75), IRPT_DASHBD-D2-W201-S4 (OBSERVATION, resolves S3 and cites Amendment 1 at 82091e0b7f, committed at 1a0fc0c2bb); the surprise-row gate graded each new row OK; no existing row edited",
+      "artifact_covered_by": [
+        "DB122-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB122-2-AC1",
+      "criterion_verbatim": "`DB122-2-AC1` -- the handler defines the five functions; `run()` calls `owed_filled_days` and `run_filled_day` and no longer calls `filled_stage`; `invoke_next_day` invokes with `InvocationType` Event and a payload with the day key; `lambda_handler` reads the event through `filled_day_event`; the new test file holds at least 8 tests whose names cover the landed no-op, the chain stop, the event and the payload; the whole handler tests directory passes with at least 113 tests. Base: FAIL (the functions are missing).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_split.py\" . DB122-2-AC1",
+      "output_evidence": "DB122-2-AC1 PASS (rc 0); the deciding line: OK: the handler has the five functions, run() runs the oldest owed day and no longer calls filled_stage, the invoke is async with a day payload; 120 tests pass (105 earlier, 15 new); last line DB122-2-AC1 PASS",
+      "denominator": "5 of 5 functions defined (seven in all); run() calls owed_filled_days and run_filled_day, 0 calls to filled_stage; the new test file holds 15 test functions (floor 8) covering the four name groups; pytest 120 passed, 0 failed (floor 113; 105 earlier, 15 new)",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's deciding line reads OK and the last line DB122-2-AC1 PASS at rc 0 at the worker's HEAD; the handler and test bytes are those of 66b0a5a021",
+      "expect": "DB122-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB122-2-AC2",
+      "criterion_verbatim": "`DB122-2-AC2` -- `iam.tf` gains exactly one new statement with the single action `lambda:InvokeFunction`, no wildcard, the only statement carrying a `lambda:` action; its resource is a function ARN built from `module.irpt_reporting_gold_lambda_name`; in the worker's own commits `iam.tf` gains at least 8 lines and loses at most 2, and no other Terraform file than `iam.tf` and `locals.tf` changes. Base: FAIL (no statement).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_split.py\" . DB122-2-AC2",
+      "output_evidence": "DB122-2-AC2 PASS (rc 0); the deciding line: OK: iam.tf gains the one lambda:InvokeFunction statement InvokeOwnFunctionOnly (iam.tf +10/-0), the ARN is built from the builder-derived function name, no wildcard, no other Terraform file; last line DB122-2-AC2 PASS",
+      "denominator": "1 of 1 new statement carrying lambda:InvokeFunction; actions exactly 1 of 1; lambda statements 1 of 1; iam.tf +10 lines added (floor 8), 0 deleted (ceiling 2); other Terraform files changed in the worker's commits 0 of 0",
+      "status": "PASS",
+      "status_reason": "PASS by output at the worker's HEAD: the statement and the record of the numstat are those of commit 66b0a5a021; locals.tf is unchanged",
+      "expect": "DB122-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB122-2-AC3",
+      "criterion_verbatim": "`DB122-2-AC3` -- `RD_SPLIT_FACTS_R122.json` has exactly the form of step 5 and its files hash as recorded; the handler change is additive in the worker's own commits (gains at least 60 lines, loses at most 10); nothing else under `infra/`, `data/`, `lib/` or `org/standards/` changes in them. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_split.py\" . DB122-2-AC3",
+      "output_evidence": "DB122-2-AC3 PASS (rc 0); the deciding line: OK: facts record valid, files hashed; the handler gains 116 lines and loses 6 in the worker's own commits; nothing else under infra/, data/, lib/ or org/standards/; last line DB122-2-AC3 PASS",
+      "denominator": "facts record blocks 6 of 6 valid (handler, behavior, iam, expected_plan, tests, files_changed); files_changed 4 of 4 hashes match the bytes at HEAD; handler own commits +116 of at least 60 added and -6 of at most 10 deleted; files changed outside the grant 0",
+      "status": "PASS",
+      "status_reason": "PASS by output at the worker's HEAD: the record RD_SPLIT_FACTS_R122.json is that of commit 940ec59113 and its four hashes are those of the committed bytes",
+      "expect": "DB122-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test: the AST arms (a run() that calls filled_stage, a typed or wrong InvocationType, a missing function, a lambda_handler that does not read the day event), the test-name arms, the HCL arms (a wildcard, a typed function name, a second lambda action, no statement), and the facts arms (a flag set true, a count out of range, a hash that differs, a digit run)",
+      "expected": "the selftest passes the green arms and refuses each red arm",
+      "observed": "selftest: the AST arms, the test-name arms, the HCL arms and the facts arms behave; selftest PASS rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "DB122-2-AC1, DB122-2-AC2 and DB122-2-AC3 run from the worktree root at the worker's HEAD, each with the same deciding line on the run after the final commit",
+      "observed": "AC1 rc 0 PASS; AC2 rc 0 PASS; AC3 rc 0 PASS (the same deciding lines as the runs before the instance commit)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Terraform plan and apply of the one new statement and the two expected changes",
+      "reason": "no terraform binary on this box and no AWS call permitted to this order; the plan, the apply and the expected_plan are another seat's act under a signed pair. The expected_plan in the facts record is the order's own statement, inferred and not planned"
+    },
+    {
+      "item": "The memory measurement and any chunk rule for one filled day",
+      "reason": "out of this cell: DB-b-246 measures memory and a chunk rule, if needed, is a later cell; the day is built as the stage builds it today"
+    },
+    {
+      "item": "A live check that the self-invoke runs on the function's own ARN with a qualifier",
+      "reason": "not checkable without AWS; the grant names the unqualified function ARN, the scheduled fire invokes the unqualified function, and the first live run is the applier's act"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W201-S1",
+    "IRPT_DASHBD-D2-W201-S2",
+    "IRPT_DASHBD-D2-W201-S3",
+    "IRPT_DASHBD-D2-W201-S4"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p122_split.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_split.py\" . DB122-2-AC1",
+      "result": "PASS rc 0 (AC1); PASS rc 0 (AC2); PASS rc 0 (AC3)"
+    },
+    {
+      "tool": "p122_split.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r122/p122_split.py\" --selftest .",
+      "result": "rc 0: selftest PASS"
+    }
+  ]
+}
