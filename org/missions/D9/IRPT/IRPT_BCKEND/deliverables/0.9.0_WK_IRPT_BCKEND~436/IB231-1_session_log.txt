@@ -1,0 +1,18 @@
+IB-pr-599 worker session, 0.9.0_WK_IRPT_BCKEND~436 (LOCAL build; nothing deployed, run against a served prefix, published or written to AWS)
+Base commit: 0a1fa2b9c4127fb1606d16668f6ab9410c6a8751. Code and tests commit: e78ddf1736 (LOCAL, branch wk-IRPT_BCKEND-436).
+
+1. Worktree checked: branch wk-IRPT_BCKEND-436; org and .tools present (TREE-OK).
+2. Sparse checkout: data/inf/manual_api added first; then, locally and never committed, data/inf/scripts/gold, data/inf/scripts/bronze and lib (the import chain and the regress file).
+3. Read: the feed (SCOPE-FEED-A and SCOPE-FEED-B), the two existing feed test files, the checker helpers under the P2 checks folder (r196, r200, r201, r207, r231).
+4. Feed edit: SCOPE-FEED-C inside the SCOPE-FEED-B region: helper _complete_days and a run redefinition carrying the day-complete gate, the DAYS and SKIPPED lines and the exit code.
+5. Existing test edits, two assertions only: test_one_call_per_household_paced_no_retry and test_failed_household_writes_no_silver_rows_for_it (both asserted a partial day was written).
+6. New test file test_scope_feed_day_complete.py: 10 tests, synthetic ids, fake transport and fake S3.
+7. Feed test files before the edit: 96 passed. After the edit and the new file: 106 passed (96 existing and 10 new).
+8. Own removal run (SCOPE-FEED-C stripped in memory, new file run): 8 failed, 2 passed, 0 errors; every failure is an AssertionError.
+9. Base comparison (scratch, outside the tree): the all-OK output of 0a1fa2b9c4 and of e78ddf1736 match on key set, decompressed bronze, silver bytes and stdout, over a default pull and a three-day from-date window with synthetic ids.
+10. ruff check with target py39 on the three Python files: All checks passed.
+11. safe-commit e78ddf1736: 4 files (3 code and test files, the record). Commit gate: pre-commit clean; naming gate PASS 0 graded; client-data check WARN (channel row IRPT_BCKEND-D2-W436-S1); surprise-row gate found no rows in that commit.
+12. Criteria IB231-1-AC1, AC2, AC3: each PASS (verbatim outputs in IB231-1_criteria_output.txt).
+13. Channel: five rows appended (IRPT_BCKEND-D2-W436-S1 to S5).
+
+Not done: no Orion call, no AWS, no S3, no Secrets Manager, no network, no deploy, no served-prefix run.

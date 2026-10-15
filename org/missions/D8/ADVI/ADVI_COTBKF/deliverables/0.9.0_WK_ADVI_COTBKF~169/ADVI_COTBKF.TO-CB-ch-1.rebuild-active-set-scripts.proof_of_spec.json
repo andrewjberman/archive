@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ch-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.md",
+    "group": "OTHER",
+    "vintage_commit": "824588956e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~169",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round86.md",
+    "vintage_commit": "824588956e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/cotbkf_active_set_v2.py",
+      "kind": "script",
+      "commit_or_etag": "b65e3ecdbd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the build script at blob edbddd5fe38712b1f0c3dc3f22389394c0729414 (last change, repair 6); read-only S3; writes two files to --out",
+      "artifact_covered_by": [
+        "CB86ch1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py",
+      "kind": "test",
+      "commit_or_etag": "4665b8007a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four stub-frame tests, no S3",
+      "artifact_covered_by": [
+        "CB86ch1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "86a456dec9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the build record: hashes, counts, six repairs, diff counts; no account value",
+      "artifact_covered_by": [
+        "CB86ch1-AC1",
+        "CB86ch1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB86ch1-AC1",
+      "criterion_verbatim": "the two rebuilt files, read from disk now and hashed now, equal the two committed pins (the pins are typed in this invocation, not read from your record).",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json',encoding='utf-8'));pins={'ACTIVE_COTTONWOOD_SET_V2.csv':'5cef7ab0c9e10fe299cb757d4dba31792d069bad35f7250defa76e18773046ae','REVERSE_MATCH_V3.csv':'0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f'};ok=[hashlib.sha256(open(f['path'],'rb').read()).hexdigest()==pins[f['name']] for f in d['files']];print('V2-REBUILD files=%d sha256_equal=%s'%(len(d['files']),all(ok) and len(ok)==2))\"",
+      "expect": "V2-REBUILD files=2 sha256_equal=True",
+      "output_evidence": "V2-REBUILD files=2 sha256_equal=False (rc 0). REVERSE_MATCH_V3.csv equal to its pin; ACTIVE_COTTONWOOD_SET_V2.csv 41825 rows against the pinned 41826, sha256 differs.",
+      "denominator": "1 of 2 rebuilt files equal to its pin; 41793 of 41826 pinned window rows reproduced as a multiset (33 pinned-only, 32 rebuilt-only); 860 of 860 reverse-match rows",
+      "status": "FAIL",
+      "status_reason": "The window file does not reproduce its pin after six repairs (three after the first report, three under amendment 1). Per the order it is not forced and not edited. The row order is not deterministic (surprise ADVI_COTBKF-D1-W169-S4). Remaining differences: ticker on 25 paired rows and 33 and 32 unmatched rows (surprises ADVI_COTBKF-D1-W169-S2 and ADVI_COTBKF-D1-W169-S4, REBUILD_RECORD.json diff_summary)."
+    },
+    {
+      "criterion_id": "CB86ch1-AC2",
+      "criterion_verbatim": "the script at HEAD is the script the record says produced the files: it is committed, and the run came from the commit.",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/REBUILD_RECORD.json',encoding='utf-8'));b=subprocess.check_output(['git','rev-parse','HEAD:'+d['script_path']]).decode().strip();print('V2-SCRIPT-COMMITTED blob_equal=%s'%(b==d['script_blob']))\"",
+      "expect": "V2-SCRIPT-COMMITTED blob_equal=True",
+      "output_evidence": "V2-SCRIPT-COMMITTED blob_equal=True (rc 0)",
+      "denominator": "1 of 1 script blob equal to the record (edbddd5fe38712b1f0c3dc3f22389394c0729414)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB86ch1-AC3",
+      "criterion_verbatim": "the four window and definition rules hold on stubs.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py -q",
+      "expect": "4 passed",
+      "output_evidence": "4 passed in 0.06s (rc 0)",
+      "denominator": "4 of 4 stub tests passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the spec names no mutant control; none run",
+      "expected": "n/a",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 hash comparison of the two outside files, recomputed on the same bytes",
+      "observed": "sha256_equal=False on the window file and True on the reverse match, recomputed. The build itself is not deterministic across hash seeds (surprise ADVI_COTBKF-D1-W169-S4)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "C:/dev/_cotbkf_rebuild_20261015/ACTIVE_COTTONWOOD_SET_V2.csv",
+      "reason": "outside the repository by design (raw account keys may not enter the tree); not a git ref; rows, bytes and sha256 in REBUILD_RECORD.json and read back by CB86ch1-AC1"
+    },
+    {
+      "item": "C:/dev/_cotbkf_rebuild_20261015/REVERSE_MATCH_V3.csv",
+      "reason": "outside the repository by design; not a git ref; read back by CB86ch1-AC1"
+    },
+    {
+      "item": "the account-id scan test_cotbkf_no_account_ids.py",
+      "reason": "fails closed (rc 1): the account set is absent at its default path, so no DENOMINATOR line exists; reported in the worker report"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W169-S1: the first act found data/ absent from the sparse worktree; LIFTED by the coordinator sparse widening (ruling on this row); row stands unedited",
+    "ADVI_COTBKF-D1-W169-S2: BLOCKING, INERT. ACTIVE_COTTONWOOD_SET_V2.csv does not reproduce its pin after six repairs (41825 rows against 41826); REVERSE_MATCH_V3.csv does reproduce",
+    "ADVI_COTBKF-D1-W169-S3: OBSERVATION, INERT. The silver and gold listings now hold two later dated keys each (2026-10-13, 2026-10-14); the build pins the snapshot at 2026-10-12",
+    "ADVI_COTBKF-D1-W169-S4: OBSERVATION, INERT. Cause established: the window-file row order depends on the process hash seed (three runs, three hashes); the sort has no tie-break; the pinned file orders its tied groups by held_to and window_basis"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~169/ADVI_COTBKF.TO-CB-ch-1.rebuild-active-set-scripts.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/assets/scripts/silver/cotbkf_active_set_v2.py --out <dir> (runs from commits 4665b8007a, 8cd4c0a81f, 9f617f4fd9, 68ffc04bc9, 501c066bdb, 0b88fd292f, b65e3ecdbd; diagnostic copies in .scratch)",
+      "result": "final run V2 41825 rows, sha256 not equal; V3 860 rows, sha256 equal to pin; two seed runs gave different V2 hashes"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cotbkf_active_set_v2.py -q",
+      "result": "4 passed"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+R1 revert of 45a3e18f only (hint kept)
+R2 gates typecheck 0 tests pass build ok
+R3 CI success deployed sha e0b43076d9da tag peeled
+R4 PROD staff read ABSENT no sanctioned staff-class login or real bearer is available to this seat; ui-smoke only stubs auth, and its stubbed internal-admin read of PROD reaches no live API (Tickets could not be loaded), so the Firm chooser and catalogue were not read
+PROD sha before: 45a3e18f197c485eb6534f4e29d49fd5e9636c98 (portal-v2.1.225)
+PROD sha after: e0b43076d9daf56f8eb4937137180e3cf4246e7f (portal-v2.1.226, tag peeled to this commit)
+Run id: 38785590551 (Deploy to Production, status completed, conclusion success; the only workflow on this sha)
+Revert: git revert -m 1 45a3e18f in an ephemeral worktree at the PROD tip (first parent 9176227f carries the hint; second parent 406345bc is c8c3). One revert commit e0b43076, no other commit on origin/PROD..HEAD. Diff 3 files, 1 insertion, 128 deletions: src/pages/InvestorReporting/contracts/submission-request.ts, src/pages/TicketCenter/analysisRequest.ts, src/pages/TicketCenter/__tests__/analysis-commentary-always-requested.test.ts (deleted). AnalysisRequestParts.tsx, TicketCenter.tsx and filing-hint.test.tsx untouched; grep -c filingHints analysisRequest.ts = 2 at the pushed sha. Note: c8c3's path is contracts/submission-request.ts, not contracts/wire/.
+Gates (revert worktree at e0b43076): bun run typecheck rc 0; bun test src/pages/TicketCenter 128 pass 0 fail 24 files (135 before, minus c8c3's 7 tests); bun run build rc 0 (built in 24.08s); worktree clean after build.
+Receipt (pages and class): Ticket Center (analysis request filing, staff caller), Opal-internal per ruling 2402; the revert removes the commentary_requested true send, so a staff filing no longer starts the chain that ends in the dead-letter queue (CTO msgs 8530, 8534; AQ2 msg 8529). The filing hint 469b stays. No queue message received, redriven or deleted; no API, IAM or data act.
+Note for the re-promote: c8c3's commit 406345bce1 stays in PROD history (a merge revert keeps it reachable), so a later c8c3 promote needs a revert of this revert or a fresh candidate, not a plain merge of the same branch.
+Screenshot (stubbed internal-admin session, PROD origin, NOT a staff read): org/tier2_senior/0.4.0_DT_ClientPlatform~DELL2/deliverables/irpt_anlreq_revert/revert_prod_ticket_center_stubbed_staff.png
+Main portal tree: on DEV, clean, throughout.
