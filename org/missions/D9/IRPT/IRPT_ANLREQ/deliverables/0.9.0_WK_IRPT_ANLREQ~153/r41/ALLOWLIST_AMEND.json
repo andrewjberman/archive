@@ -1,0 +1,507 @@
+{
+  "schema": "ar352_allowlist_amend/1",
+  "cell": "AR-y-352",
+  "order": "IRPT_ANLREQ.TO-AR-y-352",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~153",
+  "base": "a4a81b30af25e436c815e4176b65c6820d85fbb1",
+  "driver": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/fwd1_driver.mjs",
+  "q1": {
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 382,
+          "text": "const response = await fetch(`${API_BASE}/auth/login`, {"
+        },
+        "fires": "sign-in form submit at /login (driver STEP-3), before the landing at /market",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 174,
+          "text": "const response = await fetch(`${API_BASE}/auth/refresh`, {"
+        },
+        "fires": "session establishment through refreshToken (AuthContext.tsx:173) when the session is restored",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "caller": {
+          "file": "portal/src/api/api-client.ts",
+          "line": 69,
+          "text": "const response = await fetch(`${AUTH_API_BASE}/auth/refresh`, {"
+        },
+        "fires": "a 401 answered by apiRequest: api-client.ts:173-175 -> refreshAndRetry -> attemptTokenRefresh (:110), then the SAME request is re-sent",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/investor-reporting/directory/resolve",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+          "line": 103,
+          "text": "const resolved = await client.resolveDirectoryContext("
+        },
+        "fires": "when the New Ticket Analysis Request form is shown (formShown TicketCenter.tsx:303, effect :304-316, call :313), once per showing; the transport is investor-reporting.ts:1276-1293 with the route row at :239",
+        "class": "read_shaped",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/prod/analytics/ingest (external origin https://f7lvfv4bjc.execute-api.us-east-1.amazonaws.com)",
+        "caller": {
+          "file": "portal/src/services/analytics.ts",
+          "line": 777,
+          "text": "await fetch(`${this.config!.apiEndpoint}/ingest`, {"
+        },
+        "fires": "the event flush: 30 s heartbeat (analytics.ts:495-523, track at :509), page exit (:756-757); the sendBeacon twin is analytics.ts:774. The driver answers it with 204 at fwd1_driver.mjs:170 and never sends it",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/investor-reporting/analysis/inputs",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+          "line": 245,
+          "text": "let result = await deps.ir.uploadAnalysisInput(input.upload, input.answers.firm).catch(atStep('upload'))"
+        },
+        "fires": "on the Submit click, the FILE step (TicketCenter.tsx:363 -> fileAndRequestAnalysis -> analysisRequest.ts:245); re-posted only while the upload answers RESOLVING (analysisRequest.ts:248-251). Transport investor-reporting.ts:1229, route row :236",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+          "line": 279,
+          "text": "const created = await deps.tickets.createTicket({"
+        },
+        "fires": "on Submit, after the upload answers NORMALIZED (the ticket is created only then). Transport tickets.ts:142-143",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/investor-reporting/analysis",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+          "line": 446,
+          "text": "const issued = await deps.ir.submitAnalysisRequest("
+        },
+        "fires": "on Submit, step 3 of I1 (sendAnalysisStep, analysisRequest.ts:435), straight after the ticket is created; also the retry and request-report paths (analysisRequest.ts:546, TicketCenter.tsx:440, :455). Transport investor-reporting.ts:1491 with query selected_tenant and account_set_id; route row :241",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets/{ticketId}/report",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+          "line": 465,
+          "text": "const recorded = await deps.tickets.recordTicketReport(ticket.ticket_id, reportRefBody(analysis.request_id, analysis.request_revision))"
+        },
+        "fires": "on Submit, step 4 (recordStep, analysisRequest.ts:436); also the retry (analysisRequest.ts:547). Transport tickets.ts:208",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets/{ticketId}/claim",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+          "line": 512,
+          "text": "await claimTicket(id)"
+        },
+        "fires": "the board Claim control (handleClaim); not on the filing path. Transport tickets.ts:147",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets/{ticketId}/complete",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+          "line": 529,
+          "text": "await completeTicket(id, resolution)"
+        },
+        "fires": "the board Complete control after window.prompt (TicketCenter.tsx:525); not on the filing path. Transport tickets.ts:154",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets/{ticketId}/commentary-sent",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+          "line": 606,
+          "text": "const answer = await (record ?? recordCommentarySent)(ticket.ticket_id)"
+        },
+        "fires": "the commentary-sent confirm press (AnalysisRequestParts.tsx:634); not on the filing path. Transport tickets.ts:222",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets/submit",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+          "line": 274,
+          "text": "const submitted = await deps.submitPartner({"
+        },
+        "fires": "the partner-firm filing only: wired at TicketCenter.tsx:415 (submitPartner: submitAnalysisTicket) and reached only when partner = !internal (TicketCenter.tsx:206). A staff caller never reaches it. Transport tickets.ts:181",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/scoped/tickets",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/TradeRequestParts.tsx",
+          "line": 137,
+          "text": "const ticket = existing ?? (await deps.createTicket(ticketInputFromForm(f))).ticket"
+        },
+        "fires": "only inside TradeRequestForm, which the type select no longer offers (TicketCenter.tsx:683 filters trade_request). Not reachable from the UI",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/general/trades/submit",
+        "caller": {
+          "file": "portal/src/pages/TicketCenter/TradeRequestParts.tsx",
+          "line": 116,
+          "text": "return publicApiRequest<unknown>('/api/general/trades/submit', { method: 'POST', body: JSON.stringify(body) })"
+        },
+        "fires": "as the row above (trade_request is not offered). Transport trade-submission.ts:244. Not reachable from the UI",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/logout",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 629,
+          "text": "await fetch(`${API_BASE}/auth/logout`, {"
+        },
+        "fires": "sign-out only",
+        "class": "writes",
+        "admitted_before": true
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/send",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 452,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/send`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/verify",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 481,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/verify`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/enroll/send-code",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 510,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/enroll/send-code`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/enroll/resend",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 529,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/enroll/resend`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/enroll/verify",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 544,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/enroll/verify`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/preference",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 565,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/preference`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it) (SMS channel)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/mfa/preference",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 581,
+          "text": "const response = await fetch(`${API_BASE}/auth/mfa/preference`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it) (email channel)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/change-password",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 684,
+          "text": "const response = await fetch(`${API_BASE}/auth/change-password`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/forgot-password",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 708,
+          "text": "const response = await fetch(`${API_BASE}/auth/forgot-password`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/reset-password",
+        "caller": {
+          "file": "portal/src/contexts/AuthContext.tsx",
+          "line": 721,
+          "text": "const response = await fetch(`${API_BASE}/auth/reset-password`, {"
+        },
+        "fires": "a second-factor step of sign-in or an account/settings screen; not on the Ticket Center path. Not read: which screen calls it (AuthContext exposes it; TicketCenter does not call it)",
+        "class": "writes",
+        "admitted_before": false
+      }
+    ],
+    "telemetry": "The one telemetry POST the page can make is OpalAnalytics.flush: fetch POST and sendBeacon to ${apiEndpoint}/ingest (portal/src/services/analytics.ts:774 and :777). apiEndpoint is https://f7lvfv4bjc.execute-api.us-east-1.amazonaws.com/prod/analytics (AuthContext.tsx:222, :370, :763). The driver already answers /analytics/ingest locally (fwd1_driver.mjs:33 ANALYTICS_RE, :170 route.fulfill 204). No OTHER telemetry or logging POST exists in non-test portal/src: setTelemetrySink (portal/src/api/endpoints/investor-reporting.ts:670) has no caller, so emitTelemetry (:678-683) sends nothing; the only sendBeacon is analytics.ts:774; console.error (analytics.ts:784) is local.",
+    "evidence": [
+      "Read at worktree HEAD a4a81b30af and the portal worktree at origin/DEV ad7c100b5c (git -C portal rev-parse HEAD equals origin/DEV).",
+      "Ticket Center files read in full where cited: portal/src/pages/TicketCenter/TicketCenter.tsx, AnalysisRequestParts.tsx, analysisRequest.ts, TradeRequestParts.tsx (and the top-level imports).",
+      "Endpoint and transport files: portal/src/api/api-client.ts, portal/src/api/endpoints/investor-reporting.ts (route table :222-263, irBuildRequest :348-370, send :1059-1099), portal/src/api/endpoints/tickets.ts, portal/src/api/endpoints/trade-submission.ts:244.",
+      "Shell: portal/src/contexts/AuthContext.tsx (every fetch with method POST listed above), portal/src/services/analytics.ts. The shell's other fetch call sites were not read one by one; a Grep of non-test portal/src for POST/PUT/PATCH/DELETE literals and sendBeacon returned only AuthContext, analytics, api-client and the endpoint modules, plus the Trade modules that the Ticket Center does not reach.",
+      "Helper names: comp-find 'postJson|apiClient\\b|fetchJson' over portal/src returned 16 hits in 1497 files (0 postJson, 0 apiClient; fetchJson only as a parameter or local name in InvestorReporting reading modules and comparisonCatalogue.ts). No helper of the cell's three names is on the Ticket Center request path; apiRequest (api-client.ts:143) and bare fetch() are the transports.",
+      "Method is the table's own verb: IR_METHOD_VERB (investor-reporting.ts:920-932) is a separate map; the transport uses route.method from the route table (:222-263, irBuildRequest :366-369). directory-search and directory-browse are GET rows, so the directory search is not a POST.",
+      "Test files (__tests__) were excluded from every search."
+    ]
+  },
+  "q2": {
+    "chain": [
+      {
+        "step": "1 New Ticket button toggles the panel",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 752,
+        "text": "onClick={() => setShowCreate(v => !v)}"
+      },
+      {
+        "step": "2 the New Ticket panel renders",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 668,
+        "text": "{showCreate && ("
+      },
+      {
+        "step": "3 the type defaults to service_request for staff",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 220,
+        "text": "const [newType, setNewType] = useState<TicketType>(partner ? 'analysis_request' : 'service_request')"
+      },
+      {
+        "step": "4 the driver chooses Analysis Request in the type select",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 678,
+        "text": "onChange={e => setNewType(e.target.value as TicketType)}"
+      },
+      {
+        "step": "5 the form is shown for analysis_request",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 303,
+        "text": "const formShown = formOpen && newType === 'analysis_request'"
+      },
+      {
+        "step": "6 the firms are read once per showing (effect; firmsAsked guard)",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 313,
+        "text": "loadAllowedFirms(ir as unknown as Pick<InvestorReportingApi, 'resolveDirectoryContext'>, internal)"
+      },
+      {
+        "step": "7 the Global read for staff (selectedTenant global)",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 103,
+        "text": "const resolved = await client.resolveDirectoryContext("
+      },
+      {
+        "step": "8 the body carries selected_tenant when set",
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 1282,
+        "text": "...(req.selectedTenant ? { selected_tenant: req.selectedTenant } : {}),"
+      },
+      {
+        "step": "9 the transport sends the built request",
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 1072,
+        "text": "const payload = await this.transport.request<TWire>(built.url, {"
+      },
+      {
+        "step": "10 the built request is POST with a JSON body",
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 369,
+        "text": "return { method: 'POST', url, headers, body: JSON.stringify(args.body ?? {}) }"
+      },
+      {
+        "step": "11 the route row: resolve-scope is POST /directory/resolve",
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 239,
+        "text": "{ operation: 'resolve-scope', method: 'POST', pathTemplate: `${IR_ROUTE_BASE}/directory/resolve`, pathParams: [], binding: 'body', status: 'DECLARED' },"
+      },
+      {
+        "step": "12 a refused envelope raises (the firms read fails and sets FIRMS_NOT_LOADED at TicketCenter.tsx:315)",
+        "file": "portal/src/api/endpoints/investor-reporting.ts",
+        "line": 1097,
+        "text": "if (parsed.refused) {"
+      },
+      {
+        "step": "13 the READY firms are returned (Global branch)",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 110,
+        "text": "return ready"
+      },
+      {
+        "step": "14 the list is stored; null until then",
+        "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "line": 314,
+        "text": ".then(list => setFirms(list))"
+      },
+      {
+        "step": "15 the staff firm select renders only when firms is non-null and non-empty",
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "line": 156,
+        "text": "{staff && firms !== null && firms.length > 0 ? ("
+      },
+      {
+        "step": "16 the select carries the chooser label",
+        "file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+        "line": 157,
+        "text": "<select aria-label={FIRM_CHOICE_LABEL} value={form.firm} onChange={e => set('firm', e.target.value)}"
+      },
+      {
+        "step": "17 the held Submit words: firms still loading, and the firm not chosen",
+        "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "line": 221,
+        "text": "if (f.firms === null) {"
+      }
+    ],
+    "blocking_calls": [
+      "POST /api/scoped/investor-reporting/directory/resolve (resolve-scope; TicketCenter.tsx:103 via loadAllowedFirms at :313). The staff firm select (AnalysisRequestParts.tsx:156-157) and the held Submit (analysisRequest.ts:221-227) both depend on it. This is the call the guard refused."
+    ],
+    "evidence": [
+      "Second blocking call: none in the source. The comparison catalogue is a GET (fetchCatalogue, TicketCenter.tsx:329) and is not a gate: comparisonKeysFor accepts a null catalogue (analysisRequest.ts:332-339) and submitHeldReason (analysisRequest.ts:217-230) does not read it. A GET is admitted by the guard regardless.",
+      "Upload and filing calls (POST analysis/inputs, tickets, analysis, tickets/<id>/report) happen only after the Submit click and are already among the seven.",
+      "Possible unrelated pre-call: apiRequest's ensureFreshToken (api-client.ts:155, :208) can issue POST /auth/refresh before a request; it is among the seven and is not a blocker of the chooser."
+    ]
+  },
+  "q3": {
+    "added": [
+      "^\\/api\\/scoped\\/investor-reporting\\/directory\\/resolve$"
+    ],
+    "needs_issuer": [],
+    "driver_sha256_before": "c3a733ce4a66bbbc3fb22b4b1b18b6f6fa483a59025a572d7ebb1e76935cf334",
+    "driver_sha256_after": "d29d0afdc4d6f2be4f575aa5d6dae970b625189db1ad1248aef391fbcd45bdcc",
+    "selftest_cases_before": 29,
+    "selftest_cases_after": 36,
+    "selftest_output": [
+      "case PASS admit POST /auth/login",
+      "case PASS admit POST /auth/refresh",
+      "case PASS admit POST /auth/logout",
+      "case PASS admit POST /api/scoped/investor-reporting/analysis/inputs",
+      "case PASS admit POST /api/scoped/tickets",
+      "case PASS admit POST /api/scoped/investor-reporting/analysis",
+      "case PASS admit POST /api/scoped/tickets/TKT-abc_1/report",
+      "case PASS admit GET on the base",
+      "case PASS admit HEAD on the base",
+      "case PASS admit OPTIONS on the base",
+      "case PASS refuse POST /api/scoped/tickets/abc/claim",
+      "case PASS refuse POST /api/scoped/tickets/abc/complete",
+      "case PASS refuse PUT",
+      "case PASS refuse DELETE",
+      "case PASS refuse POST to another host",
+      "case PASS refuse GET to another host",
+      "case PASS admit POST /api/scoped/investor-reporting/directory/resolve",
+      "case PASS admit POST directory/resolve with a query suffix (the guard reads the path, as for the seven)",
+      "case PASS refuse POST directory/resolve/x",
+      "case PASS refuse POST directory/resolved",
+      "case PASS refuse POST directory (the parent)",
+      "case PASS refuse POST directory/resolve/ (trailing slash)",
+      "case PASS refuse POST directory/browse (a sibling read is not a POST shape)",
+      "case PASS base refuses http://example.com",
+      "case PASS base refuses https://localhost.evil.com",
+      "case PASS base refuses http://localhost:5174.evil",
+      "case PASS base admits http://localhost:5174",
+      "case PASS two generated passwords differ",
+      "case PASS generated passwords are at least 24 characters",
+      "case PASS redactor removes a known password and a known refresh_token value",
+      "case PASS plan mode exits 0 with boto3 poisoned",
+      "case PASS plan lists STEP-1 to STEP-7 in order",
+      "case PASS without --go the run phase is refused (exit 0, plan only)",
+      "case PASS an empty order token is refused (exit 2)",
+      "case PASS a token outside the TO-RUN-FWD1 form is refused (exit 2)",
+      "case PASS a non-localhost base is refused even with a token (exit 2)",
+      "SELFTEST-OK 36 cases"
+    ],
+    "near_misses_refused": [
+      "/api/scoped/investor-reporting/directory/resolve/x",
+      "/api/scoped/investor-reporting/directory/resolved",
+      "/api/scoped/investor-reporting/directory",
+      "/api/scoped/investor-reporting/directory/resolve/",
+      "/api/scoped/investor-reporting/directory/browse (POST)"
+    ],
+    "query_suffix": "admitted, as for the seven: the guard tests URL.pathname, which excludes the query, so /api/scoped/investor-reporting/directory/resolve?selected_tenant=global is admitted (self-test case 2 of the seven additions).",
+    "reasoning": "Every request in q1.requests that is a POST and not already admitted is either read_shaped (directory/resolve, the only one needed before or during the filing) or a write that the filing does not need (claim, complete, commentary-sent, tickets/submit, the trade path, the MFA/password screens, the analytics ingest answered locally). None is added. No write needed by the filing is outside the seven, so needs_issuer is empty."
+  },
+  "not_read": "NOT READ, stated plainly: (1) the live portal bundle, DEV at localhost:5174 and PROD: only the source at origin/DEV ad7c100b5c was read, so whether the page makes a request the source does not show (a prefetch, a browser-issued request, a service worker) is UNKNOWN. (2) The live run: none, by order. (3) The server handler behind resolve-scope was read only at its entry bodies (infra/aws/lambda/investor-reporting/directory/entry.py at pin 742646e9a4, lines 261-304 and 414-456, via git show, the tree being sparse here); the scope resolver it calls (_scope_resolver.resolve, entry.py:292), response_envelope and the guard's serve path were NOT read, so 'writes nothing' is the issuer's and the entry bodies' reading, not a full write-path trace. (4) The edge validator that sets x-firm-id, x-user-email and x-user-type was not read. (5) The IR client transport (this.transport) and its timeout: a read that never settles is an open case. (6) Whether Playwright's page.route intercepts navigator.sendBeacon (analytics.ts:774): the driver's ANALYTICS_RE rule covers the fetch path by construction; the beacon path is UNVERIFIED offline. (7) Which screen calls each MFA/password function, and whether the sign-in of the synthetic user meets a second factor: not read; the Ticket Center does not call them. (8) The shell's other components were searched by pattern, not read one by one. (9) The PROD build differences beyond what the issuer recorded (STAFF_FIRMS_CATALOGUE_READ.json) were not re-read. (10) The mint helper's row values were not read here beyond a grep for mfa flags. (11) The live directory artifacts, the users rows and the Lambda environment (IRPT_DIRECTORY_BUCKET_MAP) were not read: no AWS call was made."
+}
