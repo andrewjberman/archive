@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-256",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "945f619bbd",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-256.dim-return-method-claims-read-who-may-write-threshold-claims-source.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~209",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~209/IRPT_DASHBD.TO-DB-b-256.dim-return-method-claims-read-who-may-write-threshold-claims-source.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~209/method_row_read_r125.py",
+      "kind": "script",
+      "commit_or_etag": "ef36f6267c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tracked read-only analysis script at ef36f6267c (sha256 6e89474d3d94af78b9ef15d82d7226c6d27cce57df56d9cd743210ababa9577f, the committed bytes; the record and the private counts file carry the same hash); run under python -I from the worktree root with GET and LIST only: one LIST of the 49 Financial dim_return_method prefix, the parquet schema of each of its two method_version data objects, an ast scan of the producer tree and the gold Lambda tree, a text scan of the investor-reporting Terraform tree; 3 S3 calls, 0 writes; writes one counts-and-names private file and nothing else; no put, copy or delete call, no vendor call, no secret read",
+      "artifact_covered_by": [
+        "DB125-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~209/RD_METHOD_ROW_READ_R125.json",
+      "kind": "config_data",
+      "commit_or_etag": "ef36f6267c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of step 6: counts, column names, paths and words only; analysis.sha256 equals the committed script bytes at ef36f6267c; reads s3_reads 3, s3_writes 0, dynamodb_writes 0, vendor_calls 0, secret_reads 0; files_in_repo, served_values_changed, pushed and deployed all false; the seven lists equal the checker's own recount at the run recorded in this instance; who_may_write carries the producer function, the entry point, the grant a writer needs and three options (A, B, C) with what each changes and what it does not change",
+      "artifact_covered_by": [
+        "DB125-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB125-3-AC1",
+      "criterion_verbatim": "`DB125-3-AC1` -- `RD_METHOD_ROW_READ_R125.json` has exactly the form of step 6; each of the seven lists EQUALS the checker's own recount (S3 listing and parquet schemas read by the checker, GET only; the call sites and the Terraform files by a scan); `who_may_write` carries the required fields and at least two options; the script is tracked, hashed as recorded, names no other firm's place and holds no write call; zero writes, flags false, no long digit run outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_methodrow.py\" . DB125-3-AC1",
+      "output_evidence": "DB125-3-AC1 PASS (rc 0); the deciding line: OK: method-row read: 2 served versions (newest lacks 6 of 6 claim columns); 1 call site(s) of emit_method_row, 0 in a scheduled function; 2 Terraform file(s) name the prefix; reporting-gold write list has it: False; every list equals the recount",
+      "denominator": "1 of 1 criterion PASS; 7 of 7 record lists equal the recount; 2 of 2 served versions listed; 1 of 1 call site; 0 of 0 scheduled call sites; 2 of 2 Terraform files; 3 S3 calls, 0 writes",
+      "status": "PASS",
+      "status_reason": "PASS as written on the checker at the worktree HEAD after the script and the record were committed at ef36f6267c (the checker requires the script to be tracked); the first run after the commit and two later runs print identical output",
+      "expect": "DB125-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own self-test: the pure helpers and one green and fourteen red record arms (a served column list, a claim list, a missing list, a call-site list, a scheduled list, a Terraform list, a grant flag, one option, a flag set true, a write count, an extra key, a long digit run) plus two text arms (a write call and another firm's place)",
+      "expected": "the self-test passes the green arm and refuses each red arm",
+      "observed": "selftest: the ast scans, the write-list reader, one green and fourteen red record arms behave; selftest PASS; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the checker compared on their full output (the recount reads the same S3 prefix twice)",
+      "observed": "two runs at the worktree HEAD printed byte-identical output (diff clean): the OK line with two served versions and six missing claim columns, and DB125-3-AC1 PASS on both, rc 0 and rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Served manifest.json objects under the 49 Financial dim_return_method prefix, which were not read",
+      "reason": "outside the order's read list (step 2 names the parquet schema of each data.parquet only); whether a served manifest carries threshold_claims is recorded as not measured in the record's words"
+    },
+    {
+      "item": "Account identifiers, and every client value and every per-account cause",
+      "reason": "not recorded by design: the method row carries method and threshold figures and no client data; the script, the record and this instance carry column names, counts, dates, hashes and words only"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W209-S1",
+    "IRPT_DASHBD-D2-W209-S2",
+    "IRPT_DASHBD-D2-W209-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p125_methodrow.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_methodrow.py\" . DB125-3-AC1",
+      "result": "PASS rc 0: DB125-3-AC1 PASS (the checker is the issuer's file at the worktree HEAD, read and not edited)"
+    },
+    {
+      "tool": "p125_methodrow.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r125/p125_methodrow.py\" --selftest .",
+      "result": "rc 0: selftest PASS"
+    }
+  ]
+}

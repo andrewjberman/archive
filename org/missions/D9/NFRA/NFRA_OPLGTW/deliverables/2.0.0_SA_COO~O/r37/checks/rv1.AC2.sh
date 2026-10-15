@@ -26,7 +26,7 @@ try:
     def rows(key):
         return pq.read_table(io.BytesIO(c.get_object(Bucket=BK, Key=key)["Body"].read())).to_pylist()
     from app import etfs_rivals as h
-    pg = h.etfs_get_peer_group(home_ticker="IDVZ")
+    pg = h.etfs_get_peer_group_members(home_ticker="IDVZ")
     pm_key, _d = newest("peer_group_map")
     pm = rows(pm_key)
     ind_riv = sorted({r.get("ticker") for r in pm if r.get("role") == "rival" and r.get("group_id") == "IDVZ"})
@@ -44,11 +44,11 @@ try:
     cv_ok = P.envelope_ok(cv) and bool(cv.get("funds") or cv.get("coverage"))
     sr = h.etfs_get_security_reference(security=tk)
     s_ok = P.envelope_ok(sr)
-    bad = h.etfs_get_peer_group(home_ticker="not a ticker")
+    bad = h.etfs_get_peer_group_members(home_ticker="not a ticker")
     bad_ok = bad.get("code") == "harvest_bad_argument"
 
     hr.get_current_principal = lambda: SimpleNamespace(email="someone@example.com", tid="t", oid="o")
-    non_opal = h.etfs_get_peer_group(home_ticker="IDVZ").get("code") in ("typed_opal_only", "harvest_opal_only")
+    non_opal = h.etfs_get_peer_group_members(home_ticker="IDVZ").get("code") in ("typed_opal_only", "harvest_opal_only")
     print("rival tools A: peer group IDVZ rivals %d vs independent %d; INEQ holdings %d rows vs independent %d, report_date equal %s; who_holds answered %s; coverage from canonical_shape %s; non-Opal refused %s" % (len(riv), len(riv), len(hl), len(crow), h_ok, w_ok, cv_ok, non_opal))
     ok = pg_ok and h_ok and w_ok and cv_ok and s_ok and bad_ok and non_opal
 except Exception as e:

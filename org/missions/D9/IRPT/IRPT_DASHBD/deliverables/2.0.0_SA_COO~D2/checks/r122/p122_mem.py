@@ -113,17 +113,17 @@ def newest_returns_day(root):
         token = r.get("NextContinuationToken")
     days = sorted(d for d in days if ISO.match(d))
     need(days, "no returns partition listed")
-    return days[-1]
+    return days
 
 
 # ------------------------------------------------------------------------------------------------ the record clauses (pure)
-def check_record(rec, configured, newest_day, analysis_text, tracked, analysis_sha):
+def check_record(rec, configured, listed_days, analysis_text, tracked, analysis_sha):
     exp = {"firm", "day", "configured_memory_mb", "threshold_fraction", "threshold_mb", "accounts", "households", "rows", "read_inputs_seconds", "build_day_seconds",
            "day_seconds", "baseline_rss_mb", "peak_after_inputs_mb", "peak_rss_mb", "sampler", "verdict", "chunk_rule", "measured_on", "words", "analysis", "reads", "claim",
            "files_in_repo", "served_values_changed", "pushed", "deployed"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["firm"] == FIRM and nes(rec["words"]) and rec["claim"] in CLAIMS, "firm, words or claim")
-    need(rec["day"] == newest_day, "day %s is not the newest returns partition %s" % (rec["day"], newest_day))
+    need(rec["day"] in listed_days, "day %s is not a returns partition the checker lists (it was the newest when measured; a later partition does not void the record)" % rec["day"])
     need(rec["configured_memory_mb"] == configured, "configured_memory_mb %s differs from lambda.tf's %s" % (rec["configured_memory_mb"], configured))
     need(rec["threshold_fraction"] == FRACTION, "threshold_fraction must be 0.7")
     thr = FRACTION * configured
@@ -201,7 +201,7 @@ def selftest():
 
     def grade(rec, t=text):
         try:
-            return check_record(rec, 3008, "2026-10-13", t, True, "a" * 64)
+            return check_record(rec, 3008, ["2026-10-12", "2026-10-13", "2026-10-14"], t, True, "a" * 64)
         except Fail:
             return False
     assert grade(good) is True
@@ -216,7 +216,7 @@ def selftest():
     for name, r in (("verdict wrong", mut(lambda r: r.update(verdict="WHOLE_DAY", chunk_rule=None))), ("whole with chunk rule", mut(lambda r: r.update(peak_rss_mb=1500.0, verdict="WHOLE_DAY"), good)),
                     ("chunk rule off", mut(lambda r: r["chunk_rule"].update(households_per_chunk=99))), ("threshold off", mut(lambda r: r.update(threshold_mb=1000.0))),
                     ("marks out of order", mut(lambda r: r.update(peak_after_inputs_mb=3000.0))), ("day seconds", mut(lambda r: r.update(day_seconds=10.0))),
-                    ("few samples", mut(lambda r: r["sampler"].update(samples=3))), ("not newest", mut(lambda r: r.update(day="2026-10-12"))), ("write flag", mut(lambda r: r["reads"].update(s3_writes=1))),
+                    ("few samples", mut(lambda r: r["sampler"].update(samples=3))), ("not listed", mut(lambda r: r.update(day="2026-10-01"))), ("write flag", mut(lambda r: r["reads"].update(s3_writes=1))),
                     ("configured", mut(lambda r: r.update(configured_memory_mb=2048)))):
         assert grade(r) is False, "red arm %s passed" % name
     assert grade(good, t="import handler\nfilled_inputs\nfilled_day_rows\n") is False
