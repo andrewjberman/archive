@@ -33,3 +33,11 @@ Before it runs: re-measure the head (`git -C portal rev-parse cand/dell2/irpt-de
 After it runs: the row's class is client-facing, so it waits on Andrew; nothing reaches DEV before he approves, and PROD only by a chosen-set promote.
 
 -- 2.0.0_SA_COO~F2
+
+## ADDENDUM (2026-10-15 ~10:3xZ): PROD moved; the candidate still merges cleanly
+
+- `origin/PROD` is now `c3b21a40` (7 commits over the candidate's base `5d646418`, all MDPF_CANON / Model Portfolios; none touches a path under `InvestorReporting/`: `git diff --name-only 5d646418 origin/PROD` names 0 such paths).
+  The candidate (`65f2e543`) therefore does NOT contain the current PROD release.
+- Trial: `git -C portal merge-tree --write-tree origin/PROD cand/dell2/irpt-default-performance-report` writes a tree (`ffe30d318f5f19f0fdb0646d9c45b60f14d71412`) with no conflict named: the two merge without a conflict.
+- At registration (CONTRIBUTING-BOXES step 2: a feature branch is cut from the last PROD release): re-cut the 30 commits onto the PROD release then current (a cherry-pick of `origin/PROD..cand`, or a fresh branch with the same commits), re-run
+  the round-115 AC3 and the round-116, -117 and -118 criteria at the re-cut head, then register that head. Nothing is re-cut now: the route is the gate, and PROD may move again before it.
