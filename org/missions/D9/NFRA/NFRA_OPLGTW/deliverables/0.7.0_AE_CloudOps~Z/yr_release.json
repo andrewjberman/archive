@@ -1,0 +1,93 @@
+{
+ "to_id": "NFRA_OPLGTW.TO-OG-yr-1",
+ "phase": "A+B",
+ "cut": "v2 (A2: the page AND the widened viewer gate)",
+ "cut_by": "0.7.0_AE_CloudOps~Z",
+ "base_sha": "bacec95ccd6cafd2201f7433af24ae2748732355",
+ "release_sha": "bf7ffb62f4ae5af8298d3c24960c63d2965542d9",
+ "supersedes": {
+  "release_sha": "02f9a9e01aba18e26094e59a2b66118c2aa67abd",
+  "why": "A2 arrived minutes after it and added the gate change and its tests to the SAME release; cut afresh as ONE commit on the base so the A1 deploy guard's parent check holds"
+ },
+ "base_is": "the host's RUNNING commit, read at the act and verified 107 of 107 md5-EQUAL over app/, deploy/ and dashboard/",
+ "release_branch": "rel-nfra-oplgtw-yr2",
+ "worktree": "C:/tmp/og-rel-yr2",
+ "three_files": {
+  "app/static/yearinreview/index.html": {
+   "working_tree": {
+    "bytes": 48235,
+    "md5": "0d828b51d433a24f7e2ef2e6ea7967ee",
+    "note": "the pin's exact bytes"
+   },
+   "as_git_stores_it": {
+    "bytes": 47891,
+    "md5": "3bbd5ab2d325657020357003c3ea387d",
+    "why": "this path carries .gitattributes text=set eol=lf, so LF is the only storable form -- which is what A2 grades"
+   },
+   "and_what_the_host_will_get": "the pin's exact CRLF bytes: a clean checkout of this path re-materialises 48235 bytes / md5 0d828b51, and the deploy tars the CHECKED-OUT file. Measured by checking the file out and re-hashing it, not assumed.",
+   "source_pin": "947fc522a8:org/tier1_exec/4.0.0_SA_CRO/deliverables/BRIEF1_YEAR_ONE_20261004/YEAR_ONE_ONE_PAGER.html",
+   "content_identical_to_the_pin": true,
+   "superseded_pins_never_read": [
+    "1db3d8d0aa",
+    "a0e00489b0"
+   ]
+  },
+  "app/yearinreview_view.py": {
+   "change": "_allowed() replaced VERBATIM from spec @c8f3a38f43",
+   "gate_line": "return _is_opal_user(email) or (bool(roster) and email in roster)",
+   "docstring_also_updated": "its 'Viewers: the owner only' paragraph stated the exact rule the new code reverses. Left alone, the module would have asserted the opposite of its own gate to the next reader. Same named file, so inside the declared surface."
+  },
+  "tests/test_yearinreview_view.py": {
+   "added": [
+    "test_yr1_opal_admitted_on_empty_roster",
+    "test_yr1_guest_refused",
+    "test_yr1_outside_domain_refused"
+   ],
+   "subject_corrections": "test_yearinreview_non_owner_403 and test_yearinreview_empty_roster_403 asserted their 403 against TENANT_USER, an @opalinvest address the widened gate now ADMITS. Their intent needs a non-Opal subject, so both move to OUTSIDER (the empty-roster arm to GUEST as well). The admitted case they used to cover is now asserted directly by the first new test. No assertion was deleted or weakened.",
+   "why_GUEST_is_an_opalinvest_address": "the Entra guest form carries #EXT#; tools._is_opal_user refuses it while a plain domain-suffix check would admit it, so the guest arm is the one that proves the predicate rather than the domain"
+  }
+ },
+ "tests": {
+  "tests/test_yearinreview_view.py": "12 passed (9 existing + 3 new)",
+  "tests/test_principal_cutover.py": "1 failed, 10 passed -- test_oga2_ac04, PROVEN PRE-EXISTING at the base bacec95ccd with identical counts; its ROUTE_CLASS table does not classify four live /hx/teams/* routes (class of row Z-W47-S2). This cut touches no route."
+ },
+ "the_widening": {
+  "before": "the OWNER only -- a verified identity present in YEARINREVIEW_VIEW_ALLOWED_EMAILS, fail closed on empty; roster size today 1",
+  "after": "any verified non-guest Opal-domain identity, plus anyone still listed on the roster",
+  "unchanged": [
+   "the ALB authenticate-oidc default action",
+   "GuardMiddleware identity verification",
+   "the route and its paths",
+   "IAM",
+   ".env keys",
+   "the tool registry",
+   "the 403 for non-Opal and guest identities"
+  ]
+ },
+ "deployed": true,
+ "note": "Phase A and Phase B both complete. The deploy landed at 23:04:51Z on the GO naming both halves signed at this release_sha; 4.0.0_SA_CRO~Z was the alternative actor and the CTO named this seat.",
+ "phase_b": {
+  "deployed_at": "2026-10-14T23:04:51Z",
+  "deployed_by": "0.7.0_AE_CloudOps~Z",
+  "ssm_command_id": "768a6366-ab1a-4220-aea9-b8e7b2cfcda3",
+  "halves_signed_at_this_release_sha": {
+   "CTO": "64be1ff690",
+   "COO": "99efc692a1"
+  },
+  "go": "issuer msg 34273, one actor (CTO msg 34259)",
+  "a1_guard_at_the_act": "deploy tree HEAD == bf7ffb62f4 in full; HEAD^ == live deployed_commit bacec95ccd; re-read AFTER the sparse-cone widening, and corroborated by the wrapper's own stale-base guard at both of its checkpoints",
+  "first_attempt_refused": "22:58:39Z rc=1 -- deploy-to-ec2.sh resolves two .env S3 roots through lib/opal_naming.py address(), whose infra/logic/registry/ was in the commit but outside the worktree's sparse cone; FileNotFoundError before any build or upload. Row NFRA_OPLGTW-Z-S132. Fixed by widening the cone, never by typing a root (LGIC R30).",
+  "triggers": {
+   "health": "200 {\"ok\":true} on 127.0.0.1:8080",
+   "registry": "46 before, 46 after -- unchanged",
+   "env_key_names": "54 before, 54 after, DELTA 0",
+   "tree_parity": "107 of 107 md5-EQUAL to the release over app/ and deploy/, 0 mismatch, 0 one-sided",
+   "served_page_md5": "0d828b51d433a24f7e2ef2e6ea7967ee -- the response BODY, equal to the page on disk and to the source",
+   "data_date": "\"until\": \"2026-10-11\" present in the served body",
+   "arms": "Opal identity off the roster 200 with the page; #EXT# guest 403/42 bytes; outside domain 403",
+   "public_endpoint": "302 to the Entra authorize endpoint -- the wall is intact"
+  },
+  "ledger": "nfra-oplgtw-gateway-release-yr CLOSED, all 4 legs proven, sentinel removed",
+  "record": "W/YR_SERVED.json"
+ }
+}

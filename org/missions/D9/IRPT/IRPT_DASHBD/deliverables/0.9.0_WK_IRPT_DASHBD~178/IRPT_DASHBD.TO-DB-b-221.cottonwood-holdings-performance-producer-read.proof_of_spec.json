@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-221",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6c67ce88b6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "6c67ce88b6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-221.cottonwood-holdings-performance-producer-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~178",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~178/session_log.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~178/RD_COTTONWOOD_PRODUCER_R110.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record. Nothing scheduled, created, changed, deployed or pushed; the record changes no served value. Its reads block: 0 vendor calls, 0 S3 writes, 0 DynamoDB writes, 0 secret reads, 0 AWS writes."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~178/session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Command log of the read: command, exit code and deciding line per step. No row values, no account identifiers, no figures."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended as bytes (IRPT_DASHBD-D2-W178-S1 to S4); no existing row edited; the file prefix is byte-identical to the base."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB110-6-AC1",
+      "criterion_verbatim": "`DB110-6-AC1` -- the record names the producer with an existing entry file, channel `blackdiamond_z09` and table `holdings_performance_daily`; states the schedule's DESIRED and APPLIED states each with existence, a place and a claim, the plane the applied state was read from, and why there is none; states the frontier as ISO dates with T-1 equal to the trading day before the read date and `trading_days_behind` equal to the checker's own count from `lib/trading_calendar.py`; lists at least one scheduled-fire need; names the irpt holdings writer with its newest date; prints a denominator with a vintage and a passed positive control; every value group carries a claim in the four-word set; no write, schedule, apply, push or deploy; no run of 8 or more digits outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r110/p110_reads.py\" . DB110-6-AC1",
+      "output_evidence": "OK: producer main(argv) in holdings_performance.py, run as its CLI with --source blackdiamond_z09 and --date or --start/--end; the scheduled Lambda wrapper is infra/aws/lambda/investor-reporting/holdings-performance/handler.py lambda_handler, which passes the event's source to main read; schedule desired False, applied False; newest gold 2026-09-25 is 12 trading days behind T-1 2026-10-13 (the checker's own calendar count agrees); 7 scheduled-fire need(s) / DB110-6-AC1 PASS (rc 0)",
+      "denominator": "1 of 1 criterion PASS; 40 SCHEDULE nodes in the served-graph read (32 DECLARED, 7 LIVE-no-DECLARED, 1 MULTI_STATE_MANAGED); 12 S3 reads (9 LIST, 3 GET of which 2 returned NoSuchKey on a wrong key); 2 live get-schedule reads; 0 writes of any kind; 4 surprise rows filed (S1 to S4)",
+      "status": "PASS",
+      "status_reason": "PASS as written: the checker returns DB110-6-AC1 PASS rc 0 on RD_COTTONWOOD_PRODUCER_R110.json. The producer entry file exists and names channel blackdiamond_z09 and table holdings_performance_daily; the applied and desired schedule states are stated with exists, where and claim, and the applied plane is served_graph; the frontier dates are ISO, T-1 is 2026-10-13, and trading_days_behind 12 equals the checker's recount; seven scheduled-fire needs are listed; the irpt holdings writer is named with newest date 2026-10-08; the denominator carries a vintage and the positive control passed; every value group carries a claim in the four-word set; the reads block is zero for writes; no 8-digit run outside exempt fields.",
+      "expect": "DB110-6-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In memory only: a copy of RD_COTTONWOOD_PRODUCER_R110.json with frontier.trading_days_behind set to 11, passed to the checker's own check_cot with the same calendar. The record on disk was not changed.",
+      "expected": "refused: the count must equal the calendar's own count",
+      "observed": "MUTANT REFUSED: frontier.trading_days_behind must equal the calendar's count from newest_gold_date to t_minus_1 (the checker recomputes 12)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run three times from the worktree root with the same arguments; outputs compared byte for byte",
+      "observed": "three identical outputs, rc 0 each; last line DB110-6-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any create, change, enable, disable or delete of a schedule, rule, Lambda, role or principal; any terraform plan or apply",
+      "reason": "Read-only grant. The schedule itself is a later round under a never-widen pair; this cell changes nothing."
+    },
+    {
+      "item": "Any run of holdings_performance.py, including without --upload, and any run of holdings_snapshot.py or the refresh dispatch",
+      "reason": "Not in the grant; nothing was invoked."
+    },
+    {
+      "item": "The SSM and run history behind the Cottonwood holdings gap on 2026-10-09, 2026-10-12 and 2026-10-13",
+      "reason": "Outside the grant (no log or SSM read). Named NOT_ESTABLISHED in the record and in row S2."
+    },
+    {
+      "item": "The upstream Black Diamond silver writer and its sweep rule beyond one landing measurement",
+      "reason": "Outside the grant. The landing time rests on one object and is named as one measurement in the fire needs."
+    },
+    {
+      "item": "The pandas_market_calendars count of trading days",
+      "reason": "The package is absent on this box. The fallback count is recorded and row S4 names the gap."
+    },
+    {
+      "item": "The Cottonwood secret, the custodian account identifiers and the channel's figures",
+      "reason": "Never read or recorded. The Schwab channel is named by its custody word only."
+    },
+    {
+      "item": "The close basis of the blackdiamond_z09 channel beyond the declaration's own statement",
+      "reason": "Not re-measured here. The record states it as inferred, with the declaration as its source."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W178-S1: OBSERVATION, ARMED (disarm owner 1.0.0_SA_CTO~DELL2): the holdings-refresh header says the irpt-holdings-snapshot slot STAYS DISABLED, while schedule.tf and the live schedule read ENABLED (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W178-S2: OBSERVATION, INERT: Cottonwood's holdings end 2026-10-08 under an ENABLED weekday schedule, three trading days short; the cause is NOT_ESTABLISHED in this read (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W178-S3: OBSERVATION, INERT: the scheduled holdings-performance role reads only the 49 Financial silver, so the declared blackdiamond_z09 channel has no scheduled identity that can read it (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W178-S4: OBSERVATION, INERT: the frontier count rests on the hardcoded calendar fallback on this box, while the newest gold manifest records pandas_market_calendars (UNDER_INVESTIGATION)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p110_reads.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r110/p110_reads.py\" . DB110-6-AC1",
+      "result": "DB110-6-AC1 PASS (rc 0) on RD_COTTONWOOD_PRODUCER_R110.json; three identical runs; selftest rc 0 (9 refusal arms, 2 passing arms); the in-memory mutant was refused"
+    }
+  ]
+}

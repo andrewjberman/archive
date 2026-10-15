@@ -1,0 +1,104 @@
+diff --git a/data/assets/scripts/gold/investor_reporting/holdings_49f.py b/data/assets/scripts/gold/investor_reporting/holdings_49f.py
+index c2ff97be24..77fad9d1f4 100644
+--- a/data/assets/scripts/gold/investor_reporting/holdings_49f.py
++++ b/data/assets/scripts/gold/investor_reporting/holdings_49f.py
+@@ -284,29 +284,6 @@ def _smartx_overlay(frames) -> "tuple[dict, dict, set]":
+     return overlay, closed, set(m["account_id10"])
+ 
+ 
+-def _directory_account_member(hs, firm_id, raw_account, dir_ids):
+-    """The DIRECTORY's opaque account id for one custody account (TO-IB-pr-493), or None.
+-
+-    The custody node mints its id from the Schwab dim_balance.account_id as read. The directory mints
+-    its id from dim_account's zero-padded 10-digit key (directory_runner._entry: raw_key is the
+-    crosswalk id, already the _pad10 form). So the two candidates are the node's own key and its
+-    _pad10 form; the member is the candidate IN dir_ids. Never invents an id; never reads dim_account.
+-    Returns (member_or_None, status); status is one of member, no_directory, no_candidate, ambiguous."""
+-    if dir_ids is None:
+-        return None, "no_directory"
+-    candidates = []
+-    for key in (raw_account, hs._pad10(raw_account)):
+-        cand = hs.opaque_id("account", firm_id, key)
+-        if cand not in candidates:
+-            candidates.append(cand)
+-    hits = [c for c in candidates if c in dir_ids]
+-    if not hits:
+-        return None, "no_candidate"
+-    if len(hits) > 1:
+-        return None, "ambiguous"
+-    return hits[0], "member"
+-
+-
+ def build_49f_actual(s3, as_of: str, *, tax_membership_path=None) -> "tuple[list, dict]":
+     hs = _hs()
+     firm_id = _firm_id()
+@@ -349,8 +326,7 @@ def build_49f_actual(s3, as_of: str, *, tax_membership_path=None) -> "tuple[list
+     census = {"models": 0, "sma_tax": 0, "client": 0, "client_closed_smartx_only": 0, "client_membership_conflict": 0,
+               "model_leaves": 0, "model_leaves_inferred": 0, "model_assets": 0,
+               "smartx_cusip_via_ticker": 0, "smartx_cusip_listed_ambiguous": 0, "smartx_cusip_listed_absent": 0,
+-              "schwab_positions": 0, "schwab_positions_named_from_master": 0, "drill_withheld": 0,
+-              "account_id_member_omitted": 0, "account_id_differs_from_node_id": 0}
++              "schwab_positions": 0, "schwab_positions_named_from_master": 0, "drill_withheld": 0}
+     dir_matched = 0
+     total_before = 0.0
+     for raw_account in sorted(balance.index):
+@@ -369,18 +345,11 @@ def build_49f_actual(s3, as_of: str, *, tax_membership_path=None) -> "tuple[list
+             dir_matched += 1
+         common = (PRODUCER, "schwab dim_balance net_mv_plus_cash (custody) x smartx account map (membership)",
+                   1, 1, "measured")
+-        # TO-IB-pr-493: the directory's id rides the node as an ADDITIVE member, or is omitted and counted.
+-        member, _member_status = _directory_account_member(hs, firm_id, raw_account, dir_ids)
+-        if member is None:
+-            census["account_id_member_omitted"] += 1
+-        elif member != account_id:
+-            census["account_id_differs_from_node_id"] += 1
+         nodes.append(hs._node(account_id, None, 0, "ACCOUNT", "OBSERVED", account_value, "USD",
+                               "UNIQUE_CUSTODY_TOTAL", account_value, None, None, *common,
+                               drill_refs=[{"ref_kind": "ACCOUNT", "ref_id": account_id}],
+                               classification=hs._unknown_classification(
+-                                  ["49F custody: Schwab master 0008335338 business_date=%s" % custody_date]),
+-                              account_id=member))
++                                  ["49F custody: Schwab master 0008335338 business_date=%s" % custody_date])))
+         allocations = overlay.get(raw_account, [])
+         in_tax = raw_account in tax_accounts
+         if allocations and in_tax:
+diff --git a/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py b/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+index 3a19dcf591..e246580ba9 100644
+--- a/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
++++ b/data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+@@ -560,8 +560,7 @@ def validate_cot_actual_positions(holdings: pd.DataFrame, account_totals: pd.Dat
+ def _node(node_id, parent_node_id, level, node_kind, basis, amount_value, amount_units,
+          denom_kind, denom_value, of_parent, of_total, producer, join_method,
+          join_matched, join_attempted, claim, model_id=None, security_id=None,
+-         drill_refs=None, classification=None, display=None, valuation_facts=None,
+-         account_id=None) -> dict:
++         drill_refs=None, classification=None, display=None, valuation_facts=None) -> dict:
+     n = {
+         "node_id": node_id,
+         "parent_node_id": parent_node_id,
+@@ -587,10 +586,6 @@ def _node(node_id, parent_node_id, level, node_kind, basis, amount_value, amount
+         n["display"] = display
+     if valuation_facts:
+         n["valuation_facts"] = list(valuation_facts)
+-    # ADDITIVE (TO-IB-pr-493): the DIRECTORY's opaque account id for an ACCOUNT node. Written only when
+-    # given, so every existing caller's node is byte-for-byte what it was.
+-    if account_id is not None:
+-        n["account_id"] = account_id
+     return n
+ 
+ 
+diff --git a/docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json b/docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json
+index d0fa103e29..e95bfa9cde 100644
+--- a/docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json
++++ b/docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json
+@@ -614,10 +614,6 @@
+             ],
+             "description": "MODEL_LEAF nodes only, optional: the MDPF registry member_id (mdpf_category_registry, from CANONICAL_MODELS.model_key); null for a Custom or third-party model; never filled from a label."
+           },
+-          "account_id": {
+-            "type": "string",
+-            "description": "ACCOUNT nodes only, optional, additive (IRPT_BCKEND TO-IB-pr-493): the directory's opaque account id for this account; absent when no directory has landed or no candidate key matches it."
+-          },
+           "assigned_strategy": {
+             "type": "object",
+             "additionalProperties": false,

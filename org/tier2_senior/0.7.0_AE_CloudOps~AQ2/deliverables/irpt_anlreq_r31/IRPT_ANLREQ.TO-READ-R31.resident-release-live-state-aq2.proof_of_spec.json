@@ -1,0 +1,91 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-R31.resident-release-live-state-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-R31.resident-release-live-state-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "964c2af58b"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-R31.resident-release-live-state-aq2.md",
+  "vintage_commit": "964c2af58b"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/LIVE_STATE_R31.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ten fact lines in the stated forms, then NOTES: three queues (one holds the stale commentary-ready message), the drafter Lambda's two env names SET and its analysis_ready mapping ENABLED, the packager secret EXISTS and never accessed, no users row, IB-pr-387 a document-only task order, the host UNREAD with its reason",
+   "artifact_covered_by": [
+    "R31R-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R31R-AC1",
+   "invocation": "grep -c -E '^(QUEUE (analysis_ready|commentary_ready|dlq) (EXISTS|ABSENT) |LAMBDA commentary_drafter (ENV (COMMENTARY_READY_QUEUE_URL|KIMI_STANDING_WORD_REF) (SET|UNSET)|MAPPING analysis_ready (ENABLED|DISABLED|ABSENT))$|SECRET svc-irpt-packager (EXISTS|ABSENT) |USERS svc-irpt-packager ROW (PRESENT|ABSENT) |PROFILE IB-pr-387 ROW (PRESENT|ABSENT) |HOST resident_root=)' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/LIVE_STATE_R31.txt",
+   "expect": "^10$",
+   "output_evidence": "10\nexit=0",
+   "denominator": "10 result lines, one per fact; no line starting with a result token is outside the ten",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(QUEUE (analysis_ready|commentary_ready|dlq) (EXISTS|ABSENT) |LAMBDA commentary_drafter (ENV (COMMENTARY_READY_QUEUE_URL|KIMI_STANDING_WORD_REF) (SET|UNSET)|MAPPING analysis_ready (ENABLED|DISABLED|ABSENT))$|SECRET svc-irpt-packager (EXISTS|ABSENT) |USERS svc-irpt-packager ROW (PRESENT|ABSENT) |PROFILE IB-pr-387 ROW (PRESENT|ABSENT) |HOST resident_root=)' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/LIVE_STATE_R31.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "every absence was searched: the packager secret by a full paged listing of 119 secrets filtered client-side with substring controls after a server-side filter returned 0; the users row by the email index and by a direct ConsistentRead key; the queues by get-queue-url for all five names; the profile row by comp-find over both named roots",
+   "observed": "the server-side secret name filter is a prefix match and would have said ABSENT for a secret that exists; the full listing found opal/ticketing/svc-irpt-packager",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "HOST resident_root, analysis_ready, commentary_ready, packager: UNREAD",
+   "reason": "the earlier legs' channel is SSM running an S3-staged script; none reads resident_bindings.json; a new script is a put (forbidden by this read-only order) and an inline command is forbidden by rule 12; the shipped bindings in the staged tarball (package as shipped, RECORD, not the host) carry none of the three keys; one read-only script cut as its own order would read the host"
+  },
+  {
+   "item": "the single QUEUE dlq line",
+   "reason": "the order names one dead-letter queue; five queues exist, so the line is the Lambda's own DLQ (the dead_letter_config target) and the other two DLQs (all 0/0/0) are listed in NOTES"
+  },
+  {
+   "item": "the age of the stale commentary_ready message now",
+   "reason": "the SQS age metric publishes nothing after 2026-10-14T13:57Z (an idle queue stops emitting); the last datapoint and the sent-time estimate are in NOTES, which also records that the metric and the queue's CreatedTimestamp disagree by 3h20m"
+  },
+  {
+   "item": "IB-pr-387 is not a data row",
+   "reason": "it is a decomposition cell and task order for a code change to served.py; the line says ABSENT with where; the svc-irpt-packager users row it might be taken to mean is ABSENT live and by the deployed design"
+  },
+  {
+   "item": "no ledger opened",
+   "reason": "a read-only order changes nothing to be landed or half-landed; nothing was written to AWS"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S104"
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r31/LIVE_STATE_R31.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 reads (sqs, lambda, secretsmanager, dynamodb, cloudwatch)",
+   "invocation": "get-queue-url, get-queue-attributes, get-function-configuration, list-event-source-mappings (paged), list-secrets (paged), describe-secret, email-index query, get-item, get-metric-statistics",
+   "result": "ten facts; no receive-message, no purge, no get-secret-value, no write"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'IB-pr-387' org/missions/D9/IRPT/IRPT_BCKEND docs --files --limit 25",
+   "result": "57 hits in 4451 files; the task order is the file-name hit"
+  }
+ ]
+}

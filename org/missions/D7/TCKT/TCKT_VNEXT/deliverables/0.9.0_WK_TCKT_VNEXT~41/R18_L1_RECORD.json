@@ -1,0 +1,99 @@
+{
+  "to_id": "TCKT_VNEXT.TO-R18-L1",
+  "serial": "0.9.0_WK_TCKT_VNEXT~41",
+  "cell": "R18-mt-1",
+  "base_commit": "023b5ce5b0",
+  "lines_changed": {
+    "infra/aws/lambda/ticket_center/lambda_function.py": [
+      "TYPE_DEFINITIONS['meeting_request'] gains questions firm (firm, required), who (text, required), purpose (text, required), proposed_time_1 (text, required), proposed_time_2 (text, optional), proposed_time_3 (text, optional); label and attachment unchanged",
+      "MATRIX gains 'MEETING': frozenset({INTERNAL}) after COMMENTARY_SENT",
+      "new helper _meeting_text(v): a string of 1 to 200 characters once stripped",
+      "new function meeting_ticket(event, tid) placed before def metrics: authorize('MEETING'), _resolve_scope, ticket read with the get_ticket scope test (404), coordinator test actor email in routing.primary (403), type (409), completed (409), body shape (400), confirm time among answers proposed_time_1..3 (400), ONE conditional update_item (status not completed AND ticket_type meeting_request; failure 409), 200 {ticket_id, meeting}",
+      "lambda_handler: one router line after commentary-sent: tail[1:] == ['meeting'] and POST -> meeting_ticket"
+    ],
+    "infra/aws/lambda/ticket_center/tests/test_meeting_request.py": ["new file, 33 test cases"],
+    "infra/aws/lambda/ticket_center/tests/test_analysis_request.py": ["two existing assertions edited, listed below"],
+    "infra/aws/lambda/ticket_center/tests/test_trade_request_type.py": ["one existing assertion edited, listed below"],
+    "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py": ["ROUTES gains the meeting route; the action count goes 11 to 12; listed below"],
+    "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~41/mutant_check.py": ["new file"],
+    "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md": ["six rows appended, TCKT_VNEXT-D2-W41-S1 to S6"]
+  },
+  "existing_assertion_edits": [
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_analysis_request.py",
+      "test": "test_four_existing_types_unchanged",
+      "old": "for t in (\"service_request\", \"meeting_request\", \"other\"):",
+      "new": "for t in (\"service_request\", \"other\"):",
+      "why": "meeting_request now carries required answers; the untyped loop (no questions, 201 with no answers) no longer holds for it. Its typed behaviour is covered in test_meeting_request.py."
+    },
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_analysis_request.py",
+      "test": "test_requester_claims_and_completes_own_ticket",
+      "old": "code, b = H.call(\"POST\", \"/api/scoped/tickets\", H.INTERNAL2, {\"ticket_type\": t, \"title\": \"mine \" + t})",
+      "new": "body = {\"ticket_type\": t, \"title\": \"mine \" + t}; if t == \"meeting_request\": body[\"answers\"] = {\"firm\": \"inflection\", \"who\": \"Pat\", \"purpose\": \"Review\", \"proposed_time_1\": \"Tue 10:00 ET\"}; code, b = H.call(\"POST\", \"/api/scoped/tickets\", H.INTERNAL2, body)",
+      "why": "the self-claim assertion is kept for meeting_request; only its create now supplies the required answers. No assertion changed."
+    },
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_trade_request_type.py",
+      "test": "test_other_untyped_types_unchanged",
+      "old": "for t in (\"service_request\", \"meeting_request\", \"other\"):",
+      "new": "for t in (\"service_request\", \"other\"):",
+      "why": "meeting_request.questions is no longer []."
+    },
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py",
+      "test": "test_layer_coverage_every_route_behind_the_matrix_and_actions_match",
+      "old": "self.assertEqual(len(authorized), 11, \"route table has 11 actions; ...\")",
+      "new": "self.assertEqual(len(authorized), 12, \"route table has 12 actions; ...\")",
+      "why": "one new authorize('MEETING') action, as the test's own message requires"
+    },
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py",
+      "test": "ROUTES (class attribute of MatrixTests)",
+      "old": "... (\"POST\", \".../TCK-20260820-aaaa1111/commentary-sent\")]",
+      "new": "... (\"POST\", \".../TCK-20260820-aaaa1111/commentary-sent\"), (\"POST\", \".../TCK-20260820-aaaa1111/meeting\")]",
+      "why": "the new route must answer 403 to an unresolvable caller, as every route does"
+    }
+  ],
+  "test_counts": {
+    "base_folder": "300 passed, 42 subtests passed, rc 0 (git HEAD, before any change)",
+    "new_file": "33 passed, rc 0 (two determinism runs: 33 passed, 33 passed)",
+    "folder_after": "333 passed, 42 subtests passed, rc 0 (300 base + 33 new)"
+  },
+  "before_arm": {
+    "run": "the new test file against the base lambda_function.py (git archive HEAD into a scratch folder)",
+    "result": "31 failed, 2 passed",
+    "passing_controls": [
+      "test_other_untyped_types_keep_their_shape (an unchanged service_request behaviour)",
+      "test_create_keeps_the_existing_dl_first_line_and_sends_no_client_notice (the existing CREATE-time DL line, which the base already sends)"
+    ]
+  },
+  "mutant": {
+    "script": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~41/mutant_check.py",
+    "mutation": "the line 'if actor[\"email\"] not in primary:' replaced by 'if False:' in a scratch copy of the ticket_center folder under .scratch/",
+    "result": "MUTANT-FIRES: pytest rc=1 on the mutant copy; 1 failed, 32 passed; the failure is test_internal_human_who_is_not_the_coordinator_is_403_and_the_names_no_one"
+  },
+  "coordinator_can": [
+    "confirm one of the filer's three proposed times (answers proposed_time_1..3), whitespace-stripped",
+    "propose one to three other times (each 1 to 200 characters)",
+    "repeat either outcome: the second overwrites meeting and appends one more event row"
+  ],
+  "coordinator_cannot": [
+    "complete, claim or reassign the ticket: the outcome writes only the meeting member and one event row",
+    "record an outcome on a completed ticket (409) or on a ticket of another type (409)",
+    "confirm a time that is not one of the three answers (400), or send any body shape not listed (400)",
+    "act on a ticket outside the caller's profile firm scope (404, the same refusal as a missing ticket)",
+    "be a client-human or a service subject (403 at the matrix)",
+    "cause any notifier to run from the outcome route: no notify_* is called on confirm, propose or any refusal"
+  ],
+  "list_route": "no edit: list_tickets returns whole items with no projection, so the meeting member reaches an INTERNAL caller; the list test pins it",
+  "not_read": [
+    "infra/aws/terraform/ (the route wiring and the ROUTING_MATRIX meeting_request.primary entry belong to TO-R18-TR2 / R18-mt-2)",
+    "portal/ (a separate repository, not touched)",
+    "the live opal-users-v2 PROFILE row of the coordinator (the CTO confirmed it per the decomposition; not read by the worker)",
+    "the decomposition beyond row R18-mt-1 and WIRE CONTRACT item 1"
+  ],
+  "live_calls": "none by design. One unintended SES send happened during a by-path run of tests/test_authz_matrix.py (surprise TCKT_VNEXT-D2-W41-S6, BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~V2). No further run of that file was made.",
+  "docstring": "the module route docstring at the top of lambda_function.py is not edited: the bound limits the edit to the definition, meeting_ticket, its MATRIX action and its router line",
+  "surprise_rows": ["TCKT_VNEXT-D2-W41-S1", "TCKT_VNEXT-D2-W41-S2", "TCKT_VNEXT-D2-W41-S3", "TCKT_VNEXT-D2-W41-S4", "TCKT_VNEXT-D2-W41-S5", "TCKT_VNEXT-D2-W41-S6"]
+}

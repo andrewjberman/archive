@@ -31,11 +31,10 @@
    "criterion_verbatim": "AC2: the deploy closed, the bare path now refuses an unauthenticated read (the check performs it live), and the authenticated twin still serves.",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/zs1.AC2.sh; echo \"exit=$?\"",
-   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0.*WebACL (rules identical before and after, updatewebacl_calls 1|not changed by this apply, updatewebacl_calls 0).*live bare path unauthenticated: 40[13]; twin unauthenticated: 40[13].*proof file: bare 40[13], twin authenticated 200, scanner authorizer read yes.*RESULT: PASS.*exit=0",
-   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0\nWebACL conditions not met (updatewebacl_calls 0)\nlive bare path unauthenticated: 401; twin unauthenticated: 401\nproof file: bare 401, twin authenticated 200, scanner authorizer read yes\nRESULT: FAIL\nexit=1",
-   "denominator": "4 limbs: 3 PASS (ledger CLOSED 1 of 1 with 0 sentinels; live bare 401 AND twin 401; proof file bare 401, twin authenticated 200, scanner authorizer read yes) and 1 FAIL -- the WebACL limb, on updatewebacl_calls 0 where the branch accepting 0 additionally requires the before/after snapshots to be ABSENT.",
-   "status": "FAIL",
-   "status_reason": "ONE of the four limbs fails, and it fails on a branch the ruling did not anticipate rather than on the world being wrong. A1 condition (iii) names exactly 1 UpdateWebACL; the measured count is 0, because terraform logged a WebACL modification it never sent -- CloudTrail shows no UpdateWebACL in a window proven settled by my own five GetWebACL calls, the LockToken is byte-identical either side, capacity is unchanged, and the rule set digests identical. The event class IS recorded (UpdateIPSet: 2 events in 30 days from wafv2), so the 0 is a true absence. Zero is strictly safer than one: the condition's purpose, that no interval exists in which the ACL evaluates without its managed rules, holds completely because the ACL was never written. But zs1.AC2's n==0 branch fires only when the before/after snapshots are ABSENT, and the same ruling told me to take them, so the honest record cannot satisfy either branch. Neither the count nor the snapshot files were adjusted to make a branch fire. Referred to the issuer as row NFRA_OPLGTW-Z-S121; the deploy is landed, read back live and its ledger is CLOSED with four legs proven."
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0.*WebACL (rules identical before and after, updatewebacl_calls [01]|not changed by this apply, updatewebacl_calls 0).*live bare path unauthenticated: 40[13]; twin unauthenticated: 40[13].*proof file: bare 40[13], twin authenticated 200, scanner authorizer read yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0\nWebACL rules identical before and after, updatewebacl_calls 0\nlive bare path unauthenticated: 401; twin unauthenticated: 401\nproof file: bare 401, twin authenticated 200, scanner authorizer read yes\nRESULT: PASS\nexit=0",
+   "denominator": "4 limbs, all PASS: ledger CLOSED 1 of 1 with 0 sentinels; the WebACL rule set identical before and after with updatewebacl_calls 0; the live unauthenticated reads 401 on the bare path AND its twin; the proof file carrying bare 401, twin authenticated 200, a named credential source and the scanner sentence. Row Z-S121 reported the 0-vs-1 gap and ruling A2 accepted a 0 beside equal snapshots, amending BOTH the check and this criterion's expect at fd4e8e0bcb; this expect is read from the order at HEAD rather than from the pin that was open when the instance was first written.",
+   "status": "PASS"
   }
  ],
  "controls": {
@@ -211,13 +210,9 @@
  "surprises": [
   "NFRA_OPLGTW-Z-S115: the root plan could not read 0/1/0 and step 4's targeting could not exclude the WebACL (web_acl_id makes it a dependency). Ruled by the issuer at A1 route (c): the identical-block churn is accepted on three recorded conditions.",
   "NFRA_OPLGTW-Z-S116: the twin's other two edge functions are no-ops on the bare path and are deliberately left off; the deployed code of both was read at the versions the twin runs.",
-  "NFRA_OPLGTW-Z-S121: A1 condition (iii) wanted exactly ONE UpdateWebACL and the measured count is ZERO, because terraform logged a modification it never sent; four instruments agree the ACL was not written, and zs1.AC2's branch accepting 0 additionally requires the snapshots to be absent, so the honest record grades FAIL. Carries the correction that my pre-apply CloudTrail control proved only that wafv2 READS are recorded."
+  "NFRA_OPLGTW-Z-S121: A1 condition (iii) wanted exactly ONE UpdateWebACL and the measured count is ZERO, because terraform logged a WebACL modification it never sent; four instruments agree the ACL was not written. DISPOSITIONED by the issuer's A2: a 0 beside equal before/after snapshots is accepted (a count above 1 stays a STOP) and zs1.AC2's branch logic was fixed. Carries the correction that my pre-apply CloudTrail control proved only that wafv2 READS are recorded, not writes -- UpdateIPSet is the control that settles the class."
  ],
  "declared_exclusions": [
-  {
-   "item": "the <status> flip to complete",
-   "reason": "the order flips it only if AC1 and AC2 both PASS. AC2 reads FAIL on one limb, so the tag stays staged and the flip waits on the issuer's ruling in Z-S121. The deploy itself is landed, read back and CLOSED."
-  },
   {
    "item": "runbook 7.2 and the EC2_MANIFEST",
    "reason": "this cell touches neither; it is a CloudFront and WAF act with no gateway release. The separate staleness of 7.2 after the mcportal release is row Z-S120 and belongs to that release's applier."
