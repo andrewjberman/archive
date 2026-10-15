@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-99",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-99.yahoo-history-days-port.md",
+    "group": "OTHER",
+    "vintage_commit": "9438a8aaab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R23_G.md",
+    "vintage_commit": "9438a8aaab",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-99.yahoo-history-days-port.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~200",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/yahoo_history_days.py",
+      "kind": "script",
+      "commit_or_etag": "060e838c6f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new stdlib module: days_of, make_history_days (prefetch in chunks, calls count, single-ticker call that propagates), default download over one yf.download frame; offline, no deploy, no AWS call",
+      "artifact_covered_by": [
+        "AR99-g-AC1",
+        "AR99-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_yahoo_history_days.py",
+      "kind": "test",
+      "commit_or_etag": "060e838c6f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six named offline tests on fakes (10 test items with the parametrized chunk guard): 10 passed in the module folder run",
+      "artifact_covered_by": [
+        "AR99-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR99-g-AC1",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g99_checks.py g99",
+      "method": "test_suite",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g99_checks.py g99",
+      "output_evidence": "AR-G99-OK 25 cases, 6 named tests pass | run from the worktree root under timeout 120, rc=0 | the 25 direct cases are the span rule, chunked prefetch and request count, omitted and empty tickers, a failed request, the chunk guard, the default download over a fake yfinance frame, laziness, hygiene, and use through swap_replacement.choose_replacement",
+      "denominator": "25 of 25 direct cases pass; 6 of 6 named tests found and passing (pytest on tests/test_yahoo_history_days.py: 10 passed, 0 failed)",
+      "expect": "^AR-G99-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR99-g-AC2",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g99_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g99_checks.py regress",
+      "output_evidence": "AR-G99-REGRESS-OK 51 tests in 3 files, 3 changed paths all the cell's own | run from the worktree root under timeout 590, rc=0 | the three existing files run one at a time: test_price_adapter_yfinance.py, test_swap_replacement.py, test_price_source.py; changed paths measured against the merge-base with box/dell2 (the module, its test, the channel file)",
+      "denominator": "51 passed, 0 failed (need at least 51) across 3 files; 3 of 3 changed paths are the cell's own files, folder, order or channel file",
+      "expect": "^AR-G99-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's own negative arms are the named tests (a failed request raises for the ticker, a bad chunk raises, an omitted ticker reads None).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W200-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q tests/test_yahoo_history_days.py (run alone, from ycharts/research); bash .tools/commit-gate.sh on both .py files",
+      "result": "10 passed; commit-gate pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
