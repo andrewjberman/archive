@@ -1,0 +1,230 @@
+{
+  "base": "cad248d9f8fe7b5c7c6b3f9e1e5d01fa54db08b2",
+  "q1": {
+    "origin_localhost_passes": "yes",
+    "gates": [
+      {
+        "gate": "origin gate (x-opal-origin-verify header; the Origin header is not read)",
+        "applies": "applies",
+        "condition": "Runs before any route, after the OPTIONS return (index.ts:187-189). Passes only when the request carries x-opal-origin-verify (or X-Opal-Origin-Verify) equal to the current or previous slot of Secrets Manager secret opal/auth/origin-verify (originVerify.ts:35, 128-141). The Origin request header is never read by this gate; Origin only shapes the CORS response (index.ts:37-58), and http://localhost:5174 is in ALLOWED_ORIGINS (index.ts:33). A request from localhost:5174 passes when it reaches the Lambda through the distribution, which injects the header on the APIGateway-portal origin. The dev build does reach /auth through the distribution: the vite proxy target is CloudFront (vite.config.ts:86-87), and vite.config.ts:183-187 records that a direct execute-api target was refused by this gate. A direct execute-api call without the header gets 403 (index.ts:220-222). The gate fails closed on a secret read error (index.ts:215-218).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/originVerify.ts", "line": 131, "text": "headers[ORIGIN_VERIFY_HEADER] ?? headers['X-Opal-Origin-Verify'];"}
+      },
+      {
+        "gate": "origin refusal response",
+        "applies": "applies",
+        "condition": "A failed origin check returns HTTP 403 with the fixed body Forbidden, before body parsing and before any credential is looked at.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts", "line": 222, "text": "return jsonResponse(403, { error: 'Forbidden' }, undefined, origin);"}
+      },
+      {
+        "gate": "JSON body parse",
+        "applies": "applies",
+        "condition": "Parsed only when event.body is present; unparseable JSON returns 400 Invalid JSON body.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts", "line": 232, "text": "return errorResponse(400, 'Invalid JSON body');"}
+      },
+      {
+        "gate": "route match POST /auth/login",
+        "applies": "applies",
+        "condition": "Exact method and path match; calls login(body, device_trust token from the cookie).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts", "line": 239, "text": "if (method === 'POST' && path === '/auth/login') {"}
+      },
+      {
+        "gate": "email and password required",
+        "applies": "applies",
+        "condition": "Either field missing throws Email and password are required; index.ts maps the word required to HTTP 400 (index.ts:500-501).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 79, "text": "throw new Error('Email and password are required');"}
+      },
+      {
+        "gate": "per-account login throttle (throttle.ts LOGIN_THROTTLE)",
+        "applies": "applies",
+        "condition": "Runs before any lookup. The key is sha256 of the trimmed, lower-cased SUBMITTED email, so it is per account and not per IP (throttle.ts:86-93). Table opal-portal-auth-throttle (throttle.ts:20). Threshold 5 counted failures in a 900 s sliding window (throttle.ts:49-50); then a cooldown of 30 s doubling per extra failure, capped at 900 s (throttle.ts:51-53, 152); never a permanent lockout. Refused with 429 and Retry-After (index.ts:481-486). Fails open on a throttle-table error (throttle.ts:111-113). A correct password clears the counter (auth.ts:104). Only failed attempts count, so a driver that signs in with the right password is not throttled.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/throttle.ts", "line": 49, "text": "threshold: 5,"}
+      },
+      {
+        "gate": "user lookup by email (GSI) then profile read",
+        "applies": "applies",
+        "condition": "Table opal-users-v2 (db.ts:22). Query on GSI email-index with equality on the email attribute, Limit 2 (db.ts:84-94); two matches throw Account lookup is ambiguous (db.ts:104-113). Then GetItem Key PK plus SK PROFILE (db.ts:128-133). auth.ts:87 lower-cases the submitted email, so a stored mixed-case email can never match. No match: logLoginFailed and recordAttempt, then Invalid email or password, which index.ts maps to 401 (auth.ts:88-94; index.ts:497-498).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 89, "text": "KeyConditionExpression: 'email = :email',"}
+      },
+      {
+        "gate": "password check (bcrypt compare against the stored hash)",
+        "applies": "applies",
+        "condition": "bcrypt.compare(submitted password, user.password_hash) with the bcryptjs library (password.ts:1, 25-26). The stored attribute is passwordHash, falling back to password_hash (db.ts:141). No pepper or secret is read (password.ts, whole file). Failure: recordAttempt and Invalid email or password (401) (auth.ts:96-101).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 96, "text": "const validPassword = await verifyPassword(password, user.password_hash);"}
+      },
+      {
+        "gate": "clear failure counter on success",
+        "applies": "applies",
+        "condition": "Runs only after the password matched, before the status check.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 104, "text": "await clearCounter(LOGIN_THROTTLE, email);"}
+      },
+      {
+        "gate": "status must be active",
+        "applies": "applies",
+        "condition": "Any status other than the string active throws Account disabled (auth.ts:106-108). The check runs after the password, so only a correct password reveals it. index.ts has no branch for that message, so it returns HTTP 500 Internal server error (index.ts:510).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 106, "text": "if (user.status !== 'active') {"}
+      },
+      {
+        "gate": "breached-password check",
+        "applies": "not_at_login",
+        "condition": "validatePassword, which holds the breached-list check (password.ts:41-53), is called only at set-time: changePassword (auth.ts:614), resetPassword (auth.ts:683) and adminCreateUser (auth.ts:722). login() calls neither, and password.ts says so (password.ts:36-39). Existing sub-12 passwords still log in.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/password.ts", "line": 36, "text": "SET-TIME ONLY: this is never called on the login path"}
+      },
+      {
+        "gate": "MFA gate",
+        "applies": "applies",
+        "condition": "A second factor is required only when user.mfaEnabled is true AND user.mfaChannel is set and not none (auth.ts:116). Both default off when the row lacks them: mfaChannel to none (db.ts:161) and mfaEnabled to false (db.ts:162). So a row without those two attributes SKIPS this gate and receives a session on the password alone. No userType value skips it: a search of every auth-handler src file for userType finds only db.ts:145, jwt.ts:170 and 178, and types.ts, never the MFA code (mfa.ts, auth.ts). When the gate applies, login returns the challenge with no session (auth.ts:154-157; index.ts:250-252).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 116, "text": "if (user.mfaEnabled && user.mfaChannel && user.mfaChannel !== 'none') {"}
+      },
+      {
+        "gate": "device trust (device_trust cookie)",
+        "applies": "not_at_login",
+        "condition": "checkDeviceTrust is reached only inside the MFA branch (auth.ts:116-134). A row that does not satisfy the MFA gate never calls it. Where the MFA gate applies, a valid device_trust cookie bound to this account and generation skips the code (deviceTrust.ts:182 onward).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 132, "text": "if (await checkDeviceTrust(deviceToken, user)) {"}
+      },
+      {
+        "gate": "mint session (access and refresh tokens)",
+        "applies": "applies",
+        "condition": "updateLastLogin, then partner identity looked up only when firmId is not opal-capital (auth.ts:204-215), then the RS256 access token (15 m) and refresh token (7 d) are signed (jwt.ts:17-18, 162-245).",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 208, "text": "if (user.firmId && user.firmId !== 'opal-capital') {"}
+      },
+      {
+        "gate": "mustChangePassword flag",
+        "applies": "not_at_login",
+        "condition": "Returned to the client in the user block (auth.ts:226); login does not refuse on it.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 226, "text": "mustChangePassword: user.must_change_password,"}
+      },
+      {
+        "gate": "refresh cookie set on the response",
+        "applies": "applies",
+        "condition": "Set-Cookie refresh_token with HttpOnly, Secure, SameSite=Strict, Path=/, Max-Age 7 days (index.ts:104-107). This HttpOnly cookie is the page session that /auth/refresh reads (index.ts:286-293), which is why a minted token cannot stand in for it.",
+        "evidence": {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts", "line": 255, "text": "return jsonResponse(200, auth, [createRefreshTokenCookie(refreshToken)], origin);"}
+      }
+    ]
+  },
+  "q2": {
+    "row_attributes": [
+      {"name": "PK", "value_or_form": "USER#<id>. createUser writes USER#usr_<12 hex> (db.ts:206-208). The walker row is USER#usr_opal_ui_walker. Login needs only that the email GSI returns this PK and that PK plus SK resolves."},
+      {"name": "SK", "value_or_form": "the literal PROFILE (db.ts:131)"},
+      {"name": "email", "value_or_form": "a LOWER-CASE string. It is the email-index key (db.ts:88-89) and login matches the lower-cased submitted address (auth.ts:87). Use a .test or .invalid address that never receives mail."},
+      {"name": "passwordHash", "value_or_form": "a bcrypt hash string at cost 12, read as passwordHash with password_hash as fallback (db.ts:141; password.ts:4, 19). Absent, login has no hash to compare (auth.ts:96)."},
+      {"name": "status", "value_or_form": "the string active (auth.ts:106; createUser writes active at db.ts:225)"},
+      {"name": "mfaEnabled", "value_or_form": "absent, or false. Either way the MFA gate is skipped (db.ts:162; auth.ts:116)."},
+      {"name": "mfaChannel", "value_or_form": "absent, or none (db.ts:161; auth.ts:116)"},
+      {"name": "userType", "value_or_form": "optional. Login never reads it; it reaches only the access-token claim when set (jwt.ts:170, 178). The walker row carries Dev."},
+      {"name": "role", "value_or_form": "optional. Login never reads it; it reaches only the access-token claim (jwt.ts:175). createUser defaults role to user (db.ts:223)."},
+      {"name": "firmId", "value_or_form": "opal-capital. It drives tier internal (jwt.ts:168) and skips the partner lookup (auth.ts:208). Other values pull a partner identity, and a failed lookup is tolerated (auth.ts:209-214)."},
+      {"name": "name", "value_or_form": "a display string, access-token claim only (jwt.ts:174)"},
+      {"name": "createdAt or created_at", "value_or_form": "optional. It feeds the refresh-token binding (jwt.ts:222); login does not need it."},
+      {"name": "mustChangePassword", "value_or_form": "absent reads as false (db.ts:147). Login does not refuse on it (auth.ts:226)."},
+      {"name": "tier (the R29 IV form writes this on the row)", "value_or_form": "NOT READ. getUser maps no tier attribute (db.ts:139-169), and the token tier is computed from firmId (jwt.ts:168). Writing tier internal on the row has no effect on login."},
+      {"name": "allowedFirmIds or allowedFirms", "value_or_form": "NOT READ by the auth handler (a search of every auth-handler src file for allowedFirm finds no hit) and absent from the token."}
+    ],
+    "token_claims": [
+      "sub = the account email (jwt.ts:173)",
+      "name = the row name (jwt.ts:174)",
+      "role = the row role (jwt.ts:175)",
+      "tier = internal when firmId is opal-capital, else advisor (jwt.ts:168)",
+      "firmId = the row firmId, or the string null when absent (jwt.ts:169, 177)",
+      "userType = the row userType, only when set (jwt.ts:170, 178)",
+      "advisorKey, advisorName, advisorRole, advisorId and firmRole, only when a partner identity is returned (jwt.ts:179-185); never for opal-capital (auth.ts:208)",
+      "iss = opal-portal-auth (jwt.ts:19, 186); aud = opal-portal-api (jwt.ts:20, 187)",
+      "exp = 15 minutes from iat (jwt.ts:17, 192)",
+      "refresh token (separate, in the cookie): sub = refreshBinding hash, email, type refresh, 7 days (jwt.ts:18, 235-239)"
+    ],
+    "test_filer_gets_tier_internal": "yes",
+    "walker_differences": [
+      "status: the walker row is disabled at rest (ui_walker_account.py:114) and set active only for one walk (ui_walker_account.py:154). Login requires active (auth.ts:106); a minted row must be active.",
+      "passwordHash: the walker hashes a random token with Python bcrypt at cost 12 (ui_walker_account.py:146); login verifies with bcryptjs (password.ts:1). Both are bcrypt. Cross-library compatibility is not exercised by this read.",
+      "mfaEnabled and mfaChannel: the walker row carries neither (ui_walker_account.py:112-115), so the MFA gate is skipped by default, exactly as for a minted row. This is the difference that decides login.",
+      "role admin and userType Dev: login never reads either. They reach only the token claims (jwt.ts:170, 175). They matter for what the page admits, not for whether login succeeds (ui_walker_account.py:14-16 names the page gates).",
+      "PK and email: the walker uses USER#usr_opal_ui_walker and opal-ui-walker@opal.test (ui_walker_account.py:38, 40). Login depends only on the email GSI and PK plus SK (db.ts:88-131), so any PK shape works.",
+      "firmId opal-capital: the same as the walker (ui_walker_account.py:114), so the partner lookup is skipped (auth.ts:208).",
+      "createdBy and name: not read by login (db.ts:139-169)."
+    ],
+    "evidence": [
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 88, "text": "IndexName: 'email-index',"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 131, "text": "Key: { PK: pk, SK: 'PROFILE' },"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 161, "text": "mfaChannel: (item.mfaChannel as MfaChannel) ?? 'none',"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 162, "text": "mfaEnabled: item.mfaEnabled ?? false,"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 145, "text": "userType: item.userType,"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts", "line": 168, "text": "const tier = user.firmId === 'opal-capital' ? 'internal' : 'advisor';"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts", "line": 170, "text": "const userType = user.userType || undefined;"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts", "line": 178, "text": "...(userType && { userType }),"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 87, "text": "const user = await getUser(email.toLowerCase());"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 208, "text": "if (user.firmId && user.firmId !== 'opal-capital') {"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 225, "text": "status: 'active',"},
+      {"file": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf", "line": 208, "text": "value = local.origin_verify_current"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 114, "text": "\"status\": {\"S\": \"disabled\"},"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 154, "text": "\":a\": {\"S\": \"active\"}"},
+      {"file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~146/r41/FWD1_PREREQ_READ.json", "line": 506, "text": "'internal' (R29 IV form; the JWT carries the same)"}
+    ]
+  },
+  "q3": {
+    "hash_scheme": "bcrypt through the bcryptjs library at cost (SALT_ROUNDS) 12. No pepper, no secret and no HMAC layer (password.ts reads none). Stored as passwordHash (db.ts:141). The walker's own writer is Python bcrypt at cost 12 (ui_walker_account.py:146).",
+    "helper_exists": true,
+    "helper": "infra/aws/opalinvest_dev/lambda/auth-handler/src/password.ts, export async function hashPassword (line 18), which calls bcrypt.hash at cost 12 (line 19). It validates nothing; validatePassword is a separate export (password.ts:41). A Node script that imports this module is the tracked route. The Python walker has no reusable hash-only function: its hash is inline in arm(), which also writes the password to SSM (ui_walker_account.py:145-147).",
+    "strength_checked_on_direct_write": "no",
+    "password_in_memory_only_possible": "yes",
+    "how": "The minting process generates a random password in memory, hashes it at cost 12, and writes passwordHash plus status active to opal-users-v2 with a condition expression. It never writes SSM. The driver then POSTs /auth/login with the in-memory value. On disarm it replaces passwordHash with an unusable hash, as ui_walker_account.py:184-189 does. No auth-handler change is needed: login reads only passwordHash (auth.ts:96; db.ts:141), applies no pepper (password.ts), and runs no strength or breach check (password.ts:36-39). The write needs DynamoDB write rights on opal-users-v2, whose IAM was not read.",
+    "evidence": [
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/password.ts", "line": 18, "text": "export async function hashPassword(password: string): Promise<string> {"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/password.ts", "line": 19, "text": "return bcrypt.hash(password, SALT_ROUNDS);"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/password.ts", "line": 4, "text": "const SALT_ROUNDS = 12;"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/password.ts", "line": 41, "text": "export function validatePassword(password: string): { valid: boolean; error?: string } {"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 614, "text": "const validation = validatePassword(newPassword);"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 722, "text": "const validation = validatePassword(password);"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 206, "text": "export async function createUser(user: User): Promise<void> {"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 221, "text": "passwordHash: user.password_hash,"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 146, "text": "bcrypt.gensalt(SALT_ROUNDS)"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 147, "text": "_ssm().put_parameter(Name=PARAM, Value=password"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 185, "text": "SET passwordHash = :h, #s = :d REMOVE armedBy, armedAt"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 213, "text": "it spawns this with UI_WALK_CHILD=1 and reads stdout in memory"}
+    ]
+  },
+  "q4": {
+    "driver_library": "playwright-core, loaded from portal/node_modules through createRequire (walk.mjs:24-25). The browser is Microsoft Edge (channel msedge) with a bundled-Chromium fallback (walk.mjs:1603-1605).",
+    "signin_method": "The real login form: page.goto(base + '/login'), fill #email and #password, click button[type=submit] (walk.mjs:1648-1651), then wait for the URL to leave /login. A signed-out landing is voided (walk.mjs:292-297). It is not a token and not a direct POST. The walker's direct POST exists only for the disarm proof (ui_walker_account.py:161-171).",
+    "guard_changes_needed": [
+      "ADMITTED_POST (walk.mjs:138) admits only /auth/login, /auth/refresh, /auth/logout, directory/resolve and selections. Add exact paths for POST /api/scoped/investor-reporting/analysis/inputs (the upload), POST /api/scoped/tickets (create, analysisRequest.ts:279), POST /api/scoped/investor-reporting/analysis (submit) and POST /api/scoped/tickets/<id>/report (record). The ticket routes exist at the distribution (cloudfront-distribution.tf:540, 559).",
+      "The upload is the first of the four POSTs, not a separate door: uploadAnalysisInput posts to analysis/inputs (analysisRequest.ts:245). The file is chosen through the input aria-label Holdings file, type file (AnalysisRequestParts.tsx:213). The walker never presses file pickers (SKILL.md:70), so the new driver must set the file through that input. On RESOLVING the upload is re-posted after a wait (analysisRequest.ts:247-252).",
+      "The guard matches the path only (walk.mjs:152, 1635), so the admitted paths are honoured on any host. A filing run that also posts to /api/scoped/tickets/submit (tickets.ts:181, the partner path) must add that path; the internal path does not use it (analysisRequest.ts:273-279).",
+      "DO_NOT_CLICK (walk.mjs:140) refuses buttons whose text carries submit, upload, create, send or save. The filing Submit must be an explicit selector in the new driver; the generic press paths keep the refusal, and the regex is not loosened. The label of the Submit control was not located in this read.",
+      "The walker's read-only invariant (SKILL.md, Read-only by construction) must stay as it is for the walker. The filing mode belongs to a new script behind its own flag.",
+      "The walker's disarm check counts HTTP 403 as refused (ui_walker_account.py:171). A driver that reuses that check for its own proof must also require 401.",
+      "An in-memory mint replaces arm() for this driver only, because arm() writes the password to SSM (ui_walker_account.py:147). disarm's hash replacement (ui_walker_account.py:185-189) can be reused."
+    ],
+    "existing_filing_driver": false,
+    "smallest_honest_driver": "A NEW script under .claude/skills/ui-walk/ (none exists yet), derived from walk.mjs. Keep its launch (walk.mjs:1603-1605), its sign-in block (walk.mjs:1645-1659), its route guard (walk.mjs:1634-1643) and signin_detect.mjs. Add an in-memory mint (q3), an allow-list of exactly the four filing POSTs, a setInputFiles on the Holdings file input (AnalysisRequestParts.tsx:213), one explicit Submit selector, and a step log. The name is the builder's choice.",
+    "searched": "portal/e2e: absent (the portal has no e2e folder). portal/tests: one file, test-positioning-data.html, with no playwright, page.goto or setInputFiles. portal/src/pages/TicketCenter: no playwright, page.goto, setInputFiles or chromium match outside the unit tests. portal/src/pages/InvestorReporting: the tests that reach the upload (tabs/analysis/tests/prospect.test.tsx:24; __tests__/mvp-upload/upload.test.ts:16) use fixture adapters and mock the API; none signs in or drives a browser. .claude/skills: no file names scoped/tickets, investor-reporting/analysis/inputs or test-filer, and the only browser-driver files are ui-walk/walk.mjs and frontend-dev/SKILL.md. frontend-dev/SKILL.md (line 68) describes a stubbed-auth screenshot pattern that stubs /auth/refresh, signs in with no credentials, and files no ticket. Its test-login env file was not opened.",
+    "recommend": "MINT_WITH_PASSWORD",
+    "deciding_fact": "A row with no mfaEnabled and no mfaChannel attribute skips the MFA gate (auth.ts:116; db.ts:161-162), so POST /auth/login returns a session on the password alone. The origin gate passes through the distribution, which sets the header (cloudfront-distribution.tf:208; vite.config.ts:86-87). The driver still has to be built new, and the guard admits must be widened for the four filing POSTs.",
+    "evidence": [
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts", "line": 116, "text": "if (user.mfaEnabled && user.mfaChannel && user.mfaChannel !== 'none') {"},
+      {"file": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts", "line": 162, "text": "mfaEnabled: item.mfaEnabled ?? false,"},
+      {"file": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf", "line": 208, "text": "value = local.origin_verify_current"},
+      {"file": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf", "line": 811, "text": "= \"/auth/*\""},
+      {"file": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf", "line": 559, "text": "= \"/api/scoped/tickets\""},
+      {"file": "portal/vite.config.ts", "line": 87, "text": "target: 'https://d2n2nzpeqf34ge.cloudfront.net',"},
+      {"file": "portal/vite.config.ts", "line": 183, "text": "the portal authorizer refuses any request that lacks CloudFront's"},
+      {"file": "portal/.env.development", "line": 4, "text": "blank sends /auth/* through the vite proxy to CloudFront"},
+      {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 245, "text": "let result = await deps.ir.uploadAnalysisInput(input.upload, input.answers.firm).catch(atStep('upload'))"},
+      {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 279, "text": "const created = await deps.tickets.createTicket({"},
+      {"file": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx", "line": 213, "text": "<input aria-label=\"Holdings file\" type=\"file\" accept=\".csv,.xlsx\" disabled={disabled}"},
+      {"file": "portal/src/api/endpoints/tickets.ts", "line": 143, "text": "return apiRequest('/api/scoped/tickets', { method: 'POST', body: JSON.stringify(input) })"},
+      {"file": ".claude/skills/frontend-dev/SKILL.md", "line": 68, "text": "the script stubs `/auth/refresh`"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 24, "text": "const require = createRequire(path.join(ROOT, 'portal', 'package.json'))"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 1603, "text": "browser = await chromium.launch({ channel: 'msedge'"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 1648, "text": "await page.goto(opt.base + '/login'"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 1651, "text": "await page.click('button[type=submit]')"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 138, "text": "const ADMITTED_POST = ["},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 140, "text": "const DO_NOT_CLICK = /export|generate|submit|upload|delete|remove|save|send"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 1637, "text": "if (ADMITTED_POST.some((re) => re.test(p))) return route.continue()"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 1642, "text": "return route.abort('blockedbyclient')"},
+      {"file": ".claude/skills/ui-walk/walk.mjs", "line": 292, "text": "if (probe && isSignInPage(probe)) {"},
+      {"file": ".claude/skills/ui-walk/SKILL.md", "line": 32, "text": "**Read-only by construction**"},
+      {"file": ".claude/skills/ui-walk/SKILL.md", "line": 70, "text": "File pickers are `<input type=file>` and are never pressed"},
+      {"file": ".claude/skills/ui-walk/ui_walker_account.py", "line": 171, "text": "return e.code in (401, 403)"}
+    ]
+  },
+  "not_read": "NOT READ: (1) the live system: no DynamoDB row, GSI, SSM parameter, Secrets Manager value (opal/auth/origin-verify, opal/auth/jwt-private-key), CloudFront configuration as deployed, or API Gateway state; (2) the deployed Lambda bytes: the source tree was read, not the zip running in AWS; (3) the remote: the portal worktree is at e578b378, the local DEV ref, and origin/DEV (which carries newer TicketCenter lines, per the W147-S8 row) was not read, so the page lines here are e578b378's; (4) the Submit control's label: searched for Submit, Request analysis and Submit request labels in TicketCenter and InvestorReporting non-test code with no button found, so the label is NOT located; (5) IAM for opal-users-v2 and the walker's SSM path; (6) the bcryptjs and Python bcrypt cross-compatibility of a written hash; (7) the R29 sitting code and the ticket_center principal class, read only through FWD1_PREREQ_READ.json (AR-y-342's record); (8) the contents of .claude/skills/frontend-dev/portal-test-login.env, a tracked file never opened. Every absence above was searched in the named paths, and the search is stated in q4.searched."
+}
