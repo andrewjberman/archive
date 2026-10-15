@@ -1,0 +1,110 @@
+## inline policy names
+[
+    "mdpf-publisher-live-serve-read-policy",
+    "mdpf-publisher-taxsma-control-read-policy",
+    "opal-assets-mdpf-egress-publisher-live-serve",
+    "opal-assets-mdpf-egress-publisher-scoped"
+]
+## mdpf-publisher-live-serve-read-policy
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*",
+            "Sid": "ReadLiveServedMdpf"
+        }
+    ]
+}
+## mdpf-publisher-taxsma-control-read-policy
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-mdpf/mdpf/global/state/taxsma_control/current.json",
+            "Sid": "ReadTaxsmaControlOnly"
+        }
+    ]
+}
+## opal-assets-mdpf-egress-publisher-live-serve
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*",
+            "Sid": "WriteLiveServedMdpf"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "platinum/mdpf/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-portal-v2",
+            "Sid": "ListLiveServedMdpf"
+        }
+    ]
+}
+## opal-assets-mdpf-egress-publisher-scoped
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-assets/portal/gold/mdpf/*",
+            "Sid": "ReadPortalGoldMdpf"
+        },
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-portal-v2/platinum/_staging/mdpf/*",
+            "Sid": "WriteStagingMdpf"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "portal/gold/mdpf/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-assets",
+            "Sid": "ListPortalGoldMdpf"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "platinum/_staging/mdpf/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-portal-v2",
+            "Sid": "ListStagingMdpf"
+        }
+    ]
+}
