@@ -1,0 +1,36 @@
+{
+  "rule": "R3-custodian-number",
+  "commonwealth_accounts": 1533,
+  "custodian_numbers": 1001,
+  "links_deterministic": 88,
+  "links_ambiguous": 1,
+  "control": {"already_matched": 2, "agree": 2, "disagree": 0},
+  "new_links": 86,
+  "new_links_active": 0,
+  "new_links_among_219": 0,
+  "denominators": {"unmatched_active": 387, "new_clients": 168, "reachable": 219},
+  "file": {
+    "path": "C:/dev/_cotbkf_match_20261015/R3_LINKS.csv",
+    "rows": 90,
+    "sha256": "aced77647ba8df05ff4f715cc658db9a3f164b5ae3980d4560225fc0203ac8cd"
+  },
+  "sources_read": [
+    {"source": "s3://opal-data-assets/blackdiamond/cottonwood/silver/fact_holdings/", "listed": 94, "read": 3, "detail": "94 date partitions listed once (date=2026-06-09 to date=2026-10-14, one data.parquet each); read: date=2026-10-12, date=2026-10-13, date=2026-10-14, columns AccountID and Account Number only"},
+    {"source": "s3://opal-data-assets/commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/", "listed": 2, "read": 1, "detail": "crosswalk.csv read (1,533 rows); crosswalk.parquet listed, not read"},
+    {"source": "s3://opal-data-assets/commonwealth/cottonwood/silver/transactions/date=2026-06-23/", "listed": 14, "read": 0, "detail": "listed only; the Commonwealth universe is the served crosswalk"},
+    {"source": "s3://opal-data-assets/commonwealth/cottonwood/silver/positions/date=2026-06-23/", "listed": 1, "read": 0, "detail": "listed only"},
+    {"source": "s3://opal-data-cot/gold/canonical/holdings/", "listed": 137, "read": 137, "detail": "first run, before AMENDMENT 1: 137 parquet parts read, 0 carry Account Number (the custodian column is not in these parts)"},
+    {"source": "s3://opal-data-cot/gold/dimensions/accounts_dimension_latest.parquet", "listed": 1, "read": 1, "detail": "schema read only (1,005 rows, 27 columns, no custodian column)"},
+    {"source": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/REVERSE_MATCH_V3.csv", "listed": 1, "read": 1, "detail": "repository file, sha256 0783f088aecbf29e46751aa5d80239b8aa53f16484778162e34ee1c09783c66f verified; 860 rows"}
+  ],
+  "not_established": [
+    "The AccountID values of fact_holdings equal the account_key values of REVERSE_MATCH_V3.csv as raw strings (860 of 860 keys appear among 1,004 distinct AccountIDs in the three partitions); no other mapping was needed or sought",
+    "The custodian numbers were read from the three most recent partitions only; a number held only in an older partition is not established, and no AccountID carried two different custodian numbers across those partitions",
+    "Equality of two numbers is not proof that two records describe one client (FWD-9); the control covers only the 2 already-matched accounts, and the rule is BLIND to a number reused for different accounts beyond that control",
+    "The yield for the active accounts is zero: all 86 new links reach closed accounts outside the 860 active keys, so R3 adds 0 to the 219 reachable unmatched active accounts",
+    "The research's 87 new links is reproduced as 86 new plus 1 AMBIGUOUS Commonwealth account (two candidates, both NOT_MATCHED in the served crosswalk, neither among the 860 active keys); the difference is the ambiguity rule, not a data difference",
+    "The served crosswalk was not edited and R3 is not wired into it; that is a later never-widen act",
+    "Transactions and positions silver were listed, not read; the Commonwealth universe used is the served crosswalk's 1,533 accounts",
+    "The CRM zip and its prefix were not read; no other bucket or prefix was read"
+  ]
+}

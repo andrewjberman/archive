@@ -26,7 +26,7 @@ have = sorted(cls)
 ok_set = assigned == have
 cnt = {k: sum(1 for v in cls.values() if v.get("class") == k) for k in ("COVERED", "BUILT", "DEFERRED")}
 src = "".join(open(f, encoding="utf-8").read() for f in glob.glob("infra/aws/ec2/opal-gateway/app/*.py"))
-built = [v.get("tool") for v in cls.values() if v.get("class") == "BUILT"]
+built = sorted({v.get("tool") for v in cls.values() if v.get("class") == "BUILT" and v.get("tool")})
 exist = sum(1 for t in built if t and re.search(r"def\s+%s\s*\(" % re.escape(t), src))
 print("classification: assigned %d of %d, covered %d, built %d, deferred %d; set equal %s; built tools defined %d of %d" % (len(assigned), len(have), cnt["COVERED"], cnt["BUILT"], cnt["DEFERRED"], ok_set, exist, len(built)))
 print("OK" if ok_set and cnt["COVERED"] + cnt["BUILT"] + cnt["DEFERRED"] == len(assigned) and exist == len(built) else "NO")
@@ -36,6 +36,6 @@ res=$(printf '%s' "$res" | tr -d '\r'); printf '%s\n' "$res" | sed '$d'
 P="$W/probe_built.py"; pr=0; pn=0
 if [ -f "$P" ]; then out=$(timeout 115 python "$P" 2>&1 | tr -d '\r'); printf '%s\n' "$out" | grep -E "^probe built:" | tail -n 2; pn=$(printf '%s\n' "$out" | grep -cE "^probe built: .* answered True"); fi
 echo "built tools probed $pn (the worker's probe lines)"
-nb=$(printf '%s' "$res" | sed -n 's/.*built \([0-9]*\),.*/\1/p' | head -1)
+nb=$(printf '%s' "$res" | sed -n 's/.*defined [0-9]* of \([0-9]*\)$/\1/p' | head -1)
 [ "$(printf '%s\n' "$res" | tail -1)" = OK ] && { [ "${nb:-0}" = 0 ] || [ "$pn" -ge "${nb:-0}" ]; } && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
