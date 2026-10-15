@@ -31,7 +31,8 @@ DATES = ("2026-07-01", "2026-09-28")
 HOUSEHOLDS = 320
 LONG_DIGITS = re.compile(r"\d{8,}")
 DIGIT_OK_KEYS = ("sha256", "path", "file", "key", "prefix", "where")
-WRITE_TOKENS = ("put_object", "upload_file", "upload_fileobj", "copy_object", "delete_object", "delete_objects", "put_item", "delete_item", "update_item", "write_table", "to_parquet", "write_dataset")
+WRITE_TOKENS = ("put_object", "upload_file", "upload_fileobj", "copy_object", "delete_object", "delete_objects", "put_item", "delete_item", "update_item", "s3fs", "filesystem=", "s3filesystem")
+GRANTED_S3 = "s3://opal-data-assets/orion/inflection/"
 FOREIGN = ("cottonwood", "blackdiamond", "schwab", "opal-data-cottonwood")
 ORION_SILVER = "s3://opal-data-assets/orion/inflection/silver/"
 
@@ -101,6 +102,8 @@ def script_clean(root, rel, recorded_sha):
         need(t not in text, "write token in script: " + t)
     for f in FOREIGN:
         need(f not in text, "foreign firm name in script: " + f)
+    for lit in re.findall(r"s3://[^\s\"'`)]*", text):
+        need(lit.startswith(GRANTED_S3) or lit.startswith("s3://opal-data-assets/eclipse/inflection/"), "s3 literal outside the granted prefixes: " + lit)
 
 
 def common_flags(rec):
