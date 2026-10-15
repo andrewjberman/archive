@@ -1,0 +1,26 @@
+SESSION TRAIL -- 0.9.0_WK_NFRA_OPLGTW~98 on NFRA_OPLGTW.TO-OG-eg-1 (OG-eg-1, round 37, EGRESS)
+worktree C:/tmp/wk-oplgtw-98, branch wk-NFRA_OPLGTW-98, base ad2abec9c5 (cut)
+(file is .session.txt because *.log is git-ignored on this tree)
+
+1. Premises re-grounded: branch and TREE-OK printed; the order's paths exist; the eg1.AC1.sh and eg1.AC2.sh checks exist;
+   trnspt/checks/_root.sh sets pipefail, so each check's rc is the real pytest rc (probed: plain pipeline rc 0, pipefail rc 1).
+2. Base measurements (before any edit):
+   - eg1.AC2.sh: "existing silver suites: rc=0; 84 passed in 4.32s", RESULT: PASS, exit=0.
+   - eg1.AC1.sh: "pytest rc=4; named tests passed 0 of 5; failed/error lines 0", RESULT: FAIL, exit=1 (test file absent, as the cut predicted).
+3. Code: lib/research/harvest/store.py (silver_cache, S3 GET counters, cached fold), lib/opal_data_harvest/cycle_runner.py
+   (driver call inside silver_cache, s3_get_count/s3_get_bytes in the record and RECORD_KEYS),
+   lib/opal_data_harvest/test_eg1_silver_cache.py (five named tests). Commit 39ae28559b.
+   harvest_grammar.py unchanged (watermark keeps calling store.silver_latest).
+   First commit attempt refused by the naming gate on one fixture string (a bronze-key literal shaped like an S3 key);
+   renamed to a non-key label; the rerun committed.
+4. Checks on the code: test_eg1_silver_cache.py 5 passed; negative controls: tie clause removed -> ac01 FAILED;
+   cap ignored (99) -> ac04 FAILED; full harvest sweep (lib/opal_data_harvest + lib/research/harvest)
+   1346 passed, 3 skipped, rc 0 (1349 collected, the 5 new ones included); commit-gate rc 0 (3 of 3 files); ruff py39 clean.
+   An o3 mutant test required the uncached supersedes text inside silver_latest; the first restructure failed it (1 failed,
+   106 passed); the full scan was restored inline and the suite passes (112 passed across the eg1, runner and silver suites).
+5. Surprise rows NFRA_OPLGTW-Z-W98-S1..S4 filed in INVESTIGATION_v1.md, commit 9bec46bac0 (gate: 4 new rows, OK).
+6. Measured GET counts (test_eg1_ac02 arithmetic, printed):
+   unchanged appends (50 watermark + 10 appends over 30 parts): cached 30 GETs, uncached 1800 (60 x 30).
+   ten appends each writing one part: cached 40 GETs (30 + 10 written), uncached 2080 (sum of parts listed per call).
+7. Criteria runs: eg1.AC1.sh -> "pytest rc=0; named tests passed 5 of 5; failed/error lines 0 / RESULT: PASS / exit=0"
+   (two further runs identical: determinism). eg1.AC2.sh -> "existing silver suites: rc=0; 84 passed in 4.32s / RESULT: PASS / exit=0".
