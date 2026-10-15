@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-575",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-575.read-49-financials-lost-account-across-the-dim-balance-partitions-and-the-upstream-writers-run-for-2026-10-13.md",
+    "group": "OTHER",
+    "vintage_commit": "5086b0b072eb58d7a7bfed3f22d3f02375f24038"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~418",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~418/IB214-1_49f_presence_read.json",
+      "kind": "doc",
+      "commit_or_etag": "9681b0e9b5e673a3a2511277948e6fd57105f91e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only investigation record. Nothing was published, re-run, invoked or written to AWS, so there is no deploy to verify."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~418/IB214-1_criteria_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "9681b0e9b5e673a3a2511277948e6fd57105f91e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output and exit codes of the three criteria, recorded in the same commit as the record."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9681b0e9b5e673a3a2511277948e6fd57105f91e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three appended rows, IRPT_BCKEND-D2-W418-S1 to S3, validated by the surprise-row gate at commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB214-1-AC1",
+      "criterion_verbatim": "IB214-1-AC1: one row per trading day 2026-10-08 to 2026-10-14 (recomputed against the calendar), the partitions' presence and row counts, the account present on 2026-10-12 and absent from the present 2026-10-13 partition, the gap located",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r214/p214_cells.py\" . IB214-1-AC1",
+      "output_evidence": "OK: the account across 5 trading days located in the partitions / IB214-1-AC1 PASS / rc=0",
+      "denominator": "5 trading days, 5 partitions present, 5 row counts (7626, 7634, 7640, 7646, 7664), 1 lost account present on 2026-10-08, 10-09 and 10-12 and absent on 2026-10-13 and 10-14; gap first absent day 2026-10-13 (measured)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB214-1-AC2",
+      "criterion_verbatim": "IB214-1-AC2: the upstream writer read in the code (file, line, identifier verified), its run for 2026-10-13 (failed, truncated or succeeded, with the row counts around it) and the claim",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r214/p214_cells.py\" . IB214-1-AC2",
+      "output_evidence": "FAIL: upstream_writer.site (the code that writes the dim_balance partition): data/assets/scripts/silver/schwab_conversion.py is not in the tree / IB214-1-AC2 FAIL / rc=1",
+      "denominator": "0 of 1 writer sites resolvable in the sparse worktree (the writer exists at HEAD, line 570, outside the granted sparse checkout); run 2026-10-13 status succeeded with claim inferred from 35 and 32 REPORT invocations and 0 error lines; row counts 7640, 7646, 7664; truncation signal false",
+      "status": "FAIL",
+      "status_reason": "The writer file data/assets/scripts/silver/schwab_conversion.py exists at HEAD (line 570, w.finalize()) but the sparse worktree holds only investor_reporting, and the grant forbids widening it. The check resolves site.file under the worktree root and cannot pass; recorded as BLOCKING row IRPT_BCKEND-D2-W418-S1 for the issuer. The record itself is complete and graded PASS on AC1 and AC3."
+    },
+    {
+      "criterion_id": "IB214-1-AC3",
+      "criterion_verbatim": "IB214-1-AC3: whether the refusal clears (the 2026-10-14 partition), the remedy and whether a partner contact is needed, notes, the six counters 0 and no long digit run; the amendment's other_files object (the days, code counts summing to the rows, the classification, the writer owner for a gap)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r214/p214_cells.py\" . IB214-1-AC3",
+      "output_evidence": "OK: whether it clears, the remedy, notes, counters 0 / IB214-1-AC3 PASS / rc=0",
+      "denominator": "3 dim_position days, 3 fact_trn days (account rows 0 on each, codes empty), classification undetermined, 4 notes, 6 counters at 0, 0 long digit runs; account absent on 2026-10-14 (measured), partner contact needed true",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The negatives in p214_cells.py and control214.py are the issuer's; the worker did not author or alter them.",
+      "expected": "Not applicable: the order names no mutant for the worker.",
+      "observed": "Not run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "No same-input pair was run: each partition was read once per object and counted once in scratch.",
+      "observed": "Not applicable to a read whose input is a live S3 state.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the Schwab silver Lambda or the writer, and any AWS write, publish, sign-in or vendor request",
+      "reason": "The order is READ ONLY and its bounds forbid each of these."
+    },
+    {
+      "item": "Widening the sparse checkout to include data/assets/scripts/silver",
+      "reason": "The grant names the investor_reporting sparse path only; the writer was read by git object read at HEAD and the gap is recorded as a BLOCKING row for AC2."
+    },
+    {
+      "item": "Any account id, name or value in a tracked file",
+      "reason": "Client data rule: the lost account's id stayed in scratch; only counts, dates, codes and classes are recorded."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W418-S1: the dim_balance writer data/assets/scripts/silver/schwab_conversion.py sits outside the granted sparse checkout, so AC2 cannot resolve its site; BLOCKING.",
+    "IRPT_BCKEND-D2-W418-S2: the fact_trn partition for the served day 2026-10-12 holds 509 rows against 11906 on 2026-10-13, a truncation-shaped size; observation.",
+    "IRPT_BCKEND-D2-W418-S3: the lost account's 20 dim_position rows vanish on 2026-10-13 with its balance row and fact_trn holds no row for it, so the rule's classes do not settle it; observation."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~418/IB214-1_criteria_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "aws s3api (read only, via .tools/aws)",
+      "invocation": "head-object and get-object on the 49F dim_balance partitions 2026-10-08 to 2026-10-14, and on dim_position and fact_trn 2026-10-12 to 2026-10-14",
+      "result": "all partitions read; 0 writes; no invoke"
+    },
+    {
+      "tool": "aws logs (read only, via .tools/aws)",
+      "invocation": "describe-log-groups under /aws/lambda/ and filter-log-events on the Schwab silver Lambda for 2026-10-13 and 2026-10-14 UTC",
+      "result": "35 and 32 REPORT events; 0 error, traceback, timeout, refusal or truncation events"
+    },
+    {
+      "tool": "python -I (scratch outside the repository)",
+      "invocation": "python -I analyze_dimbal.py and python -I other_files.py on partition copies in scratch",
+      "result": "counts and codes only; account ids never printed"
+    },
+    {
+      "tool": "git show <base> (read only)",
+      "invocation": "git show of the writer file and of the investigation item schema from the base object store to scratch",
+      "result": "writer read (632 lines, line 570 finalize); schema read; nothing committed outside the record set"
+    },
+    {
+      "tool": "python -I p214_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r214/p214_cells.py\" . <criterion id>",
+      "result": "AC1 PASS rc=0, AC2 FAIL rc=1, AC3 PASS rc=0"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5086b0b072eb58d7a7bfed3f22d3f02375f24038",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-575.read-49-financials-lost-account-across-the-dim-balance-partitions-and-the-upstream-writers-run-for-2026-10-13.md"
+  }
+}
