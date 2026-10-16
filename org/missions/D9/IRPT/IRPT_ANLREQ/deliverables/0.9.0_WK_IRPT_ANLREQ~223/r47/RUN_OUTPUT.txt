@@ -1,0 +1,24 @@
+AR-tz-63 run output, worker 0.9.0_WK_IRPT_ANLREQ~223, base 6df6c60552, test commit 45d143eef6, row commit 177499e9b3.
+Verbatim, from the worktree root C:/dev/wk-irpt-anlreq-223.
+
+== 1. AR63-tz-AC1 invocation (run twice, outputs compared with cmp: DETERMINISTIC)
+$ python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 4 infra/aws/lambda/ticket_center/tests/test_cross_firm_profile_scope.py
+R46-RED-OK red=5
+rc=0
+
+== 2. Checker self-test
+$ python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test
+R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused
+rc=0
+
+== 3. The test file, plain pytest (rc=1 by design: 5 red)
+$ python -m pytest -q --color=no -p no:cacheprovider -rfp infra/aws/lambda/ticket_center/tests/test_cross_firm_profile_scope.py
+FAILED test_cross_firm_no_marker_no_list_refused       -- (200, {'count': 3, ...}) == (403, {'error': 'firm scope not configured'})
+FAILED test_cross_firm_empty_list_refused              -- (200, {'count': 3, ...}) == (403, {'error': 'firm scope not configured'})
+FAILED test_cross_firm_marker_not_bool_true_refused    -- ("scope_all_firms='true'", 200, {'count': 3, ...}) == (403, {'error': 'firm scope not configured'})
+FAILED test_cross_firm_list_and_marker_both_malformed  -- (200, {'count': 1, ...}) == (403, {'error': 'firm scope malformed'})
+FAILED test_cross_firm_marker_reads_every_firm_and_unmarked_row_refused -- ('unmarked row', 200, {'count': 3, ...}) == (403, {'error': 'firm scope not configured'})
+PASSED test_cross_firm_non_list_allowed_firms_malformed   -- control: base already refuses non-list values malformed
+PASSED test_cross_firm_non_empty_list_reads_listed_firm_only -- control: a non-empty list reads firm-a only
+5 failed, 2 passed in 0.92s
+rc=1
