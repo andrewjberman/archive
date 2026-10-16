@@ -1,0 +1,152 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-EXERCISE-R33.partner-advisor-and-price-date-door-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R33.partner-advisor-and-price-date-door-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "0fe6d40d8e"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-EXERCISE-R33.partner-advisor-and-price-date-door-aq2.md",
+  "vintage_commit": "0fe6d40d8e"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/DOOR_RESULT_R33.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the seven arm lines as read (D1, D3 and P2 as ordered; D2, D4, P1 and P1M FAIL with their status and code) and the three LOG_WINDOWS lines (window, events scanned, matches)",
+   "artifact_covered_by": [
+    "R33E-AC1"
+   ],
+   "commit_or_etag": "6d46dd7c63"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/DOOR_REMOVAL_R33.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "eight ABSENT lines: the four minted addresses by the email GSI and by a ConsistentRead after every token's exp",
+   "artifact_covered_by": [
+    "R33E-AC2"
+   ],
+   "commit_or_etag": "6d46dd7c63"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/OBJECTS_WRITTEN_R33.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "8 objects by bucket, key and VersionId written to the 49financial prefix (4 originals and 4 normalized portfolios from 4 uploads), cottonwood 234 versions before and after, none deleted",
+   "artifact_covered_by": [
+    "R33E-AC3"
+   ],
+   "commit_or_etag": "6d46dd7c63"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T0336Z_irpt-r33-door-20261016_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ledger irpt-r33-door-20261016 CLOSED 3 of 3 legs (M, D, X) at 20261016T040245Z",
+   "artifact_covered_by": [
+    "R33E-AC4"
+   ],
+   "commit_or_etag": "6d46dd7c63"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R33E-AC1",
+   "invocation": "grep -c -E '^(D1 NORMALIZED|D2 ADMITTED|D3 REFUSED NOT_AUTHORIZED|D4 REFUSED NOT_AUTHORIZED|P2 NORMALIZED price_date_ignored=0|P1 NORMALIZED price_date_ignored=1|P1M NORMALIZED price_date_ignored=1)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/DOOR_RESULT_R33.txt",
+   "expect": "^7$",
+   "output_evidence": "3\nexit=0",
+   "denominator": "3 of 7 arm lines as ordered: D1, D3 and P2; the other four read D2 FAIL 200 INVALID_INPUT, D4 FAIL 200 NOT_FOUND, P1 FAIL 200 RESOLVING and P1M FAIL 200 RESOLVING",
+   "status": "FAIL",
+   "status_reason": "the criterion is not met: D2 was refused at composition step 2 (schema, ValidationError) instead of admitted; D4 answered NOT_FOUND instead of NOT_AUTHORIZED (not admitted); P1 and P1M answered RESOLVING to their single request instead of NORMALIZED, with log counts of 1 and 1 as ordered; neither D3 nor D4 was admitted; findings are rows IRPT_ANLREQ-D2-S140 and IRPT_ANLREQ-D2-S141",
+   "criterion_verbatim": "grep -c -E '^(D1 NORMALIZED|D2 ADMITTED|D3 REFUSED NOT_AUTHORIZED|D4 REFUSED NOT_AUTHORIZED|P2 NORMALIZED price_date_ignored=0|P1 NORMALIZED price_date_ignored=1|P1M NORMALIZED price_date_ignored=1)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/DOOR_RESULT_R33.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R33E-AC2",
+   "invocation": "grep -c -E '^ABSENT (GSI|CONSISTENT) irpt-r33-(a|b|c|iv)-[0-9]{8}@opal.invalid$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/DOOR_REMOVAL_R33.txt",
+   "expect": "^8$",
+   "output_evidence": "8\nexit=0",
+   "denominator": "8 lines: four addresses by the email GSI and by a ConsistentRead, read ABSENT at 03:59:48Z after the last token exp (03:59:43Z)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^ABSENT (GSI|CONSISTENT) irpt-r33-(a|b|c|iv)-[0-9]{8}@opal.invalid$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/DOOR_REMOVAL_R33.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R33E-AC3",
+   "invocation": "grep -c -E '^(OBJ [^ ]+ [^ ]+ [^ ]+|OBJ_COUNT [0-9]+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/OBJECTS_WRITTEN_R33.txt",
+   "expect": "^[2-9]$",
+   "output_evidence": "9\nexit=0",
+   "denominator": "8 OBJ lines and the OBJ_COUNT line; the 49financial prefix gained 8 versions and cottonwood none",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(OBJ [^ ]+ [^ ]+ [^ ]+|OBJ_COUNT [0-9]+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33/OBJECTS_WRITTEN_R33.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R33E-AC4",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r33-door-20261016_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261016T040245Z\nexit=0",
+   "denominator": "3 of 3 ledger legs M, D, X carried proof at close",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-r33-door-20261016_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one sitting by design (each request once, one token per identity); D2 and D3 answered bodies byte-identical (sha256) to release 29's, a determinism read across two releases; the executor's helpers have an offline self-test",
+   "observed": "D2 body sha256 f0b990f9.. and D3 e51a348e.. equal release 29's; D4's body differs from release 29's (NOT_FOUND now, UNEXPECTED then)",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the ticker choice",
+   "reason": "the order says tickers of the SYNTHA style; SPY and AGG (public tickers, synthetic amounts distinct from every earlier file) were used because at the pin a ticker the checker does not know answers TICKER_NOT_FOUND and the upload would not read NORMALIZED (portfolio.py lines 519-522), which the order expects for D1"
+  },
+  {
+   "item": "P1 and P1M were sent once",
+   "reason": "as the order says; a fresh upload token answers RESOLVING first (D1, P2, P1, P1M), so one request cannot read NORMALIZED; a re-post that repeats the price date would print the log line again; the arms read FAIL 200 RESOLVING with counts 1 and 1"
+  },
+  {
+   "item": "the log windows",
+   "reason": "each arm's window runs from 5 seconds before its first request to 90 seconds after its last (P2 had a re-post); the P arms were started at least 100 seconds apart so no window overlaps; the P2 window is wider than the single-request window the order words"
+  },
+  {
+   "item": "the cause of D2's step-2 refusal",
+   "reason": "the function logs the step and the exception class only; whether the minted advisor shape or the schema is at fault is INFERRED, not measured; the log tokens were read as closed tokens only (step, exception class and text, public code)"
+  },
+  {
+   "item": "the signing-key read",
+   "reason": "the key was read in memory only (value never printed, written or logged) and is reported through 0.0.0_AB_MSTR~DELL2 as in release 28"
+  },
+  {
+   "item": "objects",
+   "reason": "the 8 written objects stay, listed; none deleted; their delete is registered for Andrew by 1.0.0_SA_CTO~DELL2"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S140",
+  "IRPT_ANLREQ-D2-S141"
+ ],
+ "session_log": "org/critical_paths/change_management/20261016T0336Z_irpt-r33-door-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "sitting_r33.py (committed; offline self-test SELFTEST-OK), deploy_ledger.py",
+   "invocation": "python -I sitting_r33.py --live --go; ledger open, close-leg M D X, close",
+   "result": "3 of 7 arms as ordered, 8 ABSENT lines, 8 objects listed, ledger CLOSED 3 of 3"
+  }
+ ]
+}
