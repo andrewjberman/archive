@@ -1,12 +1,15 @@
 Session log -- 0.9.0_WK_NFRA_OPLGTW~125 on NFRA_OPLGTW.TO-OG-en-12 (worktree C:/tmp/wk-oplgtw-125, branch wk-NFRA_OPLGTW-125)
 
 1. TREE-OK: branch wk-NFRA_OPLGTW-125; org/ and .tools/ present.
-2. Baseline (before the change, same tree): python -m pytest over tests/test_og_ch1, test_og_cl1..cl7, test_og_en4, test_blackdiamond:
-   65 passed, 3 failed. Failed at base: test_og_ch1::test_ogch1_ac02 (order-dependent), test_og_ch1::test_ogch1_ac04 (roster file absent), test_blackdiamond::test_mx_t13_catalog_gated (catalog file absent).
-3. Change (commit e3b32e3789): client_core.py (address rows, _row_for, prefix, _scope, list_partitions, read_rows, flat and folder layouts), client_role.py (role_key -live suffix, is_live, LiveRoleUnset, client_for live flag), tests/test_og_en12.py (five named tests).
-   Mid-change: test_og_cl1::test_ogcl1_ac04 failed on a one-argument client_for stub and on a literal 'opal-data' in a comment; both fixed in the product code (the non-live call keeps its one-argument form; the comment no longer types the bucket). No test was weakened and no existing test was edited.
-4. After the change: test_og_en12.py 5 passed; the related set 69 passed, 4 failed. New failure vs base: test_og_ch1::test_ogch1_ac03 (line 170 pins the old -live key; file outside the grant; row S1 BLOCKING ARMED). Other failures are the base ones.
-   Full tests/test_og_*.py run: 254 passed, 5 failed (ch1 ac03 new; ch1 ac04, mu1 ac01 and ac02, test_blackdiamond catalog gated are missing-input failures, rows S5).
-5. Rows S1-S5 committed at 63644e2ec1 (surprise-row-gate OK: 5 new rows of 961).
-6. AC1: _named.sh tests/test_og_en12.py test_ogen12_ac01..ac05 -> pytest rc=0; named tests passed 5 of 5; failed/error lines 0; RESULT: PASS; exit=0 (twice).
-7. AC2: _wkbound.sh 0.9.0_WK_NFRA_OPLGTW~125 ... -> files touched 4; product files 3; outside the allowed set 0 (want 0); RESULT: PASS; exit=0.
+2. Baseline (before the change, b758457a14): tests/test_og_ch1, test_og_cl1..cl7, test_og_en4, test_blackdiamond: 65 passed, 3 failed (ch1 ac02 order-dependent, ch1 ac04 roster file absent, blackdiamond catalog gated: catalog file absent).
+3. Change (commit e3b32e3789): client_core.py, client_role.py, tests/test_og_en12.py (five named tests).
+   Mid-change fixes in product code: client_for keeps the one-argument call for non-live reads (test_og_cl1 stubs take one argument); a comment no longer types the bucket (test_og_cl1 ac04 scans client_core.py text). No existing test edited.
+4. Row commit 63644e2ec1: rows S1-S5 (surprise-row-gate OK, 5 new of 961).
+5. Amendment A1 (issuer commit fbba99d1ba, on this branch): test_og_ch1.py is in the grant; S1 disarmed, S4 accepted.
+6. Commit 751be0e202: test_og_ch1.py line 170 now asserts role_key("blackdiamond", "49f-live") == "blackdiamond49flive" (one assertion; comment extended). Nothing else in the file changed.
+7. Runs after 751be0e202:
+   - AC1 _named.sh tests/test_og_en12.py test_ogen12_ac01..ac05: pytest rc=0; named tests passed 5 of 5; failed/error lines 0; RESULT: PASS; exit=0 (run twice, identical).
+   - AC2 _wkbound.sh 0.9.0_WK_NFRA_OPLGTW~125 (amended regex with ch[0-9]+): files touched 9; product files 4; outside the allowed set 0 (want 0); RESULT: PASS; exit=0.
+   - Mutant (deliverables/og_en12_mutant_fallback.py, -p, PYTHONPATH=deliverables folder): test_ogen12_ac03 FAILED; ac01, ac02, ac04, ac05 PASSED; 1 failed, 4 passed.
+   - tests/test_og_ch1 + cl1..cl7 + en4 + en12 + test_blackdiamond: 70 passed, 3 failed: test_ogch1_ac02 (order-dependent, base), test_ogch1_ac04 (roster file absent, base), test_mx_t13_catalog_gated (catalog file absent, base). test_ogch1_ac03 now PASSES.
+   - Full tests/test_og_*.py + test_blackdiamond + test_firm_catalog_visibility: 255 passed, 4 failed: ch1 ac04, mu1 ac01 and ac02 (intake.py absent), blackdiamond catalog gated. All four are missing-input failures in this sparse checkout; none is new.
