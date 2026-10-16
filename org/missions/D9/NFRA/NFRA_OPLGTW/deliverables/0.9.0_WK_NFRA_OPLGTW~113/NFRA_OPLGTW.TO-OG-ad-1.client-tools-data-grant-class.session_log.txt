@@ -1,0 +1,19 @@
+NFRA_OPLGTW.TO-OG-ad-1 -- session log -- 0.9.0_WK_NFRA_OPLGTW~113 -- worktree C:/tmp/wk-oplgtw-113, branch wk-NFRA_OPLGTW-113, base 397cbfe4c6
+
+1. Re-ground. Branch wk-NFRA_OPLGTW-113; TREE-OK. The worker face (sections 1 to 5) was read; the record face was not used.
+
+2. Baseline before any change: the entitlement suites (family, admin, bd2, bd3, guard, hv1, sh1, ab1_carry) gave one failure, test_ogz1_ac08 (the route-class pin missing three routes), which is not an entitlement assertion and predates this order.
+
+3. The change, app/data_entitlement.py (commit 0a18a57a24): the five client_* tools leave NATIVE_TOOLS for CLIENT_TOOLS, classified legacy in the TOOL_CLASSES union; DATA_GRANT_TOOLS and TIER_ADMITTED_TOOLS take CLIENT_TOOLS; the comments name the five and cite the order.
+
+4. Tests: tests/test_og_ad1.py, five named tests (ac01 to ac05). ac04 sets the standard principal's tier as OG-bd-2 does (WRITE_CAPABLE_PRINCIPALS), since the default tier is read_only. All five pass.
+
+5. Pin updates named as required: tests/test_data_entitlement_family.py, the non-data pin 113 -> 108 (the assertion and its two comments), and test_ogpf1_ac04's family pin, which follows the new truth (the frozenset gains CLIENT_TOOLS; 6 -> 11).
+
+6. Not updated, named (see the surprise rows): tests/test_entitlement_admin.py test_ogz2_ac08 (the 122 registered count; S8, BLOCKING; the file is named do-not-change); tests/test_data_entitlement_guard.py test_ogz1_ac06, ac07, ac11 (NATIVE membership pins; S9, BLOCKING; outside this order's grant).
+
+7. AC1 (ad1.AC1.sh): in DATA_GRANT_TOOLS 5 of 5; in TIER_ADMITTED_TOOLS 5 of 5; in NATIVE_TOOLS 0; classified 5 of 5; unprofiled standard denied 5 of 5; read_only denied 5 of 5; master_admin passes 5 of 5; RESULT: PASS.
+
+8. AC2 (ad1.AC2.sh): named tests 5 of 5 PASS; entitlement suites pytest rc=1, passed 18, failed 1 (test_ogz2_ac08, assert 117 == 122). RESULT: FAIL. The order stays pending.
+
+9. Full gateway directory on the committed tree: 63 failed, 1012 passed (S10). test_ogpf1_ac01 passes alone and fails after test_schwab_wiring.py; the remaining failures are in unrelated modules. A HEAD baseline of the full directory was not run.
