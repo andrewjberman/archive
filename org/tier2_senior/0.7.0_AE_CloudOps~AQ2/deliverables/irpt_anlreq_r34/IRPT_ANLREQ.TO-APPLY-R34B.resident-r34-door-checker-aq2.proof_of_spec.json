@@ -18,7 +18,7 @@
    "path_or_key": "host i-0167fd745ad906a66: /opt/irpt-resident/0485393f3a-r34 (running root of irpt-analysis-resident.service)",
    "kind": "aws_resource",
    "deployed_state": "STAGED-AWAITING-GATE",
-   "deploy_evidence": "INSTALLED AND RUNNING on the host (the schema has no installed-but-unverified value, so STAGED-AWAITING-GATE is used: the gate awaited is V2, which needs the yfinance library); SSM install 36162a8a-8294-4e38-999d-93f473ac9573 Success rc 0, host script rc 0, no rollback; V1 green (10 of 10 members MATCH, sums 0 of 313 not OK, census 8 changed 4 added 0 removed, pool pinned, pricing off, producer list unchanged, queue 0 0, no sign-in); V2 FAILED (yfinance not installed on the host), so the release is not fully verified and the ledger stays OPEN",
+   "deploy_evidence": "ROLLED BACK at 05:06Z (CTO msg 9070, the issuer's step 9): the r34 root is KEPT on the host but is NOT running; the resident runs r32 again (read back twice: running root r32 active restarts 0, 10 of 10 members at their P1 values, queue 0 0); STAGED-AWAITING-GATE is the nearest schema value (the gate awaited is V2, which needs the yfinance library); the install itself: SSM install 36162a8a-8294-4e38-999d-93f473ac9573 Success rc 0, host script rc 0, no rollback; V1 green (10 of 10 members MATCH, sums 0 of 313 not OK, census 8 changed 4 added 0 removed, pool pinned, pricing off, producer list unchanged, queue 0 0, no sign-in); V2 FAILED (yfinance not installed on the host), so the release is not fully verified and the ledger stays OPEN",
    "artifact_covered_by": [
     "R34B-AC1"
    ],
@@ -62,9 +62,9 @@
    "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-r34-20261016_deploy_completion.md",
    "expect": "^\\*\\*Status:\\*\\* CLOSED",
    "output_evidence": "**Status:** OPEN\nexit=0",
-   "denominator": "4 of 5 ledger legs (P1, D1, D2, V1) carry proof; leg V2 is open because V2 failed",
+   "denominator": "4 of 5 ledger legs (P1, D1, D2, V1) carry proof of a passing read; leg V2 carries the failure read and the rollback as its proof text",
    "status": "FAIL",
-   "status_reason": "the ledger irpt-resident-r34-20261016 is deliberately left OPEN: the order closes it only if V2 passed (step 8) and the CTO's added STOP requires it open on a V2 failure; the release stays installed and running",
+   "status_reason": "the ledger irpt-resident-r34-20261016 reads ROLLED-BACK, not CLOSED: step 9 (amendment 1) closes it as ROLLED-BACK after the rollback and says this criterion is not expected to read its line; V1 was proven, V2 failed, the release is rolled back to r32",
    "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-r34-20261016_deploy_completion.md",
    "method": "command"
   }
@@ -104,8 +104,12 @@
    "reason": "counted (r32 634, r34 633) and not diffed"
   },
   {
-   "item": "rollback",
-   "reason": "not run: the order and the CTO leave it to the issuer's order; the r32 root and the kept library copy remain on the host"
+   "item": "the rollback",
+   "reason": "run on the issuer's order (step 9, CTO msg 9070): rollback_r34.sh rc 0, read back by the script and by an independent read-only script; the r34 root, the r32 root, the receipt copies and the three r34 S3 objects stay (nothing deleted)"
+  },
+  {
+   "item": "the ledger status line",
+   "reason": "the ledger tool's close writes CLOSED; the Status line was set to ROLLED-BACK by hand because the order asks for that closure text and the tool has no rolled-back close"
   }
  ],
  "surprises": [

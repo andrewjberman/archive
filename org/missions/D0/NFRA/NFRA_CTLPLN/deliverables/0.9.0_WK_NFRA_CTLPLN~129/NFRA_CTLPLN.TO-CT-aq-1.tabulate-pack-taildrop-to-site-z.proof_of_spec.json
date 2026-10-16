@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aq-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aq-1.tabulate-pack-taildrop-to-site-z.md",
+    "group": "OTHER",
+    "vintage_commit": "22d4a89963"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~129",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round27.md",
+    "vintage_commit": "22d4a89963",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aq-1.tabulate-pack-taildrop-to-site-z.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/records/intake-20261016-tabulate/TAILDROP_RECORD_SITEZ.md",
+      "kind": "doc",
+      "commit_or_etag": "f4d8f26863",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Taildrop send log to site Z (sitez): four tailscale file cp sitez: calls, each once, each exit code 0, at 2026-10-16T05:05:26Z, 05:05:44Z, 05:06:07Z and 05:06:26Z (UTC, after each command). Names, bytes and SHA-256 of the four files only; no file content. The pre-send record (names, bytes, SHA-256, written before any send) is committed in 810823cb02; the send log is committed in f4d8f26863. Delivery NOT proven: a Taildrop has no read receipt; site Z's own tailscale file get and intake_receive.py verify are the proof, asked of site Z's CTO. No install and no deploy.",
+      "artifact_covered_by": [
+        "CTaq1-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round25_journey_record.py",
+      "kind": "test",
+      "commit_or_etag": "af1ad26e99",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only test; --taildrop-sitez added beside --taildrop, which is unchanged. --taildrop-sitez reads only TAILDROP_RECORD_SITEZ.md for its send rows and file table (the pack folder is read for SHA-256 only) and never calls Tailscale. ok requires four send rows, each exit 0, each to sitez:, each naming one pack file once, distinct commands, and the record's SHA-256 of each file equal to the pack file on disk. Two in-code mutants (nonzero_exit_row, other_device_row) must read held=True. Committed in af1ad26e99; no deploy.",
+      "artifact_covered_by": [
+        "CTaq1-AC1",
+        "CTaq1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "fc5922a03e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row, NFRA_CTLPLN-W129-S1 (the cell says the existing --taildrop flag carries two mutant cases; in code it carries none; the site Z flag carries its own). Gate: surprise-row-gate OK, 1 new row of 466 checked. Committed in fc5922a03e; no deploy.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaq1-AC1",
+      "criterion_verbatim": "all four files were sent to site Z by Taildrop, each exit code recorded and each SHA-256 equal to the pack's file on disk (base: the flag does not exist); report the whole line and the record.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round25_journey_record.py --taildrop-sitez",
+      "output_evidence": "JOURNEY-TAILDROP-SITEZ files_sent=4 failed=0 target=sitez ok=True (run from the worktree root under timeout 280 on the committed state at af1ad26e99 with the record at f4d8f26863). Mutant lines: JOURNEY-TAILDROP-SITEZ-MUTANT case=nonzero_exit_row ok=False expected=False held=True; JOURNEY-TAILDROP-SITEZ-MUTANT case=other_device_row ok=False expected=False held=True. Detail: JOURNEY-TAILDROP-SITEZ-DETAIL record=TAILDROP_RECORD_SITEZ.md rows=4 files_rows=4 exit_codes=['0', '0', '0', '0'] to_sitez=True distinct_commands=True names_once=True shas_equal_pack_on_disk=True pack_files_on_disk=4 mutants_held=True. The sends were four calls, one per file, each once, in the form tailscale file cp \"C:\\Users\\AndrewBerman\\tdrop\\out\\intake-20261016-tabulate\\<name>\" sitez: with the names MANIFEST.json, tabulate-0.9.0-py3-none-any.whl, tabulate-0.9.0-py3-none-any.whl.check.json and tabulate-0.9.0-py3-none-any.whl.delivery.txt; exit codes 0, 0, 0, 0 at 2026-10-16T05:05:26Z, 05:05:44Z, 05:06:07Z and 05:06:26Z. sitez was listed, not offline, and a Taildrop target in tailscale status and tailscale file cp --targets at 2026-10-16T04:53:11Z. No re-send. Delivery is NOT proven by this criterion: a Taildrop has no read receipt.",
+      "denominator": "4 of 4 files sent (exit 0); 0 failed; 4 of 4 send rows name a distinct pack file to sitez:; 4 of 4 file rows SHA-256 equal to the pack file on disk; 2 of 2 in-code mutants held",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaq1-AC2",
+      "criterion_verbatim": "the pack is unchanged after the send: 4 files and verify reads wheels=1 verified=1 checked=1 stray=0 ok=True (a control that holds at the base and after); report the whole line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round25_journey_record.py --pack",
+      "output_evidence": "JOURNEY-PACK files=4 manifest_ok=True verify=INTAKE-VERIFY pack=intake-20261016-tabulate wheels=1 verified=1 checked=1 stray=0 ok=True ok=True (run from the worktree root under timeout 280 on the committed state at af1ad26e99, after the four sends). Detail: JOURNEY-PACK-DETAIL pack=intake-20261016-tabulate names=['MANIFEST.json', 'tabulate-0.9.0-py3-none-any.whl', 'tabulate-0.9.0-py3-none-any.whl.check.json', 'tabulate-0.9.0-py3-none-any.whl.delivery.txt'] names_exact=True verify_rc=0. Base: the same verify was run once before the sends as AGENTBUS_DEVICE=laptop python org/devices/intake/intake_receive.py verify --from \"$HOME/tdrop/out/intake-20261016-tabulate\", last line INTAKE-VERIFY pack=intake-20261016-tabulate wheels=1 verified=1 checked=1 stray=0 ok=True, rc 0. The pack file sizes were the same before and after the sends (638, 35252, 7477, 1666 bytes), and the SHA-256 values pinned in TAILDROP_RECORD_SITEZ.md before the sends equal the files read from disk after them (shas_equal_pack_on_disk=True in the CT-aq-1 criterion). Prove and install were not run.",
+      "denominator": "4 of 4 pack files named exactly; verify wheels=1 verified=1 checked=1 stray=0 (4 of 4 counters as expected) at the base and after; 1 of 1 manifest entry matches the wheel, check record and delivery text",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-code mutants of --taildrop-sitez, built in memory from the real record and never written to disk: (1) nonzero_exit_row: the first send row's exit code set to 1; (2) other_device_row: the first send row retargeted from sitez: to dell1:. The real TAILDROP_RECORD_SITEZ.md is not altered.",
+      "expected": "each mutant reads ok=False (held=True); the real record reads ok=True",
+      "observed": "JOURNEY-TAILDROP-SITEZ-MUTANT case=nonzero_exit_row ok=False expected=False held=True; JOURNEY-TAILDROP-SITEZ-MUTANT case=other_device_row ok=False expected=False held=True; JOURNEY-TAILDROP-SITEZ files_sent=4 failed=0 target=sitez ok=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each new flag run twice on the committed state at af1ad26e99 by this worker (same command, timeout 280); the two outputs compared with diff; outputs kept in the worktree scratch folder",
+      "observed": "--taildrop-sitez: first and second run identical (diff empty, 4 lines each); --pack: first and second run identical (diff empty, 2 lines each)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W129-S1"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~129/NFRA_CTLPLN.TO-CT-aq-1.tabulate-pack-taildrop-to-site-z.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~129 on 2026-10-16; the session's final message is the WORKER REPORT). The sparse set gained .claude/skills/tdrop, as the cell instructed. One stray file, C:/Users/AndrewBerman/.. created by a mistyped redirect in a status check, was removed in the same session; it was outside the worktree and no commit carries it.",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round25_journey_record.py --taildrop-sitez",
+      "result": "JOURNEY-TAILDROP-SITEZ files_sent=4 failed=0 target=sitez ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round25_journey_record.py --pack",
+      "result": "JOURNEY-PACK files=4 manifest_ok=True verify=INTAKE-VERIFY pack=intake-20261016-tabulate wheels=1 verified=1 checked=1 stray=0 ok=True ok=True"
+    }
+  ]
+}
