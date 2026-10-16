@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-1302",
+  "genre": "BUILD",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4fd78cac82"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R127_F.md",
+    "vintage_commit": "ac575c7ad2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-1302.fwd5-49-financial-account-transaction-producer-offline-tests-not-wired.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~1302",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1302/IRPT_DASHBD.TO-DB-f-1302.fwd5-49-financial-account-transaction-producer-offline-tests-not-wired.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_transaction.py",
+      "kind": "script",
+      "commit_or_etag": "255a5b0086",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The producer: TABLE_TRANSACTION, the 17-column ARROW_SCHEMA with nullability, load_words, supported_firm and custodian read through account_return_daily from the sources.json custody entry, normalize_trn, check_transaction_rows, emit_transaction_day (upload=False makes no s3 call). Imported by nothing; not wired. Committed on the worktree branch wk-IRPT_DASHBD-1302 in 255a5b0086; not pushed."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_account_transaction.py",
+      "kind": "test",
+      "commit_or_etag": "255a5b0086",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "23 offline tests, synthetic made-up accounts and symbols, one stub client that fails on any call; the census test reads the round-124 code counts only. pytest: 23 passed in the run before the commit and after the mutant revert. Committed in 255a5b0086."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "255a5b0086",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended as bytes: IRPT_DASHBD-D2-W1302-S1 to S5, class OBSERVATION, hazard INERT. Committed in 255a5b0086; surprise-row-gate OK on the five new rows."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF127-2-AC1",
+      "criterion_verbatim": "DBF127-2-AC1 -- tests/test_account_transaction.py has test function names containing the eight words mapping, unmapped, new code, flow, action, absent, schema, vocabulary (underscores read as spaces), and python -m pytest on it passes with 0 failures, 0 errors and at least 14 tests. Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r127/p127_producer.py\" . DBF127-2-AC1",
+      "output_evidence": "DBF127-2-AC1 PASS (rc 0; run 1 and run 2 after the commit, both PASS rc 0). The checker's pytest run on tests/test_account_transaction.py: 23 passed, 0 failed, 0 errors; the eight title words are all present in the test names.",
+      "denominator": "1 of 1 criterion; 23 of 23 tests pass (14 required); 8 of 8 title words present",
+      "status": "PASS",
+      "expect": "DBF127-2-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DBF127-2-AC2",
+      "criterion_verbatim": "DBF127-2-AC2 -- the producer against the contract, run by the checker: ARROW_SCHEMA's field names are the contract's 17 columns in order and its name:type lines hash to the contract's schema_hash; TABLE_TRANSACTION is account_transaction; load_words() equals the contract's mapping and type_action; normalize_trn on a three-row frame (a mapped code, a code the table maps to UNMAPPED, a code the mapping lacks) returns three rows with the contract's keys in order, the four absent columns None, the mapped row's word, action, flow class and MEASURED, the table-UNMAPPED row UNMAPPED_BY_TABLE with its flow class, and the unseen row UNMAPPED, UNRESOLVED, CODE_NOT_IN_MAPPING and a None action; and check_transaction_rows accepts those rows and refuses a word outside the vocabulary. Base: FAIL (no producer).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r127/p127_producer.py\" . DBF127-2-AC2",
+      "output_evidence": "DBF127-2-AC2 PASS (rc 0; run 1 and run 2 after the commit, both PASS rc 0). The checker recomputes the schema hash over the 17 name:type lines and it equals the contract's schema_hash; load_words equals the contract's mapping and type_action; the three-row smoke frame returns three rows with the contract's keys in order, the absent columns None, and the three coverage and flow outcomes the criterion names; check_transaction_rows refuses a word outside the vocabulary.",
+      "denominator": "1 of 1 criterion; 17 of 17 columns in order; 3 of 3 smoke rows; 4 of 4 absent columns None; 1 of 1 refusal arm",
+      "status": "PASS",
+      "expect": "DBF127-2-AC2 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Temporary edit: a code the mapping lacks (coverage CODE_NOT_IN_MAPPING) is forced to MEASURED in account_transaction.py; the edit was reverted and a grep for the mutant marker returned 0.",
+      "expected": "at least one test in test_account_transaction.py fails",
+      "observed": "pytest test_account_transaction.py: 2 failed, 21 passed; the failures are test_new_code_is_unmapped_unresolved_code_not_in_mapping_and_counted and test_new_code_rows_in_equal_rows_out_in_input_order. After the revert both files pass: 48 passed (23 + 25).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each criterion (DBF127-2-AC1 and DBF127-2-AC2) and the checker --selftest, on the commit 255a5b0086; the PASS line and rc compared",
+      "observed": "AC1 run 1 PASS rc 0; AC1 run 2 PASS rc 0; AC2 run 1 PASS rc 0; AC2 run 2 PASS rc 0; --selftest PASS (7 arms) rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wiring into reporting-gold/handler.py, any Terraform, the new gold prefix, any S3 read or write, and any upload=True call.",
+      "reason": "Out of this cell by the order's BOUNDS: the module is not wired and is never run against S3. The contract's served flag is false; serving is a later never-widen release."
+    },
+    {
+      "item": "Cottonwood and Inflection transaction rows.",
+      "reason": "Not in this order. The producer serves the registry-derived 49 Financial scope only and refuses any other firm."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W1302-S1: OBSERVATION, INERT. The worker face's four materialized folders do not cover the existing class test's imports; data/assets/scripts/lib and infra/aws/lambda/v2_portal/_shared were added by git sparse-checkout add and the gate then passed 25 of 25.",
+    "IRPT_DASHBD-D2-W1302-S2: OBSERVATION, INERT. The contract's cash-sign rule needs tr_cd, which the order's column list omits; the normaliser requires it and refuses a frame without it (the contract shape wins under the refusal clause).",
+    "IRPT_DASHBD-D2-W1302-S3: OBSERVATION, INERT. The firm literal is not typed in the module; the supported firm is derived from the declaration's registry key, which resolves to the same value.",
+    "IRPT_DASHBD-D2-W1302-S4: OBSERVATION, INERT. The contract gives no amount sign for a security trade leg (tr_cd TR); the producer carries gross_amount unsigned on every non-FC row.",
+    "IRPT_DASHBD-D2-W1302-S5: OBSERVATION, INERT. Four mapping rows pair a word with a flow class of another kind (INTR, SO, GUP, DFRAJ); the producer copies the mapping as stated."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p127_producer.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r127/p127_producer.py\" . DBF127-2-AC1 and the same with DBF127-2-AC2; python -I <checker> --selftest",
+      "result": "DBF127-2-AC1 PASS rc 0; DBF127-2-AC2 PASS rc 0; --selftest PASS (7 arms) rc 0; two runs of each criterion, all PASS rc 0."
+    }
+  ]
+}

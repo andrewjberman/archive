@@ -36,3 +36,16 @@ at commit `db78445db3`, blob `64884b3338965c79a962c3f40cdb5cde44ad5811`, sha256 
 5. The DLQ message of window 2 stays untouched. The run drives portal DEV at or after `f7eb6b14` from a private worktree on port 5174.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## AMENDMENT 1 (the re-pin), SIGNED 2026-10-16 ~06:5xZ
+
+**COO half:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM3_AMENDMENT1_REPIN_COO_HALF.md`,
+blob `7a4e8735155f871b8f8573d0d4d0f3cc63704bec`, sha256 `52430487da67ad423e456dae6cd61fde1f077fa53458ee0a34fd742d89b11f55` (re-measured).
+
+**SIGNED.** It replaces ONLY R0d and R0e:
+- **R0d:** `irpt-ycharts-generate` stays at r33 `kxOEgpbs...`; `irpt-status` moves to r35L `+TcZDWmw...` (live, AQ2 msg 9129).
+- **R0e:** the resident root `0485393f3a-r34c` from the R34D tar `272d5c54...2ff8` (packet blob `6feb7b728c`, signed @b249e74f7a), with the hard
+  gate: the closure pair installed first, V2 SPY KEPT, V3 UpdateItem allowed.
+
+W7, W8 and every other term and condition of ADDENDUM 3 and of this half stand unchanged. The earlier blob b778d4072e was never signed.
+
