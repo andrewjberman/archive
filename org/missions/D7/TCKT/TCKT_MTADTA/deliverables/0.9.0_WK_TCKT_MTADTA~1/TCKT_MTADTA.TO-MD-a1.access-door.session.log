@@ -1,0 +1,29 @@
+TCKT_MTADTA.TO-MD-a1 -- worker session log, 0.9.0_WK_TCKT_MTADTA~1, worktree C:/tmp/wk-tckt-mtadta-1 (branch wk-TCKT_MTADTA-1), 2026-10-16
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-TCKT_MTADTA-1 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+Coordinator message: TO-MD-h1 merged at issuer commit 77716ab496. git merge-base --is-ancestor 77716ab496 HEAD -> not an ancestor (HEAD 7ffa70368d). Not merged here (surprise TCKT_MTADTA-D1-W1-S5).
+
+Builder names (lib/opal_naming.py name(), grade() CONFORMANT):
+  name('globgrph', None, 'trino-access', 'group')   -> globgrph-trino-access-group
+  name('globgrph', None, 'trino-access', 'role')    -> globgrph-trino-access-role
+  name('globgrph', None, 'trino-access', 'lambda')  -> globgrph-trino-access-lambda
+  name('globgrph', None, 'trino-access', 'policy')  -> globgrph-trino-access-policy
+  name('globgrph', None, 'trino-invoke', 'policy')  -> globgrph-trino-invoke-policy
+  grade('/aws/lambda/globgrph-trino-access-lambda', 'LOG_GROUP') -> CONFORMANT
+
+Baseline: timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_a1.py handler -> A1-HANDLER-REFUSED no handler.py ; ... tf -> A1-TF-REFUSED no access.tf
+
+Build:
+  handler.py (door contract), tests/test_handler.py (20 tests), access.tf, build.sh (chmod +x).
+  timeout 120 python -m pytest infra/aws/lambda/globgrph-trino-access/tests -p no:cacheprovider -q -> 20 passed in 0.04s
+  timeout 120 bash infra/aws/lambda/globgrph-trino-access/build.sh (silver_builder.py absent in this worktree, by design) -> cp: cannot stat .../silver_builder.py ; rc=1
+  Trial build from a scratch copy with a stub silver_builder (.scratch/build_try, not committed): built ... (2 files), zip members ['handler.py', 'silver_builder.py'], rc=0
+  timeout 120 terraform fmt -check infra/aws/terraform/trino/access.tf -> rc=3 ; terraform fmt on the file -> rc=0 ; fmt -check access.tf main.tf -> rc=0
+
+Checks:
+  timeout 120 python ... r1_check_a1.py handler -> A1-HANDLER-OK calls_logged=7 (rc=0), run twice
+  timeout 120 python ... r1_check_a1.py tf -> A1-TF-OK (rc=0), run twice
+
+Commit 9d4f20bdb8 (safe-commit, author 0.9.0_WK_TCKT_MTADTA~1): handler.py, build.sh, tests/test_handler.py, access.tf, investigation rows S5 to S7 (in 9d4f20bdb8). The naming gate, in its warn window, printed three REFUSE verdicts (handler.py:34-36, the typed tier prefixes) and one RAISE (access.tf:106, the star in an IAM object resource); it did not block. Rows S8 and S9 record them.
+
+Nothing applied. No AWS, S3, Lambda or Microsoft call. No merge, no push.
