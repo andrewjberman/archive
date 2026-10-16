@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cy-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cy-1.bloomberg-history-coverage.md",
+    "group": "OTHER",
+    "vintage_commit": "85c0226f91"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~192",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round103.md",
+    "vintage_commit": "85c0226f91",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cy-1.bloomberg-history-coverage.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~192/BBG_COVERAGE_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: primary rivalfunds security_market (14 objects, 5,696 close points, 656 security ids); coverage 0 securities and 0 of 15,973,399 unpriced holding-days; listed 3,059, came back priced 41; counts only, no account id, security id, ticker, name or value; written from scratch-read counts, read-only AWS, no Bloomberg call, no write"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "85c0226f915ed6392f3391d28b1cfbf390cba480",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row ADVI_COTBKF-D1-W192-S1 appended as LF bytes after the existing rows; git diff --numstat shows 26 added lines and 0 deleted"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB103cy1-AC1",
+      "criterion_verbatim": "`CB103cy1-AC1` -- the record states the Bloomberg objects and points in Opal's store, the unpriced securities and holding-days they cover, and how many of the listed securities came back priced, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~192/BBG_COVERAGE_RECORD.json',encoding='utf-8'));m=d['measured'];print('BBG-COVERAGE-RECORD measured=%s' % m + ((' objects=%d points=%d securities_covered=%d holding_days_covered=%d listed=%d came_back=%d' % (d['bloomberg']['objects'],d['bloomberg']['points'],d['coverage']['securities_covered'],d['coverage']['holding_days_covered'],d['listed']['listed'],d['listed']['came_back_priced'])) if m else ' reason=%s' % d['reason']))\"",
+      "output_evidence": "BBG-COVERAGE-RECORD measured=True objects=14 points=5696 securities_covered=0 holding_days_covered=0 listed=3059 came_back=41",
+      "denominator": "14 of 14 primary parquet objects; 5,696 positive close points; 656 security ids; 0 of 4,371 unpriced securities and 0 of 15,973,399 unpriced holding-days covered; 41 of 3,059 listed securities came back priced (8 never-priced, 29 gap)",
+      "status": "PASS",
+      "expect": "^BBG-COVERAGE-RECORD measured=(True objects=\\d+ points=\\d+ securities_covered=\\d+ holding_days_covered=\\d+ listed=\\d+ came_back=\\d+|False reason=.+)$"
+    },
+    {
+      "criterion_id": "CB103cy1-AC2",
+      "criterion_verbatim": "`CB103cy1-AC2` -- the issuer's script independently lists the primary location, reads only its three named columns, joins to the served unpriced holding-days and prints the same objects, points, securities covered and holding-days covered as the record (and the 15,973,399 unpriced holding-days of round 102).",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cy1_bbg_coverage_check.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~192/BBG_COVERAGE_RECORD.json",
+      "output_evidence": "BBG-COVERAGE objects=14 bbg_points=5696 bbg_cusips=656 unpriced_cusips_covered=0 unpriced_rows_covered=0 unpriced_rows=15973399 objects_equal=True points_equal=True cusips_covered_equal=True rows_covered_equal=True",
+      "denominator": "4 of 4 record keys equal the issuer's recompute (objects, points, securities covered, holding-days covered); unpriced_rows=15,973,399 matches round 102; rc 0 (timeout 120)",
+      "status": "PASS",
+      "expect": "^BBG-COVERAGE objects=\\d+ bbg_points=\\d+ bbg_cusips=\\d+ unpriced_cusips_covered=\\d+ unpriced_rows_covered=\\d+ unpriced_rows=15973399 objects_equal=True points_equal=True cusips_covered_equal=True rows_covered_equal=True$"
+    },
+    {
+      "criterion_id": "CB103cy1-AC3",
+      "criterion_verbatim": "`CB103cy1-AC3` -- the cell wrote nothing: the three served keys still carry the VersionIds the round-98 apply left.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cu1_ac3_served_unchanged_check.py",
+      "output_evidence": "SERVED-UNCHANGED versions_equal=3 of 3",
+      "denominator": "3 of 3 served keys carry the round-98 VersionIds (timeout 120, rc 0)",
+      "status": "PASS",
+      "expect": "^SERVED-UNCHANGED versions_equal=3 of 3$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the cell is a read-only measurement whose record is checked by the issuer's independent recompute (AC2)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the issuer's recompute (AC2) run against the record written from the worker's own read of the same objects",
+      "observed": "BBG-COVERAGE objects=14 bbg_points=5696 bbg_cusips=656 unpriced_cusips_covered=0 unpriced_rows_covered=0 equal to the record on all four key groups",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Bloomberg pulls, queue draws, vendor and Yahoo calls, S3 writes, filling any blank, and the FWD-3 grade",
+      "reason": "forbidden by the order: AWS reads only; no blank is filled; the CTO grades FWD-3"
+    },
+    {
+      "item": "Coverage through the ticker-keyed Bloomberg stores (bbg/ and price_history_px_last)",
+      "reason": "the issuer's script joins on CUSIP and the ticker labels have no CUSIP mapping in the tree; reported as not measured and filed as ADVI_COTBKF-D1-W192-S1"
+    },
+    {
+      "item": "A markdown companion to the record",
+      "reason": "the agent-level rule against report .md files governs; the record JSON carries the same what_this_shows and not_established content and no criterion reads a companion"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W192-S1: the primary Bloomberg close store keys 569 of its 656 security ids by non-CUSIP shapes and the two other Bloomberg close stores are keyed by ticker label, so the CUSIP coverage join reaches none of them; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~192/ADVI_COTBKF.TO-CB-cy-1.bloomberg-history-coverage.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "scratch measurement (outside the worktree, C:/Dev/ajb_workspace/.scratch/cotbkf_r103a/)",
+      "invocation": "python -I cover.py (list_objects_v2, parquet reads of the named columns, served account_day_value at its pinned VersionId)",
+      "result": "LISTS union=3059 (held_back included); SERVED unpriced_rows=15973399 unpriced_secs=4371 never=3791 gap=580; LISTED never=2354 gap=515; PRIMARY objects=14 points=5696 securities=656; CAME_BACK came_back=41; COVERAGE covered_secs=0 covered_rows=0"
+    },
+    {
+      "tool": "cy1_bbg_coverage_check.py (issuer's check, read-only)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cy1_bbg_coverage_check.py <record>",
+      "result": "rc 0: BBG-COVERAGE objects=14 bbg_points=5696 bbg_cusips=656 unpriced_cusips_covered=0 unpriced_rows_covered=0 unpriced_rows=15973399 objects_equal=True points_equal=True cusips_covered_equal=True rows_covered_equal=True"
+    }
+  ]
+}
