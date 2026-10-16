@@ -34,3 +34,14 @@ The signature above on A1's one-blob pins is SUPERSEDED. This half now binds to 
   (ANNOUNCE, Z-S126). So B's `scopes.json` equals the host's, and the host changes by the catalog alone. A1 would have
   rolled the host's copy back.
 - The widening and the BASE-MOVED clause above are unchanged.
+
+## v2 SIGNED ~11:2xZ: the re-measured catalog (COO~MI msg 34956; ask section 6 @7c325ce5ef)
+
+MX-r-15 (B) landed at 10:38:53Z. r13.AC3 failed on one stale freshness claim (yield-curve-fred `generated_at`). v2 re-measures it.
+Re-read from git:
+- **Catalog blob:** `4c27b2817148...` at trunk `58ae2c5417`.
+- **Base:** the live `deployed_commit` is `0cb4a87bcb` (B), per EC2_MANIFEST at HEAD. One file changes, and rollback is to B.
+- **Blob diff `cf7616c08e` to `4c27b28171`:** 104 lines in, 104 out, ALL freshness and depth claims (`read_at`, `value`, partition
+  counts, the build header). **No `firm`, `vendor`, `bucket` or visibility field changes**, so no new widening.
+
+This half binds to v2's pins. B's half above stands for what is live.
