@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-l-2.move-plan-cottonwood",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-2.move-plan-cottonwood.md",
+    "group": "OTHER",
+    "vintage_commit": "7ee8e70830"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~82",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R8.md",
+    "vintage_commit": "7ee8e70830",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-2.move-plan-cottonwood.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the two arms carry their own checks (the r8 plan shape grader and the r4 write-surface scope check)",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: the record is a saved read taken once at 2026-10-14T12:31Z; a second sweep would read a later live state",
+      "observed": "N/A -- no second sweep was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "Any AWS write, producer run, deploy, Terraform command, registry edit or product-file edit", "reason": "Bound (order section 2, item 1): read verbs only. Every AWS call was a list, get, describe, head or simulate, each under timeout 100 (or 120 for comp-find)."},
+    {"item": "Secret contents and the orion credential object", "reason": "Bound (order section 2, item 3): not read, not printed. Lambda environments recorded as variable names, plus bucket, region, prefix and queue values."},
+    {"item": "Object bodies and downloads", "reason": "The plan needs listing counts and head-object stamps only; no object was downloaded (the data folder holds JSON config and IAM documents only, outside the checkout)."},
+    {"item": "Judgment on whether the plan is right or complete", "reason": "Order section 4: the grader proves shape and read-only discipline; the CTO reads the plan and the issuer re-reads a sample. No verdict is recorded here on correctness."}
+  ],
+  "artifacts_produced": [
+    {"path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~82/PLAN_COTTONWOOD.json", "kind": "doc", "commit_or_etag": "bf0dc6d68a", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "read-only plan record; nothing is deployed or scheduled by it"},
+    {"path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~82/PLAN_COTTONWOOD.md", "kind": "doc", "commit_or_etag": "bf0dc6d68a", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "prose form of the same plan; nothing is deployed or scheduled by it"},
+    {"path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md", "kind": "doc", "commit_or_etag": "PENDING-THIS-COMMIT", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "six rows ADVI_FIRMBKTS-D1-W82-S1 to S6 appended; no existing row edited"}
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape and read-only discipline: expect ^PLAN: OK firm=cottonwood moves=[0-9]+ retire=[0-9]+$ (invocation: r8_checks.py plan --file PLAN_COTTONWOOD.json --firm cottonwood --min 6 --require-text opal-data-cottonwood crosswalk cot-etf-ownership-daily)",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-82 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py plan --file C:/dev/wk-firmbkts-82/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~82/PLAN_COTTONWOOD.json --firm cottonwood --min 6 --require-text opal-data-cottonwood crosswalk cot-etf-ownership-daily",
+      "output_evidence": "PLAN: OK firm=cottonwood moves=30 retire=6",
+      "denominator": "30 moves and 6 retire rows checked; rc=0; the record parses as JSON; 0 id-shaped tokens of nine or more digits; all 30 moves carry rollback, proof and evidence; decommission window_days 45",
+      "status": "PASS",
+      "expect": "^PLAN: OK firm=cottonwood moves=[0-9]+ retire=[0-9]+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound: the changed set is inside the deliverables folder and the surprise-channel investigations file, with no outside change",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-82 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-82 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~82/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing",
+      "denominator": "3 changed paths checked (PLAN_COTTONWOOD.json, PLAN_COTTONWOOD.md, INVESTIGATION_v1.md); 0 outside the allowed set; 0 required missing",
+      "status": "PASS",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "judgment": false
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W82-S1: platinum_destinations.json holds no cottonwood rows, so a routed-alias flip alone cannot move the canonical list. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "ADVI_FIRMBKTS-D1-W82-S2: edge-auth-validator-edge is marked no legacy touch, but its FIRM_CONFIG ownership read names opal-data-cot and the Lambda@Edge role grants opal-data-bd only. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "ADVI_FIRMBKTS-D1-W82-S3: opal-data-cottonwood is in no CloudTrail data-event selector; no read or write instrument on the canonical bucket. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "ADVI_FIRMBKTS-D1-W82-S4: the Cottonwood bucket-policy Deny admits only role names matching role/*-cot-*; satellites and performance-adapter roles get explicitDeny on the new home (simulate). OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "ADVI_FIRMBKTS-D1-W82-S5: the organisation trail records WriteOnly data events on all of opal-data-cot/, not only platinum/firm/ as PRD DEC-12 states. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "ADVI_FIRMBKTS-D1-W82-S6: cot-etf-ownership-daily is marked legacy no in PLANINV, but its live role grants and env still name opal-data-cot. OBSERVATION, INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~82/ADVI_FIRMBKTS.TO-FB-l-2.session.log.txt",
+  "compiler_tools": [
+    {"tool": "comp-find --corpus aws", "invocation": "comp-find --corpus aws 'opal-data-cot|opal-data-cottonwood' --limit 60", "result": "9 hits across 2929 aws nodes; vintage 2026-10-14 12:05:51 UTC"},
+    {"tool": "aws (.tools/aws shim)", "invocation": "aws s3 / s3api / events / scheduler / lambda / iam / cloudtrail / cloudfront / ssm read verbs, each under timeout 100", "result": "listing, head, get, describe, simulate only; 2 bucket policies, 2 notification configs, 4 event-selector sets, 28 Lambda configs, 18 roles, 44 inline documents, 7 simulations"},
+    {"tool": "r8_checks.py plan", "invocation": "cd C:/dev/wk-firmbkts-82 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py plan --file <PLAN_COTTONWOOD.json> --firm cottonwood --min 6 --require-text opal-data-cottonwood crosswalk cot-etf-ownership-daily", "result": "PLAN: OK firm=cottonwood moves=30 retire=6 (rc=0)"},
+    {"tool": "r4_scope.py", "invocation": "cd C:/dev/wk-firmbkts-82 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-82 --allow ... --allow ...", "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing (rc=0)"}
+  ]
+}

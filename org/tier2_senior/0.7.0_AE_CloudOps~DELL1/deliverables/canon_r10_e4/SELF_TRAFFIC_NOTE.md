@@ -16,3 +16,8 @@ Any later act of this seat on the bucket is appended below before the L3 read.
 | 2026-10-16 16:24:19-16:25:39Z | mdpf-gold-lambda qa_local invoke (the lambda's own reads of gold inputs, workbook snapshot writes) | portal/gold/*, gateway/global/* | canon_r11_muni/L4_invoke.txt |
 | 2026-10-16 16:27-16:29Z | r11 after print, same 1083 requests to opal-data-assets | same prefixes as the before print | canon_r11_muni/canon_r11_after_d4_20261016.json |
 | 2026-10-16 15:42-16:30Z | the co-seated AE lanes on this box (IB2, DB2, ZS, SC1, HV1 and others) share the IAM user cloudops-dell1-agent-user; their requests on the bucket are NOT listed here and cannot be subtracted from the table | -- | git log of the day |
+| 2026-10-16 16:32-16:36Z | r11 rollback: one copy-object of the 1,958,957 B package onto portal/gold/mdpf/_code/mdpf-gold-lambda.zip (server-side) | portal/gold/mdpf/_code/ | canon_r11_muni/ROLLBACK_package_restore.txt |
+| 2026-10-16 16:45-16:47Z | r11 redeploy before print: 569 requests to opal-data-assets (heads only on staged keys), SMArtX/assignment partition reads (about 10 requests, one 52 KB parquet) | same prefixes as the first before print | canon_r11_muni/canon_r11b_before_print_20261016.json |
+| 2026-10-16 16:48:00Z | put of the 1,985,336 B gold package plus one get-object read back | portal/gold/mdpf/_code/mdpf-gold-lambda.zip | ledger mdpf-canon-r11-muni-custom-redeploy-dell1-20261016 |
+| 2026-10-16 16:52:44-16:54:06Z | mdpf-gold-lambda qa_local invoke (the lambda's own reads and workbook snapshot writes) | portal/gold/*, gateway/global/* | canon_r11_muni/L3b_invoke.txt |
+| 2026-10-16 16:55-16:57Z | r11 redeploy after print, 569 requests to opal-data-assets | same prefixes | canon_r11_muni/canon_r11b_after_d4b_20261016.json |
