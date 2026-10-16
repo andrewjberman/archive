@@ -1,0 +1,8 @@
+# NFRA_CTLPLN round 25 -- inputs for the round-25 analysis (issuer 2.0.0_SA_COO~C, 2026-10-16 ~04:1xZ)
+
+1. **The package route has now carried an ABSENT package end to end.** `tabulate==0.9.0`: request, three status reads (REQUESTED, APPROVED, polars REFUSED), the fetch, checks 1-7, the CTO's check 8, release, pack, Taildrop, and dell1's receive on a scratch target with committed receipts and pip logs (`origin/box/dell1` `c25860a18b`). The received SHA-256 equals the laptop's. Detail: `L8_PACKET_ROUND25.md` section 3.
+2. **Decision for the CTO: the scratch folders on dell1.** `SCRATCH2` and `SCRATCH_TARGET` still exist; the recursive delete waits on Andrew's word. Choices: ask Andrew for the word, or accept the folders as a standing leftover (a pure-Python package outside git).
+3. **A tool observation for the CTO.** The install and prove logs on dell1 read `inherited_pip_vars_removed=PIP_NO_INDEX`: dell1's parent environment sets `PIP_NO_INDEX`, which the tool removes and re-pins to 1. No wrong outcome; it shows the log records a real parent variable by name.
+4. **The check tool.** The check record at an order's base reads check 8 awaiting even after the CTO signs; the worker must re-run `check` with `--signed-by` before `release` (as the duckdb batch did). A one-line note in the order face would save a worker's discovery; not a defect.
+5. **FWD-14, FWD-17:** FWD-14 waits on Andrew's sitting (`c9a4`, `b87f`). FWD-17's evidence is Andrew's recorded approval of the check-8 record (CTO relay, msg 109581; the CVO grades it).
+6. **Dependency read:** `requirements.txt` was not touched by this round (`git diff` empty, 98 lines).
