@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-22",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d694ed9a5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "28182f03a2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-22.cottonwood-coverage-census-where-the-data-starts-and-which-days-are-absent.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~414",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~414/COTTONWOOD_COVERAGE_CENSUS_R145.json",
+      "kind": "doc",
+      "commit_or_etag": "d9619ae9c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The census record: tables (partitions, first and last date, absent trading days, runs) for the four Cottonwood gold tables; floor; silver footer summary; twelve-day gap (found); account histories as counts; coverage vocabulary; reads 153 list, 150 get, 0 writes, 0 invokes. Counts, dates and words only.",
+      "artifact_covered_by": ["DBC145-1-AC1", "DBC145-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~414/COTTONWOOD_COVERAGE_CENSUS_R145.md",
+      "kind": "doc",
+      "commit_or_etag": "d9619ae9c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The census note, 29 lines, in words: for each fact, what a person looking at a Cottonwood account must be told. No run of 8 or more digits.",
+      "artifact_covered_by": ["DBC145-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~414/census_r145_read.py",
+      "kind": "script",
+      "commit_or_etag": "d9619ae9c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read script: boto3 list_objects_v2 (CommonPrefixes), get_object with parquet metadata num_rows for silver footers and account_id/day_quality/absent_kind columns; trading_calendar from lib; no put, delete, invoke. Run from the worktree root with plain python.",
+      "artifact_covered_by": ["DBC145-1-AC1", "DBC145-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~414/census_words_r145.json",
+      "kind": "doc",
+      "commit_or_etag": "d9619ae9c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The prose fields the record carries (floor evidence, coverage vocabulary words), written from the measured counts.",
+      "artifact_covered_by": ["DBC145-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d9619ae9c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows, IRPT_DASHBD-D2-W414-S1 and IRPT_DASHBD-D2-W414-S2, both UNDER_INVESTIGATION; the row gate passed on the commit.",
+      "artifact_covered_by": ["DBC145-1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC145-1-AC1",
+      "criterion_verbatim": "DBC145-1-AC1 -- the record's `tables` section equals a FRESH measurement made by the checker: for each of the four tables the partition count, first and last date, the exact list of absent trading days and the runs. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r145/p145_bcw.py\" . DBC145-1-AC1",
+      "output_evidence": "DBC145-1-AC1 PASS (rc=0). Run on the committed record at d9619ae9c6; the same line on two further runs.",
+      "denominator": "4 of 4 tables (filled_report_values 65 partitions; account_return_daily 3390; holdings_performance_daily 88; account_dim 2); absent trading days 3 + 15 + 0 + 0 = 18 compared exactly; runs compared per table",
+      "status": "PASS",
+      "expect": "DBC145-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBC145-1-AC2",
+      "criterion_verbatim": "DBC145-1-AC2 -- the floor, the twelve-day gap, the account histories and the bounds: the floor date equals the first date of `filled_report_values` in a fresh LIST; the empty-silver boundaries equal a fresh footer read at the first and last empty dates and the first non-empty one after; the twelve-day gap run (if found) is a run of exactly 12 trading days in the fresh absent list of `account_return_daily`; the partial-history count equals a fresh recount; the record carries zero writes and invokes and no identifier value; only the worker's folder, the channel and its order changed. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r145/p145_bcw.py\" . DBC145-1-AC2",
+      "output_evidence": "DBC145-1-AC2 PASS (rc=0).",
+      "denominator": "floor 2026-07-10 of 1 (first date of filled_report_values); silver boundaries 2026-04-25 (0 rows), 2026-07-09 (0 rows), 2026-07-10 (rows) of 145 fact_allocations partitions, 33 empty in total; twelve-day run 2026-06-23 to 2026-07-09 found, 12 of 12 trading days; account histories 1004 / 835 / 166 recounted; writes 0, invokes 0",
+      "status": "PASS",
+      "expect": "DBC145-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC1 checker run on a scratch copy of the record (.scratch/mutroot, a copy of lib, checks and the standards folder) with tables.account_return_daily.partitions reduced by one.",
+      "expected": "DBC145-1-AC1 FAIL",
+      "observed": "account_return_daily.partitions differs from a fresh measurement / DBC145-1-AC1 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times on the committed record, each a fresh S3 measurement by the checker.",
+      "observed": "DBC145-1-AC1 PASS on each of the three runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "DB-c-23, the portal screen read (its own order, folder 0.9.0_WK_IRPT_DASHBD~415)",
+      "reason": "Outside this order; a separate worker's grant."
+    },
+    {
+      "item": "Any AWS write, invoke, Terraform, push, or secret read",
+      "reason": "The order is read only; the reads were S3 list and get calls on the named prefixes, with zero writes and zero invokes."
+    },
+    {
+      "item": "The producer rule that starts the gold series at 2026-07-10 and the cause of each absent day",
+      "reason": "NOT_ESTABLISHED. A census measures counts and dates; it did not read the producer logic."
+    },
+    {
+      "item": "A per-figure fallback signal",
+      "reason": "Neither named coverage column carries one; other columns of account_return_daily were not read in this cell."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W414-S1: the Cottonwood tables have three starts (filled_report_values 2026-07-10, account_return_daily 2013-04-03, holdings_performance_daily 2026-06-10), and the 12-day gap is in account_return_daily, not filled.",
+    "IRPT_DASHBD-D2-W414-S2: the silver fact_allocations empty partitions are not one block before the floor (33 empty of 74 partitions in 2026-04-25 to 2026-07-09; 11 empty trading days), so they do not by count alone explain the floor."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~414/COTTONWOOD_COVERAGE_CENSUS_R145.json",
+  "compiler_tools": [
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py at safe-commit d9619ae9c6 (run by safe-commit)",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; 2 new row(s) of 739 total checked"
+    }
+  ]
+}
