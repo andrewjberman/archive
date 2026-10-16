@@ -2,7 +2,7 @@
 
 FWD-3 DONE WHEN: one account's daily returns read across the whole span and checked against the monthly figures Commonwealth reported.
 Reads (read-only, one get each, at the pinned VersionIds) the served daily_returns and month_grades; picks the account BY RULE (the account
-with the most GRADED months, that is rows of month_grades whose verdict is MATCH or DIFF; a tie goes to the smallest sha256 hex of the account id), strings its daily returns into a monthly return
+with the most GRADED months, that is rows of month_grades whose verdict is MATCH or DIFF; a tie goes to the smallest sha256 hex of the account id), strings its daily returns into a monthly return (a month with both sides absent counts as equal, as the order says)
 the way commonwealth_monthly_grade.py does ((prod(1 + return) - 1) * 100 over the month's rows; UNGRADABLE when any day of the month has a null
 return), and compares with the served computed_pct and with Commonwealth's reported_month_pct (MATCH when abs(diff) <= 0.05 percentage points).
 
@@ -60,6 +60,8 @@ def recompute():
         rep = row["reported_month_pct"]
         if s is not None and comp == comp and abs(s - float(comp)) <= 1e-6:
             eq += 1
+        elif s is None and comp != comp:
+            eq += 1  # both absent: the days could not be strung and the served table shows no figure (AMENDMENT 1: the order's "or both absent")
         if s is None or rep != rep:
             ungr += 1
         elif abs(s - float(rep)) <= TOL:

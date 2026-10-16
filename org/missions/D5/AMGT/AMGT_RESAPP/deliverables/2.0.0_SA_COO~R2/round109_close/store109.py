@@ -29,7 +29,7 @@ OUT = os.path.join(HERE, "store_write")
 PRE = os.path.join(OUT, "pre_versions.json")
 LOG = os.path.join(OUT, "write_log.jsonl")
 COO_HALF = os.path.join(HERE, "..", "..", "..", "ledger", "NEVER_WIDEN_ROUND109_AIFILL_95_KEY_STORE_WRITE_COO_HALF.md")
-COO_HALF_SHA = None  # set to the signed half's sha256 (the one the CTO half binds) before write; write refuses while it is None
+COO_HALF_SHA = "1342e9e489cf0c27df6dda9f0dd7b9eda8ee908293c37a53f411b57791d9cead"  # the signed half's sha256, the one the CTO half binds
 PREFIX = "amgt/harvest/gold/ai_fill/"
 EXPECTED_N = 95
 
