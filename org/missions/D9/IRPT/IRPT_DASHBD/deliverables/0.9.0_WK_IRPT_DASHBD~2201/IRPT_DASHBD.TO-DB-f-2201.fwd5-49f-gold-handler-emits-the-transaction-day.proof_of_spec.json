@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2201.fwd5-49f-gold-handler-emits-the-transaction-day",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2201.fwd5-49f-gold-handler-emits-the-transaction-day.md",
+    "group": "OTHER",
+    "vintage_commit": "6e39c73840"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R136_F.md",
+    "vintage_commit": "be99bf5767",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2201.fwd5-49f-gold-handler-emits-the-transaction-day.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2201",
+  "session_log": "Worker drive on branch wk-IRPT_DASHBD-2201 cut from the issuance commit be99bf5767. Commit a1f3cb9c48 carried the handler, the new test file, the surprise row S1 and the amended order text (trunk 6e39c73840). The checker p136_handler.py was copied from trunk as a read-only input and is not committed. The order status is not flipped. No AWS call of any kind was made. Worker tool calls are not recorded here.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "a1f3cb9c48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Guarded import of account_transaction (at49, AT49_IMPORT_ERROR); transaction_frame and emit_transactions added; run and run_backfill each call emit_transactions after their filled-report stage and return transaction_rows and transaction_failed; backfill_stages accepts [\"transaction\"] (amendment 1) and run_backfill's transaction-only branch. Not wired into the function bundle or role: the bundle members and the write grant are sibling orders. Not deployed.",
+      "artifact_covered_by": ["DBF136-1-AC1", "DBF136-1-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_transaction_emission.py",
+      "kind": "test",
+      "commit_or_etag": "a1f3cb9c48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "29 offline tests, all PASS in the worktree at a1f3cb9c48 (python -m pytest on the file: 29 passed). Covers the guarded import, emission per day, skipped, never-raises, upload and dry run, the scheduled and backfill order, the lots-only and one-day filled non-calls, and the transaction-only selection.",
+      "artifact_covered_by": ["DBF136-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a1f3cb9c48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row, IRPT_DASHBD-D2-W2201-S1 (OBSERVATION, INERT): the twelve reporting-gold tests that fail at the base and still fail after this cell. Appended as bytes; the surprise-row gate passed at commit.",
+      "artifact_covered_by": ["DBF136-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF136-1-AC1",
+      "criterion_verbatim": "`DBF136-1-AC1` -- the emission function and the stage selection, run by the checker with stubs: `backfill_stages` returns the three stages for no key, `[\"lots\"]` and `[\"transaction\"]` for those selections, and refuses by name every other value; each day's rows go through `emit_transaction_day(upload=...)` and come back as `({day: rows}, {})`; a day the producer refuses, a day whose emit raises and a day whose partition cannot be read are skipped, printed as `TRANSACTION_SKIPPED <day>` and leave the other days written; a producer that did not import fails every day with the import error's text; no days return `({}, {})`; nothing raises. Base: FAIL (no function).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p136_handler.py\" . DBF136-1-AC1",
+      "output_evidence": "DBF136-1-AC1 PASS (rc=0). Measured at a1f3cb9c48 from the worktree root. Base at be99bf5767, measured with the pre-amendment checker (the amended checker's base run was not repeated): reason: at49 (the guarded import's name) is not defined at module level; ... the handler has no transaction_frame; the handler has no emit_transactions; ... DBF136-1-AC1 FAIL.",
+      "denominator": "6 of 6 behaviour arms (green, refused_day, emit_raises, frame_raises, not_importable, empty_days) and 7 of 7 backfill_stages inputs (no key, [\"lots\"], [\"transaction\"], [\"transaction\", \"lots\"], [\"returns\"], [], \"transaction\"); selftest PASS (7 arms).",
+      "status": "PASS",
+      "expect": "DBF136-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBF136-1-AC2",
+      "criterion_verbatim": "`DBF136-1-AC2` -- the wiring, read from the handler's syntax tree: the guarded import and its error constant; `run` calls `emit_transactions` exactly once, after its filled-report stage, and `run_backfill` exactly twice (the transaction-only branch, and the full path after its filled-report stage), both returning `transaction_rows` and `transaction_failed`; `run_day_event`, the stage functions of the earlier tables and the lots-only branch do not call it. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p136_handler.py\" . DBF136-1-AC2",
+      "output_evidence": "DBF136-1-AC2 PASS (rc=0). Measured at a1f3cb9c48 from the worktree root. Base at be99bf5767, measured with the pre-amendment checker (the amended checker's base run was not repeated): the reasons name the missing guarded import, AT49_IMPORT_ERROR, transaction_frame, emit_transactions, and the missing emit_transactions calls and return keys; DBF136-1-AC2 FAIL.",
+      "denominator": "wiring checks: the guarded import and AT49_IMPORT_ERROR present; run 1 of 1 emit_transactions call after the filled stage; run_backfill 2 of 2 calls, the later one after filled_write; 2 of 2 return keys in each of run and run_backfill; 4 functions checked for no call (run_day_event, filled_stage, emit_classes, emit_lots).",
+      "status": "PASS",
+      "expect": "DBF136-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DBF136-1-AC3",
+      "criterion_verbatim": "`DBF136-1-AC3` -- the new test file holds at least 14 tests with the named words, and the whole tests directory shows no failure beyond the twelve pre-existing ones the issuer recorded (`checks/r136/handler_tests_base_failures.txt`). Base: FAIL (no test file).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p136_handler.py\" . DBF136-1-AC3",
+      "output_evidence": "DBF136-1-AC3 PASS (rc=0). Measured at a1f3cb9c48: python -m pytest infra/aws/lambda/investor-reporting/reporting-gold/tests -q: 12 failed, 137 passed. The 12 failed ids equal checks/r136/handler_tests_base_failures.txt (set difference: none new). The new file alone: 29 passed.",
+      "denominator": "new test file: 29 tests, at least 14 required; whole directory: 149 tests, 137 passed, 12 failed of which 12 are pre-existing and 0 are new.",
+      "status": "PASS",
+      "expect": "DBF136-1-AC3 PASS"
+    },
+    {
+      "criterion_id": "DBF136-1-J1",
+      "criterion_verbatim": "JUDGMENT, graded only by 3.0.0_SA_CVO at L9, never self-graded: the CVO compares **20 sampled rows of the Inflection producer's output drawn FRESH after the merge from the ONE newest Orion snapshot** (the issuer's `tools/sample_inflection_latest_snapshot.py`, seed 135, one forced rolled line) **against the source rows by their NATURAL KEY**, field by field for the 19 columns, with the one-snapshot census printed beside it (rows per status, Complete rows, duplicate keys, the Reversed keys derived from that snapshot, the producer's rows out, and zero source lines on more than one emitted day), and the S6 print \"N of 96\" from the launcher's report. Committed form: the snapshot day, the key hashes and the non-figure results.",
+      "method": "manual_read_with_citation",
+      "invocation": "none by the worker: the L9 sample is drawn and compared by 3.0.0_SA_CVO",
+      "output_evidence": "NO WORKER OUTPUT: judgment criterion (judgment=true); no sample drawn and no verdict recorded by the worker.",
+      "denominator": "N/A -- judgment criterion; the CVO's sample of 20 rows.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded only by 3.0.0_SA_CVO at L9 and never self-graded. The Inflection producer is not this cell's; the worker records no verdict.",
+      "judgment": true
+    },
+    {
+      "criterion_id": "DBF136-1-J2",
+      "criterion_verbatim": "JUDGMENT, graded only by 3.0.0_SA_CVO at L9, never self-graded: the CVO compares **20 sampled rows of the 49 Financial producer's output, drawn FRESH after the merge** (the issuer's `tools/sample_49f_producer_rows.py`), **against the source rows by their NATURAL KEY**, field by field for the 19 columns, including the per-row business-date claim; the sample includes at least one of the lines whose trade date falls on a non-trading day (`inferred`) and at least one `measured` line. Drawn and committed as for J1.",
+      "method": "manual_read_with_citation",
+      "invocation": "none by the worker: the L9 sample is drawn and compared by 3.0.0_SA_CVO",
+      "output_evidence": "NO WORKER OUTPUT: judgment criterion (judgment=true); no sample drawn and no verdict recorded by the worker.",
+      "denominator": "N/A -- judgment criterion; the CVO's sample of 20 rows.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded only by 3.0.0_SA_CVO at L9 and never self-graded. The worker records no verdict and draws no sample.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two temporary mutants on handler.py, each reverted from a saved copy (cmp byte-identical). A: emit_transactions called before the filled stage in run. B: the try and except around the per-day transaction body removed, so an emit or read exception propagates.",
+      "expected": "at least one test fails for each mutant",
+      "observed": "A: 2 tests failed, including test_scheduled_fire_calls_the_transaction_stage_last_in_order_after_the_filled_stage and test_a_dry_run_scheduled_fire_reaches_the_producer_with_upload_false. B: 9 tests failed, including test_emit_a_raising_emit_is_caught_for_that_day_only, test_emit_never_raises_for_a_system_exit_or_any_other_exception and test_emit_a_partition_that_cannot_be_read_is_skipped_and_never_raises. Both reverted; the handler then matched the committed bytes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three mechanical criteria and the full test directory rerun on the same commit a1f3cb9c48",
+      "observed": "AC1, AC2, AC3 PASS on both runs; the full directory 12 failed, 137 passed on both runs, the same 12 ids.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, listing or read of any kind.",
+      "reason": "The order states no AWS access in this cell; none was made."
+    },
+    {
+      "item": "The bundle members (account_transaction.py and transaction_words.json as staged_from pins) and the write grant (Terraform).",
+      "reason": "Sibling orders DB-f-2202 and DB-f-2203; this cell changes the handler only, not the function's bundle or role."
+    },
+    {
+      "item": "The twelve pre-existing failing tests in test_activity_lot_emission.py, test_class_catch_up.py and test_class_table_emission.py.",
+      "reason": "Outside the grant and failing at the base be99bf5767; not edited. Filed as surprise row IRPT_DASHBD-D2-W2201-S1."
+    },
+    {
+      "item": "The judgment criteria DBF136-1-J1 and DBF136-1-J2.",
+      "reason": "Graded only by 3.0.0_SA_CVO at L9; the worker records no verdict and draws no sample."
+    },
+    {
+      "item": "The order status is not flipped.",
+      "reason": "The order states the issuer flips status."
+    },
+    {
+      "item": "The checker p136_handler.py copied from trunk into the worktree is not committed.",
+      "reason": "It is a read-only input outside this order's grant (the deliverables folder of the issuer)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W2201-S1: OBSERVATION, INERT. The twelve reporting-gold tests named in checks/r136/handler_tests_base_failures.txt fail at the base be99bf5767 and still fail after this cell (12 failed, 137 passed); the new harness patches every heavy stage and does not inherit the defect."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p136_handler.py (--selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p136_handler.py\" --selftest",
+      "result": "selftest PASS (7 arms)."
+    },
+    {
+      "tool": "python -m pytest (reporting-gold tests directory)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reporting-gold/tests -q -p no:cacheprovider --color=no -rf",
+      "result": "12 failed, 137 passed; the failed set equals handler_tests_base_failures.txt."
+    }
+  ]
+}
