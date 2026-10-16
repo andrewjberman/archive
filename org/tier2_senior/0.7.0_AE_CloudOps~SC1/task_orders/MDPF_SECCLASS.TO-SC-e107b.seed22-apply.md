@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SC1</issued_to>
     <date>2026-10-16</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>27</round>
   </metadata>
