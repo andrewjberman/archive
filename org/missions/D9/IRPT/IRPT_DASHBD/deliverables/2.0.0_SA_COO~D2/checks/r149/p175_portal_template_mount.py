@@ -94,7 +94,9 @@ def check_diff(root):
         need("PerformanceReportDocument" in (p / f).read_text(encoding="utf-8"), "%s must reference PerformanceReportDocument" % f.rsplit("/", 1)[-1])
     need(any("PerformanceReportDocument" in (p / f).read_text(encoding="utf-8") for f in (IR + "export/Preview.tsx", IR + "render/PrintEntry.tsx")), "Preview.tsx or PrintEntry.tsx must reference PerformanceReportDocument")
     need(any("templateState" in (p / f).read_text(encoding="utf-8") for f in (IR + "export/Preview.tsx", IR + "render/PrintEntry.tsx")), "the export (Preview.tsx or PrintEntry.tsx) must read the tab's template state from templateState")
-    need("templateState" in (p / VIEW).read_text(encoding="utf-8"), "the view must publish its state through templateState")
+    vtext = (p / VIEW).read_text(encoding="utf-8")
+    need("templateState" in vtext, "the view must publish its state through templateState")
+    need(re.search(r"publishTemplateState\(\s*null\s*\)", vtext) is not None, "the view must clear the published state (publishTemplateState(null)) in an effect cleanup, so the export never reads a stale tab (the page owner's condition 1)")
     return True
 
 
