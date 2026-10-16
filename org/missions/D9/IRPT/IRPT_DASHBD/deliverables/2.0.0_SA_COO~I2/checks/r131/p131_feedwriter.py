@@ -11,7 +11,12 @@ tests on THOSE partitions. Every id and value is synthetic (accounts 7001 to 700
                 eight, every row valid under the contract's validator, 0 unaccounted).
   DBI131-1-AC2  the round-129 run script (run_real) on the same partitions through a fake reader: status RAN, the whitelisted keys.
   DBI131-1-AC3  the new test file builds its feed frames ONLY by calling the feed's run(), holds no hand-built feed frame, passes
-                (at least 6 tests) and names a mutant test.
+                (at least 6 tests), names a mutant test, and RECORDS its dimension input (a named DIM_IDS constant) and explains
+                why PRESENT differs from RETURNED (it names NO_EOD_VALUE and asserts rows_present) (CTO msg 8823).
+
+AMENDMENT 1 (CTO round-130 analysis, msg 8823): AC1 also grades the chain on a MULTI-DAY feed-writer fixture: one account carries a
+series point on each of 10 calendar days (8 trading days); every one of them is a PRESENT row and the chained rows equal the product
+of the silver's own factors. A fixture with at most 3 days left the chain assumed, not graded.
 
 The checker uses the feed's harness itself (its fake S3, transport and canned Scope replies) to make the golden partitions, so it
 cannot disagree with the feed about the shape.
@@ -77,6 +82,29 @@ def feed_partitions(root):
     return out
 
 
+def multiday_partitions(root):
+    """The feed's own run() over 10 calendar days (8 trading days) for ONE account carrying a series point on every calendar day."""
+    import pandas as pd
+    root = Path(root)
+    sys.path.insert(0, str(root / "lib"))
+    sys.path.insert(0, str(root / FEED_DIR))
+    import pull_inflection_scope_account_returns as M
+    import test_scope_feed_daily_factor as T
+    first, last = "2026-10-05", "2026-10-14"
+    cal = [("2026-10-%02d" % d) for d in range(5, 15)]
+    points = [T._factor_point(day, 1.0 + 0.001 * (i + 1)) for i, day in enumerate(cal)]
+    responses = {5001: T._response([T._group(7001, series=points), T._group(7003, series=None)]), 5002: T._response([])}
+    s3 = T._fixture_s3()
+    code, _t, _p = T._run(s3, responses, from_date=first)
+    need(code == 0, "the feed's own run exited %r on the multi-day fixture" % code)
+    out = {}
+    for day in cal:
+        bucket, key = M._split(M.feed_addresses(day)[1])
+        need((bucket, key) in s3.objects, "the feed wrote no silver for %s" % day)
+        out["date=" + day] = pd.read_parquet(io.BytesIO(s3.objects[(bucket, key)]))
+    return out, first, last
+
+
 def weekdays(lo, hi):
     return P129.weekdays(lo, hi)
 
@@ -114,7 +142,39 @@ def grade_wrapper(root):
         probs = cmod.row_problems(cmod.CONTRACT, r)
         need(not probs, "contract validator on a %s row: %s" % (r["row_status"], probs))
     need(rec["contract_version"] == cmod.CONTRACT["contract_version"], "contract_version")
+    grade_multiday(root, wrapper, cmod)
     return silver
+
+
+def grade_multiday(root, wrapper, cmod):
+    import pandas as pd
+    import pyarrow.parquet as pq
+    silver, first, last = multiday_partitions(root)
+    tdays = weekdays(first, last)
+    need(len(tdays) == 8, "multi-day fixture must carry 8 trading days: %d" % len(tdays))
+    dim = pd.DataFrame({"account_id": [str(a) for a in ACCOUNTS]})
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "out"
+        rec = wrapper.run(silver, dim, tdays, FIRM, 0, str(out))
+        rows = []
+        for p in sorted(out.glob("date=*")):
+            rows.extend(pq.read_table(str(p / "data.parquet")).to_pylist())
+    mine = sorted((r for r in rows if r["source_account_id"] == 7001), key=lambda r: r["business_date"])
+    need(len(mine) == 8 and all(r["row_status"] == "PRESENT" for r in mine), "the series account must be PRESENT on all 8 trading days: %r" % [r["row_status"] for r in mine])
+    need(sum(r["carried_days"] for r in mine) == 10, "carried_days must sum to the 10 calendar days: %r" % sum(r["carried_days"] for r in mine))
+    table_chain = 1.0
+    for r in mine:
+        table_chain *= 1.0 + r["total_return_daily"]
+    silver_chain = 1.0
+    for frame in silver.values():
+        for row in frame.to_dict("records"):
+            if int(row["account_id"]) == 7001 and row["status"] == "RETURNED":
+                silver_chain *= float(row["daily_factor"])
+    need(abs(table_chain - silver_chain) <= 1e-12, "the chain over 8 trading days differs from the silver's own factors by %.3e" % abs(table_chain - silver_chain))
+    for r in rows:
+        probs = cmod.row_problems(cmod.CONTRACT, r)
+        need(not probs, "contract validator on a %s row of the multi-day fixture: %s" % (r["row_status"], probs))
+    need(rec["trading_days_unaccounted"] == 0 and rec["rows_present"] >= 8, "multi-day run record: %r" % {k: rec[k] for k in ("rows_present", "trading_days_unaccounted")})
 
 
 def grade_run_real(root):
@@ -141,6 +201,8 @@ def grade_tests(root):
     for bad in ("pd.DataFrame([", "pandas.DataFrame([", "DataFrame({\"pull_date\"", "DataFrame({'pull_date'"):
         need(bad not in src, "the test file hand-builds a frame (%s); a feed frame must come from the feed's run()" % bad)
     need(re.search(r"^def test_\w*mutant\w*\(", src, re.M) is not None, "no test named test_*mutant*")
+    need(re.search(r"^DIM_IDS\s*=", src, re.M) is not None, "the test file must record its dimension input as a module constant DIM_IDS")
+    need("NO_EOD_VALUE" in src and "rows_present" in src, "the test file must assert rows_present and name NO_EOD_VALUE (why PRESENT differs from RETURNED)")
     r = subprocess.run([sys.executable, "-I", "-m", "pytest", "-q", "-p", "no:cacheprovider", str(tf)], cwd=str(root), capture_output=True, text=True, timeout=100)
     tail = (r.stdout or "").strip().splitlines()[-1:] or [""]
     need(r.returncode == 0, "pytest rc %s: %s" % (r.returncode, tail[0]))
