@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-ty-53",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-ty-53.fwd5-commentary-draft-and-guards-cross-firm-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "9d0664b2ff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R46_TX.md",
+    "vintage_commit": "9d0664b2ff",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-ty-53.fwd5-commentary-draft-and-guards-cross-firm-tests.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~216",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_draft_store_get_ref.py",
+      "kind": "test",
+      "commit_or_etag": "5a98db6e42",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-216 at 5a98db6e42 (not pushed); 4 tests; pytest 4 passed; no deploy, no AWS call"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_retention_gate.py",
+      "kind": "test",
+      "commit_or_etag": "5a98db6e42",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-216 at 5a98db6e42 (not pushed); 2 tests; pytest 2 passed; no deploy, no AWS call"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/tests/test_cross_firm_owner_reads_guard.py",
+      "kind": "test",
+      "commit_or_etag": "5a98db6e42",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-216 at 5a98db6e42 (not pushed); 4 tests; pytest 4 passed; no deploy, no AWS call"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR53-ty-AC1",
+      "criterion_verbatim": "AR53-ty-AC1 -- every file exists, every test function is named test_cross_firm_*, the tests pass, and at least 6 tests pass. Invocation: python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_draft_store_get_ref.py infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_retention_gate.py infra/aws/lambda/investor-reporting/_scope/tests/test_cross_firm_owner_reads_guard.py ; expect R46-TESTS-OK.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_draft_store_get_ref.py infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_retention_gate.py infra/aws/lambda/investor-reporting/_scope/tests/test_cross_firm_owner_reads_guard.py",
+      "output_evidence": "R46-TESTS-OK passed=10 (process rc=0)",
+      "denominator": "10 of 10 tests collected in the three files passed; the criterion requires at least 6",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four guard lines removed one at a time in scratch copies of the worktree tree (.scratch/mut): M1 commentary_draft_store.py identity clause (tenant_firm_id != tenant_hint), M2 commentary_draft_store.py owner clause (owner firm_id != tenant), M3 retention.py service-branch clause (firm != owner firm_id), M4 owner_reads.py owner-firm clause (owner firm_id != tenant). The cross-firm test of each guard is run against its mutant.",
+      "expected": "each cross-firm test FAILS on its own mutant and every same-firm control still passes",
+      "observed": "M1: 1 failed (test_cross_firm_get_ref_refuses_record_filed_under_callers_firm_with_another_identity), 3 passed. M2: 1 failed (test_cross_firm_get_ref_refuses_owner_that_names_another_firm), 3 passed. M3: 1 failed (test_cross_firm_retention_service_read_refuses_another_firms_owner, DID NOT RAISE), 1 passed. M4: 1 failed (test_cross_firm_owner_read_tenant_binding_alone_refuses_an_opal_global_caller, DID NOT RAISE), 3 passed. Note: M4 leaves the non-global cross-firm test passing, because the principal-firm clause (owner_reads.py:30) also refuses that read; the OPAL_GLOBAL test is the one that isolates line 28.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the checker over the three test files at HEAD 5a98db6e42, outputs compared byte for byte",
+      "observed": "run 1 and run 2: R46-TESTS-OK passed=10, rc=0, identical",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W216-S1: OBSERVATION/INERT -- the R46 checker folder was absent at the first grounding read and present at the acceptance run; the sparse-checkout cone does not list org/tier1_exec; the checker blob equals the HEAD index entry and the run passed; cause not measured.",
+    "IRPT_ANLREQ-D2-W216-S2: OBSERVATION/INERT -- the cell cites retention.py:102 and owner_reads.py:28 for refusals whose raise lines are 103 and 33; the cited lines open the decision conditions; the tests were written against what the code does."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the non-global owner-read route's principal-firm clause (owner_reads.py:30) as an isolated mutant",
+      "reason": "the cell names the owner-firm line (owner_reads.py:28) only; the OPAL_GLOBAL test isolates that line, and the non-global test is kept as the realistic cross-firm case"
+    },
+    {
+      "item": "tests for binding-map rows outside 25, 29 and 34",
+      "reason": "the cell names rows 25, 29 and 34 only; rows 1 to 24 and 26 to 38 are other cells"
+    },
+    {
+      "item": "the full-tree pytest of the investor-reporting package",
+      "reason": "the acceptance names the three new files; the neighbouring suites were not run by this worker"
+    },
+    {
+      "item": "push to origin, deploy, AWS call, network, secret",
+      "reason": "out of the order's bounds (no network, no AWS, no secret, no deploy); the commit is LOCAL on wk-IRPT_ANLREQ-216"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 <three test files>",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_draft_store_get_ref.py infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_retention_gate.py infra/aws/lambda/investor-reporting/_scope/tests/test_cross_firm_owner_reads_guard.py",
+      "result": "R46-TESTS-OK passed=10 (rc=0)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "result": "R46-SELFTEST-OK green plus four mutants refused (rc=0); information only, not a criterion"
+    },
+    {
+      "tool": "python -m pytest -q (the three files, run from the worktree root)",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_draft_store_get_ref.py infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_retention_gate.py infra/aws/lambda/investor-reporting/_scope/tests/test_cross_firm_owner_reads_guard.py",
+      "result": "10 passed in 0.41s (rc=0)"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py (this instance, AR53-ty-AC1)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~216/IRPT_ANLREQ.TO-AR-ty-53.fwd5-commentary-draft-and-guards-cross-firm-tests.proof_of_spec.json AR53-ty-AC1",
+      "result": "VALID (rc=0), violations=0; governing TO bound by decomp_ref.to_ref; 2 surprises resolve to channel rows"
+    }
+  ]
+}
