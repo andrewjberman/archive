@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-109",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-109.hop-failure-store-and-resident-writers.md",
+    "group": "OTHER",
+    "vintage_commit": "dd4897fd22"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R28_G.md",
+    "vintage_commit": "dd4897fd22",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-109.hop-failure-store-and-resident-writers.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~251",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/durable_job.py",
+      "kind": "script",
+      "commit_or_etag": "ccdc4bcf9fb78e7f485b2f6083b29b2187233326",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "HOP_FAILURE_CODES, _HOP_AT, mark_hop_failure (set-once update_item, state untouched), get_state carries hop_failure only when set; offline, no deploy",
+      "artifact_covered_by": ["AR109-g-AC1", "AR109-g-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "ccdc4bcf9fb78e7f485b2f6083b29b2187233326",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "send_ready records READY_SIGNAL_SEND_FAILED in its except branch; a failing write prints HOP_FAILURE_MARK_FAILED and is swallowed; offline, no deploy",
+      "artifact_covered_by": ["AR109-g-AC1", "AR109-g-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "ccdc4bcf9fb78e7f485b2f6083b29b2187233326",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "make_packager gains clock=; packager wraps handle_commentary_ready, records PACKAGER_REFUSED or PACKAGER_FAILED and re-raises; build_resident_runtime passes clock; offline, no deploy",
+      "artifact_covered_by": ["AR109-g-AC1", "AR109-g-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_hop_failure.py",
+      "kind": "test",
+      "commit_or_etag": "ccdc4bcf9fb78e7f485b2f6083b29b2187233326",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 offline Stubber/fake-store tests named by the checker: test_mark_hop_failure_is_set_once, test_get_state_carries_hop_failure, test_a_failed_ready_send_records_the_hop, test_a_packager_failure_records_the_hop, test_a_failing_hop_write_never_masks_the_error; 5 passed",
+      "artifact_covered_by": ["AR109-g-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR109-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g109",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g109",
+      "output_evidence": "AR-G109-OK issuer=21 named=5 worker=5 | issuer tests: 21 passed in 3.11s | named tests missing: none | worker tests: 5 passed in 2.53s | rc=0 | run under a 590000 ms bound at the worker tree after commit ccdc4bcf9f",
+      "denominator": "21 of 21 issuer tests passed (need 21); 5 of 5 named worker tests passed (need 5); base before the edits was AR-G109-FAIL issuer=3/21 with the test file absent",
+      "expect": "^AR-G109-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR109-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress109",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress109",
+      "output_evidence": "AR-G109-REGRESS-OK 136 tests in 6 files, 4 changed paths all the cell's own | run under a 590000 ms bound at the worker tree after commit ccdc4bcf9f",
+      "denominator": "136 passed, 0 failed across 6 existing test files run one at a time (need at least 136); changed paths vs box/dell2 at the product commit: 4, all within the cell's own files and test file",
+      "expect": "^AR-G109-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The issuer's negative arms are the controls: a second write returns False, a conditional failure with no stored value is raised, six invalid shapes are refused before any call, a failing write never masks the packager error, an unreadable message records nothing.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes (boto3 Stubber, fake stores); no live call",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q --color=no infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_hop_failure.py (one file at a time, plus the six regress files via ar_g109_checks.py regress109)",
+      "result": "5 passed (test_hop_failure.py); 136 passed in 6 files (regress109)"
+    }
+  ]
+}
