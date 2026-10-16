@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -19,7 +19,7 @@
 </decomp_ref>
 
   <objective>
-    STAGED. This order carries no GO until the issuer adds a CONDITIONAL GO amendment (the signed pair AR_V32_PAIR.md, both halves, at the blobs the amendment names). On the GO: with the hop failure COMMENTARY_DRAFT_REFUSED standing on the job row of request REQ-d47252fe74634d0c5cdd8067 (tenant 49financial), open the ticket TCK-20261015-944c84f8 in the Ticket Center on the DEV dev server (http://localhost:5174) as a minted synthetic staff user, read what the page shows under the ticket, take one full-page screenshot, then remove the user and read it ABSENT. Write one record file. The issuer looks at the screenshot itself. You change nothing else.
+    GO (AMENDMENT 1 below, conditional on the measured blobs). On the GO: with the hop failure COMMENTARY_DRAFT_REFUSED standing on the job row of request REQ-d47252fe74634d0c5cdd8067 (tenant 49financial), open the ticket TCK-20261015-944c84f8 in the Ticket Center on the DEV dev server (http://localhost:5174) as a minted synthetic staff user, read what the page shows under the ticket, take one full-page screenshot, then remove the user and read it ABSENT. Write one record file. The issuer looks at the screenshot itself. You change nothing else.
   </objective>
 
   <context>
@@ -30,7 +30,9 @@
   </context>
 
   <the_act>
-    GO is the issuer's conditional amendment; without it STOP at step 0.
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~V2, 2026-10-16 ~15:5xZ; gate limb: none graded this modification; it adds no placeholder and widens no path). CONDITIONAL GO. The pair is SIGNED by both halves: COO half in `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V32/AR_V32_PAIR.md` (git blob `5b694ac0e2e14d1b1057266191def5b83334322c`, sha256 `47269323d08729a14716a7c1bc31d41002a9efb11e288c9fc63c329fb6b9c9e5`); CTO half in `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_AR_V32_TICKET_PAGE_READ_CTO_HALF.md` (git blob `6902bc6b4b6e6d03ff7093912a169bd090c7f152`, @8780b1ffc9, msg 9544). Measure all four blobs named in this order (the two above, the helper `f368e9d95c62dc9fce1e6d5e04cd7fe6f79c444a`, the checker `17bc09fbb5aaaafd70760f03bcac02e269dfbbe2`) with `git hash-object` before step 1; any difference is a STOP and no GO. The t55 precondition is met at the time of writing (leg A reported by AQ2, msg 9541: hop_failure COMMENTARY_DRAFT_REFUSED at 2026-10-16T15:44:44Z); read it live in step 1 all the same.
+    The CTO's three conditions bind: (1) the password stays in memory, and the report says so in words; (2) Branch 2 (the failure absent, a package attached, the row already present, a blob or origin different) grades nothing: the order stops, removes a row it minted first, and reports it; (3) the minted user's removal is read back ABSENT before the report, whatever branch ran.
+    STEPS:
     0. NEVER-2: read the ledger (every live worktree, `ls-tree`) and open ONE change ledger entry naming this order, the one users row and the dev server; it closes at step 9. STOP if the issuer's amendment is absent, if any blob named there differs, or if the t55 ledger is not OPEN with leg A reported.
     1. READ BEFORE, no write: the job row (names and state: state READY, hop_failure code COMMENTARY_DRAFT_REFUSED with its `at`), the ticket `TCK-20261015-944c84f8` (analysis_request, in_progress, NO package pointer), and the users row for `fwd1-staff-r41b@opal.invalid` ABSENT (a consistent get; PRESENT is a STOP, it is another run's). Record lines B1, B2 and A1 (the format is in the checker's docstring).
     2. START the dev server of the portal DEV checkout (HEAD at or after dc057891b086) on port 5174 only (`bun run dev --port 5174`; resolve bun by the profile, bake no path). Record the browser origin you open: it must read exactly http://localhost:5174. Any other origin is a STOP.
