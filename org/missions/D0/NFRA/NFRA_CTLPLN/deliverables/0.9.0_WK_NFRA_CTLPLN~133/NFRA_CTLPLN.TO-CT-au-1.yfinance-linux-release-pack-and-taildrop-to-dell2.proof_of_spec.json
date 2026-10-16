@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-au-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-au-1.yfinance-linux-release-pack-and-taildrop-to-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "0cbc99ae54"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~133",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round27.md",
+    "vintage_commit": "0cbc99ae54",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-au-1.yfinance-linux-release-pack-and-taildrop-to-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_round27_yfinance_batch.py",
+      "kind": "test",
+      "commit_or_etag": "c998428813",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--release and --pack flags added (read-only; --taildrop NOT written). Output at c998428813: BATCH-RELEASE released=0 check8=OTHER names_equal=False sha_equal=True ok=False; BATCH-PACK files=0 manifest_ok=False verify=NO-PACK ok=False.",
+      "artifact_covered_by": ["CTau1-AC1", "CTau1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c998428813",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row NFRA_CTLPLN-W133-S1 (class BLOCKING, hazard INERT, UNDER_INVESTIGATION): the signed check-8 file names no wheel file name, so intake_check.py check 8 fails and release refuses.",
+      "artifact_covered_by": [],
+      "introduces": ["NFRA_CTLPLN-W133-S1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTau1-AC1",
+      "criterion_verbatim": "the 17 checked wheels are released with check 8 signed and nothing else is in the release folder for this batch (base: the flag does not exist; the release folder does not hold the batch); report the whole line.",
+      "method": "command",
+      "invocation": "timeout 280 python .tools/tests/test_round27_yfinance_batch.py --release (worktree root, committed state at c998428813; run twice, output identical)",
+      "output_evidence": "BATCH-RELEASE-FAIL beautifulsoup4-4.14.3-py3-none-any.whl check 8 verdict=awaiting path=None (and the same line for each of the 17 files); BATCH-RELEASE-FAIL still in holding: 17 names; BATCH-RELEASE released=0 check8=OTHER names_equal=False sha_equal=True ok=False; rc=1",
+      "denominator": "0 of 17 wheels released; 0 of 17 check records read check 8 passed with the signed file's path; 17 of 17 wheels still in holding",
+      "status": "FAIL",
+      "status_reason": "The committed check records read check 8 awaiting, and the signed file CTO_CHECK8_NFRA_CTLPLN_INTAKE_YFINANCE_LINUX_20261016.md at 4c20c2bb3c names none of the 17 wheel file names, which intake_check.py check_8 requires (lines 801-804). A scratch dry run (frozendict, scratch root) read c8 failed with 'the signature file's text does not contain the file name' and release refused. No check was re-run on the real records and nothing was released. The release-folder sha_equal=True is vacuous over 0 released files. Clearing needs the CTO: a signed file naming the 17 wheel files, or a ruling on the tool's text rule.",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTau1-AC2",
+      "criterion_verbatim": "the pack holds the 52 files and `verify` reads wheels=17 verified=17 checked=17 stray=0 ok=True (base: the flag does not exist); report the whole line.",
+      "method": "command",
+      "invocation": "timeout 280 python .tools/tests/test_round27_yfinance_batch.py --pack (worktree root, committed state at c998428813; run twice, output identical)",
+      "output_evidence": "BATCH-PACK files=0 manifest_ok=False verify=NO-PACK ok=False; rc=1",
+      "denominator": "0 of 52 pack files; 0 of 17 wheels verified (no pack folder exists under ~/tdrop/out/intake-20261016-yfinance-linux)",
+      "status": "FAIL",
+      "status_reason": "No pack was produced: intake_check.py pack refuses an empty release folder, and release (CTau1-AC1) refused every file on check 8, so verify could not run on a pack. No local verify was run on any pack.",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTau1-AC3",
+      "criterion_verbatim": "all 52 files were sent to dell2 by Taildrop, each exit code recorded (base: the flag does not exist); report the whole line and the record.",
+      "method": "command",
+      "invocation": "timeout 280 python .tools/tests/test_round27_yfinance_batch.py --taildrop (NOT RUN: the flag does not exist)",
+      "output_evidence": "not run: no --taildrop flag exists at c998428813, no TAILDROP_RECORD_DELL2.md was written, and no tailscale file cp was issued by this worker",
+      "denominator": "0 of 52 files sent to dell2",
+      "status": "FAIL",
+      "status_reason": "Taildrop is gated on release and pack verify (CTau1-AC1, CTau1-AC2), both FAIL. The coordinator's hold was lifted on dell2's CTO answer (record 11f0240cd4), but the tool's check-8 refusal is unchanged, so the send was not made. The --taildrop flag was not written.",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names two --taildrop mutant cases (a call with a nonzero exit code; a call naming another device) that must read held=True. The --taildrop flag was not written, so neither case was run.",
+      "expected": "both --taildrop mutant cases print held=True",
+      "observed": "NOT BUILT: no --taildrop flag at c998428813; the two mutant cases were never run",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: --release and --pack each run twice on the committed state at c998428813, last output line of each run byte-compared",
+      "observed": "run 1 and run 2 of --release: 'BATCH-RELEASE released=0 check8=OTHER names_equal=False sha_equal=True ok=False'; run 1 and run 2 of --pack: 'BATCH-PACK files=0 manifest_ok=False verify=NO-PACK ok=False'; cmp equal for both pairs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W133-S1: the CTO's signed check-8 file names the batch but none of the 17 wheel file names, so intake_check.py check 8 reads failed for every file and release refuses. Row UNDER_INVESTIGATION, BLOCKING, hazard INERT; no file released, packed or sent."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~133/NFRA_CTLPLN.TO-CT-au-1.yfinance-linux-release-pack-and-taildrop-to-dell2.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~133 on 2026-10-16). Sparse set gained org/tier1_exec/1.0.0_SA_CTO/deliverables and .claude/skills/tdrop. Coordinator hold (no Taildrop until dell2 CTO answered) and its lift (PROCEED, record 11f0240cd4) both received; the lift does not change the check-8 refusal.",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/intake_check.py check --batch intake-20261016-yfinance-linux --file frozendict-2.4.7-py3-none-any.whl --approved-by <main-tree approval file> --signed-by org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_CHECK8_NFRA_CTLPLN_INTAKE_YFINANCE_LINUX_20261016.md (scratch root via OPAL_INTAKE_ROOT and OPAL_INTAKE_RECORDS)",
+      "result": "c1 passed, c2 passed, c3 passed, c4 passed, c5 not_applicable, c6 passed, c7 passed, c8 failed (the signature file's text does not contain the file name); verdict=not_checked. Checks 1-7 equal the committed earlier record."
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/intake_check.py release --batch intake-20261016-yfinance-linux --file frozendict-2.4.7-py3-none-any.whl (scratch root)",
+      "result": "INTAKE-RELEASE REFUSED batch=intake-20261016-yfinance-linux file=frozendict-2.4.7-py3-none-any.whl reason=the check record does not read 'checked'; rc=1"
+    }
+  ]
+}
