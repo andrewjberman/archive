@@ -15,18 +15,18 @@
   "assignee": "0.9.0_WK_IRPT_DASHBD~601",
   "artifacts_produced": [
     {
-      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~601/BLOCKED_READ_STATUS_R119.json",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~601/RD_FWD3_THREAD_R119.json",
       "kind": "doc",
-      "commit_or_etag": "ffaa6ff0ec8da527ad826c12363b25fd2d458e30",
+      "commit_or_etag": "87a64a856b826af0818120bbc2c3800d112104d5",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on branch wk-IRPT_DASHBD-601 only; nothing deployed, pushed or served. Records the blocked state and the measured counts; it is not the RD record."
+      "deploy_evidence": "Committed on branch wk-IRPT_DASHBD-601 only. The step-8 thread record; a read with no AWS call, no write to any served path, nothing deployed or pushed."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "ffaa6ff0ec8da527ad826c12363b25fd2d458e30",
+      "commit_or_etag": "87a64a856b826af0818120bbc2c3800d112104d5",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One appended row IRPT_DASHBD-D2-W601-S1 (class BLOCKING) carried by the commit; surprise-row-gate OK on the commit."
+      "deploy_evidence": "Rows S2 and S3 appended by the commit as OBSERVATION; row S1 (BLOCKING, from the blocked first pass) was carried by commit ffaa6ff0ec and is not re-appended."
     }
   ],
   "acceptance": [
@@ -35,42 +35,43 @@
       "criterion_verbatim": "`DBF119-2-AC1` -- `RD_FWD3_THREAD_R119.json` has exactly the form of step 8; each cited file exists and each cited line holds the token class its field names; `hops` has at least 4 entries numbered from 1, each with an owner, a risk class in the set and a boolean `exists_today`; `gold_table` carries a boolean `applied` and words; every claim is in the four-word set; the reads block is all zero, the four flags are false and no run of 8 or more digits stands outside the exempt fields. Base: FAIL (no record).",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r119/p119_fwd3.py\" . DBF119-2-AC1",
-      "output_evidence": "reason: missing record org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~601/RD_FWD3_THREAD_R119.json / DBF119-2-AC1 FAIL",
-      "denominator": "1 criterion of 1; 0 of 1 PASS (the record RD_FWD3_THREAD_R119.json is absent)",
-      "status": "FAIL",
-      "status_reason": "The record of step 8 was not written because the source reads of steps 1-4 (data/assets/scripts/gold/irpt_reporting/ and infra/aws/lambda/investor-reporting/) are sparse-excluded from this worktree and cannot be opened here. Stop on that point; surprise IRPT_DASHBD-D2-W601-S1 (BLOCKING). Nothing rebuilt, extracted or sparse-widened.",
+      "output_evidence": "DBF119-2-AC1 PASS (rc=0); the same output on a second run at the same commit",
+      "denominator": "1 criterion of 1; 1 PASS (the record RD_FWD3_THREAD_R119.json is present at commit 87a64a856b826af0818120bbc2c3800d112104d5)",
+      "status": "PASS",
       "expect": "DBF119-2-AC1 PASS",
       "judgment": false
     }
   ],
   "controls": {
     "mutant": {
-      "description": "No mutant is applied: the criterion grades the presence of the record, and the checker's own base case is a missing record that must FAIL.",
+      "description": "The checker was run on the blocked tree with no record present (commit 6bc16c0547), a mutant of the thread record; the checker must refuse it.",
       "expected": "missing record reported as FAIL",
-      "observed": "reason: missing record ... DBF119-2-AC1 FAIL, rc=1",
-      "status": "N/A-SPEC-NAMES-NONE"
+      "observed": "reason: missing record ... RD_FWD3_THREAD_R119.json / DBF119-2-AC1 FAIL (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Single run of the criterion checker; a repeat was not made because the record cannot be produced in this worktree.",
-      "observed": "one run only",
-      "status": "N/A-WITH-REASON"
+      "method": "two same-input runs of the criterion checker at commit 87a64a856b826af0818120bbc2c3800d112104d5, outputs compared",
+      "observed": "run 1: DBF119-2-AC1 PASS rc=0; run 2: DBF119-2-AC1 PASS rc=0; identical",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "DBF119-2-AC1 record-form checks of step 8 (gold_table, producer, series_contract, served_path, portal_reuse, hops, reads)",
-      "reason": "Not attempted: the cell's source files are sparse-excluded in this worktree (surprise IRPT_DASHBD-D2-W601-S1, BLOCKING). The record would carry claims of absent for code that is present at HEAD, which would be a false reading."
+      "item": "Live state of the gold prefix (whether class rows for each trading day are present now)",
+      "reason": "Not read: no AWS call by this cell. The applied claim rests on the R37 first-fire and R41 backfill log lines and the closed deploy-completion record. The owner (2.0.0_SA_COO~D2) confirms the live prefix."
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W601-S1"
+    "IRPT_DASHBD-D2-W601-S1",
+    "IRPT_DASHBD-D2-W601-S2",
+    "IRPT_DASHBD-D2-W601-S3"
   ],
-  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~601/BLOCKED_READ_STATUS_R119.json",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~601/RD_FWD3_THREAD_R119.json",
   "compiler_tools": [
     {
-      "tool": "p119_fwd3.py (criterion checker, run at worktree root)",
-      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r119/p119_fwd3.py . DBF119-2-AC1",
-      "result": "rc=1; reason: missing record; DBF119-2-AC1 FAIL"
+      "tool": "p119_fwd3.py (criterion checker, run at the worktree root)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r119/p119_fwd3.py\" . DBF119-2-AC1",
+      "result": "rc=0; DBF119-2-AC1 PASS"
     }
   ]
 }
