@@ -1,0 +1,31 @@
+OG-en-10 session log -- 0.9.0_WK_NFRA_OPLGTW~124 -- worktree C:/tmp/wk-oplgtw-124 -- branch wk-NFRA_OPLGTW-124
+
+Premises (first act): git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-124; test -d org && test -d .tools -> TREE-OK.
+Base HEAD before the cell: 060e0ba6e2.
+
+Round 1 (base task order): code commit a41d358992 (app/ratelimit.py, app/audit.py, app/server.py, tests/test_og_en10.py,
+INVESTIGATION_v1.md rows S1 and S2). Round 1 close commit 38d59c8258 (proof instance, session log, status complete).
+
+Amendment A2 (issuer commit 57ea1584b0): the 429 row names the client that fills the window.
+Code commit b5e26f7cf2 (first attempt blocked by the commit gate on one unused import in tests/test_og_en10.py,
+removed; the re-commit landed b5e26f7cf2). Changes: app/ratelimit.py (client_key, check client=, parallel _CLIENTS
+deque pruned in step, enforce_identity_counted(email, client_id), by_client_map, record_identity_refusal(principal,
+retry, detail)), app/audit.py (log_ratelimit by_client, distinct_clients), app/server.py (client_id passed through),
+tests/test_og_en10.py (ac01 asserts the one-client map; new ac04; module imports app.server inside its fixture).
+
+Own tests (on b5e26f7cf2): pytest tests/test_og_en10.py -> 4 passed.
+Related modules (on b5e26f7cf2): pytest tests/test_ratelimit.py tests/test_auth_hardening.py tests/test_audit_bytes_principal.py
+tests/test_audit_lake_key_stamp.py tests/test_audit_rivalfunds_args.py tests/test_schwab_audit.py tests/test_data_entitlement_guard.py
+tests/test_og_en10.py -> 46 passed, 1 failed. The failure is tests/test_data_entitlement_guard.py::test_ogz1_ac08, a route-set
+assertion (extra /hx/teams routes, "Extra items in the right set"), not touched by this cell; filed as NFRA_OPLGTW-Z-W121-S3.
+tests/test_deploy_base_guard.py was not re-run this round (8 failures measured in round 1, filed as NFRA_OPLGTW-Z-W82-S7; no reference to the changed modules).
+
+Mutant control (scratch plugin .scratch/og_en10_mutant_noaudit.py, record_identity_refusal replaced by a no-op), on b5e26f7cf2:
+pytest tests/test_og_en10.py -p og_en10_mutant_noaudit -> 4 failed (ac01 assert 0 == 1; ac02 burst row; ac03 assert 0 == 1; ac04 assert 0 == 1). FIRED.
+
+Sweep smoke (scratch, _SWEEP_AT=2): 6 keys + 1 fresh key -> logs=1 clients=1 misaligned=0.
+
+Proof checks (on b5e26f7cf2):
+AC1 run 1: bash .../2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en10.py test_ogen10_ac01 test_ogen10_ac02 test_ogen10_ac03 test_ogen10_ac04 -> pytest rc=0; named tests passed 4 of 4; failed/error lines 0; RESULT: PASS; exit=0
+AC1 run 2 (determinism): identical.
+AC2: bash .../2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~124 '<allowed regex>' -> files touched 8; product files 4; outside the allowed set 0 (want 0); RESULT: PASS; exit=0
