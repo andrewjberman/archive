@@ -1,0 +1,137 @@
+{
+  "to_id": "TCKT_VNEXT.TO-R19-L1",
+  "serial": "0.9.0_WK_TCKT_VNEXT~45",
+  "cell": "R19-nr-1",
+  "row_under_build": "IRPT_ANLREQ-D2-S134 item 1",
+  "worktree": "C:/dev/wk-tckt-vnext-45 (branch wk-TCKT_VNEXT-45)",
+  "commits": {
+    "source_and_tests": "8398ba291b build(TCKT_VNEXT R19-L1, 0.9.0_WK_TCKT_VNEXT~45): the client notice recipient is derived from the ticket firm's configured contacts (LOCAL)",
+    "one_more_test_case": "f388d5ea4a test(TCKT_VNEXT R19-L1, 0.9.0_WK_TCKT_VNEXT~45): one more named case, the blank stored requester (LOCAL)",
+    "record_and_instance": "the commit that carries this file, the instance, mutant_check.py, the investigation rows and the status flip (see the worker report)"
+  },
+  "lines_changed": {
+    "infra/aws/lambda/ticket_center/lambda_function.py": {
+      "added": "def _client_contact_map() -> dict (module level, about line 1182): reads CLIENT_NOTICE_CONTACT_MAP at call time; unset, empty, malformed JSON, non-object or a value that is not a list of strings gives {} for that firm; one WE_CLIENT_CONTACT_MAP_MALFORMED line with a reason token, never the text",
+      "replaced": "def _client_recipients(item): the body-address derivation (req.email stripped, one element) is replaced by: firm from requester.firm; contacts = the map's list for that firm; no firm or no contacts logs WE_CLIENT_NO_CONTACT firm=<f> and returns []; a stored address (stripped, lower-cased) equal to a contact returns that contact; otherwise returns contacts[0] and logs WE_CLIENT_RECIPIENT_IGNORED firm=<f> to_digest=<_recipient_digest(stored)>",
+      "unchanged": "requester.email is still stored from the body (create_ticket, submit_form); _recipient_digest; notify_client and its single-recipient guard; notify_client_isolated; the DL path (notify_dl*, resolve_recipients); every route"
+    }
+  },
+  "test_counts": {
+    "new_file_test_notice_recipient_firm": "16 passed, 17 subtests passed (rc=0), run twice: 0.48s and 0.61s",
+    "folder_base_b569143371_continue_on_collection_errors": "305 passed, 8 errors, 42 subtests passed in 2.61s (rc=1)",
+    "folder_after_build": "321 passed, 8 errors, 59 subtests passed (rc=1); the 321 = 305 existing + 16 new; all 305 existing tests still pass",
+    "folder_without_continue_flag": "rc=2 Interrupted: 8 errors during collection (the 8 are the same at base and after the build; see the surprise row TCKT_VNEXT-D2-W45-S2)",
+    "collection_errors": [
+      "tests/test_no_row_refuses.py",
+      "tests/test_package_409_codes.py",
+      "tests/test_package_env_firms.py",
+      "tests/test_package_i5p_i7.py",
+      "tests/test_package_principal.py",
+      "tests/test_package_request_id.py",
+      "tests/test_package_route.py",
+      "tests/test_status_active.py"
+    ]
+  },
+  "new_test_cases": {
+    "file": "infra/aws/lambda/ticket_center/tests/test_notice_recipient_firm.py",
+    "count": 16,
+    "names": [
+      "StoredRequesterIsAContact.test_the_stored_requester_that_is_a_contact_gets_the_notice",
+      "StoredRequesterIsNotAContact.test_a_stored_requester_that_is_not_a_contact_goes_to_the_FIRST_contact_with_a_digest_only_log",
+      "StoredRequesterIsNotAContact.test_a_BLANK_stored_requester_goes_to_the_first_contact_with_the_ignored_token",
+      "FirmHasNoContacts.test_a_firm_with_an_empty_list_or_absent_from_the_map_sends_nothing_and_logs_no_contact",
+      "UnsetOrMalformedMap.test_an_unset_map_sends_nothing",
+      "UnsetOrMalformedMap.test_an_empty_or_blank_map_sends_nothing",
+      "UnsetOrMalformedMap.test_malformed_json_sends_nothing_logs_ONE_token_and_never_the_text",
+      "UnsetOrMalformedMap.test_a_non_object_document_sends_nothing",
+      "UnsetOrMalformedMap.test_a_value_that_is_not_a_list_of_strings_drops_only_that_firm",
+      "UnsetOrMalformedMap.test_a_list_holding_a_non_string_drops_that_firm_too",
+      "OtherFirmsListIsNotHonoured.test_a_body_address_on_ANOTHER_firms_list_is_not_honoured_for_this_firm",
+      "MatchIsCaseInsensitive.test_the_match_is_case_insensitive_and_sends_the_CONFIGURED_form",
+      "RecipientSetNeverMoreThanOne.test_the_derived_set_is_never_more_than_one_address",
+      "RecipientSetNeverMoreThanOne.test_the_single_recipient_guard_still_refuses_two_addresses",
+      "CreateWithBodyAddress.test_a_CREATE_with_an_outside_body_requester_email_sends_its_pickup_notice_to_the_firm_contact",
+      "NoAddressInTheNoticeLogs.test_no_log_line_the_notice_path_writes_contains_a_full_address"
+    ],
+    "step_4_bullets_covered": "9 of 9 (contact; not a contact; no contacts or absent; unset or malformed map; other firm's list; case-insensitive; at most one; CREATE with body requester_email; no full address in logs)"
+  },
+  "before_arm": {
+    "run": "final test file run with -v against the base lambda (git show b569143371:infra/aws/lambda/ticket_center/lambda_function.py) in .scratch/r19l1_before/ (scratch, outside the product tree)",
+    "result": "19 failed, 7 passed, 9 subtests passed (16 test cases: 9 FAILED, 7 PASSED at test level; 10 further subtests failed inside tests reported PASSED)",
+    "failing_on_base": [
+      "StoredRequesterIsNotAContact.test_a_stored_requester_that_is_not_a_contact_goes_to_the_FIRST_contact_with_a_digest_only_log",
+      "StoredRequesterIsNotAContact.test_a_BLANK_stored_requester_goes_to_the_first_contact_with_the_ignored_token",
+      "UnsetOrMalformedMap.test_an_unset_map_sends_nothing",
+      "UnsetOrMalformedMap.test_malformed_json_sends_nothing_logs_ONE_token_and_never_the_text",
+      "UnsetOrMalformedMap.test_a_value_that_is_not_a_list_of_strings_drops_only_that_firm",
+      "UnsetOrMalformedMap.test_a_list_holding_a_non_string_drops_that_firm_too",
+      "OtherFirmsListIsNotHonoured.test_a_body_address_on_ANOTHER_firms_list_is_not_honoured_for_this_firm",
+      "MatchIsCaseInsensitive.test_the_match_is_case_insensitive_and_sends_the_CONFIGURED_form",
+      "CreateWithBodyAddress.test_a_CREATE_with_an_outside_body_requester_email_sends_its_pickup_notice_to_the_firm_contact"
+    ],
+    "failing_only_in_subtests_on_base": [
+      "FirmHasNoContacts (3 subtests)",
+      "UnsetOrMalformedMap.test_a_non_object_document_sends_nothing (4 subtests)",
+      "UnsetOrMalformedMap.test_an_empty_or_blank_map_sends_nothing (2 subtests)",
+      "RecipientSetNeverMoreThanOne.test_the_derived_set_is_never_more_than_one_address (1 subtest, the blank address)"
+    ],
+    "passing_on_base_by_construction": [
+      "StoredRequesterIsAContact.test_the_stored_requester_that_is_a_contact_gets_the_notice",
+      "RecipientSetNeverMoreThanOne.test_the_single_recipient_guard_still_refuses_two_addresses",
+      "NoAddressInTheNoticeLogs.test_no_log_line_the_notice_path_writes_contains_a_full_address"
+    ],
+    "deviation": "the cell's premise that every case FAILS on the base does not hold for the three cases above; they are regression pins. Filed as TCKT_VNEXT-D2-W45-S4."
+  },
+  "mutant": {
+    "checker": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~45/mutant_check.py",
+    "mutation": "the single fallback line return [contacts[0]] (anchor count 1) is replaced by return [str(req.get(\"email\") or \"\").strip()]: the stored body address is used whatever the firm's list holds",
+    "scratch": "copy in .scratch/r19l1_mutant (inside the gitignored worktree scratch, outside infra/aws/lambda/ticket_center)",
+    "result": "pytest rc=1, 5 failed, 11 passed, 17 subtests passed on the 16 test cases; MUTANT-FIRES, exit 0"
+  },
+  "edited_fixtures": [
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_client_notify.py",
+      "where": "class Case, setUp and tearDown",
+      "old": "no line replaced; setUp ends with: self.sent = []",
+      "new": "setUp adds: self._saved_env = os.environ.get(\"CLIENT_NOTICE_CONTACT_MAP\") and os.environ[\"CLIENT_NOTICE_CONTACT_MAP\"] = json.dumps({\"inflection\": [CLIENT[\"email\"], CLIENT_EMAIL], \"49financial\": [CLIENT_EMAIL]}); tearDown adds restore of the saved value",
+      "why": "the fixtures' requester (CLIENT_EMAIL, and for the submit path the principal CLIENT[\"email\"]) is the firm's configured contact, so each test keeps what it asserted about the send. No existing assertion is changed; 10 lines added."
+    },
+    {
+      "file": "infra/aws/lambda/ticket_center/tests/test_client_mail_digest.py",
+      "where": "MailDigest.test_send_failed_digest_is_none_when_the_recipient_did_not_resolve",
+      "old": "no line replaced; the test sets r[\"requester\"][\"email\"] = \"\" then builds the buffer",
+      "new": "adds one line before the buffer: os.environ[\"CLIENT_NOTICE_CONTACT_MAP\"] = \"{}\" (with a two-line comment)",
+      "why": "the test asserts a blank requester refuses with WE_CLIENT_NOT_SINGULAR; under the cell's rule a blank address goes to the first contact, so the zero-contact map keeps the refusal assertion unchanged. Filed as TCKT_VNEXT-D2-W45-S3."
+    }
+  ],
+  "rows_filed": [
+    {
+      "id": "TCKT_VNEXT-D2-W45-S2",
+      "class": "OBSERVATION",
+      "hazard": "INERT",
+      "summary": "the folder's drain run cannot collect 8 modules: they read org/missions/D9 files outside the sparse cone; same at base and after the build"
+    },
+    {
+      "id": "TCKT_VNEXT-D2-W45-S3",
+      "class": "OBSERVATION",
+      "hazard": "INERT",
+      "summary": "the cell's blank-requester rule contradicts one existing assertion (test_client_mail_digest blank case); kept by a zero-contact map in that one test; the CTO or CVO to confirm the rule"
+    },
+    {
+      "id": "TCKT_VNEXT-D2-W45-S4",
+      "class": "OBSERVATION",
+      "hazard": "INERT",
+      "summary": "the before-arm premise (every case FAILS on base) does not hold for three regression-pin cases"
+    }
+  ],
+  "row_already_filed_earlier": "TCKT_VNEXT-D2-W45-S1 (BLOCKING, sparse cone excluded infra/aws) is left unedited; its cause is fixed (lambda_function.py and tests/ are materialised and tracked at H); it is listed in the instance surprises",
+  "not_read": [
+    "infra/aws/terraform/ (read-only by the grant; not opened)",
+    "the decomposition TCKT_VNEXT_DECOMP_R19.md CONTRACT section (the cell text inlined in the task order was used; the decomposition file itself was not opened)",
+    "the CTO ADDENDUM 7 message (msg 8833) and row IRPT_ANLREQ-D2-S134 (only the task order's restatement was read)",
+    "TO-R19-L2 and TO-R19-L3 (other workers' cells; the shared-file rule was honoured by touching only the recipient functions)",
+    "the other lambda test modules beyond the three edited or read files (run only as a folder count)",
+    "portal/ (a separate repository with a dirty submodule pointer in this worktree; not touched, not staged)"
+  ],
+  "live_calls": "none: no AWS, network, mail, deploy, apply, Terraform, invoke or push; the test suite ran against stubs with conftest.py guards in place"
+}
