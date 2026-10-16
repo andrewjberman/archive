@@ -31,9 +31,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~240/RD_REPIN_THREE_FACTS_R149.json",
       "kind": "doc",
-      "commit_or_etag": "376689568e",
+      "commit_or_etag": "c8f0cc9311",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Facts record: the three entry names, the re-pinned paths per entry, the unchanged-member counts (10, 13, 11), the BUILD_ONLY base64 sha256 of each entry at the committed source map, and one paragraph of words. The checker never reached its recount (AC1 refusal), so the record is the worker's measurement, not a checker-confirmed one.",
+      "deploy_evidence": "Facts record: the three entry names, the re-pinned paths per entry, the unchanged-member counts (10, 13, 11), the BUILD_ONLY base64 sha256 of each entry at the committed source map, and one paragraph of words. The checker's recount is not reached (AC2 and AC3 refuse on the import clause), so the record is the worker's measurement, not a checker-confirmed one.",
       "artifact_covered_by": [
         "DB165-1-AC3"
       ]
@@ -45,10 +45,9 @@
       "criterion_verbatim": "DB165-1-AC1 -- each of the three entries differs from the base only in its stale members' pin and sha256 (each new pin an ancestor commit whose file bytes equal the sha256 and the file at HEAD); a member that was not stale is byte-identical; no other key (the deployed fields included), no other entry and no top-level key moved; at the end every staged member of the three entries equals its pinned bytes. Base: FAIL.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p165_repin_three.py\" . DB165-1-AC1",
-      "output_evidence": "FAIL: irpt-49f-reporting-gold-lambda: member form: infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py\nDB165-1-AC1 FAIL",
-      "denominator": "1 of 3 entries clears check_repin in run order (irpt-cot-reporting-publish-lambda); irpt-49f-reporting-gold-lambda is refused at its 3rd of 21 staged members (form clause); irpt-cot-account-return-daily-lambda is not reached; 14 of 14 stale members re-pinned (2 + 8 + 4); 48 members in the three entries (12 + 21 + 15)",
-      "status": "FAIL",
-      "status_reason": "The form clause of check_repin (packaged_as == repo_path == base repo_path for every member) refuses the unchanged 49F member infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py, whose packaged_as is etf_classifications_dynamodb.py at base and at HEAD. Step 2 forbids changing packaged_as, so the criterion cannot pass as written. Filed as IRPT_DASHBD-D2-W240-S1.",
+      "output_evidence": "OK: the three entries differ from the base only in their stale members' pins and sha256 (irpt-cot-reporting-publish 2, irpt-49f-reporting-gold 8, irpt-cot-account-return-daily 4); every member of the three now equals its pinned bytes and the file at HEAD; no other entry, key or deployed field moved\nDB165-1-AC1 PASS",
+      "denominator": "3 of 3 entries differ from the base only in stale-member pins; 14 of 14 stale members re-pinned (2 + 8 + 4); 34 of 34 non-stale members byte-identical (10 + 13 + 11); 48 members in the three entries (12 + 21 + 15); 0 other entries or keys moved",
+      "status": "PASS",
       "expect": "DB165-1-AC1 PASS"
     },
     {
@@ -56,10 +55,10 @@
       "criterion_verbatim": "DB165-1-AC2 -- the BUILD_ONLY package of each of the three entries holds exactly the entry's files with every member's bytes equal to its source, and its third-party imports are pyarrow plus the runtime's (the layer holds it). Base: FAIL.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p165_repin_three.py\" . DB165-1-AC2",
-      "output_evidence": "FAIL: irpt-49f-reporting-gold-lambda: member form: infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py\nDB165-1-AC2 FAIL",
-      "denominator": "0 of 3 entries reach the package check through the checker (check_all_entries refuses first, the same clause as AC1); the worker's own BUILD_ONLY runs of the three entries exited 0 (3 of 3) and printed the base64 hashes in the facts record; the package-vs-source and import clauses were not run through the checker",
+      "output_evidence": "FAIL: the bundle's third-party imports (any statement, besides boto3/botocore) must be exactly pyarrow, read ['pandas', 'pyarrow']\nDB165-1-AC2 FAIL",
+      "denominator": "1 of 3 entries clears the package and import path in run order (irpt-cot-reporting-publish-lambda); irpt-49f-reporting-gold-lambda is refused on its third-party set (pandas and pyarrow read, only pyarrow admitted); irpt-cot-account-return-daily-lambda is not reached; the worker's own BUILD_ONLY runs exited 0 for 3 of 3 entries (measurement outside the checker)",
       "status": "FAIL",
-      "status_reason": "The checker refuses at the same form clause before any build is inspected (IRPT_DASHBD-D2-W240-S1). The worker's BUILD_ONLY runs are measurements outside the checker, not the criterion.",
+      "status_reason": "The import clause admits only pyarrow, but the 49F bundle also imports pandas, which the shared layer irpt-performance-native-layer holds (a GET, version 1, holds python/pandas/__init__.py). Filed as IRPT_DASHBD-D2-W240-S2; the criterion cannot pass as written.",
       "expect": "DB165-1-AC2 PASS"
     },
     {
@@ -67,10 +66,10 @@
       "criterion_verbatim": "DB165-1-AC3 -- the facts record equals the checker's recount (the re-pinned paths per entry, the unchanged counts, the three build-only hashes) and the worker's commits change only the source map, the folder, the investigation file and task-order files. Base: FAIL.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p165_repin_three.py\" . DB165-1-AC3",
-      "output_evidence": "FAIL: irpt-49f-reporting-gold-lambda: member form: infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py\nDB165-1-AC3 FAIL",
-      "denominator": "0 of 5 facts-record keys checked by the checker (the recount halts at the form clause); 0 of 3 build-only hashes recounted by the checker; the worker's commits (ebe2302322, 376689568e) touch 2 files in the source map and folder plus the investigation file, all inside the grant, by the worker's own read",
+      "output_evidence": "FAIL: the bundle's third-party imports (any statement, besides boto3/botocore) must be exactly pyarrow, read ['pandas', 'pyarrow']\nDB165-1-AC3 FAIL",
+      "denominator": "0 of 5 facts-record keys checked by the checker (the recount halts at the import clause); 0 of 3 build-only hashes recounted by the checker; the worker's commits (ebe2302322, 376689568e, c8f0cc9311) touch the source map, the folder and the investigation file, all inside the grant, by the worker's own read",
       "status": "FAIL",
-      "status_reason": "The checker halts at the AC1 form clause before check_facts and the grant check. The recount was not reached.",
+      "status_reason": "The checker halts at the import clause (IRPT_DASHBD-D2-W240-S2) before check_facts and the grant check. The recount was not reached.",
       "expect": "DB165-1-AC3 PASS"
     }
   ],
@@ -82,8 +81,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Each criterion run once on the committed tree at 376689568e; the refusal is the same deciding line in AC1, AC2 and AC3 because all three call the same check_all_entries first. A repeat was not run.",
-      "observed": "DB165-1-AC1, DB165-1-AC2 and DB165-1-AC3 each print FAIL: irpt-49f-reporting-gold-lambda: member form: infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py",
+      "method": "AC1, AC2 and AC3 run twice each on the committed tree (first at f4f95492d7 with the pre-fix checker, then at c8f0cc9311 with the fixed checker from f86d63befd); AC2 and AC3 refuse on the same import line both times.",
+      "observed": "At c8f0cc9311: DB165-1-AC1 PASS; DB165-1-AC2 and DB165-1-AC3 each print FAIL: the bundle's third-party imports (any statement, besides boto3/botocore) must be exactly pyarrow, read ['pandas', 'pyarrow']",
       "status": "STABLE"
     }
   },
@@ -102,7 +101,8 @@
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W240-S1: the p165 form clause refuses the unchanged 49F member whose packaged_as differs from its repo_path, so AC1 to AC3 fail as written"
+    "IRPT_DASHBD-D2-W240-S1: the p165 form clause refuses the unchanged 49F member whose packaged_as differs from its repo_path (cleared by the issuer's fixed checker, f86d63befd; AC1 now PASS)",
+    "IRPT_DASHBD-D2-W240-S2: the p165 import clause admits only pyarrow, but the 49F bundle also imports pandas, which the shared layer holds, so AC2 and AC3 fail as written"
   ],
   "compiler_tools": [
     {
