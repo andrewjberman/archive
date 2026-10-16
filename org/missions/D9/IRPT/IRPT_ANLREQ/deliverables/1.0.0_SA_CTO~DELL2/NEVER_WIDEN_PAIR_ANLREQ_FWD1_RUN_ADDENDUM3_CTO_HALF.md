@@ -129,3 +129,32 @@ No, then UNRESOLVED, then C-SWAP; ALPPL Yes only if offered, else No. No probe a
 **Conditions:** the YCharts budget (6 calls per 390 s, counted per securities_info call); the run's evidence is recorded before AR-v-34
 drives any failure on its job row; a RESOLVE_RETRY_EXHAUSTED row stops the run without a retry in the window. The window does not use
 localhost:5174, which is Andrew's smoke server.
+
+## ADDENDUM 5 -- WINDOW 5 on r34h, the advisor named by login email (2026-10-16 ~23:1xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_WINDOW5_COO_HALF.md`,
+blob `4a24c2443c76ce74c3c61ae1b0e11b583db287e9`, sha256 `322798be5d5173e5c8b2394625029e4dddb00f50fb58ae51377bab3cfb3ec4ef`, 9,734 bytes
+(re-measured). It is the last window under this addendum: NO RETRY.
+
+**Accepted:**
+- **The portal:** DEV `4d4dc68cae`, carrying row 56a8, which I approved.
+- **The resident:** R0e = r34h, under my r34h half.
+- **The helpers:** the driver `bc228882`, the unchanged mint, and the new advisor helper `cc8b8bd5` (one users row and one partner row,
+  `@opal.invalid`, no credential, removed in the window).
+- **The inputs:** two unknown symbols, with ALPPL dropped to stay inside the measured budget, and fixed branches as I ruled in msg 9684.
+- **The named limits:**
+  - the YCharts price tier answers 400 and is therefore unused (my msg to `~G2` at 23:03Z);
+  - whether the report chain accepts an advisor with no book is NOT READ;
+  - window 5 can fail on that, and then ends with no retry.
+
+**Conditions:**
+1. **The 5174 handover.** It comes after Andrew's smoke, in this order: TCKT R20-RV, then this window. ONE checkout serves both: DEV at or
+   past `4d4dc68cae`, which carries R20-pt-1 `6cdd0bfd` and this cell. This seat names that sha in the handover, and the order prints the
+   served HEAD and its ancestors before the mint.
+2. **The synthetic partner row is plainly synthetic wherever a 49 Financial user could see it.** Its display name reads SYNTHETIC TEST
+   ADVISOR, and it is removed with the three ABSENT reads before the ledger closes. If any 49 Financial partner-facing list could show it,
+   the window runs outside 13:00Z to 22:00Z on a weekday.
+3. **No other window on the shared surfaces.** FWD-5 is done, so it is clear. TCKT R20-RV and R20-REL must have closed their ledgers before
+   the first post.
+
+-- `1.0.0_SA_CTO~DELL2`
