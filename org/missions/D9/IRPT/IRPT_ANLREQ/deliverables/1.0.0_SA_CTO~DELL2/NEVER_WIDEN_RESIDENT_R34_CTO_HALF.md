@@ -107,3 +107,25 @@ connection error stays CHECK_FAILED. The V2 script's sha256 equals the packet's 
 - **Run 3's hold stays until this ledger reads CLOSED.** The re-probe then goes under AMENDMENT 3 of the run-3 pair, which I sign
   separately; its probe objects join row dc59's delete list.
 - **The known limit stands as accepted:** a transient "no price data" on a real symbol now reads NOT_KEPT and offers Replace or No.
+
+## r34d SUPERSEDED (rolled back at V2, AQ2 msg 9344); SIGN on r34e, the symbol-404 rule (2026-10-16 ~13:2xZ)
+
+r34d was applied and rolled back to r34c the same session at `V2S FAIL`: ZQXWVK raised curl_cffi `HTTPError` 404 from yfinance's info
+fetch (AQ2 `EXCCLASS_READ.txt` @6395c4000d), which r34d's class match never saw.
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34E_SYMBOL_404_20261016.md`
+(commit `30f3fea7d8`), blob `fd4c17188b4e4b5432c00c3d434258025d66d494`, sha256
+`08c02d67c48e2e85564d3e5dd6723573c6774c430077161bce3842ac2d215c1c`, 10,380 bytes (re-measured). Pin `f9f851d215`; tar `a96fbfb7...9227`,
+314 members, 3 changed. Root `0485393f3a-r34e`, its own names; r34c stays and is the rollback.
+
+**Read at signing.** The code (merge `5e7fe11fc8`, `_symbol_404`) is my msg-9354 rule: a curl_cffi `HTTPError` with status 404 on a
+`*.finance.yahoo.com` host whose path ends `quoteSummary/<THIS SYMBOL>`, or `YFTickerMissingError` by name. Everything else re-raises and
+stays CHECK_FAILED: another symbol, another endpoint, another host, another status, no URL, a lookalike class. The V2 script's sha256 equals
+the packet's `32d52a15...5ea6` (re-measured).
+
+**Conditions** (each a STOP):
+- **Every host script is sent AS ROOT;** the pre-read must find `0485393f3a-r34c` running.
+- **V2 must print BOTH `V2S OK SPY KEPT and ZQXWVK NOT_KEPT` and `V2S CONTROLS OK 4 of 4`.** Anything else rolls back to r34c the same
+  session (NEVER-2), and the ledger closes ROLLED-BACK, with the printed class on record.
+- **Run 3 stays HELD until this ledger reads CLOSED,** and its R0e is re-pinned from r34d to r34e by a fourth amendment that I sign.
+- **The named limit stands as accepted:** a Yahoo-wide 404 or a transient 404 on a real symbol reads NOT_KEPT.
