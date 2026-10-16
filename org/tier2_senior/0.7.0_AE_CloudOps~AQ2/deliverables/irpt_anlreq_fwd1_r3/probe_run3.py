@@ -79,6 +79,18 @@ def select(results):
     return {"U1": u1, "U2": u2, "U3": u3}
 
 
+def gate(results):
+    """The CTO's SET 2 STOP conditions (msgs 9337 and 9380): ZQXWVK must read NEEDS_CORRECTION:TICKER_NOT_FOUND with no suggestion; all five
+    reading TICKER_CHECK_FAILED stops. Returns (ok, reason)."""
+    by = {c: r for c, r in results}
+    z = by.get("ZQXWVK")
+    if not z or z["label"] != "NEEDS_CORRECTION:TICKER_NOT_FOUND" or z["suggestion"]:
+        return False, "ZQXWVK did not read NOT_FOUND without a suggestion: %s" % (z["label"] if z else "NOT PROBED")
+    if results and all(r["label"].endswith("TICKER_CHECK_FAILED") for _, r in results):
+        return False, "all five candidates read TICKER_CHECK_FAILED"
+    return True, "ZQXWVK reads NOT_FOUND"
+
+
 def selftest():
     ok = {"ok": True, "data": {"state": "NEEDS_CORRECTION", "findings": [{"code": "TICKER_NOT_FOUND", "value": "zzz", "actions": ["ACCEPT_SUGGESTION", "REPLACE_TICKER"], "suggestion": {"symbol": "ZZY"}}]}}
     assert describe(200, ok, "ZZZ") == ("NEEDS_CORRECTION:TICKER_NOT_FOUND", True, "ZZY", ["ACCEPT_SUGGESTION", "REPLACE_TICKER"])
@@ -99,7 +111,13 @@ def selftest():
     assert select([("A", r(False, None))]) == {"U1": None, "U2": None, "U3": None}
     assert select([("A", r(True, "A1")), ("B", r(True, "B1")), ("C", r(True, "C1"))]) == {"U1": "A", "U2": "B", "U3": "C"}
     assert csv_for("ALPPL") == b"Ticker,Dollars,Acct Market Value\nSPY,100,26000000\nALPPL,50,5000000\n"
-    print("SELFTEST-OK probe helpers: describe (6 shapes), select (4 cases incl. UNEXERCISED and the no-suggestion preference), csv_for")
+    nf = {"label": "NEEDS_CORRECTION:TICKER_NOT_FOUND", "suggestion": None}
+    cf = {"label": "NEEDS_CORRECTION:TICKER_CHECK_FAILED", "suggestion": None}
+    assert gate([("ALPPL", cf), ("ZQXWVK", nf)]) == (True, "ZQXWVK reads NOT_FOUND")
+    assert gate([("ALPPL", nf), ("ZQXWVK", cf)])[0] is False
+    assert gate([("ALPPL", nf), ("ZQXWVK", dict(nf, suggestion="X"))])[0] is False
+    assert gate([("ALPPL", nf)])[0] is False
+    print("SELFTEST-OK probe helpers: describe (6 shapes), select (4 cases incl. UNEXERCISED and the no-suggestion preference), csv_for, gate (4 cases)")
     return 0
 
 
@@ -118,7 +136,8 @@ def live(args):
     date = args.date
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    addr = "irpt-r3p-iv-%s@opal.invalid" % date
+    tag = args.tag
+    addr = "irpt-%s-iv-%s@opal.invalid" % (tag, date)
     ddb = boto3.client("dynamodb", region_name=base.REGION)
     lam = boto3.client("lambda", region_name=base.REGION)
     s3 = boto3.client("s3", region_name=base.REGION)
@@ -143,7 +162,7 @@ def live(args):
         if wait > 0:
             time.sleep(wait)
         state["posts"] += 1
-        body = {"upload_token": tok, "filename": "r3p-%s.csv" % cand.lower(), "file_base64": base64.b64encode(csv_for(cand)).decode(), "file_type": "csv"}
+        body = {"upload_token": tok, "filename": "%s-%s.csv" % (tag, cand.lower()), "file_base64": base64.b64encode(csv_for(cand)).decode(), "file_type": "csv"}
         req = urllib.request.Request(base.BASE + UPLOAD, data=json.dumps(body).encode("utf-8"), method="POST")
         req.add_header("Authorization", "Bearer " + state["token"])
         req.add_header("x-contract-version", "v1")
@@ -170,7 +189,7 @@ def live(args):
         say("intake BEFORE bucket %s prefix %s: %d versions, %d delete markers" % (BUCKET, PREFIX, len(before[0]), before[1]))
         now = base.iso()
         item = {"PK": key["PK"], "SK": key["SK"], "email": {"S": addr}, "firmId": {"S": "opal-capital"}, "status": {"S": "active"},
-                "name": {"S": "IRPT_ANLREQ R3 probe synthetic internal viewer"}, "role": {"S": "user"}, "tier": {"S": "internal"},
+                "name": {"S": "IRPT_ANLREQ R3 probe synthetic internal viewer (%s)" % tag}, "role": {"S": "user"}, "tier": {"S": "internal"},
                 "userType": {"S": "test-filer"}, "createdAt": {"S": now}, "createdBy": {"S": "0.7.0_AE_CloudOps~AQ2"}, "updatedAt": {"S": now}}
         ddb.put_item(TableName=base.USERS, Item=item, ConditionExpression="attribute_not_exists(PK)")
         written = True
@@ -183,7 +202,7 @@ def live(args):
             raise RuntimeError("signing secret is not a PEM string")
         iat = int(time.time())
         claims = {"sub": addr, "iss": "opal-portal-auth", "aud": "opal-portal-api", "firmId": "opal-capital", "tier": "internal", "role": "user",
-                  "userType": "test-filer", "name": "IRPT_ANLREQ R3 probe synthetic internal viewer", "iat": iat, "exp": iat + LIFE}
+                  "userType": "test-filer", "name": "IRPT_ANLREQ R3 probe synthetic internal viewer", "iat": iat, "exp": iat + args.life}
         state["token"] = pyjwt.encode(claims, pem, algorithm="RS256")
         exp = claims["exp"]
         del pem
@@ -193,7 +212,7 @@ def live(args):
                 say("PROBE %s NOT PROBED: the token window is nearly spent" % cand)
                 results.append((cand, dict(status=None, label="NOT_PROBED", qualifies=False, suggestion=None, actions=[], sha=None, posts=0)))
                 continue
-            tok = "irpt-r3p-%s-%s" % (cand.lower(), date)
+            tok = "irpt-%s-%s-%s" % (tag, cand.lower(), date)
             st, b, raw, _ = post(cand, tok)
             label, q, sug, acts = describe(st, b, cand)
             n = 1
@@ -238,6 +257,8 @@ def live(args):
                "new_objects": None if new is None else [{"key": k, "version_id": v, "size": after[0][(k, v)]} for k, v in new]}
         (out / "probe_results.json").write_text(json.dumps(doc, indent=1), encoding="utf-8")
         (out / "probe_trace.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        ok_, why_ = gate(results) if results else (False, "no results")
+        say("GATE %s: %s" % ("OK" if ok_ else "STOP", why_))
         say("SELECTION U1=%s U2=%s U3=%s (None = UNEXERCISED); new intake objects: %s" % (sel["U1"], sel["U2"], sel["U3"], "unread" if new is None else len(new)))
     return 0 if not stop else 1
 
@@ -249,9 +270,13 @@ def main(argv):
     ap.add_argument("--go", action="store_true")
     ap.add_argument("--date", default=dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d"))
     ap.add_argument("--out", default="")
+    ap.add_argument("--tag", default="r3p", help="viewer tag: r3p for SET 1, r3q for SET 2")
+    ap.add_argument("--life", type=int, default=LIFE, help="token life in seconds (at most 1200)")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
+    if a.life > 1200:
+        ap.error("--life is at most 1200 seconds (20 minutes)")
     if a.live and a.go and a.out:
         return live(a)
     ap.error("choose --selftest, or --live --go --out <folder>")
