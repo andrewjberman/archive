@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-bc-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-bc-1.placement-check-fails-loud.md",
+    "group": "OTHER",
+    "vintage_commit": "833181d311"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~141",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round29.md",
+    "vintage_commit": "833181d311",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-bc-1.placement-check-fails-loud.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/placement-check.py",
+      "kind": "script",
+      "commit_or_etag": "a575660e48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Exit 3 with an ERROR: line when org/missions is absent (text and --json), when org/projects is absent, when a register row cannot be read, and when a non-terminal register row that carries a tree home (its declared home field under org/missions/, united with an in-ROOT tree home) is not read as a live project. The read counts an UNREADABLE project.json as reached. A new line 'placement-check | register rows with a tree home: <m> | live projects read: <n> | match=True' prints on every successful run. Findings keep exit 0. read_projects() and its signature are unchanged (crossbox-deploy-check.py and open-calls.py import it). Measured on the worktree copy of the tool with org/missions widened to the full HEAD tree (read only): rc=0, live projects 30, register rows with a tree home 30, match=True. In the same worktree before org/missions was widened the same tool exited 3 with 'ERROR: placement-check read 1 live project(s) but the register lists 30 with a tree home'.",
+      "artifact_covered_by": ["CTbc1-AC1", "CTbc1-AC2"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round29_placement_loud.py",
+      "kind": "test",
+      "commit_or_etag": "e3c51b12b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library plus the tool. Seven arms on synthetic trees in temporary folders (the tool and lib/devices.py are copied in, so ROOT is the temporary tree): (a) no org/missions; (b) register lists 2 with a tree home, the tree reads 1, message names 1 and 2 and the code not read; (c) healthy; (d) planted cross-box overlap, exit 0 and OVERLAP printed; (e) --json with no org/missions; (f) no org/projects; (g) one unreadable project.json, exit 0 and UNREADABLE finding. No network. Last line PLACEMENT-LOUD arms=7/7 ok=True.",
+      "artifact_covered_by": ["CTbc1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "de88698374",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three appended rows, never edited, carried by 4aef68dfd1 (S1, S2) and de88698374 (S3): NFRA_CTLPLN-W141-S1 (the register expectation read as an in-ROOT tree home shrinks with a sparse org/missions; OBSERVATION, INERT), NFRA_CTLPLN-W141-S2 (the wk cut lacks org/projects and infra/aws/lambda/ci; OBSERVATION, INERT) and NFRA_CTLPLN-W141-S3 (a neighbour read-back suite rewrites a tracked CT-ai-1 deliverable on each run; OBSERVATION, INERT). All UNDER_INVESTIGATION.",
+      "artifact_covered_by": ["CTbc1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTbc1-AC1",
+      "criterion_verbatim": "a missing org/missions or org/projects and a short project count each exit 3 with an ERROR line, while findings keep exit 0 (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round29_placement_loud.py",
+      "output_evidence": "run from the worktree root (committed code: .tools files at e3c51b12b2, the last code commit) under timeout 280; exit code 0; last line verbatim: PLACEMENT-LOUD arms=7/7 ok=True. Arm lines: PASS (a) no org/missions -> ERROR, exit 3 [rc=3 errors=1]; PASS (b) register lists 2 with a tree home, read 1 -> ERROR names 1 and 2, exit 3 [rc=3, message 'ERROR: placement-check read 1 live project(s) but the register lists 2 with a tree home; first not read: B']; PASS (c) healthy tree -> exit 0, match=True line, no ERROR [rc=0]; PASS (d) healthy tree + cross-box overlap -> exit 0, OVERLAP printed [rc=0 overlaps_line=True]; PASS (e) --json with no org/missions -> exit 3, JSON error key [rc=3]; PASS (f) no org/projects -> ERROR, exit 3 [rc=3]; PASS (g) unreadable project.json -> exit 0, UNREADABLE finding, not ERROR [rc=0 unreadable_line=True].",
+      "denominator": "7 of 7 arms passed (arms a to g); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTbc1-AC2",
+      "criterion_verbatim": "the tool's own planted cases still pass (base: `placement-check --self-test: 7/7 PASS`, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/placement-check.py --self-test",
+      "output_evidence": "run from the worktree root (committed code: .tools files at e3c51b12b2, the last code commit) under timeout 280; exit code 0; last line verbatim: placement-check --self-test: 7/7 PASS. The self_test() function was not changed; its seven cases are the base cases.",
+      "denominator": "7 of 7 cases passed (the base count); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "placement-check --self-test: 7/7 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A mutant copy under the worktree scratch folder (.scratch/mut: the test file, lib/devices.py and placement-check.py with the one line 'if missing:' changed to 'if False and missing:', so the short-count check never fires), run against the unchanged test file.",
+      "expected": "arm (b) fails (a short register count must exit 3), the other six arms are unaffected, and the last line reads not ok",
+      "observed": "arm (b): FAIL (rc=0, msg=none); arms (a), (c), (d), (e), (f), (g): PASS; last line PLACEMENT-LOUD arms=6/7 ok=False; exit 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed code at e3c51b12b2 (the last code commit), same command, timeout 280; the PASS, FAIL and last lines of the two runs compared with diff",
+      "observed": "AC1: PLACEMENT-LOUD arms=7/7 ok=True and exit 0 in both runs; the two outputs differ only in the temporary folder name inside arm (f)'s detail text. AC2: placement-check --self-test: 7/7 PASS, exit 0, identical output in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-bc-1 to complete",
+      "reason": "the order file is outside this worker's paths; the issuer flips it on a valid, all-PASS instance"
+    },
+    {
+      "item": "the expectation as the task order words it (non-terminal register rows with a tree home under ROOT only)",
+      "reason": "read in a sparse worktree that holds part of org/missions, that count shrinks with the tree and reads a short count as a match; the worker used the register's declared home field united with the in-ROOT tree home. Filed as NFRA_CTLPLN-W141-S1 for the CTO's reading of ruling 3"
+    },
+    {
+      "item": "neighbour suite test_round19_register.py --fwd2 and --fwd7 at the merge",
+      "reason": "reported in the worker report, not a criterion of this order: --fwd7 first read red (FileNotFoundError on infra/aws/lambda/ci, a sparse-cut gap, not this change) and was green after git sparse-checkout add infra/aws/lambda/ci (FWD7-OVERLAPS total=62 shared=58 split=0 not_same_file=4 unclassified=0 ok=True); --fwd2 FWD2-BOX-ADDED tools=8/8 not_reached=0 named=8 ok=True"
+    },
+    {
+      "item": "the real register, the real tree and the portal gitlink; any push, deploy, AWS write or terraform command",
+      "reason": "the cell's rules; the test writes only temporary folders; the portal gitlink and org/git-author-override-audit.laptop.log are not committed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W141-S1: the register expectation read as a tree home under ROOT shrinks with a sparse org/missions (a sparse worktree would read a short count as a match); the worker used the declared home field united with the in-ROOT tree home. Both sets are 30 on the main tree.",
+    "NFRA_CTLPLN-W141-S2: the wk cut lacks org/projects and infra/aws/lambda/ci, which the placement read and test_round19_register.py --fwd7 read; each was added with git sparse-checkout add.",
+    "NFRA_CTLPLN-W141-S3: test_round19_register.py --fwd7 rewrites a tracked CT-ai-1 deliverable (FWD7_OVERLAP_CLASSES.md) on each run; the worker restored it to HEAD and committed nothing outside its paths."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~141/NFRA_CTLPLN.TO-CT-bc-1.placement-check-fails-loud.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile .tools/placement-check.py .tools/tests/test_round29_placement_loud.py",
+      "result": "exit 0 (both files compile under Python 3.12); safe-commit commit-gate: 'All checks passed!' on both .py commits"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_register.py --fwd7 and --fwd2 (neighbour suites, run at the worktree root)",
+      "result": "FWD7-OVERLAPS total=62 shared=58 split=0 not_same_file=4 unclassified=0 ok=True; FWD2-BOX-ADDED tools=8/8 not_reached=0 named=8 ok=True"
+    }
+  ]
+}
