@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-111",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-111.status-failure-code-and-words.md",
+    "group": "OTHER",
+    "vintage_commit": "f934c0ab73"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R30_G.md",
+    "vintage_commit": "f934c0ab73",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-111.status-failure-code-and-words.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~253",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/status.py",
+      "kind": "script",
+      "commit_or_etag": "dad5c4530b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FAILURE_STEP_WORDS and FAILURE_WORDS literal tables and failure_words(code, step) inserted after CORRECTION_WORDS; no envelope field or schema change; no deploy",
+      "artifact_covered_by": [
+        "AR111-g-AC1",
+        "AR111-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/owned_status.py",
+      "kind": "script",
+      "commit_or_etag": "dad5c4530b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_failure(snapshot, phase) above OwnedJobStatusReader; read() carries a known closed code as public_reason_code (not for the GENERATE step) and adds one safe NONE action with the fixed words; no state change; no deploy",
+      "artifact_covered_by": [
+        "AR111-g-AC1",
+        "AR111-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_owned_status.py",
+      "kind": "test",
+      "commit_or_etag": "dad5c4530b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two assertions changed: FAILED and ATTENTION now expect the GENERATE step's one NONE action; running phases keep WAIT only",
+      "artifact_covered_by": [
+        "AR111-g-AC1",
+        "AR111-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_hop_failure_status.py",
+      "kind": "test",
+      "commit_or_etag": "dad5c4530b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three named offline tests: a hop failure reads as its code and words; an unknown code reads the step's generic words; a generate failure keeps its reason: 3 passed",
+      "artifact_covered_by": [
+        "AR111-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR111-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g111",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g111",
+      "output_evidence": "AR-G111-OK issuer=15 named=3 worker=3 | issuer tests: 15 passed in 5.79s | named tests missing: none | worker tests: 3 passed in 3.19s | rc=0 | run at the worktree root at dad5c4530b under timeout 590000 ms (base before the commit: AR-G111-FAIL issuer=5/15, worker test file absent)",
+      "denominator": "15 of 15 issuer tests passed, 0 failed; 3 of 3 named worker tests present and passed, 0 failed",
+      "expect": "^AR-G111-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR111-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress111",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress111",
+      "output_evidence": "AR-G111-REGRESS-OK 123 tests in 5 files, 4 changed paths all the cell's own | rc=0 | run at the worktree root at dad5c4530b under timeout 590000 ms (base: the order's stated PASS at 123)",
+      "denominator": "123 passed, 0 failed across 5 files (test_owned_status, test_owned_report, test_owned_requests, test_owned_entry, test_ticket_contract; each run on its own); minimum 123",
+      "expect": "^AR-G111-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; the issuer's three named worker tests and 15 issuer tests are the negative arms (a dropped reason override, a blank fallback, an unknown hop, a generate failure's reason).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes, no network, no clock dependence in the assertions beyond the fixture's fixed timestamp",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "Lambda leg: re-pin of ops/status.py, ops/owned_status.py and ycharts/generate/durable_job.py in lambda-source-map.json and a release",
+      "reason": "the order names it a later cell and pair; no deploy, no AWS call in this order"
+    },
+    {
+      "item": "the ticket page reading the code and the words",
+      "reason": "another seat's page; out of this order's paths"
+    },
+    {
+      "item": "a live job row carrying hop_failure",
+      "reason": "not claimed; the proof is offline on the fixture's DynamoDB item form"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q infra/aws/lambda/investor-reporting/ops/tests/test_hop_failure_status.py (run on its own)",
+      "result": "3 passed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g111",
+      "result": "AR-G111-OK issuer=15 named=3 worker=3 (rc=0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress111",
+      "result": "AR-G111-REGRESS-OK 123 tests in 5 files (rc=0)"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/commit-gate.sh <each of the four .py files>",
+      "result": "pre-commit gate clean for 1 of 1 file(s), four times (rc=0)"
+    }
+  ]
+}
