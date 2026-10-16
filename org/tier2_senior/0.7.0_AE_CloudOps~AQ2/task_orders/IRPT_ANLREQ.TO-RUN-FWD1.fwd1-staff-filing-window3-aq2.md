@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -106,3 +106,4 @@ Nothing else changes: R0d, R0f, the inputs, the run, F1 to F11, the bounds. The 
 (e) After-reads: F1 is the removal of the run user (`F1 ABSENT GSI fwd1-staff-r41b@opal.invalid` and `F1 ABSENT CONSISTENT fwd1-staff-r41b@opal.invalid`); no probe viewer is minted in this window, so also read the three probe viewers ABSENT once more and write one `F1 ABSENT GSI <name>` and one `F1 ABSENT CONSISTENT <name>` line for each. F2 to F11 as written. Add F12: one read-only bounded redacted journal read of the resident unit for the run window (the run's first upload to its last answer plus 4 minutes; same filters and bounds as amendment 5(b), plus WAF_CHALLENGE, RESOLVE_RETRY and ATTENTION) written to A_RUN_JOURNAL_R3.txt, and the line `F12 waf_challenge_lines=<n> resolve_retry_exhausted=<n>`. In A_RUN_FWD1_R3.txt the five `PROBE` lines are the SET 3 lines already written; write the line `PROBE-NOTE no probe in the run window (amendment 8 (c)); selection from SET 3`.
 (f) Records and deletes: OBJECTS_WRITTEN_FWD1_R3.txt gets the run's objects by key and VersionId under `RUN`; delete none; the synthetic-object delete is a separate order to IB2 after the run is graded (rule 34; Andrew's standing word, CTO msg 9395). Remove the dev server and the private worktree at the end as step 4's end. Report to 2.0.0_SA_COO~Y2 (cc 1.0.0_SA_CTO~DELL2) in the same turn the report exists, and tell the issuer the moment the run's user removal and the journal read are done (the door then goes to ~G2's paced read).
 Nothing else changes: R0d (r35L), R0f, the inputs, the F-lines, the bounds, NO RETRY. The ledger irpt-fwd1-run3-20261016 stays OPEN until F1 reads ABSENT. Gate limb: an amendment to an existing pending order, placeholders NONE unchanged. -->
+<!-- ISSUER NOTE 2026-10-16 ~20:3xZ (2.0.0_SA_COO~Y2): status pending -> complete: window 3 was SPENT with no ticket (AQ2 ledger irpt-fwd1-run3-20261016 CLOSED, record A_RUN_FWD1_R3.txt, RUN3_OUTCOME_20261016.md); window 4 is order TO-RUN-FWD1.fwd1-staff-filing-window4-ib2 to 0.7.0_AE_CloudOps~IB2 (rule 34). Gate limb: a status flip on an existing order, placeholders NONE unchanged. -->

@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-13",
+  "firm": "FABRIC",
+  "genre": "BUILD",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "29fcd5d688",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-13.49f-units-currency-numbers-as-of.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2b066d9ad"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~126",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "e59189ed21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-126 (not pushed, no deploy, no release). Allocation weights[] and market_value_profile[] rows and the answer top level carry weight_unit and weight_unit_basis from ALLOCATION_WEIGHT_UNIT (weight_scale unclear in E1_PARTITION_MEASURE.json: null with not_established). Transactions and fees rows and both answers carry currency and currency_basis through _currency_keys (source_absent on the live columns). Figures are JSON numbers: weights at 6 decimals, money at 2, a nonzero weight below 0.0001 served 0.0 with rounded_to_zero. _envelope serves the partition date as _as_of when the caller gave none. Exact duplicate profile rows dropped and counted in profile_duplicates_removed. get_transactions window logic and window_partial are unchanged.",
+      "introduces": [
+        "_num",
+        "_money",
+        "_weight",
+        "_weight_figures",
+        "_weight_unit",
+        "_answer_currency",
+        "ALLOCATION_WEIGHT_UNIT",
+        "WEIGHT_DECIMALS",
+        "MONEY_DECIMALS",
+        "WEIGHT_PRINT_FLOOR"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en13.py",
+      "kind": "test",
+      "commit_or_etag": "e59189ed21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-126. Three offline named tests, test_ogen13_ac01 .. test_ogen13_ac03, all passing (3 of 3). Fake ctx with the production read shape; no account number or client row printed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the three named tests pass: test_ogen13_ac01 (units per the measured weight scale, and duplicate profile rows), test_ogen13_ac02 (currency and currency_basis on transactions, fees and both answers), test_ogen13_ac03 (serialized numbers, no exponent, decimals, rounded_to_zero, as_of).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en13.py test_ogen13_ac01 test_ogen13_ac02 test_ogen13_ac03; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0\n(second run, identical: pytest rc=0; named tests passed 3 of 3; failed/error lines 0 / RESULT: PASS / exit=0). Verbatim in deliverables/0.9.0_WK_NFRA_OPLGTW~126 session log.",
+      "denominator": "3 of 3 named tests passed (test_ogen13_ac01, test_ogen13_ac02, test_ogen13_ac03)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the commits of this serial touch only the listed files (the adapter, the new test file, and the existing gateway tests the order lists, plus the record paths).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~126 '^infra/aws/ec2/opal-gateway/(app/client_adapter_bd49f\\.py|tests/test_og_(en13|en4|en12|cl2|ch1)\\.py)$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~126: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~126: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "2 product files of 3 files touched (the third is the INVESTIGATION_v1.md rows, a record path); 0 outside the allowed set",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted defect: _weight drops the print floor, so a 0.00001 weight serves as 1e-05 with rounded_to_zero false (plugin deliverables/0.9.0_WK_NFRA_OPLGTW~126/og_en13_mutant_weight_floor.py, loaded with -p; the committed tree is unchanged).",
+      "expected": "test_ogen13_ac03 FAILS (the exponent in the serialized holdings JSON). ac01 and ac02 do not exercise the floor and PASS.",
+      "observed": "PYTHONPATH=<the deliverables folder above> python -m pytest tests/test_og_en13.py -p og_en13_mutant_weight_floor -v (run in the gateway directory) -> test_ogen13_ac03 FAILED (AssertionError: ('holdings', '1e-0')); test_ogen13_ac01 and test_ogen13_ac02 PASSED. 1 failed, 2 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The named-test check (AC1) run twice on the final code (commit e59189ed21) with the same invocation; the pytest summary and RESULT lines compared.",
+      "observed": "Both runs: pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS; exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Full gateway suite green.",
+      "reason": "Not claimed. tests/test_og_ch1.py has 2 of 6 failing at the base commit before any change of this serial (test_ogch1_ac02 registry collision, test_ogch1_ac04 roster file absent from the tree). Filed as NFRA_OPLGTW-Z-W126-S1. The adjacent set en4, en12, en13, cl2, cl7 passes 25 of 25."
+    },
+    {
+      "item": "Existing tests updated to the new truth.",
+      "reason": "None needed. test_og_en4.py, test_og_en12.py, test_og_cl2.py and test_og_cl7.py pass unchanged; test_og_ch1.py is unchanged (its failures are at base). No assertion was weakened."
+    },
+    {
+      "item": "Release, deploy, IAM, registry, catalog and any other adapter.",
+      "reason": "Out of this cell by the order. Gateway code and offline tests only; the release is a later applier order. get_transactions and get_fees window logic and window_partial are left exactly as they were for OG-en-15."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W126-S1: tests/test_og_ch1.py is red at base 99f261e135 before any change of this serial (test_ogch1_ac02 registry collision; test_ogch1_ac04 roster file absent). Identical before and after the OG-en-13 commit. OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W126-S2: the order's precision rule names weights and money only; unit_cost and units have no stated precision. Both served as JSON numbers, unrounded, for the issuer to confirm. OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W126-S3: the order's as_of rule names holdings and allocation answers; the shared envelope now serves the partition date for every undated answer (resolve, transactions and fees too). OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~O."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~126/NFRA_OPLGTW.TO-OG-en-13.49f-units-currency-numbers-as-of.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (named tests)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en13.py test_ogen13_ac01 test_ogen13_ac02 test_ogen13_ac03",
+      "result": "3 passed, rc 0 (on e59189ed21, twice)"
+    },
+    {
+      "tool": "pytest (adjacent gateway set)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_en4.py tests/test_og_en12.py tests/test_og_en13.py tests/test_og_cl2.py tests/test_og_cl7.py tests/test_og_ch1.py -q",
+      "result": "29 passed, 2 failed: test_ogch1_ac02 and test_ogch1_ac04 (both at base, see S1)"
+    }
+  ]
+}

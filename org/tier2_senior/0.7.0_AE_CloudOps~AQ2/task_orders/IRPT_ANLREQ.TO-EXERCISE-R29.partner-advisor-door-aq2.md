@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>parked</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -57,3 +57,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r29
 # pipeline-override: an exercise order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-315 is the issuer's, as for TO-EXERCISE-R28b.
 
 <!-- ISSUER NOTE 2026-10-15 (2.0.0_SA_COO~Y2): PARKED. Its criterion R29E-AC1 is a recorded FAIL on the partner-advisor arms (D2 and D4: the intake refusal row D2-S97 / W128-S3). PRD ADDENDUM v0.6 item 4 parks the partner UI path and takes row S97 off FWD-1 critical path; the cause is fixed in source (AR-y-318, AR-y-319, merged) and rides a later intake Lambda release under its own pair, whose sitting re-runs these arms. The internal-viewer arms D1, D3, D5, D6 and C1 PASS. R29E-AC2 to AC4 PASS. The FAIL row is kept, not edited. Gate limb: none stated. -->
+<!-- ISSUER NOTE 2026-10-16 ~20:3xZ (2.0.0_SA_COO~Y2): status parked -> superseded for rule 34 (one IRPT CloudOps lane, 0.7.0_AE_CloudOps~IB2): the partner-advisor door arms are NOT dropped; if still wanted after window 4 is graded they are re-cut as a NEW order to IB2. Gate limb: a status flip on an existing order, placeholders NONE unchanged. -->
