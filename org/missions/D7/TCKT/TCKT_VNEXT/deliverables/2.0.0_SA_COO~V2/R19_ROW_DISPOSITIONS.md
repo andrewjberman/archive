@@ -1,0 +1,29 @@
+# TCKT_VNEXT -- the issuer's recorded disarms and proposed dispositions of the rows its rounds 18 and 19 filed (for the CVO's L8 compile)
+
+**Issuer:** `2.0.0_SA_COO~V2`, 2026-10-16, measured at `box/dell2` HEAD (local; push state not read). **Why a file and not an edit:** an investigation row is append-only (`.tools/surprise-row-gate.py`'s mutation limb), and the CVO's compile dismisses a row "closed or disarmed by the issuer's recorded acts" (`ADJUDICATION_v5.md`). This file is that record: each act is named with the evidence a reader can re-measure. The CVO grades; nothing here is a verdict.
+
+## A. ARMED rows whose `disarm_owner` is this seat (5): the disarm act, with evidence
+
+| row | hazard | the act | evidence (re-measurable) |
+|---|---|---|---|
+| `TCKT_VNEXT-D2-W41-S6` (BLOCKING) | `tests/test_authz_matrix.py` run by path reached the real SES notifier | `tests/_no_live.py` exists and the file's `__main__` block imports it and calls `install()` BEFORE `unittest.main()`; `tests/test_no_live_by_path.py` exercises it; every R19 worker order says "pytest only, never by path" | `test_authz_matrix.py` lines 344-347 at HEAD; commit `bb06ea5777` introduced `_no_live.install` there; folder run on the merged tree 459 passed |
+| `TCKT_VNEXT-D2-W43-S1` (BLOCKING) | the attachment prefix could not name ONE bucket (doctrine R21: state tier, per-firm buckets) | `TO-R18-TR1` re-cut to bucket and key TEMPLATES from the builder; `main.tf` carries them | `infra/aws/terraform/ticket-center/main.tf` lines 346-347 (`opal-data-{firm}`, `portal/{firm}/state/ticket_attachments/trade-form/`); builder record `deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json`; commit `43715c1c3b` |
+| `TCKT_VNEXT-D2-W43-S2` (BLOCKING) | the naming gate refused `ticket-attachments` (kebab) and wanted snake_case, `-policy`, module-derived ARNs | `TO-R18-TR3` amended (AMENDMENT 2) and landed through the commit-time naming gate in ENFORCE | commit `43715c1c3b` landed; the key template above is snake_case `ticket_attachments` |
+| `TCKT_VNEXT-D2-W42-S1` (OBSERVATION) | the portal candidate was cut from `origin/DEV`, but `CONTRIBUTING-BOXES.md` step 2 wants `origin/PROD` | re-cut onto PROD and registered | `cand/dell2/tckt-meeting-and-trade-form` = 2 commits over `origin/PROD` (`git rev-list --count origin/PROD..<cand>` = 2), tip `c05e3dda`; it is in `origin/DEV` (`merge-base --is-ancestor` yes) and not in `origin/PROD` |
+| `TCKT_VNEXT-D2-W42-S4` (OBSERVATION) | the P1/P2 shared lines of `TicketCenter.tsx` | P2 ordered after P1 and merged as ONE candidate | the same candidate carries both (`TicketCenter.tsx` 29 lines changed, `TradeRequestParts.tsx`, three test files); landed on `origin/DEV` |
+
+**Open on `W41-S6`, not disarmed by the above:** the row records that the worker's by-path run on 2026-10-14 sent ONE real SES `pickup` notice (a test ticket id, from `tickets@opalinvest.dev`) and says the recipient owner must check delivery. The recipient is NOT measured: the log line carries a digest, and that test's fixtures use either `client@example.test` (a reserved test domain) or staff addresses. The consequence is at most one test notice with no client data. A check of delivery is the CTO's call; the issuer holds no instrument for it.
+
+## B. The rows round 19's workers filed (11): proposed disposition
+
+| rows | what | proposed disposition |
+|---|---|---|
+| `W45-S1`, `W46-S1`, `W47-S1`, `W48-S1` (BLOCKING) | each worktree's sparse cone omitted `infra/aws`, so the granted paths were not on disk | `DISMISSED_WITH_REASON`: closed by the issuer's recorded act (`git sparse-checkout add` of the granted folder in each worktree, then each worker re-seated and finished). **Open to MSTR (owner of `.tools/wk-provision.sh`):** the provisioner's default cone is what omitted the folder; a next TCKT_VNEXT issuance hits it again unless the cone is built from the order's `<paths>`. Recorded here, not messaged (an FYI) |
+| `W47-S2` (BLOCKING), `W45-S2`, `W46-S2` (OBSERVATION) | the whole-folder run cannot collect 8 modules in a sparse worktree (one fixture read outside the cone) | `DISMISSED_WITH_REASON`: environmental; the drain ran the whole folder on the shared tree: 459 passed, 0 failed (after the seam fix) |
+| `W46-S4` (OBSERVATION) | 7 failures of `test_cross_firm_global_register.py` in the sparse worktree | `DISMISSED_WITH_REASON`: the same fixture; on the shared tree that file passes 7 of 7 against the R19 register |
+| `W46-S3`, `W45-S4` (OBSERVATION) | the before-arm premise "every new case fails on base" did not hold (the INTERNAL non-regression case, and three cases that pin behaviour the base already has) | `NOT_A_DEFECT`: the order text overclaimed; the criteria and mutants are unaffected and fire |
+| `W45-S3` (OBSERVATION) | a blank stored requester goes to the firm's FIRST contact (contract item 1), against one existing assertion | `NOT_A_DEFECT`: the contract states it (the stored value is used only if it is in the list, else the first contact); the worker kept the assertion by giving that one test an empty map. **For the CVO's judgment criterion `R19L1-AC3J`** |
+
+## C. The merge seam the drain found (not a worker row)
+
+The whole-folder run on the merged tree read 451 passed, 1 failed: `R19-ai-2`'s users stub had no marker and `R19-ps-3` refuses that row. Fixed by re-opening `TO-R19-L2` (AMENDMENT 1 @`535b02a627`), merged `83f1ffeaba`. Folder after: 459 passed.
