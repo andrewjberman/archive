@@ -43,7 +43,9 @@ CAL_VALUES = ("pandas_market_calendars", "fallback_2010_2027")
 PUBLISHER_VERSION = "0.3.0"
 HEX40, HEX64 = re.compile(r"[0-9a-f]{40}$"), re.compile(r"[0-9a-f]{64}$")
 LONG_DIGITS = re.compile(r"\d{8,}")
-GRANT_FILES = {HANDLER_REL, TEST_REL, SOURCE_MAP_REL}
+UNION_TEST_REL = SOURCE_DIR + "/tests/test_publisher_account_union.py"
+TESTS_DIR = SOURCE_DIR + "/tests"
+GRANT_FILES = {HANDLER_REL, TEST_REL, SOURCE_MAP_REL, UNION_TEST_REL}
 GRANT_PREFIXES = (D + AUTHOR + "/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/")
 
 
@@ -129,8 +131,9 @@ def load_handler(h, root, handler_path, name="f49_handler"):
     return h.load_module(handler_path, name)
 
 
-def check_behaviour(h, root, handler_path, patch=None):
-    """The behaviour clause. `patch(publisher_module)` injects a fault for the self-test and returns an undo callable."""
+def check_behaviour(h, root, handler_path, patch=None, contract_root=None):
+    """The behaviour clause. `patch(publisher_module)` injects a fault for the self-test and returns an undo callable. The series contract is read from
+    `contract_root` (default root): the bundle does not package it, so the unpacked run grades against the repo's."""
     root = Path(root)
     naming = h.load_module(root / "lib" / "opal_naming.py", "opal_naming")
     tc = h.load_module(root / "lib" / "trading_calendar.py", "trading_calendar")
@@ -138,7 +141,7 @@ def check_behaviour(h, root, handler_path, patch=None):
     for name in ("run", "resolve_firm", "_publish_one"):
         need(hasattr(mod, name), "the handler must define %s" % name)
     firm = mod.resolve_firm(None)[1]
-    contract = json.loads((root / CONTRACT_REL).read_bytes().decode("utf-8"))
+    contract = json.loads((Path(contract_root or root) / CONTRACT_REL).read_bytes().decode("utf-8"))
     pub = sys.modules["publisher"]
     undo = patch(pub) if patch else None
     try:
@@ -324,7 +327,7 @@ def run(root, cid):
             with zipfile.ZipFile(zpath) as z:
                 hh.check_package([n for n in z.namelist() if not n.endswith("/")], entry["files"], lambda mem: z.read(mem), lambda mem: source_of(root, entry, mem).read_bytes())
                 z.extractall(tmp)
-            r = subprocess.run([sys.executable, "-I", str(Path(__file__).resolve()), "--unpacked", str(tmp)], capture_output=True, text=True, timeout=600, cwd=str(tmp))
+            r = subprocess.run([sys.executable, "-I", str(Path(__file__).resolve()), "--unpacked", str(tmp), str(root)], capture_output=True, text=True, timeout=600, cwd=str(tmp))
             need(r.returncode == 0 and "UNPACKED PASS" in r.stdout, "the unpacked handler failed the behaviour clause: %s" % (r.stdout + r.stderr)[-300:].replace("\n", " | "))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
@@ -333,6 +336,8 @@ def run(root, cid):
     if cid == "DB160-1-AC3":
         need((root / TEST_REL).is_file(), "no %s" % TEST_REL)
         n = run_pytest(root, TEST_REL)
+        n_dir = run_pytest(root, TESTS_DIR)
+        need(n_dir >= n, "the whole tests directory must pass (it holds %d passing tests)" % n_dir)
         check_test_words((root / TEST_REL).read_text(encoding="utf-8"))
         moved = check_entry(bm, nm, head_blob, pin_blob, pin_ok)
         changed = set()
@@ -340,7 +345,7 @@ def run(root, cid):
             changed |= set(git(root, "show", "--name-only", "--format=", cm)[0].decode().split())
         check_grant(changed)
         check_facts(json.loads((root / REC_REL).read_text(encoding="utf-8")), moved, n)
-        print("OK: %d tests pass and assert the empty list, a listed day and calendar_source; %d files changed, all in the grant; the facts record equals the recount" % (n, len(changed)))
+        print("OK: %d new tests pass and assert the empty list, a listed day and calendar_source, and the whole tests directory passes (%d tests); %d files changed, all in the grant; the facts record equals the recount" % (n, n_dir, len(changed)))
         return True
     raise Fail("unknown criterion %s" % cid)
 
@@ -399,7 +404,7 @@ def selftest():
         r2 = copy.deepcopy(rec)
         fn(r2)
         red(lambda: check_facts(r2, ["x/ids.py"], 8), label)
-    assert check_grant({HANDLER_REL, TEST_REL, SOURCE_MAP_REL, D + AUTHOR + "/x.json"})
+    assert check_grant({HANDLER_REL, TEST_REL, SOURCE_MAP_REL, UNION_TEST_REL, D + AUTHOR + "/x.json"})
     red(lambda: check_grant({HANDLER_REL, TEST_REL}), "no source map")
     red(lambda: check_grant({HANDLER_REL, TEST_REL, SOURCE_MAP_REL, "lib/x.py"}), "outside grant")
     assert check_test_words("a unreported_trading_days b calendar_source c == []")
@@ -425,7 +430,7 @@ if __name__ == "__main__":
     if sys.argv[1:2] == ["--unpacked"]:
         tmp = Path(sys.argv[2])
         try:
-            check_behaviour(p148(), tmp, tmp / "handler.py")
+            check_behaviour(p148(), tmp, tmp / "handler.py", contract_root=sys.argv[3])
             print("UNPACKED PASS")
             sys.exit(0)
         except Exception as e:  # noqa: BLE001
