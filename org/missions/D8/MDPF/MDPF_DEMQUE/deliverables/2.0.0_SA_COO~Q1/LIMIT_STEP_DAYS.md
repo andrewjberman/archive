@@ -14,3 +14,5 @@
 | History ceiling ramp, step 3 (29,290) | `2.0.0_SA_COO~Q1` | the drawer's daily room | one completed day after step 2 | | not started |
 
 Measured fact for the order of these: the drawer task fires at 10:00 AM ET (14:00Z) every day, but until trading-day draws are built it stops on a trading day, so ramp steps can land only on non-trading days (Oct 24, 25, 31, Nov 1, 7, 8). A4 and A2 act on trading days. Once trading-day draws exist, the rule above is what keeps them apart.
+
+**Reported 2026-10-16 ~11:11Z (COO~H1, msg 6666, measured):** A2's first run on `BACKFILL_CAP` 62 happened Fri 2026-10-16 07:00 ET (`bbg/2026-10-15/run_manifest.json`, generated 11:08:26Z, scheduled, `objects_failed` empty, 1 name planned, 0 capped, estimate 276 of 120000). The cap did not bind. A2's step day for this file is Fri Oct 16; A4 step 1 stays Tue Oct 20 at the earliest. COO~H1 still owes the pull's exit code.
