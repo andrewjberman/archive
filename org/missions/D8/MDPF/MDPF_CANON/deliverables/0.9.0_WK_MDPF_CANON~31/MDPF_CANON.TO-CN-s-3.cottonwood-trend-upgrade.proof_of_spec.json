@@ -18,12 +18,12 @@
     {
       "path_or_key": "portal/src/lib/cottonwoodTrend.ts",
       "kind": "frontend_component",
-      "commit_or_etag": "34a15de1",
+      "commit_or_etag": "7aefb45b",
       "artifact_covered_by": [
         "AC1"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Portal commit 34a15de1 on branch wk-MDPF_CANON-31-portal (LOCAL, nested repo at C:/dev/wk-MDPF_CANON-31/portal, on top of CN-s-5 commit e206e06e). New pure module: buildCottonwoodTrendRows(raw) builds one row per total-bearing served date from the first total (2026-06-09). Not pushed to DEV; the client-facing landing is an approval row cut from PROD per CLAUDE.md (Portal). Also on wk-31-r11-candidate as 978da061."
+      "deploy_evidence": "Portal commit 34a15de1 on branch wk-MDPF_CANON-31-portal (LOCAL, nested repo at C:/dev/wk-MDPF_CANON-31/portal, on top of CN-s-5 commit e206e06e). New pure module: buildCottonwoodTrendRows(raw) builds one row per total-bearing served date from the first total (2026-06-09). Not pushed to DEV; the client-facing landing is an approval row cut from PROD per CLAUDE.md (Portal). Also on wk-31-r11-candidate as 978da061. AMENDMENT 2 (LOCAL): the Total and the five primary lines are read through readFirmAggregateSeries and readModelSeries (src/lib/pairedProvenanceRead.ts); the class is still derived from the model leg and meta.composed_backfill; rows identical on the committed fixture. Portal commit 7aefb45b on wk-31-r11-candidate (LOCAL), 1 file, 13 insertions(+), 3 deletions(-)."
     },
     {
       "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
@@ -57,6 +57,16 @@
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "graded at the round close",
       "judgment": true
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 runs the portal provenance read guard: cd portal and node scripts/provenance-read-guard.mjs; echo exit. Expect: no FAIL line, and exit=0 (added by AMENDMENT 2: the push-time guard that refused src/lib/cottonwoodTrend.ts; no other criterion reads it).",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && timeout 120 node scripts/provenance-read-guard.mjs; echo \"exit=$?\"",
+      "output_evidence": "OK: no unlabeled reads -- every provenance-bearing value array is read via the paired accessor.\n    (scanned src/**/*.{ts,tsx}; allowlist: src/lib/pairedProvenanceRead.ts)\nexit=0",
+      "denominator": "0 violations (the guard printed no FAIL line); the guard prints no file count (it scans src/**/*.{ts,tsx}). Before the repair the same guard printed FAIL on two lines of src/lib/cottonwoodTrend.ts and exited 1 (compiler_tools).",
+      "status": "PASS",
+      "expect": "\\A(?![\\s\\S]*FAIL)[\\s\\S]*exit=0"
     }
   ],
   "controls": {
@@ -68,7 +78,7 @@
     },
     "determinism": {
       "method": "The pure check run twice from the worktree root after the edit, stdout captured and compared with cmp.",
-      "observed": "pure: IDENTICAL, 7 of 7 arms, rc=0 on both runs.",
+      "observed": "pure: IDENTICAL, 7 of 7 arms, rc=0 on both runs. AMENDMENT 2 (after the repair): the module rows on the committed fixture were dumped by a bun script before (HEAD 7a88ca75) and after (7aefb45b) the repair; the two JSON dumps are byte-identical (cmp), 90 rows each, rows equal, input unmutated True.",
       "status": "STABLE"
     }
   },
@@ -127,6 +137,21 @@
       "tool": "git -C portal commit (AMENDMENT 1 repair, candidate branch)",
       "invocation": "git -C C:/dev/wk-MDPF_CANON-31/portal commit --author \"0.9.0_WK_MDPF_CANON~31 <0.9.0_WK_MDPF_CANON~31@opal.agent>\" -F .scratch/cn_s_3_r_portal_msg.txt",
       "result": "rc=0: 7a88ca75 on wk-31-r11-candidate, 1 file, 4 insertions(+), 3 deletions(-)"
+    },
+    {
+      "tool": "provenance-read-guard.mjs (portal guard, AC3)",
+      "invocation": "cd portal && node scripts/provenance-read-guard.mjs",
+      "result": "before the repair: FAIL, 2 violations on src/lib/cottonwoodTrend.ts (lines 43 and 67), exit=1; after 7aefb45b: OK, exit=0"
+    },
+    {
+      "tool": "bun run typecheck (portal drain check, not a criterion)",
+      "invocation": "cd portal && timeout 120 bun run typecheck",
+      "result": "tsc -b --noEmit, rc=0"
+    },
+    {
+      "tool": "git -C portal commit (AMENDMENT 2 repair, candidate branch)",
+      "invocation": "git -C C:/dev/wk-MDPF_CANON-31/portal commit --author \"0.9.0_WK_MDPF_CANON~31 <0.9.0_WK_MDPF_CANON~31@opal.agent>\" -F .scratch/cn3/portal_msg.txt",
+      "result": "rc=0: 7aefb45b on wk-31-r11-candidate, 1 file, 13 insertions(+), 3 deletions(-)"
     }
   ]
 }
