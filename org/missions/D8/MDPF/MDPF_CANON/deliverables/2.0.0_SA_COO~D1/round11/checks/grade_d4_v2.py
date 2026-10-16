@@ -58,14 +58,37 @@ def diffs(a, b, path="", out=None):
     return out
 
 
+def trunc(old, new, n):
+    """cut a list of `new` back to n cells ONLY where the parallel list of `old` is exactly the date axis long (n cells)
+    and `new` is longer: an appended date. Any other list (a members list, a key list) is left whole, so a real
+    addition there still shows."""
+    if isinstance(old, dict) and isinstance(new, dict):
+        return {k: (trunc(old[k], v, n) if k in old else v) for k, v in new.items()}
+    if isinstance(old, list) and isinstance(new, list) and len(old) == n and len(new) > n:
+        return new[:n]
+    return new
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--response", required=True)
     ap.add_argument("--baseline", required=True)
     ap.add_argument("--against")
+    ap.add_argument("--allow-append", action="store_true",
+                    help="the response is a LATER object: its axis may extend the baseline axis; compare on the baseline length")
     a = ap.parse_args()
     r, new = load(a.response)
     old = {(s, t): json.load(open(os.path.join(a.baseline, "%s__%s.json" % (s, t)), encoding="utf-8")) for s in SCOPES for t in TYPES}
+    if a.allow_append:
+        ext = {}
+        for key in list(new):
+            o = old[key]
+            if isinstance(new[key].get("dates"), list) and isinstance(o.get("dates"), list) and len(new[key]["dates"]) > len(o["dates"]):
+                ext[key] = new[key]["dates"][len(o["dates"]):]
+                if new[key]["dates"][:len(o["dates"])] != o["dates"]:
+                    arm("V1x", False, "axis of %s is not an extension of the baseline axis" % (key,))
+            new[key] = trunc(o, new[key], len(o["dates"])) if isinstance(o.get("dates"), list) else new[key]
+        print("  appended dates by pair:", {"%s/%s" % k: v for k, v in sorted(ext.items())})
     arm("V0", r.get("status") == "green" and r.get("errors") == [] and r.get("a4_objects_built") == 16 and len(new) == 16,
         "status=%s errors=%s built=%s bodies=%d" % (r.get("status"), r.get("errors"), r.get("a4_objects_built"), len(new)))
     c0, c1 = old[("cottonwood", "aggregate-aua-timeseries")], new[("cottonwood", "aggregate-aua-timeseries")]
