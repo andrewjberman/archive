@@ -7,7 +7,7 @@ Counts and source names only. The workbook is on the desktop, outside the reposi
 | Rows to confirm (To confirm sheet) | 107 |
 | Already matched (settled) | 11 |
 | Households (To confirm) | 70 |
-| Strong / likely / weak | 0 / 12 / 95 |
+| Strong / likely / weak | 0 / 28 / 79 |
 | Competing groups among rows to confirm (rows) | 18 (42) |
 
 ## Not established
