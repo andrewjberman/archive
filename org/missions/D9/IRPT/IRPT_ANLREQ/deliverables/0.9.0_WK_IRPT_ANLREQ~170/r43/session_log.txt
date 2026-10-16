@@ -1,0 +1,32 @@
+0.9.0_WK_IRPT_ANLREQ~170 -- AR-y-378 session log (verbatim deciding lines; ANSI codes removed; ASCII only)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-170 ; test -d org && test -d .tools -> TREE-OK (rc 0)
+
+2. Finding (read only): see r43/APPLIES_WHEN.json. Portal src/pages/TicketCenter/TicketCenter.tsx lines 104-121 (loadAllowedFirms);
+   served.py lines 1154-1193 and 1249-1260 (internal narrowing); directory/entry.py lines 414-456 (global_context).
+
+3. BEFORE ARM: bun test src/pages/TicketCenter/__tests__/advisor-email.test.tsx on the unchanged base (fcbf2bce)
+   result: 1 pass, 6 fail, 7 tests
+   failing: (a) (b) (c) (e) (f) and the refused-body shape case
+   passing: (d) the control (no field, no advisor_email key)
+
+4. AFTER ARM (source edits made; 4 source files + the new test file):
+   bun test src/pages/TicketCenter/__tests__/advisor-email.test.tsx -> 7 pass, 0 fail, 37 expect() calls, rc 0
+   bun test src/pages/TicketCenter -> 203 pass, 0 fail, 32 files, rc 0
+
+5. TYPECHECK (run once): bun run typecheck -> rc 2, three TS2339 errors, all in the new test file (FileOutcome narrowing).
+   Corrected in the test file before the portal commit (narrowing on outcome.filed); not re-run (the order says once).
+
+6. PORTAL COMMIT: 9355392a9337f9e2eea741d85434643889568215 on wk-IRPT_ANLREQ-170-portal;
+   LOCAL branch cand/dell2/anlreq-advisor-login-email at 9355392a (not pushed)
+   git diff --stat fcbf2bce 9355392a: 5 files changed, 291 insertions(+), 16 deletions(-)
+
+7. CHECKERS:
+   AC1 portal_check.py run 1: PORTAL-TESTS-OK 7 new, 203 folder, 0 failed (rc 0)
+   AC1 portal_check.py run 2: PORTAL-TESTS-OK 7 new, 203 folder, 0 failed (rc 0)
+   AC2 mutant_check.py: MUTANT-FIRES bun test of the new file failed with the advisor_email member removed (rc=1);
+       restored sha256 ok 4a819dde1c0107f9; the sha256 check passed and the portal status stayed clean
+   AC3 scope_check.py: SCOPE-OK 5 paths, all under src/pages/TicketCenter/ or src/api/endpoints/investor-reporting.ts;
+       src/pages/InvestorReporting diff empty
+
+8. No push, no network call, no AWS call, no deploy.

@@ -108,10 +108,10 @@ def head_problems(rec, new_resource):
     a = rec["after"]
     if not (isinstance(a, dict) and isinstance(a.get("function"), dict) and a["function"].get("memory") == 8192 and a["function"].get("timeout") == 900
             and a["function"].get("code_sha256") == BUILD_B64 and isinstance(a.get("write_resources"), list) and len(a["write_resources"]) == 7
-            and a["write_resources"][-1] == new_resource and a["write_resources"][:6] == b.get("write_resources")
+            and sorted(a["write_resources"]) == sorted(list(b.get("write_resources")) + [new_resource])
             and isinstance(a.get("policy"), dict) and sorted(a["policy"]) == sorted(SIDS)
             and all(a["policy"][s] == b["policy"][s] for s in SIDS if s != WRITE_SID) and a["policy"][WRITE_SID] != b["policy"][WRITE_SID]):
-        pr.append("after must show the new code hash, memory 8192, timeout 900, seven write resources (the six, then the new one), every statement but the write statement byte-identical")
+        pr.append("after must show the new code hash, memory 8192, timeout 900, seven write resources (the six and the new one, as a SET: IAM stores the list in its own order), every statement but the write statement byte-identical")
     return pr
 
 
@@ -337,6 +337,12 @@ def selftest():
     r4 = copy.deepcopy(rec)
     r4["after"]["policy"]["OwnLogStreamOnly"] = "x"
     arm("other-statement-changed-red", len(head_problems(r4, new)), 1)
+    r4b = copy.deepcopy(rec)
+    r4b["after"]["write_resources"] = [old6[0], new] + old6[1:]
+    arm("write-resources-are-a-set-green", head_problems(r4b, new), [])
+    r4c = copy.deepcopy(rec)
+    r4c["after"]["write_resources"] = old6 + ["arn:aws:s3:::b/other/*"]
+    arm("write-resources-wrong-member-red", len(head_problems(r4c, new)), 1)
     r5 = copy.deepcopy(rec)
     r5["time_trigger"].update({"sum_ms": 800000, "act3_stage_duration_ms": 500000, "over_720s": True})
     arm("trigger-without-rollback-red", len(events_problems(r5, "p/")), 1)
