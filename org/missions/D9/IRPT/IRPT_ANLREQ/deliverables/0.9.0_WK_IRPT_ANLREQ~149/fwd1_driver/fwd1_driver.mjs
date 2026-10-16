@@ -29,6 +29,23 @@ const TITLE = 'SYNTHETIC IRPT_ANLREQ FWD-1 run r41b, do not action'
 const NEW_TICKET_LABEL = 'New Ticket'
 const SUBMIT_LABEL = 'File Analysis Request'
 const TABS = ['Open', 'In Progress', 'Completed']
+// AR-y-366 (round 41, ZZ27): the Ticket Center prompt words the --decisions option presses or reads. Each is the candidate form's
+// own text (portal 0ba0cb13: AnalysisRequestParts.tsx and analysisRequest.ts); labels_check.py reads these lines and checks each.
+const PROMPT_YES = 'Yes'
+const PROMPT_REPLACE = 'Replace'
+const PROMPT_NO = 'No'
+const PROMPT_CHECK = 'Check'
+const REPLACE_INPUT_PREFIX = 'Replacement ticker for '
+const FILED_AS_GIVEN_HEADING = 'These holdings were filed as given.'
+const DID_YOU_MEAN_PREFIX = 'Did you mean '
+const NOT_FOUND_SUFFIX = ' was not found.'
+const NO_CHOICE_LINE = 'Opal Staff will manage the replacement.'
+const DECISIONS_MAX = 20
+const PROMPT_ROUNDS = 6
+const PROMPT_SETTLE_MS = 20000
+const TICKER_SHAPE = /^[A-Z0-9.-]{1,12}$/
+const DECISION_KEYS = ['symbol', 'answer', 'replacement']
+const DECISION_ANSWERS = ['yes', 'replace', 'no']
 const GO_RE = /^IRPT_ANLREQ\.TO-RUN-FWD1\.\S+$/
 const ANALYTICS_RE = /\/analytics\/ingest$/
 const POST_ALLOWED = [
@@ -106,7 +123,7 @@ export function findTicketId(node, depth = 0) {
 const pathOf = (url) => { try { return new URL(url).pathname } catch { return '(unparsed)' } }
 
 export function parseArgs(argv) {
-  const o = { base: 'http://localhost:5174', firm: null, holdings: null, out: null, pollMinutes: 20, plan: false, selftest: false, go: null }
+  const o = { base: 'http://localhost:5174', firm: null, holdings: null, out: null, pollMinutes: 20, plan: false, selftest: false, go: null, decisionsPath: null }
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     const next = () => argv[++i]
@@ -118,6 +135,7 @@ export function parseArgs(argv) {
     else if (a === '--go') o.go = next() ?? null
     else if (a === '--plan') o.plan = true
     else if (a === '--selftest') o.selftest = true
+    else if (a === '--decisions') o.decisionsPath = next() ?? null
     else return { error: 'unknown argument ' + a }
   }
   return { o }
@@ -128,14 +146,145 @@ function printPlan(base) {
   for (const s of STEPS) console.log(s)
 }
 
+// ---- AR-y-366 (round 41, ZZ27): the --decisions file and the Ticket Center prompts. Pure parts first. --------------------
+// A decision is pressed only before the Submit click and only when its prompt is on the page; a prompt no decision names
+// stops the run; nothing is guessed. The labels are the constants above (the candidate form's own words).
+export function validateDecisions(doc) {
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return { error: 'the file must be a JSON object' }
+  for (const k of Object.keys(doc)) if (k !== 'decisions') return { error: 'unknown key ' + k }
+  if (!Array.isArray(doc.decisions)) return { error: 'decisions must be an array' }
+  if (doc.decisions.length > DECISIONS_MAX) return { error: 'at most ' + DECISIONS_MAX + ' decisions' }
+  const seen = new Set()
+  const out = []
+  for (const d of doc.decisions) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return { error: 'each decision must be an object' }
+    for (const k of Object.keys(d)) if (!DECISION_KEYS.includes(k)) return { error: 'unknown key ' + k + ' in a decision' }
+    if (typeof d.symbol !== 'string' || d.symbol.length < 1 || d.symbol.length > 40 || d.symbol !== d.symbol.trim()) {
+      return { error: 'symbol must be the typed symbol as the form shows it (1 to 40 characters, no outer spaces)' }
+    }
+    if (seen.has(d.symbol)) return { error: 'more than one decision for symbol ' + d.symbol }
+    seen.add(d.symbol)
+    if (!DECISION_ANSWERS.includes(d.answer)) return { error: 'answer must be exactly yes, replace or no (symbol ' + d.symbol + ')' }
+    if (d.answer === 'replace') {
+      if (typeof d.replacement !== 'string' || !TICKER_SHAPE.test(d.replacement)) {
+        return { error: 'replace needs a replacement ticker of 1 to 12 upper-case letters, digits, . or - (symbol ' + d.symbol + ')' }
+      }
+    } else if (Object.prototype.hasOwnProperty.call(d, 'replacement')) {
+      return { error: 'replacement is allowed only with replace (symbol ' + d.symbol + ')' }
+    }
+    out.push({ symbol: d.symbol, answer: d.answer, replacement: d.answer === 'replace' ? d.replacement : null })
+  }
+  return { ok: true, decisions: out }
+}
+
+export function readDecisionsFile(file) {
+  let text
+  try { text = fs.readFileSync(file, 'utf8') } catch { return { error: 'the decisions file cannot be read' } }
+  let doc
+  try { doc = JSON.parse(text) } catch { return { error: 'the decisions file is not valid JSON' } }
+  return validateDecisions(doc)
+}
+
+// The button names a prompt offers: with the door's suggestion Yes / Replace / No; without one Replace / No.
+export function buttonNamesFor(promptText) {
+  const t = String(promptText).trim()
+  if (t.startsWith(DID_YOU_MEAN_PREFIX)) return [PROMPT_YES, PROMPT_REPLACE, PROMPT_NO]
+  if (t.endsWith(NOT_FOUND_SUFFIX)) return [PROMPT_REPLACE, PROMPT_NO]
+  return null
+}
+
+// The typed symbol a prompt line names: "Did you mean X? (row N: SYM)" or "(SYM)", and "SYM was not found.".
+export function promptSymbol(promptText) {
+  const t = String(promptText).trim()
+  if (t.startsWith(DID_YOU_MEAN_PREFIX)) {
+    const m = t.match(/\((?:row \d+: )?([^()]+)\)$/)
+    return m ? m[1] : null
+  }
+  if (t.endsWith(NOT_FOUND_SUFFIX)) {
+    const s = t.slice(0, t.length - NOT_FOUND_SUFFIX.length)
+    return s.length > 0 ? s : null
+  }
+  return null
+}
+
+// The one press a decision plans for one prompt. ok:false names the symbol and the reason; the caller stops the run.
+export function planPrompt(promptText, decisions) {
+  const symbol = promptSymbol(promptText)
+  const buttons = buttonNamesFor(promptText)
+  if (symbol === null || buttons === null) return { ok: false, symbol: null, why: 'the line is not a prompt the driver knows' }
+  const d = decisions.find((x) => x.symbol === symbol)
+  if (!d) return { ok: false, symbol, why: 'no decision names ' + symbol }
+  const button = d.answer === 'yes' ? PROMPT_YES : d.answer === 'replace' ? PROMPT_REPLACE : PROMPT_NO
+  if (!buttons.includes(button)) return { ok: false, symbol, why: 'the form offers no ' + button + ' for ' + symbol }
+  return { ok: true, symbol, button, replacement: d.answer === 'replace' ? d.replacement : null, buttons }
+}
+
+// Presses only the planned buttons, before the Submit click (the caller). At most PROMPT_ROUNDS rounds; each round reads the
+// prompts, then presses each planned one and waits for the upload door's answer (or PROMPT_SETTLE_MS). Every press is recorded.
+export async function answerPrompts(page, decisions, report, log) {
+  const hints = () => page.locator('[data-slot="analysis-filing-hint"]')
+  const isUploadAnswer = (r) => r.request().method() === 'POST' && /\/analysis\/inputs$/.test(pathOf(r.url()))
+  const visible = async () => {
+    const texts = []
+    const n = await hints().count()
+    for (let i = 0; i < n; i++) texts.push(((await hints().nth(i).locator('p').first().textContent()) || '').trim())
+    return texts.filter((t) => t !== NO_CHOICE_LINE)
+  }
+  for (let round = 1; round <= PROMPT_ROUNDS; round++) {
+    const open = await visible()
+    if (open.length === 0) { log('FORM-DECISIONS round ' + round + ': no prompt remains'); return 'clear' }
+    for (const text of open) {
+      const plan = planPrompt(text, decisions)
+      if (!plan.ok) throw new Error('UNPLANNED-PROMPT ' + plan.why + ' (round ' + round + '); the run stops, nothing is guessed')
+      if ((await hints().filter({ hasText: text }).count()) === 0) continue
+      const item = hints().filter({ hasText: text }).first()
+      const answered = page.waitForResponse(isUploadAnswer, { timeout: PROMPT_SETTLE_MS }).catch(() => null)
+      if (plan.button === PROMPT_REPLACE) {
+        await item.getByRole('button', { name: PROMPT_REPLACE, exact: true }).click()
+        await item.getByLabel(REPLACE_INPUT_PREFIX + plan.symbol, { exact: true }).fill(plan.replacement)
+        await item.getByRole('button', { name: PROMPT_CHECK, exact: true }).click()
+      } else {
+        await item.getByRole('button', { name: plan.button, exact: true }).click()
+      }
+      const answer = await answered
+      await sleep(1000)
+      const still = (await hints().filter({ hasText: text }).count()) > 0
+      const after = still ? ((await hints().filter({ hasText: text }).first().locator('p').first().textContent()) || '').trim() : 'the prompt is no longer shown'
+      report.form_decisions.push({ round, symbol: plan.symbol, button: plan.button, replacement: plan.replacement,
+        prompt_before: text, line_after: after, upload_answer_status: answer ? answer.status() : null, utc: iso() })
+      log('FORM-DECISIONS round ' + round + ' pressed ' + plan.button + ' for ' + plan.symbol + ' upload_answer=' + (answer ? answer.status() : 'none'))
+    }
+  }
+  if ((await visible()).length > 0) throw new Error('PROMPTS-REMAIN after ' + PROMPT_ROUNDS + ' rounds; the run stops before Submit')
+  return 'clear'
+}
+
+// Reading only, after the filed outcome is visible: the notice heading and its lines (the not-covered holdings).
+export async function readFormNotice(page, report, log) {
+  const box = page.locator('[data-slot="analysis-filing-notice"]')
+  await box.first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {})
+  if ((await box.count()) === 0) { report.form_notice = null; log('FORM-NOTICE none shown'); return }
+  const heading = ((await box.first().locator('p').first().textContent()) || '').trim()
+  const lines = (await box.first().locator('li').allTextContents()).map((s) => s.trim())
+  report.form_notice = { heading, heading_matches: heading === FILED_AS_GIVEN_HEADING, lines, utc: iso() }
+  log('FORM-NOTICE shown, ' + lines.length + ' line(s)')
+}
+
 // ---- the run (never reached without --go, a localhost base and a valid order token) --------------------------------
 async function run(o) {
+  // AR-y-366: a bad --decisions file refuses the run here, before any directory, mint or browser.
+  if (o.decisionsPath) {
+    const loaded = readDecisionsFile(o.decisionsPath)
+    if (!loaded.ok) { console.log('RUN-REFUSED decisions: ' + loaded.error); return 2 }
+    o.decisions = loaded.decisions
+  }
   const secrets = []
   const steps = []
   const shots = []
   let shotN = 0
   const report = { schema: 'fwd1_run_report/1', base: o.base, firm: o.firm, started_utc: iso(), order: o.go, steps,
     polls: [], guard_refused: [], absent: [], screenshots: shots, ticket_id: null, errors: [], remove_rc: null }
+  if (o.decisions) { report.form_decisions = []; report.form_notice = null }
   const log = (line) => {
     const text = `${iso()} ${redact(line, secrets)}`
     console.log(text)
@@ -196,6 +345,7 @@ async function run(o) {
     if ((await firmSel.inputValue()) !== o.firm) throw new Error('the firm control did not take the chosen firm id')
     await page.locator('select[aria-label="Report type"]').selectOption('Overview')
     await page.locator('input[aria-label="Holdings file"]').setInputFiles(o.holdings)
+    if (o.decisions) await answerPrompts(page, o.decisions, report, log)
     const submit = page.getByRole('button', { name: SUBMIT_LABEL, exact: true })
     await submit.waitFor({ state: 'visible', timeout: 30000 })
     for (let i = 0; i < 30 && !(await submit.isEnabled()); i++) await sleep(1000)
@@ -211,6 +361,7 @@ async function run(o) {
     report.ticket_id = findTicketId(body)
     if (!report.ticket_id) throw new Error('no ticket_id in the POST /api/scoped/tickets answer (status ' + resp.status() + ')')
     log('STEP-4 ticket ' + report.ticket_id + ' filed (POST /api/scoped/tickets status ' + resp.status() + ')')
+    if (o.decisions) await readFormNotice(page, report, log)
 
     const deadline = Date.now() + o.pollMinutes * 60000
     let n = 0
@@ -325,6 +476,34 @@ function selftest() {
   const mintSrc = (() => { try { return fs.readFileSync(MINT, 'utf8') } catch (e) { return '' } })()
   const mintEmail = (mintSrc.match(/^EMAIL = "([^"]+)"/m) || [])[1]
   check('the run address equals the mint helper address (one address in both files)', mintEmail !== undefined && EMAIL === mintEmail)
+  // AR-y-366 (round 41, ZZ27): the --decisions file, the prompt buttons, the unplanned stop, the round bound and the labels. Offline.
+  const okDoc = { decisions: [{ symbol: 'ABCD', answer: 'yes' }, { symbol: 'EFGH', answer: 'replace', replacement: 'SPY' }, { symbol: 'IJKL', answer: 'no' }] }
+  const vOk = validateDecisions(okDoc)
+  check('decisions: a valid file of three answers is admitted', vOk.ok === true && vOk.decisions.length === 3)
+  check('decisions: an answer outside yes / replace / no is refused', validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'maybe' }] }).error !== undefined)
+  check('decisions: replace without a replacement is refused', validateDecisions({ decisions: [{ symbol: 'EFGH', answer: 'replace' }] }).error !== undefined)
+  check('decisions: a replacement on yes is refused', validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'yes', replacement: 'SPY' }] }).error !== undefined)
+  check('decisions: a lower-case replacement is refused', validateDecisions({ decisions: [{ symbol: 'EFGH', answer: 'replace', replacement: 'spy' }] }).error !== undefined)
+  check('decisions: a 13-character replacement is refused', validateDecisions({ decisions: [{ symbol: 'EFGH', answer: 'replace', replacement: 'ABCDEFGHIJKLM' }] }).error !== undefined)
+  check('decisions: more than 20 decisions are refused', validateDecisions({ decisions: Array.from({ length: 21 }, (_, i) => ({ symbol: 'S' + i, answer: 'no' })) }).error !== undefined)
+  check('decisions: two decisions for one symbol are refused', validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'yes' }, { symbol: 'ABCD', answer: 'no' }] }).error !== undefined)
+  check('decisions: an unknown key inside a decision is refused', validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'no', note: 'x' }] }).error !== undefined)
+  check('decisions: an unknown top-level key is refused', validateDecisions({ decisions: [], extra: 1 }).error !== undefined)
+  check('decisions: a file that is not an object with a decisions array is refused', validateDecisions([]).error !== undefined && validateDecisions({}).error !== undefined)
+  check('decisions: a missing file is refused by the reader', readDecisionsFile(path.join(os.tmpdir(), 'no-such-fwd1-decisions-ar366.json')).error !== undefined)
+  check('decisions: a prompt with a suggestion offers Yes, Replace, No', JSON.stringify(buttonNamesFor('Did you mean ABC? (row 3: ABCX)')) === JSON.stringify(['Yes', 'Replace', 'No']))
+  check('decisions: a prompt without a suggestion offers Replace, No', JSON.stringify(buttonNamesFor('ABCX was not found.')) === JSON.stringify(['Replace', 'No']))
+  check('decisions: a prompt for a symbol no decision names stops the plan (unplanned)', (() => { const p = planPrompt('Did you mean ABC? (row 3: ZZZZ)', vOk.decisions); return p.ok === false && p.symbol === 'ZZZZ' })())
+  check('decisions: yes for a prompt without a suggestion is not offered (stop)', (() => { const p = planPrompt('MNOP was not found.', [{ symbol: 'MNOP', answer: 'yes', replacement: null }]); return p.ok === false })())
+  check('decisions: a planned replace names the Replace button and its replacement', (() => { const p = planPrompt('EFGH was not found.', vOk.decisions); return p.ok === true && p.button === 'Replace' && p.replacement === 'SPY' })())
+  check('decisions: the round bound is six', PROMPT_ROUNDS === 6)
+  check('decisions: the prompt labels equal the form words named in the cell', PROMPT_YES === 'Yes' && PROMPT_REPLACE === 'Replace' && PROMPT_NO === 'No' && PROMPT_CHECK === 'Check' && REPLACE_INPUT_PREFIX === 'Replacement ticker for ' && FILED_AS_GIVEN_HEADING === 'These holdings were filed as given.')
+  check('decisions: --decisions is read by the argument parser', parseArgs(['--decisions', 'd.json']).o.decisionsPath === 'd.json')
+  const badDec = path.join(os.tmpdir(), 'fwd1_bad_decisions_ar366_' + process.pid + '.json')
+  fs.writeFileSync(badDec, JSON.stringify({ decisions: [{ symbol: 'ABCD', answer: 'maybe' }] }))
+  const badRun = spawnSync(process.execPath, [SELF, '--base', B, '--firm', '49financial', '--holdings', SELF, '--out', os.tmpdir(), '--go', 'IRPT_ANLREQ.TO-RUN-FWD1.x', '--decisions', badDec], { encoding: 'utf8', timeout: 60000 })
+  fs.rmSync(badDec, { force: true })
+  check('a bad decisions file refuses the run with rc 2 before any step', badRun.status === 2 && /RUN-REFUSED decisions/.test(badRun.stdout) && !/STEP-1 password generated/.test(badRun.stdout))
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n)
   for (const [n, ok] of cases) console.log((ok ? 'case PASS ' : 'case FAIL ') + n)
   if (failed.length === 0) {
