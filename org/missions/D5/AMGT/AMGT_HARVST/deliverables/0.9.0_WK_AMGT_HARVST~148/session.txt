@@ -1,0 +1,34 @@
+0.9.0_WK_AMGT_HARVST~148 session, TO AMGT_HARVST.TO-HVST-cb-12 (worktree C:/dev/wk-harvst-148, branch wk-AMGT_HARVST-148)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_HARVST-148; test -d org && test -d .tools -> TREE-OK.
+2. Baseline (base 18b728a307, before any edit):
+   AC2 set (10 files): 110 passed in 5.64s, rc=0.
+   lib/opal_data_harvest: 1 failed (test_harvest_grammar.py::test_one_writer_for_both_channels, sparse worktree, known), 878 passed, 3 skipped, rc=1.
+   lib/research/harvest: 2 failed (test_m1_move / test_m2_move, test_import_identity_no_bare_vs_qualified_split, pre-existing), 509 passed, rc=1.
+3. Edits: store.py silver_append known= and written_hashes; silver_known.py (new); uploads.py known_db= on the wrapper and the two HarvestUploader call sites; test_cb12_uploader_known_hashes.py (new, 9 tests).
+4. AC1: 9 passed in 0.57s, rc=0 (run again: 9 passed in 0.49s and 9 passed in 0.50s).
+5. First AC2 run after the edit: 12 failed, 98 passed. Ten were the silver prefix read-count assertions (by design, filed S1); two were the receipt TypeError (date key in written_hashes), fixed by returning the three keys from the wrapper. My own test asserted the stripped key and failed once; corrected to check silver_known.
+6. AC2 final: 10 failed, 100 passed in 7.16s, rc=1. All 10 are the read-count assertions.
+7. lib/opal_data_harvest final: 11 failed, 877 passed, 3 skipped, rc=1 (10 AC2 read-count + the known sparse failure).
+8. lib/research/harvest final: 2 failed, 509 passed, rc=1 (unchanged from base).
+9. Commits: a14134ea40 (code, 4 files, 296 insertions, 10 deletions); 1560f4c800 (surprise rows S1-S3, 68 insertions, 0 deletions).
+10. Not run: any publisher, S3, Secrets Manager, box, browser. Reads of org/surprise_channel/schemas were via git show HEAD (sparse worktree).
+
+AMENDMENT 1 (issuer, order commit 2f091111e1; read on this branch):
+11. store.py: written_hashes added ONLY when known is a mapping; the default path returns exactly written_rows, skipped_unchanged, parts. Test (2) asserts that key set.
+12. The ten read-count tests (ai5: 4, at1: 6) now record store.silver_append calls with the same expected lists, and assert LATEST_READS == [] on the new pass. Other assertions and mutant arms unchanged.
+13. Mutant check (scratch harness, the restored per-row or per-group grouping run on each test's own specs):
+    ai5 test_batched_reads_silver_prefix_once_per_source: mutant STILL FAILS (6 appends).
+    ai5 test_mutant_per_row_grouping_fails_the_once_per_source_check: mutant STILL FAILS (6 appends); its own assertions hold.
+    ai5 test_type_conflict_row_does_not_strand_the_batch: mutant STILL FAILS (6 appends).
+    ai5 test_cross_row_type_conflict_is_isolated_locally: mutant STILL FAILS (6 appends).
+    at1 test_silver_prefix_read_once_per_source_new_n_old: mutant STILL FAILS (14 appends).
+    at1 test_untableable_page_is_isolated_and_pending_while_the_rest_upload: mutant STILL FAILS (7 appends).
+    at1 test_cross_page_type_conflict_is_isolated_locally: mutant STILL FAILS (6 appends).
+    at1 test_no_column_the_per_page_path_kept_is_lost_across_pages: mutant STILL FAILS (4 appends; grade 2 to 3).
+    at1 test_failing_append_pends_the_batch_with_no_per_page_retry: mutant STILL FAILS (9 appends).
+    at1 test_mutant_per_group_appends_fails_the_once_per_source_check: mutant STILL FAILS (10 appends); its own assertions hold.
+    LATEST_READS was empty in every mutant run.
+14. AC1 9 passed (rc 0). AC2 110 passed in 7.21s (rc 0). opal_data_harvest: 1 failed (known sparse), 887 passed, 3 skipped. lib/research/harvest: 2 failed (pre-existing), 509 passed.
+15. Commit 02345aaa29 (amendment code and tests, 4 files). Proof instance updated and re-checked (VALID, both forms); rows pinned to 02345aaa29 where the artifact changed in this commit; uploads.py and silver_known.py unchanged, pinned at a14134ea40.
+16. Order status NOT flipped (coordinator instruction).
