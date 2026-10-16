@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cc-1.a-model-figure-carries-its-claim-and-the-continuing-ops-eps-is-not-diluted-eps",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-1.a-model-figure-carries-its-claim-and-the-continuing-ops-eps-is-not-diluted-eps.md",
+    "group": "OTHER",
+    "vintage_commit": "11a8a786593cc7881688dcacbec4b3e6479b814a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "4516893b3b27f292ca430e5a52b8efb981e23366",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-1.a-model-figure-carries-its-claim-and-the-continuing-ops-eps-is-not-diluted-eps.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~150",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_figures.py",
+      "kind": "script",
+      "commit_or_etag": "c2536621e13eec8d56aadf29660b9e0c4b071c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FIG_FIELDS gains basis and figure_claim (after scope); MODEL_COLUMNS gains basis (last); FIGURE_CLAIMS holds IS_DIL_EPS_CONT_OPS -> the NOT-the-reported claim; _fund_model passes the producer basis through verbatim and sets figure_claim from FIGURE_CLAIMS only when the key is in FIG_FIELDS. Exercised by AC1 (test_cc1_arm1 .. arm5). Not deployed: the deploy is HVST-cc-7.",
+      "introduces": [
+        "FIGURE_CLAIMS"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_cc1_model_basis.py",
+      "kind": "test",
+      "commit_or_etag": "c2536621e13eec8d56aadf29660b9e0c4b071c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New offline test file with five tests: arm 1 (UNH IS_DIL_EPS_CONT_OPS claim and basis; IS_EPS claim None), arm 2 (BA FY2025 -8.81), arm 3 (absent producer basis served as None), arm 4 (claim not leaked to other lines), arm 5 (mutant: seven-field projection fails arm 1). In-memory recording S3 fake copied from test_og_gt3.py; no AWS call.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell HVST-cc-1): bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc1_model_basis.py -q -p no:cacheprovider --color=no; expect (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc1_model_basis.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".....\n5 passed in 1.52s\nAC1 rc=0 (second run, same invocation with -v: 5 passed in 1.47s)",
+      "denominator": "5 of 5 tests in tests/test_cc1_model_basis.py passed (arms 1, 2, 3, 4 and the mutant arm 5)",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (cell HVST-cc-1): bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no; expect (?m)^16 passed in",
+      "method": "test_suite",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "................\n16 passed in 3.01s\nAC2 rc=0 (base count at the worktree cut: 16 passed in 3.22s, identical)",
+      "denominator": "16 of 16 tests in the three existing gateway suites passed (test_og_gt1 + test_og_gt3 + test_og_gt4); test_og_gt3.py unedited",
+      "status": "PASS",
+      "expect": "(?m)^16 passed in"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "arm 5 (test_cc1_arm5_mutant_old_projection_fails_arm1) monkeypatches FIG_FIELDS back to the seven old names and asserts that arm 1 raises AssertionError; with the old projection neither the figure_claim nor the basis key is served, so arm 1 fails and the pytest.raises arm holds.",
+      "expected": "With FIG_FIELDS at the seven old names, _check_unh(m) raises AssertionError (arm 1 fails); with the fix, arm 1 passes.",
+      "observed": "arm 5 PASSED in the 5-passed run, i.e. _check_unh raised AssertionError under the seven-field projection; arm 1 PASSED under the fix (5 passed, 0 failed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 suite compared (the literal -q invocation, then the same file with -v)",
+      "observed": "run 1: 5 passed in 1.52s; run 2: 5 passed in 1.47s; outcome identical (5 of 5 both runs)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3, AWS, box or browser call, and any deploy",
+      "reason": "Order section 1c: LOCAL code and offline tests only. The served read is HVST-cc-7 (staged), not this cell. The tests use the in-memory recording S3 fake."
+    },
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "Worker face line 59 says do not edit the order file; the issuer flips its status. The standing worker-light rule would flip on a PASS; the face's explicit line was followed. Filed as AMGT_HARVST-D1-W150-S2."
+    },
+    {
+      "item": "The producer model_block_pull.py and the standing-rules file .claude/agents/worker-light.md",
+      "reason": "Read only, through git show HEAD:<path>; both are outside the worktree sparse checkout. Filed as AMGT_HARVST-D1-W150-S1. No file outside the order's <paths> changed."
+    },
+    {
+      "item": "A reported diluted EPS figure in FIGURE_CLAIMS",
+      "reason": "The producer FIELD_BASIS holds no reported diluted EPS field: IS_EPS is Bloomberg's reported EPS figure (not labelled diluted), IS_DIL_EPS_CONT_OPS is the continuing-operations figure. The order's branch 'if none is, add nothing' was taken, so no served figure is labelled reported diluted EPS."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W150-S1",
+    "AMGT_HARVST-D1-W150-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "run_release_suites.sh (AC1, the new file)",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc1_model_basis.py -q -p no:cacheprovider --color=no",
+      "result": "5 passed in 1.52s, rc 0"
+    },
+    {
+      "tool": "run_release_suites.sh (AC2, the existing gateway suites)",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no",
+      "result": "16 passed in 3.01s, rc 0"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-1.a-model-figure-carries-its-claim-and-the-continuing-ops-eps-is-not-diluted-eps.md",
+      "result": "see the checker's last line in the worker report"
+    }
+  ]
+}
