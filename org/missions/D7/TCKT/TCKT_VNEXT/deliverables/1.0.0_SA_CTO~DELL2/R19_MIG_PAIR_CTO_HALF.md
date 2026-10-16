@@ -36,3 +36,13 @@ any of the 19 should be narrowed to a list is a separate staffing call. It is no
 As proposed: R19 ships combined with R18 after the laptop bucket apply. No separate R19-first release is needed.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RE-SIGN, revision 2 (2026-10-16 ~03:4xZ)
+
+**SIGNED on revision 2:** pair blob `ee84f96d7064e5ac45128e15020cc01e3370fb60`, sha256
+`25fbcbf9045f91e0f4dc476103a4927d67e6700aaac401d8238d49f590005364` (both re-measured by this seat). This seat read the diff
+a4dd43f239 -> ee84f96d70. It changes only the order row (`c0e3ab717375` -> `558473dce2f9`) and adds the revision note.
+
+The order diff c0e3ab7173 -> 558473dce2 changes only `<status>` staged -> pending and adds AMENDMENT 1, the conditional GO. Every term
+and condition above stands unchanged. **Revision 1's signature is superseded by this one.**
+
