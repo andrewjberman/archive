@@ -7,7 +7,7 @@ The 49 Financial template file Andrew named (a252) holds no disclosure page (onl
 text to print; the renderer may not author disclosure language. The 49 Financial default performance report document (render/performance/report) therefore gains a LAST sheet, the disclosure
 page, whose slot reads the visible placeholder while no text is supplied; the custody ClientReportDocument's unfilled disclosure slot reads it too.
 
-Run as:  python -I <this file> <root> <CRITERION_ID>      (root = the worktree root; the portal is root/portal)
+Run as:  python -I <this file> <root> <CRITERION_ID>      (root = the worktree root; the portal under test is the CANDIDATE named by commit, see candidate_portal)
 
   DB144-1-AC1  the new test file exists, holds the required cases and passes under two runtime zones (bun test)
   DB144-1-AC2  the neighbours' existing tests pass (bun test)
@@ -17,6 +17,7 @@ Run as:  python -I <this file> <root> <CRITERION_ID>      (root = the worktree r
 Prints `<ID> PASS` or `<ID> FAIL` with the reason. Stdlib only; every subprocess is bounded.
        python -I <this file> --selftest        the pure clauses on synthetic arms
 """
+import atexit
 import json
 import os
 import re
@@ -39,6 +40,10 @@ VERDICT = "VERDICT: DISCLOSURE-PLACEHOLDER-OK"
 REQUIRED_TOKENS = (WORDS, VERDICT, "data-disclosure-placeholder", "unfilled", "filled", "data-slot-state", "disclosures", "INCOMPLETE_WITHOUT_DISCLOSURE", "Page ")
 TEST_RX = re.compile(r"(^|/)(__tests__|__harness__|__fixtures__|__mocks__)/|\.(test|spec)\.[cm]?[jt]sx?$|\.harness\.cjs$")
 LONG_DIGITS = re.compile(r"\d{8,}")
+# the ONE pre-existing label that holds "advisory fee" in a scanned file: file, exact line text, and the line it had at the base commit
+EXEMPT = ((IR + "render/clientreport/ClientReportDocument.tsx", "Billed advisory fee: {typeof fees.is_billed_fee === 'boolean' ? (fees.is_billed_fee ? 'yes' : 'no') : textOrWord(fees.is_billed_fee)}"),)
+BANNED = ("past performance", "not a guarantee", "advisory fee", "form adv", "hypothetical")
+CANDIDATE = "af8ca0ba"  # the portal candidate wk-IRPT_DASHBD-224-portal, named by commit (round 145: a criterion that reads the wrong tree is not a grade)
 BASE_COMMIT = "c81d54ff"  # the head of the 49 Financial report render lineage (wk-IRPT_DASHBD-180-portal), not merged to DEV
 
 
@@ -53,6 +58,36 @@ def need(cond, why):
 
 def read(p):
     return Path(p).read_bytes().decode("utf-8")
+
+
+def _git(portal_repo, *a):
+    return subprocess.run(["git", "-C", str(portal_repo)] + list(a), capture_output=True, text=True, timeout=300)
+
+
+def candidate_portal(root):
+    """The portal tree the criteria read: root/portal when it already carries the candidate commit (the worker's tree), else a detached worktree of the
+    candidate commit with node_modules linked (cleaned at exit). The criteria therefore read the candidate by commit, never the landed tree's portal."""
+    portal = Path(root) / "portal"
+    if portal.is_dir() and _git(portal, "rev-parse", "--git-dir").returncode == 0:
+        if _git(portal, "merge-base", "--is-ancestor", CANDIDATE, "HEAD").returncode == 0 and (portal / "src/pages/InvestorReporting/render/disclosurePlaceholder.ts").is_file():
+            return portal
+    need(portal.is_dir() and _git(portal, "cat-file", "-t", CANDIDATE).stdout.strip() == "commit", "the candidate commit %s is not in the portal repo of %s" % (CANDIDATE, root))
+    import tempfile
+    tmp = Path(tempfile.mkdtemp(prefix="p144_cand_", dir="C:/dev" if Path("C:/dev").is_dir() else None))
+    wt = tmp / "portal"
+    r = _git(portal, "worktree", "add", "--detach", str(wt), CANDIDATE)
+    need(r.returncode == 0, "could not make the candidate worktree: %s" % r.stderr.strip()[:200])
+    nm = portal / "node_modules"
+    if nm.exists():
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(wt / "node_modules"), str(nm)], capture_output=True, timeout=60)
+
+    def cleanup():
+        if (wt / "node_modules").exists():
+            subprocess.run(["cmd", "/c", "rmdir", str(wt / "node_modules")], capture_output=True, timeout=60)
+        _git(portal, "worktree", "remove", "--force", str(wt))
+        shutil.rmtree(str(tmp), ignore_errors=True)
+    atexit.register(cleanup)
+    return wt
 
 
 def bun():
@@ -118,10 +153,25 @@ def check_report_sheet(doc_src, sheets_src):
     return True
 
 
-def check_no_authored_language(src_texts):
-    """The renderer may not author disclosure language: no new sentence of compliance wording beside the placeholder."""
-    bad = [w for w in ("past performance", "not a guarantee", "form adv", "hypothetical") if any(w in t.lower() for t in src_texts)]
-    need(not bad, "authored disclosure language found in the render files: %s" % bad)
+def check_no_authored_language(files):
+    """The renderer may not author disclosure language: no compliance wording in the render files. `files` is a list of (relative path, text).
+    A banned phrase on a line is allowed ONLY when that exact line of that exact file is in EXEMPT (the one pre-existing label)."""
+    bad = []
+    for rel, text in files:
+        for line in text.splitlines():
+            low = line.lower()
+            for w in BANNED:
+                if w in low and (rel, line.strip()) not in EXEMPT:
+                    bad.append("%s: %r" % (rel, w))
+    need(not bad, "authored disclosure language found in the render files: %s" % sorted(set(bad))[:4])
+    return True
+
+
+def check_exempt_is_preexisting(portal):
+    """The exemption names a label that exists at the base commit, unchanged: a new line cannot hide behind it."""
+    for rel, line in EXEMPT:
+        g = subprocess.run(["git", "-C", str(portal), "show", "%s:%s" % (BASE_COMMIT, rel)], capture_output=True, text=True, timeout=60)
+        need(g.returncode == 0 and any(ln.strip() == line for ln in g.stdout.splitlines()), "the exempt line is not in %s at the base commit %s" % (rel, BASE_COMMIT))
     return True
 
 
@@ -149,7 +199,7 @@ def check_record(r, commit_ok):
 
 # ------------------------------------------------------------------------------------------------ the criteria
 def check_ac1(root):
-    portal = root / "portal"
+    portal = candidate_portal(root)
     f = portal / NEW_TEST
     need(f.is_file(), "the new test file %s does not exist" % NEW_TEST)
     check_test_source(read(f))
@@ -167,7 +217,7 @@ def neighbours(portal):
 
 
 def check_ac2(root):
-    portal = root / "portal"
+    portal = candidate_portal(root)
     nb = neighbours(portal)
     need(len(nb) >= 12, "the neighbour set must hold at least 12 test files (the irpt-dashbd and clientreport tests), found %d" % len(nb))
     for n in nb + [NEW_TEST]:
@@ -178,13 +228,14 @@ def check_ac2(root):
 
 
 def check_ac3(root):
-    portal = root / "portal"
+    portal = candidate_portal(root)
     client, perf, sheets = read(portal / CLIENT_DOC), read(portal / PERF_DOC), read(portal / DOC_SHEETS)
     hits = product_literals(portal)
     check_constant(hits, client, perf)
     check_client_branches(client)
     check_report_sheet(perf, sheets)
-    check_no_authored_language([client, perf, sheets, read(portal / hits[0][0])])
+    check_exempt_is_preexisting(portal)
+    check_no_authored_language([(CLIENT_DOC, client), (PERF_DOC, perf), (DOC_SHEETS, sheets), (hits[0][0], read(portal / hits[0][0]))])
     r = json.loads(read(root / RECORD))
 
     def commit_ok(c):
@@ -231,9 +282,11 @@ def selftest():
     red(lambda: check_report_sheet(doc.replace('"disclosures"', 'x'), sheets), 'sheet not named')
     red(lambda: check_report_sheet(doc.replace('{INCOMPLETE_WITHOUT_DISCLOSURE}', ''), sheets), 'pointer line removed')
     red(lambda: check_report_sheet(doc, sheets.replace('accompanying', 'x')), 'pointer constant changed')
-    assert check_no_authored_language(["Disclosure page pending"])
-    red(lambda: check_no_authored_language(["Past performance is no guarantee"]), "authored language")
-    assert check_no_authored_language(["Billed advisory fee:"])
+    assert check_no_authored_language([("a.ts", "Disclosure page pending")])
+    red(lambda: check_no_authored_language([("a.ts", "Past performance is no guarantee")]), "authored language")
+    red(lambda: check_no_authored_language([("a.ts", "Billed advisory fee: x")]), "advisory fee outside the exemption")
+    red(lambda: check_no_authored_language([(EXEMPT[0][0], "Our advisory fee is 1 percent")]), "advisory fee on another line of the exempt file")
+    assert check_no_authored_language([(EXEMPT[0][0], EXEMPT[0][1])])
     rec = {"claim": "measured", "portal": {"branch": "wk-IRPT_DASHBD-224-portal", "commit": "abcdef1", "files_changed": ["src/a.ts"]}, "constant": {"file": "src/a.ts", "name": "X", "value": WORDS},
            "branches": {"client_unfilled": "placeholder", "client_filled": "verbatim paragraphs", "report_sheet": "last sheet, placeholder when no text is supplied", "pointer_line": "unchanged"},
            "tests": {"mutant_failed": True, "lint_errors": 0, "typecheck_errors": 0, "suite_after": {"new_failing_ids": []}}, "pushed": False, "deployed": False, "words": "w" * 100}
@@ -248,7 +301,7 @@ def selftest():
         fn(r2)
         red(lambda: check_record(r2, lambda c: True), label)
     red(lambda: check_record(rec, lambda c: False), "commit not descending from PROD")
-    print("selftest: test source (%d red arms), constant (4), client (3), report sheet (6), language (1) and record (%d red arms + 1) clauses behave" % (len(REQUIRED_TOKENS) + 1, len(arms)))
+    print("selftest: test source (%d red arms), constant (4), client (3), report sheet (6), language (4) and record (%d red arms + 1) clauses behave" % (len(REQUIRED_TOKENS) + 1, len(arms)))
     print("selftest PASS")
 
 
