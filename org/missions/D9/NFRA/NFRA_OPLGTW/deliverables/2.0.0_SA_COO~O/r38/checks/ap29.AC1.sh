@@ -24,8 +24,17 @@ put_del = [a for a in allow_actions if re.match(r"s3:(Put|Delete|\*)", a)]
 star = bool(re.search(r'Resource\s*=\s*"\*"|Resource\s*=\s*\[\s*"\*"', s))
 root_obj = bool(re.search(r'arn:aws:s3:::opal-data-bd/\*"', s))
 tables = ["unrealized", "allocations", "transactions", "fees"]
-obj_ok = all(("opal-data-bd/silver/%s/" % t) in s for t in tables)
-pref_ok = all(('"silver/%s/' % t) in s for t in tables)
+import json as _json
+# The naming limb refuses a typed S3 address, so the .tf reads the four prefixes from registry rows (Z-S294, the applier was right):
+# the check follows the rows. The four rows must exist (bucket opal-data-bd, template silver/<t>/) and the .tf must reference each by key
+# and use them for the Allow object resources and the ListBucket s3:prefix values.
+_reg = _json.load(open("infra/logic/registry/legacy_addresses.json", encoding="utf-8"))
+_rows = {r["key"]: r for r in _reg["legacy_addresses"]}
+_keys = ["gateway-client-bdlive-%s" % t for t in tables]
+_reg_ok = all(k in _rows and _rows[k].get("bucket") == "opal-data-bd" and _rows[k].get("template") == "silver/%s/" % t for k, t in zip(_keys, tables))
+_ref_ok = all(('"%s"' % k) in s for k in _keys)
+obj_ok = _reg_ok and _ref_ok and ("local.bdlive_objects" in s)
+pref_ok = _reg_ok and _ref_ok and ("local.bdlive_prefixes" in s) and ("s3:prefix" in s)
 other_bucket = bool(re.findall(r'arn:aws:s3:::(?!opal-data-bd)[a-z0-9-]+', s))
 pm = re.search(r"(\d+) to add, (\d+) to change, (\d+) to destroy", plan)
 plan_ok = bool(pm) and int(pm.group(1)) == 2 and int(pm.group(2)) in (0, 1) and int(pm.group(3)) == 0
