@@ -1,0 +1,2854 @@
+{
+ "as_of": "2026-10-16",
+ "claim": "inferred",
+ "postulates": {
+  "mece": "Declared domain: the UNION of the distinct tran_srcde codes of the CRO classification table (187 rows, 157 distinct tran_srcde codes, 30 distinct rules, 10 codes with several rules) and the codes in the live silver (160 distinct, 3 silver-only, 0 table-only), so 160 codes. Subtraction over that domain: codes with no 49financial row 0, rows naming a code outside the union 0, duplicate rows 0. The Cottonwood and Inflection domains are carried unchanged.",
+  "same_grain": "Grain: one row per tran_srcde code, the level at which the CRO table gives a code its meaning (rule, category, description). tr_cd and sb_cd are not the grain: a code is never mapped by the sb_cd or tr_cd it sits under, so the 160-code tran_srcde union replaces the 15-value sb_cd grain of the earlier proposal.",
+  "intent_coherence": "One axis: the Opal type word says what a source code IS (a deposit, a dividend, a fee). The flow class is a separate axis for where value sits against the account boundary, and the action is derived from the type through the type table, never typed on a row.",
+  "state_coherence": "Values one remedy does NOT move: moving one code between UNMAPPED and a word changes no other code's row, and adding or retiring a word changes no existing row's word or flow class. unmapped_policy is shown: an UNMAPPED row stays on the page and in the export with its reason and is counted in every denominator."
+ },
+ "state_coherence_by_word": {
+  "Deposit": "A code moved into or out of Deposit changes no other code's word; the action Contribution and the flow class EXTERNAL_IN of every other word stay as they are.",
+  "Transfer in": "A code moved into or out of Transfer in changes no other code's word; the action Transfer and the flow class EXTERNAL_IN of every other word stay as they are.",
+  "Withdrawal": "A code moved into or out of Withdrawal changes no other code's word; the action Withdrawal and the flow class EXTERNAL_OUT of every other word stay as they are.",
+  "Transfer out": "A code moved into or out of Transfer out changes no other code's word; the action Transfer and the flow class EXTERNAL_OUT of every other word stay as they are.",
+  "Buy": "A code moved into or out of Buy changes no other code's word; the action Trade and the flow class INTERNAL of every other word stay as they are.",
+  "Sell": "A code moved into or out of Sell changes no other code's word; the action Trade and the flow class INTERNAL of every other word stay as they are.",
+  "Dividend": "A code moved into or out of Dividend changes no other code's word; the action Income and the flow class INCOME of every other word stay as they are.",
+  "Interest": "A code moved into or out of Interest changes no other code's word; the action Income and the flow class INCOME of every other word stay as they are.",
+  "Capital gain": "A code moved into or out of Capital gain changes no other code's word; the action Income and the flow class INCOME of every other word stay as they are.",
+  "Other income": "A code moved into or out of Other income changes no other code's word; the action Income and the flow class INCOME of every other word stay as they are.",
+  "Reinvestment": "A code moved into or out of Reinvestment changes no other code's word; the action Income and the flow class INTERNAL of every other word stay as they are.",
+  "Tax withheld": "A code moved into or out of Tax withheld changes no other code's word; the action Tax and the flow class INTERNAL of every other word stay as they are.",
+  "Fee": "A code moved into or out of Fee changes no other code's word; the action Fee and the flow class FEE of every other word stay as they are.",
+  "Management fee": "A code moved into or out of Management fee changes no other code's word; the action Fee and the flow class FEE of every other word stay as they are.",
+  "Trading expense": "A code moved into or out of Trading expense changes no other code's word; the action Fee and the flow class FEE of every other word stay as they are.",
+  "Fee credit": "A code moved into or out of Fee credit changes no other code's word; the action Fee and the flow class FEE of every other word stay as they are.",
+  "Corporate action": "A code moved into or out of Corporate action changes no other code's word; the action Adjustment and the flow class CORPORATE_ACTION of every other word stay as they are.",
+  "Journal": "A code moved into or out of Journal changes no other code's word; the action Transfer and the flow class INTERNAL of every other word stay as they are.",
+  "Account transfer": "A code moved into or out of Account transfer changes no other code's word; the action Transfer and the flow class UNRESOLVED of every other word stay as they are.",
+  "Adjustment": "A code moved into or out of Adjustment changes no other code's word; the action Adjustment and the flow class INTERNAL of every other word stay as they are.",
+  "Return of capital": "A code moved into or out of Return of capital changes no other code's word; the action Adjustment and the flow class INTERNAL of every other word stay as they are.",
+  "UNMAPPED": "A code moved out of UNMAPPED changes no other code's word; each UNMAPPED row stays on the page and in the export with its reason and is counted in every denominator, and no other word's action or flow class moves."
+ },
+ "unmapped_policy": "shown",
+ "cross_firm_statement": "Remapping a code of one firm never moves another firm's rows: a 49 Financial change reaches only its own tran_srcde rows, and the Cottonwood and Inflection rows keep their own source values, so no row of another firm moves.",
+ "opal_actions": [
+  {
+   "word": "Contribution",
+   "definition": "Value that comes into the account from outside the firm."
+  },
+  {
+   "word": "Withdrawal",
+   "definition": "Value that leaves the account to the client or to an outside party."
+  },
+  {
+   "word": "Trade",
+   "definition": "A purchase or sale of a security."
+  },
+  {
+   "word": "Income",
+   "definition": "Value earned by holding an investment, paid out or reinvested."
+  },
+  {
+   "word": "Fee",
+   "definition": "A charge against the account."
+  },
+  {
+   "word": "Tax",
+   "definition": "Tax taken from the account's income or distributions."
+  },
+  {
+   "word": "Transfer",
+   "definition": "Value that moves between accounts or institutions."
+  },
+  {
+   "word": "Adjustment",
+   "definition": "A non-cash or bookkeeping change to the account."
+  }
+ ],
+ "opal_types": [
+  {
+   "word": "Deposit",
+   "definition": "Cash or securities a client adds to the account from outside the firm.",
+   "action": "Contribution",
+   "flow_class": "EXTERNAL_IN"
+  },
+  {
+   "word": "Transfer in",
+   "definition": "Cash or securities moved into the account from another account or institution.",
+   "action": "Transfer",
+   "flow_class": "EXTERNAL_IN"
+  },
+  {
+   "word": "Withdrawal",
+   "definition": "Cash or securities paid out of the account to the client or to an outside party.",
+   "action": "Withdrawal",
+   "flow_class": "EXTERNAL_OUT"
+  },
+  {
+   "word": "Transfer out",
+   "definition": "Cash or securities moved out of the account to another account or institution.",
+   "action": "Transfer",
+   "flow_class": "EXTERNAL_OUT"
+  },
+  {
+   "word": "Buy",
+   "definition": "Purchase of a security for the account.",
+   "action": "Trade",
+   "flow_class": "INTERNAL"
+  },
+  {
+   "word": "Sell",
+   "definition": "Sale of a security from the account.",
+   "action": "Trade",
+   "flow_class": "INTERNAL"
+  },
+  {
+   "word": "Dividend",
+   "definition": "Cash or shares paid by a holding as a dividend.",
+   "action": "Income",
+   "flow_class": "INCOME"
+  },
+  {
+   "word": "Interest",
+   "definition": "Interest credited or paid on cash or on a debt holding.",
+   "action": "Income",
+   "flow_class": "INCOME"
+  },
+  {
+   "word": "Capital gain",
+   "definition": "A capital gain distribution paid by a fund or holding.",
+   "action": "Income",
+   "flow_class": "INCOME"
+  },
+  {
+   "word": "Other income",
+   "definition": "Income paid to the account that is not a dividend, interest or capital gain.",
+   "action": "Income",
+   "flow_class": "INCOME"
+  },
+  {
+   "word": "Reinvestment",
+   "definition": "Income used to buy more of the same holding; no cash leaves the account.",
+   "action": "Income",
+   "flow_class": "INTERNAL"
+  },
+  {
+   "word": "Tax withheld",
+   "definition": "Tax taken from income or a distribution before it reaches the account; the repository's withholding rule makes it neither an external flow nor income.",
+   "action": "Tax",
+   "flow_class": "INTERNAL"
+  },
+  {
+   "word": "Fee",
+   "definition": "A charge for the account's services or expenses.",
+   "action": "Fee",
+   "flow_class": "FEE"
+  },
+  {
+   "word": "Management fee",
+   "definition": "A fee for investment management, billed on the account.",
+   "action": "Fee",
+   "flow_class": "FEE"
+  },
+  {
+   "word": "Trading expense",
+   "definition": "A cost of executing trades, charged to the account.",
+   "action": "Fee",
+   "flow_class": "FEE"
+  },
+  {
+   "word": "Fee credit",
+   "definition": "A reversal or offset that returns part of a fee to the account.",
+   "action": "Fee",
+   "flow_class": "FEE"
+  },
+  {
+   "word": "Corporate action",
+   "definition": "A non-cash change to a holding caused by the issuer, such as a split, merger, spin-off or expiry.",
+   "action": "Adjustment",
+   "flow_class": "CORPORATE_ACTION"
+  },
+  {
+   "word": "Journal",
+   "definition": "A book entry that moves value between accounts or sub-accounts inside one client boundary.",
+   "action": "Transfer",
+   "flow_class": "INTERNAL"
+  },
+  {
+   "word": "Account transfer",
+   "definition": "A movement of an account or sub-account to or from another account; whether it crosses the client boundary is decided per event.",
+   "action": "Transfer",
+   "flow_class": "UNRESOLVED"
+  },
+  {
+   "word": "Adjustment",
+   "definition": "A bookkeeping correction or revaluation with no cash flow, including reversals.",
+   "action": "Adjustment",
+   "flow_class": "INTERNAL"
+  },
+  {
+   "word": "Return of capital",
+   "definition": "A repayment of principal, not income; it lowers cost basis and leaves the account value unchanged.",
+   "action": "Adjustment",
+   "flow_class": "INTERNAL"
+  }
+ ],
+ "mapping": [
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "$JNL",
+   "opal_type": "Account transfer",
+   "cro_rules": [
+    "journals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule journals, but the description TRF BTWN SCH ACCTS names a transfer between accounts and the table does not state that both accounts share one client, so the word keeps the UNRESOLVED flow class."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "$TYPE",
+   "opal_type": "Journal",
+   "cro_rules": [
+    "journals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule journals; the description JOURNAL names a book entry between accounts."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ABFEA",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisory-fee"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule advisory-fee; the description \"QTLY ABP FEE ADJ\" names the event; Management fee is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ABFEE",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisory-fee"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule advisory-fee; the description \"QTLY ABP FEE\" names the event; Management fee is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ADJ",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "corp-actions-ic",
+    "misc-adj"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Two rows with two meanings: the FC row (rule misc-adj, FUNDS ADJUSTMENT) is a cash funds adjustment, and the IC row (rule corp-actions-ic, POSITION ADJ) is a security position adjustment. They take different words (Adjustment and Corporate action), so the table gives this code no single meaning."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ADRF",
+   "opal_type": "Fee",
+   "cro_rules": [
+    "adr-fee"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule adr-fee; the description ADR MGMT FEE is an ADR depositary charge, not an investment-management fee, so it takes Fee and not Management fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ADRFA",
+   "opal_type": "Fee",
+   "cro_rules": [
+    "adr-fee"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule adr-fee with no description; carried on Fee with the ADR charge ADRF."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "AS1CR",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "misc-adj"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule misc-adj with a generic description (MISC ADJUSTMENT); the table does not say whether cash moves, and the Adjustment word is defined with no cash flow."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "AS1DR",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "checks-classified"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule checks-classified with the description SCHWAB CHECK; the same description is a deposit on one code and a paid check on another, and this row states neither direction, so no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "AS1FE",
+   "opal_type": "Fee",
+   "cro_rules": [
+    "service-fees"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule service-fees; the description MISC ADJUSTMENT is generic, and the rule names a service fee, so Fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ASG",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions-ic"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions-ic; the description ASSIGNED names an assignment of a position; Corporate action is the closest word, and the corp-actions-ic rule supports it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BILL",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisory-fee"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule advisory-fee; the description BILLING INVOICE is the billing of the advisory fee, so Management fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BKINA",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest; the description bank interest adj is an adjustment to bank interest, carried on Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BKINT",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest; the description bank interest names interest, so Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BKSWP",
+   "opal_type": "Journal",
+   "cro_rules": [
+    "sweeps"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule sweeps; the description AUTO BANK SWEEP moves cash between the brokerage and bank sub-accounts of one relationship, a book entry, so Journal."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BKTRF",
+   "opal_type": "Journal",
+   "cro_rules": [
+    "sweeps"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule sweeps; the description IC OVERDRAFT TRF moves cash between the brokerage and bank sub-accounts of one relationship, a book entry, so Journal."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BRINA",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "int-adj-fc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule int-adj-fc; the description int manual adj is a manual interest adjustment, carried on Interest so it sits with the interest it corrects."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BRSWP",
+   "opal_type": "Journal",
+   "cro_rules": [
+    "sweeps"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule sweeps; the description AUTO BANK SWEEP moves cash between the brokerage and bank sub-accounts of one relationship, a book entry, so Journal."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWBKI",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "int-adj-fc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule int-adj-fc with no description; an interest adjustment, carried on Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWCAP",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withholding with no further description; tax withheld before it reaches the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWCRI",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withholding with no further description; tax withheld before it reaches the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWDIA",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withholding with no further description; tax withheld before it reaches the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWDIV",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withholding; the description IRS WITHHOLD is tax taken from a dividend before it reaches the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWDYE",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withholding with no further description; tax withheld before it reaches the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "BWSTG",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withholding with no further description; tax withheld before it reaches the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CAPU",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions-ic"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions-ic; the description Capital Bal Update names a balance update; Corporate action is the closest word, and the corp-actions-ic rule supports it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CDINT",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule interest and no description; the rule names the event, and Interest is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CDMT",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions with no description; Corporate action by the rule."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CFR",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description LT CAP GAIN REIN names a long-term capital gain distribution, reinvested. The income credit is Capital gain; the buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CFRAJ",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description LT CAP GN REIN AJ is an adjustment to a long-term capital gain distribution, carried on Capital gain."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CFRYE",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description LT CAP GAIN names a long-term capital gain distribution, so Capital gain and not Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CGC",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description LT CAP GAIN CASH names a long-term capital gain distribution paid in cash, so Capital gain."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CHE",
+   "opal_type": "Withdrawal",
+   "cro_rules": [
+    "withdrawals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withdrawals; the description WIRED FUNDS OUT is cash paid to an outside bank."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CHEA",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description WIRE FUND ADJ adjusts an incoming wire from outside the firm, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CHK",
+   "opal_type": "Withdrawal",
+   "cro_rules": [
+    "withdrawals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule withdrawals; the description FUNDS PAID is a check paid out of the account."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CIL",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "cash-in-lieu"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule cash-in-lieu; a cash payment for a fractional share. The table does not say whether a sale of the fraction or a corporate-action payment, so no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CILA",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "cash-in-lieu"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule cash-in-lieu; a cash payment for a fractional share. The table does not say whether a sale of the fraction or a corporate-action payment, so no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CLIQ",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule corp-actions and no description; the rule names the event, and Corporate action is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CMR",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description MERGER ACTIVITY names an issuer merger, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CSMR",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description MERGER names an issuer merger, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CVN",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions-ic"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions-ic; the description CONVERSION names an issuer conversion of a holding, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "CYE",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description LT CAP GAIN names a long-term capital gain distribution, so Capital gain and not Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DBS1B",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description DEPOSIT names an inflow from outside the firm, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DDEFT",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description MONEYLINK DEPOSIT is an electronic transfer in from the client's linked bank, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DEL",
+   "opal_type": "Transfer out",
+   "cro_rules": [
+    "shares-delivered"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule shares-delivered; the description SHRS.DELIVERED-OUT is securities leaving the account for another institution, so Transfer out."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DFR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description ORD INC DIV REINV names an ordinary dividend credited and reinvested. The income credit is Dividend; the buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DFRAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends",
+    "no-rule"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules dividends and no-rule; both rows carry the description ADJUST DIVIDEND, a correction to a dividend, so one word, Dividend, is right for both."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DFRYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule dividends; the description \"CASH DIV\" names the event; Dividend is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DFYAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; a dividend adjustment with no description, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DIV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends",
+    "no-rule"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules dividends and no-rule; both rows carry the description ORD DIV - CASH, an ordinary cash dividend, so one word, Dividend, is right for both."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DIVAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends",
+    "no-rule"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules dividends and no-rule; both rows carry the description ADJUST DIVIDEND, a correction to a dividend, so one word, Dividend, is right for both."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPAJ",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "misc-adj"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule misc-adj with no description; the table does not say whether cash moves, and the Adjustment word is defined with no cash flow."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPCRS",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description DEPOSIT names an inflow from outside the firm, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPCSC",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description SCHWAB CHECK names a check deposited into the account, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPCSH",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "misc-adj"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule misc-adj with no description; the table does not say whether cash moves, and the Adjustment word is defined with no cash flow."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPGVT",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description DEPOSIT names an inflow from outside the firm, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPINS",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits",
+    "no-rule"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules no-rule and deposits; both rows carry the description *DEPOSIT, an inflow from outside the firm, so one word, Deposit, is right for both."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPMOD",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description DEPOSIT names an inflow from outside the firm, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPRET",
+   "opal_type": "Withdrawal",
+   "cro_rules": [
+    "checks-classified"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule checks-classified; the description RETURNED DEPOSIT reverses an earlier deposit, so cash goes back to the payer and this is a Withdrawal."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DPWRF",
+   "opal_type": "Deposit",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits; the description WIRED FUNDS IN is wired cash from outside the firm, so Deposit."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DRT",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule dividends and no description; the rule names the event, and Dividend is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DST",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SHARE DIVIDEND is a dividend paid in shares, which the Dividend word covers (cash or shares)."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DYAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule dividends and no description; the rule names the event, and Dividend is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "DYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule dividends; the description \"CASH DIV\" names the event; Dividend is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "EXC",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description EXCHANGE/EXERCISE names an issuer exchange of a holding, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "EXP",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions-ic"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions-ic; the description EXPIRED names the expiry of a holding, which Corporate action lists."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "EXRT",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions-ic"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions-ic; the description EXPIRATION names the expiry of a holding, which Corporate action lists."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "EXWT",
+   "opal_type": "Corporate action",
+   "cro_rules": [],
+   "in_cro_table": false,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Silver-only code (not in the CRO table). The description carries the word MATURED, a security that matured. Corporate action names expiry as the issuer-side end of a holding, and a maturity is that end, so Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "FCQ",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule corp-actions and no description; the rule names the event, and Corporate action is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "FEE",
+   "opal_type": "Fee",
+   "cro_rules": [
+    "service-fees"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule service-fees; the description SERVICE FEE is a charge for the account's services, so Fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "FEEA",
+   "opal_type": "Fee",
+   "cro_rules": [
+    "service-fees"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule service-fees; the description SERVICE FEE ADJ is an adjustment to a service fee, carried on Fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "FS",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions with no description; Corporate action by the rule."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "FTP",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "foreign-tax"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule foreign-tax; the description FOREIGN TAX PAID is foreign tax taken from income before it reaches the account, so Tax withheld."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "FTR",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "foreign-tax"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule foreign-tax; the description FOREIGN TX RECLAIM reverses foreign tax previously withheld. No separate reclaim word exists, so the row stays on the Tax withheld word of the tax it reverses."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "GSPAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description ADJUST DIVIDEND is a correction to a dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "GUP",
+   "opal_type": "Fee credit",
+   "cro_rules": [
+    "corp-misc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-misc; the description SCH SVC CREDIT is a Schwab service credit that offsets a service charge, the Fee credit definition. The rule is a catch-all bucket, so the description decides."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "INT",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Single CRO rule interest; the description \"CREDIT INT\" names the event; Interest is the word for it."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "INTAJ",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest with no description; carried on Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "INTR",
+   "opal_type": "Fee",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest; the description MARGIN INTEREST is a charge the account pays on its debit balance, an expense and not income, so Fee (a charge against the account). Interest would move an expense into the income class."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "INTRA",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest with no description; carried on Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "IRAWH",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "ira-withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule ira-withholding; the description IRS WITHHOLDING is federal tax withheld from an IRA distribution before the cash reaches the account, so Tax withheld."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "JNL",
+   "opal_type": "Journal",
+   "cro_rules": [
+    "journals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule journals (the IC row carries rule journals); the description JOURNAL names a book entry."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "LIT",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "corp-misc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-misc with the description Litigation; the table does not say whether a settlement is income, a return of cost or a correction, so no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "MCE",
+   "opal_type": "Tax withheld",
+   "cro_rules": [
+    "ira-withholding"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule ira-withholding; the description IRS WITHHOLD is tax withheld from an IRA distribution, so Tax withheld."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "MEXC",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description Mand Reorg Exc names a mandatory reorganisation exchange, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "MGFEA",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisor-fee-explicit"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule advisor-fee-explicit; the description ADVISOR FEE ADJ is an adjustment to the advisor fee, carried on Management fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "MGFEE",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisor-fee-explicit"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule advisor-fee-explicit; the description ADVISOR FEE is the advisor's investment-management fee, so Management fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NC",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description NC is a code with no further text, so Corporate action by the rule."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDFR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description REINVEST DIVIDEND (securities) is a dividend paid in shares and reinvested. The income credit is Dividend; the cash buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDFRA",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description REINVEST DIV ADJ is a correction to a reinvested dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDIV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "alt-income",
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules dividends and alt-income; both rows carry the description DIVIDEND, so one word, Dividend, is right for both."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDIVA",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "alt-income"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule alt-income; the description DIVIDEND names a dividend, which the description decides over the alternative-income bucket."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description NON-QUAL DIV is a non-qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDRAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description NON-QUAL DIV ADJ is a correction to a non-qualified dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDST",
+   "opal_type": "Other income",
+   "cro_rules": [
+    "alt-income",
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules dividends and alt-income; the description AI Distribution names an alternative-investment distribution, which is income that is neither a dividend, interest nor a capital gain, so Other income. The one word is right for both rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDSTA",
+   "opal_type": "Other income",
+   "cro_rules": [
+    "alt-income"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule alt-income; the description AI Dist Adj is an adjustment to an alternative-investment distribution, carried on Other income."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description NON-QUAL DIV is a non-qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDVAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description NON-QUAL DIV ADJ is a correction to a non-qualified dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NDYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description NON-QUAL DIV is a non-qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "NFRYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description NON-QUAL DIV is a non-qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ORG",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description REORG LEDGER ENTRY is a ledger entry for an issuer reorganisation, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDEF",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description Rdm Prerefund Exc names a pre-refunded redemption exchange, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDEFT",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "deposits",
+    "withdrawals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules deposits and withdrawals under one description, MONEYLINK TRANSFER: one row is an inflow and one an outflow. The description does not give the direction, so the table gives this code no single meaning."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIV FOR REINV names a cash dividend credited for reinvestment. The income credit is Dividend; the buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDRAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIV ADJ is a correction to a cash dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDRTN",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "deposits",
+    "returned-deposits",
+    "withdrawals"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules returned-deposits, deposits and withdrawals under one empty description: the rows run in both directions. The table gives this code no single meaning."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDRYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIVIDEND is a cash dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIVIDEND is a cash dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PDVAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIV ADJ is a correction to a cash dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PIL",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SUB INC PYMT is an income payment on a holding, carried on Dividend under the rule."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PILAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SUB INC PYMT ADJ is a correction to that income payment, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PILR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description REIN SUB INC PMT is an income payment credited for reinvestment. The income credit is Dividend; the buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PRIN",
+   "opal_type": "Return of capital",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description PRINCIPAL PAYMENT is a repayment of principal, which the table's dividend rule would misread as income. Return of capital is defined as a repayment of principal, not income, so the description decides."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "PRO",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "corp-misc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-misc with the description CREDIT PRO and category Dividends and Interest. The description does not say whether the credit is income or a correction, so no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "QDR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description QUALIFIED DIV is a qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "QDV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description QUALIFIED DIV is a qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "QDVAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description QUAL DIV ADJ is a correction to a qualified dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RADJ",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "no-rule"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule no-rule with no description; the table does not say whether cash moves, and the Adjustment word is defined with no cash flow."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RCR",
+   "opal_type": "Adjustment",
+   "cro_rules": [
+    "corp-misc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-misc; the description ADJ SMALL BALANCE names a small-balance adjustment, the Adjustment word for a bookkeeping correction."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RDM",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions",
+    "corp-misc"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rules corp-misc and corp-actions; every row carries the description REDEMP/CONVERSION, an issuer redemption or conversion of a holding, so one word, Corporate action, is right for all rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RDMC",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description REDEMP/CONVERSION is an issuer redemption or conversion, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RDPC",
+   "opal_type": "Corporate action",
+   "cro_rules": [],
+   "in_cro_table": false,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Silver-only code (not in the CRO table). The description carries the words PARTIAL CALL, a bond partial redemption: the same issuer redemption event as the table's REDEMP/CONVERSION codes, so Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "REC",
+   "opal_type": "Transfer in",
+   "cro_rules": [
+    "shares-delivered"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule shares-delivered; the description SHRS.RECEIVED-IN is securities arriving from another institution, so Transfer in."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RFR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends with no description; carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RID",
+   "opal_type": "Reinvestment",
+   "cro_rules": [
+    "reinvest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule reinvest on the TR buy side; the description REINVEST DIVIDEND is dividend cash used to buy more of the same holding, so Reinvestment."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RIDA",
+   "opal_type": "Reinvestment",
+   "cro_rules": [
+    "reinvest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule reinvest; the description ADJ REINVESTMENT is a correction to a reinvestment buy, carried on Reinvestment."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "ROC",
+   "opal_type": "Return of capital",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description RETURN OF CAPITAL names a return of capital, which the Return of capital word covers and Dividend does not, so the description decides."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "RS",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description REVERSE SPLIT is a split, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "S1C",
+   "opal_type": "Withdrawal",
+   "cro_rules": [
+    "schwab-checks-out"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule schwab-checks-out; a Schwab check drawn on the account and paid out, so Withdrawal."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "S1INA",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest; the description MISC ADJUSTMENT is generic and category OTHER. The rule names interest, so Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "S1INT",
+   "opal_type": "Interest",
+   "cro_rules": [
+    "interest"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule interest; the description INTEREST is interest credited, so Interest."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SCFR",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description ST CAP GAIN REINV names a short-term capital gain distribution, reinvested. The income credit is Capital gain; the buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SCFRA",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CAP GAIN REINV ADJ is a correction to a reinvested capital gain distribution, carried on Capital gain."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SCGYE",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description S/T CAP GN names a short-term capital gain distribution, so Capital gain and not Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SDIV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; a dividend with no description, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SDVYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; a dividend with no description, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SFRYE",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description S/T CAP GN names a short-term capital gain distribution, so Capital gain and not Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SMFEE",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisor-fee-verified"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule advisor-fee-verified; the advisor's verified management fee billed on the account, so Management fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SMR",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description MERGER names an issuer merger, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SND",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SPEC NON-QUAL DIV is a special non-qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SNDYE",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SPEC N/Q DIV is a special non-qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SO",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends, but the description SPIN-OFF names a spin-off, which the Corporate action definition lists. The description decides over the rule."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SQD",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SPEC QUAL DIV is a special qualified dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SQDAJ",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [],
+   "in_cro_table": false,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Silver-only code (not in the CRO table). The description carries an issuer name and no transaction word, and the AJ ending is not a basis for a meaning (the record decides on the description, never on a sub-code or a suffix), so the table and the silver give no single meaning here."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "STCG",
+   "opal_type": "Capital gain",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description ST CAP GAIN CASH names a short-term capital gain distribution paid in cash, so Capital gain."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "STK",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description STOCK SPLIT is a split, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "STOP",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits with the description Stop Check Payment. A stop credits back a check that was paid, a reversal of an earlier withdrawal, not an inflow from outside; the rule and the description disagree and no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "SUD",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description SPECIAL DIV is a special dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "T/A",
+   "opal_type": "Account transfer",
+   "cro_rules": [
+    "acct-transfer"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule acct-transfer; the description TRANSFER ACCOUNT is the movement of an account to or from another account, flow decided per event."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "TOA",
+   "opal_type": "Account transfer",
+   "cro_rules": [
+    "acct-transfer"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule acct-transfer; the description TRANSFER ACCOUNT is the movement of an account to or from another account, flow decided per event."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "TPFEE",
+   "opal_type": "Management fee",
+   "cro_rules": [
+    "advisor-fee-verified"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule advisor-fee-verified; a verified advisory fee with no description, carried on Management fee."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "TRADE",
+   "opal_type": "Adjustment",
+   "cro_rules": [
+    "trades"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "The one code under category Trades and tr_cd TR. Its description is ADJUSTING ENTRY, a bookkeeping correction, so Adjustment and not Buy or Sell. The Trades category and the TR tr_cd do not decide it; the description does."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "TRM",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions; the description ADR Terminations is the termination of an ADR, a Corporate action."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "TYP",
+   "opal_type": "Journal",
+   "cro_rules": [
+    "acct-transfer"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule acct-transfer, but the description JOURNAL names a book entry; the description decides, so Journal."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "UDR",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIV FOR REINV names a cash dividend credited for reinvestment. The income credit is Dividend; the buy side is the Reinvestment rows."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "UDV",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIVIDEND is a cash dividend, so Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "UDYAJ",
+   "opal_type": "Dividend",
+   "cro_rules": [
+    "dividends"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule dividends; the description CASH DIV ADJ is a correction to a cash dividend, carried on Dividend."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "VOID",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "deposits"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule deposits with the description Voided Check. A voided check credits back a check that was paid, a reversal of an earlier withdrawal, not an inflow from outside; the rule and the description disagree and no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "WLES",
+   "opal_type": "UNMAPPED",
+   "cro_rules": [
+    "lending-misc-ic"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule lending-misc-ic with no description; securities lending income and a lending return cannot be told apart from the table, so no single word fits."
+  },
+  {
+   "firm": "49financial",
+   "field": "tran_srcde",
+   "source_value": "WTEX",
+   "opal_type": "Corporate action",
+   "cro_rules": [
+    "corp-actions"
+   ],
+   "in_cro_table": true,
+   "in_live_silver": true,
+   "not_observed": false,
+   "reason": "Rule corp-actions with no description; Corporate action by the rule."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Cash Deposit",
+   "opal_type": "Deposit",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line95",
+   "basis": "TYPE_CLASS EXTERNAL_IN label; a client cash deposit."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Transfer In",
+   "opal_type": "Transfer in",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line96",
+   "basis": "TYPE_CLASS EXTERNAL_IN label; value moved in from another account."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Cash Withdrawal",
+   "opal_type": "Withdrawal",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line97",
+   "basis": "TYPE_CLASS EXTERNAL_OUT label; a client cash withdrawal."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Transfer Out",
+   "opal_type": "Transfer out",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line98",
+   "basis": "TYPE_CLASS EXTERNAL_OUT label; value moved out to another account."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Buy",
+   "opal_type": "Buy",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line99",
+   "basis": "TYPE_CLASS INTERNAL label; a security purchase."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Sale",
+   "opal_type": "Sell",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line100",
+   "basis": "TYPE_CLASS INTERNAL label; a security sale."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Dividend Reinvestment",
+   "opal_type": "Reinvestment",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line101",
+   "basis": "TYPE_CLASS INTERNAL label; a dividend used to buy shares."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Journal",
+   "opal_type": "Journal",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line102",
+   "basis": "TYPE_CLASS INTERNAL label; a book entry."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Dividend",
+   "opal_type": "Dividend",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line103",
+   "basis": "TYPE_CLASS INCOME label; a dividend."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Interest",
+   "opal_type": "Interest",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line104",
+   "basis": "TYPE_CLASS INCOME label; interest."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Income",
+   "opal_type": "Other income",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line105",
+   "basis": "TYPE_CLASS INCOME label; income that is neither a dividend nor interest by name."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Capital Gains",
+   "opal_type": "Capital gain",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line106",
+   "basis": "TYPE_CLASS IN_VALUE label; a capital gain distribution."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Return of Capital",
+   "opal_type": "Return of capital",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line107",
+   "basis": "TYPE_CLASS IN_VALUE label; a return of principal."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Expense",
+   "opal_type": "Fee",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line108",
+   "basis": "TYPE_CLASS IN_VALUE label; a charge against the account, so the general Fee word."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Management Fee",
+   "opal_type": "Management fee",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line109",
+   "basis": "TYPE_CLASS IN_VALUE label; a management fee by name."
+  },
+  {
+   "firm": "cottonwood",
+   "field": "type",
+   "source_value": "Corporate Action",
+   "opal_type": "Corporate action",
+   "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line110",
+   "basis": "TYPE_CLASS CORPORATE_ACTION label."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Client Contribution",
+   "opal_type": "Deposit",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line62",
+   "basis": "NNA bucket, direction in: a client deposits new cash."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Employer Contribution",
+   "opal_type": "Deposit",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line70",
+   "basis": "NNA bucket, direction in: employer retirement match, client-acquired cash."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Rollover Contribution",
+   "opal_type": "Transfer in",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line77",
+   "basis": "NNA bucket, direction in: an external retirement account rolled into the firm."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Merge In from Other Account",
+   "opal_type": "Transfer in",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line85",
+   "basis": "NNA bucket, direction in: an external account merged in."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "External Account Activity In",
+   "opal_type": "Transfer in",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line94",
+   "basis": "NNA bucket, direction in: external account activity inflow."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Client Distribution",
+   "opal_type": "Withdrawal",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line102",
+   "basis": "NNA bucket, direction out: a client withdrawal from the firm."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Cancel Account",
+   "opal_type": "Withdrawal",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line109",
+   "basis": "NNA bucket, direction out: account closure paid to the client."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Merge Out to Other Account",
+   "opal_type": "Transfer out",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line116",
+   "basis": "NNA bucket, direction out: an account merged out."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "External Account Activity Out",
+   "opal_type": "Transfer out",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line125",
+   "basis": "NNA bucket, direction out: external account activity outflow."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Buy Exchange",
+   "opal_type": "Buy",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line138",
+   "basis": "Internal bucket: the buy leg of a rebalance exchange."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Sell Exchange",
+   "opal_type": "Sell",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line144",
+   "basis": "Internal bucket: the sell leg of a rebalance exchange."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Income Reinvested",
+   "opal_type": "Reinvestment",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line150",
+   "basis": "Internal bucket: DRIP, income reinvested in shares."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Starting Value",
+   "opal_type": "UNMAPPED",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line157",
+   "basis": "Internal bucket, but the yaml calls it a synthetic per-position opening seed, not a transaction a client made.",
+   "reason": "Internal bucket, but the yaml calls it a synthetic per-position opening seed, not a transaction a client made."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Merge In Exchange",
+   "opal_type": "Journal",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line164",
+   "basis": "Internal bucket: the balancing book entry paired with a merge in."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Merge Out Exchange",
+   "opal_type": "Journal",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line170",
+   "basis": "Internal bucket: the balancing book entry paired with a merge out."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Internal Account Journal In",
+   "opal_type": "Journal",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line176",
+   "basis": "Internal bucket: an intra-account journal, inbound."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Internal Account Journal Out",
+   "opal_type": "Journal",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line184",
+   "basis": "Internal bucket: an intra-account journal, outbound."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Decrease in Value",
+   "opal_type": "Adjustment",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line192",
+   "basis": "Internal bucket: a valuation adjustment with no real cash flow."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Spin Off in",
+   "opal_type": "Corporate action",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line198",
+   "basis": "CorporateAction-type event in the Internal bucket: a spin-off, same economic position."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Spin Off out",
+   "opal_type": "Corporate action",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line204",
+   "basis": "Internal bucket: the paired spin-off outflow."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Dividend Reinvested",
+   "opal_type": "Reinvestment",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line210",
+   "basis": "Internal bucket: DRIP, a value-neutral swap of dividend into shares."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Interest Reinvested",
+   "opal_type": "Reinvestment",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line217",
+   "basis": "Internal bucket: interest DRIP, value-neutral."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Return of Capital",
+   "opal_type": "Return of capital",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line224",
+   "basis": "Internal bucket: pure return of principal, value-neutral to the account."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Return of Principal (Bonds)",
+   "opal_type": "Return of capital",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line231",
+   "basis": "Internal bucket: a bond principal repayment, value-neutral."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Dividend Paid from Cash",
+   "opal_type": "Dividend",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line237",
+   "basis": "Internal bucket (excluded from the cash-flow axis): a dividend paid from a cash balance. The type is a dividend; the exclusion is a flow matter (surprise row IRPT_DASHBD-D2-W802-S3)."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Income Paid",
+   "opal_type": "Other income",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line243",
+   "basis": "Internal bucket (excluded from the cash-flow axis): the paired income distribution of Dividend Paid from Cash."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Dividend to Cash",
+   "opal_type": "Dividend",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line255",
+   "basis": "Return bucket: income realised as cash, performance-positive."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Management Fee",
+   "opal_type": "Management fee",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line262",
+   "basis": "Return bucket: the advisor fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Long Term Gain to Cash",
+   "opal_type": "Capital gain",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line269",
+   "basis": "Return bucket: a realised long-term gain distribution to cash."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Trading Expense",
+   "opal_type": "Trading expense",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line275",
+   "basis": "Return bucket: a transaction-related fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Short Term Gain to Cash",
+   "opal_type": "Capital gain",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line282",
+   "basis": "Return bucket: a realised short-term gain distribution to cash."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Interest Paid in Cash",
+   "opal_type": "Interest",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line288",
+   "basis": "Return bucket: interest income as cash."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Federal Tax Withheld",
+   "opal_type": "Tax withheld",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line294",
+   "basis": "Return bucket, account boundary out before tax return: federal tax withheld."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Fee Credit",
+   "opal_type": "Fee credit",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line302",
+   "basis": "Return bucket: a fee reversal, a positive offset to Management Fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "State Tax Withheld",
+   "opal_type": "Tax withheld",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line308",
+   "basis": "Return bucket: state tax withheld."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Foreign Tax Withheld",
+   "opal_type": "Tax withheld",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line316",
+   "basis": "Return bucket: foreign tax withheld."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Foreign Dividend Tax",
+   "opal_type": "Tax withheld",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line322",
+   "basis": "Return bucket: foreign withholding on dividends."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Tax Credit",
+   "opal_type": "Tax withheld",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line328",
+   "basis": "Return bucket: a tax adjustment on the tax line (the reversal side of a tax withheld line)."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Interest Paid",
+   "opal_type": "Interest",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line334",
+   "basis": "Return bucket: interest income paid, a variant under Other."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "ADR Fee",
+   "opal_type": "Fee",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line340",
+   "basis": "Return bucket: an American depositary receipt holding fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Administrative Fee",
+   "opal_type": "Fee",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line347",
+   "basis": "Return bucket: an account administrative fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Administrative Fee Adjustment",
+   "opal_type": "Fee credit",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line354",
+   "basis": "Return bucket: a fee adjustment that reverses an administrative fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Wire Fee",
+   "opal_type": "Fee",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line360",
+   "basis": "Return bucket: a wire transfer fee."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Stock Split",
+   "opal_type": "Corporate action",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line375",
+   "basis": "CorporateAction bucket: a split, zero cash impact."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Reverse Stock Split",
+   "opal_type": "Corporate action",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line380",
+   "basis": "CorporateAction bucket: a reverse split, zero cash impact."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Expired-",
+   "opal_type": "Corporate action",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line385",
+   "basis": "CorporateAction bucket: an option or security expiry, zero cash impact."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Remark",
+   "opal_type": "UNMAPPED",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line390",
+   "basis": "Internal bucket, but the yaml says Remark is a position seed only where a ticker is present and a cash-shaped Remark fails loud to UNRESOLVED; its meaning depends on the row shape.",
+   "reason": "Internal bucket, but the yaml says Remark is a position seed only where a ticker is present and a cash-shaped Remark fails loud to UNRESOLVED; its meaning depends on the row shape."
+  },
+  {
+   "firm": "inflection",
+   "field": "type",
+   "source_value": "Reversal",
+   "opal_type": "Adjustment",
+   "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line395",
+   "basis": "Internal bucket: an adjustment reversal, netted against its original in the pair matcher."
+  }
+ ],
+ "census": {
+  "method": "word-boundary",
+  "denominators": {
+   "49financial": 160,
+   "cottonwood": 16,
+   "inflection": 48
+  },
+  "denominator_total": 224,
+  "cro_rows": 187,
+  "cro_distinct_tran_srcde": 157,
+  "live_silver_distinct_tran_srcde": 160,
+  "silver_only_count": 3,
+  "table_only_count": 0,
+  "live_read": {
+   "read_at_utc": "2026-10-16T05:00:00Z",
+   "rows": 3349750,
+   "partitions": 572
+  },
+  "per_type_word": {
+   "Account transfer": 3,
+   "Adjustment": 4,
+   "Buy": 2,
+   "Capital gain": 13,
+   "Corporate action": 32,
+   "Deposit": 12,
+   "Dividend": 45,
+   "Fee": 10,
+   "Fee credit": 3,
+   "Interest": 13,
+   "Journal": 11,
+   "Management fee": 9,
+   "Other income": 4,
+   "Reinvestment": 6,
+   "Return of capital": 5,
+   "Sell": 2,
+   "Tax withheld": 15,
+   "Trading expense": 1,
+   "Transfer in": 5,
+   "Transfer out": 4,
+   "UNMAPPED": 18,
+   "Withdrawal": 7
+  },
+  "unmapped": 18
+ },
+ "reads": {
+  "s3_reads": 0,
+  "s3_writes": 0,
+  "dynamodb_writes": 0,
+  "vendor_calls": 0,
+  "secret_reads": 0
+ },
+ "files_in_repo": false,
+ "served_values_changed": false,
+ "pushed": false,
+ "deployed": false
+}
