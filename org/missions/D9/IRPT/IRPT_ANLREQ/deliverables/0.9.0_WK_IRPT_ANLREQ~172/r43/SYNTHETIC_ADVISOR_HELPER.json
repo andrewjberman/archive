@@ -1,0 +1,47 @@
+{
+  "record": "IRPT_ANLREQ.TO-AR-y-380 -- the synthetic partner advisor mint and remove helper (window 5, FWD-1)",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~172",
+  "cell": "AR-y-380 (decomp org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md)",
+  "order": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-380.fwd1-synthetic-advisor-mint-and-remove.md",
+  "helper": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~172/fwd1_advisor.py",
+  "helper_sha256": "cc8b8bd5f120f3e54bb73b9c82d97ba390207a65e95e769ddf1a2e1706906a34",
+  "bytes": 12024,
+  "files": [
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~172/fwd1_advisor.py", "role": "mint and remove helper (boto3 only inside real_clients)"},
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~172/test_fwd1_advisor.py", "role": "AR380-y-AC1: 18 offline cases on stubs"},
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~172/check_items.py", "role": "AR380-y-AC2: attribute sets of the two items"},
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~172/mutant_check.py", "role": "AR380-y-AC3: allowedFirmIds removed, scratch copy outside the product tree"}
+  ],
+  "tests_output": "ADVISOR-TESTS-OK 18 (rc 0; 18 of 18 cases)",
+  "check_items_output": "ITEMS-OK users=13 partner=8 (rc 0)",
+  "mutant_output": "POSITIVE-CONTROL unmutated copy PASSES: rc=0 ADVISOR-TESTS-OK 18; MUTANT-FIRES allowedFirmIds list removed: tests rc=1 ADVISOR-TESTS-BAD 3 of 18 cases failed (rc 0)",
+  "commit_gate": "bash .tools/commit-gate.sh on each of the four .py files: pre-commit gate clean for 1 of 1 file(s), four times",
+  "constants_read_from": [
+    {"constant": "REGION", "value": "us-east-1", "read_from": "sitting_r28.py:32, reached through sitting_r33.py:29-30 (base.REGION)"},
+    {"constant": "USERS (the users table)", "value": "opal-users-v2", "read_from": "sitting_r28.py:34, reached through sitting_r33.py:194-200 (base.USERS)"},
+    {"constant": "PARTNER_PREFIX / partner table", "value": "opal-partner-<firm>", "read_from": "sitting_r33.py:190-191 (ptable)"},
+    {"constant": "EMAIL_INDEX", "value": "email-index", "read_from": "sitting_r33.py:199-201 (gsi, IndexName)"},
+    {"constant": "USER_PK_PREFIX and SK_VALUE (users key)", "value": "USER# + address; PROFILE", "read_from": "sitting_r33.py:184-185 (ukey)"},
+    {"constant": "PARTNER_KEY_ATTR (partner key)", "value": "email", "read_from": "sitting_r33.py:187-188 (pkey)"},
+    {"constant": "TIER and ROLE", "value": "advisor; user", "read_from": "sitting_r33.py:284-285"},
+    {"constant": "ADVISOR_ROLE and FIRM_ROLE", "value": "viewer; user", "read_from": "sitting_r33.py:301-302"},
+    {"constant": "REMOVE_WINDOW_S and POLL_S", "value": "300; 10", "read_from": "sitting_r33.py:423 (deadline 300 s) and sitting_r33.py:432 (sleep 10)"},
+    {"constant": "ADDRESS shape", "value": "irpt-w5-advisor-%s@opal.invalid", "read_from": "the order cell; release-33 shape irpt-r33-<k>-<date>@opal.invalid at sitting_r33.py:169-171 (not copied)"},
+    {"constant": "FIRM", "value": "49financial", "read_from": "the order cell; sitting_r33.py:169-170 uses 49financial for advisors A and B"},
+    {"constant": "NAME", "value": "IRPT_ANLREQ FWD-1 synthetic advisor", "read_from": "the order cell; release-33 names at sitting_r33.py:283 and :289 follow the same pattern"},
+    {"constant": "CREATED_BY", "value": "0.7.0_AE_CloudOps~IB2", "read_from": "the order cell. DIVERGES from sitting_r33.py:286 and :302, which write 0.7.0_AE_CloudOps~AQ2; filed as IRPT_ANLREQ-D2-W172-S5"},
+    {"constant": "TTL_HOURS", "value": "3", "read_from": "the order cell; the same TTL is fwd1_mint.py:28 (TTL_HOURS = 3)"}
+  ],
+  "partner_table_and_users_table_names": "read from sitting_r28.py:34 and sitting_r33.py:191 with certainty; no BLOCKING row. The users table name is not spelled in sitting_r33.py itself: filed as IRPT_ANLREQ-D2-W172-S4",
+  "door_read_at_HEAD": "infra/aws/lambda/investor-reporting/_authz/served.py lines 1085-1104 (_advisor_owner) via git show HEAD:<path>: the partner row's email and firmId (defaulting to the tenant) and the user row's email, firmId and status must be active. The helper's rows satisfy both reads; the partner row carries no firmId, so the default applies.",
+  "not_read": [
+    "no live mint and no live remove: neither subcommand was run; the tests and checkers build no boto3 client and make no network or AWS call",
+    "the live state of opal-users-v2 and of opal-partner-49financial: not read here; mint reads the pre-state at run time and that read is not a claim made by this record",
+    "whether the report chain accepts an advisor with no book (no report, no portfolio): not read; this is the open question the window-5 order and the CTO's ruling carry",
+    "whether the door admits the minted advisor end to end: not exercised; the door's two reads were read at HEAD, not run",
+    "whether opal-users-v2 applies a TTL to the exp attribute: not read; exp is written as the order states and the door does not read it",
+    "the createdBy stamp: the order's IB2 is used; the release-33 AQ2 is the other value (IRPT_ANLREQ-D2-W172-S5); no resolution here",
+    "the DEV approval row for the portal candidate, the served portal and the window-5 run: other seats' and later, not in this order"
+  ],
+  "disposition": "The helper is committed and tested offline. Its mint and remove are for the window-5 order's lane under the CTO's never-widen pair. This order runs neither."
+}
