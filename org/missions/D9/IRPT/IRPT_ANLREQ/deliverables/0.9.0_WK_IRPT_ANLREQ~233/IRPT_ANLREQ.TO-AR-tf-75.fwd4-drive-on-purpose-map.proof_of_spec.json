@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tf-75",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-75.fwd4-drive-on-purpose-map.md",
+    "group": "OTHER",
+    "vintage_commit": "e1112edbda"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~233",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R54_TX.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-75.fwd4-drive-on-purpose-map.md",
+    "vintage_commit": "e1112edbda"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~233/FWD4_DRIVE_ON_PURPOSE_MAP.md",
+      "kind": "doc",
+      "commit_or_etag": "e2c2f4e158",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the read record: 13 table rows, one per failure-and-trigger for the ready-signal send (2), the commentary draft and post (6), the packager refusal and failure (4) and the generator down (1); every row ADMITS, each with its deciding code line, its trigger and its status-route reading; R45-REC-OK rows=13 at this commit"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0d6782094f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four appended rows IRPT_ANLREQ-D2-W233-S1 to S4 (append-only; no existing row edited); each row parses as JSON and carries its id, class, hazard_standing, grounding and disposition",
+      "introduces": ["IRPT_ANLREQ-D2-W233-S1", "IRPT_ANLREQ-D2-W233-S2", "IRPT_ANLREQ-D2-W233-S3", "IRPT_ANLREQ-D2-W233-S4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR75-tf-AC1",
+      "criterion_verbatim": "every citation is a real line, every quote occurs within 5 lines of it, the denominator equals the rows, every verdict is in the closed set, and there are at least 8 rows.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R45_CHECKS/r45_checks.py rec org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~233/FWD4_DRIVE_ON_PURPOSE_MAP.md 8",
+      "output_evidence": "R45-REC-OK rows=13 (rc=0; run from the worktree root at record commit e2c2f4e158 under timeout 120, which completed inside the bound). Negative arm: the same record with min_rows 14 gives R45-REC-FAIL only 13 rows, need at least 14 (rc=1). Rerun gives R45-REC-OK rows=13 again.",
+      "denominator": "13 table rows, equal to the DENOMINATOR line of 13 (per-class: (a) 2, (b) 6, (c) 4, (d) 1); minimum 8 rows",
+      "expect": "R45-REC-OK",
+      "status": "PASS",
+      "status_reason": "the checker's own output at the worktree root of wk-IRPT_ANLREQ-233 on the record commit e2c2f4e158; the dry-run base at box/dell2 6ddf55422c was the FAIL the order records (R45-...-FAIL absent) and was not re-run"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own --self-test: a green record plus four mutants (bad path, bad quote, bad verdict, wrong denominator), each of which must be refused; plus a min_rows negative arm against this record",
+      "expected": "R45-SELFTEST-OK green plus four mutants refused; min_rows 14 refused on the 13-row record",
+      "observed": "R45-SELFTEST-OK green plus four mutants refused (rc=0); min_rows 14 gives R45-REC-FAIL only 13 rows, need at least 14 (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of r45_checks.py rec on the record at the same commit, compared",
+      "observed": "both runs R45-REC-OK rows=13 (rc=0 each)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "running any trigger in the record against the DEV estate: env values, the packager secret, the resident service, the commentary functions, the ticket API, the commentary queues",
+      "reason": "a read cell: the record designs the exercise and names the live act per row; no AWS call, no network, no secret, no deploy was made"
+    },
+    {
+      "item": "the live form of the retained-package read failure (record row 11)",
+      "reason": "no seat act reaches it without damaging the artifact store; the row is ADMITS on the offline form only and says so"
+    },
+    {
+      "item": "the synchronous ticket write at commentary lambda_handler.py:421-425 (write_draft_ticket, not the I4 queue path)",
+      "reason": "not one of the hops the cell names (a) to (d); noted in the record's not-enumerated paragraph, not a row"
+    },
+    {
+      "item": "the drafter's own refusals in commentary drafter.py",
+      "reason": "not opened in this read; the record says so"
+    },
+    {
+      "item": "the surprise rows' dispositions",
+      "reason": "the issuer records dispositions; this worker appended rows and edited none"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W233-S1: the ready-signal hop writes no hop_failure when IRPT_ANALYSIS_READY_QUEUE_URL is unset (resident_worker.py:218-221 returns before the try block)",
+    "IRPT_ANLREQ-D2-W233-S2: the commentary step stops with no vendor word and writes no hop_failure (lambda_handler.py:386-388)",
+    "IRPT_ANLREQ-D2-W233-S3: a 5xx answer from the ticket attach is recorded as PACKAGER_REFUSED because the code is chosen by exception class (resident_installed.py:458)",
+    "IRPT_ANLREQ-D2-W233-S4: the worktree's sparse checkout omits org/surprise_channel, so the row schema is absent on disk and was read at HEAD with git show"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~233/FWD4_DRIVE_ON_PURPOSE_MAP.md",
+  "compiler_tools": [
+    {
+      "tool": "r45_checks.py rec",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R45_CHECKS/r45_checks.py rec org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~233/FWD4_DRIVE_ON_PURPOSE_MAP.md 8",
+      "result": "R45-REC-OK rows=13"
+    },
+    {
+      "tool": "r45_checks.py --self-test",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R45_CHECKS/r45_checks.py --self-test",
+      "result": "R45-SELFTEST-OK green plus four mutants refused"
+    }
+  ]
+}
