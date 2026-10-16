@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tf-73",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6efa66552c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R48_TX.md",
+    "vintage_commit": "cd692a3b94",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-73.draft-store-role-jobs-grant.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~227",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/export/commentary_draft_store.tf",
+      "kind": "terraform",
+      "commit_or_etag": "969d0360f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only, committed on the worker branch wk-IRPT_ANLREQ-227 (LOCAL). No terraform plan, no apply, no AWS call. The apply is the applier's WORLD act under an iam simulate-custom-policy packet, owned by the issuer."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py",
+      "kind": "test",
+      "commit_or_etag": "969d0360f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Static test, stdlib and pytest only, reads the policy text. Runs with no AWS and no network. Committed on the worker branch (LOCAL)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR73-tf-AC1",
+      "criterion_verbatim": "`AR73-tf-AC1` -- the test file exists, every test function is named `test_hop_failure_*`, the tests pass and at least 5 pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 5 --prefix=test_hop_failure_ infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py",
+      "output_evidence": "R46-TESTS-OK passed=11 (rc=0; run twice, identical; full per-test listing in the session log)",
+      "denominator": "11 passed of 11 test functions defined, all named test_hop_failure_*; minimum required 5",
+      "status": "PASS",
+      "expect": "R46-TESTS-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two in-memory mutants inside the test (PutItem added to S6; Attributes condition removed) must each be refused by the same check function, plus twelve scratch-copy guard mutations of the .tf (each must turn at least one named test red, with the unmodified control green).",
+      "expected": "control green; every mutant red on at least one test_hop_failure_* test",
+      "observed": "control 11 passed; 12 of 12 scratch mutants red (the session log lists the named red tests per mutant); both in-memory mutants refused by check_grant",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the acceptance invocation compared",
+      "observed": "run 1: R46-TESTS-OK passed=11 rc=0; run 2: R46-TESTS-OK passed=11 rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan, terraform apply and any iam simulate-custom-policy battery",
+      "reason": "Out of this cell per TO-AR-tf-73: no plan, no apply, no AWS call. The apply is a later WORLD act by the applier under a pair whose packet carries the simulate battery; that packet is the issuer's."
+    },
+    {
+      "item": "the fail op of the draft store and the writer DynamoGenerationStore.mark_hop_failure",
+      "reason": "Not this cell: AR-tf-71 builds the fail op, AR-tf-72 calls it, and TO-AR-g-109 (2.0.0_SA_COO~G2) owns the writer, which is not merged at this base."
+    },
+    {
+      "item": "the S1 to S5 statements of commentary_draft_store.tf",
+      "reason": "Kept byte-identical: the commit's numstat shows 21 insertions and 0 deletions on that file."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W227-S1: the surprise channel INVESTIGATION_v1.md carries LF line endings, not the CRLF the order names; the two rows were appended with the file's own LF endings, binary append only.",
+    "IRPT_ANLREQ-D2-W227-S2: the worktree is a sparse checkout; org/surprise_channel/ is tracked at HEAD but absent on disk, so the row schema was read with git show from HEAD into the worker scratch folder."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~227/AR73_session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "R46 checker, tests mode (r46_checks.py)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 5 --prefix=test_hop_failure_ infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py",
+      "result": "R46-TESTS-OK passed=11, rc=0"
+    },
+    {
+      "tool": "R46 checker, self-test",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "result": "R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused, rc=0"
+    },
+    {
+      "tool": "safe-commit.sh with the surprise row gate and to-pipeline gate",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~227 <0.9.0_WK_IRPT_ANLREQ~227@opal.agent>\" -F <msgfile> -- <3 paths>",
+      "result": "commit 969d0360f9 (LOCAL); surprise-row-gate OK 2 new rows of 781 checked; commit-gate all checks passed"
+    }
+  ]
+}

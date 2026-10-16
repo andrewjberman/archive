@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e103",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e103.fwd45-b01b-e18-disposition.md",
+    "group": "OTHER",
+    "vintage_commit": "d63495282e481bb354bf117eaa0149e216136405"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R26.md",
+    "vintage_commit": "d63495282e481bb354bf117eaa0149e216136405",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e103.fwd45-b01b-e18-disposition.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~93",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~93/FWD45_B01B_E18_DISPOSITION.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record only: the line table (24 rows, check rc 0), the etf-classifications read, the caller census, the chain census, three decision lines and the round-27 list. No code, data, infra or lib path changed (AC2 = 0). Nothing deployed, nothing written to AWS.",
+      "artifact_covered_by": [
+        "SC26-e103-AC1",
+        "SC26-e103-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three appended rows, 80 insertions and 0 deletions (git diff --numstat): MDPF_SECCLASS-D1-W93-S1, -S2, -S3. Append-only.",
+      "artifact_covered_by": [
+        "SC26-e103-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC26-e103-AC1",
+      "criterion_verbatim": "every live reference line has a row with a class and a replacement, the three decision lines are present.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_fwd45_disposition.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~93/FWD45_B01B_E18_DISPOSITION.md",
+      "output_evidence": "FWD45-DISPOSITION ok=True live=24 rows=24 missing=[] extra=[] bad=[] decisions=True (exit 0)",
+      "denominator": "24 of 24 live reference lines matched by a row (7 B_01b, 17 E_18); 0 missing, 0 extra, 0 bad",
+      "status": "PASS",
+      "expect": "FWD45-DISPOSITION ok=True"
+    },
+    {
+      "criterion_id": "SC26-e103-AC2",
+      "criterion_verbatim": "the control that you changed no code (the branch you commit on carries no change under data, infra or lib relative to box/dell1).",
+      "method": "command",
+      "invocation": "bash -c 'git diff --name-only box/dell1...HEAD -- data infra lib | wc -l'",
+      "output_evidence": "0 (exit 0)",
+      "denominator": "0 changed paths under data, infra, lib on wk-MDPF_SECCLASS-93 versus box/dell1",
+      "status": "PASS",
+      "expect": "0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the record with its B_01b:3 row removed (grep -v of that row into .scratch), fed to the same check",
+      "expected": "ok=False with missing=[('B_01b', 3)]",
+      "observed": "FWD45-DISPOSITION ok=False live=24 rows=23 missing=[('B_01b', 3)] extra=[] bad=[] decisions=True (exit 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the check run three times on the final record, outputs and exit codes compared",
+      "observed": "run 1, 2 and 3 each: FWD45-DISPOSITION ok=True live=24 rows=24 missing=[] extra=[] bad=[] decisions=True, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any code, test, script, data or infra change, including the shared module and gold_dispatch.sh",
+      "reason": "BOUNDS and the order's own text: a record only. The round-27 list in section f of the record is the proposal, not built here."
+    },
+    {
+      "item": "Deleting the old table bd-securities (FWD-5)",
+      "reason": "Not in this order; it waits until the reads are zero and Andrew gives his word."
+    },
+    {
+      "item": "A write, deploy or invoke against AWS",
+      "reason": "BOUNDS: AWS read-only. The five etf-classifications rows and the NAME:: count were read with get_item and paginated scan only."
+    },
+    {
+      "item": "A census of bd-securities writers across the whole repository (5828 hits in 7207 files)",
+      "reason": "Outside the order's named paths. The gold-folder census carries the writer question for the two scripts; the repo-wide census was run only to see the shape of the hits."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W93-S1: the chain comment at gold_dispatch.sh:562 and the B_01b docstring say a later step reads what B_01b writes; the census shows no step does (B_02 has zero matches). Row OBSERVATION, INERT.",
+    "MDPF_SECCLASS-D1-W93-S2: the order's premise that E_18 already classifies new tickers into the canonical table holds for the write only; E_18's class input is the old list through the lookup at E_18:291, which cannot be repointed (plan_rows skips carried tickers). Row OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~M1.",
+    "MDPF_SECCLASS-D1-W93-S3: the 24-line pattern census cannot carry a name-prefix reader; the bd-securities name scan at E_18:156-171 names the table only through the handle at :214. Row OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e103.fwd45-b01b-e18-disposition.md",
+  "compiler_tools": [
+    {
+      "tool": "check_fwd45_disposition.py (R26 SC-e-103 check, read-only)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_fwd45_disposition.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~93/FWD45_B01B_E18_DISPOSITION.md",
+      "result": "FWD45-DISPOSITION ok=True live=24 rows=24 missing=[] extra=[] bad=[] decisions=True, rc=0; mutant ok=False rc=1; three runs identical"
+    },
+    {
+      "tool": "boto3 get_item and paginated scan on etf-classifications (read-only)",
+      "invocation": "python .scratch/etf_probe.py (in the worktree .scratch, uncommitted)",
+      "result": "IEFA, DIVZ, IDVZ and two NAME:: rows read; NAME_COUNT total=5673 pages=3; ALL_ROWS total=11362 pages=3"
+    },
+    {
+      "tool": "comp-find (corpus=all)",
+      "invocation": "comp-find default_bd_securities_lookup; comp-find --files 'bd-securities' data/black_diamond/scripts/gold/; comp-find --files 'legacy-fork-table|legacy_fork_table'",
+      "result": "22 hit(s) across 7203 file(s); 48 hit(s) across 128 file(s); 8 hit(s) across 7207 file(s)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~93 <0.9.0_WK_MDPF_SECCLASS~93@opal.agent>\" -F <msgfile> -- <paths>",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~93 <0.9.0_WK_MDPF_SECCLASS~93@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "recorded in the commit output at the flip (see the worker report)"
+    }
+  ]
+}

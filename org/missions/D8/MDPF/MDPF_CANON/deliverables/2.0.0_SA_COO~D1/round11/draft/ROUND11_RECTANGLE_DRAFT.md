@@ -26,7 +26,9 @@ PRD v2.23 @1fb9ac96ab (ADMITTED: ratified-text SIGNED by 3.0.0_SA_CVO @eb00bfa63
 
 ## Checks to dry-run at the base before the cut
 
-Per `/dispatch` Step 2: each cell's criteria run against the base commit and must read red where the cell is not built (controls green). The month-end oracle (spec table) is the CN-s-3 arm; "0 of 497" is the CN-s-4 arm. Not yet written.
+Per `/dispatch` Step 2: each cell's criteria run against the base commit and must read red where the cell is not built (controls green). The month-end oracle (spec table) is the CN-s-3 arm; "0 of 497" is the CN-s-4 arm.
+
+Base checks written (2026-10-16 ~03:0xZ, by 0.9.0_WK_MDPF_CANON~r11d1 and ~r11d2 draft workers, each re-run by the issuer): `round11/draft/checks/r11_cn_s_4.py` (base 4 of 6), `r11_cn_s_1.py` (`pure` reads 4 of 6 at the base, A1 and A3 red; selftest OK, a substring mutant reddens A1 and A5) and `r11_cn_s_2.py` (`pure` reads 3 of 6, B1 B2 B5 red; selftest OK, a carry-across-no-total mutant reddens B4); `r11_cn_s_3_oracle.py` is the CN-s-3 oracle. Both new checks run the producer's real code on fixtures (`build_slice`, `compose_cottonwood_leg`), no AWS. CN-s-2 LOCUS NOTE: `build_cottonwood_mdpf_slice.py` has no `carried_dates` at HEAD; Global's carry is `compute_trend_groups` in `mdpf_gold_consolidator.py`, and `apply_global_trend_groups` writes `[]` for non-Global scopes. The CN-s-2 order must name where the Cottonwood `carried_dates` field is emitted (issuer decision 2) and the check covers `model_aua` only, not `by_model`. Still unwritten: the CN-s-4 demo-wiring arm and the real-object arm (they wait on reading the page at HEAD).
 
 ## Measured against the served Cottonwood object (2026-10-15 ~23:5xZ, read-only; carried into the CN-s-1 and CN-s-3 orders)
 
@@ -51,3 +53,12 @@ What this means for the pair and the order:
 - The producer recomposes every date from the gold dim partitions each run, so adding the row moves the ENTIRE served history of both objects (Cottonwood and Global) on the next fire, from the account's first date: the pair counts that, with a per-key rollback (prior VersionIds) and the identity flag as its precondition.
 - CN-s-2 edits the same producer file, so it rides the same chain after CN-s-1 and the pair covers both emissions in one fire (one gold change per fire: round 10's fires 2026-10-16 13:30Z; this lands no earlier than the 2026-10-17 13:30Z fire).
 - Deploy: the gold lambda package (CloudOps ADHOC order, as round 10) AND the daily-emitter Lambda package for the crosswalk copy; the order names both and the issuer reads both CodeSha256 values afterwards.
+
+## CN-s-4's demo wiring, read from the page at HEAD (2026-10-16 ~03:5xZ; portal DEV @39dab87f, read-only)
+
+The cell row above says the demo repair is `trendModeFor` plus one condition. The page says it is wider, and the wider part touches the edge gate:
+
+- `portal/src/lib/trendGrouping.ts:153` `trendModeFor(internal: boolean)` is a one-line function of ONE flag; its call site is `ModelPortfolios.tsx:389` `trendModeFor(internal)`, where `internal = isInternal() || isDev()` (L386). A demo-tenant session is NOT internal: its `effectiveFirmId` is forced to `'global'` by `MDPF_GLOBAL_VIEW_FIRMS` (L300, L407-411).
+- So turning the demo session to Variant 1 by the flag alone draws Variant 1 WITHOUT its stitch: the two single-firm reads that feed the stitch (`'49financial'` L453-458, `'inflection'` L459-464) are `enabled: effectiveFirmId === 'global' && internal`, and the stitch memo returns `null` for `!internal` (L539). With no stitch the pre-05-15 history stays empty or falls back.
+- To give the demo session the stitch the cell must (a) change those three `internal` gates to a "variant-1 session" flag and (b) let the demo session read the 49F and Inflection per-firm objects. (b) is the edge gate the CTO named (msg 5913: the `auth-validator-edge` firm gate on `/api/general/mdpf/...`); the PRD line says the cell REPORTS a refusal and never widens the gate. The demo read of the single-firm objects is exactly what a firm gate refuses.
+- Recommendation for the cut: split CN-s-4 into (4a) the Variant 2 band repair, which is one condition in `trendGrouping.ts` and needs no gate, and (4b) the demo-to-Variant-1 wiring, whose acceptance is "the demo session draws Variant 1 over the full history, or the cell reports the edge refusal verbatim". Today's pure check `r11_cn_s_4.py` already covers 4a. 4b's criteria are a bun run of the page's hook over a stubbed demo session plus one real read as the demo walker (`/ui-walk`), written when the order is cut.

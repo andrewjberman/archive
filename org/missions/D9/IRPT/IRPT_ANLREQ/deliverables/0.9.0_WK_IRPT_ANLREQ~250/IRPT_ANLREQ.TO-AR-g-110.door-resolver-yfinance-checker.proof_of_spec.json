@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-110",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-110.door-resolver-yfinance-checker.md",
+    "group": "OTHER",
+    "vintage_commit": "dd4897fd22"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R28_G.md",
+    "vintage_commit": "dd4897fd22",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-110.door-resolver-yfinance-checker.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~250",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py",
+      "kind": "script",
+      "commit_or_etag": "694f8b2fed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "template_resolver gains checker=None; None builds YfinanceChecker() into SecurityResolver; no other line changed; offline, no deploy, no AWS call, no push",
+      "introduces": [
+        "YfinanceChecker()"
+      ],
+      "artifact_covered_by": [
+        "AR110-g-AC1",
+        "AR110-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_resident_session_checker.py",
+      "kind": "test",
+      "commit_or_etag": "694f8b2fed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two offline named tests: test_the_door_resolver_keeps_a_yfinance_known_symbol and test_a_missing_library_is_a_failed_check; 2 passed; the yfinance library is never imported",
+      "artifact_covered_by": [
+        "AR110-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR110-g-AC1",
+      "criterion_verbatim": "AR110-g-AC1 (cell AR-g-110): the issuer's 5 tests run against the worker tree (a yfinance-known symbol the provider omits is KEPT and the found symbol never reaches the checker; a symbol neither knows stays NOT_FOUND; a missing library and a 429 pushback read as failed checks, never absence; an injected checker wins over the default), then the two named tests exist and pass. Invocation: python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g110",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g110",
+      "output_evidence": "AR-G110-OK issuer=5 named=2 worker=2 | run under timeout 590000 ms | rc=0 | issuer tests: 5 passed in 0.32s | named tests missing: none | worker tests: 2 passed in 0.19s",
+      "denominator": "5 passed of 5 issuer tests; 2 of 2 named tests present; 2 passed of 2 worker tests; 0 failed",
+      "expect": "^AR-G110-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR110-g-AC2",
+      "criterion_verbatim": "AR110-g-AC2 (cell AR-g-110): the four existing test files run one at a time (the session, the checker, the KEPT holding, the resolve upload; 71 tests) all pass, and the branch against the merge-base with box/dell2 changes only the worker's two files, its folder, its order and the channel file. Invocation: python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress110",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress110",
+      "output_evidence": "AR-G110-REGRESS-OK 71 tests in 4 files, 2 changed paths all the cell's own | run under timeout 590000 ms | rc=0",
+      "denominator": "71 passed of 71 (need at least 71) in 4 existing files run one at a time; 0 failed; 2 changed paths, both the cell's own",
+      "expect": "^AR-G110-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's negative arms are the issuer's tests (a found symbol never sent to the checker, a missing library as a failed check, a pushback as a failed check, an injected checker winning over the default).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes: the provider child is stubbed, the yfinance history port is a fake, time.sleep is patched, and no network is reached",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether the resident host has yfinance installed",
+      "reason": "NOT CLAIMED. A missing library reads as a failed check (YFINANCE_CHECK_FAILED), never a wrong answer; no install was run."
+    },
+    {
+      "item": "Whether Yahoo answers from this host",
+      "reason": "NOT CLAIMED. No live call was made; the history port is a fake in every test."
+    },
+    {
+      "item": "Whether the resident package carries intake/yfinance_check.py",
+      "reason": "NOT CLAIMED. The release tooling adds it; this cell cannot ship it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py g110",
+      "result": "AR-G110-OK issuer=5 named=2 worker=2"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g109_checks.py regress110",
+      "result": "AR-G110-REGRESS-OK 71 tests in 4 files, 2 changed paths all the cell's own"
+    }
+  ]
+}

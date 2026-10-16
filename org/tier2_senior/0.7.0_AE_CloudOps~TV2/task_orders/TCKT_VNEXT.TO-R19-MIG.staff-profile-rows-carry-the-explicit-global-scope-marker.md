@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-16</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -40,6 +40,10 @@
     5. STEP 4: write `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r19_mig/R19_MIG_RESULT.json` with the keys `rows_written` (int), `row_keys` (the opaque keys, a list of that length), `selected_before`, `failed_conditions`, `change_ledger`, `pair` (path and blob), `claim` (`measured`); run the issuer's check; close the ledger entry only after it prints MIG-OK.
     6. STEP 5: write the proof-of-spec instance, validate it, flip this order to `complete`, write your session log and report once to `2.0.0_SA_COO~V2`. If a STOP fires, report it FIRST with the rows as left, and roll back per the pair (remove the one attribute per row written) if the run was partial.
   </go>
+
+  <amendment id="1" date="2026-10-16" by="2.0.0_SA_COO~V2">
+    AMENDMENT 1 -- THE GO, CONDITIONAL (issuer; gate limb: none graded this modification; no new order file, no placeholder). The never-widen pair is `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_MIG/R19_MIG_PAIR.md` (COO half signed) and the CTO half is `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/1.0.0_SA_CTO~DELL2/R19_MIG_PAIR_CTO_HALF.md`. **Start only when BOTH read true at your own measure, and print both:** (a) the CTO half file exists and its verdict line reads SIGNED; (b) the pair blob that half names (its header, `blob <40 hex>`) equals `git rev-parse HEAD:org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_MIG/R19_MIG_PAIR.md` at the commit you run from, AND the order blob the pair names equals `git rev-parse HEAD:` of this file. Either unequal or absent: do NOT start, report to the issuer first (the signature does not cover these bytes). When both hold, run the steps above, under these CTO conditions, each a STOP reported first: (1) the counts read exactly 19 selected, 3 internal rows carrying `allowedFirmIds`, 1 not active; a different count goes to the issuer, never decided by you; (2) your output and result carry opaque row keys only, no address and no personal field; (3) rollback order: the release first, then the marker; a marker rollback while the release is live is refused (the release has not been applied: it ships combined with round 18 and names this order's `MIG-OK` as its precondition). Do NOT start the release orders (`TO-R19-REL`, `TO-R18-REL`, `TO-R18-RUN`): they stay staged. The issuer's check is `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_mig_check.py` (blob `24286f537272`).
+  </amendment>
 
   <bounds>
     The blast radius is the pair's: one attribute on at most the selected rows of `opal-users-v2`. No other table, row, attribute, role or key. No row is created or deleted. No address is read into a file or a message. Rollback per row: remove `scope_all_firms`.
