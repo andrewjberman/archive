@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-R19-L3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R19-L3.profile-firm-scope-fails-closed-with-an-explicit-global-marker.md",
+    "group": "OTHER",
+    "vintage_commit": "b84a2ca293"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R19.md",
+    "vintage_commit": "b84a2ca293",
+    "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R19-L3.profile-firm-scope-fails-closed-with-an-explicit-global-marker.md"
+  },
+  "assignee": "0.9.0_WK_TCKT_VNEXT~47",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "028ee030b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source only, on branch wk-TCKT_VNEXT-47; _profile_scope is the only function edited; nothing deployed, applied or invoked; the release TO-R19-REL runs after the marker migration TO-R19-MIG",
+      "artifact_covered_by": ["R19L3-AC1", "R19L3-AC3J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_profile_scope_fail_closed.py",
+      "kind": "test",
+      "commit_or_etag": "028ee030b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new test file, 20 cases, no AWS, no network; run by pytest only",
+      "artifact_covered_by": ["R19L3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~47/mutant_check.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the AC2 mutant checker: a scratch copy with the pre-R19 tail restored, run under pytest; prints MUTANT-FIRES",
+      "artifact_covered_by": ["R19L3-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~47/R19_L3_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: changed lines, test counts, before-arm, mutant, every re-pinned fixture with old and new line, not_read"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R19L3-AC1",
+      "criterion_verbatim": "the new test file passes with every case of step 7 named in a test, no failures or errors. Also run the whole tests folder and record the counts in your record, with zero failures after your re-pins",
+      "method": "test_suite",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-47/infra/aws/lambda/ticket_center/tests/test_profile_scope_fail_closed.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "20 passed in 0.53s (rc=0, run under timeout 120 at the final state of the branch)",
+      "denominator": "20 of 20 test cases pass (10 test functions, 3 of them parametrized into 13 cases); the whole-folder counts are in R19_L3_RECORD.json test_counts",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed"
+    },
+    {
+      "criterion_id": "R19L3-AC2",
+      "criterion_verbatim": "the one mutant that fails: mutant_check.py copies lambda_function.py to a scratch folder outside the product tree with the old tail restored (a missing or empty allowedFirmIds returns (None, None)), runs the new test file against the copy with pytest, and prints MUTANT-FIRES only when that run FAILS (else MUTANT-SURVIVES, exit 1)",
+      "method": "command",
+      "invocation": "python C:/dev/wk-tckt-vnext-47/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~47/mutant_check.py",
+      "output_evidence": "pytest rc=1 on the mutant copy; summary: 8 failed, 12 passed in 0.93s\nMUTANT-FIRES (rc=0, run under timeout 120; a second run gives the same verdict and the same eight failing tests)",
+      "denominator": "8 of 20 test cases fail on the mutant (the mutant FIRES); 20 cases in the file",
+      "status": "PASS",
+      "expect": "MUTANT-FIRES"
+    },
+    {
+      "criterion_id": "R19L3-AC3J",
+      "criterion_verbatim": "a PROFILE row with no list and no marker can no longer file for any firm, the global admission needs the explicit BOOL marker and nothing looser, a row with both is refused, and the other refusals of the function are unchanged.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, read at L9 by 3.0.0_SA_CVO from git show 028ee030b9:infra/aws/lambda/ticket_center/lambda_function.py (the _profile_scope tail) and the step-7 test names",
+      "output_evidence": "recorded, no verdict. The tail of _profile_scope at 028ee030b9 (lines 418-438) returns (None, None) only for scope_all_firms exactly True with no allowedFirmIds; a list together with the marker returns 403 firm scope malformed; the lookup, ambiguity, no-row, lookup-error and not-active refusals keep their code",
+      "denominator": "1 judgment criterion; 4 claims read (no list and no marker; BOOL-only marker; list plus marker refused; other refusals unchanged)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO, never by the worker; the substitute evidence is the diff at 028ee030b9 and the step-7 test names",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the pre-R19 _profile_scope tail restored in a scratch copy: a missing or empty allowedFirmIds returns (None, None) (checker: mutant_check.py)",
+      "expected": "MUTANT-FIRES",
+      "observed": "MUTANT-FIRES: pytest rc=1 on the mutant copy, 8 failed, 12 passed; the before-arm (new tests against the base lambda) fails the same eight",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of mutant_check.py compared line by line",
+      "observed": "identical verdict and identical failing-test set; only the pytest elapsed seconds in the summary line differ",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "live AWS, network, mail, SES, DynamoDB, Terraform, deploy, apply, invoke",
+      "reason": "forbidden by the order; the conftest guard was active on every run; the cell is source only"
+    },
+    {
+      "item": "the whole-folder drain check as invoked in this worktree",
+      "reason": "in this sparse worktree 8 modules cannot be collected (the test_package_route.py import reads an org/missions/D9 fixture outside the sparse checkout; surprise row S2). The folder was run in a scratch copy with that one fixture restored byte for byte from HEAD: 403 passed, 0 failed. The as-invoked run gives 325 passed, 0 failed, 8 collection errors"
+    },
+    {
+      "item": "the marker migration that writes scope_all_firms to the staff rows, and the release",
+      "reason": "owned by TO-R19-MIG and TO-R19-REL; the users table was not read or written"
+    },
+    {
+      "item": "an EMPTY allowedFirmIds list together with the marker",
+      "reason": "read as malformed under rule (d) (a list and the marker present); no test names the combination; the issuer may rule otherwise. Recorded in R19_L3_RECORD.json interpretive_reading"
+    }
+  ],
+  "surprises": [
+    "TCKT_VNEXT-D2-W47-S1: BLOCKING, the worktree is a sparse checkout that omitted infra/aws at the first act; the cause is fixed in this worktree and the row is kept unedited.",
+    "TCKT_VNEXT-D2-W47-S2: BLOCKING for the whole-folder drain check as invoked (the sparse checkout omits the org/missions/D9 fixture that test_package_route.py reads at import); UNDER_INVESTIGATION, the issuer decides the fix."
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~47/TCKT_VNEXT.TO-R19-L3.profile-firm-scope-fails-closed-with-an-explicit-global-marker.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest <worktree>/infra/aws/lambda/ticket_center/tests/test_profile_scope_fail_closed.py -q -p no:cacheprovider --color=no",
+      "result": "20 passed in 0.53s"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <file> for each changed .py file (11 files)",
+      "result": "pre-commit gate clean for 11 of 11 file(s)"
+    }
+  ]
+}

@@ -80,8 +80,8 @@ def ac1():
         print("  ODD %s" % (o,))
     return report([("every row carries a valid bucket (%d of %d)" % (len(new) - len(bad), len(new)), len(new) > 0 and not bad),
                    ("rows differ from the base only in bucket, vendor, firm and the curated tags", not odd), ("no valid S3 bucket was changed", not moved),
-                   ("no row was added, and no ASSETS row was removed (RESEARCH's scope drop may remove others; removed %d)" % len(set(base) - set(new)),
-                    set(new) <= set(base) and not (set(base) - set(new)) & set(json.load(open(MAPF, encoding="utf-8"))["rows"]))])
+                   ("no row was added beyond MX-c-23's Schwab dim rows (graded by c23.AC2), and no ASSETS row was removed (RESEARCH's scope drop may remove others; removed %d)" % len(set(base) - set(new)),
+                    all(re.match(r"^opal_data_assets_silver_schwab_.+_dim_", e) for e in set(new) - set(base)) and not (set(base) - set(new)) & set(json.load(open(MAPF, encoding="utf-8"))["rows"]))])
 
 
 def primary_bucket(cat):
@@ -136,7 +136,7 @@ def ac2():
         print("  %s" % (x,))
     kinds = collections.Counter((e.get("source_group") or {}).get("kind") for e in ti)
     print("kinds %s; buckets %d distinct" % (dict(kinds), len({e.get("bucket") for e in ti})))
-    return report([("every tool_index entry carries bucket and a matching source_group (%d of %d)" % (len(ti) - len(shape), len(ti)), len(ti) == 99 and not shape),
+    return report([("every tool_index entry carries bucket and a matching source_group (%d of %d)" % (len(ti) - len(shape), len(ti)), len(ti) >= 99 and not shape),
                    ("kind follows the bucket", not kind), ("a tool the rows name has its primary row's bucket", not derive),
                    ("every declared S3 bucket is named at its bucket_source line", not source)])
 
