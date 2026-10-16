@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cx-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cx-1.blank-census-by-reason-and-driver.md",
+    "group": "OTHER",
+    "vintage_commit": "7c3d99a3b9"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~191",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round102.md",
+    "vintage_commit": "7c3d99a3b9",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cx-1.blank-census-by-reason-and-driver.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/cx1_record_build.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only builder: three get_object reads at the pinned VersionIds, the transactions cache, the round-99 price cache, one read-only silver Asset_Type read, the MDPF_DEMQUE request records; writes only the two record files in this folder; no S3 write, no vendor call"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/BLANK_CENSUS_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: days 1,691,729 total, 1,584,413 blank, 0 unreasoned; months 82,593 total, 0 unreasoned; unpriced 15,973,399 holding-days over 4,371 cusips; counts only, no account id, cusip, ticker, name or value"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/BLANK_CENSUS_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the same figures as the record, in prose and tables"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W191-S1, -S2 and -S3 appended as LF bytes after the existing rows; git diff --numstat shows 72 added lines and 0 deleted"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB102cx1-AC1",
+      "criterion_verbatim": "`CB102cx1-AC1` -- the record states the blank days, how many lack a reason (days and months), how many reason codes there are and how many securities are unpriced, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/BLANK_CENSUS_RECORD.json',encoding='utf-8'));m=d['measured'];print('BLANK-CENSUS measured=%s' % m + ((' days_blank=%d unreasoned_days=%d unreasoned_months=%d reasons=%d unpriced_cusips=%d' % (d['days']['blank'],d['unreasoned']['days'],d['unreasoned']['months'],len(d['days']['by_reason']),d['unpriced']['cusips'])) if m else ' reason=%s' % d['reason']))\"",
+      "output_evidence": "BLANK-CENSUS measured=True days_blank=1584413 unreasoned_days=0 unreasoned_months=0 reasons=7 unpriced_cusips=4371",
+      "denominator": "1,584,413 blank days of 1,691,729 with 0 unreasoned; 78,915 non-MATCH months of 82,593 with 0 unreasoned; 7 reason codes; 4,371 unpriced cusips",
+      "status": "PASS",
+      "expect": "^BLANK-CENSUS measured=(True days_blank=\\d+ unreasoned_days=\\d+ unreasoned_months=\\d+ reasons=\\d+ unpriced_cusips=\\d+|False reason=.+)$"
+    },
+    {
+      "criterion_id": "CB102cx1-AC2",
+      "criterion_verbatim": "`CB102cx1-AC2` -- the issuer's script recomputes the census from the served objects and the record equals it on the days, the months, the unreasoned counts and the unpriced partition.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cx1_blank_census.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/BLANK_CENSUS_RECORD.json",
+      "output_evidence": "CENSUS-CROSS days_equal=True months_equal=True unreasoned_equal=True unpriced_equal=True",
+      "denominator": "4 of 4 key groups equal (days, months, unreasoned, unpriced); the issuer's recompute read the three served objects at the pinned VersionIds (timeout 120, rc 0)",
+      "status": "PASS",
+      "expect": "^CENSUS-CROSS days_equal=True months_equal=True unreasoned_equal=True unpriced_equal=True$"
+    },
+    {
+      "criterion_id": "CB102cx1-AC3",
+      "criterion_verbatim": "`CB102cx1-AC3` -- the cell wrote nothing: the three served keys still carry the VersionIds the round-98 apply left (the issuer's script reads object metadata only).",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cu1_ac3_served_unchanged_check.py",
+      "output_evidence": "SERVED-UNCHANGED versions_equal=3 of 3",
+      "denominator": "3 of 3 served keys carry the round-98 VersionIds (timeout 120, rc 0)",
+      "status": "PASS",
+      "expect": "^SERVED-UNCHANGED versions_equal=3 of 3$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the cell is a read-only census whose record is checked by the issuer's independent recompute (AC2)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the issuer's census recomputed in the AC2 run and compared with the record built from the first read of the same three served objects",
+      "observed": "CENSUS-CROSS days_equal=True months_equal=True unreasoned_equal=True unpriced_equal=True on the second and independent read; the record's census keys equal the first run's three census lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Filling, estimating or grading any blank, and the FWD-3 grade",
+      "reason": "forbidden by the order: the CTO grades; no blank is filled or repaired"
+    },
+    {
+      "item": "Whether the lists of the committed Bloomberg requests came back priced, per security",
+      "reason": "no committed record carries a per-security outcome; reported as not established and filed as surprise ADVI_COTBKF-D1-W191-S2"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W191-S1: dv.universe_from_tx leaves asset_type blank, so the asset-type split was read from the silver transactions Asset_Type column through the analysis module's reader (read-only); OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W191-S2: no committed record carries the per-security Bloomberg outcome for the Cottonwood request lists; the came-back count is not established; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W191-S3: the store-rule replay prices 897 never-priced cusips that the served as-traded basis does not, so the resolved-but-unpriced split is a replay, not the served valuation; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/ADVI_COTBKF.TO-CB-cx-1.blank-census-by-reason-and-driver.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "cx1_record_build.py",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~191/cx1_record_build.py",
+      "result": "rc 0; days_blank=1584413 unreasoned_days=0 unreasoned_months=0; unpriced rows=15973399 cusips=4371 never_priced_cusips=3791 gap_cusips=580; record and md written; run three times while the classes were corrected, the final run is the one graded"
+    },
+    {
+      "tool": "cx1_blank_census.py (issuer's check, read-only)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cx1_blank_census.py",
+      "result": "rc 0: CENSUS-DAYS total=1691729 with_return=107316 blank=1584413 unreasoned=0; CENSUS-MONTHS total=82593 not_match=78915 unreasoned=0; CENSUS-UNPRICED rows=15973399 cusips=4371 never_priced_cusips=3791 never_priced_rows=7492099 gap_cusips=580 gap_rows=8481300"
+    }
+  ]
+}
