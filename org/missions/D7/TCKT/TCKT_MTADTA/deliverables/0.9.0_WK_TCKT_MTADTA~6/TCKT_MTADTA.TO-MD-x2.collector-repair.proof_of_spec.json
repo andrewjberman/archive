@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_MTADTA.TO-MD-x2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/decompositions/TCKT_MTADTA_DECOMP_R2.md",
+    "vintage_commit": "21da981e7c",
+    "to_ref": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-x2.collector-repair.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/prd/TCKT_MTADTA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2614b497ed"
+  },
+  "assignee": "0.9.0_WK_TCKT_MTADTA~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/filter.py",
+      "kind": "script",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 builds code only; the collector is packaged by build.sh and not deployed (release act)",
+      "artifact_covered_by": ["MD2-x2-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/coverage_record.py",
+      "kind": "script",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 builds code only; not deployed (release act)",
+      "artifact_covered_by": ["MD2-x2-AC1", "MD2-x2-AC3"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/collect.py",
+      "kind": "script",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 builds code only; not deployed (release act)",
+      "artifact_covered_by": ["MD2-x2-AC1", "MD2-x2-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/source_client.py",
+      "kind": "script",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not exercised live (no Management API call; WORLD bound); its listing shape is covered by the fake source only"
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/access_client.py",
+      "kind": "script",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 builds code only; the door's derive_silver and get_state replies are the far side's contract (another cell)",
+      "artifact_covered_by": ["MD2-x2-AC3"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_collector.py",
+      "kind": "test",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "synthetic events only; run by pytest from the worktree root (21 passed)"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/m365-metadata-collector/handler.py",
+      "kind": "script",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not invoked (no AWS call); the Lambda is not created until the release act"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/collector.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1175fb6b70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DESIRED: terraform fmt -check rc=0 only; no init, validate, plan or apply (WORLD bound); the alias reference is dangling until access.tf declares it (surprise TCKT_MTADTA-D1-W6-S1)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MD2-x2-AC1",
+      "criterion_verbatim": "MD2-x2-AC1 -- one coverage object per fire; a planted gap in fire 1 is still there after a clean fire 2; derive_silver is called once per Eastern day with bronze.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x2.py coverage",
+      "output_evidence": "X2-COVERAGE-OK objects=10   (rc=0)",
+      "denominator": "2 fires over 2 Eastern days with bronze (2026-10-14, 2026-10-15); 10 coverage objects after 2 fires (8 touched days on fire 1, 2 on fire 2); planted gap on 2026-10-14 checked on fire 1 and after fire 2; derive_silver calls checked as a set of 2 days; 0 refused",
+      "status": "PASS",
+      "expect": "X2-COVERAGE-OK"
+    },
+    {
+      "criterion_id": "MD2-x2-AC2",
+      "criterion_verbatim": "MD2-x2-AC2 -- a two-day window splits its listed and fetched counts by each blob's own day; the cursor trims by age; the id-only actor counter reads 1 on a planted GUID-only event.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x2.py attribution",
+      "output_evidence": "X2-ATTRIBUTION-OK   (rc=0)",
+      "denominator": "3 synthetic blobs over 2 Eastern days (2026-10-14: listed 2 fetched 1 gap True; 2026-10-15: listed 1 fetched 1 gap False); cursor of 3 seen entries trimmed to 2 (1 aged out); 3 planted events (1 GUID-only counted, 1 outsider dropped, 1 member kept); 4 assertion groups; 0 refused",
+      "status": "PASS",
+      "expect": "X2-ATTRIBUTION-OK"
+    },
+    {
+      "criterion_id": "MD2-x2-AC3",
+      "criterion_verbatim": "MD2-x2-AC3 -- the keys equal builder output; the client invokes the collector alias; collector.tf has no data source and grants invoke on the alias ARN with no S3 or KMS action.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x2.py invoker",
+      "output_evidence": "X2-INVOKER-OK   (rc=0)",
+      "denominator": "3 key equalities against lib/opal_naming address() output (bronze, cursor, coverage); 1 Qualifier check on lambda_invoker; collector.tf: 0 data blocks, 1 aws_iam_policy collector block naming aws_lambda_alias.collector.arn, 0 s3: or kms: actions in it; 0 refused",
+      "status": "PASS",
+      "expect": "X2-INVOKER-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "coverage_record.fire_key replaced by the round-1 constant key (date=YYYY-MM-DD/coverage.json, no fire tag) on a scratch copy of the collector package; the coverage check run against the copy.",
+      "expected": "X2-COVERAGE-REFUSED: fire 2 overwrites fire 1's gap",
+      "observed": "X2-COVERAGE-REFUSED fire_key 'm365-metadata/trino/gold/collection_coverage/date=2026-10-14/coverage.json' 'm365-metadata/trino/gold/collection_coverage/date=2026-10-14/coverage.json'; fire 1 did not record the planted gap on 2026-10-14; fire 2 wrote no coverage object of its own   (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of coverage, attribution and invoker run twice from the worktree root; stdout of run 1 compared with run 2 byte for byte",
+      "observed": "coverage STABLE: X2-COVERAGE-OK objects=10 (rc 0/0); attribution STABLE: X2-ATTRIBUTION-OK (rc 0/0); invoker STABLE: X2-INVOKER-OK (rc 0/0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live Management API listing and fetch (source_client.py)",
+      "reason": "WORLD bound: no Microsoft call in this order; the fake source drives the listing shape (contentId and contentCreated)."
+    },
+    {
+      "item": "terraform init, validate, plan and apply of the trino root",
+      "reason": "WORLD bound: only terraform fmt -check was run on collector.tf (rc=0). The alias reference cannot be planned until access.tf declares aws_lambda_alias.collector (surprise TCKT_MTADTA-D1-W6-S1)."
+    },
+    {
+      "item": "Live handler run of lambda_handler (infra/aws/lambda/m365-metadata-collector/handler.py)",
+      "reason": "No boto3 client and no AWS call in this order; the handler's only change is the qualifier, which AC3 proves at the client."
+    },
+    {
+      "item": "The door's derive_silver and get_state replies",
+      "reason": "DOOR CONTRACT v2 is another cell's; the client assumes {ok, rows} for derive_silver and {body_b64} for get_state, and run_once raises when derive_silver does not answer ok."
+    },
+    {
+      "item": "Coverage object for a blob's own day outside the touched window",
+      "reason": "Judgment left open by the contract; built to the union of touched days and blob days so no count is lost (surprise TCKT_MTADTA-D1-W6-S2)."
+    },
+    {
+      "item": "Secret values and the subject key",
+      "reason": "Read by secret id at run time only; no value is read, stored or logged in this order."
+    }
+  ],
+  "surprises": [
+    "TCKT_MTADTA-D1-W6-S1: BLOCKING -- collector.tf grants invoke on aws_lambda_alias.collector.arn, but no aws_lambda_alias is declared in the trino root at base a49927b4d1; the reference dangles until the door cell declares the alias.",
+    "TCKT_MTADTA-D1-W6-S2: OBSERVATION -- the contract names one coverage object per touched day; a new blob's counts are written to its own Eastern day, which can be outside the touched days, so run_once writes that day's object too."
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.9.0_WK_TCKT_MTADTA~6/TCKT_MTADTA.TO-MD-x2.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.1.1 (python 3.14.7)",
+      "invocation": "python -m pytest -p no:cacheprovider --color=no -q data/m365_metadata/scripts/tests/test_collector.py",
+      "result": "21 passed in 0.08s (rc=0)"
+    },
+    {
+      "tool": "ruff 0.15.11 (py39 target)",
+      "invocation": "ruff check --target-version py39 data/m365_metadata/scripts/collector/ data/m365_metadata/scripts/tests/test_collector.py infra/aws/lambda/m365-metadata-collector/handler.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/m365_metadata/scripts/collector/filter.py data/m365_metadata/scripts/collector/coverage_record.py data/m365_metadata/scripts/collector/collect.py data/m365_metadata/scripts/collector/source_client.py data/m365_metadata/scripts/collector/access_client.py infra/aws/lambda/m365-metadata-collector/handler.py",
+      "result": "rc=0"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/trino/collector.tf",
+      "result": "rc=0 (no diff)"
+    }
+  ]
+}
