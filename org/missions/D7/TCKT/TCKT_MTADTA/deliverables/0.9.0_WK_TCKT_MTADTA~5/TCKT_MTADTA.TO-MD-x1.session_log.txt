@@ -1,0 +1,22 @@
+TCKT_MTADTA.TO-MD-x1 -- session log, worker 0.9.0_WK_TCKT_MTADTA~5, worktree /c/tmp/wk-tckt-mtadta-5 (branch wk-TCKT_MTADTA-5)
+Date: 2026-10-16. Nothing applied; no AWS call, no S3 access, no Lambda invoke, no terraform init, plan or apply (order BOUNDS).
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-TCKT_MTADTA-5; test -d org && test -d .tools -> TREE-OK.
+2. Premises re-grounded: the three checks run on the base tree printed the order's dry-run lines (AC1 X1-ALIAS-REFUSED, AC2 X1-TF-REFUSED, AC3 X1-KEYS-REFUSED AttributeError: ... 'key_ok').
+   opal_naming.address() emitted the four builder keys under s3://opal-data-trino/; collector.tf declares aws_iam_role.collector.
+3. Built handler.py to DOOR CONTRACT v2 (alias gate from the 8th ARN field; key_ok full match; list_state; collector and member op tables).
+4. Rewrote tests/test_handler.py for v2 (keys and PREFIX compared with opal_naming.address output).
+5. Edited access.tf: ListBucket and ListBucketVersions out of the Deny; publish = true; aliases collector and member; group invoke on the member alias ARN alone;
+   aws_lambda_permission collector_invoke (AllowCollectorRoleOnItsAlias) on the collector alias; alias design and residuals in the header.
+6. Commit e887029d25 (handler.py, tests/test_handler.py, access.tf) via safe-commit. Its commit-gate reported WARN non-ascii U+0665 at test_handler.py:173.
+7. Fixed the one non-ASCII character (escape written by a scratch script .scratch/ascii_fix.py); commit d38f40d8cc (tests/test_handler.py) via safe-commit.
+8. Naming-gate WARN window (ENFORCE off) graded five key-grammar lines of handler.py as REFUSE (LIVE-READ-FAILED on the census); filed as TCKT_MTADTA-D1-W5-S1 in the investigation file.
+9. Controls: mutant (member alias granted put, in .scratch/mutant copy) -> 1 failed, 104 passed (test_member_alias_never_puts); unmutated -> 112 passed.
+   Determinism: the three checks run twice -> identical output digests f71f4ee8bdba834ebf1b9c8d2344036c3cdc067425cf7755f65afc65cac506f8.
+
+Final criterion outputs (rc from the run):
+X1-ALIAS-OK calls_logged=21 (rc=0)
+X1-TF-OK (rc=0)
+X1-KEYS-OK (rc=0)
+pytest infra/aws/lambda/globgrph-trino-access/tests -p no:cacheprovider -q: 112 passed in 0.59s (rc=0)
+terraform fmt -check -diff infra/aws/terraform/trino/access.tf: rc=0

@@ -1,0 +1,29 @@
+TCKT_MTADTA.TO-MD-x2 -- session log, worker 0.9.0_WK_TCKT_MTADTA~6, worktree C:/tmp/wk-tckt-mtadta-6, branch wk-TCKT_MTADTA-6
+Base HEAD a49927b4d1. Work commits: 1175fb6b70 (collector repair), 261ffde (surprise rows D1-W6-S1, D1-W6-S2).
+WORLD bound held: no Microsoft, AWS, S3 or terraform init/plan/apply call. Synthetic events only.
+
+Preflight: git rev-parse --abbrev-ref HEAD -> wk-TCKT_MTADTA-6; test -d org && test -d .tools -> TREE-OK.
+Baseline (base tree, before any edit), each under timeout 120:
+  coverage   -> X2-COVERAGE-REFUSED AttributeError: module 'x2_coverage_record' has no attribute 'fire_key'   rc=1
+  attribution-> X2-ATTRIBUTION-REFUSED TypeError: cannot use 'dict' as a set element (unhashable type: 'dict')  rc=1
+  invoker    -> X2-INVOKER-REFUSED AttributeError: module 'x2_collect' has no attribute 'bronze_key'   rc=1
+Premise check: no aws_lambda_alias in infra/aws/terraform/trino/ at base (surprise TCKT_MTADTA-D1-W6-S1).
+Premise check: lib/opal_naming address('m365-metadata', ...) returns s3://opal-data-trino/m365-metadata/... (builder accepts the scope).
+
+Edits: collector/filter.py, coverage_record.py, collect.py, source_client.py, access_client.py; tests/test_collector.py;
+infra/aws/lambda/m365-metadata-collector/handler.py; infra/aws/terraform/trino/collector.tf (patch collector_tf_direct_references.patch applied with git apply, then the invoke grant set to aws_lambda_alias.collector.arn).
+
+Verification after the edits (worktree root):
+  python r2_check_x2.py coverage   -> X2-COVERAGE-OK objects=10   rc=0
+  python r2_check_x2.py attribution -> X2-ATTRIBUTION-OK   rc=0
+  python r2_check_x2.py invoker    -> X2-INVOKER-OK   rc=0
+  python -m pytest -p no:cacheprovider --color=no -q data/m365_metadata/scripts/tests/test_collector.py -> 21 passed in 0.08s rc=0
+  ruff check --target-version py39 (collector package, test, handler) -> All checks passed! rc=0
+  python -m py_compile (changed modules) -> rc=0
+  terraform fmt -check -diff infra/aws/terraform/trino/collector.tf -> rc=0 (no output)
+Mutant control (scratch copy, coverage_record.fire_key replaced by the round-1 constant key): coverage check ->
+  X2-COVERAGE-REFUSED fire_key '...date=2026-10-14/coverage.json' '...date=2026-10-14/coverage.json'; fire 1 did not record the planted gap on 2026-10-14; fire 2 wrote no coverage object of its own   rc=1
+Determinism: each X2 check run twice, output compared byte for byte: coverage STABLE, attribution STABLE, invoker STABLE.
+
+Pre-commit risk reflex (comp-pulse diff) flagged handler.py by basename against unrelated investigator-reporting handlers
+(change record 20260911T1227Z_irpt-bckend-rt8); no commit refused; the flagged files are not this order's surface.
