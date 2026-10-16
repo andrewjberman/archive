@@ -1,0 +1,148 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-24",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~ZS",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "def417d2be"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "705ef2c190",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-24.client-grants-batch.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/client_vendor_roles_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "6da70aa7de",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Six aws_iam_role + six aws_iam_role_policy at sha256-16 21a54e8f197eeea2 (re-hashed before the first apply). Each pair applied ONE at a time through safe-apply, targeted, plan 2 add / 0 change / 0 destroy then 'Apply complete! Resources: 2 added, 0 changed, 0 destroyed', in the ask's order: inf-orion, inf-eclipse, 49f-blackdiamond, cot-commonwealth, cot-blackdiamond, smartx. Each read back from IAM (trust principal opal-gateway-role only, Action sts:AssumeRole, no Condition, 1 statement; 1 inline policy, 0 attached) and each targeted re-plan read No changes; the 12-target re-plan reads No changes.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "iam:role/gateway-49f-blackdiamond-read-role,gateway-cot-blackdiamond-read-role,gateway-inf-orion-read-role,gateway-inf-eclipse-read-role,gateway-cot-commonwealth-read-role,gateway-smartx-read-role",
+   "kind": "aws_resource",
+   "commit_or_etag": "19b3257eb9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live policy sha256-16 (sort_keys, compact) re-read from IAM after the sixth apply: gateway-49f-blackdiamond-read-role ceb6ae001918528d; gateway-cot-blackdiamond-read-role 9478782eab8110fe; gateway-inf-orion-read-role 88e8cfb0354003ea; gateway-inf-eclipse-read-role 626bf8fa80b49cd4; gateway-cot-commonwealth-read-role b6e3941ba6a2ab54; gateway-smartx-read-role f87d77937ababb48. Every Allow is s3:GetObject, s3:GetObjectVersion, s3:ListBucket on non-wildcard resources. Recorded in W/GR_APPLIED.json. The live gateway-blackdiamond-read-policy (4893211d4408180a) and gateway-schwab-read-role-policy (a3e8ca81172af8cc) re-hashed unchanged.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/logic/registry/legacy_addresses.json",
+   "kind": "doc",
+   "commit_or_etag": "6321876e2e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Phase A: 22 gateway-client-* read-address rows the .tf reads its prefixes from; no change in Phase B.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZS/NEVER_WIDEN_ASK_OG-ap-24.md",
+   "kind": "doc",
+   "commit_or_etag": "1ef958e44b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The ask with the CTO half SIGNED (no ExternalId); COO half @947810faa8 and CVO half @5b66771763 are in their own files. All three bind to the .tf hash 21a54e8f197eeea2.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T0238Z_nfra-oplgtw-grants-ap24_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "19b3257eb9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ledger nfra-oplgtw-grants-ap24 opened (entry and sentinel committed) before the first apply, 8 legs (R1-R6 per role, V1 re-plan, V2 live-policy hashes), all proven, CLOSED; sentinel removed in the same commit.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (Phase A): the grant .tf equals what the generator derives from the merged adapters, five role resources in the new .tf, no wildcard, no Put or Delete, trust only the gateway role, and the plan reads no destroy.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap24.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "generator --check exit 0 (want 0); roles in the .tf 6 (want at least 5); wildcard resource 0 (want 0); put or delete in actions 0 (want 0); trust principals other than the gateway role 0 (want 0); plan: 12 to add, 0 to change, 0 to destroy\nRESULT: PASS\nexit=0",
+   "denominator": "The plan figure is read from the stored W/GR_PLAN.txt (the Phase A plan, 12 to add), not from a fresh plan: after the apply a fresh plan of these targets reads No changes (V1).",
+   "status": "PASS",
+   "status_reason": "Re-run at 19b3257eb9 after the apply, same output as Phase A. Six role resources in the .tf, not five, because the A3 ruling keyed Black Diamond by firm; the criterion reads at least 5.",
+   "expect": "(?s)generator --check exit 0 \\(want 0\\); roles in the .tf [5-9] \\(want at least 5\\); wildcard resource 0 \\(want 0\\); put or delete in actions 0 \\(want 0\\); trust principals other than the gateway role 0 \\(want 0\\); plan: [0-9]+ to add, [0-9]+ to change, 0 to destroy.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (Phase B): the roles are live in IAM, each read back, and the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap24.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0; roles live in IAM 6 of 6;  policy live yes\nRESULT: PASS\nexit=0",
+   "denominator": "6 roles in the amended check's list (d55475e545), which now names gateway-49f-blackdiamond-read-role in place of the pre-existing gateway-blackdiamond-read-role. The first run at 19b3257eb9, on the old script, printed 6 of 6 without the 'policy live' field and could not match the expect; row NFRA_OPLGTW-Z-S158 filed it and the issuer amended the check script only. This seat also read each of the six new roles individually (get-role, get-role-policy, targeted re-plan).",
+   "status": "PASS",
+   "status_reason": "Re-run at d55475e545 after the issuer's fix (msg 34693): ledger CLOSED, sentinel 0 at HEAD, six roles live, _policy_live true from GR_APPLIED.json.",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0; roles live in IAM 6 of 6;  policy live yes.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative arm: iam simulate-principal-policy per role, ONE resource per call, against an in-prefix object, an object under a prefix the role was not granted in the same bucket, an object in opal-data-bd, and a PutObject on the in-prefix key.",
+   "expected": "In-prefix GetObject allowed; the other three denied.",
+   "observed": "6 of 6 roles: in-prefix GetObject allowed; other prefix explicitDeny; opal-data-bd explicitDeny; PutObject explicitDeny. Each role's first table prefix was also confirmed to hold objects (list-objects-v2 KeyCount 5, or 1 for Commonwealth), because an 'allowed' proves the pattern and not the existence.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each pair re-planned right after its own apply, then all 12 targets re-planned once after the sixth; AC1 and AC2 each run once after the closing commit.",
+   "observed": "Every re-plan read No changes; AC1 and AC2 each PASS exit=0. Neither check was run as a negative arm here: AC2's refusal of an absent GR_APPLIED.json is read from the script, and the issuer measured the pre-cut FAIL.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "CVO condition C1: one real sts:AssumeRole by the gateway role into a new role.",
+   "reason": "Not done. The trust admits only opal-gateway-role, so this seat cannot assume any of the six, and the order's criteria and bounds name no act on the gateway host. simulate-principal-policy does not read trust. It needs the gateway's instance role, so it belongs to OG-ap-23's acceptance on the host."
+  },
+  {
+   "item": "CVO condition C2: SmartX is firm-safe.",
+   "reason": "Not claimed. The role reads objects that hold four firms and IAM cannot fence them; the code filters rows, and the two-firm negative arm is OG-ap-23's."
+  },
+  {
+   "item": "That any tool or page reads through these roles.",
+   "reason": "The roles are unused until OG-ap-23; no consumer was read."
+  },
+  {
+   "item": "Schwab fact_* coverage and the 49F live opal-data-bd tables.",
+   "reason": "Named gaps in the ask (MX-c-23 / MX-r-15, and tables with no catalog row); nothing was granted for them."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S158"
+ ],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. Phase B 2026-10-16 02:36Z-03:15Z on GO msg 34663. Phase A log: the ask and PHASE_A_FINDINGS.md in W. The session log for this window is not yet written.",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway apply -auto-approve -var market_update_s3_root=<address() output> -target=<role> -target=<role policy>, six times",
+   "result": "PASS",
+   "notes": "rc 0 each; the required variable market_update_s3_root has no default and was fed the lib/opal_naming.py address() value minus the partition, as variables.tf says."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (8 legs), close-leg x8, close",
+   "result": "PASS",
+   "notes": "open commits itself; close left the closed entry and the sentinel deletion uncommitted, so they went in the Phase B commit."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "--drift",
+   "result": "ADVISORY",
+   "notes": "Carrier C2 (DEPLOY-LEDGER) read 'scanned 0 of 25 ledger entries; BUDGET PARTIAL'; it was not read as zero. No schedule or trigger is added or changed by this order."
+  }
+ ]
+}

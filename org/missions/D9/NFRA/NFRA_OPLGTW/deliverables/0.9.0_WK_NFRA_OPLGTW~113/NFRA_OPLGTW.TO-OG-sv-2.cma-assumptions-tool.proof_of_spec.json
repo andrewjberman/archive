@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-sv-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "40051277fc",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sv-2.cma-assumptions-tool.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "40051277fc"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~113",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_json_served.py",
+      "kind": "script",
+      "commit_or_etag": "4578c5e7ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the module on the worktree branch carries portal_get_cma_assumptions; no release, deploy or registration in this order (the issuer's hookup and OG-ap-23)",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_sv2.py",
+      "kind": "test",
+      "commit_or_etag": "4578c5e7ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline tests on a recording fake bucket and a synthetic catalog; run by the AC1 invocation"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/SV2_ROW.json",
+      "kind": "doc",
+      "commit_or_etag": "4578c5e7ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the row decision: BUILT, edition 2026, 27 rows; read by the AC2 invocation"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/probe_sv2.py",
+      "kind": "script",
+      "commit_or_etag": "4578c5e7ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the real-bucket probe, read-only, run by the AC2 invocation; prints one line of booleans, counts and the year",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the named offline tests of portal_get_cma_assumptions pass (test_ogsv2_ac01 .. test_ogsv2_ac04 in infra/aws/ec2/opal-gateway/tests/test_og_sv2.py)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/sv2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 named tests of 4 (ac01..ac04; the ac02 and ac03 cases are parametrised within their named tests)",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "W/SV2_ROW.json decides the cma_assumptions row (BUILT, edition read from the object), its tool is defined in app/portal_json_served.py, and the worker's probe read the real bucket for the tool and refused a non-Opal principal with zero reads",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/sv2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "row: entity ok True; class BUILT; tool defined 1 of 1; edition read from the object True\nprobe sv2: portal_get_cma_assumptions answered True as_of 2026 non_opal_refused True reads_on_refusal 0\ncma tool probed 1 of 1 (the worker's probe line)\nRESULT: PASS\nexit=0",
+      "denominator": "rows 1 of 1 (the cma row); tool defined 1 of 1; probed 1 of 1",
+      "status": "PASS",
+      "expect": "(?s)row: entity ok True; class BUILT; tool defined 1 of 1; edition read from the object True.*cma tool probed 1 of 1.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the cell names no mutant; the order's criteria are the offline tests and the two proof invocations",
+      "expected": "N/A -- the cell names no mutant",
+      "observed": "N/A -- the cell names no mutant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two runs of the AC1 offline invocation on one tree compared (both rc=0, 4 of 4 named tests passed); the AC2 probe reads the live object and is not in this comparison",
+      "observed": "STABLE for AC1 (both runs 4 of 4 PASS)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "registration of portal_get_cma_assumptions in app/tools.py and app/data_entitlement.py, and the pinned tool count",
+      "reason": "the issuer's hookup at the merge, one commit (the order's bounds)"
+    },
+    {
+      "item": "release, deploy, IAM, Terraform and any catalog edit",
+      "reason": "out of the cell's bounds; the release is the later applier order OG-ap-23"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/NFRA_OPLGTW.TO-OG-sv-2.cma-assumptions-tool.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_sv2.py tests/test_og_sv1.py -q (from infra/aws/ec2/opal-gateway)",
+      "result": "14 passed (sv-2 six cases under four names; the sv-1 suite unchanged)"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39) via safe-commit",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~113 <0.9.0_WK_NFRA_OPLGTW~113@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "4578c5e7ae landed; all checks passed, no naming refusal"
+    }
+  ]
+}
