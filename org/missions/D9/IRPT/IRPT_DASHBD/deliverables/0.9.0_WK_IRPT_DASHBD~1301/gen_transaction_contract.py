@@ -251,7 +251,7 @@ def main():
         "type_action": type_action,
         "flow_class_rule": [{"partition": p, "rule": r, "flow_class": f, "reason": why} for p, r, f, why in RULE_TABLE],
         "source_mapping": source_mapping,
-        "unmapped_display": "Other",
+        "unmapped_display": "Unclassified",
         "new_code_reason": "CODE_NOT_IN_MAPPING",
         "firms_served": [FIRM49],
         "firms_pending": [
