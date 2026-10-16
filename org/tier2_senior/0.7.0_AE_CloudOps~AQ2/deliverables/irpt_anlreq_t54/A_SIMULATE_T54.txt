@@ -1,0 +1,15 @@
+policy statements: ['S6', 'S7', 'S1', 'S2', 'S3', 'S4', 'S5']
+A1 UpdateItem hop_failure,tenant,job, served key, ReturnValues NONE | expected allowed | read allowed | PASS
+A2 UpdateItem same, served key cottonwood | expected allowed | read allowed | PASS
+D1 PutItem | expected denied | read implicitDeny | PASS
+D2 DeleteItem | expected denied | read implicitDeny | PASS
+D3 GetItem | expected denied | read implicitDeny | PASS
+D4 Query | expected denied | read implicitDeny | PASS
+D5 Scan | expected denied | read implicitDeny | PASS
+D6 UpdateItem naming another attribute (state) | expected denied | read implicitDeny | PASS
+D7 UpdateItem on a leading key that is not a served firm | expected denied | read implicitDeny | PASS
+D8 UpdateItem with ReturnValues ALL_NEW | expected denied | read implicitDeny | PASS
+CONTROL1 *:* policy, A1 shape | expected allowed | read allowed | PASS
+CONTROL2 BEFORE policy S1 to S5, A1 shape | expected denied | read implicitDeny | PASS
+S7 kms:EncryptionContext:aws:dynamodb:tableName CANNOT be simulated for a DynamoDB-mediated call; the proof's write is its evidence.
+BATTERY OK (0 failing)
