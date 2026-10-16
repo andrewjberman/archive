@@ -18,7 +18,7 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7db826a659",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Three subcommands over the shared etf_classification_scheduled module (imported, not copied). plan (read-only; amendment 1 adds --fold-map, which seeds the map's 9 seed tickers with the ruled class, provenance and fold_* audit and holds out the map's 9 held_out tickers to seed_pending). apply (writes only under a signed pair; built and selftested, never run against AWS by this worker) writes with its own conditional put attribute_not_exists(ticker), carrying source_table, source_last_updated and the fold_* audit attributes, because the shared write() drops them. selftest (stub tables, no AWS) now includes fold-map cases (vi) and (vii).",
       "artifact_covered_by": [
@@ -28,7 +28,7 @@
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7db826a659",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Plan file from one read-only run of seed22.py plan --fold-map (amendment 1, base 13b4c04fc0, read_at 2026-10-16T05:00:42Z): firm 49financial, 22 candidates, planned=13 ($170,529.30: equity 15,777.17, fixed_income 120,888.00, alternatives 11,855.56, commodities 22,008.57), seed_pending=9 ($242,812.29), unresolved=0. Total dollars 413,341.59. No S3 or DynamoDB write was made.",
       "artifact_covered_by": [
@@ -39,7 +39,7 @@
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7db826a659",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Appended one row this round, MDPF_SECCLASS-D1-W97-S2 (AC2 and AC3 cannot both pass: five null-sub-class seeds fail check_seed22_plan.py 'class incomplete'). Append only (30 insertions, no existing row edited). Parsed as JSON at the append. MDPF_SECCLASS-D1-W97-S1 (the earlier plan_rows direct-match finding) is left as written.",
       "artifact_covered_by": []
@@ -61,11 +61,10 @@
       "criterion_verbatim": "the real plan covers exactly the 22 baseline tickers once each, every planned row carries provenance equal to the live old row, none is in the canonical table now, and the dollars equal the baseline total within $1.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
-      "output_evidence": "SEED22-PLAN ok=False planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=['CPXIX class incomplete', 'HPI class incomplete', 'LCFYX class incomplete', 'PFF class incomplete', 'VRP class incomplete'] ; exit rc=1. The criterion's own arms all hold on this plan: the partition is 13 + 0 + 9 = 22 with no duplicate; the dollars are 413341.59 against the baseline 413341.59 (delta 0.00); every planned row has source_table bd-securities and a source_last_updated; no planned ticker is in the canonical table. The five failures are the single rule 'a planned row must carry a non-empty sub_asset_class' (check_seed22_plan.py line 48), which the fold ruling's null sub-classes (HPI, LCFYX, PFF, VRP, CPXIX) cannot satisfy while AC3 requires them to be absent. The check was not edited or weakened. Filed as MDPF_SECCLASS-D1-W97-S2.",
-      "denominator": "22 baseline tickers = 13 planned + 0 unresolved + 9 seed_pending, each exactly once; 13 of 13 planned rows carry provenance equal to the live old row (13 get_item reads); 8 of 13 planned rows have a non-empty sub_asset_class (5 are null-sub map rows, failing this check's rule); 0 of 13 planned tickers in etf-classifications; dollars 413341.59 vs baseline 413341.59, delta 0.00",
-      "status": "FAIL",
-      "expect": "SEED22-PLAN ok=True",
-      "status_reason": "AC2 cannot pass as written together with AC3: check_seed22_plan.py line 48 fails every planned row without a non-empty sub_asset_class, and the five null-sub ruled rows (HPI, LCFYX, PFF, VRP, CPXIX) must carry none (AC3, check_seed22_fold.py line 40). Filed as MDPF_SECCLASS-D1-W97-S2; check not weakened; order stays pending."
+      "output_evidence": "SEED22-PLAN ok=True planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=[] ; exit rc=0. Run 2026-10-16 by 0.9.0_WK_MDPF_SECCLASS~97 at HEAD 97b5a2a2c8, under timeout 120, after the issuer amended the check at 72d63fef7f (amendment 2): check_seed22_plan.py no longer demands a non-empty sub_asset_class on every planned row; it still requires an asset_class and the provenance on each planned row. HISTORY, kept as written: the run BEFORE that amendment read 'SEED22-PLAN ok=False planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=['CPXIX class incomplete', 'HPI class incomplete', 'LCFYX class incomplete', 'PFF class incomplete', 'VRP class incomplete'] ; exit rc=1'. That failure was the issuer's defect (the check's single rule 'a planned row must carry a non-empty sub_asset_class'), filed as MDPF_SECCLASS-D1-W97-S2; the commit message of 72d63fef7f names row MDPF_SECCLASS-D1-S43 as disarming it. The check was amended by the issuer, not by this worker.",
+      "denominator": "22 baseline tickers = 13 planned + 0 unresolved + 9 seed_pending = 22, each exactly once; dollars 413341.59 vs baseline 413341.59, delta 0.00",
+      "status": "PASS",
+      "expect": "SEED22-PLAN ok=True"
     },
     {
       "criterion_id": "SC27-e107-AC3",
@@ -107,14 +106,14 @@
   ],
   "surprises": [
     "MDPF_SECCLASS-D1-W97-S1: the R27 seed22 plan, built on the shared plan_rows as ordered, plans 4 of the 22 old-list tickers and leaves 18 unresolved, because plan_rows does not fold. Amendment 1 resolves the 18 through the CTO fold map (9 seeded, 9 held out). The S1 row itself is not edited; its disarm owner 2.0.0_SA_COO~M1 is unchanged.",
-    "MDPF_SECCLASS-D1-W97-S2: AC2 (check_seed22_plan.py line 48) requires every planned row to carry a non-empty sub_asset_class, and AC3 (check_seed22_fold.py line 40) requires the five null-sub map rows (HPI, LCFYX, PFF, VRP, CPXIX) to carry none. The two cannot both pass for the ruled plan. AC2 is FAIL; the check was not weakened; the order stays pending. BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~M1."
+    "MDPF_SECCLASS-D1-W97-S2: AC2 (check_seed22_plan.py line 48) requires every planned row to carry a non-empty sub_asset_class, and AC3 (check_seed22_fold.py line 40) requires the five null-sub map rows (HPI, LCFYX, PFF, VRP, CPXIX) to carry none. The two cannot both pass for the ruled plan. The issuer amended check_seed22_plan.py at 72d63fef7f (amendment 2); AC2 now reads PASS (SEED22-PLAN ok=True) and the issuer's commit names row MDPF_SECCLASS-D1-S43 as disarming S1 and S2. The S2 row itself is not edited."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md",
   "compiler_tools": [
     {
       "tool": "check_seed22_plan.py (R27_CHECKS, read-only)",
       "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
-      "result": "SEED22-PLAN ok=False planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=['CPXIX class incomplete', 'HPI class incomplete', 'LCFYX class incomplete', 'PFF class incomplete', 'VRP class incomplete']; rc=1."
+      "result": "SEED22-PLAN ok=True planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=[]; rc=0 (after the issuer's amendment 2 at 72d63fef7f; the earlier rc=1 run is recorded under AC2)."
     },
     {
       "tool": "check_seed22_fold.py (R27_CHECKS, read-only)",
