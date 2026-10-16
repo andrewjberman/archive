@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cb-14.the-known-hash-lookup-matches-and-is-seeded-once",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cb-14.the-known-hash-lookup-matches-and-is-seeded-once.md",
+    "group": "OTHER",
+    "vintage_commit": "ce8abf0167"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "ce8abf0167",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cb-14.the-known-hash-lookup-matches-and-is-seeded-once.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~149",
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~149/session.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/silver_known.py",
+      "kind": "script",
+      "commit_or_etag": "28309f6547",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only. KnownMap keyed by the encoded record-key text; get and __contains__ encode the lookup tuple with encode_key, so a datetime.date fetch_date_utc matches its stored text. load returns KnownMap. encode_key, decode_key, ensure, note unchanged. store.py not edited. Not deployed; no S3, publisher or box touched.",
+      "introduces": [
+        "class KnownMap",
+        "def __contains__(self, key_tuple):"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/seed_silver_known.py",
+      "kind": "script",
+      "commit_or_etag": "28309f6547",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module. UPLOADER_TABLES (article, listing_hit) with the uploads.py line references in its docstring; seed reads each (publisher, table) once through store.silver_latest, notes the keys the local record lacks, writes silver_known_seed.json; --dry-run writes nothing; check --since counts rows written again and exits 1 when any. Run only by a person later; no test runs it against S3.",
+      "introduces": [
+        "UPLOADER_TABLES",
+        "def main(argv=None)"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_cb14_known_lookup_and_seed.py",
+      "kind": "test",
+      "commit_or_etag": "28309f6547",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 tests, offline: KnownMap date, datetime and difference arms; end-to-end second upload writes nothing with a date key; seed then the same rows write nothing, a changed hash is written; dry-run writes neither database nor snapshot; a local entry is not overwritten; check 0 then 1 after a direct rewrite; the raw-tuple mutant fails the end-to-end arm. Fakes only.",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "introduces": [
+        "def test_mutant_raw_tuple_lookup_fails_the_second_upload_arm"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_cb12_uploader_known_hashes.py",
+      "kind": "test",
+      "commit_or_etag": "28309f6547",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The datetime-limit test now asserts the match through load(...).get(...) and is renamed to match; the dict comparisons compare through get, len, or set(...) of encoded texts. Nothing else changed. 9 of 9 pass.",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "introduces": [
+        "def test_silver_known_matches_the_datetime_key_through_get_and_keeps_the_pair_apart"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a5f2044842",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows AMGT_HARVST-D1-W149-S1 to S4 appended by bytes: 83 insertions, 0 deletions; the fenced array parses with 437 rows; the one duplicate id is the pre-existing AMGT_HARVST-Z-S106 pair named in the order.",
+      "introduces": [
+        "AMGT_HARVST-D1-W149-S1",
+        "AMGT_HARVST-D1-W149-S2",
+        "AMGT_HARVST-D1-W149-S3",
+        "AMGT_HARVST-D1-W149-S4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_cb14_known_lookup_and_seed.py lib/opal_data_harvest/test_cb12_uploader_known_hashes.py -q -p no:cacheprovider --color=no expects (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_cb14_known_lookup_and_seed.py lib/opal_data_harvest/test_cb12_uploader_known_hashes.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^\\d+ passed in",
+      "output_evidence": "18 passed in 0.70s (rc 0; run under timeout 120; three runs: 18 passed in 0.84s, 0.69s, 0.70s, rc 0 each)",
+      "denominator": "18 of 18 tests in the two files pass, 0 failed (9 in test_cb14_known_lookup_and_seed.py, 9 in test_cb12_uploader_known_hashes.py)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/research/harvest/tests/test_store.py lib/research/harvest/tests/test_o3_silver_tie_break.py lib/research/harvest/test_at4_silver_union_keys.py lib/opal_data_harvest/test_ai5_batched_silver_append.py lib/opal_data_harvest/test_at1_batched_listing_upload.py lib/opal_data_harvest/test_eg1_silver_cache.py lib/opal_data_harvest/test_retrieval_provenance.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_au1_upload_timeout.py -q -p no:cacheprovider --color=no expects (?m)^110 passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_store.py lib/research/harvest/tests/test_o3_silver_tie_break.py lib/research/harvest/test_at4_silver_union_keys.py lib/opal_data_harvest/test_ai5_batched_silver_append.py lib/opal_data_harvest/test_at1_batched_listing_upload.py lib/opal_data_harvest/test_eg1_silver_cache.py lib/opal_data_harvest/test_retrieval_provenance.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_au1_upload_timeout.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^110 passed in",
+      "output_evidence": "110 passed in 6.26s (rc 0, under timeout 120; the base count on this worktree is also 110 passed in 5.50s, rc 0; re-run 6.28s, rc 0)",
+      "denominator": "110 of 110 tests in the 10-file set pass, 0 failed (base on this worktree: 110 passed)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "KnownMap.get monkeypatched to look up the RAW tuple (no encode_key); the end-to-end second-upload arm must FAIL (test_mutant_raw_tuple_lookup_fails_the_second_upload_arm asserts pytest.raises(AssertionError)).",
+      "expected": "the mutant test PASSES: the end-to-end arm raises AssertionError under the raw lookup",
+      "observed": "the mutant test passes; the raw lookup writes the two rows again and the arm's assertion fails",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times (once before the code commit, twice after the surprise-row commit); AC2 run twice after the code commit",
+      "observed": "AC1 18 passed in each run, rc 0; AC2 110 passed in each run, rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Task-order status flip to complete",
+      "reason": "The order says the issuer flips its status; the order file is outside <paths>, so the worker does not edit it."
+    },
+    {
+      "item": "The dry run against the real bucket (seed --dry-run for barrons)",
+      "reason": "The order forbids any run against S3, a publisher, Secrets Manager or a box in this cell; the issuer's dry run and the re-pin act are outside the worker's scope."
+    },
+    {
+      "item": "The seed run against the runtime root and the check run after the first uploads",
+      "reason": "Run by the executor 0.7.0_AE_CloudOps~SC1 at the re-pin act with the runner stopped (order, Where the seed runs). Not run here."
+    },
+    {
+      "item": "The suite failure test_harvest_grammar.py::test_one_writer_for_both_channels",
+      "reason": "Pre-existing in this sparse worktree (a missing import outside the cone), named in the order as a known failure; unchanged by this cell (base 1 failed, after 1 failed)."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W149-S1: arm (4) as worded (check --since the test's start time, before the seed) counts the seeded parts as DUPLICATES; the window opens after the seed in the test, and the re-pin T0 must be an instant after the seed (ARMED, disarm owner 2.0.0_SA_COO~W1).",
+    "AMGT_HARVST-D1-W149-S2: the cb-12 test form: dict(...) of the encoded texts does not apply to KnownMap; the test uses get, len and set(...) of encoded texts, and renames the datetime test.",
+    "AMGT_HARVST-D1-W149-S3: the sparse cone omits org/surprise_channel/schemas/investigation_item.schema.json; the row was checked against the HEAD blob.",
+    "AMGT_HARVST-D1-W149-S4: the naming gate WARNs on the snapshot table-name string in the new test (barrons/listing_hit); a REFUSE in its WARN window that did not block the commit."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh (code commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~149 <0.9.0_WK_AMGT_HARVST~149@opal.agent>\" -F .scratch/msg_code.txt -- lib/opal_data_harvest/silver_known.py lib/opal_data_harvest/seed_silver_known.py lib/opal_data_harvest/test_cb14_known_lookup_and_seed.py lib/opal_data_harvest/test_cb12_uploader_known_hashes.py",
+      "result": "committed 28309f6547 (4 files, 566 insertions, 21 deletions); commit-gate passed; naming-gate WARN (2 graded, 1 REFUSE in the WARN window, not enforced) on the snapshot table-name string, filed as S4"
+    },
+    {
+      "tool": "commit gate via .tools/safe-commit.sh (surprise rows)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~149 <0.9.0_WK_AMGT_HARVST~149@opal.agent>\" -F .scratch/msg_rows.txt -- org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "committed a5f2044842 (1 file, 83 insertions, 0 deletions); surprise-row-gate OK, 4 new rows of 437 total checked; surprise-corpus clean against baseline (4 known, 0 new)"
+    }
+  ]
+}
