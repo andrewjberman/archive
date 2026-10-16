@@ -82,3 +82,13 @@ and VersionId. The second set repeats step 0 once with the same five candidates 
   amendment.
 - **ZQXWVK must read NOT_FOUND.** If it does not, the fix did not reach the door: stop and report, whatever the other four read.
 - **Every SET 2 object goes into row dc59's source record the same session.** The delete stays Andrew's act, after run 3 is graded.
+
+## AMENDMENT 4 -- R0e re-pinned from r34d (rolled back) to r34e (2026-10-16 ~13:3xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM3_AMENDMENT4_REPIN_R34E_COO_HALF.md`
+(COO half @0d7d051f08), blob `a560bc08075380f7b0137015e3fb2ef9e935dcb8`, sha256 `43feb386e4d3bc3945a024fe9f5c5bfc6c5ba30a6d390a5a52969f15d496be93`,
+5,312 bytes (re-measured). Only R0e's pins change. Its r34e binding (packet blob `fd4c17188b`, tar `a96fbfb7...9227`) equals the r34e
+signature in my R34 half (@5699c80f35). AMENDMENT 3's terms and my conditions on it stand.
+
+**Condition:** HOLD lifts only after ledger `irpt-resident-r34e-20261016` reads CLOSED with both `V2S OK SPY KEPT and ZQXWVK NOT_KEPT` and
+`V2S CONTROLS OK 4 of 4` from inside the service. SET 2's ZQXWVK must read NOT_FOUND at the door, or the window stops.

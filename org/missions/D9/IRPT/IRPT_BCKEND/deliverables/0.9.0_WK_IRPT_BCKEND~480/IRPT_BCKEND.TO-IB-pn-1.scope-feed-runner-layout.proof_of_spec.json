@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pn-1",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pn-1.scope-feed-runner-layout.md",
+    "group": "OTHER",
+    "vintage_commit": "a9c3f46a3dd5b0b84fa7ba41a735dfbf32a30719"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R4_N.md",
+    "vintage_commit": "a9c3f46a3dd5b0b84fa7ba41a735dfbf32a30719",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pn-1.scope-feed-runner-layout.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~480",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/inf/manual_api/pull_inflection_scope_account_returns.py",
+      "kind": "script",
+      "commit_or_etag": "335df499ac647a779ce05a1c8240b0a4cb2ace74",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build, nothing deployed or run against a served prefix. Three RUNNER-LAYOUT edits: _REPO_LIB guarded by len(_HERE.parents) > 2 (line 34); _calendar and _builder skip the sys.path insert when _REPO_LIB is None (lines 388, 399); BUILDER_PATH is the beside-file builder when present, else the repository scripts/gold path (line 71). Request bodies, SCOPE-FEED-A/B/C blocks, exit codes and the day-complete rule unchanged.",
+      "artifact_covered_by": [
+        "IBN1-1-AC1",
+        "IBN1-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/inf/manual_api/test_scope_feed_runner_layout.py",
+      "kind": "test",
+      "commit_or_etag": "335df499ac647a779ce05a1c8240b0a4cb2ace74",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 offline tests: module executes at two ancestors; _REPO_LIB None without a third ancestor; source_prefixes reads the beside builder in the flat layout; source_prefixes falls back to the repository path. Each builds its own flat directory in a temp dir and removes it.",
+      "artifact_covered_by": [
+        "IBN1-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBN1-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC1 -> IBN1-AC1 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC1",
+      "output_evidence": "IBN1-AC1 PASS / exit=0 (run from the worktree root, after the edits; base control at a9c3f46a3d: IBN1-AC1 FAIL: IndexError: 2)",
+      "denominator": "1 of 1 flat-layout module execution (script two directories below the root)",
+      "expect": "IBN1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBN1-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC2 -> IBN1-AC2 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC2",
+      "output_evidence": "IBN1-AC2 PASS / exit=0 (after the edits; base control: IBN1-AC2 FAIL: FileNotFoundError on the sibling scripts/gold INF_B_00 path)",
+      "denominator": "3 of 3 source_prefixes values (bucket, accounts_v2 prefix, positions_mv prefix) returned in the flat layout",
+      "expect": "IBN1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBN1-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC3 -> IBN1-AC3 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC3",
+      "output_evidence": "IBN1-AC3 PASS / exit=0. The check runs pytest on the new test file and the three existing feed test files; a direct run of the same four files printed '46 passed in 6.77s' with rc=0. The record names two changed paths, both inside the grant.",
+      "denominator": "46 of 46 tests across the four feed test files (4 new + 42 existing); 2 of 2 changed_paths inside the grant",
+      "expect": "IBN1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base control: the three checks run on the unedited base a9c3f46a3d before any edit, as the difference control.",
+      "expected": "IBN1-AC1 FAIL (IndexError: 2), IBN1-AC2 FAIL (FileNotFoundError on the sibling path), IBN1-AC3 FAIL (new test file absent)",
+      "observed": "IBN1-AC1 FAIL: IndexError: 2; IBN1-AC2 FAIL: FileNotFoundError ... scripts\\gold\\INF_B_00.canonical_holdings.py; IBN1-AC3 FAIL: new test file absent; each rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "IBN1-AC1 and IBN1-AC2 each run twice on the same tree: once after the edits (before the test file existed) and once in the criteria run. Same PASS line and exit 0 both times.",
+      "observed": "AC1 PASS rc=0 in both runs; AC2 PASS rc=0 in both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "Deployment of the edited script to the runner, the S3 code prefixes, or any scheduled run",
+      "reason": "LOCAL build under the TO bounds; nothing is deployed, published or run against a served prefix. The runner copy changes only at a later WORLD apply under its own pair."
+    },
+    {
+      "item": "A Python 3.9 interpreter run of the edited files",
+      "reason": "The local interpreter is Python 3.14.7. ruff 0.15.11 with --target-version py39 --select E9,F passed on both files; no 3.9 interpreter was available to the worker."
+    },
+    {
+      "item": "A full read of INF_B_00.canonical_holdings.py and orion-gold-dispatch.sh",
+      "reason": "Read only as far as the order's checks require: the builder's imports and three constants, and the dispatch script is cited by path from the order and not opened."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pn1_cells.py (the order's check)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~N2/checks/r1/pn1_cells.py\" . IBN1-AC1 (and -AC2, -AC3)",
+      "result": "IBN1-AC1 PASS, IBN1-AC2 PASS, IBN1-AC3 PASS, each exit=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/inf/manual_api/test_scope_feed_runner_layout.py data/inf/manual_api/test_pull_inflection_scope_account_returns.py data/inf/manual_api/test_scope_feed_daily_factor.py data/inf/manual_api/test_scope_feed_day_complete.py",
+      "result": "46 passed in 6.77s, rc=0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 --select E9,F data/inf/manual_api/pull_inflection_scope_account_returns.py data/inf/manual_api/test_scope_feed_runner_layout.py",
+      "result": "All checks passed!, rc=0"
+    }
+  ]
+}
