@@ -1,0 +1,27 @@
+HVST-cc-4 step 2: the exact command line the runner used for a bbg job, and what this cell changes.
+
+SOURCES (stated, not guessed):
+ (1) backfill_driver.Collector.run_job at the pin, lines 275-277, builds: ["run", "--harvest-grammar", "--retrieval-mode", "backfill",
+     "--floor", <pair_floor>, "--new-only", "--no-sign-in", "--security-json", <sec_file>, "--publishers", <publisher>, "--max-jobs", "1"];
+     _flags() prepends ["--runtime-root", <runtime_root>]; _spawn runs [sys.executable, "-m", "lib.opal_data_harvest"] + args with cwd=ROOT (the pin).
+ (2) A live process record of a runner job observed this session (pid 11332, a barrons job at 2026-10-15 23:09 local; not a bbg job, the
+     bbg job's own process ended before any census): 
+     C:\Users\Test\AppData\Local\Programs\Python\Python314\pythonw.exe -m lib.opal_data_harvest --runtime-root C:\dev\ajb_workspace\.runtime\harvest-cycle\runtime run --harvest-grammar --retrieval-mode backfill --floor 2026-10-15 --new-only --no-sign-in --security-json C:\dev\ajb_workspace\.runtime\harvest-cycle\state\cycles\barrons\securities\BA.json --publishers barrons --max-jobs 1
+ (3) The bbg cycle's floor: the log line "CYCLE bbg 20261016T081114Z floor 2026-10-15"; the cycle checkpoint carries no pair_floors entry for
+     security-7f993eb1cab6b5ea (pair_floors None), so pair_floor() returns the cycle floor 2026-10-15.
+ The bbg job's own command line is NOT in any record (the job process ended before a census; the log carries no command): the line below is
+ (1) with publisher bbg and the bbg security file, which is what (2) shows the same code producing for barrons.
+
+THE COMMAND THE RUNNER RAN FOR THE FAILED bbg JOB (reconstructed from the sources above):
+ pythonw.exe -m lib.opal_data_harvest --runtime-root C:\dev\ajb_workspace\.runtime\harvest-cycle\runtime run --harvest-grammar --retrieval-mode backfill --floor 2026-10-15 --new-only --no-sign-in --security-json C:\dev\ajb_workspace\.runtime\harvest-cycle\state\cycles\bbg\securities\security-7f993eb1cab6b5ea.json --publishers bbg --max-jobs 1
+ cwd = C:\dev\wk-harvest-runner-pin-ddd7dcdc38 ; environment: the scheduled task runs as the logged-on user, whose USER-level
+ OPAL_HARVEST_PROFILE_ROOT = C:\dev\ajb_workspace\.runtime\opal-data-harvest\browser-profiles (read from the registry this session; a shell of this
+ seat does NOT carry it, so every leg here sets it explicitly -- without it the pin's default_profile_root() would name an empty profile under the pin).
+
+WHAT EACH LEG CHANGES (and nothing else):
+ --runtime-root  C:\dev\ajb_workspace\.runtime\harvest-cycle\runtime  ->  C:\dev\ajb_workspace\.runtime\cc4-bbg-trace\runtime  (scratch, new, empty)
+ interpreter     pythonw.exe -> python.exe, started as cc4_harness.py, which imports the pin's code and calls its CLI main() with the argument list above
+ Arm C           --security-json -> security-b0fe721e1f2a0d8b.json (the control)
+ Arm B           TabSession(..., minimize=False): the switch the pin's signature offers (tab_transport.py:89), forced by wrapping __init__ in this process
+ The harness stops the job BEFORE any hold of the vendor's control (verification._press_and_hold_box raises HarnessStop on the first call that
+ finds the control); the runner's job would go on to hold it. That difference is declared in cc4_trace.out.

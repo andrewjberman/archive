@@ -1,0 +1,23 @@
+HVST-cc-4 Arm A analysis (this seat, 2026-10-16T16:30Z). Files: cc4_arm_A.jsonl (the trace), cc4_arm_A.stdout, run record 20261016T162436Z-run-8e3a7413 in the scratch runtime root.
+
+WHAT ARM A DID (harness stop before any hold, my own addition; the runner's job goes on to hold the control):
+  t=21.585  PacedSession._solve_challenge.enter (the 403 bot_check bloomberg_press_and_hold was met about here)
+  t=21.617  verification._press_and_hold_box (first locate): page_is_closed=False; t=22.668 exit found=False (1.05 s)
+  t=22.668  solve(): no control found and confirm == "fetch" -> page.goto(blocked route) then page.wait_for_timeout(5000)  (verification.py:366-371)
+  t=28.009  second locate: page_is_closed=False; t=28.194 exit found=True, box x=473.5 y=194.4 w=310 h=100
+  t=28.196  HarnessStop raised (the harness refuses to hold the vendor's control)
+  t=28.253  RUNNER_CLOSE_CALL TabSession.close (worker.py run_job -> publishers.py:454), then page.close_event 28.270, context.close_event, browser.disconnected, chrome main process gone 28.751.
+  Minimise: minimize.setWindowBounds_returned at t=2.804, before everything; the window stayed open 26 s after it.
+  Result: the page was NOT closed by anyone between the 403 and the second locate. Every close in this arm is the runner-side close that follows the harness's own stop.
+
+WHAT THE RUNNER'S TWO FAILED JOBS SHOW (events.jsonl, run records 20261016T081953Z-run-44138fa3 and 20261016T083553Z-run-6f00a52f):
+  challenge_presented (the 403) -> job_finished error: 25.508 s (08:20:25.743 -> 08:20:51.250) and 25.613 s (08:36:15.584 -> 08:36:41.194).
+  This arm reached the same control 6.6 s after the 403 (22.67 locate done + 5.34 s goto and wait, 28.19 found). In the runner's flow the NEXT steps are
+  capture_dom (on_control), press_and_hold_adaptive (HOLD_MAX_S = 12 s, press_and_hold_lib.py:63-184: mouse.down, poll, mouse.up; no close, no goto in the library),
+  page.wait_for_timeout(4000), then the second loop pass _press_and_hold_box(page) -> control.count() (verification.py:303-312). 6.6 s + capture + up to 12 s + 4 s
+  is about 23-26 s: the observed 25.5 s fits a Locator.count call on the SECOND hold-loop pass, after the hold.
+  Inference (not shown by a trace): the page was gone after the hold, not before it. The TargetClosedError is raised when the loop LOOKS for the control again.
+
+WHAT THIS ARM CANNOT SAY: who closed the page (the vendor's challenge page after a hold, the browser, or the runner's minimised window) because it never held the control.
+  Arm B with the same stop would also never reach the step. So CLOSED_BY cannot be graded from arms that stop before the hold.
+NOT ESTABLISHED: whether the page closes during the hold, at its release, or in the 4 s wait; whether a hold on a visible window closes it.
