@@ -27,3 +27,10 @@ The commit-time naming gate (ENFORCE) REFUSES 16 catalog literals. A probe branc
 - The four `blackdiamond_live_<t>.yaml` entry files (byte-equal to trunk), as one commit with the registry and as a second commit: REFUSED, 12 graded (per file: line 2 `silver/<t>/`, line 3 `blackdiamond/49f-live/silver/<t>/`, line 48 `49financial`). They are NEW at this base; MI's trunk commit was a pure rename of content already committed.
 - The release commit on top of prelude 1: `CATALOG-EXEMPT admitted=12 refused=4`; the 4 are `DATA_CATALOG.yaml` `blackdiamond/49f-live/silver/{allocations,fees,transactions,unrealized}/` (K3, '49f-live' is not a tier). Exit 1.
 - Nothing overridden beyond the two audited lane escapes the order names. No release_sha, ask or AC1 run. The probe branch `rel-nfra-oplgtw-batch2-probe` (`191eedf892`) is not the release.
+
+## The deferred step 1 and 3 reads (COO msg 35151, ~17:30Z) -- done
+- Host md5 walk against the live ref (`ap28_host_md5.py` -> `.json`, SSM): 139 expected files (git blobs of `d14445961d` over app, deploy, lib, requirements, allowlist), 141 on the host (the two staged `app/refs` files, both equal to trunk's blobs): 139 equal, 0 differ, 0 missing, 0 unexplained extra. Dashboard excluded by grain.
+- `.env` names only: 64 keys, `MUSE_CLIENT_ID` is not a key, `BLACKDIAMOND49FLIVE_READER_ROLE_ARN` not yet a key (65 after the release); 9 keys end in `_READER_ROLE_ARN` (the order's "7" counts the six vendor keys plus the new one).
+- `tools_list_before` (`ap28_toolslist.py` -> `.json`): registry 103; `tools/list` to a master_admin stand-in 103; health 200.
+- IAM, simulated one resource per call on `gateway-49f-blackdiamond-live-read-role`: GetObject allowed on the four live prefixes, ListBucket with the prefix allowed, controls (`bronze/`, `silver_legacy/`) explicitDeny; bucket `opal-data-bd` exists.
+- `NEVER_WIDEN_ASK_OG-ap-28.md` drafted with A1-A3 text; `release_sha`, the final `trunk_sha`, the four gate lines and the signatures are blank. Nothing committed on the release branch.
