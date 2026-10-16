@@ -1,0 +1,21 @@
+{
+  "to_id": "NFRA_OPLGTW.TO-OG-en-8",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~121",
+  "branch": "wk-NFRA_OPLGTW-121",
+  "code_commit": "6f8a884aa0",
+  "read_first": {
+    "1_narrowing_location": "decide() in app/data_entitlement.py has no client input and stays unchanged. The narrowing is a separate client gate (muse_tool_denial, muse_route_denial) called first in tool_denial, visible_tools and route_denial. The client is the token's client_id claim, which server.py already reads (_bearer_auth) and sets with set_current_principal; it is read through context.get_current_client_id(). The setting is MUSE_CLIENT_ID in app/config.py, read as get_config().MUSE_CLIENT_ID; empty means inert. No client id is in code or in this log.",
+    "2_shape": "per-client allowlist, not a tier list: MUSE_M365_TOOLS, a principal whose verified client equals MUSE_CLIENT_ID is admitted only to that set (and to /teams/poll on the route side).",
+    "3_allowlist_names": ["whoami", "list_recent_email", "list_email_filtered", "search_email", "read_email", "list_email_attachments", "inspect_email_attachment", "create_draft", "send_email", "reply_email", "list_teams", "list_channels", "list_chats", "read_channel_messages", "read_chat_messages", "read_chat_message_images", "read_teams_attachment", "send_channel_message", "send_chat_message", "poll_addressed_teams_messages"],
+    "3_excluded_by_judgment": ["save_email_attachment_to_site", "list_calendar", "find_online_meeting", "list_meeting_transcripts", "read_meeting_transcript", "list_shared_folder", "copy_site_file_to_s3"],
+    "4_admission_class": "unchanged: no tool's class or DATA_GRANT / TIER_ADMITTED membership was touched; the client_* and Schwab sets are untouched."
+  },
+  "existing_tests_updated": [],
+  "existing_test_failing_before_and_after": "tests/test_data_entitlement_guard.py::test_ogz1_ac08 (line 756, route declaration set); recorded on the channel as NFRA_OPLGTW-Z-W121-S3; not edited",
+  "runs": [
+    "pytest tests/test_data_entitlement_guard.py tests/test_data_entitlement_family.py tests/test_entitlement_admin.py tests/test_og_bd3.py tests/test_og_ad1.py at base: 1 failed (test_ogz1_ac08), 32 passed",
+    "same five files plus tests/test_og_en8.py after the change: 1 failed (test_ogz1_ac08), 35 passed",
+    "pytest tests/test_og_en8.py -v -s: 3 passed; 118 registered tools; 20-name allowlist derived from app/tools.py; 708 verdicts equal to the pre-change verdict",
+    "pytest tests/test_og_en8.py -q after the test-domain change: 3 passed"
+  ]
+}
