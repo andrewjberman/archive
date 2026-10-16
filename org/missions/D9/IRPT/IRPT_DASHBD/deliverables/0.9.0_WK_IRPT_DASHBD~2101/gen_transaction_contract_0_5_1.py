@@ -447,9 +447,9 @@ def main():
                                             "source_txn_id", "coverage", "source_action_raw", "business_date_claim"]
     assert len(columns) == 19
 
-    # the sources section is UNCHANGED from 0.5.0 (the round-135 order lists it among the unchanged sections): copied from the trunk contract read
-    # above, its targets and sources checked against the ground reads here. The 0.5.0 price method keeps its own (round-131/132) figures; that
-    # is filed as a surprise row, not restated in this cell.
+    # the sources section is the 0.5.0 section (copied from the trunk contract read above, its targets and sources checked against the ground
+    # reads here), except the Inflection price entry's METHOD, restated with the latest-snapshot figures (AMENDMENT 1 of the order, trunk
+    # d58c1dda9c: the checker names these figures). Its source, from_columns, claim and reason stay as 0.5.0 states them.
     sources = old["sources"]
     assert sorted(sources) == sorted(GROUND) and all(
         {t["target"]: t["source"] for t in sources[f] if (f, t["target"]) != (FIRM_INF, "price")}
@@ -458,6 +458,20 @@ def main():
     fund = lprice["fund_family"]
     assert lprice["null_or_blank_rows_complete"]["avgPrice"] == lprice["complete_rows"], "the R135 census no longer finds avgPrice null on every Complete row"
     assert fund["with_fund_family"] + fund["without_fund_family"] == fund["unit_bearing_positive_nav_rows"]
+    price_entries = [e for e in sources[FIRM_INF] if e["target"] == "price"]
+    assert len(price_entries) == 1 and price_entries[0]["source"] == "navPrice" and price_entries[0]["from_columns"] == ["noUnits", "fundFamilyName"] \
+        and price_entries[0]["claim"] == "inferred", "the 0.5.0 Inflection price entry is navPrice from noUnits and fundFamilyName, inferred"
+    price_entries[0]["method"] = (
+        "The price is navPrice ONLY on a line that carries a fund family: the fundFamilyName is non-blank, noUnits is non-zero and "
+        "navPrice is positive. Every other line serves null, never zero, with the reason NAV_PRICE_FUND_ONLY (units non-zero, "
+        "navPrice positive, no fund family), ZERO_UNITS (no units) or NAV_NOT_POSITIVE (units non-zero, navPrice not positive). The "
+        "round-128 ground read named avgPrice for this target and read no value; the round-135 census (values-free, "
+        "R135_INFLECTION_LATEST_PRICE_CENSUS.json, latest snapshot {snap}) finds avgPrice null or blank on every one of {rows:,} Complete rows, "
+        "so the producer never reads it. The same census finds {upr:,} unit-bearing rows with a positive navPrice, of "
+        "which {wff:,} carry a fund family and {wof:,} do not; navPrice times noUnits equals transAmount within one percent on "
+        "{fw1:,} of the {wff:,} fund-family lines, so navPrice is the unit price the amount is booked at.").format(
+            snap=lprice["latest_snapshot"], rows=lprice["complete_rows"], upr=fund["unit_bearing_positive_nav_rows"],
+            wff=fund["with_fund_family"], wof=fund["without_fund_family"], fw1=fund["fund_rows_within_1pct"])
 
     fee_basis = {FIRM49: {"columns": list(targets[FIRM49]["fee"]["from_columns"]), "rule": FEE_RULE_49F},
                  FIRM_CW: {"columns": list(targets[FIRM_CW]["fee"]["from_columns"]), "rule": FEE_RULE_CW},
