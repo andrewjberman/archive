@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-m-1.readiness-halt-guard",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_READYHALT.md",
+    "vintage_commit": "45dbfe72f6",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-m-1.readiness-halt-guard.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-m-1.readiness-halt-guard.md",
+    "group": "OTHER",
+    "vintage_commit": "e97cb670d5"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~84",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/inf-portal-publisher/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "bdf95dcaa8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "105 inserted lines, 0 changed against base blob 371eb01b42e5c1e4f6ce1c8ddac20071c0636762 (GUARDDIFF OK inserted=105 changed=0, re-run at the current state); the guard is not deployed (FB-m-2 deploys it)",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/inf-portal-publisher/tests/test_readiness_halt.py",
+      "kind": "test",
+      "commit_or_etag": "bdf95dcaa8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six tests, faked clients and loaders (arms i to v and the halt-line test); 6 passed (AC1); two mutant controls fired (section controls)",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/READINESS_SIGNAL.json",
+      "kind": "config_data",
+      "commit_or_etag": "79ef8ebba5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "amended signal record (CTO msg 5552 as amended by msg 5571): three dated inputs with key, date column and loader, excluded dimensions, served-date field, NNA tolerance and why, five arms, not_read list",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/READINESS_SIGNAL.md",
+      "kind": "doc",
+      "commit_or_etag": "bdf95dcaa8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-page record: the three dated inputs and the excluded dimensions, how the served date is read, the NNA tolerance with the live October partition listing, what each of the five arms does",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_FIRMBKTS-D1-W84-S8 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~B1: the S4 disarm is in a commit message only) and -S9 (OBSERVATION, INERT: served date equals newest holdings date at read time) appended in this commit (LOCAL); S4 to S7 are unchanged, never edited",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/wk-firmbkts-84 && timeout 120 python -m pytest infra/aws/lambda/inf-portal-publisher/tests/test_readiness_halt.py -q -- expect ^6 passed",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-firmbkts-84 && timeout 120 python -m pytest infra/aws/lambda/inf-portal-publisher/tests/test_readiness_halt.py -q",
+      "expect": "^6 passed",
+      "output_evidence": "6 passed in 1.38s (rc=0; line captured with -p no:warnings --color=no at the current state; the default-warnings run prints the same six-passed line with 8 pre-existing utcnow deprecation warnings in base lines)",
+      "denominator": "6 of 6 tests passed (test_all_at_d_publishes, test_one_input_behind_halts_zero_writes, test_same_day_refire_halts, test_served_absent_publishes, test_nna_five_days_behind_halts, test_halt_log_names_each_input_date)",
+      "status": "PASS",
+      "status_reason": "rc 0 and the expected count matches the output"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "guarddiff against base blob 371eb01b42e5c1e4f6ce1c8ddac20071c0636762 -- expect ^GUARDDIFF: OK inserted=[0-9]+ changed=0$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-84 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py guarddiff --root C:/dev/wk-firmbkts-84 --file C:/dev/wk-firmbkts-84/infra/aws/lambda/inf-portal-publisher/lambda_function.py --base-blob 371eb01b42e5c1e4f6ce1c8ddac20071c0636762",
+      "output_evidence": "GUARDDIFF: OK inserted=105 changed=0 (rc=0)",
+      "denominator": "105 inserted lines of the 1 to 120 allowed; 0 changed lines of the base file",
+      "status": "PASS",
+      "status_reason": "expected pattern matches; the file gains 105 lines, under the 120 bound"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "r4_scope.py --root C:/dev/wk-firmbkts-84 with --allow for the deliverables folder, lambda_function.py, the tests folder and INVESTIGATION_v1.md -- expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-84 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-84 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/ --allow infra/aws/lambda/inf-portal-publisher/lambda_function.py --allow infra/aws/lambda/inf-portal-publisher/tests/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing (rc=0)",
+      "denominator": "5 changed files (lambda_function.py, tests/test_readiness_halt.py, READINESS_SIGNAL.json, READINESS_SIGNAL.md, INVESTIGATION_v1.md) against the order's base; 0 outside the write surface; 0 required missing",
+      "status": "PASS",
+      "status_reason": "expected pattern matches with zero outside the surface"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two scratch copies of lambda_function.py under .scratch/mut, tests unchanged: (a) same-day comparison weakened from '<=' to '<' (dates['holdings'] < served); (b) NNA tolerance widened from 4 to 5 calendar days",
+      "expected": "test_same_day_refire_halts fails under (a); test_nna_five_days_behind_halts fails under (b)",
+      "observed": "(a) tests/test_readiness_halt.py::test_same_day_refire_halts FAILED, 1 failed, 5 passed (rc=1); (b) tests/test_readiness_halt.py::test_nna_five_days_behind_halts FAILED, 1 failed, 5 passed (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 pytest and AC2 guarddiff run at the committed code state, then re-run at the current state",
+      "observed": "AC1: 6 passed on both runs; AC2: GUARDDIFF: OK inserted=105 changed=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "the live read of the frontier against the bucket, and the live arm behaviour", "reason": "FB-m-2 reads the arms live at deploy (the order's own statement); the tests fake every client"},
+    {"item": "the parquet date column contents (client_performance, holdings_2026-10-14, canonical_nna_2026-10-13)", "reason": "bounds: no parquet body is read; the date-column claim is inferred from the loader code and recorded as inferred in READINESS_SIGNAL.json"},
+    {"item": "the clock schedule, the dispatch edit and any deploy", "reason": "outside this cell (FB-m-2 and the floor schedule are separate orders); no AWS write, no invoke, no terraform"},
+    {"item": "the task order status flip", "reason": "the order's section 5 says do not flip this order's status; the issuer flips it"}
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W84-S4: on the completed 2026-10-14 chain day the NNA newest partition is canonical_nna_2026-10-13.parquet and canonical_nna_2026-10-14.parquet returns 404, while holdings is at 2026-10-14; the all-three-equal rule would halt a completed day (ARMED, disarm owner 2.0.0_SA_COO~B1; the amended tolerance addresses its premise in code, the disarm record is S8)",
+    "ADVI_FIRMBKTS-D1-W84-S5: the served-date glob aua_by_*.json matches a stale fourth object aua_by_tax_status.json (last written 2026-06-30); the guard reads only the three keys the publisher writes",
+    "ADVI_FIRMBKTS-D1-W84-S6: the existing reader _load_parquet prints a 'Loaded <key>' line per read, so a halt path carries those lines beside the single READINESS HALT line",
+    "ADVI_FIRMBKTS-D1-W84-S7: build_snapshots stamps data_as_of from the wall-clock date when holdings has no dated rows (lambda_function.py:782), so an unguarded served date can be a run date",
+    "ADVI_FIRMBKTS-D1-W84-S8: the amendment commit e97cb670d5 records S4 as disarmed, but the investigation file still carries S4 as ARMED with no channel row recording the disarm (ARMED, disarm owner 2.0.0_SA_COO~B1)",
+    "ADVI_FIRMBKTS-D1-W84-S9: at read time the served data_as_of and the newest holdings date are both 2026-10-14, so the amended guard halts that frontier as a same-day re-fire (INERT, by the rule)",
+    "ADVI_FIRMBKTS-D1-W84-S10: an in-place append to INVESTIGATION_v1.md rewrote the 73 CRLF lines of the W79-S1 to S3 rows as LF in b531e2e019 (content unchanged); restored in 6e99d4450d; the row gate grades new rows only (INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~84/READINESS_SIGNAL.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (.tools/aws, read verbs only)",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-inf --prefix gold/canonical/canonical_nna_2026-10 and --prefix gold/canonical/holdings_2026-10 (query Key and LastModified, text output); aws s3 cp of platinum/firm/snapshots/aua_by_architect.json (earlier in this cell, top-level keys only); head-object of client_performance.parquet, the three aua_by_* objects, aua_by_tax_status.json and canonical_nna_2026-10-14.parquet (earlier in this cell)",
+      "result": "NNA partitions 2026-10-01, 02, 05, 06, 07, 08, 09, 13 (none for 10-03/04, 10-10/11, 10-12); holdings daily 2026-10-01 to 2026-10-14 (newest LastModified 12:18:39Z); served architect data_as_of 2026-10-14 (LastModified 12:53:58Z); canonical_nna_2026-10-14 404; tax_status LastModified 2026-06-30T17:18:23Z"
+    },
+    {
+      "tool": "r8_checks.py guarddiff, r4_scope.py, pytest, surprise-row-gate.py, commit-gate.sh, safe-commit.sh",
+      "invocation": "as in the acceptance rows; surprise-row-gate.py on INVESTIGATION_v1.md; commit-gate.sh through safe-commit.sh on the two .py files",
+      "result": "GUARDDIFF OK inserted=105 changed=0; ROUND 4 SCOPE OK 5 changed 0 outside; pytest 6 passed; commit-gate clean for the two .py files (two pre-existing non-ASCII WARN lines in base lines 11 and 1063, not added by this cell)"
+    }
+  ]
+}
