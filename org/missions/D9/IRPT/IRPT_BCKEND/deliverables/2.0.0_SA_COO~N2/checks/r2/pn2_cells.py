@@ -86,8 +86,11 @@ def ac2(root):
          and rep.get("sha256") == rep.get("saved_copy_sha256"), "record: the replaced script object is not hashed and saved")
     need(cid, ap.get("script", {}).get("uploaded_sha256") == SCRIPT_SHA, "record: the uploaded script's sha256 is not " + SCRIPT_SHA)
     sm = ap.get("import_smoke", {})
-    need(cid, sm.get("ran_on_runner") is True and sm.get("built_from_live_prefixes") is True and sm.get("exit_code") == 0
-         and sm.get("orion_requests") == 0, "record: the in-runner import smoke over the live code prefixes did not run clean")
+    # AMENDMENT 1 (CTO msg 9580): on the runner, or on the seat's host with the runner's Python when the runner will not self-stop
+    where_ok = sm.get("ran_on_runner") is True or (sm.get("ran_on_runner") is False and sm.get("fallback_host") is True
+                                                    and bool(str(sm.get("python_version", "")).strip()))
+    need(cid, where_ok and sm.get("built_from_live_prefixes") is True and sm.get("exit_code") == 0
+         and sm.get("orion_requests") == 0, "record: the import smoke over the live code prefixes did not run clean")
     de = ap.get("dispatch_edit", {})
     n = de.get("chain_entries_added")
     need(cid, de.get("rows_added") == 1 and type(n) is int and n > 0 and n == de.get("chains_carrying_perf")
