@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-303",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "af4a95917f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "af4a95917f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-303.cottonwood-history-scope-first-row.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~242",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~242/IRPT_DASHBD.TO-DB-b-303.cottonwood-history-scope-first-row.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "17074034fb11406881d30733c926a46876086d5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "derive_rows and derive only: floor_values replaced by floor_accounts; no other function moved; nothing deployed, no AWS call, no push",
+      "artifact_covered_by": ["DB171-1-AC1", "DB171-1-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_history_scope_derivation.py",
+      "kind": "test",
+      "commit_or_etag": "17074034fb11406881d30733c926a46876086d5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "floor_values use renamed to floor_accounts as sets; three first_row tests added; the other two Cottonwood test files unchanged"
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_SERIES_CONTRACT.json",
+      "kind": "doc",
+      "commit_or_etag": "17074034fb11406881d30733c926a46876086d5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one sentence appended to series.fields.history_scope.sentence; one line changed, no line added or removed"
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json",
+      "kind": "doc",
+      "commit_or_etag": "17074034fb11406881d30733c926a46876086d5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one sentence appended to conditional_columns[1].rule and to rule24_record.v046; two lines changed, no line added or removed"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~242/RD_COT_FIRST_ROW_FACTS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "17074034fb11406881d30733c926a46876086d5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "facts record with the seven fields of the order; words paragraph states what is not proven"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB171-1-AC1",
+      "criterion_verbatim": "`DB171-1-AC1` -- the adapter differs from the base only inside `derive_rows` and `derive`, with `floor_values` gone; the three contract fields gain exactly the one sentence and nothing else of either contract moves (same line count, one changed line per field). Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p171_cot_first_row.py\" . DB171-1-AC1",
+      "output_evidence": "DB171-1-AC1 PASS (rc 0); the deciding line: OK: the adapter changes only inside derive_rows and derive; the three contract sentences gain exactly the one clarifying sentence and no other byte of either contract, the handler or any other file moves",
+      "denominator": "1 of 1 check PASS; 2 of 2 changed functions (derive_rows, derive); 3 of 3 contract fields with one changed line each; 0 other adapter bytes changed",
+      "status": "PASS",
+      "status_reason": "PASS as written at the worktree root on af4a95917f with the cell's edits committed at 17074034fb; the repeat run printed identical output",
+      "expect": "DB171-1-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DB171-1-AC2",
+      "criterion_verbatim": "`DB171-1-AC2` -- behaviour: with `floor_accounts` an account in the set reads PARTIAL_HISTORY with the claim whatever its floor-day value, an account outside the set (even an empty set) reads FULL with the claim, None keeps the legacy rows without a claim; `derive` over a fake reader reads zero, negative and unreadable floor rows as PARTIAL and an account absent from the floor partition as FULL; no floor day, or one absent from the listing, writes no claim. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p171_cot_first_row.py\" . DB171-1-AC2",
+      "output_evidence": "DB171-1-AC2 PASS (rc 0); the deciding line: OK: an account with a row on the floor day (positive, zero, negative or unreadable) reads PARTIAL_HISTORY with the claim, an account absent from the floor partition reads FULL with the claim, and no floor keeps the legacy rows without a claim",
+      "denominator": "1 of 1 check PASS; 5 derive_rows cases (legacy, in set, outside set, empty set) and 3 derive cases (floor rows of four accounts, the absent account, no floor day, floor day not listed) asserted by the check",
+      "status": "PASS",
+      "status_reason": "PASS as written: the adapter loaded from the worktree; the fake-reader accounts read PARTIAL_HISTORY with the claim for positive, zero, negative and unreadable floor rows; the absent account reads FULL with the claim",
+      "expect": "DB171-1-AC2 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DB171-1-AC3",
+      "criterion_verbatim": "`DB171-1-AC3` -- `floor_values` is gone from the adapter and its three test files, the history-scope test file holds at least three new `first_row` tests, and the three Cottonwood test files pass under pytest. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p171_cot_first_row.py\" . DB171-1-AC3",
+      "output_evidence": "DB171-1-AC3 PASS (rc 0); the deciding line: OK: floor_values is gone from the adapter and its tests, the history-scope test file holds the new first-row tests, and the three Cottonwood test files pass",
+      "denominator": "1 of 1 check PASS; 3 new first_row tests (required at least 3); pytest over 3 test files: 95 passed, 0 failed",
+      "status": "PASS",
+      "status_reason": "PASS as written: pytest run by the check (-x over the three files) returned rc 0; a separate pytest run over the same three files printed 95 passed",
+      "expect": "DB171-1-AC3 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker selftest against the worktree adapter: three single-fault mutants of the behaviour (membership replaced by positivity, absent account reads PARTIAL, claim dropped) and one diff mutant (a changed line outside derive_rows and derive); the adapter bytes restored afterwards and the blob hash compared before and after",
+      "expected": "each mutant red; the reference green",
+      "observed": "selftest: green on the reference and red on 4 single-fault mutants; selftest PASS; adapter blob hash f4d45c560935b9a664d958a2e532f53667f650ba before and after",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three criteria run a second time from the worktree root with the same arguments; outputs compared with the first run",
+      "observed": "rc 0 in both runs for AC1, AC2 and AC3; outputs identical; last lines DB171-1-AC1 PASS, DB171-1-AC2 PASS, DB171-1-AC3 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The client-data check of the commit gate.",
+      "reason": "the hashed account-id list is absent on this box, so the gate printed WARN and did not check the commit; the worker's own scan of the added lines found no run of eight or more digits and no non-ASCII byte."
+    },
+    {
+      "item": "The Black Diamond and Cottonwood source data and any landed day.",
+      "reason": "not read and not rewritten: the cell is code and contract text in a branch; no landed partition was touched, no served object was read, and nothing was deployed."
+    },
+    {
+      "item": "The trading calendar's library.",
+      "reason": "pandas_market_calendars is absent on this box, so the checker answered from the hardcoded NYSE fallback (2010-2027) for its fixed days 2026-07-10 to 2026-07-14; the behaviour checks use no calendar day outside that range."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p171_cot_first_row.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p171_cot_first_row.py\" . DB171-1-AC1 (and AC2, AC3)",
+      "result": "PASS rc 0 for AC1, AC2 and AC3; the selftest PASS with four mutants red"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider --color=no <test_history_scope_derivation.py> <test_cottonwood_rewrite.py> <test_cottonwood_bd_account_return_daily.py>",
+      "result": "95 passed in 1.32s, rc 0"
+    }
+  ]
+}

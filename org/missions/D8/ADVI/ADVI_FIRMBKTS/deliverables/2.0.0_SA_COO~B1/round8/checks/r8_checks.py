@@ -6,6 +6,7 @@
   move --file F                                             FB-l-5: the first moved trigger's record.
   guarddiff --root R --file F --base-blob B                 FB-m-1: the readiness guard is purely additive against a pinned base blob.
   readyhalt --file F                                        FB-m-2: the deployed readiness halt, three arms read live.
+  tradeform --file F                                        FB-n-1: the trade-form fence apply (policies, Allow-append, CORS), one scoped apply, read back.
 Plain ASCII; exit 0 on a pass. Proves SHAPE and read-only discipline, never that a finding is true.
 """
 import argparse
@@ -278,6 +279,74 @@ def readyhalt(a):
     return 0
 
 
+TF_BUCKETS = ("opal-data-49financial", "opal-data-inflection", "opal-data-cottonwood")
+TF_ORIGINS = {"https://opalinvest.dev", "https://www.opalinvest.dev", "http://localhost:5174"}
+TF_ALLOWS = {"opal-data-49financial": 0, "opal-data-inflection": 3, "opal-data-cottonwood": 1}
+
+
+def tradeform(a):
+    """FB-n-1: the trade-form fence apply (three policies, the Allow-append, three CORS rules), one scoped apply, read back."""
+    raw, d = _load(a.file, "TRADEFORM")
+    if d is None:
+        return 1
+    p = _common("TRADEFORM", raw, d, ("order", "read_at", "preconditions", "plan", "applied", "after", "pair", "rollback", "ledger_closed", "claim"))
+    if p and p[-1].startswith("missing"):
+        print("TRADEFORM: FAIL " + "; ".join(p))
+        return 1
+    pc = d["preconditions"]
+    if not isinstance(pc, dict):
+        p.append("preconditions must be an object")
+    else:
+        cnt = pc.get("prefix_object_counts")
+        if not isinstance(cnt, dict) or sorted(cnt) != sorted(TF_BUCKETS) or any(cnt[b] != 0 for b in cnt):
+            p.append("preconditions.prefix_object_counts needs all three buckets at 0")
+        if pc.get("role_exists") is not True or pc.get("rows_at_head") != 3:
+            p.append("preconditions needs role_exists true and rows_at_head 3")
+        if pc.get("baseline_part1") != "No changes":
+            p.append("baseline_part1 must read exactly 'No changes'")
+        b2 = pc.get("baseline_part2")
+        if not isinstance(b2, dict) or b2.get("inflection_allows_added") != 2 or b2.get("cottonwood_allows_added") != 0:
+            p.append("baseline_part2 needs inflection_allows_added 2 and cottonwood_allows_added 0")
+        if pc.get("prior_policy_saved") is not True or pc.get("prior_cors_absent") is not True:
+            p.append("the prior policy JSON must be saved and the prior CORS read absent")
+        if pc.get("m02_open_apply_on_inflection") is not False:
+            p.append("m02_open_apply_on_inflection must be false (sequenced, never two open applies)")
+    pl = d["plan"]
+    if not isinstance(pl, dict) or (pl.get("add"), pl.get("change"), pl.get("destroy"), pl.get("statements_removed")) != (3, 3, 0, 0):
+        p.append("plan must read add 3, change 3, destroy 0, statements_removed 0")
+    ap_ = d["applied"]
+    if not isinstance(ap_, dict) or ap_.get("apply_count") != 1 or ap_.get("targets") != 6 or not str(ap_.get("commit", "")).strip():
+        p.append("applied needs apply_count 1, targets 6 and the apply commit")
+    af = d["after"]
+    bk = af.get("buckets") if isinstance(af, dict) else None
+    if not isinstance(bk, dict) or sorted(bk) != sorted(TF_BUCKETS):
+        p.append("after.buckets must name exactly the three buckets")
+    else:
+        for b in TF_BUCKETS:
+            r = bk[b]
+            cors = r.get("cors") if isinstance(r, dict) else None
+            if not isinstance(r, dict) or r.get("policy_read_back") is not True or r.get("other_principals_byte_unchanged") is not True:
+                p.append("%s: policy_read_back and other_principals_byte_unchanged must be true" % b)
+            if not isinstance(cors, dict) or set(cors.get("origins", [])) != TF_ORIGINS or len(cors.get("origins", [])) != 3 \
+                    or sorted(cors.get("methods", [])) != ["GET", "PUT"] or cors.get("max_age") != 300:
+                p.append("%s: cors needs exactly the three origins, GET and PUT, max_age 300" % b)
+        if af.get("allows_added_by_this_apply") != TF_ALLOWS:
+            p.append("allows_added_by_this_apply must equal inflection 3, cottonwood 1, 49financial 0")
+    pair = d["pair"]
+    if not isinstance(pair, dict) or not str(pair.get("coo_half", "")).strip() or not str(pair.get("cto_half", "")).strip():
+        p.append("pair needs coo_half and cto_half commits")
+    rb = d["rollback"]
+    if not isinstance(rb, dict) or rb.get("recorded") is not True or not str(rb.get("how", "")).strip():
+        p.append("rollback needs recorded true and how")
+    if d["ledger_closed"] is not True:
+        p.append("the ledger entry is not closed")
+    if p:
+        print("TRADEFORM: FAIL " + "; ".join(p[:6]))
+        return 1
+    print("TRADEFORM: OK buckets=3 applies=1")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -289,7 +358,7 @@ def main():
     ce = sub.add_parser("census")
     ce.add_argument("--file", required=True)
     ce.add_argument("--min", type=int, default=10)
-    for nm in ("retire", "move", "readyhalt"):
+    for nm in ("retire", "move", "readyhalt", "tradeform"):
         q = sub.add_parser(nm)
         q.add_argument("--file", required=True)
     gd = sub.add_parser("guarddiff")
@@ -298,7 +367,7 @@ def main():
     gd.add_argument("--base-blob", required=True)
     gd.add_argument("--max-insert", type=int, default=120)
     a = ap.parse_args()
-    return {"plan": plan, "census": census, "retire": retire, "move": move, "readyhalt": readyhalt, "guarddiff": guarddiff}[a.cmd](a)
+    return {"plan": plan, "census": census, "retire": retire, "move": move, "readyhalt": readyhalt, "tradeform": tradeform, "guarddiff": guarddiff}[a.cmd](a)
 
 
 if __name__ == "__main__":
