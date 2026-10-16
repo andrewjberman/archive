@@ -16,6 +16,10 @@ Three steps, one actor (the single IRPT CloudOps lane under rule 34; the lane is
 
 After the combined ticket-service release a staff row with neither `allowedFirmIds` nor the global marker is refused (403, firm scope not configured). The ruling: synthetic staff users minted after the release carry `allowedFirmIds` = [the ONE firm the run files under], never `scope_all_firms`; the mint's read-back prints the scope and the entitlement rows; each helper lands that as an amendment to its own helper's pair, which the CTO signs. For this act: `fwd5_mint.py` already writes `allowedFirmIds` as a list of strings from `--allowed-firm-ids` (measured header). To measure at the pin: (a) the mint's read-back does NOT yet print the scope and entitlement rows (header: output is only `MINT-OK READBACK-OK` / `MINT-REFUSED`), so an amendment cell is owed before this packet is signed; (b) the principal is a firm-B principal (its own firm), so its `allowedFirmIds` is [firm B] and it must be refused every call on firm A's ticket.
 
+## 1b. Gate state at 18:1xZ (measured from a message, not read live by this seat)
+
+The combined ticket-service release is LIVE (held: `2.0.0_SA_COO~V2` msg 9734: `opal-ticket-api` CodeSha `JwdnACONAnxw...`, modified 17:57:13Z; TV2's ledger closed 18:01:43Z; V2 ran `r18_rel_check.py` and `r19_rel_check.py` itself: REL-OK both). This is the readback the draft waited on. The base for the driver is the portal dev server on port 5174 as in V2's AR-v33 (measured in `ar_v33_run.mjs`: `BASE = http://localhost:5174`); the applier starts it and stops it after, as AR-v33 did. Firm A is `49financial` (ticket `TCK-20261015-944c84f8`, request and job `REQ-d47252fe74634d0c5cdd8067`: the synthetic row, now restored by t56). Firm B is another firm whose id the ticket service knows (to measure: `inflection` or `cottonwood`, the two other firm buckets named by the TO-FB-n-1 record); the principal is firm B's own principal.
+
 ## 2. To measure before signing
 
 - V2's readback message for TO-R18-REL (code and env released; the ticket service carries the fence); the DEV origin the driver is aimed at (the ticket service's address, not a client page).
