@@ -15,11 +15,11 @@ sys.path.insert(0, str(CHECK.parent.parent / "r196"))
 import p246_cells as P  # noqa: E402
 
 GOOD = {
-    "gates": {"ledger_open_l6_only": True, "function_code_sha256": P.DIGEST, "xa_f98b_state": "RULED", "helper_blob": P.HELPER_BLOB, "cto_ruling_msg": 9653},
-    "user": {"role": "user", "userType": "test-filer", "firmId": "opal-capital", "entitlement_rows": 0, "removed_read_back_absent": True, "password_in_memory_only": True},
+    "gates": {"ledger_open_l6_only": True, "function_code_sha256": P.DIGEST, "cto_ruling_msg": 9743},
+    "claims": {"role": "admin", "firm": "49financial", "user_row_minted": False, "authorizer_exercised": False},
     "old_receipt": {"readable": True, "status": "complete"},
-    "new_export": {"posts": 1, "http_class": "2xx", "status": "complete", "readable": True, "emails_sent": 0},
-    "counters": {"exports_requested": 1, "users_minted": 1, "users_removed": 1, "lambda_code_changes": 0, "iam_changes": 0, "schedule_changes": 0, "files_deleted": 0, "markers_closed": 0},
+    "new_export": {"creating_invokes": 1, "http_class": "2xx", "status": "complete", "readable": True, "emails_sent": 0},
+    "counters": {"creating_invokes": 1, "status_reads": 3, "users_minted": 0, "users_removed": 0, "lambda_code_changes": 0, "iam_changes": 0, "schedule_changes": 0, "files_deleted": 0, "markers_closed": 0},
 }
 
 
@@ -37,16 +37,15 @@ def mut(path, value):
 NEGS = [
     ("wrong_digest", "AC1", mut(["gates", "function_code_sha256"], "o9UugRAV")),
     ("ledger_not_l6_only", "AC1", mut(["gates", "ledger_open_l6_only"], False)),
-    ("xa_not_ruled", "AC1", mut(["gates", "xa_f98b_state"], "PENDING")),
-    ("helper_differs", "AC1", mut(["gates", "helper_blob"], "0" * 40)),
-    ("ruling_not_cited", "AC1", mut(["gates", "cto_ruling_msg"], 0)),
-    ("role_is_admin", "AC2", mut(["user", "role"], "admin")),
-    ("firm_not_opal", "AC2", mut(["user", "firmId"], "some-firm")),
-    ("entitlement_row", "AC2", mut(["user", "entitlement_rows"], 1)),
-    ("user_not_absent", "AC2", mut(["user", "removed_read_back_absent"], False)),
-    ("password_written", "AC2", mut(["user", "password_in_memory_only"], False)),
+    ("ruling_not_cited", "AC1", mut(["gates", "cto_ruling_msg"], 9653)),
+    ("role_is_staff", "AC2", mut(["claims", "role"], "user")),
+    ("firm_other", "AC2", mut(["claims", "firm"], "opal-capital")),
+    ("user_row_minted", "AC2", mut(["claims", "user_row_minted"], True)),
+    ("authorizer_claimed_exercised", "AC2", mut(["claims", "authorizer_exercised"], True)),
     ("old_receipt_refused", "AC3", mut(["old_receipt", "readable"], False)),
-    ("two_exports", "AC3", mut(["new_export", "posts"], 2)),
+    ("two_creating_invokes", "AC3", mut(["new_export", "creating_invokes"], 2)),
+    ("no_status_read", "AC3", mut(["counters", "status_reads"], 0)),
+    ("user_minted", "AC3", mut(["counters", "users_minted"], 1)),
     ("export_not_2xx", "AC3", mut(["new_export", "http_class"], "5xx")),
     ("export_unreadable", "AC3", mut(["new_export", "readable"], False)),
     ("email_sent", "AC3", mut(["new_export", "emails_sent"], 1)),
