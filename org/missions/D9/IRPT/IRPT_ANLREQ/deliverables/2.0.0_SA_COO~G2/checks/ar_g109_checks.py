@@ -4,6 +4,7 @@
     python ar_g109_checks.py g110       issuer tests (5) + the worker's named tests for the yfinance wiring pass
     python ar_g109_checks.py regress109 existing test files (run one at a time) still pass; the branch changed only AR-g-109's own files
     python ar_g109_checks.py regress110 same for AR-g-110
+    python ar_g109_checks.py g111 / regress111 the same for AR-g-111 (the irpt-status failure code and words)
 
 Prints one RESULT line: AR-G109-OK / AR-G110-OK / AR-G109-REGRESS-OK ... or ...FAIL <why>; rc 0 only on OK. ASCII only. Writes nothing.
 """
@@ -36,6 +37,15 @@ CELLS = {
         "regress": [R + "ycharts/session/tests/test_resident_session.py", R + "intake/tests/test_yfinance_check.py",
                     R + "intake/tests/test_kept_holding.py", R + "ycharts/generate/tests/test_resolve_upload.py"],
         "min_total": 71, "order": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-110."},
+    "111": {
+        "issuer": CHECKS + "ar_g111_issuer_tests.py", "env": ("AR111_ROOT", "AR-G111"), "issuer_count": 15,
+        "worker": R + "ops/tests/test_hop_failure_status.py",
+        "named": ["test_a_hop_failure_reads_as_its_code_and_words", "test_an_unknown_code_reads_the_steps_generic_words",
+                  "test_a_generate_failure_keeps_its_reason"],
+        "own": [R + "ops/status.py", R + "ops/owned_status.py", R + "ops/tests/test_owned_status.py"],
+        "regress": [R + "ops/tests/test_owned_status.py", R + "ops/tests/test_owned_report.py", R + "ops/tests/test_owned_requests.py",
+                    R + "ops/tests/test_owned_entry.py", R + "ops/tests/test_ticket_contract.py"],
+        "min_total": 123, "order": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-111."},
 }
 
 
@@ -94,9 +104,9 @@ def regress(key):
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    if mode in ("g109", "g110"):
+    if mode in ("g109", "g110", "g111"):
         sys.exit(grade(mode[1:]))
-    if mode in ("regress109", "regress110"):
+    if mode in ("regress109", "regress110", "regress111"):
         sys.exit(regress(mode[7:]))
-    print("usage: ar_g109_checks.py g109 | g110 | regress109 | regress110")
+    print("usage: ar_g109_checks.py g109 | g110 | g111 | regress109 | regress110 | regress111")
     sys.exit(2)

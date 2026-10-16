@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-280",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-280.cottonwood-series-publish-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "a989b48c08"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "a989b48c08",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-280.cottonwood-series-publish-handler.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~226",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~226/RD_COT_PUBLISH_HANDLER_FACTS_R147.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish-cot/handler.py",
+      "kind": "script",
+      "commit_or_etag": "6b4e2f43f2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "lambda_handler(event, context=None, s3=None): dry run by default, upload only when the event's upload is exactly True; contract guard before any S3 call; the only S3 calls are list_objects_v2, get_object, put_object and head_object. Not packaged, not applied, not invoked.",
+      "artifact_covered_by": [
+        "DB147-2-AC1",
+        "DB147-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish-cot/tests/test_handler.py",
+      "kind": "test",
+      "commit_or_etag": "5eeb255c85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 tests over a fake S3 and synthetic parquet only: the floor, the dry run and the exact-True switch, the upload keys, null income, the unreported day, a refused account without its id, a null account id, the account filter, the contract guard, the size read-back, the summary keys and the printed line. All 14 pass.",
+      "artifact_covered_by": [
+        "DB147-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~226/RD_COT_PUBLISH_HANDLER_FACTS_R147.json",
+      "kind": "doc",
+      "commit_or_etag": "5eeb255c85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Facts record: floor_day 2026-07-10, dry_run_default true, upload_switch exactly True, the 14 summary keys, reads_only_from_floor true, tests 14, and one paragraph of words.",
+      "artifact_covered_by": [
+        "DB147-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB147-2-AC1",
+      "criterion_verbatim": "DB147-2-AC1 -- on a fake S3 holding synthetic Cottonwood gold the two pre-floor partitions are never read; no event but upload exactly True writes; an upload writes exactly the series and manifest of the two accounts that build, at the builder's address; the stored income is null; the unreported day is listed; the account filter, the contract guard (before any S3 call) and the summary hold.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r147/p148_cothandler.py\" . DB147-2-AC1",
+      "output_evidence": "OK: a fake S3 holding synthetic Cottonwood gold: the two pre-floor partitions are never read; no event but upload=True writes; an upload writes exactly the series and manifest of the two accounts that build, at the builder's address; income stays null; the unreported day is listed; the account filter, the contract guard and the summary hold\nDB147-2-AC1 PASS",
+      "denominator": "run against the 0.3.0 contract on this branch (names both unreported keys); 2 pre-floor partitions never read of 2; 2 accounts built and written of 3 named (1 refused by reason); 4 objects written (2 accounts x series and manifest) of 4; 1 unreported day listed of 1 expected",
+      "status": "PASS",
+      "expect": "DB147-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB147-2-AC2",
+      "criterion_verbatim": "DB147-2-AC2 -- every import is standard library, boto3, pyarrow, the publisher, the naming builder or the calendar; no string literal is a bucket, an s3:// uri or a key prefix; the firm word appears only inside lookup(); the upload switch is tested with is True; no print names an account identifier.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r147/p148_cothandler.py\" . DB147-2-AC2",
+      "output_evidence": "OK: 13 imports, all stdlib, boto3, pyarrow, the publisher, the naming builder or the calendar; 60 string literals, none a bucket, an s3 uri or a key prefix; the firm token only inside lookup(); upload tested with `is True`; no print names an account\nDB147-2-AC2 PASS",
+      "denominator": "13 imports of 13 in the allowed set; 60 string literals, 0 bucket, uri or key-prefix hits; 1 firm token, inside lookup(); 1 upload switch, tested with is True; 1 print, naming no account",
+      "status": "PASS",
+      "expect": "DB147-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB147-2-AC3",
+      "criterion_verbatim": "DB147-2-AC3 -- your test file holds at least ten passing tests, the worker's commits change only the handler, its test file, the folder, the investigation file and task-order files, and the facts record equals the handler and the landing function's floor.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r147/p148_cothandler.py\" . DB147-2-AC3",
+      "output_evidence": "OK: 14 tests pass; 19 files changed, all in the grant; the facts record equals the handler and the landing function's floor\nDB147-2-AC3 PASS",
+      "denominator": "14 tests passing of at least 10 required; 19 of 19 changed paths of this worker's commits in the grant (the grant clause after the carried checker fix); facts record equals the handler and the landing floor (2026-07-10)",
+      "status": "PASS",
+      "expect": "DB147-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own selftest, which runs its clauses on seeded faults: discipline arms (an extra import, a typed bucket, a typed uri, a typed key prefix, a firm token outside lookup, a non-is switch, a printed account, a printed wanted list), grant arms, and facts arms.",
+      "expected": "every red arm refused and the selftest prints PASS",
+      "observed": "selftest: discipline (8 red arms), grant (3) and facts (9 red arms) clauses behave / selftest PASS (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run again on the committed tree at 433de0be8c.",
+      "observed": "DB147-2-AC1 PASS and DB147-2-AC2 PASS on the repeat, the same deciding lines as the first run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any run of the handler against the real bucket, or any upload",
+      "reason": "A pair-gated act, not in this cell. The handler's behaviour is measured on a fake S3 only."
+    },
+    {
+      "item": "Packaging of the handler's sys.path lines into a Lambda layout",
+      "reason": "Not in this cell; the lines follow the repo layout the report-build handler uses."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W226-S2: DB147-2-AC1 cannot pass while the HEAD contract (0.2.0) lacks the pair; ruled by the coordinator and resolved by the merge of the 0.3.0 contract",
+    "IRPT_DASHBD-D2-W226-S3: DB147-2-AC3's grant clause walked the completed DB-b-279 commits; ruled a checker defect and resolved by the fixed checker carried as Amendment 2 (5b9a1fa1ca)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p148_cothandler.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r147/p148_cothandler.py\" --selftest",
+      "result": "selftest PASS (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 on handler.py and test_handler.py",
+      "result": "All checks passed! (rc=0); both files ASCII"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author 0.9.0_WK_IRPT_DASHBD~226 -F <msgfile> -- <grant paths>",
+      "result": "commit-gate, surprise-row-gate and to-pipeline-gate OK on each commit; msg-verify MATCH at 6b4e2f43f2, 5eeb255c85 and 433de0be8c"
+    }
+  ]
+}
