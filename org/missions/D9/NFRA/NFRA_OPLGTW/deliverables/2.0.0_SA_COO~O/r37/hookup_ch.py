@@ -57,10 +57,12 @@ def edit(path, old, new, count=1):
 imp = "from . import etfs_rivals as _rv1, etfs_rivals_flow as _rv2   # NFRA_OPLGTW G5r rival funds (FWD-22)"
 mods = ", ".join("client_adapter_%s as _ca_%s" % (a, a) for a in ADAPTERS)
 new_imp = (imp + "\nfrom . import client_core as _cc, portal_served as _ps, etfs_silver as _es   # NFRA_OPLGTW G2 client tools + remainders (FWD-22)"
-           "\nfrom . import " + mods +
-           "\nfor _adapter_mod in (" + ", ".join("_ca_%s" % a for a in ADAPTERS) + "):\n    _cc.register_adapter(_adapter_mod)")
+           "\nfrom . import " + mods)
+# The register loop goes AFTER every import (ruff E402), just before the first new tool block.
+LOOP = "for _adapter_mod in (" + ", ".join("_ca_%s" % a for a in ADAPTERS) + "):\n    _cc.register_adapter(_adapter_mod)"
 edit(APP + "tools.py", imp, new_imp)
-blk = ["# NFRA_OPLGTW G2 client tools and remainders (round 37, FWD-22): nine READ tools, Opal principals only.",
+blk = ["# Register the seven client adapters once, after every import (E402).", LOOP, "",
+       "# NFRA_OPLGTW G2 client tools and remainders (round 37, FWD-22): nine READ tools, Opal principals only.",
        "# Every key and bucket comes from the module's DATA_CATALOG row at call time; the client tools admit through the client surface before any read."]
 for mod, name, sig, call, audit, doc in TOOLS:
     blk += ["@mcp.tool()", "def %s(%s) -> dict:" % (name, sig), '    """%s"""' % doc,
