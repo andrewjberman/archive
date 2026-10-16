@@ -11,20 +11,20 @@
 | `opal-tickets`, item `TCK-20261014-2965a5e0` (packaged, release 28) | NO write (read by the page only) | none |
 | the portal DEV dev server | one process on port 5174 (reuse a server already there whose checkout contains `dc057891b086`; stop only one the order started) | stop the process |
 | the existing status route | the page's own reads (the dev server's StrictMode doubles effects, so the count is recorded, not capped) | none (reads) |
-| `irpt-jobs` rows of the two requests | NO write by this order: the failures are `2.0.0_SA_COO~T2`'s order `t56` (leg A set, leg B removal after this order's report) | not this pair's |
+| `irpt-jobs` row of arm A's request | NO write by this order: the failure is `2.0.0_SA_COO~T2`'s order `t56` (leg A set, leg B removal after this order's report) | not this pair's |
 
 **Not touched:** any other users row, ticket, table, route, queue, key, function, schedule or IAM; any client's data (the users, tickets and requests are synthetic). The password is a fresh random value held in memory and typed into the login page; it is never printed, written, put in argv or the environment (the receipt says so in words).
 
 ## Bound pins
 
 - `fwd1_mint.py` (`org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/`): git blob `f368e9d95c62dc9fce1e6d5e04cd7fe6f79c444a`, sha256 `04e4ba64ddb74895442a7b291e14862fc9b395b65cc814c75bb737b8445ec5d4`.
-- `ar_v33_checks.py` (`org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V_CHECKS/`): git blob `94a192c93e84b95bb08d66a0c9d899352d9c5f14`.
+- `ar_v33_checks.py` (`org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V_CHECKS/`): git blob `1a96ed42b9b3ce19b4a334fe8b99cfb6fbd879a7`.
 
 ## Both branches of the expected outcome (read from the producers' own rules, not predicted from shape)
 
-**Writers of the properties:** the fixture `report_ref` has ONE writer under this pair (the conditional `update-item` above; the service route `report_ticket` is not called: it admits only the assignee or the ticket's creator `fwd1-staff-r41a`, and a Retry by `r41b` would file a NEW request under a different principal, `acceptance.py:35`, `:129`) and ONE remover; the user row has ONE writer (`fwd1_mint.py mint`) and ONE remover; the failures on the job rows are `t56`'s, set-once by the commentary function's `fail` op. N = 3 rules read.
+**Writers of the properties:** the fixture `report_ref` has ONE writer under this pair (the conditional `update-item` above; the service route `report_ticket` is not called: it admits only the assignee or the ticket's creator `fwd1-staff-r41a`, and a Retry by `r41b` would file a NEW request under a different principal, `acceptance.py:35`, `:129`) and ONE remover; the user row has ONE writer (`fwd1_mint.py mint`) and ONE remover; the failure on arm A's job row is `t56`'s, set-once by the commentary function's `fail` op. N = 3 rules read.
 
-- **Branch 1, the fixture and both failures stand, the arm-A ticket has no package and the arm-B ticket has one:** arm A shows the COMMENTARY step's words (`ops/status.py` FAILURE_WORDS `COMMENTARY_DRAFT_REFUSED`) and the page stays intact; arm B shows the package and NO failure words (clause 5: a package suppresses the read); everything restored; the user ABSENT.
+- **Branch 1, the fixture and the failure stand, the arm-A ticket has no package and the arm-B ticket has one:** arm A shows the COMMENTARY step's words (`ops/status.py` FAILURE_WORDS `COMMENTARY_DRAFT_REFUSED`) and the page stays intact; arm B (PARTIAL: the packaged ticket's request has no irpt-jobs row, `~T2` msg 9660, so no failure can be driven on it) shows the package, NO failure words and NO status read for its request (clause 5: a package suppresses the read); everything restored; the user ABSENT. The "packaged AND failed" half of arm B is OWED to the first packaged ticket with a job row.
 - **Branch 2, anything else** (a `report_ref` already on the ticket, a `hop_failure` absent, a package on the arm-A ticket, a blob or the origin different, the user row present): the order STOPS before the write; if it wrote the fixture or minted the user it removes them first. **Branch 2 grades nothing.** If arm A reads NO words with the fixture and the failure both standing, that is a REAL finding about the page or the status route, graded as a FAIL of arm A, never softened.
 
 **The grade names the link as hand-written (a fixture).** Only the page's status read and the failure on the job row are real. Why step 4 failed in FWD-1 window 2 stays a separate owed row.

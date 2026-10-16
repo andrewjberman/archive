@@ -8,11 +8,12 @@ record only (no network, no AWS); the issuer re-reads the live rows and tickets 
             words for the arm-A request) and P1/P2 (the words showed under the arm-A ticket, the page stayed intact, the
             canvas read rgb(244, 246, 250), a screenshot exists, the origin was http://localhost:5174).
             Prints V33-ARMA-OK or V33-ARMA-FAIL <word>.
-  armb      B3/A2 (the packaged ticket's row also carries a failure) and P3 (the packaged ticket shows NO failure words and
-            its package block shows). Prints V33-ARMB-OK or V33-ARMB-FAIL <word>.
+  armb      B3 (the packaged ticket), S3 (the page made NO status read for its request: it has no irpt-jobs row, so the
+            "row also failed" half of arm B is OWED to the first packaged ticket that has one) and P3 (the packaged ticket
+            shows NO failure words and its package block shows). Prints V33-ARMB-OK or V33-ARMB-FAIL <word>.
   restore   R1 (the minted staff user ABSENT, consistent), R3 (the fixture's report_ref ABSENT and the ticket's item hash
             equal to its pre-write hash), and no line carries a password or a hash. Prints V33-RESTORE-OK or -FAIL <word>.
-  --self-test   a good record, eight one-line mutants and a record with a password line; prints V33-SELFTEST-OK.
+  --self-test   a good record, nine one-line mutants and a record with a password line; prints V33-SELFTEST-OK.
 
 --record PATH overrides the default record path.
 """
@@ -25,6 +26,7 @@ DEFAULT = "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_arv33
 TICKET_A = "TCK-20261015-944c84f8"
 TICKET_B = "TCK-20261014-2965a5e0"
 REQ_A = "REQ-d47252fe74634d0c5cdd8067"
+REQ_B = "REQ-28a5ca6be3b7f438a9ca8217"
 CODE = "COMMENTARY_DRAFT_REFUSED"
 CANVAS = "rgb(244, 246, 250)"
 ORIGIN = "http://localhost:5174"
@@ -78,9 +80,9 @@ def check_armb(lines):
     b3 = _line(lines, "B3")
     if not b3 or TICKET_B not in b3 or "package=PRESENT" not in b3:
         return "B3"
-    a2 = _line(lines, "A2")
-    if not a2 or ("code=" + CODE) not in a2 or TICKET_B not in a2:
-        return "A2"
+    s3 = _line(lines, "S3")
+    if not s3 or ("request_id=" + REQ_B) not in s3 or "count=0" not in s3:
+        return "S3"
     p3 = _line(lines, "P3")
     if not p3 or TICKET_B not in p3:
         return "P3"
@@ -129,7 +131,7 @@ def _good(png_a, png_b):
         "P2 canvas=%s screenshot=%s" % (CANVAS, png_a),
         "R2 browser origin=%s" % ORIGIN,
         "B3 ticket %s status=open package=PRESENT" % TICKET_B,
-        "A2 job_row ticket=%s hop_failure code=%s at=2026-10-16T17:21:00Z" % (TICKET_B, CODE),
+        "S3 status_reads request_id=%s count=0" % REQ_B,
         "P3 page ticket=%s words_shown=NO package_block=YES page_intact=YES screenshot=%s" % (TICKET_B, png_b),
         "R1 users_row=ABSENT consistent=YES",
         "R3 ticket %s report_ref=ABSENT item_hash_equals_pre=YES" % TICKET_A,
@@ -153,6 +155,7 @@ def selftest():
             ("arma", 4, "S1 status_route request_id=%s http=200 public_reason_code=ANALYSIS_REQUIRES_ATTENTION action=NONE" % REQ_A),
             ("arma", 5, "P1 page ticket=%s words_shown=NO step_named=NO page_intact=YES blank_row=NO" % TICKET_A),
             ("armb", 8, "B3 ticket %s status=open package=ABSENT" % TICKET_B),
+            ("armb", 9, "S3 status_reads request_id=%s count=2" % REQ_B),
             ("armb", 10, "P3 page ticket=%s words_shown=YES package_block=YES page_intact=YES screenshot=%s" % (TICKET_B, pb)),
             ("restore", 11, "R1 users_row=PRESENT consistent=YES"),
             ("restore", 12, "R3 ticket %s report_ref=PRESENT item_hash_equals_pre=NO" % TICKET_A),

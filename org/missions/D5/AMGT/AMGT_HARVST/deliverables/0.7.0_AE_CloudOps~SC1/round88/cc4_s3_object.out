@@ -12,3 +12,53 @@ HVST-cc-4 step 10 (i), 2026-10-16T16:23:06Z: list-object-versions for exactly th
     "DeleteMarkers": null
 }
 (prefix listing of one exact key; denominator = the versions printed above)
+
+=== step 10 (ii)/(iii), 2026-10-16T16:54:00Z: issuer msg 6899 'cc-4 graded' (complete, @0581f1112c)
+--- re-list exactly the key before deleting
+{
+    "Versions": [
+        [
+            "amgt/harvest/bronze/run_record/date=2026-10-16/20261016T161321Z-run-03342e31.json",
+            "9qX1QhDe.v.jbHYpqrlYiZyvacpO9CoE",
+            true,
+            "2026-10-16T16:13:29+00:00",
+            1670
+        ]
+    ],
+    "DeleteMarkers": null
+}
+versions of this exact key: 1 ; VersionId=9qX1QhDe.v.jbHYpqrlYiZyvacpO9CoE ; size=1670
+--- delete that one version by VersionId (no prefix, no recursion)
+
+aws: [ERROR]: An error occurred (AccessDenied) when calling the DeleteObject operation: User: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user is not authorized to perform: s3:DeleteObjectVersion on resource: "arn:aws:s3:::opal-data-harvest/amgt/harvest/bronze/run_record/date=2026-10-16/20261016T161321Z-run-03342e31.json" with an explicit deny in an identity-based policy: arn:aws:iam::313476888478:policy/cloudops-dell-agent-deploy-policy
+--- read back
+list-object-versions after:
+{
+    "Versions": [
+        {
+            "ETag": "\"5b3093c71a926ebe1b7f58efac19aa1b\"",
+            "ChecksumAlgorithm": [
+                "CRC32"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 1670,
+            "StorageClass": "STANDARD",
+            "Key": "amgt/harvest/bronze/run_record/date=2026-10-16/20261016T161321Z-run-03342e31.json",
+            "VersionId": "9qX1QhDe.v.jbHYpqrlYiZyvacpO9CoE",
+            "IsLatest": true,
+            "LastModified": "2026-10-16T16:13:29+00:00",
+            "Owner": {
+                "ID": "5b2d5dc40076894c1ac4d3aee2ae6af2a81ae9dc528a672239cbeeed8a6c4692"
+            }
+        }
+    ],
+    "RequestCharged": null,
+    "Prefix": "amgt/harvest/bronze/run_record/date=2026-10-16/20261016T161321Z-run-03342e31.json"
+}
+head-object after:
+{
+    "AcceptRanges": "bytes",
+RESULT: the delete was REFUSED by IAM (AccessDenied on s3:DeleteObjectVersion for arn:aws:iam::313476888478:user/cloudops-dell1-agent-user). The one version 9qX1QhDe.v.jbHYpqrlYiZyvacpO9CoE is STILL THERE after the attempt (the read-back above lists it, IsLatest true, 1670 B, 16:13:29Z; head-object answers 200, not 404).
+Not done, by the order's bound (no IAM change) and its rule (a VersionId delete, never a prefix): no other principal was tried, and no plain delete-object (on a versioned bucket that writes a delete marker and hides the version without removing it).
+Arms A and A' (step 10 iii): no S3 write attempted: run_record_persist.SUPPRESSED x1 each, AWS_WRITE_BLOCKED x0 (cc4_arm_A.jsonl, cc4_arm_Aprime.jsonl).
+S3_RUN_RECORD_DELETED=no
