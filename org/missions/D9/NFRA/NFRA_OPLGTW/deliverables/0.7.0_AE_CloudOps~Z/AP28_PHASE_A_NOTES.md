@@ -34,3 +34,10 @@ The commit-time naming gate (ENFORCE) REFUSES 16 catalog literals. A probe branc
 - `tools_list_before` (`ap28_toolslist.py` -> `.json`): registry 103; `tools/list` to a master_admin stand-in 103; health 200.
 - IAM, simulated one resource per call on `gateway-49f-blackdiamond-live-read-role`: GetObject allowed on the four live prefixes, ListBucket with the prefix allowed, controls (`bronze/`, `silver_legacy/`) explicitDeny; bucket `opal-data-bd` exists.
 - `NEVER_WIDEN_ASK_OG-ap-28.md` drafted with A1-A3 text; `release_sha`, the final `trunk_sha`, the four gate lines and the signatures are blank. Nothing committed on the release branch.
+
+## A3 GO (msg 35164, ~17:31Z) -- Phase A finished
+- New `trunk_sha` `858e9275589e51f0f15d8c55462125c7152f621c` (holds the CRO's `ca679b6560`); catalog blob still `b81c48aa3c`. Between the old and the new trunk only four files changed: `app/harvest_research.py`, its test, `legacy_addresses.json` (+40 lines) and `lib/research/aifill/contract.py`; the take is byte-unchanged.
+- Seam rerun (`ap28_seams_nt.out`): one NEW STOP-class edge, `tests/test_og_gt4.py` -> `app/harvest_research.py` (trunk's CC-2 change, not in the take). Satisfied by the base file: `test_og_gt4` passes against it (`ap28_tests.out`).
+- Branch recreated from the live ref (the old one kept as `rel-nfra-oplgtw-batch2-prelude-old`; the probe branch kept as `...-probe`). Prelude `2dc919cf26` (the two registry files at the NEW bytes, `PLATFORM_LOGIC_DOCS`), release `bf9d23b518527e0e5f9a26aa240fd5af72af6c11` (`CLOUD_OPS_OR_ETL`): **exit 0, `NAMING-GATE: WARN 46 graded`, 0 REFUSE, `CATALOG-EXEMPT admitted=12 refused=0`**. The four entry files are not carried (A3).
+- `ap28_release.json` written with full shas; the ask finalized with `release_sha` and the gate lines (4 RAISE-EXISTING for the `49f-live` prefixes, 8 RAISE for the `silver_legacy` prefixes, both printed as WARN-class).
+- Release tree state after the commit: the overlay (30 gate-input files laid from trunk, uncommitted) and the untracked test support stay in `C:/tmp/og-rel-batch2`; Phase B restores the overlay's non-bundle files before the deploy tree's clean check.

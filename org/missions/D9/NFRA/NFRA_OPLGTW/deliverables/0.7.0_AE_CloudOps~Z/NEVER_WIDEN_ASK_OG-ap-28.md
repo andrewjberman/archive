@@ -1,8 +1,8 @@
-# Never-widen ask -- OG-ap-28: the round-38 batched gateway release (DRAFT: release_sha and the final trunk_sha are BLANK until the prelude and release commits exist)
+# Never-widen ask -- OG-ap-28: the round-38 batched gateway release (FINAL TEXT: release `bf9d23b518`; signatures blank)
 
 By: `0.7.0_AE_CloudOps~Z`, 2026-10-16. Order `NFRA_OPLGTW.TO-OG-ap-28` at A3 (`1a74cf39b7`). For three halves: `1.0.0_SA_CTO~Z`, `2.0.0_SA_COO~O`, `3.0.0_SA_CVO~Z`.
 `base_sha` = the live ref `d14445961dd6d04275ca8186372a4df4c4fcc5cc` (EC2_MANIFEST `deployed_commit` at HEAD; the S3 `git-ref` of `opal-gateway-latest.tar.gz` reads the same; the host md5 walk below).
-`trunk_sha` = `066649b10fd44946faf7c28cf34fffe140344729` (the GO; **to be replaced** by the new trunk_sha MI's registry rows produce, A3). `mcportal_sha` = `59e802a4185a62129bf28ebb4df6eda9b70e03ff`. `release_sha` = ___ (blank).
+`trunk_sha` = `858e9275589e51f0f15d8c55462125c7152f621c` (the GO of msg 35164; it holds the CRO's four lookup-alias rows `ca679b6560`; the catalog blob is still `b81c48aa3c`). `mcportal_sha` = `59e802a4185a62129bf28ebb4df6eda9b70e03ff`. `prelude_sha` = `2dc919cf26ce4190157b21c7f3c18737de10c573`. **`release_sha` = `bf9d23b518527e0e5f9a26aa240fd5af72af6c11`** (the tip; its parent is the prelude, whose parent is `base_sha`). `W/ap28_release.json` records all of them.
 No deploy, no apply. Everything below is measured on the re-cut tree `C:/tmp/og-rel-batch2` (uncommitted take) or on the live host, read-only.
 
 ## 0. What I measured at the live ref (Phase A step 1)
@@ -17,7 +17,7 @@ No deploy, no apply. Everything below is measured on the re-cut tree `C:/tmp/og-
 
 ## 1. CTO half -- the `diff` (what changes, by file)
 
-Cut at the live ref; every file below is taken from `trunk_sha`, and each live-to-trunk hunk is attributed to a named order (`W/ap28_attr.json`: 17 app files, 0 unattributable hunks). The seams are enumerated (`W/ap28_seams.out`: 66 distinct seams over 169 importer edges; the six STOP-class edges were checked and are order-only or pre-existing, see `W/AP28_PHASE_A_NOTES.md`).
+Cut at the live ref; every file below is taken from the earlier trunk `066649b10f`, and `858e927558` changed none of them (the only gateway change since is `harvest_research.py`, which is not in the take, plus the registry file the prelude carries), and each live-to-trunk hunk is attributed to a named order (`W/ap28_attr.json`: 17 app files, 0 unattributable hunks). The seams are enumerated (`W/ap28_seams.out`: 66 distinct seams over 169 importer edges; the six STOP-class edges were checked and are order-only or pre-existing, see `W/AP28_PHASE_A_NOTES.md`).
 
 | file | change | order |
 |---|---|---|
@@ -32,11 +32,11 @@ Cut at the live ref; every file below is taken from `trunk_sha`, and each live-t
 | tests | 4 modified, 9 new test files, all named by the orders' `<paths>`; 9 named paths do not exist at trunk (`W/ap28_take.json`) | en-4/5/6/8/9/10/12, ts-1 |
 | `deploy-to-ec2.sh` (the hunk, against the LIVE script) | 3 changed lines: `READER_ARN_BD49FLIVE="$(_vr_arn gateway-49f-blackdiamond-live-read-role)"` after the SMARTX line; `BLACKDIAMOND49FLIVE_READER_ROLE_ARN=%s\n` after `SMARTX_READER_ROLE_ARN=%s\n` in the one env printf; `"${READER_ARN_BD49FLIVE}"` after `"${READER_ARN_SMARTX}"` in its argument list. Every other slot is unmoved; the existing `_vr_arn` helper refuses the deploy with no upload if the role does not resolve. | order step 2 |
 | `infra/aws/ec2/EC2_MANIFEST.json` | `services.opal-gateway.mcportal_commit` `c66ca82952` to `59e802a418`, NOTHING else (one-value text replacement; parent `c66ca82952` is the pin on the host now; origin DEV holds `59e802a418`) | MP-pf-11 |
-| **naming-gate prelude (A3), carried below the release tip** | `infra/logic/registry/catalog_fork_keys.json` and `legacy_addresses.json`, byte-equal to the NEW trunk_sha. They do not ship (the archive carries `app`, `deploy`, `lib`, the dashboard). Needed because the ENFORCE gate reads its registry with `git show HEAD:` only. Landed under the audited `GIT_COMMIT_AUTHOR_OVERRIDE=PLATFORM_LOGIC_DOCS` on the prelude commit only; the release commit is under `CLOUD_OPS_OR_ETL`. **Status: the prelude and the release commit wait on MI's four whole-string rows (XA-20261016T171531Z-7acd); my `46be947ba9` is at the OLD trunk bytes and will be redone.** | A2, A3 |
+| **naming-gate prelude (A3), carried below the release tip (`2dc919cf26`)** | `infra/logic/registry/catalog_fork_keys.json` and `infra/logic/registry/legacy_addresses.json`, byte-equal to `858e927558` (blob `1591eb3a55` and `07581da3da`). They do not ship (the archive carries `app`, `deploy`, `lib`, the dashboard). Needed because the ENFORCE gate reads its registry with `git show HEAD:` only. Landed under the audited `GIT_COMMIT_AUTHOR_OVERRIDE=PLATFORM_LOGIC_DOCS` on the prelude commit only; the release commit is under `CLOUD_OPS_OR_ETL`. The four entry files are dropped (A3). | A2, A3 |
 
 NOT in the release: `app/tools.py`, `app/destructive_ops.py` (order-only differences from the base), `admin_people_access.py`, `family_depth.py`, `refs/silver_families.json`, the yearinreview files, `integrations/opal_discover/integration.py`, `app/refs/partner_roster.json` and `scopes.json` (the deploy script stages them from the repo; never committed, row Z-S161). No Terraform, no IAM.
 
-Gate state to read: the naming gate refused the catalog's four `blackdiamond/49f-live/silver/<table>/` literals ("K3: 49f-live is not a tier", RAISE) in every attempt so far (rows Z-S301, Z-S303). The durable fix is the CTO's and the CRO's. The four WARN/RAISE lines the final run prints go here: ___ (blank until the release commit exits 0).
+Gate state to read: the release commit `bf9d23b518` EXITED 0 under ENFORCE: `NAMING-GATE: WARN 46 graded`, **0 REFUSE**, `CATALOG-EXEMPT admitted=12 refused=0 new_via_registry=8`. The 46 graded lines: 12 REGISTRY-HELD, 8 CONFORMANT, 10 OUT-OF-PATTERN (existing, WARN), 4 ALIAS (existing, WARN), **4 RAISE-EXISTING** (`blackdiamond/49f-live/silver/{allocations,fees,transactions,unrealized}/` at `DATA_CATALOG.yaml` lines 3372, 3437, 3503, 3570: 'pre-LGIC key; conformance via its migration project, Rule 30') and **8 RAISE** ('rule or registry defect': the eight `blackdiamond/49financial/silver_legacy/<table>/` prefixes at lines 4110, 4182, 4478, 4554, 4626, 4771, 4842, 4916, admitted as registry-held but still printed). The durable fix for the tier grammar is the CTO's and the CRO's, not this release's. (Earlier attempts, rows Z-S301 and Z-S303, refused the four entry files and the 49f-live literals; A3 ruled the route that cleared them.)
 
 ## 2. COO half -- the `widening`, stated plainly
 
