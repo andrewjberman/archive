@@ -1,0 +1,89 @@
+{
+  "as_of": "2026-10-16",
+  "firms": [
+    {
+      "firm": "49financial",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 44,
+      "columns": [
+        "account_id",
+        "business_date",
+        "debit_credit",
+        "gross_amount",
+        "tran_srcde",
+        "tr_cd",
+        "sb_cd",
+        "transaction_detail_description",
+        "quantity",
+        "price",
+        "cusip",
+        "dividend_interest_share_quantity",
+        "trade_typcd",
+        "ticker_symbol"
+      ],
+      "action_codes": ["FC", "IC", "TR"],
+      "type_codes": ["DV", "FC", "RO", "FI", "IC", "IN", "FE", "WD", "FO", "JR", "TA", "RD", "TR", "WH", "WI"],
+      "vocabulary_where": "No file names an action or a type field for this firm. The code reads tr_cd as the cash marker FC (sources.json line 59), the in-kind marker IC (line 75) and the trade marker TR (line 63), and sb_cd as the sub-code that carries the withholding marker WD (line 78). The meanings live in the CRO classification table named at sources.json line 98 (the file under org/tier1_exec/4.0.0_SA_CRO/deliverables/ whose name carries the CRO table prefix SCHWAB_TRANSACTION_CODE_CLASSIFICATION), 187 rows with fields tran_srcde, tr_cd, sb_cd, partition, category, rule and desc; measured distinct counts: tr_cd 3, sb_cd 15, tran_srcde 157, category 8, partition 10. The final classes per partition value are at account_return_daily.py lines 230-242 (FINAL_BY_PARTITION: 5 final values INTERNAL, FEE-MANAGEMENT, FEE-ADMIN, EXTERNAL, UNRESOLVED). The mapping of these fields to the PRD words action and type is not in the repository: reading tr_cd as action and sb_cd as type is inferred. tran_srcde, the transaction source code and the table key, is not listed as a code set here. Column count: the reporting dashboard backend brief (docs/briefs, line 59) says about 130 columns; the docstring of account_return_daily.py line 513 says 140 columns; the list above is the declared set the code reads (transaction_columns, lines 510-532). The register brief (docs/briefs, the inventory brief dated in its file name) names no fact_trn column.",
+      "claim": "measured"
+    },
+    {
+      "firm": "cottonwood",
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+      "line": 430,
+      "columns": [
+        "AccountID",
+        "Trade Date",
+        "External Flow",
+        "Transaction Type",
+        "Market Value"
+      ],
+      "action_codes": [],
+      "type_codes": ["Cash Deposit", "Transfer In", "Cash Withdrawal", "Transfer Out", "Buy", "Sale", "Dividend Reinvestment", "Journal", "Dividend", "Interest", "Income", "Capital Gains", "Return of Capital", "Expense", "Management Fee", "Corporate Action"],
+      "vocabulary_where": "No action column is among the five fact_transactions columns the code reads (line 430), so action_codes is empty for this firm. The Transaction Type words are the vendor's type codes: TYPE_CLASS (lines 94-111, 16 entries) gives a reader label per word (EXTERNAL_IN, EXTERNAL_OUT, INTERNAL, INCOME, IN_VALUE, CORPORATE_ACTION); the file says the label is not a gate. The External Flow words Contribution, Withdrawal and None (WORD_SIGN, line 115) decide the flow sign and are read as the vendor states them. The backfill script build_cottonwood_interpolated_backfill.py line 97 names four of the types as EXTERNAL_FLOW_TYPES (Cash Deposit, Cash Withdrawal, Transfer In, Transfer Out). The words are Black Diamond's own; no Opal word for them is defined in any file read.",
+      "claim": "measured"
+    },
+    {
+      "firm": "inflection",
+      "file": "data/inf/manual_api/pull_inflection_transactions_rest.py",
+      "line": 99,
+      "columns": [
+        "id",
+        "accountId",
+        "clientId",
+        "householdId",
+        "transTypeId",
+        "transDate",
+        "transAmount",
+        "noUnits",
+        "navPrice",
+        "ticker",
+        "transactionDescription"
+      ],
+      "action_codes": [],
+      "type_codes": ["Client Contribution", "Employer Contribution", "Rollover Contribution", "Merge In from Other Account", "External Account Activity In", "Client Distribution", "Cancel Account", "Merge Out to Other Account", "External Account Activity Out", "Buy Exchange", "Sell Exchange", "Income Reinvested", "Starting Value", "Merge In Exchange", "Merge Out Exchange", "Internal Account Journal In", "Internal Account Journal Out", "Decrease in Value", "Spin Off in", "Spin Off out", "Dividend Reinvested", "Interest Reinvested", "Return of Capital", "Return of Principal (Bonds)", "Dividend Paid from Cash", "Income Paid", "Dividend to Cash", "Management Fee", "Long Term Gain to Cash", "Trading Expense", "Short Term Gain to Cash", "Interest Paid in Cash", "Federal Tax Withheld", "Fee Credit", "State Tax Withheld", "Foreign Tax Withheld", "Foreign Dividend Tax", "Tax Credit", "Interest Paid", "ADR Fee", "Administrative Fee", "Administrative Fee Adjustment", "Wire Fee", "Stock Split", "Reverse Stock Split", "Expired-", "Remark", "Reversal"],
+      "vocabulary_where": "No action field is among the confirmed fields (line 98-102); transactionDescription is free text. The Orion type ids are numeric (transTypeId, line 99). The pull file's docstring at line 38 names four: 24 Management Fee, 110 Fee Credit, 8 Client Contribution, 51 Client Distribution, and says all are stored and filtered downstream. The type_codes list is the 48 type_desc entries of data/inf/scripts/silver/orion_cashflow_taxonomy.yaml, which are keyed by description text and not by id; each entry carries a bucket (measured counts: NNA 9, Internal 19, Return 17, CorporateAction 3). The reporting dashboard backend brief (docs/briefs, line 60) says 47 type ids. The id-to-description map was not found in the files read.",
+      "claim": "measured"
+    }
+  ],
+  "brief_flow_classes": {
+    "file": "docs/briefs/reporting-dashboard-backend-brief-20260930.md",
+    "line": 78,
+    "count": 7,
+    "claim": "measured"
+  },
+  "opal_vocab_home": {
+    "words": "No file defines Opal's own words for a transaction's action and type. Searched: org/standards (the 121-file folder read in record RD_FWD5_THREAD_R119.json holds no account_transaction contract, and this worker's comp-find over org/standards and docs/briefs found account_transaction in 1 hit of 835 files scanned, in the reporting dashboard backend brief (docs/briefs), and no org/standards hit for txn_type or EXTERNAL_IN); docs/ (the reporting dashboard backend brief, line 78, names account_transaction and says its action and txn_type are Opal closed enums without listing their values; its flow_class list of seven values is on the same line; the PRD line 292 names the Opal action and type vocabulary without listing it; CORPORATE_ACTION hits in docs/briefs are 2, in bd_pipeline_script_audit.md and the same brief); portal/src (comp-find over 1495 files scanned: 0 hits for txn_type, flow_class and EXTERNAL_IN; Transactions 31 hits, none defining an action or type word; PerfrpTransactions.tsx renders the producer's headers). Verdict: absent.",
+    "claim": "absent"
+  },
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
