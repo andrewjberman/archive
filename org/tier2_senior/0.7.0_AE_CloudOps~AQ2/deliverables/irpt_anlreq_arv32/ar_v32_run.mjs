@@ -109,6 +109,19 @@ async function run(shotPath, factsPath) {
     if (mint.status !== 0 || !/MINT-OK READBACK-OK/.test(mintOut)) throw new Error('mint did not return MINT-OK READBACK-OK')
     facts.minted = true
 
+    // U1 (AMENDMENT 5): the minted row's role set, read before anything else; names and the count only, no hash, no other attribute.
+    const u1py = 'import boto3,sys\n' +
+      'c=boto3.client("dynamodb",region_name="us-east-1")\n' +
+      'pk="USER#"+sys.argv[1]\n' +
+      'r=c.get_item(TableName="opal-users-v2",Key={"PK":{"S":pk},"SK":{"S":"PROFILE"}},ConsistentRead=True).get("Item") or {}\n' +
+      'q=c.query(TableName="opal-users-v2",KeyConditionExpression="PK = :p",ExpressionAttributeValues={":p":{"S":pk}},ConsistentRead=True)\n' +
+      'g=lambda k:(r.get(k) or {}).get("S","ABSENT")\n' +
+      'print("U1 users_row role=%s userType=%s firmId=%s entitlement_rows=%d status=%s"%(g("role"),g("userType"),g("firmId"),q["Count"]-(1 if r else 0),g("status")))\n'
+    const u1 = spawnSync(PYTHON, ['-I', '-c', u1py, EMAIL], { encoding: 'utf8', timeout: 60000, windowsHide: true })
+    facts.u1 = String(u1.stdout || '').trim()
+    log(facts.u1 || 'U1 read failed rc=' + u1.status)
+    if (!/^U1 users_row role=user userType=test-filer firmId=opal-capital entitlement_rows=0 status=active$/.test(facts.u1)) throw new Error('U1 is not the expected staff-only row: STOP')
+
     const portalRequire = createRequire(path.join(PORTAL, 'package.json'))
     const { chromium } = portalRequire('playwright-core')
     try { browser = await chromium.launch({ channel: 'msedge', headless: true }) } catch { browser = await chromium.launch({ headless: true }) }
