@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cl-6",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "b56fd6ef9d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-6.client-commonwealth.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b56fd6ef9d"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~108",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py",
+      "kind": "script",
+      "commit_or_etag": "2deec4da02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code only, not deployed: no release, no IAM, no Terraform. The five tools are not registered in app/tools.py; the issuer's hookup order does that.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl6.py",
+      "kind": "test",
+      "commit_or_etag": "2deec4da02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven named tests over a recording FakeCtx; 7 of 7 pass; a BUILD mutant (fence widened) fails AC06 and the file was restored identical.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~108/probe_commonwealth.py",
+      "kind": "script",
+      "commit_or_etag": "2deec4da02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only probe with the box's own credentials against the real silver; prints one counts-and-booleans line; 0 account numbers printed.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~108/NFRA_OPLGTW.TO-OG-cl-6.client_commonwealth.session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "c52a63dc7a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts and booleans only; the measurements and both proof runs."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the named tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 7 of 7; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 named tests passed (test_ogcl6_ac01..ac07); failed or error lines 0",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 7 of 7; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the probe, re-run here against the real silver, prints the complete envelope, a count equal to an independent read, a zero-row fence negative arm and no account number.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl6.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "probe commonwealth: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0\nprobe rc 0; digit runs of 8 or more in the output 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 probe booleans and counts: envelope_ok, independent_count_equal (partition 469 rows and account rows), fence_negative_arm, account_numbers_printed 0; digit runs of 8 or more 0",
+      "status": "PASS",
+      "expect": "(?s)probe commonwealth: envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Fence-widening mutant on the BUILD adapter: the firm check is replaced by if False, so a request for inflection reaches the catalog. Planted, AC06 run, file restored byte-identical from a backup.",
+      "expected": "AC06 fails.",
+      "observed": "tests/test_og_cl6.py::test_ogcl6_ac06 FAILED (AssertionError); 1 failed, 6 deselected; restored file identical (cmp); 7 passed after restore.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice against the same bytes and the same real silver: once directly, once through the check script.",
+      "observed": "Each run printed the same pytest summary and the same probe line (envelope_ok True; independent_count_equal True; fence_negative_arm True; account_numbers_printed 0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "OG-cl-1's app/client_core.py (the real Ctx)",
+      "reason": "Not on this ref. The probe carries its own ProbeCtx under amendment A1 item 2; the core's behaviour is unverified and filed as S4."
+    },
+    {
+      "item": "app/tools.py registrations, app/data_entitlement.py, app/destructive_ops.py and the pinned-count tests",
+      "reason": "Not this cell's write set. The issuer's hookup order registers the five tools and re-pins the counts at the merge."
+    },
+    {
+      "item": "ctx.firm_roster() and the SmartX roster",
+      "reason": "Commonwealth has no roster row-filter; amendment A1 item 4 is SmartX-only."
+    },
+    {
+      "item": "Any IAM grant, role read, Terraform or deploy",
+      "reason": "Bounded: the probe reads with the box's own credentials; the gateway read role for commonwealth/cottonwood is a release order's never-widen ask."
+    },
+    {
+      "item": "Portal, mdpf gold, bronze and every non-silver prefix",
+      "reason": "A2: the adapter reads only the vendor's silver prefixes through catalog rows."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W108-S1: the contract names no refusal code for a missing, unparseable or reversed window; the adapter raises window_invalid (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W108-S2: the 78-trading-day lag is frontier-dependent; on 2026-10-15 the 2026-06-23 partition is 79 days behind T-1; the adapter emits no literal lag (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-Z-W108-S3: Commonwealth transactions have no event id, so dedupe-on-event-id has no key; 3,161 identical row pairs across the 14 parts (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W108-S4: read_rows is written two ways; on the 14-part transactions partition, newest-part-only returns 73,800 of 1,416,497 rows (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W108-S5: account_day_value value is null on 15,993,996 of 21,102,041 rows; the adapter passes the null through (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~108/NFRA_OPLGTW.TO-OG-cl-6.client_commonwealth.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-6.client-commonwealth.md",
+      "result": "Not run: the order's worker face was the whole context; navigation used the order's named paths, and the census part was read with the native Read and Grep tools."
+    }
+  ]
+}
