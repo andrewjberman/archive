@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gt-1.each-block-carries-its-own-validation-state",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "080d287713",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gt-1.each-block-carries-its-own-validation-state.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gt-1.each-block-carries-its-own-validation-state.md",
+    "group": "OTHER",
+    "vintage_commit": "080d287713"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~482",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/contract.py",
+      "kind": "script",
+      "commit_or_etag": "21cae8f3d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib module on the wk-AMGT_RESAPP-482 branch; no deploy, no AWS call, no network; adds the optional validation key to the block key rule and the validation problems; no served output changes until a caller stamps the key"
+    },
+    {
+      "path_or_key": "lib/research/aifill/validation.py",
+      "kind": "script",
+      "commit_or_etag": "21cae8f3d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new stdlib module, no I/O and no clock read; stamp_validation is called by no other module in this order"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_validation.py",
+      "kind": "test",
+      "commit_or_etag": "21cae8f3d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module, 29 tests; every document a hand-built grounded dict; no network, no model"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL GS-2 ARMS: YES (N of N)` with N equal to 16, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-482 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round107_aifill_prep/checks/check_gs2_validation.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM the stamped document round-trips through JSON and still validates PASS round trip differs\nARM contract.py and validation.py stay ASCII with no network import PASS non-ASCII or a forbidden import\nARM the stamped document does not share structure with the input PASS the stamped copy shares structure with the input\nAIFILL GS-2 ARMS: YES (16 of 16)\nexit=0",
+      "denominator": "16 of 16 arms; the summary line AIFILL GS-2 ARMS: YES (16 of 16) is the printed count; a full run (first of two) printed 16 ARM lines, 16 PASS and 0 FAIL",
+      "status": "PASS",
+      "status_reason": "the deciding line AIFILL GS-2 ARMS: YES (16 of 16) is printed, no FAIL arm line exists in the full run, and exit=0.",
+      "expect": "AIFILL GS-2 ARMS: YES \\(16 of 16\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least 313) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-482 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_validation.py lib/research/aifill/tests/test_contract_grounding.py lib/research/aifill/tests/test_contract_v2.py lib/research/aifill/tests/test_contract_orchestrate.py lib/research/aifill/tests/test_grounding.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "........................................................................ [ 86%]\n............................................                             [100%]\n332 passed in 0.58s\nexit=0",
+      "denominator": "332 passed of 332 collected; 0 failed; 0 errors; 29 from test_validation.py, and the rest from the four existing modules; 332 is at least the 313 the criterion names",
+      "status": "PASS",
+      "status_reason": "the last non-empty line before exit= is 332 passed in 0.58s; 332 is at least 313; no failed or error line in the last three; exit=0. The N at least 313 bound is read by hand from the printed count; the expect regex does not encode it.",
+      "expect": "[0-9]+ passed in [0-9.]+s\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant; the two criteria grade the built module against the GS-2 check arms and the offline suite",
+      "expected": "N/A",
+      "observed": "no mutant named by the order",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: both criteria are offline and deterministic; AC1 and AC2 were each run twice on the committed bytes",
+      "observed": "AC1 printed AIFILL GS-2 ARMS: YES (16 of 16) on both runs; the full first run had zero FAIL lines; AC2 printed 332 passed on both runs",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real model call, a live source fetch, or any AWS read or write",
+      "reason": "order egress class NONE: every test uses hand-built documents and the check script is offline"
+    },
+    {
+      "item": "any change to orchestrate.py, run.py, store.py, revalidate.py, grounding.py or the builders",
+      "reason": "the order names them as other cells' surfaces; none of them stamps or requires the validation key in this order"
+    },
+    {
+      "item": "any edit to the three existing contract test modules",
+      "reason": "the order allows one assertion edit only if one pins the old key rule; no assertion in those modules failed under the new rule, so none was edited"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W482-S1: org/surprise_channel is absent from this sparse worktree (the sparse cone omits it), so the investigation item schema was read from the base checkout; OBSERVATION, INERT, nothing acted on."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~482/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "check_gs2_validation.py",
+      "invocation": "PYTHONPATH=<worktree> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round107_aifill_prep/checks/check_gs2_validation.py",
+      "result": "AIFILL GS-2 ARMS: YES (16 of 16); exit=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=<worktree> python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_validation.py lib/research/aifill/tests/test_contract_grounding.py lib/research/aifill/tests/test_contract_v2.py lib/research/aifill/tests/test_contract_orchestrate.py lib/research/aifill/tests/test_grounding.py",
+      "result": "332 passed in 0.58s; exit=0"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/contract.py lib/research/aifill/validation.py lib/research/aifill/tests/test_validation.py",
+      "result": "pre-commit gate clean for 3 of 3 file(s); exit=0 after the unused import was removed"
+    }
+  ]
+}
