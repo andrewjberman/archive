@@ -147,3 +147,20 @@ other cause keeps 60 s, and the BUSY path is untouched.
   controls and `V2S BACKOFF`; anything else rolls back to r34e the same session.
 - **Run 3 stays HELD until this ledger reads CLOSED,** and its R0e is then re-pinned from r34e to r34f by AMENDMENT 7, which I sign.
 - **The calendar hunk `f25618c0b4` ships only under its own pair** (r34g or later), never by drift into this root.
+
+## SIGN on r34g, the door asks yfinance first; opal_pricing ON (2026-10-16 ~17:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34G_DOOR_YFINANCE_FIRST_20261016.md`
+(commit `f0cd10473c`), blob `d818d2c28da9afab7e68a254d0c620c639ed4e04`, sha256
+`c3217d1178fc3b1b609c422cdb31dc0bec522dd25f5de644ffbdcb5168d8d9ef`, 9,538 bytes (re-measured). Pin `cd48501d0d`; tar `1e5b3ef4...580b`, 314
+members, 3 changed. r34f stays and is the rollback. The V2 script's sha256 `e8bc0fc4...6fba` is re-measured equal. Applier IB2 (rule 34).
+
+**Read at signing.** This is PRD v0.22 items 1 to 3 and pricing ON, per my msgs 9600, 9620 and 9685. A Yahoo-kept symbol never reaches
+YCharts at the door. The 8 to 9 YCharts recipe calls per report are named as the remaining YCharts use, and item 4 is not here.
+
+**One named gap (not a stop):** `opal_pricing` tiers are `["estate", "yfinance"]`. C-PRICES puts YCharts per symbol third, before C-SWAP.
+Leaving YCharts out of the pricing tiers spends fewer lookups against the WAF budget, but a symbol Yahoo cannot price goes straight to C-SWAP.
+That YCharts pricing tier is OWED with item 4 (the count-per-window lease), so it is spent under the measured budget. The receipt names it.
+
+**Conditions** (each a STOP): scripts AS ROOT; the pre-read finds `0485393f3a-r34f`; V2 prints `V2S OK` with r34f's controls, the back-off
+check, `V2S DOOR` and `V2S PRICING`, else roll back to r34f the same session. Window 4 starts only after this ledger reads CLOSED.
