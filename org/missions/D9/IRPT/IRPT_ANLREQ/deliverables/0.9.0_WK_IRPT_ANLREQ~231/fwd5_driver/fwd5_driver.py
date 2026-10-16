@@ -15,6 +15,22 @@ under a pair, after 2.0.0_SA_COO~V2's release.
                               ^IRPT_ANLREQ\\.TO-RUN-FWD5\\.\\S+$ it prints the plan and exits 0 with no request sent.
                               The password is read from stdin as one JSON object {"password": "..."}; it is never
                               printed, logged or written.
+  --control                   with --go: the POSITIVE CONTROL (AR-tz-70). The SAME routes, order, guard, sign-in,
+                              redirect handling and EXCLUDED rows, with --email as an identity ENTITLED to the ticket
+                              (--firm-a its own firm label, --firm-b the ticket's owner firm). Without --go it prints
+                              the plan and sends nothing. Without --control the run is unchanged.
+
+Control verdicts (--control only, a closed set): ALLOWED, DENIED, UNREACHED, EXCLUDED.
+  any 2xx on a ticket or package route           -> ALLOWED (a 2xx is the pass here, not a leak; no marker scan)
+  a 2xx ticket-list whose JSON carries a tickets list with the ticket id (case-insensitive) -> ALLOWED;
+  a 2xx ticket-list without it                   -> DENIED
+  401, 403 or 404                                -> DENIED
+  3xx, 400, 405, 5xx, a dropped connection, a call the guard refused, a route with no GET shape, a missing id
+                                                 -> UNREACHED
+  EXCLUDED: the two excluded rows, never sent.
+  Control exit: 0 when ticket-read AND ticket-list are both ALLOWED; 1 when either is DENIED; 2 when either is
+  UNREACHED, no session was established, or a required id is missing (checked before sign-in, zero requests).
+  The package routes are reported and do not change the exit. The report is fwd5_control_report.json in --out.
 
 Verdicts (a closed set): REFUSED, LEAK, UNREACHED, EXCLUDED.
   any 2xx on a ticket or package route           -> LEAK (a 2xx is never a refusal, an empty body included)
@@ -50,8 +66,12 @@ FIRM_RE = re.compile(r"^[A-Za-z0-9_.-]{4,80}$")
 EMAIL_SUFFIX = "@opal.invalid"
 FWD1_EMAIL = "fwd1-staff-r41b@opal.invalid"
 REPORT_NAME = "fwd5_run_report.json"
+CONTROL_REPORT_NAME = "fwd5_control_report.json"
+CONTROL_SCHEMA = "fwd5_control_report/1"
 TIMEOUT_S = 30
 VERDICTS = ("REFUSED", "LEAK", "UNREACHED", "EXCLUDED")
+CONTROL_VERDICTS = ("ALLOWED", "DENIED", "UNREACHED", "EXCLUDED")
+CONTROL_GATE = ("ticket-read", "ticket-list")
 SEG = r"[A-Za-z0-9_-]+"
 
 # The guard: GET only to these path shapes (the ticket routes and the package-file routes the record lists),
@@ -189,6 +209,57 @@ def exit_code(rows):
     return 0
 
 
+def _holds_id(node, want):
+    """True when a string value of the node equals the ticket id, case-insensitive. Keys are not read."""
+    if isinstance(node, str):
+        return node.lower() == want
+    if isinstance(node, dict):
+        return any(_holds_id(v, want) for v in node.values())
+    if isinstance(node, list):
+        return any(_holds_id(v, want) for v in node)
+    return False
+
+
+def list_carries_ticket(body, ticket):
+    """A ticket-list answer that is a JSON object whose tickets list has an entry holding the ticket id."""
+    try:
+        obj = json.loads(body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return False
+    if not isinstance(obj, dict) or not isinstance(obj.get("tickets"), list):
+        return False
+    want = ticket.lower()
+    return any(_holds_id(item, want) for item in obj["tickets"])
+
+
+def control_answer(is_list, status, body, ticket):
+    """The control verdict for one answer, as (verdict, fixed one-line reason). The body is read for the ticket id
+    on ticket-list only, never scanned for markers (an entitled identity may see the id), and never kept."""
+    if status is None:
+        return "UNREACHED", "no answer (dropped connection)"
+    if 200 <= status < 300:
+        if not is_list:
+            return "ALLOWED", "2xx answer"
+        if list_carries_ticket(body, ticket):
+            return "ALLOWED", "2xx ticket list carries the ticket id"
+        return "DENIED", "2xx ticket list does not carry the ticket id"
+    if status in (401, 403, 404):
+        return "DENIED", "%d answer" % status
+    return "UNREACHED", "%d answer is not a verdict" % status
+
+
+def control_exit_code(rows):
+    """Decided over the two gate routes only (ticket-read, ticket-list); the package routes are reported and do not
+    change it. 1 when either gate route is DENIED; 0 when both are ALLOWED; else 2 (UNREACHED, no session, a gate
+    row missing)."""
+    gate = [r["verdict"] for r in rows if r["route"] in CONTROL_GATE]
+    if "DENIED" in gate:
+        return 1
+    if len(gate) == len(CONTROL_GATE) and all(v == "ALLOWED" for v in gate):
+        return 0
+    return 2
+
+
 def sign_in(base, email, password, opener):
     """POST /auth/login. Returns (access token or None, a fixed reason). The password is never echoed."""
     body = json.dumps({"email": email, "password": password}).encode("utf-8")
@@ -217,8 +288,9 @@ def _excluded_row(r):
             "body_len": 0, "reason": r["excluded"]}
 
 
-def run_calls(routes, base, opener, token, ctx, markers):
-    """Every route, in order. Returns (rows, guard-refused route names). A row never holds a body."""
+def run_calls(routes, base, opener, token, ctx, markers, control=False):
+    """Every route, in order. Returns (rows, guard-refused route names). A row never holds a body. control=True reads
+    each answer with control_answer (AR-tz-70): no marker scan, and the verdict carries a fixed reason."""
     rows = []
     refused = []
     for r in routes:
@@ -245,7 +317,10 @@ def run_calls(routes, base, opener, token, ctx, markers):
             else:
                 row["status"] = status
                 row["body_len"] = len(body)
-                row["verdict"] = classify(r["list"], status, body, markers)
+                if control:
+                    row["verdict"], row["reason"] = control_answer(r["list"], status, body, ctx["ticket"])
+                else:
+                    row["verdict"] = classify(r["list"], status, body, markers)
         rows.append(row)
     return rows, refused
 
@@ -288,7 +363,7 @@ def read_password(stream):
     return pw
 
 
-def print_plan(routes=ROUTES):
+def print_plan(routes=ROUTES, control=False):
     print("FWD5 DRIVER PLAN (build only; the run is a WORLD act under a pair after 2.0.0_SA_COO~V2's release)")
     print("sign-in: POST /auth/login, JSON {email, password}; bearer access token and refresh cookie held in memory")
     for i, r in enumerate(routes, 1):
@@ -303,6 +378,11 @@ def print_plan(routes=ROUTES):
     print("a run needs --firm-b <id> --request-id <id> --job-id <id> (all REQUIRED: a missing one exits 2 before any "
           "request)")
     print("a run needs --go IRPT_ANLREQ.TO-RUN-FWD5.<id> and the password on stdin; --plan sends nothing")
+    if control:
+        print("CONTROL MODE (--control): the same routes, guard and sign-in as an identity ENTITLED to the ticket; verdicts "
+              "ALLOWED, DENIED, UNREACHED, EXCLUDED (the run verdict line above does not apply); no marker scan; exit 0 "
+              "ticket-read and ticket-list both ALLOWED, 1 either DENIED, 2 either UNREACHED or no session; report "
+              "fwd5_control_report.json")
 
 
 def _unreached_rows(routes, why):
@@ -311,7 +391,7 @@ def _unreached_rows(routes, why):
              "body_len": 0, "reason": why} for r in routes]
 
 
-def do_run(ns, stdin, routes):
+def do_run(ns, stdin, routes, control=False):
     required = (("--base", ns.base), ("--email", ns.email), ("--ticket", ns.ticket),
                 ("--firm-a", ns.firm_a), ("--firm-b", ns.firm_b), ("--request-id", ns.request_id),
                 ("--job-id", ns.job_id), ("--out", ns.out))
@@ -338,15 +418,17 @@ def do_run(ns, stdin, routes):
     opener = build_opener()
     token, why = sign_in(base, ns.email, password, opener)
     password = None
-    print("RUN %s principal=%s firm-a=%s firm-b=%s" % (ns.go, digest(ns.email), ns.firm_a, ns.firm_b))
+    print("%s %s principal=%s firm-a=%s firm-b=%s" % ("CONTROL" if control else "RUN", ns.go, digest(ns.email),
+                                                     ns.firm_a, ns.firm_b))
     if token is None:
         rows, refused = _unreached_rows(routes, why), []
     else:
         ctx = {"ticket": ns.ticket, "firm_b": ns.firm_b, "request_id": ns.request_id, "job_id": ns.job_id}
         markers = [ns.ticket.lower(), ns.firm_b.lower()]
-        rows, refused = run_calls(routes, base, opener, token, ctx, markers)
+        rows, refused = run_calls(routes, base, opener, token, ctx, markers, control=control)
     token = None
-    rc = exit_code(rows)
+    rc = control_exit_code(rows) if control else exit_code(rows)
+    verdicts = CONTROL_VERDICTS if control else VERDICTS
     report = {
         "schema": "fwd5_run_report/1",
         "go": ns.go,
@@ -356,21 +438,39 @@ def do_run(ns, stdin, routes):
         "sign_in": why,
         "calls": rows,
         "guard_refused": refused,
-        "counts": {v: sum(1 for r in rows if r["verdict"] == v) for v in VERDICTS},
+        "counts": {v: sum(1 for r in rows if r["verdict"] == v) for v in verdicts},
         "rc": rc,
     }
+    name = REPORT_NAME
+    if control:
+        report["schema"] = CONTROL_SCHEMA
+        report["mode"] = "control"
+        name = CONTROL_REPORT_NAME
     os.makedirs(ns.out, exist_ok=True)
-    path = os.path.join(ns.out, REPORT_NAME)
+    path = os.path.join(ns.out, name)
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2, sort_keys=True)
         fh.write("\n")
     for r in rows:
         if r["verdict"] == "EXCLUDED":
             print("EXCLUDED %s: %s" % (r["route"], r["reason"]))
-    print("FWD5-RUN rc=%d REFUSED=%d LEAK=%d UNREACHED=%d EXCLUDED=%d of %d rows report=%s" % (
-        rc, report["counts"]["REFUSED"], report["counts"]["LEAK"], report["counts"]["UNREACHED"],
-        report["counts"]["EXCLUDED"], len(rows), path))
+    if control:
+        gate = {r["route"]: r["verdict"] for r in rows}
+        print("FWD5-CONTROL rc=%d ticket-read=%s ticket-list=%s ALLOWED=%d DENIED=%d UNREACHED=%d EXCLUDED=%d "
+              "of %d rows report=%s" % (
+                  rc, gate.get("ticket-read"), gate.get("ticket-list"), report["counts"]["ALLOWED"],
+                  report["counts"]["DENIED"], report["counts"]["UNREACHED"], report["counts"]["EXCLUDED"],
+                  len(rows), path))
+    else:
+        print("FWD5-RUN rc=%d REFUSED=%d LEAK=%d UNREACHED=%d EXCLUDED=%d of %d rows report=%s" % (
+            rc, report["counts"]["REFUSED"], report["counts"]["LEAK"], report["counts"]["UNREACHED"],
+            report["counts"]["EXCLUDED"], len(rows), path))
     return rc
+
+
+def _gate(ticket_read, ticket_list):
+    """Two gate rows as control_exit_code reads them (selftest only)."""
+    return [{"route": "ticket-read", "verdict": ticket_read}, {"route": "ticket-list", "verdict": ticket_list}]
 
 
 def selftest():
@@ -396,6 +496,27 @@ def selftest():
                                                     {"verdict": "EXCLUDED"}]), 0),
         ("exit 1 leak beats excluded", exit_code([{"verdict": "LEAK"}, {"verdict": "EXCLUDED"}]), 1),
         ("exit 2 no made call", exit_code([{"verdict": "EXCLUDED"}]), 2),
+        ("control 2xx answer allowed", control_answer(False, 200, b"", "TKT-a1b2")[0], "ALLOWED"),
+        ("control marker in 2xx not a leak", control_answer(False, 200, b"TKT-a1b2", "TKT-a1b2")[0], "ALLOWED"),
+        ("control list carries id allowed", control_answer(True, 200, b'{"tickets": [{"ticket_id": "tkt-a1b2"}]}',
+                                                           "TKT-a1b2")[0], "ALLOWED"),
+        ("control list lacks id denied", control_answer(True, 200, b'{"tickets": [{"ticket_id": "TKT-other"}]}',
+                                                        "TKT-a1b2")[0], "DENIED"),
+        ("control list not json denied", control_answer(True, 200, b"<html>", "TKT-a1b2")[0], "DENIED"),
+        ("control 403 denied", control_answer(False, 403, b"", "TKT-a1b2")[0], "DENIED"),
+        ("control 404 denied", control_answer(False, 404, b"", "TKT-a1b2")[0], "DENIED"),
+        ("control 302 unreached", control_answer(False, 302, b"", "TKT-a1b2")[0], "UNREACHED"),
+        ("control 500 unreached", control_answer(False, 500, b"", "TKT-a1b2")[0], "UNREACHED"),
+        ("control dropped unreached", control_answer(False, None, b"", "TKT-a1b2")[0], "UNREACHED"),
+        ("control exit 0 both allowed", control_exit_code(_gate("ALLOWED", "ALLOWED")), 0),
+        ("control exit 0 package denied ignored", control_exit_code(_gate("ALLOWED", "ALLOWED")
+                                                                    + [{"route": "form-as-filled",
+                                                                        "verdict": "DENIED"}]), 0),
+        ("control exit 1 ticket-read denied", control_exit_code(_gate("DENIED", "ALLOWED")), 1),
+        ("control exit 1 ticket-list denied", control_exit_code(_gate("ALLOWED", "DENIED")), 1),
+        ("control exit 1 denied beats unreached", control_exit_code(_gate("DENIED", "UNREACHED")), 1),
+        ("control exit 2 ticket-read unreached", control_exit_code(_gate("UNREACHED", "ALLOWED")), 2),
+        ("control exit 2 no session", control_exit_code(_gate("UNREACHED", "UNREACHED")), 2),
     ]
     for name, got, want in checks:
         if got != want:
@@ -421,13 +542,15 @@ def main(argv=None, stdin=None, routes=None):
                    help="REQUIRED for a run: the job id, sourced from the ticket the FWD-1 run files")
     p.add_argument("--out")
     p.add_argument("--go")
+    p.add_argument("--control", action="store_true",
+                   help="the positive control (AR-tz-70): --email is an identity ENTITLED to the ticket")
     ns = p.parse_args(argv)
     if ns.selftest:
         return selftest()
     if ns.plan or not (ns.go and GO_RE.match(ns.go)):
-        print_plan()
+        print_plan(control=ns.control)
         return 0
-    return do_run(ns, stdin if stdin is not None else sys.stdin, routes or ROUTES)
+    return do_run(ns, stdin if stdin is not None else sys.stdin, routes or ROUTES, control=ns.control)
 
 
 if __name__ == "__main__":
