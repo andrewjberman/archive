@@ -1,0 +1,44 @@
+# NFRA_CTLPLN round 27 -- drain end and L8 packet, for the CVO and 1.0.0_SA_CTO (issuer 2.0.0_SA_COO~C, 2026-10-16 ~09:5xZ)
+
+Round 27 is terminal: six cut orders `complete` (issuance `22d4a89963`; decomposition `NFRA_CTLPLN_DECOMP.round27.md`, five amendments `37295c379d`, `b676486163`, `5b4ecb9474`, `0cbc99ae54`, `8ec35ee85f`). `python .tools/round-close-check.py --project NFRA_CTLPLN --round 27` reads `verdict=MAY-CLOSE` (`orders=29 judgment=2 graded=2 ungraded=0 self_graded=0`; 6 tree orders). Pins are commits on `box/laptop`, LOCAL (push is `0.0.0_AB_MSTR`'s; the push state is stated in the message that carries this file). Inputs for the analysis: `ROUND27_INPUTS_FOR_ROUND_ANALYSIS.md` in this folder.
+
+## 1. Judgment criteria owed to the CVO
+
+None on the six orders. The EVIDENCE the CVO grades (the CTO's round-26 analysis, section 3): **FWD-18** (site Z half), **FWD-19** (the lane-wait clause), **FWD-11** (the drill), and the organic arm of **FWD-15/16** (the CTO's ruling term 5: cited beside the deliberate tabulate drive; no re-grade owed, both are REALIZED).
+
+## 2. Cells, their orders and the issuer's own re-run in the main tree
+
+| cell | what | merge / flip | issuer re-run |
+|---|---|---|---|
+| `CT-aq-1` | the checked tabulate pack Taildropped to site Z | `4471df360a` / `dfea122e44` | `JOURNEY-TAILDROP-SITEZ files_sent=4 failed=0 target=sitez ok=True`; `JOURNEY-PACK ... ok=True` |
+| `CT-ar-1` | closure tool: linux x86_64 cp312 target, host-aware single-root form; yfinance closure | `97477e8786` / `f13815b407` | `LINUX-CLOSURE arms=7/7`; `INTAKE-CLOSURE-TEST cases=10/10`; closure 24 members, 7 host-satisfied, 0 conflicts, 17 to fetch |
+| `CT-as-1` | `intake_fetch.py resolve` (one release-document request per member, host set re-checked against the index's `requires_dist`); `fetchlist` refuses a non-Windows closure | `12a02b633b` / `c347d4e52e` | `RESOLVE arms=9/9`; `INTAKE-FETCH-TEST cases=21/21`; the REAL run (17 requests, all 200, no download): 16 wheels named, 1 SDIST-ONLY |
+| `CT-at-1` | the 17 approved wheels fetched one at a time; checks 1-7 on each; each wheel's own Requires-Dist read | `e0b9a21bc0` / `96b78fc9a0` | `BATCH-FETCH wheels=17 ... ok=True`; `BATCH-CHECK ... checks_run_each=7 failed_total=4 ... ok=True`; `BATCH-REQUIRES ... new_deps=0 ... multitasking_requires=NONE ok=True` |
+| `CT-av-1` | the CTO-ruled SIGNED WAIVER: a failed check 3-7 carries to release only by a named, reasoned `WAIVE <file> check <N>: <reason>` line; verdict `released-with-waiver`; check 6 records `compared_across_platforms` and the post-CRLF count; the stale red case of the check suite fixed | `6f07651fdf` / `35aceaf4b9` | `WAIVER arms=20/20`; `INTAKE-CHECK-TEST cases=60/60` (was RED 56/57); `INTAKE-RECEIVE-TEST cases=36/36`; the issuer's own probe of `compute_verdict` on hand-made records |
+| `CT-au-1` | the 17 wheels released, packed (52 files), verified, Taildropped to dell2 | `bc7970050f` / `a8c11f7b55` | `BATCH-RELEASE released=17 ... ok=True`; `BATCH-PACK files=52 ... verify ... wheels=17 verified=17 checked=17 stray=0 ok=True`; `BATCH-TAILDROP files_sent=52 failed=0 target=dell2 ok=True`; all 17 wheels hashed by the issuer equal to the approved sha256 AND size |
+
+## 3. The organic journey (FWD-15/16, the first REAL consumer of the route)
+
+dell2's IRPT_ANLREQ lane (call `XB-20261016T052534Z-983c`, `2.0.0_SA_COO~G2`) needed `yfinance==1.2.0` for its resident Linux host. In order, every step read from git or the tool: call acked (`4a2c5f6bfe`) -> CTO ruled YES with terms (`5740f0d341`) -> closure computed from the laptop's installed copies (24 members; 7 left out as host-satisfied; 17 to fetch; 8 of the 17 already APPROVED by `requirements.txt`, 9 UNKNOWN: 9 requests filed and approved) -> the index read named 16 wheels; `multitasking==0.0.12` is source-only: the CTO's bounded rule chose `0.0.13` (a version change he ruled, `1fb283d47c`, `e8beef9100`) -> dell2's CTO approved the 17 (`565cae62e0`) -> fetch and checks 1-7 -> the CTO read every `.py` of the four check-6 failures (curl_cffi, numpy, pandas, websockets) against the laptop's Windows installs and signed check 8 (`4c20c2bb3c`, `0f1ce30022`) -> the release tool refused those four (no waiver existed): the CTO ruled the waiver (`a71c144be8`), `CT-av-1` built it, he added four `WAIVE` lines (`9eb4ea9f37`) -> dell2's CTO answered PROCEED on his condition 1 (`ad5fa79f45`) -> release, pack, Taildrop (4 calls, 09:14:14Z-09:15:27Z, each exit 0) -> **dell2's collector `0.0.0_AB_MSTR~DELL2` recorded 52 of 52 files equal to the sender's manifest, the 17 wheels equal to the intake records, `intake_receive verify ok=True 17/17/17` with four waived lines (record `40b21e0a58` on `origin/CLOUD`; its 17-row table equals the approved list)**. Nothing was installed on the laptop or on dell2 by the route (the install is dell2's own pair). The return to `2.0.0_SA_COO~G2` (the 17 sha256 values, the waivers, the gaps): `XB_983C_RETURN_TO_COO_G2.md`. Calls closed: `a8d8`, `ea7f`, `fbfa`, `662b`, `779c`, `a0a3` (from side), `983c` (to side; dell2 closed its side).
+
+**Four gates the issuer did not dry-run at the cut surfaced, one per attempt, and each cost a cycle:** the approval file's exact `multitasking==0.0.13` line (row `W132-S1`), the signed file's per-wheel names (`W133-S1`), the verdict rule that refused a failed check (`W133-S2`), and the closure tool's Windows-only `fetchlist` suffix (`W130-S2`, closed by `CT-as-1`). Corrective practice: the issuer now runs the tool's own gate function over every line the cell will use, at the cut.
+
+## 4. The other evidence of this round
+
+- **FWD-18, site Z:** the checked `tabulate` pack was received on site Z, verified, proved, installed to a scratch target, and read from that scratch only; `received_sha256` equals the laptop's wheel; both pip logs hash to their receipts; `__file__` under `SCRATCH_TARGET_Z` (read from git, `7d969d9aa6`): `FWD18_SITEZ_READS_20261016.md`. The Taildrop files had been auto-saved to Downloads; hashes cross-checked against the laptop's send record. Dell half: rounds 25-26.
+- **FWD-19 (lane-wait clause):** the lane `2.0.0_SA_COO~C` waited on `toml==0.10.2` (request `REQ-20261016T045108Z-toml`); the three places agreed (status REQUESTED, call `66e3` OPEN in the local and cloud lists, broker summary WAITING) at 05:03Z, then the CTO REFUSED it (05:05:35Z) and the lane dropped its one piece of work: `FWD19_LANE_WAIT_READS_20261016.md` (`3f367473c0`, `fdbee28564`).
+- **FWD-11 (the drill, dell1):** `2.0.0_SA_COO~C1` (ADVI_COTBKF) was killed 05:15:59Z and respawned 05:16:41Z (MSTR~DELL1's report, not read by this seat); its first commit after (`923f06e998`) carried round 95 unchanged ("nothing redone or lost"); round 96 drained 05:46:28Z (`26f2781a61`) and round 95's owed measurement landed (`251b7a4d10`); no task order was open at the kill (dell1's own strict reading, for the grade): `FWD11_DRILL_READS_20261016.md`. The Andrew hold of 2026-10-14 was read by dell1's CTO as spent; this seat did not adjudicate it.
+- **FWD-14:** Andrew scratched the MacBook RDP arm (CTO msg 109642, `c9a4` closed); `b87f` stays (his sitting).
+- **The 12 other ADVANCED FWDs** (the CTO's round-26 ruling 3): `ROUND27_ADVANCED_FWD_SHORT_ACTS.md` (`233eddd257`): measured where this tick could, carried and marked where not; no grade.
+- `requirements.txt`: `git diff 22d4a89963..HEAD -- requirements.txt` reads empty.
+
+## 5. Rows this round minted (all OBSERVATION or BLOCKING-INERT; the BLOCKING ones are cleared)
+
+`W126-S1` (accepted WARN-only state); `W128-S1`; `W129-S1`; `W130-S1`, `W130-S2` (ARMED; CLOSED by `CT-as-1`: `fetchlist` on the linux closure now exits 2); `W132-S1`, `W133-S1`, `W133-S2` (BLOCKING, INERT; each cleared by the act named in section 3); `W134-S1` (the check suite was red at the base), `W134-S2` (`intake_receive.py` accepts a `checked` record without re-reading checks 1-7; branch unchanged). Carried rows: unchanged from the round-24 decomposition.
+
+## 6. Open, with owner and condition
+
+- **dell1's and site Z's scratch folders** (`SCRATCH2`, `SCRATCH_TARGET`, `PACK2`; `SCRATCH3`, `SCRATCH_TARGET_Z`, `PACK3`): NOT deleted (a recursive delete is Andrew's word; the CTO puts it to him). No grade depends on them.
+- **dell2's install of the yfinance wheels** (the pydeps pair, `2.0.0_SA_COO~G2` and AQ2): not this project's act; dell2's import gate is the guard for the nine members without dependency lists and the compiled members.
+- **FWD-14** `b87f` (Andrew's sitting). The 12 other ADVANCED FWDs: see the section above (CVO reads for FWD-4, 12 and 22; a CTO ruling for FWD-7; seat acts for FWD-8, 10, 21, 23, 25; Andrew for FWD-2, 6 and 27).
+- Not read by this seat: dell1's and site Z's live filesystems; the restart act itself (MSTR~DELL1's spawn record); the full `.py` lists of the four check-6 failures (the CTO read them; this seat read one file per package).
