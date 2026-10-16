@@ -8,12 +8,12 @@ Method: the line patterns class every file that names the map (window of +/-4 li
 
 ## 1. Counts
 
-- git grep -l (whole repository, HEAD): **2521** files
-- classed: **2521** files; reconciled=True; other=0; ok=True
-- classes: read_whole=174, read_one=0, write=6, test=21, doc=2320, other=0
-- basis: 245 by reading table, 2276 by line pattern
-- stale reading rows (path not in the grep set): 1
-- pattern class disagreed with the reading table: 31
+- git grep -l (whole repository, HEAD): **2524** files
+- classed: **2524** files; reconciled=True; other=0; ok=True
+- classes: read_whole=175, read_one=0, write=6, test=21, doc=2322, other=0
+- basis: 246 by reading table, 2278 by line pattern
+- stale reading rows (path not in the grep set): 0
+- pattern class disagreed with the reading table: 32
 
 ### Per top-level folder
 
@@ -27,7 +27,7 @@ Method: the line patterns class every file that names the map (window of +/-4 li
 | docs | 52 | 0 | 0 | 0 | 0 | 52 | 0 |
 | infra | 106 | 11 | 0 | 2 | 18 | 75 | 0 |
 | lib | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
-| org | 2310 | 153 | 0 | 3 | 2 | 2152 | 0 |
+| org | 2313 | 154 | 0 | 3 | 2 | 2154 | 0 |
 | projects | 5 | 0 | 0 | 0 | 0 | 5 | 0 |
 | rcg | 5 | 2 | 0 | 0 | 0 | 3 | 0 |
 | workflows | 25 | 0 | 0 | 0 | 0 | 25 | 0 |
@@ -38,6 +38,7 @@ Method: the line patterns class every file that names the map (window of +/-4 li
 |---|---|---|
 | .tools/tool_index.py | READ_ONE | DOC |
 | infra/aws/lambda/ci/build-nodejs-lambda.sh | WRITE | READ_WHOLE |
+| org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~140/source_map_census.py | WRITE | READ_WHOLE |
 | org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/r6_campaign_resolve.py | READ_ONE | DOC |
 | org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_en_r3.py | READ_ONE | DOC |
 | org/missions/D14/LGIC/LGIC_LGCTFM/deliverables/2.0.0_SA_COO~G/fixed_inputs/r4/check_lt_r4.py | READ_ONE | DOC |
@@ -855,6 +856,9 @@ owner_commits=14 non_owner_commits=13 non_owner_data=1 non_owner_code=12 unread=
 | DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~12/TRADING_CALENDAR_IMPORTERS.md | pattern:doc-extension | 127: / infra/aws/lambda/ci/lambda-source-map.json / packaging list: 10 functions list lib/trading_calendar.py (mdpf-gold-lambda, inf-etf-ownership-daily, etf-positio |
 | DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/FWD7_PROJECT_PATH_OVERLAPS.md | pattern:doc-extension | 13: / 1 / AMGT_RESAPP (dell1) / NFRA_MCPORTAL (sitez) / `infra/aws/lambda/ci/lambda-source-map.json` / `infra/aws/lambda/ci/lambda-source-map.json` / `infra/aws/lam |
 | DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/NFRA_CTLPLN.TO-CT-ay-1.fwd7-cross-box-overlaps-by-class.proof_of_spec.json | pattern:doc-extension | 30: "deploy_evidence": "Written by fwd7_classify.py from the live read (62 OVERLAP lines, FINDINGS 62, 30 live projects). Top sentence: 'Project-path overlaps: 9 PR |
+| DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~140/LAMBDA_SOURCE_MAP_CONSUMER_CENSUS.md | pattern:doc-extension | 5: Map: `infra/aws/lambda/ci/lambda-source-map.json`. Deploy script: `infra/aws/lambda/ci/record-terraform-deploy.sh`. |
+| DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~140/READINGS_CONSUMERS_A.tsv | pattern:doc-extension | 13: infra/aws/terraform/investor-reporting/account-return-daily/locals.tf	READ_WHOLE	44: jsondecode(file(...lambda-source-map.json)) of the whole map	artifact key f |
+| READ_WHOLE | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~140/source_map_census.py | reading | 443: ['locals {', '  m = jsondecode(file("x/lambda-source-map.json"))', '}'], "READ_WHOLE"), |
 | DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~6/PROPOSAL_FENCE_ROW_SHAPE_READ_ONLY_PREFIX.md | pattern:doc-extension | 41: / packagers/manifests / `.tools/safe_deploy_core.py:528`, two `build_package.py`, `harvest/lambda_src/build_zip.py:116`, `build-and-upload-scoped-amgt.sh:240`,  |
 | DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~62/NFRA_CTLPLN.TO-CT-u-6.portal-functions-caller-tier-fence.proof_of_spec.json | pattern:doc-extension | 32: "deploy_evidence": "unit tests on fake events; not packaged (absent from lambda-source-map.json). Drives every route of the census table: 39 class-ii routes ref |
 | DOC | org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md | pattern:doc-extension | 18: - Lambda source map: lambda-source-map.json line 677 opens opal-portal-data-proxy; its files list is lambda_function.py and session_tracker.py (lines 680-683).  |
