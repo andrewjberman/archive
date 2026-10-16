@@ -20,3 +20,8 @@ The normal pattern is a branch that merges into DEV clean. Here 53 overlapping c
 ### Other solutions
 (B) Hold until the DEV-to-PROD promote. This blocks Andrew's DEV view on promotions dell2 does not control, so it is worse. Andrew's own
 smoke runs on 5174 either way, so neither option touches PROD.
+
+## CORRECTION (2026-10-16 ~20:37Z, `~D2` msg 9854, measured on portal origin refs)
+The branch is ALREADY DEV-based: 30 commits ahead of origin/DEV, 0 behind, merge-base the DEV head fcbf2bce. Its two-dot diff against DEV
+is 37 files, all under `src/pages/InvestorReporting`. The 53 overlapping commits are DEV commits not yet on PROD. Position (A) therefore
+needs no re-cut: the waiver covers this head (75a71ae3) for DEV only. Terms 2 to 4 are unchanged.
