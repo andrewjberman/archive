@@ -37,7 +37,7 @@ APPLIER = H.APPLIER
 REC_REL = D + APPLIER + "/COT_PUBLISH_CODE_UPDATE_RECORD.json"
 PACKET_REL = D + "2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_REPORTING_PUBLISH_CODE_UPDATE_SCHEDULE_REPUBLISH.md"
 COO_HALF_REL = D + "2.0.0_SA_COO~D2/NEVER_WIDEN_COTTONWOOD_REPORTING_PUBLISH_CODE_UPDATE_SCHEDULE_REPUBLISH_COO_HALF.md"
-CTO_HALF_REL = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_COTTONWOOD_REPORTING_PUBLISH_CODE_UPDATE_SCHEDULE_REPUBLISH_CTO_HALF.md"
+CTO_HALF_REL = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_COTTONWOOD_PUBLISH_CODE_UPDATE_SCHEDULE_REPUBLISH_CTO_HALF.md"
 PACKET_SHA = "77f0af99d2bb28cd49344df6cf63494e8185f04d6cc8fff65bf9c4f1f2d501b0"
 BUILD_B64 = "GagDGBNGmPsmYaJR1B7qG/TvaPdQU3LiVAh6c+wt6jo="
 BEFORE_CODE = "HDgIzQoXMyUNBxeyqgLXcplD1c01QwVsASRoMJbd4hk="
@@ -124,7 +124,7 @@ def check_tail(rec):
     need(isinstance(c["checks"], dict) and set(c["checks"]) == set(CHECKS) | {"publisher_version"} and all(c["checks"][k] is True for k in CHECKS) and c["checks"]["publisher_version"] == "0.3.0", "canary checks: all true and publisher_version 0.3.0")
     need(nes(c["request_id"]), "canary.request_id")
     fu = rec["full"]
-    fk = {"payload", "invoked_utc", "status_code", "function_error", "returned", "report", "objects_after", "sampled_hash12", "sample_checks_pass", "claim_count", "request_id"}
+    fk = {"payload", "invoked_utc", "status_code", "function_error", "returned", "report", "objects_after", "sampled_hash12", "sample_checks_pass", "claim_count", "manifest_calendar_count", "calendar_sources_answered", "request_id"}
     need(isinstance(fu, dict) and set(fu) == fk, "full keys differ")
     need(fu["payload"] == {"upload": True} and fu["status_code"] == 200 and fu["function_error"] is None, "full: payload {upload: true}, 200, no function error")
     need(H.UTC.match(str(fu["invoked_utc"])) and fu["invoked_utc"] >= c["invoked_utc"], "full.invoked_utc after the canary")
@@ -132,6 +132,9 @@ def check_tail(rec):
     need(fu["returned"]["published"] == dr["published"] and fu["returned"]["refused"] == dr["refused"] and fu["returned"]["unreported_trading_days"] == dr["unreported_trading_days"], "full: published, refused and the unreported list must equal the dry run's")
     need(fu["objects_after"] == 2 * fu["returned"]["published"], "full: objects_after must be 2 x published (a republish adds no key)")
     need(fu["claim_count"] == fu["returned"]["published"], "full: the count of series carrying the claim must equal published (the S104 read)")
+    need(fu["manifest_calendar_count"] == fu["returned"]["published"], "full: the count of manifests carrying calendar_source must equal published (the CTO's condition 2)")
+    cs = fu["calendar_sources_answered"]
+    need(isinstance(cs, list) and cs and cs == sorted(set(cs)) and set(cs) <= set(CAL_VALUES), "full: calendar_sources_answered must be a sorted non-empty list of the contract's values")
     need(isinstance(fu["sampled_hash12"], list) and len(fu["sampled_hash12"]) == 10 and all(HEX12.match(str(h)) for h in fu["sampled_hash12"]) and fu["sample_checks_pass"] is True and nes(fu["request_id"]), "full: ten sampled hash prefixes and the sample checks passing")
     H.check_report(fu["report"], "full")
     need(rec["ledger_closed"] is False, "the ledger must stay OPEN")
@@ -182,13 +185,19 @@ def live(root, rec):
         mb = s3.get_object(Bucket=H.BUCKET, Key="%saccount=%s/manifest.json" % (H.PREFIX, a))["Body"].read()
         vs = s3.list_object_versions(Bucket=H.BUCKET, Prefix="%saccount=%s/series.json.gz" % (H.PREFIX, a)).get("Versions", [])
         samples.append((a, sb, mb, len(vs)))
-    claims = 0
+    claims, cal_n, cal_seen = 0, 0, set()
     for a in accts:
-        pass
+        sj = json.loads(gzip.decompress(s3.get_object(Bucket=H.BUCKET, Key="%saccount=%s/series.json.gz" % (H.PREFIX, a))["Body"].read()).decode("utf-8"))
+        mj = json.loads(s3.get_object(Bucket=H.BUCKET, Key="%saccount=%s/manifest.json" % (H.PREFIX, a))["Body"].read().decode("utf-8"))
+        if sj.get("income_claim") == "absent" and all(x is None for x in sj["income"]):
+            claims += 1
+        if mj.get("calendar_source") in CAL_VALUES:
+            cal_n += 1
+            cal_seen.add(mj["calendar_source"])
     return {"layers": [x["Arn"] for x in cfg.get("Layers", [])], "memory": cfg["MemorySize"], "timeout": cfg["Timeout"], "code_sha256": cfg["CodeSha256"], "handler": cfg["Handler"], "runtime": cfg["Runtime"], "role": cfg["Role"],
             "env": cfg.get("Environment"), "concurrency": conc, "sids": sorted(s.get("Sid", "") for s in ex), "sched_sids": sorted(s.get("Sid", "") for s in sp), "n_put": len(put), "put_resources": put[0]["Resource"] if len(put) == 1 else None,
             "sched_actions": [s["Action"] for s in sp], "sched_resources": [s["Resource"] for s in sp], "schedule": {"state": sc["State"], "cron": sc["ScheduleExpression"], "zone": sc.get("ScheduleExpressionTimezone"), "input": json.loads(sc["Target"].get("Input", "null"))},
-            "schedule_target": sc["Target"]["Arn"], "artifact_version": ver.get("VersionId"), "objects": objs, "gold_days": gold_days, "reports": reports, "samples": samples, "claims": claims}
+            "schedule_target": sc["Target"]["Arn"], "artifact_version": ver.get("VersionId"), "objects": objs, "gold_days": gold_days, "reports": reports, "samples": samples, "claims": claims, "cal_n": cal_n, "cal_seen": sorted(cal_seen)}
 
 
 def check_sample(root, a, sb, mb, nver, rec):
@@ -259,6 +268,10 @@ def run(root, cid):
         rp = rec["dry_run"]["report"]
         need([r for r in lv["reports"] if r[2] == rp["max_memory_used_mb"] and abs(r[0] - rp["duration_ms"]) < 1.0 and r[1] == 1024], "no REPORT line in the log group equals the dry run's")
         need(not [r for r in lv["reports"] if r[2] > 717], "a REPORT line reads Max Memory Used above 717 MB")
+        need(lv["claims"] == n == rec["full"]["claim_count"], "live count of series carrying income_claim absent beside all-null income: %d, record %s, published %d" % (lv["claims"], rec["full"]["claim_count"], n))
+        need(lv["cal_n"] == n == rec["full"]["manifest_calendar_count"] and lv["cal_seen"] == rec["full"]["calendar_sources_answered"], "live manifests carrying calendar_source: %d (sources %s), record %s %s, published %d" % (lv["cal_n"], lv["cal_seen"], rec["full"]["manifest_calendar_count"], rec["full"]["calendar_sources_answered"], n))
+        ctr = json.loads((root / "org/standards/IRPT_DASHBD_SERIES_CONTRACT.json").read_bytes().decode("utf-8"))
+        need(json.dumps(ctr).count("RETURN_METHOD_DOES_NOT_SEPARATE_INCOME") >= 2 and ctr["contract_version"] == "0.3.2", "series contract 0.3.2 must carry the fixed reason RETURN_METHOD_DOES_NOT_SEPARATE_INCOME")
         need((root / "org/critical_paths/.open_deploys" / (LEDGER_SLUG + ".json")).is_file(), "the ledger's open marker is missing: the ledger must stay OPEN")
         print("OK: the dry run left the prefix as it was; %d objects (%d series, %d manifests), no key added; ten sampled series validate against series contract 0.3.2, carry income_claim absent beside all-null income and the pair equal to the dry run's list, with a manifest at publisher 0.3.0 naming its calendar source and the prior version of each series key still present; a REPORT line equals the dry run's, none above 717 MB; ledger open" % (len(keys), n, n))
         return True
@@ -295,7 +308,7 @@ def selftest():
                 "canary": {"payload_shape": {"upload": True, "accounts": 1}, "account_hash12": "abcdef012345", "invoked_utc": "2026-10-16T10:02:00Z", "status_code": 200, "function_error": None,
                            "returned": summ(True, 1, 1, 0, {}), "report": rp, "objects_after": 1878, "request_id": "r2", "checks": dict({k: True for k in CHECKS}, publisher_version="0.3.0")},
                 "full": {"payload": {"upload": True}, "invoked_utc": "2026-10-16T10:03:00Z", "status_code": 200, "function_error": None, "returned": summ(True, 979, 939, 40, {"no positive value": 40}), "report": rp,
-                         "objects_after": 1878, "sampled_hash12": ["%012x" % i for i in range(10)], "sample_checks_pass": True, "claim_count": 939, "request_id": "r3"},
+                         "objects_after": 1878, "sampled_hash12": ["%012x" % i for i in range(10)], "sample_checks_pass": True, "claim_count": 939, "manifest_calendar_count": 939, "calendar_sources_answered": ["pandas_market_calendars"], "request_id": "r3"},
                 "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}}
         assert check_head(good, "b" * 40, "SIGNED " + PACKET_SHA, "SIGNED " + PACKET_SHA[:12], True) and check_tail(good)
         arms = (("claim", lambda r: r.update(claim="inferred")), ("blob", lambda r: r["gates"].update(packet_blob="c" * 40)), ("cto", lambda r: r["gates"].update(cto_half_signed=False)), ("applier", lambda r: r.update(applier="x")),
@@ -307,7 +320,7 @@ def selftest():
                 ("sched sids", lambda r: r["after"].update(scheduler_policy_sids=["x"])), ("dry payload", lambda r: r["dry_run"].update(payload={"upload": True})), ("dry uploaded", lambda r: r["dry_run"]["returned"].update(uploaded=True)),
                 ("dry objects", lambda r: r["dry_run"].update(objects_after=1879)), ("memory717", lambda r: r["dry_run"]["report"].update(max_memory_used_mb=800)), ("canary two", lambda r: r["canary"]["returned"].update(published=2)),
                 ("canary objects", lambda r: r["canary"].update(objects_after=1880)), ("canary check", lambda r: r["canary"]["checks"].update(income_claim_absent=False)), ("canary version", lambda r: r["canary"]["checks"].update(publisher_version="0.2.0")),
-                ("full published", lambda r: r["full"]["returned"].update(published=938)), ("full objects", lambda r: r["full"].update(objects_after=1877)), ("claim count", lambda r: r["full"].update(claim_count=900)),
+                ("full published", lambda r: r["full"]["returned"].update(published=938)), ("full objects", lambda r: r["full"].update(objects_after=1877)), ("claim count", lambda r: r["full"].update(claim_count=900)), ("cal count", lambda r: r["full"].update(manifest_calendar_count=938)), ("cal value", lambda r: r["full"].update(calendar_sources_answered=["x"])),
                 ("sample", lambda r: r["full"].update(sample_checks_pass=False)), ("order", lambda r: r["full"].update(invoked_utc="2026-10-16T10:00:30Z")), ("ledger", lambda r: r.update(ledger_closed=True)), ("extra", lambda r: r.update(z=1)))
         for label, fn in arms:
             r2 = copy.deepcopy(good)

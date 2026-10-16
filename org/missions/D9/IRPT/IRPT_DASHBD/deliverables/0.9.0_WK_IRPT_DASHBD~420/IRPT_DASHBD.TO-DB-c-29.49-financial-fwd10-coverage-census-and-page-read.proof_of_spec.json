@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-c-29",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "group": "OTHER",
+    "vintage_commit": "8c1db7c3f3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-CW.md",
+    "vintage_commit": "8c1db7c3f3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-c-29.49-financial-fwd10-coverage-census-and-page-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~420",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/FWD10_49F_CENSUS_R149.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/gold_census_r149.py",
+      "kind": "script",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only S3 list (Delimiter slash) of the two gold table prefixes and the trading calendar; no object opened, nothing written to AWS, nothing deployed.",
+      "artifact_covered_by": ["DBC150-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/read_publish_r149.py",
+      "kind": "script",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only S3 list and get_object of series documents only, on the published series prefix; the python truth over the downloaded files; nothing deployed.",
+      "artifact_covered_by": ["DBC150-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/page_read_r149.ts",
+      "kind": "script",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Bun script that imports the page's readSeries and performanceView by relative path and reads the downloaded files; run from the portal worktree, portal not edited; nothing deployed.",
+      "artifact_covered_by": ["DBC150-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/assemble_r149.py",
+      "kind": "script",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Copies the three measurement outputs into the record's fixed fields; writes only the record file; nothing deployed.",
+      "artifact_covered_by": ["DBC150-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/FWD10_49F_CENSUS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The labelled TEST READ record (counts and dates only, claim measured, ids_recorded false, pushed false, deployed false); a record, not a deploy."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/FWD10_49F_CENSUS_R149.md",
+      "kind": "doc",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The prose reading of the test read in words, counts only; a document, not a deploy."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "448810c867",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended as bytes (IRPT_DASHBD-D2-W420-S1 and -S2); the channel is not deployed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBC150-1-AC1",
+      "criterion_verbatim": "DBC150-1-AC1 -- the record's `gold` section equals a FRESH listing-and-calendar measurement the checker makes for both tables (partitions, first and last date, the exact absent trading days and the runs), and the record is labelled a TEST READ with claim `measured`. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r149/p150_bcw.py\" . DBC150-1-AC1",
+      "output_evidence": "DBC150-1-AC1 PASS (exit 0). The checker's fresh listing and calendar measurement agrees with the record for account_return_daily (571 partitions, first day and last day as recorded, 0 absent trading days, 0 runs) and holdings_performance_daily (570 partitions, 0 absent trading days, 0 runs); the record label is 'TEST READ -- not a serve, not a production run' and its claim is measured.",
+      "denominator": "2 of 2 gold tables equal the fresh measurement on partitions, first date, last date, absent trading days and runs; 571 and 570 partitions listed against a trading calendar window of 571 and 570 trading days (positive control); mutant control FIRED (an added partition count is named as the differing field); determinism control: two runs identical",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBC150-1-AC2",
+      "criterion_verbatim": "DBC150-1-AC2 -- the record's `series_truth` equals a FRESH read of the published series prefix, and the page-side counts agree: every document read with none refused or threw, the accounts printing the unreported-days sentence equal the documents with a non-empty list, no printed count differs from its list and no income was coerced to zero. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r149/p150_bcw.py\" . DBC150-1-AC2",
+      "output_evidence": "DBC150-1-AC2 PASS (exit 0). The checker's fresh read of the series prefix agrees with series_truth on every compared field; read_ok equals the documents read; read_refused 0; performance_view_threw 0; accounts printing the unreported-days sentence 0 equal nonempty_lists 0; sentence_n_mismatch 0; income_coerced_to_zero 0.",
+      "denominator": "6949 of 6949 series documents parse and are read ok by the page reader; 0 refused; 0 threw; 0 of 0 accounts with a non-empty unreported-days list print the sentence; 0 of 6949 documents with a count mismatch; 0 of 6949 incomes coerced; 6949 series objects in the listing, 6949 manifests, 4344 other objects (kinds not established)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBC150-1-AC3",
+      "criterion_verbatim": "DBC150-1-AC3 -- the hygiene: no account identifier token anywhere in the worker's folder, the record reports zero writes and invokes and `ids_recorded`, `pushed` and `deployed` false, no downloaded object is left in the folder, the note is at most 50 lines, and only the worker's folder, the channel and this order changed from the branch point. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r149/p150_bcw.py\" . DBC150-1-AC3",
+      "output_evidence": "DBC150-1-AC3 PASS (exit 0). No identifier-like token in the folder's text files; writes 0 and invokes 0; ids_recorded, pushed and deployed false; no .gz or .parquet file in the folder; the note is 28 lines (at most 50); the committed diff from the merge-base with box/dell2 names only the worker's folder, the channel and this order.",
+      "denominator": "0 of the folder's text files carry an identifier-like token; 0 writes, 0 invokes; 3 of 3 flags false; 0 downloaded objects left (6949 downloaded and deleted); 28 of 50 note lines; committed paths from the branch point 7 of 7, all inside the grant (6 under the worker's folder, 1 the channel); paths outside the grant 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker was loaded at its own path in a python -I process, and its AC1 arm was run with fresh_gold replaced by a measurement whose account_return_daily partition count is raised by one; the comparison must fire.",
+      "expected": "ac_1 raises a failure naming account_return_daily.partitions",
+      "observed": "MUTANT FIRED: account_return_daily.partitions differs from a fresh measurement",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "DBC150-1-AC1 run twice on the same commit, stdout compared byte for byte; AC2 was run once in full (a second 6949-document read was not repeated).",
+      "observed": "run 1 and run 2 each printed DBC150-1-AC1 PASS; the two outputs were identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping this order's status to complete",
+      "reason": "The order's BOUNDS say to leave the status as it is; the issuer flips it."
+    },
+    {
+      "item": "Re-running the 49 Financial download and page read after the order's deletion of the downloaded objects",
+      "reason": "The order requires the downloaded objects and their folder to be deleted; the record's counts are the single read's, and the checker's own fresh read re-measures the series prefix for AC2."
+    },
+    {
+      "item": "The kind of the 4344 other objects under the series prefix",
+      "reason": "The order bounds S3 reads to the gold partition listing and to series.json.gz objects; no other object was listed by name or read. Recorded as a count in row IRPT_DASHBD-D2-W420-S2."
+    },
+    {
+      "item": "Any portal edit, portal commit, push, deploy, Terraform, invoke or AWS write",
+      "reason": "Outside the grant: the portal is read, never edited; the order makes no push, deploy or write."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "gold_census_r149.py (worker, read-only S3 list of the two gold prefixes; trading calendar)",
+      "invocation": "python gold_census_r149.py <worktree root>",
+      "result": "2 list calls, 0 errors; account_return_daily 571 partitions, holdings_performance_daily 570 partitions; 0 absent trading days in either; 0 runs"
+    },
+    {
+      "tool": "read_publish_r149.py (worker, read-only S3 list and get of series documents; python truth)",
+      "invocation": "python -I read_publish_r149.py <worktree root> <temporary folder outside every repository> <gold first date> <partition template with placeholder value>",
+      "result": "19 list calls, 6949 get calls, 6949 of 6949 gets ok; objects_series 6949, objects_manifest 6949, objects_other 4344, docs_parse_ok 6949 of 6949, pair_present 0, pair_absent 6949, nonempty_lists 0, income_all_null_docs 0, income_any_number_docs 6949, first_data_date_after_gold_first_day 4097"
+    },
+    {
+      "tool": "page_read_r149.ts (worker, the page's readSeries and performanceView, run by bun from the portal worktree)",
+      "invocation": "cd <worktree>/portal && bun run <worktree>/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~420/page_read_r149.ts <temporary folder outside every repository>",
+      "result": "docs_read 6949, read_ok 6949, read_refused 0, performance_view_threw 0, accounts_printing_unreported_sentence 0, sentences_total 0, sentence_n_mismatch 0, income_coerced_to_zero 0, accounts_printing_returns_from 6949, accounts_printing_excluded_days_note 0, accounts_printing_day_quality_note 6945"
+    },
+    {
+      "tool": "assemble_r149.py (worker, copies the three outputs into the record)",
+      "invocation": "python assemble_r149.py <gold.json> <series.json> <page.json> <read_utc> <record path>",
+      "result": "wrote record keys=11; reads s3_list_calls 21, s3_get_calls 6949, writes 0, invokes 0"
+    },
+    {
+      "tool": "DBC150-1-AC1..AC3 checker (COO-issued, run at its own path with python -I)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~C2/checks/r149/p150_bcw.py . <id>",
+      "result": "DBC150-1-AC1 PASS; DBC150-1-AC2 PASS; DBC150-1-AC3 PASS (each rc 0)"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W420-S1: no 49 Financial series document carries the unreported-days pair (0 of 6949), so the page prints no unreported-days sentence for any 49 Financial account, while the gold census finds no absent trading day; the round-148 Cottonwood publish carried the pair on all 939 documents.",
+    "IRPT_DASHBD-D2-W420-S2: the 49 Financial series prefix holds 4344 objects that are neither series nor manifest documents (the round-148 Cottonwood prefix held none); their kind is not established."
+  ]
+}
