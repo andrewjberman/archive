@@ -1,0 +1,56 @@
+{
+ "order": "FB-p-1",
+ "read_at": "2026-10-16T18:14:42Z",
+ "key": "opal-data-inf/gold/meta/pipeline-complete.json",
+ "calls": [
+  "aws sts get-caller-identity (identity check; account 313476888478, dell1 agent user)",
+  "aws s3api get-bucket-notification-configuration --bucket opal-data-inf",
+  "aws s3api head-object --bucket opal-data-inf --key gold/meta/pipeline-complete.json (ContentLength 135, LastModified 2026-10-16T12:56:43Z; body not read)",
+  "aws events list-event-buses (1 bus: default)",
+  "aws events list-rules --event-bus-name default (156 rules, CLI auto-paginated, counted client-side: 134 schedule-only, 22 with an event pattern)",
+  "aws events list-targets-by-rule --rule <rule> --event-bus-name default for mdpf-feeder-accelerator, FIRMSEP-s3-direct-access-bypass, opal-globgrph-cloudtrail-mgmt, inf-assets-trigger-bronze-complete, inf-silver-chain-bronze-complete, inf-otp-state-change, opal-inf-served-guard-on-write",
+  "aws events describe-rule --name mdpf-feeder-accelerator",
+  "comp-find --corpus aws 'pipeline-complete' (2 hits across 2972 aws nodes scanned)",
+  "aws iam list-policies --scope Local (57 listed)",
+  "aws iam get-policy-version --policy-arn arn:aws:iam::313476888478:policy/opal-assets-one-way-fan-in-fence --version-id v1",
+  "aws iam list-entities-for-policy --policy-arn arn:aws:iam::313476888478:policy/opal-assets-one-way-fan-in-fence --entity-filter Role (13 roles)",
+  "comp-find -i 'pipeline-complete' infra/ --all (corpus all: 51 hits across 7905 files)",
+  "comp-find -i 'pipeline-complete' lib/ --all (corpus all: 0 hits across 831 files)",
+  "comp-find -i 'pipeline-complete' integrations/ --all (corpus all: 0 hits across 127 files)",
+  "comp-find -i 'pipeline-complete' .tools/ --all (corpus all: 0 hits across 590 files)",
+  "comp-find -i 'pipeline-complete' --all --files (whole repo: 412 hits across 15471 files)",
+  "comp-find -i 'gold/meta/' --all --files (whole repo: 525 hits across 15471 files)",
+  "comp-find --name '*orion-gold-dispatch*' (2 files)",
+  "comp-find 'PIPELINE_COMPLETE' data/black_diamond/scripts data/cot/scripts (4 hits across 312 files)",
+  "aws scheduler get-schedule --name mdpf-feeder-backstop-daily",
+  "aws lambda get-function-configuration --function-name <name> for mdpf-feeder-trigger, inf-gold-trigger, inf-portal-publisher, etfs-netassets-daily (Active); mdpf-daily-trigger and inf-gold-freshness-guard (ResourceNotFoundException)",
+  "aws lambda list-functions (244 functions, names matched client-side)"
+ ],
+ "denominators": {"s3_notification_entries": 1, "eventbridge_rules_listed": 156, "eventbridge_buses": 1, "aws_plane_nodes_scanned": 2972, "repo_dirs_scanned": 4},
+ "consumers": [
+  {"kind": "eventbridge_rule", "name": "mdpf-feeder-accelerator", "status": "RETIRING", "evidence": "events describe-rule: State ENABLED; EventPattern source aws.s3, detail-type Object Created, bucket name opal-data-inf, object key gold/meta/pipeline-complete.json (exact); list-targets-by-rule: one target MdpfFeederTrigger -> lambda mdpf-feeder-trigger (Active). This is the watcher the retirement names."},
+  {"kind": "s3_notification", "name": "inf-portal-publisher (bucket notification entry)", "status": "ABSENT_LIVE", "evidence": "get-bucket-notification-configuration on opal-data-inf: 1 entry, a LambdaFunctionConfigurations entry (Id tf-s3-lambda-<id>, target inf-silver-aggregator, ObjectCreated, prefix silver/_silver_complete/, suffix .json); no entry filters gold/meta/. The function inf-portal-publisher is still Active (LastModified 2026-10-14) but its trigger is absent. EventBridgeConfiguration is present (empty), so S3 object events also reach the default bus."},
+  {"kind": "eventbridge_rule", "name": "FIRMSEP-s3-direct-access-bypass", "status": "LIVE_OTHER", "evidence": "ENABLED; EventPattern CloudTrail GetObject on bucket opal-data-inf with any key and userAgent anything-but Amazon CloudFront; target SNS opal-infrastructure-alerts. Fires on a non-CloudFront GetObject of the key; not part of the retirement."},
+  {"kind": "eventbridge_rule", "name": "opal-globgrph-cloudtrail-mgmt", "status": "LIVE_OTHER", "evidence": "ENABLED; EventPattern CloudTrail management events with readOnly false for 14 aws sources including aws.s3, no key filter; target SQS opal-globgrph-incremental-events. A write call on the key would match through CloudTrail; a generic graph-feed sink, not key-specific."},
+  {"kind": "code_reader", "name": "inf-gold-trigger", "status": "LIVE_OTHER", "evidence": "infra/aws/lambda/inf-gold-trigger/lambda_function.py:33 s3.get_object(Key=COMPLETE_KEY) inside _check_idempotency (constant at :24); on a read failure :41-42 logs WARN and dispatches. Function Active (get-function-configuration). Reads the key; not part of the retirement."},
+  {"kind": "code_reader", "name": "inf-gold-freshness-guard", "status": "ABSENT_LIVE", "evidence": "infra/aws/lambda/inf-pipeline/inf-gold-freshness-guard/lambda_function.py:140 s3.get_object(Key=SENTINEL_KEY) (default at :42). Live: get-function-configuration ResourceNotFoundException; not in list-functions (244 scanned)."},
+  {"kind": "code_reader", "name": "mdpf-daily-trigger", "status": "ABSENT_LIVE", "evidence": "infra/aws/lambda/mdpf-pipeline/mdpf-daily-trigger/lambda_function.py:53 defines INF_SENTINEL_KEY with the key as default; the name has no other reference in that file (Grep count 1). Live: get-function-configuration ResourceNotFoundException; not in list-functions (244 scanned)."},
+  {"kind": "other", "name": "mdpf-feeder-backstop-daily (schedule)", "status": "LIVE_OTHER", "evidence": "scheduler get-schedule: State ENABLED, cron(52 12 * * ? *) UTC, target lambda mdpf-feeder-trigger via role mdpf-feeder-scheduler-role. It does not read the key; it is a second trigger of the accelerator's target. Its description says never remove without a replacement trigger."},
+  {"kind": "iam_fence", "name": "opal-assets-one-way-fan-in-fence :: DenyInfGoldSentinelAbsolutely", "status": "LIVE_OTHER", "evidence": "get-policy-version v1: Sid DenyInfGoldSentinelAbsolutely, Effect Deny, Action s3:*, Resource arn:aws:s3:::opal-data-inf/gold/meta/pipeline-complete.json. list-entities-for-policy: 13 attached roles (equals AttachmentCount 13). Not part of the retirement."}
+ ],
+ "writers": [
+  {"name": "data/inf/scripts/gold/orion-gold-dispatch.sh (gold chain tail, on success of --chain full)", "evidence": "data/inf/scripts/gold/orion-gold-dispatch.sh:1906 'aws s3 cp - s3://${INF_S3_BUCKET}/gold/meta/pipeline-complete.json'; guarded at :1894-1902 by MODE chain, TARGET full, DRY_RUN 0 and chain_exit 0; INF_S3_BUCKET defaults to opal-data-inf at :64. Failure path writes gold/meta/pipeline-failed.json at :1917, not this key. Runner link: infra/aws/ec2/inf-gold-layer-runner/run-gold-layer.sh:61 names orion-gold-dispatch.sh as the gold-chain script run on that EC2."}
+ ],
+ "writer_determined": true,
+ "writer_note": "",
+ "not_read": [
+  "The deployed copies of run-gold-layer.sh and orion-gold-dispatch.sh in s3://opal-data-inf/code/runner/ (run-gold-layer.sh:25 and :49 pull the runner from there at boot): the writer evidence is the repo copy, not the live copy.",
+  "The bodies of the 13 roles attached to the fence policy: only the policy document and the attachment count were read, not each role's policies.",
+  "The S3 server access logs and CloudTrail data events for reads of the key: not queried; the rule-side read is the FIRMSEP pattern only.",
+  "The 134 schedule-only rules on the default bus carry no event pattern and were not matched against the key; they are scheduled, not event-driven.",
+  "The 244 Lambda functions were matched by name only; their code was not scanned live, the code-reader search is repo-side (comp-find) and cites file lines.",
+  "data/black_diamond/scripts/gold/lib/s3_layout.py and data/cot/scripts/gold/lib/s3_layout.py declare PIPELINE_COMPLETE constants under other buckets; comp-find shows no use of those constants (4 hits, 312 files); not read beyond the declaration lines.",
+  "Of the 22 default-bus rules with an event pattern, 7 were target-read live (listed in calls); the other 15 were classified by their pattern text only (other buckets or keys, or no key match)."
+ ],
+ "claim": "measured"
+}
