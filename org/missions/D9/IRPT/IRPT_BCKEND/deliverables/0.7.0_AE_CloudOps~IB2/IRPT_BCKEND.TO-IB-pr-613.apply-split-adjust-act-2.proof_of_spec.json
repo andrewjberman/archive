@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-613",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-613.apply-split-adjust-act-2.md",
+  "group": "OTHER",
+  "vintage_commit": "411412982f"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-613.apply-split-adjust-act-2.md",
+  "vintage_commit": "411412982f"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/ (the 47 split-day keys, 2024-07-09 to 2026-09-03, one data.parquet each)",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "47 dated invokes of irpt-holdings-performance-lambda, each key read back with a new IsLatest version and compared row by row with its prior version: changed rows equal the signed per-day counts (sum 1291), other rows changed 0; each prior version remains the Branch B target; nothing deleted",
+   "artifact_covered_by": [
+    "IB244-1-AC2"
+   ],
+   "commit_or_etag": "47 new version ids in IB244-1_act2_record.json"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB244-1_act2_record.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the criteria's record: 47 days with prior and new version ids, totals, window",
+   "artifact_covered_by": [
+    "IB244-1-AC1",
+    "IB244-1-AC2",
+    "IB244-1-AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB244-1-AC1",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r244/p244_cells.py\" . IB244-1-AC1",
+   "expect": "IB244-1-AC1 PASS",
+   "output_evidence": "OK: the gates: the pair and addenda, Act 1 landed and read, the candidate live, the handler line, the 47 signed days\nIB244-1-AC1 PASS\nexit code: 0\n(run 2026-10-16 under timeout 120 from the repo root)",
+   "denominator": "2004 ledger files read (0 OPEN naming the function or root), 3 CTO halves, 4 byte hashes, 1 CodeSha256 read, 47 days against the signed record, 1 handler line, 1 census (313 files, 111716 scanned)",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r244/p244_cells.py\" . IB244-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "IB244-1-AC2",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r244/p244_cells.py\" . IB244-1-AC2",
+   "expect": "IB244-1-AC2 PASS",
+   "output_evidence": "OK: the 47 days in ascending order, each with its prior version, only split-holders changed, each count equal to the signed one\nIB244-1-AC2 PASS\nexit code: 0\n(run 2026-10-16 under timeout 120 from the repo root)",
+   "denominator": "47 days x (1 prior version, 1 new version, 1 row-by-row comparison over 19 columns); 47 comparison_ok, 0 stops",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r244/p244_cells.py\" . IB244-1-AC2",
+   "method": "command"
+  },
+  {
+   "criterion_id": "IB244-1-AC3",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r244/p244_cells.py\" . IB244-1-AC3",
+   "expect": "IB244-1-AC3 PASS",
+   "output_evidence": "OK: the totals, the event keys, the window, the siblings never invoked, no rollback, the counters\nIB244-1-AC3 PASS\nexit code: 0\n(run 2026-10-16 under timeout 120 from the repo root)",
+   "denominator": "47 manifests read, 13 named ratio-absent entries, 48 invokes (1 refused), 1 window computation, 0 sibling invokes",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r244/p244_cells.py\" . IB244-1-AC3",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (its comp-adversary arm ran its negatives on synthetic records).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "each day carries a positive control: the split-holder set is recomputed with the deployed code's own functions and equals the signed per-day holder count (11 on 2024-07-09, 985 on 2026-04-21)",
+   "observed": "47 of 47 changed counts equal the signed counts",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the first invoke of day 1 (2026-10-16 14:19:50Z)",
+   "reason": "the producer refused a date-only event (three sources declared) before any compute; nothing was written; ADDENDUM 3 then named the source; it is counted: 48 invokes, 47 that wrote"
+  },
+  {
+   "item": "schema 1.1 to 1.2 on every row of each restated key and the added span_trading_days column",
+   "reason": "the stored history predates two producer schema steps; the CTO's rule A accepted the move after a reader census (no reader pins a column count or schema_version), and the comparison ran over the prior version's own 19 columns; row IRPT_BCKEND-D2-S225"
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-D2-S225"
+ ],
+ "session_log": "org/critical_paths/change_management/20261016T1419Z_irpt-holdings-performance-act2-ib613-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "act-2 day harness (python 3.12, pandas 2.2.3, pyarrow 14.0.2) and the AWS CLI",
+   "invocation": "per day: record the prior IsLatest version and the split-holder set, one aws lambda invoke, read the new version, compare row by row",
+   "result": "47 of 47 days comparison_ok; totals 1291 changed, 13 named ratio-absent"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'holdings_performance_daily' --files --all, and --corpus aws",
+   "result": "776 hits over 111716 files; first-party readers read named columns, test a superset, or take account_id only"
+  }
+ ]
+}
