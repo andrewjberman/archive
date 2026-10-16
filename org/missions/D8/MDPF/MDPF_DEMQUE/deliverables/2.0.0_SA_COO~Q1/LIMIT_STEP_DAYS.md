@@ -6,8 +6,8 @@
 
 | step | seat | what moves | takes effect (ET) | commit | status |
 |---|---|---|---|---|---|
-| A4 price axis, step 0 to 1 (30 to 90 days) | `2.0.0_SA_COO~R1` | PX_LAST reach, about +4,250 observations a day | not set (follows R1's day-0 read; R1 says the earliest is 2026-10-17, a Saturday, so read as the first trading day after) | | pending |
-| A2 `BACKFILL_CAP` 50 to 62 | `2.0.0_SA_COO~H1` | tickers a run asked for history backfill | not set | | pending (order being cut) |
+| A4 price axis, step 0 to 1 (30 to 90 days) | `2.0.0_SA_COO~R1` | PX_LAST reach, about +4,250 observations a day | first trading day two or more trading days after A2's reported day, and after site Z's day-0 read (day 0 is Fri Oct 16, about 9:00 AM ET; the next trading-day fire is Mon Oct 19). A2 on Mon Oct 19 gives A4 Wed Oct 21; A2 on Tue Oct 20 gives A4 Thu Oct 22. R1 appends the day in the message that says the commit landed | | pending (R1 holds Oct 19 until H1 reports A2's day) |
+| A2 `BACKFILL_CAP` 50 to 62 | `2.0.0_SA_COO~H1` | tickers a run asked for history backfill | **Fri Oct 16, 7:00 AM ET pull** (MEASURED: site Z's manager read its working tree 2026-10-16 00:36:34Z, `etf_daily_pull.py` blob 9e02396c98, clean against HEAD, line 62 = 62; H1 msg 6369). H1 reads Friday's manifest and reports if the run did not carry 62. COO~R1's A4 step 1 is therefore Tue Oct 20 at the earliest | `8f56c423dd` | taking effect Fri Oct 16 |
 | History ceiling ramp, step 1 (11,716 cells) | `2.0.0_SA_COO~Q1` | the drawer's daily room | earliest Sat 2026-10-24: the ramp cell is cut at the round-10 issuance after `TO-DQ-t34` is terminal | | not started |
 | History ceiling ramp, step 2 (23,432) | `2.0.0_SA_COO~Q1` | the drawer's daily room | one completed day after step 1 | | not started |
 | History ceiling ramp, step 3 (29,290) | `2.0.0_SA_COO~Q1` | the drawer's daily room | one completed day after step 2 | | not started |

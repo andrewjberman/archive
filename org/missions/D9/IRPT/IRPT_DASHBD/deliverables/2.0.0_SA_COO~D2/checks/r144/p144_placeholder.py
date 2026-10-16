@@ -43,7 +43,8 @@ LONG_DIGITS = re.compile(r"\d{8,}")
 # the ONE pre-existing label that holds "advisory fee" in a scanned file: file, exact line text, and the line it had at the base commit
 EXEMPT = ((IR + "render/clientreport/ClientReportDocument.tsx", "Billed advisory fee: {typeof fees.is_billed_fee === 'boolean' ? (fees.is_billed_fee ? 'yes' : 'no') : textOrWord(fees.is_billed_fee)}"),)
 BANNED = ("past performance", "not a guarantee", "advisory fee", "form adv", "hypothetical")
-CANDIDATE = "af8ca0ba"  # the portal candidate wk-IRPT_DASHBD-224-portal, named by commit (round 145: a criterion that reads the wrong tree is not a grade)
+CANDIDATE = "42a1539b"  # the REGISTERED candidate cand/dell2/irpt-49f-report-render-disclosure-placeholder, named by commit (a criterion that reads the wrong tree is not a grade)
+ORIGINAL = "af8ca0ba"  # the worker's branch head wk-IRPT_DASHBD-224-portal that the candidate was re-cut from onto the PROD release e0e69da7 (22 commits, cherry-picked with -x)
 BASE_COMMIT = "c81d54ff"  # the head of the 49 Financial report render lineage (wk-IRPT_DASHBD-180-portal), not merged to DEV
 
 
@@ -184,7 +185,7 @@ def check_record(r, commit_ok):
     need(isinstance(pt, dict) and set(pt) == {"branch", "commit", "files_changed"} and pt["branch"] == "wk-IRPT_DASHBD-224-portal" and re.fullmatch(r"[0-9a-f]{7,40}", str(pt["commit"])),
          "portal: the branch wk-IRPT_DASHBD-224-portal and a commit")
     need(isinstance(pt["files_changed"], list) and pt["files_changed"] and all(str(x).startswith("src/") for x in pt["files_changed"]), "files_changed must list portal files under src/")
-    need(commit_ok(pt["commit"]), "the portal commit does not exist or does not descend from the report render base %s" % BASE_COMMIT)
+    need(commit_ok(pt["commit"]), "the record's portal commit must be the worker's head %s and the candidate %s must carry it as a cherry-pick trailer" % (ORIGINAL, CANDIDATE))
     c = r["constant"]
     need(isinstance(c, dict) and set(c) == {"file", "name", "value"} and c["value"] == WORDS and str(c["file"]).startswith("src/") and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", str(c["name"])), "constant: file, name and the exact words")
     b = r["branches"]
@@ -240,8 +241,10 @@ def check_ac3(root):
 
     def commit_ok(c):
         g = subprocess.run(["git", "-C", str(portal), "cat-file", "-t", c], capture_output=True, text=True, timeout=60)
-        a = subprocess.run(["git", "-C", str(portal), "merge-base", "--is-ancestor", BASE_COMMIT, c], capture_output=True, timeout=60)
-        return g.returncode == 0 and g.stdout.strip() == "commit" and a.returncode == 0
+        full = subprocess.run(["git", "-C", str(portal), "rev-parse", c], capture_output=True, text=True, timeout=60).stdout.strip()
+        # the worker's commit is the record's; the registered candidate carries it as the (cherry picked from commit ...) trailer of its head
+        t = subprocess.run(["git", "-C", str(portal), "log", CANDIDATE, "--format=%b", "--grep=cherry picked from commit " + full], capture_output=True, text=True, timeout=120)
+        return g.returncode == 0 and g.stdout.strip() == "commit" and full.startswith(ORIGINAL) and ("cherry picked from commit " + full) in t.stdout
     check_record(r, commit_ok)
     need(r["constant"]["file"] == hits[0][0], "the record's constant file differs from the product source")
     print("OK: the words %r are one shared constant in %s used by both render paths; the unfilled slot and the report document's last sheet print the placeholder; the filled branch and the pointer line are unchanged; no authored language; the record is bound to a portal commit" % (WORDS, hits[0][0]))

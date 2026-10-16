@@ -35,11 +35,17 @@ def main():
     finally:
         snap = store.get_stats_snapshot()
         records = sorted((scratch / "run_records").glob("*.json"))
+        keys = ""
         if records:
-            jobs = json.loads(records[-1].read_text(encoding="utf-8")).get("jobs") or [{}]
+            record = json.loads(records[-1].read_text(encoding="utf-8"))
+            jobs = record.get("jobs") or [{}]
             status = jobs[0].get("status")
-        print("PROBE publisher=%s get_count=%d get_bytes=%d status=%s" % (
-            publisher, snap["get_count"], snap["get_bytes"], status))
+            # HVST-cb-10 puts the process's own counters on the run record: the probe prints them beside its own.
+            keys = " record_get_count=%s record_get_bytes=%s" % (record.get("s3_get_count"), record.get("s3_get_bytes"))
+        ledger = scratch / "s3_get_ledger.jsonl"
+        lines = len(ledger.read_text(encoding="utf-8").splitlines()) if ledger.exists() else 0
+        print("PROBE publisher=%s get_count=%d get_bytes=%d status=%s%s ledger_lines=%d" % (
+            publisher, snap["get_count"], snap["get_bytes"], status, keys, lines))
 
 
 if __name__ == "__main__":
