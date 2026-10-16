@@ -1,0 +1,83 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-CHECKFAIL.served-checker-check-failed-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-CHECKFAIL.served-checker-check-failed-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "1106dc852b"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R35_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-CHECKFAIL.served-checker-check-failed-aq2.md",
+  "vintage_commit": "1106dc852b"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/CHECKFAIL_READ.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the six sections of a read-only look at the resident unit (sandbox, process environment, cache folders, import-path wiring, probe-window journal) and the analysis",
+   "artifact_covered_by": [
+    "CHECKFAIL-AC1",
+    "CHECKFAIL-AC2"
+   ],
+   "commit_or_etag": "51686af530"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CHECKFAIL-AC1",
+   "invocation": "grep -c -E '^SECTION (UNIT|SANDBOX|PROCENV|CACHE|PYPATH|JOURNAL)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/CHECKFAIL_READ.txt",
+   "expect": "^6$",
+   "output_evidence": "6\nexit=0",
+   "denominator": "6 sections, each once",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^SECTION (UNIT|SANDBOX|PROCENV|CACHE|PYPATH|JOURNAL)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/CHECKFAIL_READ.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "CHECKFAIL-AC2",
+   "invocation": "awk '/^SECTION PROCENV$/{f=1;next} /^SECTION /{f=0} f' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/CHECKFAIL_READ.txt | grep -c -E '^[A-Z_]+=' | grep -E '^([0-9]|1[01])$'",
+   "expect": "^([0-9]|1[01])$",
+   "output_evidence": "11\nexit=0",
+   "denominator": "the process-environment section prints at most the eleven named variables",
+   "status": "PASS",
+   "criterion_verbatim": "awk '/^SECTION PROCENV$/{f=1;next} /^SECTION /{f=0} f' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/CHECKFAIL_READ.txt | grep -c -E '^[A-Z_]+=' | grep -E '^([0-9]|1[01])$'",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one read-only script sent once; the environment read prints only the eleven named variables and the record was grepped for password, secret, bearer and authorization (0 hits)",
+   "observed": "6 sections; 11 environment lines; 0 secret words",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the exception text behind TICKER_CHECK_FAILED",
+   "reason": "the journal carries none: the checker keeps only a reason code and the resident logs no checker line; the record says so"
+  },
+  {
+   "item": "the fourth hypothesis (yfinance 1.2.0 raises for an unknown symbol when hide_exceptions is False)",
+   "reason": "INFERRED from the repository code and the yfinance wheel source, not observed on the host; proving it needs a vendor call that captures the exception class, which this order forbids"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/CHECKFAIL_READ.txt",
+ "compiler_tools": [
+  {
+   "tool": "ssm_run_yf.py --as-root, checkfail_read.sh (committed)",
+   "invocation": "one root read-only script by Systems Manager",
+   "result": "six sections"
+  }
+ ]
+}
