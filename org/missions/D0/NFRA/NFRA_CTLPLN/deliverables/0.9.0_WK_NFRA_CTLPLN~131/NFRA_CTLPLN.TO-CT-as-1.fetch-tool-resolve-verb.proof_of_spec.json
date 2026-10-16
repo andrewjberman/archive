@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-as-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-as-1.fetch-tool-resolve-verb.md",
+    "group": "OTHER",
+    "vintage_commit": "b676486163"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~131",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round27.md",
+    "vintage_commit": "b676486163",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-as-1.fetch-tool-resolve-verb.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_fetch.py",
+      "kind": "script",
+      "commit_or_etag": "2260ca7521",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "resolve verb: one release-document GET per member (Resolve inherits Fetch.get/get_json), ONE exact wheel by the three-rule order, sha256/size from the index, approval gate before any socket, re-check lines NEW-MEMBER / SPECIFIER-MISMATCH / HOST-CONFLICT / HOST-OK / NO-METADATA; the verdict line is last. Last carried by 2260ca7521 (failure-line member count). No push, no deploy.",
+      "artifact_covered_by": [
+        "CTas1-AC1",
+        "CTas1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/intake_closure.py",
+      "kind": "script",
+      "commit_or_etag": "76d0fa6943",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cmd_fetchlist refuses a closure whose target is not cp314-win_amd64: stdout 'fetchlist: this closure targets cp312-linux_x86_64; use intake_fetch.py resolve to name its files', exit 2, no file written. Windows output byte-identical: fetch-list JSON and Markdown sha256 equal the pre-change run (47b486a5a5f4... and 5c4e64f97045...). Committed in 76d0fa6943; no deploy.",
+      "artifact_covered_by": [
+        "CTas1-AC1",
+        "CTas1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_fetch.py",
+      "kind": "test",
+      "commit_or_etag": "b81c9a39d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two cases added for the verb (case_resolve_names_one_file, case_resolve_approval_gate_zero_requests); no existing case changed; contextlib import added. Suite reads INTAKE-FETCH-TEST cases=21/21 ok=True. Committed in b81c9a39d0; no deploy.",
+      "artifact_covered_by": [
+        "CTas1-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round27_resolve.py",
+      "kind": "test",
+      "commit_or_etag": "b81c9a39d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New battery, nine arms (a-g, h1, h2), loopback fake index only, no real network. Reads RESOLVE arms=9/9 ok=True. Committed in b81c9a39d0; no deploy.",
+      "artifact_covered_by": [
+        "CTas1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTas1-AC1",
+      "criterion_verbatim": "the resolve verb names one exact wheel per member from a loopback index, stops on a source-only or other-platform release, refuses before any socket when the approval lacks a line, and `fetchlist` no longer names Windows files for a Linux closure (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_round27_resolve.py",
+      "output_evidence": "RESOLVE arms=9/9 ok=True (last line, verbatim; exit code 0). Arm lines, verbatim: PASS arm a: a  choice: pure, manylinux_2_28 over 2_17/win/sdist, sdist-only -- purepkg -> purepkg-1.0-py3-none-any.whl; compiled -> compiled-2.0-cp312-cp312-manylinux_2_28_x86_64.whl (not manylinux_2_17, not win_amd64, not the sdist); sourceonly -> NO-WHEEL SDIST-ONLY | PASS arm b: b  other-platform, yanked never chosen, yanked-only, no release -- muslpkg NO-WHEEL OTHER-PLATFORM-ONLY (tag cp312-cp312-musllinux_1_1_x86_64); yankedpkg CHOSEN the 2_17 file, the yanked 2_28 never; yankonly NO-WHEEL YANKED; gone NO-WHEEL NO-RELEASE (HTTP 404) | PASS arm c: c  approval gate: refusal before any socket, difference control -- partial approval: rc=2, 'lacks 1 of 2 exact line(s): compiled==2.0', server requests=0; complete approval: server requests=2 (difference control) | PASS arm d: d  one request per member, no other path -- 3 members -> 3 requests, one per release document (/pypi/compiled/2.0/json, /pypi/purepkg/1.0/json, /pypi/sourceonly/3.0/json); no file, project or attestation path | PASS arm e: e  output JSON sha256/size from the index, rows sorted, ASCII md -- sha256 and size equal the index's values (66410eac9161..., 36 bytes); rows sorted alpha,purepkg,zeta; .md ASCII | PASS arm f: f  fetchlist refuses a Linux closure; Windows output byte-identical -- linux closure: rc=2 and the stated message only, no file written; windows closure: rc=0, json sha256 47b486a5a5f4... and md sha256 5c4e64f97045... equal the pre-change values | PASS arm g: g  CONTROL: the arm-a assertion on a manylinux_2_17 result FAILS -- control FAILED as required: compiled: file compiled-2.0-cp312-cp312-manylinux_2_17_x86_64.whl, want compiled-2.0-cp312-cp312-manylinux_2_28_x86_64.whl | PASS arm h1: h1 re-check issues: NEW-MEMBER, SPECIFIER-MISMATCH, HOST-CONFLICT -- NEW-MEMBER newdep, SPECIFIER-MISMATCH beta 2.0 <2, HOST-CONFLICT hosty 2.0 <2, HOST-OK clean; last line: INTAKE-RESOLVE target=cp312-linux_x86_64 members=2 chosen=2 no_wheel=0 requests=2 ok=False new_members=1 specifier_mismatches=1 host_conflicts=1 | PASS arm h2: h2 re-check clean: HOST-OK, win32 marker and extra not followed -- no STOP line; HOST-OK clean and hosty; winonly (win32) and extra_only not followed; last line: INTAKE-RESOLVE target=cp312-linux_x86_64 members=2 chosen=2 no_wheel=0 requests=2 ok=True new_members=0 specifier_mismatches=0 host_conflicts=0",
+      "denominator": "9 of 9 arms PASS",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTas1-AC2",
+      "criterion_verbatim": "the fetch tool's own suite still passes with the verb added (base: `INTAKE-FETCH-TEST cases=19/19 ok=True`, a control); report the whole last line.",
+      "method": "test_suite",
+      "invocation": "python org/devices/intake/test_intake_fetch.py",
+      "output_evidence": "INTAKE-FETCH-TEST cases=21/21 ok=True (last line, verbatim; exit code 0). PASS lines: 21 of 21 (base 19 of 19). The two added cases are case_resolve_names_one_file and case_resolve_approval_gate_zero_requests; no existing case changed.",
+      "denominator": "21 of 21 cases PASS (base 19 of 19)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTas1-AC3",
+      "criterion_verbatim": "the closure tool's suite still passes after the `fetchlist` change (base: `INTAKE-CLOSURE-TEST cases=10/10 ok=True`, a control); report the whole last line.",
+      "method": "test_suite",
+      "invocation": "python org/devices/intake/test_intake_closure.py",
+      "output_evidence": "INTAKE-CLOSURE-TEST cases=10/10 ok=True (last line, verbatim; exit code 0). PASS case lines: 10 of 10 (base 10 of 10); fetchlist change does not touch build_fetchlist, so cases 1-10 are unchanged.",
+      "denominator": "10 of 10 cases PASS (base 10 of 10)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arm g of .tools/tests/test_round27_resolve.py: the arm-a assertion (arm_a_failures) run on a HAND-MADE result that names compiled-2.0-cp312-cp312-manylinux_2_17_x86_64.whl where the manylinux_2_28 file must be. The hand-made result never touches the tool or the index.",
+      "expected": "the assertion returns a failure naming the 2_17 file against the 2_28 file (control FAILS as required)",
+      "observed": "arm g PASS: 'control FAILED as required: compiled: file compiled-2.0-cp312-cp312-manylinux_2_17_x86_64.whl, want compiled-2.0-cp312-cp312-manylinux_2_28_x86_64.whl'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice on the committed code (2260ca7521); the two outputs compared with diff; outputs kept in the worktree scratch folder (AC1_run.txt / AC1_det2.txt, AC2_run.txt / AC2_det2.txt, AC3_run.txt / AC3_det2.txt)",
+      "observed": "AC1 identical (diff empty, 10 lines); AC2 identical (diff empty, 22 lines); AC3 identical (diff empty, 11 lines)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~131/NFRA_CTLPLN.TO-CT-as-1.fetch-tool-resolve-verb.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~131 on 2026-10-16; the session's final message is the WORKER REPORT). Sparse set gained org/tier1_exec/1.0.0_SA_CTO/deliverables for the ruling and the approval. Interpretations, disclosed: resolve adds reasons REQUIRES-PYTHON-UNMET, NO-DIGEST and NO-FILES where the four named reasons do not cover the case; --host-pydeps is an option of the verb (named in re-check item 1b); host_conflicts prints UNREAD when no host file is given. No network request to any real host, no install, no push, no deploy, no AWS write.",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round27_resolve.py",
+      "result": "RESOLVE arms=9/9 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_fetch.py",
+      "result": "INTAKE-FETCH-TEST cases=21/21 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_closure.py",
+      "result": "INTAKE-CLOSURE-TEST cases=10/10 ok=True"
+    }
+  ]
+}
