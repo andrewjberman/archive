@@ -1,0 +1,54 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~476 on AMGT-bo-1 (round 108). Verbatim run outputs, in order. Worktree: C:/dev/wk-resapp-476. Portal branch: cand/dell1/amgt-sa-withheld-reasons, base e0e69da7, head 01e06415f17f5e2ea79b28548647142879cce340 (LOCAL).
+
+1. Harness run on the UNCHANGED page (before any product edit), node src/pages/SecurityAnalysis/__harness__/withheldReasons.harness.cjs:
+   M1 PASS, M2 PASS, M3 PASS, M4 FAIL (2025 cell: 3.6x-5x), M5 PASS, M6 FAIL (team P/E cells 3 (expected 3), carrying the mark 0), M7 PASS, M8 PASS,
+   R1 FAIL, R2 FAIL, R3 FAIL, R4 FAIL (reason line absent), R5 PASS, R6 FAIL (line starts "absent"),
+   C1 FAIL (withheld PE rows listed 3 of 3; section carries 14.9x true, 15.1x true), C2 FAIL (rows listed 33 of 33 served; Changed tile reads 33), C3 PASS, C4 FAIL (table present true, reason sentence 0 time(s), tile 33)
+   WITHHELD REASONS HARNESS: NO (8 of 18 checks)     exit 1
+
+2. First run after the product edits (before the harness fixture correction):
+   ... C4 FAIL (table present false, reason sentence 1 time(s), tile 30)
+   WITHHELD REASONS HARNESS: NO (17 of 18 checks)
+   Cause: the C4 harness fixture kept the served changed denominator at 33 while keeping only 3 changed rows; the tile then read 33 minus 3 dropped = 30. The harness fixture was corrected (served denominator set to the 3 rows it serves). The product code was not changed.
+
+3. AC1 (final, exact invocation), two runs on identical input, outputs identical:
+   CHECK M1_shop_2025_text_range_prints_mark PASS (2025 cell: 74x-193.1xresearch team estimate)
+   CHECK M2_shop_2026E_team_estimate_prints_mark PASS (2026E cell: 67.8xresearch team estimate)
+   CHECK M3_shop_2027E_team_estimate_prints_mark PASS (2027E cell: 53.0xresearch team estimate)
+   CHECK M4_pbr_2025_range_prints_mark PASS (2025 cell: 3.6x-5xresearch team estimate)
+   CHECK M5_pbr_2026E_and_2027E_print_mark PASS (2026E: 5.9xresearch team estimate | 2027E: 6.1xresearch team estimate)
+   CHECK M6_team_pe_in_column_without_withhold_prints_mark PASS (team P/E cells 3 (expected 3), carrying the mark 3)
+   CHECK M7_vendor_pe_cells_print_no_mark PASS (vendor P/E cells 3, carrying the mark 0)
+   CHECK M8_team_cell_on_another_row_prints_no_mark PASS (team cells on other Key Figures rows 3, carrying the mark 0)
+   CHECK R1_zurn_sw_no_pe_row_reason_once PASS (P/E row present false, Key Figures rows 3, reason line carries the sentence 1 time(s))
+   CHECK R2_939_hk_no_pe_row_reason_once PASS (P/E row present false, Key Figures rows 2, reason line carries the sentence 1 time(s))
+   CHECK R3_ict_pm_no_pe_row_reason_once PASS (P/E row present false, Key Figures rows 3, reason line carries the sentence 1 time(s))
+   CHECK R4_1299_hk_no_pe_row_reason_once PASS (P/E row present false, Key Figures rows 3, reason line carries the sentence 1 time(s))
+   CHECK R5_shop_with_pe_row_has_no_reason_line PASS (P/E row present true)
+   CHECK R6_reason_line_is_a_p_with_the_words PASS (line starts "P/E not shown: the price is in CHF and c")
+   CHECK C1_zurn_compare_lists_no_withheld_pe_row PASS (withheld PE rows listed 0 of 3; section carries 14.9x false, 15.1x false)
+   CHECK C2_zurn_compare_lists_30_rows_tile_reads_30 PASS (rows listed 30 of 33 served; Changed tile reads 30)
+   CHECK C3_control_no_withhold_entries_lists_all_33_rows PASS (rows listed 33; Changed tile reads 33 (expected 33 and 33))
+   CHECK C4_every_changed_row_dropped_prints_one_reason_line PASS (table present false, reason sentence 1 time(s), tile 0)
+   WITHHELD REASONS HARNESS: YES (18 of 18 checks)
+   exit=0
+
+4. Existing round 107 harness after T5 was flipped to expect the mark:
+   TEAM ESTIMATE MARK HARNESS: YES (12 of 12 checks)     exit 0
+   modelPattern.harness.cjs: CHECKS-OK 12 of 12     exit 0
+
+5. AC2 (exact invocation, tail -2):
+   repo-wide lint rc 1 (information only: PROD itself reads non-zero in a file this feature does not touch) | typecheck rc 0 | lint rc 0 (src/pages/SecurityAnalysis) | harness 24 of 27 pass | base 20 of 26 | regressions 0: none | pre-existing: assembled.harness.cjs exportCompare.harness.cjs timelineFourStates.harness.cjs
+   R103 FEATURE GREEN: YES (typecheck rc 0, lint rc 0, harness 24 of 27 pass, base 20 of 26, regressions 0, pre-existing: assembled.harness.cjs exportCompare.harness.cjs timelineFourStates.harness.cjs)
+   exit=0
+
+6. AC3 (exact invocation), after the receipt was written:
+   10 files, all class page (src/pages/SecurityAnalysis/...)
+   R103 FEATURE SURFACE: YES (10 files: 10 page, 0 shared named, 0 forbidden, 0 unnamed)
+   exit=0
+
+7. Approval row, check-only (not registered):
+   APPROVAL-REGISTER result=OK row=- head_sha=01e06415f17f5e2ea79b28548647142879cce340 commits=1 check-only=yes waived=0
+   exit=0
+
+8. Commit gates that printed on the portal commit: commit-gate checked 0 of 10 file(s) (it reads .py/.sh/.tf only); naming-gate WARN on the copied ZURN SW compare fixture (an s3:// address in served body; fixture bytes unedited).
