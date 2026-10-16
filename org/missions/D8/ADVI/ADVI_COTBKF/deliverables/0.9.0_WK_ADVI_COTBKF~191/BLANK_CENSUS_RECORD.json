@@ -1,0 +1,467 @@
+{
+  "measured": true,
+  "served": {
+    "daily_returns_version": "lNzQMjfx6uX2zdFdWKsDANboShtDUz2N",
+    "month_grades_version": "nkTE.F82uFSboXr9PEamIENCwFL9cwcC",
+    "account_day_value_version": "ObKZXku7Am.QGjO.oSAsIScy8IcJxN5a"
+  },
+  "days": {
+    "total": 1691729,
+    "with_return": 107316,
+    "blank": 1584413,
+    "unreasoned": 0,
+    "by_reason": {
+      "DVR_CLOSE_STEP": 1069,
+      "FIRST_DAY": 1533,
+      "FLOW_UNVALUED": 5,
+      "HELD_SOURCE_UNDER_REVIEW": 988,
+      "NON_POSITIVE_BASE": 22521,
+      "REGRESSED_UNDER_AS_TRADED": 110,
+      "UNPRICED": 1558187
+    }
+  },
+  "months": {
+    "total": 82593,
+    "not_match": 78915,
+    "unreasoned": 0,
+    "by_verdict": {
+      "ABSENT": 5,
+      "DIFF": 288,
+      "MATCH": 3678,
+      "UNGRADABLE": 78622
+    }
+  },
+  "unreasoned": {
+    "days": 0,
+    "months": 0
+  },
+  "unpriced": {
+    "rows": 15973399,
+    "cusips": 4371,
+    "never_priced_cusips": 3791,
+    "never_priced_rows": 7492099,
+    "gap_cusips": 580,
+    "gap_rows": 8481300
+  },
+  "drivers": [
+    {
+      "kind": "day",
+      "code": "UNPRICED",
+      "count": 1558187,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_daily_returns.py",
+        "line": 259,
+        "text": "reason[out[\"value\"].isna() | out[\"prev\"].isna()] = \"UNPRICED\""
+      },
+      "driver": "the account value or the prior day's value is null because a holding on that day has no close: 1558543 account-days carry at least one unpriced holding-day (1556548 of the UNPRICED blanks match such an account-day; 1639 UNPRICED blanks have no unpriced holding-day on the same account-day, which is the prior-day half of the rule)",
+      "bloomberg_fill": "yes",
+      "why": "the driver is a missing close of the security; a vendor daily close of each unpriced security on its unpriced dates would supply it (the never-priced and gap securities); coverage by a vendor is not established, and the group with no ticker symbol may not be keyable by a vendor"
+    },
+    {
+      "kind": "day",
+      "code": "NON_POSITIVE_BASE",
+      "count": 22521,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_daily_returns.py",
+        "line": 258,
+        "text": "reason[(out[\"prev\"] <= 0) if timing == \"end\" else (base <= 0)] = \"NON_POSITIVE_BASE\""
+      },
+      "driver": "the prior day's value is zero or negative, so the return has no positive base",
+      "bloomberg_fill": "no",
+      "why": "a property of the account's own valued base, not a missing price; a vendor price does not change the base"
+    },
+    {
+      "kind": "day",
+      "code": "FIRST_DAY",
+      "count": 1533,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_daily_returns.py",
+        "line": 267,
+        "text": "reason[first] = \"FIRST_DAY\""
+      },
+      "driver": "the first row of each account has no previous day in the table",
+      "bloomberg_fill": "no",
+      "why": "there is no prior value to divide by; a price history does not create one"
+    },
+    {
+      "kind": "day",
+      "code": "DVR_CLOSE_STEP",
+      "count": 1069,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+        "line": 538,
+        "text": "#     DVR_CLOSE_STEP, for every account holding the security that day."
+      },
+      "driver": "a distribution day on which the security's close steps up by 0.5 to 1.5 times the per-share distribution, so the step cannot be separated from the market move (daily_returns sets the reason at line 263)",
+      "bloomberg_fill": "no",
+      "why": "a rule of the method on the close and the account's distribution rows; the blank is by design, not a missing price"
+    },
+    {
+      "kind": "day",
+      "code": "HELD_SOURCE_UNDER_REVIEW",
+      "count": 988,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_fwd3_serve.py",
+        "line": 97,
+        "text": "HELD_REASON = \"HELD_SOURCE_UNDER_REVIEW\"  # --hold-cusips: every holding-day of a held CUSIP is blank with this reason"
+      },
+      "driver": "a held security whose holding-days are blanked pending source review (988 account_day_value rows over 1 securities, the review list being the --hold-cusips or the Yahoo active-policy blank)",
+      "bloomberg_fill": "no",
+      "why": "a held row under review: the blank is a source-review decision, not an absent history"
+    },
+    {
+      "kind": "day",
+      "code": "REGRESSED_UNDER_AS_TRADED",
+      "count": 110,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_fwd3_serve.py",
+        "line": 30,
+        "text": "REGRESSED_UNDER_<after rule>: R28 for method_r28 over method_r26, AS_TRADED for the as-traded price basis over the store's), never valued."
+      },
+      "driver": "every daily row of an account-month that matched before the rule change and is a DIFF after it (ABSENT account-months)",
+      "bloomberg_fill": "no",
+      "why": "a regression recorded by design of the rule separation; a price history does not change the verdict"
+    },
+    {
+      "kind": "day",
+      "code": "FLOW_UNVALUED",
+      "count": 5,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_daily_returns.py",
+        "line": 253,
+        "text": "reason[out[\"n_unvalued\"] > 0] = \"FLOW_UNVALUED\""
+      },
+      "driver": "an external-flow row whose Amount is zero or null and which the day's price cannot value (no price, or no Quantity or CUSIP)",
+      "bloomberg_fill": "not_established",
+      "why": "the split between a missing price and a missing Quantity or CUSIP is not made in this census"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE blank_days first_reason=DVR_CLOSE_STEP",
+      "count": 21,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 104,
+        "text": "reasons.append(\"%d blank day(s) of %d; first blank reason: %s\" % (len(blank), len(g), first))"
+      },
+      "driver": "the month holds at least one blank day; the first blank reason of the month is DVR_CLOSE_STEP",
+      "bloomberg_fill": "no",
+      "why": "the month's blank days carry this method reason, which a price history does not change"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE blank_days first_reason=FIRST_DAY",
+      "count": 1533,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 104,
+        "text": "reasons.append(\"%d blank day(s) of %d; first blank reason: %s\" % (len(blank), len(g), first))"
+      },
+      "driver": "the month holds at least one blank day; the first blank reason of the month is FIRST_DAY",
+      "bloomberg_fill": "no",
+      "why": "the month's blank days carry this method reason, which a price history does not change"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE blank_days first_reason=HELD_SOURCE_UNDER_REVIEW",
+      "count": 47,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 104,
+        "text": "reasons.append(\"%d blank day(s) of %d; first blank reason: %s\" % (len(blank), len(g), first))"
+      },
+      "driver": "the month holds at least one blank day; the first blank reason of the month is HELD_SOURCE_UNDER_REVIEW",
+      "bloomberg_fill": "no",
+      "why": "the month's blank days carry this method reason, which a price history does not change"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE blank_days first_reason=NON_POSITIVE_BASE",
+      "count": 1173,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 104,
+        "text": "reasons.append(\"%d blank day(s) of %d; first blank reason: %s\" % (len(blank), len(g), first))"
+      },
+      "driver": "the month holds at least one blank day; the first blank reason of the month is NON_POSITIVE_BASE",
+      "bloomberg_fill": "no",
+      "why": "the month's blank days carry this method reason, which a price history does not change"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE blank_days first_reason=UNPRICED",
+      "count": 74791,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 104,
+        "text": "reasons.append(\"%d blank day(s) of %d; first blank reason: %s\" % (len(blank), len(g), first))"
+      },
+      "driver": "the month holds at least one blank day; the first blank reason of the month is UNPRICED",
+      "bloomberg_fill": "yes",
+      "why": "the month's blank days carry the UNPRICED reason; the fill is the same daily close as the UNPRICED days"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE no_daily_returns",
+      "count": 116,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 99,
+        "text": "reasons.append(\"no daily returns for the month\")"
+      },
+      "driver": "the account-month has no daily_returns row at all",
+      "bloomberg_fill": "not_established",
+      "why": "why an account-month has no daily rows is not split in this census"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE no_reported_return",
+      "count": 1901,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 111,
+        "text": "reasons.append(\"no reported monthly return\")"
+      },
+      "driver": "the reported monthly figure is absent for the account-month",
+      "bloomberg_fill": "no",
+      "why": "the reported side is the client's performance figure, not a price; a vendor price does not supply it"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE reported_null",
+      "count": 0,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 118,
+        "text": "reasons.append(\"reported value is null\")"
+      },
+      "driver": "the reported monthly figure is null",
+      "bloomberg_fill": "no",
+      "why": "the reported side, not a price"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE side_absent",
+      "count": 0,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 122,
+        "text": "diff, verdict = None, UNGRADABLE"
+      },
+      "driver": "guard: neither side is present",
+      "bloomberg_fill": "no",
+      "why": "guard branch, see count"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE reported_span_not_month",
+      "count": 2865,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 57,
+        "text": "return key, \"reported span %s..%s is not one calendar month\" % (start, end)"
+      },
+      "driver": "the performance rows of the account-month span more than one calendar month or are not a calendar month; the reported figure is withheld",
+      "bloomberg_fill": "no",
+      "why": "the reported side is withheld for a span reason; a price history does not change the span"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE reported_rows_disagree",
+      "count": 15,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 81,
+        "text": "out[k] = (None, \"%d reported rows disagree: %s\" % (len(rows), sorted(map(str, vals))))"
+      },
+      "driver": "conflicting duplicate performance rows for the account-month; the reported figure is withheld",
+      "bloomberg_fill": "no",
+      "why": "a conflict on the reported side, not a price"
+    },
+    {
+      "kind": "month",
+      "code": "UNGRADABLE other",
+      "count": 0,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 122,
+        "text": "diff, verdict = None, UNGRADABLE"
+      },
+      "driver": "reason texts not in the classes above (grouped by masked text in the run's counts)",
+      "bloomberg_fill": "not_established",
+      "why": "grouped by masked text in the run output; not classified further here"
+    },
+    {
+      "kind": "month",
+      "code": "DIFF",
+      "count": 288,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 130,
+        "text": "verdict = DIFF"
+      },
+      "driver": "both sides exist and the compounded daily return differs from the reported figure beyond the tolerance",
+      "bloomberg_fill": "no",
+      "why": "a computed value exists, so the month is not blank; a price history does not change the comparison"
+    },
+    {
+      "kind": "month",
+      "code": "ABSENT",
+      "count": 5,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+        "line": 51,
+        "text": "ABSENT account-month  month_grades rows whose reason starts REGRESSED_UNDER_ (5 account-months): every daily_returns row of"
+      },
+      "driver": "REGRESSED_UNDER_ reason on the month (a null verdict)",
+      "bloomberg_fill": "no",
+      "why": "a regression recorded by design; the reason sits in the sidecar of the build"
+    },
+    {
+      "kind": "month",
+      "code": "MATCH",
+      "count": 3678,
+      "rule": {
+        "file": "data/assets/scripts/silver/commonwealth_monthly_grade.py",
+        "line": 128,
+        "text": "verdict, reason = MATCH, \"\""
+      },
+      "driver": "computed and reported figures agree within tolerance; no blank day",
+      "bloomberg_fill": "no",
+      "why": "not a blank; included for completeness"
+    }
+  ],
+  "unpriced_breakdown": {
+    "never_priced": {
+      "securities": 3791,
+      "holding_days": 7492099,
+      "by_asset_type": {
+        "Alternative Investment": {
+          "securities": 22,
+          "holding_days": 13510
+        },
+        "Annuity": {
+          "securities": 29,
+          "holding_days": 83370
+        },
+        "Cash Equivalent": {
+          "securities": 477,
+          "holding_days": 200770
+        },
+        "ETF": {
+          "securities": 143,
+          "holding_days": 189810
+        },
+        "Equity": {
+          "securities": 1335,
+          "holding_days": 1734224
+        },
+        "Fixed Income": {
+          "securities": 764,
+          "holding_days": 808211
+        },
+        "Mutual Fund": {
+          "securities": 873,
+          "holding_days": 4255286
+        },
+        "Mutual Fund (Closed End)": {
+          "securities": 90,
+          "holding_days": 166568
+        },
+        "Unit Investment Trust": {
+          "securities": 58,
+          "holding_days": 40350
+        }
+      },
+      "by_ticker_status": {
+        "no_ticker_symbol": {
+          "securities": 1139,
+          "holding_days": 873269
+        },
+        "ticker_no_store_row": {
+          "securities": 1657,
+          "holding_days": 3535870
+        },
+        "ticker_key_claimed_by_more_than_one_security": {
+          "securities": 98,
+          "holding_days": 749593
+        },
+        "resolved_dropped_conflicting": {
+          "securities": 82,
+          "holding_days": 243571
+        },
+        "resolved_no_conflict_still_unpriced": {
+          "securities": 815,
+          "holding_days": 2089796
+        },
+        "not_in_universe": {
+          "securities": 0,
+          "holding_days": 0
+        }
+      }
+    },
+    "gap": {
+      "securities": 580,
+      "holding_days": 8481300,
+      "position": {
+        "BEFORE_FIRST_PRICED": {
+          "securities": 571,
+          "rows": 8480069
+        },
+        "AFTER_LAST_PRICED": {
+          "securities": 22,
+          "rows": 959
+        },
+        "INTERIOR": {
+          "securities": 27,
+          "rows": 272
+        }
+      }
+    },
+    "bloomberg_overlap": {
+      "records": {
+        "ZZ-ADVI_COTBKF-ACTIVE-BBG batches (27 files)": {
+          "listed": 1732,
+          "never_priced_listed": 1062,
+          "gap_listed": 498
+        },
+        "MDPF_SECHIST-CARD-A-B1-OPTION-C request": {
+          "listed": 614,
+          "never_priced_listed": 593,
+          "gap_listed": 17
+        },
+        "MDPF_SECHIST-CARD-A-COT-BBG-HISTORY quote ranked list": {
+          "listed": 1319,
+          "never_priced_listed": 1292,
+          "gap_listed": 11
+        },
+        "MDPF_SECHIST-CARD-A-COT-BBG-HISTORY quote ranked list, pursued flag": {
+          "listed": 1241,
+          "never_priced_listed": 1216,
+          "gap_listed": 11
+        }
+      },
+      "union": {
+        "listed": 3059,
+        "never_priced_listed": 2354,
+        "gap_listed": 515
+      },
+      "came_back_priced": "not_established"
+    },
+    "replay_check": {
+      "served_priced_cusips": 822,
+      "replay_priced_cusips": 1720,
+      "never_priced_but_replay_priced": 897,
+      "gap_or_unpriced_served_priced_but_replay_unpriced": 0
+    }
+  },
+  "what_this_shows": "Of 1584413 blank daily returns, 1584413 carry a reason (0 unreasoned), and of 78915 non-MATCH months 78915 carry a reason (0 unreasoned). UNPRICED drives 1558187 of 1584413 blank days (98.3%), 7492099 of the 15973399 unpriced holding-days belong to 3791 never-priced securities and 8481300 to 580 gap securities. A vendor daily close for the unpriced securities could fill the UNPRICED days (1558187 are a missing close), but it could not fill the 22521 NON_POSITIVE_BASE, 1533 FIRST_DAY, 1069 DVR_CLOSE_STEP, 988 HELD_SOURCE_UNDER_REVIEW and 110 REGRESSED_UNDER_AS_TRADED blanks, nor the DIFF months, and it has not been shown to cover any of the unpriced securities.",
+  "not_established": [
+    "Bloomberg came-back per security: no committed record carries the per-security outcome of the request lists; BBG_ACTUALS.jsonl holds 5 job rows with cell counts only, so how many listed securities came back priced is not established.",
+    "Replay of the valuation's price resolution on the round-99 cache is not the served as-traded basis (the Yahoo substitution and the SECHIST store are not replayed): the replay priced 1720 cusips against 822 served priced cusips; the never-priced ticker-status split uses the replay, and its resolved-but-unpriced groups are approximate.",
+    "asset_type is read from the silver transactions Asset_Type column through the analysis module's universe reader (read-only); the round-99 transactions cache does not carry the column.",
+    "FLOW_UNVALUED split between missing price and missing Quantity or CUSIP is not made.",
+    "UNGRADABLE months with no_daily_returns: the reason the account-month has no daily rows is not split.",
+    "No blank day lacks a reason and no non-MATCH month lacks a reason on the served tables (unreasoned = 0 on both), so no row listing is needed."
+  ]
+}
