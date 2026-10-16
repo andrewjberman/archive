@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-66",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-66.fwd5-global-sites-gate-widened.md",
+    "group": "OTHER",
+    "vintage_commit": "857e3085b3f757e9ddd1b7e42a806589cff015ca"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R51_TX.md",
+    "vintage_commit": "857e3085b3f757e9ddd1b7e42a806589cff015ca",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-66.fwd5-global-sites-gate-widened.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~230",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_cross_firm_global_sites_widened.py",
+      "kind": "test",
+      "commit_or_etag": "472bc00a41530e6ca4dad03cfa7c02385df0c421",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 472bc00a41 on branch wk-IRPT_ANLREQ-230 (worktree C:/dev/wk-irpt-anlreq-230); not pushed; one new test file, no source edited, no deploy, no AWS call.",
+      "artifact_covered_by": [
+        "AR66-tz-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR66-tz-AC1",
+      "criterion_verbatim": "the file exists, every test function is named test_cross_firm_*, the tests pass (an xfail is not a pass or a failure) and at least 4 pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 4 infra/aws/lambda/ticket_center/tests/test_cross_firm_global_sites_widened.py",
+      "output_evidence": "R46-TESTS-OK passed=6 ; rc=0. Run from the worktree root C:/dev/wk-irpt-anlreq-230 at commit 472bc00a41, twice, the same line each run. Verbose pytest on the same file: 6 passed, 1 xfailed in 17.14s (test_cross_firm_admits_files_are_register_rows XFAIL).",
+      "denominator": "7 test functions defined under test_cross_firm_*: 6 passed, 1 xfailed (an xfail counts as neither); minimum 4 passed.",
+      "expect": "R46-TESTS-OK",
+      "status": "PASS",
+      "status_reason": "mechanical criterion: the checker verdict R46-TESTS-OK passed=6 with rc=0 is the verdict; the deciding line is in output_evidence"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "three in-memory mutants of the checked inputs: one table count lowered (maintained_sources.py 6 to 5), one new site in a new file, and one register row removed (the G1 row); each must return a violation, and the unmodified inputs must return none.",
+      "expected": "lowered count: exactly one violation naming maintained_sources.py; new site: exactly one violation naming the new file; G1 row removed: one more coverage violation naming interactive_access.py; unmodified inputs: none.",
+      "observed": "lowered count: 1 violation naming maintained_sources.py (scan finds 6, table says 5); new site: 1 violation naming _scope/imaginary_new_site.py; G1 row removed: coverage violations 6 to 7, the added one naming interactive_access.py; unmodified inputs: [] (control). Each read by the test functions test_cross_firm_mutant_lowered_count_is_a_violation, test_cross_firm_mutant_new_site_is_a_violation, test_cross_firm_mutant_register_row_removed_is_a_violation and test_cross_firm_control_unmodified_inputs_return_no_violation, all PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the R46 checker on the committed test file at commit 472bc00a41, the output lines compared",
+      "observed": "run 1 and run 2 each printed R46-TESTS-OK passed=6 with rc=0; identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The register R19_GLOBAL_ADMISSIONS_REGISTER.md is not edited; the 6 unregistered ADMITS files (_scope/global.py, _scope/owner_reads.py, _scope/resolve.py, holdings/resolve.py, reports/repository.py, reports/retention.py) stay open for 2.0.0_SA_COO~V2",
+      "reason": "the register and the record are not in this order's write grant; the order states that the register is V2's to extend, and the strict xfail flips when V2 adds the rows"
+    },
+    {
+      "item": "No commit-time hook or gate is added; the completeness scan runs as a test only",
+      "reason": "the order's BOUNDS: a gate is a test; no alarm, monitor or notification, and no edit to a shared gate"
+    },
+    {
+      "item": "The record's classifications are not re-derived; the table is copied from OPAL_GLOBAL_SITES_CLASSIFIED.md and the scan is checked against it",
+      "reason": "the order makes the record the claim and the scan the instrument; the scan agrees with the record at 40 sites in 21 files, so no table edit was needed"
+    },
+    {
+      "item": "The decomp_ref owned cell AR-tz-66 is not a field of this instance's decomp_ref block",
+      "reason": "the schema's decomp_ref object is closed (doc, vintage_commit, to_ref; additionalProperties false); the cell is named in the order's <decomp_ref> and in the test's header"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W230-S1: the TO-AR-tz-66 <paths> line 52 is spliced (the r46 checker invocation and a file-name fragment sit inside the channel path); the worker used the decoded channel path and the test file path",
+    "IRPT_ANLREQ-D2-W230-S2: the order's scan rule (principal_class compared with == or in) does not reproduce the record's 40 comparison sites; the test scans ==, !=, in and not in against the literal, which reproduces the record's 40 sites in 21 files",
+    "IRPT_ANLREQ-D2-W230-S3: the xfail reason's '8 ADMITS files' count is 6 files at the file level (the record's 8 unlisted ADMITS sites include interactive_access.py:131, a site in a file G1 names); the reason string reads 6 ADMITS files"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (rows IRPT_ANLREQ-D2-W230-S1 to S3 filed by 0.9.0_WK_IRPT_ANLREQ~230 on AR-tz-66, commit 9678062900)",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 4 infra/aws/lambda/ticket_center/tests/test_cross_firm_global_sites_widened.py",
+      "result": "R46-TESTS-OK passed=6; rc=0 (two runs)"
+    },
+    {
+      "tool": "pytest (verbose, -p no:cacheprovider)",
+      "invocation": "python -m pytest -v -p no:cacheprovider infra/aws/lambda/ticket_center/tests/test_cross_firm_global_sites_widened.py",
+      "result": "6 passed, 1 xfailed in 17.14s; rc=0"
+    }
+  ]
+}
