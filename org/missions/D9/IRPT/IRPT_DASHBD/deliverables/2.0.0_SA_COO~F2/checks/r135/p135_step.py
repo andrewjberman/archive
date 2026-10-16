@@ -26,6 +26,7 @@ from pathlib import Path
 LAUNCHER = "data/inf/scripts/gold/INF_G_01.account_transaction_gold.py"
 MANIFEST = "data/inf/scripts/gold/INF_G_01.bundle.json"
 TESTS = "data/inf/scripts/gold/tests/test_INF_G_01_account_transaction_gold.py"
+INF_PRODUCER_TESTS = "data/assets/scripts/gold/irpt_reporting/tests/test_account_transaction_inflection.py"
 ADAPTER = "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py"
 SYNC_DIRS = ("data/inf/scripts/gold", "data/inf/scripts/silver", "data/inf/scripts/bronze", "data/inf/manual_api")
 GOLD_KEY = "irpt/inflection/gold/account_transaction/"
@@ -220,6 +221,8 @@ def ac1(root):
         need(w in low, "the launcher's test names lack %r" % w)
     run = subprocess.run([sys.executable, "-m", "pytest", TESTS, "-q", "-p", "no:cacheprovider"], cwd=str(root), capture_output=True, text=True, timeout=600)
     need(run.returncode == 0, "pytest %s failed: %s" % (TESTS, (run.stdout or "")[-300:]))
+    run = subprocess.run([sys.executable, "-m", "pytest", INF_PRODUCER_TESTS, "-q", "-p", "no:cacheprovider"], cwd=str(root), capture_output=True, text=True, timeout=600)
+    need(run.returncode == 0, "pytest %s failed (the contract moved to 0.5.1; the row-filter test must read the latest-snapshot record): %s" % (INF_PRODUCER_TESTS, (run.stdout or "")[-300:]))
 
 
 def closure_problems(manifest, root):

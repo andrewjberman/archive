@@ -1,10 +1,10 @@
-"""IRPT_BCKEND workstream ~PM round 5 (issuer 2.0.0_SA_COO~P2) -- the check of one DRIVE order: one DEV export under a transient staff-only user, to close L6 of the IB-pr-521 ledger.
+"""IRPT_BCKEND workstream ~PM round 5 (issuer 2.0.0_SA_COO~P2) -- the check of one DRIVE order: one export by a direct invoke with synthetic claims (CTO ruling B, msg 9743), to close L6 of the IB-pr-521 ledger.
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
-  IB246-1  IB-pr-615  mint ONE staff-only transient user, read one pre-existing receipt, request ONE new DEV export, read its status, remove the user (read back ABSENT)
-    AC1  the gates: the ledger open at L6 only, the function at the signed digest, XA-f98b RULED, the helper blob, the CTO ruling cited
-    AC2  the user: staff role, firm opal-capital, 0 entitlement rows, removed and read back ABSENT, password in memory only
+  IB246-1  IB-pr-615  ONE direct invoke of irpt-export-render with synthetic claims (admin, firm 49financial) creates ONE export; read it and one pre-existing receipt
+    AC1  the gates: the ledger open at L6 only, the function at the signed digest, the CTO ruling (B) cited
+    AC2  the claims: role admin, firm 49financial, no user row minted, the authorizer stated not exercised
     AC3  the reads: the old receipt readable, ONE new export readable with no email, the counters
 """
 import json
@@ -19,7 +19,6 @@ import p196_cells as P6  # noqa: E402
 D = P6.D
 REC = D + "0.7.0_AE_CloudOps~IB2/IB246-1_export_drive_record.json"
 DIGEST = "5/9LZBbTEWOfrnNZufc6Mqz5pbDxTxYAxpWcZVURGs4="
-HELPER_BLOB = "f368e9d95c62dc9fce1e6d5e04cd7fe6f79c444a"
 fail, load = P6.fail, P6.load
 
 
@@ -27,18 +26,18 @@ def ac1(r):
     g = r.get("gates") or {}
     if g.get("ledger_open_l6_only") is not True or g.get("function_code_sha256") != DIGEST:
         fail("gates: the ledger must read OPEN at L6 only and the function CodeSha256 must equal the signed digest %s" % DIGEST)
-    if g.get("xa_f98b_state") != "RULED" or g.get("helper_blob") != HELPER_BLOB or g.get("cto_ruling_msg") != 9653:
-        fail("gates: XA-20261016T160537Z-f98b must read RULED, the helper blob must equal %s and the CTO ruling (msg 9653) must be cited" % HELPER_BLOB)
-    print("OK: the gates: L6 only open, the signed digest live, XA-f98b RULED, the helper blob, the CTO ruling")
+    if g.get("cto_ruling_msg") != 9743:
+        fail("gates: the CTO ruling (B), msg 9743, must be cited")
+    print("OK: the gates: L6 only open, the signed digest live, the CTO ruling (B) cited")
 
 
 def ac2(r):
-    u = r.get("user") or {}
-    if u.get("role") not in ("user", "staff") or u.get("firmId") != "opal-capital" or u.get("entitlement_rows") != 0:
-        fail("user: role user or staff, firmId opal-capital and entitlement_rows 0 (CTO condition: staff only, no firm entitlement row)")
-    if u.get("removed_read_back_absent") is not True or u.get("password_in_memory_only") is not True:
-        fail("user: removed_read_back_absent and password_in_memory_only must both be true")
-    print("OK: the transient user was staff-only, no entitlement row, removed and read back ABSENT")
+    c = r.get("claims") or {}
+    if c.get("role") != "admin" or c.get("firm") != "49financial":
+        fail("claims: role admin and firm 49financial exactly (CTO ruling B, msg 9743)")
+    if c.get("user_row_minted") is not False or c.get("authorizer_exercised") is not False:
+        fail("claims: user_row_minted false and authorizer_exercised false (no user row; the receipt says the authorizer was not exercised)")
+    print("OK: the claims were admin/49financial, no user row minted, the authorizer stated not exercised")
 
 
 def ac3(r):
@@ -46,13 +45,15 @@ def ac3(r):
     if o.get("readable") is not True or not o.get("status"):
         fail("old_receipt must read readable true with a status word (a refusal here is a finding about IB-pr-521)")
     n = r.get("new_export") or {}
-    if n.get("posts") != 1 or n.get("http_class") != "2xx" or n.get("readable") is not True or not n.get("status") or n.get("emails_sent") != 0:
-        fail("new_export must read posts 1, http_class 2xx, readable true, a status word and emails_sent 0 (ONE export, no client emailed)")
+    if n.get("creating_invokes") != 1 or n.get("http_class") != "2xx" or n.get("readable") is not True or not n.get("status") or n.get("emails_sent") != 0:
+        fail("new_export must read creating_invokes 1, http_class 2xx, readable true, a status word and emails_sent 0 (ONE creating invoke, no email)")
     k = r.get("counters") or {}
-    want = {"exports_requested": 1, "users_minted": 1, "users_removed": 1, "lambda_code_changes": 0, "iam_changes": 0, "schedule_changes": 0, "files_deleted": 0, "markers_closed": 0}
+    want = {"creating_invokes": 1, "users_minted": 0, "users_removed": 0, "lambda_code_changes": 0, "iam_changes": 0, "schedule_changes": 0, "files_deleted": 0, "markers_closed": 0}
     for key, val in want.items():
         if k.get(key) != val:
             fail("counters.%s must read %s, read %r" % (key, val, k.get(key)))
+    if not (isinstance(k.get("status_reads"), int) and k["status_reads"] >= 1):
+        fail("counters.status_reads must be an integer of 1 or more (the old receipt and the new export are each read)")
     if re.search(r"(?<![0-9a-fA-F-])\d{9,}(?![0-9a-fA-F])", json.dumps(r)):
         fail("the record carries a long digit run")
     print("OK: the old receipt readable, ONE new export readable, no email, the counters")
