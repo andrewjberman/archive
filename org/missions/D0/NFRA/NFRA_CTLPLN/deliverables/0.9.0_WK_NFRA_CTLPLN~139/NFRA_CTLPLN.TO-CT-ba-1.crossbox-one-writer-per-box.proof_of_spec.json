@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ba-1.crossbox-one-writer-per-box",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ba-1.crossbox-one-writer-per-box.md",
+    "group": "OTHER",
+    "vintage_commit": "833181d311"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~139",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round29.md",
+    "vintage_commit": "833181d311",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ba-1.crossbox-one-writer-per-box.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/crossbox-call.py",
+      "kind": "script",
+      "commit_or_etag": "c3e1f8f0c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Layout 2 (crossbox/2 from-side file XB-<id>.json; crossbox-answer/1 answer file XB-<id>.<box>.json): FROM2_KEYS and ANS_KEYS, check_from2, check_answer, assemble (one reader: the crossbox/1 shape with state derived), load_call_path, load_call_text, fold_texts, fold_dir, layout_switch (the committed org/devices/crossbox/LAYOUT first line 2, absent at this commit), writers routed by side (open, sent, acked, close --side from, withdraw, supersede to the from-side file; ack, close --side to to the answer file; merge on crossbox/2 prints NOTHING-TO-FOLD), refuse_unknown_schema. The crossbox/1 writers and the selftest are unchanged: CROSSBOX-SELFTEST cases=40/40 ok=True.",
+      "artifact_covered_by": ["CTba1-AC1", "CTba1-AC2"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_crossbox_call.py",
+      "kind": "test",
+      "commit_or_etag": "c5f1670907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The stale case 'writer and watcher comparison' now cuts the writer's msg_content literal at '# D0_TIGHTENING T1: stamp the broker row id into the FILE' (was 'msg_path.write_text(msg_content', which no longer exists in org/mcp/server.py). No other case changed. Base read CROSSBOX-TEST cases=69/70 ok=False; at c5f1670907 it reads CROSSBOX-TEST cases=76/76 ok=True, and at 7b20dc39df the same.",
+      "artifact_covered_by": ["CTba1-AC3"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round29_crossbox_split.py",
+      "kind": "test",
+      "commit_or_etag": "7b20dc39df",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file. Thirteen arms (a) to (m) on temporary git clones of one bare origin and on a copy of the base tool at 7d4aef5b93 (the base object is present, so no arm skipped): (a) LAYOUT 2 open writes one file; (b) the answering box writes only its answer file; (c) from-side close and to-side close merge with zero conflicts and read CLOSED-BOTH on both clones; (d) each wrong-side writer refuses and writes nothing (7 of 7); (e) no LAYOUT is crossbox/1 identical to the base; (f) the 234 existing call files read byte-identical through list, list --open and status against the base (234 files, 236 commands, 0 differing); (g) merge on crossbox/2 is NOTHING-TO-FOLD and writes nothing, and crossbox/1 folds; (h) open-calls.py's reader closes a CROSS-BOX row through a layout-2 call (close rc=0); (i) unknown schema and unknown key refused (3 of 3); (j) control, a from-side-only reader is detected; (k) the known resolver folds crossbox/1 and HOLDs layout 2; (l) the matrix reads a layout-2 pair across two refs as CLOSED-BOTH; (m) the deploy check reads a live layout-2 call as a HIT and a CLOSED-BOTH one as not live. Last line CROSSBOX-SPLIT arms=13/13 ok=True.",
+      "artifact_covered_by": ["CTba1-AC1"]
+    },
+    {
+      "path_or_key": ".tools/open-calls.py",
+      "kind": "script",
+      "commit_or_etag": "c3e1f8f0c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "crossbox_closed_both (the reader cmd_close calls for a CROSS-BOX row) reads the folder through crossbox-call.py fold_dir instead of a raw JSON glob, so a layout-2 call reads as its one call. Its own suite: OPEN-CALLS-TEST cases=19/19 ok=True (base 19/19). Arm (h) of the split test drives it.",
+      "artifact_covered_by": ["CTba1-AC1"]
+    },
+    {
+      "path_or_key": ".tools/crossbox-deploy-check.py",
+      "kind": "script",
+      "commit_or_etag": "c3e1f8f0c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The open-call measure reads the folder through cross_call_entries (crossbox-call.py fold_dir) instead of a raw JSON glob; a file it cannot read is a HIT, never a clear. On the real folder (234 call files) its output is identical to the base tool's apart from the notice timestamp (read-only comparison, base copy at 7d4aef5b93). Arm (m) of the split test drives it.",
+      "artifact_covered_by": ["CTba1-AC1"]
+    },
+    {
+      "path_or_key": ".tools/crossbox-matrix.py",
+      "kind": "script",
+      "commit_or_etag": "7b20dc39df",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "union folds each ref's folder through crossbox-call.py fold_texts; every answer file is offered to every ref's fold (a layout-2 pair can span refs), and shape() checks the folded record. CROSSBOX-MATRIX-SELFTEST cases=7/7 ok=True. Arm (l) of the split test drives a pair across two refs.",
+      "artifact_covered_by": ["CTba1-AC1"]
+    },
+    {
+      "path_or_key": ".tools/merge-resolve-known.py",
+      "kind": "script",
+      "commit_or_etag": "c3e1f8f0c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fold_crossbox HOLDs any side whose schema is not crossbox/1 (a crossbox/2 from-side file or a crossbox-answer/1 file), so box-sync never folds a layout-2 file by the crossbox/1 rule. A crossbox/1 record folds exactly as before. Arm (k) of the split test drives it.",
+      "artifact_covered_by": ["CTba1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c3e1f8f0c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended, never edited: NFRA_CTLPLN-W139-S1 and -S2 (committed at c5f1670907, the gate read 2 new rows) and NFRA_CTLPLN-W139-S3 and -S4 (committed at c3e1f8f0c3, the gate read 2 new rows). All UNDER_INVESTIGATION.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTba1-AC1",
+      "criterion_verbatim": "two boxes' writes to one call merge with zero conflicts, each side writes only its own file, every existing call file reads identically through the new reader, and the layout switch defaults to the old layout (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round29_crossbox_split.py",
+      "output_evidence": "Run from the worktree root under timeout 280 at 7b20dc39df; exit code 0; last line verbatim: CROSSBOX-SPLIT arms=13/13 ok=True. Deciding lines: ok (a) LAYOUT 2 open writes one file; ok (b) the answering box's ack writes only its answer file; ok (c) from-side close and to-side close merge with zero conflicts and read CLOSED-BOTH; ok (d) each wrong-side writer refuses (7 of 7); ok (e) no LAYOUT is crossbox/1 as at the base; ok (f) the existing calls read identically (234 files, 236 commands, differing=0); ok (g) merge on crossbox/2 is NOTHING-TO-FOLD; ok (h) open-calls.py close closes through a layout-2 call; ok (i) unknown schema refused (3 of 3); ok (j) control: from-side-only reader detected; ok (k) box-sync's resolver HOLDs layout 2; ok (l) crossbox-matrix.py reads the pair across two refs as CLOSED-BOTH; ok (m) crossbox-deploy-check.py reads a live layout-2 call as a HIT. Base: the test did not exist; the base object 7d4aef5b93 is present, so arms (e) and (f) ran. Second run at 7b20dc39df: the same last line.",
+      "denominator": "13 of 13 arms passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTba1-AC2",
+      "criterion_verbatim": "the tool's own selftest passes with the layout's cases added (base: `CROSSBOX-SELFTEST cases=40/40 ok=True`, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/crossbox-call.py --selftest",
+      "output_evidence": "Run from the worktree root under timeout 280 at 7b20dc39df; exit code 0; last line verbatim: CROSSBOX-SELFTEST cases=40/40 ok=True. Base value (control): CROSSBOX-SELFTEST cases=40/40 ok=True at 833181d311. The layout's cases are in the split test (CTba1-AC1) and the tool's selftest is unchanged for crossbox/1. Second run at 7b20dc39df: identical output.",
+      "denominator": "40 of 40 cases passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTba1-AC3",
+      "criterion_verbatim": "the tool's suite passes, its one stale case repaired (base: `CROSSBOX-TEST cases=69/70 ok=False`, a red base); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_crossbox_call.py",
+      "output_evidence": "Run from the worktree root under timeout 280 at 7b20dc39df; exit code 0; last line verbatim: CROSSBOX-TEST cases=76/76 ok=True. Base: CROSSBOX-TEST cases=69/70 ok=False at 833181d311 with org/mcp present in the sparse set (the case 'writer and watcher comparison' raised ValueError: substring not found, its end marker 'msg_path.write_text(msg_content' being stale); repaired in c5f1670907 by ending the case's slice at '# D0_TIGHTENING T1: stamp the broker row id into the FILE'. Second run at 7b20dc39df: identical output.",
+      "denominator": "76 of 76 cases passed (69 at base plus the seven checks of the repaired case)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arm (j) of the split test: a reader that reads only the from-side file (load_call_path replaced by a function that calls assemble(raw, None, where), so the answer file is never read), run through the same closed_flow as arm (c).",
+      "expected": "The mutant never reaches CLOSED-BOTH on the sender's view or the answering box's view; arm (j) passes only when the flow refuses or its status is not CLOSED-BOTH.",
+      "observed": "Mutant refused before CLOSED-BOTH: Refused: XB-... is not acknowledged yet (no ack recorded in this copy); a call closes after the other side has read it. Observed in the run of the split test before the final commit; the arm's code has not changed since.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion run twice on the committed state at 7b20dc39df, same command, timeout 280; the last lines and the full outputs of the two runs compared.",
+      "observed": "AC1: CROSSBOX-SPLIT arms=13/13 ok=True in both runs, the ok lines identical. AC2: CROSSBOX-SELFTEST cases=40/40 ok=True, outputs identical. AC3: CROSSBOX-TEST cases=76/76 ok=True, outputs identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md (surprise rows only): not a test artifact; each appended row is graded by .tools/surprise-row-gate.py at its commit",
+      "reason": "A surprise channel holds rows, not behaviour; the gate is the check for its rows. Four rows are filed, all UNDER_INVESTIGATION."
+    },
+    {
+      "item": "org/devices/crossbox/LAYOUT: not created by this cell",
+      "reason": "The issuer commits the LAYOUT switch after every box carries the new tool (task order design 5). Until then open writes crossbox/1 as at the base, which arm (e) proves."
+    },
+    {
+      "item": "the real org/devices/crossbox folder: never written by this cell",
+      "reason": "Every experiment runs in a temporary root. The 234 existing call files were read through the tools (arms (f) and the read-only deploy-check comparison) and copied into temporary folders only."
+    },
+    {
+      "item": "tests/test_apply_who_and_crossbox.py (apply-gates suite): red after this change, outside the cell's write grant",
+      "reason": "The suite's fixture copies the deploy check without crossbox-call.py, which the check now imports beside itself. The suite reads APPLY-GATES-TEST cases=51/100 ok=False (base 100/100). Surprise row NFRA_CTLPLN-W139-S3; the one COPIES line belongs to the issuer at the merge."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W139-S1: the base tests/test_crossbox_call.py was red (CROSSBOX-TEST cases=69/70 ok=False); its one stale case cut the writer's text at a marker that no longer exists; the case's end marker is repaired and the suite reads 76/76.",
+    "NFRA_CTLPLN-W139-S2: in a worktree whose sparse set lacks org/mcp, tests/test_crossbox_call.py reads green (cases=70/70 ok=True) because its writer case SKIPs seven checks.",
+    "NFRA_CTLPLN-W139-S3: tests/test_apply_who_and_crossbox.py reads APPLY-GATES-TEST cases=51/100 ok=False after this change (base 100/100): its fixture copies the deploy check without the crossbox-call.py it now imports; the fix is one COPIES line outside this cell's paths.",
+    "NFRA_CTLPLN-W139-S4: the comment at the crossbox case of .tools/git-hooks/mstr-ledger-check.sh says the folder holds only crossbox/1 JSON; layout 2 files are now admitted there by the same pattern; the comment is stale and the file is outside the cell's paths."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~139/NFRA_CTLPLN.TO-CT-ba-1.crossbox-one-writer-per-box.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile .tools/crossbox-call.py .tools/open-calls.py .tools/crossbox-deploy-check.py .tools/crossbox-matrix.py .tools/merge-resolve-known.py .tools/tests/test_round29_crossbox_split.py .tools/tests/test_crossbox_call.py",
+      "result": "exit 0 at 7b20dc39df (all seven files compile under Python 3.12)"
+    }
+  ]
+}
