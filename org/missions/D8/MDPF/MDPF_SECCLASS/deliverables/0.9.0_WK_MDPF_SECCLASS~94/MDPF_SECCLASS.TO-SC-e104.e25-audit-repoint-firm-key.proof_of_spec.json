@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e104",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e104.e25-audit-repoint-firm-key.md",
+    "group": "OTHER",
+    "vintage_commit": "d63495282e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R26.md",
+    "vintage_commit": "d63495282e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e104.e25-audit-repoint-firm-key.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~94",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/E_25.aua_decomposition_audit.py",
+      "kind": "script",
+      "commit_or_etag": "03351b7766",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo edit confined to load_mix_summary_latest (E_25:130-174 at 03351b7766): reads summary['firm'] (error 'firm key missing from mix_daily_summary' when empty); adds 'classes' (every row key except total, 2 places); pct over every class; note replaced. Only caller main() at E_25:387, reads only the 'date' key. Not deployed: E_25 is in no gold chain; no AWS call.",
+      "artifact_covered_by": [
+        "SC26-e104-AC1",
+        "SC26-e104-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_e25_firm_key_r26.py",
+      "kind": "test",
+      "commit_or_etag": "03351b7766",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, 4 tests (a: latest date classes, total and pct over every class; b: difference control, old firm_daily key returns the error; c: empty firm returns the error; d: note no longer claims cash is fixed_income). Stubbed S3 client; boto3.client patched during the load; no AWS call.",
+      "artifact_covered_by": [
+        "SC26-e104-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC26-e104-AC1",
+      "criterion_verbatim": "the new test passes, including the difference control (b).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_e25_firm_key_r26.py -q --tb=short",
+      "output_evidence": "run under timeout 120 (bound, not in the criterion): 4 passed in 0.61s (ANSI-coloured run; the summary line is '4 passed in 0.61s'); rc=0. Test (b), the difference control, asserts load_mix_summary_latest on a firm_daily-only summary returns {'error': 'firm key missing from mix_daily_summary'}, and on a firm summary returns no error.",
+      "denominator": "4 passed of 4 collected",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "SC26-e104-AC2",
+      "criterion_verbatim": "the repointed function reads a committed copy of a REAL C_06 body (2,297 firm dates) and returns its latest date with every non-zero class.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_e25_real_body.py",
+      "output_evidence": "run under timeout 120 (bound, not in the criterion): E25-REAL ok=True error=None date=2026-10-13 want_date=2026-10-13 total=2024173839.81 classes_served=['alternatives', 'cash', 'commodities', 'equity', 'fixed_income', 'other', 'structured', 'unclassified'] of_nonzero=7; rc=0",
+      "denominator": "1 committed real body of 2,297 firm dates (2020-06-30 .. 2026-10-13); 7 of 7 non-zero classes of the latest date served",
+      "status": "PASS",
+      "expect": "E25-REAL ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the HEAD E_25 (base d63495282e, pre-change: reads firm_daily) fed to a copy of the new test file under .scratch/mut (uncommitted, no change to the committed test): the difference control and the three other arms must fire",
+      "expected": "failures on all four tests, including the difference control (b) which asserts the error text",
+      "observed": "4 failed in 0.76s of 4 collected; each arm failed (the firm_daily-only summary returns the firm_daily error text; the firm summary returns the firm_daily error text; the note still carries the cash claim; the empty firm returns the firm_daily text)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the arms call load_mix_summary_latest on fixed in-memory summaries with a stub client; no clock, randomness or network. The check script reads one committed body file, no AWS.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the deploy of E_25 to any served location and any run of the gold chain",
+      "reason": "BOUNDS: E_25 is in no gold chain and no infrastructure; the repo copy is the record. Nothing is deployed by this order."
+    },
+    {
+      "item": "the served org/tier2_senior body and the served mix_daily_summary.json",
+      "reason": "read only: the committed body is the input to the check; nothing is written."
+    },
+    {
+      "item": "the 2,278 four-key firm rows in the committed body (the surprise row MDPF_SECCLASS-D1-W94-S1)",
+      "reason": "out of this cell: the reader handles both shapes and the order names no change to C_06 or to the data. Why C_06 writes the four-key shape on older dates was not measured."
+    },
+    {
+      "item": "the other callers of load_mix_summary_latest outside E_25",
+      "reason": "none exist: the grep of the worktree finds one call, E_25:387 in main(). No other file is edited."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W94-S1: the order's nine-key class row holds for 19 of 2,297 firm dates in the committed C_06 body; 2,278 carry four keys (equity, fixed_income, alternatives, total). The repointed reader returns whichever keys a row carries; no criterion changed."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e104.e25-audit-repoint-firm-key.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (new test file)",
+      "invocation": "timeout 120 python -m pytest data/black_diamond/scripts/gold/tests/test_e25_firm_key_r26.py -q --tb=short",
+      "result": "4 passed in 0.61s, rc=0"
+    },
+    {
+      "tool": "check_e25_real_body.py (R26_CHECKS, read-only)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_e25_real_body.py",
+      "result": "E25-REAL ok=True error=None date=2026-10-13 of_nonzero=7, rc=0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~94 <0.9.0_WK_MDPF_SECCLASS~94@opal.agent>\" -F <msgfile> -- <3 paths>",
+      "result": "commit 03351b7766: commit-gate All checks passed; surprise-row-gate OK 1 new row of 295 checked; msg-verify MATCH; the one-writer WARN on the unsuffixed investigation file is a WARN, 0 blocked"
+    }
+  ]
+}
