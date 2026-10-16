@@ -38,7 +38,11 @@ REGION = "us-east-1"
 FUNCTION, ROLE, POLICY, SCHEDULE = chk.FUNCTION, chk.ROLE, chk.POLICY, chk.SCHEDULE
 BUCKET, FLOOR, NEWEST, HELD = chk.BUCKET, chk.FLOOR, chk.NEWEST, chk.HELD
 ART_BUCKET, ART_KEY = chk.ARTIFACT_BUCKET, chk.ARTIFACT_KEY
-EVENTS, ALLOWANCE, ALLOWED_COLS = chk.EVENTS, chk.ALLOWANCE, chk.ALLOWED_COLS
+ALLOWANCE, ALLOWED_COLS = chk.ALLOWANCE, chk.ALLOWED_COLS
+# ADDENDUM 1 (COO, CTO countersigned @d2994a4773, sha256 e6f1f4b4..): TEN events over the same 66 days in place of the packet's four.
+EVENTS = [("2026-07-10", "2026-07-15", 4), ("2026-07-16", "2026-07-21", 4), ("2026-07-22", "2026-07-28", 5), ("2026-07-29", "2026-08-04", 5), ("2026-08-05", "2026-08-12", 6),
+          ("2026-08-13", "2026-08-18", 4), ("2026-08-20", "2026-08-31", 8), ("2026-09-01", "2026-09-15", 10), ("2026-09-16", "2026-09-23", 6), ("2026-09-28", "2026-10-15", 14)]
+assert sum(e[2] for e in EVENTS) == 66
 MEM_LINE, DUR_LINE = chk.MEM_LINE, chk.DUR_LINE
 PREFIX = "irpt/cottonwood/gold/account_return_daily/"
 KEYRE = re.compile(r"^.*/date=([0-9-]{10})/(data\.parquet|manifest\.json)$")
@@ -248,9 +252,11 @@ def cmd_invoke(name):
     if (STATE / ("%s_invoke.json" % name)).exists():
         print("REFUSED: %s was already invoked (state file present)" % name)
         return 2
-    if not name.startswith("dry") and not (STATE / ("%s_read.json" % ("dry" if name == "1" else str(int(name) - 1)))).exists():
-        print("REFUSED: the previous act's after-read is not recorded")
-        return 2
+    if not name.startswith("dry"):
+        prev = ["dryA", "dryB"] if name == "1" else [str(int(name) - 1)]
+        if not all((STATE / ("%s_read.json" % p)).exists() for p in prev):
+            print("REFUSED: the previous act's after-read is not recorded")
+            return 2
     vers, _m = survey()
     ds = landed_in(vers, s, e)
     if len(ds) != n or set(ds) & set(HELD):
@@ -429,7 +435,7 @@ def cmd_compile():
         ev.append({"payload": inv["payload"], "invoked_utc": inv["invoked_utc"], "status_code": inv["status_code"], "function_error": inv["function_error"], "returned": inv["returned"], "report": inv["report"],
                    "rows": rd["rows"], "before_partial": rd["before_partial"], "partial": rd["partial"], "full": rd["full"], "full_to_partial": rd["full_to_partial"], "partial_to_full": rd["partial_to_full"],
                    "floor_day_accounts": rd["floor_day_accounts"], "floor_day_positive": rd["floor_day_positive"], "changed_by_day": rd["changed_by_day"], "request_id": inv["request_id"]})
-    di, dr = load("dry_invoke.json"), load("dry_read.json")
+    di, dr = load("dryA_invoke.json"), load("dryA_read.json")  # the 25-day dry run timed out (rows IB2-S129); dry run A (3 days) is the record's dry_run, dry run B is kept in state/dryB_*.json
     rec = {"claim": "measured", "gates": load("gates.json"), "ledger_entry": OWN_SLUG, "applier": chk.APPLIER, "before": load("before.json"), "build": load("build.json"), "plan": load("plan.json"),
            "apply_finished_utc": load("apply_finished.json")["apply_finished_utc"], "after": load("after.json"),
            "dry_run": {"payload": di["payload"], "invoked_utc": di["invoked_utc"], "status_code": di["status_code"], "function_error": di["function_error"], "returned": di["returned"], "report": di["report"],
