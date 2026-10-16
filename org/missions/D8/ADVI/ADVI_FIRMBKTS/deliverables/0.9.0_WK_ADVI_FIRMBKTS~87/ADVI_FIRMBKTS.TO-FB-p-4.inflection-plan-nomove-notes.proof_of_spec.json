@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-p-4.inflection-plan-nomove-notes",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-4.inflection-plan-nomove-notes.md",
+    "group": "OTHER",
+    "vintage_commit": "ab8081bfdd"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~87",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R9.md",
+    "vintage_commit": "ab8081bfdd",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-4.inflection-plan-nomove-notes.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the record's shape is graded by r9_checks.py planq and its read-only discipline by the write-verb rule in the same grader",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: AC1 reads the committed record file once at the state recorded; the live reads were made once each and are recorded in the record's calls list",
+      "observed": "N/A -- no second sweep was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every AWS write, producer run, deploy and terraform command",
+      "reason": "Bound (order section 2, item 1): read verbs only. Every AWS call was a list, get or describe read, bounded by timeout 120."
+    },
+    {
+      "item": "Account ids, role ARNs, topic ARNs, distribution ids, subscription endpoints, SES addresses and secret values",
+      "reason": "Not printed in the record, the channel rows or this instance (order section 2, item 2). Counts and resource names only."
+    },
+    {
+      "item": "Source code of the Lambda functions read by environment only (mdpf-gold-lambda, inf-ec2-launch-monitor, inf-ec2-retry-launch, bd-silver-merge, bd-gold-trigger)",
+      "reason": "The order's checks are the live state and the named resources; the record's not_read list states which code was not read, and L02 rests on the writer role grant instead."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~87/PLAN_INFLECTION_NOMOVE_16_30.json",
+      "kind": "doc",
+      "commit_or_etag": "d562e2b88d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read-only verdict record for plan entries 16 to 30: 14 CONFIRMED, 1 CONTRADICTED (entry 23), 0 CARRIED. Nothing deployed; no AWS write."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape and discipline. Expect: ^PLANQ: OK entries=15 carried=[0-9]+$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 60 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py planq --first 16 --last 30 --kind NOMOVE --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~87/PLAN_INFLECTION_NOMOVE_16_30.json",
+      "output_evidence": "PLANQ: OK entries=15 carried=0",
+      "denominator": "rc=0; entries 15 of 15 (n=16 to 30, once each); notes_checked 15 of notes_in_plan 15; aws_lists_counted 95; 0 write-verb calls; 0 nine-digit tokens",
+      "status": "PASS",
+      "expect": "^PLANQ: OK entries=15 carried=[0-9]+$",
+      "judgment": false
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W87-S1: INF-FN-37 reads its 49financial key through a directory-bucket map to opal-data-bd, not a 49financial bucket as entry 23 and the serving row say; no opal-data-inf, so no-move holds. OBSERVATION, INERT.",
+    "ADVI_FIRMBKTS-D1-W87-S2: INF-FN-38's bundle map sends 49financial, cottonwood and inflection to three different buckets, not all three to opal-data-inflection as entry 23 says; no opal-data-inf, so no-move holds. OBSERVATION, INERT.",
+    "ADVI_FIRMBKTS-D1-W87-S3: the order asks for its status flip to complete in the same commit, but the order file is outside the lane's <paths> grant; the flip is not made by this worker. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~87/ADVI_FIRMBKTS.TO-FB-p-4.inflection-plan-nomove-notes.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "r9_checks.py planq (the order's own grader)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 60 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py planq --first 16 --last 30 --kind NOMOVE --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~87/PLAN_INFLECTION_NOMOVE_16_30.json",
+      "result": "PLANQ: OK entries=15 carried=0, rc=0"
+    },
+    {
+      "tool": "aws CLI (read only) via .tools/aws",
+      "invocation": "timeout 120 .tools/aws <get|list|describe> ... (the record's calls list)",
+      "result": "every AWS call returned rc=0; every call read-only; denominators in the record"
+    }
+  ]
+}
