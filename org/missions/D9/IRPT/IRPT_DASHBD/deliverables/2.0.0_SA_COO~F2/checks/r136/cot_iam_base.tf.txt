@@ -1,0 +1,166 @@
+# IRPT_DASHBD round 123 (B-49F, DB-b-252) -- the two roles and their policies. NEW roles only; nothing existing is widened.
+#
+# EXECUTION ROLE (the function): the Black Diamond silver tables this landing reads, and the one gold prefix it writes.
+#   Read: s3:GetObject on fact_allocations and fact_transactions ONLY. List: s3:ListBucket on the silver bucket under a
+#   s3:prefix condition for those two table prefixes ONLY. Write: s3:PutObject on the ONE gold prefix
+#   account_return_daily ONLY (exactly one PutObject statement in this root). Logs: its own log group only.
+#   No delete action, no wildcard action, no all-resources grant.
+#
+# SCHEDULER ROLE (EventBridge Scheduler): lambda:InvokeFunction on the one function ARN, nothing else.
+#
+# Statement ids are the record's iam.statement_ids (facts file RD_COT_ROOT_FACTS_R123.json).
+
+# ---------------------------------------------------------------------------------------------- the execution role
+
+module "irpt_account_return_daily_execution_role_name" {
+  source    = "../../modules/opal_name"
+  system    = "irpt"
+  scope     = local.irpt_arc_firm
+  function  = "account-return-daily"
+  kind      = "role"
+  qualifier = "execution"
+}
+
+module "irpt_account_return_daily_execution_policy_name" {
+  source    = "../../modules/opal_name"
+  system    = "irpt"
+  scope     = local.irpt_arc_firm
+  function  = "account-return-daily"
+  kind      = "policy"
+  qualifier = "execution"
+}
+
+data "aws_iam_policy_document" "irpt_account_return_daily_execution_assume" {
+  statement {
+    sid       = "ExecutionRoleAssumedByLambdaService"
+    effect    = "Allow"
+    actions   = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "irpt_account_return_daily_execution" {
+  name               = module.irpt_account_return_daily_execution_role_name.name
+  description        = "IRPT_DASHBD round 123 (DB-b-252): the account-return-daily function's execution role. Reads two Black Diamond silver tables, lists the silver prefixes they sit under, writes one gold prefix, and writes its own log group. No other grant."
+  assume_role_policy = data.aws_iam_policy_document.irpt_account_return_daily_execution_assume.json
+}
+
+data "aws_iam_policy_document" "irpt_account_return_daily_execution" {
+  statement {
+    sid       = "ListSilverTablePrefixesOnly"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${local.irpt_arc_silver_bucket}"]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "${local.irpt_arc_silver_allocations}*",
+        "${local.irpt_arc_silver_transactions}*",
+      ]
+    }
+  }
+
+  statement {
+    sid     = "ReadTwoBlackDiamondSilverTablesOnly"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      "arn:aws:s3:::${local.irpt_arc_silver_bucket}/${local.irpt_arc_silver_allocations}*",
+      "arn:aws:s3:::${local.irpt_arc_silver_bucket}/${local.irpt_arc_silver_transactions}*",
+    ]
+  }
+
+  # PutObject only, on the ONE gold prefix this landing writes (data.parquet and manifest.json of each landed day).
+  statement {
+    sid       = "WriteTheOneAccountReturnDailyGoldPrefixOnly"
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${local.irpt_arc_gold_bucket}/irpt/${local.irpt_arc_firm}/gold/account_return_daily/*"]
+  }
+
+  # ListBucket on the gold bucket under ONE prefix: the handler's scheduled path lists the account_return_daily prefix to
+  # find the newest landed partition (handler.py lines 119 to 120). Amendment 1 of the order (issuer, 2026-10-15).
+  statement {
+    sid       = "ListTheOneAccountReturnDailyGoldPrefixOnly"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${local.irpt_arc_gold_bucket}"]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["irpt/${local.irpt_arc_firm}/gold/account_return_daily/*"]
+    }
+  }
+
+  statement {
+    sid       = "OwnLogStreamOnly"
+    effect    = "Allow"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${module.irpt_account_return_daily_lambda_name.name}:*"]
+  }
+}
+
+resource "aws_iam_role_policy" "irpt_account_return_daily_execution" {
+  name   = module.irpt_account_return_daily_execution_policy_name.name
+  role   = aws_iam_role.irpt_account_return_daily_execution.id
+  policy = data.aws_iam_policy_document.irpt_account_return_daily_execution.json
+}
+
+# ---------------------------------------------------------------------------------------------- the scheduler role
+
+module "irpt_account_return_daily_scheduler_role_name" {
+  source    = "../../modules/opal_name"
+  system    = "irpt"
+  scope     = local.irpt_arc_firm
+  function  = "account-return-daily"
+  kind      = "role"
+  qualifier = "scheduler"
+}
+
+# The scheduler POLICY's own builder name (round 129, DB-b-261): kind policy. The role name module above is a role name
+# and the naming-plan gate refuses it on a policy (safe-apply rc 7, nothing written).
+module "irpt_account_return_daily_scheduler_policy_name" {
+  source    = "../../modules/opal_name"
+  system    = "irpt"
+  scope     = local.irpt_arc_firm
+  function  = "account-return-daily"
+  kind      = "policy"
+  qualifier = "scheduler"
+}
+
+data "aws_iam_policy_document" "irpt_account_return_daily_scheduler_assume" {
+  statement {
+    sid       = "SchedulerRoleAssumedBySchedulerService"
+    effect    = "Allow"
+    actions   = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["scheduler.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "irpt_account_return_daily_scheduler" {
+  name               = module.irpt_account_return_daily_scheduler_role_name.name
+  description        = "IRPT_DASHBD round 123 (DB-b-252): EventBridge Scheduler role for the account-return-daily schedule. Grants lambda:InvokeFunction on that one function and nothing else."
+  assume_role_policy = data.aws_iam_policy_document.irpt_account_return_daily_scheduler_assume.json
+}
+
+data "aws_iam_policy_document" "irpt_account_return_daily_scheduler" {
+  statement {
+    sid       = "InvokeTheAccountReturnDailyFunctionOnly"
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [module.irpt_account_return_daily.function_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "irpt_account_return_daily_scheduler" {
+  name   = module.irpt_account_return_daily_scheduler_policy_name.name
+  role   = aws_iam_role.irpt_account_return_daily_scheduler.id
+  policy = data.aws_iam_policy_document.irpt_account_return_daily_scheduler.json
+}
