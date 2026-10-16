@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-18",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-18.scope-feed-wrapper-and-run-script-tests-on-the-feeds-own-writer-output.md",
+    "vintage_commit": "ed9233af0a"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ed9233af0a"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~318",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
+      "kind": "test",
+      "commit_or_etag": "2e5b09d5fc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new pytest file, 7 tests, 253 lines. Every feed partition comes from the feed's own run() over the feed's own offline fakes (test_scope_feed_daily_factor). Runs under python -I -m pytest -q: 7 passed. No AWS, no network, no vendor call; output only to pytest's temp area; synthetic accounts 7001 to 7005.",
+      "artifact_covered_by": ["DBI131-1-AC1", "DBI131-1-AC2", "DBI131-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI131-1-AC1",
+      "criterion_verbatim": "`DBI131-1-AC1` -- control: the wrapper on partitions written by the feed's own run() is accepted and the invariants hold (15 rows, valid, 0 unaccounted, reasons inside the contract's eight). Base: PASS (round 130 landed); it must still PASS.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC1",
+      "output_evidence": "DBI131-1-AC1 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC1 PASS'). Feed partitions written by the feed's run(): DAYS: complete=3 skipped=0.",
+      "denominator": "1 of 1 criterion PASS (3 feed partitions; 15 account-day rows checked by the checker)",
+      "expect": "DBI131-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBI131-1-AC2",
+      "criterion_verbatim": "`DBI131-1-AC2` -- control: the round-129 run script on the same partitions through a fake reader reads RAN with the whitelisted keys. Base: PASS; it must still PASS.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC2",
+      "output_evidence": "DBI131-1-AC2 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC2 PASS').",
+      "denominator": "1 of 1 criterion PASS (the run_real record on the same 3 partitions: status RAN, record keys equal the whitelist)",
+      "expect": "DBI131-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBI131-1-AC3",
+      "criterion_verbatim": "`DBI131-1-AC3` -- the new test file builds its feed frames ONLY by calling the feed's run(), holds no hand-built feed frame, reads the feed's own silver addresses, passes with at least 6 tests and names a mutant test. Base: FAIL (no test file).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC3",
+      "output_evidence": "DBI131-1-AC3 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC3 PASS'). Base before the file existed: 'REASON: no test file at data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py' / 'DBI131-1-AC3 FAIL'.",
+      "denominator": "1 of 1 criterion PASS (the checker's pytest run of the file: 7 passed, at least 6 required; 1 test named test_mutant_)",
+      "expect": "DBI131-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "test_mutant_partition_check_comparing_pull_date_refuses_the_feed_partitions: the wrapper source text is copied with its partition check changed to compare pull_date, executed as a module with the real __file__; it must refuse the feed's own partitions, and the unmutated wrapper must accept the same frames.",
+      "expected": "the mutated copy raises ValueError 'partition keys refused: 10 row' (the 10-12 and 10-13 partitions; the 10-14 partition's pull date equals its day and passes), and writes nothing; the unmutated wrapper accepts all 15 rows",
+      "observed": "mutant selection: 1 passed, 6 deselected; the mutant refused with 'partition keys refused: 10 row(s) name a day other than their partition's'; the control accepted 15 rows",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the three r131 criteria in this worktree, with their PASS lines compared; the new file run twice under python -I -m pytest",
+      "observed": "DBI131-1-AC1 PASS, DBI131-1-AC2 PASS, DBI131-1-AC3 PASS, each rc 0 on both runs; 7 passed on both pytest runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live run against the real Scope feed silver or any AWS, network or vendor call",
+      "reason": "The order's bounds: the feed's own offline fakes only; the run script's reader is not exercised against S3 here."
+    },
+    {
+      "item": "A single-run form of the skipped-day case (test 3 of the order)",
+      "reason": "One feed run cannot skip a middle day alone when the household holds accounts on the neighbouring days. The case is built from three feed runs. Recorded as surprise row IRPT_DASHBD-D2-W318-S1."
+    },
+    {
+      "item": "Correcting the wrapper's stale module docstring (pull-date refusal)",
+      "reason": "Not this order's grant: the wrapper is read only. Recorded as surprise row IRPT_DASHBD-D2-W318-S3."
+    },
+    {
+      "item": "A worktree copy of the surprise-row schema",
+      "reason": "The org/surprise_channel folder is absent from this worktree; the schema was read from the base checkout only. Recorded as surprise row IRPT_DASHBD-D2-W318-S2."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W318-S1: a single feed run cannot skip a middle day alone for a household failure (it skips every day its accounts are held on); the skipped-day case is built from three feed runs, OBSERVATION, INERT.",
+    "IRPT_DASHBD-D2-W318-S2: the worktree carries no org/surprise_channel/ folder; the row schema was read from the base checkout, read only, OBSERVATION, INERT.",
+    "IRPT_DASHBD-D2-W318-S3: the round-127 wrapper's module docstring still names a pull-date refusal the code no longer makes; the code and the tests follow the round-130 rule, OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~318/SESSION_LOG_DB_I18.json",
+  "compiler_tools": [
+    {
+      "tool": "p131_feedwriter.py (issuer checker, DBI131-1-AC1 to AC3)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC1 (AC2 and AC3 the same way)",
+      "result": "DBI131-1-AC1 PASS, DBI131-1-AC2 PASS, DBI131-1-AC3 PASS, each rc 0 on two runs"
+    },
+    {
+      "tool": "pytest (the new test file)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
+      "result": "7 passed (rc 0), on two runs"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff)",
+      "invocation": ".tools/commit-gate.sh data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
+      "result": "All checks passed; pre-commit gate clean for 1 of 1 file(s) (rc 0)"
+    }
+  ]
+}
