@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-133",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R44_G.md",
+    "vintage_commit": "1a907fdddf",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-133.door-asks-yfinance-first.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-133.door-asks-yfinance-first.md",
+    "group": "OTHER",
+    "vintage_commit": "1a907fdddf"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~265",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/security_resolution.py",
+      "kind": "script",
+      "commit_or_etag": "3bd9f1036d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AR-g-133 yfinance-first resolver (check: one checker batch, KEPT final, provider once for the rest, CHECK_FAILED/NOT_CHECKED words, verified_suggestions FOUND or KEPT); committed on wk-IRPT_ANLREQ-265 only, no deploy in this order",
+      "artifact_covered_by": ["AR133-g-AC1", "AR133-g-AC2", "AR133-g-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py",
+      "kind": "test",
+      "commit_or_etag": "3bd9f1036d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_kept_state_is_the_checkers_answer_with_history_and_no_receipt rewritten to the new order (provider asked only about AAPL); 19 collected, all pass",
+      "artifact_covered_by": ["AR133-g-AC1", "AR133-g-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_door_yfinance_first.py",
+      "kind": "test",
+      "commit_or_etag": "3bd9f1036d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new file, one test per numbered behaviour 1-6; behaviours 2-4 carry a hold arm and a flip arm; 16 collected, all pass; 7 fail against the base module",
+      "artifact_covered_by": ["AR133-g-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b47670d02a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "surprise row IRPT_ANLREQ-D2-W265-S1 appended; surprise-row-gate OK (1 new row)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR133-g-AC1",
+      "criterion_verbatim": "AC1 runs the real `SecurityResolver` with fake provider, identity, cache and checker ports: one checker call with every uncached symbol, the provider asked only about symbols not kept (none when all kept), KEPT rows identical to today's, a provider FOUND beating a NOT_KEPT with no second checker call, CHECK_FAILED / NOT_CHECKED reason words, a checker that raises, a provider outage leaving a kept symbol KEPT, and `verified_suggestions` showing KEPT and FOUND candidates. At base it FAILs.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g133_checks.py build",
+      "output_evidence": "AR-G133-OK build: all arms; run under timeout 120 at b47670d02a, rc=0. Base 1a907fdddf (same invocation, before any edit): AR-G133-FAIL build: b1 (two messages), b2, b6, b7 failed.",
+      "denominator": "7 of 7 build arms (b1-b7) pass at b47670d02a; at base 4 of 7 fail (b1, b2, b6, b7)",
+      "expect": "^AR-G133-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR133-g-AC2",
+      "criterion_verbatim": "AC2 holds what must not move: no checker is the resolver of today, a cached FOUND and a cached KEPT are served with no call, an outage leaves a non-kept symbol UNAVAILABLE and never NOT_FOUND, a duplicated symbol is one checker entry. At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g133_checks.py guard",
+      "output_evidence": "AR-G133-OK guard: all arms; run under timeout 120 at b47670d02a, rc=0. Base 1a907fdddf: AR-G133-OK guard: all arms (also passes at base).",
+      "denominator": "4 of 4 guard arms (g1-g4) pass at b47670d02a and at base",
+      "expect": "^AR-G133-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR133-g-AC3",
+      "criterion_verbatim": "AC3 runs each existing resolver test file on its own (`test_security_resolution.py`, `test_kept_holding.py`, `test_registry_known.py`, `test_yfinance_check.py`, `ycharts/session/tests/test_resolution_broker.py`) and then that the branch changed only your files, your folder, the order and the channel file (against the merge-base with `box/dell2`). At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g133_checks.py regress",
+      "output_evidence": "AR-G133-REGRESS-OK ; run under timeout 120 at b47670d02a, rc=0. Each of the five files passed on its own (rc=0) and the scope check reported no stray path against the merge-base 1a907fdddf.",
+      "denominator": "5 of 5 regress files rc=0 (collected per file: test_security_resolution 37, test_kept_holding 19, test_registry_known 11, test_yfinance_check 50, test_resolution_broker 22); scope: 0 stray paths",
+      "expect": "^AR-G133-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: the three criteria and the new test file run against the base module (1a907fdddf, read with git show) in a scratch copy under .scratch.",
+      "expected": "AC1 FAILs at base; the flip arms of behaviours 2, 3 and 6 fail at base",
+      "observed": "AR-G133-FAIL build at base (b1, b2, b6, b7); test_door_yfinance_first.py at base: 7 failed, 9 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three criteria re-run at b47670d02a after the row commit",
+      "observed": "the same OK lines and rc=0 as at 3bd9f1036d",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live checker's Yahoo behaviour at a larger first batch (the cap of 10 and the 1 s pacing are unchanged)",
+      "reason": "no network in this order; the offline fakes are the only evidence here"
+    },
+    {
+      "item": "any deploy of intake/security_resolution.py and the resident's wall time",
+      "reason": "the cell moves nothing deployed; no deploy and no AWS call in this order"
+    },
+    {
+      "item": "the rest of the intake suite, including intake/tests/test_decision_tree_findings.py",
+      "reason": "outside the regress set and the paths grant; not run by this order"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W265-S1: safe-commit's client-data-check found no hashed account-id list on this box, so commit 3bd9f1036d was not checked for client account ids."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no intake/tests/test_door_yfinance_first.py intake/tests/test_kept_holding.py intake/tests/test_security_resolution.py intake/tests/test_registry_known.py (run in infra/aws/lambda/investor-reporting)",
+      "result": "83 passed (16 + 19 + 37 + 11 collected)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no intake/tests/test_yfinance_check.py ycharts/session/tests/test_resolution_broker.py ycharts/generate/tests/test_registry_identity_port.py (run in infra/aws/lambda/investor-reporting)",
+      "result": "83 passed (50 + 22 + 11 collected)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 intake/security_resolution.py intake/tests/test_door_yfinance_first.py intake/tests/test_kept_holding.py",
+      "result": "All checks passed! (ruff 0.15.11)"
+    }
+  ]
+}
