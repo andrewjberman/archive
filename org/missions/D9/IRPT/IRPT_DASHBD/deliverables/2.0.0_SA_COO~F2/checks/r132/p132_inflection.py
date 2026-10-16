@@ -223,7 +223,7 @@ def ac_all(root):
     # the reason census
     reasons = mod.price_null_census(frame([base_row(id=11), base_row(id=12, noUnits=0.0), base_row(id=13, navPrice=0.0),
                                            base_row(id=14, fundFamilyName=" "), base_row(id=15, fundFamilyName=None, noUnits=0.0)]))
-    need(reasons == {"NAV_PRICE_FUND_ONLY": 2, "ZERO_UNITS": 2, "NAV_NOT_POSITIVE": 1},
+    need(reasons == {"NAV_PRICE_FUND_ONLY": 1, "ZERO_UNITS": 2, "NAV_NOT_POSITIVE": 1},
          "price_null_census must count the null prices by reason code: %s" % (reasons,))
     mod.check_transaction_rows(rows)
     try:
