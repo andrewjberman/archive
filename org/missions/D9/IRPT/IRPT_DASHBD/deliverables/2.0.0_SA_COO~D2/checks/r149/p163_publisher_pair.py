@@ -273,13 +273,13 @@ def run(root, cid):
         n = run_pytest(root, [TEST_REL])
         n_p = run_pytest(root, [PUBDIR + "/tests", COTDIR])
         need(n >= 10, "the new test file holds %d passing tests, at least 10 are owed" % n)
-        base = base_commit(root)
         edited = 0
-        for f in PINNED_TESTS:
-            for ln in git(root, "diff", "--numstat", base, "HEAD", "--", f).decode().split("\n"):
-                p = ln.split("\t")
-                if len(p) == 3 and p[0].isdigit() and p[1].isdigit():
-                    edited += int(p[0]) + int(p[1])
+        for cm in own_commits(root):
+            for f in PINNED_TESTS:
+                for ln in git(root, "show", "--numstat", "--format=", cm, "--", f).decode().split("\n"):
+                    p = ln.split("\t")
+                    if len(p) == 3 and p[0].isdigit() and p[1].isdigit():
+                        edited += int(p[0]) + int(p[1])
         need(edited <= MAX_PIN_LINES, "the earlier tests may change by at most %d lines (the version pins), read %d" % (MAX_PIN_LINES, edited))
         changed = set()
         for cm in own_commits(root):
