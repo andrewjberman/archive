@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-306",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-306.hop2-reader-joins-through-the-accounts.md",
+    "group": "OTHER",
+    "vintage_commit": "ba3478dab4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "ba3478dab4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-306.hop2-reader-joins-through-the-accounts.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~247",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~247/RD_FILLED_READER_ACCOUNTS_FACTS_R149.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "2e9c03c174",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Inside the first FILLED-REPORT-A block only: read_filled_report_gold rewritten to the account join; _filled_partition_index and the module-level _FILLED_CACHE added. filled_report_enabled, run_filled_report and filled_report_fire byte for byte; publisher.py and locals.tf unchanged. Nothing built for upload, uploaded, invoked or deployed; the switch stays OFF.",
+      "artifact_covered_by": [
+        "DB174-1-AC1",
+        "DB174-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py",
+      "kind": "test",
+      "commit_or_etag": "2e9c03c174",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reader tests rewritten to the account join with synthetic raw ids minted by the handler's own ids.opaque_account; ten tests are new, nine with accounts in the name; 23 tests in the file.",
+      "artifact_covered_by": [
+        "DB174-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2e9c03c174",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended (IRPT_DASHBD-D2-W247-S1, OBSERVATION, INERT). Append only; no existing row edited.",
+      "artifact_covered_by": [
+        "DB174-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~247/RD_FILLED_READER_ACCOUNTS_FACTS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "c278bd6601",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Facts record with the five fields the order lists: join, cache, memory, tests_added (ten names), and words (1609 characters, including what is NOT proven).",
+      "artifact_covered_by": [
+        "DB174-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB174-1-AC1",
+      "criterion_verbatim": "DB174-1-AC1 -- handler.py differs from the base only inside the reader and its private helpers in the first FILLED-REPORT-A block (the switch, filled_report_enabled, run_filled_report, filled_report_fire and the event branch byte for byte); publisher.py and locals.tf are byte-identical to the base. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p174_filled_reader_accounts.py\" . DB174-1-AC1",
+      "output_evidence": "OK: handler.py differs from the base only inside the reader and its helpers (the switch, the pass and the event branch stay byte for byte); publisher.py and locals.tf are byte-identical to the base\nDB174-1-AC1 PASS",
+      "denominator": "1 of 1 handler.py diff confined to the first FILLED-REPORT-A block; 3 of 3 named functions byte-identical to the base (filled_report_enabled, run_filled_report, filled_report_fire); 2 of 2 FILLED-REPORT-A marker pairs kept; 2 of 2 files byte-identical to the base (publisher.py, locals.tf)",
+      "status": "PASS",
+      "expect": "DB174-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB174-1-AC2",
+      "criterion_verbatim": "DB174-1-AC2 -- behaviour over a fake S3: one household composed for a client whose accounts (minted) are in it; no match, no account ids, a client not in the directory, directory ids equal to the RAW table ids, and no partition each raise NotYetAvailable; accounts spanning two households raise PublishRefused; across a pass the partition's data.parquet is fetched ONCE and an older partition never; a partition rewritten under the same key is re-read; 400 clients over 200 thousand rows finish inside the limit; the pass writes one object and records the refused and unavailable clients. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p174_filled_reader_accounts.py\" . DB174-1-AC2",
+      "output_evidence": "OK: the reader joins through the minted account ids (one household composed, none or no accounts NotYetAvailable, two households PublishRefused, raw ids never match), fetches the partition once per pass, re-reads a rewritten partition, and serves 400 clients over 200 thousand rows well inside the limit\nDB174-1-AC2 PASS",
+      "denominator": "7 of 7 behaviour clauses pass (one composed household; 4 NotYetAvailable arms plus no partition; 1 PublishRefused arm; 1 fetch of the partition for the pass; 1 re-read after a rewrite; 1 speed arm of 400 clients over about 200 thousand rows, limit 25 s; 1 pass arm writing one and recording one refused and one unavailable). Run twice on the committed tree: wall 12 s and 13 s for the whole process.",
+      "status": "PASS",
+      "expect": "DB174-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB174-1-AC3",
+      "criterion_verbatim": "DB174-1-AC3 -- at least six NEW tests carry accounts in their name; the reader no longer mentions relationship or sha256; the block reads the partition with read_dictionary and mints with the handler's own ids.opaque_account; both filled-report test files pass under pytest. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p174_filled_reader_accounts.py\" . DB174-1-AC3",
+      "output_evidence": "OK: six or more new accounts tests exist, the relationship-id rule is gone from the reader, it mints with the handler's own ids.opaque_account, and both filled-report test files pass\nDB174-1-AC3 PASS",
+      "denominator": "9 of 9 new tests with accounts in the name (threshold 6; 10 new tests in total); 0 occurrences of relationship or sha256 in the reader function; 1 read_dictionary call and 1 ids.opaque_account mint in the block; pytest 46 passed of 46 across the two filled-report test files",
+      "status": "PASS",
+      "expect": "DB174-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own selftest on the committed reader: the reference must be green, and five single-fault mutants of the reader (minting skipped, two households merged, partition re-read per client, no partition returns an empty document, and a diff mutant touching the event handler) must each turn the check red. Run on the final code; the handler's bytes were restored afterwards (same sha256 before and after).",
+      "expected": "every mutant red and the selftest prints PASS (rc=0)",
+      "observed": "selftest: green on the reference and red on 5 single-fault mutants / selftest PASS (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run again on the committed tree at c278bd6601 (after the record commit), together with pytest on both filled-report test files.",
+      "observed": "DB174-1-AC1 PASS, DB174-1-AC3 PASS, DB174-1-AC2 PASS (rc=0, wall 13 s); pytest 46 passed in 1.41 s, the same deciding lines as the first run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any Terraform plan or apply, any AWS call, any upload or invoke, and any push",
+      "reason": "Outside the grant (the order's BOUNDS). The reader was exercised against a fake S3 only; the join was measured by the issuer on the real partition and directory, not by this worker."
+    },
+    {
+      "item": "The 1,024 MB and 300 s Lambda limits for a whole pass",
+      "reason": "Not exercised here: the speed arm runs 400 clients over about 200 thousand rows in the process, not the real 4.7 million rows inside the Lambda."
+    },
+    {
+      "item": "The client-data scan of the commit gate (hashed account-id list absent on this box)",
+      "reason": "The order makes the scan the worker's own. The staged text holds code, synthetic ids (SYN-prefixed raw ids and their minted forms), paths, counts and words only; no client figure is present."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W247-S1: the composed filled document carries the table's RAW custodial account id as account_id (the reader takes it from row_key); the summary builder writes the minted id; the checker fixes the raw form as the contract. Not decided here; OBSERVATION, INERT (the switch is off)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p174_filled_reader_accounts.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p174_filled_reader_accounts.py\" --selftest .",
+      "result": "selftest PASS (rc=0)"
+    },
+    {
+      "tool": "pytest on the two filled-report test files",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py",
+      "result": "46 passed"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_DASHBD~247 <0.9.0_WK_IRPT_DASHBD~247@opal.agent>\" -F <msgfile> -- <grant paths>",
+      "result": "commit gates OK on 2e9c03c174 (handler, tests, row; surprise-row-gate: 1 new row, clean) and on c278bd6601 (record); msg-verify MATCH on both; client-data-check WARN (hashed list absent on this box), scanned by the worker instead"
+    }
+  ]
+}
