@@ -1,0 +1,26 @@
+Worker 0.9.0_WK_AMGT_HARVST~147 on AMGT_HARVST.TO-HVST-cb-11.a-job-derives-its-backfill-bound-from-local-state
+branch wk-AMGT_HARVST-147, worktree C:/dev/wk-harvst-147, TREE-OK, base 3467e51337 (issuer, round 87).
+
+BUILD: commit 40db997c81 -- lib/opal_data_harvest/harvest_grammar.py (backfill_bound local_watermark keyword, sentinel _NOT_GIVEN; watermark() unchanged),
+lib/opal_data_harvest/worker.py (_local_watermark, _note_local_watermark; call site swapped; note after the articles INSERT commit), and
+lib/opal_data_harvest/test_cb11_local_watermark.py (13 tests: arms 1-6 plus date-basis, unparseable, corrupt-row).
+Diff: harvest_grammar.py 14 lines, worker.py 38 lines (no whole-file diff; both files LF).
+
+SURPRISE ROW: commit b865a983b3 -- INVESTIGATION_v1.md, one row AMGT_HARVST-D1-W147-S1 (23 insertions, 0 deletions), ARMED, disarm_owner 2.0.0_SA_COO~W1.
+
+SUITE, lib/opal_data_harvest
+  before: 1 failed, 859 passed, 3 skipped, 6 subtests passed
+          (failed: test_harvest_grammar.py::test_one_writer_for_both_channels -- the sparse-worktree missing import, known)
+  after:  1 failed, 872 passed, 3 skipped, 6 subtests passed
+          (same single failure; 872 = 859 + 13 new; no new failure; no existing test edited)
+
+PUBLISHER SHAPES (read from publishers.py and recorded fixtures; no network, no publisher call)
+  wsj, barrons (DowJones.article): props publishedUtc or article publishedDateTimeUtc -- ISO-8601 strings, Z form (fixture 2026-09-30T00:00:00Z).
+  sa (listing JSON):               attributes publishOn -- ISO-8601 with offset (fixture 2026-09-30T10:00:00-04:00).
+  bbg (json and page paths):       publishedAt -- ISO-8601 with millisecond fraction (fixture 2026-08-07T00:02:16.329Z); page fallback is a date-only hit_date.isoformat().
+  No epoch or locale shape found for the four publishers. normalize() guards only the first 10 characters (fromisoformat(published[:10])),
+  so a non-ISO value with a date prefix would be accepted as a candidate and then ignored by _note_local_watermark (the bound stays the floor).
+  The local mark is normalised to aware UTC, so wm.date() is the UTC date; the silver published_utc basis is assumed UTC and was not measured.
+
+NOT RUN: any publisher, S3, Secrets Manager, any box's progress.sqlite3, any browser. __main__.py plan --with-watermark left on S3 by design.
+NOT DONE: the task-order status flip (the order says the issuer flips it; the file is outside <paths>).
