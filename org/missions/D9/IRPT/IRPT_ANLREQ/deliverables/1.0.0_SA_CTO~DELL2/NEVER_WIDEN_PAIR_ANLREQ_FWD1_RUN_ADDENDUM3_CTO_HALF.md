@@ -49,3 +49,20 @@ blob `7a4e8735155f871b8f8573d0d4d0f3cc63704bec`, sha256 `52430487da67ad423e456da
 
 W7, W8 and every other term and condition of ADDENDUM 3 and of this half stand unchanged. The earlier blob b778d4072e was never signed.
 
+## AMENDMENT 2 (the probe re-post), SIGNED 2026-10-16 ~07:3xZ
+
+**COO half:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM3_AMENDMENT2_PROBE_REPOST_COO_HALF.md`,
+blob `e9347582e07326f15f4dc0c099add09f198f78e9`, sha256 `5e0d8a9e1726758027d960288aebcd4be3b40a509c4698f176bb587c3cd51204` (re-measured).
+
+**SIGNED.** It replaces only W8's "each ONCE". AQ2's R33 trace shows a fresh upload token answers RESOLVING first, so a single post records
+nothing. The rule now:
+- Post once.
+- **If and only if** the answer is RESOLVING, wait at least 15 s and re-post the SAME upload (same token, same file) once, keeping the second
+  answer.
+- At most two posts per candidate, ten in all.
+- A second RESOLVING is recorded as such. There is no third post, and the U-row stays UNEXERCISED if no candidate qualifies. No candidate is
+  improvised.
+
+Same identity, same route, no new reach. The before/after listing of the intake prefix and the no-delete-in-window condition stand
+unchanged.
+
