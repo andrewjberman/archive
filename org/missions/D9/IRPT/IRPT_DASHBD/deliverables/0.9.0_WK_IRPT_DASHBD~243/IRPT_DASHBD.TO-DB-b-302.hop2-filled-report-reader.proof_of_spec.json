@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-302",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-302.hop2-filled-report-reader.md",
+    "group": "OTHER",
+    "vintage_commit": "a043273386d2f991fee93217eed89cf88a09f1f2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "a043273386d2f991fee93217eed89cf88a09f1f2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-302.hop2-filled-report-reader.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~243",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "a228fd4929dc6a31697e3aa80840d371831daf93",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_DASHBD-243; not in deploy scope: no Terraform command, no AWS call, no plan or apply; the filled-report switch stays off"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py",
+      "kind": "script",
+      "commit_or_etag": "a228fd4929dc6a31697e3aa80840d371831daf93",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_DASHBD-243; not in deploy scope: nothing deployed, PUBLISHER_VERSION unchanged"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py",
+      "kind": "test",
+      "commit_or_etag": "a228fd4929dc6a31697e3aa80840d371831daf93",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_DASHBD-243; test file, not deployed"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py",
+      "kind": "test",
+      "commit_or_etag": "a228fd4929dc6a31697e3aa80840d371831daf93",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_DASHBD-243; new test file (18 tests), not deployed"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-publish/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a228fd4929dc6a31697e3aa80840d371831daf93",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_DASHBD-243; no terraform command was run (no plan, no apply, no init); the grant change is not planned"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~243/RD_FILLED_READER_FACTS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "a228fd4929dc6a31697e3aa80840d371831daf93",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "facts record of the cell; a document, not a deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB170-1-AC1",
+      "criterion_verbatim": "the diff: handler.py and publisher.py change only inside their FILLED-REPORT-A block; locals.tf gains exactly the filled table local and its read prefix as the third list entry; the other root files, publisher.py outside its block and the source map are byte-identical to the base. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p170_filled_reader.py\" . DB170-1-AC1",
+      "output_evidence": "OK: handler.py changes only inside the first FILLED-REPORT-A block (the switch, the pass and the inline branch stay byte for byte); locals.tf gains exactly the filled table local and its read prefix; the other root files, publisher.py and the source map are byte-identical to the base\nDB170-1-AC1 PASS",
+      "denominator": "1 of 1 criterion (checker exit 0; the checker's diff clauses all hold)",
+      "status": "PASS",
+      "expect": "DB170-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB170-1-AC2",
+      "criterion_verbatim": "behaviour over a fake S3 and a synthetic directory: the reader returns the contract document of the client's household from the newest partition only (paged listing, other households ignored) and it validates; every absent form raises NotYetAvailable (no partition, no rows, no relationship id, client not in the directory) and the last two read nothing; a malformed household raises PublishRefused; the reader writes nothing and calls only list and get; the pass writes one object at the builder address; the validator accepts the per-window form and refuses the one-word form, a missing window, an extra window, an unknown word and a null. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p170_filled_reader.py\" . DB170-1-AC2",
+      "output_evidence": "OK: the reader returns the contract document of the client's household from the newest partition only (paged listing, other households ignored), raises NotYetAvailable for every absent form without a read or a write, raises PublishRefused for a malformed household, and the pass writes one object at the builder address\nDB170-1-AC2 PASS",
+      "denominator": "1 of 1 criterion (checker exit 0; every behaviour clause over the fake S3 holds)",
+      "status": "PASS",
+      "expect": "DB170-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB170-1-AC3",
+      "criterion_verbatim": "the worker's tests: the stub test is gone, the new test file holds at least eight tests including present, absent and refused, and both test files pass under pytest. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p170_filled_reader.py\" . DB170-1-AC3",
+      "output_evidence": "OK: the stub test is gone, the new test file holds present, absent and refused tests, and both test files pass\nDB170-1-AC3 PASS",
+      "denominator": "1 of 1 criterion (checker exit 0; pytest over both files: 35 passed of 35 collected)",
+      "status": "PASS",
+      "expect": "DB170-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "single-fault mutant: the reader reads the OLDEST date partition (handler.py anchor max(days) changed to min(days)), run against both test files, then restored by sha256",
+      "expected": "the present, pagination and pass tests fail",
+      "observed": "mutant: 4 failed, 31 passed; reference: 35 passed; handler restored byte-identical",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of both test files under pytest, compared by pass count (the timing suffix differs between runs)",
+      "observed": "run A: 35 passed; run B: 35 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deployment of the reader, the publisher validator and the read grant",
+      "reason": "risk class WORLD in a branch: no Terraform command, no AWS call, no plan or apply; the signed deploy pair and its own blast radius are later cells"
+    },
+    {
+      "item": "the filled-report switch and the re-pin of the source map",
+      "reason": "the switch stays off and the source map stays byte-identical to base; both are later cells"
+    },
+    {
+      "item": "the id-space match between directory relationship ids and table household refs",
+      "reason": "unmeasured: it is measured only at hop 1's first write, so the reader's mapping is proven on synthetic ids only"
+    },
+    {
+      "item": "run_filled_report refusal handling",
+      "reason": "not repaired: the pass is outside this order's grant (byte for byte); filed as IRPT_DASHBD-D2-W243-S1 for the issuer"
+    },
+    {
+      "item": "stale comment above irpt_rp_gold_read_prefixes in locals.tf",
+      "reason": "not repaired: the order allows two added lines and nothing else; filed as IRPT_DASHBD-D2-W243-S2"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W243-S1: run_filled_report catches only NotYetAvailable around the reader, so a refused household would end the pass once the switch is on",
+    "IRPT_DASHBD-D2-W243-S2: the locals.tf comment above the read list still reads 'the two gold prefixes' though the list holds three"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~243/RD_FILLED_READER_FACTS_R149.json",
+  "compiler_tools": [
+    {
+      "tool": "issuer checker p170_filled_reader.py (2.0.0_SA_COO~D2 r149)",
+      "invocation": "python -I <checker> . DB170-1-AC1 ; python -I <checker> . DB170-1-AC2 ; python -I <checker> . DB170-1-AC3",
+      "result": "exit 0 with last line PASS on each of the three criteria"
+    },
+    {
+      "tool": "pytest 9.1.1 (Python 3.14.7)",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no test_filled_report_publish.py test_filled_report_reader.py",
+      "result": "35 passed"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> DB170-1-AC1,DB170-1-AC2,DB170-1-AC3",
+      "result": "VALID (rc=0), violations=0; 3 acceptance rows; 6 artifact rows resolved at pin a228fd4929 (0 PENDING, 0 unresolved); 2 surprise rows resolve to the channel"
+    }
+  ]
+}
