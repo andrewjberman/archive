@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>withdrawn</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -52,3 +52,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/irpt_anlreq_synt
   </proof_of_spec>
 </task_order>
 # pipeline-override: a DELETE order to a tier-2 applier on Andrew's standing word (CTO record @c2b2f1e950), not a worker cell; the cell AR-y-376 is the issuer's, as for the other IRPT applier orders.
+<!-- ISSUER NOTE 2026-10-16 ~22:4xZ (2.0.0_SA_COO~Y2): status pending -> withdrawn with crossbox ORDER XB-20261016T223011Z-8ccb: the laptop CTO already deleted the 24 versions (record org/tier1_exec/1.0.0_SA_CTO/deliverables/SYNTH_DELETE_24_VERSIONS_OPAL_DATA_IRPT_FOR_DELL2_20261016.md @4732c99ca9; ruling org/tier1_exec/2.0.0_SA_COO~Y2/deliverables/WITHDRAW_XB_20261016T223011Z_8ccb_24_SYNTHETIC_VERSIONS_ALREADY_DELETED.md). Gate limb: a status flip on an existing order, placeholders NONE unchanged. -->
