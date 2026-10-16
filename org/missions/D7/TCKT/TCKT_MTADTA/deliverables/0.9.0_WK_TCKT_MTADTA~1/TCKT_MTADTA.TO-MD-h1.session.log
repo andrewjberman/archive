@@ -1,0 +1,39 @@
+TCKT_MTADTA.TO-MD-h1 -- worker session log, 0.9.0_WK_TCKT_MTADTA~1, worktree C:/tmp/wk-tckt-mtadta-1 (branch wk-TCKT_MTADTA-1), 2026-10-16
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-TCKT_MTADTA-1 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+
+Baseline (before any edit):
+  timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_h1.py rows   -> H1-ROWS-REFUSED builder: source 'm365-metadata' is not a systems.json key   rc=1
+  ... ledger -> H1-R20-MISSING ['m365-metadata', 'dropped at the outset', 'opal-data-trino']   rc=1
+  ... tf -> H1-TF-REFUSED no main.tf   rc=1
+  timeout 120 python lib/opal_naming.py validate -> VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s)   rc=0
+
+Edits: scopes.json (trino row), systems.json (m365-metadata row), root_map.json (roots.trino with three globgrph exceptions),
+06_CONFORMANCE_LEDGER.md (row X18 after X17), infra/aws/terraform/trino/main.tf (new).
+
+After registry edits:
+  timeout 120 python lib/opal_naming.py validate -> VALIDATE: OK 55 system row(s), 15 scope row(s), 0 warning(s)   rc=0
+  builder: address bronze -> s3://opal-data-trino/m365-metadata/trino/bronze/audit_events/date=20261016/events.json.gz
+  builder: address state  -> s3://opal-data-trino/m365-metadata/trino/state/subscription_cursor/current/cursor.json
+  builder: name           -> m365-metadata-trino-collector-lambda
+  builder: grade bucket   -> ('CONFORMANT', 'opal-data-trino')
+  builder: grade secret   -> ('CONFORMANT', 'm365-metadata/trino/api-credentials')
+  rows check, before regenerate -> H1-ROWS-REFUSED targets stale n=19 (expected: the registry hash moved)
+
+Generate into a scratch dir first (.scratch/gen_h1), diffed each target, then in place:
+  timeout 120 python lib/opal_naming.py generate --out .   -> GENERATE: 19 written, 0 skipped   rc=0
+  Diff nature against the worktree copies: 16 targets differ on the registry hash line only; generated_locals.tf adds four
+  trino lines (scope, class, bucket, system maps); vendorDisplayNames.generated.ts adds two VENDOR rows (m365-metadata and
+  microsoft-365-metadata); portal firmAccess.ts differs by line endings only (CRLF working copy, LF generator output).
+
+After regenerate:
+  timeout 120 python ... r1_check_h1.py rows   -> H1-ROWS-OK targets=19   rc=0
+  timeout 120 python ... r1_check_h1.py ledger -> H1-R20-OK   rc=0
+  timeout 120 python ... r1_check_h1.py tf     -> H1-TF-OK   rc=0
+  terraform fmt -check infra/aws/terraform/trino/main.tf -> rc=0
+
+Determinism: the three checks run a second time -> identical lines and rc=0 (H1-ROWS-OK targets=19 / H1-R20-OK / H1-TF-OK).
+
+Commit 21c6720238 (safe-commit, author 0.9.0_WK_TCKT_MTADTA~1): 22 files: the three registry files, the ledger, the new
+trino main.tf, 16 non-portal generator targets, and the investigation rows TCKT_MTADTA-D1-W1-S1 to S4.
+Portal targets: not committed (TCKT_MTADTA-D1-W1-S2). Nothing applied, no AWS or Microsoft call, no push.
