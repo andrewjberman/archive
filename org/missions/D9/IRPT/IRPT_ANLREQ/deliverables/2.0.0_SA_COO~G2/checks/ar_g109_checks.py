@@ -18,10 +18,11 @@ ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", CHECKS, "org/missi
           "org/tier1_exec/2.0.0_SA_COO~G2/", "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md")
 CELLS = {
     "109": {
-        "issuer": CHECKS + "ar_g109_issuer_tests.py", "env": ("AR109_ROOT", "AR-G109"), "issuer_count": 21,
+        "issuer": CHECKS + "ar_g109_issuer_tests.py", "env": ("AR109_ROOT", "AR-G109"), "issuer_count": 29,
         "worker": R + "ycharts/generate/tests/test_hop_failure.py",
         "named": ["test_mark_hop_failure_is_set_once", "test_get_state_carries_hop_failure", "test_a_failed_ready_send_records_the_hop",
-                  "test_a_packager_failure_records_the_hop", "test_a_failing_hop_write_never_masks_the_error"],
+                  "test_a_packager_failure_records_the_hop", "test_a_failing_hop_write_never_masks_the_error",
+                  "test_mark_hop_failure_keyed_is_set_once_without_a_read"],
         "own": [R + "ycharts/generate/durable_job.py", R + "ycharts/generate/resident_worker.py", R + "reports/resident_installed.py"],
         "regress": [R + "ycharts/generate/tests/test_durable_job.py", R + "ycharts/generate/tests/test_resident_worker.py",
                     R + "reports/tests/test_resident_installed.py", R + "reports/tests/test_resident_packager_binding.py",

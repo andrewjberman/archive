@@ -254,3 +254,58 @@ def test_an_unreadable_message_records_nothing_and_still_reraises(monkeypatch, c
     with pytest.raises(opal_packager.PackagerRefused):
         packager("not json")
     assert calls == [] and "HOP_FAILURE_MARK_FAILED PACKAGER" in capsys.readouterr().out
+
+
+# --- the keyed form (no composition hash, UpdateItem only) --------------------------------------------------------------------------------
+
+def keyed_client():
+    client = boto3.client("dynamodb", region_name="us-east-1", aws_access_key_id="x", aws_secret_access_key="x")
+    stub = Stubber(client)
+    stub.activate()
+    calls = []
+    client.meta.events.register_first("before-parameter-build.dynamodb.UpdateItem", lambda params, **kw: calls.append(dict(params)))
+    return client, stub, calls
+
+
+def test_keyed_form_writes_once_with_a_key_existence_condition_and_no_read():
+    client, stub, calls = keyed_client()
+    stub.add_response("update_item", {})
+    assert durable_job.mark_hop_failure_keyed(client, "49financial", REQ, "COMMENTARY", "COMMENTARY_DRAFT_REFUSED", "2026-10-16T03:00:00Z") is True
+    call = calls[0]
+    assert call["TableName"] == "irpt-jobs" and call["Key"] == {"tenant": {"S": "49financial"}, "job": {"S": REQ}}
+    assert call["UpdateExpression"].replace(" ", "") == "SEThop_failure=:value"
+    cond = call["ConditionExpression"]
+    assert "attribute_not_exists(hop_failure)" in cond and "attribute_exists(" in cond and "composition_sha256" not in cond
+    assert set(call["ExpressionAttributeValues"]) == {":value"}
+    assert call["ExpressionAttributeValues"][":value"] == {"M": {"hop": {"S": "COMMENTARY"}, "code": {"S": "COMMENTARY_DRAFT_REFUSED"},
+                                                                "at": {"S": "2026-10-16T03:00:00Z"}}}
+    assert "ReturnValues" not in call or call["ReturnValues"] == "NONE"
+
+
+def test_keyed_form_returns_false_on_a_failed_condition_without_any_read():
+    client, stub, calls = keyed_client()
+    stub.add_client_error("update_item", "ConditionalCheckFailedException")
+    assert durable_job.mark_hop_failure_keyed(client, "49financial", REQ, "COMMENTARY", "COMMENTARY_DRAFT_FAILED", "2026-10-16T03:00:00Z") is False
+    stub.assert_no_pending_responses()
+
+
+def test_keyed_form_propagates_other_errors():
+    client, stub, calls = keyed_client()
+    stub.add_client_error("update_item", "ProvisionedThroughputExceededException")
+    with pytest.raises(Exception) as info:
+        durable_job.mark_hop_failure_keyed(client, "49financial", REQ, "COMMENTARY", "COMMENTARY_DRAFT_FAILED", "2026-10-16T03:00:00Z")
+    assert "Provisioned" in str(info.value)
+
+
+@pytest.mark.parametrize("tenant,job,hop,code,at", [
+    ("", REQ, "COMMENTARY", "COMMENTARY_DRAFT_FAILED", "2026-10-16T03:00:00Z"),
+    ("49financial", "", "COMMENTARY", "COMMENTARY_DRAFT_FAILED", "2026-10-16T03:00:00Z"),
+    ("49financial", REQ, "PACKAGER", "COMMENTARY_DRAFT_FAILED", "2026-10-16T03:00:00Z"),
+    ("49financial", REQ, "COMMENTARY", "COMMENTARY_DRAFT_FAILED", "yesterday"),
+    (None, REQ, "COMMENTARY", "COMMENTARY_DRAFT_FAILED", "2026-10-16T03:00:00Z"),
+])
+def test_keyed_form_refuses_bad_input_before_any_call(tenant, job, hop, code, at):
+    client, stub, calls = keyed_client()
+    with pytest.raises(LeaseRefused) as info:
+        durable_job.mark_hop_failure_keyed(client, tenant, job, hop, code, at)
+    assert str(info.value) == "HOP_FAILURE_INVALID" and calls == []
