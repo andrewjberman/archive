@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-sv-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "7c8c1ee4db",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sv-1.json-served-family.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "7c8c1ee4db"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~113",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/portal_json_served.py",
+      "kind": "script",
+      "commit_or_etag": "35848c868969fde27d1ba1b802ced66181f85af6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the six-tool module on the worktree branch; no release, deploy or registration in this order (the issuer's hookup and OG-ap-23)",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_sv1.py",
+      "kind": "test",
+      "commit_or_etag": "35848c868969fde27d1ba1b802ced66181f85af6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline tests on a recording fake bucket and a synthetic catalog; run by the AC1 invocation"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/SV1_ROWS.json",
+      "kind": "doc",
+      "commit_or_etag": "35848c868969fde27d1ba1b802ced66181f85af6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the seven row decisions with their measured lags; read by the AC2 invocation"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/probe_sv1.py",
+      "kind": "script",
+      "commit_or_etag": "35848c868969fde27d1ba1b802ced66181f85af6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the real-bucket probe, read-only, run by the AC2 invocation; prints counts, booleans and dates only",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6d31ea24a5b5ae22146452ad8fecf4545f2e188c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended: NFRA_OPLGTW-Z-W113-S1 and NFRA_OPLGTW-Z-W113-S2"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the six named offline tests pass (test_ogsv1_ac01 .. test_ogsv1_ac06 in infra/aws/ec2/opal-gateway/tests/test_og_sv1.py)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/sv1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 6 of 6; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "6 named tests of 6 (ac01..ac06; the parametrised cases of ac03 are one named test)",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 6 of 6; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the seven rows are decided exactly once, the stale one is ruled out with its number, every BUILT tool exists, and each answered a read of the real bucket and refused a non-Opal principal with zero reads",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/sv1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "rows: wanted 7 of 7, built 6, ruled out 1; set equal True; views ruled out True; ruled-out reasons carry a measurement True; built tools defined 6 of 6\nprobe sv: portal_get_peer_performance answered True as_of 2026-09-30 non_opal_refused True reads_on_refusal 0\nprobe sv: portal_get_trending answered True as_of 2026-10-15 non_opal_refused True reads_on_refusal 0\nprobe sv: portal_get_factor_tilts answered True as_of 2026-10-14 non_opal_refused True reads_on_refusal 0\nbuilt tools probed 6 (the worker's probe lines)\nRESULT: PASS\nexit=0",
+      "denominator": "rows 7 of 7; BUILT tools defined 6 of 6; BUILT tools probed 6 of 6 (the AC2 script prints the last three probe lines; all six answered in the probe run)",
+      "status": "PASS",
+      "expect": "(?s)rows: wanted 7 of 7, built \\d+, ruled out \\d+; set equal True; views ruled out True; ruled-out reasons carry a measurement True; built tools defined (\\d+) of \\1.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the cell names no mutant; the order's criteria are the two proof invocations and the six offline tests",
+      "expected": "N/A -- the cell names no mutant",
+      "observed": "N/A -- the cell names no mutant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two runs of the AC1 offline invocation on one tree compared (both rc=0, 6 of 6 named tests passed); the AC2 probe reads live objects and is not in this comparison",
+      "observed": "STABLE for AC1 (both runs 6 of 6 PASS)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "registration of the six tools in app/tools.py, app/data_entitlement.py and app/destructive_ops.py, and the pinned tool counts",
+      "reason": "the issuer's hookup at the merge, one commit (the order's bounds)"
+    },
+    {
+      "item": "release, deploy, IAM, Terraform and any grant",
+      "reason": "out of the cell's bounds; the release is the later applier order OG-ap-23"
+    },
+    {
+      "item": "the model_portfolios_views row as a tool",
+      "reason": "RULED_OUT in W/SV1_ROWS.json: newest partition 95 trading days behind T-1"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W113-S1: the naming gate issued two REFUSE verdicts on the served json field name 'etfs' in app/portal_json_served.py (WARN window, the commit landed); nothing renamed, no override used",
+    "NFRA_OPLGTW-Z-W113-S2: the row schema the order names is not present in this sparse worktree; the rows follow the filed-row format"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/NFRA_OPLGTW.TO-OG-sv-1.json-served-family.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_sv1.py -q (from infra/aws/ec2/opal-gateway)",
+      "result": "8 passed (six named tests, ac03 and ac04 parametrised)"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39) via safe-commit",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~113 <0.9.0_WK_NFRA_OPLGTW~113@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "35848c8689 landed after one fix (an unused import); commit-gate All checks passed; naming-gate WARN 2 REFUSE not blocking"
+    },
+    {
+      "tool": "surprise-row-gate via safe-commit",
+      "invocation": "same safe-commit on the investigation file",
+      "result": "6d31ea24a5: 2 new row(s) of 773 total checked; OK"
+    }
+  ]
+}
