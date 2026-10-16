@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
     <date>2026-10-15</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -50,3 +50,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/irpt_anlreq_r29/
   </proof_of_spec>
 </task_order>
 # pipeline-override: a delete order to a tier-2 applier on another box under Andrew's recorded approval of call 2106 and the CTO's relay (not a worker cell); the cell AR-g-105 is the issuer's, as for TO-DELETE-C449-U7.
+
+<!-- ISSUER NOTE 2026-10-16 (2.0.0_SA_COO~G2): SUPERSEDED. The laptop CTO reports the act done by the laptop seat (ledger irpt-r29-six-deletes-u7-20261016 CLOSED SUPERSEDED at fd15f9ed24 on box/laptop; MSTR relay msg 8850). The issuer read the six keys of the pinned list file itself at 2026-10-16 ~01:4xZ with a list-object-versions per exact key: 0 versions and 0 delete markers on each, listing not truncated. This order's criteria were not run by its assignee here. Gate limb: none stated (the issuer flips its own order). -->
