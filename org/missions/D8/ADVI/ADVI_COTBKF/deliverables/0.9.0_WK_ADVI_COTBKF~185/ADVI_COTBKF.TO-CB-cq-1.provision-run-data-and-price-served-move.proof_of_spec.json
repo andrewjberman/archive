@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cq-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cq-1.provision-run-data-and-price-served-move.md",
+    "group": "OTHER",
+    "vintage_commit": "91f3058570"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~185",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round95.md",
+    "vintage_commit": "91f3058570",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cq-1.provision-run-data-and-price-served-move.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~185/SERVED_MOVE_PRICED_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record of a read; no S3 write, no serve, no deploy; the control was not run"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~185/SERVED_MOVE_PRICED_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the short report beside the record; counts only, no deploy"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (ADVI_COTBKF-D1-W185-S1, -S2); the file's existing rows are unchanged (numstat 55 added, 0 deleted)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB95cq1-AC1",
+      "criterion_verbatim": "CB95cq1-AC1: the record states the control result and the added columns, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~185/SERVED_MOVE_PRICED_RECORD.json',encoding='utf-8'));m=d['measured'];print('SERVED-MOVE measured=%s' % m + ((' equal_tables=%d of 3 added_columns=%s' % (sum(1 for t in d['control'].values() if t['pre_existing_equal']), ','.join(sorted(set(c for t in d['added_columns'].values() if isinstance(t,dict) for c in t.get('columns_added',[])))))) if m else ' reason=%s' % d['reason']))\"",
+      "expect": "^SERVED-MOVE measured=(True equal_tables=[0-3] of 3 added_columns=[a-z_,]*|False reason=.+)$",
+      "output_evidence": "SERVED-MOVE measured=False reason=The run data could not be provisioned on dell1: the Yahoo close cache that the as-traded price basis reads (--yahoo-cache; the pinned copy is 3580 per-ticker files, sha256 5b4bb7db3acde4b18f15b22bde58e3d4a27c1e690c5c601f7684bcf62e0cf3cb per PRICE_CACHE_PIN.json) is not on this box, not under any sibling worktree scratch, and not under s3://opal-data-assets/yahoo/global/. Its only producer is a yfinance pass (a vendor call the cell does not permit). The regrade therefore has no as-traded input, and no build, control or added-column count was produced. Stopped at CB-cq-1 item 1; channel row ADVI_COTBKF-D1-W185-S1.",
+      "denominator": "1 record of 1 (measured=False with reason; 0 of 3 control tables measured)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB95cq1-AC2",
+      "criterion_verbatim": "CB95cq1-AC2: every label count adds up to the built row count of its table.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~185/SERVED_MOVE_PRICED_RECORD.json',encoding='utf-8'));ok=(not d['measured']) or all(sum(t['use_class'].values())==d['control'][k]['built_rows'] and sum(t['porting_verdict'].values())==d['control'][k]['built_rows'] for k,t in d['added_columns'].items() if isinstance(t,dict));print('SERVED-MOVE-SUMS consistent=%s' % ok)\"",
+      "expect": "SERVED-MOVE-SUMS consistent=True",
+      "output_evidence": "SERVED-MOVE-SUMS consistent=True",
+      "denominator": "0 of 3 tables with label counts (not measured; the all() over added_columns is short-circuited by measured=False)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not run: the control was not produced on dell1",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "rides the named later run: the CB-cq-1 control re-run after the Yahoo close cache is placed on dell1"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "CB-cq-1 item 1: run-data provisioning and the regrade",
+      "reason": "stopped: the Yahoo close cache (--yahoo-cache) is absent on dell1 and in S3; channel row ADVI_COTBKF-D1-W185-S1"
+    },
+    {
+      "item": "CB-cq-1 item 2: the local fwd3 build",
+      "reason": "needs the item 1 outputs; not run"
+    },
+    {
+      "item": "CB-cq-1 item 3: the control against the three served tables (row counts, per-column equality, max_abs_diff)",
+      "reason": "needs the item 2 build; not run; the served run_commit was not read"
+    },
+    {
+      "item": "CB-cq-1 item 4: label counts per use_class and porting_verdict, and the NOT_FOR_ACTIVE account count",
+      "reason": "needs the item 2 build; not run"
+    },
+    {
+      "item": "served_run_commit",
+      "reason": "not read: head-object gives LastModified 2026-10-09T12:41Z on the three keys, conflicting with the 728d223ddc the records name; channel row ADVI_COTBKF-D1-W185-S2"
+    },
+    {
+      "item": "pinned price cache digest and split-store pin comparison",
+      "reason": "not provisioned; the split store is an S3 version read at as_of 2026-10-09T11:52:52Z and no local copy is needed"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W185-S1: the Yahoo close cache that the as-traded basis reads is absent on dell1 and in S3, so the run data cannot be provisioned (stop at CB-cq-1 item 1)",
+    "ADVI_COTBKF-D1-W185-S2: the three served objects were last written 2026-10-09T12:41Z, after the round-82 build the records name as served; the served run_commit and hold list are unconfirmed"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~185/ADVI_COTBKF.TO-CB-cq-1.provision-run-data-and-price-served-move.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (json, re) reading the record and the TO",
+      "invocation": "python -c <the two acceptance invocations, verbatim from the TO>",
+      "result": "AC1 rc=0 SERVED-MOVE measured=False reason=...; AC2 rc=0 SERVED-MOVE-SUMS consistent=True"
+    }
+  ]
+}
