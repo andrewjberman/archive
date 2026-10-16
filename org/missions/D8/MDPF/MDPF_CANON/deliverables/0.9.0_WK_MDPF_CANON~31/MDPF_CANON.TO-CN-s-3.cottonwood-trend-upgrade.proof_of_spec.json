@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-s-3",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1fb9ac96ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "e96996c705",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-s-3.cottonwood-trend-upgrade.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/lib/cottonwoodTrend.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "34a15de1",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit 34a15de1 on branch wk-MDPF_CANON-31-portal (LOCAL, nested repo at C:/dev/wk-MDPF_CANON-31/portal, on top of CN-s-5 commit e206e06e). New pure module: buildCottonwoodTrendRows(raw) builds one row per total-bearing served date from the first total (2026-06-09). Not pushed to DEV; the client-facing landing is an approval row cut from PROD per CLAUDE.md (Portal)."
+    },
+    {
+      "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "34a15de1",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit 34a15de1 on branch wk-MDPF_CANON-31-portal (LOCAL). The Cottonwood view draws its Trend from buildCottonwoodTrendRows only (window from the first row, Other band from the rows, carried keys and legend, interpolated marking via pointClass); every other firm's Trend path is unchanged. Not pushed to DEV; landing as for cottonwoodTrend.ts above."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs the new pure module under bun on the committed copy of the real served Cottonwood object (as served 2026-10-15; the check holds the CRO spec's month-end oracle): r11_cn_s_3.py pure, seven arms (P0 to P6). Expect: ROUND 11 CN-S-3 PURE: 7 of 7 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_3.py\" pure; echo \"exit=$?\"",
+      "output_evidence": "  PASS P0 control: module exists and exports buildCottonwoodTrendRows\n  PASS P1 window: first row is the first total-bearing date; rows and cls follow the rule\n  PASS P2 partition: primaries + custom + other = total on every row (+-$0.005); no group negative\n  PASS P3 month-end oracle at the spec's five period ends (+-$0.05M per cell)\n  PASS P4 the absent-model-leg dates are carried at the last measured leg, total kept\n  PASS P5 Other at 2026-06-30 equals the spec value (+-$0.05M)\n  PASS P6 control: input not mutated; no served null turned into 0\nROUND 11 CN-S-3 PURE: 7 of 7 arms\nexit=0\n(The per-arm detail lines are withheld from this record: they carry client figures. Denominators: 90 total-bearing rows, 12 carried dates, 5 period ends.)",
+      "denominator": "7 of 7 arms (P0-P6); 90 of 90 rows partition (P2); 40 cells compared at 5 period ends (P3); 12 of 12 absent-leg dates carried (P4)",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-3 PURE: 7 of 7 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is JUDGMENT, graded at the round close (never self-graded): the issuer renders the Cottonwood Trend at a STATED portal commit on bun run dev:live --port 5174 and looks at the window start, the Other AUM band, the interpolated and carried marking and the Aug 31 bar. The worker does not render.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- judgment criterion (no invocation the order could reduce to an expectation). The issuer renders the Cottonwood Trend at a stated portal commit and reads the window start, the Other AUM band, the interpolated and carried marking and the Aug 31 bar at the round close.",
+      "output_evidence": "No output: the worker did not render (bounds 4: no browser launch). The judgment is recorded here as not performed by this worker.",
+      "denominator": "N/A -- judgment criterion; the window start, the Other band, the marking and the Aug 31 bar are read at the round close",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for CN-s-3; the issuer's selftest (planted mutants: Other taken as non_model_aua, the 12 dates left absent, the window starting at the first model date, a negative group, the input mutated) is issuer-only and is not one of the order's invocations.",
+      "expected": "N/A: the order names no mutant",
+      "observed": "No mutant arm run. AC1 is read against the served object by the issuer's check; the base tree (module absent) is red on all seven arms per the order's preflight, not re-run here.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The pure check run twice from the worktree root after the edit, stdout captured and compared with cmp.",
+      "observed": "pure: IDENTICAL, 7 of 7 arms, rc=0 on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC2 render: the Cottonwood Trend on bun run dev:live --port 5174",
+      "reason": "Bounded out by the order (bounds 4: no browser launch; AC2 is judgment graded at the round close)."
+    },
+    {
+      "item": "Repo-wide hygiene and the portal type check",
+      "reason": "Bounds 8: the issuer runs the type check and the real run at the drain. No tsc or bun install was run; the new code is written against the module's strict interfaces."
+    },
+    {
+      "item": "Optional extension of the window back to 2026-04-22",
+      "reason": "Not in this cell (the spec's optional extension, Andrew's call). The window starts at the first total-bearing date."
+    },
+    {
+      "item": "Commonwealth custody slice and any series the object does not serve",
+      "reason": "Bounds 3: not drawn; no month-end gap is filled with it."
+    },
+    {
+      "item": "trendGrouping.ts and the portal test files",
+      "reason": "Bounds 1: trendGrouping.ts is not this order's; no test file was written for this cell."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~31/MDPF_CANON.TO-CN-s-3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r11_cn_s_3.py pure (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_3.py pure",
+      "result": "ROUND 11 CN-S-3 PURE: 7 of 7 arms, exit=0 (run twice, identical)"
+    },
+    {
+      "tool": "r11_cn_s_4.py pure (issuer's check, read-only; the CN-s-4 guard)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py pure",
+      "result": "ROUND 11 CN-S-4 PURE: 6 of 6 arms"
+    },
+    {
+      "tool": "git -C portal commit (nested portal repo, CN-s-3 commit)",
+      "invocation": "git -C C:/dev/wk-MDPF_CANON-31/portal commit --author \"0.9.0_WK_MDPF_CANON~31 <0.9.0_WK_MDPF_CANON~31@opal.agent>\" -F .scratch/cn_s_3_portal_msg.txt",
+      "result": "rc=0: 34a15de1 on wk-MDPF_CANON-31-portal, 2 files, 142 insertions(+), 10 deletions(-)"
+    }
+  ]
+}
