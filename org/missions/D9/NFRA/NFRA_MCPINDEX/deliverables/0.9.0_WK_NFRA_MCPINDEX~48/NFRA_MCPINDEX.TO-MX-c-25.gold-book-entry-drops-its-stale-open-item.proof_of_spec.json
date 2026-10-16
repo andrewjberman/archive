@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-25",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "00113acb2f",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-25.gold-book-entry-drops-its-stale-open-item.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "00113acb2f"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~48",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/atom_decomposition/catalog_entries/opal_data_etfs_gold_book.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "0761bf4c0e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One open_items item removed (its two source lines) at 0761bf4c0e; LOCAL, not pushed, not deployed. Read at the sparse worktree by c25.AC1 (1 file differing from 0afc0f3a19).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "DENOMINATOR catalog entry files differing from 0afc0f3a19: 1; open_items at base 2 (stale 1); now 1; every CHECK ok -- RESULT: PASS -- exit=0 (c25.AC1; order section 4)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round19/checks/c25.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR catalog entry files differing from 0afc0f3a19: 1 (workflows/atom_decomposition/catalog_entries/opal_data_etfs_gold_book.yaml) | DENOMINATOR open_items at base 2 (stale 1); now 1 | CHECK ok  : exactly one entry file differs, the gold book one | CHECK ok  : the base holds exactly one stale item naming implicitDeny on gold/book | CHECK ok  : the stale item is gone and the other items are byte-equal and in order | CHECK ok  : no other field of the entry changed (0 changed) | CHECK ok  : no line is added (0 added) | RESULT: PASS -- exit=0 (run twice at 0761bf4c0e; both runs identical)",
+      "denominator": "catalog entry files differing from 0afc0f3a19: 1; open_items at base 2 (stale 1), now 1",
+      "status": "PASS",
+      "status_reason": "Both DENOMINATOR lines and every CHECK line read from the run at 0761bf4c0e; RESULT: PASS and exit=0 match the order's expectation.",
+      "expect": "DENOMINATOR catalog entry files differing from 0afc0f3a19: [0-9]+ .*DENOMINATOR open_items at base [0-9]+ \\(stale [0-9]+\\); now [0-9]+.*RESULT: PASS -- exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "validator rc 0; gold book OK lines 1; FAIL lines 0 -- RESULT: PASS -- exit=0 (c25.AC2; order section 4)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round19/checks/c25.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR validator rc 0; gold book OK lines 1; FAIL lines 0 | CHECK ok  : the gold book entry validates | CHECK ok  : no FAIL line and rc 0 | RESULT: PASS -- exit=0 (run at the sparse cone amended by order amendment A1, which adds infra/aws/ec2/opal-gateway/app/refs; the earlier run at 0761bf4c0e read rc 1 on the missing DATA_CATALOG.yaml and is superseded by this run, per surprise NFRA_MCPINDEX-Z-W48-S1).",
+      "denominator": "validator rc 0 (expected 0); gold book OK lines 1 (expected 1); FAIL lines 0 (expected 0)",
+      "status": "PASS",
+      "status_reason": "Read from the run after the issuer's amendment A1 widened the sparse cone to infra/aws/ec2/opal-gateway/app/refs: rc 0, gold book OK 1, FAIL 0, RESULT: PASS -- exit=0, matching the order's expectation. The earlier FAIL measurement is superseded and recorded in surprise NFRA_MCPINDEX-Z-W48-S1, which is not edited.",
+      "expect": "DENOMINATOR validator rc 0; gold book OK lines 1; FAIL lines 0.*RESULT: PASS -- exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The stale item restored to the entry (base-vs-entry predicate of c25.AC1, python run with base from git show 0afc0f3a19): the stale line is appended back to the edited open_items list.",
+      "expected": "the no==kept predicate and the len==base-1 predicate both False for the mutant; both True for the unmutated entry.",
+      "observed": "MUTANT stale restored: open_items 2 | check no==kept: False | check len==base-1: False; CONTROL unmutated: open_items 1 | check no==kept: True | len==base-1: True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "c25.AC1.sh run twice at 0761bf4c0e; the two runs' DENOMINATOR and CHECK lines compared by eye (identical), rc=0 on both.",
+      "observed": "run 1 and run 2 both print DENOMINATOR lines 1 and 2 and five CHECK ok lines and RESULT: PASS, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The expect fields encode the printed digits as [0-9]+ (worker face section 5.1); every literal token of the printed output is kept.",
+      "reason": "The checker matches expect as a regex against the recorded output_evidence, so the digits are generalised and the tokens are not."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W48-S1: AC2 cannot pass as written in this worktree: validate_catalog_v02.py exits 1 (FileNotFoundError on infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml, outside the sparse cone); AC1 passes."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~48/session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "workflows/atom_decomposition/validate_catalog_v02.py",
+      "invocation": "python workflows/atom_decomposition/validate_catalog_v02.py",
+      "result": "rc=1; gold book OK line printed; FileNotFoundError at line 87 on infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml (absent from the sparse worktree); not repaired."
+    },
+    {
+      "tool": "python (inline open_items predicate, read-only)",
+      "invocation": "python -c '<load base via git show 0afc0f3a19 and the entry; compare open_items with the c25.AC1 predicate>'",
+      "result": "unmutated: no==kept True, len==base-1 True; mutant (stale restored): both False."
+    }
+  ]
+}

@@ -20,7 +20,7 @@
       "commit_or_etag": "1175fb6b70",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "round 2 builds code only; the collector is packaged by build.sh and not deployed (release act)",
-      "artifact_covered_by": ["MD2-x2-AC2"]
+      "artifact_covered_by": ["MD2-x2-AC2", "MD2-x2-AC4"]
     },
     {
       "path_or_key": "data/m365_metadata/scripts/collector/coverage_record.py",
@@ -33,10 +33,10 @@
     {
       "path_or_key": "data/m365_metadata/scripts/collector/collect.py",
       "kind": "script",
-      "commit_or_etag": "1175fb6b70",
+      "commit_or_etag": "d386f84f49",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "round 2 builds code only; not deployed (release act)",
-      "artifact_covered_by": ["MD2-x2-AC1", "MD2-x2-AC2"]
+      "deploy_evidence": "round 2 amendment builds code only; not deployed (release act)",
+      "artifact_covered_by": ["MD2-x2-AC1", "MD2-x2-AC2", "MD2-x2-AC4"]
     },
     {
       "path_or_key": "data/m365_metadata/scripts/collector/source_client.py",
@@ -56,23 +56,23 @@
     {
       "path_or_key": "data/m365_metadata/scripts/tests/test_collector.py",
       "kind": "test",
-      "commit_or_etag": "1175fb6b70",
+      "commit_or_etag": "d386f84f49",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "synthetic events only; run by pytest from the worktree root (21 passed)"
+      "deploy_evidence": "synthetic events only; run by pytest from the worktree root (25 passed)"
     },
     {
       "path_or_key": "infra/aws/lambda/m365-metadata-collector/handler.py",
       "kind": "script",
-      "commit_or_etag": "1175fb6b70",
+      "commit_or_etag": "d386f84f49",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "not invoked (no AWS call); the Lambda is not created until the release act"
+      "deploy_evidence": "not invoked (no AWS call); the budget is read from the Lambda context at run time; the Lambda is not updated until the release act"
     },
     {
       "path_or_key": "infra/aws/terraform/trino/collector.tf",
       "kind": "terraform",
-      "commit_or_etag": "1175fb6b70",
+      "commit_or_etag": "d386f84f49",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "DESIRED: terraform fmt -check rc=0 only; no init, validate, plan or apply (WORLD bound); the alias reference is dangling until access.tf declares it (surprise TCKT_MTADTA-D1-W6-S1)"
+      "deploy_evidence": "DESIRED: terraform fmt -check rc=0 only; no init, validate, plan or apply (WORLD bound); timeout 900; the alias reference is dangling until access.tf declares it (surprise TCKT_MTADTA-D1-W6-S1)"
     }
   ],
   "acceptance": [
@@ -105,18 +105,28 @@
       "denominator": "3 key equalities against lib/opal_naming address() output (bronze, cursor, coverage); 1 Qualifier check on lambda_invoker; collector.tf: 0 data blocks, 1 aws_iam_policy collector block naming aws_lambda_alias.collector.arn, 0 s3: or kms: actions in it; 0 refused",
       "status": "PASS",
       "expect": "X2-INVOKER-OK"
+    },
+    {
+      "criterion_id": "MD2-x2-AC4",
+      "criterion_verbatim": "MD2-x2-AC4 -- (the fourth mechanical criterion, with its reason in the amendment above) a fire stops at its time budget, saves what it did without advancing past the unprocessed, and the next fires finish the backlog with every blob fetched exactly once. Two invariants: every partial save passes the population filter and the C-FIELDS levers before the write (planted outsider, subject, internal and external recipients searched in all stored bytes); the cursor advances only past blobs whose writes landed (a failed bronze put leaves the cursor unwritten).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x2.py budget",
+      "output_evidence": "X2-BUDGET-OK fires=3 blobs=60   (rc=0)",
+      "denominator": "60 blobs over 3 Eastern days, 25-second budget at 1 second per fetch: fire 1 stopped with complete=False after 25 fetches (<= 26 allowed); 3 fires in all, the third complete; 60 fetches, each blob once; 3 planted values searched in every stored object of the 3 fires; 1 failed bronze put checked (no cursor written); coverage documents carry complete false then true; 0 refused",
+      "status": "PASS",
+      "expect": "X2-BUDGET-OK"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "coverage_record.fire_key replaced by the round-1 constant key (date=YYYY-MM-DD/coverage.json, no fire tag) on a scratch copy of the collector package; the coverage check run against the copy.",
-      "expected": "X2-COVERAGE-REFUSED: fire 2 overwrites fire 1's gap",
-      "observed": "X2-COVERAGE-REFUSED fire_key 'm365-metadata/trino/gold/collection_coverage/date=2026-10-14/coverage.json' 'm365-metadata/trino/gold/collection_coverage/date=2026-10-14/coverage.json'; fire 1 did not record the planted gap on 2026-10-14; fire 2 wrote no coverage object of its own   (rc=1)",
+      "description": "The budget check in collect.run_once disabled (`if budget_seconds is not None and clock() - start_clock >= budget_seconds:` replaced by `if False:`) on a scratch copy of the collector package; the budget check run against the copy.",
+      "expected": "X2-BUDGET-REFUSED: fire 1 must stop at its 25-second budget with complete=False",
+      "observed": "X2-BUDGET-REFUSED fire 1 must stop at its 25-second budget with complete=False and a partial count: {'fetched': 60, 'bronze_objects': 3, 'coverage_days': 8, 'untimed': 0, 'failed': 0, 'complete': True}; the backlog should finish in a few fires (fires=1 complete=True); coverage documents must carry complete=false for a stopped fire and complete=true for the finishing fire   (rc=1)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "each of coverage, attribution and invoker run twice from the worktree root; stdout of run 1 compared with run 2 byte for byte",
-      "observed": "coverage STABLE: X2-COVERAGE-OK objects=10 (rc 0/0); attribution STABLE: X2-ATTRIBUTION-OK (rc 0/0); invoker STABLE: X2-INVOKER-OK (rc 0/0)",
+      "method": "each of coverage, attribution, invoker and budget run twice from the worktree root; stdout of run 1 compared with run 2 byte for byte",
+      "observed": "coverage STABLE: X2-COVERAGE-OK objects=10 (rc 0/0); attribution STABLE: X2-ATTRIBUTION-OK (rc 0/0); invoker STABLE: X2-INVOKER-OK (rc 0/0); budget STABLE: X2-BUDGET-OK fires=3 blobs=60 (rc 0/0)",
       "status": "STABLE"
     }
   },
@@ -126,12 +136,16 @@
       "reason": "WORLD bound: no Microsoft call in this order; the fake source drives the listing shape (contentId and contentCreated)."
     },
     {
+      "item": "A live hourly fire and the 900-second Lambda timeout",
+      "reason": "WORLD bound: no AWS call; the budget is proven on a fake clock (AC4), not on the function's clock."
+    },
+    {
       "item": "terraform init, validate, plan and apply of the trino root",
       "reason": "WORLD bound: only terraform fmt -check was run on collector.tf (rc=0). The alias reference cannot be planned until access.tf declares aws_lambda_alias.collector (surprise TCKT_MTADTA-D1-W6-S1)."
     },
     {
       "item": "Live handler run of lambda_handler (infra/aws/lambda/m365-metadata-collector/handler.py)",
-      "reason": "No boto3 client and no AWS call in this order; the handler's only change is the qualifier, which AC3 proves at the client."
+      "reason": "No boto3 client and no AWS call in this order; the budget and the counts line are read from the code, not from a Lambda context."
     },
     {
       "item": "The door's derive_silver and get_state replies",
@@ -155,7 +169,7 @@
     {
       "tool": "pytest 9.1.1 (python 3.14.7)",
       "invocation": "python -m pytest -p no:cacheprovider --color=no -q data/m365_metadata/scripts/tests/test_collector.py",
-      "result": "21 passed in 0.08s (rc=0)"
+      "result": "25 passed in 0.10s (rc=0)"
     },
     {
       "tool": "ruff 0.15.11 (py39 target)",
@@ -164,7 +178,7 @@
     },
     {
       "tool": "py_compile",
-      "invocation": "python -m py_compile data/m365_metadata/scripts/collector/filter.py data/m365_metadata/scripts/collector/coverage_record.py data/m365_metadata/scripts/collector/collect.py data/m365_metadata/scripts/collector/source_client.py data/m365_metadata/scripts/collector/access_client.py infra/aws/lambda/m365-metadata-collector/handler.py",
+      "invocation": "python -m py_compile data/m365_metadata/scripts/collector/collect.py infra/aws/lambda/m365-metadata-collector/handler.py",
       "result": "rc=0"
     },
     {

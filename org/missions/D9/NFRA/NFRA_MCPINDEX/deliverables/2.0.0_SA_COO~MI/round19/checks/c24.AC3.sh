@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# MX-c-24 c24.AC3 -- see c24_check.py (ac3).
+D="$(cd "$(dirname "$0")" && pwd)"
+. "$D/_root.sh"
+timeout 285 python "$(native "$D/c24_check.py")" ac3 | tr -d ''
+exit ${PIPESTATUS[0]}

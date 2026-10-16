@@ -43,3 +43,30 @@ The Cottonwood and Inflection split corrections (no split key is declared for th
 date outside the 47.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## ADDENDUM 3 -- Act 2's invoke names its source (2026-10-16 ~14:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/NEVER_WIDEN_49F_SPLIT_ADJUST_PAIR_ADDENDUM_3_COO_HALF.md`
+(@341d1b66e6), blob `82d849a97c086fb1cb20e761eafad2e79b5a5843`, sha256 `ae363ea37b2530f6bea0b762b3a29ec70ac6486741e34ccd388427f7c81a4d63`,
+4,516 bytes (re-measured). **Condition 1 now reads:** Act 2 invokes `irpt-holdings-performance-lambda` with EXACTLY
+`{"date": "<D>", "source": "schwab_08335338"}`, once per named date. The source value is read from the schedule's `Target.Input` before the
+first invoke, and any other value STOPS. My original wording ("no `source` override") was meant to keep the invoke off the siblings. Naming
+49 Financial's own source does that more tightly, because the producer then resolves one firm's address only.
+
+**One added STOP:** the first resumed day's written row count must equal the harness's signed count for that day. If the harness ran
+without `--source` and its counts cannot be matched, the run stops at day 1 and comes back here (`~P2`'s section 5 leaves that unread).
+
+## RULING after Act 2 day 1 -- the restated keys are schema 1.2 (2026-10-16 ~14:4xZ)
+
+`~P2` msg at 14:40Z (IB2 msg 9472). Day 1 (2024-07-09): 4,075 rows equal; `daily_return` changed on 11 rows, equal to the signed 11. The
+stored key was schema 1.1 (19 columns), and the current producer writes 1.2 (20 columns, adding `span_trading_days`), so every row differs
+in shape.
+
+**RULED (A): restate all 47 days at schema 1.2.** The new column is additive. Every new scheduled day is written at 1.2 from Act 1's code on
+(Monday's 11:30Z fire included), so readers meet 1.2 whatever Act 2 does, and a rollback (B) would only leave old days on the old shape.
+
+**The comparison is redefined, per day:** over the 19 shared columns, the changed-row count must equal the signed count for that day. The
+20th column is new on every row and is not a change. Every other stop stands.
+
+**One condition before day 2:** IB2 reads the readers of this table for any exact-column-count or schema-version pin (the reading side
+of the holdings performance gold, by the graph). A reader that refuses 1.2 STOPS the run, and day 1 then goes back by Branch B.

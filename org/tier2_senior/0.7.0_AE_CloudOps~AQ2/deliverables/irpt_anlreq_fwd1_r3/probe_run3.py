@@ -79,6 +79,18 @@ def select(results):
     return {"U1": u1, "U2": u2, "U3": u3}
 
 
+def gate(results):
+    """The CTO's SET 2 STOP conditions (msgs 9337 and 9380): ZQXWVK must read NEEDS_CORRECTION:TICKER_NOT_FOUND with no suggestion; all five
+    reading TICKER_CHECK_FAILED stops. Returns (ok, reason)."""
+    by = {c: r for c, r in results}
+    z = by.get("ZQXWVK")
+    if not z or z["label"] != "NEEDS_CORRECTION:TICKER_NOT_FOUND" or z["suggestion"]:
+        return False, "ZQXWVK did not read NOT_FOUND without a suggestion: %s" % (z["label"] if z else "NOT PROBED")
+    if results and all(r["label"].endswith("TICKER_CHECK_FAILED") for _, r in results):
+        return False, "all five candidates read TICKER_CHECK_FAILED"
+    return True, "ZQXWVK reads NOT_FOUND"
+
+
 def selftest():
     ok = {"ok": True, "data": {"state": "NEEDS_CORRECTION", "findings": [{"code": "TICKER_NOT_FOUND", "value": "zzz", "actions": ["ACCEPT_SUGGESTION", "REPLACE_TICKER"], "suggestion": {"symbol": "ZZY"}}]}}
     assert describe(200, ok, "ZZZ") == ("NEEDS_CORRECTION:TICKER_NOT_FOUND", True, "ZZY", ["ACCEPT_SUGGESTION", "REPLACE_TICKER"])
@@ -99,7 +111,13 @@ def selftest():
     assert select([("A", r(False, None))]) == {"U1": None, "U2": None, "U3": None}
     assert select([("A", r(True, "A1")), ("B", r(True, "B1")), ("C", r(True, "C1"))]) == {"U1": "A", "U2": "B", "U3": "C"}
     assert csv_for("ALPPL") == b"Ticker,Dollars,Acct Market Value\nSPY,100,26000000\nALPPL,50,5000000\n"
-    print("SELFTEST-OK probe helpers: describe (6 shapes), select (4 cases incl. UNEXERCISED and the no-suggestion preference), csv_for")
+    nf = {"label": "NEEDS_CORRECTION:TICKER_NOT_FOUND", "suggestion": None}
+    cf = {"label": "NEEDS_CORRECTION:TICKER_CHECK_FAILED", "suggestion": None}
+    assert gate([("ALPPL", cf), ("ZQXWVK", nf)]) == (True, "ZQXWVK reads NOT_FOUND")
+    assert gate([("ALPPL", nf), ("ZQXWVK", cf)])[0] is False
+    assert gate([("ALPPL", nf), ("ZQXWVK", dict(nf, suggestion="X"))])[0] is False
+    assert gate([("ALPPL", nf)])[0] is False
+    print("SELFTEST-OK probe helpers: describe (6 shapes), select (4 cases incl. UNEXERCISED and the no-suggestion preference), csv_for, gate (4 cases)")
     return 0
 
 
@@ -118,7 +136,9 @@ def live(args):
     date = args.date
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    addr = "irpt-r3p-iv-%s@opal.invalid" % date
+    tag = args.tag
+    order = [c.strip().upper() for c in args.order.split(",")] if args.order else list(CANDIDATES)
+    addr = "irpt-%s-iv-%s@opal.invalid" % (tag, date)
     ddb = boto3.client("dynamodb", region_name=base.REGION)
     lam = boto3.client("lambda", region_name=base.REGION)
     s3 = boto3.client("s3", region_name=base.REGION)
@@ -138,12 +158,12 @@ def live(args):
         return ddb.query(TableName=base.USERS, IndexName="email-index", KeyConditionExpression="email = :e",
                          ExpressionAttributeValues={":e": {"S": addr}}, Select="COUNT")["Count"]
 
-    def post(cand, tok):
-        wait = GAP - (time.time() - state["last"])
+    def post(cand, tok, gap=GAP):
+        wait = gap - (time.time() - state["last"])
         if wait > 0:
             time.sleep(wait)
         state["posts"] += 1
-        body = {"upload_token": tok, "filename": "r3p-%s.csv" % cand.lower(), "file_base64": base64.b64encode(csv_for(cand)).decode(), "file_type": "csv"}
+        body = {"upload_token": tok, "filename": "%s-%s.csv" % (tag, cand.lower()), "file_base64": base64.b64encode(csv_for(cand)).decode(), "file_type": "csv"}
         req = urllib.request.Request(base.BASE + UPLOAD, data=json.dumps(body).encode("utf-8"), method="POST")
         req.add_header("Authorization", "Bearer " + state["token"])
         req.add_header("x-contract-version", "v1")
@@ -170,7 +190,7 @@ def live(args):
         say("intake BEFORE bucket %s prefix %s: %d versions, %d delete markers" % (BUCKET, PREFIX, len(before[0]), before[1]))
         now = base.iso()
         item = {"PK": key["PK"], "SK": key["SK"], "email": {"S": addr}, "firmId": {"S": "opal-capital"}, "status": {"S": "active"},
-                "name": {"S": "IRPT_ANLREQ R3 probe synthetic internal viewer"}, "role": {"S": "user"}, "tier": {"S": "internal"},
+                "name": {"S": "IRPT_ANLREQ R3 probe synthetic internal viewer (%s)" % tag}, "role": {"S": "user"}, "tier": {"S": "internal"},
                 "userType": {"S": "test-filer"}, "createdAt": {"S": now}, "createdBy": {"S": "0.7.0_AE_CloudOps~AQ2"}, "updatedAt": {"S": now}}
         ddb.put_item(TableName=base.USERS, Item=item, ConditionExpression="attribute_not_exists(PK)")
         written = True
@@ -183,27 +203,37 @@ def live(args):
             raise RuntimeError("signing secret is not a PEM string")
         iat = int(time.time())
         claims = {"sub": addr, "iss": "opal-portal-auth", "aud": "opal-portal-api", "firmId": "opal-capital", "tier": "internal", "role": "user",
-                  "userType": "test-filer", "name": "IRPT_ANLREQ R3 probe synthetic internal viewer", "iat": iat, "exp": iat + LIFE}
+                  "userType": "test-filer", "name": "IRPT_ANLREQ R3 probe synthetic internal viewer", "iat": iat, "exp": iat + args.life}
         state["token"] = pyjwt.encode(claims, pem, algorithm="RS256")
         exp = claims["exp"]
         del pem
         say("token minted (held in memory only) iat=%s exp=%s" % (base.iso(iat), base.iso(exp)))
-        for cand in CANDIDATES:
+        halted = None
+        for cand in order:
+            if halted:
+                say("PROBE %s NOT PROBED: %s" % (cand, halted))
+                results.append((cand, dict(status=None, label="NOT_PROBED", qualifies=False, suggestion=None, actions=[], sha=None, posts=0)))
+                continue
             if time.time() > exp - 150:
                 say("PROBE %s NOT PROBED: the token window is nearly spent" % cand)
                 results.append((cand, dict(status=None, label="NOT_PROBED", qualifies=False, suggestion=None, actions=[], sha=None, posts=0)))
                 continue
-            tok = "irpt-r3p-%s-%s" % (cand.lower(), date)
+            tok = "irpt-%s-%s-%s" % (tag, cand.lower(), date)
             st, b, raw, _ = post(cand, tok)
+            state.setdefault("first_post", base.iso())
             label, q, sug, acts = describe(st, b, cand)
             n = 1
             if label == "RESOLVING":
                 say("PROBE %s first answer RESOLVING; the SAME upload is posted once more (amendment 2)" % cand)
-                st, b, raw, _ = post(cand, tok)
+                st, b, raw, _ = post(cand, tok, gap=args.repost_wait)
                 label, q, sug, acts = describe(st, b, cand)
                 n = 2
             say("PROBE %s status %s %s suggestion=%s%s actions=%s body_sha256 %s posts %d" % (cand, st, label, "yes" if sug else "no", (" " + sug) if sug else "", ",".join(acts), sha(raw), n))
             results.append((cand, dict(status=st, label=label, qualifies=q, suggestion=sug, actions=acts, sha=sha(raw), posts=n)))
+            state["last_answer"] = base.iso()
+            if args.zq_first and cand == "ZQXWVK" and (label != "NEEDS_CORRECTION:TICKER_NOT_FOUND" or sug):
+                halted = "ZQXWVK did not read NOT_FOUND without a suggestion (%s): the SET ends and the window STOPS" % label
+                say("STOP-GATE " + halted)
         after = list_store(s3)
     except Exception as e:  # noqa: BLE001 -- anything is a STOP; the row is still removed after exp
         stop = "STOP (%s): %s" % (type(e).__name__, str(e)[:300])
@@ -232,12 +262,15 @@ def live(args):
         rem = ["F1 ABSENT GSI %s" % addr if g else "F1 PRESENT GSI %s" % addr, "F1 ABSENT CONSISTENT %s" % addr if c else "F1 PRESENT CONSISTENT %s" % addr]
         sel = select(results) if results else {"U1": None, "U2": None, "U3": None}
         new = sorted(set(after[0]) - set(before[0])) if before and after else None
-        doc = {"results": [dict(candidate=c, **r) for c, r in results], "selection": sel, "removal": rem, "stop": stop,
+        doc = {"order": order, "first_post_utc": state.get("first_post"), "last_answer_utc": state.get("last_answer"), "repost_wait_s": args.repost_wait,
+               "results": [dict(candidate=c, **r) for c, r in results], "selection": sel, "removal": rem, "stop": stop,
                "intake_before": None if not before else {"versions": len(before[0]), "markers": before[1]},
                "intake_after": None if not after else {"versions": len(after[0]), "markers": after[1]},
                "new_objects": None if new is None else [{"key": k, "version_id": v, "size": after[0][(k, v)]} for k, v in new]}
         (out / "probe_results.json").write_text(json.dumps(doc, indent=1), encoding="utf-8")
         (out / "probe_trace.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        ok_, why_ = gate(results) if results else (False, "no results")
+        say("GATE %s: %s" % ("OK" if ok_ else "STOP", why_))
         say("SELECTION U1=%s U2=%s U3=%s (None = UNEXERCISED); new intake objects: %s" % (sel["U1"], sel["U2"], sel["U3"], "unread" if new is None else len(new)))
     return 0 if not stop else 1
 
@@ -249,9 +282,16 @@ def main(argv):
     ap.add_argument("--go", action="store_true")
     ap.add_argument("--date", default=dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d"))
     ap.add_argument("--out", default="")
+    ap.add_argument("--tag", default="r3p", help="viewer tag: r3p for SET 1, r3q for SET 2")
+    ap.add_argument("--order", default="", help="comma list of candidates in order (default ALPPL,APPL,BREIT,SREIT,ZQXWVK)")
+    ap.add_argument("--repost-wait", type=int, default=GAP, help="seconds from a candidate's first post to its one re-post (SET 3: 90)")
+    ap.add_argument("--zq-first", action="store_true", help="end the SET at ZQXWVK when it does not read NOT_FOUND without a suggestion")
+    ap.add_argument("--life", type=int, default=LIFE, help="token life in seconds (at most 1200)")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
+    if a.life > 1200:
+        ap.error("--life is at most 1200 seconds (20 minutes)")
     if a.live and a.go and a.out:
         return live(a)
     ap.error("choose --selftest, or --live --go --out <folder>")
