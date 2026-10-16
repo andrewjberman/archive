@@ -145,11 +145,36 @@ stage = (
     b'mkdir -p "$TMP/bundle/app/refs"\n'
     b'cp "$WORKSPACE_ROOT/lib/opal_naming.py" "$TMP/bundle/lib"\n'
     b'cp "$WORKSPACE_ROOT/data/mdpf/config/partner_roster.json" "$TMP/bundle/app/refs/partner_roster.json"\n'
-    b'cp "$WORKSPACE_ROOT/infra/logic/registry/scopes.json" "$TMP/bundle/app/refs/scopes.json"\n')
+    b'cp "$WORKSPACE_ROOT/infra/logic/registry/scopes.json" "$TMP/bundle/app/refs/scopes.json"\n'
+    b'\n'
+    b'# NFRA_OPLGTW OG-ap-23 (A3, Phase A gap 1): the six vendor reader role ARNs the client tools assume (app/client_role.py role_env_name).\n'
+    b'# A role ARN is not a secret. Each one is READ from IAM, never typed, and a role that does not resolve REFUSES the deploy before any upload.\n'
+    b'_vr_account="$(aws sts get-caller-identity --query Account --output text | tr -d \'\\r\')" \\\n'
+    b'    || { echo "ERROR: REFUSED (no upload): the AWS account could not be resolved for the vendor reader roles." >&2; exit 1; }\n'
+    b'_vr_arn() {\n'
+    b'    _a="$(aws iam get-role --role-name "$1" --query Role.Arn --output text 2>/dev/null | tr -d \'\\r\')" || _a=""\n'
+    b'    if [ "$_a" != "arn:aws:iam::${_vr_account}:role/$1" ]; then\n'
+    b'        echo "ERROR: REFUSED (no upload): vendor reader role $1 did not resolve to its expected ARN in the account." >&2; return 1\n'
+    b'    fi\n'
+    b'    printf \'%s\' "$_a"\n'
+    b'}\n'
+    b'READER_ARN_BD49F="$(_vr_arn gateway-49f-blackdiamond-read-role)"\n'
+    b'READER_ARN_BDCOTTONWOOD="$(_vr_arn gateway-cot-blackdiamond-read-role)"\n'
+    b'READER_ARN_ORION="$(_vr_arn gateway-inf-orion-read-role)"\n'
+    b'READER_ARN_ECLIPSE="$(_vr_arn gateway-inf-eclipse-read-role)"\n'
+    b'READER_ARN_COMMONWEALTH="$(_vr_arn gateway-cot-commonwealth-read-role)"\n'
+    b'READER_ARN_SMARTX="$(_vr_arn gateway-smartx-read-role)"\n')
 b = b.replace(cal, cal + stage)
-tail = b'-C "$TMP/bundle" "$DASHBOARD_BUNDLE_DIR" lib\n'
-assert b.count(tail) == 1
-b = b.replace(tail, b'-C "$TMP/bundle" "$DASHBOARD_BUNDLE_DIR" lib app/refs/partner_roster.json app/refs/scopes.json\n')
+# the six keys in the .env the script rebuilds: six %s placed BEFORE the two ADVI roots (the ab1/ab2 tests pin the market-update
+# argument second-to-last and the fee-statement argument last), with the six arguments in the same place in the argument list
+fmt_head = b'ADVI_MARKET_UPDATE_S3_ROOT=%s\\n'   # the deploy script's printf carries a LITERAL backslash-n, not a newline
+assert b.count(fmt_head) == 1
+b = b.replace(fmt_head, b'BLACKDIAMOND49F_READER_ROLE_ARN=%s\\nBLACKDIAMONDCOTTONWOOD_READER_ROLE_ARN=%s\\nORION_READER_ROLE_ARN=%s\\n'
+              b'ECLIPSE_READER_ROLE_ARN=%s\\nCOMMONWEALTH_READER_ROLE_ARN=%s\\nSMARTX_READER_ROLE_ARN=%s\\n' + fmt_head)
+arg_head = b'"${ADVI_MARKET_UPDATE_S3_ROOT}" "${ADVI_FEE_STATEMENT_S3_ROOT}" | sudo -u ec2-user tee'
+assert b.count(arg_head) == 1
+b = b.replace(arg_head, b'"${READER_ARN_BD49F}" "${READER_ARN_BDCOTTONWOOD}" "${READER_ARN_ORION}" "${READER_ARN_ECLIPSE}" '
+              b'"${READER_ARN_COMMONWEALTH}" "${READER_ARN_SMARTX}" ' + arg_head)
 put(p, b)
 taken.append(p)
 

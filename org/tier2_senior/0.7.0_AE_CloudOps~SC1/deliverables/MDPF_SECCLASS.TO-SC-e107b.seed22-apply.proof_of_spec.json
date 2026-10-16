@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e107b.seed22-apply",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4dda49c7e3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R27.md",
+    "vintage_commit": "a027dd2c77",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e107b.seed22-apply.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "dynamodb:us-east-1:etf-classifications (13 new keys, plan SEED22_PLAN.json)",
+      "kind": "ddb_rows",
+      "commit_or_etag": "13 keys written 2026-10-16T06:27:08Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "seed22.py apply (sha256 84e77caf..., plan sha256 5337b6ba...) printed 'SEED22-APPLY written=13 refused=0'. Window read in the same shell: bd-gold-layer-runner pending/running/stopping=0, gold/trigger-pending.json ABSENT. Leg P before: 22 get_item all absent, ItemCount 11362, PITR ENABLED, scan 11362. After: get_item 13/13 present and 0/9 held-out present, scan 11375. Output at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_ACT_20261016.out, org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_LEGP_20261016.json, org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_LEGP_POST_20261016.json.",
+      "artifact_covered_by": [
+        "SC27-e107b-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_STEP0_20261016.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 0 reads: three documents, sha256 equal, runner stopped, trigger-pending absent, PutItem simulation (typo control also allowed: wildcard grant, not relied on), two old open ledgers named.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e107_legp.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only leg P script; commit-gate clean (py_compile, ds-precommit, ruff).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC27-e107b-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/e107_seeded_check.py -- expect 'E107-SEEDED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/e107_seeded_check.py",
+      "expect": "E107-SEEDED ok=True",
+      "output_evidence": "E107-SEEDED ok=True present=13/13 absent_ok=9/9 problems=[] (read 2026-10-16T06:27:33Z; E107_ACT_20261016.out). At the base it read 'ok=False present=0/13 absent_ok=9/9' (the order).",
+      "denominator": "13 planned keys present and 9 held-out keys absent, by get_item. The census of the 200 pre-act keys was re-read by get_item: 200 checked, 0 missing, 0 last_updated moved (an earlier top-200 comparison printed moved=1 'AMT': an artifact of the 13 new keys sorting into the first 200; recorded). The table's ItemCount lags (11362 after) and is not the oracle; the scan reads 11375.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "seed22.py",
+      "invocation": "apply --plan SEED22_PLAN.json --pair NEVER_WIDEN_CTO_HALF_SECCLASS_SEED22_20261016.md",
+      "result": "SEED22-APPLY written=13 refused=0"
+    },
+    {
+      "tool": "e107_seeded_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/e107_seeded_check.py",
+      "result": "E107-SEEDED ok=True present=13/13 absent_ok=9/9 problems=[]"
+    },
+    {
+      "tool": "comp-iam (simulate-principal-policy)",
+      "invocation": "dynamodb:PutItem on the table ARN, one ARN per call, with positive and typo controls",
+      "result": "allowed, but the typo control also read allowed (wildcard grant); not relied on, the conditional put is the oracle"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order (an ad-hoc issuer act, not a scheduled producer)"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (2 legs), close-leg x2, close",
+      "result": "opened and committed before the write; closed after leg B"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arms that could STOP the act or invalidate its evidence: (a) sha256 of plan and script equal to the order's values; (b) window re-read in the SAME shell as leg P and the apply and aborting them: bd-gold-layer-runner pending/running/stopping, gold/trigger-pending.json; (c) conditional put attribute_not_exists(ticker) refuses an existing key (a race is a refusal); (d) the 9 held-out keys absent before and after.",
+      "expected": "Every arm clear; written=13 refused=0.",
+      "observed": "(a) both equal; (b) 0 instances, trigger-pending 404 with a sibling-key read control; (c) refused=0; (d) 0/9 before and after. WHAT FIRED: AC1 read ok=False present=0/13 at the base and ok=True present=13/13 after the apply, so a no-op apply would have read otherwise.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The act ran once: one apply. The check was read by e107_seeded_check.py and independently by get_item of the 22 keys and a full scan (11362 -> 11375).",
+      "observed": "13 present, 9 absent by all three reads.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Leg G: the first scheduled fire after the apply (13 tickers' dollars in the ruled classes on every date C_06 re-derives; the 9 held-out remain Unclassified).",
+      "reason": "Assigned to the ISSUER by the order. Not measurable until a scheduled BD gold fire runs. The baseline is leg P's file: org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_LEGP_20261016.json."
+    },
+    {
+      "item": "The readers outside the BD tree (partners-data etf_classifier, positioning, live portal lookups, inflection) and cottonwood's PFF.",
+      "reason": "Named unmeasured in the request (BLIND in the order's adversary list); this seat reads none of them."
+    },
+    {
+      "item": "The PutItem IAM simulation as evidence of permission.",
+      "reason": "Its typo control also read allowed (wildcard grant), so it proves only that a pattern matches; the conditional put's result is the evidence."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/2026-10-16/session_e107b_seed22_apply_0620-0640Z.md"
+}
