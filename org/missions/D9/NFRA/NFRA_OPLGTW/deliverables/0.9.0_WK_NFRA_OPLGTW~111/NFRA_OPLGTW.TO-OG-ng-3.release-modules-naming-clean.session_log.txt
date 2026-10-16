@@ -1,0 +1,25 @@
+NFRA_OPLGTW.TO-OG-ng-3 -- session log, 0.9.0_WK_NFRA_OPLGTW~111
+Worktree: C:/tmp/wk-oplgtw-111 (branch wk-NFRA_OPLGTW-111), fast-forwarded to trunk 647c5b2786 (rc-1 merged).
+
+1. Tree check: rev-parse wk-NFRA_OPLGTW-111; org and .tools present (TREE-OK). Order sections 1 to 5 read; issuer notes not read.
+2. Line checks at HEAD: portal_served.py lines 125 and 126 are ts.Scope("mdpf", ...); etfs_silver.py line 313 is
+   _audit_over_cap(tool, "bloomberg_profile").
+3. portal_served.py: the scope label is row["bucket"].rsplit("-", 1)[-1] for the row case (the bucket's last segment,
+   as typed_scope.py line 46 derives its own), and TOOL when the row is absent. Nothing else in the module changed.
+4. name_rulings.json: one row bloomberg_profile / INSTANCE_PROFILE, none_owed and evidence as the order gives them,
+   owner the etfs silver module. 7 insertions, 0 deletions. 136 rows, unique.
+5. Tests: no assertion changed. tests/test_og_gp1.py and tests/test_og_gf1.py assert no label text (native Grep of
+   the files: no match for the mdpf label or the scope refusal text). gp1 and gf1 suites: 11 passed, 0 failed.
+6. Gate, full add of the 17 release modules of ng3.AC1.sh, ENFORCE:
+   BEFORE (W/NG3_BEFORE.txt): REFUSE 4 lines (NAMING-GATE: REFUSE 15 graded):
+     admin_gateway_breakdown.py:164 opal-data-bd; etfs_silver.py:313 bloomberg_profile; portal_served.py:125 and :126 mdpf.
+   AFTER (W/NG3_AFTER.txt): REFUSE 1: admin_gateway_breakdown.py:164 opal-data-bd (outside this order; BLOCKING row
+     NFRA_OPLGTW-Z-W111-S16). The three named lines are clean; etfs_silver.py:313 and portal_json_served.py:374/:376
+     print RULED.
+7. AC1 (ng3.AC1.sh) observed: "full-add naming gate over 17 release modules in ENFORCE: rc=1; REFUSE verdicts 1 (want 0);
+   RULED verdicts 11; NAMING-GATE: REFUSE 13 graded" / RESULT: FAIL / exit=1.
+   AC2 (ng3.AC2.sh) observed: "name_rulings: bloomberg_profile rows 1 of 1; unique per (name, type) True; portal_served.py
+   typed Scope("mdpf") sites 0 (want 0)" / "gp1 and gf1 suites: pytest rc=0; passed 11; failed 0 (want 0)" / RESULT: PASS / exit=0.
+8. Commit a9dd9aff6c via safe-commit.
+
+Not done (by bounds): admin_gateway_breakdown.py (outside the surfaces), the gf-1 pins of Z-W111-S15 (the order says those are the issuer's), no override.
