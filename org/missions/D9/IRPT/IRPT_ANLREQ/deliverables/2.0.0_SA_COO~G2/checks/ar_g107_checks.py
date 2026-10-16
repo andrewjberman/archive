@@ -24,7 +24,8 @@ IR = "infra/aws/lambda/investor-reporting/"
 MAPS = "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/"
 POOL_SRC = "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/swap_pool.json"
 CHANGED = sorted(["SHA256SUMS", "reports/resident_bindings.json", "intake/portfolio.py", "intake/uploads.py", "ops/status.py",
-                  "reports/resident_installed.py", "ycharts/research/opal_producer.py", "ycharts/session/resident_session.py"])
+                  "reports/resident_installed.py", "ycharts/research/opal_producer.py", "ycharts/session/resident_session.py",
+                  "ycharts/generate/durable_job.py", "ycharts/generate/resident_worker.py"])
 ADDED = sorted(["intake/yfinance_check.py", "ycharts/research/swap_pass.py", "ycharts/research/swap_pool.json", "ycharts/research/yahoo_history_days.py"])
 FROM_MAP = {"ycharts/research/overview_map.json": MAPS + "overview_map.json", "ycharts/research/comparison_map.json": MAPS + "comparison_map.json",
             "ycharts/research/multi_map.json": MAPS + "multi_map.json", "lib/trading_calendar.py": "lib/trading_calendar.py",
@@ -154,7 +155,7 @@ def main(stage, record_path, want_tar=None):
         # 8. no credential-shaped text in a changed or added member or a script
         scripts_dir = stage + "/scripts"
         texts = [(n, open(xnew + "/" + n, "rb").read().decode("utf-8", "replace")) for n in changed + added if n != "SHA256SUMS"]
-        names = ["pre_read_r34.sh", "install_r34.sh", "rollback_r34.sh", "resident_host_install_0485393f3a-r34.sh"]
+        names = ["pre_read_r34.sh", "install_r34.sh", "rollback_r34.sh", "resident_host_install_0485393f3a-r34c.sh"]
         for n in names:
             texts.append((n, open("%s/%s" % (scripts_dir, n), "rb").read().decode("ascii")))
         for n, t in texts:
@@ -172,7 +173,7 @@ def main(stage, record_path, want_tar=None):
         want_checks = sorted('check "%s" %s' % (n, wnew[n]) for n in changed + added)
         if sorted(checks) != want_checks:
             fail("the host script's member checks differ from the recomputed ones (%d vs %d)" % (len(checks), len(want_checks)))
-        if "NEW=0485393f3a-r34\nOLD=0485393f3a-r32\n" not in host or "NEW=0485393f3a-r34\nOLD=0485393f3a-r32\n" not in install:
+        if "NEW=0485393f3a-r34c\nOLD=0485393f3a-r32\n" not in host or "NEW=0485393f3a-r34c\nOLD=0485393f3a-r32\n" not in install:
             fail("NEW/OLD are not r34/r32 in the host or install script")
         if "WANT=" + sha_bytes(sc[names[3]]) not in install or "WANTSUM=" + wnew["SHA256SUMS"] not in install:
             fail("the install script's WANT or WANTSUM is not the host script's or the sums' sha256")
