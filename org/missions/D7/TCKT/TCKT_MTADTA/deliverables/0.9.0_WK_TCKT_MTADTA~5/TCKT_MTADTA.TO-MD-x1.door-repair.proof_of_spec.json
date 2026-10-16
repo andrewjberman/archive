@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_MTADTA.TO-MD-x1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/decompositions/TCKT_MTADTA_DECOMP_R2.md",
+    "vintage_commit": "21da981e7c",
+    "to_ref": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-x1.door-repair.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/prd/TCKT_MTADTA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2614b497ed"
+  },
+  "assignee": "0.9.0_WK_TCKT_MTADTA~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/handler.py",
+      "kind": "script",
+      "artifact_covered_by": ["MD2-x1-AC1", "MD2-x1-AC3"],
+      "commit_or_etag": "e887029d25",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build order, no deploy: the door is deployed by the release act (one apply, cell MD-r-1); nothing is applied or invoked here (WORLD excluded by the order's bounds)"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
+      "kind": "test",
+      "artifact_covered_by": ["MD2-x1-AC1", "MD2-x1-AC3"],
+      "commit_or_etag": "d38f40d8cc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests -p no:cacheprovider -q: 112 passed, rc=0; no deploy"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/access.tf",
+      "kind": "terraform",
+      "artifact_covered_by": ["MD2-x1-AC2"],
+      "commit_or_etag": "e887029d25",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "terraform fmt -check -diff: rc=0; no init, plan or apply (order BOUNDS); the apply is cell MD-r-1's act"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MD2-x1-AC1",
+      "criterion_verbatim": "the collector alias serves put, derive_silver (a count only) and the cursor read, and nothing else; the member alias serves the reads and never a put; an unqualified, unknown or absent context is refused; a key carrying a file name is refused; every call is logged without a person or a file name.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x1.py alias",
+      "output_evidence": "X1-ALIAS-OK calls_logged=21 (rc=0; run under timeout 120, from the worktree root)",
+      "denominator": "1 invocation; 21 of 21 driven calls logged; the check's refusal list is empty",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MD2-x1-AC2",
+      "criterion_verbatim": "access.tf has the two aliases, a published function, the group policy on the member alias alone, the collector role's resource permission on its alias, and no ListBucket in the Deny.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x1.py tf",
+      "output_evidence": "X1-TF-OK (rc=0; run under timeout 120, from the worktree root)",
+      "denominator": "1 invocation; 8 of 8 structural assertions passed (Deny without ListBucket, alias collector, alias member, publish, group policy on the member alias ARN alone, resource permission on the collector alias, no wildcard principal, no alarm or notification)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MD2-x1-AC3",
+      "criterion_verbatim": "the key allowlist admits exactly the builder's keys for the four datasets and refuses a person, an address, a file name and a foreign prefix.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x1.py keys",
+      "output_evidence": "X1-KEYS-OK (rc=0; run under timeout 120, from the worktree root)",
+      "denominator": "1 invocation; 4 of 4 builder keys admitted (bronze, silver, state, gold); 7 of 7 refused keys refused",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the member alias granted put (the one served op the spec refuses it) in a scratch copy of handler.py, with the test file unchanged; the suite must fail on the member-never-puts test",
+      "expected": "test_member_alias_never_puts fails",
+      "observed": "scratch-tree pytest: 1 failed, 104 passed; the failure is test_member_alias_never_puts; the unmutated tree: 112 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three r2_check_x1.py invocations run twice, output captured to a file each run, sha256 of the two files compared",
+      "observed": "run1 f71f4ee8bdba834ebf1b9c8d2344036c3cdc067425cf7755f65afc65cac506f8 == run2 f71f4ee8bdba834ebf1b9c8d2344036c3cdc067425cf7755f65afc65cac506f8",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "collector.tf and silver_builder.py",
+      "reason": "other cells' files (MD-x-2 and the silver cell); never created or edited here (order BOUNDS)"
+    },
+    {
+      "item": "the collector role's identity-policy invoke grant on the collector alias ARN (decomposition ruling 2)",
+      "reason": "lives in collector.tf, the MD-x-2 cell's file; this cell adds the resource permission the order names and edits no identity policy"
+    },
+    {
+      "item": "terraform init, validate, plan and apply; any AWS call, S3 access or Lambda invoke",
+      "reason": "WORLD by the gate's path floor and the order's bounds; only terraform fmt -check ran (no network)"
+    }
+  ],
+  "surprises": [
+    "TCKT_MTADTA-D1-W5-S1: the door's key grammars are hand-written regular expressions in handler.py and the naming gate's warn window grades five of them REFUSE as out-of-pattern S3 keys; filed as OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.9.0_WK_TCKT_MTADTA~5/TCKT_MTADTA.TO-MD-x1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r2_check_x1.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x1.py alias",
+      "result": "X1-ALIAS-OK calls_logged=21, rc=0"
+    },
+    {
+      "tool": "r2_check_x1.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x1.py tf",
+      "result": "X1-TF-OK, rc=0"
+    },
+    {
+      "tool": "r2_check_x1.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x1.py keys",
+      "result": "X1-KEYS-OK, rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests -p no:cacheprovider -q",
+      "result": "112 passed, rc=0"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/trino/access.tf",
+      "result": "rc=0"
+    }
+  ]
+}
