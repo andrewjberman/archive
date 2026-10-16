@@ -15,3 +15,23 @@ The finish line asks every in-scope row for a live `read_tool`. These rows descr
 | SmartX: draft and account-detail facts | 8 | `smartx_allocation_positions_draft`, `smartx_allocation_valuation_draft`, `smartx_fact_account_allocations`, `smartx_fact_account_detail`, `smartx_fact_model_aum_daily`, `smartx_fact_model_changerequests`, `smartx_fact_model_performance`, `smartx_fact_nonzerosleeve` |
 
 Total: 91.
+
+## RULING (1.0.0_SA_CTO~Z, msg 34782, addendum @33d41059d9, 2026-10-16)
+
+All 10 groups are **OUT of the 22:00Z finish line**. Each row reads: reason "no client tool is built to read this table"; `gap_owner` NFRA_OPLGTW (a `gap_owner` does not meet the line on its own); a reopen condition naming the tool. The 9 market-data rows go to the ETFS tool question. Record: `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_NFRA_MCPINDEX_R18_RESEARCH_32_OUT_OF_LINE_20261016_Z.md` (addendum).
+
+Reopen condition per group (named by the issuer from the planned tool names in `client_tool_map.json`; the CTO's rule is that each names the tool):
+
+| group | rows | reopen condition |
+|---|---|---|
+| Schwab (3 masters): fact_* and dim_asset | 48 | `client_get_lots` for the realized/unrealized families; the MX-c-23/r-15 Schwab fact gap for the rest |
+| Black Diamond Cottonwood: _s2, realized, unrealized | 7 | `client_get_lots` |
+| Black Diamond 49Financial: legacy silver, insurance, fees, prices | 3 | `client_get_insurance` (insurance), `client_get_lots` (realized/unrealized), `client_get_fees` on the 49F live fee tables |
+| Black Diamond 49F: tax-SMA report; Gateway tax-SMA workbook | 3 | a tax-SMA read tool (none planned) |
+| Commonwealth Cottonwood: performance, documents, returns, grades, coverage | 8 | `client_get_performance` |
+| Orion: performance and assets facts | 3 | `client_get_performance` |
+| Eclipse: portfolios facts | 2 | `client_get_profile` |
+| SmartX: draft and account-detail facts | 8 | `client_get_profile` |
+| Market data: Pathfinder, TrueShares, Yahoo | 9 | the ETFS tool question (CTO) |
+
+Counts are those of the table above (tracked rows before the regeneration); the release record lists the final rows after `land_links.sh`.
