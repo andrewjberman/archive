@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-288",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-288.publish-daily-schedule-created-disabled.md",
+    "group": "OTHER",
+    "vintage_commit": "52586aaad3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "52586aaad3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-288.publish-daily-schedule-created-disabled.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~232",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~232/RD_PUBLISH_SCHEDULE_FACTS_R148.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-publish-iso/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c4093e3fe4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Base text kept as an unchanged prefix (4193 bytes); 56 lines appended: two opal_name modules (role and policy, qualifier scheduler), the assume-role statement SchedulerRoleAssumedBySchedulerService, aws_iam_role.irpt_reporting_publish_iso_scheduler, the statement InvokeThePublishFunctionOnly (lambda:InvokeFunction on the function ARN only), and aws_iam_role_policy.irpt_reporting_publish_iso_scheduler. Nothing planned or applied.",
+      "artifact_covered_by": [
+        "DB156-1-AC1",
+        "DB156-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-publish-iso/schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c4093e3fe4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file: one opal_name module (daily) and aws_scheduler_schedule.irpt_reporting_publish_iso with state DISABLED, cron(30 9 ? * MON-FRI *) America/New_York, flexible window OFF, target = the function ARN, role = the scheduler role, input jsonencode({ upload = true }). Nothing planned, applied or invoked.",
+      "artifact_covered_by": [
+        "DB156-1-AC1",
+        "DB156-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~232/RD_PUBLISH_SCHEDULE_FACTS_R148.json",
+      "kind": "doc",
+      "commit_or_etag": "6ecc2139c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Facts record: root, the three builder names, the three addresses, expected plan 3/0/0 inferred, the schedule block, and one paragraph of words.",
+      "artifact_covered_by": [
+        "DB156-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c4093e3fe4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row IRPT_DASHBD-D2-W232-S1 (OBSERVATION, INERT, UNDER_INVESTIGATION): the face's local irpt_pub_firm does not exist in the root; the appended HCL takes irpt_iso_firm.",
+      "artifact_covered_by": [
+        "DB156-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB156-1-AC1",
+      "criterion_verbatim": "DB156-1-AC1 -- main.tf, locals.tf and lambda.tf are byte-identical to the base; iam.tf keeps the base text as a prefix and only appends; the root declares exactly two roles, two role policies and one schedule, six opal_name calls and one yang-lambda module; the schedule is DISABLED at the cron above with the flexible window OFF, the function ARN as target and the input {\"upload\": true}; the statement ids are the six earlier ones plus the two new; the one lambda:InvokeFunction statement holds only that action on the function ARN; the one PutObject statement is unchanged; no builder name is typed.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p156_pubschedule.py\" . DB156-1-AC1",
+      "output_evidence": "OK: root HCL: main, locals and lambda byte-identical to the base, iam.tf append-only; 3 new resources (scheduler role, its policy, one schedule created DISABLED at cron(30 9 ? * MON-FRI *) America/New_York with input {upload: true}); six opal_name calls; the scheduler policy holds only lambda:InvokeFunction on the one function ARN; the execution statements unchanged; no typed builder name\nDB156-1-AC1 PASS",
+      "denominator": "3 of 3 base files byte-identical (main, locals, lambda); iam.tf prefix equal to the 4193-byte base; 2 of 2 roles, 2 of 2 role policies, 1 of 1 schedule; 6 of 6 opal_name calls; 1 of 1 yang-lambda module; 8 of 8 statement ids (6 base + 2 new); 1 of 1 lambda:InvokeFunction statement; 1 of 1 PutObject statement unchanged",
+      "status": "PASS",
+      "expect": "DB156-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB156-1-AC2",
+      "criterion_verbatim": "DB156-1-AC2 -- the checker builds the three new names from the root's own module arguments with lib/opal_naming.py and runs the REAL .tools/naming-apply-gate.py in plan mode on a synthetic plan holding them: three CONFORMANT lines, no REFUSE.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p156_pubschedule.py\" . DB156-1-AC2",
+      "output_evidence": "OK: the real naming gate grades the three new names CONFORMANT (irpt-cot-reporting-publish-scheduler-role, irpt-cot-reporting-publish-scheduler-policy, irpt-cot-reporting-publish-daily)\nDB156-1-AC2 PASS",
+      "denominator": "3 of 3 names CONFORMANT with 0 REFUSE in the plan-mode gate; the commit-time gate printed NAMING-GATE: PASS 3 graded and graded the three module blocks as BUILT-NOT-GRADED (scope is a local, non-literal)",
+      "status": "PASS",
+      "expect": "DB156-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB156-1-AC3",
+      "criterion_verbatim": "DB156-1-AC3 -- the facts record has exactly the form above and its names equal the checker's recount.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p156_pubschedule.py\" . DB156-1-AC3",
+      "output_evidence": "OK: the facts record equals the builder recount\nDB156-1-AC3 PASS",
+      "denominator": "6 of 6 record keys; 3 of 3 new names equal the recount; 3 of 3 new addresses; expected plan 3/0/0 claim inferred; schedule block 4 of 4 fields; words 80 to 1800 characters with no long digit run",
+      "status": "PASS",
+      "expect": "DB156-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own selftest, which runs its clauses on seeded faults: 14 HCL red arms (enabled, cron, input, no input, flexible window, zone, target, typed name, second invoke, wildcard invoke, extra action, statement id, five opal_name calls, extra resource), 5 unchanged-file arms, 2 gate arms, and 8 facts arms.",
+      "expected": "every red arm refused and the selftest prints PASS",
+      "observed": "selftest: hcl (14 red arms), unchanged (5), gate (2) and facts (8) clauses behave / selftest PASS (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run again on the committed tree at HEAD 6ecc2139c4, after the facts record commit.",
+      "observed": "DB156-1-AC1, DB156-1-AC2 and DB156-1-AC3 PASS on the repeat, the same deciding lines as the first run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any terraform plan, apply or state read; any AWS write, upload or invoke",
+      "reason": "Nothing is planned, applied, uploaded or invoked by this order. The applier's plan must read 3 add / 0 change / 0 destroy, claimed inferred."
+    },
+    {
+      "item": "Enabling the schedule",
+      "reason": "The schedule is created DISABLED. Enabling it is the CTO's separate word, a later one-line change under its own pair."
+    },
+    {
+      "item": "The byte-identical files main.tf, locals.tf and lambda.tf",
+      "reason": "Not produced by this order; their base bytes are checked by AC1 and no commit of this order touches them."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W232-S1: the face names scope = local.irpt_pub_firm, which the root does not define; the appended HCL takes local.irpt_iso_firm, the root's existing firm local, and locals.tf stays byte-identical"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p156_pubschedule.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p156_pubschedule.py\" --selftest",
+      "result": "selftest PASS (rc=0)"
+    },
+    {
+      "tool": "naming-apply-gate (commit-time)",
+      "invocation": "bash .tools/safe-commit.sh on iam.tf and schedule.tf",
+      "result": "NAMING-GATE: PASS 3 graded; the three opal_name module blocks with a local scope are BUILT-NOT-GRADED; committed c4093e3fe4"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author 0.9.0_WK_IRPT_DASHBD~232 -F <msgfile> -- <grant paths>",
+      "result": "commit-gate, surprise-row-gate, to-pipeline-gate and surprise-corpus OK; msg-verify MATCH at c4093e3fe4 and 6ecc2139c4"
+    }
+  ]
+}
