@@ -151,7 +151,7 @@ def test_fwd5_envelope_every_get_carries_contract_version_run(tmp_path):
     with Fake(answers((200, envelope(True, "READY"), JSON_HEADERS))) as fake:
         drive(tmp_path, fake.base)
     gets = [v for m, _p, v in fake.headers_seen if m == "GET"]
-    assert len(gets) == 7  # ticket-read, ticket-list, form-as-filled and the four report-side routes
+    assert len(gets) == 13  # ticket-read, ticket-list, form-as-filled, the ten report-side routes (AR-tz-74)
     assert set(gets) == {"v1"}
     assert [v for m, _p, v in fake.headers_seen if m == "POST"] == [None]  # the sign-in POST is unchanged
 
@@ -161,7 +161,7 @@ def test_fwd5_envelope_every_get_carries_contract_version_control(tmp_path):
         rc, _out = drive(tmp_path, fake.base, control=True)
     gets = [v for m, _p, v in fake.headers_seen if m == "GET"]
     assert rc == 0
-    assert len(gets) == 7
+    assert len(gets) == 13  # the same thirteen GETs as the run (AR-tz-74)
     assert set(gets) == {"v1"}
 
 
