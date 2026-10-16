@@ -1,0 +1,50 @@
+{
+  "to_id": "TCKT_VNEXT.TO-R19-L2",
+  "cell": "R19-ai-2",
+  "issued_to": "0.9.0_WK_TCKT_VNEXT~46",
+  "worktree": "C:/dev/wk-tckt-vnext-46",
+  "branch": "wk-TCKT_VNEXT-46",
+  "base_commit": "b84a2ca293",
+  "source_commit": "8957fed16b",
+  "state": "BUILT -- source, tests and re-pin committed at 8957fed16b; R19L2-AC1 PASS (7 of 7), R19L2-AC2 PASS (MUTANT-FIRES), R19L2-AC3J recorded for L9 (3.0.0_SA_CVO)",
+  "supersedes": "the BLOCKED stop of cc54cc0fb8 (row TCKT_VNEXT-D2-W46-S1, sparse cone omitted infra/); the cone now carries infra/aws/lambda/ticket_center, so the cell was built in place; S1 is left as filed",
+  "lines_changed": [
+    {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "lines": "88-90", "change": "new module frozenset ANALYST_INTAKE_ALLOWED_FIRMS from env ANALYST_INTAKE_ALLOWED_FIRMS, built as COMMENTARY_ALLOWED_FIRMS is (strip, drop empties, drop literal ALL); unset or empty = no firm"},
+    {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "lines": "1418-1421", "change": "list_tickets: inside the existing filter chain, when pc == SVC_ANALYST_INTAKE keep only items whose requester.firm is a str in ANALYST_INTAKE_ALLOWED_FIRMS (missing firm dropped); runs after _in_profile_scope, before the sort; limit and the response shape unchanged"},
+    {"file": "infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py", "lines": "1-244 (new)", "change": "7 named tests, one per step-4 case, in-memory table double, no AWS"},
+    {"file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "lines": "225, 236-242", "change": "re-pin, see re_pinned_lines"}
+  ],
+  "test_counts": {
+    "new_file": "7 passed, 0 failed (command: python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py -q -p no:cacheprovider --color=no; last line 7 passed in 0.49s; rc=0)",
+    "folder_run": "312 passed, 42 subtests passed, 8 collection errors; rc=1 (command: python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/ -q -p no:cacheprovider --color=no --continue-on-collection-errors). The 8 errors are the modules that load test_package_route.py, which reads org/missions/D9/.../I7_SAMPLE.json outside the sparse cone; not run here; see surprise row TCKT_VNEXT-D2-W46-S2"
+  },
+  "before_arm": {
+    "method": "HEAD lambda_function.py (git show 8957fed16b~1:...) copied to a scratch folder with a copy of tests/, new file run under pytest",
+    "result": "6 failed, 1 passed (rc=1)",
+    "failed": ["test_intake_lists_only_the_tickets_of_the_configured_firms", "test_an_unset_or_empty_configuration_lists_nothing_with_status_200", "test_all_is_never_a_wildcard_for_the_intake_list", "test_a_ticket_with_no_requester_firm_is_dropped", "test_status_assignee_and_ticket_type_filters_still_work_inside_the_set", "test_the_response_carries_cutoff_et_and_a_count_equal_to_the_list_length"],
+    "passed": ["test_an_internal_caller_is_unchanged_by_the_set (a non-regression guard for INTERNAL; passes on the base by design; surprise row TCKT_VNEXT-D2-W46-S3)"]
+  },
+  "mutant": {
+    "command": "python C:/dev/wk-tckt-vnext-46/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~46/mutant_check.py",
+    "result": "pytest rc=1 summary: 6 failed, 1 passed in 0.88s; MUTANT-FIRES (rc=0)",
+    "mutation": "the intake branch's if replaced by if False: (every firm returned); the scratch copy lives under .scratch/ and is removed after the run"
+  },
+  "re_pinned_lines": [
+    {"file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "base_line": 225, "new_line": 225, "old": "# ---- (f) and (g): the internal and service lists are unchanged ----", "new": "# ---- (f): the internal list is unchanged; (g): the service intake list is scoped to the configured firms (R19-ai-2) ----", "kind": "comment only"},
+    {"file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "base_line": 236, "new_line": 236, "old": "def test_the_service_analyst_intake_list_is_unchanged_full_rows():", "new": "def test_the_service_analyst_intake_list_is_scoped_to_the_configured_firms(monkeypatch):", "kind": "rename to the new rule"},
+    {"file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "base_line": null, "new_line": 238, "old": "(inserted; the base test began with use(PagedTable(...)) at line 237)", "new": "    monkeypatch.setattr(mod, \"ANALYST_INTAKE_ALLOWED_FIRMS\", frozenset({FIRM_A}))   # the intake principal's configured set fixture", "kind": "fixture: the configured set (insertion)"},
+    {"file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "base_line": 240, "new_line": 241, "old": "    assert b[\"count\"] == 6, b", "new": "    assert b[\"count\"] == 5, b                                                       # firm A's five tickets; firm B's one is absent", "kind": "the re-pinned assertion (unscoped 6 -> scoped 5)"},
+    {"file": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py", "base_line": null, "new_line": 242, "old": "(inserted after the count assertion)", "new": "    assert tid(3) not in ids(b), \"firm B is not configured for the intake principal: its ticket is absent\"", "kind": "added assertion for the scope (insertion)"}
+  ],
+  "other_existing_assertions_changed": "none. The internal list test (line 231, count == 6) is unchanged; the events assertion in the intake test is unchanged.",
+  "fixtures_needing_the_new_env_var": "none beyond the monkeypatch in the re-pinned test; the new file sets the module attribute per case, and no other existing test reads the intake list",
+  "risk_reflex_note": "the commit-time risk reflex printed HOLD matches for lambda_function.py by basename against other lambda files (inf-gold-trigger and others, citing org/critical_paths/HOLD_INF_CANONICAL_NNA_REBUILD_20260713.md:304); the matched nodes are not ticket_center; the commit proceeded and nothing was changed for them",
+  "not_read": [
+    "infra/aws/terraform/ (out of grant; ANALYST_INTAKE_ALLOWED_FIRMS env value belongs to TO-R19-TR)",
+    "the L1 and L3 cells' edits to lambda_function.py (other workers; merge is the issuer's)",
+    "the 8 modules that fail collection in this worktree (test_no_row_refuses, test_package_409_codes, test_package_env_firms, test_package_i5p_i7, test_package_principal, test_package_request_id, test_package_route, test_status_active): not executed, cause is the sparse cone (S2)",
+    "org/surprise_channel/schemas/investigation_item.schema.json read at HEAD via git show (the worktree cone omits org/surprise_channel)",
+    "live AWS, the deployed function, the live poller's firm needs (none called; no network, mail or deploy)"
+  ],
+  "surprise_rows": ["TCKT_VNEXT-D2-W46-S2 (OBSERVATION, INERT): 8 modules not collectable in the worktree", "TCKT_VNEXT-D2-W46-S3 (OBSERVATION, INERT): before-arm 6 of 7 failing, not 7"]
+}
