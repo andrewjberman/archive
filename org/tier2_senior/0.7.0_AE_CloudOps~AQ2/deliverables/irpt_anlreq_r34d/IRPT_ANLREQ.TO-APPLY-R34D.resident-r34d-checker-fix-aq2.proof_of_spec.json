@@ -1,0 +1,118 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-APPLY-R34D.resident-r34d-checker-fix-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R34D.resident-r34d-checker-fix-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "b8554e2112"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R37_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R34D.resident-r34d-checker-fix-aq2.md",
+  "vintage_commit": "b8554e2112"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-ycharts/resident/ (3 new objects: the r34d tar, sums and host script)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "each key read 404 first, uploaded from the stage folder, read back by VersionId with sha256 equal (9a088a5c..., 9220275a..., 1a9e6c44...); kept after the rollback",
+   "artifact_covered_by": [
+    "R34D-AC1"
+   ],
+   "commit_or_etag": "VersionIds 3cIv32VVkycbrMIRGHl4YtydxEcHU2Vr, UL5SGK10g3j7xKz8_n8y3Fc1tW0zxadD, cMcZT1Y26IYE4LQgSC1dAeKxtaUA6ZDT"
+  },
+  {
+   "path_or_key": "host:/opt/irpt-resident/0485393f3a-r34d on the resident host i-0167fd745ad906a66 (installed, then rolled back; kept, not running)",
+   "kind": "aws_resource",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "install_r34.sh as root rc=0 and V1 green (1 of 1 member MATCH, sums 313 of 313, package census 3/0/0, pool pinned, pricing off, producer list unchanged, queue 0 0); V2S in the service's own environment FAILED (ZQXWVK CHECK_FAILED EXCEPTION), so rollback_r34.sh as root returned the unit to r34c (running root r34c, restarts 0, member at its r34c value, queue 0 0); the r34d root stays on the host, not running",
+   "artifact_covered_by": [
+    "R34D-AC1"
+   ],
+   "commit_or_etag": "Systems Manager commands 5fe48882-3b4d-4a0e-9323-70daa1ba8b62 (install), 46aae874-a210-45e3-ac88-d3b6cce77192 (V2S), cf611d15-75a1-4707-b3fc-9cb818a44c84 (rollback)"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34d/A_AFTER_R34D.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the lines as read (V2S FAIL), the three ROLLBACK lines, the VersionIds, the rcs and the notes",
+   "artifact_covered_by": [
+    "R34D-AC1"
+   ],
+   "commit_or_etag": "42452bc86b"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T1210Z_irpt-resident-r34d-20261016_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ledger irpt-resident-r34d-20261016 ROLLED-BACK, all 5 legs carry proof",
+   "artifact_covered_by": [
+    "R34D-AC2"
+   ],
+   "commit_or_etag": "42452bc86b"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R34D-AC1",
+   "invocation": "grep -c -E '^(P1 running root r34c queue 0 0|D1 three keys uploaded and read back equal|V1 running root r34d active|V1 members 1 of 1 MATCH|V1 sums 313 of 313|V1 census 3 changed 0 added 0 removed|V1 pool pinned pricing off producer list unchanged|V2S OK SPY KEPT and ZQXWVK NOT_KEPT)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34d/A_AFTER_R34D.txt",
+   "expect": "^8$",
+   "output_evidence": "7\nexit=0",
+   "denominator": "8 lines: P1, D1, V1 root, V1 member, V1 sums, V1 census, V1 pool and producer list, V2S",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -c -E '^(P1 running root r34c queue 0 0|D1 three keys uploaded and read back equal|V1 running root r34d active|V1 members 1 of 1 MATCH|V1 sums 313 of 313|V1 census 3 changed 0 added 0 removed|V1 pool pinned pricing off producer list unchanged|V2S OK SPY KEPT and ZQXWVK NOT_KEPT)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34d/A_AFTER_R34D.txt",
+   "method": "command",
+   "status_reason": "7 of the 8 lines hold; the eighth, V2S OK SPY KEPT and ZQXWVK NOT_KEPT, did not: V2S FAIL, ZQXWVK read CHECK_FAILED EXCEPTION in the service's own environment, so the order's step 8 rolled the resident back to r34c (the record carries the FAIL line and the ROLLBACK lines)"
+  },
+  {
+   "criterion_id": "R34D-AC2",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-r34d-20261016_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** ROLLED-BACK -- r34d rolled back to r34c the same session (V2S FAIL: ZQXWVK read CHECK_FAILED EXCEPTION in the service's own environment; SPY KEPT); P1, D1, D2, V1 proven; nothing stranded; r34d root and its three S3 objects kept; closed per the ledger tool below (the tool wrote CLOSED; this line was set to ROLLED-BACK by hand as the order says). Tool line was: CLOSED -- nothing stranded -- closed 20261016T121811Z\nexit=0",
+   "denominator": "1 ledger, closed by the tool and set ROLLED-BACK by hand",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-r34d-20261016_deploy_completion.md",
+   "method": "command",
+   "status_reason": "the ledger closed ROLLED-BACK, not CLOSED, as the order's step 8 requires after a failed V2S"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "every signed artifact and script hashed against the order before use; keys read back by VersionId; the install verified its own fetched script and sums; V2S ran in a transient unit built from the unit's own properties",
+   "observed": "all hashes equal; sums 313 of 313; V2S result as printed",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the exception class behind ZQXWVK's CHECK_FAILED",
+   "reason": "the V2S script prints the checker's reason code only (EXCEPTION), not the exception class; the order and the script do not capture it"
+  },
+  {
+   "item": "the open run-3 ledger at the census",
+   "reason": "irpt-fwd1-run3-20261016 (mine, held) names the resident as a gate read only and writes nothing to the host; the CTO's signed condition sequences run 3 behind this ledger"
+  },
+  {
+   "item": "two census print labels",
+   "reason": "my census script prints r34d for the first root's file count and labels the r34d root 'r34c root' on the presence line; the counts and names are right"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T1210Z_irpt-resident-r34d-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "ssm_run_yf.py --as-root, upload_r34d.py, v1_census_r34d.sh, rb_readback_r34d.sh, the signed pre_read_r34.sh install_r34.sh rollback_r34.sh and v2_service_env_r34d.sh, deploy_ledger.py",
+   "invocation": "census, P1, D1, D2, V1, V2S, rollback, read-back",
+   "result": "V1 green, V2S FAIL, rolled back to r34c, ledger ROLLED-BACK"
+  }
+ ]
+}
