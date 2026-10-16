@@ -129,3 +129,21 @@ the packet's `32d52a15...5ea6` (re-measured).
   session (NEVER-2), and the ledger closes ROLLED-BACK, with the printed class on record.
 - **Run 3 stays HELD until this ledger reads CLOSED,** and its R0e is re-pinned from r34d to r34e by a fourth amendment that I sign.
 - **The named limit stands as accepted:** a Yahoo-wide 404 or a transient 404 on a real symbol reads NOT_KEPT.
+
+## SIGN on r34f, the bounded WAF backoff (2026-10-16 ~15:5xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34F_WAF_BACKOFF_20261016.md`
+(commit `21361df8d5`), blob `e9ede8d67f4e24aefd53d18329de7a2e462ef101`, sha256
+`e547fb61d1d11db5056a97e830258143b7db0c3c1df16867309613bcdd21554d`, 8,442 bytes (re-measured). Pin `a81abf691f` (a named scratch commit
+without the DASHBD calendar hunk `f25618c0b4`); tar `0d223e50...4a3f`, 314 members, 3 changed. r34e stays and is the rollback. The V2
+script's sha256 `125677f4...1f99` is re-measured equal.
+
+**Read at signing.** Only a RETRY whose code ENDS `:WAF_CHALLENGE` moves, to +150, +300 and +450 s (900 s in all, my 15-minute cap). Every
+other cause keeps 60 s, and the BUSY path is untouched.
+
+**Conditions** (each a STOP):
+- **The applier is `0.7.0_AE_CloudOps~IB2`, not AQ2** (rule 34, msg 9561). The packet's applier line is read as IB2; nothing else moves.
+- **Every host script is sent AS ROOT;** the pre-read must find `0485393f3a-r34e` running. V2 must print `V2S OK` with the four r34e
+  controls and `V2S BACKOFF`; anything else rolls back to r34e the same session.
+- **Run 3 stays HELD until this ledger reads CLOSED,** and its R0e is then re-pinned from r34e to r34f by AMENDMENT 7, which I sign.
+- **The calendar hunk `f25618c0b4` ships only under its own pair** (r34g or later), never by drift into this root.
