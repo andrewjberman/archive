@@ -1,0 +1,1127 @@
+diff --git a/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml b/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
+index 16250301d6..b81c48aa3c 100644
+--- a/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
++++ b/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
+@@ -1,6 +1,6 @@
+ # DATA_CATALOG v0.4 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
+ #
+-# BUILT BY: workflows/atom_decomposition/emit_catalog_v02.py at git HEAD 7018ac20dc
++# BUILT BY: workflows/atom_decomposition/emit_catalog_v02.py at git HEAD e717bd2fb2
+ # EXECUTES: OPAL_ANALYST_PRD.md sec.9.6 + sec.10.1 (W5 supersede @9c7b59f9df) as amended by
+ #           OPAL_ANALYST.W5-V03 (the three Rule-24 axis reshapes WITH catalog_gate, one
+ #           versioned change; 0.5.0_AE_OpalETL~Z, 2026-08-20).
+@@ -48,7 +48,7 @@
+ # addendum, @dc75ddbe32. One object is rowed (channel etfs_positioning); nothing else under the prefix is.
+ 
+ version: 0.5
+-built_at_git_head: 7018ac20dc
++built_at_git_head: e717bd2fb2
+ supersedes: v0.4 (MX-c-11, the harvest rows at table grain, one per dataset, 78; the loader and the tool index take the table rows); v0.3 (widening to platinum/etfs, @dc75ddbe32); v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
+ bucket: opal-data-portal-v2
+ access_tool: tools/portal_lookup.py   # NEVER raw `aws s3` to answer a user
+@@ -1347,7 +1347,7 @@ finding_no_servable_market_returns_source:
+   status: OPEN -- rides the deliverable to COO/CTO/Andrew
+ 
+ tool_index:
+-  # one entry per tool served by the gateway at services.opal-gateway.deployed_commit (1bc2df0b13): the denominator
++  # one entry per tool served by the gateway at services.opal-gateway.deployed_commit (d14445961d): the denominator
+   # is the gateway code's own tool list (tool_census.py), 127 tools. member a = reads data a catalog row describes
+   # (read_tool + index + links + history_depth + freshness); b = reads data no row describes yet (owner); c = not a data
+   # read (reason). Source: workflows/atom_decomposition/tool_index/ (members.yaml classified from each definition).
+@@ -1366,7 +1366,7 @@ tool_index:
+       source: 'list-objects-v2 of the prefix members.yaml names for row blackdiamond_fees: the earliest and latest
+         YYYY-MM-DD in an object key (2008 partitions); the dataset is queried live, so this is the served window'
+       method: partition-listing
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+     freshness:
+       claim: absent
+       reason: a live-queried Black Diamond vendor API row has no served artifact to list; the fee dates come from
+@@ -1421,6 +1421,8 @@ tool_index:
+       name: opal-data-assets
+       kind: bucket
+     serves:
++    - vendor: blackdiamond
++      firm: 49financial
+     - vendor: blackdiamond
+       firm: cottonwood
+     - vendor: commonwealth
+@@ -1441,6 +1443,8 @@ tool_index:
+       name: opal-data-assets
+       kind: bucket
+     serves:
++    - vendor: blackdiamond
++      firm: 49financial
+     - vendor: blackdiamond
+       firm: cottonwood
+     - vendor: commonwealth
+@@ -1612,18 +1616,18 @@ tool_index:
+     - etfs.01.positioning-data
+     history_depth:
+       claim: measured
+-      value: '2026-10-13'
++      value: '2026-10-15'
+       row: etfs.01.positioning-data
+       field: data_as_of
+       method: snapshot-asof
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: measured
+-      value: '2026-10-15'
++      value: '2026-10-16'
+       row: etfs.01.positioning-data
+       method: last-modified
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       objects: 1
+       basis: s3://opal-data-portal-v2/
+     bucket: opal-data-portal-v2
+@@ -1733,21 +1737,21 @@ tool_index:
+         row: mp.04.model-portfolio-timeseries
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mp.05.model-portfolio-benchmarks
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mp.06.etf-returns
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-03-11'
+@@ -1757,34 +1761,34 @@ tool_index:
+         source: generated_at (the publish time of the assumption set) read from the served object by the worker; the
+           object's data_as_of is the year string 2026, not a date, so no as-of date is measured
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2026-01-09'
+         row: cma.02.views
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: cor.01.correlation-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: ft.01.tier1-snapshot
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: ft.02.tier2-spreads
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-10-15'
+@@ -1794,20 +1798,20 @@ tool_index:
+         source: data_as_of read from the served object by the worker; the object is over the answer-time read bound
+           of opal_discover, so the gateway does not re-read it at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+-        value: '2026-10-13'
++        value: '2026-10-15'
+         row: etfs.01.positioning-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mac.01.macro-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: 2026-10-16..2026-10-16
+@@ -1817,20 +1821,20 @@ tool_index:
+           date of its 79 objects; the objects are overwritten in place, so this is the write window, not a history
+           depth'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+-        value: '2026-10-14'
++        value: '2026-10-15'
+         row: mac.03.volatility-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mac.04.yield-curve-fred
+         field: generated_at
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-10-15'
+@@ -1840,22 +1844,22 @@ tool_index:
+         source: data_as_of read by the worker from the object; the row is BLOCKED-BY-ALLOWLIST for every principal,
+           so the gateway serves nothing from it and opal_discover reads nothing from it at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2024-11-01'
+         row: mp.01.aum-metrics
+         scope: global
+         field: total.series_start
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+-        value: '2026-10-15'
++        value: '2026-10-16'
+         row: mp.02.account-distribution
+         scope: global
+         field: _provenance.source_vintages.global/account-distribution
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2024-11-01'
+@@ -1863,14 +1867,14 @@ tool_index:
+         scope: global
+         field: as_of_first
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-09-30'
+         row: mp.07.peer-performance
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-10-15'
+@@ -1880,7 +1884,7 @@ tool_index:
+         source: data_as_of read by the worker after decoding the object, which is stored gzip-encoded (Content-Encoding
+           gzip); the aws CLI and the opal_discover read do not decode it, so it is not re-read at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: '2026-10-15'
+         row: att.04.positioning-data
+@@ -1889,23 +1893,23 @@ tool_index:
+         source: data_as_of read by the worker after decoding the object, which is stored gzip-encoded (Content-Encoding
+           gzip); the aws CLI and the opal_discover read do not decode it, so it is not re-read at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2026-09-30'
+         row: att.02.holdings-attribution
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+-        value: '2026-10-15'
++        value: '2026-10-16'
+         row: news.03.live-singletons
+         field: generated_at
+         basis: s3://opal-data-portal-v2/
+         source: generated_at read by the worker from the first of the two singleton objects the row names; the row
+           names two objects, so no single object is measured and opal_discover does not re-read it
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: '2026-10-15'
+         row: val.01.valuation-data
+@@ -1914,13 +1918,13 @@ tool_index:
+         source: data_as_of read from the served object by the worker; the object is over the answer-time read bound
+           of opal_discover, so the gateway does not re-read it at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2026-10-15'
+         row: val.02.risk-premium-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: absent
+@@ -2213,19 +2217,19 @@ tool_index:
+     - mp.02.account-distribution
+     history_depth:
+       claim: measured
+-      value: '2026-10-15'
++      value: '2026-10-16'
+       row: mp.02.account-distribution
+       scope: global
+       field: _provenance.source_vintages.global/account-distribution
+       method: snapshot-asof
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: measured
+-      value: '2026-10-15'
++      value: '2026-10-16'
+       row: mp.02.account-distribution
+       method: last-modified
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       objects: 4
+       basis: s3://opal-data-portal-v2/
+     bucket: opal-data-portal-v2
+@@ -2248,14 +2252,14 @@ tool_index:
+       scope: global
+       field: as_of_first
+       method: body-field
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: measured
+-      value: '2026-10-15'
++      value: '2026-10-16'
+       row: mp.03.aggregate-aua-timeseries
+       method: last-modified
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       objects: 4
+       basis: s3://opal-data-portal-v2/
+     bucket: opal-data-portal-v2
+@@ -2278,14 +2282,14 @@ tool_index:
+       scope: global
+       field: total.series_start
+       method: body-field
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: measured
+-      value: '2026-10-15'
++      value: '2026-10-16'
+       row: mp.01.aum-metrics
+       method: last-modified
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       objects: 4
+       basis: s3://opal-data-portal-v2/
+     bucket: opal-data-portal-v2
+@@ -2316,14 +2320,14 @@ tool_index:
+       row: mp.05.model-portfolio-benchmarks
+       field: data_as_of
+       method: snapshot-asof
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: measured
+       value: '2026-10-16'
+       row: mp.05.model-portfolio-benchmarks
+       method: last-modified
+-      read_at: '2026-10-16T11:38:17Z'
++      read_at: '2026-10-16T15:31:21Z'
+       objects: 1
+       basis: s3://opal-data-portal-v2/
+     bucket: opal-data-portal-v2
+@@ -2433,21 +2437,21 @@ tool_index:
+         row: mp.04.model-portfolio-timeseries
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mp.05.model-portfolio-benchmarks
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mp.06.etf-returns
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-03-11'
+@@ -2457,34 +2461,34 @@ tool_index:
+         source: generated_at (the publish time of the assumption set) read from the served object by the worker; the
+           object's data_as_of is the year string 2026, not a date, so no as-of date is measured
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2026-01-09'
+         row: cma.02.views
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: cor.01.correlation-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: ft.01.tier1-snapshot
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: ft.02.tier2-spreads
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-10-15'
+@@ -2494,20 +2498,20 @@ tool_index:
+         source: data_as_of read from the served object by the worker; the object is over the answer-time read bound
+           of opal_discover, so the gateway does not re-read it at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+-        value: '2026-10-13'
++        value: '2026-10-15'
+         row: etfs.01.positioning-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mac.01.macro-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: 2026-10-16..2026-10-16
+@@ -2517,20 +2521,20 @@ tool_index:
+           date of its 79 objects; the objects are overwritten in place, so this is the write window, not a history
+           depth'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+-        value: '2026-10-14'
++        value: '2026-10-15'
+         row: mac.03.volatility-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-10-15'
+         row: mac.04.yield-curve-fred
+         field: generated_at
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-10-15'
+@@ -2540,22 +2544,22 @@ tool_index:
+         source: data_as_of read by the worker from the object; the row is BLOCKED-BY-ALLOWLIST for every principal,
+           so the gateway serves nothing from it and opal_discover reads nothing from it at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2024-11-01'
+         row: mp.01.aum-metrics
+         scope: global
+         field: total.series_start
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+-        value: '2026-10-15'
++        value: '2026-10-16'
+         row: mp.02.account-distribution
+         scope: global
+         field: _provenance.source_vintages.global/account-distribution
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2024-11-01'
+@@ -2563,14 +2567,14 @@ tool_index:
+         scope: global
+         field: as_of_first
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: measured
+         value: '2026-09-30'
+         row: mp.07.peer-performance
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+         value: '2026-10-15'
+@@ -2580,7 +2584,7 @@ tool_index:
+         source: data_as_of read by the worker after decoding the object, which is stored gzip-encoded (Content-Encoding
+           gzip); the aws CLI and the opal_discover read do not decode it, so it is not re-read at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: '2026-10-15'
+         row: att.04.positioning-data
+@@ -2589,23 +2593,23 @@ tool_index:
+         source: data_as_of read by the worker after decoding the object, which is stored gzip-encoded (Content-Encoding
+           gzip); the aws CLI and the opal_discover read do not decode it, so it is not re-read at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2026-09-30'
+         row: att.02.holdings-attribution
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+       - claim: inferred
+-        value: '2026-10-15'
++        value: '2026-10-16'
+         row: news.03.live-singletons
+         field: generated_at
+         basis: s3://opal-data-portal-v2/
+         source: generated_at read by the worker from the first of the two singleton objects the row names; the row
+           names two objects, so no single object is measured and opal_discover does not re-read it
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: '2026-10-15'
+         row: val.01.valuation-data
+@@ -2614,13 +2618,13 @@ tool_index:
+         source: data_as_of read from the served object by the worker; the object is over the answer-time read bound
+           of opal_discover, so the gateway does not re-read it at answer time
+         method: body-field
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: measured
+         value: '2026-10-15'
+         row: val.02.risk-premium-data
+         field: data_as_of
+         method: snapshot-asof
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+         basis: s3://opal-data-portal-v2/
+     freshness:
+       claim: absent
+@@ -2960,7 +2964,7 @@ tool_index:
+           the earliest and latest date= partition across them (1265 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-05-24..2026-10-15
+         row: schwab_dim_balance
+@@ -2969,7 +2973,7 @@ tool_index:
+           the earliest and latest date= partition across them (1174 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-05-24..2026-10-15
+         row: schwab_dim_position
+@@ -2978,7 +2982,7 @@ tool_index:
+           the earliest and latest date= partition across them (1174 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-01-16..2026-10-15
+         row: schwab_dim_transaction
+@@ -2987,7 +2991,7 @@ tool_index:
+           the earliest and latest date= partition across them (1265 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+     freshness:
+       claim: absent
+       reason: the tool describes the dataset's fields, types and grain from the contract; it reads no dated data,
+@@ -3027,7 +3031,7 @@ tool_index:
+           the earliest and latest date= partition across them (1265 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-05-24..2026-10-15
+         row: schwab_dim_balance
+@@ -3036,7 +3040,7 @@ tool_index:
+           the earliest and latest date= partition across them (1174 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-05-24..2026-10-15
+         row: schwab_dim_position
+@@ -3045,7 +3049,7 @@ tool_index:
+           the earliest and latest date= partition across them (1174 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-01-16..2026-10-15
+         row: schwab_dim_transaction
+@@ -3054,7 +3058,7 @@ tool_index:
+           the earliest and latest date= partition across them (1265 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+     freshness:
+       claim: absent
+       reason: 'a live-queried silver row has no served artifact to list: the dataset is read through its producer
+@@ -3095,7 +3099,7 @@ tool_index:
+           the earliest and latest date= partition across them (1265 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-05-24..2026-10-15
+         row: schwab_dim_balance
+@@ -3104,7 +3108,7 @@ tool_index:
+           the earliest and latest date= partition across them (1174 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-05-24..2026-10-15
+         row: schwab_dim_position
+@@ -3113,7 +3117,7 @@ tool_index:
+           the earliest and latest date= partition across them (1174 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+       - claim: inferred
+         value: 2024-01-16..2026-10-15
+         row: schwab_dim_transaction
+@@ -3122,7 +3126,7 @@ tool_index:
+           the earliest and latest date= partition across them (1265 partitions); the dataset is queried live, so this
+           is the served window'
+         method: partition-listing
+-        read_at: '2026-10-16T11:38:17Z'
++        read_at: '2026-10-16T15:31:21Z'
+     freshness:
+       claim: absent
+       reason: 'a live-queried silver row has no served artifact to list: the dataset is read through its producer
+@@ -3303,6 +3307,269 @@ silver_datasets:
+     bucket: opal-data-bd
+     vendor: blackdiamond
+     firm: 49financial
++  - entity: blackdiamond_live_allocations
++    business_meaning: silver parquet table allocations (live) of bucket opal-data-bd, prefix silver/allocations/; 49 Financial accounts only (every account id starts z08); Opal-internal principals only until a data grant names the firm. The frozen copy of the same name in opal-data-assets (opal_data_assets_silver_49financial_allocations_silver_legacy) is a different row.
++    example_questions:
++    - What is account ...1234 worth?
++    grain: one row per account per allocation report; snapshot or increment UNMEASURED (contract decision 8)
++    freshness_field: 'NONE -- flat files: the freshness date is the YYYY-MM-DD file name; no date column measured'
++    firm_scope_rule: firm-scoped
++    never_sum_rules:
++    - 'never sum across partitions: grain UNMEASURED (contract decision 8); no tool sums or spans partitions'
++    producer: 'inferred: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)'
++    tools:
++    - client_get_allocation
++    read_tool: client_get_allocation
++    bucket: opal-data-bd
++    prefix: silver/allocations/
++    table: allocations
++    layer: silver
++    format: parquet
++    contract:
++      id: c-184353c68c4b
++      label: silver allocations (live)
++      size:
++        objects: 135
++        bytes: 148588719
++        newest_part: 2026-10-09.parquet
++        claim: measured
++      freshness:
++        latest_partition: '2026-10-09'
++        trading_days_behind_t1: 5
++        t1_frontier: '2026-10-16'
++        basis: trading-day-frontier
++        newest_last_modified_utc: '2026-10-11T00:19:18Z'
++        claim: measured
++      partition:
++        keys:
++        - file-name date
++        layout: flat files silver/allocations/<YYYY-MM-DD>.parquet, no date= directory
++        claim: measured
++      producer:
++        name: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)
++        schedule: weekly (one dated file per Friday; newest 2026-10-09)
++        claim: inferred
++    fork_keys:
++      firm:
++        column_or_key_segment: none -- single-firm table, every account id starts z08
++        values:
++        - 49financial
++        claim: inferred
++      account:
++        column: account_id
++        claim: inferred
++      platform: null
++    nl_tags:
++    - live account allocation
++    - account market value
++    - current allocation
++    retired: false
++    open_items:
++    - flat files silver/allocations/<date>.parquet, no date= directory
++    - 'grain (snapshot or increment) is UNMEASURED (contract decision 8): no tool sums or spans partitions'
++    - 'the FROZEN copy of the same name is opal_data_assets_silver_49financial_allocations_silver_legacy in opal-data-assets: do not read it'
++    gap_owner: null
++    address: blackdiamond/49f-live/silver/allocations/
++    vendor: blackdiamond
++    firm: 49financial
++  - entity: blackdiamond_live_fees
++    business_meaning: silver parquet table fees (live) of bucket opal-data-bd, prefix silver/fees/; 49 Financial accounts only (every account id starts z08); Opal-internal principals only until a data grant names the firm. The frozen copy of the same name in opal-data-assets (opal_data_assets_silver_49financial_fees_silver_legacy) is a different row.
++    example_questions:
++    - What fees were charged to account ...1234 on a trade date?
++    grain: one row per fee transaction line (transaction_id); snapshot or increment UNMEASURED (contract decision 8)
++    freshness_field: 'NONE -- flat files: the freshness date is the YYYY-MM-DD file name; no date column measured'
++    firm_scope_rule: firm-scoped
++    never_sum_rules:
++    - 'never sum across partitions: grain UNMEASURED (contract decision 8); no tool sums or spans partitions'
++    producer: 'inferred: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)'
++    tools:
++    - client_get_fees
++    read_tool: client_get_fees
++    bucket: opal-data-bd
++    prefix: silver/fees/
++    table: fees
++    layer: silver
++    format: parquet
++    contract:
++      id: c-c74ec0faa389
++      label: silver fees (live)
++      size:
++        objects: 2008
++        bytes: 209472388
++        newest_part: 2026-10-14.parquet
++        claim: measured
++      freshness:
++        latest_partition: '2026-10-14'
++        trading_days_behind_t1: 2
++        t1_frontier: '2026-10-16'
++        basis: trading-day-frontier
++        newest_last_modified_utc: '2026-10-15T22:21:36Z'
++        claim: measured
++      partition:
++        keys:
++        - file-name date
++        layout: flat files silver/fees/<YYYY-MM-DD>.parquet, no date= directory
++        claim: measured
++      producer:
++        name: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)
++        schedule: daily (one dated file per calendar day, weekends included; newest 2026-10-14)
++        claim: inferred
++    fork_keys:
++      firm:
++        column_or_key_segment: none -- single-firm table, every account id starts z08
++        values:
++        - 49financial
++        claim: inferred
++      account:
++        column: account_id
++        claim: inferred
++      platform: null
++    nl_tags:
++    - live fees
++    - advisory fees
++    - transaction fees
++    retired: false
++    open_items:
++    - flat files silver/fees/<date>.parquet, no date= directory
++    - 'grain (snapshot or increment) is UNMEASURED (contract decision 8): no tool sums or spans partitions'
++    - 'the FROZEN copy of the same name is opal_data_assets_silver_49financial_fees_silver_legacy in opal-data-assets: do not read it'
++    gap_owner: null
++    address: blackdiamond/49f-live/silver/fees/
++    vendor: blackdiamond
++    firm: 49financial
++  - entity: blackdiamond_live_transactions
++    business_meaning: silver parquet table transactions (live) of bucket opal-data-bd, prefix silver/transactions/; 49 Financial accounts only (every account id starts z08); Opal-internal principals only until a data grant names the firm. The frozen copy of the same name in opal-data-assets (opal_data_assets_silver_49financial_transactions_silver_legacy) is a different row.
++    example_questions:
++    - What trades did account ...1234 make last month?
++    grain: one row per transaction line (transaction_id); snapshot or increment UNMEASURED (contract decision 8)
++    freshness_field: 'NONE -- flat files: the freshness date is the YYYY-MM-DD file name; no date column measured'
++    firm_scope_rule: firm-scoped
++    never_sum_rules:
++    - 'never sum across partitions: grain UNMEASURED (contract decision 8); no tool sums or spans partitions'
++    producer: 'inferred: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)'
++    tools:
++    - client_get_transactions
++    read_tool: client_get_transactions
++    bucket: opal-data-bd
++    prefix: silver/transactions/
++    table: transactions
++    layer: silver
++    format: parquet
++    contract:
++      id: c-d70cdd17e233
++      label: silver transactions (live)
++      size:
++        objects: 1931
++        bytes: 630681309
++        newest_part: 2026-10-16.parquet
++        claim: measured
++      freshness:
++        latest_partition: '2026-10-16'
++        trading_days_behind_t1: 0
++        t1_frontier: '2026-10-16'
++        basis: trading-day-frontier
++        newest_last_modified_utc: '2026-10-16T00:16:02Z'
++        claim: measured
++      partition:
++        keys:
++        - file-name date
++        layout: flat files silver/transactions/<YYYY-MM-DD>.parquet, no date= directory
++        claim: measured
++      producer:
++        name: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)
++        schedule: daily (one dated file per calendar day, weekends included; newest 2026-10-16)
++        claim: inferred
++    fork_keys:
++      firm:
++        column_or_key_segment: none -- single-firm table, every account id starts z08
++        values:
++        - 49financial
++        claim: inferred
++      account:
++        column: account_id
++        claim: inferred
++      platform: null
++    nl_tags:
++    - live transactions
++    - recent trades
++    - cash flows
++    - net new assets
++    retired: false
++    open_items:
++    - flat files silver/transactions/<date>.parquet, no date= directory
++    - 'grain (snapshot or increment) is UNMEASURED (contract decision 8): no tool sums or spans partitions'
++    - 'the FROZEN copy of the same name is opal_data_assets_silver_49financial_transactions_silver_legacy in opal-data-assets: do not read it'
++    gap_owner: null
++    address: blackdiamond/49f-live/silver/transactions/
++    vendor: blackdiamond
++    firm: 49financial
++  - entity: blackdiamond_live_unrealized
++    business_meaning: silver parquet table unrealized (live) of bucket opal-data-bd, prefix silver/unrealized/; 49 Financial accounts only (every account id starts z08); Opal-internal principals only until a data grant names the firm. The frozen copy of the same name in opal-data-assets (opal_data_assets_silver_49financial_unrealized_silver_legacy) is a different row.
++    example_questions:
++    - What does account ...1234 hold?
++    grain: one row per open tax lot (account x asset x open_date); snapshot or increment UNMEASURED (contract decision 8)
++    freshness_field: 'NONE -- flat files: the freshness date is the YYYY-MM-DD file name; no date column measured'
++    firm_scope_rule: firm-scoped
++    never_sum_rules:
++    - 'never sum across partitions: grain UNMEASURED (contract decision 8); no tool sums or spans partitions'
++    producer: 'inferred: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)'
++    tools:
++    - client_get_holdings
++    read_tool: client_get_holdings
++    bucket: opal-data-bd
++    prefix: silver/unrealized/
++    table: unrealized
++    layer: silver
++    format: parquet
++    contract:
++      id: c-157012c10a5c
++      label: silver unrealized (live)
++      size:
++        objects: 77
++        bytes: 166073010
++        newest_part: 2026-10-09.parquet
++        claim: measured
++      freshness:
++        latest_partition: '2026-10-09'
++        trading_days_behind_t1: 5
++        t1_frontier: '2026-10-16'
++        basis: trading-day-frontier
++        newest_last_modified_utc: '2026-10-11T00:20:42Z'
++        claim: measured
++      partition:
++        keys:
++        - file-name date
++        layout: flat files silver/unrealized/<YYYY-MM-DD>.parquet, no date= directory
++        claim: measured
++      producer:
++        name: bd-49f live runners write opal-data-bd silver/ (the exact trigger is not traced here)
++        schedule: weekly (one dated file per Friday; newest 2026-10-09)
++        claim: inferred
++    fork_keys:
++      firm:
++        column_or_key_segment: none -- single-firm table, every account id starts z08
++        values:
++        - 49financial
++        claim: inferred
++      account:
++        column: account_id
++        claim: inferred
++      platform: null
++    nl_tags:
++    - live holdings
++    - current tax lots
++    - open gains and losses
++    - current positions
++    retired: false
++    open_items:
++    - flat files silver/unrealized/<date>.parquet, no date= directory
++    - 'grain (snapshot or increment) is UNMEASURED (contract decision 8): no tool sums or spans partitions'
++    - 'the FROZEN copy of the same name is opal_data_assets_silver_49financial_unrealized_silver_legacy in opal-data-assets: do not read it'
++    - silver/unrealized/ holds a non-dated unrealized_gain_loss.parquet that is never a partition
++    gap_owner: null
++    address: blackdiamond/49f-live/silver/unrealized/
++    vendor: blackdiamond
++    firm: 49financial
+   - entity: dynamodb_dynamodb_opal_keyword_intelligence
+     business_meaning: 'dynamodb dynamodb table opal-keyword-intelligence in bucket none (DynamoDB us-east-1), prefix none; grain: one item per topic keyword per generation day: HASH keyword, RANGE generated_date; GSI date-index (generated_date, keyword). Opal-internal data.'
+     example_questions:
+@@ -3839,8 +4106,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/allocations/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/allocations/
+     table: allocations (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -3896,7 +4163,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/allocations/ until F11 moves the writer here. Live opal-data-bd silver/allocations newest 2026-10-09 (7,345 rows, z08, 94 columns); 5 schema variants here mix snake_case and Title Case names.'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/allocations/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/allocations/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_assets_silver_legacy
+@@ -3911,8 +4178,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/assets/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/assets/
+     table: assets (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -3968,7 +4235,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/assets/ until F11 moves the writer here. Its live original also stops 2026-06-18.'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/assets/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/assets/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_fact_insurance_insurancerelationshiplist_export
+@@ -4207,8 +4474,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/fees/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/fees/
+     table: fees (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -4268,7 +4535,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/fees/ until F11 moves the writer here. Live opal-data-bd silver/fees newest 2026-10-12 (710 rows, z08 only, 34 columns = this schema).'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/fees/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/fees/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_prices_silver_legacy
+@@ -4283,8 +4550,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/prices/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/prices/
+     table: prices (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -4340,7 +4607,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/prices/ until F11 moves the writer here. Live opal-data-bd silver/prices newest 2026-10-14 (11,143 rows).'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/prices/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/prices/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_realized_silver_legacy
+@@ -4355,8 +4622,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/realized/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/realized/
+     table: realized (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -4412,7 +4679,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/realized/ until F11 moves the writer here. Live opal-data-bd silver/realized newest 2026-10-14 (45,208 rows, z08).'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/realized/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/realized/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_single_file_silver_legacy
+@@ -4500,8 +4767,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/transactions_enriched/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/transactions_enriched/
+     table: transactions_enriched (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -4556,7 +4823,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/transactions_enriched/ until F11 moves the writer here. Its live original also stops 2026-04-20: a retired diagnostic.'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/transactions_enriched/date=<d>/data.parquet
++    key_template: blackdiamond/49financial/silver_legacy/transactions_enriched/date=<d>/data.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_transactions_silver_legacy
+@@ -4571,8 +4838,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/transactions/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/transactions/
+     table: transactions (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -4630,7 +4897,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/transactions/ until F11 moves the writer here. Live opal-data-bd silver/transactions newest 2026-10-14 (2,921 rows, z08, 74 columns).'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/transactions/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/transactions/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_49financial_unrealized_silver_legacy
+@@ -4645,8 +4912,8 @@ silver_datasets:
+     producer: 'inferred: one-time copy of s3://opal-data-bd/silver/<table>/ made 2026-08-25 22:59-23:09Z (ADVI_FIRMBKTS F11 move, scopes.json tier_live note); no writer since'
+     tools: []
+     read_tool: null
+-    bucket: opal-data-bd
+-    prefix: silver/unrealized/
++    bucket: opal-data-assets
++    prefix: blackdiamond/49financial/silver_legacy/unrealized/
+     table: unrealized (silver_legacy)
+     layer: silver
+     format: parquet
+@@ -4704,7 +4971,7 @@ silver_datasets:
+     open_items:
+     - 'FROZEN copy: do not build a tool on this prefix; read the live opal-data-bd silver/unrealized/ until F11 moves the writer here. Live opal-data-bd silver/unrealized newest 2026-10-09 (108,439 rows, 7,395 accounts, z08). This is the nearest 49F HOLDINGS table.'
+     gap_owner: NFRA_OPLGTW
+-    key_template: silver/unrealized/<d>.parquet
++    key_template: blackdiamond/49financial/silver_legacy/unrealized/date=<d>/<d>.parquet
+     firm: 49financial
+     vendor: blackdiamond
+   - entity: opal_data_assets_silver_commonwealth_cottonwood_account_day_value
+@@ -14272,7 +14539,6 @@ silver_datasets:
+     retired: false
+     open_items:
+     - gold skips a trading day when the Bloomberg L1 landing (bbg/<D>/) arrives after 13:00Z (bbg/2026-10-12 landed 14:39:56Z) -- 3 trading days missing
+-    - 'gateway role: GetObject on gold/book simulates implicitDeny (read-grant widening needed)'
+     gap_owner: null
+     key_template: gold/book/date={YYYY-MM-DD}/book.parquet
+   - entity: opal_data_etfs_gold_buying_trend
