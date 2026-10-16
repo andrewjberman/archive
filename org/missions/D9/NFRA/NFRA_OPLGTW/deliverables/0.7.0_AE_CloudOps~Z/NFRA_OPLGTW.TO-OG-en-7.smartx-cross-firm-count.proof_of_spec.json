@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-en-7",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-16/en7_smartx_crossfirm.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "3b056fd12e",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-7.smartx-cross-firm-count.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record holds a positive denominator, the count of candidates mapping to another firm (0 is the expectation, any other number is a finding), the method and the live commit, with no long digit run and no e-mail address.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en7.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)smartx cross-firm count: candidates checked [1-9]\\d*; mapping to another firm \\d+ \\(expected 0\\); fields present True; digit runs of 8 or more 0 \\(want 0\\); e-mail addresses 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "smartx cross-firm count: candidates checked 6010; mapping to another firm 0 (expected 0); fields present True; digit runs of 8 or more 0 (want 0); e-mail addresses 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "6010 candidates checked, 0 mapping to another firm (expected 0), over 4528 distinct last4 values, 10193 firm allocations, 10268 roster rows, 7650 account-map rows; run twice, identical: True. The number is the finding and the CVO reads it; the check proves the record's existence and hygiene only.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The host read was run once, as the order requires (no retry loop); the check AC1 was run twice on the committed record.",
+   "observed": "AC1 outputs identical on both runs; the live ref (S3 git-ref of the deployed artifact) was equal before and after the host read.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Independent arms inside the one read: (a) the served tool client_resolve_account agreed with the module's own grouping on 6 of 6 last4 values; (b) a shared-account count (accounts also carrying an allocation outside the firm's set) read 0; (c) unmapped-advisor candidates 0.",
+   "expected": "k = 0; tool and module agree; no shared account",
+   "observed": "k 0 of 6010; 6 of 6 agree; shared 0; unmapped 0",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/SMARTX_CROSSFIRM.json",
+   "kind": "config_data",
+   "commit_or_etag": "ea351576c2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record: read_at, live_commit, method, n and k, denominator",
+   "introduces": [
+    "candidates_mapping_to_other_firm"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/en7_host.py",
+   "kind": "script",
+   "commit_or_etag": "ea351576c2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "pulled from S3 and run once on the host under /opt/opal-gateway/.venv/bin/python; read-only, audit sink stubbed",
+   "introduces": [
+    "CROSSCHECK_MAX"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/en7_run.py",
+   "kind": "script",
+   "commit_or_etag": "ea351576c2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "uploads the host program, one SSM command, writes the record only if the live ref is unchanged",
+   "introduces": [
+    "ref_before"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "the served read, SmartX candidate enumeration",
+   "invocation": "python W/en7_run.py (uploads W/en7_host.py, one SSM command)",
+   "result": "6010 candidates, 0 mapping to another firm, tool and module agree on 6 of 6 last4 values"
+  },
+  {
+   "tool": "en7.AC1",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en7.AC1.sh",
+   "result": "PASS exit 0"
+  }
+ ],
+ "surprises": [],
+ "declared_exclusions": [
+  {
+   "item": "the 75 roster rows with an advisor name the map does not hold",
+   "reason": "The adapter drops them and attributes them to no firm, so they are outside the candidate set; the count cannot speak for them (named in the record's note)."
+  },
+  {
+   "item": "host bytes",
+   "reason": "The live commit is the deployed artifact's S3 git-ref, equal before and after the read; no md5 walk of the host was run for this read-only count."
+  },
+  {
+   "item": "the client-data account-id hash check",
+   "reason": "The hashed account-id list is absent on this box; absent is not empty. The record carries counts and the method only."
+  }
+ ]
+}
