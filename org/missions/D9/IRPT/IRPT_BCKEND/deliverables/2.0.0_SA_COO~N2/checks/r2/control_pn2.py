@@ -40,6 +40,7 @@ NEGATIVES = [
     ("wrong upload hash", ("apply", "script", "uploaded_sha256"), "d" * 64, "IBN2-AC2"),
     ("smoke exit nonzero", ("apply", "import_smoke", "exit_code"), 1, "IBN2-AC2"),
     ("smoke not on live prefixes", ("apply", "import_smoke", "built_from_live_prefixes"), False, "IBN2-AC2"),
+    ("smoke off the runner, no fallback flag", ("apply", "import_smoke", "ran_on_runner"), False, "IBN2-AC2"),
     ("smoke made an Orion request", ("apply", "import_smoke", "orion_requests"), 1, "IBN2-AC2"),
     ("replaced object not saved", ("apply", "replaced_script", "saved_copy_sha256"), "e" * 64, "IBN2-AC2"),
     ("two rows added", ("apply", "dispatch_edit", "rows_added"), 2, "IBN2-AC2"),
@@ -78,6 +79,12 @@ def main(repo):
         pos = {c: run(root, c) for c in P.CHECKS}
         print("POSITIVE:", {c: v[1] for c, v in pos.items()})
         bad += sum(1 for v in pos.values() if v[0] != 0)
+        fallback = copy.deepcopy(GOOD)
+        fallback["apply"]["import_smoke"].update({"ran_on_runner": False, "fallback_host": True, "python_version": "3.9.x"})
+        rec.write_text(json.dumps(fallback), encoding="utf-8")
+        fb = {c: run(root, c) for c in P.CHECKS}
+        print("POSITIVE (CTO-approved fallback host, AMENDMENT 1):", {c: v[1] for c, v in fb.items()})
+        bad += sum(1 for v in fb.values() if v[0] != 0)
         for name, path, value, cid in NEGATIVES:
             mutated = copy.deepcopy(GOOD)
             node = mutated
