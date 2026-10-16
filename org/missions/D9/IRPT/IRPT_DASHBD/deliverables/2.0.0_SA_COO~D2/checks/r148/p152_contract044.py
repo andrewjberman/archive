@@ -1,10 +1,10 @@
 """IRPT_DASHBD round 148, workstream CONTRACT (issuer 2.0.0_SA_COO~D2, the contract's sole writer) -- DB-b-284, the SOURCE TABLE contract 0.4.4 (CTO round-147 analysis, msg 9060 item 1): a row whose
 income_received is null because the source reports no income carries a CLAIM, `income_claim` = `absent` with the fixed reason SOURCE_REPORTS_NO_INCOME, so the null can be told apart from a failed read
-("a value must carry its claim"). One new OPTIONAL column; the 19 columns' hashed fields and `schema_hash` stay byte-identical; `schema_hash_with_optional` is recomputed; row S104 is the owner's.
+("a value must carry its claim"). One new entry in a NEW section `conditional_columns` (a column only one SOURCE emits); `optional_columns`, the 19 columns and BOTH schema hashes stay byte-identical, so no pinned reader test moves; row S104 is the owner's.
 LOCAL: a JSON standard, a test file and at most 14 changed lines across the earlier four contract tests.
 
   DB-b-284 (~228)   org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json (0.4.4) + data/assets/scripts/gold/irpt_reporting/tests/test_account_return_contract_044.py + a facts record
-                    DB152-1-AC1 (the contract differs from the base ONLY in the allowed places; the recomputed hash),
+                    DB152-1-AC1 (the contract differs from the base ONLY in the allowed places; both hashes unchanged),
                     DB152-1-AC2 (BEHAVIOUR: a reference rule driven only by the declarations accepts five rows and rejects six),
                     DB152-1-AC3 (the new tests, the earlier four contract test files, the grant, the facts record with the token census recounted)
 
@@ -90,20 +90,22 @@ def census(root, base):
 def check_diff(base, c):
     need(base["contract_version"] == "0.4.3", "the base is not 0.4.3: %s" % base["contract_version"])
     need(c.get("contract_version") == "0.4.4", "contract_version is not 0.4.4 (a patch bump)")
-    moved = sorted(k for k in set(base) | set(c) if k not in ("contract_version", "supersedes", "rule24_record", "optional_columns", "schema_hash_with_optional") and base.get(k) != c.get(k))
-    need(not moved, "sections changed beyond the allowed ones: %s" % moved)
+    need("conditional_columns" not in base, "the base already holds conditional_columns")
+    moved = sorted(k for k in set(base) | set(c) if k not in ("contract_version", "supersedes", "rule24_record", "conditional_columns") and base.get(k) != c.get(k))
+    need(not moved, "sections changed beyond the allowed ones (optional_columns, the 19 columns and both schema hashes must be byte-identical): %s" % moved)
     need(c["schema_hash"] == base["schema_hash"] and schema_hash(c["columns"]) == c["schema_hash"], "schema_hash moved or no longer equals its recomputation over the 19 columns")
-    ob, on = base["optional_columns"], c["optional_columns"]
-    need(isinstance(on, list) and len(on) == len(ob) + 1 and on[:len(ob)] == ob, "optional_columns must keep every earlier entry byte-identical and append exactly one")
-    n = on[-1]
-    need(n.get("name") == NEWCOL and n.get("type") == "string" and n.get("nullable") is True and n.get("values") == ["absent"] and n.get("reason") == REASON and nes(n.get("meaning")) and nes(n.get("since_schema_version")),
+    allc = c["columns"] + [{"name": o["name"], "type": o["type"]} for o in c["optional_columns"]]
+    need(c["schema_hash_with_optional"] == base["schema_hash_with_optional"] == schema_hash(allc), "schema_hash_with_optional must stay equal to the base's and to its recomputation over the 19 columns plus the SIX optional columns")
+    cc = c.get("conditional_columns")
+    need(isinstance(cc, list) and len(cc) == 1, "conditional_columns must hold exactly one entry")
+    n = cc[0]
+    need(set(n) == {"name", "type", "nullable", "meaning", "values", "reason", "emitted_when", "required_when", "rule", "since_schema_version"}, "the conditional column's keys differ: %s" % sorted(n))
+    need(n["name"] == NEWCOL and n["type"] == "string" and n["nullable"] is True and n["values"] == ["absent"] and n["reason"] == REASON and nes(n["meaning"]) and nes(n["since_schema_version"]),
          "the new column: name %s, string, nullable, values [absent], reason %s, a meaning and a since_schema_version" % (NEWCOL, REASON))
-    need(n.get("required_when") == {"source": BD} and n.get("required_when_null") == "income_received", "the new column must declare required_when {source: BD-computed} and required_when_null income_received")
-    rule = n.get("rule") or ""
-    need(nes(rule) and "income_received" in rule and BD in rule and "never" in rule.lower() and "zero" in rule.lower() and "reject" in rule.lower(),
-         "income_claim.rule must say: required exactly when income_received is null and the source is the BD-computed one; a row carrying the claim with an income is invalid; a consumer that needs income rejects it; never zero")
-    allc = c["columns"] + [{"name": o["name"], "type": o["type"]} for o in on]
-    need(c["schema_hash_with_optional"] == schema_hash(allc) and c["schema_hash_with_optional"] != base["schema_hash_with_optional"], "schema_hash_with_optional must be the recomputed hash over the 19 columns plus all seven optional columns, and must have moved")
+    need(n["emitted_when"] == {"source": BD} and n["required_when"] == {"source": BD, "income_received": None}, "emitted_when {source: BD} and required_when {source: BD, income_received: null} (the condition as ONE dict of equalities, a JSON null for the null income)")
+    rule = n["rule"]
+    need(nes(rule) and "income_received" in rule and BD in rule and "never" in rule.lower() and "zero" in rule.lower() and "reject" in rule.lower() and "optional_columns" in rule,
+         "income_claim.rule must say: required exactly when income_received is null and the source is the BD-computed one; a row carrying the claim with an income is invalid; a consumer that needs income rejects it; never zero; and why it is not an optional column (it is emitted by one source, so it sits outside the hash basis `optional_columns`)")
     sb, sn = base["supersedes"], c["supersedes"]
     need(isinstance(sn, list) and len(sn) == len(sb) + 1 and sn[:len(sb)] == sb, "supersedes must keep every earlier entry byte-identical and append one")
     e = sn[-1]
@@ -116,13 +118,12 @@ def check_diff(base, c):
 
 
 def claim_required(c, row):
-    col = next(x for x in c["optional_columns"] if x["name"] == NEWCOL)
-    cond = col["required_when"]
-    return all(row.get(k) == v for k, v in cond.items()) and row.get(col["required_when_null"]) is None
+    col = next(x for x in c["conditional_columns"] if x["name"] == NEWCOL)
+    return all(row.get(k) == v for k, v in col["required_when"].items())
 
 
 def row_ok(c, row):
-    col = next(x for x in c["optional_columns"] if x["name"] == NEWCOL)
+    col = next(x for x in c["conditional_columns"] if x["name"] == NEWCOL)
     claim = row.get(NEWCOL)
     if claim is not None and claim not in col["values"]:
         return False
@@ -157,7 +158,7 @@ def check_facts(rec, c, base_sha, counts):
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["contract_version"] == "0.4.4" and rec["base_sha256"] == base_sha, "version or base sha256 differ")
     need(rec["new_column"] == {"name": NEWCOL, "values": ["absent"], "reason": REASON}, "new_column differs")
-    need(rec["hashes"] == {"schema_hash_unchanged": True, "schema_hash_with_optional": c["schema_hash_with_optional"]}, "hashes block differs from the contract")
+    need(rec["hashes"] == {"schema_hash_unchanged": True, "schema_hash_with_optional_unchanged": True}, "hashes block: both hashes unchanged")
     ce = rec["census"]
     need(isinstance(ce, dict) and set(ce) == {"method", "counts"} and nes(ce["method"]) and "git grep -l -w" in ce["method"] and ce["counts"] == counts, "census: the method in words and the counts recounted by the checker %s" % counts)
     need(isinstance(rec["tests"], int) and not isinstance(rec["tests"], bool) and rec["tests"] >= 8, "tests must be a whole number, at least 8")
@@ -228,18 +229,19 @@ def selftest():
             "enums": {"a": [1]}, "columns": cols, "optional_columns": old_opt}
     good = copy.deepcopy(base)
     good["contract_version"] = "0.4.4"
-    good["optional_columns"].append({"name": NEWCOL, "type": "string", "nullable": True, "values": ["absent"], "reason": REASON, "meaning": "the claim", "since_schema_version": "1.5",
-                                     "required_when": {"source": BD}, "required_when_null": "income_received",
-                                     "rule": "Required exactly when income_received is null and source is '%s'; a row carrying the claim with an income is invalid; a consumer that needs income rejects it and never treats the null as zero." % BD})
-    good["schema_hash_with_optional"] = schema_hash(cols + [{"name": o["name"], "type": o["type"]} for o in good["optional_columns"]])
-    good["supersedes"].append({"contract_version": "0.4.3", "schema_hash": base["schema_hash"], "schema_hash_with_optional": base["schema_hash_with_optional"], "changes": "income_claim added"})
+    good["conditional_columns"] = [{"name": NEWCOL, "type": "string", "nullable": True, "meaning": "the claim", "values": ["absent"], "reason": REASON, "emitted_when": {"source": BD},
+                                    "required_when": {"source": BD, "income_received": None}, "since_schema_version": "1.5",
+                                    "rule": "Required exactly when income_received is null and source is '%s'; a row carrying the claim with an income is invalid; a consumer that needs income rejects it and never treats the null as zero. It sits outside optional_columns because one source emits it." % BD}]
+    good["supersedes"].append({"contract_version": "0.4.3", "schema_hash": base["schema_hash"], "schema_hash_with_optional": base["schema_hash_with_optional"], "changes": "income_claim added as a conditional column"})
     good["rule24_record"]["v044"] = "income_claim for income_received: one value (absent), reason %s, no other state." % REASON
     assert check_diff(base, good)
-    arms = (("version", lambda x: x.update(contract_version="0.4.3")), ("hash", lambda x: x.update(schema_hash="z")), ("hash_opt same", lambda x: x.update(schema_hash_with_optional=base["schema_hash_with_optional"])),
-            ("enums", lambda x: x["enums"].update(a=[2])), ("column changed", lambda x: x["columns"][0].update(type="int64")), ("old optional", lambda x: x["optional_columns"][0].update(nullable=False)),
-            ("two columns", lambda x: x["optional_columns"].append({"name": "y", "type": "string"})), ("values", lambda x: x["optional_columns"][-1].update(values=["absent", "present"])),
-            ("reason", lambda x: x["optional_columns"][-1].update(reason="OTHER")), ("required_when", lambda x: x["optional_columns"][-1].update(required_when={"source": "orion"})),
-            ("rule", lambda x: x["optional_columns"][-1].update(rule="short")), ("supersedes", lambda x: x["supersedes"].pop(0)), ("entry hash", lambda x: x["supersedes"][-1].update(schema_hash="z")),
+    cc = lambda x: x["conditional_columns"][0]  # noqa: E731
+    arms = (("version", lambda x: x.update(contract_version="0.4.3")), ("hash", lambda x: x.update(schema_hash="z")), ("hash_opt moved", lambda x: x.update(schema_hash_with_optional="z")),
+            ("enums", lambda x: x["enums"].update(a=[2])), ("column changed", lambda x: x["columns"][0].update(type="int64")), ("optional touched", lambda x: x["optional_columns"][0].update(nullable=False)),
+            ("optional appended", lambda x: x["optional_columns"].append({"name": NEWCOL, "type": "string"})), ("two conditional", lambda x: x["conditional_columns"].append({"name": "y"})),
+            ("values", lambda x: cc(x).update(values=["absent", "present"])), ("reason", lambda x: cc(x).update(reason="OTHER")), ("emitted_when", lambda x: cc(x).update(emitted_when={"source": "orion"})),
+            ("required_when", lambda x: cc(x).update(required_when={"source": BD})), ("required_when orion", lambda x: cc(x).update(required_when={"source": "orion", "income_received": None})),
+            ("rule", lambda x: cc(x).update(rule="short")), ("extra key", lambda x: cc(x).update(z=1)), ("supersedes", lambda x: x["supersedes"].pop(0)), ("entry hash", lambda x: x["supersedes"][-1].update(schema_hash="z")),
             ("rule24 missing", lambda x: x["rule24_record"].pop("v044")), ("rule24 words", lambda x: x["rule24_record"].update(v044="changed")), ("rule24 earlier", lambda x: x["rule24_record"].update(v043="y")),
             ("other section", lambda x: x.update(extra=1)))
     for label, fn in arms:
@@ -248,16 +250,16 @@ def selftest():
         red(lambda: check_diff(base, x), label)
     assert check_behaviour(good) == (5, 6)
     nb = copy.deepcopy(good)
-    nb["optional_columns"][-1]["required_when"] = {"source": "nothing"}
+    nb["conditional_columns"][0]["required_when"] = {"source": "nothing", "income_received": None}
     red(lambda: check_behaviour(nb), "weakened required_when")
     assert check_grant({CONTRACT_REL, TEST_REL, EARLIER[0], D + AUTHOR + "/x.json"})
     red(lambda: check_grant({CONTRACT_REL, TEST_REL, "lib/x.py"}), "outside grant")
     red(lambda: check_grant({CONTRACT_REL}), "no test")
     counts = {REASON: 3, NEWCOL: 5}
-    rec = {"contract_version": "0.4.4", "base_sha256": "a" * 64, "new_column": {"name": NEWCOL, "values": ["absent"], "reason": REASON}, "hashes": {"schema_hash_unchanged": True, "schema_hash_with_optional": good["schema_hash_with_optional"]},
+    rec = {"contract_version": "0.4.4", "base_sha256": "a" * 64, "new_column": {"name": NEWCOL, "values": ["absent"], "reason": REASON}, "hashes": {"schema_hash_unchanged": True, "schema_hash_with_optional_unchanged": True},
            "census": {"method": "git grep -l -w <token> at the base commit, files counted", "counts": counts}, "tests": 8, "words": "w" * 100}
     assert check_facts(rec, good, "a" * 64, counts)
-    farms = (("version", lambda r: r.update(contract_version="0.4.3")), ("base", lambda r: r.update(base_sha256="b" * 64)), ("column", lambda r: r["new_column"].update(reason="x")), ("hash", lambda r: r["hashes"].update(schema_hash_with_optional="z")),
+    farms = (("version", lambda r: r.update(contract_version="0.4.3")), ("base", lambda r: r.update(base_sha256="b" * 64)), ("column", lambda r: r["new_column"].update(reason="x")), ("hash", lambda r: r["hashes"].update(schema_hash_with_optional_unchanged=False)),
              ("census counts", lambda r: r["census"].update(counts={REASON: 1, NEWCOL: 1})), ("census method", lambda r: r["census"].update(method="by eye")), ("tests", lambda r: r.update(tests=2)),
              ("extra", lambda r: r.update(z=1)), ("words", lambda r: r.update(words="short")), ("digits", lambda r: r.update(words="w" * 100 + " 123456789")))
     for label, fn in farms:
