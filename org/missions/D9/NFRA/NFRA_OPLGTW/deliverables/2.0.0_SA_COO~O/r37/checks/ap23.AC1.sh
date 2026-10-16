@@ -8,11 +8,11 @@
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 REC="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap23_release.json"
 [ -f "$REC" ] || { echo "ap23_release.json absent"; echo "RESULT: FAIL"; exit 1; }
-read -r base rel trunk <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''))" "$(native "$REC")" | tr -d '\r')"
+read -r base rel trunk mcp <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''),d.get('mcportal_sha',''))" "$(native "$REC")" | tr -d '\r')"
 git cat-file -e "${rel}^{commit}" && git cat-file -e "${trunk}^{commit}" || { echo "release_sha ${rel:-EMPTY} or trunk_sha ${trunk:-EMPTY} is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
 live=$dep; [ "$dep" = "$rel" ] && live=$prev
-ALLOW="^($GW/(app/(client_[a-z0-9_]+|etfs_rivals|etfs_rivals_flow|etfs_silver|portal_served|portal_json_served|tools|destructive_ops|data_entitlement|admin_gateway_breakdown|admin_people)\.py|app/integrations/portal_index/integration\.py|app/refs/(partner_roster|scopes)\.json|deploy-to-ec2\.sh|tests/test_[a-z0-9_]+\.py)|lib/opal_naming\.py)$"
+ALLOW="^($GW/(app/(client_[a-z0-9_]+|etfs_rivals|etfs_rivals_flow|etfs_silver|portal_served|portal_json_served|tools|destructive_ops|data_entitlement|admin_gateway_breakdown|admin_people)\.py|app/integrations/portal_index/integration\.py|app/refs/(partner_roster|scopes)\.json|deploy-to-ec2\.sh|tests/test_[a-z0-9_]+\.py)|lib/opal_naming\.py|infra/aws/ec2/EC2_MANIFEST\.json)$"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); outside=$(printf '%s\n' "$files" | grep -vE "$ALLOW" | grep -c .)
 tf=$(git diff --name-only "$base" "$rel" | grep -c '\.tf$' | tr -d '\r')
 read -r want have extra safe native <<<"$(python - "$base" "$rel" "$trunk" <<'PYEOF2'
@@ -35,9 +35,25 @@ PYEOF2
 )"
 sc=$(git show "$rel:lib/opal_naming.py" 2>/dev/null | wc -c | tr -d ' \r')
 rs=$(git show "$rel:$GW/app/refs/scopes.json" 2>/dev/null | md5sum | cut -d' ' -f1); ts=$(git show "$trunk:infra/logic/registry/scopes.json" 2>/dev/null | md5sum | cut -d' ' -f1)
+mcp_ok=no
+if [ -n "$mcp" ] && git -C mcportal cat-file -e "${mcp}^{commit}" 2>/dev/null && git -C mcportal merge-base --is-ancestor 421f8fbe8446650881a178fbac82a6432bb5d6ca "$mcp" 2>/dev/null; then
+  mcp_ok=$(python - "$base" "$rel" "$mcp" <<'PYEOF3'
+import json, subprocess, sys
+base, rel, mcp = sys.argv[1:4]
+def man(ref):
+    raw = subprocess.run(["git", "show", "%s:infra/aws/ec2/EC2_MANIFEST.json" % ref], capture_output=True).stdout.decode("utf-8", "replace")
+    return json.loads(raw)["services"]["opal-gateway"]
+b, r = man(base), man(rel)
+same = {k: v for k, v in b.items() if k != "mcportal_commit"} == {k: v for k, v in r.items() if k != "mcportal_commit"}
+print("yes" if r.get("mcportal_commit") == mcp and same else "no")
+PYEOF3
+)
+  mcp_ok=$(printf '%s' "$mcp_ok" | tr -d '\r')
+fi
 echo "base ${base:0:10} is the live ref before this release: $([ "$base" = "$live" ] && echo yes || echo no) (manifest ${dep:0:10}/${prev:0:10}); release ${rel:0:10}; trunk ${trunk:0:10}"
 echo "files differing $(printf '%s\n' "$files" | grep -c .); outside the batch set $outside (want 0); terraform files differing $tf (want 0)"
 echo "tools added by trunk $want; registered in the release $have of $want; extra tools in the release $extra (want 0); SAFE $safe of $want; NATIVE $native of $want"
+echo "mcportal bundle: manifest mcportal_commit equals the GO's, descends from 421f8fbe84, only that manifest field changed $mcp_ok"
 echo "staged for the host shape: lib/opal_naming.py bytes ${sc:-0}; app/refs/scopes.json byte-equal to the registry $([ -n "$rs" ] && [ "$rs" = "$ts" ] && echo yes || echo no)"
-[ "$base" = "$live" ] && [ "$outside" = 0 ] && [ "$tf" = 0 ] && [ "${want:-0}" -ge 20 ] && [ "$have" = "$want" ] && [ "$extra" = 0 ] && [ "$safe" = "$want" ] && [ "$native" = "$want" ] && [ "${sc:-0}" -gt 0 ] && [ "$rs" = "$ts" ] && { echo "RESULT: PASS"; exit 0; }
+[ "$base" = "$live" ] && [ "$outside" = 0 ] && [ "$tf" = 0 ] && [ "${want:-0}" -ge 20 ] && [ "$have" = "$want" ] && [ "$extra" = 0 ] && [ "$safe" = "$want" ] && [ "$native" = "$want" ] && [ "${sc:-0}" -gt 0 ] && [ "$rs" = "$ts" ] && [ "$mcp_ok" = yes ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
