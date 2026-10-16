@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # MX-c-39 A1 p21.AC1 -- the release catalog is PLACED: the tracked gateway catalog is byte-equal (md5) to the issuer's emitted candidate and passes the r21 release-candidate checks.
-# P21_MD5 names the candidate md5 (default: the round 21 candidate emitted 2026-10-16 ~21:0xZ from the measure 0bc424dd91).
+# P21_MD5 names the candidate md5 (default: the round 21 candidate re-emitted 2026-10-16 ~22:5xZ at deployed commit 4be300110e from the measure 0bc424dd91).
 D="$(cd "$(dirname "$0")" && pwd)"
 . "$D/_root.sh"
-WANT="${P21_MD5:-9c456f9341dd2d5ab2369f9e1479c3ab}"
+WANT="${P21_MD5:-bdfee515ec348f0ea2ee716eff5acba5}"
 T=infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
 GOT="$(md5sum "$T" | cut -d' ' -f1)"
 echo "DENOMINATOR tracked catalog md5 $GOT; expected $WANT"
