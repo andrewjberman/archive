@@ -1,0 +1,118 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-AR-ty-56",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-ty-56.fwd5-second-firm-mint-helper.md",
+  "group": "OTHER",
+  "vintage_commit": "9d0664b2ff"
+ },
+ "assignee": "0.9.0_WK_IRPT_ANLREQ~219",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R46_TX.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-ty-56.fwd5-second-firm-mint-helper.md",
+  "vintage_commit": "9d0664b2ff"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/fwd5_mint.py",
+   "kind": "script",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the scoped cross-firm mint and remove helper: email, firm and allowed firm ids are parameters; allowedFirmIds written as an L of S (the shape lambda_function.py:418-426 reads); import is AWS-free; no subcommand was run against AWS",
+   "artifact_covered_by": [
+    "AR56-ty-AC1"
+   ],
+   "commit_or_etag": "0e5544c353"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "kind": "test",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "15 offline test functions, all named test_cross_firm_mint_*; a fake DynamoDB client records every call; run at its own path: 15 passed, rc 0, twice",
+   "artifact_covered_by": [
+    "AR56-ty-AC1"
+   ],
+   "commit_or_etag": "0e5544c353"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two rows IRPT_ANLREQ-D2-W219-S1 (BLOCKING) and IRPT_ANLREQ-D2-W219-S2 (OBSERVATION) appended after the last row; no earlier row edited; surprise-row-gate OK on 2 new rows",
+   "commit_or_etag": "0e5544c353"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR56-ty-AC1",
+   "criterion_verbatim": "AR56-ty-AC1 -- the test file exists, every test function is named test_cross_firm_* (yours: test_cross_firm_mint_*), the tests pass and at least 5 pass. Expect: R46-TESTS-OK.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 5 org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "expect": "R46-TESTS-OK",
+   "output_evidence": "run at the worktree root C:/dev/wk-irpt-anlreq-219 (HEAD 796c51cf7b, checker tracked at dbf56b0a3d, now in the cone): stdout \"R46-TESTS-OK passed=15\"; rc=0. Checker self-test (r46_checks.py --self-test): \"R46-SELFTEST-OK green plus four mutants refused\"; rc=0.",
+   "denominator": "15 passed of 15 collected test_cross_firm_mint_* functions (15 of 15 \"def test_\" lines are named test_cross_firm_mint_*); the checker requires at least 5 passed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "email guard removed in a scratch copy: valid_email's suffix check and FWD-1 check replaced by return True; the copy's test file run against the copy's module",
+   "expected": "the refusal tests fail: the email, FWD-1 address and remove refusals",
+   "observed": "3 failed, 12 passed, rc=1: FAILED test_cross_firm_mint_refuses_email_without_opal_invalid_before_client_call (someone@example.com), FAILED test_cross_firm_mint_refuses_fwd1_address_before_client_call (fwd1-staff-r41b@opal.invalid), FAILED test_cross_firm_mint_remove_refuses_bad_email_before_client_call (assert 0 == 1)",
+   "status": "FIRED-AS-EXPECTED",
+   "recorded_by": "predecessor 0.9.0_WK_IRPT_ANLREQ~219 at commit 0e5544c353 (instance 796c51cf7b); CITED, not re-run by the re-seated worker"
+  },
+  "determinism": {
+   "method": "the real test file run twice with the same command (python -m pytest -q -p no:cacheprovider on the file) and the pass lines compared",
+   "observed": "run 1: 15 passed in 2.56s rc=0; run 2: 15 passed in 2.46s rc=0; the pass counts are identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the mint, the remove, any sign-in, any AWS or DynamoDB call, any GSI, IAM or SSM value",
+   "reason": "the order forbids any AWS call and any mint; the later run is a separate WORLD act through 0.7.0_AE_CloudOps~AQ2 under a pair"
+  },
+  {
+   "item": "the checker materialization gap recorded as IRPT_ANLREQ-D2-W219-S1",
+   "reason": "resolved in this re-seat: the issuer added the fwd5_driver folder and org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS to the sparse cone; the checker now runs at the worktree path. The row itself is not edited by this worker (CVO disposition)"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-W219-S1: BLOCKING -- the order's acceptance checker r46_checks.py is tracked at HEAD but absent from this sparse worktree (core.sparseCheckout set does not include org/tier1_exec), so the invocation returns rc=2 and AR56-ty-AC1 cannot PASS here",
+  "IRPT_ANLREQ-D2-W219-S2: OBSERVATION -- the order asks for allowedFirmIds as a DynamoDB string set; lambda_function.py:418-426 reads a Python list, and boto3 returns a set for SS, so the helper writes an L of S; the report names the type used"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r46_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 5 org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "result": "rc=0, \"R46-TESTS-OK passed=15\" (re-seat run; the earlier rc=2 was the sparse-cone absence, now resolved)"
+  },
+  {
+   "tool": "offline pytest (substitute, not the criterion)",
+   "invocation": "python -m pytest -q -p no:cacheprovider org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "result": "15 passed, rc=0"
+  },
+  {
+   "tool": "name census (Grep def test_ over the test file, worktree path)",
+   "invocation": "Grep pattern def\\s+test_ and def\\s+test_cross_firm_mint_\\w+ on C:/dev/wk-irpt-anlreq-219/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "result": "15 def test_ lines; 15 def test_cross_firm_mint_ lines"
+  },
+  {
+   "tool": "boto3 TypeDeserializer (offline, no AWS)",
+   "invocation": "python -c TypeDeserializer().deserialize on {'SS': ['a','b']} and {'L': [{'S':'a'},{'S':'b'}]}",
+   "result": "SS -> set {'a', 'b'}; L -> list ['a', 'b']: the reason the helper writes an L, not the SS the cell named"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~219 <0.9.0_WK_IRPT_ANLREQ~219@opal.agent>\" -F .scratch/msg_ar56_build.txt -- <3 paths>",
+   "result": "committed 0e5544c353; msg-verify MATCH; surprise-row-gate OK 2 new rows; to-pipeline-gate OK"
+  },
+  {
+   "tool": "r46_checks.py --self-test",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+   "result": "rc=0, \"R46-SELFTEST-OK green plus four mutants refused\""
+  }
+ ]
+}
