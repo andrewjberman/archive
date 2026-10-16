@@ -25,7 +25,7 @@
 |---|---|
 | the first two (the report side's `authorize_current` and the resident's `make_authorize`) | RULED: CTO ruling ADDENDUM 7 item 4 (msg 8833): `OPAL_GLOBAL` stands by design for Opal staff only |
 | the third (the ticket service's own marker) | contract item 3, built by `TO-R19-L3`, written by `TO-R19-MIG`; ruled with item 3 |
-| the last eight (the report side's sites above) | NAMED, not individually ruled. Each is the same kind of admission item 4 ruled stands (an Opal-staff principal, with the authorizer callback or a selected single firm still deciding), but item 4 counted two, so whether these eight are inside that ruling is the CTO's word. Until it is given they read as named, not as approved |
+| the last eight (the report side's sites above) | **RULED 2026-10-16: they STAND under item 4** (CTO ruling ADDENDUM 8 @`a9417710f3`, msg 9080, in `CTO_RULING_DELL2_IRPT_ANLREQ_FOUR_LANES_END_TO_END_20261015.md`): each is an Opal-staff `OPAL_GLOBAL` minted from the server-side roster with a second decider still holding (one selected firm, the authorizer, or the tenant equality), none admits a partner or client principal, none forms an all-firm union. One defect named, not a block: the population admission is duplicated byte for byte (the `_scope` and `holdings` copies of `resolve.py`), so the pairing stands as the guard; owner `2.0.0_SA_COO~S2`. |
 
 A row is added for every new site in the commit that adds the site (change rule below). The `names()` test in `test_cross_firm_global_register.py` matches a row to a file by any `.py` token in the row, so a basename shared by two files (`resolve.py`: G7 and G8) is matched by either row; the rows therefore carry full repo-relative paths.
 
