@@ -1,0 +1,41 @@
+session log -- 0.9.0_WK_IRPT_ANLREQ~222 on IRPT_ANLREQ.TO-AR-tz-62 (round 47, workstream ~TX, cell AR-tz-62)
+worktree: C:/dev/wk-irpt-anlreq-222   branch: wk-IRPT_ANLREQ-222
+first act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-222 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+base HEAD at start: 6df6c60552 ; base named by the order: box/dell2 3086b5fe82 (ancestor of HEAD: yes)
+
+1. premises re-grounded
+   infra/aws/lambda/ticket_center/lambda_function.py present; COMMENTARY_ALLOWED_FIRMS pattern at lines 82-83 ("ALL" dropped)
+   list path for svc-analyst-intake: list_tickets -> _resolve_scope -> _table.scan(Limit=limit), unscoped (no firm filter)
+   harness read: infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py (PagedTable, _UsersStub, _DdbStub, call)
+   checker present: org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py
+   decomp present: org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R47_TX.md
+   CTO ruling path: NOT materialized (sparse cone) -- surprise row IRPT_ANLREQ-D2-W222-S1
+
+2. file written (one file, the only source-tree file)
+   infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py
+   commit 794415c168 "test(IRPT_ANLREQ round 47 ...): FWD-5 acceptance tests ..." (1 file, 220 insertions)
+
+3. surprise row appended
+   commit 3d1f82f (row IRPT_ANLREQ-D2-W222-S1) -- this commit re-wrote the whole file with CRLF (969+/943-)
+   commit 22be376384 (restores base line endings; row only) -- git diff --numstat 794415c168 HEAD gives 26 0
+
+4. runs (bounded timeout 120)
+   A. python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 2 infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py
+      -> R46-RED-OK red=5 ; rc=0
+   B. python -m pytest -q -p no:cacheprovider infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py  (worktree root)
+      -> 5 failed, 2 passed in 0.79s ; rc=1
+      FAILED test_cross_firm_intake_lists_only_the_configured_firms            AssertionError: firm-c must not be listed ...
+      FAILED test_cross_firm_intake_env_unset_lists_no_firm                   AssertionError: unset env = NO firm ...
+      FAILED test_cross_firm_intake_env_empty_lists_no_firm                   AssertionError: empty env = NO firm ...
+      FAILED test_cross_firm_intake_env_all_alone_is_no_wildcard              AssertionError: ALL is dropped as a wildcard ...
+      FAILED test_cross_firm_intake_env_all_with_firm_a_lists_firm_a_only     AssertionError: ALL is no wildcard ...
+      (controls passed: test_cross_firm_internal_profile_with_three_firms_sees_all_three, test_cross_firm_client_still_sees_only_its_own_firm)
+   C. same pytest run from infra/aws/lambda/ticket_center (tests/test_cross_firm_intake_list.py) -> 5 failed, 2 passed in 0.86s ; rc=1, same five names
+
+5. controls
+   test_cross_firm_internal_profile_with_three_firms_sees_all_three: env "firm-a", users profile allowedFirmIds [firm-a, firm-b, firm-c] -> 6 of 6 listed. PASS at base.
+   test_cross_firm_client_still_sees_only_its_own_firm: env "firm-a,firm-b,firm-c", client firmId firm-a -> firm-a tickets only. PASS at base.
+
+6. proof instance
+   org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~222/IRPT_ANLREQ.TO-AR-tz-62.fwd5-intake-list-scope-acceptance-tests.proof_of_spec.json
+   validated with python .tools/proof-of-spec-check.py <instance> AR62-tz-AC1 (see the flip commit)
