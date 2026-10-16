@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e106",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e106.four-ticker-seed-evidence.md",
+    "group": "OTHER",
+    "vintage_commit": "9fc445a18bfd2f40c9d9f96320bd2b133ee1da2e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R26.md",
+    "vintage_commit": "9fc445a18bfd2f40c9d9f96320bd2b133ee1da2e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e106.four-ticker-seed-evidence.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~96",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~96/FOUR_TICKER_SEED_EVIDENCE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Evidence record only: the four-ticker open-lots and canonical-holdings reads, the live etf-classifications get_item reads and the seed script's source read. No S3 or DynamoDB write; nothing deployed.",
+      "artifact_covered_by": [
+        "SC26-e106-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC26-e106-AC1",
+      "criterion_verbatim": "the file has the four tickers and every field, no proposed row without a source row, no outside model, and `table_row_present` equals a live read.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_four_ticker_evidence.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~96/FOUR_TICKER_SEED_EVIDENCE.json",
+      "output_evidence": "FOURTICKER ok=True problems=[]",
+      "denominator": "4 of 4 tickers (HPI, CUBE, GLPI, PCEF) checked; problems=[] across the 4 tickers, each with a live get_item read; rc=0",
+      "status": "PASS",
+      "expect": "FOURTICKER ok=True"
+    },
+    {
+      "criterion_id": "SC26-e106-AC2",
+      "criterion_verbatim": "the control that you changed no code.",
+      "method": "command",
+      "invocation": "bash -c 'git diff --name-only box/dell1...HEAD -- data infra lib | wc -l'",
+      "output_evidence": "0 -- the wc -l count of the name-only diff box/dell1...HEAD -- data infra lib: no file under data, infra or lib differs from box/dell1 (the pipeline printed 0 and nothing else)",
+      "denominator": "0 changed files of the diff box/dell1...HEAD under data, infra and lib",
+      "status": "PASS",
+      "expect": "0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the check's negative arm: the same evidence file with HPI given a proposed_row while its source_rows stays empty, run through the unchanged check",
+      "expected": "FOURTICKER ok=False with a problem naming HPI proposed_row without a source row",
+      "observed": "FOURTICKER ok=False problems=['HPI proposed_row without a source row'] (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the same evidence file, outputs compared",
+      "observed": "run 1 and run 2 both FOURTICKER ok=True problems=[] (rc=0); the live table_row_present reads agree",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any write to etf-classifications (put_item, batch_writer, update_item or delete_item)",
+      "reason": "BOUNDS: AWS is read-only for this cell. The issuer writes the signed pair and a CloudOps seat writes any row later."
+    },
+    {
+      "item": "edits to infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py and to infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "reason": "BOUNDS: not edited. The module holds no row for the four tickers, so no rule change is proposed here."
+    },
+    {
+      "item": "a proposed_row for HPI, CUBE, GLPI or PCEF",
+      "reason": "No source row exists in the seed script's only class source (surprise MDPF_SECCLASS-D1-W96-S1). Nothing is guessed and no outside model is used."
+    },
+    {
+      "item": "the Bloomberg GICS and Schwab master reads named in the order",
+      "reason": "The seed script reads neither; the only class source it reads is the hardcoded module, so there is no such read to perform (surprise MDPF_SECCLASS-D1-W96-S1)."
+    },
+    {
+      "item": "null-ticker lots rows whose asset_name or cusip might name one of the four securities",
+      "reason": "The order fixes the lots read to the ticker column; the 95,429 null-ticker rows were not matched to the four securities."
+    },
+    {
+      "item": "line-by-line reconciliation of the CVO's $63,967.82 against the issuer's $62,906.43",
+      "reason": "Not in this cell. My open-lots sum of the four tickers is 62,906.42 (per-group values rounded to cents), one cent from the issuer's figure."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W96-S1: the order's premise that seed-etf-classifications.py reads the Bloomberg GICS data and the Schwab master first does not hold. The script's only class source is the hardcoded dict module _shared/etf_classification.py, which holds no row for HPI, CUBE, GLPI or PCEF and no key for their CUSIPs; proposed_row is null for all four. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e106.four-ticker-seed-evidence.md",
+  "compiler_tools": [
+    {
+      "tool": "check_four_ticker_evidence.py (R26_CHECKS, read-only, run at its own path)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_four_ticker_evidence.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~96/FOUR_TICKER_SEED_EVIDENCE.json",
+      "result": "FOURTICKER ok=True problems=[] (rc=0); rerun identical"
+    },
+    {
+      "tool": "read-only evidence gatherer (.scratch/gather_evidence.py, uncommitted scaffold; boto3, pandas, pyarrow)",
+      "invocation": "python .scratch/gather_evidence.py 395989cf9ef029a4ba4cde84ed2d2d497b24dfe5 org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~96/FOUR_TICKER_SEED_EVIDENCE.json",
+      "result": "LOTS rows=1314844; CANON rows=114553; four get_item reads, table_row_present False x4; TOTAL open-lots market_value 62906.42; WROTE read_at=2026-10-16T03:43:19Z"
+    }
+  ]
+}
