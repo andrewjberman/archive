@@ -24,8 +24,8 @@ IR = "infra/aws/lambda/investor-reporting/"
 MAPS = "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/"
 POOL_SRC = "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/swap_pool.json"
 CHANGED = sorted(["SHA256SUMS", "reports/resident_bindings.json", "intake/portfolio.py", "intake/uploads.py", "ops/status.py",
-                  "reports/resident_installed.py", "ycharts/research/opal_producer.py"])
-ADDED = sorted(["ycharts/research/swap_pass.py", "ycharts/research/swap_pool.json", "ycharts/research/yahoo_history_days.py"])
+                  "reports/resident_installed.py", "ycharts/research/opal_producer.py", "ycharts/session/resident_session.py"])
+ADDED = sorted(["intake/yfinance_check.py", "ycharts/research/swap_pass.py", "ycharts/research/swap_pool.json", "ycharts/research/yahoo_history_days.py"])
 FROM_MAP = {"ycharts/research/overview_map.json": MAPS + "overview_map.json", "ycharts/research/comparison_map.json": MAPS + "comparison_map.json",
             "ycharts/research/multi_map.json": MAPS + "multi_map.json", "lib/trading_calendar.py": "lib/trading_calendar.py",
             "ycharts/research/etf_classifications_dynamodb.py": "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py",
@@ -85,8 +85,8 @@ def main(stage, record_path, want_tar=None):
         tarfile.open(tar_path).extractall(xnew)
         tarfile.open(BASE_TAR).extractall(xold)
         wnew, wold = walk(xnew), walk(xold)
-        if len(wnew) != rec["artifact"]["member_count"] or len(wnew) != 313:
-            fail("member count %d (record %d), want 313" % (len(wnew), rec["artifact"]["member_count"]))
+        if len(wnew) != rec["artifact"]["member_count"] or len(wnew) != 314:
+            fail("member count %d (record %d), want 314" % (len(wnew), rec["artifact"]["member_count"]))
         # 2. the delta is exactly the expected sets
         changed = sorted(n for n in wnew if n in wold and wnew[n] != wold[n])
         added = sorted(set(wnew) - set(wold))
