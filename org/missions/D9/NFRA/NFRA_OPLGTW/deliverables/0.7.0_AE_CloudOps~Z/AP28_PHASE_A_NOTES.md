@@ -50,3 +50,10 @@ The commit-time naming gate (ENFORCE) REFUSES 16 catalog literals. A probe branc
 - e12: 34, 2, 7 and 2 rows on the four `-live` tools, every first source key in `opal-data-bd` (catalog row), `as_of` the newest dated file, the assumed role `gateway-49f-blackdiamond-live-read-role` on all four (the allocation tool also reads the assets-copy profile table through the legacy 49f role, as designed); an unprofiled non-admin refused with 0 S3 client requests.
 - e10 is in-process (a real bearer needs a table write the order forbids); its limits are stated in the record.
 - Standing clauses (shared tree): `EC2_MANIFEST.json` deployed_commit `d14445961d` -> `bf9d23b518`, mcportal pin, 3 of 10 checksums moved (host-controlled), release_note; runbook 7.2 names the new release.
+
+## AC3 evidence (A5, COO msg 35189, ~18:50Z) -- captured, NOT committed
+- File: `W/CVO_AC3_BODIES_OG-ap-28.json` (29897 bytes, sha256 `0db2c9b8be28aeac23a6cea7c6dae9cf659f7617f0ab12545a827dd198e59fe6`, read 2026-10-16 ~18:5xZ from the live release `bf9d23b518`). It is untracked and excluded locally (`.git/info/exclude`), never `git add`ed: it holds client positions, so the CVO reads it on this box.
+- Per-capture rows: 49F BD live holdings 34, transactions 2, allocation 7, fees 2 (one account, shown `****<last4>`); an EMPTY news window 0 rows with `coverage_floor`; a chatter answer 10 rows with `trading_days_behind_t1`.
+- Masking was minimal: numbers, tickers, CUSIPs, security ids and dates are as served. Withheld: the account's vendor id (the ref is `****<last4>`), 7 `portfolio_name` fields (a registered person name), and any e-mail, phone or person-name-shaped value (0 found besides those). A search of the final file for the name tokens of the first capture finds none.
+- Two host runs, disclosed: the first capture carried the allocation's `portfolio_name` (a person name) because my masking rule did not name that key; it was local and uncommitted, and the second run, with the key and a name-shape rule added, overwrote it. Read-only both times; no retry loop beyond that fix.
+- Script: `ap28_ac3_capture.py` (committed; it contains no data).
