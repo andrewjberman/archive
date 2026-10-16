@@ -10,6 +10,8 @@
 <risk>SERVED</risk>
 <proof_genre>DEPLOY</proof_genre>
 <placeholders>NONE</placeholders>
+<round>150</round>
+<workstream>B-CW</workstream>
 <preflight>
 comp-blast: DECLARED-NOT-APPLICABLE -- the blast radius is two commits on one file (`src/pages/InvestorReporting/dashboard/seriesContract.ts`, +10 -1): two optional type members and the eight-name optional list the pin test reads; type-only, the built dist is byte-identical to PROD's (measured, 88 of 88 files); no API, IAM, Lambda or data change.
 comp-routes: DECLARED-NOT-APPLICABLE -- no route is added or changed; step 6 compares two builds. comp-cache: DECLARED-NOT-APPLICABLE. comp-schedule: DECLARED-NOT-APPLICABLE. comp-iam: DECLARED-NOT-APPLICABLE -- no AWS act.
