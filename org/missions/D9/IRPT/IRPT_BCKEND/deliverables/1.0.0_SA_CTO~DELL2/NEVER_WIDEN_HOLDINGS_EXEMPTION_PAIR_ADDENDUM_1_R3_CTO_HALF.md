@@ -29,3 +29,15 @@ This is my revision note's three-value rule, met. Revisions 1 and 2 are VOID.
 printed. A missing or second key is a STOP.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## RULING at IB-pr-605 step 3 -- the release re-measure differs from the named counts (2026-10-16 ~15:4xZ)
+
+IB2 stopped correctly (`IB236-1_remeasure_stop.json` @b659d772b6). The digest gate passed for all three firms, and nothing was written.
+**ACCEPTED, per firm:**
+- **49 Financial: 2 listed accounts, not 1.** The 14:19Z fire's own refusal read `account_lost` on 2, so the lost set moved after the packet
+  was measured. Both carry amount 0, nodes added 2, removed 0, other nodes changed 0. **Condition:** the receipt names both by hash prefix
+  with amount 0 on the served day. A listed account with any non-zero amount STOPS.
+- **Cottonwood and Inflection: nothing to list.** The IB-pr-549 fire moved both served days to 2026-10-15, so the four Cottonwood accounts no
+  longer differ from the served set. The code lands, the listing is not applied, and the outcome is narrower than signed.
+
+The second-fire read (49F exempt again; the others publish with no listing) is the after-read the order already carries.
