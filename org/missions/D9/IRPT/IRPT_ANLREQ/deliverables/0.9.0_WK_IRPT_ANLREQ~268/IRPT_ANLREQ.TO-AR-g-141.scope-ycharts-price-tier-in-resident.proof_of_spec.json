@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-141",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-141.scope-ycharts-price-tier-in-resident.md",
+    "group": "OTHER",
+    "vintage_commit": "cb45dec9ff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R46_G.md",
+    "vintage_commit": "cb45dec9ff",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-141.scope-ycharts-price-tier-in-resident.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~268",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~268/YCHARTS_PRICE_TIER_SCOPE.json",
+      "kind": "doc",
+      "commit_or_etag": "4ada2b6368",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only scope record (51 rows, 7 gaps) committed LOCAL on wk-IRPT_ANLREQ-268; no deploy, no AWS call, no push",
+      "artifact_covered_by": [
+        "AR141-g-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "4ada2b6368",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended, IRPT_ANLREQ-D2-W268-S1 and IRPT_ANLREQ-D2-W268-S2; surprise-row-gate OK on the committed file",
+      "artifact_covered_by": [
+        "AR141-g-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR141-g-AC1",
+      "criterion_verbatim": "AC1 checks the record is well formed and every citation is real: each site exists at that line and its line_text equals the file's line; every row has a role from the closed list, a claim word, what and use; the summary equals the rows; the five roles the cell needs are all present; gaps is a list. It does not grade whether the scope is complete.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g141_checks.py verify org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~268/YCHARTS_PRICE_TIER_SCOPE.json",
+      "output_evidence": "AR-G141-OK trace verified | rc=0 (timeout 120 bound) | 16 entry_points_read, 51 rows, summary.rows=51, 5 of 5 required roles present (READER_TEMPLATE, PRICE_FETCH, SESSION_OR_LEASE, WIRING, TIER_LIST), gaps is a list of 7",
+      "denominator": "51 rows checked (51 sites read at their line, 0 line_text mismatches, 0 role or claim failures); summary.rows = 51; 5 of 5 required roles",
+      "expect": "^AR-G141-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR141-g-AC2",
+      "criterion_verbatim": "AC2 checks (against the merge-base with box/dell2) that the branch changed nothing outside the worker's own folder, the order and the channel file, and the issuer's issuance files.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g141_checks.py scope box/dell2 org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~268 org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-141.scope-ycharts-price-tier-in-resident.md",
+      "output_evidence": "AR-G141-SCOPE-OK | rc=0 (timeout 120 bound) | changed paths vs merge-base with box/dell2: the record JSON and INVESTIGATION_v1.md, both inside the grant; outside the write set: none",
+      "denominator": "2 changed paths vs the merge-base, 2 inside the grant, 0 outside",
+      "expect": "^AR-G141-SCOPE-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arm: in a scratch copy of the record, row 0 line_text is changed to a wrong value; the verifier must refuse the copy.",
+      "expected": "AR-G141-FAIL naming row 0 line_text",
+      "observed": "AR-G141-FAIL row 0 line_text does not equal infra/aws/lambda/investor-reporting/reports/resident_installed.py:78 (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 verify run twice on the committed record; the two outputs compared byte for byte",
+      "observed": "identical: AR-G141-OK trace verified, rc=0 in both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W268-S1: the pinned overview map source (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json) is outside the sparse worktree; read only at HEAD via git show, no line cited",
+    "IRPT_ANLREQ-D2-W268-S2: the surprise-channel schema the order names (org/surprise_channel/schemas/investigation_item.schema.json) is absent from this worktree; the row was shaped from the channel's own rows"
+  ],
+  "declared_exclusions": [
+    {
+      "item": "any live YCharts, AWS or network read of the price route",
+      "reason": "the scope is a read-only record: the order's WORKER FACE forbids network, AWS calls and pushes"
+    },
+    {
+      "item": "the pinned overview map's ticker and security template",
+      "reason": "the file is absent from the sparse worktree (surprise S1); read only at HEAD, and no line of it is cited in the record"
+    },
+    {
+      "item": "completeness of the scope",
+      "reason": "the verifier checks citations and roles, not coverage; the issuer reads the content before cutting AR-g-142 (per the order's AC1 text)"
+    }
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g141_checks.py verify <record>",
+      "result": "AR-G141-OK trace verified (rc=0)"
+    },
+    {
+      "tool": "git",
+      "invocation": "git diff --name-only $(git merge-base HEAD box/dell2) HEAD",
+      "result": "2 paths, both inside the grant"
+    }
+  ]
+}
