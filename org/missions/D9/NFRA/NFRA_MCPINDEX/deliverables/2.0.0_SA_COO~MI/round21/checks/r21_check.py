@@ -24,6 +24,7 @@ CAT = os.environ.get("C21_CATALOG") or GW + "/app/refs/DATA_CATALOG.yaml"
 SECS = ("silver_datasets", "portal_datasets", "harvest_datasets")
 KEYS = ("depth_kind", "measured_at")
 SERIES_FIELDS = ("total.series_start", "as_of_first")
+READ = ("read_at",)   # a fresh measure moves only the read stamps; every value must still equal the live one
 
 
 def report(res):
@@ -51,7 +52,7 @@ def claims(h):
 def strip(h):
     if not isinstance(h, dict):
         return h
-    h = {k: v for k, v in h.items() if k not in KEYS}
+    h = {k: v for k, v in h.items() if k not in KEYS + READ}
     if h.get("claim") == "per-link":
         h["links"] = [strip(x) for x in h.get("links") or []]
     return h
@@ -70,9 +71,15 @@ def ac1():
         b2 = dict(b)
         if "history_depth" in b2:
             b2["history_depth"] = strip(b2["history_depth"])
+        if "freshness" in b2:
+            b2["freshness"] = strip(b2["freshness"])
+        a = dict(a)
+        for hk in ("history_depth", "freshness"):
+            if hk in a:
+                a[hk] = strip(a[hk])
         if a != b2:
             diff.append(a["tool"])
-    res.append(("with the two keys removed every tool_index entry equals the live one (%d differ: %s)" % (len(diff), ",".join(diff[:3])), not diff))
+    res.append(("with the two keys and the read stamps removed every tool_index entry equals the live one (%d differ: %s)" % (len(diff), ",".join(diff[:3])), not diff))
     n = bad = other = nser = 0
     for e in ct:
         for c in claims(e.get("history_depth")):
