@@ -1,6 +1,6 @@
-"""write_manifest.py: record MX-r-14 in EC2_MANIFEST.json services.opal-gateway, in ONE write.
+"""write_manifest.py: record MX-r-15 in EC2_MANIFEST.json services.opal-gateway, in ONE write.
 
-Asserts the precondition (deployed_commit still ee23dd004c, so a concurrent write is not overwritten), changes only the
+Asserts the precondition (deployed_commit still 3d5c9c8bf1, so a concurrent write is not overwritten), changes only the
 five fields below by textual replacement inside the opal-gateway block (the rest of the file stays byte-for-byte), and
 refuses if any other field of that block, or any other service, differs after the edit.
 """
@@ -10,25 +10,25 @@ import re
 import sys
 
 F = "infra/aws/ec2/EC2_MANIFEST.json"
-OLD = "06cfb6db6471972c7304cd3d7a5b93e6f521ad72"
-NEW = "c4c106aea1cc47d15f81397208226bd9b292c9dc"
+OLD = "3d5c9c8bf1dea0854c9b59d58b83fdf9dcb480e4"
+NEW = "0cb4a87bcb8df4adbb71d095f0818b0f50c562f1"
 NOTE = (
-    "NFRA_MCPINDEX MX-r-14 (round 17 chain tail; the round 17 catalog release): release commit " + NEW + " (deploy-only, "
-    "never merged, never pushed; TWO files vs " + OLD + ": app/refs/DATA_CATALOG.yaml blob b97c59e6ac and "
-    "app/integrations/opal_discover/integration.py blob 92ca8b57f7, both at trunk 7cfd0b09ec) deployed 2026-10-15T19:50:39Z "
-    "with DEPLOY_BASE_REF=" + OLD + " (the stale-base guard read the live ref at both checkpoints and it was equal both "
-    "times); SSM 663c8355-e719-4224-aaeb-117be2529521 Success. The catalog carries 44 derived nl_tags marked inferred and a "
-    "firm field on 24 firm-scoped table rows (304 rows, nl_tags on all 304); the discover module shows a firm-scoped row to "
-    "its own firm's principals only and gives a string never_sum_rules at most one caveat line. NO tool, grant, key or "
-    "integration id is added: tools 99 = 99 by name, .env keys 57 = 57, ENABLED_INTEGRATIONS 7 = 7. The MC Portal per-tool "
-    "link counts moved 33 tools / 112 links -> 39 / 119, as ruled (six etfs_* and mdpf_* tools gain a catalog link; a count "
-    "of catalog rows naming tools the gateway already serves). Read-back on the installed code: /health 200; host bytes 121 "
-    "of 121 equal to the cut (DIFFER 2 against " + OLD[:10] + " = exactly the two files); the host's real reader reads "
-    "39 / 119; r13.AC2 PASS (sum 99 of 99, definitions 99 of 99), r13.AC3 PASS, r14.AC4 PASS (host catalog md5 equal to the "
-    "tree's). NOT exercised on the host: a firm principal's view of the 24 rows (the issuer's f1 checks grade it on the "
-    "tree). Rollback: redeploy " + OLD + " through safe-ec2-deploy.sh with DEPLOY_BASE_REF=" + NEW + " from a clean tree "
-    "at " + OLD[:10] + ", never further; the rollback key opal-gateway-" + OLD[:10] + ".tar.gz is 734,698 B, ETag d8470277. "
-    "Ledger nfra-mcpindex-r14-catalog-release. ||| PREVIOUS: "
+    "NFRA_MCPINDEX MX-r-15 (round 18 release tail; the round 18 catalog release): release commit " + NEW + " (deploy-only, "
+    "never merged, never pushed; TWO files vs " + OLD + ": app/refs/DATA_CATALOG.yaml blob cf7616c08e and "
+    "infra/logic/registry/scopes.json blob dde73e4bd0, the bytes the host already served, so the host's changed set was the "
+    "catalog alone; both at trunk 739786b974) deployed 2026-10-16T10:38:53Z with DEPLOY_BASE_REF=" + OLD + " (the stale-base "
+    "guard read the live ref before the upload and it was equal); SSM af86ef3c-a8cd-4371-a977-88ab8e822388 Success. The catalog "
+    "carries a C-GROUP bucket on all 280 rows and 127 tools, vendor and firm on 136 rows, 0 inferred nl_tags, the 12 Schwab dim "
+    "rows, 61 read_tool names. NO tool, grant, key or integration id is added: tools 127 = 127 by name, .env keys 64 = 64, "
+    "ENABLED_INTEGRATIONS 7 = 7. The MC Portal per-tool link counts moved 39 tools / 119 links -> 65 / 192, as ruled. Read-back "
+    "on the installed code: /health 200; host bytes 141 of 141 equal to the cut (DIFFER 2 against " + OLD[:10] + " = the "
+    "catalog and scopes.json); the host's real reader reads 65 / 192; r13.AC2 PASS (sum 127 of 127, definitions 127 of 127), "
+    "r15.AC4 PASS (host catalog md5 9519ebce equal to the tree's). r13.AC3 FAIL at the apply: ONE catalog claim went stale, "
+    "mac.04.yield-curve-fred generated_at (catalog 2026-10-14, served 2026-10-15), and the old catalog fails the same way, so "
+    "it is not a deploy effect; the issuer re-measures. NOT exercised on the host: a firm principal's view of the 96 newly "
+    "visible rows (the issuer's matrix). Rollback: redeploy " + OLD + " through safe-ec2-deploy.sh with DEPLOY_BASE_REF=" + NEW + " "
+    "from a clean tree at " + OLD[:10] + ", never further; the rollback key opal-gateway-" + OLD[:10] + ".tar.gz is 893,303 B, "
+    "ETag d43206bf (it carries the live ref's own scopes.json d0f83d17db). Ledger nfra-mcpindex-r15-catalog-release. ||| PREVIOUS: "
 )
 NOTE.encode("ascii")
 
@@ -56,7 +56,7 @@ def sub(key, value, blk):
 old_note = svc["release_note"]
 blk2 = sub("deployed_commit", NEW, blk)
 blk2 = sub("previous_deployed_commit", OLD, blk2)
-blk2 = sub("deployed_at", "2026-10-15T19:50:39Z", blk2)
+blk2 = sub("deployed_at", "2026-10-16T10:38:53Z", blk2)
 blk2 = sub("deployed_by", "0.7.0_AE_CloudOps~MI", blk2)
 blk2 = sub("release_note", NOTE + old_note, blk2)
 new_text = text[:start] + blk2 + text[end:]
