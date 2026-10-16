@@ -32,9 +32,11 @@ pt = b.get("per_tool") or {}
 good = sum(1 for n in names if isinstance(pt.get(n), dict) and pt[n].get("opal_served") is True and pt[n].get("non_opal_refused") is True and pt[n].get("reads_on_refusal") == 0)
 c1, c2 = b.get("assume_role_real") is True, b.get("smartx_two_firm_arm") is True
 env = b.get("reader_env_keys_present")
+ca = b.get("client_admission") or {}
+adm = ca.get("unprofiled_nonadmin_refused") is True and ca.get("reads_on_refusal") == 0 and ca.get("master_admin_served") is True
 cls = isinstance(pt.get("mdpf_get_security_classification"), dict) and pt["mdpf_get_security_classification"].get("via_internal_reader") is True
-print("registry %s -> %s (+%d); per-tool %d of %d; reader env keys %s of 6; classification call via the internal reader %s; C1 real AssumeRole %s; C2 smartx two-firm arm %s" % (before, after, len(names), good, len(names), env if isinstance(env, int) else 0, "yes" if cls else "no", "yes" if c1 else "no", "yes" if c2 else "no"))
-print("OK" if names and grew and good == len(names) and env == 6 and cls and c1 and c2 else "NO")
+print("registry %s -> %s (+%d); per-tool %d of %d; reader env keys %s of 6; client admission refused-then-served %s; classification call via the internal reader %s; C1 real AssumeRole %s; C2 smartx two-firm arm %s" % (before, after, len(names), good, len(names), env if isinstance(env, int) else 0, "yes" if adm else "no", "yes" if cls else "no", "yes" if c1 else "no", "yes" if c2 else "no"))
+print("OK" if names and grew and good == len(names) and env == 6 and adm and cls and c1 and c2 else "NO")
 PYEOF
 )
 res=$(printf '%s' "$res" | tr -d '\r')

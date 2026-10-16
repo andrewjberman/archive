@@ -1,0 +1,18 @@
+Session log -- 0.9.0_WK_TCKT_MTADTA~2 on TCKT_MTADTA.TO-MD-i1 (cell MD-i-1), 2026-10-16
+Worktree /c/tmp/wk-tckt-mtadta-2, branch wk-TCKT_MTADTA-2. Nothing run live: no Microsoft, Graph, Management API or AWS call; no --apply; no terraform.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-TCKT_MTADTA-2; test -d org && test -d .tools -> TREE-OK.
+2. Premise check: infra/aws/terraform/trino/ absent at HEAD (git ls-files: 0 paths, worktree and main). Worktree is a sparse checkout
+   (core.sparseCheckout=true) that does not materialise org/surprise_channel/. Filed rows TCKT_MTADTA-D1-W2-S1 and TCKT_MTADTA-D1-W2-S2.
+3. Built: data/m365_metadata/scripts/app/register_app.py, start_subscriptions.py, RUNBOOK.md; data/m365_metadata/scripts/tests/test_app.py;
+   infra/aws/terraform/trino/identity.tf. Code commit 90ec0c42ec (safe-commit, author 0.9.0_WK_TCKT_MTADTA~2).
+4. Checks, each under timeout 120:
+   python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_i1.py app   -> I1-APP-OK, rc=0
+   python .../r1_check_i1.py subs  -> I1-SUBS-OK, rc=0
+   python .../r1_check_i1.py tf    -> I1-TF-OK, rc=0
+   python -m pytest data/m365_metadata/scripts/tests/test_app.py -q -> 10 passed, rc=0
+   python data/m365_metadata/scripts/app/register_app.py -> plan dict printed (one permission, graph_permissions [], secret_id m365-metadata/trino/api-credentials), DRY-RUN line, rc=0
+   python data/m365_metadata/scripts/app/start_subscriptions.py -> three planned URLs, DRY-RUN line, rc=0
+5. Mutant (scratch copy under .scratch/mut, the check run at its own worktree path): "Role" changed to "Scope" in register_app.py ->
+   I1-APP-REFUSED permissions [('Office 365 Management APIs', 'ActivityFeed.Read', 'Scope')], rc=1 (the check fires).
+6. Determinism: r1_check_i1.py app run twice -> I1-APP-OK rc=0 both times.
