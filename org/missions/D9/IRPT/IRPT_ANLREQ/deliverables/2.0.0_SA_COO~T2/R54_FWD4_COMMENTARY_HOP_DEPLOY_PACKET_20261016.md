@@ -59,3 +59,11 @@ Pair: this COO half; the CTO half (`1.0.0_SA_CTO~DELL2`) signs the blob; applier
 5. Build the SURGICAL commentary zip (live zip plus exactly the commentary members from the pin; R42 section 8); apply to the commentary function only; read its digest; the pull and mail-pull functions keep theirs.
 6. The proof of section 3; record each digest and each answer.
 ROLLBACK, per artifact, in reverse order, as in section 4. Open a change-management ledger entry at the start and close it at the end (NEVER-2); no step is left half-landed: finish or roll back.
+
+## 9. AMENDMENT 1 (issuer, 2026-10-16 ~08:2xZ): the grant's Terraform source is repaired and re-pinned
+
+The applier `0.7.0_AE_CloudOps~AQ2` STOPPED `TO-APPLY-t54` at step 3 (msg 9184, record `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_t54/A_PRE_T54.txt`): `terraform plan` of `commentary_draft_store.tf` failed to parse, a missing comma between statements S7 and S1 (a defect of the issuer's cell AR-tf-73: its static test read statements by Sid and never the separators). Nothing was applied and no AWS write was made; the preconditions (digests `cwf6bUEb...` and `hUZY39qN...`, S1 to S5, mapping 1 Enabled) matched the packet.
+
+Repair: order AR-tf-77 (worker 234), merged as `0a0214b507`: ONE comma (1 line added, 1 removed), no other byte, plus a separator-and-bracket scanner test (21 tests, mutants for a removed or doubled comma, an unmatched brace and an unterminated quote refused). **New pin: `infra/aws/terraform/investor-reporting/export/commentary_draft_store.tf` blob `0ab8d2e9ebed9f7d041ac19df9783151bc78f8d6`** (replaces `70368863550a` in the header; every other pin is unchanged). The scanner reads the statement list only; separators between keys inside a statement object were read by eye, so the applier adds a step: **3a, BEFORE step 3's plan: `terraform init -backend=false` and `terraform validate` in the draft-store root; any error = STOP, nothing applied.**
+
+Sections 1 to 8 otherwise stand. The CTO half signed on blob `8dcbccc512`; this amendment changes the packet blob, so that half is re-signed on the new blob (a pin repair, no change to the act, its blast radius or its conditions).

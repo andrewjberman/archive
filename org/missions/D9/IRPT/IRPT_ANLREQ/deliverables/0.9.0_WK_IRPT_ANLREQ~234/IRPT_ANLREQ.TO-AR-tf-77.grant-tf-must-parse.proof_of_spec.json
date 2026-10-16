@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tf-77",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R56_TX.md",
+    "vintage_commit": "130d95061c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-77.grant-tf-must-parse.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R56_TX.md",
+    "group": "OTHER",
+    "vintage_commit": "130d95061c"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~234",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/export/commentary_draft_store.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0a0214b507",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "No deploy: the repair is one comma in the role policy list (diff: 1 line changed). No terraform plan or apply and no AWS call was made (order bounds). The applier re-runs the plan after this commit lands.",
+      "introduces": [
+        "tables.jobs } } },"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py",
+      "kind": "test",
+      "commit_or_etag": "0a0214b507",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib and pytest only; run in place by the acceptance invocation (21 passed).",
+      "introduces": [
+        "def statement_separator_problems(",
+        "def test_hop_failure_comma_between_s7_and_s1_missing_refused()",
+        "def test_hop_failure_unterminated_string_refused()"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0a0214b507",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended as a binary append; the commit's surprise-row gate read them OK (2 new rows of 823 checked).",
+      "introduces": [
+        "IRPT_ANLREQ-D2-W234-S1",
+        "IRPT_ANLREQ-D2-W234-S2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR77-tf-AC1",
+      "criterion_verbatim": "the tests pass and at least 12 pass (the file had 11 before this cell, so the base reads FAIL): python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 12 --prefix=test_hop_failure_ infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py -> expect R46-TESTS-OK",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 12 --prefix=test_hop_failure_ infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py",
+      "output_evidence": "R46-TESTS-OK passed=21 (rc=0). Repeated twice: identical line and rc=0 both times. Base at 9971214f96 before the repair: R46-TESTS-FAIL only 11 test functions defined, need 12 (rc=1); the pytest run on the base showed 6 failed, 15 passed, the six being the separator and comma tests.",
+      "denominator": "21 passed of 21 test functions defined with the prefix test_hop_failure_ (need 12)",
+      "status": "PASS",
+      "expect": "R46-TESTS-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-memory mutants of the repaired text (test file, scanner): (a) the S7-S1 comma removed; (b) the S1-S2 comma removed; (c) a double comma after S1; (d) the S7-S1 comma removed with a comma inside a comment in its place; (e) the Statement list close bracket dropped; (f) an unterminated quote appended at end of file. Each must be refused. (g) a trailing comma after the last statement must be allowed.",
+      "expected": "a, b, c, d, e, f refused; g passes the separator scanner",
+      "observed": "(a) '0 comma(s) between the previous statement and S1ReadAndWriteRequestIndexAndRetentionRowsInServedFirmPartitions, need exactly one'; (b) '0 comma(s) between the previous statement and S2EncryptAndDecryptIndexRowsViaDynamoOnly, need exactly one'; (c) '2 comma(s) between the previous statement and S2EncryptAndDecryptIndexRowsViaDynamoOnly, need exactly one'; (d) '0 comma(s) between the previous statement and S1ReadAndWriteRequestIndexAndRetentionRowsInServedFirmPartitions, need exactly one'; (e) \"unmatched '}' at line 110\"; (f) '1 string(s) or interpolation(s) still open at end of file'; (g) [] (pass).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the acceptance invocation run twice from the worktree root after the repair",
+      "observed": "two runs, each 'R46-TESTS-OK passed=21' with rc=0; the real policy text passes the separator scanner and the balance check with no problems",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate and terraform plan of the repaired file",
+      "reason": "terraform is not installed in this worker environment and the order bounds it out (no terraform, no AWS). The applier's plan re-run is the parse proof; this worker proves the list structure with the stdlib scanner."
+    },
+    {
+      "item": "member-level separators inside each statement object (keys within an object)",
+      "reason": "not scanned: the scanner reads the top-level list only, per the order's scope (between adjacent statement objects, brackets, braces and quotes across the file). The S1 to S7 objects were read by eye to carry newline or comma separators; that is a reading, not a check."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W234-S1: the worktree's sparse checkout omits org/surprise_channel, so the row schema is absent on disk; read at HEAD with git show.",
+    "IRPT_ANLREQ-D2-W234-S2: the order's dry-run quote (R46-TESTS-FAIL 11 passed, need 12) differs from the live base output (only 11 test functions defined, need 12); both FAIL."
+  ],
+  "session_log": "Read the worker face; verified the worktree branch and TREE-OK; read the applier record A_PRE_T54 (step 3: missing item separator at line 88). Wrote the scanner tests first and confirmed the base red (6 failed, 15 passed; the separator defect reported as '0 comma(s) between the previous statement and S1ReadAndWrite...'). Added one comma after line 87 (diff: 1 line changed). Tests green (21). Commit 0a0214b507 (LOCAL on wk-IRPT_ANLREQ-234) carries the repair, tests and two surprise rows. This instance and the order status flip are the second commit. No terraform run, no AWS call, no push.",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py tests",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 12 --prefix=test_hop_failure_ infra/aws/terraform/investor-reporting/export/tests/test_hop_failure_grant.py",
+      "result": "R46-TESTS-OK passed=21 (rc=0)"
+    }
+  ]
+}

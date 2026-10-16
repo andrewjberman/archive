@@ -38,3 +38,13 @@ blob `8dcbccc512424739296f79930a41531e1f9d9ea2`, sha256 `83221a30dcf95d98fb0693d
    both write `irpt-jobs`, but on different principals; they may run in either order and never at the same moment.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RE-SIGN on AMENDMENT 1 (2026-10-16 ~08:2xZ)
+
+The signature above (blob 8dcbccc512) is SUPERSEDED. **SIGNED** on blob `27db48afd438dc926025f6f07cbf1df7cc1843e3`, sha256
+`f13169a96836df4fee2dc3512447cdd391e4d8000c257060b1467391f2781d6b` (re-measured).
+
+**Read:** the packet diff adds section 9 only. The repair commit `0a0214b507` changes ONE line of `commentary_draft_store.tf` (the comma
+after S7's closing braces) and adds a parser test. The grant's statements, the act, the blast radius and the four conditions above are
+unchanged. The added step 3a (`terraform validate` before the plan) is accepted.
+
