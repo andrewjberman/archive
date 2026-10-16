@@ -1,0 +1,66 @@
+# TCKT_VNEXT rounds 18 and 19 -- ONE ticket-service release: never-widen pair, COO half (DRAFT, NOT SIGNED)
+
+**Status:** DRAFT written 2026-10-16 by `2.0.0_SA_COO~V2` while the release is gated on the laptop's bucket apply (target 2026-10-20). **The COO half is not signed and no half is owed yet:** the bytes below are re-read, and the live baseline re-measured, at signing. This file replaces round 18's `R18_REL/R18_REL_PAIR.md` as the release's pair (that pair bound a `lambda_function.py` blob that round 19 changed, so it is void) and folds in `TO-R19-REL`.
+**Executor:** `0.7.0_AE_CloudOps~TV2`, ONE apply, under `TCKT_VNEXT.TO-R18-REL` with `TO-R19-REL` folded into it (the GO says which order carries which check). **Rows served:** FWD-10 and FWD-11 (PRD v0.6) and `IRPT_ANLREQ-D2-S134` items 1 to 3 (CTO ADDENDUM 7). **CTO half owed by:** `1.0.0_SA_CTO~DELL2`.
+
+## 1. What is released, bound to bytes (the ORDER files are deliberately not bound: the GO is written into them, so binding them voids a signature, as the migration pair showed)
+
+| file | blob (first 12) | where it came from |
+|---|---|---|
+| `infra/aws/lambda/ticket_center/lambda_function.py` | `501c46097813` | rounds 18 and 19: merges `fb3734e380`, `10e16510d9`, `3b49c49f99`, `3a61646b26`, seam fix `83f1ffeaba` |
+| `infra/aws/terraform/ticket-center/main.tf` | `748e680fd7f8` | R18 (`5cb98dbac4`, `43715c1c3b`) then R19-TR (`9855742266`, merge `7ae1fdc03e`) |
+| `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~43/ATTACH_ADDRESS.json` | `8cde2e8c07cf` | builder output, state tier (doctrine R21) |
+| `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R18_CHECKS/r18_rel_check.py` | `2268c668fcaf` | the R18 half of the read-back |
+| `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_rel_check.py` | `ae9e25b4d8a1` | the R19 half of the read-back |
+| `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_mig_check.py` | `af529513ba89` | the migration precondition (the corrected check; the earlier blob `24286f537272` is superseded) |
+
+A later commit that changes any of these voids this pair until it is re-read. The ticket service test folder on this tree reads `459 passed` except `test_cross_firm_global_register.py`, whose scan list `~T2` widens (it reads 4 of 7 red until then: a stale-row reading of register rows G4 to G11, not a service defect).
+
+**Live baseline (read-only, 2026-10-16):** `opal-ticket-api` `CodeSha256` `Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A=`, last modified `2026-10-14T15:10:00Z`; its environment carries `CLIENT_LINK_MAP`, `COMMENTARY_ALLOWED_FIRMS`, `CUTOFF_ET`, `IRPT_REQUESTS_TABLE`, `PACKAGE_ALLOWED_FIRMS`, `ROUTING_MATRIX`, `TABLE_NAME`, `TICKET_DEEP_LINK_BASE`, `TICKET_DL_MAP`, `USERS_TABLE` and none of the four new variables. The applier re-reads it at STEP 1.
+
+## 2. What the release makes possible, and what it stops (stated)
+
+**Round 18, widens:** (1) `POST /api/scoped/tickets/{ticketId}/meeting` for an INTERNAL human in the ticket's `routing.primary`; (2) a 300-second presigned PUT and GET of a trade form (PDF, XLSX, CSV, at most 10 MB) under a firm the caller is scoped to; (3) `meeting_request.primary` becomes `jeanette@opalinvest.com` ALONE; (4) the Lambda role gains the one statement `TicketAttachmentsTradeForm` (`s3:PutObject`, `s3:GetObject` on `portal/<firm>/state/ticket_attachments/trade-form/*` in the three firm buckets; no List, no Delete).
+**Round 19, narrows (each is a fix of a cross-firm admission):**
+1. The client notice's recipient is derived from `CLIENT_NOTICE_CONTACT_MAP[ticket firm]`, never from the request body. **The map ships EMPTY (`{}`), so the ack and pickup notices to requesters STOP until contacts are supplied.** Measured: today the live function has no switch for client notices (its environment holds no such variable, section 1) and sends `ack` when a ticket is created and `pickup` when it is claimed, to the requester address the request body names (the pre-release `_client_recipients` read `requester.email`, base `b84a2ca293`; in the bound blob the two call sites are `create_ticket`'s `notify_client_isolated(item, "ack")` at line 1369 and the claim path's `"pickup"` at line 1658). This is a client-visible change.
+2. `svc-analyst-intake` lists only `49financial`, `inflection`, `cottonwood` (`ANALYST_INTAKE_ALLOWED_FIRMS`); `ALL` is never a wildcard.
+3. A staff PROFILE row with no `allowedFirmIds` and no `scope_all_firms` marker is refused (`403 firm scope not configured`) instead of reaching every firm. The 19 active staff rows that depended on the omission carry the marker (`TO-R19-MIG`, MIG-OK).
+
+**Not newly possible:** any CLIENT login using round 18's routes; any object outside the three prefixes; any change to the analysis request, package, commentary, claim, complete or report routes.
+
+## 3. Preconditions, each read by the applier before the apply (a failed one is a STOP, reported first)
+
+1. **The laptop's bucket change is live:** `get-bucket-policy` and `get-bucket-cors` on each of the three buckets: the ticket role admitted for the two actions on the prefix only, the prefix snake_case (`portal/<firm>/state/ticket_attachments/trade-form/`; a statement built from the earlier kebab-case rows is a STOP), CORS present with the portal's DEV and PROD origins exactly (no `*`), `PUT` and `GET`.
+2. **The staff-row migration reads MIG-OK:** `r19_mig_check.py` at `af529513ba89` prints `MIG-OK` against the live table and `R19_MIG_RESULT.json` exists (the CTO's condition on the migration pair).
+3. **Client notices decided (section 7):** the CTO's answer to the open call below is in the record before the apply.
+4. No open ledger names `opal-ticket-api` in any live worktree (print the per-tree denominator); the live `CodeSha256` still reads the baseline or an explained successor.
+5. The package differs from the live one by exactly this tree's ticket source (member by member).
+6. `terraform` and `safe-apply` run on dell2 (the worker shells report the binary absent); else STOP, no hand edit, no `aws lambda update-function-code`.
+
+## 4. The expected plan, exactly
+
+Three `aws_apigatewayv2_route` additions (`POST /api/scoped/tickets/{ticketId}/meeting`, `POST /api/scoped/tickets/attachment-upload`, `GET /api/scoped/tickets/{ticketId}/attachment`); the Lambda's environment gains `TICKET_ATTACH_BUCKET_TEMPLATE`, `TICKET_ATTACH_KEY_TEMPLATE`, `ANALYST_INTAKE_ALLOWED_FIRMS`, `CLIENT_NOTICE_CONTACT_MAP` and `ROUTING_MATRIX` changes only in `meeting_request.primary`; one IAM statement addition; the function code update from the package. Any other resource or attribute: STOP before apply.
+
+## 5. Blast radius and rollback per key
+
+| key | touched | rollback |
+|---|---|---|
+| Lambda code | the package of section 1 | the applier saves the live package (S3 version or a copy named by its sha) BEFORE the upload; re-apply the pre-release tree with it |
+| Lambda environment | +4 variables, `ROUTING_MATRIX` value | re-apply the pre-release `main.tf` |
+| API `7k3ed8px20` routes | +3 | re-apply the pre-release tree |
+| role `opal-ticket-api-role` | +1 statement | re-apply the pre-release tree |
+| `opal-users-v2` markers | none touched by this release | **order matters: roll the release back FIRST, then the marker; a marker rollback while the release is live is refused** |
+
+The release creates no ticket, reads none in detail and writes nothing to a bucket. The run that exercises round 18 is `TO-R18-RUN` under its own pair.
+
+## 6. The act's evidence
+
+Both `R18_REL_RESULT.json` and `R19_REL_RESULT.json` (the same hashes in each) and both checks printing `REL-OK`; a change-management ledger entry opened at the start and closed after both read-backs.
+
+## 7. The one open decision (queued as a call; the combined release does not start without it)
+
+ADDENDUM 7 says a client-facing route among items 1 to 3 waits on Andrew's promote word. Item 1 stops existing client notices (section 2). **Recommendation:** supply the firm contacts in `CLIENT_NOTICE_CONTACT_MAP` (a row in `main.tf`, no code) in the SAME apply, so no notice is lost; that is an open input owned by `1.0.0_SA_CTO~DELL2`. If the contacts are not ready, the CTO rules whether the stop needs Andrew's word.
+
+## COO half -- NOT SIGNED (draft)
+
+To be signed after the laptop's apply reads back, with sections 1 and 3 re-measured at that vintage.

@@ -155,7 +155,7 @@ def main(stage, record_path, want_tar=None):
         # 8. no credential-shaped text in a changed or added member or a script
         scripts_dir = stage + "/scripts"
         texts = [(n, open(xnew + "/" + n, "rb").read().decode("utf-8", "replace")) for n in changed + added if n != "SHA256SUMS"]
-        names = ["pre_read_r34.sh", "install_r34.sh", "rollback_r34.sh", "resident_host_install_0485393f3a-r34.sh"]
+        names = ["pre_read_r34.sh", "install_r34.sh", "rollback_r34.sh", "resident_host_install_0485393f3a-r34c.sh"]
         for n in names:
             texts.append((n, open("%s/%s" % (scripts_dir, n), "rb").read().decode("ascii")))
         for n, t in texts:
@@ -173,7 +173,7 @@ def main(stage, record_path, want_tar=None):
         want_checks = sorted('check "%s" %s' % (n, wnew[n]) for n in changed + added)
         if sorted(checks) != want_checks:
             fail("the host script's member checks differ from the recomputed ones (%d vs %d)" % (len(checks), len(want_checks)))
-        if "NEW=0485393f3a-r34\nOLD=0485393f3a-r32\n" not in host or "NEW=0485393f3a-r34\nOLD=0485393f3a-r32\n" not in install:
+        if "NEW=0485393f3a-r34c\nOLD=0485393f3a-r32\n" not in host or "NEW=0485393f3a-r34c\nOLD=0485393f3a-r32\n" not in install:
             fail("NEW/OLD are not r34/r32 in the host or install script")
         if "WANT=" + sha_bytes(sc[names[3]]) not in install or "WANTSUM=" + wnew["SHA256SUMS"] not in install:
             fail("the install script's WANT or WANTSUM is not the host script's or the sums' sha256")
