@@ -1,0 +1,27 @@
+OG-en-10 session log -- 0.9.0_WK_NFRA_OPLGTW~124 -- worktree C:/tmp/wk-oplgtw-124 -- branch wk-NFRA_OPLGTW-124
+
+Premises (first act): git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-124; test -d org && test -d .tools -> TREE-OK.
+Base HEAD before the cell: 060e0ba6e2.
+
+Baseline (before edits): pytest tests/test_ratelimit.py tests/test_audit_bytes_principal.py -> 9 passed.
+Baseline: pytest tests/test_auth_hardening.py -> 5 passed.
+
+Edits: app/ratelimit.py (check count_out, enforce_identity_counted, record_identity_refusal, audit_failure_count),
+app/audit.py (log_ratelimit), app/server.py (GuardMiddleware refusal branch), tests/test_og_en10.py (new).
+Code commit: a41d358992 (LOCAL on wk-NFRA_OPLGTW-124).
+
+Own tests: pytest tests/test_og_en10.py -v -> 3 passed (test_ogen10_ac01, ac02, ac03).
+
+Mutant control (scratch plugin .scratch/og_en10_mutant_noaudit.py, record_identity_refusal replaced by a no-op):
+pytest tests/test_og_en10.py -p og_en10_mutant_noaudit -v -> 3 FAILED (ac01 assert 0 == 1; ac02 burst assertion; ac03 assert 0 == 1). FIRED.
+
+Related modules after the change: pytest tests/test_ratelimit.py tests/test_auth_hardening.py tests/test_audit_bytes_principal.py
+tests/test_audit_lake_key_stamp.py tests/test_audit_rivalfunds_args.py tests/test_schwab_audit.py tests/test_data_entitlement_guard.py
+-> 45 passed, 1 failed. The failure is tests/test_data_entitlement_guard.py, a route-set assertion (extra /hx/teams routes),
+not touched by this cell; the same assertion family is filed as NFRA_OPLGTW-Z-W121-S3.
+tests/test_deploy_base_guard.py -> 8 failed before and after (missing comp_constants_cli.py in the rig's closure check),
+already filed as NFRA_OPLGTW-Z-W82-S7; no reference to the changed modules in that file.
+
+Proof checks (after commit a41d358992):
+AC1: bash .../2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en10.py test_ogen10_ac01 test_ogen10_ac02 test_ogen10_ac03 -> pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS (run twice, identical).
+AC2: bash .../2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~124 '<allowed regex>' -> files touched 5; product files 4; outside the allowed set 0 (want 0); RESULT: PASS.
