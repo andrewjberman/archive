@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-s-4",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1fb9ac96ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "e96996c705",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-s-4.variant2-band-not-carried.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/lib/trendGrouping.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "af2ae947",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit af2ae947 on branch wk-MDPF_CANON-31-portal (LOCAL, nested repo at C:/dev/wk-MDPF_CANON-31/portal, base DEV 39dab87f3b). One file, 1 insertion, 1 deletion: the roll-forward carry condition in buildGlobalTrendRows gains !(key === MODELS_BAND_LABEL && !pre). Not pushed to DEV; the client-facing landing is an approval row cut from PROD per CLAUDE.md (Portal) and rides the next promote on Andrew's word."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs the pure module under bun on a small fixture: r11_cn_s_4.py pure, six arms (S0 to S5, S0 S3 S5 controls). The Variant 2 Models band is never carried forward on or after per_model_detail_begins; no row draws the band together with the model stack; the five primary lines, Custom Models, the three groups and the Variant 1 path keep their behaviour. Expect: ROUND 11 CN-S-4 PURE: 6 of 6 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py\" pure; echo \"exit=$?\"",
+      "output_evidence": "  PASS S0 control: before the boundary the band is drawn\n  PASS S1 the band is not carried after the boundary\n  PASS S2 no row draws the band and the stack\n  PASS S3 control: variant 1 draws no band\n  PASS S4 the primary lines still carry\n  PASS S5 control: input not mutated\nROUND 11 CN-S-4 PURE: 6 of 6 arms\nexit=0",
+      "denominator": "6 of 6 arms (S0-S5)",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-4 PURE: 6 of 6 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 runs the module on the committed copy of the real served Global object (ref/served_global_aggregate_20261015.json, as served 2026-10-15) and asserts that no row draws the band together with the model stack and that no drawn group is above the Total on the 9 carried dates from per_model_detail_begins. Expect: ROUND 11 CN-S-4 REAL: 5 of 5 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py\" real; echo \"exit=$?\"",
+      "output_evidence": "  PASS R0 control: one row per served date and the module exports exist  -- rows 498 of 498 served dates\n  PASS R1 control: variant 1 draws no Models band on any row  -- 0 of 498 rows draw a band\n  PASS R2 no row draws the Models band together with any model line  -- 0 of 498 rows draw the band with a model line; first []\n  PASS R3 no drawn group above the Total on the carried dates from the boundary (dollars, tolerance 0.01)  -- 0 of 9 carried dates from 2026-05-15 exceed the Total; first []\n  PASS R4 control: every row's total is the served Total (carried dates: the last measured Total, listed as carried)  -- measured 489 of 489 equal the served Total; carried 9 of 9 carry the last measured Total; literal 489 of 498 equal (served null on 9 dates)\nROUND 11 CN-S-4 REAL: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms (R0-R4); R2 0 of 498 rows; R3 0 of 9 carried dates",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-4 REAL: 5 of 5 arms"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded at the round close (never self-graded): the issuer renders the Global Trend for a non-internal session at a STATED portal commit on bun run dev:live --port 5174 and looks at the 9 carried dates. The worker does not render.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- judgment criterion (no invocation the order could reduce to an expectation). The issuer renders the Global Trend for a non-internal session at a stated portal commit and reads the 9 carried dates at the round close.",
+      "output_evidence": "No output: the worker did not render (bounds 4: no browser launch). The judgment is recorded here as not performed by this worker.",
+      "denominator": "N/A -- judgment criterion; 9 carried dates are read at the round close",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted defect = the unrepaired base module (the carry loop without the boundary condition), run through the same two checks before the edit. The arms that name the defect must fire.",
+      "expected": "pure: S1 and S2 FAIL; real: R2 and R3 FAIL (R2 names the band-with-stack rows, R3 the carried dates above the Total)",
+      "observed": "Base run before the edit: pure 4 of 6 arms exit=1 (S1 FAIL, S2 FAIL, S0 S3 S4 S5 PASS); real 3 of 5 arms exit=1 (R2 FAIL: 9 of 498 rows draw the band with a model line; R3 FAIL: 9 of 9 carried dates from the boundary exceed the Total; R0 R1 R4 PASS).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each check run twice from the worktree root after the edit, stdout captured to .scratch/det_<arm>_1.txt and .scratch/det_<arm>_2.txt and compared with cmp.",
+      "observed": "pure: IDENTICAL, 6 of 6 arms, rc=0 on both runs; real: IDENTICAL, 5 of 5 arms, rc=0 on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC3 render: the Global Trend for a non-internal session on bun run dev:live --port 5174",
+      "reason": "Bounded out by the order (bounds 4, no browser launch; AC3 is judgment graded at the round close)."
+    },
+    {
+      "item": "Repo-wide hygiene and the portal type check",
+      "reason": "Bounds 8: the issuer runs the type check and the real run at the drain. The edit keeps the module's strict interfaces; no tsc or bun install was run."
+    },
+    {
+      "item": "AWS contact, deploy, push, bun install, and the wiring arms W5-W10 and P1-P4 of the check",
+      "reason": "Bounds 4 and the order's proof scope. The wiring arms need the page edits (CN-s-5 and CN-s-3), not this cell."
+    },
+    {
+      "item": "ModelPortfolios.tsx and the portal test files",
+      "reason": "Bounds 1: ModelPortfolios.tsx belongs to CN-s-5 and CN-s-3; no test file was written for this cell."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~31/MDPF_CANON.TO-CN-s-4.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r11_cn_s_4.py pure (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py pure",
+      "result": "ROUND 11 CN-S-4 PURE: 6 of 6 arms, exit=0"
+    },
+    {
+      "tool": "r11_cn_s_4.py real (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py real",
+      "result": "ROUND 11 CN-S-4 REAL: 5 of 5 arms, exit=0"
+    },
+    {
+      "tool": "git -C portal commit (nested portal repo, one commit for this cell)",
+      "invocation": "git -C C:/dev/wk-MDPF_CANON-31/portal commit --author \"0.9.0_WK_MDPF_CANON~31 <0.9.0_WK_MDPF_CANON~31@opal.agent>\" -F .scratch/cn_s_4_portal_msg.txt",
+      "result": "rc=0: af2ae947 on wk-MDPF_CANON-31-portal, 1 file, 1 insertion(+), 1 deletion(-)"
+    }
+  ]
+}
