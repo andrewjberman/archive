@@ -56,6 +56,24 @@ echo "base ${base:0:10} is the live ref before this release: $([ "$base" = "$liv
 echo "files differing $(printf '%s\n' "$files" | grep -c .); outside the batch set $outside (want 0); terraform files differing $tf (want 0)"
 echo "tools added by trunk $want; registered in the release $have of $want; extra tools in the release $extra (want 0); SAFE $safe of $want; NATIVE $native of $want"
 echo "mcportal bundle: manifest mcportal_commit equals the GO's, descends from 421f8fbe84, only that manifest field changed $mcp_ok"
-echo "bundle staging: deploy script stages opal_naming $dep_on, partner_roster $dep_ro, scopes $dep_sc line(s) (want 1 or more each); sources exist at trunk $src_ok; data copies committed in the release $cm (want 0)"
-[ "$base" = "$live" ] && [ "$outside" = 0 ] && [ "$tf" = 0 ] && [ "${want:-0}" -ge 20 ] && [ "$have" = "$want" ] && [ "$extra" = 0 ] && [ "$safe" = "$want" ] && [ "$native" = "$want" ] && [ "$dep_on" -ge 1 ] && [ "$dep_ro" -ge 1 ] && [ "$dep_sc" -ge 1 ] && [ "$src_ok" = yes ] && [ "$cm" = 0 ] && [ "$mcp_ok" = yes ] && { echo "RESULT: PASS"; exit 0; }
+cens=$(python - "$trunk" "$(native "$REC")" <<'PYEOF4'
+import hashlib, json, os, subprocess, sys
+trunk, rec = sys.argv[1], sys.argv[2]
+cp = os.path.join(os.path.dirname(rec), "ap23_tar_census.json")
+def blob_md5(path):
+    b = subprocess.run(["git", "show", "%s:%s" % (trunk, path)], capture_output=True).stdout
+    return hashlib.md5(b).hexdigest() if b else None
+try:
+    m = json.load(open(cp, encoding="utf-8")).get("members", {})
+except Exception:
+    m = {}
+want = {"app/refs/partner_roster.json": blob_md5("data/mdpf/config/partner_roster.json"), "app/refs/scopes.json": blob_md5("infra/logic/registry/scopes.json")}
+cnt = {k: (m.get(k) or {}).get("count") for k in want}
+ok = all(want[k] and cnt[k] == 1 and (m.get(k) or {}).get("md5") == want[k] for k in want)
+print("%s %s %s" % (cnt["app/refs/partner_roster.json"] or 0, cnt["app/refs/scopes.json"] or 0, "yes" if ok else "no"))
+PYEOF4
+)
+read -r tr_ro tr_sc tr_ok <<<"$(printf '%s' "$cens" | tr -d '\r')"
+echo "bundle staging: deploy script stages opal_naming $dep_on, partner_roster $dep_ro, scopes $dep_sc line(s) (want 1 or more each); sources exist at trunk $src_ok; data copies committed in the release $cm (want 0); tar census: roster ${tr_ro:-0} and registry copy ${tr_sc:-0} member(s) in the archive, md5 equal to trunk's blobs ${tr_ok:-no}"
+[ "$base" = "$live" ] && [ "$outside" = 0 ] && [ "$tf" = 0 ] && [ "${want:-0}" -ge 20 ] && [ "$have" = "$want" ] && [ "$extra" = 0 ] && [ "$safe" = "$want" ] && [ "$native" = "$want" ] && [ "$dep_on" -ge 1 ] && [ "$dep_ro" -ge 1 ] && [ "$dep_sc" -ge 1 ] && [ "$src_ok" = yes ] && [ "$cm" = 0 ] && [ "${tr_ok:-no}" = yes ] && [ "$mcp_ok" = yes ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
