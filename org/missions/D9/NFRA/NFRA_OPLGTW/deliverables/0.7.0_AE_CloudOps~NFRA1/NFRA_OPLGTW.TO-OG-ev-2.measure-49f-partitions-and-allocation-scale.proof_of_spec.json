@@ -1,0 +1,74 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "29fcd5d688"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "29fcd5d688",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-2.measure-49f-partitions-and-allocation-scale.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/E1_PARTITION_MEASURE.json",
+   "kind": "doc",
+   "commit_or_etag": "5cda0a5f7e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed at 5cda0a5f7e. Counts, ratios and fixed words only, from a read-only pass over s3 silver/transactions, silver/fees (newest 6 dated partitions each) and the newest silver/allocations partition under the applier's own identity. Nothing was written to any bucket or table.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record is complete and self-consistent: both table classifications and the allocation scale follow their stated rules from the recorded numbers, and nothing but counts, ratios and the fixed words is in it.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ev2.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "transactions: partitions 1930, pairs checked 5, median overlap 0.0, classification increment (rule says increment)\nfees: partitions 2008, pairs checked 5, median overlap 0.0, classification increment (rule says increment)\nallocations: accounts sampled 7345; near_1 1570, near_100 0, other 5775; weight_scale unclear (rule says unclear)\ncontent hygiene: long digit runs 0 (want 0); e-mail addresses 0 (want 0)\nRESULT: PASS\nexit=0\n",
+   "denominator": "transactions 1930 dated partitions and fees 2008 (prefix listing paginated client-side, 2 and 3 pages); 5 consecutive pairs each; 7345 allocation accounts in the newest partition.",
+   "status": "PASS",
+   "status_reason": "All limbs met. Note: weight_scale is unclear by the order's rule; the check grades self-consistency, and the unclear verdict is reported with its distribution in row Z-S313.",
+   "expect": "(?s)transactions: partitions \\d+, pairs checked [3-9]\\d*, median overlap \\S+, classification (\\w+) \\(rule says \\1\\).*fees: partitions \\d+, pairs checked [3-9]\\d*, median overlap \\S+, classification (\\w+) \\(rule says \\2\\).*allocations: accounts sampled (?:[2-9]\\d|[1-9]\\d{2,}); near_1 \\d+, near_100 \\d+, other \\d+; weight_scale (\\w+) \\(rule says \\3\\).*content hygiene: long digit runs 0 \\(want 0\\); e-mail addresses 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Read-only measurement; the order names no mutant.",
+   "status": "N/A-SPEC-NAMES-NONE",
+   "expected": "The order names no mutant for a read-only measurement.",
+   "observed": "None run. The issuer recorded its own pre-cut controls (record absent FAIL; contradicting classification FAIL; a 12-digit run FAIL; too few accounts FAIL)."
+  },
+  "determinism": {
+   "status": "N/A-WITH-REASON",
+   "method": "One read pass by order (do not loop); the partitions are immutable dated files.",
+   "observed": "All five pairs of both tables read exactly 0.0, which is itself a stable pattern across 10 independent pairs."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Re-deriving the allocation weight scale by a different test.",
+   "reason": "The order fixes the near-1 / near-100 rule; the distribution that explains unclear is filed as row Z-S313 for the issuer."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S313: OBSERVATION -- per-account sums of account_allocation + cash_allocation are not 1 for 5775 of 7345 accounts; the rule reads unclear; no sum is near 100.",
+  "NFRA_OPLGTW-Z-S314: OBSERVATION -- transaction_id repeats within one daily partition (14359 rows, 2954 distinct in the newest transactions partition; 3081 rows, 2982 distinct in fees)."
+ ],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, second order (msg 35227). One read pass (listing counted client-side; key column and the three allocation columns only), plus one diagnostic read of the same newest allocations partition, counts only, to explain the unclear verdict. No client value printed or committed.",
+ "compiler_tools": [
+  {
+   "tool": "pyarrow/boto3",
+   "invocation": "list_objects_v2 paginated, pyarrow read of named columns",
+   "result": "PASS",
+   "note": "Key column named by name: transaction_id for both tables."
+  }
+ ]
+}
