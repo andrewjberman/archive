@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # _root.sh -- sourced by every NFRA_MCPORTAL round-5 check: cd to the PARENT worktree root, never a nested repo.
-_R="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
+# The root comes from THIS FILE's own location, never from the shell's cwd (a worker's shell resets to the primary checkout between calls).
+_S="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+_R="$(git -C "${_S:-.}" rev-parse --show-superproject-working-tree 2>/dev/null)"
+[ -n "$_R" ] || _R="$(git -C "${_S:-.}" rev-parse --show-toplevel 2>/dev/null)"
+[ -n "$_R" ] || _R="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
 [ -n "$_R" ] || _R="$(git rev-parse --show-toplevel 2>/dev/null)"
 [ -n "$_R" ] || { echo "ERROR: not inside a git worktree"; exit 9; }
 cd "$_R" || { echo "ERROR: cannot cd to $_R"; exit 9; }
