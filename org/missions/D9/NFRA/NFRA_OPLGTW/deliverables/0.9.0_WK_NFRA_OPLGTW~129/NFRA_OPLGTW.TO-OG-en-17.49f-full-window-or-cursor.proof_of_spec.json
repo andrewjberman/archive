@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-17",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "f1c5b4f8d7",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-17.49f-full-window-or-cursor.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f1c5b4f8d7"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~129",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "d0708b11bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-129 (not pushed). WINDOW_STRATEGY cursor: get_transactions and get_fees answer one page of PAGE_PARTITIONS 60 newest partitions per call, read with ThreadPoolExecutor(max_workers=16); next_cursor pages back via to_date; rows newest partition first. No tool signature changed; app/tools.py untouched. No deploy, no IAM.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en17.py",
+      "kind": "test",
+      "commit_or_etag": "d0708b11bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-129 (not pushed). The three named tests ac01 (61 and 395 partitions, cursor pages, every row once, at most 16 reads in flight), ac02 (the 396-day window, see declared_exclusions), ac03 (get_fees paging, fence, fail closed on an unreadable partition). Offline fake ctx.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en15.py",
+      "kind": "test",
+      "commit_or_etag": "d0708b11bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-129 (not pushed). Pinned truth updated to the new behaviour: AC1 expected rows newest partition first and read order compared order-free; AC3 cap note replaced by the cursor (next_cursor, page back with to_date=). No assertion weakened.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl2.py",
+      "kind": "test",
+      "commit_or_etag": "d0708b11bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-129 (not pushed). AC03 served order [101, 9] (newest partition first) and read order compared order-free; AC08 partition read order compared order-free. No assertion weakened.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a8b0a86276",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows by this worker, NFRA_OPLGTW-Z-W129-S1 (BLOCKING, INERT), NFRA_OPLGTW-Z-W129-S2, S3 and S4 (OBSERVATION, INERT), appended in fenced json blocks at a8b0a86276. Existing rows not edited.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~129/NFRA_OPLGTW.TO-OG-en-17.49f-full-window-or-cursor.session.log",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log of the measured runs (read of the measure, test runs, commits, AC1 and AC2).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en17.py test_ogen17_ac01 test_ogen17_ac02 test_ogen17_ac03; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "named tests passed 3 of 3 (test_ogen17_ac01, test_ogen17_ac02, test_ogen17_ac03)",
+      "status": "PASS",
+      "status_reason": "Run after commit a8b0a86276, from the worktree root. Window test files (en13, en15, cl2, en17) also 18 passed, three repeated runs."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~129 '^infra/aws/ec2/opal-gateway/(app/client_adapter_bd49f\\.py|tests/test_og_(en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~129: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~129: files touched 5; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "files touched by this serial's commits: 5 (4 product files and the investigation channel file); outside the allowed set 0 of 4 product files",
+      "status": "PASS",
+      "status_reason": "Run after commit a8b0a86276. Product files: client_adapter_bd49f.py, test_og_en17.py, test_og_en15.py, test_og_cl2.py. The investigation file and the deliverables folder are the standing record paths."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the order. The order's own named tests are the discriminating checks; the pre-change run shows them failing on the old cap-and-order behaviour.",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "Adapter edited, existing window files run before their pins were updated: 3 failed, 12 passed (en15 AC1 served order, en15 AC3 read order and cap note, cl2 AC03 served order).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "python -m pytest tests/test_og_en17.py tests/test_og_en15.py tests/test_og_en13.py tests/test_og_cl2.py -q -p no:cacheprovider, run three times after the commit.",
+      "observed": "18 passed on each of the three runs (1.02 s, 1.01 s, 1.01 s). The reads run concurrently; every order-sensitive pin is now order-free or keyed on partition.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The concurrent full-read branch (WINDOW_STRATEGY concurrent, MAX_WINDOW_PARTITIONS 400) is not implemented, and its assertions in the cell's test description are not written.",
+      "reason": "WINDOW_MEASURE.json body.request_budget.verdict is outside; the order says implement ONLY the branch the verdict names."
+    },
+    {
+      "item": "AC2 names a window of 450 partitions; the test runs over the 396 daily partitions of the largest admitted 13-month window.",
+      "reason": "A window of at most 13 months holds at most 396 daily partitions; 450 cannot be built. Filed BLOCKING as NFRA_OPLGTW-Z-W129-S1."
+    },
+    {
+      "item": "Rows run newest partition first, although the order says 'as today'.",
+      "reason": "At base f1c5b4f8d7 the rows ran oldest first; the named test requires newest first. Filed as NFRA_OPLGTW-Z-W129-S2 for the CTO to confirm."
+    },
+    {
+      "item": "next_cursor is null when no partition of the window lies before the page, not only at the window start.",
+      "reason": "The literal rule would flag a fully read window as partial and send the caller to an empty page. Filed as NFRA_OPLGTW-Z-W129-S3."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W129-S1: OG-en-17 AC2 names a window of 450 partitions; a 13-month window holds at most 396 daily partitions, so the test runs over 396. BLOCKING, INERT.",
+    "NFRA_OPLGTW-Z-W129-S2: 'newest first, as today' is false at the base, where rows ran oldest first; the served order now runs newest first and the pinned tests were updated. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W129-S3: the literal cursor rule flags a fully read window as partial; next_cursor is set only while a partition of the window lies before the page. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W129-S4: off-task, tests/test_og_ch1.py fails 2 of 6 when run in this worktree (registry ValueError, roster file absent); no file of this write set involved. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~129/NFRA_OPLGTW.TO-OG-en-17.49f-full-window-or-cursor.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (inside safe-commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~129 <0.9.0_WK_NFRA_OPLGTW~129@opal.agent>\" -F .scratch/msg_og_en17_code.txt -- <four product files>",
+      "result": "All checks passed!; OK: pre-commit gate clean for 4 of 4 file(s); [msg-verify] committed d0708b11bf; rc 0"
+    },
+    {
+      "tool": "safe-commit (investigation rows)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~129 <0.9.0_WK_NFRA_OPLGTW~129@opal.agent>\" -F .scratch/msg_og_en17_rows.txt -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[msg-verify] committed a8b0a86276; 1 file changed, 101 insertions(+); rc 0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_en17.py tests/test_og_en15.py tests/test_og_en13.py tests/test_og_cl2.py -q -p no:cacheprovider",
+      "result": "18 passed in 1.02s; rc 0"
+    }
+  ]
+}
