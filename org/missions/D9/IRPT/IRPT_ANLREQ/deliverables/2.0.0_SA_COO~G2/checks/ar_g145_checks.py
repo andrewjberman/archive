@@ -85,8 +85,8 @@ def main(stage, record_path, want_tar=None):
         tarfile.open(tar_path).extractall(xnew)
         tarfile.open(BASE_TAR).extractall(xold)
         wnew, wold = walk(xnew), walk(xold)
-        if len(wnew) != rec["artifact"]["member_count"] or len(wnew) != 314:
-            fail("member count %d (record %d), want 314" % (len(wnew), rec["artifact"]["member_count"]))
+        if len(wnew) != rec["artifact"]["member_count"] or len(wnew) != 315:
+            fail("member count %d (record %d), want 315" % (len(wnew), rec["artifact"]["member_count"]))
         # 2. the delta is exactly the expected sets
         changed = sorted(n for n in wnew if n in wold and wnew[n] != wold[n])
         added = sorted(set(wnew) - set(wold))
