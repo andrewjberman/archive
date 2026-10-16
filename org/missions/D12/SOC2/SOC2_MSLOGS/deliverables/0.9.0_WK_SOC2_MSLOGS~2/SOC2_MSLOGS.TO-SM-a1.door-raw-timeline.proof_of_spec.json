@@ -18,17 +18,17 @@
     {
       "path_or_key": "infra/aws/lambda/globgrph-trino-access/handler.py",
       "kind": "script",
-      "commit_or_etag": "e70208bfe7",
+      "commit_or_etag": "b4f2f10bbb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-2, LOCAL only. Not deployed: no package build, no upload and no Lambda update; WORLD by the gate's path floor, nothing applied or called live (order BOUNDS).",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-2, LOCAL only: door v3 at e70208bfe7, write-once head fix at b4f2f10bbb. Not deployed: no package build, no upload and no Lambda update; WORLD by the gate's path floor, nothing applied or called live (order BOUNDS).",
       "artifact_covered_by": ["SM1-a1-AC1", "SM1-a1-AC2"]
     },
     {
       "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
       "kind": "test",
-      "commit_or_etag": "e70208bfe7",
+      "commit_or_etag": "b4f2f10bbb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-2, LOCAL only. A test file is not deployed; 173 tests pass in the worktree."
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-2, LOCAL only. A test file is not deployed; 187 tests pass in the worktree at b4f2f10bbb."
     },
     {
       "path_or_key": "infra/aws/terraform/trino/access.tf",
@@ -41,9 +41,9 @@
     {
       "path_or_key": "org/missions/D12/SOC2/SOC2_MSLOGS/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "e70208bfe7",
+      "commit_or_etag": "b4f2f10bbb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Surprise rows S1 and S2 at e70208bfe7; row S3 appended in the instance commit that carries this proof. A document is not deployed."
+      "deploy_evidence": "Surprise rows S1 and S2 at e70208bfe7, row S3 at da5fe81961, row S4 at b4f2f10bbb. A document is not deployed."
     }
   ],
   "acceptance": [
@@ -63,7 +63,7 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_a1.py bronze",
       "output_evidence": "A1-BRONZE-OK\nrc=0",
-      "denominator": "1 verdict line of 1 (A1-BRONZE-OK); the check's bad-list empty across the write-once, frozen-table, derive and key-grammar arms",
+      "denominator": "1 verdict line of 1 (A1-BRONZE-OK); the check's bad-list empty across the write-once (found, and the 404, NoSuchKey and NotFound write arms), the head-failure arms (500, 403, SlowDown fail closed), the frozen-table, derive and key-grammar arms",
       "status": "PASS",
       "expect": "A1-BRONZE-OK"
     },
@@ -80,9 +80,9 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The write-once check disabled in a copy of the door (if False in place of the head check); the bronze criterion re-run against that copy.",
-      "expected": "A1-BRONZE-REFUSED: the second write must be refused as already stored, and the stored bytes must not change.",
-      "observed": "A1-BRONZE-REFUSED a second write to an existing bronze key must be refused with already_stored=true: {'ok': True, 'key': ...}; the stored bytes changed on a second write (rc=1)",
+      "description": "The head result forced to absent in a copy of the door (state = absent in place of the head call); the bronze criterion re-run against that copy.",
+      "expected": "A1-BRONZE-REFUSED: the second write must be refused as already stored, a head failure must not become a write, and the stored bytes must not change.",
+      "observed": "A1-BRONZE-REFUSED: a second write accepted and the stored bytes changed; head_object failures 500, 403 and SlowDown each let a bronze put through (rc=1)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -98,32 +98,29 @@
     },
     {
       "item": "collector.tf, silver_builder.py, the collector package and the registry",
-      "reason": "Other cells' files (the order's BOUNDS): never created or edited here. The timeline reader's column list is not met by silver_builder.py at HEAD; filed as SOC2_MSLOGS-D1-W2-S1."
+      "reason": "Other cells' files (the order's BOUNDS): never created or edited here. Row S1 (the silver columns) is resolved by the merged silver builder, per the issuer."
     },
     {
       "item": "A real parquet read by the default timeline reader",
-      "reason": "The unit tests inject pyarrow through a stub module; no real parquet is read in this worktree. The column mismatch is filed as SOC2_MSLOGS-D1-W2-S1."
+      "reason": "The unit tests inject pyarrow through a stub module; no real parquet is read in this worktree."
     },
     {
-      "item": "Write-once under a head failure that is not a missing object",
-      "reason": "The spec's literal rule reads any head exception as missing and the code follows it; filed as SOC2_MSLOGS-D1-W2-S2 for the CVO's disposition."
-    },
-    {
-      "item": "Naming-gate verdict on the two hand-typed bronze audit_records prefixes",
-      "reason": "The gate ran in its WARN window (not blocking) and its live read failed; filed as SOC2_MSLOGS-D1-W2-S3."
+      "item": "The naming gate's WARN verdict on the two hand-typed bronze audit_records prefixes",
+      "reason": "Row S3, accepted by the issuer as a WARN; not changed here."
     }
   ],
   "surprises": [
-    "SOC2_MSLOGS-D1-W2-S1: the timeline's default reader reads columns (record_id, feed, client_ip, item_name, user_id) that silver_builder.py at HEAD does not write; row in surprise-channel/investigations/INVESTIGATION_v1.md.",
-    "SOC2_MSLOGS-D1-W2-S2: the write-once rule reads ANY head_object exception as a missing object, so a non-404 head failure lets a put overwrite; row in surprise-channel/investigations/INVESTIGATION_v1.md.",
-    "SOC2_MSLOGS-D1-W2-S3: the naming gate refuses the two hand-typed bronze audit_records S3 prefixes at handler.py:55 and :77 (WARN window, not blocking); row in surprise-channel/investigations/INVESTIGATION_v1.md."
+    "SOC2_MSLOGS-D1-W2-S1: the timeline's default reader reads columns that silver_builder.py at HEAD did not write; resolved by the merged silver builder per the issuer; row in surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "SOC2_MSLOGS-D1-W2-S2: the write-once rule read ANY head_object exception as missing; fixed at b4f2f10bbb per the issuer's amendment (only not-found codes write; other head failures answer error and write nothing); accepted by the issuer; row in surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "SOC2_MSLOGS-D1-W2-S3: the naming gate refuses the two hand-typed bronze audit_records S3 prefixes at handler.py:55 and :77 (WARN window, not blocking); accepted by the issuer; row in surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "SOC2_MSLOGS-D1-W2-S4: the owned-paths lane gate refused every commit of the door's paths once the order was complete at HEAD; re-opened by the issuer at f3da4710d8, the amendment committed at b4f2f10bbb; disposition left to the issuer; row in surprise-channel/investigations/INVESTIGATION_v1.md."
   ],
   "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~2/SOC2_MSLOGS.TO-SM-a1.session.log",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_handler.py -q -p no:cacheprovider",
-      "result": "173 passed, rc=0"
+      "result": "187 passed, rc=0"
     },
     {
       "tool": "ruff",
@@ -138,7 +135,7 @@
     {
       "tool": "safe-commit gates",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_SOC2_MSLOGS~2 <0.9.0_WK_SOC2_MSLOGS~2@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "commit-gate OK; surprise-row-gate OK (2 new rows); naming-gate WARN 2 graded, not blocking; one-writer WARN on the unsuffixed investigation file"
+      "result": "commit-gate OK; surprise-row-gate OK (1 new row at b4f2f10bbb); naming-gate WARN on the S3 prefixes (not blocking); one-writer WARN on the unsuffixed investigation file"
     }
   ]
 }
