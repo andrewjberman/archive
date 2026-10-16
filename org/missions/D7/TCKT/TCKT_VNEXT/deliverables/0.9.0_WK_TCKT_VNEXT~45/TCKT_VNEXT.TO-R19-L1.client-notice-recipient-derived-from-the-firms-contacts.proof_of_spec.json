@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-R19-L1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R19-L1.client-notice-recipient-derived-from-the-firms-contacts.md",
+    "group": "OTHER",
+    "vintage_commit": "b84a2ca293"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R19.md",
+    "vintage_commit": "b84a2ca293",
+    "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R19-L1.client-notice-recipient-derived-from-the-firms-contacts.md"
+  },
+  "assignee": "0.9.0_WK_TCKT_VNEXT~45",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one appended row TCKT_VNEXT-D2-W45-S1 (class BLOCKING): the order's named source paths are absent from this worktree (sparse cone excludes infra/aws); nothing else was produced",
+      "artifact_covered_by": [
+        "R19L1-AC1",
+        "R19L1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R19L1-AC1",
+      "criterion_verbatim": "the new test file passes with every case of step 4 named in a test, no failures or errors (python -m pytest C:/dev/wk-tckt-vnext-45/infra/aws/lambda/ticket_center/tests/test_notice_recipient_firm.py -q -p no:cacheprovider --color=no; expect ^[0-9]+ passed)",
+      "method": "command",
+      "invocation": "timeout 120 python -m pytest C:/dev/wk-tckt-vnext-45/infra/aws/lambda/ticket_center/tests/test_notice_recipient_firm.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "ERROR: file or directory not found: C:/dev/wk-tckt-vnext-45/infra/aws/lambda/ticket_center/tests/test_notice_recipient_firm.py / no tests ran in 0.00s (rc=4)",
+      "denominator": "0 of 0 tests collected: the named test file does not exist in this worktree and the cell's step 4 has no test written",
+      "status": "FAIL",
+      "status_reason": "the worktree is a sparse checkout that excludes infra/aws (surprise row TCKT_VNEXT-D2-W45-S1); the test file cannot be created in a tree that lacks lambda_function.py and tests/, and the worker did not reconstruct the tree",
+      "expect": "^[0-9]+ passed"
+    },
+    {
+      "criterion_id": "R19L1-AC2",
+      "criterion_verbatim": "you write mutant_check.py: it copies lambda_function.py to a scratch folder OUTSIDE the product tree with the contact-list restriction removed, runs the new test file against the copy with pytest, and prints MUTANT-FIRES only when that run FAILS (else MUTANT-SURVIVES, exit 1)",
+      "method": "command",
+      "invocation": "timeout 120 python C:/dev/wk-tckt-vnext-45/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~45/mutant_check.py",
+      "output_evidence": "C:\\Users\\Test\\AppData\\Local\\Programs\\Python\\Python314\\python.exe: can't open file 'C:\\dev\\wk-tckt-vnext-45\\org\\missions\\D7\\TCKT\\TCKT_VNEXT\\deliverables\\0.9.0_WK_TCKT_VNEXT~45\\mutant_check.py': [Errno 2] No such file or directory (rc=2)",
+      "denominator": "0 of 1 mutant runs: the checker file was not written, because the source it mutates (lambda_function.py) is absent from this worktree and a checker run against nothing would prove nothing",
+      "status": "FAIL",
+      "status_reason": "no mutant fires: the checker and the new test file do not exist; blocked by surprise row TCKT_VNEXT-D2-W45-S1",
+      "expect": "MUTANT-FIRES"
+    },
+    {
+      "criterion_id": "R19L1-AC3J",
+      "criterion_verbatim": "judgment (graded at L9, never by the worker): a caller can no longer choose where a firm's notice goes: the recipient is a configured contact of the ticket's own firm, a body address outside the list is ignored and logged by digest only, an absent or malformed config sends nothing, and the single-recipient guard stands.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment row, graded at L9 by 3.0.0_SA_CVO (never self-graded)",
+      "output_evidence": "no candidate code exists in this worktree; the HEAD source read for the premise (git show HEAD:infra/aws/lambda/ticket_center/lambda_function.py) shows the current _client_recipients at line 1182 and the body requester_email at line 1373, which the cell would change",
+      "denominator": "N/A -- one judgment criterion",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "the oracle is 3.0.0_SA_CVO at L9 reading the built change; no change was built, so the oracle has nothing to grade",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the AC2 mutant: the stored-requester restriction removed from a scratch copy of lambda_function.py, run against the new test file",
+      "expected": "MUTANT-FIRES: the new test file fails on the copy",
+      "observed": "NOT RUN: lambda_function.py and the test file are absent from this worktree",
+      "status": "NOT-RUN"
+    },
+    "determinism": {
+      "method": "the AC1 file-path invocation and the AC1 folder invocation, one run each, on the same tree",
+      "observed": "file-path run rc=4 'file or directory not found'; folder run rc=4 'file or directory not found: .../tests/'",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the cell's build: the edit to lambda_function.py (_client_recipients, its config reader), the new test file and the mutant checker",
+      "reason": "the source and test folder named by <paths> are absent from this sparse worktree (surprise TCKT_VNEXT-D2-W45-S1); the worker did not reconstruct or copy the tree"
+    },
+    {
+      "item": "the step-5 fixture edits in tests/test_client_notify.py and tests/test_client_mail_digest.py",
+      "reason": "same cause: the test folder is not materialised, so no fixture was read or changed"
+    },
+    {
+      "item": "the drain run of the whole tests/ folder and the R19_L1_RECORD.json record",
+      "reason": "same cause; the folder run was attempted and returned rc=4"
+    },
+    {
+      "item": "any live AWS, network or mail call, deploy, apply or push",
+      "reason": "none was made; the order forbids them and none was needed to record the block"
+    }
+  ],
+  "surprises": [
+    "TCKT_VNEXT-D2-W45-S1: the worktree is a sparse checkout that excludes infra/aws, so the order's named source and test paths exist at HEAD b84a2ca293 but not on disk; the cell cannot be built here"
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~45/TCKT_VNEXT.TO-R19-L1.client-notice-recipient-derived-from-the-firms-contacts.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "git",
+      "invocation": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools (in C:/dev/wk-tckt-vnext-45)",
+      "result": "box branch wk-TCKT_VNEXT-45; TREE-OK for org and .tools only"
+    },
+    {
+      "tool": "git",
+      "invocation": "git config --get core.sparseCheckout; git sparse-checkout list; git ls-files -v infra/aws | grep -c ^S",
+      "result": "true; cone = .tools, infra/logic/registry, lib, org/devices, org/missions/D7/TCKT/TCKT_VNEXT, org/modules/graph, org/ref, org/standards; 9277 of 9277 infra/aws entries skip-worktree"
+    },
+    {
+      "tool": "git",
+      "invocation": "git cat-file -e HEAD:infra/aws/lambda/ticket_center/lambda_function.py; git show HEAD:infra/aws/lambda/ticket_center/lambda_function.py (read-only, piped to grep)",
+      "result": "rc=0; _client_recipients at 1182, _recipient_digest 1195, notify_client 1204, notify_client_isolated 1225, body requester_email 1373"
+    },
+    {
+      "tool": "python",
+      "invocation": "timeout 120 python -m pytest C:/dev/wk-tckt-vnext-45/infra/aws/lambda/ticket_center/tests/test_notice_recipient_firm.py -q -p no:cacheprovider --color=no",
+      "result": "rc=4 ERROR: file or directory not found; no tests ran"
+    },
+    {
+      "tool": "python",
+      "invocation": "timeout 120 python -m pytest C:/dev/wk-tckt-vnext-45/infra/aws/lambda/ticket_center/tests/ -q -p no:cacheprovider --color=no",
+      "result": "rc=4 ERROR: file or directory not found; no tests ran"
+    },
+    {
+      "tool": "python",
+      "invocation": "timeout 120 python C:/dev/wk-tckt-vnext-45/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~45/mutant_check.py",
+      "result": "rc=2 can't open file: [Errno 2] No such file or directory"
+    }
+  ]
+}
