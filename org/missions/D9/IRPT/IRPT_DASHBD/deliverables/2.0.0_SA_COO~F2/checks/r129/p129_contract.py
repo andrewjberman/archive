@@ -2,9 +2,11 @@
 
   DB-f-1501 (~1501) replaces the DRAFT 0.1.0 (CTO round-127 analysis, msg 9162): every target's source column per firm from the three ground
                     reads that read their sources (round 128), `fee` as a stated sum with a `fee_basis` naming its columns, the ratified
-                    words for 49 Financial and Inflection (Cottonwood's re-cut words are not ratified and are not in the contract), the
-                    Inflection id with no live rows marked not_observed, and a rule-24 record with a computed census for each value set
-                    the contract adds (coverage; the flow-class rule).        DBF129-1-AC1 (form), AC2 (bindings to the records and the data file)
+                    words of ALL THREE firms (Cottonwood's re-cut words were ratified in the round-128 analysis, msg 9175, in their own
+                    section; Transfer Out's flow class is EXTERNAL_OUT by that ruling), the Inflection id with no live rows marked
+                    not_observed, a rule-24 record with a computed census for each value set the contract adds (coverage; the flow-class
+                    rule), and the worker's OWN non-null `reads` (partitions, objects, rows and columns per firm from tools/source_reads.py;
+                    the issuer's census is corroboration, never the record).    DBF129-1-AC1 (form), AC2 (bindings, reads, the data file)
 
 The checker recomputes: the schema hash; every source from the ground-read records; the fee basis; the mapping words from the ratified
 proposal; each 49 Financial code's flow class from the contract's own rule over the CRO table; the Inflection not_observed set from the
@@ -22,6 +24,9 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 CONTRACT = "org/standards/IRPT_DASHBD_ACCOUNT_TRANSACTION_CONTRACT.json"
 DATA = "data/assets/scripts/gold/irpt_reporting/transaction_words.json"
 PROPOSAL = D + "0.9.0_WK_IRPT_DASHBD~1001/FWD5_WORDS_PROPOSAL_R124.json"
+COTTONWOOD = D + "0.9.0_WK_IRPT_DASHBD~1402/FWD5_WORDS_COTTONWOOD_R128.json"
+READS = D + "0.9.0_WK_IRPT_DASHBD~1501/RD_READS_R129.json"
+TRANSFER_OUT_PAIR = "Transfer Out | Transfer Out"
 CENSUS49 = D + "2.0.0_SA_COO~F2/R124_LIVE_SILVER_CENSUS_49F.json"
 CENSUS3 = D + "2.0.0_SA_COO~F2/R128_LIVE_SOURCE_CENSUS_3FIRMS.json"
 CRO = "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json"
@@ -38,8 +43,9 @@ BRIEF14 = COLUMNS[3:]
 TYPES = ("string", "date32[day]", "double")
 COVERAGE = ("MEASURED", "CODE_NOT_IN_MAPPING", "UNMAPPED_BY_TABLE")
 KEYS = ("contract_version", "supersedes", "project", "prd", "authored_by", "authored_under", "table", "grain", "partition", "producer",
-        "columns", "sources", "fee_basis", "enums", "type_action", "flow_class_rule", "source_mapping", "unmapped_display",
-        "new_code_reason", "firms_served", "firms_pending", "rule24_records", "schema_hash", "schema_hash_basis", "served", "served_note")
+        "columns", "sources", "fee_basis", "enums", "type_action", "flow_class_rule", "source_mapping", "cottonwood_mapping",
+        "unmapped_display", "new_code_reason", "firms_served", "firms_pending", "rule24_records", "reads", "schema_hash",
+        "schema_hash_basis", "served", "served_note")
 POSTULATES = ("mece", "same_grain", "intent_coherence", "state_coherence")
 EXPECTED_RULE = {
     ("CONDITIONAL-BY-COUNTERPARTY", "acct-transfer"): "UNRESOLVED", ("CONDITIONAL-BY-COUNTERPARTY", "journals"): "UNRESOLVED",
@@ -135,12 +141,12 @@ def form_problems(con, rec49):
         pr.append("enums.flow_class / enums.coverage are not the seven classes / three coverage values in order")
     if con["unmapped_display"] != "Unclassified" or con["new_code_reason"] != "CODE_NOT_IN_MAPPING":
         pr.append("unmapped_display Unclassified and new_code_reason CODE_NOT_IN_MAPPING")
-    if con["firms_served"] != [FIRM49]:
-        pr.append("firms_served must be [49financial]")
-    fp = con["firms_pending"]
-    if not (isinstance(fp, list) and sorted(x.get("firm") for x in fp if isinstance(x, dict)) == ["cottonwood", "inflection"]
-            and all(isinstance(x.get("reason"), str) and x["reason"].strip() for x in fp)):
-        pr.append("firms_pending must name cottonwood and inflection, each with a reason")
+    served, fp = con["firms_served"], con["firms_pending"]
+    pending = sorted(x.get("firm") for x in fp if isinstance(x, dict)) if isinstance(fp, list) else []
+    if not (isinstance(served, list) and FIRM49 in served and sorted(served + pending) == sorted(GROUND)):
+        pr.append("firms_served (with 49financial) and firms_pending must together be exactly the three firms")
+    if not (isinstance(fp, list) and all(isinstance(x.get("reason"), str) and x["reason"].strip() for x in fp if isinstance(x, dict))):
+        pr.append("every firms_pending entry needs a reason")
     pr += rule24_problems(con["rule24_records"])
     if con["served"] is not False:
         pr.append("served must be false")
@@ -247,6 +253,51 @@ def mapping_problems(con, prop, cro_rows, census49, census3):
     return pr
 
 
+def cottonwood_problems(con, rec):
+    """The contract's Cottonwood section equals the ratified record, except the CTO's round-128 ruling for Transfer Out."""
+    cm = con["cottonwood_mapping"]
+    if not (isinstance(cm, dict) and sorted(cm.keys()) == ["action_derivation", "actions", "external_flow_rule", "type_pairs"]):
+        return ["cottonwood_mapping must hold exactly action_derivation, actions, external_flow_rule, type_pairs"]
+    pr = []
+    if cm["external_flow_rule"] != rec["external_flow_rule"]:
+        pr.append("cottonwood_mapping.external_flow_rule differs from the ratified record")
+    if not (isinstance(cm["action_derivation"], str) and "pair" in cm["action_derivation"].lower()):
+        pr.append("cottonwood_mapping.action_derivation must say a line with no Action derives its action from the pair (CTO msg 9175)")
+    want_t, want_a = {}, {}
+    for m in rec["mapping"]:
+        if m["field"] == "type_pair":
+            want_t[m["source_value"]] = (m["opal_type"], m["flow_class_none"])
+        else:
+            want_a[m["source_value"]] = m["opal_action"]
+    if TRANSFER_OUT_PAIR in want_t:
+        want_t[TRANSFER_OUT_PAIR] = (want_t[TRANSFER_OUT_PAIR][0], "EXTERNAL_OUT")
+    got_t = {m.get("source_value"): (m.get("opal_type"), m.get("flow_class_none")) for m in cm["type_pairs"]}
+    got_a = {m.get("source_value"): m.get("opal_action") for m in cm["actions"]}
+    if got_t != want_t or len(cm["type_pairs"]) != len(want_t):
+        pr.append("cottonwood_mapping.type_pairs differ from the ratified record (Transfer Out | Transfer Out is EXTERNAL_OUT by the ruling)")
+    if got_a != want_a or len(cm["actions"]) != len(want_a):
+        pr.append("cottonwood_mapping.actions differ from the ratified record")
+    return pr
+
+
+def reads_problems(con, reads, census3):
+    """The contract's `reads` is the worker's own non-null read of each firm; the column lists equal the issuer's census."""
+    pr = []
+    r = con["reads"]
+    if not (isinstance(r, dict) and sorted(r.keys()) == sorted(GROUND)):
+        return ["reads must hold exactly the three firms"]
+    for firm in GROUND:
+        w = reads.get("firms", {}).get(firm) if isinstance(reads, dict) else None
+        if not (isinstance(w, dict) and all(isinstance(w.get(k), int) and w[k] > 0 for k in ("partitions_read", "objects_read", "rows"))):
+            pr.append("%s: the worker's own read (RD_READS_R129.json) must have partitions_read, objects_read and rows above zero" % firm)
+            continue
+        if w.get("columns") != census3["firms"][firm]["columns"]:
+            pr.append("%s: the worker's own read of the schema differs from the issuer's census" % firm)
+        if r[firm] != {k: w[k] for k in ("partitions_read", "objects_read", "rows", "read_at_utc")}:
+            pr.append("%s: contract reads must be {partitions_read, objects_read, rows, read_at_utc} of the worker's own read" % firm)
+    return pr
+
+
 def census_problems(con):
     """The two rule-24 censuses equal the counts computed from the mapping."""
     pr = []
@@ -288,6 +339,7 @@ def ac_bindings(root):
     pr = source_problems(con, recs) + rule_problems(con)
     pr += mapping_problems(con, load(root, PROPOSAL), load(root, CRO), load(root, CENSUS49), load(root, CENSUS3))
     pr += census_problems(con) + data_problems(con, load(root, DATA))
+    pr += cottonwood_problems(con, load(root, COTTONWOOD)) + reads_problems(con, load(root, READS), load(root, CENSUS3))
     need(not pr, "; ".join(pr[:6]))
 
 
@@ -318,6 +370,22 @@ def selftest():
     arm("rule24-red", len(rule24_problems({"coverage": good24["coverage"]})), 1)
     arm("fee-basis-form", source_problems({"sources": {"x": []}, "fee_basis": {}}, {}), ["sources must hold exactly the three firms"])
     arm("form-red", form_problems({"a": 1}, rec49)[0].startswith("contract fields"), True)
+    rec_cw = {"external_flow_rule": {"x": "y"}, "mapping": [
+        {"field": "type_pair", "source_value": TRANSFER_OUT_PAIR, "opal_type": "Transfer out", "flow_class_none": "UNRESOLVED"},
+        {"field": "action", "source_value": "Buy", "opal_action": "Trade"}]}
+    con_cw = {"cottonwood_mapping": {"action_derivation": "from the pair", "external_flow_rule": {"x": "y"},
+                                     "type_pairs": [{"source_value": TRANSFER_OUT_PAIR, "opal_type": "Transfer out", "flow_class_none": "EXTERNAL_OUT"}],
+                                     "actions": [{"source_value": "Buy", "opal_action": "Trade"}]}}
+    arm("cottonwood-ruling-green", cottonwood_problems(con_cw, rec_cw), [])
+    old = {"cottonwood_mapping": dict(con_cw["cottonwood_mapping"], type_pairs=[{"source_value": TRANSFER_OUT_PAIR, "opal_type": "Transfer out",
+                                                                                 "flow_class_none": "UNRESOLVED"}])}
+    arm("cottonwood-ruling-red", len(cottonwood_problems(old, rec_cw)), 1)
+    c3 = {"firms": {f: {"columns": ["a"]} for f in GROUND}}
+    ok = {f: {"partitions_read": 1, "objects_read": 1, "rows": 2, "columns": ["a"], "read_at_utc": "t"} for f in GROUND}
+    con_r = {"reads": {f: {k: ok[f][k] for k in ("partitions_read", "objects_read", "rows", "read_at_utc")} for f in GROUND}}
+    arm("reads-green", reads_problems(con_r, {"firms": ok}, c3), [])
+    zero = {f: dict(ok[f], rows=0) for f in GROUND}
+    arm("reads-must-be-nonzero", len(reads_problems(con_r, {"firms": zero}, c3)), 3)
     arm("fixed-points", sorted(FIXED_POINTS), ["IRAWH", "MCE"])
     print("selftest %s" % ("FAIL" if bad else "PASS (%d arms)" % count))
     return 1 if bad else 0
