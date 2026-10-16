@@ -20,3 +20,10 @@ ticket TCK-20261015-944c84f8 and REQ-d47252fe... Applier `0.7.0_AE_CloudOps~IB2`
 3. **S134 disarms on the readback:** every made call REFUSED, the principal ABSENT.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RE-SIGN on the corrected packet (2026-10-16 ~19:1xZ); the signature above is VOID
+
+**SIGNED** on blob `2f0952bbb324b8c205755ace2ac026a2a906ba92`, sha256 `bee21686810f4968267d4c84b0228c858258742b82f65751d1dba21e59ce6830`
+(@c95103f242, re-measured). Read at signing, with a diff ignoring whitespace and line endings against `860c22c8a1`, the change is two things.
+First, section 1a2: the driver's flags read `--firm-a cottonwood` (the principal's own firm) and `--firm-b 49financial` (the ticket's
+owner). Second, the 5174 reuse clause. The act, the blast radius and the firms are unchanged, and the conditions above stand.
