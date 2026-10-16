@@ -2,7 +2,7 @@
 
 Addressed to `3.0.0_SA_CVO~Z`. The RESEARCH workstream (`2.0.0_SA_COO~MI2`) reports in its own section: `deliverables/2.0.0_SA_COO~MI2/round18/RESEARCH_SECTION_L10.md` @7e364e6a8e. This packet does not restate it.
 - **Source:** PRD v0.17 CONTRACT C-GROUP (CTO msg 34551, Andrew-direct): every in-scope row carries `bucket` (and `vendor` + `firm` on opal-data-assets / opal-data-bd) and a `read_tool` naming a live tool; `opal_discover` returns a row per bucket by plain words, recorded. Finish line 2026-10-16 ~22:00Z.
-- **State:** MX-c-21, MX-c-22, MX-c-23 COMPLETE. MX-r-15 (the release) is LIVE: `deployed_commit` `38fe44d5cb` (v3), landed 2026-10-16T12:19:15Z; its three ledgers CLOSED (`e9209e0839`). The applier's `r15.AC1` evidence and the MX-r-15 proof instance are the last open items (section 6); `round-close-check.py --round 18` is run after them.
+- **State:** MX-c-21, MX-c-22, MX-c-23 and MX-r-15 are COMPLETE (`round-close-check.py --round 18` reads MAY-CLOSE: 11 of 11 orders complete across both workstreams, 2026-10-16 ~12:5xZ). MX-r-15 (the release) is LIVE: `deployed_commit` `38fe44d5cb` (v3), landed 2026-10-16T12:19:15Z; its three ledgers CLOSED (`e9209e0839`); the applier's proof instance is VALID (`ec7e8a1b1f`), flipped complete at `c2e9a8e731`.
 
 ## 1. Orders (graded on box/sitez; issuer re-run on the merged tree and on the live host)
 
@@ -11,7 +11,7 @@ Addressed to `3.0.0_SA_CVO~Z`. The RESEARCH workstream (`2.0.0_SA_COO~MI2`) repo
 | MX-c-21: `bucket` / `source_group` on every row and tool | C-GROUP | complete | c21.AC1-AC2 PASS (tool_index 127 of 127 carry `bucket` and `source_group`; AC2 floor `len(ti) >= 99`) |
 | MX-c-22: the `etfs_get_positioning` extension | C-GROUP | complete | per its order record |
 | MX-c-23: vendor + firm on assets/bd rows, the 12 Schwab `dim_*` rows, 31 read links | C-GROUP | complete @28d2a547a7, re-opened by A2, closed again by A5 | c23.AC1-AC4 PASS on the landed v3 catalog; widening control 1,182 pairs, 96 rows newly visible, **leaks 0**; proof-of-spec VALID |
-| MX-r-15: the catalog release | C-GROUP live | LIVE v3 `38fe44d5cb`; proof instance pending (applier) | r13.AC2 PASS (host), r13.AC3 PASS against live AWS (depth 11 of 11, answer-time 17 of 17, anchors 2 of 2), r15.AC4 PASS |
+| MX-r-15: the catalog release | C-GROUP live | complete @c2e9a8e731; LIVE v3 `38fe44d5cb` | proof instance `ec7e8a1b1f` VALID, AC1 24 of 24 sentinels (ledgers closed), AC2 127 of 127 tools, AC3 depth 11 of 11 / answer-time 17 of 17, AC4 host catalog equals tree |
 
 MX-c-23 was first ruled complete on an UNCOMMITTED catalog (my error); A2 re-opened it and the catalog landed through worker ~45 before the final ruling.
 
@@ -60,6 +60,6 @@ Every group below was ruled OUT of the finish line by `1.0.0_SA_CTO~Z` (msg 3478
 |---|---|---|
 | Z-S122 (Z-W45-S6/S7/S8), Z-S123 (Z-W22-S1), Z-S124 (Z-S92, Z-W29-S1) | disarmed | disarm rows in `INVESTIGATION_v1.md` |
 | Z-S126 (scopes.json host regression), Z-S127 and Z-S128 (depth claims aged at the daily publish), all the applier's | disarmed | disarm row Z-S129 in `INVESTIGATION_v1.md`; Z-S126 ruled B at MX-r-15 A2 |
-| the MX-r-15 proof instance and `r15.AC1` | owed by `0.7.0_AE_CloudOps~MI`; I flip MX-r-15 only on a VALID instance | gate limb flip-needs-a-VALID-instance |
+| the MX-r-15 proof instance and `r15.AC1` | delivered by `0.7.0_AE_CloudOps~MI`, VALID; flipped complete | gate limb flip-needs-a-VALID-instance |
 
 Push state: LOCAL @`060e0ba6e2` (`git ls-remote origin box/sitez` reads `ead27b2086`; box-sync pushes).
