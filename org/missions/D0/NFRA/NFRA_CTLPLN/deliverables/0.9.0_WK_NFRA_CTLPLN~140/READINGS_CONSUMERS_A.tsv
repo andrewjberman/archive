@@ -1,0 +1,98 @@
+path	class	hit_line	what_it_does	per_function_effect
+.github/workflows/lambda-deploy.yml	READ_WHOLE	71: json.load(f) of the whole map; 117: jq over .functions	CI matrix reads one function's source_dir from the whole map	shell/jq: read the one function file
+.tools/deploy_ledger.py	READ_WHOLE	535: json.loads(smap.read_text()) of the whole map	reads tf_resource for the leg target	python: folder reader, one function
+.tools/check-lambda-layer-deps	READ_WHOLE	296: json.loads(SOURCE_MAP.read_text()) of the whole map	lists each Lambda's packaged deps	python: iterate the folder
+.tools/naming-gate.py	READ_WHOLE	1299: git show HEAD:<map>; 1340: line scan of the raw map for name positions	commit-time naming gate scans the map's raw lines	gate change: scan folder files (git ls-tree + git show per file); owned by the naming canon
+.tools/parity-gates.sh	READ_WHOLE	129: jq over .functions keys and top-level function keys	P9 parity: declared Lambdas vs deployed	jq over the folder (one call per file, or jq -s)
+.tools/backfill-lambda-iam-mapping.py	WRITE	260: SOURCE_MAP_PATH.write_text() rewrites every entry (iam_role)	backfill writes iam_role into the whole map	writes one file per function; loop over the folder
+infra/aws/lambda/ci/record-terraform-deploy.sh	WRITE	568: git add of the map; node writeFileSync of the map (update_source_map)	stamps last_deployed_commit/at into the whole map, then commits it	owned by 0.7.0_AE_CloudOps; writes only the deployed function's file (projects do not edit this script)
+infra/aws/lambda/ci/build-and-upload.sh	WRITE	155: fs.writeFileSync(SOURCE_MAP_PATH) after upload (artifact_s3_key, artifact_sha256); 100,148: JSON.parse of whole map	writes the artifact fields of one entry into the whole map	node: read and write the one function file
+infra/aws/lambda/ci/build-nodejs-lambda.sh	READ_WHOLE	103: JSON.parse(fs.readFileSync(map)) of the whole map	reads one function's source_dir (whole load, one lookup)	node: read the one function file
+infra/aws/lambda/verify-local.sh	READ_WHOLE	56-81: jq -r over .functions[name] of the whole map (per field)	verifies one function's fields	jq on the one function file
+infra/aws/lambda/investor-reporting/_authz/routetable.py	READ_WHOLE	76-78: json.load(SOURCE_MAP) then doc.get("functions")	route table uses function entries from the whole map	python: folder reader
+infra/aws/terraform/investor-reporting/account-return-daily/locals.tf	READ_WHOLE	44: jsondecode(file(...lambda-source-map.json)) of the whole map	artifact key for the function from the map entry	TF: fileset()+for_each or merge() over the folder; plan check, no apply
+infra/aws/terraform/investor-reporting/reporting-gold-iso/locals.tf	READ_WHOLE	47: jsondecode(file(...lambda-source-map.json)) of the whole map	artifact key for the function from the map entry	TF: fileset()+for_each or merge() over the folder; plan check, no apply
+infra/aws/terraform/investor-reporting/reporting-publish-iso/locals.tf	READ_WHOLE	43: jsondecode(file(...lambda-source-map.json)) of the whole map	artifact key for the function from the map entry	TF: fileset()+for_each or merge() over the folder; plan check, no apply
+lib/opal_lgctfm.py	READ_WHOLE	902: read_json(LAMBDA_SOURCE_MAP) of the whole map	packaged-source names for the source_text leg	python: shared folder reader (lib, LGIC-owned call site)
+lib/opal_naming.py	READ_WHOLE	2820: _lambda_source_map() json-loads the whole map	Lambda plane record used by name() and address()	python: shared folder reader; naming canon call site (LGIC-owned)
+lib/opal_naming_scope.py	READ_WHOLE	162: json.loads(_read_text(SOURCE_MAP)).get("functions")	scope rows for the Lambda plane	python: shared folder reader
+infra/aws/lambda/ci/deployed-drift-classify.py	READ_WHOLE	126-127: json.load(args.source_map) of the whole map	classifies deployed-vs-recorded drift per function	python: folder reader; --source-map default changes
+infra/aws/lambda/ci/record-deploy-scope.py	READ_WHOLE	50-51: json.load(fh) of DEFAULT_MAP	resolves the deployment set from the whole map	python: folder reader
+infra/aws/lambda/ci/release-census.py	READ_WHOLE	58: json.loads(git show <pin>:<map>) of the whole map at a pin	reads the map as it stood at a pin	python: git ls-tree of the folder at the pin, then git show per file
+infra/aws/lambda/ci/source-map-staleness-census.py	READ_WHOLE	103-104: json.load(fh) of the whole map	staleness census over all functions	python: folder reader
+infra/aws/ec2/estate-report-runner/estate_report_runner.py	READ_WHOLE	869-874: git checkout REPO_BRANCH -- <map> then json.load of the whole map	attribution hop; the checkout restores the one file	a checkout of the removed path fails (check=True), the hop degrades to unavailable; folder reader and a folder checkout
+rcg/bin/lexicon.py	READ_WHOLE	124-125: json.loads(path.read_text()) of the whole map	channel_lambdas(): every Lambda name as a lexicon token	python: iterate the folder for names
+rcg/bin/mark.py	READ_WHOLE	113-116: json.loads(smap.read_text()).get("functions")	function names for the mark tool	python: iterate the folder for names
+org/modules/graph/extract_lambda_routes.py	READ_WHOLE	74: json.loads(map_file.read_text()) of the whole map	source_dir map for route extraction	python: folder reader
+org/modules/graph/extract_s3.py	READ_WHOLE	575: _json.loads(sm_file.read_text()) of the whole map	S3 writer scan uses the map's functions	python: folder reader
+org/modules/graph/extract_iam.py	READ_WHOLE	2611: json.loads(source_map_file.read_text()) of the whole map	Lambda profiles for the IAM scan	python: folder reader
+org/modules/graph/extract_eventbridge.py	READ_WHOLE	318-324: import json as _json; the map is loaded at the path (line 318) and parsed	EventBridge scan of Lambda source files	python: folder reader
+org/modules/graph/comp_closure.py	READ_WHOLE	920: json.load(open(SOURCE_MAP)) of the whole map	function closure from the map	python: folder reader
+org/modules/graph/lambdamap_cli.py	READ_WHOLE	50-51: json.load(open(root/SRCMAP_REL)) of the whole map	lambdamap compares the map with TF and disk	python: folder reader; the derive --write path is CVO-gated future work
+org/modules/graph/comp_ws4_crosswalk.py	DOC	82: docstring names the registry keys; loads only a graph file (231-232)	none: the map is named in a docstring	text update only
+org/modules/graph/census_substrate.py	DOC	180: a join-key description string	none: a description string	text update only
+org/modules/graph/iam_cli.py	DOC	680, 782: comment and print text naming the map	none: a message	text update only
+org/modules/graph/TOOL_MASTER.yaml	DOC	1388: a concern string naming the map	none: a text field	text update only
+org/modules/graph/comp-coverage-map.yaml	DOC	835: a concern string naming the map	none: a text field	text update only
+org/modules/graph/comp-tools.yaml	DOC	682: a help line naming the map	none: a text line	text update only
+org/modules/graph/graph-call-manifest.yaml	DOC	220: an anti-pattern text naming the map	none: a text field	text update only
+org/modules/graph/aws-shapes/s3-hand-audit-fixture-v1.0.yaml	DOC	203: declared_state text naming the map path	none: a fixture string	text update only
+org/modules/graph/aws-shapes/s3-hand-audit-fixture-v1.1.yaml	DOC	190: declared_state text naming the map path	none: a fixture string	text update only
+org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml	DOC	251: provenance text naming the map	none: a text field	text update only
+org/tier2_senior/0.8.0_AE_CloudComp/deliverables/tool_source_audit.py	DOC	135: a name in a list of json file names; the audit reads python sources, not the map	none	text only
+org/tier2_senior/0.8.0_AE_CloudComp/deliverables/build_p21ae_proof.py	DOC	169-170: an evidence-row tuple naming the map as config_data	none: records the path in a proof row	text only
+org/tier2_senior/0.7.0_AE_CloudOps/deliverables/mdpf_d2_20261008/mdpf-gold-lambda.zip	DOC	23011: a copy of consumer code inside an archived zip	none: archived evidence, not executed from this path	none (archive)
+org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~1/a3_build_proof.py	DOC	107: an evidence-row dict naming the map as config_data	none: records the path	text only
+org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~24/record_readback.py	READ_WHOLE	87: json.loads(sm_path.read_text()) of the whole map	reads back the map for a record	FROZEN: closed-round record script; raises on the missing file if re-run
+org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~1/a1_deployed_vs_source.py	READ_WHOLE	62: json.loads(git show HEAD:<map>) of the whole map	deployed-vs-source comparison	FROZEN: closed-round script; raises on the missing file if re-run
+org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round85_prep/checks/r85_sourcemap.py	READ_WHOLE	50: json.load(open(root/CI/map)) of the whole map	checks the map's top-level keys (M2)	FROZEN: closed-round check; raises on the missing file if re-run
+org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/_root.sh	READ_WHOLE	19: json.load(open(map))['functions'] of the whole map	grant-writer entry lookup	FROZEN: closed-round check
+org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round3/checks/a2.AC4.sh	READ_WHOLE	7: git show HEAD:<map> piped to python json.loads	grant-writer note check at HEAD	FROZEN: closed-round check
+org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~13/clamp_precheck/clamp_precheck.py	READ_WHOLE	--source-map default; passed to build_table(routes, source_map_path) which reads it	clamp precheck table	FROZEN: closed-round tool; a re-run with the default path raises on the missing file
+org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_repin.py	READ_WHOLE	40-41: json.loads(git show base:<map>) and json.load(open(map)) of the whole map	re-pin check of one entry	FROZEN: closed-round check
+org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/deployed_bytes_diff.py	READ_WHOLE	45-46: json.load(open(SOURCE_MAP_PATH)) of the whole map	deployed bytes vs declared zip	FROZEN: closed-round check
+org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/bd49f_served_vs_built.py	READ_WHOLE	31-32: json.load(open(SOURCE_MAP_PATH)) of the whole map	served vs built artifact sha	FROZEN: closed-round check
+org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/cot_served_vs_built.py	READ_WHOLE	31-32: json.load(open(SOURCE_MAP_PATH)) of the whole map	served vs built artifact sha	FROZEN: closed-round check
+org/missions/D8/MDPF/MDPF_TAXSMA/prd/component_manifest.yaml	DOC	318: a component name entry naming the map file	none: a manifest name	text only
+org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/preflight-blast-radius.py	READ_WHOLE	185-186: open(path) then json.load(f) of the whole map	which Lambdas assume a role	FROZEN: closed-round preflight; raises on the missing file if re-run
+org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/raise_population_r8_build.py	DOC	131, 168: prose naming the map as a forbidden declaration	none: prose	text only
+org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/r6_campaign_resolve.py	DOC	217: a kind label string	none: a label	text only
+org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r4/check_en_r4.py	DOC	696, 936: printed label and a string	none: a message	text only
+org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_en_r3.py	DOC	538: owner_basis string naming the map	none: a string	text only
+org/missions/D14/LGIC/LGIC_LGCTFM/deliverables/2.0.0_SA_COO~G/fixed_inputs/r4/check_lt_r4.py	DOC	171: a refusal message string naming the map	none: a message	text only
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/flat_zip_module_census.py	READ_WHOLE	26: json.load(open(tree/map)) of the whole map	module census of the flat zip	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/prepare_directory_runtime.py	READ_WHOLE	19-21: map_bytes = blob(map); json.loads(map_bytes)['functions'][name]	one function's row from the whole map	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/served_import_closure.py	READ_WHOLE	76-77: json.load(fh)["functions"][a.function]	one function's row from the whole map	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/verify_opal_packages.py	READ_WHOLE	18-20: manifest_path.read_bytes(); json.loads(manifest_bytes)	reads the whole map as the package manifest	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/verify_holdings_package.py	READ_WHOLE	198: json.loads(blob(root, ref, MAP)) of the whole map at a ref	before-state of the map	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/verify_selection_packages.py	READ_WHOLE	100: json.loads(git_blob(root, ref, MAP)) of the whole map at a ref	before-state of the map	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/live_walk/bundle_vs_live_census.py	READ_WHOLE	90: json.loads(git show <commit>:MAP) of the whole map	reads the map at a commit	FROZEN: closed-round tool
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/live_walk/repin_source_map_rows.py	WRITE	92: io.open(path,'w').write(text) of the whole map	rewrites the named function rows of the whole map	writer of record for re-pins; one file per function after the split
+org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py	READ_WHOLE	29: json.loads(MAP.read_text()).get("functions") of the whole map	every aws_lambda_function has a map entry	FROZEN: closed-round check; folder reader if re-run
+org/tier1_exec/2.0.0_SA_COO~G2/deliverables/r33/make_packet_r33.py	READ_WHOLE	23: json.loads(git show pin:<map>) of the whole map	reads the map at a pin	FROZEN: closed-round packet writer
+org/tier1_exec/2.0.0_SA_COO~G2/deliverables/r33/r33_build.py	READ_WHOLE	112: json.loads(git show pin:<map>) of the whole map	reads the map at a pin	FROZEN: closed-round build
+org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/holdings_inventory_probe_f886.py	READ_WHOLE	22: json.loads(blob(PIN, MAP))['functions']['irpt-holdings']	one entry from the map at a pin	FROZEN: closed-round probe
+org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/holdings_inventory_retest_f0f3.py	READ_WHOLE	24: json.loads(blob(PIN, MAP))['functions']['irpt-holdings']	one entry from the map at a pin	FROZEN: closed-round probe
+org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/holdings_multipart_probe_c9e4.py	READ_WHOLE	20: json.loads(blob(PIN, MAP))['functions']['irpt-holdings']	one entry from the map at a pin	FROZEN: closed-round probe
+org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/holdings_package_probe_0fb7.py	READ_WHOLE	14: MAP path; blob of the map at a pin is parsed for the holdings entry	one entry from the map at a pin	FROZEN: closed-round probe
+org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/package_probe_0510.py	READ_WHOLE	28-29: json.loads(blob(BEFORE, MAP)), json.loads(blob(PIN, MAP))	before/after map at two pins	FROZEN: closed-round probe
+org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/primary_policy_probe_cf11.py	READ_WHOLE	29: json.loads(blob(ref, MAP)) at two refs	before/after map at two pins	FROZEN: closed-round probe
+org/tier1_exec/4.0.0_SA_CRO~X/deliverables/analysis_trace_20261001/member_census.py	READ_WHOLE	35: json.load(open("infra/.../map"))["functions"] of the whole map	member census	FROZEN: closed-round analysis
+org/tier1_exec/4.0.0_SA_CRO/deliverables/NFRA_AKPIPE_LAMBDA_PACKAGE/lambda_function.py	DOC	10: a prose note naming the map (gate owner)	none: prose	text only
+org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~145/scope_check.py	READ_WHOLE	71-72: json.loads(git_bytes(base, MAP)) and json.loads(open(MAP)) of the whole map	before/after scope of the map	FROZEN: closed-round check
+.tools/tool_index.py	DOC	6804: a keyword string 'lambda-source-map drift'	none: a keyword	text only
+.tools/tool_overrides.yaml	DOC	163: a concern text naming the map	none: a text field	text only
+.owned-paths.yaml	DOC	2800: a lane-grant key naming the map path	none at runtime; the owned-paths validator matches this path string	the split commit must replace this key with the folder row, or the grant lapses
+rcg/charters.yaml	DOC	24: a list entry naming the map as an input	none: a charter list	text only
+workflows/atom_decomposition/catalog_entries/opal_data_etfs_gold_book.yaml	DOC	14, 48: provenance text naming the map	none: a text field	text only
+workflows/atom_decomposition/catalog_entries/opal_data_etfs_gold_holding.yaml	DOC	14, 46: provenance text naming the map	none: a text field	text only
+infra/aws/globgrph/debtscan_canon_scorer.py	DOC	53: a string describing a source	none: a string	text only
+infra/aws/lambda/bd-pipeline/bd-served-vintage-alarm/lambda_function.py	DOC	43: a comment about files[] parity; the function reads S3 keys, not the map	none	text only
+infra/aws/lambda/ci/build-deck-generation.sh	DOC	98: an echo message naming the map	none: a log line	text only
+infra/aws/lambda/ci/import-closure-check.py	DOC	191: a usage message naming the map; reads sources and BUILD_MANIFEST, not the map	none	text only
+infra/aws/lambda/investor-reporting/intake/parse.py	DOC	177: a comment naming the map	none	text only
+infra/aws/users/lambda/portal-authorizer/originVerify.mjs	DOC	16: a comment naming the map files[] array	none	text only
+infra/aws/ec2/opal-gateway/app/admin_grants.py	DOC	28: a comment on which path writes a grant	none	text only
+infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml	DOC	14220, 14252: producer provenance text	none: a catalog text	text only
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R1_CHECKS/ar1_t2_checks.py	READ_WHOLE	69: json.loads(Path(map).read_text())["functions"][name]	one entry, whole load	FROZEN: closed-round check
+org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/flat_import_check.py	READ_WHOLE	76: rt._source_map(map_root/map) loads the whole map	one function's handler check	FROZEN: closed-round tool; the loader raises on the missing file

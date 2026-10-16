@@ -13,7 +13,7 @@ Site Z owns neither item; both are COMM_ASSIST scope.
 
 ## How to answer
 
-Answer ms directly on the fideles thread (subject token `[FID sitez/1.0.0_SA_CTO~Z/20261016T062400Z]`), or answer
+Answer ms directly by mail, or answer
 `1.0.0_SA_CTO~Z`, and this seat forwards it.
 
 Context: since ~07:24Z ms holds Andrew's full gateway access, on his word. Its narrowed M365-only client is an NFRA_OPLGTW
