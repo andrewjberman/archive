@@ -1,0 +1,444 @@
+{
+  "cell": "AR-g-141",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~268",
+  "entry_points_read": [
+    "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_yfinance.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_bbg.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py",
+    "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py",
+    "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py",
+    "infra/aws/lambda/investor-reporting/ycharts/session/deadline_transport.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/runner.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/transport.py",
+    "infra/aws/lambda/investor-reporting/reports/tests/test_opal_pricing_binding.py",
+    "infra/aws/lambda/investor-reporting/reports/build_resident_package.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_source.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_ycharts.py"
+  ],
+  "rows": [
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:78",
+      "line_text": "PRICING_TIERS = (\"estate\", \"yfinance\")",
+      "what": "The resident's allow-list of pricing tier names; the binding validator accepts only these two.",
+      "role": "TIER_LIST",
+      "use": "The cell adds \"ycharts\" to this tuple, since the validator at line 121 reads it.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:76",
+      "line_text": "# the chain tiers this resident can read today: estate (the BBG history on the host's own S3 client) and yfinance.",
+      "what": "A comment that enumerates the same two tiers and goes stale when the tuple at line 78 changes.",
+      "role": "TIER_LIST",
+      "use": "The cell rewrites this comment to name the ycharts tier in the same change as line 78.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:121",
+      "line_text": "or any(not isinstance(tier, str) or tier not in PRICING_TIERS for tier in pricing[\"tiers\"])",
+      "what": "The binding validator refuses any tier name not in PRICING_TIERS with RESIDENT_PRICING_BINDINGS.",
+      "role": "TIER_LIST",
+      "use": "The logic stays as it is; the ycharts name passes once line 78 lists it.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:386",
+      "line_text": "for tier in binding[\"tiers\"]:",
+      "what": "The per-job dispatch builds one reader per binding tier, in binding order, with an if/elif and no else branch.",
+      "role": "WIRING",
+      "use": "The cell adds an elif for ycharts here, and the estate and yfinance branches stay as they are; a listed tier with no branch is silently not built.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:389",
+      "line_text": "readers[tier] = price_adapter_bbg.make_reader(clients[\"s3\"])",
+      "what": "The estate tier reader is made from the host S3 client through the price_adapter_bbg.make_reader factory.",
+      "role": "READER_TEMPLATE",
+      "use": "The ycharts branch copies this shape: import the adapter, call its make_reader with the transport the cell builds from the session.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:392",
+      "line_text": "readers[tier] = price_adapter_yfinance.make_reader()",
+      "what": "The yfinance tier reader is made with no argument and uses its own default fetch.",
+      "role": "READER_TEMPLATE",
+      "use": "This no-argument form does not fit the ycharts tier, which needs an injected session transport.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:393",
+      "line_text": "return {\"pricing\": True, \"price_readers\": readers, \"as_of\": _t_minus_1(clock())}",
+      "what": "The extras return the pricing keys (pricing, price_readers, as_of); this is the only path by which the readers reach the Opal producer.",
+      "role": "WIRING",
+      "use": "The cell's readers dict flows through this return unchanged, so no new key is needed for the ycharts tier.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:373",
+      "line_text": "def _pricing_extras(bindings, clients, clock):",
+      "what": "Builds the per-job pricing extras from bindings and clients only; the ResidentSession is not among its arguments.",
+      "role": "WIRING",
+      "use": "The cell adds the session, or a session-backed transport factory, to this signature and to the call at line 540.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:384",
+      "line_text": "load_opal_producer()",
+      "what": "The extras call the producer loader first, which puts ycharts/research on sys.path so the price adapter modules import.",
+      "role": "WIRING",
+      "use": "The new ycharts branch's import sits after this call, as the estate and yfinance imports do.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:527",
+      "line_text": "session = ResidentSession(secrets_client=clients[\"secretsmanager\"], dynamo_client=clients[\"dynamodb\"],",
+      "what": "The one ResidentSession of the resident is built here, holding the stored YCharts session and its provider lease.",
+      "role": "SESSION_OR_LEASE",
+      "use": "The cell reuses this object for the ycharts tier; it is a local of build_resident_runtime, so it is in scope at line 540.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:536",
+      "line_text": "opal_stores = make_opal_stores(dynamodb=clients[\"dynamodb\"], s3=clients[\"s3\"], artifacts=stores.artifacts,",
+      "what": "The Opal producer's ports are built here, and no session argument is passed to make_opal_stores.",
+      "role": "WIRING",
+      "use": "The cell threads the session through the pricing_extras keyword at line 540, or adds a keyword here.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:540",
+      "line_text": "pricing_extras=_pricing_extras(bindings, clients, clock),",
+      "what": "The call that supplies the pricing extras to make_opal_stores; it is the only pricing entry into the stores.",
+      "role": "WIRING",
+      "use": "The cell passes the session (or its transport factory) into _pricing_extras here.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:324",
+      "line_text": "stores.update(pricing_extras())",
+      "what": "The extras are called once per job inside the stores closure, so any lease acquired there is per job, not at install.",
+      "role": "WIRING",
+      "use": "The cell acquires the ycharts transport inside the extras call, not in build_resident_runtime.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:193",
+      "line_text": "sys.path.append(research)",
+      "what": "load_opal_producer appends ycharts/research to sys.path before the producer and its price adapters are imported.",
+      "role": "WIRING",
+      "use": "No change; it is the reason the ycharts adapter module is importable from the resident.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:534",
+      "line_text": "stores = opal_stores(principal, record)",
+      "what": "The producer's stores are built inside run_opal in the same process as the resident session, per job.",
+      "role": "WIRING",
+      "use": "The session is reachable from the producer by closure; the lease needs no out-of-process path.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py:15",
+      "line_text": "CHAIN = (\"estate\", \"yfinance\", \"ycharts\")",
+      "what": "The chain order of the price tiers, with ycharts already third.",
+      "role": "TIER_LIST",
+      "use": "No change; the cell relies on this order, so the ycharts reader is asked only after the estate and yfinance tiers miss.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py:119",
+      "line_text": "if tier not in readers:",
+      "what": "A chain tier with no key in the readers dict records TIER_ABSENT and does not fail the run.",
+      "role": "WIRING",
+      "use": "The cell must add a ycharts key whenever the binding lists it, or the tier is silently absent.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py:79",
+      "line_text": "def make_reader(transport: Callable[[str, dict], Any], *, spacing_s: float = 2.0,",
+      "what": "The YCharts price reader factory over an injected transport; it makes one fund_data call per symbol.",
+      "role": "READER_TEMPLATE",
+      "use": "The new branch calls this factory with a transport wrapper over the session; the module itself is not changed.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py:20",
+      "line_text": "_FUND_PATH = \"/charts/fund_data.json\"",
+      "what": "The one YCharts path the price reader fetches.",
+      "role": "PRICE_FETCH",
+      "use": "The transport wrapper's path is this value, with the params encoded as a query string.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py:94",
+      "line_text": "answer = transport(_FUND_PATH, {\"securities\": \"id:\" + name + \",include:true,\", \"zoom\": \"max\"})",
+      "what": "The one fund_data call per symbol: the transport is called with a path and a params dict, and the symbol is sent as an id: token.",
+      "role": "PRICE_FETCH",
+      "use": "The cell's transport must accept (path, params) and return the parsed JSON answer; no existing object does (see gaps).",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py:92",
+      "line_text": "pause(spacing_s)",
+      "what": "The reader sleeps spacing_s (2.0) before every call after its first, on top of the lease's own spacing.",
+      "role": "CAP_OR_BUDGET",
+      "use": "Keep as it is; the cell need not add a second spacing.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_ycharts.py:95",
+      "line_text": "pairs = _served_pairs(answer)",
+      "what": "An answer that is not a dict with chart_data returns no rows, so NO_DATA is recorded silently; raw bytes from the transport would do this.",
+      "role": "OTHER",
+      "use": "The transport wrapper must parse the reply body into a dict before this line.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_yfinance.py:83",
+      "line_text": "def make_reader(*, fetch: Optional[Callable[[str], Any]] = None, yf: Any = None) -> Callable[[str, str, str], List[Tuple[str, float]]]:",
+      "what": "The yfinance tier reader factory, with an injectable fetch and a lazily imported default.",
+      "role": "READER_TEMPLATE",
+      "use": "A reference for an injectable-fetch reader; the ycharts factory already follows the same reader(symbol, start, end) contract.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_adapter_bbg.py:106",
+      "line_text": "def make_reader(s3: Any, *, partitions: Optional[Iterable[Tuple[str, Iterable[dict]]]] = None) -> Callable[..., Any]:",
+      "what": "The estate tier reader factory takes the resident's S3 client as its injected dependency.",
+      "role": "READER_TEMPLATE",
+      "use": "The ycharts factory takes the session transport the same way, as its injected dependency.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:42",
+      "line_text": "SPACING = 2.0",
+      "what": "The provider lease's minimum spacing between calls on one account, in seconds.",
+      "role": "SESSION_OR_LEASE",
+      "use": "A ycharts call through the lease waits at most this between calls; the cell budgets its run time with it.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:43",
+      "line_text": "MAX_TTL = 900.0",
+      "what": "The longest lease time-to-live the provider lease accepts, in seconds.",
+      "role": "CAP_OR_BUDGET",
+      "use": "The cell's price stage must fit its calls in a lease of at most this many seconds, or renew the lease.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:97",
+      "line_text": "def acquire(self, holder, *, session_fence, ttl):",
+      "what": "Acquires the provider lease for one holder against the session fence; one token per transport.",
+      "role": "SESSION_OR_LEASE",
+      "use": "The ycharts tier's transport holds one such token per lease window.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:163",
+      "line_text": "raise OperationRefused(\"OPERATION_SPACING\", retry_after=math.ceil(",
+      "what": "A reserve inside the spacing window is refused with OPERATION_SPACING and a retry_after.",
+      "role": "SESSION_OR_LEASE",
+      "use": "The cell's wrapper must wait out the spacing (or the adapter's own pause) before each call so this refusal is not hit.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:165",
+      "line_text": "row[\"next_allowed_at\"] = now + self.SPACING",
+      "what": "Sets the next allowed time after each reserved call to now plus SPACING.",
+      "role": "SESSION_OR_LEASE",
+      "use": "No change; this is the spacing the price stage inherits.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:242",
+      "line_text": "def request(self, path, method=\"GET\", payload=None, content_type=None):",
+      "what": "The session-bearing transport's request: it takes a path that already carries its query string and returns the invoke result.",
+      "role": "SESSION_OR_LEASE",
+      "use": "The cell's wrapper calls this with the path plus query, then parses the body; the adapter's (path, params) shape is not accepted here.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py:246",
+      "line_text": "if delay > self.lease.SPACING or now + delay + self.request_budget >= row[\"expires_at\"]:",
+      "what": "Refuses a call whose wait plus request budget would run past the lease's expiry.",
+      "role": "SESSION_OR_LEASE",
+      "use": "A long price stage must renew the lease or split into several leases, or this refusal ends it.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py:115",
+      "line_text": "def acquire(self, *, request_budget=60, ttl=120):",
+      "what": "The session-bearing acquire, which reads the stored session and returns a fenced transport.",
+      "role": "SESSION_OR_LEASE",
+      "use": "The ycharts tier calls this (not the sessionless form) from its extras, once per lease window.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py:120",
+      "line_text": "def acquire_sessionless(self, *, request_budget=60, ttl=120):",
+      "what": "A transport with no session, documented for the signed-out ticker lookup only.",
+      "role": "SESSION_OR_LEASE",
+      "use": "Not used for fund_data: the repo does not show that the price route answers a signed-out caller.",
+      "claim": "INFERRED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py:100",
+      "line_text": "self.lease = OperationLease(DynamoOperationStore(dynamo_client, table=jobs_table),",
+      "what": "The provider lease is stored on the jobs table and keyed to the enrolled account.",
+      "role": "SESSION_OR_LEASE",
+      "use": "No change; the ycharts tier shares this lease with the research runner and the other YCharts callers.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/session/deadline_transport.py:85",
+      "line_text": "return result[\"info\"], body",
+      "what": "The invoke returns the raw reply body, not a parsed object.",
+      "role": "OTHER",
+      "use": "A parse step (as read_json_request does) sits between this and the price reader.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/transport.py:282",
+      "line_text": "def read_json_request(transport, path, method=\"GET\", data=None):",
+      "what": "An existing wrapper that calls transport.request and parses the body as JSON, falling back to an empty dict.",
+      "role": "OTHER",
+      "use": "The price transport wrapper copies its parse step (json.loads of the body) rather than the adapter receiving raw bytes.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:41",
+      "line_text": "MAX_REQUESTS_PER_WINDOW = 6  # the firewall challenges the 7th request of a lease window (row S6)",
+      "what": "The vendor firewall's per-window ceiling: the 7th request of one lease window is challenged.",
+      "role": "CAP_OR_BUDGET",
+      "use": "The price stage must split its calls into windows of at most this many, or the cell refuses that run.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:121",
+      "line_text": "request_path = path + (\"?\" + urllib.parse.urlencode(call_params, safe=\":,\") if call_params else \"\")",
+      "what": "Builds the GET query string with urlencode and safe=':,', so the id: separators stay literal.",
+      "role": "PRICE_FETCH",
+      "use": "The price wrapper must encode the adapter's params the same way, or the id: token changes on the wire.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:249",
+      "line_text": "session.wait(budget[\"window_seconds\"])",
+      "what": "Between lease windows the lease is released and the session waits window_seconds.",
+      "role": "CAP_OR_BUDGET",
+      "use": "The price stage's window wait comes from a budget; no budget exists for it in the binding today.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:252",
+      "line_text": "transport = session.acquire(request_budget=REQUEST_BUDGET, ttl=TTL)",
+      "what": "The research run acquires one lease per window with REQUEST_BUDGET 60 and TTL 600 (runner.py lines 39 and 40).",
+      "role": "SESSION_OR_LEASE",
+      "use": "The price stage copies this shape: one lease per window of at most six calls.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:265",
+      "line_text": "info, body = transport.request(call[\"request_path\"])",
+      "what": "A GET is sent with request_path only and returns the (info, body) pair with the body raw.",
+      "role": "SESSION_OR_LEASE",
+      "use": "The price wrapper follows this call shape and parses the body before it returns to the adapter.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:547",
+      "line_text": "help=\"at most N requests per lease window (1-6); needs --window-seconds\")",
+      "what": "The research CLI's window ceiling, 1 to 6 requests per lease window, matching line 41.",
+      "role": "CAP_OR_BUDGET",
+      "use": "The price stage's budget, if one is added, takes the same 1 to 6 range.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py:282",
+      "line_text": "res = price_source.resolve_prices(list(amounts), _start_of(as_of), as_of, readers, as_of)",
+      "what": "The holdings' price stage asks the chain for every unique ticker of the run, with no window split or count ceiling.",
+      "role": "CAP_OR_BUDGET",
+      "use": "The cell bounds this path for the ycharts tier (a per-run count or a window split) so a run cannot exceed the per-window ceiling.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py:295",
+      "line_text": "ref = price_source.resolve_prices([BENCHMARK_SYMBOL, RISK_FREE_SYMBOL], _start_of(as_of), as_of, readers, as_of)",
+      "what": "A second chain call for the benchmark and the risk-free symbol in the same run.",
+      "role": "CAP_OR_BUDGET",
+      "use": "The cell counts these two symbols in the ycharts budget, since a ycharts miss on each adds a call.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py:34",
+      "line_text": "price_readers    (with pricing) a dict of tier name -> reader(symbol, start, end), any subset of price_source.CHAIN",
+      "what": "The producer's documented contract: price_readers may hold any subset of the chain tiers.",
+      "role": "TIER_LIST",
+      "use": "No change; a ycharts key passes through the producer unchanged.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:119",
+      "line_text": "\"opal_pricing\": {\"enabled\": False, \"tiers\": [\"estate\", \"yfinance\"]},",
+      "what": "The packaged bindings default enumerates the two tiers with enabled false.",
+      "role": "TIER_LIST",
+      "use": "The cell keeps enabled false; a ycharts entry here would change the default for every install.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:45",
+      "line_text": "OPAL_MAP_SRC = \"org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json\"",
+      "what": "The source path of the pinned overview map, which lies outside the sparse worktree (see gaps).",
+      "role": "OTHER",
+      "use": "The cell reads the holdings and ticker template from this map at HEAD only; it does not edit it under this grant.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/tests/test_opal_pricing_binding.py:54",
+      "line_text": "stores = _stores(package, pricing={\"enabled\": True, \"tiers\": [\"estate\", \"yfinance\"]})",
+      "what": "The enabled-binding fixture that builds stores with the two existing tiers.",
+      "role": "TEST_FIXTURE",
+      "use": "The cell adds a ycharts case beside this one, with the same helper.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/tests/test_opal_pricing_binding.py:70",
+      "line_text": "{\"enabled\": True, \"tiers\": [\"demque\"]}, {\"enabled\": True, \"tiers\": [\"bloomberg\"]}, {\"enabled\": True, \"tiers\": [\"ycharts\"]},",
+      "what": "A refusal fixture that pins ycharts as an invalid tier name.",
+      "role": "TEST_FIXTURE",
+      "use": "The cell removes the ycharts entry from this refused list in the same change as line 78, or the test fails.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_source.py:40",
+      "line_text": "assert tuple(ps.CHAIN) == (\"estate\", \"yfinance\", \"ycharts\")",
+      "what": "A test that pins the chain order with ycharts third.",
+      "role": "TEST_FIXTURE",
+      "use": "No change; it already matches the chain the cell relies on.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_adapter_ycharts.py:50",
+      "line_text": "assert fake.calls == [(\"/charts/fund_data.json\", {\"securities\": \"id:QQQ,include:true,\", \"zoom\": \"max\"})]",
+      "what": "A test that pins the single call shape: path /charts/fund_data.json and a securities id token with zoom max.",
+      "role": "TEST_FIXTURE",
+      "use": "The cell's transport wrapper test reuses this expected call shape.",
+      "claim": "MEASURED"
+    }
+  ],
+  "summary": {
+    "rows": 51
+  },
+  "gaps": [
+    "No object gives the price reader the transport it calls. price_adapter_ycharts.py:94 calls transport(path, params) and expects the parsed JSON answer, but the stored session's request (operation_lease.py:242) takes a path that already carries its query string and returns a raw body (deadline_transport.py:85). A wrapper must build the query as runner.py:121 does, parse the body as generate/transport.py:288 does, and let errors propagate. The repo holds no such wrapper for fund_data.",
+    "The stored session is not passed into the pricing path. make_opal_stores (resident_installed.py:536) and _pricing_extras (resident_installed.py:373) take no session, so the cell must thread the session from resident_installed.py:527. The lease is reachable from the producer's process: the stores closure is called in-process per job (resident_worker.py:534), so no out-of-process lease path was found.",
+    "No window or count budget bounds the price stage. opal_producer.py:282 and :295 issue one reader call per unique holding plus two calls for SPY and BIL, in one run, and runner.py:41 records that the 7th request of a lease window is challenged. The binding validator (resident_installed.py:115-124) checks only enabled and tiers, so no ycharts budget exists yet.",
+    "The YCharts security id form for a plain holding ticker is not established. price_adapter_ycharts.py:94 sends id:<TICKER>. The repo's only served id forms are the portfolio security_id placeholder and the benchmark id:^SPXTR, both in the pinned overview map, which is readable only at HEAD (see the next gap). No repo evidence shows that id:<TICKER> resolves at YCharts.",
+    "The pinned overview map (build_resident_package.py:45) is absent from this sparse worktree: the sparse checkout includes only org/missions/D9/IRPT/IRPT_ANLREQ under the IRPT folder. The file was read only through git show of HEAD (blob da312a9b), so no line of it is cited here. At HEAD the file has no expand key, so its holdings-expansion spec is not a source of the ticker template.",
+    "The served shape of a single-ticker fund_data answer at zoom max is not measured by any live capture identified in the repo. The shape is evidenced only by the adapter's docstring, its test fixtures and kept fixture files (for example ycharts/research/tests/fixtures/kept/step=01_fixture_series.json).",
+    "Whether the price route answers a signed-out caller is not established. The sessionless transport (resident_session.py:120) is documented only for the signed-out ticker lookup, so the cell is expected to use the session-bearing acquire (resident_session.py:115), and no live check of that choice is in the repo."
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-142",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-142.lease-window-budget.md",
+    "group": "OTHER",
+    "vintage_commit": "9d765b4c8c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R47_G.md",
+    "vintage_commit": "536c462f54",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-142.lease-window-budget.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~269",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py",
+      "kind": "script",
+      "commit_or_etag": "8116e45eb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "window_budget on OperationLease: a per-window reserved-call count in the stored row (window_start, window_count), refused with OPERATION_WINDOW_BUDGET; no budget is today's lease. Offline, no AWS call, no deploy; reaches production only through a later resident release under its own never-widen pair.",
+      "artifact_covered_by": [
+        "AR142-g-AC1",
+        "AR142-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py",
+      "kind": "script",
+      "commit_or_etag": "8116e45eb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ResidentSession(window_budget=None) passes the budget to its OperationLease; default None is today's behaviour. Offline, no deploy.",
+      "artifact_covered_by": [
+        "AR142-g-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_window_budget.py",
+      "kind": "test",
+      "commit_or_etag": "8116e45eb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline tests: 31 passed (invalid budgets, the fourth call and retry_after, rollover at exactly window_s, a second lease object shares the count, the carry-over in acquire, the row shapes, store-invalid arms, spacing before budget, ResidentSession pass-through).",
+      "artifact_covered_by": [
+        "AR142-g-AC1",
+        "AR142-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_resident_session.py",
+      "kind": "test",
+      "commit_or_etag": "8116e45eb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repair of test_resident_factory_uses_canonical_secret_and_durable_lookup_boundary (item 6): an offline checker is passed to template_resolver; no assertion weakened; 4 passed.",
+      "artifact_covered_by": [
+        "AR142-g-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_resident_session_checker.py",
+      "kind": "test",
+      "commit_or_etag": "8116e45eb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rewrite of test_the_door_resolver_keeps_a_yfinance_known_symbol to the AR-g-133 order (checker asked AAPL then ZZQX; provider asked AAPL only); the second test is unchanged; 2 passed.",
+      "artifact_covered_by": [
+        "AR142-g-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR142-g-AC1",
+      "criterion_verbatim": "AC1 runs the real OperationLease over a fake linearizable store: three calls pass and the fourth is refused with OPERATION_WINDOW_BUDGET and the exact retry_after; a refused reserve consumes nothing; the window rolls over at exactly window_s; the count is shared by a second lease object on the same store (the carry-over in acquire); ten invalid budgets are refused; the stored row carries exactly the eight keys plus the two window keys; resident_session.py passes the budget on. At base it FAILs.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g142_checks.py build",
+      "output_evidence": "AR-G142-OK build: all arms  [timeout 120; rc=0; at base 9d765b4c8c the same invocation printed 'AR-G142-FAIL build: OperationLease takes no window_budget' rc=1]",
+      "denominator": "5 build arms of ar_g142_checks.py (b1 to b5; b4 covers 10 invalid budgets), 0 failed",
+      "expect": "^AR-G142-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR142-g-AC2",
+      "criterion_verbatim": "AC2 holds what must not move: with no budget twenty spaced calls pass and the row keeps exactly its eight keys; an old-schema row reads under a budget; an unknown key and malformed window fields are still OPERATION_STORE_INVALID; OPERATION_SPACING still comes before the budget and consumes no count. At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g142_checks.py guard",
+      "output_evidence": "AR-G142-OK guard: all arms  [timeout 120; rc=0; at base 9d765b4c8c the same invocation printed 'AR-G142-OK guard: all arms' rc=0]",
+      "denominator": "4 guard arms of ar_g142_checks.py (g1 to g4), 0 failed",
+      "expect": "^AR-G142-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR142-g-AC3",
+      "criterion_verbatim": "AC3 runs each existing lease, session, capture and runner test file on its own (test_operation_lease.py, test_resident_session.py, test_resident_session_checker.py, test_host_capture.py, ycharts/research/tests/test_runner.py) and then that the branch changed only your files, your folder, the order and the channel file (against the merge-base with box/dell2). At base it FAILs on the two tests named in items 6 and 7 (a live Yahoo call in an offline test; an assertion of the old order); after your change it passes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g142_checks.py regress",
+      "output_evidence": "AR-G142-REGRESS-OK   [timeout 120; rc=0; per file under python -m pytest: test_operation_lease.py 15 passed; test_resident_session.py 4 passed; test_resident_session_checker.py 2 passed; test_host_capture.py 18 passed 1 skipped; ycharts/research/tests/test_runner.py 57 passed; scope vs merge-base 8f9c005e8f: 7 changed files, 0 outside the write set]",
+      "denominator": "5 existing test files: 15 + 4 + 2 + 18 + 57 passed, 0 failed (1 skipped in test_host_capture.py); scope: 0 of 7 changed files outside the write set",
+      "expect": "^AR-G142-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: the window rolls over at '>' window_s instead of '>=' (the rollover-at-exactly-window_s rule of item 3); build must FAIL.",
+      "expected": "build FAILs at b2 (the call at exactly window_start + window_s is refused)",
+      "observed": "AR-G142-FAIL build: b2 at exactly window_start + window_s the call was refused ('OPERATION_WINDOW_BUDGET'); rc=1; the file was restored byte-identical (cmp) and build returned AR-G142-OK rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of build and guard on commit 8116e45eb8, outputs compared",
+      "observed": "build: 'AR-G142-OK build: all arms' twice; guard: 'AR-G142-OK guard: all arms' twice; regress 'AR-G142-REGRESS-OK' once",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live DynamoDB row for the provider account, and any older process still reading it, under the two new keys",
+      "reason": "no AWS call in this order; the window keys are optional and absent when no budget is set, so an older reader of an unbudgeted row is unaffected; the live row is not read here."
+    },
+    {
+      "item": "the budget NUMBER for the provider lease",
+      "reason": "set later from the paced read through the bindings (cell AR-g-144); this cell sets no number; ResidentSession defaults window_budget to None."
+    },
+    {
+      "item": "the real provider WAF behaviour",
+      "reason": "every test is offline with a fake linearizable store and a fixed clock; no network."
+    },
+    {
+      "item": "deployment of the resident",
+      "reason": "no deploy; the cell moves nothing deployed and reaches production only through a later resident release under its own never-widen pair."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W269-S1: the commit gate's client-data-check printed WARN (hashed account-id list absent on this device), so commit 8116e45eb8 was not checked for client account ids"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/session/tests/test_window_budget.py",
+      "result": "31 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 operation_lease.py resident_session.py test_window_budget.py test_resident_session.py test_resident_session_checker.py",
+      "result": "All checks passed!"
+    }
+  ]
+}

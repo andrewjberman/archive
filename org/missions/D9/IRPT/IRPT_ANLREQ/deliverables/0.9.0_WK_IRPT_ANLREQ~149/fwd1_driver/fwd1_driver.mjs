@@ -48,8 +48,23 @@ const TICKET_WAIT_MS = 240000
 const ROUND_WAIT_MS = 90000
 const PROMPT_POLL_MS = 1000
 const TICKER_SHAPE = /^[A-Z0-9.-]{1,12}$/
-const DECISION_KEYS = ['symbol', 'answer', 'replacement']
+const DECISION_KEYS = ['symbol', 'answer', 'replacement', 'fallback']
 const DECISION_ANSWERS = ['yes', 'replace', 'no']
+// AR-y-372 (round 43, ZZ33): the stated fall-through. A yes may carry fallback "no" (taken when its Yes button is not offered);
+// the file may carry on_unplanned "no" (a prompt for a symbol no decision names takes No). Nothing else is admitted.
+const TOP_KEYS = ['decisions', 'on_unplanned']
+const FALLBACK_NO = 'no'
+const ON_UNPLANNED_NO = 'no'
+// AR-y-372: the reading-only diagnostics (a PNG and a page-text record after each press round and each 60 s of silence while no
+// prompt is visible): at most DIAG_SHOTS_MAX files per run, the page text at most PAGE_TEXT_MAX characters, through redact.
+const DIAG_SHOTS_MAX = 16
+const WAIT_SHOT_MS = 60000
+const PAGE_TEXT_MAX = 600
+// AR-y-374 (round 43, ZZ35): the form's own still-checking sentence (portal fcbf2bce, analysisRequest.ts STILL_CHECKING_MESSAGE). When it is
+// shown and no prompt is, the driver waits RESUBMIT_WAIT_MS and clicks the same Submit button again, at most RESUBMIT_MAX times.
+const STILL_CHECKING_TEXT = 'The file is still being checked after several tries; nothing was filed, and you can submit it again later.'
+const RESUBMIT_WAIT_MS = 60000
+const RESUBMIT_MAX = 4
 const GO_RE = /^IRPT_ANLREQ\.TO-RUN-FWD1\.\S+$/
 const ANALYTICS_RE = /\/analytics\/ingest$/
 const POST_ALLOWED = [
@@ -155,8 +170,11 @@ function printPlan(base) {
 // stops the run; nothing is guessed. The labels are the constants above (the candidate form's own words).
 export function validateDecisions(doc) {
   if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return { error: 'the file must be a JSON object' }
-  for (const k of Object.keys(doc)) if (k !== 'decisions') return { error: 'unknown key ' + k }
+  for (const k of Object.keys(doc)) if (!TOP_KEYS.includes(k)) return { error: 'unknown key ' + k }
   if (!Array.isArray(doc.decisions)) return { error: 'decisions must be an array' }
+  if (Object.prototype.hasOwnProperty.call(doc, 'on_unplanned') && doc.on_unplanned !== ON_UNPLANNED_NO) {
+    return { error: 'on_unplanned may only be the value "no"' }
+  }
   if (doc.decisions.length > DECISIONS_MAX) return { error: 'at most ' + DECISIONS_MAX + ' decisions' }
   const seen = new Set()
   const out = []
@@ -169,6 +187,10 @@ export function validateDecisions(doc) {
     if (seen.has(d.symbol)) return { error: 'more than one decision for symbol ' + d.symbol }
     seen.add(d.symbol)
     if (!DECISION_ANSWERS.includes(d.answer)) return { error: 'answer must be exactly yes, replace or no (symbol ' + d.symbol + ')' }
+    if (Object.prototype.hasOwnProperty.call(d, 'fallback')) {
+      if (d.answer !== 'yes') return { error: 'fallback is allowed only with answer yes (symbol ' + d.symbol + ')' }
+      if (d.fallback !== FALLBACK_NO) return { error: 'fallback may only be the value "no" (symbol ' + d.symbol + ')' }
+    }
     if (d.answer === 'replace') {
       if (typeof d.replacement !== 'string' || !TICKER_SHAPE.test(d.replacement)) {
         return { error: 'replace needs a replacement ticker of 1 to 12 upper-case letters, digits, . or - (symbol ' + d.symbol + ')' }
@@ -178,9 +200,10 @@ export function validateDecisions(doc) {
     } else if (Object.prototype.hasOwnProperty.call(d, 'replacement')) {
       return { error: 'replacement is allowed only with replace (symbol ' + d.symbol + ')' }
     }
-    out.push({ symbol: d.symbol, answer: d.answer, replacement: d.answer === 'replace' ? d.replacement : null })
+    out.push({ symbol: d.symbol, answer: d.answer, replacement: d.answer === 'replace' ? d.replacement : null,
+      fallback: d.answer === 'yes' && d.fallback === FALLBACK_NO ? FALLBACK_NO : null })
   }
-  return { ok: true, decisions: out }
+  return { ok: true, decisions: out, on_unplanned: doc.on_unplanned === ON_UNPLANNED_NO ? ON_UNPLANNED_NO : null }
 }
 
 export function readDecisionsFile(file) {
@@ -214,15 +237,32 @@ export function promptSymbol(promptText) {
 }
 
 // The one press a decision plans for one prompt. ok:false names the symbol and the reason; the caller stops the run.
-export function planPrompt(promptText, decisions) {
+// AR-y-372: fell_through is "yes->no" (a planned yes with no Yes button takes its stated fallback No), "unplanned->no" (a symbol
+// no decision names takes No under on_unplanned "no"), or null (the press is the one planned). A planned no or replace is unchanged.
+export function planPrompt(promptText, decisions, onUnplanned = null) {
   const symbol = promptSymbol(promptText)
   const buttons = buttonNamesFor(promptText)
   if (symbol === null || buttons === null) return { ok: false, symbol: null, why: 'the line is not a prompt the driver knows' }
   const d = decisions.find((x) => x.symbol === symbol)
-  if (!d) return { ok: false, symbol, why: 'no decision names ' + symbol }
+  if (!d) {
+    if (onUnplanned === ON_UNPLANNED_NO && buttons.includes(PROMPT_NO)) {
+      return { ok: true, symbol, button: PROMPT_NO, replacement: null, buttons, fell_through: 'unplanned->no' }
+    }
+    return { ok: false, symbol, why: 'no decision names ' + symbol }
+  }
   const button = d.answer === 'yes' ? PROMPT_YES : d.answer === 'replace' ? PROMPT_REPLACE : PROMPT_NO
-  if (!buttons.includes(button)) return { ok: false, symbol, why: 'the form offers no ' + button + ' for ' + symbol }
-  return { ok: true, symbol, button, replacement: d.answer === 'replace' ? d.replacement : null, buttons }
+  if (!buttons.includes(button)) {
+    if (d.answer === 'yes' && d.fallback === FALLBACK_NO && buttons.includes(PROMPT_NO)) {
+      return { ok: true, symbol, button: PROMPT_NO, replacement: null, buttons, fell_through: 'yes->no' }
+    }
+    return { ok: false, symbol, why: 'the form offers no ' + button + ' for ' + symbol }
+  }
+  return { ok: true, symbol, button, replacement: d.answer === 'replace' ? d.replacement : null, buttons, fell_through: null }
+}
+
+// AR-y-372: the page text a diagnostic records: whitespace collapsed, redacted, at most PAGE_TEXT_MAX characters.
+export function pageTextFrom(raw, secrets = []) {
+  return redact(String(raw).replace(/\s+/g, ' ').trim(), secrets).slice(0, PAGE_TEXT_MAX)
 }
 
 // AR-y-367 (round 41, ZZ28): the decisions run AFTER the Submit click. The Ticket Center's prompts come only from the upload
@@ -233,6 +273,17 @@ export function planPrompt(promptText, decisions) {
 // the run; nothing is guessed. Every press and fill is recorded in report.form_decisions.
 export function ticketWaitMs(withDecisions) {
   return withDecisions ? TICKET_WAIT_MS + ROUND_WAIT_MS * PROMPT_ROUNDS : TICKET_WAIT_MS
+}
+
+// AR-y-374: the pure rule for the still-checking sentence. The sentence is matched after whitespace is collapsed. A prompt always wins
+// (wait), an answered run only reads (wait); the sentence alone re-clicks while resubmits is below RESUBMIT_MAX, and stops at it.
+export function stillCheckingAction({ pageText, promptsVisible, answered, resubmits }) {
+  const shown = String(pageText ?? '').replace(/\s+/g, ' ').includes(STILL_CHECKING_TEXT)
+  if (!shown) return { action: 'wait' }
+  if (Number(promptsVisible) > 0) return { action: 'wait' }
+  if (answered) return { action: 'wait' }
+  if (Number(resubmits) >= RESUBMIT_MAX) return { action: 'stop', why: 'STILL-CHECKING after ' + RESUBMIT_MAX + ' resubmits; the run stops, nothing is guessed' }
+  return { action: 'resubmit' }
 }
 
 export async function answerAfterSubmit(page, decisions, answered, report, log, opts = {}) {
@@ -249,18 +300,85 @@ export async function answerAfterSubmit(page, decisions, answered, report, log, 
     for (let i = 0; i < n; i++) texts.push(((await hints().nth(i).locator('p').first().textContent()) || '').trim())
     return texts.filter((t) => t !== NO_CHOICE_LINE)
   }
+  // AR-y-372 (reading only): a PNG and one report.form_waits entry per diagnostic. Off without opts.outDir (run() passes it with
+  // --decisions only); at most DIAG_SHOTS_MAX files; the page text is the filing area's visible text, redacted, bounded.
+  const onUnplanned = opts.onUnplanned ?? null
+  const waitShotMs = opts.waitShotMs ?? WAIT_SHOT_MS
+  const secrets = opts.secrets ?? []
+  const diagOn = Boolean(opts.outDir)
+  let diagN = 0
+  if (diagOn && !Array.isArray(report.form_waits)) report.form_waits = []
+  const pageTextOf = async () => {
+    try {
+      let area = page.locator('xpath=//*[@data-slot="analysis-filing-hint"]/ancestor::*[.//button[normalize-space(.)="' + SUBMIT_LABEL + '"]][1]')
+      if ((await area.count()) === 0) area = page.locator('main')
+      return pageTextFrom(await area.first().innerText(), secrets)
+    } catch { return '(unreadable)' }
+  }
+  const diagShot = async (kind, stem, prompts) => {
+    if (!diagOn || diagN >= DIAG_SHOTS_MAX) return
+    diagN += 1
+    const name = stem + '-' + String(diagN).padStart(2, '0') + '.png'
+    await page.screenshot({ path: path.join(opts.outDir, name), fullPage: true }).catch(() => {})
+    const entry = { utc: iso(), kind, shot: name, prompts_visible: prompts.map((t) => redact(t, secrets)), page_text: await pageTextOf() }
+    if (kind === 'wait') entry.last_upload = opts.lastUpload ? opts.lastUpload() : null
+    report.form_waits.push(entry)
+  }
+  // AR-y-374: the re-click state. resubmitN counts the clicks made; stillSince is when the sentence was first seen (or null); the
+  // records go to report.form_resubmits (only with an outDir, the --decisions path). A shot here takes one of the DIAG_SHOTS_MAX files.
+  const resubmitWaitMs = opts.resubmitWaitMs ?? RESUBMIT_WAIT_MS
+  let resubmitN = 0
+  let stillSince = null
+  if (diagOn && !Array.isArray(report.form_resubmits)) report.form_resubmits = []
+  // The whole filing area's visible text, for the sentence test only: NOT cut to PAGE_TEXT_MAX (the sentence may lie past the cut).
+  const filingFullText = async () => {
+    try {
+      let area = page.locator('xpath=//*[@data-slot="analysis-filing-hint"]/ancestor::*[.//button[normalize-space(.)="' + SUBMIT_LABEL + '"]][1]')
+      if ((await area.count()) === 0) area = page.locator('main')
+      return String(await area.first().innerText())
+    } catch { return '' }
+  }
+  const reserveShot = async (stem) => {
+    diagN += 1
+    const name = stem + '-' + String(diagN).padStart(2, '0') + '.png'
+    await page.screenshot({ path: path.join(opts.outDir, name), fullPage: true }).catch(() => {})
+    return name
+  }
+  let nextWaitAt = Date.now() + waitShotMs
   for (let round = 1; round <= PROMPT_ROUNDS; round++) {
     let open = []
     for (;;) {
       if (answered()) { log('FORM-DECISIONS round ' + round + ': the ticket answer arrived; the driver only reads from here'); return done('answered') }
       open = await visible()
-      if (open.length > 0) break
+      if (open.length > 0) { nextWaitAt = Date.now() + waitShotMs; break }
       if (Date.now() >= deadline) throw new Error('NO-ANSWER neither the ticket answer nor a prompt within the wait bound (round ' + round + ')')
+      if (Date.now() >= nextWaitAt) { nextWaitAt = Date.now() + waitShotMs; await diagShot('wait', 'wait', []) }
+      if (diagOn) {
+        // AR-y-374: the sentence shown, no prompt, not answered: after RESUBMIT_WAIT_MS since it was first seen (or since the last
+        // click) one more click of the SAME Submit button, shot first. The click is the only new action; the file input is not touched.
+        const act = stillCheckingAction({ pageText: await filingFullText(), promptsVisible: open.length, answered: answered(), resubmits: resubmitN })
+        if (act.action === 'stop') throw new Error(act.why)
+        if (act.action === 'wait') stillSince = null
+        else {
+          if (stillSince === null) stillSince = Date.now()
+          if (Date.now() - stillSince >= resubmitWaitMs) {
+            if (diagN >= DIAG_SHOTS_MAX) throw new Error('RESUBMIT-BUDGET the ' + DIAG_SHOTS_MAX + '-file screenshot bound is spent before resubmit ' + (resubmitN + 1) + '; the run stops, nothing is guessed')
+            const shot = await reserveShot('resubmit-' + (resubmitN + 1))
+            if (answered()) continue
+            resubmitN += 1
+            await page.getByRole('button', { name: SUBMIT_LABEL, exact: true }).click()
+            stillSince = null
+            await sleep(afterPressMs)
+            report.form_resubmits.push({ utc: iso(), n: resubmitN, shot, after_text: await pageTextOf() })
+            log('FORM-RESUBMIT ' + resubmitN + ' of ' + RESUBMIT_MAX + ': the still-checking sentence was shown with no prompt; the same Submit button was clicked again (shot ' + shot + ')')
+          }
+        }
+      }
       await sleep(pollMs)
     }
     for (const text of open) {
       if (answered()) break
-      const plan = planPrompt(text, decisions)
+      const plan = planPrompt(text, decisions, onUnplanned)
       if (!plan.ok) throw new Error('UNPLANNED-PROMPT ' + plan.why + ' (round ' + round + '); the run stops, nothing is guessed')
       if ((await hints().filter({ hasText: text }).count()) === 0) continue
       const item = hints().filter({ hasText: text }).first()
@@ -281,9 +399,11 @@ export async function answerAfterSubmit(page, decisions, answered, report, log, 
       const still = (await hints().filter({ hasText: text }).count()) > 0
       const after = still ? ((await hints().filter({ hasText: text }).first().locator('p').first().textContent()) || '').trim() : 'the prompt is no longer shown'
       report.form_decisions.push({ round, symbol: plan.symbol, button: plan.button, replacement: plan.replacement,
-        prompt_before: text, line_after: after, upload_answer_status: got ? got.status() : null, utc: iso() })
-      log('FORM-DECISIONS round ' + round + ' pressed ' + plan.button + ' for ' + plan.symbol + ' upload_answer=' + (got ? got.status() : 'none'))
+        prompt_before: text, line_after: after, upload_answer_status: got ? got.status() : null, fell_through: plan.fell_through, utc: iso() })
+      log('FORM-DECISIONS round ' + round + ' pressed ' + plan.button + ' for ' + plan.symbol + ' upload_answer=' + (got ? got.status() : 'none')
+        + (plan.fell_through ? ' fell_through=' + plan.fell_through : ''))
     }
+    await diagShot('press-round', 'form-r' + round, await visible())
   }
   if (answered()) return done('answered')
   if ((await visible()).length > 0) throw new Error('PROMPTS-REMAIN after ' + PROMPT_ROUNDS + ' rounds; the run stops with the ticket not yet answered')
@@ -308,6 +428,7 @@ async function run(o) {
     const loaded = readDecisionsFile(o.decisionsPath)
     if (!loaded.ok) { console.log('RUN-REFUSED decisions: ' + loaded.error); return 2 }
     o.decisions = loaded.decisions
+    o.onUnplanned = loaded.on_unplanned
   }
   const secrets = []
   const steps = []
@@ -315,7 +436,7 @@ async function run(o) {
   let shotN = 0
   const report = { schema: 'fwd1_run_report/1', base: o.base, firm: o.firm, started_utc: iso(), order: o.go, steps,
     polls: [], guard_refused: [], absent: [], screenshots: shots, ticket_id: null, errors: [], remove_rc: null }
-  if (o.decisions) { report.form_decisions = []; report.form_notice = null }
+  if (o.decisions) { report.form_decisions = []; report.form_notice = null; report.form_waits = [] }
   const log = (line) => {
     const text = `${iso()} ${redact(line, secrets)}`
     console.log(text)
@@ -382,6 +503,9 @@ async function run(o) {
     if (!(await submit.isEnabled())) throw new Error('the Submit control stayed disabled (a held reason)')
     await shot(page, 'before-submit')
 
+    // AR-y-372: a passive listener (it sends nothing and reads no body) keeps the status and path of the last upload answer for the diagnostics.
+    let lastUpload = null
+    if (o.decisions) page.on('response', (r) => { if (r.request().method() === 'POST' && /\/analysis\/inputs$/.test(pathOf(r.url()))) lastUpload = { status: r.status(), path: pathOf(r.url()) } })
     // AR-y-367: the ticket-answer listener is set BEFORE the Submit click; its bound is 240 s, or ticketWaitMs(true) with --decisions.
     let ticketDone = false
     const ticketAnswer = page.waitForResponse((r) => r.request().method() === 'POST' && pathOf(r.url()) === '/api/scoped/tickets', { timeout: ticketWaitMs(Boolean(o.decisions)) })
@@ -389,7 +513,8 @@ async function run(o) {
     await submit.click()
     log('STEP-4 Submit clicked; ' + (o.decisions ? 'the planned decisions are answered until the ticket answer, then the driver only reads' : 'from here the driver only reads'))
     if (o.decisions) {
-      const loop = await answerAfterSubmit(page, o.decisions, () => ticketDone, report, log)
+      const loop = await answerAfterSubmit(page, o.decisions, () => ticketDone, report, log,
+        { secrets, outDir: o.out, onUnplanned: o.onUnplanned, lastUpload: () => lastUpload })
       report.form_decisions_unused = o.decisions.map((d) => d.symbol).filter((s) => !loop.pressed.includes(s))
       log('FORM-DECISIONS ' + loop.outcome + '; symbols pressed: ' + loop.pressed.length + ' of ' + o.decisions.length + ' planned')
     }
@@ -556,7 +681,8 @@ async function selftest() {
   check('the decisions loop is called after the Submit click in source order', callIdx.length === 1 && callIdx[0] > iSubmit)
   check('without --decisions no press path is reachable: the one loop call sits behind if (o.decisions) and is the only await call',
     callIdx.length === 1 && SRC_LINES[callIdx[0] - 1] === '    if (o.decisions) {' && awaitCalls === 1)
-  const fakeFormPage = (hints, presses) => {
+  // AR-y-374: filing (optional) is { text(), onSubmit() }: the filing area's text, and a hook run on each Submit click; absent, the text is the AR-y-372 fake.
+  const fakeFormPage = (hints, presses, shots = { n: 0 }, filing = null) => {
     const remove = (h) => { hints.splice(hints.indexOf(h), 1) }
     const itemOf = (h) => ({
       locator: () => ({ first: () => ({ textContent: async () => h.text }) }),
@@ -578,12 +704,14 @@ async function selftest() {
       first: () => itemOf(list()[0]),
     })
     const page = {
-      locator: () => view(() => hints),
+      locator: (sel) => (String(sel).startsWith('xpath=') ? { count: async () => 1, first: () => ({ innerText: async () => (filing ? filing.text() : 'FAKE FILING AREA') }) } : view(() => hints)),
       waitForResponse: () => Promise.resolve({ status: () => 200 }),
+      getByRole: (role, o) => ({ click: async () => { presses.push('submit ' + o.name); if (filing) filing.onSubmit() } }),
+      screenshot: async () => { shots.n += 1 },
     }
     return page
   }
-  const quick = { waitMs: 2000, pollMs: 1, afterPressMs: 0 }
+  const quick = { waitMs: 2000, pollMs: 1, afterPressMs: 0, outDir: os.tmpdir() }
   const pr1 = []
   const r1 = await answerAfterSubmit(fakeFormPage([{ text: 'ZZZZ was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }], pr1),
     [{ symbol: 'ABCD', answer: 'no', replacement: null }], () => false, { form_decisions: [] }, () => {}, quick).then(() => null, (e) => e.message)
@@ -604,6 +732,117 @@ async function selftest() {
   check('a planned replace presses Replace, fills its replacement input, presses Check, and is recorded',
     JSON.stringify(pr4) === JSON.stringify(['Replace EFGH was not found.', 'fill Replacement ticker for EFGH=SPY', 'Check EFGH was not found.'])
     && rep4.form_decisions.length === 1 && rep4.form_decisions[0].replacement === 'SPY' && r4.outcome === 'answered')
+  // AR-y-372 (round 43, ZZ33): the stated fall-through keys, the fall-through presses, and the reading-only diagnostics with their
+  // bounds. The file with neither new key keeps its signed shape. The fakes show prompts and count presses; nothing is launched.
+  const fbDoc = validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'yes', fallback: 'no' }] })
+  check('decisions: a yes with fallback "no" is admitted and carries it', fbDoc.ok === true && fbDoc.decisions[0].fallback === 'no')
+  check('decisions: fallback on a no decision is refused', validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'no', fallback: 'no' }] }).error !== undefined)
+  check('decisions: fallback on a replace decision is refused', validateDecisions({ decisions: [{ symbol: 'EFGH', answer: 'replace', replacement: 'SPY', fallback: 'no' }] }).error !== undefined)
+  check('decisions: fallback with any value other than "no" is refused', ['yes', 'NO', 'replace', null, 1].every((v) => validateDecisions({ decisions: [{ symbol: 'ABCD', answer: 'yes', fallback: v }] }).error !== undefined))
+  check('decisions: on_unplanned "no" is admitted and carried', (() => { const v = validateDecisions({ decisions: [], on_unplanned: 'no' }); return v.ok === true && v.on_unplanned === 'no' })())
+  check('decisions: on_unplanned with any value other than "no" is refused', ['yes', 'replace', 'NO', null, true].every((v) => validateDecisions({ decisions: [], on_unplanned: v }).error !== undefined))
+  check('decisions: an unknown top-level key is still refused beside on_unplanned', validateDecisions({ decisions: [], on_unplanned: 'no', extra: 1 }).error !== undefined)
+  check('decisions: a file with neither new key keeps the signed shape (on_unplanned null, fallback null)', (() => { const v = validateDecisions(okDoc); return v.ok === true && v.on_unplanned === null && v.decisions[0].fallback === null })())
+  const pFb = planPrompt('MNOP was not found.', [{ symbol: 'MNOP', answer: 'yes', replacement: null, fallback: 'no' }])
+  check('planPrompt: a planned yes with no Yes button and fallback "no" takes No (fell_through yes->no)', pFb.ok === true && pFb.button === 'No' && pFb.fell_through === 'yes->no')
+  check('planPrompt: a planned yes with no Yes button and no fallback is ok:false', planPrompt('MNOP was not found.', [{ symbol: 'MNOP', answer: 'yes', replacement: null, fallback: null }]).ok === false)
+  const pYes = planPrompt('Did you mean ABC? (row 3: ABCD)', [{ symbol: 'ABCD', answer: 'yes', replacement: null, fallback: 'no' }])
+  check('planPrompt: a planned yes whose Yes button is offered is unchanged (button Yes, fell_through null)', pYes.ok === true && pYes.button === 'Yes' && pYes.fell_through === null)
+  const pUn = planPrompt('ZZZZ was not found.', [], 'no')
+  check('planPrompt: an unplanned symbol with on_unplanned "no" takes No (fell_through unplanned->no)', pUn.ok === true && pUn.button === 'No' && pUn.fell_through === 'unplanned->no')
+  check('planPrompt: an unplanned symbol without on_unplanned is ok:false', planPrompt('ZZZZ was not found.', [], null).ok === false)
+  check('planPrompt: a planned no and a planned replace are unchanged by on_unplanned', (() => {
+    const n = planPrompt('EFGH was not found.', [{ symbol: 'EFGH', answer: 'no', replacement: null }], 'no')
+    const r = planPrompt('EFGH was not found.', [{ symbol: 'EFGH', answer: 'replace', replacement: 'SPY', fallback: null }], 'no')
+    return n.button === 'No' && n.fell_through === null && r.button === 'Replace' && r.fell_through === null
+  })())
+  const pr5 = []
+  const rep5 = { form_decisions: [] }
+  const hints5 = [{ text: 'MNOP was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }]
+  const r5 = await answerAfterSubmit(fakeFormPage(hints5, pr5), [{ symbol: 'MNOP', answer: 'yes', replacement: null, fallback: 'no' }],
+    () => hints5.length === 0 && pr5.length > 0, rep5, () => {}, quick).catch((e) => ({ outcome: 'threw: ' + e.message, pressed: [] }))
+  check('the loop presses the fall-through No, records fell_through yes->no, and reads on to the answer', r5.outcome === 'answered' && JSON.stringify(pr5) === JSON.stringify(['No MNOP was not found.']) && rep5.form_decisions[0].fell_through === 'yes->no')
+  const pr6 = []
+  const rep6 = { form_decisions: [] }
+  const hints6 = [{ text: 'QQQQ was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }]
+  const r6 = await answerAfterSubmit(fakeFormPage(hints6, pr6), [], () => hints6.length === 0 && pr6.length > 0, rep6, () => {}, { ...quick, onUnplanned: 'no' })
+    .catch((e) => ({ outcome: 'threw: ' + e.message, pressed: [] }))
+  check('the loop presses No for an unplanned symbol under on_unplanned "no" and records unplanned->no', r6.outcome === 'answered' && rep6.form_decisions[0].symbol === 'QQQQ' && rep6.form_decisions[0].fell_through === 'unplanned->no')
+  const shotsB = { n: 0 }
+  const presB = []
+  const repB = { form_decisions: [] }
+  const rB = await answerAfterSubmit(fakeFormPage([], presB, shotsB), [], () => false, repB, () => {},
+    { waitMs: 1000, pollMs: 1, afterPressMs: 0, waitShotMs: 1, outDir: os.tmpdir(), secrets: [], lastUpload: () => ({ status: 200, path: '/api/scoped/investor-reporting/analysis/inputs' }) })
+    .then(() => null, (e) => e.message)
+  check('the diagnostic files are bounded at 16 (DIAG_SHOTS_MAX) with no press or fill, and the wait stays NO-ANSWER',
+    DIAG_SHOTS_MAX === 16 && shotsB.n === 16 && repB.form_waits.length === 16 && presB.length === 0 && typeof rB === 'string' && /NO-ANSWER/.test(rB))
+  check('a wait entry carries the last upload status and path only (no body), and its page text', (() => {
+    const w = repB.form_waits.find((e) => e.kind === 'wait')
+    return !!w && JSON.stringify(w.last_upload) === JSON.stringify({ status: 200, path: '/api/scoped/investor-reporting/analysis/inputs' }) && w.page_text === 'FAKE FILING AREA'
+  })())
+  const SECRET_T = 'SAMPLE-SECRET-TEXT-4242'
+  const pt = pageTextFrom(SECRET_T + ' token=SAMPLE-TOKEN-99887766 ' + 'y '.repeat(400), [SECRET_T])
+  check('page text is redacted and at most 600 characters; whitespace is collapsed', pt.length <= 600 && !pt.includes(SECRET_T) && !pt.includes('SAMPLE-TOKEN-99887766')
+    && pageTextFrom('z'.repeat(1000), []).length === 600 && pageTextFrom('a \n\n  b\tc  ', []) === 'a b c')
+  const shotsC = { n: 0 }
+  const repC = { form_decisions: [] }
+  await answerAfterSubmit(fakeFormPage([{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }], [], shotsC),
+    [{ symbol: 'EFGH', answer: 'no', replacement: null }], () => false, repC, () => {}, { waitMs: 50, pollMs: 1 }).catch(() => null)
+  check('without an outDir no diagnostic file or form_waits entry is written (the signed path)', shotsC.n === 0 && repC.form_waits === undefined)
+  // AR-y-374 (round 43, ZZ35): the still-checking sentence. The pure rule first; then the loop against the fake page, where the sentence
+  // stays shown until the fake Submit clicks change it. resubmitWaitMs is short here; the real bound is RESUBMIT_WAIT_MS (60000).
+  const STILL_SENTENCE = 'The file is still being checked after several tries; nothing was filed, and you can submit it again later.'
+  const sa = (o) => stillCheckingAction(o).action
+  check('still-checking: the sentence absent is wait', sa({ pageText: 'FAKE FILING AREA', promptsVisible: 0, answered: false, resubmits: 0 }) === 'wait')
+  check('still-checking: the sentence present with no prompt and 0 resubmits is resubmit', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: false, resubmits: 0 }) === 'resubmit')
+  check('still-checking: the sentence present with a prompt visible is wait (a prompt always wins)', sa({ pageText: STILL_SENTENCE, promptsVisible: 1, answered: false, resubmits: 0 }) === 'wait')
+  check('still-checking: the sentence present once answered is wait', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: true, resubmits: 0 }) === 'wait')
+  check('still-checking: the sentence present at 3 resubmits is resubmit', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: false, resubmits: 3 }) === 'resubmit')
+  check('still-checking: the sentence present at 4 resubmits is stop, with the error line', (() => {
+    const s = stillCheckingAction({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: false, resubmits: 4 })
+    return s.action === 'stop' && s.why === 'STILL-CHECKING after 4 resubmits; the run stops, nothing is guessed'
+  })())
+  check('still-checking: the constants equal 60000 and 4', RESUBMIT_WAIT_MS === 60000 && RESUBMIT_MAX === 4)
+  check('still-checking: STILL_CHECKING_TEXT equals the form sentence exactly', STILL_CHECKING_TEXT === STILL_SENTENCE)
+  check('still-checking: a near miss (Nothing with a capital N) is not the sentence: wait', sa({ pageText: STILL_SENTENCE.replace('nothing', 'Nothing'), promptsVisible: 0, answered: false, resubmits: 0 }) === 'wait')
+  check('still-checking: the match collapses whitespace in the page text', sa({ pageText: 'Upload\n\n ' + STILL_SENTENCE.replace(' after ', '  after '), promptsVisible: 0, answered: false, resubmits: 0 }) === 'resubmit')
+  check('still-checking: an answered run at 4 resubmits reads on (answered wins over stop)', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: true, resubmits: 4 }) === 'wait')
+  const stillCfg = { waitMs: 5000, pollMs: 1, afterPressMs: 0, resubmitWaitMs: 1, outDir: os.tmpdir(), waitShotMs: 600000 }
+  const fL1 = { clicks: 0, text: () => (fL1.clicks >= 2 ? 'The ticket is filed.' : STILL_SENTENCE), onSubmit: () => { fL1.clicks += 1 } }
+  const pL1 = []
+  const shotsL1 = { n: 0 }
+  const repL1 = { form_decisions: [] }
+  const rL1 = await answerAfterSubmit(fakeFormPage([], pL1, shotsL1, fL1), [], () => fL1.clicks >= 2, repL1, () => {}, stillCfg)
+    .catch((e) => ({ outcome: 'threw: ' + e.message, pressed: [] }))
+  check('still-checking: two re-clicks of the same Submit button, each recorded and shot, then the answer is read',
+    rL1.outcome === 'answered' && JSON.stringify(pL1) === JSON.stringify(['submit File Analysis Request', 'submit File Analysis Request'])
+    && repL1.form_resubmits.length === 2 && repL1.form_resubmits[1].n === 2 && /^resubmit-1-\d\d\.png$/.test(repL1.form_resubmits[0].shot) && shotsL1.n === 2)
+  const fL2 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL2.clicks += 1 } }
+  const pL2 = []
+  const shotsL2 = { n: 0 }
+  const repL2 = { form_decisions: [] }
+  const rL2 = await answerAfterSubmit(fakeFormPage([], pL2, shotsL2, fL2), [], () => false, repL2, () => {}, stillCfg).then(() => null, (e) => e.message)
+  check('still-checking: after 4 resubmits the sentence stops the run with the error line; no fifth click', rL2 === 'STILL-CHECKING after 4 resubmits; the run stops, nothing is guessed'
+    && fL2.clicks === 4 && repL2.form_resubmits.length === 4 && shotsL2.n === 4)
+  const hints3 = [{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }]
+  const fL3 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL3.clicks += 1 } }
+  const pL3 = []
+  const repL3 = { form_decisions: [] }
+  const rL3 = await answerAfterSubmit(fakeFormPage(hints3, pL3, { n: 0 }, fL3), [{ symbol: 'EFGH', answer: 'no', replacement: null }], () => fL3.clicks >= 1, repL3, () => {}, stillCfg)
+    .catch((e) => ({ outcome: 'threw: ' + e.message, pressed: [] }))
+  check('still-checking: a prompt shown with the sentence is pressed first; the re-click follows only once no prompt is shown',
+    rL3.outcome === 'answered' && pL3.length === 2 && pL3[0] === 'No EFGH was not found.' && pL3[1] === 'submit File Analysis Request')
+  const fL4 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL4.clicks += 1 } }
+  const shotsL4 = { n: 0 }
+  const pL4 = []
+  const repL4 = { form_decisions: [] }
+  const rL4 = await answerAfterSubmit(fakeFormPage([], pL4, shotsL4, fL4), [], () => false, repL4, () => {},
+    { waitMs: 10000, pollMs: 1, afterPressMs: 0, resubmitWaitMs: 2000, waitShotMs: 1, outDir: os.tmpdir() }).then(() => null, (e) => e.message)
+  check('still-checking: the 16-file bound spent before a resubmit stops the run with RESUBMIT-BUDGET and no click',
+    typeof rL4 === 'string' && /RESUBMIT-BUDGET/.test(rL4) && fL4.clicks === 0 && shotsL4.n === 16 && repL4.form_resubmits.length === 0)
+  const fL5 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL5.clicks += 1 } }
+  const rL5 = await answerAfterSubmit(fakeFormPage([], [], { n: 0 }, fL5), [], () => false, { form_decisions: [] }, () => {}, { waitMs: 60, pollMs: 1 }).then(() => null, (e) => e.message)
+  check('still-checking: without an outDir (the signed path) the sentence is not acted on: no click, NO-ANSWER', fL5.clicks === 0 && typeof rL5 === 'string' && /NO-ANSWER/.test(rL5))
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n)
   for (const [n, ok] of cases) console.log((ok ? 'case PASS ' : 'case FAIL ') + n)
   if (failed.length === 0) {

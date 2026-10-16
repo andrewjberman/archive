@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-615",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-615.drive-one-dev-export-and-close-ib521-l6.md",
+  "group": "OTHER",
+  "vintage_commit": "2dea90cbc8"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-615.drive-one-dev-export-and-close-ib521-l6.md",
+  "vintage_commit": "f8dcbdc2be"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-ycharts/firms/49financial/generations/ (one new export: pending pointer, bundle, artifact and receipt written by the function itself)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ONE creating invoke of irpt-export-render (state QUEUED, EXPORT_QUEUED), two status-read invokes (RUNNING then READY); store read after: 2 receipts, both READY, validation PASSED 0 failures, page_count 11, artifact objects present, vendor_signed_url_exposed false",
+   "artifact_covered_by": [
+    "IB246-1-AC3"
+   ],
+   "commit_or_etag": "the new export's receipt object (opaque id kept out of the record)"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB246-1_export_drive_record.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the gates, the claims, the old receipt read, the new export read, the counters and the notes",
+   "artifact_covered_by": [
+    "IB246-1-AC1",
+    "IB246-1-AC2",
+    "IB246-1-AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB246-1-AC1",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r246/p246_cells.py\" . IB246-1-AC1",
+   "expect": "IB246-1-AC1 PASS",
+   "output_evidence": "OK: the gates: L6 only open, the signed digest live, the CTO ruling (B) cited\nIB246-1-AC1 PASS\nexit=0",
+   "denominator": "1 record; ledger list read: 1 OPEN entry naming irpt-export-render with stranded ['L6']; CodeSha256 re-read before the creating invoke",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r246/p246_cells.py\" . IB246-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "IB246-1-AC2",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r246/p246_cells.py\" . IB246-1-AC2",
+   "expect": "IB246-1-AC2 PASS",
+   "output_evidence": "OK: the claims were admin/49financial, no user row minted, the authorizer stated not exercised\nIB246-1-AC2 PASS\nexit=0",
+   "denominator": "1 record; claims classified FIRM_OPERATIONS by the repo's own resolve.py before any invoke",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r246/p246_cells.py\" . IB246-1-AC2",
+   "method": "command"
+  },
+  {
+   "criterion_id": "IB246-1-AC3",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r246/p246_cells.py\" . IB246-1-AC3",
+   "expect": "IB246-1-AC3 PASS",
+   "output_evidence": "OK: the old receipt readable, ONE new export readable, no email, the counters\nIB246-1-AC3 PASS\nexit=0",
+   "denominator": "1 creating invoke, 3 status-read invokes counted (1 old, 2 new); receipt store 2 receipts after, 1 before",
+   "status": "PASS",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r246/p246_cells.py\" . IB246-1-AC3",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (its comp-adversary arm ran the negatives on synthetic records).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "a lock file made a second creating invoke refuse; the receipt store was counted before (1) and after (2)",
+   "observed": "1 creating invoke; receipts 1 to 2",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the transient user, the mint helper and XA-20261016T160537Z-f98b",
+   "reason": "out of this order by amendment 2 (CTO ruling B, msg 9743): no user row was minted or removed; the helper blob stop (msg 9726) and the user-class hold (msg 9740) are superseded"
+  },
+  {
+   "item": "the API authorizer and the edge validator",
+   "reason": "not exercised: the function was invoked directly with synthetic claims; the release changed the function, not the authorizer"
+  },
+  {
+   "item": "emails_sent 0",
+   "reason": "measured by source (no SES, SNS, SQS or events client in the export directory), not by a mail-side read"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261014T0000Z_irpt-export-receipt-repin-20261013_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "ib615_drive.py (boto3 lambda invoke; preflight, old, create, poll)",
+   "invocation": "preflight, old, create, poll",
+   "result": "FIRM_OPERATIONS; old READY; create QUEUED; poll RUNNING then READY"
+  }
+ ]
+}

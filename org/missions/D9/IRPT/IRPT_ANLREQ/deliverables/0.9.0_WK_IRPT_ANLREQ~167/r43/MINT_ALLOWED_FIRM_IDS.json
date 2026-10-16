@@ -1,0 +1,43 @@
+{
+  "record": "AR-y-373 FWD-1 mint helper: allowedFirmIds as the one-firm list (49financial)",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-373",
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~167",
+  "branch": "wk-IRPT_ANLREQ-167",
+  "base": "35cccb751691e52264824688b8a4b109ae2125d3",
+  "edited_file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/fwd1_mint.py",
+  "mint_sha256_before": "04e4ba64ddb74895442a7b291e14862fc9b395b65cc814c75bb737b8445ec5d4",
+  "mint_sha256_after": "f1c655c48ed042959a1acc854f6dfd49fa27b8a8fcee3b50ce58e29b151a2f17",
+  "bytes_after": 7100,
+  "changes": [
+    "RUN_FIRM = \"49financial\" module constant beside FIRM = \"opal-capital\"",
+    "item_for adds allowedFirmIds = {\"L\": [{\"S\": RUN_FIRM}]}; every other attribute, the key, exp and the conditional write are unchanged",
+    "readback_ok(row) is a pure function: status == {\"S\": \"active\"}, firmId == {\"S\": \"opal-capital\"}, passwordHash present, allowedFirmIds == {\"L\": [{\"S\": \"49financial\"}]} exactly, and none of mfaEnabled, mfaChannel, scope_all_firms present",
+    "cmd_mint calls readback_ok; prints MINT-OK READBACK-OK then one SCOPE line on stdout; READBACK-BAD shape and rc 1 unchanged on failure",
+    "the SCOPE line reads the member strings and the presence of scope_all_firms and of mfaEnabled or mfaChannel from the row; it never prints the hash or the password",
+    "module docstring states the new stdout shape; the removal path (cmd_remove), read_password, hash_password and the EMAIL constant are unchanged"
+  ],
+  "interpretation": "The order's 'allowedFirmIds equals exactly [{\"S\": \"49financial\"}]' is read as the DynamoDB attribute value of that list, i.e. {\"L\": [{\"S\": \"49financial\"}]}. A string, an NS or SS set, an empty list, a second member or a non-string member all fail the comparison.",
+  "files_written": [
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~167/test_fwd1_mint.py", "kind": "test", "cases": 15},
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~167/check_item.py", "kind": "test"},
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~167/mutant_check.py", "kind": "test"},
+    {"path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~167/r43/MINT_ALLOWED_FIRM_IDS.json", "kind": "doc"}
+  ],
+  "tests_output": {
+    "AC1": "python .../0.9.0_WK_IRPT_ANLREQ~167/test_fwd1_mint.py -> MINT-TESTS-OK 15 (rc 0); 15 cases over item_for and readback_ok: 2 positive (the list, the base attributes) and 1 good read-back pass, 12 negative (no list, two firms, string, scope_all_firms with and without a list, mfaEnabled, mfaChannel, status not active, empty list, other firm, non-string member, no passwordHash) each refused",
+    "AC2": "python .../0.9.0_WK_IRPT_ANLREQ~167/check_item.py -> ITEM-OK 11 attributes (rc 0): the ten base attributes PK, SK, email, passwordHash, status, firmId, role, userType, name, exp, plus allowedFirmIds",
+    "AC3": "python .../0.9.0_WK_IRPT_ANLREQ~167/mutant_check.py -> MUTANT-FIRES readback_ok admits a row with no allowedFirmIds; test rc=1 MINT-TESTS-BAD row with no allowedFirmIds fails (rc 0)",
+    "commit_gate": "bash .tools/commit-gate.sh on the helper and on the three new .py files: pre-commit gate clean, 1 of 1 file each",
+    "mint_output_path_stub": "the cmd_mint path run once with boto3 and botocore replaced by in-process stubs (no real import, no AWS) and bcrypt replaced by a stub hash: stdout MINT-OK READBACK-OK then SCOPE allowedFirmIds=49financial scope_all_firms=absent mfa=absent; rc 0. The stub only exercises the print path; no client call reached AWS."
+  },
+  "driver_reads_mint_output_as": "fwd1_driver.mjs (READ only) line 339 runs spawnSync(PYTHON, [MINT, 'mint']) with the password on stdin and a 180000 ms timeout; line 340 logs 'STEP-2 mint rc=' + status + ' ' + the trimmed stdout; line 341 throws 'mint did not return OK' when status is not 0. So the driver reads the EXIT CODE only: it does not require stdout to equal MINT-OK READBACK-OK, and the new SCOPE second line is carried in that log line without any exact-match test. The only other read of the helper file is lines 512 to 516, which take the EMAIL constant by regex ^EMAIL = and compare it with the driver's address; that constant is unchanged. No BLOCKING row was needed.",
+  "not_read": [
+    "any live mint or remove: neither subcommand was run; no AWS, network or boto3 call was made (the cmd_mint stub run replaced boto3 in-process)",
+    "the combined ticket-service release's own code as it runs live: infra/aws/lambda/ticket_center is not on disk in this sparse worktree; _profile_scope was read at HEAD only (lines 392 to 441), see surprise IRPT_ANLREQ-D2-W167-S1",
+    "how the pre-release authorizer reads allowedFirmIds: the new helper is at HEAD but the ticket-service release is not applied, so the live authorizer's current reading of a list attribute was not examined",
+    "the live opal-users-v2 table and any existing row for the synthetic address",
+    "the window-4 addendum, the address decision and the pin of the new sha256: the cell says the issuer pins them in the next addendum; mint_sha256_after is recorded here for that pin",
+    "the rest of fwd1_driver.mjs beyond lines 339 to 341 and 512 to 516, and the driver's redact function, which this worker did not edit",
+    "the password handling and the removal path: both are unchanged by this cell and were not re-derived beyond reading the code"
+  ]
+}

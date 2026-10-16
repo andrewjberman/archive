@@ -7,9 +7,9 @@
   python c26_check.py ac2   the eight FROZEN-copy rows (49financial_<t>_silver_legacy for allocations, assets, fees, prices, realized, transactions_enriched, transactions, unrealized): prefix is
                             blackdiamond/49financial/silver_legacy/<t>/ and a non-empty listing exists there in opal-data-assets (aws CLI), the group map round18/assets_group_map.json
                             says bucket opal-data-assets for all nine legacy rows, each still has read_tool null, gap_owner NFRA_OPLGTW and its `FROZEN copy` open item
-  python c26_check.py ac7   (A7) the four `address` strings are HELD whole at HEAD of the registry file the naming gate's catalog exemption reads (catalog_fork_keys.json, read
-                            through naming-gate.py's own `_catalog_registry_held(repo)`), the registry differs from its A4 state d1092a10f6 ONLY by one new top-level key, and the placed
-                            catalog blob is unchanged (b81c48aa3c)
+  python c26_check.py ac7   (A7, CTO msg 35145) the four `address` strings are HELD whole at HEAD by legacy_addresses.json (read through naming-gate.py's own `_catalog_registry_held(repo)`),
+                            that file differs from its state at d1092a10f6 by exactly the four appended rows, catalog_fork_keys.json is byte-equal to that state, and the placed catalog
+                            blob is unchanged (b81c48aa3c)
   python c26_check.py ac3   the field: `address` is an accepted optional TABLE-row field in the emitter and the validator and is carried to the emitted row by the row builder; exactly four
                             entries carry it, each unique; tests/test_address_field.py (new, at least 5 tests) with tests/test_c_group.py and tests/test_silver_table_grain.py pass;
                             validate_catalog_v02.py prints no FAIL line
@@ -184,8 +184,8 @@ def ac7():
     held = ng._catalog_registry_held(repo=os.path.abspath(ROOT))
     want = ["blackdiamond/49f-live/silver/%s/" % t for t in TOOLS]
     got = {w: held.get(w, "") for w in want}
-    print("DENOMINATOR addresses %d; held at HEAD by the registry %d" % (len(want), sum(1 for v in got.values() if v.endswith("catalog_fork_keys.json"))))
-    res = [("the four address strings are held whole in catalog_fork_keys.json at HEAD", all(v.endswith("catalog_fork_keys.json") for v in got.values()))]
+    print("DENOMINATOR addresses %d; held at HEAD by legacy_addresses.json %d" % (len(want), sum(1 for v in got.values() if v.endswith("legacy_addresses.json"))))
+    res = [("the four address strings are held whole in legacy_addresses.json at HEAD", all(v.endswith("legacy_addresses.json") for v in got.values()))]
 
     def git_show(ref, path):
         r = subprocess.run(["git", "-C", ROOT, "show", "%s:%s" % (ref, path)], capture_output=True)
@@ -193,12 +193,16 @@ def ac7():
             print("ERROR: git show %s:%s rc %d" % (ref, path, r.returncode))
             sys.exit(9)
         return r.stdout
-    reg = "infra/logic/registry/catalog_fork_keys.json"
-    old, new = json.loads(git_show("d1092a10f6", reg)), json.loads(git_show("HEAD", reg))
-    added = sorted(set(new) - set(old))
-    changed = sorted(k for k in old if old[k] != new.get(k))
-    print("DENOMINATOR registry top-level keys: A4 %d, HEAD %d; added %s; changed %s" % (len(old), len(new), added, changed))
-    res.append(("the registry differs from its A4 state only by ONE new top-level key (rows, entities, labels equal)", len(added) == 1 and not changed))
+    legacy, fork = "infra/logic/registry/legacy_addresses.json", "infra/logic/registry/catalog_fork_keys.json"
+    old, new = json.loads(git_show("d1092a10f6", legacy)), json.loads(git_show("HEAD", legacy))
+    orows, nrows = old["legacy_addresses"], new["legacy_addresses"]
+    appended = nrows[len(orows):]
+    keys = [r.get("key") for r in appended]
+    ok_rows = (len(appended) == 4 and nrows[:len(orows)] == orows and keys == ["gateway-client-bdlive-%s-logical" % t for t in TOOLS]
+               and [r.get("template") for r in appended] == want and all(r.get("bucket") == "opal-data-bd" and r.get("shape") == "prefix" for r in appended))
+    print("DENOMINATOR legacy rows: d1092a10f6 %d, HEAD %d; appended keys %s" % (len(orows), len(nrows), keys))
+    res.append(("legacy_addresses.json differs from its d1092a10f6 state by exactly the four appended rows (keys, templates, bucket, shape)", ok_rows))
+    res.append(("catalog_fork_keys.json is byte-equal to its d1092a10f6 state", git_show("d1092a10f6", fork) == git_show("HEAD", fork)))
     blob = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD:infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml"], capture_output=True, text=True).stdout.strip()
     res.append(("the placed catalog blob is unchanged (%s)" % blob[:10], blob == "b81c48aa3c6c0ce3e79628e55cc5e8501f73dcf3"))
     return report(res)

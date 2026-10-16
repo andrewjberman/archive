@@ -26,6 +26,7 @@ from pathlib import Path
 LAUNCHER = "data/inf/scripts/gold/INF_G_01.account_transaction_gold.py"
 MANIFEST = "data/inf/scripts/gold/INF_G_01.bundle.json"
 TESTS = "data/inf/scripts/gold/tests/test_INF_G_01_account_transaction_gold.py"
+INF_PRODUCER_TESTS = "data/assets/scripts/gold/irpt_reporting/tests/test_account_transaction_inflection.py"
 ADAPTER = "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py"
 SYNC_DIRS = ("data/inf/scripts/gold", "data/inf/scripts/silver", "data/inf/scripts/bronze", "data/inf/manual_api")
 GOLD_KEY = "irpt/inflection/gold/account_transaction/"
@@ -51,7 +52,7 @@ class FakeS3:
         data = Body.read() if hasattr(Body, "read") else Body
         self.store[(Bucket, Key)] = data
         self.puts.append((Bucket, Key))
-        return {"ETag": "x", "VersionId": "v"}
+        return {"ETag": '"%s"' % hashlib.md5(data).hexdigest(), "VersionId": "v"}  # a single-part S3 put returns the body MD5
 
     def get_object(self, Bucket, Key, **kw):  # noqa: N803
         if (Bucket, Key) not in self.store:
@@ -220,6 +221,8 @@ def ac1(root):
         need(w in low, "the launcher's test names lack %r" % w)
     run = subprocess.run([sys.executable, "-m", "pytest", TESTS, "-q", "-p", "no:cacheprovider"], cwd=str(root), capture_output=True, text=True, timeout=600)
     need(run.returncode == 0, "pytest %s failed: %s" % (TESTS, (run.stdout or "")[-300:]))
+    run = subprocess.run([sys.executable, "-m", "pytest", INF_PRODUCER_TESTS, "-q", "-p", "no:cacheprovider"], cwd=str(root), capture_output=True, text=True, timeout=600)
+    need(run.returncode == 0, "pytest %s failed (the contract moved to 0.5.1; the row-filter test must read the latest-snapshot record): %s" % (INF_PRODUCER_TESTS, (run.stdout or "")[-300:]))
 
 
 def closure_problems(manifest, root):
@@ -322,7 +325,8 @@ def selftest():
     s3.put_object("b", "x/date=2026-01-02/part.parquet", Body=b"2")
     r = s3.list_objects_v2("b", Prefix="x/", Delimiter="/")
     arm("fake-prefixes", [p["Prefix"] for p in r["CommonPrefixes"]], ["x/date=2026-01-01/", "x/date=2026-01-02/"])
-    arm("fake-get", s3.get_object("b", "x/date=2026-01-01/part.parquet")["Body"].read(), b"1")
+    arm("fake-etag-is-the-body-md5", s3.put_object("b", "y", Body=b"1")["ETag"], '"%s"' % hashlib.md5(b"1").hexdigest())
+    arm("fake-get",s3.get_object("b", "x/date=2026-01-01/part.parquet")["Body"].read(), b"1")
     pages = list(s3.get_paginator("list_objects_v2").paginate(Bucket="b", Prefix="x/"))
     arm("fake-paginate", len(pages[0]["Contents"]), 2)
     arm("sequence-green", sequence_problems([("d1", {"source_txn_id": "A"}), ("d2", {"source_txn_id": "B"})]), [])
