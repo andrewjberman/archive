@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-294",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fd4518ee96f8feedb2fe9157e2e8ac262a3c1d0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "5fd4518ee96f8feedb2fe9157e2e8ac262a3c1d0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-294.producers-derive-history-scope.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~237",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~237/RD_HISTSCOPE_PRODUCERS_FACTS_R149.json",
+  "artifacts_produced": [
+    {
+      "commit_or_etag": "822c8acc13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code and tests only, committed on wk-IRPT_DASHBD-237; not deployed, no build or upload, no producer run against S3.",
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "DB162-1-AC1"
+      ]
+    },
+    {
+      "commit_or_etag": "822c8acc13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code and tests only, committed on wk-IRPT_DASHBD-237; not deployed, no build or upload, no producer run against S3.",
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "DB162-1-AC2"
+      ]
+    },
+    {
+      "commit_or_etag": "822c8acc13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code and tests only, committed on wk-IRPT_DASHBD-237; not deployed, no build or upload, no producer run against S3.",
+      "path_or_key": "infra/aws/lambda/investor-reporting/account-return-daily/handler.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "DB162-1-AC2",
+        "DB162-1-AC3"
+      ]
+    },
+    {
+      "commit_or_etag": "822c8acc13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code and tests only, committed on wk-IRPT_DASHBD-237; not deployed, no build or upload, no producer run against S3.",
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_history_scope_derivation.py",
+      "kind": "test",
+      "artifact_covered_by": [
+        "DB162-1-AC3"
+      ]
+    },
+    {
+      "commit_or_etag": "822c8acc13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Code and tests only, committed on wk-IRPT_DASHBD-237; not deployed, no build or upload, no producer run against S3.",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~237/RD_HISTSCOPE_PRODUCERS_FACTS_R149.json",
+      "kind": "doc",
+      "artifact_covered_by": [
+        "DB162-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB162-1-AC1",
+      "criterion_verbatim": "DB162-1-AC1 -- the 49 Financial producer derives history_scope per account against the source floor (the earliest balance partition): the floor-start account is PARTIAL_HISTORY, accounts first seen after it FULL, every row of a derived call carries history_scope_claim = inferred; with window-local inception or no balance days the old constant and NO claim; table_for and emit_day write the 19 columns plus the claim only when the frame has it; the 19-column schema and its contract hash are untouched. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p162_producers_scope.py\" . DB162-1-AC1",
+      "output_evidence": "OK: the 49 Financial producer derives history_scope per account against the source floor (the earliest balance partition): the floor-start account is PARTIAL_HISTORY, the ones first seen after it FULL, every row carries history_scope_claim = inferred; with no durable inception or no floor the old constant and NO claim; table_for and emit_day write the 19 columns plus the claim only when the frame has it, and the 19-column schema and its contract hash are untouched\nDB162-1-AC1 PASS",
+      "denominator": "1 of 1 checker run (check_ard); 3 of 3 accounts; 3 of 3 no-floor arms (no first_data, no bal_days, empty bal_days); 2 of 2 emit_day arms",
+      "status": "PASS",
+      "expect": "DB162-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB162-1-AC2",
+      "criterion_verbatim": "DB162-1-AC2 -- the Cottonwood adapter derives history_scope from the floor-day partition (a value on the floor day is PARTIAL_HISTORY, none is FULL) and writes 19 columns, the source label, then the claim; with no floor day or no floor partition the old 20-column table and NO claim; its schema constants and its 0.3.0 hash are untouched; a day landed through the handler carries the derived scope. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p162_producers_scope.py\" . DB162-1-AC2",
+      "output_evidence": "OK: the Cottonwood adapter derives history_scope from the floor-day partition (a value on the floor day is PARTIAL_HISTORY, none is FULL) and writes 19 columns, source, then the claim; with no floor day or no floor partition the old 20-column table and NO claim; its constants and 0.3.0 hash are untouched; a day landed through the handler carries the derived scope\nDB162-1-AC2 PASS",
+      "denominator": "1 of 1 checker run (check_cbd); 2 of 2 accounts on the floor-day partition; 2 of 2 legacy arms (no floor day, floor partition absent)",
+      "status": "PASS",
+      "expect": "DB162-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB162-1-AC3",
+      "criterion_verbatim": "DB162-1-AC3 -- the new test file holds at least 10 passing tests; the whole gold tests directory (the one known pre-existing red deselected) and the landing handler's tests pass; the worker's commits change only the two producers, the landing handler, the new test file, the folder, the investigation file and task-order files; the facts record equals the checker's recount. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p162_producers_scope.py\" . DB162-1-AC3",
+      "output_evidence": "OK: 28 new tests pass; the whole gold tests directory passes (757 tests, the one known pre-existing red deselected) and the landing handler's tests (16); 5 files changed, all in the grant; the facts record equals the recount\nDB162-1-AC3 PASS",
+      "denominator": "28 of 28 new tests passed (minimum 10); 757 of 758 gold tests (1 deselected, known pre-existing red); 16 of 16 landing-handler tests; 5 of 5 changed files inside the grant",
+      "status": "PASS",
+      "expect": "DB162-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for this cell; the issuer's checker p162 holds the single-fault mutants (14 red arms run at issuance).",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "not fired by this worker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "checker AC1 and AC2 each run twice; outputs compared byte for byte",
+      "observed": "AC1 and AC2 outputs identical across two runs (both PASS, rc 0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "neither producer run against S3; no gold partition rewritten; no build, upload or deploy",
+      "reason": "Risk class WORLD: the code update, the gold history_scope rebuild and the republish are later signed pairs and the applier's."
+    },
+    {
+      "item": "rebuild of already-landed Cottonwood days",
+      "reason": "The landing refuses to overwrite a partition that already holds objects; a rebuild is a separate act."
+    },
+    {
+      "item": "Inflection adapters",
+      "reason": "Outside the grant and no series is published from them; they still write the constant."
+    },
+    {
+      "item": "test_account_activity_lots.py::test_the_calendar_itself_raises_before_2010_and_the_index_never_asks_it",
+      "reason": "Red before this edit and outside the cell; deselected by the checker and not touched."
+    },
+    {
+      "item": "commit-gate client-data scan",
+      "reason": "The hashed account-id list is absent on this box, so the gate printed WARN and did not check the commit; the worker scanned the staged diff for client figures and long digit runs (none found)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_history_scope_derivation.py",
+      "result": "28 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests --deselect <known pre-existing red>",
+      "result": "757 passed, 1 deselected"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/account-return-daily",
+      "result": "16 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 on account_return_daily.py, cottonwood_bd_account_return_daily.py, test_history_scope_derivation.py, handler.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
