@@ -162,7 +162,7 @@ def check_behaviour(h, root, handler_path, patch=None, contract_root=None):
                 m = json.loads(s3.puts[h.series_key(naming, firm, acct, "manifest.json")].decode("utf-8"))
                 src = "pandas_market_calendars" if tc.calendar_source().startswith("NYSE/pandas_market_calendars") else "fallback_%d_%d" % (tc.FALLBACK_FIRST_YEAR, tc.FALLBACK_LAST_YEAR)
                 need(m.get("calendar_source") == src and m["calendar_source"] in CAL_VALUES, "%s: the manifest's calendar_source must be %s, got %r" % (label, src, m.get("calendar_source")))
-                need(m["publisher_version"] == PUBLISHER_VERSION and m["firm"] == firm and m["account_id"] == acct and m["byte_sizes"]["series.json.gz"] == len(gz), "%s: manifest firm, account, size or publisher version" % label)
+                need(m["publisher_version"] == pub.PUBLISHER_VERSION and m["firm"] == firm and m["account_id"] == acct and m["byte_sizes"]["series.json.gz"] == len(gz), "%s: manifest firm, account, size or publisher version" % label)
     finally:
         if undo:
             undo()
