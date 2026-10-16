@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-12",
+  "firm": "FABRIC",
+  "genre": "BUILD",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "b758457a14",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-12.bd49f-live-address-and-role-key.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b758457a14"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~125",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_core.py",
+      "kind": "script",
+      "commit_or_etag": "e3b32e3789",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-125 (not pushed, no deploy; the release is the batched round-38 applier order). Ctx.prefix answers to a row's address when the row carries one; _row_for maps a key to its row; _scope serves the row's real prefix in the row's bucket; list_partitions and read_rows accept the date=<d>/ folder and the <d>.parquet flat layout.",
+      "introduces": [
+        "_row_for",
+        "_partition_of",
+        "_tail"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_role.py",
+      "kind": "script",
+      "commit_or_etag": "e3b32e3789",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-125 (not pushed, no deploy). role_key keeps the -live suffix for a firm-keyed vendor (blackdiamond/49f-live/ -> blackdiamond49flive; role variable BLACKDIAMOND49FLIVE_READER_ROLE_ARN); client_for(live=True) refuses closed with LiveRoleUnset (code live_role_unset) and has no fallback.",
+      "introduces": [
+        "LiveRoleUnset",
+        "is_live"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en12.py",
+      "kind": "test",
+      "commit_or_etag": "e3b32e3789",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-125. Five offline named tests, test_ogen12_ac01 .. test_ogen12_ac05, all passing.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_ch1.py",
+      "kind": "test",
+      "commit_or_etag": "751be0e202",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-125. Amendment A1 (fbba99d1ba): line 170 of test_ogch1_ac03 asserts role_key('blackdiamond', '49f-live') == 'blackdiamond49flive'; one assertion changed, nothing else in the file.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the four named tests pass: address resolution with the real prefix on the row's bucket, the dedicated -live role key that refuses closed, and parity for every other vendor.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en12.py test_ogen12_ac01 test_ogen12_ac02 test_ogen12_ac03 test_ogen12_ac04 test_ogen12_ac05; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0\n(second run, identical: pytest rc=0; named tests passed 5 of 5; failed/error lines 0 / RESULT: PASS / exit=0)",
+      "denominator": "5 of 5 named tests passed (test_ogen12_ac01 .. test_ogen12_ac05; the amended order names five, its criterion text says four, and the five are run)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the commits of this serial touch only the client core, the role key, the 49F adapter and the client tests.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~125 '^infra/aws/ec2/opal-gateway/(app/client_(core|role|adapter_bd49f)\\.py|tests/(test_og_(en12|cl[0-9]+|ch[0-9]+)|test_client_role)\\.py)$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~125: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~125: files touched 9; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 product files of 9 files touched (the other five are the INVESTIGATION_v1.md rows, the order's amendment, the proof instance, the session log and the mutant plugin, all record paths); 0 outside the allowed set",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted defect: client_role.client_for ignores live=True, so a live read with its role variable unset falls back to the default client instead of refusing closed (plugin org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~125/og_en12_mutant_fallback.py, loaded with -p; the committed tree is unchanged).",
+      "expected": "test_ogen12_ac03 FAILS (its refusal assertion). ac01, ac02, ac04 and ac05 do not exercise the refusal and PASS.",
+      "observed": "PYTHONPATH=<the deliverables folder above> python -m pytest tests/test_og_en12.py -p og_en12_mutant_fallback -v (run in the gateway directory) -> test_ogen12_ac03 FAILED (AssertionError: a refused live read never reaches the default client); ac01, ac02, ac04, ac05 PASSED. 1 failed, 4 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The named-test check (AC1) run twice on the final code (commit 751be0e202) with the same invocation; the pytest summary and RESULT lines compared.",
+      "observed": "Both runs: pytest rc=0; named tests passed 5 of 5; failed/error lines 0; RESULT: PASS; exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Full gateway suite green.",
+      "reason": "Not claimed. Remaining failures in this sparse checkout are missing inputs the change does not touch: test_ogch1_ac02 (order-dependent, base), test_ogch1_ac04 (roster file absent), test_ogmu1_ac01 and ac02 (intake.py absent), test_mx_t13_catalog_gated (catalog file absent). Filed as NFRA_OPLGTW-Z-W125-S5."
+    },
+    {
+      "item": "tests/test_client_role.py (named in <paths>).",
+      "reason": "The file does not exist in this tree; not created, since the cell's role-key tests are in test_og_en12.py. Filed as NFRA_OPLGTW-Z-W125-S3."
+    },
+    {
+      "item": "The catalog address field on the four 49F live rows, the OG-ap-29 role, the release and any deploy.",
+      "reason": "Out of this cell by the order: NFRA_MCPINDEX writes the rows, OG-ap-29 writes the role, the batched release deploys. No IAM, catalog or registry change here."
+    },
+    {
+      "item": "app/client_adapter_bd49f.py.",
+      "reason": "The order says the adapter should need none. It is unchanged; the live reads go through ctx.prefix as before."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W125-S1: tests/test_og_ch1.py test_ogch1_ac03 pinned the old -live key at line 170 and failed after the change. Disarmed by the issuer's amendment A1 (fbba99d1ba) and fixed at 751be0e202: the assertion now reads blackdiamond49flive; test_ogch1_ac03 passes. BLOCKING, ARMED at filing; disarm owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W125-S2: the order names an existing refusal for a missing role; none existed (client_for fell back to the default client). Added for the -live key only. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W125-S3: tests/test_client_role.py is in <paths> but absent from the tree; not created. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W125-S4: the order said list_partitions returns the flat dates newest first; the code is ascending. Accepted by amendment A1; ascending kept, and test_ogen12_ac05 asserts ascending. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W125-S5: sparse checkout (org/surprise_channel/schemas skip-worktree) and several gateway tests read files this tree does not carry. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~125/NFRA_OPLGTW.TO-OG-en-12.bd49f-live-address-and-role-key.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (named tests)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en12.py test_ogen12_ac01 test_ogen12_ac02 test_ogen12_ac03 test_ogen12_ac04 test_ogen12_ac05",
+      "result": "5 passed, rc 0 (on 751be0e202, twice)"
+    },
+    {
+      "tool": "pytest (related client modules, after A1)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_ch1.py tests/test_og_cl1.py tests/test_og_cl2.py tests/test_og_cl3.py tests/test_og_cl4.py tests/test_og_cl5.py tests/test_og_cl6.py tests/test_og_cl7.py tests/test_og_en4.py tests/test_og_en12.py tests/test_blackdiamond.py",
+      "result": "70 passed, 3 failed: test_ogch1_ac02 (order-dependent, base), test_ogch1_ac04 (base, roster absent), test_mx_t13_catalog_gated (base, catalog absent). test_ogch1_ac03 passes."
+    },
+    {
+      "tool": "pytest (full OG set)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_*.py tests/test_blackdiamond.py tests/test_firm_catalog_visibility.py",
+      "result": "255 passed, 4 failed: test_ogch1_ac04, test_ogmu1_ac01, test_ogmu1_ac02, test_mx_t13_catalog_gated (all missing inputs in this sparse checkout)"
+    }
+  ]
+}
