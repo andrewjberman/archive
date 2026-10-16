@@ -33,6 +33,8 @@ CTO_ADD2 = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_49F_SPLIT_ADJUST_ADDENDUM_2_CTO_H
 PAIR_SHA256 = "8f645588ab1079c35d22002f786c49d2b78dea27ae4e453ac2afb44bf6b9d6e5"
 ADD_BLOB = "f0cec424f485aa3fc34a1670a3cf9eab558e42f0"
 ADD2_BLOB = "47e819dd938e0d295e6658057a5be7e165836b47"
+ADD3_BLOB = "82d849a97c086fb1cb20e761eafad2e79b5a5843"
+SOURCE = "schwab_08335338"
 CAND = "LiDXhN74TsATYhoQKzs+Oy1qtNn3hDJxxjkLa0ZlfLg="
 FN = "irpt-holdings-performance-lambda"
 SIBLINGS = ("irpt-inf-holdings-performance-lambda", "irpt-cot-holdings-performance-lambda")
@@ -65,13 +67,13 @@ def ac1(r):
     for rel, want in ((COO_ADD, ADD_BLOB), (COO_ADD2, ADD2_BLOB)):
         if blob(rel) != want:
             fail("%s must have the signed blob %s" % (rel, want))
-    for rel, key in ((CTO_HALF, PAIR_SHA256[:12]), (CTO_ADD, ADD_BLOB[:12]), (CTO_ADD2, ADD2_BLOB[:10])):
+    for rel, key in ((CTO_HALF, PAIR_SHA256[:12]), (CTO_HALF, ADD3_BLOB[:10]), (CTO_ADD, ADD_BLOB[:12]), (CTO_ADD2, ADD2_BLOB[:10])):
         t = text(rel)
         if key not in t or not re.search(r"(?<![A-Za-z])SIGNED", t.upper()):
             fail("the CTO half must name the signed bytes and read SIGNED: %s" % rel)
     g = r.get("gates") or {}
-    if g.get("pair_sha256") != PAIR_SHA256 or g.get("addendum_blob") != ADD_BLOB or g.get("addendum_2_blob") != ADD2_BLOB or g.get("both_halves_signed") is not True:
-        fail("gates must carry the signed pair's sha256 and both addendum blobs and both_halves_signed true")
+    if g.get("pair_sha256") != PAIR_SHA256 or g.get("addendum_blob") != ADD_BLOB or g.get("addendum_2_blob") != ADD2_BLOB or g.get("addendum_3_blob") != ADD3_BLOB or g.get("both_halves_signed") is not True:
+        fail("gates must carry the signed pair's sha256 and the three addendum blobs (ADDENDUM 3: the invoke names its source) and both_halves_signed true")
     a1 = g.get("act_1") or {}
     if a1.get("order_complete") is not True or a1.get("first_scheduled_run_read") is not True or a1.get("manifest_split_adjust_declared") is not True:
         fail("gates.act_1 must read order_complete true, first_scheduled_run_read true and manifest_split_adjust_declared true (CTO condition 5: Act 2 starts only after that run is read)")
@@ -112,12 +114,12 @@ def ac2(r):
 def ac3(r):
     want = days()
     t = r.get("totals") or {}
-    if t.get("days_run") != 47 or t.get("account_days_changed") != 1291 or t.get("invokes") != 47:
-        fail("totals must read days_run 47, account_days_changed 1291, invokes 47")
+    if t.get("days_run") != 47 or t.get("account_days_changed") != 1291 or t.get("invokes") != 47 or r.get("refused_invokes") != 1:
+        fail("totals must read days_run 47, account_days_changed 1291, invokes 47 (that wrote) and refused_invokes 1 (the day-1 invoke the producer refused before ADDENDUM 3, which wrote nothing)")
     if t.get("ratio_absent_named_total") != sum(x for _, _, x in want):
         fail("totals.ratio_absent_named_total must equal the signed record's ratio-absent security-days (%d): the manifests name them, never silent (CTO condition 3)" % sum(x for _, _, x in want))
-    if r.get("event_keys_sent") != ["date"]:
-        fail("event_keys_sent must be exactly [date]: no source override and no other event key (CTO condition 1)")
+    if r.get("event_keys_sent") != ["date", "source"] or r.get("event_source") != SOURCE or r.get("source_read_from_schedule") is not True:
+        fail("event_keys_sent must be exactly [date, source] with event_source %s read from the schedule's Target.Input (ADDENDUM 3, CTO condition 1 as amended); no other key" % SOURCE)
     w = r.get("window") or {}
     if not (is_int(w.get("minutes_clear_before_fire_min")) and w["minutes_clear_before_fire_min"] >= 30 and is_int(w.get("minutes_clear_after_fire_min")) and w["minutes_clear_after_fire_min"] >= 30):
         fail("window.minutes_clear_before_fire_min and minutes_clear_after_fire_min must both be 30 or more (one writer per key)")
@@ -126,7 +128,7 @@ def ac3(r):
     if r.get("rollback_performed") is not False:
         fail("rollback_performed must be false for a completed Act 2")
     c = r.get("counters") or {}
-    wantc = {"lambda_invokes": 47, "version_deletes": 0, "iam_changes": 0, "schedule_changes": 0, "artifact_uploads": 0, "other_keys_written": 0, "markers_closed": 0}
+    wantc = {"lambda_invokes": 48, "version_deletes": 0, "iam_changes": 0, "schedule_changes": 0, "artifact_uploads": 0, "other_keys_written": 0, "markers_closed": 0}
     for k, v in wantc.items():
         if c.get(k) != v:
             fail("counters.%s must read %s, read %r" % (k, v, c.get(k)))
