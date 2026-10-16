@@ -1,6 +1,6 @@
 """IRPT_DASHBD (workstream F-SHIP, ~F2): the READ-ONLY sampler for the Inflection J2 criterion (DBF131-1-J2), under the CTO's natural-key ruling (msg 9192).
 
-  python <this file> <out.json> <hashed_out.json> [seed] [n]       defaults: seed 132, n 20 (round 132: ONE row is forced to be a ROLLED line)
+  python <this file> <out.json> <hashed_out.json> [seed] [n]       defaults: seed 134, n 20 (ONE row is forced to be a ROLLED line; the round-134 claim is recorded per row)
 
 The comparison key is the source row's NATURAL KEY: account, trade date, transaction description, symbol, units and amount (`accountId`, `transDate`,
 `transactionDescription`, `ticker`, `noUnits`, `transAmount`). Only rows whose status is Complete are candidates (the producer's own row filter), and
@@ -152,11 +152,12 @@ def main(out_path, hashed_path, seed=132, n=20):
                                "id_usable": True, "txn_type": prod["txn_type"], "action": prod["action"], "flow_class": prod["flow_class"],
                                "coverage": prod["coverage"], "settle_date_present": prod["settle_date"] is not None,
                                "fee_present": prod["fee"] is not None, "price_present": prod["price"] is not None,
-                               "rolled": str(prod["business_date"]) != str(prod["trade_date"]),
+                               "rolled": str(prod["business_date"]) != str(prod["trade_date"]), "business_date_claim": prod["business_date_claim"],
                                "source_txn_id_present": prod["source_txn_id"] is not None,
                                "source_action_raw_equals_source": prod["source_action_raw"] == plain(one.iloc[0]["transactionDescription"])})
         print("sampled", day, flush=True)
-    assert any(r["rolled"] for r in hashed["rows"]), "the sample must hold a rolled line"
+    assert any(r["rolled"] for r in hashed["rows"]) and any(not r["rolled"] for r in hashed["rows"]), "the sample must hold a rolled line and a measured line"
+    assert all((r["business_date_claim"] == "inferred") == r["rolled"] for r in hashed["rows"]), "the claim must read inferred exactly on the rolled lines"
     json.dump(out, open(out_path, "w", encoding="utf-8"), indent=1)
     text = json.dumps(hashed, indent=1)
     assert text.isascii()
@@ -168,4 +169,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 3:
         print(__doc__)
         sys.exit(2)
-    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 132, int(sys.argv[4]) if len(sys.argv) > 4 else 20)
+    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 134, int(sys.argv[4]) if len(sys.argv) > 4 else 20)
