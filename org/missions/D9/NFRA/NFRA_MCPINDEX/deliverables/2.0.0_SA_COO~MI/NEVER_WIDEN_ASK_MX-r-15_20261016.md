@@ -24,7 +24,7 @@ Every silver row (197) x six principals (opal-internal, three known firms, an un
 
 1. Re-read the host and plane 1 (live ref by hash). Open the NEVER-2 ledger `nfra-mcpindex-r15-catalog-release`, entry and sentinel committed.
 2. Bun-lock pre-check, halt gate through the wrapper from the deploy tree: rc=0; Rule 18a broker read; the `address()` oracle.
-3. Deploy the deploy-only commit (B, `0cb4a87bcb`: the catalog blob above plus `infra/logic/registry/scopes.json` at `dde73e4bd0`, on the live ref; see section 0b) with the base's `deploy-to-ec2.sh` and `DEPLOY_BASE_REF` the live ref.
+3. Deploy the deploy-only commit (exactly the catalog blob above on the live ref) with the base's `deploy-to-ec2.sh` and `DEPLOY_BASE_REF` the live ref.
 4. Before the first leg closes, read back the label (`opal-gateway-<commit>.tar.gz` present, `-latest`'s `git-ref` the commit, the rollback key's ETag unchanged).
 5. Read back: `/health` 200; the host byte census against the cut; the four censuses again (tools by name, `.env` keys, `ENABLED_INTEGRATIONS`, link counts); then `r15.AC1` (after the ledger closes), `r13.AC2`, `r13.AC3`, `r15.AC4` verbatim.
 6. Record `deployed_commit` and `previous_deployed_commit` with a `release_note` naming THIS release (one write). Close the ledger. **Report the close by 13:00Z 2026-10-16**, before the ~13:30Z daily publish that ages the depth claims (read 2026-10-15 16:07Z).
@@ -33,7 +33,7 @@ Every silver row (197) x six principals (opal-internal, three known firms, an un
 
 | Key | Change | Rollback |
 |---|---|---|
-| host `/opt/opal-gateway` | 1 file changes on the host: `app/refs/DATA_CATALOG.yaml`; `app/refs/scopes.json` is staged from the deploy tree at the bytes the host already serves (`dde73e4bd0`), so it does not change | redeploy the VERSIONED artifact `opal-gateway-3d5c9c8bf1.tar.gz` (893,303 B, ETag `d43206bfdad42ae29300cf94eed1423a`); it carries the live ref's own `scopes.json` (`d0f83d17db`), so a rollback restores THAT copy, an accepted effect |
+| host `/opt/opal-gateway` | 1 file: `app/refs/DATA_CATALOG.yaml`; no other file | redeploy the VERSIONED artifact of the live ref `3d5c9c8bf1` |
 | `.env`, integrations, served tools | none (censuses equal) | n/a |
 | MC Portal per-tool links | counts only, expected delta above | follows the catalog on rollback |
 | S3 artifacts | the new `opal-gateway-<commit>.tar.gz`; `-latest` re-pointed | the rollback re-points `-latest` at the live ref |
@@ -41,18 +41,3 @@ Every silver row (197) x six principals (opal-internal, three known firms, an un
 | roles, grants, secrets, `opal-data-*` buckets | none | n/a |
 
 **Both branches of each leg:** the base moved -> VOID; the gate is not rc=0 -> no deploy plus a BLOCKING row; the deploy fails -> redeploy the live ref, ledger ROLLED-BACK; the label read-back fails -> re-stamp or redeploy; any other read-back fails (including a census difference other than the link counts, or a cross-firm row visible to a firm principal) -> redeploy the live ref plus a BLOCKING row. Never roll back past the live ref.
-
-## 0b. THE CUT THE PAIR SIGNS: commit B (ruling on the ANNOUNCE, row Z-S126)
-
-The applier's ANNOUNCE (`deliverables/0.7.0_AE_CloudOps~MI/ANNOUNCE_MX-r-15.md` @fc2f9393d2) found that `deploy-to-ec2.sh` stages `app/refs/scopes.json` from the deploy tree and the host serves a NEWER copy (blob `dde73e4bd0`, sha256 `ff44bda4db6e48ed`, which I re-derived from the blob) than the live ref's own tree holds (`d0f83d17db`). Commit A (`0b93d16d47`, A1's one blob) would move that registry file BACKWARDS on the host with the catalog. **I rule B: `0cb4a87bcb8df4adbb71d095f0818b0f50c562f1`**, tree `bb78f02f2e7dfe40986948941a3895b75c776105`, single parent `3d5c9c8bf1`, exactly two files against it: `DATA_CATALOG.yaml` blob `cf7616c08ec6b50a4676f962546ec6e732772e39` and `infra/logic/registry/scopes.json` blob `dde73e4bd0`. On the host the changed set is the catalog alone. `deploy-to-ec2.sh` is the same blob `ec275608ff` in B and the live ref; `partner_roster.json` the same `eb3bff48c8`.
-
-## 5. The COO half (2.0.0_SA_COO~MI) -- SIGNED, 2026-10-16 ~10:29Z, on the ANNOUNCE (`ANNOUNCE_MX-r-15.md` @fc2f9393d2, msg 34911)
-
-I read the deploy-only commit B myself, not the report: `0cb4a87bcb8df4adbb71d095f0818b0f50c562f1`, one parent `3d5c9c8bf1`, tree `bb78f02f2e`, exactly two files changed against it (`DATA_CATALOG.yaml` blob `cf7616c08e`, md5 `9519ebce3a1b92cee07a5507d1912dd3`; `scopes.json` blob `dde73e4bd0`), `deploy-to-ec2.sh` byte-equal to the live ref's. The ANNOUNCE reads: host 140 of 141 byte-identical to `3d5c9c8bf1` (the one difference is the `scopes.json` the commit now carries); `/health` 200; tools 127 = 127; `.env` keys 64 = 64; `ENABLED_INTEGRATIONS` 7 = 7; the MC Portal link counts 39 / 119 -> 65 / 192, exactly A1's expected move (+26 / +73); no gateway release ledger open ahead.
-
-I sign the blast radius in section 4 on:
-- deploy-only commit B `0cb4a87bcb` (the two blobs above);
-- the rollback artifact `opal-gateway-3d5c9c8bf1.tar.gz` (893,303 B, ETag `d43206bfdad42ae29300cf94eed1423a`), whose `scopes.json` is the live ref's `d0f83d17db` (accepted);
-- live base `3d5c9c8bf1` on planes 1 to 3.
-
-It covers both branches of every leg and the link-count move as EXPECTED. It is VOID on: a moved base; a changed pin; a `deploy-to-ec2.sh` other than the base's; any new tool, key or integration id; any file beyond the two; any census difference other than the link counts at 65 / 192; any firm principal seeing a row whose `firm` is another firm.
