@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bo-6.g4-held-marker-skipped-and-counted",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bo-6.g4-held-marker-skipped-and-counted.md",
+    "group": "OTHER",
+    "vintage_commit": "41f1b2bba746a10e8e5704a9885f127f6f90d62c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "41f1b2bba746a10e8e5704a9885f127f6f90d62c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bo-6.g4-held-marker-skipped-and-counted.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~480",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/batch.py",
+      "kind": "script",
+      "commit_or_etag": "2d336d77dd2a71c9f8450ff9d53eb36f03bec28e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: main() wraps the run_group call in the fetch loop and the hf.state_put_filing_attempt call in the unresolved loop in try/except hf.FilingAttemptChangedError; a caught name or group prints one HELD line and is counted in a held counter; HELD DONE: <n> name(s) held prints after UNRESOLVED-SOURCE DONE, always. run_group, plan, load_universe and every other function are unchanged. Library code, no deploy target; the scheduled task is not registered or run.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_batch_held_continue.py",
+      "kind": "test",
+      "commit_or_etag": "2d336d77dd2a71c9f8450ff9d53eb36f03bec28e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: six tests T1 to T6. T1 two groups, the first held, the second still runs, exit 0. T2 unresolved loop, the second name held, the third still written, written count 2, HELD count 1. T3 no held names, HELD DONE: 0 printed and no HELD line. T4 a RuntimeError from a group still propagates. T5 --write-pool off reaches no held handling. T6 a held two-key group names both keys and counts both. Every S3, EDGAR, model and boto3 boundary is stubbed; no subprocess.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2d336d77dd2a71c9f8450ff9d53eb36f03bec28e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPENDED: two rows, AMGT_RESAPP-D1-W480-S1 (the held counter counts names, a choice the order does not settle) and AMGT_RESAPP-D1-W480-S2 (the worktree sparse checkout omits org/surprise_channel). Both OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R1. surprise-row-gate: OK, 2 new row(s) of 1221 total checked."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/wk-resapp-480 && timeout 300 python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q; echo \"exit=$?\" -- expect: a line `<n> passed` with n at least 5, no `failed`; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-480 && timeout 300 python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q; echo \"exit=$?\"",
+      "output_evidence": "6 passed in 0.27s\nexit=0",
+      "denominator": "6 passed of 6 tests in the file (0 failed); the order's floor is 5",
+      "status": "PASS",
+      "expect": "(?!.*\\bfailed\\b)[\\s\\S]*?\\b(?:[5-9]|[1-9]\\d+) passed\\b[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd C:/dev/wk-resapp-480 && timeout 600 python -m pytest lib/research/filings/tests lib/research/harvest/tests/test_filing_attempt_skip_held.py -q -p no:cacheprovider; echo \"exit=$?\" -- expect: a line `<n> passed` with n at least 355 (the 350 now plus at least 5), no `failed`; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-480 && timeout 600 python -m pytest lib/research/filings/tests lib/research/harvest/tests/test_filing_attempt_skip_held.py -q -p no:cacheprovider; echo \"exit=$?\"",
+      "output_evidence": "356 passed in 11.16s\nexit=0",
+      "denominator": "356 passed, 0 failed of the two targets together; the order's floor is 355 (350 before the edit plus 6 new)",
+      "status": "PASS",
+      "expect": "(?!.*\\bfailed\\b)[\\s\\S]*?\\b(?:3[5-9][5-9]|3[6-9]\\d|[4-9]\\d{2}|[1-9]\\d{3,}) passed\\b[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-build batch (no try/except around the two per-name boundaries) run against this file's own tests is the planted discriminator: the held-name behaviour is absent from the base tree.",
+      "expected": "T1, T2, T3, T5 and T6 fail on the base tree; T4 passes, because a non-held exception already propagates on the base.",
+      "observed": "5 failed, 1 passed, exit=1 on the base tree, before any edit (failed: T1, T2, T3, T5, T6; passed: T4). Recorded in the session log, FIRST RUN RED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 test file after the build, compared on the pass count",
+      "observed": "run 1 (literal AC1 form): 6 passed in 0.27s, exit=0; run 2 (-p no:cacheprovider --color=no): 6 passed in 0.29s. Same pass count, same test set.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registering, enabling or running the OpalResearch-FilingsAnalyzer Windows scheduled task",
+      "reason": "Out of bounds by the order (section 2, item 1): never register, enable or run a Windows task in this cell; activation is Andrew's word."
+    },
+    {
+      "item": "Any AWS call, and any real run of the filings batch",
+      "reason": "Out of bounds by the order (section 2, item 1); every S3, EDGAR and model boundary is stubbed in the tests."
+    },
+    {
+      "item": "Changes to lib/research/harvest/filings.py, analyze.py, fetch.py and every other module",
+      "reason": "Out of scope by the order (section 1, item 5): the harvest raise stays because battery.py and its tests depend on it."
+    },
+    {
+      "item": "The <status> flip of the task order to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1), not this worker's."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W480-S1: the order does not settle the unit of the held counter for a fetch group (caught groups or names); the batch counts names, and test T6 pins that reading. OBSERVATION, INERT.",
+    "AMGT_RESAPP-D1-W480-S2: the worktree's sparse checkout omits org/surprise_channel, so the investigation item schema is absent at its path here; it is readable at HEAD only. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~480/AMGT_RESAPP.TO-AMGT-bo-6.g4-held-marker-skipped-and-counted.SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (AC1 and AC2 literal forms)",
+      "invocation": "cd C:/dev/wk-resapp-480 && timeout 300 python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q; echo \"exit=$?\" ; timeout 600 python -m pytest lib/research/filings/tests lib/research/harvest/tests/test_filing_attempt_skip_held.py -q -p no:cacheprovider; echo \"exit=$?\"",
+      "result": "AC1 6 passed exit=0; AC2 356 passed exit=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/filings/batch.py lib/research/filings/tests/test_batch_held_continue.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); exit 0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (surprise-row-gate, to-pipeline-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~480 <0.9.0_WK_AMGT_RESAPP~480@opal.agent>\" -F .scratch/msg_A.txt -- lib/research/filings/batch.py lib/research/filings/tests/test_batch_held_continue.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "exit 0; surprise-row-gate OK (2 new rows of 1221); commit 2d336d77dd"
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bo-7.g4-event-reads-the-same-keys",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "fe0bbd0e37"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "fe0bbd0e37",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bo-7.g4-event-reads-the-same-keys.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~481",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/llm_batch/inputs.py",
+      "kind": "script",
+      "commit_or_etag": "8975bfe276dc40bae4d7b535279e036c3664727e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_RESAPP-481: plan_argv and would_run(runner, keys=None). Library code with no deploy target; no scheduled task runs it from this change.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/llm_batch/run.py",
+      "kind": "script",
+      "commit_or_etag": "8975bfe276dc40bae4d7b535279e036c3664727e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_RESAPP-481: plan_command_for, run_task keyed plan-only count, --print-plan-command. Library code, no deploy target.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/llm_batch/tests/test_plan_only_keys.py",
+      "kind": "test",
+      "commit_or_etag": "8975bfe276dc40bae4d7b535279e036c3664727e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_RESAPP-481: 8 new tests, every runner stubbed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/llm_batch/tests/test_security_keys.py",
+      "kind": "test",
+      "commit_or_etag": "8975bfe276dc40bae4d7b535279e036c3664727e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_RESAPP-481: one existing test updated (T8 asserted the old unfiltered plan-only argv); the stub now matches the keyed argv by prefix.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a line `<n> passed` with n at least 6, no `failed`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-481 && timeout 300 python -m pytest lib/research/llm_batch/tests/test_plan_only_keys.py -q; echo \"exit=$?\"",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.79s\nexit=0",
+      "denominator": "8 passed of 8 collected in lib/research/llm_batch/tests/test_plan_only_keys.py (T1 to T8); no failed line",
+      "status": "PASS",
+      "expect": "^(?![\\s\\S]*\\bfailed\\b)[\\s\\S]*?\\b(?:[6-9]|[1-9][0-9]+) passed\\b[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "exactly one stdout line `LLM-BATCH task=filings plan-command=<the plan-only argv with the eight --security-key pairs in order>`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-481 && timeout 120 python -m lib.research.llm_batch.run filings --print-plan-command; echo \"exit=$?\"",
+      "output_evidence": "LLM-BATCH task=filings plan-command=python -m lib.research.filings.batch --universe newest --plan-only --security-key ASML_US_Equity --security-key BA_US_Equity --security-key COST_US_Equity --security-key HAL_US_Equity --security-key HD_US_Equity --security-key INTU_US_Equity --security-key KMB_US_Equity --security-key VLO_US_Equity\nexit=0",
+      "denominator": "1 LLM-BATCH stdout line of 1 printed (the eight --security-key pairs of first_fire_limit.json security_keys.filings, in list order); exit=0",
+      "status": "PASS",
+      "expect": "^LLM-BATCH task=filings plan-command=python -m lib\\.research\\.filings\\.batch --universe newest --plan-only --security-key ASML_US_Equity --security-key BA_US_Equity --security-key COST_US_Equity --security-key HAL_US_Equity --security-key HD_US_Equity --security-key INTU_US_Equity --security-key KMB_US_Equity --security-key VLO_US_Equity$\nexit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a line `<n> passed` with n at least 52 (the 46 now plus at least 6), no `failed`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-481 && timeout 300 python -m pytest lib/research/llm_batch/tests -q; echo \"exit=$?\"",
+      "output_evidence": "......................................................                   [100%]\n54 passed in 0.86s\nexit=0",
+      "denominator": "54 passed of 54 collected in lib/research/llm_batch/tests (46 before the build plus 8 new); no failed line",
+      "status": "PASS",
+      "expect": "^(?![\\s\\S]*\\bfailed\\b)[\\s\\S]*?\\b(?:5[2-9]|[6-9][0-9]|[1-9][0-9]{2,}) passed\\b[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted mutant. The discriminating evidence is the red-first run before the build.",
+      "expected": "N/A: the order names no mutant.",
+      "observed": "No separate mutant run. Red-first on the unchanged code: test_plan_only_keys.py 8 failed (would_run takes 1 positional argument; print-plan-command exited 2). Green after the build: 8 passed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 invocation run twice on the same committed bytes; the two captured outputs compared with cmp.",
+      "observed": "ev_ac2_run1 and ev_ac2_run2 byte-identical (344 bytes each; cmp SAME).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Registering, enabling or running any Windows scheduled task (filings, management, scores)",
+      "reason": "Out of the cell: the order says the three Windows tasks stay Disabled. register --plan prints PLAN: 3 task(s), 0 created."
+    },
+    {
+      "item": "A real run of the filings batch and any AWS or S3 call",
+      "reason": "Bounded out by the order (EGRESS CLASS NONE); every runner and S3 client is a stub in the tests."
+    },
+    {
+      "item": "A live keyed plan-only read against the real universe",
+      "reason": "Not in the bounds of this order; the criteria are the stubbed suite and the printed argv."
+    },
+    {
+      "item": "The <status> flip of AMGT-bo-7 in the task order",
+      "reason": "The status flip is the issuer's (2.0.0_SA_COO~R1), per the order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~481/AMGT_RESAPP.TO-AMGT-bo-7.g4-event-reads-the-same-keys.SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/llm_batch/inputs.py lib/research/llm_batch/run.py lib/research/llm_batch/tests/test_plan_only_keys.py lib/research/llm_batch/tests/test_security_keys.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "ASCII check over lib/research/llm_batch/**/*.py",
+      "invocation": "python -c (every .py under lib/research/llm_batch: count of characters with ord > 127)",
+      "result": "files checked 14 non-ascii files 0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~481 <0.9.0_WK_AMGT_RESAPP~481@opal.agent>\" -F .scratch/msg_bo7_code.txt -- the four .py paths",
+      "result": "committed 8975bfe276 on wk-AMGT_RESAPP-481; msg-verify MATCH len=787"
+    },
+    {
+      "tool": "python -m lib.research.llm_batch.register --plan",
+      "invocation": "python -m lib.research.llm_batch.register --plan | tail -1",
+      "result": "PLAN: 3 task(s), 0 created"
+    }
+  ]
+}
