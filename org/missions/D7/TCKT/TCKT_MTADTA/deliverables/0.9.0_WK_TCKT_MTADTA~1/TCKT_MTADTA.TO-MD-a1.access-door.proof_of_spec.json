@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_MTADTA.TO-MD-a1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-a1.access-door.md",
+    "group": "OTHER",
+    "vintage_commit": "c9971df7ca"
+  },
+  "assignee": "0.9.0_WK_TCKT_MTADTA~1",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/decompositions/TCKT_MTADTA_DECOMP.md",
+    "vintage_commit": "c9971df7ca",
+    "to_ref": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-a1.access-door.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/handler.py",
+      "kind": "script",
+      "commit_or_etag": "9d4f20bdb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source only: the door's handle() and lambda_handler; no zip built into a deploy, no function updated, no Lambda invoked"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/build.sh",
+      "kind": "script",
+      "commit_or_etag": "9d4f20bdb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "packaging script; refused rc=1 in this worktree (silver_builder.py absent, by design); a trial zip built from a scratch copy only"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
+      "kind": "test",
+      "commit_or_etag": "9d4f20bdb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest, 20 passed; the fake client, the readers and a stub builder injected; silver_builder.py never imported"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/access.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9d4f20bdb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source only: no terraform init against the backend, no terraform apply, no AWS call; terraform fmt -check rc=0"
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_MTADTA/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9d4f20bdb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "surprise rows TCKT_MTADTA-D1-W1-S5 to S7 in 9d4f20bdb8; S8 and S9 in the flip commit; a document, nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MD1-a1-AC1",
+      "criterion_verbatim": "the door, driven with a fake client: a put under the prefix lands with SSE-KMS; a foreign or dot-dot key is refused and writes nothing; bronze is never returned; a non-member is refused; every call is logged.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_a1.py handler",
+      "output_evidence": "A1-HANDLER-OK calls_logged=7 (rc=0); run twice with identical output. The pytest suite of the door's own tests: 20 passed in 0.04s (python -m pytest infra/aws/lambda/globgrph-trino-access/tests -p no:cacheprovider -q)",
+      "denominator": "7 of 7 driven calls logged (put under prefix, put foreign key, put dot-dot key, get of bronze, unknown op, get_day member, get_day non-member); 20 of 20 pytest tests pass, covering every row of the door table and the refusals",
+      "status": "PASS",
+      "expect": "A1-HANDLER-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "MD1-a1-AC2",
+      "criterion_verbatim": "access.tf declares the group, role, function, group policy, bucket policy and key policy, builder-named, with an explicit Deny and no wildcard principal or alarm.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_a1.py tf",
+      "output_evidence": "A1-TF-OK (rc=0); run twice with identical output. With it: terraform fmt -check infra/aws/terraform/trino/access.tf rc=0",
+      "denominator": "6 of 6 required resource types present (aws_iam_group, aws_iam_role, aws_lambda_function, aws_s3_bucket_policy, aws_kms_key_policy, aws_iam_group_policy); 3 of 3 builder names present in the file (globgrph-trino-access-group, -lambda, -role); no wildcard principal; an explicit Deny present; no alarm, SNS or SES resource",
+      "status": "PASS",
+      "expect": "A1-TF-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Dry-run state before any edit: handler.py and access.tf absent. Each check must refuse on its own missing file.",
+      "expected": "A1-HANDLER-REFUSED no handler.py and A1-TF-REFUSED no access.tf, both rc=1",
+      "observed": "A1-HANDLER-REFUSED no handler.py (rc=1); A1-TF-REFUSED no access.tf (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the handler and tf checks each run twice, and the output lines and rc compared",
+      "observed": "run 1 and run 2 identical: A1-HANDLER-OK calls_logged=7 (rc=0); A1-TF-OK (rc=0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Applying anything: terraform apply, terraform init against the remote backend, any AWS, S3, KMS, IAM or Lambda call, any Lambda invoke",
+      "reason": "order BOUNDS: WORLD by the gate's path floor; nothing is applied; this cell writes source only"
+    },
+    {
+      "item": "silver_builder.py (cell MD-s-1): not created, not edited, not packaged in this branch",
+      "reason": "order BOUNDS; the tests inject a stub with build(events) -> bytes; build.sh refuses without the file (rc=1, by design)"
+    },
+    {
+      "item": "The issuer's merge 77716ab496 into this branch",
+      "reason": "a worker never merges; the drain or the issuer carries it (surprise TCKT_MTADTA-D1-W1-S5)"
+    },
+    {
+      "item": "The group's members and the pandas layer ARN",
+      "reason": "membership is an IAM act at apply; the layer ARN is a tfvars value at apply (variable pandas_layer_arn has no default here)"
+    },
+    {
+      "item": "The real zip build/globgrph-trino-access.zip",
+      "reason": "build.sh needs silver_builder.py, which this branch does not carry; a trial zip was built in a scratch copy with a stub, and not committed"
+    }
+  ],
+  "surprises": [
+    "TCKT_MTADTA-D1-W1-S5: the coordinator's merge of TO-MD-h1 (77716ab496) is not an ancestor of this branch; the merge was not performed",
+    "TCKT_MTADTA-D1-W1-S6: a Deny for every principal needs a wildcard principal, which AC2 refuses; the bucket policy uses NotPrincipal (the role) and the role's own policy denies its non-TLS requests",
+    "TCKT_MTADTA-D1-W1-S7: the silver reader needs parquet decoding from the pandas layer, imported lazily in read_day_rows; BUILD 1's stdlib-only line is not met there and is untested",
+    "TCKT_MTADTA-D1-W1-S8: the naming gate refused three typed S3 tier prefixes in handler.py (warn window, did not block); the builder's address() gives the same tails, the package carries no builder",
+    "TCKT_MTADTA-D1-W1-S9: the naming gate raised the IAM object pattern m365-metadata/trino/* as a secret (a grader defect, not a refusal of the name)"
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.9.0_WK_TCKT_MTADTA~1/TCKT_MTADTA.TO-MD-a1.access-door.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "timeout 120 python -m pytest infra/aws/lambda/globgrph-trino-access/tests -p no:cacheprovider -q",
+      "result": "20 passed in 0.04s"
+    },
+    {
+      "tool": "build.sh (refusal)",
+      "invocation": "timeout 120 bash infra/aws/lambda/globgrph-trino-access/build.sh",
+      "result": "cp: cannot stat .../silver_builder.py: No such file or directory; rc=1 (no zip; silver_builder.py absent by design)"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "timeout 120 terraform fmt -check infra/aws/terraform/trino/access.tf infra/aws/terraform/trino/main.tf",
+      "result": "rc=0"
+    }
+  ]
+}
