@@ -1,0 +1,113 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-en-11",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-16/en11_bd49f_served_source.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "3b056fd12e",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-11.bd49f-served-source.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record names, for each of the four tools, the bucket class read, with the live commit, the method and the finding; what the classes ARE is the finding, never a criterion.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en11.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)49f bd served: tools [4-9] of the 4 required present True; bucket classes: opal-data-bd \\d+, opal-data-assets \\d+, bad class 0 \\(want 0\\); fields present True; digit runs of 8 or more 0 \\(want 0\\); e-mail addresses 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "49f bd served: tools 4 of the 4 required present True; bucket classes: opal-data-bd 0, opal-data-assets 0, bad class 0 (want 0); fields present True; digit runs of 8 or more 0 (want 0); e-mail addresses 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "4 of 4 required tools present, each with a bucket_class from the enum; the classes read: opal-data-bd 0, opal-data-assets 0, none 4 (each absent_reason no_catalog_row); run twice, identical: True. The classes are the finding and the CVO reads them; the check proves the record's existence and hygiene only.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "Two host runs, not a loop: run 1 left out the window transactions and fees require and answered window_required for those two; run 2 supplied it. AC1 was run twice on the committed record.",
+   "observed": "Holdings and allocation answered no_catalog_row in both host runs; run 2 gave no_catalog_row for all four; AC1 outputs identical.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Independent arm: the cause was read from the adapter's code path (_live_prefix -> ctx.prefix) and the repository DATA_CATALOG (no 49f-live row; the build cell's tests plant one), and it agrees with the live answer.",
+   "expected": "a catalog gap reads as no_catalog_row on all four",
+   "observed": "no_catalog_row on all four, 0 S3 clients created",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/BD49F_SERVED.json",
+   "kind": "config_data",
+   "commit_or_etag": "7876feaad9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record: read_at, live_commit, method, role, four tools, finding, run_note",
+   "introduces": [
+    "bucket_class"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/en11_host.py",
+   "kind": "script",
+   "commit_or_etag": "7876feaad9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "pulled from S3 and run on the host under /opt/opal-gateway/.venv/bin/python; read-only, audit sink stubbed, no S3 client created",
+   "introduces": [
+    "seen_buckets"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/en11_run.py",
+   "kind": "script",
+   "commit_or_etag": "7876feaad9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "uploads the host program, one SSM command, writes the record only if the live ref is unchanged",
+   "introduces": [
+    "def klass"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "the served read, 49F Black Diamond tools",
+   "invocation": "python W/en11_run.py (uploads W/en11_host.py, one SSM command)",
+   "result": "resolver 2 Black Diamond candidates; holdings, transactions, allocation and fees each absent_reason no_catalog_row"
+  },
+  {
+   "tool": "en11.AC1",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en11.AC1.sh",
+   "result": "PASS exit 0"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S293: none of the four 49F Black Diamond client tools reads any bucket on the live host -- each answers absent_reason no_catalog_row because the DATA_CATALOG has no blackdiamond/49f-live/silver row (cause read from the code path)."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the runtime catalog read directly",
+   "reason": "The cause is read from the adapter's code and the repository catalog; the host's runtime catalog was not dumped. Its answer (no_catalog_row on all four) agrees."
+  },
+  {
+   "item": "the IAM layer behind the catalog gap",
+   "reason": "No S3 read was reached, so the role's policy was not exercised; the CVO's row Z-S292 reads an explicit Deny on opal-data-bd for the 49f role by simulation."
+  },
+  {
+   "item": "the client-data account-id hash check",
+   "reason": "The hashed account-id list is absent on this box; absent is not empty. The record carries no account number: the account reference was dropped."
+  }
+ ]
+}
