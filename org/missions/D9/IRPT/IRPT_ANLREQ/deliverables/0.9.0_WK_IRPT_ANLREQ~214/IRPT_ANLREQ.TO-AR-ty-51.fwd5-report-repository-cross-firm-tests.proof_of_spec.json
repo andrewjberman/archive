@@ -20,7 +20,7 @@
       "kind": "test",
       "commit_or_etag": "830a4c7616",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-214 at 830a4c7616; 10 tests, 10 pass under pytest; no deploy, no push, no AWS call, no network",
+      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-214 at 830a4c7616; 10 tests, 10 pass under the checker's tests mode and under pytest; no deploy, no push, no AWS call, no network",
       "artifact_covered_by": [
         "AR51-ty-AC1"
       ]
@@ -30,7 +30,7 @@
       "kind": "doc",
       "commit_or_etag": "ffc7d6206a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "one BLOCKING row, IRPT_ANLREQ-D2-W214-S1, appended and committed LOCAL at ffc7d6206a; no other row touched",
+      "deploy_evidence": "one BLOCKING row, IRPT_ANLREQ-D2-W214-S1, appended and committed LOCAL at ffc7d6206a; no other row touched; the row is resolved (the issuer added the checker folder to the cone) and is not edited",
       "artifact_covered_by": [
         "AR51-ty-AC1"
       ]
@@ -42,18 +42,17 @@
       "criterion_verbatim": "AR51-ty-AC1 -- every file exists, every test function is named test_cross_firm_*, the tests pass, and at least 8 tests pass. Invocation: python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_report_reads.py ; expect R46-TESTS-OK.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_report_reads.py",
-      "output_evidence": "Run from the worktree root at 830a4c7616, rc=2: python.exe: can't open file '<worktree>/org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py': [Errno 2] No such file or directory. The checker is tracked at HEAD (blob 417fffb48cfda08eb898835e2465fd38780daa9e) and absent on disk, because org/tier1_exec is outside the sparse cone. Substitute, not the criterion: python -m pytest -q -p no:cacheprovider on the test file gives 10 passed in 0.37s rc=0.",
-      "denominator": "criterion: 0 of 1 invocations produced R46-TESTS-OK. Substitute: 10 of 10 collected tests pass under pytest (threshold 8); 10 of 10 collected test names carry the test_cross_firm_ prefix.",
+      "output_evidence": "Run from the worktree root (C:/dev/wk-irpt-anlreq-214, HEAD 885080e436; the checker is present on disk because org/tier1_exec is now inside the sparse cone). Output verbatim: R46-TESTS-OK passed=10 ; exit code 0.",
+      "denominator": "passed=10 of the 10 tests in the file, threshold 8 (the checker's own count); the checker returned OK, so every test function carried the test_cross_firm_ prefix and all 10 passed.",
       "expect": "R46-TESTS-OK",
-      "status": "FAIL",
-      "status_reason": "The invocation does not produce R46-TESTS-OK. The checker is outside this worktree's sparse cone (git sparse-checkout list omits org/tier1_exec), so it is absent on disk. It was not copied, widened or reconstructed. Surprise row IRPT_ANLREQ-D2-W214-S1 (BLOCKING) files the gap. This order stays open until the checker runs from a cone that holds it."
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The order names no mutant control. The guard-removal experiment the REPORT asks for ran in five scratch copies of reports/ (not committed): one guard line removed per copy, the test file run against each copy.",
+      "description": "The order names no mutant control. Two mutant checks ran. (1) The checker's own --self-test: green pair plus four mutants refused. (2) The guard-removal experiment the REPORT asks for, from the predecessor's five scratch copies of reports/ (not committed, not re-run here): one guard line removed per copy, the test file run against each copy.",
       "expected": "N/A",
-      "observed": "line 181 removed: 2 failed (get; list with foreign data_firm). line 289 removed: 1 failed (history tenant row). line 386 removed: 2 failed (artifact get; artifact head). line 487 placement removed: 1 failed (head, by message only; the refusal is still raised). line 296 removed: 0 failed, 10 passed (equivalent mutant: get at line 300 refuses the same row through lines 181 and 240).",
+      "observed": "(1) python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test -> R46-SELFTEST-OK green plus four mutants refused (exit 0). (2) Guard-removal, one line per copy: line 181 removed: 2 failed (get; list with foreign data_firm), killed by a test. line 289 removed: 1 failed (history tenant row), killed. line 386 removed: 2 failed (artifact get; artifact head), killed. line 487 placement removed: 1 failed (head, by message only; the refusal is still raised), killed. line 296 removed: 0 failed, 10 passed: an EQUIVALENT mutant, since get at line 300 refuses the same row through lines 181 and 240. Kill count 4 of 5; the one survivor (296) is equivalent by construction and is named in declared_exclusions.",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
@@ -63,14 +62,10 @@
     }
   },
   "surprises": [
-    "IRPT_ANLREQ-D2-W214-S1: the AR-ty-51 acceptance checker org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py is tracked at HEAD but outside the sparse cone, so AR51-ty-AC1 cannot run in this worktree."
+    "IRPT_ANLREQ-D2-W214-S1: the AR-ty-51 acceptance checker org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py was tracked at HEAD but outside the sparse cone, so AR51-ty-AC1 could not run in this worktree. Resolved: the issuer added the folder to the cone; the checker now runs and returns R46-TESTS-OK passed=10."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "declared_exclusions": [
-    {
-      "item": "the AR51-ty-AC1 checker run and its --self-test",
-      "reason": "org/tier1_exec is outside the sparse cone; row IRPT_ANLREQ-D2-W214-S1 (BLOCKING). The checker was read from HEAD for its grading rule and was not placed on disk."
-    },
     {
       "item": "a separate guard-removal kill for reports/repository.py line 296",
       "reason": "equivalent mutant: get at line 300 refuses the same row through the same _allow (lines 181 and 240), so no test can separate the two. The list test pins the empty page, which line 181 breaks."
@@ -81,7 +76,7 @@
     },
     {
       "item": "the drain-time gate on a complete flip",
-      "reason": "the order is not met (criterion FAIL); no complete flip is made"
+      "reason": "the drain-time gate is the drain's, not the worker's; this worker flips the order's status to complete only after the criterion graded PASS-by-output with rc 0"
     }
   ],
   "compiler_tools": [
@@ -93,12 +88,17 @@
     {
       "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 <test file>",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 infra/aws/lambda/investor-reporting/reports/tests/test_cross_firm_report_reads.py",
-      "result": "rc=2, can't open file: the checker is absent from the sparse cone"
+      "result": "R46-TESTS-OK passed=10 rc=0 (run from the worktree root at HEAD 885080e436)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "result": "R46-SELFTEST-OK green plus four mutants refused rc=0"
     },
     {
       "tool": "python .scratch/ar51_mutate.py (scratch copies of reports/, not committed)",
       "invocation": "python .scratch/ar51_mutate.py",
-      "result": "line 181: 2 failed; line 289: 1 failed; line 296: 0 failed; line 386: 2 failed; line 487: 1 failed"
+      "result": "line 181: 2 failed; line 289: 1 failed; line 296: 0 failed (equivalent); line 386: 2 failed; line 487: 1 failed"
     }
   ]
 }
