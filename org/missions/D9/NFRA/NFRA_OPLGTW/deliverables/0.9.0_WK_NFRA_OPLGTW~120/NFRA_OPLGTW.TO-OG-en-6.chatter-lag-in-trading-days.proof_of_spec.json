@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-6",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "e08686be6a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-6.chatter-lag-in-trading-days.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-6.chatter-lag-in-trading-days.md",
+    "group": "OTHER",
+    "vintage_commit": "e08686be6a"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~120",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_press.py",
+      "kind": "script",
+      "commit_or_etag": "1593976003",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "gateway code on the worktree branch wk-NFRA_OPLGTW-120 (LOCAL); no deploy, no release (order preflight: comp-schedule DECLARED-NOT-APPLICABLE); rides the next batched gateway release"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en6.py",
+      "kind": "test",
+      "commit_or_etag": "1593976003",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test file on the worktree branch wk-NFRA_OPLGTW-120 (LOCAL); no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass (test_ogen6_ac01, test_ogen6_ac02, test_ogen6_ac03).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en6.py test_ogen6_ac01 test_ogen6_ac02 test_ogen6_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 named tests of 3 passed; failed/error lines 0; pytest rc 0 (run twice on 1593976003, same read)",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only harvest_press.py and the chatter tests (write-set bound).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~120 '^infra/aws/ec2/opal-gateway/(app/harvest_press\\.py|tests/test_og_(en6|hv1|gt4|gt5)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~120: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files touched by this serial's commits (2 product files: harvest_press.py, test_og_en6.py; 1 standing record file: the surprise-channel investigation); outside the allowed set 0 of 2 product files",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~120: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run twice on the committed code at 1593976003 (once before the commit, once after); the existing press tests test_og_gt2.py and test_og_gt9.py run as a regression read (9 of 9 passed)",
+      "observed": "AC1: 3 of 3 passed on both runs; gt2 and gt9: 9 passed, rc 0; the tests assert the new keys by name, so a revert of harvest_press.py fails them with a missing-key read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the order names no mutant control (section 4 names AC1 and AC2 only); the discriminating reads are the Monday case (Friday chatter on a Monday lags 0 where calendar-day arithmetic would give 3) and the Thursday case (lags 1), both in test_ogen6_ac02",
+      "expected": "not applicable: no mutant named in the order",
+      "observed": "no planted mutant was run in this cell",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "release and deploy of the gateway (the batched release with OG-en-4, en-5, en-8)",
+      "reason": "the order's preflight: comp-schedule DECLARED-NOT-APPLICABLE; the release is a later applier order"
+    },
+    {
+      "item": "harvest_identity.py _behind (not reused, not changed)",
+      "reason": "it takes a LastModified string and reads the clock itself; the chatter lag mirrors its t1 and trading_days_behind call on a date (surprise NFRA_OPLGTW-Z-W120-S2)"
+    },
+    {
+      "item": "existing tests test_og_hv1.py, test_og_gt4.py, test_og_gt5.py (listed in the order's paths, not changed)",
+      "reason": "none pins the chatter answer's key set and none calls harvest_get_chatter; the chatter tests are test_og_gt2.py and test_og_gt9.py (surprise NFRA_OPLGTW-Z-W120-S1)"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W120-S1: the order names test_og_hv1.py and test_og_gt4.py as the nearest chatter tests; neither calls harvest_get_chatter (the chatter tests are test_og_gt2.py and test_og_gt9.py, outside <paths>); no existing test needed an update",
+    "NFRA_OPLGTW-Z-W120-S2: the order says to patch a _today-style clock as the existing tests do; harvest_press.py had none and harvest_identity._behind cannot take a date; the change adds a _now() seam and mirrors the t1 and trading_days_behind call",
+    "NFRA_OPLGTW-Z-W120-S3: section 5 flips the order's own <status> tag on the order file, which is not in <paths>; the flip is made in the closing commit and its lane gate result is stated in the report"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "_named.sh (AC1 named tests)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en6.py test_ogen6_ac01 test_ogen6_ac02 test_ogen6_ac03; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (named tests passed 3 of 3; failed/error lines 0)"
+    },
+    {
+      "tool": "_wkbound.sh (AC2 write-set bound)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~120 '^infra/aws/ec2/opal-gateway/(app/harvest_press\\.py|tests/test_og_(en6|hv1|gt4|gt5)\\.py)$'; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (files touched 3; product files 2; outside the allowed set 0)"
+    }
+  ]
+}
