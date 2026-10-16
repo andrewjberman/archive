@@ -116,3 +116,16 @@ r34f is the backoff that condition waited for.
 **Conditions:** HOLD lifts only on ledger `irpt-resident-r34f-20261016` CLOSED with `V2S OK`, `V2S CONTROLS OK 4 of 4` and `V2S BACKOFF`
 from inside the service. The run's uploads go one in flight at a time. A row ending RESOLVE_RETRY_EXHAUSTED during the run stops the run and
 is reported, never retried in the window.
+
+## ADDENDUM 4 -- WINDOW 4 on r34g, deterministic branches only (2026-10-16 ~19:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM4_WINDOW4_COO_HALF.md`
+(COO half @21e1a1f85d), blob `85115a4f0397c7665b5d2d52fcf5cd8c035838eb`, sha256 `73a73670688f84b4ffd7c7cdf48d8581ec6772ce4cbc725698a830687f261b1d`,
+10,181 bytes (re-measured). R0e = r34g (my signature @d5c047fa37). The branches are fixed, as I ruled in msg 9684: ZQXWVK Replace VNQ; APPL
+No, then UNRESOLVED, then C-SWAP; ALPPL Yes only if offered, else No. No probe and no selection rule. **Section 2.2, REUSING
+`fwd1-staff-r41b@opal.invalid`: ACCEPTED** (removed and read ABSENT at 17:04:02Z, already on the producer list). `allowedFirmIds
+["49financial"]`, staff only, zero entitlement rows. Applier IB2.
+
+**Conditions:** the YCharts budget (6 calls per 390 s, counted per securities_info call); the run's evidence is recorded before AR-v-34
+drives any failure on its job row; a RESOLVE_RETRY_EXHAUSTED row stops the run without a retry in the window. The window does not use
+localhost:5174, which is Andrew's smoke server.
