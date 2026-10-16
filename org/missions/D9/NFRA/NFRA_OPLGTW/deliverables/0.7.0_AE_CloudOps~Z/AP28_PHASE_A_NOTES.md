@@ -21,3 +21,9 @@ GO msg 35122: trunk_sha `066649b10fd44946faf7c28cf34fffe140344729`, mcportal_sha
 
 ## The STOP -- row NFRA_OPLGTW-Z-S301
 The commit-time naming gate (ENFORCE) REFUSES 16 catalog literals. A probe branch (`rel-nfra-oplgtw-batch2-probe`, prelude commit `191eedf892` carrying the two registry files at trunk bytes) clears 12 and leaves 4 (`blackdiamond/49f-live/silver/<table>/`, S3Key, 'K3: 49f-live is not a tier'). No gate was overridden; no release commit, release_sha, `ap28_release.json`, ask or AC1 run exists.
+
+## After A2 (msg 35140, ~17:05Z) -- second STOP, row NFRA_OPLGTW-Z-S303
+- Prelude commit 1 (the two registry files, byte-equal to trunk, `GIT_COMMIT_AUTHOR_OVERRIDE=PLATFORM_LOGIC_DOCS`): committed on `rel-nfra-oplgtw-batch2`, `46be947ba9`.
+- The four `blackdiamond_live_<t>.yaml` entry files (byte-equal to trunk), as one commit with the registry and as a second commit: REFUSED, 12 graded (per file: line 2 `silver/<t>/`, line 3 `blackdiamond/49f-live/silver/<t>/`, line 48 `49financial`). They are NEW at this base; MI's trunk commit was a pure rename of content already committed.
+- The release commit on top of prelude 1: `CATALOG-EXEMPT admitted=12 refused=4`; the 4 are `DATA_CATALOG.yaml` `blackdiamond/49f-live/silver/{allocations,fees,transactions,unrealized}/` (K3, '49f-live' is not a tier). Exit 1.
+- Nothing overridden beyond the two audited lane escapes the order names. No release_sha, ask or AC1 run. The probe branch `rel-nfra-oplgtw-batch2-probe` (`191eedf892`) is not the release.

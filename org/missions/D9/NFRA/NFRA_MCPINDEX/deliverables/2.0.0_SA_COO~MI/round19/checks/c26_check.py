@@ -7,6 +7,9 @@
   python c26_check.py ac2   the eight FROZEN-copy rows (49financial_<t>_silver_legacy for allocations, assets, fees, prices, realized, transactions_enriched, transactions, unrealized): prefix is
                             blackdiamond/49financial/silver_legacy/<t>/ and a non-empty listing exists there in opal-data-assets (aws CLI), the group map round18/assets_group_map.json
                             says bucket opal-data-assets for all nine legacy rows, each still has read_tool null, gap_owner NFRA_OPLGTW and its `FROZEN copy` open item
+  python c26_check.py ac7   (A7) the four `address` strings are HELD whole at HEAD of the registry file the naming gate's catalog exemption reads (catalog_fork_keys.json, read
+                            through naming-gate.py's own `_catalog_registry_held(repo)`), the registry differs from its A4 state d1092a10f6 ONLY by one new top-level key, and the placed
+                            catalog blob is unchanged (b81c48aa3c)
   python c26_check.py ac3   the field: `address` is an accepted optional TABLE-row field in the emitter and the validator and is carried to the emitted row by the row builder; exactly four
                             entries carry it, each unique; tests/test_address_field.py (new, at least 5 tests) with tests/test_c_group.py and tests/test_silver_table_grain.py pass;
                             validate_catalog_v02.py prints no FAIL line
@@ -173,11 +176,39 @@ def ac3():
     return report(res)
 
 
+def ac7():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("naming_gate", os.path.join(ROOT, ".tools", "naming-gate.py"))
+    ng = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ng)
+    held = ng._catalog_registry_held(repo=os.path.abspath(ROOT))
+    want = ["blackdiamond/49f-live/silver/%s/" % t for t in TOOLS]
+    got = {w: held.get(w, "") for w in want}
+    print("DENOMINATOR addresses %d; held at HEAD by the registry %d" % (len(want), sum(1 for v in got.values() if v.endswith("catalog_fork_keys.json"))))
+    res = [("the four address strings are held whole in catalog_fork_keys.json at HEAD", all(v.endswith("catalog_fork_keys.json") for v in got.values()))]
+
+    def git_show(ref, path):
+        r = subprocess.run(["git", "-C", ROOT, "show", "%s:%s" % (ref, path)], capture_output=True)
+        if r.returncode != 0:
+            print("ERROR: git show %s:%s rc %d" % (ref, path, r.returncode))
+            sys.exit(9)
+        return r.stdout
+    reg = "infra/logic/registry/catalog_fork_keys.json"
+    old, new = json.loads(git_show("d1092a10f6", reg)), json.loads(git_show("HEAD", reg))
+    added = sorted(set(new) - set(old))
+    changed = sorted(k for k in old if old[k] != new.get(k))
+    print("DENOMINATOR registry top-level keys: A4 %d, HEAD %d; added %s; changed %s" % (len(old), len(new), added, changed))
+    res.append(("the registry differs from its A4 state only by ONE new top-level key (rows, entities, labels equal)", len(added) == 1 and not changed))
+    blob = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD:infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml"], capture_output=True, text=True).stdout.strip()
+    res.append(("the placed catalog blob is unchanged (%s)" % blob[:10], blob == "b81c48aa3c6c0ce3e79628e55cc5e8501f73dcf3"))
+    return report(res)
+
+
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("ac1", "ac2", "ac3"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("ac1", "ac2", "ac3", "ac7"):
         print(__doc__)
         return 9
-    return {"ac1": ac1, "ac2": ac2, "ac3": ac3}[sys.argv[1]]()
+    return {"ac1": ac1, "ac2": ac2, "ac3": ac3, "ac7": ac7}[sys.argv[1]]()
 
 
 if __name__ == "__main__":
