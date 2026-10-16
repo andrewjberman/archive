@@ -20,9 +20,12 @@ import sys
 from pathlib import Path
 
 REPO = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()).resolve()
+# the initialised .terraform and the sibling modules live in the MAIN checkout; a worker runs this from a sparse linked worktree, so read the real root there
+COMMON = subprocess.run(["git", "rev-parse", "--git-common-dir"], capture_output=True, text=True, cwd=str(REPO)).stdout.strip()
+MAIN = (Path(COMMON) if Path(COMMON).is_absolute() else REPO / COMMON).resolve().parent
 ROOT_REL = "infra/aws/terraform/cot-pipeline"
 SSM_REL = ROOT_REL + "/ssm.tf"
-TF = str(REPO / ".tools" / "terraform.exe")
+TF = str(MAIN / ".tools" / "terraform.exe")
 
 mode, patch_rel = sys.argv[1], sys.argv[2]
 patch = (REPO / patch_rel).read_text(encoding="utf-8")
@@ -52,8 +55,8 @@ if mode == "shape":
           % (len(files), len(removed), len(added), table, nongating, before, chk.returncode == 0))
     raise SystemExit(0)
 
-src = REPO / ROOT_REL
-tmp = REPO / (ROOT_REL + "_r105_plan_tmp")
+src = MAIN / ROOT_REL
+tmp = MAIN / (ROOT_REL + "_r105_plan_tmp")
 shutil.rmtree(tmp, ignore_errors=True)
 try:
     tmp.mkdir()
@@ -62,7 +65,7 @@ try:
     for extra in (".terraform.lock.hcl",):
         if (src / extra).exists():
             shutil.copy(src / extra, tmp / extra)
-    r = subprocess.run(["git", "apply", "--directory", tmp.relative_to(REPO).as_posix(), "-p5", str(REPO / patch_rel)], capture_output=True, text=True, cwd=str(REPO))
+    r = subprocess.run(["git", "apply", "--directory", tmp.relative_to(MAIN).as_posix(), "-p5", str(REPO / patch_rel)], capture_output=True, text=True, cwd=str(MAIN))
     if r.returncode != 0:
         print("PATCH-PLAN add=-1 change=-1 destroy=-1 address=patch-did-not-apply")
         raise SystemExit(0)
