@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_MTADTA.TO-MD-r1",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/decompositions/TCKT_MTADTA_DECOMP_R2.md",
+    "vintage_commit": "21da981e7c",
+    "to_ref": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-r1.apply-and-refusals.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/prd/TCKT_MTADTA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2614b497ed"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TM1",
+  "acceptance": [
+    {
+      "criterion_id": "MD2-r1-AC1",
+      "criterion_verbatim": "MD2-r1-AC1 -- the live bucket policy denies the object data actions to every principal but the access role (and does not deny ListBucket), the key policy admits root and the role alone, the two aliases and the group exist.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r1.py applied",
+      "output_evidence": "R1-APPLIED-OK aliases=collector,member   (rc=0)",
+      "denominator": "1 bucket policy (2 Deny statements read), 1 bucket encryption, 1 key policy, 2 aliases of 1 function (list-aliases), 1 group; run twice, identical",
+      "status": "PASS",
+      "expect": "R1-APPLIED-OK"
+    },
+    {
+      "criterion_id": "MD2-r1-AC2",
+      "criterion_verbatim": "MD2-r1-AC2 -- the box identity with no MFA is refused with AccessDenied on BOTH aliases, and the collector role is simulated able to invoke its own alias under the new Deny (the carve-out) and nothing else (no member alias, no S3 read, no KMS action).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r1.py refusals",
+      "output_evidence": "R1-REFUSALS-OK   (rc=0). Hand probe before the check: member -> AccessDeniedException rc=254; collector -> AccessDeniedException rc=254, both 'explicit deny in a resource-based policy'",
+      "denominator": "2 aliases probed by a live invoke as cloudops-dell1-agent-user (no MFA); 4 simulate-principal-policy calls on the collector role, one resource each; run twice, identical",
+      "status": "PASS",
+      "expect": "R1-REFUSALS-OK"
+    },
+    {
+      "criterion_id": "MD2-r1-AC3",
+      "criterion_verbatim": "MD2-r1-AC3 -- terraform plan -detailed-exitcode on the root after the policy lands exits 0.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r1.py plan",
+      "output_evidence": "R1-PLAN-OK exit=0   (rc=0)",
+      "denominator": "1 root (infra/aws/terraform/trino) planned after the 7a apply; the 7c Deny is outside Terraform state and is not in the plan; run twice, identical",
+      "status": "PASS",
+      "expect": "R1-PLAN-OK"
+    },
+    {
+      "criterion_id": "MD2-r1-AC4",
+      "criterion_verbatim": "MD2-r1-AC4 -- the group's invoke Allow carries aws:MultiFactorAuthPresent, the group holds Andrew_Berman alone, and he has an MFA device.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r1.py mfa",
+      "output_evidence": "R1-MFA-OK members=1 mfa_devices>=1   (rc=0)",
+      "denominator": "1 group policy statement, 1 group member read, MFA device count printed as a count only; run twice, identical",
+      "status": "PASS",
+      "expect": "R1-MFA-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same refusals criterion run on the first-apply state, before the 7a-7c acts (bucket Deny in place, no MFA condition, no alias Deny), is the negative arm.",
+      "expected": "R1-REFUSALS-REFUSED with the box identity invoking both aliases",
+      "observed": "R1-REFUSALS-REFUSED an admin GetObject was not refused (rc=254); a non-member invoke of the member alias was not refused (rc=0); the box identity invoked the collector alias (rc=0)   (rc=1, 2026-10-16 about 08:3xZ, the pre-amendment check)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of applied, refusals, plan and mfa run twice from the repository root; the last stdout line of run 1 compared with run 2",
+      "observed": "applied STABLE R1-APPLIED-OK aliases=collector,member; refusals STABLE R1-REFUSALS-OK; plan STABLE R1-PLAN-OK exit=0; mfa STABLE R1-MFA-OK members=1 mfa_devices>=1",
+      "status": "STABLE"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/trino/access.tf",
+      "kind": "terraform",
+      "commit_or_etag": "46130e1cff",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0, 0 added 1 changed 0 destroyed; live get-group-policy shows the MFA condition",
+      "artifact_covered_by": [
+        "MD2-r1-AC3",
+        "MD2-r1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/door_resource_policy.json",
+      "kind": "iam",
+      "commit_or_etag": "46130e1cff",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws lambda put-resource-policy accepted both documents; the probe reads AccessDenied on both aliases",
+      "artifact_covered_by": [
+        "MD2-r1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/layer.auto.tfvars",
+      "kind": "terraform",
+      "commit_or_etag": "8691d491db",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "first apply: 26 added 0 changed 0 destroyed; the access Lambda carries the layer",
+      "artifact_covered_by": [
+        "MD2-r1-AC1"
+      ]
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The admin GetObject probe",
+      "reason": "Removed from AC2 by the amendment: on a key that does not exist S3 answers NoSuchKey. It runs in MD-r-2 after the first clean fire."
+    },
+    {
+      "item": "Office egress addresses (item 3)",
+      "reason": "No authoritative list exists in the estate; population.json office_ips is unchanged (empty). Row TCKT_MTADTA-D1-S6."
+    },
+    {
+      "item": "A principal that can edit IAM, the Lambda policy or the key policy",
+      "reason": "PRD C-RESIDUAL (1)(2): it can undo the Deny. Stated, not tested."
+    }
+  ],
+  "surprises": [
+    "TCKT_MTADTA-D1-S6: OBSERVATION -- no authoritative office egress list in the estate; office_ips stays empty.",
+    "TCKT_MTADTA-D1-S8: OBSERVATION -- list-layer-versions is denied to the box identity; the layer pin is the highest readable version, 31."
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.7.0_AE_CloudOps~TM1/TCKT_MTADTA.TO-MD-r1.session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / show -json",
+      "invocation": "terraform -chdir=infra/aws/terraform/trino plan -out ...; show -json | jq",
+      "result": "26 create, 0 destroy or replace; second plan 0 add 1 change 0 destroy"
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/trino apply <plan>",
+      "result": "two applies, rc=0 each"
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"office egress ip addresses\"",
+      "result": "returned a generic content search with 4875 hits; native Grep over the repo found the candidates"
+    }
+  ]
+}
