@@ -39,3 +39,11 @@ One invoke of the draft-store Lambda in a DEV test tenant with a synthetic reque
 ## 6. Who
 
 Pair: this COO half; the CTO half (`1.0.0_SA_CTO~DELL2`) signs the blob; applier `0.7.0_AE_CloudOps~AQ2` under an order cut only after the signed half. The grant's pair may be `2.0.0_SA_COO~G2`'s as the `irpt-jobs` owner (CTO msg 8970); name the pair here at the pin.
+
+## 7. Measured on 2026-10-16 ~07:4xZ (issuer; read-only AWS gets of single resources)
+
+- Live draft-store Lambda code digest: `cwf6bUEbPvKkpOtbldaTmzaqst08D/L7DFB32RtJP1A=`, 139,803 bytes, last modified 2026-10-12T00:06:20Z, handler `commentary_draft_store.lambda_handler`. It EQUALS the `artifact_sha256` the source map records for the entry (measured), so the repo's claimed live artifact is the live artifact.
+- Live inline policy `irpt-commentary-draft-store-policy` carries statements S1 to S5 only; S6 and S7 are not applied (measured by `iam get-role-policy`, Sids only).
+- The commentary function's live digest is `hUZY39qN` (the surgical zip applied in TO-APPLY-t34, R44); the rollback zip for this act is that one, re-read at the pin.
+- G2's reader half is in trunk: `irpt-status` returns the closed failure code (commit dad5c4530b, AR-g-111, `ops/owned_status.py` reads `hop_failure`). The writers of the ready-signal and packager hops are G2's (AR-g-109, merged).
+- **Source-map row.** `infra/aws/lambda/ci/lambda-source-map.json` entry `irpt-commentary-draft-store-lambda` needs one `staged_from` row for `ycharts/generate/durable_job.py` (pin `065652d351`, sha256 `877929f2...ece979`, read from that blob). The issuer's commit was REFUSED by the lane `IRPT_COMPLETION_SOURCE_MAP` (CTO grantor IRPT-P-BUILD-01: exact shared file, incumbents plus COO~P). The change is saved as `R54_SOURCE_MAP_ROW_durable_job.patch` beside this packet; whoever holds the lane lands it, and the build reads it at the pin. Until then this act cannot build the draft-store zip.
