@@ -30,6 +30,7 @@ d, n = sys.argv[1], int(sys.argv[2])
 GUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 BEARING = {"principal_profile", "data_entitlement", "person_access"}
 pages, count, scanned, policy, bearing, audit = [], 0, 0, 0, set(), set()
+policy_total, excluded = 0, {}
 dg = lambda t, o: hashlib.sha256(("%s:%s" % (t.lower(), o.lower())).encode()).hexdigest()[:12]
 ok = True
 for k in range(1, n + 1):
@@ -41,13 +42,24 @@ for k in range(1, n + 1):
     for it in p.get("Items") or []:
         pk, sk = it["pk"]["S"], it["sk"]["S"]
         parts = pk.split("#")
+        if parts[0] == "POLICY":
+            policy_total += 1
         if len(parts) != 3 or parts[0] != "POLICY" or not (GUID.match(parts[1]) and GUID.match(parts[2])):
+            if parts[0] == "POLICY":
+                key = "emaildeny" if parts[1:2] == ["EMAILDENY"] else ("probe" if parts[1:2] and parts[1].startswith("probe-") else "other_not_a_principal_key")
+                excluded[key] = excluded.get(key, 0) + 1
             continue
         policy += 1
         rt = sk.split("#")[0]
         if rt in BEARING: bearing.add(dg(parts[1], parts[2]))
-        elif rt == "operator_audit": audit.add(dg(parts[1], parts[2]))
+        elif rt == "operator_audit":
+            audit.add(dg(parts[1], parts[2])); excluded["operator_audit_item"] = excluded.get("operator_audit_item", 0) + 1
+        else: excluded["other_record_type_on_a_principal"] = excluded.get("other_record_type_on_a_principal", 0) + 1
+WHY = {"emaildeny": "POLICY#EMAILDENY#<digest> is an email deny entry, not a principal key", "probe": "POLICY#probe-* is a test probe key whose id is not a GUID (canonical_guid excludes it as the page does)",
+       "other_not_a_principal_key": "a POLICY# key that is not POLICY#<guid>#<guid>", "operator_audit_item": "an audit row of the grant writer, not a grant (a principal with only audit rows is counted as audit_only_principals)",
+       "other_record_type_on_a_principal": "a record type that is not principal_profile, data_entitlement or person_access"}
 print("RAW " + json.dumps({"complete": ok, "pages": n, "per_page": pages, "count": count, "scanned": scanned, "policy_items": policy,
+      "policy_total": policy_total, "excluded": [{"class": k, "count": v, "reason": WHY[k]} for k, v in sorted(excluded.items())],
       "raw_set": sorted(bearing), "raw_n": len(bearing), "audit_only_principals": len(audit - bearing)}))
 PY
 python org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pf/checks/_r3_page_probe.py "$TM/params.json"

@@ -49,7 +49,7 @@ UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 ISO_DAY = re.compile(r"\d{4}-\d{2}-\d{2}$")
 HEX12 = re.compile(r"[0-9a-f]{12}$")
 LONG_DIGITS = re.compile(r"\d{8,}")
-DIGIT_OK_KEYS = ("sha256", "packet_blob", "landed_version_id", "version_id", "code_sha256", "addresses", "ledger_entry", "apply_finished_utc", "zip_sha256", "zip_sha256_b64", "content_sha256",
+DIGIT_OK_KEYS = ("sha256", "packet_sha256", "packet_blob", "landed_version_id", "version_id", "code_sha256", "addresses", "ledger_entry", "apply_finished_utc", "zip_sha256", "zip_sha256_b64", "content_sha256",
                  "request_id", "request_ids", "account_hash12", "invoked_utc", "sampled_hash12", "layer_arn", "members", "applier")
 
 
@@ -237,11 +237,11 @@ def live(root, rec):
             break
     layers = [x["Arn"] for x in cfg.get("Layers", [])]
     samples = []
-    accts = sorted({k[len(PREFIX):].split("/")[0] for k, _, _ in objs})
+    accts = sorted({k[len(PREFIX):].split("/")[0][len("account="):] for k, _, _ in objs})
     pick = [accts[i] for i in range(0, len(accts), max(1, len(accts) // 10))][:10] if accts else []
     for a in pick:
-        sb = s3.get_object(Bucket=BUCKET, Key="%s%s/series.json.gz" % (PREFIX, a))["Body"].read()
-        mb = s3.get_object(Bucket=BUCKET, Key="%s%s/manifest.json" % (PREFIX, a))["Body"].read()
+        sb = s3.get_object(Bucket=BUCKET, Key="%saccount=%s/series.json.gz" % (PREFIX, a))["Body"].read()
+        mb = s3.get_object(Bucket=BUCKET, Key="%saccount=%s/manifest.json" % (PREFIX, a))["Body"].read()
         samples.append((a, sb, mb))
     return {"layers": layers, "memory": cfg["MemorySize"], "timeout": cfg["Timeout"], "code_sha256": cfg["CodeSha256"], "handler": cfg["Handler"], "runtime": cfg["Runtime"], "role": cfg["Role"],
             "env": cfg.get("Environment"), "concurrency": conc, "sids": sorted(s.get("Sid", "") for s in sts), "n_put": len(put), "put_resources": put[0]["Resource"] if len(put) == 1 else None,

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ac-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "00883c0c0d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ac-1.etf-classifications-census.md"
+  },
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "00883c0c0d"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~113",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/ETF_CLASS_CENSUS.json",
+      "kind": "doc",
+      "commit_or_etag": "0373dbe9f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the census of the etf-classifications table, read only: DescribeTable, a Select=COUNT scan, one 200-item sample scan; eight fields, names and counts only, no item content"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/ETF_CLASS_SPEC.md",
+      "kind": "doc",
+      "commit_or_etag": "0373dbe9f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the tool, the one-statement read grant and the refusal arms; no IAM, Terraform or code change (the build and the grant are later orders)"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0373dbe9f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows appended: NFRA_OPLGTW-Z-W113-S3, S4 and S5"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the census holds the eight measured fields with their claim words, and the spec has the three sections (Tool, Grant, Refused); the grant names a read action and the measured table ARN, and carries no write or scan action",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ac1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "census: fields 8 of 8; claim words ok True; item_count/attributes/classified_by shaped True; spec sections True; grant names read action and the table arn True; grant carries no write or scan action True\nRESULT: PASS\nexit=0",
+      "denominator": "census fields 8 of 8; spec sections 3 of 3; grant statements 1 of 1",
+      "status": "PASS",
+      "expect": "(?s)census: fields 8 of 8; claim words ok True; item_count/attributes/classified_by shaped True; spec sections True; grant names read action and the table arn True; grant carries no write or scan action True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the cell names no mutant; its criterion is the census and spec shape check",
+      "expected": "N/A -- the cell names no mutant",
+      "observed": "N/A -- the cell names no mutant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run on the pre-commit tree and again on the committed tree, both over the same two files; the census itself is a live read and is not repeated here",
+      "observed": "STABLE for AC1 (both runs print the same line and RESULT: PASS)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the table-wide attribute union and the table-wide classified_by counts",
+      "reason": "the order's bound is a 200-item sample; a full projected scan is outside the bound (surprise NFRA_OPLGTW-Z-W113-S3)"
+    },
+    {
+      "item": "the table's own newest last_updated",
+      "reason": "not measured under the bound: newest_date is the maximum over the sample, claimed inferred"
+    },
+    {
+      "item": "the account segment of the table ARN",
+      "reason": "elided in every record (order bounds: no account number printed or stored); the grant order resolves it from the caller identity"
+    },
+    {
+      "item": "the build of mdpf_get_security_classification and the grant itself",
+      "reason": "the order names the census and the spec only; the build and the grant are later orders with their own halves"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W113-S3: the order's projection-limited sample cannot yield an attribute-name union; the 200-item sample ran unprojected and was reduced in memory",
+    "NFRA_OPLGTW-Z-W113-S4: the CRO G4 spec is tracked at HEAD but absent from the sparse worktree; read as the committed blob",
+    "NFRA_OPLGTW-Z-W113-S5: the contract's 3,507-row figure (2026-10-07) against the 11,362 this run counts"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/NFRA_OPLGTW.TO-OG-ac-1.etf-classifications-census.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "boto3 (dynamodb client, box credentials)",
+      "invocation": "DescribeTable; scan with Select=COUNT (paginated); scan with Limit 200 (reduced in memory)",
+      "result": "ACTIVE; ticker HASH; count 11362 over 3 pages; sample 200 items, 15 attribute names"
+    },
+    {
+      "tool": "commit-gate via safe-commit",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~113 <0.9.0_WK_NFRA_OPLGTW~113@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "0373dbe9f5 landed; surprise-row-gate passed the three rows"
+    }
+  ]
+}

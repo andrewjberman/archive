@@ -1,0 +1,126 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-APPLY-R34B.resident-r34-door-checker-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R34B.resident-r34-door-checker-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "30e7194d58"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R27_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-R34B.resident-r34-door-checker-aq2.md",
+  "vintage_commit": "30e7194d58"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "host i-0167fd745ad906a66: /opt/irpt-resident/0485393f3a-r34 (running root of irpt-analysis-resident.service)",
+   "kind": "aws_resource",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "ROLLED BACK at 05:06Z (CTO msg 9070, the issuer's step 9): the r34 root is KEPT on the host but is NOT running; the resident runs r32 again (read back twice: running root r32 active restarts 0, 10 of 10 members at their P1 values, queue 0 0); STAGED-AWAITING-GATE is the nearest schema value (the gate awaited is V2, which needs the yfinance library); the install itself: SSM install 36162a8a-8294-4e38-999d-93f473ac9573 Success rc 0, host script rc 0, no rollback; V1 green (10 of 10 members MATCH, sums 0 of 313 not OK, census 8 changed 4 added 0 removed, pool pinned, pricing off, producer list unchanged, queue 0 0, no sign-in); V2 FAILED (yfinance not installed on the host), so the release is not fully verified and the ledger stays OPEN",
+   "artifact_covered_by": [
+    "R34B-AC1"
+   ],
+   "commit_or_etag": "root 0485393f3a-r34"
+  },
+  {
+   "path_or_key": "s3: ec2/investor-reporting-ycharts/resident/irpt-resident-0485393f3a-r34.tar.gz (VersionId 4BBk39y8KL4tl.OzFnZDHkrwcJLTcxSn), irpt-resident-0485393f3a-r34.package.SHA256SUMS (VersionId JQPVyzC44QNFMZeVD3bV_8VxNy4RceAn), resident_host_install_0485393f3a-r34.sh (VersionId klFOM6bDxCtZ1a17EGo67BaNqpbElIE6)",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "each key read 404 first, uploaded from the stage folder, read back by download and compared by sha256 (3 of 3 EQUAL: 861e6900..., d647a499..., 91d57fb6...)",
+   "artifact_covered_by": [
+    "R34B-AC1"
+   ],
+   "commit_or_etag": "VersionId 4BBk39y8KL4tl.OzFnZDHkrwcJLTcxSn"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/A_AFTER_R34B.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "seven of the eight lines as written, the V2 line as V2 yahoo FAIL ModuleNotFoundError, the three VersionIds, the install rc, and notes naming each deviation and the probe",
+   "artifact_covered_by": [
+    "R34B-AC1"
+   ],
+   "commit_or_etag": "6a447c79ba"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R34B-AC1",
+   "invocation": "grep -c -E '^(P1 running root r32 queue 0 0|D1 three keys uploaded and read back equal|V1 running root r34 active|V1 members 10 of 10 MATCH|V1 sums 313 of 313|V1 census 8 changed 4 added 0 removed|V1 pool pinned pricing off producer list unchanged|V2 yahoo two reads ok checker KEPT pool loads)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/A_AFTER_R34B.txt",
+   "expect": "^8$",
+   "output_evidence": "7\nexit=0",
+   "denominator": "7 of 8 lines as written: P1, D1 and the five V1 lines; the V2 line reads V2 yahoo FAIL ModuleNotFoundError",
+   "status": "FAIL",
+   "status_reason": "the criterion is not met because V2 failed: `import yfinance` raised ModuleNotFoundError through the resident's interpreter and the checker raised CheckerUnavailable, so no Yahoo call was made and the checker could not read KEPT; the CTO's added STOP (msg 9040) directs the ledger to stay OPEN and the report to the issuer and the CTO; finding is row IRPT_ANLREQ-D2-S143",
+   "criterion_verbatim": "grep -c -E '^(P1 running root r32 queue 0 0|D1 three keys uploaded and read back equal|V1 running root r34 active|V1 members 10 of 10 MATCH|V1 sums 313 of 313|V1 census 8 changed 4 added 0 removed|V1 pool pinned pricing off producer list unchanged|V2 yahoo two reads ok checker KEPT pool loads)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/A_AFTER_R34B.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R34B-AC2",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-r34-20261016_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** OPEN\nexit=0",
+   "denominator": "4 of 5 ledger legs (P1, D1, D2, V1) carry proof of a passing read; leg V2 carries the failure read and the rollback as its proof text",
+   "status": "FAIL",
+   "status_reason": "the ledger irpt-resident-r34-20261016 reads ROLLED-BACK, not CLOSED: step 9 (amendment 1) closes it as ROLLED-BACK after the rollback and says this criterion is not expected to read its line; V1 was proven, V2 failed, the release is rolled back to r32",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-r34-20261016_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the install is signed bytes verified by sha256 on the host before it runs; the P1 pre-read and the V1 census read the same members before and after (6 changed at their r32 values and 4 added ABSENT before; the same 8 and 4 at their r34 values after); V2 was run once and its failure is a library-absence read, corroborated by an independent read-only probe",
+   "observed": "before and after reads agree member for member: 8 changed, 4 added, 0 removed, 3776 identical; V2's ModuleNotFoundError and the probe's find_spec reads agree (absent for ec2-user and root, with and without the pydeps)",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "V2's two Yahoo calls",
+   "reason": "ZERO Yahoo calls were made: `import yfinance` failed before yf.download and the checker raises CheckerUnavailable before any network call; the order allowed two"
+  },
+  {
+   "item": "the read-only probe",
+   "reason": "not ordered; sent once after the V2 FAIL to name where the library is absent; no network call, no install, no write; booleans, counts and names only"
+  },
+  {
+   "item": "the effect of the missing library on uploads and swaps",
+   "reason": "read from the packet (sections 2, 2b, 2c) and not exercised; no upload and no job was run"
+  },
+  {
+   "item": "the install's V1 member table prints 10 members",
+   "reason": "the sums file and the bindings are verified by the host script's own checks and read by the census, as in r32"
+  },
+  {
+   "item": "census excludes runtime pyc files",
+   "reason": "counted (r32 634, r34 633) and not diffed"
+  },
+  {
+   "item": "the rollback",
+   "reason": "run on the issuer's order (step 9, CTO msg 9070): rollback_r34.sh rc 0, read back by the script and by an independent read-only script; the r34 root, the r32 root, the receipt copies and the three r34 S3 objects stay (nothing deleted)"
+  },
+  {
+   "item": "the ledger status line",
+   "reason": "the ledger tool's close writes CLOSED; the Status line was set to ROLLED-BACK by hand because the order asks for that closure text and the tool has no rolled-back close"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-S143"
+ ],
+ "session_log": "org/critical_paths/change_management/20261016T0435Z_irpt-resident-r34-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "aws ssm send-command (AWS-RunShellScript) with pre_read_r34.sh, install_r34.sh, census_r34.sh, v2_yahoo_r34.sh and v2_probe_r34.sh as the command text; aws s3 cp and s3api head-object; deploy_ledger.py; ar_g107_checks.py verify",
+   "invocation": "verify the build; P1 pre-read; three uploads with read-back; the signed install; the census; V2; the probe; ledger open and close-leg P1 D1 D2 V1",
+   "result": "AR-G107-OK; P1 STOP-READ-0 PASS; D1 3 of 3 EQUAL; install rc 0 no rollback; V1 green; V2 FAIL ModuleNotFoundError; ledger OPEN with V2 unproven"
+  }
+ ]
+}
