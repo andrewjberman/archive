@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-16",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "a10173850b",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-16.en14-tests-order-independent.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a10173850b"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~128",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en14.py",
+      "kind": "test",
+      "commit_or_etag": "d0d41d101d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-128 (not pushed). The mods fixture sets MOCK_GRAPH through monkeypatch.setenv and sets the cached config's MOCK_GRAPH to True for the test. No assertion of OG-en-14 changed. No file under app/ changed. Offline tests only; no deploy, no IAM.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d0d41d101d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows by this worker, NFRA_OPLGTW-Z-W128-S1 and NFRA_OPLGTW-Z-W128-S2 (OBSERVATION, INERT), appended in the fenced json blocks at d0d41d101d. Existing rows not edited.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~128/NFRA_OPLGTW.TO-OG-en-16.en14-tests-order-independent.session.log",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log of the measured runs (base reproduction, edit, commit, AC1, AC2).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three files pass in both orders with the same count (forward order en4, en12, en14: passed N, failed 0; reverse order en14, en12, en4: passed N, failed 0; RESULT: PASS exit=0).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en16.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)forward order en4, en12, en14: passed (\\d+); failed 0.*reverse order en14, en12, en4: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "forward order en4, en12, en14: passed 11; failed 0\nreverse order en14, en12, en4: passed 11; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "forward order: 11 passed of 11 collected, 0 failed; reverse order: 11 passed of 11 collected, 0 failed. Base (a10173850b) forward order was 10 passed, 1 failed.",
+      "status": "PASS",
+      "status_reason": "The issuer's check run unchanged at HEAD d0d41d101d under timeout 280. Both orders give the same count (11) with zero failures.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only tests/test_og_en14.py (write-set bound for 0.9.0_WK_NFRA_OPLGTW~128: outside the allowed set 0, want 0; RESULT: PASS exit=0).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~128 '^infra/aws/ec2/opal-gateway/tests/test_og_en14\\.py$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~128: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~128: files touched 2; product files 1; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "files touched by this serial's commits: 2 (test_og_en14.py and the investigation channel file, the latter a standing record path); product files 1; outside the allowed set 0 of 1 product file.",
+      "status": "PASS",
+      "status_reason": "Measured at d0d41d101d. The proof commit that adds this instance, the session log and the order flip touches only the standing record and deliverables paths, so the bound still reads outside 0.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the order. The order's own check is the discriminating control: at the base the forward order fails (10 passed, 1 failed).",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "Base a10173850b forward order: 10 passed, 1 failed (test_ogen14_ac03, RuntimeError: Missing required env var: TENANT_ID). After the edit the same order: 11 passed, 0 failed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Forward order run three times (manual pytest run after the edit, the en16.AC1.sh forward run, and the solo/reverse runs); reverse order run twice; en14 alone run once.",
+      "observed": "Forward 11 passed 0 failed on each run; reverse 11 passed 0 failed; en14 alone 3 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The order's named fix (monkeypatch.setenv as the first line of the fixture) is kept, but the setenv alone cannot reach the failing read.",
+      "reason": "The cached Config instance reads MOCK_GRAPH once at its first import. The order's robust clause allows the cached-instance setattr, which is also in the fixture. Filed as NFRA_OPLGTW-Z-W128-S2."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W128-S1: the order places the RuntimeError in the mods fixture's import of app.config; live it is raised in the test body of test_ogen14_ac03 at the import of app.server (server.py:72 validate()). OBSERVATION, INERT, filed by this seat at d0d41d101d.",
+    "NFRA_OPLGTW-Z-W128-S2: monkeypatch.setenv('MOCK_GRAPH') as the fixture's first line cannot reach the failing read; the cached Config instance's MOCK_GRAPH must be set too, which the fixture now does. OBSERVATION, INERT, filed by this seat at d0d41d101d."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~128/NFRA_OPLGTW.TO-OG-en-16.en14-tests-order-independent.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/tests/test_og_en14.py",
+      "result": "All checks passed!; OK: pre-commit gate clean for 1 of 1 file(s); rc 0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest -q -p no:cacheprovider tests/test_og_en4.py tests/test_og_en12.py tests/test_og_en14.py",
+      "result": "11 passed, 1 warning; rc 0 (base a10173850b: 1 failed, 10 passed; rc 1)"
+    }
+  ]
+}
