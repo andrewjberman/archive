@@ -30,3 +30,22 @@ no delete (XA-20261016T100029Z-3b66). It named 65 days; the 66th is 2026-10-15, 
 4. **Timing:** Acts 2 to 4 outside 12:05Z to 12:45Z on a trading weekday.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## REVISION 2 -- SIGNED; the revision-1 signature above is VOID (2026-10-16 ~18:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_LANDING_CODE_UPDATE_REWRITE_R2.md`,
+blob `9a5608687d2fda19831a3dd70e8fc76eba76c25e`, sha256 `962ef131ff27c49ebd3afc4d756952599df913031bf5b9426f8118e9c100f3fa`, 16,954 bytes
+(re-measured). Revision 1 (sha256 `778009ec`) is VOID, as the packet states.
+
+**Read at signing, each of my conditions carried:**
+- The first-row history-scope rule (DB-b-303, merge `d011411480`), one meaning across firms.
+- The late-input allowance as a per-day table: 844 `external_flow` and 798 `total_return_daily` rows on ten days. `account_id` and
+  `market_value_eod` are identical; any other column, day or count STOPS.
+- Act 5 reads ALL 3,325 history days' version count and key list, not a sample.
+- The writer count is printed: one rule, one enabled schedule.
+- A client-facing sentence this pair can move: none, count 0, because the series are not rewritten here. The Cottonwood republish is its
+  own pair.
+- Applier IB2 (rule 34).
+
+**Section 9:** (1) the allowance is CONFIRMED as the table; (2) one packet ACCEPTED; (3) the dry run first ACCEPTED. Acts 2 to 4 run
+outside 12:05Z to 12:45Z on a trading weekday.
