@@ -27,6 +27,12 @@ ROOT = Path(".")
 D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 GROUND_D = D + "0.9.0_WK_IRPT_DASHBD~1401/"
 PROPOSAL = D + "0.9.0_WK_IRPT_DASHBD~1001/FWD5_WORDS_PROPOSAL_R124.json"
+COTTONWOOD_REC = D + "0.9.0_WK_IRPT_DASHBD~1402/FWD5_WORDS_COTTONWOOD_R128.json"
+READS = D + "0.9.0_WK_IRPT_DASHBD~1501/RD_READS_R129.json"
+TRANSFER_OUT_PAIR = "Transfer Out | Transfer Out"
+CW_TRANSFER_OUT_RULING = "EXTERNAL_OUT"  # the CTO's round-128 ruling (msg 9175), the one change to the ratified record
+CW_ACTION_DERIVATION = ("A Cottonwood line whose vendor Action is None derives its action word from its (Transaction Type, Transaction Sub "
+                        "Type) pair through the type table (type_action), the same rule as a 49 Financial code with no action field.")
 CENSUS124 = D + "2.0.0_SA_COO~F2/R124_LIVE_SILVER_CENSUS_49F.json"
 CENSUS128 = D + "2.0.0_SA_COO~F2/R128_LIVE_SOURCE_CENSUS_3FIRMS.json"
 CRO = "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json"
@@ -173,6 +179,8 @@ def main():
     cen124 = load(CENSUS124)
     cen128 = load(CENSUS128)
     ground = {f: load(p) for f, p in GROUND.items()}
+    cw = load(COTTONWOOD_REC)
+    reads_doc = load(READS)
 
     missing = sorted({(r["partition"], r["rule"]) for r in cro} - set(rule_map))
     if missing:
@@ -274,6 +282,21 @@ def main():
                   "CODE_NOT_IN_MAPPING": 0}
     not_observed = sorted(r["source_value"] for r in rows_inf if r["not_observed"])
 
+    # Cottonwood's ratified words (round 128, msg 9175), copied by script; the one change is the Transfer Out pair's flow class.
+    cw_type_pairs = [{"source_value": m["source_value"], "opal_type": m["opal_type"],
+                      "flow_class_none": (CW_TRANSFER_OUT_RULING if m["source_value"] == TRANSFER_OUT_PAIR else m["flow_class_none"]),
+                      "reason": m["reason"]} for m in cw["mapping"] if m["field"] == "type_pair"]
+    cw_actions = [{"source_value": m["source_value"], "opal_action": m["opal_action"], "reason": m["reason"]}
+                  for m in cw["mapping"] if m["field"] == "action"]
+    assert len(cw_type_pairs) == 33 and len(cw_actions) == 87, (len(cw_type_pairs), len(cw_actions))
+    assert [m for m in cw_type_pairs if m["source_value"] == TRANSFER_OUT_PAIR][0]["opal_type"] == "Transfer out"
+    cottonwood_mapping = {"external_flow_rule": cw["external_flow_rule"], "action_derivation": CW_ACTION_DERIVATION,
+                          "type_pairs": cw_type_pairs, "actions": cw_actions}
+
+    # The worker's own non-null reads (the tool's output, assembled into RD_READS_R129.json): counts and the read time only.
+    reads = {f: {k: reads_doc["firms"][f][k] for k in ("partitions_read", "objects_read", "rows", "read_at_utc")} for f in GROUND}
+    assert all(reads[f]["rows"] > 0 and reads[f]["objects_read"] > 0 for f in GROUND)
+
     contract = {
         "contract_version": "0.2.0",
         "supersedes": "0.1.0 (a draft, never ratified)",
@@ -299,14 +322,15 @@ def main():
         "type_action": type_action,
         "flow_class_rule": [{"partition": p, "rule": r, "flow_class": f, "reason": why} for p, r, f, why in rule_table],
         "source_mapping": source_mapping,
+        "cottonwood_mapping": cottonwood_mapping,
         "unmapped_display": "Unclassified",
         "new_code_reason": "CODE_NOT_IN_MAPPING",
         "firms_served": [FIRM49],
         "firms_pending": [
             {"firm": FIRM_CW,
-             "reason": "No producer exists yet. Its ground read is round 128 (RD_FWD5_GROUND_COTTONWOOD_R128.json) and its table fills all 14 "
-                       "targets. Its re-cut words (33 type pairs and 87 Action values) are a proposal awaiting ratification, so no Cottonwood "
-                       "row is in source_mapping."},
+             "reason": "Words ratified in the round-128 analysis (msg 9175) at pair grain and carried in cottonwood_mapping, with "
+                       "Transfer Out | Transfer Out EXTERNAL_OUT by that ruling. Producer not yet built (its ground read is round 128, all 14 "
+                       "targets). No Cottonwood row is in source_mapping, which keeps 49 Financial and Inflection."},
             {"firm": FIRM_INF,
              "reason": "No producer exists yet. Its ground read is round 128: settle_date and fee are absent from its 36 columns. 47 of the 48 "
                        "ratified descriptions are live in the census; the 48th is marked not_observed."},
@@ -321,6 +345,7 @@ def main():
                 "census": {"method": "word-boundary", "denominator": len(rows49), "per_value": dict(flow_counts)},
             },
         },
+        "reads": reads,
         "schema_hash": schema_hash(columns),
         "schema_hash_basis": SCHEMA_BASIS,
         "served": False,
