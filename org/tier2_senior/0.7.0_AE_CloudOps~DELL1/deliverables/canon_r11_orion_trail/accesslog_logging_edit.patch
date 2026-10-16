@@ -1,0 +1,22 @@
+diff --git a/infra/aws/terraform/opal-assets/monolith.tf b/infra/aws/terraform/opal-assets/monolith.tf
+index 2e93140c7e..c1af4fb51a 100644
+--- a/infra/aws/terraform/opal-assets/monolith.tf
++++ b/infra/aws/terraform/opal-assets/monolith.tf
+@@ -125,6 +125,17 @@ resource "aws_s3_bucket" "monolith" {
+   }
+ }
+ 
++# ADHOC.canon-r11-orion-reader-trail (MDPF_CANON CN-r-3 / E4 follow-up; dell1 CTO ruling 4F7E, msg 6965): S3 SERVER
++# ACCESS LOGGING to name the reader of the opal-data-assets/orion/ burst (REST.GET.OBJECT lines carry the requester,
++# source IP and user agent). One-time named measurement, NOT a standing monitor. TIME-BOXED: REMOVE this resource
++# within 72 hours of the apply, or as soon as the reader is named. The target bucket's policy admits this one source
++# through the opsec root (s3_access_logs.tf), and loses that line when this resource is removed.
++resource "aws_s3_bucket_logging" "monolith_orion_reader" {
++  bucket        = aws_s3_bucket.monolith.id
++  target_bucket = "opal-data-security-access-logs"
++  target_prefix = "opal-data-assets/"
++}
++
+ # Versioning ON. Bronze is IRREPLACEABLE -- a re-pull of history is sometimes
+ # impossible (the 01_raw lesson: vendor REST floors move). This is the net under
+ # the standing law that historical bronze/silver keys are NEVER rewritten in place.
