@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+"""Run INSIDE a worker worktree: merge box/sitez into the worker branch (pull-merge, never rebase), resolving
+the append-only channel by id-union and the worker's own order file as box/sitez's text with the worker's status.
+Usage: python sync_branch.py <order-path> <status>"""
+import json
+import re
+import subprocess
+import sys
+
+CH = "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md"
+ORDER, STATUS = sys.argv[1], sys.argv[2]
+BLOCK = re.compile(r"(?m)^([ ]*)```json[ ]*\n(.*?)\n[ ]*```[ ]*$", re.S)
+
+
+def run(*a):
+    return subprocess.run(list(a), capture_output=True)
+
+
+def show(ref, path):
+    r = run("git", "show", "%s:%s" % (ref, path))
+    return r.stdout.decode("utf-8") if r.returncode == 0 else None
+
+
+def rows(t):
+    out = {}
+    for m in BLOCK.finditer(t):
+        try:
+            d = json.loads(m.group(2))
+        except Exception:
+            continue
+        if isinstance(d, dict) and d.get("id"):
+            out[d["id"]] = m.group(0)
+    return out
+
+
+mine_head = show("HEAD", CH)            # the worker's branch (its own rows)
+main = show("box/sitez", CH)            # the trunk
+assert mine_head is not None and main is not None
+r = run("git", "merge", "--no-edit", "box/sitez")
+print("git merge rc", r.returncode)
+conf = run("git", "diff", "--name-only", "--diff-filter=U").stdout.decode().split()
+print("conflicted:", conf)
+if CH in conf or True:
+    have = set(rows(main))
+    new = [(k, v) for k, v in rows(mine_head).items() if k not in have and v]
+    text = main.rstrip("\n") + "\n"
+    for k, v in new:
+        text += "\n" + v.strip("\n") + "\n"
+    open(CH, "w", encoding="utf-8", newline="").write(text)
+    print("channel: trunk + %d worker row(s): %s" % (len(new), ", ".join(k for k, _ in new)))
+o = show("box/sitez", ORDER)
+if o is not None:
+    for st in ("<status>pending</status>", "<status>complete</status>", "<status>staged</status>"):
+        if o.count(st) == 1:
+            o = o.replace(st, "<status>%s</status>" % STATUS)
+            break
+    open(ORDER, "w", encoding="utf-8", newline="").write(o)
+    print("order: trunk text with status", STATUS)
+run("git", "add", CH, ORDER)
+left = run("git", "diff", "--name-only", "--diff-filter=U").stdout.decode().split()
+print("still conflicted:", left)
+if not left:
+    r = run("git", "-c", "user.name=2.0.0_SA_COO~O", "-c", "user.email=2.0.0_SA_COO~O@opal.agent", "commit", "--no-edit")
+    print("commit rc", r.returncode, r.stdout.decode()[-200:], r.stderr.decode()[-200:])
