@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-cd-1.intake-npm-packument-age-and-bun-cache-install",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-cd-1.intake-npm-packument-age-and-bun-cache-install.md",
+    "group": "OTHER",
+    "vintage_commit": "dd4ee9a041"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~148",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round30.md",
+    "vintage_commit": "dd4ee9a041",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-cd-1.intake-npm-packument-age-and-bun-cache-install.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_fetch.py",
+      "kind": "script",
+      "commit_or_etag": "2358938a32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_npm reads the packument (GET <base>/<name>, same host) after the version document and before the tarball: Fetch.read_packument refuses an unreadable packument, a packument with no versions[<version>], no time[<version>] that states a zone, or a versions[<version>].dist.integrity that differs from the version document's dist.integrity, all before any tarball request; it records the packument block and the check 4 project facts (release_count, first_release_at, this_release_at). The iso_time helper is new. The PyPI run() path is untouched.",
+      "artifact_covered_by": [
+        "CTcd1-AC1",
+        "CTcd1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/intake_check.py",
+      "kind": "script",
+      "commit_or_etag": "2358938a32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "check_4_npm calls check_4 (the PyPI rule, unchanged) on the packument facts and adds release_age_source; no WAIVE line is involved. NPM_CHECKS keeps the same order. check_4 and the PyPI check path are untouched.",
+      "artifact_covered_by": [
+        "CTcd1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_npm.py",
+      "kind": "test",
+      "commit_or_etag": "2358938a32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The fixture registry serves a packument per name with time[<version>] 2024-03-01 and three earlier releases, so check 4 reads its facts from the registry. Arms a, h, i and k moved from a waiver expectation to check 4 passed with no WAIVE line (verdict checked); the default signed_lines carries no waiver. Last line INTAKE-NPM arms=13/13 ok=True at HEAD.",
+      "artifact_covered_by": [
+        "CTcd1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_npm_packument.py",
+      "kind": "test",
+      "commit_or_etag": "3eec8d37df",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file. Arms a (check 4 passes on an old packument with earlier releases, fails on a two-day-old release with age_days in the evidence, no waiver), b (no time[version] and an absent packument refused with zero tarball requests; disarms row NFRA_CTLPLN-W147-S1), c (a differing dist.integrity refused with zero tarball requests), d (control: a mutant that ignores the packument time passes the too-new case). Loopback registry and temporary folders only. Last line INTAKE-NPM-PACKUMENT arms=4/4 ok=True.",
+      "artifact_covered_by": [
+        "CTcd1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/intake_receive.py",
+      "kind": "script",
+      "commit_or_etag": "dafbdd0356",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "install --ecosystem npm --pack <pack> --lockfile <bun.lock> --target <bun cache dir> [--by] [--receipt-dir]: verify_pack first; npm_plan_members (in memory) refuses a '..' or absolute member, a link of any kind, a name outside package/, a non-regular member, a member over 64 MiB or an expanded total over 256 MiB; destinations are classified by the precheck's own _state, loaded by path (load_precheck); each folder is unpacked into a hidden sibling and renamed into place (_npm_place); the install is refused as a whole when any tarball is not cleared or any destination exists and is not present; a receipt JSON records each package's outcome and the sha256 of its package.json; last line INTAKE-NPM-INSTALL. Nothing runs. The pypi branch is unchanged except that --from is checked by hand with the same argparse message.",
+      "artifact_covered_by": [
+        "CTcd1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_npm_install.py",
+      "kind": "test",
+      "commit_or_etag": "dafbdd0356",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file. Arms e (three packages, one scoped, land as name@version@@@1 folders whose package.json parse), f (the REAL bun_cache_precheck.py as a subprocess reads 3 of 3 and exits 0; the same script reads 0 of 3 and exits 1 on an empty cache), g (a tarball whose bytes differ is refused with nothing written), h (a '..' member and an absolute member refused), i (an already-present folder left byte-identical and reported already), j (an empty destination refused, not overwritten), k (a run twice is idempotent), l (a postinstall listed and its marker never written), m (control: a mutant that drops package.json is read as 0 of 3, exit 1). Temporary folders and a loopback registry only. Last line INTAKE-NPM-INSTALL-TEST arms=9/9 ok=True.",
+      "artifact_covered_by": [
+        "CTcd1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/APPROVAL_AND_SIGNED_FILE_DEMANDS.md",
+      "kind": "doc",
+      "commit_or_etag": "16732ac6a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Section 1b (the packument read and check 4, citing Fetch.read_packument and check_4_npm), section 4a (the install verb: refusal, placement, present, nothing runs), one dry-run row for verify --ecosystem npm. No graded example block was added; .tools/tests/test_round28_intake_page.py reads INTAKE-PAGE blocks=13 accepted=10 refused=35 ok=True, unchanged from base.",
+      "artifact_covered_by": [
+        "CTcd1-AC1",
+        "CTcd1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "fc291154a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended, never edited: NFRA_CTLPLN-W148-S1 to NFRA_CTLPLN-W148-S5, all OBSERVATION and INERT, all UNDER_INVESTIGATION. surprise-row-gate: 5 new row(s) of 519 total checked, OK.",
+      "artifact_covered_by": [
+        "CTcd1-AC1",
+        "CTcd1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTcd1-AC1",
+      "criterion_verbatim": "check 4 reads the packument's publish time and passes or fails on measured facts with no waiver; a packument with no `time[<version>]` or with a different integrity is refused before any tarball request (base: the test does not exist; the existing `test_intake_npm.py` reads `INTAKE-NPM arms=13/13 ok=True` and must stay green); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_npm_packument.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-NPM-PACKUMENT arms=4/4 ok=True. Deciding lines: 'old time limbprobe@1.0.0: packument read before the tarball=True check 4=passed earlier=3 age_days=959.8 verdict=checked waived=[]'; 'too-new time (2 days): check 4=failed age_days=2.0 summary=release is 2.00 days old, below the minimum 14 verdict=not_checked waived=[]'; 'no time[version]: outcome=refused reason=packument has no time[1.0.0] publish time ... tarball_requests=0 held=False'; 'packument absent: outcome=refused reason=packument unreadable: HTTP 404 ... tarball_requests=0 held=False'; 'packument integrity differs: outcome=refused reason=packument versions[1.0.0].dist.integrity ... tarball_requests=0 held=False packument requested=True'; 'real code check 4 on the too-new case=failed'; 'mutant (ignores the packument time) check 4 on the too-new case=passed ... detected=True'. Neighbour, at HEAD fc291154a9: test_intake_npm.py last line INTAKE-NPM arms=13/13 ok=True (base dd4ee9a041: the same).",
+      "denominator": "4 of 4 arms passed (a: unscoped pass, scoped pass and the too-new failure; b: two refusal cases; c: one case; d: one control); 0 FAIL lines; tarball_requests=0 in every refused case; INTAKE-NPM 13 of 13 arms.",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTcd1-AC2",
+      "criterion_verbatim": "a verified npm pack is placed as unpacked `name@version@@@1/` directories that dell1's OWN precheck reads `3 of 3` present, nothing is written for a failed file, an unsafe member or an incomplete destination, and no lifecycle script runs (base: the test does not exist); report the whole last line with its denominator and the precheck's own output.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_npm_install.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-NPM-INSTALL-TEST arms=9/9 ok=True. The REAL precheck's own output, run as a subprocess on the installed scratch cache: 'real precheck on the installed cache: rc=0 output=3 of 3'; the same script on an empty scratch cache: 'negative control, empty cache: rc=1 output=0 of 3 | @limbprobe/core@7.29.7 absent | limbextra@0.4.2 absent | limbprobe@1.0.0 absent'. Install of the 3-package pack: 'INTAKE-NPM-INSTALL tarballs=3 unpacked=3 already=0 refused=0 present=3/3 ok=True'; scoped folder @limbprobe/core@7.29.7@@@1/package.json exists=True. Tampered tarball: 'INTAKE-NPM-INSTALL tarballs=3 unpacked=0 already=0 refused=3 present=0/3 ok=False', target not written. '..' and absolute members: each 'refused=1 ... target untouched=True'. Already present: second run 'tarballs=3 unpacked=0 already=3 refused=0 present=3/3 ok=True', tree byte- and mtime-identical (10 entries). Empty destination: refused, still empty, the other destinations not written. Lifecycle script: unpacked package.json names the postinstall, marker absent. Control: a mutant without package.json read by the real precheck as '0 of 3', rc=1.",
+      "denominator": "9 of 9 arms passed; 3 of 3 packages present on the real precheck (rc=0); 0 FAIL lines. The real precheck is run on a scratch cache in this worktree, not on dell1's cache.",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTcd1-AC3",
+      "criterion_verbatim": "the PyPI fetch behaves exactly as before (base: `INTAKE-FETCH-TEST cases=21/21 ok=True`, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_fetch.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-FETCH-TEST cases=21/21 ok=True (both determinism runs at HEAD fc291154a9). Base at dd4ee9a041: INTAKE-FETCH-TEST cases=21/21 ok=True.",
+      "denominator": "21 of 21 cases.",
+      "status": "PASS",
+      "expect": "INTAKE-FETCH-TEST cases=21/21 ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants built into the suites, not copied into scratch folders: (1) test_intake_npm_packument.py arm d's mutant_check_4 ignores time[<version>] and reads 2001-01-01 in its place, and must PASS the two-day-old case while the real check 4 FAILS it; (2) test_intake_npm_install.py arm m's mutant_place writes the folders and removes package.json before the rename, and the real precheck must read 2 of 3 or fewer and exit 1.",
+      "expected": "mutant (1) passes the too-new case, so arm a's expectation of a failure is not met and the mutant is detected; mutant (2) makes the real precheck read at most 2 of 3 with exit 1.",
+      "observed": "arm d: 'real code check 4 on the too-new case=failed'; 'mutant (ignores the packument time) check 4 on the too-new case=passed; ... detected=True'; PASS d_control_mutant_ignoring_time_detected. arm m: 'mutant (no package.json) read by the real precheck: rc=1 first line=0 of 3'; PASS m_control_mutant_without_package_json_detected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed state at HEAD fc291154a9, same command, timeout 280; the PASS and FAIL line counts and the last line of the two runs compared",
+      "observed": "AC1: INTAKE-NPM-PACKUMENT arms=4/4 ok=True in both runs; 4 PASS lines and 0 FAIL lines. AC2: INTAKE-NPM-INSTALL-TEST arms=9/9 ok=True in both runs; 9 PASS lines and 0 FAIL lines. AC3: INTAKE-FETCH-TEST cases=21/21 ok=True in both runs. Exit code 0 in every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-cd-1 to complete",
+      "reason": "the order file is outside this worker's paths; the issuer flips it on a valid, all-PASS instance"
+    },
+    {
+      "item": "dell1's own bun cache, the real ~/.bun, C:/opal-intake/, any real batch, and any release, pack, check or install against a real batch",
+      "reason": "the cell's rules: temporary folders, a loopback registry and a scratch bun cache only; the precheck was run on a scratch cache in this worktree, so dell1's cache was not read; who unpacks on dell1 is the call XB-20261016T175819Z-333b"
+    },
+    {
+      "item": "any request to the public internet (registry.npmjs.org, pypi.org)",
+      "reason": "the suites serve 127.0.0.1 only; the public-host policy is checked as a pure function with no socket"
+    },
+    {
+      "item": "the portal gitlink and org/git-author-override-audit.laptop.log",
+      "reason": "not committed, per the cell's rules; both show as modified in the worktree and no commit carries them"
+    },
+    {
+      "item": "the row NFRA_CTLPLN-W147-S1 (ARMED)",
+      "reason": "the channel is append-only and the row was not edited; arm b of test_intake_npm_packument.py is the evidence that a packument with no time[version] is refused, and the row's disposition belongs to its disarm_owner"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W148-S1: the cut's sparse checkout omitted infra/aws/ec2/opal-gateway/ops, org/tier0_exec/0.0.0_AB_MSTR/deliverables, org/tier1_exec/1.0.0_SA_CTO/deliverables and docs/briefs; the base test_intake_check.py read 59/60 ok=False until docs/briefs was added.",
+    "NFRA_CTLPLN-W148-S2: the dell1 answer the order names, org/tier0_exec/0.0.0_AB_MSTR/deliverables/DELL1_BUN_CACHE_DETAILS_ANSWER_20261016.md, is untracked in the base checkout and in no commit; the worker read the base copy read-only.",
+    "NFRA_CTLPLN-W148-S3: the order's install signature has no --lockfile, but its verify step requires one for npm; the npm install therefore requires --lockfile, and install's --from is checked by hand so that --pack can stand for npm.",
+    "NFRA_CTLPLN-W148-S4: the precheck's total counts only the lock entries this host installs, while the install's present counts every tarball in the pack; the two denominators agree only when every packed tarball is one this host installs.",
+    "NFRA_CTLPLN-W148-S5: a packument with an old time[version] makes check 4 pass for real, so four npm arms of test_intake_npm.py moved from a waiver expectation to check 4 passed with no WAIVE line; the choice is recorded for the issuer's review."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~148/NFRA_CTLPLN.TO-CT-cd-1.intake-npm-packument-age-and-bun-cache-install.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile org/devices/intake/intake_fetch.py org/devices/intake/intake_check.py org/devices/intake/intake_receive.py org/devices/intake/test_intake_npm.py org/devices/intake/test_intake_npm_packument.py org/devices/intake/test_intake_npm_install.py",
+      "result": "exit 0 at HEAD fc291154a9 (Python 3.12)"
+    },
+    {
+      "tool": "python",
+      "invocation": "timeout 280 python <suite> for org/devices/intake/test_intake_npm.py, test_intake_fetch.py, test_intake_check.py, test_intake_receive.py, test_intake_closure.py, test_intake_seam.py, .tools/tests/test_round28_intake_page.py, .tools/tests/test_round27_waiver.py, .tools/tests/test_round28_check6_platform.py",
+      "result": "BASE dd4ee9a041 -> AFTER HEAD fc291154a9: npm 13/13 -> 13/13 ok=True; fetch 21/21 -> 21/21 ok=True; check 60/60 -> 60/60 ok=True (base read 59/60 ok=False until docs/briefs was added to the sparse set, row W148-S1); receive 36/36 -> 36/36 ok=True; closure 10/10 -> 10/10 ok=True; seam stages=6 negative_arms=4/4 -> same ok=True; page blocks=13 accepted=10 refused=35 -> same ok=True; waiver arms=20/20 -> same ok=True; check6-platform arms=14/14 -> same ok=True. New suites: packument arms=4/4 ok=True; install-test arms=9/9 ok=True."
+    }
+  ]
+}
