@@ -1,0 +1,419 @@
+{
+  "entry_points_read": [
+    "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/frozen_worker.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/job.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/comparison_catalogue.py",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/templates.json",
+    "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py",
+    "infra/aws/lambda/investor-reporting/reports/build_resident_package.py",
+    "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+    "infra/aws/lambda/investor-reporting/intake/security_resolution.py"
+  ],
+  "dependencies": [
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:40",
+      "line_text": "raise RecipeRefused(\"holdings row %r has no provider check\" % (security_id,))",
+      "what": "On the template path, _check_for raises RecipeRefused when a holding's security_id has no provider check, so a holding with no YCharts provider check stops the whole upload preparation.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Send Yahoo-priced holdings on the canonical path (CANONICAL_SECURITY, normalized_input.py:85-87), which never calls _check_for; the template path keeps the requirement for every holding it carries.",
+      "claim": "MEASURED",
+      "id_source": "the door's provider check for the holding (security_checks, frozen by intake/portfolio.py freeze_template_portfolio on the TEMPLATE_UPLOAD lane), keyed by the holding's security_id"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:51",
+      "line_text": "raise RecipeRefused(\"holdings row has no provider receipt\")",
+      "what": "_receipt_sha256 raises RecipeRefused when a holding's check has no provider receipt; a yfinance-kept holding is filed with no receipt, so whether its check carries one decides refusal (INFERRED: the kept check's receipt presence was not read).",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Route kept holdings to the canonical path, which binds without a provider receipt (normalized_input.py:110-112), or give kept checks an explicit receipt-free state that this line accepts.",
+      "claim": "INFERRED",
+      "id_source": "the provider receipt sha256 the door attaches to a provider check (intake/portfolio.py sets provider_receipt_sha256 to None for a yfinance-kept row, line 599)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:72",
+      "line_text": "if any(isinstance(row, dict) and row.get(\"resolution\") == \"UNRESOLVED\" for row in document.get(\"rows\") or []):",
+      "what": "Any template row with resolution UNRESOLVED (no YCharts id) makes prepare_normalized_upload refuse the whole upload before anything is built, so one Yahoo-priced holding with no YCharts id stops the report.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Only by sending the other holdings without this one and naming its dollars in the disclosures, or by carrying it on the canonical path; the refusal is deliberate (comment at normalized_input.py:69-71: sending the rest would drop that holding silently).",
+      "claim": "MEASURED",
+      "id_source": "the door's per-row resolution state; UNRESOLVED is set for a kept TICKER_NOT_FOUND holding (intake/portfolio.py lines 591-594)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:74",
+      "line_text": "rows = [{\"identifier\": row[\"security_id\"], \"quantity\": {\"units\": \"USD\", \"value\": row[\"dollars\"]}}",
+      "what": "Builds each CSV identifier from the template row's security_id, so a holding goes to YCharts under its YCharts id, or under its ticker when yfinance kept it and YCharts has no id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Use the canonical identifier from the canonical path instead (as normalized_input.py:109 does); a YCharts id is not needed to send a symbol that YCharts resolves itself.",
+      "claim": "MEASURED",
+      "id_source": "the template row's security_id: the YCharts provider id for a FOUND holding (intake/portfolio.py line 597 provider_id), or the client's typed ticker for a yfinance-kept one"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:80",
+      "line_text": "_receipt_sha256(document[\"security_checks\"], row[\"security_id\"])}",
+      "what": "The template identity binding reads the provider receipt for each holding's security_id through _receipt_sha256; a holding with no receipt cannot be bound, so the prepare fails for it (INFERRED: which kept holdings lack a receipt was not read).",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Same as normalized_input.py:51: the canonical path binds without a provider receipt.",
+      "claim": "INFERRED",
+      "id_source": "the provider receipt sha256 behind the holding's security_id (its security_checks entry)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:98",
+      "line_text": "if (row.get(\"identity_kind\") != \"CANONICAL_SECURITY\" or \"security_id\" in row",
+      "what": "The canonical path refuses any row that carries a security_id, so a canonical holding must carry no YCharts id; a Yahoo-priced holding with no YCharts id passes this check.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable: this line is the canonical path's guarantee that no vendor id is present.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:109",
+      "line_text": "rows.append({\"identifier\": symbol, \"quantity\": {\"units\": \"USD\", \"value\": row[\"dollars\"]}})",
+      "what": "The canonical path writes the holding's ticker as the CSV Symbol; a Yahoo-priced holding with no YCharts id is sent by its ticker, so YCharts must resolve that ticker itself (INFERRED: YCharts behaviour for an unresolvable ticker was not read; the failure follows from the echo rule at lines 145 and 150).",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Cannot be removed while YCharts builds the portfolio from its own upload: the holding must be a symbol YCharts resolves, or it is left out of the YCharts portfolio and priced on the Opal producer path (opal_pricing, reports/build_resident_package.py:119).",
+      "claim": "INFERRED",
+      "id_source": "the door's canonical identifier (ticker or CUSIP, intake/portfolio.py lines 149-150), which YCharts must resolve to its own security at upload"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:139",
+      "line_text": "expected = {row[\"identifier\"]: _cents(_amount(row[\"quantity\"][\"value\"])) for row in prepared[\"rows\"]}",
+      "what": "Builds the expected echo map keyed on each holding's symbol; the upload binds only when the vendor echo carries the same keys, so a holding whose YCharts identity is not its symbol cannot match.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Only by matching echo rows to holdings through a separately evidenced mapping, which the module names as the required contract (comment at normalized_input.py:124-127); until then the symbol-to-YCharts-id identity must be exact.",
+      "claim": "MEASURED",
+      "id_source": "the vendor upload echo, whose security_id keys must equal the sent symbols"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:145",
+      "line_text": "if (not isinstance(identity, str) or identity not in expected or identity in echoed",
+      "what": "Each echoed row must carry a string security_id that is one of the sent symbols; a holding whose echoed YCharts id differs from its sent symbol (for example a fund keyed M:<ticker>) raises unproven vendor security identity.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Cannot be removed without the mapping contract the module names; the refusal is by design (comment at normalized_input.py:124-127).",
+      "claim": "MEASURED",
+      "id_source": "the vendor upload response rows[].security_id"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:150",
+      "line_text": "if echoed != expected:",
+      "what": "The echoed map must equal the expected map exactly, so a holding the vendor does not return with an id makes the bind refuse, and resident_worker.py:436 ends the job as VENDOR_UPLOAD_BINDING_REFUSED.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Only by accepting a partial echo and naming the dropped holdings in the disclosures; the code refuses instead (recipe.py comment at lines 534-537).",
+      "claim": "MEASURED",
+      "id_source": "the vendor upload response (echoed security_id and weighting per row)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:154",
+      "line_text": "\"identity_bindings\": [dict(binding, vendor_security_id=(binding[\"canonical_identifier\"]",
+      "what": "The identity bindings take vendor_security_id from canonical_identifier on the canonical path and from security_id only on the template path, so the canonical path reads the ticker, not a YCharts id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable on the canonical path.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:230",
+      "line_text": "if not isinstance(security_id, str) or not security_id:",
+      "what": "comparison_security_ids reads each selected comparison's YCharts security_id and refuses an entry with none (COMPARISON_NO_VENDOR_MAPPING); this concerns comparison securities, not holdings.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to a holding; a comparison with no YCharts id cannot be priced by YCharts.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:278",
+      "line_text": "if not rows or len({r[\"security_id\"] for r in rows}) != len(rows):",
+      "what": "validate_envelope de-duplicates holdings on r['security_id'], which would raise KeyError on a canonical row; validate_envelope has no non-test caller in the investor-reporting tree, so the line is not reached on report generation.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Delete validate_envelope or key its de-duplication on security_key; it is not on the live path.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:341",
+      "line_text": "return {\"kind\": \"S\", \"vendor_id\": \"S:\" + identifier, \"typed\": True}",
+      "what": "typed_identity builds an S: vendor id from a TICKER, CUSIP or ISIN identifier by string prefix, not from a YCharts lookup; typed_identity has no non-test caller.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not on the live path; no removal needed for this trace.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:512",
+      "line_text": "if quantity.get(\"units\") != \"USD\":",
+      "what": "holdings_csv refuses a row whose units are not USD, since a conversion would need a price this cell does not have; this is a price gap rather than an id gap, and it refuses a Yahoo-priced share holding whatever its id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Price share holdings from the T-1 price chain (price_source.py resolve_prices) before the CSV is built; no caller of resolve_prices on this path was found in this read.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:517",
+      "line_text": "lines.append(\"%s,%s,,\" % (row[\"identifier\"], _cents(quantity.get(\"value\"))))",
+      "what": "Writes the CSV Symbol column from the holding's identifier; YCharts keys the upload on this symbol, so a holding with a ticker and no YCharts id is written as its ticker.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not removable: the Symbol column is the key the upload is built on.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:523",
+      "line_text": "info, body = transport.request(\"/model_portfolios/fixed/holdings_upload/client\",",
+      "what": "POSTs the holdings CSV to the YCharts holdings_upload route; this call stays for every report whatever the holding's id, and it is the remaining YCharts call that carries the symbols.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not removable while YCharts builds the portfolio.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:541",
+      "line_text": "echoed = {r[\"security_id\"]: _dollars(r[\"weighting\"]) for r in returned}",
+      "what": "Builds the echo map keyed on each returned row's security_id; a returned row without one raises KeyError, the upload is marked unreconciled and ok is False, and no portfolio is created.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Cannot be removed without losing the reconciliation that stops YCharts building the portfolio from its own reading (recipe.py comment at lines 534-537).",
+      "claim": "MEASURED",
+      "id_source": "the holdings_upload response rows[].security_id (the YCharts security id of each returned holding)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:545",
+      "line_text": "reconciled = (unique and expected == echoed and parsed[\"weight\"] == \"Dollars\"",
+      "what": "reconciled requires the echo map to equal the sent map, so a holding the vendor does not return with its YCharts id makes reconciled False and the upload not ok.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Same as recipe.py:541: a partial echo would have to be accepted, which the code refuses.",
+      "claim": "MEASURED",
+      "id_source": "the holdings_upload response: the echo map of security_id to dollars must equal the sent map"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:572",
+      "line_text": "\"rows\": [dict(r, weighting=str(echoed[r[\"security_id\"]])) for r in returned]",
+      "what": "When the upload reconciled, each returned row is carried forward with its vendor security_id, and step_create reads those rows; the forwarded ids are the YCharts ids.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Only by changing step_create to take symbols, which the measured create body does not do (items_body builds from the echo, recipe.py lines 622-627).",
+      "claim": "MEASURED",
+      "id_source": "the reconciled upload rows (vendor security_id and display_security_id per holding)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:639",
+      "line_text": "\"security_id\": r[\"security_id\"],",
+      "what": "The create body's item security_id is the holding's YCharts id from the echo; a holding without one cannot be an item of the YCharts-built portfolio.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Not removable for a YCharts-built portfolio: the create body is keyed on the vendor id, so the holding must be in the YCharts portfolio or left out of it.",
+      "claim": "MEASURED",
+      "id_source": "the upload echo's security_id for the holding (the vendor id)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:648",
+      "line_text": "info, body = transport.request(\"/model_portfolios/fixed/\", \"POST\", payload, mime)",
+      "what": "POSTs the portfolio create (portfolio plus items) to YCharts; one call per report, carrying the echoed ids; a remaining YCharts call.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not removable while YCharts builds the portfolio.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:747",
+      "line_text": "info, body = transport.request(\"/model_portfolios/%s/status\" % portfolio_id)",
+      "what": "GETs the portfolio status for read-back (READ_BACK_POLLS = 1); keyed on the created model portfolio id, not a holding id; a remaining call.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not a holding dependency; stays while the read-back check stands.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:765",
+      "line_text": "info, body = transport.request(\"/model_portfolios/fixed/%s\" % portfolio_id)",
+      "what": "GETs the saved portfolio once it is available, to read back the effective settings; keyed on the created portfolio id; a remaining call.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not a holding dependency; stays while the read-back check stands.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:448",
+      "line_text": "info, body = transport.request(COMPARISON_IDENTITY_ROUTE + \"?\" + urlencode({\"securities\": \",\".join(tickers)}))",
+      "what": "GETs /securities/securities_info for classified ETF comparison tickers before the first mutation; it runs only when an ETF comparison is selected and sends nothing for holdings.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not a holding dependency; stays for ETF comparisons.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:814",
+      "line_text": "if c.get(\"namespace\") != \"YCHARTS\":",
+      "what": "Refuses a comparison whose namespace is not YCHARTS before any id is built, so an Opal-namespace comparison never reaches the vendor body; comparisons only.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to holdings.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:817",
+      "line_text": "ids = [\"P:\" + str(model_portfolio_id)] + [c[\"vendor_id\"] for c in comparisons]",
+      "what": "Builds the validate and generate security list from P:<model_portfolio_id> (the portfolio YCharts builds from the holdings) plus the comparison vendor ids; no holding id appears in this list.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable; the holding's YCharts id lives inside the created P: portfolio.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:829",
+      "line_text": "\"POST\", {\"security_ids\": security_ids, \"modules\": None})",
+      "what": "POSTs security_ids to validate_report_securities, a remaining YCharts call per report keyed on the P: id and comparison ids.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Stays while report validation is called.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:906",
+      "line_text": "secondary = {\"securityId\": c[\"vendor_id\"], \"securityName\": c.get(\"name\"),",
+      "what": "Writes the COMPARISON secondarySecurity securityId from the comparison's vendor_id; comparisons only.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to holdings.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:942",
+      "line_text": "\"primarySecurity\": {\"securityId\": security_ids[0],",
+      "what": "Writes primarySecurity securityId from security_ids[0], the P: model portfolio id; a YCharts portfolio id, not a holding id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to holdings.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:990",
+      "line_text": "transport, \"/custom_pdf_reports/%s\" % template[\"template_id\"], \"POST\", body)",
+      "what": "POSTs the full generation body to the custom PDF route; the remaining YCharts call that produces the report, one per report.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Stays: it is the report.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:412",
+      "line_text": "info, body = transport.request(\"/custom_pdf_reports/generate/%s\" % template[\"template_id\"])",
+      "what": "GETs the report template (step 2), a remaining call per report keyed on the template id, not a holding id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Stays while the template is verified.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/frozen_worker.py:82",
+      "line_text": "upload = prepare_normalized_upload(frozen_input)",
+      "what": "Calls prepare_normalized_upload, which raises RecipeRefused for a template-path holding with no provider check, no receipt, or UNRESOLVED, so the whole job's preparation stops.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Only by the canonical path for Yahoo-priced holdings (normalized_input.py:85-87), which raises none of these.",
+      "claim": "MEASURED",
+      "id_source": "the retained template input's holding rows and their provider checks (normalized_input.py lines 40, 51, 73 and 80)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:435",
+      "line_text": "upload = self.mutation(\"holdings_upload\", recipe.step_upload, rows)",
+      "what": "Sends the prepared rows through the holdings-upload mutation; a Yahoo-priced holding's ticker passes this line, and its failure is decided on the echo at normalized_input.py:145 and 150 and recipe.py:541 and 545.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not removable while YCharts builds the portfolio; the line itself carries no id.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:436",
+      "line_text": "bind_upload_or_attention(prepared[\"frozen_input\"], upload)",
+      "what": "Binds the vendor upload to the retained input; a refusal (echo mismatch or a holding with no vendor id) ends the job as ATTENTION with VENDOR_UPLOAD_BINDING_REFUSED.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Only by accepting a partial upload, which the binding refuses by design.",
+      "claim": "MEASURED",
+      "id_source": "the vendor upload echo (the recipe.py:541 echo map and the normalized_input.py:145 and 150 checks)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:443",
+      "line_text": "upload[\"upload_record_id\"], upload[\"rows\"], plan[\"settings\"])",
+      "what": "Passes the echoed rows, each carrying its vendor security_id, into the create step, so the created YCharts portfolio is built from YCharts ids.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "Same as recipe.py:639.",
+      "claim": "MEASURED",
+      "id_source": "the reconciled upload rows (vendor security_id per holding)"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:474",
+      "line_text": "if prepared[\"comparisons\"] and missing_comparisons(data, prepared[\"comparisons\"]):",
+      "what": "After the PDF downloads, checks that each chosen comparison's name is printed; comparisons only, no holding id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to holdings.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/job.py:388",
+      "line_text": "upload[\"rows\"], self.settings)",
+      "what": "job.py passes the upload's echoed rows into step_create the same way resident_worker.py:443 does; no non-test module in the investor-reporting tree imports job.py (grep), so this path is not reached on report generation (INFERRED from the import search).",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not on the live path; the same removal as recipe.py:639 applies if it is revived.",
+      "claim": "INFERRED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/research/price_source.py:15",
+      "line_text": "CHAIN = (\"estate\", \"yfinance\", \"ycharts\")",
+      "what": "Declares the price chain CHAIN as estate, yfinance, ycharts; a symbol that yfinance prices never reaches the ycharts tier, so a Yahoo-priced holding needs no YCharts price call.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable; the ycharts tier stays the last fallback for a holding that no earlier tier prices.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:119",
+      "line_text": "\"opal_pricing\": {\"enabled\": False, \"tiers\": [\"estate\", \"yfinance\"]},",
+      "what": "The shipped opal_pricing flag is off and names tiers estate and yfinance only, so the priced Opal run never asks the ycharts tier for a price.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable: the flag is off and excludes the ycharts tier.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/intake/portfolio.py:591",
+      "line_text": "rows.append({\"original\": copy.deepcopy(original), \"security_id\": symbol,",
+      "what": "A holding with no provider id is filed UNRESOLVED with its typed symbol and kept out of the vendor totals (comment at lines 588-590), so its dollars never reach the YCharts portfolio; report generation then refuses the whole upload at normalized_input.py:72-73.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "YES",
+      "removal": "On the template path, only by carrying the holding on the canonical path (the yfinance kept route at intake/portfolio.py:603); keeping it out of the totals silently is what the refusal prevents.",
+      "claim": "MEASURED",
+      "id_source": "the typed symbol kept as the row id (no YCharts id); UNRESOLVED from a provider TICKER_NOT_FOUND state"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/intake/portfolio.py:603",
+      "line_text": "row.update(method=\"KEPT_BY_HISTORY\", price_source=\"yfinance\",",
+      "what": "Files a yfinance-kept holding as KEPT_BY_HISTORY with price_source yfinance and the checker's own history; this line adds no YCharts id, so a Yahoo-priced holding passes the freeze without one; its failure is downstream at normalized_input.py:74 and 150.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable: this is the Yahoo path itself.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/intake/security_resolution.py:72",
+      "line_text": "if row.get(\"security_id\") != row.get(\"id\"):",
+      "what": "For a fund row the provider's security_id must equal its id, else FUND_ROW_SECURITY_ID_MISMATCH; this reads the YCharts id only where the provider returned a row, so a holding the provider did not answer is not affected.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to a holding with no provider row.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/intake/security_resolution.py:185",
+      "line_text": "result.update(state=\"NOT_FOUND\", reason=\"EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ\")",
+      "what": "A symbol absent from the provider read is set NOT_FOUND (EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ), which routes it to the yfinance checker and not to a refusal; this is where a Yahoo-priced holding enters with no YCharts id.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable: this routes, it does not refuse.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/templates.json:133",
+      "line_text": "\"security_id\": \"P:1728415\",",
+      "what": "The comparison catalog stores a hard-coded YCharts security_id (P:1728415) for an Opal comparison model; comparisons only, not holdings.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to holdings.",
+      "claim": "MEASURED"
+    },
+    {
+      "site": "infra/aws/lambda/investor-reporting/ycharts/generate/templates.json:107",
+      "line_text": "\"namespace\": \"OPAL\",",
+      "what": "An OPAL-namespace comparison (vendor_id UST) carries no security_id, so comparison_security_ids and report_security_ids refuse it; comparisons only, not holdings.",
+      "needs_ycharts_id_for_yahoo_priced_holding": "NO",
+      "removal": "Not applicable to holdings.",
+      "claim": "MEASURED"
+    }
+  ],
+  "summary": {
+    "dependencies": 46,
+    "needs_yes": 17
+  },
+  "remaining_ycharts_calls": [
+    "GET /custom_pdf_reports/generate/<template_id> (recipe.py:412): 1 per report",
+    "POST /model_portfolios/fixed/holdings_upload/client (recipe.py:523): 1 per report, carries the holdings CSV symbols",
+    "POST /model_portfolios/fixed/ portfolio create (recipe.py:648): 1 per report",
+    "GET /model_portfolios/<id>/status read-back poll (recipe.py:747): 1 per report (READ_BACK_POLLS = 1)",
+    "GET /model_portfolios/fixed/<id> saved-portfolio read-back (recipe.py:765): 1 per report, when the portfolio is available",
+    "GET /securities/securities_info for ETF comparison tickers (recipe.py:448): 1 per report when an ETF comparison is selected, 0 otherwise",
+    "POST /custom_pdf_reports/validate_report_securities/<template_id> (recipe.py:829): 1 per report",
+    "POST /custom_pdf_reports/<template_id> generate (recipe.py:990): 1 per report",
+    "GET signed report_url download (recipe.py:1006): 1 per report",
+    "Upload door: one batched GET /securities/securities_info per upload, at most 200 symbols (intake/upload_resolution.py docstring line 7; that file was not opened, so this count is INFERRED): 1 per upload"
+  ],
+  "coverage": "Opened in full or by range: recipe.py (all), normalized_input.py (all), frozen_worker.py (all), job.py (330-475), resident_worker.py (130-200, 380-480, 566-600), comparison_catalogue.py (1-30, 80-130), templates.json (96-140), price_source.py (all), build_resident_package.py (108-129), intake/portfolio.py (120-160, 300-340, 576-635 and the def list), intake/security_resolution.py (60-90). Searched by content line only (non-test .py, id-term and holding-term hits read, no id hit): custody_submission, submission, entry, transport, durable_job, prospect_submission, publisher, resident_main. Not opened (zero hits on holding, security, price, vendor_id, identifier): acceptance, composition_admission, current_authority, kimi_port, publication_worker, recipe_snapshot, report_index, submission_service, ticket_confirmation. Non-test generate .py files total 23. Tests excluded. The verifier checks citations, not completeness."
+}
