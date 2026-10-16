@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-HOSTLIB.resident-host-platform-and-pydeps-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-HOSTLIB.resident-host-platform-and-pydeps-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "35c2769144"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R31_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-HOSTLIB.resident-host-platform-and-pydeps-aq2.md",
+  "vintage_commit": "35c2769144"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/HOST_PLATFORM.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the eight platform lines read from the resident host by Systems Manager as ec2-user through /usr/bin/python3.12: x86_64, Python 3.12.14, linux-x86_64, glibc 2.34, pip present, 52 pydeps entries, pydeps writable by ec2-user, 2542164 KB free",
+   "artifact_covered_by": [
+    "HOSTLIB-AC1"
+   ],
+   "commit_or_etag": "62fe613467"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/PYDEPS_INVENTORY.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "COUNT 22 and one Name Version line per .dist-info METADATA, sorted; the host's own count of dist-info directories reads 22",
+   "artifact_covered_by": [
+    "HOSTLIB-AC2"
+   ],
+   "commit_or_etag": "62fe613467"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "HOSTLIB-AC1",
+   "invocation": "grep -c -E '^(ARCH [A-Za-z0-9_]+|PYTHON [0-9]+\\.[0-9]+\\.[0-9]+|PLATFORM_TAG [A-Za-z0-9_.-]+|GLIBC [0-9]+\\.[0-9]+|PIP (present|absent)|PYDEPS_ENTRIES [0-9]+|PYDEPS_WRITABLE (yes|no)|DISK_FREE_KB [0-9]+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/HOST_PLATFORM.txt",
+   "expect": "^8$",
+   "output_evidence": "8\nexit=0",
+   "denominator": "8 lines in the stated forms, every value parsed by script from the saved host output",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(ARCH [A-Za-z0-9_]+|PYTHON [0-9]+\\.[0-9]+\\.[0-9]+|PLATFORM_TAG [A-Za-z0-9_.-]+|GLIBC [0-9]+\\.[0-9]+|PIP (present|absent)|PYDEPS_ENTRIES [0-9]+|PYDEPS_WRITABLE (yes|no)|DISK_FREE_KB [0-9]+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/HOST_PLATFORM.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "HOSTLIB-AC2",
+   "invocation": "grep -c -E '^COUNT [0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/PYDEPS_INVENTORY.txt",
+   "expect": "^1$",
+   "output_evidence": "1\nexit=0",
+   "denominator": "1 COUNT line, the first line of the inventory (COUNT 22)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^COUNT [0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/PYDEPS_INVENTORY.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "two read-only scripts by Systems Manager; the platform strings were read from the resident's own interpreter and from getconf (two sources agree on glibc 2.34); the pydeps listing was counted twice by the host (52 and 52) and the inventory count equals the host's own count of dist-info directories (22)",
+   "observed": "glibc 2.34 from both the interpreter and getconf; 52 entries by two counts; 22 inventory lines equal 22 dist-info directories",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "directories of the pydeps folder that are not distributions",
+   "reason": "the folder holds 52 entries, 22 of them .dist-info directories; the other entries are package directories, a bin directory, a pycache directory, two single-file modules and one shared object; they are listed whole in the saved host output and are not inventoried by name and version because they carry no METADATA of their own"
+  },
+  {
+   "item": "no import, no install, no network call",
+   "reason": "none made; `python3.12 -m pip --version` reported pip 23.2.1 from the system site-packages and changed nothing"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/ssm_hostlib_platform_out.txt",
+ "compiler_tools": [
+  {
+   "tool": "aws ssm send-command (AWS-RunShellScript) with hostlib_platform_r34.sh and hostlib_pydeps_r34.sh as the command text",
+   "invocation": "two read-only scripts as ec2-user; the two result files written by script from the saved outputs",
+   "result": "HOSTLIB-AC1 8, HOSTLIB-AC2 1"
+  }
+ ]
+}
