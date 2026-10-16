@@ -1,0 +1,103 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-DELETE-SYNTH-INTAKE.fwd1-sets-r33-and-run3-ib2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-DELETE-SYNTH-INTAKE.fwd1-sets-r33-and-run3-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "dbdf18eb6c"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-DELETE-SYNTH-INTAKE.fwd1-sets-r33-and-run3-ib2.md",
+  "vintage_commit": "46265e4af7"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-irpt/irpt/49financial/state/ (24 named synthetic object versions: original_holdings 16, normalized_portfolios 8)",
+   "kind": "aws_resource",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "NOT DELETED: 24 of 24 head-read by key and VersionId (no delete marker, intake prefixes only); the first delete-object by VersionId returned AccessDenied; nothing else attempted",
+   "artifact_covered_by": [
+    "DEL1-AC1",
+    "DEL1-AC2"
+   ],
+   "commit_or_etag": "no change made"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_synth_delete/A_DELETE_SYNTH.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "24 DEL lines as FAIL with the AccessDenied reading, DEL_TOTAL deleted=0 failed=24, the read-back of row 1 and the positive control",
+   "artifact_covered_by": [
+    "DEL1-AC1",
+    "DEL1-AC2",
+    "DEL1-AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DEL1-AC1",
+   "invocation": "grep -c -E '^DEL irpt/49financial/state/(original_holdings|normalized_portfolios)/ART-[0-9a-f]{64}/[0-9a-f]{64}\\.(csv|json) [A-Za-z0-9._-]+ ABSENT$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_synth_delete/A_DELETE_SYNTH.txt",
+   "expect": "^24$",
+   "output_evidence": "0\nexit=1",
+   "denominator": "24 DEL lines in the record, 0 reading ABSENT",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -c -E '^DEL irpt/49financial/state/(original_holdings|normalized_portfolios)/ART-[0-9a-f]{64}/[0-9a-f]{64}\\.(csv|json) [A-Za-z0-9._-]+ ABSENT$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_synth_delete/A_DELETE_SYNTH.txt",
+   "method": "command",
+   "status_reason": "the dell2 operator role is refused delete-object by VersionId in opal-data-irpt: the FIRST delete returned AccessDenied; per the order nothing else was attempted, no retry, no policy edit, no other identity; the version still reads present with a positive control; the act is for the laptop seat (the issuer routes it)"
+  },
+  {
+   "criterion_id": "DEL1-AC2",
+   "invocation": "grep -c -E '^DEL_TOTAL deleted=24 failed=0 denominator=24$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_synth_delete/A_DELETE_SYNTH.txt",
+   "expect": "^1$",
+   "output_evidence": "0\nexit=1",
+   "denominator": "1 total line reading deleted=0 failed=24",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -c -E '^DEL_TOTAL deleted=24 failed=0 denominator=24$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_synth_delete/A_DELETE_SYNTH.txt",
+   "method": "command",
+   "status_reason": "the dell2 operator role is refused delete-object by VersionId in opal-data-irpt: the FIRST delete returned AccessDenied; per the order nothing else was attempted, no retry, no policy edit, no other identity; the version still reads present with a positive control; the act is for the laptop seat (the issuer routes it)"
+  },
+  {
+   "criterion_id": "DEL1-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-synth-intake-delete-*_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed (all 2 legs proven)\nexit=0",
+   "denominator": "1 ledger CLOSED with its failures written (the order's close rule)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-synth-intake-delete-*_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the row-1 head by key and VersionId after the AccessDenied, and a positive control head of the last row",
+   "observed": "version present; the head instrument reads the bucket",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "DEL1-AC1 and DEL1-AC2",
+   "reason": "the dell2 operator role is refused delete-object by VersionId in opal-data-irpt: the FIRST delete returned AccessDenied; per the order nothing else was attempted, no retry, no policy edit, no other identity; the version still reads present with a positive control; the act is for the laptop seat (the issuer routes it)"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T2216Z_irpt-synth-intake-delete-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "delete_synth.py (boto3 head-object, delete-object by VersionId, list-object-versions read-back)",
+   "invocation": "check, delete --go",
+   "result": "24 of 24 passed the head checks; first delete AccessDenied; stopped"
+  }
+ ]
+}
