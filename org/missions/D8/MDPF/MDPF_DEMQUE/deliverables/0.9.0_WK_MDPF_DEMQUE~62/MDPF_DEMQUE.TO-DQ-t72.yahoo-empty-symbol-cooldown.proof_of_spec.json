@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t72",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t72.yahoo-empty-symbol-cooldown.md",
+    "group": "OTHER",
+    "vintage_commit": "3561e2fcdd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "3561e2fcdd",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t72.yahoo-empty-symbol-cooldown.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~62",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/yahoo_pull.py",
+      "kind": "script",
+      "commit_or_etag": "01b895aa9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EMPTY_COOLDOWN_DAYS = 7 (module constant); Pacer.cooling(symbol, now=None) added after done(), unchanged; run() skips a cooling symbol with pacer.done(sym) or pacer.cooling(sym) before pacer.allow() and pacer.wait(). Import of datetime, timedelta, timezone added; module docstring run line updated. No vendor call, no S3 write, no pacer state written.",
+      "artifact_covered_by": ["DQ9-t72-AC1", "DQ9-t72-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_empty_cooldown.py",
+      "kind": "test",
+      "commit_or_etag": "01b895aa9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file. The three tests with the exact names of the order, offline: a temp state file, a stub fetch, a no-op sleep; no network. All three PASSED by name at 01b895aa9a. No existing test file was edited.",
+      "artifact_covered_by": ["DQ9-t72-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t72-AC1",
+      "criterion_verbatim": "`DQ9-t72-AC1` -- the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t72_tests.py",
+      "output_evidence": "test_demque_empty_cooldown.py::test_a_symbol_that_returned_empty_within_the_cooldown_is_not_requested_again_and_uses_no_budget PASSED\ntest_demque_empty_cooldown.py::test_a_symbol_that_returned_empty_before_the_cooldown_is_requested_again PASSED\ntest_demque_empty_cooldown.py::test_an_ok_symbol_and_a_new_symbol_behave_as_before_and_a_pushback_still_stops_the_run PASSED\n3 passed in 0.91s\nCOOLT-OK   (rc=0 at the worktree root)",
+      "denominator": "3 of 3 named tests PASSED by name; folder: timeout 120 python -m pytest -q -p no:cacheprovider data/mdpf/scripts/demque = 243 passed in 48.52s, rc=0 (the folder run on the same bytes as 01b895aa9a)",
+      "status": "PASS",
+      "expect": "COOLT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t72-AC2",
+      "criterion_verbatim": "`DQ9-t72-AC2` -- on a temp pacer state: a symbol empty an hour ago is not requested, one empty 8 days ago is, an OK symbol is not, a new one is; the stub is called for exactly two symbols and the pacer count rises by exactly two; `EMPTY_COOLDOWN_DAYS` is 7.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t72_check.py",
+      "output_evidence": "COOL-OK   (rc=0 at the worktree root; the check reads EMPTY_COOLDOWN_DAYS == 7, runs run([AAA, BBB, CCC, DDD]) on a temp state, and the stub fetch was called for ['BBB', 'DDD'] with the pacer count at 12 from 10)",
+      "denominator": "1 of 1 criterion; within the check: 4 symbols in the run, 2 requested (BBB, DDD), 2 not requested (AAA cooling, CCC OK), count rise exactly 2; second run on the same tree also COOL-OK rc=0",
+      "status": "PASS",
+      "expect": "COOL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Pacer.cooling replaced in-process by a constant False (scratch harness .scratch/dq_t72_mutant.py, no file edit), then the three named tests run",
+      "expected": "at least one named test FAILS, because the cooling skip and the cooling assertion are what the tests pin",
+      "observed": "1 failed, 2 passed; FAILED test_a_symbol_that_returned_empty_within_the_cooldown_is_not_requested_again_and_uses_no_budget (AssertionError: assert False on pacer.cooling(AAA)); rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 check run twice at 01b895aa9a with the same tree and the outputs compared; AC1 run once plus the full folder run",
+      "observed": "AC2 run 1 COOL-OK rc=0; AC2 run 2 COOL-OK rc=0; identical; AC1 COOLT-OK rc=0 and folder 243 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the merge of box/dell1 and the push of wk-MDPF_DEMQUE-62",
+      "reason": "order BOUNDS: do not merge anything; the issuer drains. The branch wk-MDPF_DEMQUE-62 carries the code, tests and this proof only."
+    },
+    {
+      "item": "any vendor call, S3 write, ledger, queue, price store, pacer state (~/.opal/demque), request file, and any draw",
+      "reason": "order BOUNDS: no vendor call and no write; the checks are offline on temp state files"
+    },
+    {
+      "item": "the daily_draw.py, batch_pull.py and other callers of run()",
+      "reason": "not edited; the cooldown applies to every caller of yahoo_pull.run by the one rule in run(), and no caller needed a change. Not in this order's paths"
+    },
+    {
+      "item": "a future-dated last_attempt in pacer state",
+      "reason": "not in the order; cooling() reads now minus last_attempt under 7 days, so a future stamp reads as cooling. The record writer stamps UTC now, so no such stamp is produced by this code"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~62/MDPF_DEMQUE.TO-DQ-t72.yahoo-empty-symbol-cooldown.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~62 <0.9.0_WK_MDPF_DEMQUE~62@opal.agent>\" -F .scratch/msg_dq_t72_code.txt -- data/mdpf/scripts/demque/yahoo_pull.py data/mdpf/scripts/demque/test_demque_empty_cooldown.py",
+      "result": "commit 01b895aa9a landed on wk-MDPF_DEMQUE-62 (LOCAL); commit-gate, surprise-row-gate and to-pipeline-gate OK; 2 files changed, 127 insertions(+), 2 deletions(-); WARN client-data-check: hashed account-id list absent, so the commit was not checked for account ids (no account data in it)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider . (from data/mdpf/scripts/demque)",
+      "result": "243 passed in 48.52s, rc=0"
+    }
+  ]
+}
