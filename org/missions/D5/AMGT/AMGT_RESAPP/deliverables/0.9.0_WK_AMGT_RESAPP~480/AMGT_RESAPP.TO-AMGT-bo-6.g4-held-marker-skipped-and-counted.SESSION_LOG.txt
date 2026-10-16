@@ -1,0 +1,51 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~480 on AMGT_RESAPP.TO-AMGT-bo-6.g4-held-marker-skipped-and-counted
+Worktree: C:/dev/wk-resapp-480 (branch wk-AMGT_RESAPP-480). Base: 41f1b2bba746a10e8e5704a9885f127f6f90d62c.
+Terminal output is quoted with ANSI colour codes stripped; no line is edited otherwise.
+
+FIRST ACT
+  git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-480
+  test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+
+PRE-EDIT RUNS (unchanged tree, before any edit)
+  AC1: timeout 300 python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q; echo "exit=$?"
+       ERROR: file or directory not found: lib/research/filings/tests/test_batch_held_continue.py
+       no tests ran in 0.00s
+       exit=4
+  AC2: timeout 600 python -m pytest lib/research/filings/tests lib/research/harvest/tests/test_filing_attempt_skip_held.py -q -p no:cacheprovider 2>&1 | tail -5
+       350 passed in 11.56s
+       exit=0   (rc read through PIPESTATUS[0]; this pre-run was piped to tail -5, so it is not the literal form)
+
+TESTS WRITTEN FIRST, RUN RED (before any batch.py edit)
+  python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q -p no:cacheprovider --color=no
+       5 failed, 1 passed in 0.46s
+       failed: T1, T2, T3, T5, T6 (each reached the un-caught FilingAttemptChangedError or the missing HELD DONE line)
+       passed: T4 (a non-held RuntimeError propagates on the base tree, as the order requires)
+       exit=1
+
+BUILD
+  lib/research/filings/batch.py: the per-group try/except in the fetch loop, the per-name try/except in the unresolved loop,
+  the held counter, the HELD line, and the HELD DONE line after UNRESOLVED-SOURCE DONE. The harvest module is untouched.
+  Interpretation recorded in channel row AMGT_RESAPP-D1-W480-S1: the held counter counts names (len of the group's keys).
+
+POST-EDIT RUNS
+  python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q; (rc 0)
+       6 passed in 0.27s
+       exit=0
+  AC2 literal: timeout 600 python -m pytest lib/research/filings/tests lib/research/harvest/tests/test_filing_attempt_skip_held.py -q -p no:cacheprovider; echo "exit=$?"
+       356 passed in 11.16s
+       exit=0
+  AC1 second run (determinism): python -m pytest lib/research/filings/tests/test_batch_held_continue.py -q -p no:cacheprovider --color=no 2>&1 | tail -30
+       6 passed in 0.29s  (same count as the literal AC1 run above, which read 6 passed in 0.27s)
+
+COMMIT GATE
+  bash .tools/commit-gate.sh lib/research/filings/batch.py lib/research/filings/tests/test_batch_held_continue.py
+       OK: pre-commit gate clean for 2 of 2 file(s)
+       gate-exit=0
+
+COMMIT A (code, tests, channel rows)
+  2d336d77dd2a71c9f8450ff9d53eb36f03bec28e  AMGT-bo-6 (round 108, G4): the filings batch skips and counts a held name instead of raising
+  surprise-row-gate: OK, 2 new row(s) of 1221 total checked.
+  one-writer: WARN on the channel path (laptop's unsuffixed file written from dell1; WARN until C-QUEUE), 0 blocked.
+
+NOT DONE, PER BOUNDS
+  No Windows task registered, enabled or run. No AWS call. The filings batch was not run for real. No status flip (the issuer's).

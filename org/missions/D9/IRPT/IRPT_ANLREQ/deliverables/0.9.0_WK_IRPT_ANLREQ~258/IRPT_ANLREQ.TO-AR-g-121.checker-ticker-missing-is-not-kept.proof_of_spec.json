@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-121",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-121.checker-ticker-missing-is-not-kept.md",
+    "group": "OTHER",
+    "vintage_commit": "c03ebfdb5c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R36_G.md",
+    "vintage_commit": "c03ebfdb5c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-121.checker-ticker-missing-is-not-kept.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~258",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/yfinance_check.py",
+      "kind": "script",
+      "commit_or_etag": "8ef81d76e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_is_ticker_missing(exc) added before default_history; default_history wraps only the history() call: a ticker-missing exception returns [] (NOT_KEPT NO_ROWS), every other exception re-raises; no deploy, no AWS call",
+      "artifact_covered_by": [
+        "AR121-g-AC1",
+        "AR121-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_yfinance_check.py",
+      "kind": "test",
+      "commit_or_etag": "8ef81d76e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four new tests appended (ticker-missing NOT_KEPT; rate limit PUSHBACK and STEP_STOPPED; four other exceptions EXCEPTION; 22 rows KEPT); existing tests untouched; 34 passed when run alone",
+      "artifact_covered_by": [
+        "AR121-g-AC1",
+        "AR121-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/yfinance_exceptions_1_2_0.py",
+      "kind": "test",
+      "commit_or_etag": "8ef81d76e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "byte copy of the real yfinance 1.2.0 exceptions module (cmp-equal to the issuer's checks copy; sha256 16241e89d10c6317825d3387fa96cb5f20b4dd0a2a15636fa41d28ae9c8e48e3)",
+      "artifact_covered_by": [
+        "AR121-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR121-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g121_checks.py build",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g121_checks.py build",
+      "output_evidence": "AR-G121-OK build: all arms | run under timeout 120, rc=0 | ticker-missing arms: YFTzMissingError and YFPricesMissingError each read NOT_KEPT NO_ROWS 0 rows and hide_exceptions restored True; fixture byte-equal to the real file; test file names yfinance_exceptions_1_2_0",
+      "denominator": "2 of 2 ticker-missing arms NOT_KEPT NO_ROWS; fixture byte-equal (1 of 1); test file names the fixture (1 of 1)",
+      "expect": "^AR-G121-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR121-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g121_checks.py guard",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g121_checks.py guard",
+      "output_evidence": "AR-G121-OK guard: all arms | run under timeout 120, rc=0 | rate limit PUSHBACK and STEP_STOPPED; data exception, plain error, connection error and lookalike class name each CHECK_FAILED EXCEPTION; SPY 22 rows KEPT HISTORY_ROWS",
+      "denominator": "5 of 5 non-ticker-missing arms CHECK_FAILED (reason as graded); SPY KEPT 22 rows (1 of 1)",
+      "expect": "^AR-G121-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR121-g-AC3",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g121_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g121_checks.py regress",
+      "output_evidence": "AR-G121-REGRESS-FAIL test_kept_holding.py: rc=1 ['1 failed, 18 passed in 0.40s']; test_resident_session_checker.py: rc=4 ['no tests ran in 0.00s'] | run under timeout 580, rc=1 | the one failure is FileNotFoundError on infra/aws/lambda/investor-reporting/ops/status.py; the session checker path is absent from this sparse worktree",
+      "denominator": "test_kept_holding.py 18 of 19 passed (1 failed, missing file); test_resident_session_checker.py 0 of 0 collected (path absent); own test file 34 of 34 passed when run alone (not in the regress line)",
+      "expect": "^AR-G121-REGRESS-OK",
+      "status": "FAIL",
+      "status_reason": "The two regress files outside the worktree sparse cone (ycharts/, ops/) cannot run here; the worker did not reconstruct the tree. Surprise IRPT_ANLREQ-D2-W258-S1 (BLOCKING). Also, scope() would flag this worker's own deliverables folder after the proof commit (IRPT_ANLREQ-D2-W258-S2); not measured as the verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's own negative arms are tests: rate limit (PUSHBACK, step stops), data exception, plain error, connection error and a lookalike class name (each EXCEPTION).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes; no network, no yfinance import",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W258-S1: the worktree's sparse cone omits ycharts/ and ops/, so AR121-g-AC3 regress cannot run test_kept_holding.py (1 failed, a missing file) or test_resident_session_checker.py (absent)",
+    "IRPT_ANLREQ-D2-W258-S2: ar_g121_checks.py scope does not grant the worker's own deliverables folder, so a committed proof instance reads as stray in scope and regress"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "AR121-g-AC3 regress over test_kept_holding.py (18 of 19) and test_resident_session_checker.py (0 collected)",
+      "reason": "the worktree is sparse (ycharts/ and ops/ not materialized); the tree was not rebuilt; surprise IRPT_ANLREQ-D2-W258-S1"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q <one file> (intake/tests/test_yfinance_check.py, run alone)",
+      "result": "34 passed in 3.71s"
+    },
+    {
+      "tool": "python",
+      "invocation": "bash .tools/commit-gate.sh on yfinance_check.py and tests/test_yfinance_check.py",
+      "result": "pre-commit gate clean for 1 of 1 file(s) each"
+    }
+  ]
+}
