@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-SM-x1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-x1.scrub.md",
+    "group": "OTHER",
+    "vintage_commit": "09a7732aab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP.md",
+    "vintage_commit": "09a7732aab",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-x1.scrub.md"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/trino/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-5; comment words and the Project tag and KMS description strings only. Nothing applied; the Terraform stays DESIRED."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/identity.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-5; comment words only. Nothing applied."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/collector.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-5; comment words only. Nothing applied."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/app/register_app.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-5; module docstring only, no code line changed. Dry-run default; --apply not exercised.",
+      "artifact_covered_by": ["SM1-x1-AC1"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/README.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-5; opening paragraph and spec pointers rewritten to SOC2_MSLOGS."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/app/RUNBOOK.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-5; opening line project and cell id only; every step left as written."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SM1-x1-AC1",
+      "criterion_verbatim": "none of the eight listed files mentions the Ticket Center, and the three Terraform files and the app registration script behave exactly as before (fingerprints equal).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_x1.py scrub",
+      "output_evidence": "X1-SCRUB-OK files=6 (rc=0). Mutant control: the same check against the pre-scrub HEAD bytes printed X1-SCRUB-REFUSED naming all six files (rc=1).",
+      "denominator": "6 of 6 listed files (4 fingerprinted: 3 Terraform + register_app.py; 2 text-only: README.md, RUNBOOK.md)",
+      "status": "PASS",
+      "expect": "X1-SCRUB-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Pre-scrub HEAD bytes of the six files, run through the same check from a scratch root, must be refused.",
+      "expected": "X1-SCRUB-REFUSED naming every file still mentioning TCKT",
+      "observed": "X1-SCRUB-REFUSED infra/aws/terraform/trino/main.tf still mentions TCKT; infra/aws/terraform/trino/identity.tf still mentions TCKT; infra/aws/terraform/trino/collector.tf still mentions TCKT; data/m365_metadata/scripts/app/register_app.py still mentions TCKT; data/m365_metadata/README.md still mentions TCKT; data/m365_metadata/scripts/app/RUNBOOK.md still mentions TCKT (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the criterion invocation on the scrubbed tree, outputs compared",
+      "observed": "run 1: X1-SCRUB-OK files=6 rc=0; run 2: X1-SCRUB-OK files=6 rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "data/m365_metadata/scripts/population.json and the README line naming it ('the eight'), and the 'eight operations team members' sentence in main.tf line 1",
+      "reason": "A word scrub of the Ticket Center name only. The eight-account framing is a population fact the collector still reads; reconciling it with the every-account purpose is a PRD question, not a cosmetic one. Left unchanged and not reported as a surprise."
+    },
+    {
+      "item": "data/m365_metadata/scripts/app/start_subscriptions.py and test_app.py",
+      "reason": "Not in this order's grant; owned by the collector cell. Not touched."
+    },
+    {
+      "item": "Any push, merge, or live call",
+      "reason": "Order bounds: LOCAL only; no AWS, no Terraform init or apply, no push."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-x1.scrub.md",
+  "compiler_tools": [
+    {
+      "tool": "s1_check_x1.py scrub",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_x1.py scrub",
+      "result": "X1-SCRUB-OK files=6 (rc=0)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~5/SOC2_MSLOGS.TO-SM-x1.scrub.proof_of_spec.json SM1-x1-AC1",
+      "result": "invoked against this instance; its verdict is the rc recorded in the worker report"
+    }
+  ]
+}
