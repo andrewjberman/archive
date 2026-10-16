@@ -1,7 +1,7 @@
 """c26_check.py -- grades MX-c-26 (the 49F live opal-data-bd tables: four NEW catalog rows, the eight frozen-copy rows back in their own bucket, the `address` field), from the repo root.
 
   python c26_check.py ac1   the four NEW live rows (unrealized, transactions, allocations, fees): entry file opal_data_bd_silver_<t>.yaml with prefix silver/<t>/, table <t>, layer silver,
-                            `address` blackdiamond/49f-live/silver/<t>/, read_tool the mapped client tool, not retired, no gap_owner, no `FROZEN` open item; freshness.latest_partition EQUAL
+                            `address` blackdiamond/49f-live/silver/<t>/, read_tool the mapped client tool, not retired, no gap_owner, and not the legacy open item "do not build a tool on this prefix" (a live row MAY point at the frozen copy, as the face requires); freshness.latest_partition EQUAL
                             to the newest YYYY-MM-DD.parquet the aws CLI lists under s3://opal-data-bd/silver/<t>/ now, claim measured, trading_days_behind_t1 equal to the trading calendar's;
                             the issuer's group map round19/live_bd_group_map.json maps the four to bucket opal-data-bd, vendor blackdiamond, firm 49financial
   python c26_check.py ac2   the eight FROZEN-copy rows (49financial_<t>_silver_legacy for allocations, assets, fees, prices, realized, transactions_enriched, transactions, unrealized): prefix is
@@ -77,8 +77,8 @@ def ac1():
         ok = (e.get("prefix") == "silver/%s/" % t and e.get("table") == t and e.get("layer") == "silver"
               and e.get("address") == "blackdiamond/49f-live/silver/%s/" % t and e.get("read_tool") == tool
               and e.get("retired") is False and not e.get("gap_owner")
-              and not any("FROZEN" in str(x) for x in (e.get("open_items") or [])))
-        res.append(("%s: prefix, table, layer, address, read_tool %s, not retired, no gap_owner, no FROZEN item" % (ent, tool), ok))
+              and not any("do not build a tool on this prefix" in str(x) for x in (e.get("open_items") or [])))
+        res.append(("%s: prefix, table, layer, address, read_tool %s, not retired, no gap_owner, no copy-over of the legacy do-not-build item" % (ent, tool), ok))
         fok = (newest is not None and str(fr.get("latest_partition"))[:10] == newest and fr.get("claim") == "measured"
                and fr.get("trading_days_behind_t1") == behind)
         res.append(("%s: freshness latest_partition %s equals the live newest %s, behind %s equals %s, claim measured"
