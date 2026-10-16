@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_RBNDV2.TO-RV-t-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_RBNDV2/decompositions/DSGN_RBNDV2_DECOMP_v8.md",
+    "vintage_commit": "97917488dc",
+    "to_ref": "org/missions/D13/DSGN/DSGN_RBNDV2/task-orders/DSGN_RBNDV2.TO-RV-t-1.rankedrow.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_RBNDV2/task-orders/DSGN_RBNDV2.TO-RV-t-1.rankedrow.md",
+    "group": "OTHER",
+    "vintage_commit": "8b76518b45"
+  },
+  "assignee": "0.9.0_WK_DSGN_RBNDV2~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/market-performance/RSIModal.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "728aa979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the portal worktree branch wk-DSGN_RBNDV2-31-portal (portal repo, not pushed). Not a deploy; the ranked row's root class gains border border-[hsl(var(--hairline))]."
+    },
+    {
+      "path_or_key": "portal/src/__tests__/dsgn-rbndv2/rb-11-t1.rankedrow.test.ts",
+      "kind": "test",
+      "commit_or_etag": "728aa979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the portal worktree branch wk-DSGN_RBNDV2-31-portal (portal repo, not pushed). Not a deploy; the test reads RSIModal.tsx as text."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "RB11T1-AC1",
+      "criterion_verbatim": "the new test prints VERDICT: RANKEDROW-OUTLINE-OK only when every arm holds, and its difference control fails on the base text.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-31/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_RBNDV2~31; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/__tests__/dsgn-rbndv2/rb-11-t1.rankedrow.test.ts 2>&1 | tail -25",
+      "output_evidence": "RANKED-ROW #C4CBDB / VERDICT: RANKEDROW-OUTLINE-OK / DIFFERENCE-CONTROL 9db2045b base-failures 2 / 2 pass / 0 fail / 7 expect() calls / Ran 2 tests across 1 file. RC=0 (portal commit 728aa979)",
+      "denominator": "2 of 2 tests pass (1 arm test + 1 difference-control test); the base-failure count is 2 of 2 arms failing at 9db2045b",
+      "status": "PASS",
+      "expect": "VERDICT: RANKEDROW-OUTLINE-OK"
+    },
+    {
+      "criterion_id": "RB11T1-AC2",
+      "criterion_verbatim": "the application typecheck, which includes the design tests, exits 0: the printed line reads TSC-RC=0.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-31/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_RBNDV2~31; mkdir -p .scratch; timeout 300 /c/Users/AndrewBerman/.bun/bin/bun x tsc -p tsconfig.app.json --noEmit > .scratch/rb11t1-tsc.txt 2>&1; echo TSC-RC=$?",
+      "output_evidence": "TSC-RC=0 (the tsc output file .scratch/rb11t1-tsc.txt is 0 lines)",
+      "denominator": "1 of 1 typecheck run; 0 diagnostic lines",
+      "status": "PASS",
+      "expect": "TSC-RC=0"
+    },
+    {
+      "criterion_id": "RB11T1-AC3",
+      "criterion_verbatim": "every test under src/__tests__/dsgn-rbndv2/, src/ui/components/panels/, src/ui/components/modal/ and src/components/market-performance/ passes: the summary line reads 0 fail.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_wk/rbndv2-31/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_RBNDV2~31; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/__tests__/dsgn-rbndv2 src/ui/components/panels src/ui/components/modal src/components/market-performance 2>&1 | tail -6",
+      "output_evidence": " 57 pass / 1 fail / 796 expect() calls / Ran 58 tests across 40 files. RC=1. The failing test, from a second run with the grep for the fail marker: RB10R1-AC1 spotlight outlines and canonical labels > SPOTLIGHT-OUTLINES-OK, with the message (d) RankedRow differs from its text at the base ref (base 4299f28a).",
+      "denominator": "57 of 58 tests pass across 40 files; 1 fail",
+      "status": "FAIL",
+      "status_reason": "FAIL on the summary line: 1 fail, not 0 fail. The one red test is RB10R1-AC1 (portal/src/__tests__/dsgn-rbndv2/rb-10-r1.spotlight.test.ts arm (d)), a round-10 test that pins RankedRow to its text at 4299f28a; the RV-t-1 change to that row is the ordered change and the pin is not moved here. Filed as DSGN_RBNDV2-W31-S1 for the issuer to re-rule. The order stays open.",
+      "expect": "0 fail"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control: the same arms run on the base text 9db2045b must fail there",
+      "expected": "the base text fails the RankedRow and SpotlightCard arms (count greater than 0)",
+      "observed": "DIFFERENCE-CONTROL 9db2045b base-failures 2 (the test asserts greater than 0; passed)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the criteria were each run once as written; the same-input pair was not run, and no stability claim is made beyond the single reads recorded above.",
+      "observed": "AC1 read once (2 pass); AC3 read once (57 pass, 1 fail). No second run was taken.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "rb-10-r1.spotlight.test.ts arm (d) (RankedRow pinned to 4299f28a) is not moved or dropped",
+      "reason": "A prior round's test, outside this cell's change. Re-pinning it is a decision for the issuer (DSGN_RBNDV2-W31-S1), not a weakening to make on the worker's own act."
+    },
+    {
+      "item": "No push of the portal branch",
+      "reason": "Worker rule: commit on the worktree branch only; nothing leaves the laptop."
+    }
+  ],
+  "surprises": [
+    "DSGN_RBNDV2-W31-S1: RV-t-1's RankedRow class change turns the round-10 test rb-10-r1 red (arm (d) pins RankedRow to 4299f28a), so RB11T1-AC3 cannot hold as written; row filed BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~RB."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_RBNDV2/deliverables/0.9.0_WK_DSGN_RBNDV2~31/DSGN_RBNDV2.TO-RV-t-1.rankedrow.session.log",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/__tests__/dsgn-rbndv2/rb-11-t1.rankedrow.test.ts",
+      "result": "2 pass, 0 fail; VERDICT: RANKEDROW-OUTLINE-OK"
+    },
+    {
+      "tool": "tsc",
+      "invocation": "bun x tsc -p tsconfig.app.json --noEmit",
+      "result": "rc=0, 0 diagnostic lines"
+    }
+  ]
+}
