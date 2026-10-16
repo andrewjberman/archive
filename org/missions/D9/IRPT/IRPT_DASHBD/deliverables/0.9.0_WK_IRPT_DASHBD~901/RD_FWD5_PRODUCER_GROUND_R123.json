@@ -1,0 +1,154 @@
+{
+  "as_of": "2026-10-16",
+  "firm": "49financial",
+  "targets": [
+    {
+      "target": "trade_date",
+      "source": "trade_date",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 116,
+      "words": "The fact_trn column trade_date is declared as the closing-trade date (the lot_source closing_trade object, traded key) and is read by account_activity_lots.py closing_trades at line 293 through lot_spec. It is NOT in the 14-column transaction_columns read set (account_return_daily.py line 510 onward), which is why the round-120 record did not list it.",
+      "claim": "measured"
+    },
+    {
+      "target": "settle_date",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+      "line": 31,
+      "words": "No column is a settlement date. comp-find -i 'settle' over the 49 files of the irpt_reporting folder gives 12 hits, none a settle-date column: the hits are market_value_settled_unsettled (sources.json line 33, a position value), and prose. account_class_daily.py line 31 states that nothing is dated by settlement. The day key the code reads is business_date (sources.json line 18); the declaration names no settle column.",
+      "claim": "absent"
+    },
+    {
+      "target": "action",
+      "source": "tr_cd",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 59,
+      "words": "tr_cd is the cash_code_column (line 59). It carries the cash marker FC, the in-kind marker IC and the trade marker TR (3 distinct tr_cd values, measured in RD_FWD5_FIELDS_R120.json). No file names an action field for this firm; reading tr_cd as the Opal action is inferred. The Opal action words are being ratified in round 122 and are not used here.",
+      "claim": "inferred"
+    },
+    {
+      "target": "txn_type",
+      "source": "sb_cd",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 47,
+      "words": "sb_cd is the third transaction key column (lines 44-48), and it carries the withholding marker WD on the withholding_code_column (line 78). 15 distinct sb_cd values are measured in RD_FWD5_FIELDS_R120.json. No file names a type field for this firm; reading sb_cd as the Opal txn_type is inferred, and the Opal type words are not ratified here.",
+      "claim": "inferred"
+    },
+    {
+      "target": "symbol",
+      "source": "ticker_symbol",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 71,
+      "words": "ticker_symbol is the first of the two trade_identifier_columns (lines 70-72; cusip is the second). account_class_daily.py trade_leg (line 315, identifier_columns at line 319) reads them. The code names the security through ticker_symbol, with cusip as the declared fallback.",
+      "claim": "measured"
+    },
+    {
+      "target": "asset_name",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 96,
+      "words": "No column is an asset name. comp-find -i over the irpt_reporting folder (49 files) gives 0 hits for asset_description and 0 for security_name. The only free-text column the code reads is transaction_detail_description (line 96), which the declaration carries for the type-transfer grammar (line 97), not for a security name. Inferred only, never a source: transaction_detail_description could carry a name text, and cusip identifies a security without naming it.",
+      "claim": "absent"
+    },
+    {
+      "target": "units",
+      "source": "quantity",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 84,
+      "words": "quantity is the inkind_quantity_column (line 84), the share count of an in-kind leg read by the producer. The share count of a dividend or interest row is dividend_interest_share_quantity (line 93), a different column, and is not used as units here.",
+      "claim": "measured"
+    },
+    {
+      "target": "price",
+      "source": "price",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 85,
+      "words": "price is the inkind_price_column (line 85). An in-kind leg whose row price is 0.00 is valued from the custodian closing_price (line 35, the admitted fallback per the inkind_valuation_comment at line 92), so the row price is the source and the closing price is a fallback, not the source.",
+      "claim": "measured"
+    },
+    {
+      "target": "amount",
+      "source": "gross_amount",
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 50,
+      "words": "gross_amount is the money_column (line 50). The money law (line 52) states that net_amount is never read, because it is zero on most cash rows and reading it computes zero flow silently.",
+      "claim": "measured"
+    },
+    {
+      "target": "fee",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "line": 25,
+      "words": "No fee column is read. fee_amount is null by design: the fee rail is unused (line 25, C-FEERAIL; FEE_RAIL_UNUSED is defined at line 179). The FEE-MANAGEMENT and FEE-ADMIN partitions (FINAL_BY_PARTITION, line 230) classify rows whose amount is gross_amount. A fee could be that money column on a fee-class row: inferred only, never a source.",
+      "claim": "absent"
+    },
+    {
+      "target": "custodian",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 7,
+      "words": "No silver column supplies custodian. It is the firm constant: the custody entry declares the custodian value schwab (line 7), and no code in the folder reads that key (a native Grep over the irpt_reporting folder finds the key read only in the Cottonwood and Inflection roster adapters, which read their own ident mapping). Claim absent as a column; the constant is declared, not measured from a row.",
+      "claim": "absent"
+    },
+    {
+      "target": "flow_class",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "line": 498,
+      "words": "Derived, not a silver column. The producer maps the classification partition value, joined on the three transaction key columns (sources.json lines 44-48), through FINAL_BY_PARTITION.get (line 498) to one of 5 finals: INTERNAL, FEE-MANAGEMENT, FEE-ADMIN, EXTERNAL, UNRESOLVED. Direction is read from debit_credit (sources.json line 53) on cash rows. The brief's 7 flow classes are not the code's 5: INCOME is recognised from the category column on cash receipt (comment at line 243), and CORPORATE_ACTION is not a final. Splitting EXTERNAL into EXTERNAL_IN and EXTERNAL_OUT would follow debit_credit: inferred.",
+      "claim": "absent"
+    },
+    {
+      "target": "source_txn_id",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "line": 115,
+      "words": "No per-transaction id column is read. comp-find -i 'txn_id' over the 49 files gives 0 hits. tran_srcde (sources.json line 45) is the source-code key of the 187-row classification table (157 distinct values measured in RD_FWD5_FIELDS_R120.json): a code shared by many rows, not a row identifier. order_number (line 115, the fact_trn closing-trade order) is present on trade rows only (account_activity_lots.py closing_trades, line 272). Inferred only, never a source: order_number could feed source_txn_id on trade rows.",
+      "claim": "absent"
+    },
+    {
+      "target": "coverage",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+      "line": 96,
+      "words": "Derived, not a silver column. The nearest closed coverage axis is the account-class COVERAGE tuple (line 96), computed by the producer from the day's values. For a transaction row the nearest derivation is the classification fallback: an unkeyed code takes UNRESOLVED with partition '<unkeyed>' (account_return_daily.py line 585, _MISS). No coverage vocabulary for account_transaction is in any file read; claim absent as a column.",
+      "claim": "absent"
+    }
+  ],
+  "absent_count": 7,
+  "pattern_producer": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+    "line": 569,
+    "words": "emit_class_day writes one day of a gold table beside account_return_daily at the builder address (line 574, opal_naming.address with TABLE_CLASS), typed by ARROW_SCHEMA (line 105), through stream_to_parquet (line 591) with a manifest. It is the closest copy target: account-by-class grain, one day per call. The activity producer emit_day (account_activity_lots.py line 1318) is the second instance of the same shape.",
+    "claim": "measured"
+  },
+  "silver_source": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+    "line": 336,
+    "words": "read_trn_window (line 329) reads one custodian transaction partition with ard.read_partition under the declared transactions_prefix (sources.json line 14, the fact_trn prefix of the custody entry; the bucket and prefix values are not copied here), with the producer's column list.",
+    "claim": "measured"
+  },
+  "address": {
+    "uri": "s3://opal-data-49financial/irpt/49financial/gold/account_transaction/date=2000-01-03",
+    "registry_row_exists": false,
+    "words": "opal_naming.address('irpt','49financial','gold','account_transaction','date=2000-01-03') returned this uri at rc 0 (LOCAL python -I call, no AWS). The builder did not refuse. Registry probe: comp-find 'account_transaction' over infra/logic/registry gives 0 hits in 17 files. The same probe for account_class_daily, a table that is emitted, also gives 0 hits, so the registry names no gold table and the zero does not show a missing row.",
+    "claim": "measured"
+  },
+  "emit_path": {
+    "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+    "line": 313,
+    "words": "Touch-points for a third gold table beside account_class_daily: (1) handler.py line 107, the GUARDED import of account_class_daily; (2) handler.py line 313, def emit_classes, which calls acd.emit_class_day at line 322 and builds the class address at line 334; (3) account_class_daily.py line 569, emit_class_day, the PutObject path (stream_to_parquet, line 591); (4) infra/aws/terraform/investor-reporting/reporting-gold/locals.tf line 90 (irpt_rg_gold_class_prefix) and the write list irpt_rg_gold_write_arns at lines 104-106 (the class prefix ARN is line 106); (5) infra/aws/terraform/investor-reporting/reporting-gold/iam.tf lines 93-96, the single s3:PutObject statement WriteTheFiveGoldPrefixesOnly over irpt_rg_gold_write_arns; (6) infra/aws/terraform/investor-reporting/reporting-gold/lambda.tf line 9, the staged_from pin for account_class_daily.py, which a new producer bundle would need as its own pin. Never-widen: a new table prefix adds one ARN to the PutObject write list (locals.tf line 104), which widens the role's write set and needs the never-widen sign-off (CLAUDE.md section 5) naming the blast radius. Nothing edited.",
+    "claim": "measured"
+  },
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
