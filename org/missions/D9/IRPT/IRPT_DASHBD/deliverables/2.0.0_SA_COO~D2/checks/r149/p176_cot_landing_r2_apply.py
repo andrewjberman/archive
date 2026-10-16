@@ -58,7 +58,10 @@ HISTORY_DAYS, HISTORY_LAST, HISTORY_FIRST = 3325, "2026-06-22", "2013-04-03"
 LANDED = 66
 ALLOWANCE = json.loads((HERE.parent.parent / "reads" / "RD_COT_REWRITE_OFFLINE_DIFF_20261016.json").read_text(encoding="utf-8"))["changed_rows_by_day"]
 ALLOWED_COLS = ("external_flow", "total_return_daily")
-EVENTS = [("2026-07-10", "2026-08-13", 25), ("2026-08-14", "2026-08-18", 3), ("2026-08-20", "2026-09-23", 24), ("2026-09-28", "2026-10-15", 14)]
+# ADDENDUM 1 (COO e6f1f4b4759f, CTO countersign @d2994a4773): ten events replace four after the 25-day dry run timed out; the dry_run record is the first small probe
+DRY = ("2026-07-10", "2026-07-14", 3)
+EVENTS = [("2026-07-10", "2026-07-15", 4), ("2026-07-16", "2026-07-21", 4), ("2026-07-22", "2026-07-28", 5), ("2026-07-29", "2026-08-04", 5), ("2026-08-05", "2026-08-12", 6),
+          ("2026-08-13", "2026-08-18", 4), ("2026-08-20", "2026-08-31", 8), ("2026-09-01", "2026-09-15", 10), ("2026-09-16", "2026-09-23", 6), ("2026-09-28", "2026-10-15", 14)]
 MEM_LINE, DUR_LINE = 819, 720000
 LAYER = "irpt-performance-native-layer"
 H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("history_keys_sha256", "keys_sha256", "request_ids")
@@ -119,10 +122,10 @@ def check_tail(rec):
     need(a["schedule"] == {"state": "ENABLED", "cron": CRON, "zone": ZONE}, "after.schedule untouched")
     d = rec["dry_run"]
     need(isinstance(d, dict) and set(d) == {"payload", "invoked_utc", "status_code", "function_error", "returned", "report", "rows_match_landed", "versions_unchanged", "request_id"}, "dry_run keys")
-    need(d["payload"] == {"rewrite": {"start": EVENTS[0][0], "end": EVENTS[0][1]}, "dry_run": True}, "dry run: the first range with dry_run true")
+    need(d["payload"] == {"rewrite": {"start": DRY[0], "end": DRY[1]}, "dry_run": True}, "dry run: the addendum's probe range %s to %s with dry_run true" % (DRY[0], DRY[1]))
     need(d["status_code"] == 200 and d["function_error"] is None and H.UTC.match(str(d["invoked_utc"])) and d["invoked_utc"] >= rec["apply_finished_utc"] and not in_window(d["invoked_utc"], "12:05", "12:45"), "dry run: 200, no error, after the apply, outside the fire window")
     r = d["returned"]
-    need(isinstance(r, dict) and set(r) == {"ok", "rewrite", "days", "held"} and r["ok"] is True and r["rewrite"] is True and r["held"] == 0 and is_int(r["days"]) and r["days"] == EVENTS[0][2], "dry run: ok, rewrite, 0 held, 25 days")
+    need(isinstance(r, dict) and set(r) == {"ok", "rewrite", "days", "held"} and r["ok"] is True and r["rewrite"] is True and r["held"] == 0 and is_int(r["days"]) and r["days"] == DRY[2], "dry run: ok, rewrite, 0 held, %d days" % DRY[2])
     check_report(d["report"], "dry_run")
     need(d["rows_match_landed"] is True and d["versions_unchanged"] is True and nes(d["request_id"]), "dry run: every day's rows equal the landed ones and the version lists are unchanged")
     ev = rec["events"]
@@ -200,7 +203,7 @@ def run(root, cid):
         need({"state": sc["State"], "cron": sc["ScheduleExpression"], "zone": sc.get("ScheduleExpressionTimezone")} == {"state": "ENABLED", "cron": CRON, "zone": ZONE}, "the schedule must be ENABLED, untouched")
         ver = s3.head_object(Bucket=ARTIFACT_BUCKET, Key=ARTIFACT_KEY)
         need(ver.get("VersionId") == rec["build"]["landed_version_id"], "the artifact's current version differs from the recorded landed version")
-        print("OK: live: the function runs the NEW code; the five-statement policy and the schedule are untouched; the artifact's current version is the recorded one; the dry run (25 days, 0 held, inside 819 MB / 720 s) and the four events (0 held, no FULL to PARTIAL flip) hold every clause of the packet and the CTO's half")
+        print("OK: live: the function runs the NEW code; the five-statement policy and the schedule are untouched; the artifact's current version is the recorded one; the dry run (3 days, 0 held, inside 819 MB / 720 s) and the ten events (0 held, no FULL to PARTIAL flip) hold every clause of the packet and the CTO's half")
         return True
     if cid == "DBC176-3-AC1":
         sys.path.insert(0, str(root / "lib"))
@@ -270,7 +273,7 @@ def run(root, cid):
                 need(nm["columns"] == om["columns"] + ["history_scope_claim"] and {k: v for k, v in nm.items() if k != "columns"} == {k: v for k, v in om.items() if k != "columns"}, "%s: the manifest must differ only in columns" % d)
             need(rows == e["rows"] and part == e["partial"] and full == e["full"], "event range %s to %s: rows %d/%d, PARTIAL %d/%d, FULL %d/%d (live/record)" % (s, en, rows, e["rows"], part, e["partial"], full, e["full"]))
             tot[s] = (rows, part, full)
-        print("OK: the 66 landed days (4 ranges) each hold two versions of both keys; against the oldest version account_id and market_value_eod are identical, only the allowance days change external_flow and total_return_daily and never above their per-day ceilings (equal to the record), the claim is inferred on every row, history_scope is PARTIAL_HISTORY exactly for the %d accounts with a row on the floor day (%d of them positive) and FULL otherwise, the manifest differs only in its columns; the %d history days' %d keys and version ids equal the record's, one version each; the three held days are absent; %s" % (len(posset), len(pos), len(hist), len(hk), "totals (rows, PARTIAL, FULL) per event: %s" % list(tot.values())))
+        print("OK: the 66 landed days (10 ranges) each hold two versions of both keys; against the oldest version account_id and market_value_eod are identical, only the allowance days change external_flow and total_return_daily and never above their per-day ceilings (equal to the record), the claim is inferred on every row, history_scope is PARTIAL_HISTORY exactly for the %d accounts with a row on the floor day (%d of them positive) and FULL otherwise, the manifest differs only in its columns; the %d history days' %d keys and version ids equal the record's, one version each; the three held days are absent; %s" % (len(posset), len(pos), len(hist), len(hk), "totals (rows, PARTIAL, FULL) per event: %s" % list(tot.values())))
         return True
     raise Fail("unknown criterion %s" % cid)
 
@@ -297,7 +300,7 @@ def selftest():
                 "plan": {"add": 0, "change": 1, "destroy": 0, "change_addresses": ["module.x.aws_lambda_function.this"], "function_change_attributes": ["source_code_hash", "s3_object_version"], "replan_no_changes": True},
                 "apply_finished_utc": "2026-10-16T14:10:00Z",
                 "after": {"function": {"memory": 1024, "timeout": 900, "reserved_concurrency": 1, "code_sha256": G.b64_of_hex(zh), "layer_arn": "arn:aws:lambda:us-east-1:1:layer:%s:1" % LAYER}, "policy": dict(pol), "schedule": {"state": "ENABLED", "cron": CRON, "zone": ZONE}},
-                "dry_run": {"payload": {"rewrite": {"start": EVENTS[0][0], "end": EVENTS[0][1]}, "dry_run": True}, "invoked_utc": "2026-10-16T14:20:00Z", "status_code": 200, "function_error": None, "returned": {"ok": True, "rewrite": True, "days": 25, "held": 0},
+                "dry_run": {"payload": {"rewrite": {"start": DRY[0], "end": DRY[1]}, "dry_run": True}, "invoked_utc": "2026-10-16T14:20:00Z", "status_code": 200, "function_error": None, "returned": {"ok": True, "rewrite": True, "days": DRY[2], "held": 0},
                             "report": dict(rp), "rows_match_landed": True, "versions_unchanged": True, "request_id": "r0"},
                 "events": [ev(i, s, en, n) for i, (s, en, n) in enumerate(EVENTS, 1)],
                 "act5": {"partitions_total": 3391, "history_days": 3325, "history_keys": 6650, "history_keys_sha256": hk, "history_one_version_all": True, "landed_days": 66, "landed_keys_two_versions_all": True, "held_days_absent": True, "other_new_keys": 0, "schedule_state": "ENABLED"},
@@ -314,8 +317,8 @@ def selftest():
                 ("plan change", lambda r: r["plan"].update(change=2)), ("plan destroy", lambda r: r["plan"].update(destroy=1)), ("plan addr", lambda r: r["plan"].update(change_addresses=["aws_iam_role.x"])),
                 ("plan attrs", lambda r: r["plan"].update(function_change_attributes=["memory_size"])), ("replan", lambda r: r["plan"].update(replan_no_changes=False)), ("apply window", lambda r: r.update(apply_finished_utc="2026-10-16T12:30:00Z")),
                 ("memory", lambda r: r["after"]["function"].update(memory=3008)), ("concurrency", lambda r: r["after"]["function"].update(reserved_concurrency=None)), ("policy moved", lambda r: r["after"]["policy"].update({SIDS[0]: "11" * 32})),
-                ("schedule", lambda r: r["after"]["schedule"].update(state="DISABLED")), ("dry payload", lambda r: r["dry_run"].update(payload={"rewrite": {"start": EVENTS[0][0], "end": EVENTS[0][1]}})),
-                ("dry held", lambda r: r["dry_run"]["returned"].update(held=1)), ("dry days", lambda r: r["dry_run"]["returned"].update(days=24)), ("dry memory", lambda r: r["dry_run"]["report"].update(max_memory_used_mb=900)),
+                ("schedule", lambda r: r["after"]["schedule"].update(state="DISABLED")), ("dry payload", lambda r: r["dry_run"].update(payload={"rewrite": {"start": DRY[0], "end": DRY[1]}})),
+                ("dry held", lambda r: r["dry_run"]["returned"].update(held=1)), ("dry days", lambda r: r["dry_run"]["returned"].update(days=DRY[2] - 1)), ("dry memory", lambda r: r["dry_run"]["report"].update(max_memory_used_mb=900)),
                 ("dry versions", lambda r: r["dry_run"].update(versions_unchanged=False)), ("events count", lambda r: r["events"].pop()), ("ev1 range", e(0, payload={"rewrite": {"start": "2026-07-10", "end": "2026-08-18"}})),
                 ("ev2 dry_run", e(1, payload={"rewrite": {"start": EVENTS[1][0], "end": EVENTS[1][1]}, "dry_run": True})), ("ev3 held", lambda r: r["events"][2]["returned"].update(held=1)), ("ev3 days", lambda r: r["events"][2]["returned"].update(days=25)),
                 ("ev4 order", e(3, invoked_utc="2026-10-16T14:05:00Z")), ("ev1 window", e(0, invoked_utc="2026-10-16T12:20:00Z")), ("ev2 memory", lambda r: r["events"][1]["report"].update(max_memory_used_mb=820)),

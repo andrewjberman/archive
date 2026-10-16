@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-70",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-70.fwd5-control-mode.md",
+    "group": "OTHER",
+    "vintage_commit": "47ca05caef"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~272",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_TX.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-70.fwd5-control-mode.md",
+    "vintage_commit": "47ca05caef"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py",
+      "kind": "script",
+      "commit_or_etag": "32792286ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--plan without --control is byte-identical to the base commit's --plan output (cmp, PLAN-RUN-IDENTICAL-TO-BASE); --plan --control adds one CONTROL MODE line; --selftest prints FWD5-SELFTEST-OK checks=36 with no request; the live control run is a later WORLD act and was not made",
+      "introduces": ["def control_answer(is_list, status, body, ticket):", "def control_exit_code(rows):"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~272/fwd5_driver/test_fwd5_driver_control.py",
+      "kind": "test",
+      "commit_or_etag": "32792286ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline tests against a local fake server on 127.0.0.1, all 14 pass; the two existing test files are not edited; no network beyond the fake server, no AWS, no secret",
+      "introduces": ["def test_fwd5_control_all_allowed_exits_zero(tmp_path):", "def test_fwd5_control_ticket_list_without_ticket_id_denied_exits_one(tmp_path):"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR70-tz-AC1",
+      "criterion_verbatim": "AR70-tz-AC1 -- the new control tests pass, at least 8. Dry-run at box/dell2 base: FAIL as expected (the file does not exist).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 --prefix=test_fwd5_control_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~272/fwd5_driver/test_fwd5_driver_control.py",
+      "expect": "R46-TESTS-OK",
+      "output_evidence": "R46-TESTS-OK passed=14 (run twice at 32792286ee from the worktree root; rc=0 both times)",
+      "denominator": "14 passed of 14 test functions defined in test_fwd5_driver_control.py; minimum 8",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR70-tz-AC2",
+      "criterion_verbatim": "AR70-tz-AC2 -- the two existing test files still pass, 21 functions in all (the unchanged-behavior control): PASS at base as expected.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 21 --prefix=test_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py",
+      "expect": "R46-TESTS-OK",
+      "output_evidence": "R46-TESTS-OK passed=23 (rc=0 at 32792286ee; the checker's own pytest run over both files, no failure or error)",
+      "denominator": "23 passed; 21 test functions defined (13 in test_fwd5_driver_offline.py, 8 in test_fwd5_driver_exit_semantics.py; the parametrized missing-id test accounts for the extra passes); minimum 21",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR70-tz-AC3",
+      "criterion_verbatim": "AR70-tz-AC3 -- the driver's own selftest still prints FWD5-SELFTEST-OK with the added checks: PASS at base as expected.",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py --selftest",
+      "expect": "FWD5-SELFTEST-OK",
+      "output_evidence": "FWD5-SELFTEST-OK checks=36 (offline: no request, no AWS, no browser) (rc=0 at 32792286ee)",
+      "denominator": "36 checks: the 19 original checks, all kept, plus 17 control checks (classifier and control exit code)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the negative arms of the control, each run as a test: a ticket-list 2xx without the ticket id exits 1; a ticket-read 403 exits 1; a dropped ticket-read exits 2; a 302 is not followed and exits 2; a package 404 is reported DENIED and the exit stays 0; a missing --firm-b or id exits 2 with zero requests; --control without --go sends nothing; a dead sign-in exits 2 with no ticket request",
+      "expected": "each arm exits with its ruled code; no request reaches the meeting path; no control test grades a 2xx as a LEAK",
+      "observed": "all 14 control tests pass at 32792286ee, including every negative arm above; the driver's selftest exits 0 with 36 checks",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice at 32792286ee, from the same worktree root",
+      "observed": "both runs R46-TESTS-OK passed=14 with rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live positive-control run: sign-in on DEV, the ticket and package GETs as the entitled identity, the report written from a real call",
+      "reason": "BUILD ONLY by the order (TO-AR-tz-70 BOUNDS: no AWS, no network beyond the local fake, no run, no mint, no deploy); the run is a later WORLD act"
+    },
+    {
+      "item": "the AC1 dry-run against the base commit",
+      "reason": "not re-run: the test file does not exist at the base by construction, so the order's recorded FAIL is a fact of the base, not a measurement this worker repeated"
+    },
+    {
+      "item": "the surprise-row dispositions (IRPT_ANLREQ-D2-W272-S1 to S3)",
+      "reason": "the rows are UNDER_INVESTIGATION; the issuer records their disposition, and this worker does not edit any row"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W272-S1: the control exit does not say which verdict wins when ticket-read is DENIED and ticket-list is UNREACHED; the driver returns 1 (DENIED first), mirroring the run mode's LEAK-before-UNREACHED",
+    "IRPT_ANLREQ-D2-W272-S2: CONTAINS the ticket id is not defined; the driver reads it as an equality over each tickets entry's string values, case-insensitive, keys not read",
+    "IRPT_ANLREQ-D2-W272-S3: the surprise-channel schema the worker face names is absent from this sparse worktree; the rows follow the channel's existing fields, the same condition as IRPT_ANLREQ-D2-W268-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~272/fwd5_driver/test_fwd5_driver_control.py",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py tests",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 --prefix=test_fwd5_control_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~272/fwd5_driver/test_fwd5_driver_control.py",
+      "result": "R46-TESTS-OK passed=14"
+    },
+    {
+      "tool": "fwd5_driver.py --selftest",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py --selftest",
+      "result": "FWD5-SELFTEST-OK checks=36 (offline: no request, no AWS, no browser)"
+    }
+  ]
+}

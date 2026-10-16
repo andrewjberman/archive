@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-16</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -26,7 +26,8 @@
   </context>
 
   <go>
-    STAGED. The GO is an AMENDMENT to this order citing the signed pair's AMENDMENT 4. Then, in order:
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~V2, 2026-10-16 ~20:0xZ; gate limb: none graded this modification; it names the GO, no placeholder, no path widened). CONDITIONAL GO. THE PAIR'S AMENDMENT 4 IS SIGNED BY BOTH HALVES: COO half `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R18_RUN/R18_RUN_PAIR.md` (git blob `b83e173a019aa9a0078a48b126f2b52040122314`, sha256 `3c4134bd9e6807714bdfe9a54820f51d7c7f98f58fe1f2670e55984c5c6e1960`, @9f20d14148); CTO half `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/1.0.0_SA_CTO~DELL2/R18_RUN_PAIR_CTO_HALF.md` (git blob `ea18a440851b55f2ddb4f0261352152c8f83b06f`, @7b473a3455, msg 9814). Measure these two blobs, the AMENDMENT 1 CTO half (`cf7c856072d14b70122bb53afbc9259156702d66`, the origin condition) and the criterion `R18_CHECKS/r18_afterread.py` (`60ff76b6073c2c7072c1d4fdb71dddb2c5a0118e`) with `git hash-object` BEFORE the start gate; any difference is a STOP and no GO. The identity is the part-1 filer `tckt-r18-filer-20261016@opal.invalid` (it was deleted after part 1 and reads ABSENT: re-read it; PRESENT is a STOP), `allowedFirmIds ["cottonwood"]`. THE CTO'S PASS (msg 9814): the issuer's after-read prints zero `WE_CLIENT_SENT` and at least one `WE_CLIENT_NO_CONTACT` with the events scanned; ANY `WE_CLIENT_SENT` stops and is a release defect: if the claim or the complete produces one, STOP at once, do nothing further to the ticket, report it first. The reused server on 5174 is Andrew's smoke copy: NEVER start, stop or restart it. Report once to the issuer when the ticket reads completed, the row reads ABSENT and the ledger is closed; the issuer runs the after-read.
+    The GO's steps are unchanged:
     1. STEP 0: open the NEVER-2 ledger entry and keep it open until the row reads ABSENT. Measure the blobs the GO names. Start gate: `TO-R18-RUN` is `complete` and its ledger closed; the ticket `TCK-20261016-9d7654eb` reads `meeting_request`, `open`, unassigned, firm `cottonwood` (any other state is a STOP); no open ledger names `opal-ticket-api`, `opal-tickets` or `opal-users-v2` in any live worktree (print the denominator); the reused server answers on `http://localhost:5174`.
     2. STEP 1: mint the identity row and its token; print the row's role set (role, userType, firmId, allowedFirmIds, entitlement rows: 0).
     3. STEP 2: as the identity, in the browser on the reused server (the Ticket Center by the sidebar link, the Open tab, the ticket listed), press Claim on that ticket only; ConsistentRead it (`status in_progress`, the assignee the identity); print the log tokens the claim produced (the issuer expects `WE_CLIENT_NO_CONTACT firm=cottonwood` and no `WE_CLIENT_SENT`). Then press Complete; ConsistentRead (`status completed`). No other ticket, button or tab.
