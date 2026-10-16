@@ -34,7 +34,8 @@
     org/critical_paths/.open_deploys/ for an open ledger touching etf-classifications (CLAUDE.md NEVER-2); name any.
 
     LEG P (before the write, same shell): get_item of the 22 baseline tickers (the 13 and the 9: all absent is the precondition); the table's ItemCount and PITR state; a census of 200 existing keys (the first 200 of a sorted key scan) with their
-    last_updated. Print all of it into org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_LEGP_20261016.json.
+    last_updated. ALSO record, IsLatest, the VersionId and ETag of the served mix daily summary (canonical bucket opal-data-49financial, key advi/49financial/platinum/views/mix_daily_summary.json, derived with lib/platinum_dest.py source()) and of
+    advi/49financial/platinum/firm/mix_summary.json: they are leg G's pre-seed baseline. Print all of it into org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E107_LEGP_20261016.json.
 
     LEG A (the act): open the ledger in org/critical_paths/change_management/ (name both the sentinel and the entry); then run exactly
       python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22.py apply --plan org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json --pair org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_CTO_HALF_SECCLASS_SEED22_20261016.md
