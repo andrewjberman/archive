@@ -30,6 +30,11 @@ TF = "infra/aws/terraform/investor-reporting/reporting-publish/"
 LOCALS = TF + "locals.tf"
 TF_OTHERS = [TF + n for n in ("iam.tf", "lambda.tf", "main.tf", "schedule.tf")]
 SOURCE_MAP = "infra/aws/lambda/ci/lambda-source-map.json"
+# CT-ca-1 (NFRA_CTLPLN round 30): the map became one JSON file per function under this folder. The folder must hold exactly
+# the functions of the map at MAP_BASE, the cell base the folder was split from. BASE above predates 550 commits in which the
+# map itself changed (the map at BASE is blob 91526a1c, the map at MAP_BASE is blob fc137d60), so the identity pin is read at MAP_BASE.
+MAP_BASE = "ca239c04869d97c8fcfa4654843fbc066e8970d2"
+FUNCTION_MAP_LIB = "lib/opal_lambda_map.py"
 PRODUCER = "data/assets/scripts/gold/irpt_reporting/filled_report_values.py"
 BEGIN, END = "# BEGIN FILLED-REPORT-A", "# END FILLED-REPORT-A"
 FIRM = "49financial"
@@ -95,7 +100,12 @@ def check_diff(root):
         need(name in pin_new, "publisher.py: the block must still define %s" % name.split("(")[0].split(" =")[0])
     for head in ("def publish_filled_report(", "def report_address(", "def _filled_value_ok(", "def _filled_absent_ok("):
         need(section(pin_new, head) == section(pin_old, head), "publisher.py: %s must be byte-identical to the base" % head)
-    need(rd(root, SOURCE_MAP) == git_show(root, SOURCE_MAP), "the source map must be byte-identical to the base (the re-pin is a later cell)")
+    olm = load_mod(Path(root) / FUNCTION_MAP_LIB, "olm_ref_170")
+    fn_new = olm.load_all(root=str(root))
+    r = subprocess.run(["git", "-C", str(root), "show", "%s:%s" % (MAP_BASE, SOURCE_MAP)], capture_output=True)
+    need(r.returncode == 0, "cannot read %s at the cell base %s" % (SOURCE_MAP, MAP_BASE[:10]))
+    fn_old = json.loads(r.stdout.decode("utf-8"))["functions"]
+    need(fn_new == fn_old, "the source map must be the function-map folder: the folder must hold exactly the %d functions of the base map, each file equal to its entry (the re-pin is a later cell)" % len(fn_old))
     for f in TF_OTHERS:
         need(rd(root, f) == git_show(root, f), "%s must be byte-identical to the base" % f)
     lo_new, lo_old = rd(root, LOCALS).decode("utf-8"), git_show(root, LOCALS).decode("utf-8")
