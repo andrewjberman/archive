@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-17",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "ed1819a0e0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-17.scope-feed-wrapper-partition-key-is-the-day-not-the-pull-date.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ed1819a0e0"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~317",
+  "artifacts_produced": [
+    {
+      "kind": "script",
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_scope_feed_run.py",
+      "commit_or_etag": "0d0bc8d861408f3e620592e1751162d2ae602a4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The partition check in run() compares each row's day with the partition's date, and its refusal message names a day other than the partition's. Nothing else in the file changed; the module docstring still describes the superseded rule (surprise IRPT_DASHBD-D2-W317-S1).",
+      "artifact_covered_by": ["DBI130-1-AC1", "DBI130-1-AC2", "DBI130-1-AC3"]
+    },
+    {
+      "kind": "script",
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "commit_or_etag": "0d0bc8d861408f3e620592e1751162d2ae602a4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "29 tests pass. The partition test moved to the day rule (a row whose day is not its partition's is refused with its count, nothing written); one test accepts a backfill-shaped feed. The existing mutant test test_mutant_dropping_the_incomplete_day_rule_is_caught is unchanged.",
+      "artifact_covered_by": ["DBI130-1-AC3"]
+    },
+    {
+      "kind": "doc",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "commit_or_etag": "0d0bc8d861408f3e620592e1751162d2ae602a4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two surprise rows, IRPT_DASHBD-D2-W317-S1 and IRPT_DASHBD-D2-W317-S2, appended as bytes, one fenced json block each, class OBSERVATION, hazard INERT, UNDER_INVESTIGATION.",
+      "artifact_covered_by": ["DBI130-1-AC3"]
+    },
+    {
+      "kind": "config_data",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~317/SESSION_LOG_DB_I17.json",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The verbatim outputs and exit codes of the checker runs, the pytest counts and the mutant comparison of this order. Synthetic fixtures only.",
+      "artifact_covered_by": ["DBI130-1-AC1", "DBI130-1-AC2", "DBI130-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI130-1-AC1",
+      "criterion_verbatim": "`DBI130-1-AC1` -- the golden through the wrapper with a BACKFILL-SHAPED feed (every row's pull_date is one later date, partitions keyed by day): accepted, with the same counts as the golden (17 PRESENT, 11 ABSENT, 4 partitions written).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r130/p130_run_partition.py\" . DBI130-1-AC1",
+      "output_evidence": "DBI130-1-AC1 PASS (rc 0; run 1 and run 2 identical)",
+      "denominator": "1 of 1 criterion PASS (the golden of 28 rows, 17 PRESENT and 11 ABSENT over 7 accounts and 4 trading days; the run record's counts and keys are checked inside the checker)",
+      "status": "PASS",
+      "expect": "DBI130-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBI130-1-AC2",
+      "criterion_verbatim": "`DBI130-1-AC2` -- the written parquet and the contract checks as in round 127 (declared fields and hash, the validator on every row, no AWS or network import, no typed contract version, nothing written outside the output directory), on the backfill-shaped feed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r130/p130_run_partition.py\" . DBI130-1-AC2",
+      "output_evidence": "DBI130-1-AC2 PASS (rc 0; run 1 and run 2 identical)",
+      "denominator": "1 of 1 criterion PASS (28 rows read back; each of the 4 partitions checked against the 25 declared fields and schema_hash_with_optional; every row through the contract validator; 0 forbidden imports; nothing written outside the output directory)",
+      "status": "PASS",
+      "expect": "DBI130-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DBI130-1-AC3",
+      "criterion_verbatim": "`DBI130-1-AC3` -- the repairs still hold (edge-day fixtures 0 unaccounted; the dimension-key, repeated-key and non-empty-directory refusals; the 299-day chain), a row whose `day` is not its partition's day is refused with a count and nothing written, a differing `pull_date` is accepted, and the adapter and wrapper test files together pass at least 30 tests and name a mutant test. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r130/p130_run_partition.py\" . DBI130-1-AC3",
+      "output_evidence": "DBI130-1-AC3 PASS (rc 0; run 1 and run 2 identical)",
+      "denominator": "1 of 1 criterion PASS (the repair sub-checks and the 299-day chain; 64 tests passed across the two test files, 35 adapter and 29 wrapper, at least 30 required; 1 mutant test named)",
+      "status": "PASS",
+      "expect": "DBI130-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The round-125 comparison (pull_date against the partition) is re-applied to the edited wrapper and run on the backfill-shaped fixture; the wrapper file's named mutant test test_mutant_dropping_the_incomplete_day_rule_is_caught also runs and passes.",
+      "expected": "the round-125 comparison refuses the backfill-shaped feed, and the day rule accepts it",
+      "observed": "mutant refused: 12 row(s) named a day other than their partition's; real rule accepted: rows_present 3 of 6 table rows, 2 partitions written; named mutant test: 1 passed, 28 deselected",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the three checker criteria in this worktree, PASS lines compared",
+      "observed": "DBI130-1-AC1 PASS, DBI130-1-AC2 PASS, DBI130-1-AC3 PASS, each rc 0, on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Base-tree FAIL for DBI130-1-AC2 and DBI130-1-AC3",
+      "reason": "Not re-measured in this session; the order states Base FAIL. The only base run made here is DBI130-1-AC1 on the pre-edit wrapper: FAIL, 48 row(s) refused."
+    },
+    {
+      "item": "A run against the real Scope feed silver",
+      "reason": "Outside the grant: the order edits the wrapper and its tests only; the first real run is the issuer's act after this merges."
+    },
+    {
+      "item": "The wrapper's module docstring wording",
+      "reason": "Stale after this order and left as is, because the order states nothing else in the file changes; filed as IRPT_DASHBD-D2-W317-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W317-S1: the wrapper's module docstring still says a partition whose rows name another pull date is refused; the check now compares day. Left unedited by the order's nothing-else rule. OBSERVATION, INERT.",
+    "IRPT_DASHBD-D2-W317-S2: a partition whose rows carry differing or null pull dates is accepted; the cell does not say so and no test covers it. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~317/SESSION_LOG_DB_I17.json",
+  "compiler_tools": [
+    {
+      "tool": "p130_run_partition.py (issuer checker, DBI130-1-AC1 to AC3)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r130/p130_run_partition.py\" . DBI130-1-AC1 (AC2 and AC3 the same way)",
+      "result": "DBI130-1-AC1 PASS, DBI130-1-AC2 PASS, DBI130-1-AC3 PASS, each rc 0 on two runs"
+    },
+    {
+      "tool": "pytest (own wrapper test file)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "result": "29 passed in 3.44s, rc 0"
+    },
+    {
+      "tool": "pytest (adapter test file, counted by the AC3 checker)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "result": "35 passed in 0.11s, rc 0"
+    }
+  ]
+}

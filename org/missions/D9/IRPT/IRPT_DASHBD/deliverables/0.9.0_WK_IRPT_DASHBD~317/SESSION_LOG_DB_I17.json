@@ -1,0 +1,63 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-i-17",
+  "assignee": "0.9.0_WK_IRPT_DASHBD~317",
+  "code_commit": "0d0bc8d861408f3e620592e1751162d2ae602a4f",
+  "base_commit": "ed1819a0e069a7f227057c1f00ff694d430cea2e",
+  "fixtures": "synthetic only; no AWS, no network, no client value",
+  "steps": [
+    {
+      "step": "base measurement of DBI130-1-AC1 on the pre-edit wrapper (the only base run made in this session)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r130/p130_run_partition.py . DBI130-1-AC1",
+      "rc": 1,
+      "output": "REASON: ValueError: partition keys refused: 48 row(s) name another pull date / DBI130-1-AC1 FAIL"
+    },
+    {
+      "step": "edit: wrapper partition check compares each row's day with the partition's date; message names a day other than the partition's",
+      "commit": "0d0bc8d861408f3e620592e1751162d2ae602a4f"
+    },
+    {
+      "step": "run 1 of the three criteria after the edit",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r130/p130_run_partition.py . <id>",
+      "results": [
+        {"id": "DBI130-1-AC1", "rc": 0, "output": "DBI130-1-AC1 PASS"},
+        {"id": "DBI130-1-AC2", "rc": 0, "output": "DBI130-1-AC2 PASS"},
+        {"id": "DBI130-1-AC3", "rc": 0, "output": "DBI130-1-AC3 PASS"}
+      ]
+    },
+    {
+      "step": "run 2 of the three criteria (determinism control)",
+      "results": [
+        {"id": "DBI130-1-AC1", "rc": 0, "output": "DBI130-1-AC1 PASS"},
+        {"id": "DBI130-1-AC2", "rc": 0, "output": "DBI130-1-AC2 PASS"},
+        {"id": "DBI130-1-AC3", "rc": 0, "output": "DBI130-1-AC3 PASS"}
+      ]
+    },
+    {
+      "step": "wrapper test file",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "rc": 0,
+      "output": "29 passed in 3.44s"
+    },
+    {
+      "step": "adapter test file (run by the AC3 checker alongside the wrapper file)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_adapter.py",
+      "rc": 0,
+      "output": "35 passed in 0.11s"
+    },
+    {
+      "step": "named mutant test in the wrapper file",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider -k mutant data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_run.py",
+      "rc": 0,
+      "output": "1 passed, 28 deselected in 0.94s"
+    },
+    {
+      "step": "round-125 comparison (pull_date against the partition) re-applied as a mutant to the edited wrapper, run on the backfill-shaped fixture",
+      "mutant_result": "refused: partition keys refused: 12 row(s) name a day other than their partition's",
+      "real_result": "accepted: rows_present 3 of 6 table rows, 2 partitions written"
+    },
+    {
+      "step": "ASCII check of the two edited files",
+      "result": "0 non-ASCII bytes in each"
+    }
+  ]
+}
