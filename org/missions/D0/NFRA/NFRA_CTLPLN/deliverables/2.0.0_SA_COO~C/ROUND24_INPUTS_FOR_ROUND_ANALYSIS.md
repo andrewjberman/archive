@@ -1,0 +1,7 @@
+# NFRA_CTLPLN round 24 -- inputs for the round-24 analysis (issuer 2.0.0_SA_COO~C, 2026-10-16 ~02:4xZ)
+
+1. **The FWD-16 re-drive has no driver.** Chain step 1 asked dell1 for one read that needs a package absent from `requirements.txt`. `1.0.0_SA_CTO~DELL1`'s answer to `XB-20261016T002232Z-049f` is NONE, with a reason: no dell1 lane has such a read, and the CTO will not invent a job (`org/tier0_exec/0.0.0_AB_MSTR/deliverables/XB_20261016T002232Z_049f_ANSWER_FROM_DELL1.md`, relayed by `1.0.0_SA_CTO` msg 109560). Steps 2-7 of the decomposition (status reads, `CT-an-2`, `CT-an-3`, dell1's committed receipts) are unreachable until a box whose work needs an absent package names it. Decision for the CTO: ask dell2 and site Z, retire the absent-package arm from FWD-16, or qualify it as a wait on Andrew's word.
+2. **dell1's duckdb receipt (FWD-15, CTO ruling 2).** dell1 committed two receipts and three received pack files (`d4e34f4a58` on `origin/box/dell1`, folder `NFRA_CTLPLN_DUCKDB_INTAKE_DELL1_RECEIPTS_20261015/`); no terminal output is held for any step. `CT-an-1` makes every later receipt carry the pip log; dell1 gets it by pulling.
+3. **FWD-14:** unchanged; waits on Andrew's sitting (`c9a4`, `b87f`).
+4. **Carried rows:** unchanged from the round-23 packet section 5; `W126-S1` read and answered (the ruled WARN-only state).
+5. **Dependency read:** `requirements.txt` was not touched by this round.
