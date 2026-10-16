@@ -39,7 +39,7 @@ WS = pathlib.Path(__file__).resolve().parents[7]
 sys.path.insert(0, str(WS / ".tools"))
 import git_bash_resolver as gbr  # noqa: E402
 
-SOURCE_MAP = WS / "infra/aws/lambda/ci/lambda-source-map.json"
+SOURCE_MAP = WS / "infra/aws/lambda/ci/function-map"  # CT-ca-1: the folder, one <name>.json per function
 BUILD_SCRIPT_REL = "infra/aws/lambda/ci/build-and-upload.sh"
 PIPELINE = "investor-reporting"
 BUCKET = "opal-313476888478-lambda-artifacts"
@@ -89,8 +89,14 @@ def sha256_hex(data: bytes) -> str:
 
 
 def load_source_map():
-    with open(SOURCE_MAP, "r", encoding="utf-8") as f:
-        return json.load(f)
+    """{"functions": {name: entry}} read from the function-map folder (CT-ca-1). Raises when the folder holds no function file."""
+    out = {}
+    for p in sorted(SOURCE_MAP.glob("*.json")):
+        with open(p, "r", encoding="utf-8") as f:
+            out[p.stem] = json.load(f)
+    if not out:
+        raise SystemExit("ERROR: function-map folder holds no function file: %s" % SOURCE_MAP)
+    return {"functions": out}
 
 
 def family_functions(sm):
@@ -132,7 +138,7 @@ def live_deployed_zip_members(fn_name, dest_dir):
     """The LIVE DEPLOYED Lambda's own code, fetched via Code.Location (a presigned URL to the
     EXACT bytes CodeSha256 was computed over) -- NOT the S3 build-artifact bucket, which this
     battery's own part (b)/(c) just overwrote with a fresh build. build-and-upload.sh only
-    updates the artifact bucket + lambda-source-map.json; a Lambda's ACTUAL served code changes
+    updates the artifact bucket + the Lambda function map; a Lambda's ACTUAL served code changes
     only on `terraform apply`, so this is re-derivable correctly no matter how many times the
     builder has since re-run. Comparing PER MEMBER (not the overall zip sha256) matters: the zip
     CONTAINER is not guaranteed byte-reproducible across different builders/runs even when every
@@ -401,7 +407,7 @@ def part_c(functions, census):
 def part_d(sm):
     _hr("(d) THE CONTROL -- mutant manifest (scratch only), the four originally-named declarations removed")
     SCRATCH.mkdir(parents=True, exist_ok=True)
-    mutant_path = SCRATCH / "mutant-lambda-source-map.json"
+    mutant_path = SCRATCH / "mutant-function-map"  # CT-ca-1: the mutant is a function-map folder too
     mutant = json.loads(json.dumps(sm))  # deep copy
     # Remove the staged_from entries that supply the four ORIGINALLY-named members (rows
     # W1-S20/W2-S59): holdings served.py/loaders.py, directory-refresh errors.py/trading_calendar.py.
@@ -411,9 +417,11 @@ def part_d(sm):
     r = mutant["functions"]["irpt-directory-refresh"]
     r["staged_from"] = [s for s in r.get("staged_from", [])
                          if s["packaged_as"] not in ("errors.py", "trading_calendar.py")]
-    with open(mutant_path, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(mutant, f, indent=2)
-        f.write("\n")
+    mutant_path.mkdir(parents=True, exist_ok=True)
+    for fn_name, entry in mutant["functions"].items():
+        with open(mutant_path / (fn_name + ".json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump(entry, f, indent=2)
+            f.write("\n")
 
     results = {}
     for fn, expect_missing in (("irpt-holdings", ["served.py", "loaders.py"]),
