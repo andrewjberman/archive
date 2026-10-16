@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-dc-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-dc-1.silver-account-attributes-apply.md",
+    "group": "OTHER",
+    "vintage_commit": "5b64371c0c"
+  },
+  "assignee": "0.7.0_AE_CloudOps~FB1",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round106.md",
+    "vintage_commit": "5b64371c0c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-dc-1.silver-account-attributes-apply.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/ssm.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4295288ac3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply of a saved plan (0 add, 1 change, 0 destroy): aws_ssm_document.cot_silver_run Modifications complete; live document opal-cot-silver-run default version 4 -> 5, hash 83b3fc89a34b4f2e4f286f6992e43242449cc3144b8e3174d4fe59b25675423e -> d72ce5341387516f56b15aa7ba6fc906a1326dde3545b210b6159af0e7429ae2; post-apply plan: No changes; tag cot-pipeline-v0.7.7 (local)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB106dc1-AC1",
+      "criterion_verbatim": "`CB106dc1-AC1` -- the live default version of `opal-cot-silver-run` differs from version 4 by exactly one added line: the non-gating `account_attributes` step, immediately after the holdings step, with nothing removed.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/dc1_apply_check.py doc",
+      "output_evidence": "SILVER-DOC default_version=5 prior_version=4 added=1 removed=0 added_is_account_attributes=True nongating=True after_holdings=True",
+      "denominator": "1 live SSM document, default version 5 compared with version 4: 1 added line, 0 removed lines",
+      "status": "PASS",
+      "expect": "^SILVER-DOC default_version=([5-9]|[1-9][0-9]) prior_version=4 added=1 removed=0 added_is_account_attributes=True nongating=True after_holdings=True$"
+    },
+    {
+      "criterion_id": "CB106dc1-AC2",
+      "criterion_verbatim": "`CB106dc1-AC2` -- the apply wrote nothing to S3: the account_attributes manifest and the 2026-08-19 partition are the versions the COO half records, and the prefix still holds one key.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/dc1_apply_check.py state",
+      "output_evidence": "SILVER-STATE manifest_unchanged=True partitions=1 existing_partition_unchanged=True",
+      "denominator": "1 manifest object (VersionId EJDw_ZHST0x7oLC_k34IoqWcC80hn6.w) and 1 key under silver/account_attributes/; read before the first scheduled fire (about 2026-10-17 midday)",
+      "status": "PASS",
+      "expect": "^SILVER-STATE manifest_unchanged=True partitions=1 existing_partition_unchanged=True$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "dc1_apply_check.py selftest: the same comparison run on synthetic gating, misplaced and removal edits of live version 4; only the good edit may read nongating=True after_holdings=True removed=0",
+      "expected": "gating nongating=False; misplaced after_holdings=False; removal removed=1",
+      "observed": "SILVER-DOC-SELFTEST good=[added=1,removed=0,added_is_account_attributes=True,nongating=True,after_holdings=True] gating=[added=1,removed=0,added_is_account_attributes=True,nongating=False,after_holdings=True] misplaced=[added=1,removed=0,added_is_account_attributes=True,nongating=True,after_holdings=False] removal=[added=1,removed=1,added_is_account_attributes=True,nongating=True,after_holdings=True]",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "dc1_apply_check.py doc and state each run twice against the live world; stdout sha256 compared",
+      "observed": "doc sha256 f342337104b7a379... on both runs; state sha256 9645ef983375eea5... on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the first scheduled fire of opal-cot-silver-run and what the new step does on the data",
+      "reason": "order bounds: no dispatch, no merge run, no read of the fire; the COO and the CVO read it"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/critical_paths/change_management/20261016T1923Z_cot-silver-account-attributes-r106-dc1-20261016_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": "dc1_apply_check.py (issuer script, run unmodified)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/dc1_apply_check.py doc | state",
+      "result": "AC1 and AC2 lines equal their expect patterns (rc=0)"
+    },
+    {
+      "tool": ".tools/safe-apply.sh",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/cot-pipeline apply <saved plan>",
+      "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed; naming WARN only on existing resources; tagauthz and tombstone gates passed"
+    }
+  ]
+}
