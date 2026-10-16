@@ -39,6 +39,15 @@ def need(cond, msg):
         raise Fail(msg)
 
 
+def non_ascii_added(base, new):
+    """The lines the edit ADDS that carry a non-ASCII character (the pinned base holds non-ASCII lines of its own, which stay)."""
+    out = []
+    for d in difflib.unified_diff(base.splitlines(), new.splitlines(), lineterm="", n=0):
+        if d.startswith("+") and not d.startswith("+++") and not d.isascii():
+            out.append(d[1:100])
+    return out
+
+
 def diff_problems(base, new):
     """The edit is a pure insertion, but for the one error-message line that gains the word txn."""
     pr = []
@@ -116,7 +125,8 @@ def ac1(root):
     need(not pr, "; ".join(pr[:6]))
     run = subprocess.run(["bash", "-n", str(Path(root, DISPATCH))], capture_output=True, text=True, timeout=120)
     need(run.returncode == 0, "bash -n failed: %s" % (run.stderr or "")[:200])
-    need(new.isascii(), "the dispatch script must stay ASCII")
+    na = non_ascii_added(base, new)
+    need(not na, "every line the edit adds must be ASCII (the base's own non-ASCII lines stay): %r" % (na[:2],))
     tp = Path(root, TESTS)
     need(tp.is_file(), "missing " + TESTS)
     names = re.findall(r"^def (test_\w+)", tp.read_text(encoding="utf-8"), re.M)
@@ -148,6 +158,10 @@ def selftest():
     arm("diff-error-line-changed-more", len(diff_problems(base, "a\nb\nerror (valid: x)\nc\n")), 1)
     arm("constants", (ROW.split("|")[0], "{date}" in ROW, MARKER.endswith(".json")), ("INF_G_01", True, True))
     arm("base-sha-form", len(BASE_SHA256), 64)
+    e = chr(233)
+    nl = chr(10)
+    arm("ascii-added-only-green", non_ascii_added("caf" + e + nl + "b" + nl, "caf" + e + nl + "b" + nl + "c" + nl), [])
+    arm("ascii-added-red", len(non_ascii_added("a" + nl, "a" + nl + "c" + e + nl)), 1)
     print("selftest %s" % ("FAIL" if bad else "PASS (%d arms)" % count))
     return 1 if bad else 0
 
