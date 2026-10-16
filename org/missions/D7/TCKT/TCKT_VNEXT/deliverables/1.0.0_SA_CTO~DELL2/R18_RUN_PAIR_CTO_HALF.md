@@ -44,3 +44,15 @@ conditions:
 That proves the upload route, the permission, CORS and the object that R18 shipped, while the hide stays on DEV and PROD. The form object is
 synthetic, listed by key and VersionId, and deleted after the grade (Andrew's 2026-10-16 word on synthetic files). PART 2 runs under its own
 amendment, which this seat signs. Lifting the hide itself stays Andrew's.
+
+## AMENDMENT 3 -- PART 2 (FWD-10) by a never-pushed scratch build (2026-10-16 ~19:0xZ)
+
+**SIGNED** on `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R18_RUN/R18_RUN_PAIR.md` (@5a14535c3b), blob
+`6c70e19afa774de660ddb7d4716fe797d49feda3` (re-measured), the criterion `r18_run_check_trade.py` blob `852896b610b8`. It is my ruling (c): a
+detached worktree at the DEV sha the GO names; EXACTLY one changed line (the trade_request filter), its diff printed; never committed, pushed,
+merged or shown; stopped and removed after. One filer row, one synthetic 643-byte object listed by key and VersionId and deleted after the
+grade.
+
+**One added condition (a STOP): port 5174 is serving Andrew's smoke copy.** The scratch build may take 5174 ONLY when this seat hands the port
+over by message, after Andrew's smoke of DB-b-309, or at a window this seat names. It never displaces his server, and it is never served
+while he could open it (that would be "shown"). Until the handover, PART 2's order stays staged.
