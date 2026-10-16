@@ -1,0 +1,108 @@
+{
+  "as_of": "2026-10-15",
+  "gold_table": {
+    "applied": true,
+    "words": "Built, both release halves signed (CTO half and COO half each carry a Signed section), and applied. The R37 activity-and-lot release apply (IRPT_DASHBD DB-b-78) is recorded in its deploy-completion ledger entry (irpt-dashbd-r37-activity-lot-release-apply, status CLOSED, nothing stranded), and that apply's first fire logged '2026-10-07 class rows=25019 LANDED' (0.9.0_WK_IRPT_DASHBD~55/R37_FIRST_FIRE_LOG_TAIL.txt line 7). A backfill record logged '2026-10-08 class rows=25057 LANDED' (0.9.0_WK_IRPT_DASHBD~63/R41_BACKFILL_LOG_TAIL.txt line 7). These are records I read, not a live read: this cell made no AWS call, so the live state of the gold prefix is for the owner to confirm (2.0.0_SA_COO~D2, an aws s3 ls of the class prefix). The never-widen packet status 'NOTHING APPLIED' and the contract's served flag (false, line 157) pre-date that apply and are stale.",
+    "claim": "measured"
+  },
+  "producer": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+    "line": 189,
+    "words": "The class of a holding is the table's asset_class read by one GetItem per identifier on the etf-classifications table (classify_identifier, lines 186-199; the table read at line 195). A cash identifier (CASH, CASH_USD) is cash whatever the table says. An identifier the table does not hold is unclassified, and a table value outside the six is unclassified with the table's value kept in the holding map. The sum rule: tied() at line 223 tests that each day's class values sum to the account value; exact() at line 235 sets cash to the account value less the non-cash classes, so the classes of one account-day sum to the account value; a day that does not tie is coverage CLASS_VALUES_DO_NOT_SUM_TO_ACCOUNT with no return. The class contribution flows are at line 240.",
+    "claim": "measured"
+  },
+  "series_contract": {
+    "carries_class_keys": false,
+    "words": "The served series does not carry class keys today. org/standards/IRPT_DASHBD_SERIES_CONTRACT.json lists class_value, class_weight and class_names as OPTIONAL (lines 40-44), each with the source note 'account_class_daily (not built in round 1)' and the sentence that the key is ABSENT until the table exists. The publisher emits only the required keys: its docstring (publisher.py lines 5-6) says the class keys are absent, and no line of reporting-publish/publisher.py writes class_value, class_weight or class_names. Because the table has landed (see gold_table), the contract's optional-key note is stale, but the publisher code has not yet been changed to write them. A per-class window read therefore needs a new object or new optional keys in series; the cheapest is a new per-account object (see proposed_shape), so the existing series bytes stay untouched.",
+    "claim": "measured"
+  },
+  "served_path": {
+    "file": "infra/aws/lambda/investor-reporting/reporting/entry.py",
+    "line": 88,
+    "words": "The account route reads whatever key the OBJECTS map names: OBJECTS = {series: series.json.gz, manifest: manifest.json} at line 88. _check_which (lines 166-168) refuses any which not in OBJECTS, and the object address is built at line 163 from OBJECTS[which] under the platinum reporting table. ROUTE_KEY (line 90) is GET .../reporting/{account_id}/{which}, and ROUTES (line 441) holds that one key plus the summary and filled-report keys. The smallest route change is therefore one new member of OBJECTS (for example class mapped to the new per-account object name) with no new route key: the which set is decided by line 88 alone, and the scope test and the NOT_READY path are reused unchanged. The non-series branch (lines 299-300) returns the object as JSON with no encoding, so a new JSON object is served without new code there.",
+    "claim": "measured"
+  },
+  "portal_reuse": {
+    "file": "portal/src/pages/InvestorReporting/tabs/holdings/assetClass.ts",
+    "line": 62,
+    "words": "Importable unchanged: the type HoldingAssetClass (line 30), the colour map ASSET_CLASS_COLOR (lines 34-44, from the shared registry in lib/chartColors.ts), the rank CLASS_RANK (lines 51-60, legend order Cash, Fixed Income, Equity, Structured, Alternatives, Commodities, then Other and Unclassified, per the IV-e-115 ruling) and the function assetClassRank (line 62). Two caveats: the portal type carries an eighth value Other (line 30, colour line 42), which the gold enum does not hold (the gold class_enum has seven values, with unclassified and no other), and the served key mapping CLASS_FOR_SERVED (lines 66-76) names the holdings node vocabulary, not the gold table. The Performance tab (portal/src/pages/InvestorReporting/tabs/reporting/) holds no asset-class code today: a case-insensitive search of its files returns no match, and there is no classes folder.",
+    "claim": "measured"
+  },
+  "proposed_shape": {
+    "words": "One document per account, account_class_<account>.json, written by the publisher beside series.json.gz and manifest.json. Every per-day array is aligned by index to date, exactly as the series contract's array_keys rule requires (IRPT_DASHBD_SERIES_CONTRACT.json lines 45-53): index i of every array is the same business date. class_names lists the seven gold classes in the gold enum order (cash, fixed_income, equity, structured, alternatives, commodities, unclassified; the portal's Cash-first legend order is applied by the page). market_value_eod is an object keyed by class name, each value an array aligned to date. class_return_daily is an object keyed by class name, each value an array aligned to date, null on any day whose coverage is not MEASURED. coverage is one string per day, the account-day coverage value (MEASURED or a stated not-measured reason). The page computes a window's per-class contribution as the sum over the window's indices of class_return_daily, because the producer's sum rule makes the classes add to the account's daily return; the window's account return itself is linked from the series, not from this shape. The mix at a date is market_value_eod[class][i] divided by the sum over classes at index i, and the mix at two dates is two indices of the same arrays. No server work is needed: the page reads one document and indexes it.",
+    "fields": [
+      "account_id",
+      "firm",
+      "as_of",
+      "method_version",
+      "schema_version",
+      "date",
+      "class_names",
+      "coverage",
+      "market_value_eod",
+      "class_return_daily"
+    ]
+  },
+  "hops": [
+    {
+      "hop": 1,
+      "what": "The gold table account_class_daily: one row per account, trading day and asset class, written per day by the producer's emit_class_day and applied under the R37 release; the class rows the page needs already exist in the gold prefix.",
+      "owner": "2.0.0_SA_COO~D2",
+      "risk": "SERVED",
+      "exists_today": true
+    },
+    {
+      "hop": 2,
+      "what": "Publisher code change: build the per-account class document (the arrays of proposed_shape) from the gold class rows, alongside series.json.gz and manifest.json. Not in publisher.py today.",
+      "owner": "2.0.0_SA_COO~D2",
+      "risk": "LOCAL",
+      "exists_today": false
+    },
+    {
+      "hop": 3,
+      "what": "Publisher redeploy carrying the class writer (the Lambda package and its source-map pins; a deploy).",
+      "owner": "0.7.0_AE_CloudOps~DB2",
+      "risk": "WORLD",
+      "exists_today": false
+    },
+    {
+      "hop": 4,
+      "what": "The scheduled publish writes the class document for each published account under the platinum reporting prefix, next to the existing series and manifest objects.",
+      "owner": "2.0.0_SA_COO~D2",
+      "risk": "SERVED",
+      "exists_today": false
+    },
+    {
+      "hop": 5,
+      "what": "Route change in reporting/entry.py: one new member of OBJECTS (line 88) for the class object, so GET .../reporting/{account_id}/{which} admits it through the existing scope test. Backend route ownership is named by no file here, so the owner is UNOWNED; the PRD assigns route and tabs to Frontend Part IV.",
+      "owner": "UNOWNED",
+      "risk": "LOCAL",
+      "exists_today": false
+    },
+    {
+      "hop": 6,
+      "what": "Route redeploy of the reporting Lambda carrying the new OBJECTS member (a deploy).",
+      "owner": "0.7.0_AE_CloudOps~DB2",
+      "risk": "WORLD",
+      "exists_today": false
+    },
+    {
+      "hop": 7,
+      "what": "The Performance tab section (a new classes folder under portal/src/pages/InvestorReporting/tabs/reporting/, not yet created) reads the class document through the route and mounts the class order and colours imported from assetClass.ts; reaches users on a PROD promotion.",
+      "owner": "2.0.0_SA_COO~F2",
+      "risk": "SERVED",
+      "exists_today": false
+    }
+  ],
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

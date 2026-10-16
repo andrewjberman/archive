@@ -1,0 +1,22 @@
+SESSION LOG -- 0.9.0_WK_AMGT_HARVST~146 on AMGT_HARVST.TO-HVST-cb-10
+worktree C:/dev/wk-harvst-146, branch wk-AMGT_HARVST-146, base HEAD 3467e51337
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_HARVST-146; test -d org && test -d .tools && echo TREE-OK -> TREE-OK.
+2. Premises re-read at base: store.get_stats_snapshot (lib/research/harvest/store.py:385); backfill_driver passes
+   --runtime-root to every spawned run and upload-harvest (_flags, backfill_driver.py:230); worker.last_run_record set
+   at worker.py:973; RECORD_KEYS at cycle_runner.py:44-45. Premise gap: __main__.py:201 had a local
+   `import lib.research.harvest.store as store` that would shadow the new top-level name; removed (surprise -W146-S1).
+3. Base measurements (before any edit):
+   AC2 set: 125 passed, 4 subtests passed in 23.96s, rc=0.
+   full lib/opal_data_harvest: 859 passed, 1 failed, 3 skipped, 6 subtests passed in 99.77s; the one failure is
+   test_harvest_grammar.py::test_one_writer_for_both_channels (the sparse-worktree case the order names).
+4. Build: lib/opal_data_harvest/s3_ledger.py (new), __main__.py (+27/-3), cycle_runner.py (+9/-1),
+   test_cb10_job_get_counters.py (new, 6 tests). No other file touched.
+5. bash .tools/commit-gate.sh on the four .py files: first run ruff E731 on one lambda in the test; rewritten as a def;
+   second run "OK: pre-commit gate clean for 4 of 4 file(s)", rc=0.
+6. After the build: AC1 6 passed (rc=0); AC2 125 passed, 4 subtests passed (rc=0); full suite 865 passed, 1 failed
+   (the same known test), 3 skipped, 6 subtests passed in 93.44s.
+7. Determinism: AC1 run twice, 6 passed both runs. Mutant: test_6_mutant_zero_sum_ledger_fails_arm_4 alone -> 1 passed,
+   i.e. arm (4) raised AssertionError under the zeroed sum_ledger.
+8. Commits (LOCAL on wk-AMGT_HARVST-146): d6a4353d58 (code and test), 0db13e410c (two surprise rows, with the override line).
+9. Not run: no publisher, S3, Secrets Manager, box or browser. No order-file edit (the order's paths grant excludes it).
