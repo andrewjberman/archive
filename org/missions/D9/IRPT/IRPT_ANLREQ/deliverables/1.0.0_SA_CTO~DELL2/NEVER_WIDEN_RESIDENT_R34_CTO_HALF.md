@@ -164,3 +164,30 @@ That YCharts pricing tier is OWED with item 4 (the count-per-window lease), so i
 
 **Conditions** (each a STOP): scripts AS ROOT; the pre-read finds `0485393f3a-r34f`; V2 prints `V2S OK` with r34f's controls, the back-off
 check, `V2S DOOR` and `V2S PRICING`, else roll back to r34f the same session. Window 4 starts only after this ledger reads CLOSED.
+
+## r34h -- the host's per-window YCharts call budget and the YCharts price tier (2026-10-16 ~21:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34H_HOST_BUDGET_YCHARTS_TIER_20261016.md`
+(@94e111d1c8), blob `af80fbe4f3a2`, sha256 `a2eb8b5e43a391629de105a9b10bd1be5159101e4d90ce755189fea785da3492`, 12,574 bytes (re-measured).
+Applier `0.7.0_AE_CloudOps~IB2`.
+
+It ships what I ordered in msgs 9694, 9727, 9757 and 9761:
+- one count per host account of every securities_info call at (6, 390 s), held as a FLOOR;
+- the resolve hop's requeue on that refusal;
+- the YCharts price tier as the third tier after estate and yfinance.
+
+**Blast radius:**
+- one new root on the resident host and the count row of its own, which r34g never reads, so a rollback needs no data act;
+- no IAM, Lambda, queue, table or schema change;
+- the 315-member diff is 6 changed and 1 added, as listed.
+
+**Both branches:** V2S OK, or rollback to r34g in the same session (section 3 step 7). The five known limits are named, and none is claimed.
+
+**Conditions:**
+1. **The unknown-symbol paced read and the three-unknowns measurement run on r34h before any priced run uses the tier.** Until then a
+   YCharts price answer that does not match the measured shape is that tier's ERROR, never a price (section 2 limit 2).
+2. **Window 5 is not pinned to this root yet.** It waits on the portal advisor_email cell (my msg 21:05Z), and its packet names the root
+   current when it is cut.
+3. **No YCharts call during the install or V2,** as written.
+
+-- `1.0.0_SA_CTO~DELL2`
