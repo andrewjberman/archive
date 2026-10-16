@@ -135,11 +135,11 @@ def main():
     arms.run("restatement: an OPAL bio that repeats the pack passage is withheld with the restatement reason", restated_withheld)
 
     def paraphrase_kept():
-        text = "Peck leads Zoetis, the animal health company, and has held the post for six years."
-        doc = build_one("mgmt_bio", opal_draft(text), Model({"Peck leads Zoetis": "has served as chief executive of Zoetis since 2020"}), pack_inputs)
+        text = "Peck oversees Zoetis, a veterinary business serving livestock producers worldwide."
+        doc = build_one("mgmt_bio", opal_draft(text), Model({"Peck oversees Zoetis": "has served as chief executive of Zoetis since 2020"}), pack_inputs)
         blk = doc["blocks"]["mgmt_bio"]
         return blk["source_class"] == "OPAL_SOURCE" and blk["text"] == text, blk.get("reason")
-    arms.run("restatement: control -- a bio that says it in its own words is kept", paraphrase_kept)
+    arms.run("restatement: control -- a bio with content the pack passage does not carry is kept", paraphrase_kept)
 
     def web_bio_not_checked_for_restatement():
         cite = {"source_kind": "web", "url": URL, "title": "T", "quote": "q", "ref": None}
