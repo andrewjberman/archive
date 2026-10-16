@@ -15,6 +15,7 @@ import random
 import sys
 import datetime as dt
 import importlib.util
+from decimal import Decimal
 from pathlib import Path
 
 import boto3
@@ -38,6 +39,8 @@ SOURCE_FIELDS = ["cashiering_transaction_identifier", "account_id", "business_da
 def plain(v):
     if v is None:
         return None
+    if isinstance(v, Decimal):
+        return str(v)
     if hasattr(v, "isoformat"):
         return v.isoformat()
     try:
@@ -66,6 +69,10 @@ def main(out_path, seed=129, n=20):
         produced = at.normalize_trn(one, "49financial")[0]
         out["rows"].append({
             "day": day,
+            "partition_row_index": int(i),
+            "partition_rows": int(len(frame)),
+            "id_note": "cashiering_transaction_identifier is null on most rows; locate the row by day + partition_row_index (the "
+                       "partition read with the objects in key order) or by the natural key in `source`",
             "source": {k: plain(one.iloc[0].get(k)) for k in SOURCE_FIELDS},
             "producer_output": {k: plain(v) for k, v in produced.items()},
         })
