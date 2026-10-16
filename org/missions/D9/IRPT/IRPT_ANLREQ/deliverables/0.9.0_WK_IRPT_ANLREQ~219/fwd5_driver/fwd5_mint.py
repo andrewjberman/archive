@@ -6,7 +6,9 @@ mint    --email <addr> --firm <firm> --allowed-firm-ids <id1,id2,...>
         FWD-1 synthetic item with firmId set from --firm and one more attribute allowedFirmIds, written as a DynamoDB
         list of strings ({"L": [{"S": ...}, ...]}): infra/aws/lambda/ticket_center/lambda_function.py reads it as a
         Python list (_profile_scope), and a boto3 resource returns a set for an SS value, which that reader refuses.
-        Stdout carries only MINT-OK READBACK-OK, MINT-OK READBACK-BAD <word> or MINT-REFUSED <word>.
+        Stdout carries only MINT-OK READBACK-OK, MINT-OK READBACK-BAD <word>, MINT-REFUSED <word>, and after a
+        READBACK-OK the scope line MINT-SCOPE allowedFirmIds=<ids> entitlement_rows=<n> (AR-tz-69): the ids are
+        firm identifiers; the rows count the partition's items whose SK is not PROFILE and must be zero.
 remove  --email <addr>
         deletes that row (attribute_exists(PK)), then polls a ConsistentRead get_item and the email-index GSI for up
         to 300 s and prints ABSENT/PRESENT GSI and CONSISTENT lines; exit 1 while either is still present.
@@ -146,6 +148,13 @@ def readback_ok(row, firm, ids):
                 and got is not None and got == ids)
 
 
+def entitlement_rows(resp):
+    """Items under the principal's PK whose SK is not PROFILE; a response with no Items key holds none. The query
+    projects SK, so every returned item carries it; an item with no SK string is counted, never waved through."""
+    items = resp.get("Items") or []
+    return sum(1 for it in items if (it.get("SK") or {}).get("S") != SK)
+
+
 def _refused_word(e):
     resp = getattr(e, "response", None)
     if isinstance(resp, dict):
@@ -184,9 +193,24 @@ def cmd_mint(args, stdin_text=None, ddb=None, hasher=None):
     except Exception as e:  # noqa: BLE001
         print("MINT-OK READBACK-BAD read " + type(e).__name__)
         return 1
-    ok = readback_ok(row, parsed["firm"], parsed["ids"])
-    print("MINT-OK READBACK-OK" if ok else "MINT-OK READBACK-BAD shape")
-    return 0 if ok else 1
+    if not readback_ok(row, parsed["firm"], parsed["ids"]):
+        print("MINT-OK READBACK-BAD shape")
+        return 1
+    try:
+        rows = entitlement_rows(ddb.query(TableName=TABLE, KeyConditionExpression="PK = :p",
+                                          ExpressionAttributeValues={":p": {"S": "USER#" + parsed["email"]}},
+                                          ConsistentRead=True, ProjectionExpression="SK"))
+    except Exception as e:  # noqa: BLE001
+        print("MINT-OK READBACK-BAD query " + type(e).__name__)
+        return 1
+    scope = ("MINT-SCOPE allowedFirmIds=" + ",".join(parsed["ids"]) + " entitlement_rows=" + str(rows))
+    if rows:
+        print("MINT-OK READBACK-BAD entitlement")
+        print(scope)
+        return 1
+    print("MINT-OK READBACK-OK")
+    print(scope)
+    return 0
 
 
 def cmd_remove(args, ddb=None):
