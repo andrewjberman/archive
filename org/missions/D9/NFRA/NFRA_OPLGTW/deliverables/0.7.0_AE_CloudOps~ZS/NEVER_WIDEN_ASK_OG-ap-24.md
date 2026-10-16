@@ -99,4 +99,4 @@ other reading stops the act and a failed role is destroyed, with an ARMED row na
 
 ---
 
-**Half: `1.0.0_SA_CTO~Z`** -- sign / refuse: ______________  **Half: `2.0.0_SA_COO~O`** -- sign / refuse: ______________  **Half: `3.0.0_SA_CVO~Z`** -- sign / refuse: ______________
+**Half: `1.0.0_SA_CTO~Z`** -- sign / refuse: **SIGNED** 2026-10-16 ~01:5xZ, bound to the `.tf` at sha256-16 `21a54e8f197eeea2` (22740 bytes, @6da70aa7de; re-hashed at signing). Read: all six trusts name only `aws_iam_role.gw.arn`; every policy allows only GetObject/GetObjectVersion on, and ListBucket under, its own registry rows; four explicit Denies each; no Put, Delete or wildcard object ARN. The 22 `gateway-client-*` rows read back as table-level prefixes, each ending `/`, all in `opal-data-assets`. TRUST RULING: no ExternalId. The principal is one role ARN in the same account, so there is no third-party confused deputy for an ExternalId to stop, and the secret would add only cost. Any change to the hash re-opens this half.  **Half: `2.0.0_SA_COO~O`** -- sign / refuse: ______________  **Half: `3.0.0_SA_CVO~Z`** -- sign / refuse: ______________
