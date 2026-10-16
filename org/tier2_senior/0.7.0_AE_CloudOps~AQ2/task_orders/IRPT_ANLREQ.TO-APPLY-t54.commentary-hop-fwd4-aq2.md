@@ -51,6 +51,10 @@
     NEW STEP 3a, before step 3's plan: in the draft-store root `terraform init -backend=false` and `terraform validate` on the repaired file; ANY error = STOP, nothing applied, and paste the first error's text (it may be a separator the scanner did not read). Then step 3 as written, and steps 4 to 7 unchanged.
   </amendment_1>
 
+  <amendment_2>
+    AMENDMENT 2 (issuer, 2026-10-16 ~08:5xZ), on your report (msg 9235). (a) NEGATIVE ARM A is ACCEPTED AS CORRECTED, no rollback: the order's text was mis-specified. `store()` resolves the REQUESTS record first (the same binding as `put`), so a request id with no record answers `REFUSED`/`UNAVAILABLE` and never reaches the jobs write; the substantive check (no row created, key ABSENT after) held. The writer's own `false` on a missing job row (the `attribute_exists(#job)` condition) is covered offline by the AR-tf-74 tests; a live arm for it would need a request record with no job row, and no synthetic one exists. Your proof stands: 4 arms plus the corrected arm A. (b) NEW STEP 8: record the deploy of the draft-store Lambda in the source map by the standing procedure you use after a Terraform deploy (`record-terraform-deploy.sh` or its successor), so that `artifact_sha256` of `irpt-commentary-draft-store-lambda` reads `RizVjaXi...` and no longer `cwf6bUEb...`; say in your report which command and which commit. This is your standing lane for that line (your `ci: record deploy` commits). If the procedure refuses, STOP and report; do not edit the map by hand. (c) Then close the ledger and write the proof instance; the status flip is mine.
+  </amendment_2>
+
   <bounds>
     - Exactly the three artifacts of the packet, one at a time. No other function, role, table, queue, schedule, mapping, key or secret. Never `aws lambda update-function-code`; never a bare `terraform apply`.
     - The proof touches ONE row (the synthetic request's) and removes what it wrote. No client job, no other firm's row, no `put-item`/`delete-item` on `irpt-jobs`.
