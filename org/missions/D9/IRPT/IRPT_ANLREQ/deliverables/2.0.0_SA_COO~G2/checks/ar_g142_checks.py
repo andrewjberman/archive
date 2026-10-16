@@ -25,13 +25,13 @@ IR = "infra/aws/lambda/investor-reporting/"
 LEASE = IR + "ycharts/session/operation_lease.py"
 SESSION = IR + "ycharts/session/resident_session.py"
 TESTS = IR + "ycharts/session/tests/"
-OWN = (LEASE, SESSION, TESTS + "test_operation_lease.py", TESTS + "test_resident_session.py", TESTS + "test_window_budget.py",
+OWN = (LEASE, SESSION, TESTS + "test_operation_lease.py", TESTS + "test_resident_session.py", TESTS + "test_resident_session_checker.py", TESTS + "test_window_budget.py",
        "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-142.lease-window-budget.md")
 OWN_PREFIX = ("org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~269/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/",
               "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md")
 ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/",
           "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/", "org/tier1_exec/2.0.0_SA_COO~G2/", "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/")
-REGRESS_FILES = (TESTS + "test_operation_lease.py", TESTS + "test_resident_session.py", TESTS + "test_host_capture.py",
+REGRESS_FILES = (TESTS + "test_operation_lease.py", TESTS + "test_resident_session.py", TESTS + "test_resident_session_checker.py", TESTS + "test_host_capture.py",
                  IR + "ycharts/research/tests/test_runner.py")
 BASE_KEYS = {"version", "fence", "holder", "session_fence", "expires_at", "next_allowed_at", "observed_at", "in_flight_until"}
 
