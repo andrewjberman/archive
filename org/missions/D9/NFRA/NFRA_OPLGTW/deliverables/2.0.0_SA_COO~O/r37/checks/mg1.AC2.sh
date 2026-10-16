@@ -14,6 +14,8 @@ live=$(timeout 100 python - "$(native "$W/MG1_BEFORE.json")" <<'EOF'
 import json, sys
 try:
     import boto3
+    from boto3.dynamodb.types import TypeDeserializer
+    TD = TypeDeserializer()
     c = boto3.client("dynamodb", region_name="us-east-1")
     kw = {"TableName": "gateway-access-state-table", "ConsistentRead": True,
           "FilterExpression": "begins_with(pk,:p)", "ExpressionAttributeValues": {":p": {"S": "POLICY#"}}}
@@ -37,12 +39,17 @@ def grant(role):
     pk, gr = val(p, "pk"), str(val(p, "grant_revision"))
     for i in items:
         if val(i, "pk") == pk and val(i, "record_type") == "data_entitlement" and str(val(i, "revision")) == gr:
-            s = val(i, "scope"); return json.loads(s) if isinstance(s, str) else s
+            s = TD.deserialize(i["scope"]) if "scope" in i else None
+            return json.loads(s) if isinstance(s, str) else s
     return None
+def cm(sc):
+    # calendar_months sits under the scope's dates map (Z-S174: the first draft read the top level of a typed map)
+    d = (sc or {}).get("dates") if isinstance(sc, dict) else None
+    return str((d or {}).get("calendar_months")) if isinstance(d, dict) else str((sc or {}).get("calendar_months"))
 def strip(sc):
     return {k: v for k, v in (sc or {}).items() if k not in ("tid", "oid", "email", "principal", "subject")}
 ga, gb = grant("andrew"), grant("bbg")
-a_ok = bool(prof.get("andrew")) and val(prof["andrew"], "status") == "active" and isinstance(ga, dict) and str(ga.get("calendar_months")) == "13"
+a_ok = bool(prof.get("andrew")) and val(prof["andrew"], "status") == "active" and isinstance(ga, dict) and cm(ga) == "13"
 b_ok = bool(prof.get("bbg")) and val(prof["bbg"], "status") == "active" and isinstance(gb, dict)
 mirror = a_ok and b_ok and strip(ga) == strip(gb)
 try:
