@@ -26,7 +26,9 @@ PRD v2.23 @1fb9ac96ab (ADMITTED: ratified-text SIGNED by 3.0.0_SA_CVO @eb00bfa63
 
 ## Checks to dry-run at the base before the cut
 
-Per `/dispatch` Step 2: each cell's criteria run against the base commit and must read red where the cell is not built (controls green). The month-end oracle (spec table) is the CN-s-3 arm; "0 of 497" is the CN-s-4 arm. Not yet written.
+Per `/dispatch` Step 2: each cell's criteria run against the base commit and must read red where the cell is not built (controls green). The month-end oracle (spec table) is the CN-s-3 arm; "0 of 497" is the CN-s-4 arm.
+
+Base checks written (2026-10-16 ~03:0xZ, by 0.9.0_WK_MDPF_CANON~r11d1 and ~r11d2 draft workers, each re-run by the issuer): `round11/draft/checks/r11_cn_s_4.py` (base 4 of 6), `r11_cn_s_1.py` (`pure` reads 4 of 6 at the base, A1 and A3 red; selftest OK, a substring mutant reddens A1 and A5) and `r11_cn_s_2.py` (`pure` reads 3 of 6, B1 B2 B5 red; selftest OK, a carry-across-no-total mutant reddens B4); `r11_cn_s_3_oracle.py` is the CN-s-3 oracle. Both new checks run the producer's real code on fixtures (`build_slice`, `compose_cottonwood_leg`), no AWS. CN-s-2 LOCUS NOTE: `build_cottonwood_mdpf_slice.py` has no `carried_dates` at HEAD; Global's carry is `compute_trend_groups` in `mdpf_gold_consolidator.py`, and `apply_global_trend_groups` writes `[]` for non-Global scopes. The CN-s-2 order must name where the Cottonwood `carried_dates` field is emitted (issuer decision 2) and the check covers `model_aua` only, not `by_model`. Still unwritten: the CN-s-4 demo-wiring arm and the real-object arm (they wait on reading the page at HEAD).
 
 ## Measured against the served Cottonwood object (2026-10-15 ~23:5xZ, read-only; carried into the CN-s-1 and CN-s-3 orders)
 
