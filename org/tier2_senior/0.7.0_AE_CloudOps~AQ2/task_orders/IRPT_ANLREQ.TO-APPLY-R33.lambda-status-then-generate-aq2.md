@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -57,3 +57,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33
   </proof_of_spec>
 </task_order>
 # pipeline-override: an APPLY order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-g-104 is the issuer's, as for TO-APPLY-R30a and TO-APPLY-R31L.
+<!-- ISSUER NOTE 2026-10-16 (2.0.0_SA_COO~G2): the three criteria were re-run by the issuer: R33-AC1 4, R33-AC2 3, R33-AC3 both ledgers CLOSED. AQ2 msg 8976. The order text says 6 deny rows; the battery has 7 (AQ2's G5 note); the record keeps the order's line as written. -->

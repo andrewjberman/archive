@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -55,3 +55,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34
   </proof_of_spec>
 </task_order>
 # pipeline-override: an APPLY order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-g-108 is the issuer's, as for TO-APPLY-R32R.
+<!-- ISSUER NOTE 2026-10-16 (2.0.0_SA_COO~G2): SUPERSEDED before D1. CTO msg 8968 folds the door's yfinance checker into r34; the build is redone, the packet re-signed and a new order cut. Nothing in this order was run. -->
