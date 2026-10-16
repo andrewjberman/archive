@@ -1,0 +1,56 @@
+diff --git a/infra/aws/terraform/trino/collector.tf b/infra/aws/terraform/trino/collector.tf
+index cdf81f5ac0..6b37efb0e8 100644
+--- a/infra/aws/terraform/trino/collector.tf
++++ b/infra/aws/terraform/trino/collector.tf
+@@ -7,7 +7,7 @@
+ # SECRETS: read by name, never by value: the Management API credential and the subject-key secret.
+ # NAMES: the order names lib/opal_naming.name(...) for these. The builder refuses system m365-metadata (not yet a
+ # systems.json key; the registry rows land in another cell), so the literal names below are used until they land.
+-# name('globgrph', None, 'trino-access', 'lambda') resolves to the door's function name and is read as a data source.
++# The door and the two secret containers are resources of this root (access.tf, identity.tf), referenced directly.
+ #
+ # PACKAGE: infra/aws/lambda/m365-metadata-collector/build.sh writes build/m365-metadata-collector.zip (never committed).
+ # RUNTIME: python3.11, stdlib plus boto3 (in the Lambda runtime).
+@@ -21,20 +21,6 @@ locals {
+   collector_log_group   = "/aws/lambda/m365-metadata-trino-collector-lambda"
+ }
+ 
+-# The access door: the only principal path to bronze, state and gold. Applied by its own cell; read here by name.
+-data "aws_lambda_function" "trino_access" {
+-  function_name = "globgrph-trino-access-lambda"
+-}
+-
+-# The Management API credential and the subject-key secret, read by name (the values are never in the code or state).
+-data "aws_secretsmanager_secret" "m365_api_credentials" {
+-  name = "m365-metadata/trino/api-credentials"
+-}
+-
+-data "aws_secretsmanager_secret" "m365_subject_key" {
+-  name = "m365-metadata/trino/subject-key"
+-}
+-
+ resource "aws_cloudwatch_log_group" "collector" {
+   name              = local.collector_log_group
+   retention_in_days = 30
+@@ -61,15 +47,15 @@ resource "aws_iam_policy" "collector" {
+         Sid      = "InvokeTheAccessDoorOnly"
+         Effect   = "Allow"
+         Action   = ["lambda:InvokeFunction"]
+-        Resource = data.aws_lambda_function.trino_access.arn
++        Resource = aws_lambda_function.access.arn
+       },
+       {
+-        Sid      = "ReadTheCollectorSecretsOnly"
+-        Effect   = "Allow"
+-        Action   = ["secretsmanager:GetSecretValue"]
++        Sid    = "ReadTheCollectorSecretsOnly"
++        Effect = "Allow"
++        Action = ["secretsmanager:GetSecretValue"]
+         Resource = [
+-          data.aws_secretsmanager_secret.m365_api_credentials.arn,
+-          data.aws_secretsmanager_secret.m365_subject_key.arn,
++          aws_secretsmanager_secret.m365_app_credential.arn,
++          aws_secretsmanager_secret.m365_subject_key.arn,
+         ]
+       },
+       {
