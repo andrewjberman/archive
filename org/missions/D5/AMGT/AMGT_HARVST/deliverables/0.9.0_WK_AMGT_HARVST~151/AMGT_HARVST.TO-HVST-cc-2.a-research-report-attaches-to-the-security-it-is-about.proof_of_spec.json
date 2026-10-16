@@ -16,11 +16,27 @@
   "assignee": "0.9.0_WK_AMGT_HARVST~151",
   "artifacts_produced": [
     {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_research.py",
+      "kind": "script",
+      "commit_or_etag": "cfa61fbc79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "exclusion list and attachment built at cfa61fbc79 (MISFILED_REPORTS, _validate_misfiled, _research_reports, the note in _research); no deploy, the order forbids it",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_cc2_research_misfiled.py",
+      "kind": "test",
+      "commit_or_etag": "cfa61fbc79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six offline arms at cfa61fbc79 (arm 1 KMB exclusion, arm 2 unchanged, arm 3 attach, arm 4 note, arm 5 validator, arm 6 mutant)",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~151/measure.out",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "42a6ff937c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "step 1 read-only measurement; staged in the commit that carries this instance",
+      "deploy_evidence": "step 1 read-only measurement from the first pass of this slot, committed at 42a6ff937c; not re-run and no S3 call in this pass",
       "artifact_covered_by": ["AC1"]
     },
     {
@@ -28,7 +44,15 @@
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "three rows AMGT_HARVST-D1-W151-S1..S3 added at the top of the first json array, 65 insertions 0 deletions, staged in the commit that carries this instance",
+      "deploy_evidence": "rows AMGT_HARVST-D1-W151-S1..S3 (first pass, 42a6ff937c) and S4..S5 (this pass, 42 insertions 0 deletions) in the first json array; staged in the commit that carries this instance",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~151/session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the second-pass section of the session log; staged in the commit that carries this instance",
       "artifact_covered_by": []
     }
   ],
@@ -38,85 +62,82 @@
       "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~151/measure.out -- expect (?m)^MEASURE rows_scanned=\\d+ with_header_ticker=\\d+ mismatched=\\d+ parts_read=\\d+ parts_total=\\d+ gets=\\d+ bytes=\\d+$",
       "method": "command",
       "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~151/measure.out",
-      "output_evidence": "rc 0 (last line of the file, python re.search on the file: True)\nMEASURE rows_scanned=355 with_header_ticker=199 mismatched=22 parts_read=5 parts_total=5 gets=11 bytes=142139",
-      "denominator": "5 of 5 parts read; 355 silver rows scanned",
+      "output_evidence": "rc 0\nMEASURE rows_scanned=355 with_header_ticker=199 mismatched=22 parts_read=5 parts_total=5 gets=11 bytes=142139",
+      "denominator": "5 of 5 parts read; 355 silver rows scanned (the inherited measurement at 42a6ff937c, read again, not re-measured)",
       "status": "PASS",
       "expect": "(?m)^MEASURE rows_scanned=\\d+ with_header_ticker=\\d+ mismatched=\\d+ parts_read=\\d+ parts_total=\\d+ gets=\\d+ bytes=\\d+$"
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_cc2_report_identity.py infra/aws/ec2/opal-gateway/tests/test_cc2_research_misfiled.py -q -p no:cacheprovider --color=no -- expect (?m)^\\d+ passed in",
+      "criterion_verbatim": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc2_research_misfiled.py -q -p no:cacheprovider --color=no -- expect (?m)^\\d+ passed in",
       "method": "test_suite",
-      "invocation": "python -m pytest lib/research/corpus/tests/test_cc2_report_identity.py infra/aws/ec2/opal-gateway/tests/test_cc2_research_misfiled.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "rc 4. 'ERROR: file or directory not found: lib/research/corpus/tests/test_cc2_report_identity.py' then 'no tests ran in 0.00s'. Step 2 was stopped by the step 1g rule (surprise AMGT_HARVST-D1-W151-S1), so the test files were not written.",
-      "denominator": "0 passed of 0 collected (both test files absent)",
-      "status": "FAIL",
-      "status_reason": "step 2 was stopped by the step 1g rule (surprise AMGT_HARVST-D1-W151-S1): the stored silver row carries no identity the guard can read, so the two test files were never written. The order stays open for the issuer.",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc2_research_misfiled.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0\n......                                                                   [100%]\n6 passed in 2.81s",
+      "denominator": "6 of 6 arms passed (arms 1 to 6, the mutant arm included); 6 of 6 on each of 3 runs",
+      "status": "PASS",
       "expect": "(?m)^\\d+ passed in"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_ingest.py lib/research/corpus/tests/test_backlog.py lib/research/corpus/tests/test_typed.py infra/aws/ec2/opal-gateway/tests/test_og_gt4.py -q -p no:cacheprovider --color=no -- expect (?m)^\\d+ passed in; issuer base count 47 passed",
+      "criterion_verbatim": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no -- expect (?m)^(16|18) passed in",
       "method": "test_suite",
-      "invocation": "python -m pytest lib/research/corpus/tests/test_ingest.py lib/research/corpus/tests/test_backlog.py lib/research/corpus/tests/test_typed.py infra/aws/ec2/opal-gateway/tests/test_og_gt4.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "rc 0\n47 passed in 4.75s (run BEFORE any change)\n47 passed in 2.91s (run AFTER; no lib or infra diff, only the channel file changed)",
-      "denominator": "47 of 47 passed, before and after; issuer base count 47",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0\n................                                                         [100%]\n16 passed in 3.36s",
+      "denominator": "16 of 16 passed; 16 before the change (base 4516893b3b, dry run) and 16 after; 16 on each of 4 runs",
       "status": "PASS",
-      "expect": "(?m)^\\d+ passed in"
+      "expect": "(?m)^(16|18) passed in"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "AC2 arm (5): report_identity_check monkeypatched to always return match; arm (1) must then FAIL",
+      "description": "AC2 arm (6): MISFILED_REPORTS monkeypatched to an empty tuple; the arm (1) assertions must FAIL (pytest.raises(AssertionError) around _check_kmb)",
       "expected": "arm (1) fails on the mutant",
-      "observed": "not run: the guard was not built (step 1g stop), so there is no report_identity_check to monkeypatch. The spec names this arm; the schema enum has no not-run value, so N/A-SPEC-NAMES-NONE is the closest member and is not a claim that the spec names none.",
-      "status": "N/A-SPEC-NAMES-NONE"
+      "observed": "test_cc2_arm6_mutant_empty_constant_fails_arm1 passed: the arm (1) assertion set raised AssertionError on the empty constant, so the arm discriminates",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1 measurement read once (all 5 parts, one pass); AC3 run twice, before and after the change set",
-      "observed": "AC3 47 passed both runs; AC1 single pass, parts_read 5 of 5",
+      "method": "AC2 run three times and AC3 run four times on the final tree of this pass",
+      "observed": "AC2 6 passed on each of 3 runs; AC3 16 passed on each of 4 runs; AC1 read from a committed file, unchanged",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "step 2 BUILD: report_identity_check, record() identity_check field, reports_for include_misfiled, gateway skip and on-the-fly check, and the two test files (AC2)",
-      "reason": "stopped by the step 1g rule: the stored silver row carries no exchange-qualified ticker and no header text for the misfiled report fbd50086c4065785 (surprise AMGT_HARVST-D1-W151-S1)"
+      "item": "the attach path has no live entry: both KMB entries carry correct_security_key None",
+      "reason": "CTO ERRATUM 2: KIMBERA MM is not in the harvest universe, so no report is attached to a live security by the list; the attach path is exercised by arm 3 on synthetic securities only"
     },
     {
-      "item": "served exclusion of KMB's misfiled report and the mutant arm (5)",
-      "reason": "cannot be built from the stored fields; needs a decision on reading the extraction body or a silver field, which is the issuer's call"
-    },
-    {
-      "item": "silver rebuild, moving the KIMBERA report, adding KIMBERA MM to the universe",
-      "reason": "out of this cell by the order's notes"
+      "item": "typed.py change, silver rebuild, S3 calls, deploy, Secrets Manager, publisher host",
+      "reason": "the amended order (Amendment 1) forbids them in this pass; no such act was taken"
     },
     {
       "item": "order status flip",
-      "reason": "AC2 is FAIL, so the order stays open; the issuer flips"
+      "reason": "the issuer flips the order status; the worker face does not carry the flip"
     }
   ],
   "surprises": [
-    "AMGT_HARVST-D1-W151-S1: HVST-cc-2 step 2 STOPPED -- the stored silver research_report row carries no exchange-qualified ticker or header text for the misfiled KMB report fbd50086c4065785, so the guard cannot be built from what a row carries (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~W1)",
+    "AMGT_HARVST-D1-W151-S1: HVST-cc-2 step 2 was STOPPED by the step-1g rule in the first pass; Amendment 1 (named exclusion list) is built at cfa61fbc79, so the stop is answered, but the row itself is unchanged (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~W1; the disarm is the owner's act)",
     "AMGT_HARVST-D1-W151-S2: a strict equal-ticker rule fires on 22 of 199 rows with a title ticker, all of them other listings of the same issuer (OBSERVATION, INERT)",
-    "AMGT_HARVST-D1-W151-S3: KMB_US_Equity holds a second silver row with the same Kimberly Clark Mexico title as a .pdf (1a3b56044db679a5), so the order's four-correct-others premise does not hold (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~W1)"
+    "AMGT_HARVST-D1-W151-S3: KMB_US_Equity holds a second silver row with the same Kimberly Clark Mexico title as a .pdf (1a3b56044db679a5); both KMB entries of MISFILED_REPORTS name it (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~W1)",
+    "AMGT_HARVST-D1-W151-S4: the amended order names AMGT_HARVST-D1-W151-S1 as the next row id, but S1 to S3 already exist; this slot's next free id is S4 (OBSERVATION, INERT)",
+    "AMGT_HARVST-D1-W151-S5: Amendment 1 step 2b names run.note as the note mechanism, but run.note carries no text; the exclusion note is written to denominator_note (OBSERVATION, INERT)"
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~151/session_log.txt",
   "compiler_tools": [
     {
-      "tool": ".tools/aws s3api (read-only: list-objects-v2, head-object, get-object)",
-      "invocation": "list prefix amgt/harvest/silver/research-report/; get-object on the 5 parts and on bronze research-report-extract/.../fbd50086c4065785/extract.json",
-      "result": "5 of 5 parts read, 133462 + 8677 bytes; 11 GET requests including 5 NoSuchKey attempts on a first loop with a bad key"
-    },
-    {
-      "tool": "python -m pytest",
+      "tool": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh (pytest in the gateway dir)",
       "invocation": "AC2 and AC3 invocations as named in the order",
-      "result": "AC2 rc 4 (files absent); AC3 47 passed before and after"
+      "result": "AC2 6 of 6 passed; AC3 16 of 16 passed; both rc 0 on the final tree"
     },
     {
-      "tool": "python re.search on measure.out",
-      "invocation": "AC1 regex from the order's <expect>",
-      "result": "True on the last line"
+      "tool": "python -m ruff check --target-version py39 --select E,F,W --ignore E501",
+      "invocation": "on infra/aws/ec2/opal-gateway/app/harvest_research.py and the new test file",
+      "result": "All checks passed (rc 0)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate)",
+      "invocation": "the code commit cfa61fbc79 and the instance commit",
+      "result": "commit-gate clean for the code commit; surprise-row-gate and to-pipeline-gate run at each commit"
     }
   ]
 }
