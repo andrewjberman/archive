@@ -29,7 +29,10 @@ C12_TOLERANCE, and the grade always prints which one it used.
   monotone     (what a POST-release grade of a shipped catalog uses) the served value equals the claim OR is later than it: a measured claim is a
                point-in-time fact, a source only moves forward, so a claim BEHIND the served value is stale but was true when measured; a claim AHEAD of
                the served value was never true and fails in every mode. The wrong-when-measured case is what `strict` at the emit catches.
-The count of claims equal to the served value and the count tolerated are printed beside the verdict. `python c12_depth.py selftest` is the negative control.
+ROUND 21 (R21-2, CTO msg 35237 accepting the CVO's correction): the direction of the tolerance depends on the claim's KIND. A `latest` claim (the object's latest date) is a FLOOR: a later
+served value means more data and is tolerated. A `series_start` claim (the start of a series: `total.series_start`, `as_of_first`) is a CEILING: an EARLIER served start (a longer history)
+is tolerated, a LATER served start is a truncation and FAILS in every mode. The kind is the claim's `depth_kind` (the legacy value `floor` reads as `latest`); a claim with no kind is read
+by its field (the two series-start fields are series_start, any other is latest), and a series_start claim is never tolerated upward. The count of claims equal to the served value and the count tolerated are printed beside the verdict. `python c12_depth.py selftest` is the negative control.
 """
 import json
 import os
@@ -45,13 +48,28 @@ ROOT = os.getcwd()
 
 
 TOL = os.environ.get("C12_TOLERANCE", "strict")
+SERIES_FIELDS = ("total.series_start", "as_of_first")
 
 
-def one_behind(claim, served, tol=None):
-    """True iff `claim` is tolerated as OLDER than `served` under the tolerance (never for equal or ahead): see the docstring."""
+def kind_of(claim):
+    """`latest` or `series_start` for a claim dict: its depth_kind (floor = latest), else read from its field."""
+    k = claim.get("depth_kind") if isinstance(claim, dict) else None
+    if k in ("latest", "series_start"):
+        return k
+    if k == "floor":
+        return "latest"
+    return "series_start" if isinstance(claim, dict) and claim.get("field") in SERIES_FIELDS else "latest"
+
+
+def one_behind(claim, served, tol=None, kind="latest"):
+    """True iff the claim is tolerated as DIFFERENT from `served` under the tolerance (never for equal): see the docstring. `kind` is latest or series_start."""
     tol = tol or TOL
     c, v = str(claim)[:10], str(served)[:10]
-    if tol == "strict" or not (DATE.match(c) and DATE.match(v)) or c >= v:
+    if tol == "strict" or not (DATE.match(c) and DATE.match(v)) or c == v:
+        return False
+    if kind == "series_start":
+        return v < c      # an EARLIER served start is a longer history; a LATER one is a truncation and fails
+    if c > v:
         return False
     if tol == "monotone":
         return True
@@ -71,11 +89,18 @@ def _selftest():
              ("one-publish", "2026-10-16", "2026-10-19", True, "Friday claim, Monday served (weekend skipped)"), ("one-publish", "2026-10-15", "2026-10-19", False, "Thursday claim, Monday served is two behind"),
              ("one-publish", "n/a", "2026-10-15", False, "a non-date claim fails"),
              ("monotone", "2026-10-13", "2026-10-15", True, "monotone: a claim behind the served value is tolerated"), ("monotone", "2026-10-16", "2026-10-15", False, "monotone: a claim AHEAD still fails"),
-             ("monotone", "2026-10-15", "2026-10-15", False, "monotone: equal is the strict case, not counted as tolerated"), ("strict", "2026-10-14", "2026-10-15", False, "strict tolerates nothing")]
+             ("monotone", "2026-10-15", "2026-10-15", False, "monotone: equal is the strict case, not counted as tolerated"), ("strict", "2026-10-14", "2026-10-15", False, "strict tolerates nothing"),
+             ("monotone", "2024-11-01", "2024-10-01", True, "series_start: an EARLIER served start (longer history) is tolerated", "series_start"),
+             ("monotone", "2024-11-01", "2024-12-01", False, "series_start: a LATER served start (truncation) FAILS", "series_start"),
+             ("monotone", "2024-11-01", "2024-11-01", False, "series_start: equal is the strict case", "series_start"),
+             ("one-publish", "2024-11-01", "2024-12-01", False, "series_start: a later start fails under one-publish too", "series_start"),
+             ("strict", "2024-11-01", "2024-10-01", False, "series_start: strict tolerates nothing", "series_start")]
     bad = 0
-    for tol, c, v, want, why in cases:
-        got = one_behind(c, v, tol)
-        print("SELFTEST %-5s [%s] %s (%s vs %s -> %s)" % ("ok" if got == want else "FAIL", tol, why, c, v, got))
+    for case in cases:
+        tol, c, v, want, why = case[:5]
+        kind = case[5] if len(case) > 5 else "latest"
+        got = one_behind(c, v, tol, kind)
+        print("SELFTEST %-5s [%s/%s] %s (%s vs %s -> %s)" % ("ok" if got == want else "FAIL", tol, kind, why, c, v, got))
         bad += got != want
     print("SELFTEST %d of %d" % (len(cases) - bad, len(cases)))
     sys.exit(1 if bad else 0)
@@ -168,7 +193,7 @@ if mode == "catalog":
                 obj, key = fetch(c)
                 got = dig(obj, c.get("field")) if obj is not None else None
                 same = got is not None and got == str(c.get("value"))[:10]
-                behind = (not same) and got is not None and one_behind(c.get("value"), got)
+                behind = (not same) and got is not None and one_behind(c.get("value"), got, kind=kind_of(c))
                 strict_claims += 1 if same else 0
                 behind_claims += 1 if behind else 0
                 good = (c.get("method") in ("body-field", "series-first", "snapshot-asof") and (same or behind))
@@ -209,7 +234,7 @@ for tool, c in measured:
     ms = [m for m in (r.get("matches") or []) if (m.get("property") or {}).get("entity") == row or m.get("dataset") == row]
     hd = (ms[0].get("history_depth") or {}) if ms else {}
     same = str(hd.get("value"))[:10] == str(c.get("value"))[:10]
-    behind = (not same) and one_behind(c.get("value"), hd.get("value"))
+    behind = (not same) and one_behind(c.get("value"), hd.get("value"), kind=kind_of(c))
     good = hd.get("claim") == "measured" and (same or behind)
     eq += 1 if (good and same) else 0
     bh += 1 if (good and behind) else 0
