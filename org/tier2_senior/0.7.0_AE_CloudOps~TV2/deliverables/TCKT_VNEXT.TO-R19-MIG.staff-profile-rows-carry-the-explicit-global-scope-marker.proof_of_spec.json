@@ -1,0 +1,120 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R19-MIG.staff-profile-rows-carry-the-explicit-global-scope-marker",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-R19-MIG.staff-profile-rows-carry-the-explicit-global-scope-marker.md",
+  "group": "OTHER",
+  "vintage_commit": "fc80699050"
+ },
+ "assignee": "0.7.0_AE_CloudOps~TV2",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R19.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-R19-MIG.staff-profile-rows-carry-the-explicit-global-scope-marker.md",
+  "vintage_commit": "fc80699050"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r19_mig/R19_MIG_RESULT.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rows_written 19, 19 opaque row keys, selected_before 19/3/1 of 23, failed_conditions [], both check runs (MIG-BAD at the signed blob, MIG-OK at the issuer-corrected blob); keys are sha256-12 of PK, no address",
+   "artifact_covered_by": [
+    "R19MIG-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r19_mig/r19_mig_apply.py",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the applier: select and apply modes, STOP on any count other than 19/3/1/23, conditional update-item per row, ConsistentRead read-back with a hash of every other attribute",
+   "artifact_covered_by": [
+    "R19MIG-AC1"
+   ],
+   "commit_or_etag": "699ba8dd77"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r19_mig/R19_MIG_BEFORE.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "sha256 of every other attribute per opaque key, taken before the first write",
+   "artifact_covered_by": [
+    "R19MIG-AC1"
+   ],
+   "commit_or_etag": "699ba8dd77"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T0407Z_tckt-vnext-r19-mig-scope-marker-20261016_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ledger tckt-vnext-r19-mig-scope-marker-20261016 CLOSED 4 of 4 legs M1-M4 after MIG-OK",
+   "artifact_covered_by": [
+    "R19MIG-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R19MIG-AC1",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_mig_check.py",
+   "expect": "^MIG-OK ",
+   "output_evidence": "MIG-OK rows_written=19 markers_live=19 internal_rows_scanned=23\nexit=0",
+   "denominator": "19 of 19 selected rows carry scope_all_firms BOOL true; 23 internal PROFILE rows scanned (table ScannedCount 86); 0 rows carry both a list and the marker",
+   "status": "PASS",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_mig_check.py",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one write pass by design; the check re-reads the live table independently of the applier. Its first run, at the blob the pair signed (24286f537272), read MIG-BAD for the string-valued service row (an issuer defect); the second, at the issuer-corrected blob af529513ba89 (commit 357bbd02af, verified equal at HEAD and in the tree), read MIG-OK",
+   "observed": "the 19 marker rows and the 23-row denominator are the same in both runs; only the classification of the one service row differs",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the corrected check is not the bytes the CTO half binds",
+   "reason": "the pair and the CTO half bind check blob 24286f537272; the issuer replaced it with af529513ba89 after the first run; the issuer owns whether the CTO half needs a re-read. The writes and the counts are unaffected: the check is read-only"
+  },
+  {
+   "item": "condition (b) of AMENDMENT 1 read from the RE-SIGN section",
+   "reason": "the CTO half's header (lines 3-4) still names revision 1 (a4dd43f239f2); its RE-SIGN section names ee84f96d70, equal to the pair blob at HEAD; the issuer's message 9007 said to read the RE-SIGN section as current. Both reads are in the ledger turn and the result file"
+  },
+  {
+   "item": "the string-valued allowedFirmIds service row (key c56e4e2e507b), the 2 rows with a list, the disabled row",
+   "reason": "not selected, not changed (pair sections 2 and 3); the released code refuses the string-valued row 403 malformed with or without this migration"
+  },
+  {
+   "item": "the release and the release orders",
+   "reason": "TO-R19-REL, TO-R18-REL, TO-R18-RUN stay staged; this act is the release's precondition only"
+  },
+  {
+   "item": "raw row keys",
+   "reason": "7 of the 23 internal PKs embed an address, so every key printed or recorded is the first 12 hex of sha256(PK)"
+  },
+  {
+   "item": "push",
+   "reason": "commit is LOCAL on box/dell2; only the integrator pushes the shared branch (hook LD-0367)"
+  }
+ ],
+ "surprises": [
+  "TCKT_VNEXT-D2-S55: the issuer's check counted the string-valued allowedFirmIds service row as locked out and printed MIG-BAD after the 19 correct writes; the issuer corrected the check at 357bbd02af"
+ ],
+ "session_log": "org/critical_paths/change_management/20261016T0407Z_tckt-vnext-r19-mig-scope-marker-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "r19_mig_apply.py, r19_mig_check.py, deploy_ledger.py, commit-gate.sh",
+   "invocation": "r19_mig_apply.py select, then apply; r19_mig_check.py; deploy_ledger.py open, close-leg M1-M4, close; commit-gate.sh on the applier",
+   "result": "counts 19/3/1 of 23; written 19, failed 0, readback_bad 0; MIG-OK rows_written=19 markers_live=19 internal_rows_scanned=23; ledger CLOSED 4 of 4; gate clean"
+  }
+ ]
+}
