@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-R20-LM",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R20.md",
+    "vintage_commit": "430b378b8f",
+    "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R20-LM.attachment-open-route-fences-and-presigns-on-one-member.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R20-LM.attachment-open-route-fences-and-presigns-on-one-member.md",
+    "group": "OTHER",
+    "vintage_commit": "430b378b8f"
+  },
+  "assignee": "0.9.0_WK_TCKT_VNEXT~49",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "902c908d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source-only order: nothing deployed, applied or invoked; +6 -1 lines in attachment_open_ticket only; the release is a later ticket-service release"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_attachment_open_same_member.py",
+      "kind": "test",
+      "commit_or_etag": "902c908d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five named cases, fake table and fake S3, run under pytest only; no deploy in scope"
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~49/mutant_check.py",
+      "kind": "test",
+      "commit_or_etag": "902c908d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2 checker; copies the ticket_center folder into the gitignored .scratch/ of this worktree, runs the new test file on an unmutated control and on the mutant copy"
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~49/R20_LM_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "902c908d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the build record: lines changed, counts, before-arm on base, mutant output, not_read"
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9e343bec23",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows TCKT_VNEXT-D2-W49-S1 and -S2 appended in LF; base bytes restored by 9e343bec23 after the editor normalised the file's line endings in 902c908d0a; diff against 430b378b8f is 53 insertions, 0 deletions"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R20LM-AC1",
+      "criterion_verbatim": "the new test file passes with every case of step 4 named in a test, no failures or errors. Also run the whole infra/aws/lambda/ticket_center/tests/ folder once and record the counts in your record (a drain check; the issuer re-runs it).",
+      "method": "test_suite",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-49/infra/aws/lambda/ticket_center/tests/test_attachment_open_same_member.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "5 passed in 0.48s (rc=0); determinism rerun: 5 passed in 0.47s (rc=0)\nfolder drain check (not the criterion; recorded in R20_LM_RECORD.json and surprise TCKT_VNEXT-D2-W49-S1): after the change, timeout 120 python -m pytest C:/dev/wk-tckt-vnext-49/infra/aws/lambda/ticket_center/tests/ -q -p no:cacheprovider --color=no --continue-on-collection-errors -> 11 failed, 382 passed, 8 errors, 59 subtests passed, rc=1; on the unchanged base 430b378b8f the same run -> 13 failed, 380 passed, 8 errors, rc=1 (the 2 difference are the new same-member cases)",
+      "denominator": "5 passed of 5 collected: the five step-4 cases, one named test each (requester and answers firm differ; no requester firm; both agree presigns from the fenced member; caller outside the firm's scope; key outside the firm's prefix). Folder: 382 passed of 393 collected, 11 failed, 8 collection errors",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "R20LM-AC2",
+      "criterion_verbatim": "you write mutant_check.py: it copies lambda_function.py to a scratch folder OUTSIDE the product tree with the equality test of step 1 removed (the route then presigns from a ticket whose two firms differ), runs the new test file against the copy with pytest, and prints MUTANT-FIRES only when that run FAILS (else MUTANT-SURVIVES, exit 1).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-tckt-vnext-49/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~49/mutant_check.py",
+      "output_evidence": "CONTROL unmutated copy: rc=0 | 5 passed in 0.52s\nMUTANT step-1 equality refusal removed: rc=1 | 1 failed, 4 passed in 0.68s\nMUTANT-FIRES (exit 0); the failing case under pytest -rf is test_open_refuses_a_ticket_whose_requester_firm_differs_from_answers_firm, on its requester-prefix sub-ticket",
+      "denominator": "1 mutant (step-1 equality refusal removed) against 5 cases: 1 case fails on the mutant; the control copy passes 5 of 5",
+      "status": "PASS",
+      "expect": "MUTANT-FIRES",
+      "judgment": false
+    },
+    {
+      "criterion_id": "R20LM-AC3J",
+      "criterion_verbatim": "the open route fences and presigns on ONE member, refuses a ticket whose requester firm and answers firm differ with the same body as a ticket with no attachment, and nothing else in the function changed.",
+      "method": "manual_read_with_citation",
+      "invocation": "git show 902c908d0a -- infra/aws/lambda/ticket_center/lambda_function.py (read by the L9 adjudicator; not graded by the worker)",
+      "output_evidence": "lambda_function.py lines 2119-2131 at 902c908d0a: req_firm = requester.firm; if req_firm != answers.firm: return 404 with the body f\"ticket {tid} carries no attachment\"; firm = req_firm; the later shape, prefix, bucket, key and presign uses read firm. git show --stat 902c908d0a: lambda_function.py 7 lines (+6 -1), one hunk, inside attachment_open_ticket",
+      "denominator": "1 judgment item; the code read against the cell contract: 3 claims (one member, same 404 body, nothing else changed)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO, never by the worker; no worker verdict recorded",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the step-1 equality refusal removed from attachment_open_ticket in a scratch copy of the ticket_center folder; the new test file run against that copy; MUTANT-FIRES expected",
+      "expected": "MUTANT-FIRES",
+      "observed": "MUTANT-FIRES: control rc=0 (5 passed); mutant pytest rc=1, 1 failed, 4 passed in 0.68s",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the new test file run twice in the same worktree state after the final edit; counts compared",
+      "observed": "run 1: 5 passed in 0.48s; run 2: 5 passed in 0.47s; same counts",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the whole-folder pytest run of infra/aws/lambda/ticket_center/tests/ (382 passed, 11 failed, 8 collection errors, rc=1 after the change)",
+      "reason": "8 modules cannot be collected in this worktree (test_no_row_refuses, test_package_409_codes, test_package_env_firms, test_package_i5p_i7, test_package_principal, test_package_request_id, test_package_route, test_status_active): they read D9 IRPT deliverables absent here. 11 failures in test_cross_firm_global_register.py (7) and test_cross_firm_global_sites_widened.py (4) read investor-reporting paths outside the grant. The same 11 failures and 8 errors occur on the unchanged base; recorded as TCKT_VNEXT-D2-W49-S1, not investigated"
+    },
+    {
+      "item": "R20LM-AC3J verdict",
+      "reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO"
+    },
+    {
+      "item": "deploy, apply, Terraform, invoke, the ticket-service release",
+      "reason": "out of grant: source-only order; infra/aws/terraform/ read-only and not opened; the worker deployed, applied and invoked nothing"
+    },
+    {
+      "item": "live AWS, network and mail calls",
+      "reason": "none in scope; none made; tests/conftest.py refuses a real call"
+    },
+    {
+      "item": "portal/ and the org/git-author-override-audit.dell2.log side effect of safe-commit",
+      "reason": "portal/ is a separate repository and not in grant; the audit log is written by the commit tooling and is not staged by this order"
+    }
+  ],
+  "surprises": [
+    "TCKT_VNEXT-D2-W49-S1: the whole-folder drain run is not clean in this worktree (11 failures and 8 collection errors on paths outside the worktree; identical on the unchanged base); recorded, not investigated",
+    "TCKT_VNEXT-D2-W49-S2: the step-2 presign from req_firm with the step-1 equality removed does not fire on an answers-prefix key; the first case carries a requester-prefix sub-ticket so the mutant fires"
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~49/R20_LM_RECORD.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-49/infra/aws/lambda/ticket_center/tests/test_attachment_open_same_member.py -q -p no:cacheprovider --color=no",
+      "result": "5 passed in 0.48s; rc=0 (determinism rerun: 5 passed in 0.47s)"
+    },
+    {
+      "tool": "pytest (before-arm, base lambda_function.py from 430b378b8f in .scratch/base_arm)",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-49/.scratch/base_arm/ticket_center/tests/test_attachment_open_same_member.py -q -p no:cacheprovider --color=no -rf",
+      "result": "2 failed, 3 passed in 1.00s; rc=1; the two failures are the requester-differs case and the no-requester-firm case"
+    },
+    {
+      "tool": "pytest (folder, drain check)",
+      "invocation": "timeout 120 python -m pytest C:/dev/wk-tckt-vnext-49/infra/aws/lambda/ticket_center/tests/ -q -p no:cacheprovider --color=no --continue-on-collection-errors",
+      "result": "382 passed, 59 subtests passed, 11 failed, 8 errors during collection; rc=1"
+    },
+    {
+      "tool": "pytest (adjacent suites)",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-49/infra/aws/lambda/ticket_center/tests/test_trade_form_attachment.py C:/dev/wk-tckt-vnext-49/infra/aws/lambda/ticket_center/tests/test_authz_matrix.py -q -p no:cacheprovider --color=no",
+      "result": "61 passed, 11 subtests passed; rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each .py file: lambda_function.py, test_attachment_open_same_member.py, mutant_check.py>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) per file, rc=0"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "timeout 120 python .tools/surprise-row-gate.py org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; rc=0"
+    }
+  ]
+}
