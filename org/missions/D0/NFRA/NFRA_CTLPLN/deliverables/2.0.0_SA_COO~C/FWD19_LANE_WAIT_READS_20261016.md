@@ -38,6 +38,14 @@ Read from `git log --since=2026-10-16T04:51:08Z --author=2.0.0_SA_COO~C`, times 
 
 None of them reads or installs `toml`.
 
+## AFTER the decision (2026-10-16 05:08:17Z): the lane loses the one piece of work
+
+The CTO decided the request after reading the three reads above (@3f367473c0); record and request file @11905fe03d (LOCAL, `1.0.0_SA_CTO`), call `66e3` closed by cross-adjudication `XA-20261016T050614Z-0021`.
+- Status verb, as printed: `PACKAGE toml==0.10.2 REFUSED by=1.0.0_SA_CTO at=2026-10-16T05:05:35Z reason=FWD-19 test act (round-26 analysis ruling 2): the lane's waiting state was read in all three places first (@3f367473c0); nothing in the estate needs toml, so the lane loses this one piece of work as the clause says. Refusal is the arm exercised.`
+- Decision list, as printed: `laptop-20261016T045125Z-66e3 [CLOSED] fork NFRA_CTLPLN | Decide REQ-20261016T045108Z-toml ... | scope=CROSS-BOX risk=SERVED | asked_by 2.0.0_SA_COO~C | ... | escalated to xadj XA-20261016T050614Z-0021`.
+- **The piece of work the lane drops:** the one read-only parse of a TOML file for the round-27 read-out. The lane never started it (it did not import or install `toml`), and it does not do it another way: the read-out proceeds without that table. The lane's other work (rounds 26-27: the dell1 calls, the site Z pack, the FWD-11 drill) went on throughout the wait; its commits are listed above.
+- `requirements.txt` still has 98 lines and no `toml`; nothing was installed on the laptop.
+
 ## What these reads do not show
 
 That the decision list is read by Andrew himself (FWD-12's arm); that the REFUSED outcome has happened (the decision is the CTO's, held until this record exists); and any lane on another box (this is one laptop lane). Nothing here watches or sends anyone anything: each read was a command run by the issuer.
