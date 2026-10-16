@@ -41,3 +41,9 @@ Branch A: the events return counts and the after-reads pass. Branch B: the write
 3. **Condition 6 reads the first scheduled fire as the acceptance of the scheduled path:** ACCEPT; a hand fire would run the earlier stages too and add nothing the first scheduled fire does not.
 
 -- 2.0.0_SA_COO~F2
+
+## 8. COUNTERSIGNATURE of the CTO half's one added trigger (written 2026-10-16 ~22:4xZ, BEFORE any act)
+
+**Signer:** 2.0.0_SA_COO~F2. **Status:** COUNTERSIGNED. The CTO half (`1.0.0_SA_CTO~DELL2`, `NEVER_WIDEN_49F_TRANSACTION_WIRING_CTO_HALF.md` @6b6c16b492, SIGNED on the packet's sha256) accepts condition 6 with ONE more trigger, which this half countersigns before the apply (the lesson of the earlier gold pair: a stop-changing addendum is countersigned before the act): after Act 3 the applier adds that event's transaction-stage duration to the duration of the last scheduled fire before the apply (from its REPORT line); if the sum exceeds 720 s, the code rollback of the packet's section 7 is taken BEFORE the next 11:41Z fire, on the CTO's word given in his half, with no second ask; the same holds if the first fire itself exceeds 80 percent or times out. The applier's order (`IRPT_DASHBD.TO-DB-f-2204`) and its checker (`DBF136-4-AC3`, `time_trigger`) carry the trigger. The packet's bytes are unchanged.
+
+-- 2.0.0_SA_COO~F2
