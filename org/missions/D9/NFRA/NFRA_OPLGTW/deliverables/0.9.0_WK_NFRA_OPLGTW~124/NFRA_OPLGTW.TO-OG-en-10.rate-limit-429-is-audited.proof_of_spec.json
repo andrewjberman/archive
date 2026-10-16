@@ -18,57 +18,70 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/ratelimit.py",
       "kind": "script",
-      "commit_or_etag": "a41d358992",
+      "commit_or_etag": "b5e26f7cf2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124 (not pushed, no deploy). check() gains an optional count_out list; enforce_identity_counted() returns (ok, retry, count); enforce_identity() keeps its (ok, retry) return; record_identity_refusal() writes the throttled refusal row and never raises; audit_failure_count() reports swallowed write failures.",
-      "introduces": ["enforce_identity_counted", "record_identity_refusal", "audit_failure_count"],
-      "artifact_covered_by": ["AC1"]
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124 (not pushed, no deploy). Round 1 (a41d358992): enforce_identity_counted, record_identity_refusal, audit_failure_count. A2 (b5e26f7cf2): client_key() (8-hex sha256 prefix, 'none' when absent), check(client=) with a parallel _CLIENTS deque pruned in step, by_client_map() (top five plus other). The window, the limit and the fail-open path are unchanged.",
+      "introduces": [
+        "client_key",
+        "by_client_map"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/audit.py",
       "kind": "script",
-      "commit_or_etag": "a41d358992",
+      "commit_or_etag": "b5e26f7cf2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124. log_ratelimit() writes event gw_ratelimit, outcome rate_limited, the principal key (never the e-mail), limit, window_s, count_in_window, retry_after_s and suppressed through the existing _emit sink.",
-      "introduces": ["log_ratelimit"],
-      "artifact_covered_by": ["AC1"]
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124. log_ratelimit() writes event gw_ratelimit, outcome rate_limited, the principal key (never the e-mail), limit, window_s, count_in_window, retry_after_s, suppressed, by_client (hashed keys only) and distinct_clients, through the existing _emit sink.",
+      "introduces": [
+        "distinct_clients"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
       "kind": "script",
-      "commit_or_etag": "a41d358992",
+      "commit_or_etag": "b5e26f7cf2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124. GuardMiddleware's per-identity refusal calls record_identity_refusal() before the unchanged 429 JSON answer; the JSON-RPC method is omitted because the body is not read on this path.",
-      "artifact_covered_by": ["AC1"]
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124. GuardMiddleware passes the bearer's client_id into enforce_identity_counted() and, on a per-identity refusal, calls record_identity_refusal() before the unchanged 429 JSON answer.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en10.py",
       "kind": "test",
-      "commit_or_etag": "a41d358992",
+      "commit_or_etag": "b5e26f7cf2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124. Three named tests test_ogen10_ac01..ac03 drive the real GuardMiddleware refusal branch with the bearer and blocklist stubbed. 3 of 3 PASS; against a planted no-audit mutant 3 of 3 FAIL.",
-      "artifact_covered_by": ["AC1"]
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-124. Four named tests test_ogen10_ac01..ac04 drive the real GuardMiddleware refusal branch with the bearer and blocklist stubbed. 4 of 4 PASS, twice; against a planted no-audit mutant 4 of 4 FAIL.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "a41d358992",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Two rows by this worker appended in the fenced json blocks: NFRA_OPLGTW-Z-W124-S1 (test file names absent at base) and NFRA_OPLGTW-Z-W124-S2 (leading-edge suppressed count). Both OBSERVATION, INERT, UNDER_INVESTIGATION.",
+      "deploy_evidence": "Two rows by this worker appended in the fenced json blocks: NFRA_OPLGTW-Z-W124-S1 (test file names absent at base) and NFRA_OPLGTW-Z-W124-S2 (leading-edge suppressed count, accepted as built by A2). Both OBSERVATION, INERT, UNDER_INVESTIGATION.",
       "artifact_covered_by": []
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "AC1: the three named tests pass: a 429 leaves an audit row with the limiter's count, bursts are folded, an audit failure never changes the answer.",
+      "criterion_verbatim": "AC1: the four named tests pass (A2 adds test_ogen10_ac04): a 429 leaves an audit row with the limiter's count, bursts are folded, an audit failure never changes the answer, and the row's by_client names the client split.",
       "method": "command",
-      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en10.py test_ogen10_ac01 test_ogen10_ac02 test_ogen10_ac03; echo \"exit=$?\"",
-      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
-      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0\n(second run, identical: pytest rc=0; named tests passed 3 of 3; failed/error lines 0 / RESULT: PASS / exit=0)",
-      "denominator": "3 of 3 named tests passed (test_ogen10_ac01, test_ogen10_ac02, test_ogen10_ac03); 0 failed, 0 errors. Related modules after the change: 45 passed, 1 failed of 46 (the failure is the route-set assertion in test_data_entitlement_guard.py, filed as NFRA_OPLGTW-Z-W121-S3; not in this cell's surfaces).",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en10.py test_ogen10_ac01 test_ogen10_ac02 test_ogen10_ac03 test_ogen10_ac04; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0\n(second run, identical: pytest rc=0; named tests passed 4 of 4; failed/error lines 0 / RESULT: PASS / exit=0)",
+      "denominator": "4 of 4 named tests passed (test_ogen10_ac01 .. test_ogen10_ac04); 0 failed, 0 errors. Related modules on the same commit: 46 passed, 1 failed of 47 (the failure is the route-set assertion test_data_entitlement_guard.py::test_ogz1_ac08, filed as NFRA_OPLGTW-Z-W121-S3; not in this cell's surfaces).",
       "status": "PASS",
-      "status_reason": "Ran at a41d358992. The three tests pass, twice. A planted no-audit mutant (record_identity_refusal replaced by a no-op) fails 3 of 3 tests, so the tests bite. Existing rate-limit and guard tests are unchanged: none pinned an identity 429 with no audit row.",
+      "status_reason": "Ran at b5e26f7cf2, the A2 commit, after the commit landed. The four tests pass, twice. A planted no-audit mutant fails 4 of 4, so the tests bite. The row's by_client carries the two hashes with their counts (100 and 30), distinct_clients 2, no client id in the row, and the 429 answer unchanged.",
       "judgment": false
     },
     {
@@ -77,29 +90,29 @@
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~124 '^infra/aws/ec2/opal-gateway/(app/(ratelimit|server|audit)\\.py|tests/(test_og_en10|test_ratelimit|test_rate_limit|test_server_guard)\\.py)$'; echo \"exit=$?\"",
       "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~124: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
-      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~124: files touched 5; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
-      "denominator": "5 files touched across this serial's commits: 4 product files (app/ratelimit.py, app/server.py, app/audit.py, tests/test_og_en10.py) and 1 standing record file (INVESTIGATION_v1.md); 0 outside the allowed set.",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~124: files touched 8; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "8 files touched across this serial's commits: 4 product files (app/ratelimit.py, app/server.py, app/audit.py, tests/test_og_en10.py) and 4 standing record files (INVESTIGATION_v1.md, this instance, its session log, the task order); 0 outside the allowed set.",
       "status": "PASS",
-      "status_reason": "Measured by the check at a41d358992 with the commit authored by the serial. The deliverables folder and the task order are standing record paths and are not product files.",
+      "status_reason": "Measured by the check at b5e26f7cf2 with the commits authored by the serial. The deliverables folder and the task order are standing record paths and are not product files.",
       "judgment": false
     }
   ],
   "controls": {
     "mutant": {
       "description": "Planted defect: record_identity_refusal replaced by a no-op, so the 429 writes no audit row (scratch plugin .scratch/og_en10_mutant_noaudit.py).",
-      "expected": "ac01, ac02 and ac03 each FAIL: no gw_ratelimit row, no burst fold, no audit_failure_count increment.",
-      "observed": "pytest tests/test_og_en10.py -p og_en10_mutant_noaudit -v -> test_ogen10_ac01 FAILED (assert 0 == 1), test_ogen10_ac02 FAILED (burst writes one row), test_ogen10_ac03 FAILED (assert 0 == 1); 3 failed",
+      "expected": "ac01, ac02, ac03 and ac04 each FAIL: no gw_ratelimit row, no burst fold, no audit_failure_count increment, no by_client split.",
+      "observed": "pytest tests/test_og_en10.py -p og_en10_mutant_noaudit -v on b5e26f7cf2 -> test_ogen10_ac01 FAILED (assert 0 == 1), test_ogen10_ac02 FAILED (burst writes one row), test_ogen10_ac03 FAILED (assert 0 == 1), test_ogen10_ac04 FAILED (assert 0 == 1); 4 failed",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "The named-test check (AC1) run twice on the same commit; the pytest summary and RESULT lines compared.",
-      "observed": "Both runs: pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS; exit=0.",
+      "observed": "Both runs: pytest rc=0; named tests passed 4 of 4; failed/error lines 0; RESULT: PASS; exit=0.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "Fixture file tests/test_rate_limit.py and tests/test_server_guard.py named in the cell's surfaces.",
+      "item": "Fixture files tests/test_rate_limit.py and tests/test_server_guard.py named in the cell's surfaces.",
       "reason": "Neither exists at the base 060e0ba6e2. No existing test pinned an identity 429 with no audit row, so no test was updated. Filed as NFRA_OPLGTW-Z-W124-S1."
     },
     {
@@ -112,34 +125,39 @@
     },
     {
       "item": "Full gateway suite green.",
-      "reason": "Not claimed. tests/test_deploy_base_guard.py fails 8 (filed as NFRA_OPLGTW-Z-W82-S7) and tests/test_data_entitlement_guard.py fails its route-set assertion (filed as NFRA_OPLGTW-Z-W121-S3); neither file references the changed modules."
+      "reason": "Not claimed. tests/test_data_entitlement_guard.py::test_ogz1_ac08 fails its route-set assertion (filed as NFRA_OPLGTW-Z-W121-S3); tests/test_deploy_base_guard.py failed 8 in round 1 (filed as NFRA_OPLGTW-Z-W82-S7) and was not re-run this round. Neither file references the changed modules."
     }
   ],
   "surprises": [
     "NFRA_OPLGTW-Z-W124-S1: the cell's surfaces name tests/test_rate_limit.py and tests/test_server_guard.py, which do not exist at the base; no test needed the new truth, so none was edited. OBSERVATION, INERT.",
-    "NFRA_OPLGTW-Z-W124-S2: AC02's 'one row carrying a suppressed count' is built as the leading-edge form (the burst's first refusal writes suppressed 0; the folded count rides the principal's next row; a burst with no later refusal leaves its count unwritten), because the limiter has no timer. OBSERVATION, INERT."
+    "NFRA_OPLGTW-Z-W124-S2: AC02's 'one row carrying a suppressed count' is built as the leading-edge form (the burst's first refusal writes suppressed 0; the folded count rides the principal's next row; a burst with no later refusal leaves its count unwritten), because the limiter has no timer. Accepted as built by amendment A2. OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~124/NFRA_OPLGTW.TO-OG-en-10.rate-limit-429-is-audited.session.log",
   "compiler_tools": [
     {
-      "tool": "pytest (own tests)",
+      "tool": "pytest (own tests, 4 named)",
       "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_en10.py -v -p no:cacheprovider --color=no",
-      "result": "3 passed, rc 0"
+      "result": "4 passed, rc 0 (on b5e26f7cf2)"
     },
     {
       "tool": "pytest (mutant control)",
       "invocation": "PYTHONPATH=.scratch python -m pytest tests/test_og_en10.py -p og_en10_mutant_noaudit -v",
-      "result": "3 failed (ac01, ac02, ac03), rc 1: the planted no-audit mutant is caught"
+      "result": "4 failed (ac01..ac04), rc 1: the planted no-audit mutant is caught"
     },
     {
       "tool": "pytest (related modules)",
-      "invocation": "python -m pytest tests/test_ratelimit.py tests/test_auth_hardening.py tests/test_audit_bytes_principal.py tests/test_audit_lake_key_stamp.py tests/test_audit_rivalfunds_args.py tests/test_schwab_audit.py tests/test_data_entitlement_guard.py",
-      "result": "45 passed, 1 failed (test_data_entitlement_guard route-set assertion, filed as NFRA_OPLGTW-Z-W121-S3)"
+      "invocation": "python -m pytest tests/test_ratelimit.py tests/test_auth_hardening.py tests/test_audit_bytes_principal.py tests/test_audit_lake_key_stamp.py tests/test_audit_rivalfunds_args.py tests/test_schwab_audit.py tests/test_data_entitlement_guard.py tests/test_og_en10.py",
+      "result": "46 passed, 1 failed (test_data_entitlement_guard::test_ogz1_ac08 route-set assertion, filed as NFRA_OPLGTW-Z-W121-S3)"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "python -m ruff check --target-version py39 tests/test_og_en10.py app/ratelimit.py app/audit.py app/server.py",
+      "result": "All checks passed!"
     },
     {
       "tool": "safe-commit.sh (commit gate, surprise-row-gate, to-pipeline-gate, missions-tree-check)",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~124 <0.9.0_WK_NFRA_OPLGTW~124@opal.agent>\" -F <msgfile> -- <5 paths>",
-      "result": "commit a41d358992 landed; pre-commit gate clean for 4 of 5 files; surprise-row-gate OK; missions-tree-check 0 violations"
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~124 <0.9.0_WK_NFRA_OPLGTW~124@opal.agent>\" -F <msgfile> -- <4 product paths>",
+      "result": "commit b5e26f7cf2 landed on the second attempt (the first was blocked by ruff F401, an unused import, removed); msg-verify MATCH"
     }
   ]
 }
