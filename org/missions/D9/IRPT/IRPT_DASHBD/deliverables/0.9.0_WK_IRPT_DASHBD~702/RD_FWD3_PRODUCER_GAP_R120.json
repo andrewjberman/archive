@@ -1,0 +1,56 @@
+{
+  "as_of": "2026-10-16",
+  "producer": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+    "line": 257,
+    "words": "The account_class_daily producer. Line 257 writes each account-day class row with its asset_class and class_return_daily. The holding-to-class mapping is classify_identifier (lines 186-199): a cash identifier (CASH, CASH_USD) is cash; otherwise the etf-classifications item's asset_class is kept when it is one of the six classes; an identifier the table does not hold, or holds with another value, is unclassified. The class return is class_contribution (lines 212-244): (MV_c,t - MV_c,t-1 - NF_c,t) / V_(t-1). Table name TABLE_CLASS at line 67. The producer is measured from source at HEAD; no live object was read.",
+    "claim": "measured"
+  },
+  "handler": {
+    "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+    "line": 931,
+    "emits_class_table": true,
+    "words": "Source at HEAD: run() (line 895) is the scheduled path, reached from lambda_handler (lines 950-961). Line 931 calls catch_up_classes, which emits every owed class day through emit_classes (lines 313-330, emit at line 322 via acd.emit_class_day) beside the returns table, in the same daily pass, after the returns days are written (lines 921-930). The class import is guarded (lines 106-111); a class failure is logged as CLASS_SKIPPED and never stops the returns. Schedule as read from code: one EventBridge schedule (schedule.tf lines 82-100) that exists only when the fire-time record carries a chosen_cron (locals.tf lines 135-136); the comment at schedule.tf line 9 states cron(41 7 ? * MON-FRI *) in America/New_York, and the handler resolves T-1 and returns on a non-trading day. The record file itself is outside the materialized folders of this worktree and was not read. The DEPLOYED function and its live schedule state are ABSENT: no AWS call was made, so whether the live function emits the table today is not measured.",
+    "claim": "inferred"
+  },
+  "sum_test": {
+    "exists": true,
+    "file": "data/assets/scripts/gold/irpt_reporting/tests/test_account_class_daily.py",
+    "line": 131,
+    "words": "The test test_classes_sum_to_the_accounts_return_on_a_day_with_trades_and_a_flow (lines 131-143) and test_the_identity_holds_for_many_random_days (lines 146-160) assert that the class contributions sum to the account's daily return (producer identity (V_t - F_t) / V_(t-1) - 1). Scope: the tests are offline and synthetic (test file line 4); in test line 136 the account value is built as the sum of the class values, so the tie of class values to the account's value is not independently asserted there. The account-value tie is enforced in code by tied() in class_contribution (producer lines 223-231, tolerance VALUE_TOLERANCE 0.005 at line 100), and a day that misses the tie is tested as null with CLASS_VALUES_DO_NOT_SUM_TO_ACCOUNT (test lines 174-184, a 50 gap). No test checks the tie against the live account producer's value on a real account-day, so the acceptance 'classes sum to the account on every day, by test' is covered for the identity and the null path only.",
+    "claim": "measured"
+  },
+  "classification_read": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+    "line": 164,
+    "dated": false,
+    "words": "ClassTable.get (lines 158-172) issues one GetItem on the etf-classifications table per distinct identifier, keyed by ticker (line 164; the key constant at line 72; the table name at line 71), cached for the run. The only attribute read is asset_class (line 169). Nothing stamps, records or compares an as-of date for the item, and no held claim is attached. So the read is LIVE (taken at run time), not a dated snapshot. A DynamoDB error raises ClassTableUnreadable (lines 165-167) and refuses the day. The contract's class_source (read GetItem, key ticker) agrees.",
+    "claim": "measured"
+  },
+  "swap_snapshot_read": {
+    "file": "infra/aws/lambda/investor-reporting/ycharts/research/swap_pass.py",
+    "line": 3,
+    "words": "The swap snapshot is a dated file, not a live read. load_pool (lines 59-91) reads the held pool file that build_swap_pool.py wrote (the module docstring of build_swap_pool.py lines 3-8 says its input is an operator-supplied aws dynamodb scan answer, or a JSON list of items, and that it reads no clock, no environment variable and makes no network call). The date is the operator's --as-of argument (build_swap_pool.py lines 91, 94, 106), stored as pool_as_of; the claim is the literal held (swap_pass.py line 22; checked at lines 71-72); a pool dated after the run date is refused (lines 76-77); a pool older than STALE_DAYS of 30 (line 23) is reported as stale (line 90). So the swap snapshot is dated by its declared as-of and labelled held, and it is produced by a whole-table Scan export. The class producer instead reads by GetItem with no date. The two are not the same read path, so the premise that the producer reads the table 'through the same path as the swap snapshot' does not hold.",
+    "claim": "measured"
+  },
+  "failing_days_words": [
+    "ACCOUNT_RETURN_NOT_MEASURABLE: the account producer's own return is not measurable for the day, or there is no positive prior value (producer lines 227-229 and 487-488). The account-day's class rows are written with a null class_return_daily and this coverage member; the market values are kept as read.",
+    "POSITIONS_PARTITION_ABSENT: no positions partition exists for the day or for the prior trading day (producer lines 489-490). The class rows are written with a null class_return_daily and this coverage member.",
+    "CLASS_VALUES_DO_NOT_SUM_TO_ACCOUNT: the class values of either day miss the account's value by more than 0.005 (producer lines 223-231; test lines 174-184). The rows are written with a null class_return_daily, the values as read, nothing plugged. The same member is also written, where no earlier member applies, when a position value or a custodian cash line is unreadable (producer lines 416-423 and 503-504), so an unreadable value is not separated from a tie failure in the coverage column.",
+    "LINKED_VALUATION_CHAIN: the account producer linked the account through an intervening custodian valuation (producer lines 510-511). The class rows are written with a null class_return_daily.",
+    "TRADE_FLOW_UNREADABLE: a trade leg carried into the day is unreadable for the account (producer lines 500 and 512-513). The class rows are written with a null class_return_daily.",
+    "CLASS_TABLE_UNREADABLE (no rows): a DynamoDB GetItem error on etf-classifications raises ClassTableUnreadable (producer lines 165-167). The whole day is refused by name and no partition is written for it (compute_classes lines 472-474; handler emit_classes lines 328-329). The scheduled catch-up retries the owed day on a later fire (handler lines 340-356 and 359-395).",
+    "DAY_FAILED (no rows): any other exception on a day, including a refused read or an empty row set, fails that day alone with a named reason and no partition is written (producer compute_classes lines 466-474; emit_class_day line 572 refuses an empty partition)."
+  ],
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}

@@ -43,6 +43,10 @@ const NO_CHOICE_LINE = 'Opal Staff will manage the replacement.'
 const DECISIONS_MAX = 20
 const PROMPT_ROUNDS = 6
 const PROMPT_SETTLE_MS = 20000
+// AR-y-367 (round 41, ZZ28): the ticket-answer bound. 240 s as signed; with --decisions, 90 s more per allowed prompt round.
+const TICKET_WAIT_MS = 240000
+const ROUND_WAIT_MS = 90000
+const PROMPT_POLL_MS = 1000
 const TICKER_SHAPE = /^[A-Z0-9.-]{1,12}$/
 const DECISION_KEYS = ['symbol', 'answer', 'replacement']
 const DECISION_ANSWERS = ['yes', 'replace', 'no']
@@ -64,7 +68,7 @@ const STEPS = [
   'STEP-2 python fwd1_mint.py mint, the password on STDIN only (one users row, attribute_not_exists(PK))',
   'STEP-3 launch the browser behind the route guard; sign in through the real form (#email, #password, button[type=submit])',
   'STEP-4 /ticket-center: New Ticket, type Analysis Request, the firm, the form, setInputFiles on Holdings file, click File Analysis Request; take the ticket id from the POST /api/scoped/tickets answer',
-  'STEP-4B from the Submit click on the driver only reads (waits and reads; no click, fill or post)',
+  'STEP-4B after the Submit click the driver presses only the decision buttons, and fills only the one replacement input, that the decisions file plans, until the ticket answer arrives; after the ticket answer it only reads (no other click, fill or post)',
   'STEP-5 poll the ticket page: reload every 60 s for --poll-minutes; record the four attachments present and openable; stop when all four are present',
   'STEP-6 finally: close the browser, python fwd1_mint.py remove, record its ABSENT GSI and ABSENT CONSISTENT lines',
   'STEP-7 write run_report.json (times, ticket id, polls, guard refusals, ABSENT lines, screenshot names; never a password, hash, token or cookie)',
@@ -169,6 +173,8 @@ export function validateDecisions(doc) {
       if (typeof d.replacement !== 'string' || !TICKER_SHAPE.test(d.replacement)) {
         return { error: 'replace needs a replacement ticker of 1 to 12 upper-case letters, digits, . or - (symbol ' + d.symbol + ')' }
       }
+      // AR-y-367: the form refuses a replacement equal to its symbol ("the same symbol ... is not sent"); the run stops here instead.
+      if (d.replacement === d.symbol.toUpperCase()) return { error: 'the replacement equals the symbol, which the form refuses (symbol ' + d.symbol + ')' }
     } else if (Object.prototype.hasOwnProperty.call(d, 'replacement')) {
       return { error: 'replacement is allowed only with replace (symbol ' + d.symbol + ')' }
     }
@@ -219,9 +225,22 @@ export function planPrompt(promptText, decisions) {
   return { ok: true, symbol, button, replacement: d.answer === 'replace' ? d.replacement : null, buttons }
 }
 
-// Presses only the planned buttons, before the Submit click (the caller). At most PROMPT_ROUNDS rounds; each round reads the
-// prompts, then presses each planned one and waits for the upload door's answer (or PROMPT_SETTLE_MS). Every press is recorded.
-export async function answerPrompts(page, decisions, report, log) {
+// AR-y-367 (round 41, ZZ28): the decisions run AFTER the Submit click. The Ticket Center's prompts come only from the upload
+// answer that the Submit click triggers, and each press re-posts that upload (a NORMALIZED answer files the ticket). So the
+// driver presses only the decision buttons the decisions file plans, and fills only the one replacement input, until the ticket
+// answer arrives; after the ticket answer it only reads. The ticket listener is set before the Submit click (run()).
+// The bound is ticketWaitMs(true): 240 s plus 90 s per allowed round. At most PROMPT_ROUNDS rounds; an unplanned prompt stops
+// the run; nothing is guessed. Every press and fill is recorded in report.form_decisions.
+export function ticketWaitMs(withDecisions) {
+  return withDecisions ? TICKET_WAIT_MS + ROUND_WAIT_MS * PROMPT_ROUNDS : TICKET_WAIT_MS
+}
+
+export async function answerAfterSubmit(page, decisions, answered, report, log, opts = {}) {
+  const pollMs = opts.pollMs ?? PROMPT_POLL_MS
+  const afterPressMs = opts.afterPressMs ?? 1000
+  const deadline = Date.now() + (opts.waitMs ?? ticketWaitMs(true))
+  const pressed = new Set()
+  const done = (outcome) => ({ outcome, pressed: Array.from(pressed) })
   const hints = () => page.locator('[data-slot="analysis-filing-hint"]')
   const isUploadAnswer = (r) => r.request().method() === 'POST' && /\/analysis\/inputs$/.test(pathOf(r.url()))
   const visible = async () => {
@@ -231,32 +250,44 @@ export async function answerPrompts(page, decisions, report, log) {
     return texts.filter((t) => t !== NO_CHOICE_LINE)
   }
   for (let round = 1; round <= PROMPT_ROUNDS; round++) {
-    const open = await visible()
-    if (open.length === 0) { log('FORM-DECISIONS round ' + round + ': no prompt remains'); return 'clear' }
+    let open = []
+    for (;;) {
+      if (answered()) { log('FORM-DECISIONS round ' + round + ': the ticket answer arrived; the driver only reads from here'); return done('answered') }
+      open = await visible()
+      if (open.length > 0) break
+      if (Date.now() >= deadline) throw new Error('NO-ANSWER neither the ticket answer nor a prompt within the wait bound (round ' + round + ')')
+      await sleep(pollMs)
+    }
     for (const text of open) {
+      if (answered()) break
       const plan = planPrompt(text, decisions)
       if (!plan.ok) throw new Error('UNPLANNED-PROMPT ' + plan.why + ' (round ' + round + '); the run stops, nothing is guessed')
       if ((await hints().filter({ hasText: text }).count()) === 0) continue
       const item = hints().filter({ hasText: text }).first()
-      const answered = page.waitForResponse(isUploadAnswer, { timeout: PROMPT_SETTLE_MS }).catch(() => null)
+      const uploadAnswer = page.waitForResponse(isUploadAnswer, { timeout: PROMPT_SETTLE_MS }).catch(() => null)
       if (plan.button === PROMPT_REPLACE) {
-        await item.getByRole('button', { name: PROMPT_REPLACE, exact: true }).click()
+        // a Replace press opens the replacement input; a repeated round finds it open and presses only Check
+        if ((await item.getByRole('button', { name: PROMPT_REPLACE, exact: true }).count()) > 0) {
+          await item.getByRole('button', { name: PROMPT_REPLACE, exact: true }).click()
+        }
         await item.getByLabel(REPLACE_INPUT_PREFIX + plan.symbol, { exact: true }).fill(plan.replacement)
         await item.getByRole('button', { name: PROMPT_CHECK, exact: true }).click()
       } else {
         await item.getByRole('button', { name: plan.button, exact: true }).click()
       }
-      const answer = await answered
-      await sleep(1000)
+      pressed.add(plan.symbol)
+      const got = await uploadAnswer
+      await sleep(afterPressMs)
       const still = (await hints().filter({ hasText: text }).count()) > 0
       const after = still ? ((await hints().filter({ hasText: text }).first().locator('p').first().textContent()) || '').trim() : 'the prompt is no longer shown'
       report.form_decisions.push({ round, symbol: plan.symbol, button: plan.button, replacement: plan.replacement,
-        prompt_before: text, line_after: after, upload_answer_status: answer ? answer.status() : null, utc: iso() })
-      log('FORM-DECISIONS round ' + round + ' pressed ' + plan.button + ' for ' + plan.symbol + ' upload_answer=' + (answer ? answer.status() : 'none'))
+        prompt_before: text, line_after: after, upload_answer_status: got ? got.status() : null, utc: iso() })
+      log('FORM-DECISIONS round ' + round + ' pressed ' + plan.button + ' for ' + plan.symbol + ' upload_answer=' + (got ? got.status() : 'none'))
     }
   }
-  if ((await visible()).length > 0) throw new Error('PROMPTS-REMAIN after ' + PROMPT_ROUNDS + ' rounds; the run stops before Submit')
-  return 'clear'
+  if (answered()) return done('answered')
+  if ((await visible()).length > 0) throw new Error('PROMPTS-REMAIN after ' + PROMPT_ROUNDS + ' rounds; the run stops with the ticket not yet answered')
+  return done('bound-reached')
 }
 
 // Reading only, after the filed outcome is visible: the notice heading and its lines (the not-covered holdings).
@@ -345,16 +376,23 @@ async function run(o) {
     if ((await firmSel.inputValue()) !== o.firm) throw new Error('the firm control did not take the chosen firm id')
     await page.locator('select[aria-label="Report type"]').selectOption('Overview')
     await page.locator('input[aria-label="Holdings file"]').setInputFiles(o.holdings)
-    if (o.decisions) await answerPrompts(page, o.decisions, report, log)
     const submit = page.getByRole('button', { name: SUBMIT_LABEL, exact: true })
     await submit.waitFor({ state: 'visible', timeout: 30000 })
     for (let i = 0; i < 30 && !(await submit.isEnabled()); i++) await sleep(1000)
     if (!(await submit.isEnabled())) throw new Error('the Submit control stayed disabled (a held reason)')
     await shot(page, 'before-submit')
 
-    const ticketAnswer = page.waitForResponse((r) => r.request().method() === 'POST' && pathOf(r.url()) === '/api/scoped/tickets', { timeout: 240000 })
+    // AR-y-367: the ticket-answer listener is set BEFORE the Submit click; its bound is 240 s, or ticketWaitMs(true) with --decisions.
+    let ticketDone = false
+    const ticketAnswer = page.waitForResponse((r) => r.request().method() === 'POST' && pathOf(r.url()) === '/api/scoped/tickets', { timeout: ticketWaitMs(Boolean(o.decisions)) })
+    ticketAnswer.then(() => { ticketDone = true }, () => { ticketDone = true })
     await submit.click()
-    log('STEP-4 Submit clicked; from here the driver only reads')
+    log('STEP-4 Submit clicked; ' + (o.decisions ? 'the planned decisions are answered until the ticket answer, then the driver only reads' : 'from here the driver only reads'))
+    if (o.decisions) {
+      const loop = await answerAfterSubmit(page, o.decisions, () => ticketDone, report, log)
+      report.form_decisions_unused = o.decisions.map((d) => d.symbol).filter((s) => !loop.pressed.includes(s))
+      log('FORM-DECISIONS ' + loop.outcome + '; symbols pressed: ' + loop.pressed.length + ' of ' + o.decisions.length + ' planned')
+    }
     const resp = await ticketAnswer
     let body = null
     try { body = await resp.json() } catch { body = null }
@@ -416,7 +454,7 @@ async function readPackage(page, ticketId) {
   return out
 }
 
-function selftest() {
+async function selftest() {
   const B = 'http://localhost:5174'
   const cases = []
   const check = (name, cond) => cases.push([name, !!cond])
@@ -504,6 +542,68 @@ function selftest() {
   const badRun = spawnSync(process.execPath, [SELF, '--base', B, '--firm', '49financial', '--holdings', SELF, '--out', os.tmpdir(), '--go', 'IRPT_ANLREQ.TO-RUN-FWD1.x', '--decisions', badDec], { encoding: 'utf8', timeout: 60000 })
   fs.rmSync(badDec, { force: true })
   check('a bad decisions file refuses the run with rc 2 before any step', badRun.status === 2 && /RUN-REFUSED decisions/.test(badRun.stdout) && !/STEP-1 password generated/.test(badRun.stdout))
+  // AR-y-367 (round 41, ZZ28): the after-Submit loop. Source checks read this file's own lines by line-start anchors; the loop runs
+  // against a fake page (offline) that shows prompts, records presses and fills, and removes a prompt on its resolving press.
+  check('decisions: a replacement equal to its own symbol is refused (the form refuses it)', validateDecisions({ decisions: [{ symbol: 'EFGH', answer: 'replace', replacement: 'EFGH' }] }).error !== undefined)
+  check('decisions: the ticket bound is 240 s without --decisions and 240 s plus 90 s per round with them (780 s at six rounds)',
+    ticketWaitMs(false) === 240000 && ticketWaitMs(true) === 240000 + 90000 * PROMPT_ROUNDS && ticketWaitMs(true) === 780000)
+  const SRC_LINES = fs.readFileSync(SELF, 'utf8').split('\n')
+  const iListen = SRC_LINES.findIndex((l) => /^    const ticketAnswer = page\.waitForResponse\(/.test(l))
+  const iSubmit = SRC_LINES.findIndex((l) => /^    await submit\.click\(\)$/.test(l))
+  const callIdx = SRC_LINES.map((l, i) => (/^      const loop = await answerAfterSubmit\(page, /.test(l) ? i : -1)).filter((i) => i >= 0)
+  const awaitCalls = SRC_LINES.filter((l) => /^ {6}(const \w+ = )?await answerAfterSubmit\(/.test(l)).length
+  check('the ticket-answer listener is created before the Submit click in source order', iListen > 0 && iSubmit > iListen)
+  check('the decisions loop is called after the Submit click in source order', callIdx.length === 1 && callIdx[0] > iSubmit)
+  check('without --decisions no press path is reachable: the one loop call sits behind if (o.decisions) and is the only await call',
+    callIdx.length === 1 && SRC_LINES[callIdx[0] - 1] === '    if (o.decisions) {' && awaitCalls === 1)
+  const fakeFormPage = (hints, presses) => {
+    const remove = (h) => { hints.splice(hints.indexOf(h), 1) }
+    const itemOf = (h) => ({
+      locator: () => ({ first: () => ({ textContent: async () => h.text }) }),
+      getByRole: (role, o) => ({
+        count: async () => (o.name === PROMPT_REPLACE && h.open ? 0 : 1),
+        click: async () => {
+          presses.push(o.name + ' ' + h.text)
+          if (o.name === PROMPT_REPLACE) h.open = true
+          else if (o.name === PROMPT_CHECK) { h.open = false; if (h.resolveOn === PROMPT_CHECK) remove(h) }
+          else if (o.name === h.resolveOn) remove(h)
+        },
+      }),
+      getByLabel: (label) => ({ fill: async (v) => { presses.push('fill ' + label + '=' + v) } }),
+    })
+    const view = (list) => ({
+      count: async () => list().length,
+      nth: (i) => itemOf(list()[i]),
+      filter: (f) => view(() => list().filter((h) => h.text.includes(f.hasText))),
+      first: () => itemOf(list()[0]),
+    })
+    const page = {
+      locator: () => view(() => hints),
+      waitForResponse: () => Promise.resolve({ status: () => 200 }),
+    }
+    return page
+  }
+  const quick = { waitMs: 2000, pollMs: 1, afterPressMs: 0 }
+  const pr1 = []
+  const r1 = await answerAfterSubmit(fakeFormPage([{ text: 'ZZZZ was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }], pr1),
+    [{ symbol: 'ABCD', answer: 'no', replacement: null }], () => false, { form_decisions: [] }, () => {}, quick).then(() => null, (e) => e.message)
+  check('an unplanned prompt stops the loop, names its symbol, and presses nothing', typeof r1 === 'string' && r1.includes('UNPLANNED-PROMPT') && r1.includes('ZZZZ') && pr1.length === 0)
+  const pr2 = []
+  const r2 = await answerAfterSubmit(fakeFormPage([{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: null, open: false }], pr2),
+    [{ symbol: 'EFGH', answer: 'no', replacement: null }], () => false, { form_decisions: [] }, () => {}, quick).then(() => null, (e) => e.message)
+  check('the loop presses at most six rounds, then stops with PROMPTS-REMAIN', pr2.length === 6 && typeof r2 === 'string' && /PROMPTS-REMAIN after 6 rounds/.test(r2))
+  const pr3 = []
+  const r3 = await answerAfterSubmit(fakeFormPage([{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }], pr3),
+    [{ symbol: 'EFGH', answer: 'no', replacement: null }], () => true, { form_decisions: [] }, () => {}, quick)
+  check('once the ticket answer has arrived the loop presses nothing and only reads', r3.outcome === 'answered' && r3.pressed.length === 0 && pr3.length === 0)
+  const pr4 = []
+  const rep4 = { form_decisions: [] }
+  const hints4 = [{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: PROMPT_CHECK, open: false }]
+  const r4 = await answerAfterSubmit(fakeFormPage(hints4, pr4), [{ symbol: 'EFGH', answer: 'replace', replacement: 'SPY' }],
+    () => hints4.length === 0 && pr4.length > 0, rep4, () => {}, quick)
+  check('a planned replace presses Replace, fills its replacement input, presses Check, and is recorded',
+    JSON.stringify(pr4) === JSON.stringify(['Replace EFGH was not found.', 'fill Replacement ticker for EFGH=SPY', 'Check EFGH was not found.'])
+    && rep4.form_decisions.length === 1 && rep4.form_decisions[0].replacement === 'SPY' && r4.outcome === 'answered')
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n)
   for (const [n, ok] of cases) console.log((ok ? 'case PASS ' : 'case FAIL ') + n)
   if (failed.length === 0) {
