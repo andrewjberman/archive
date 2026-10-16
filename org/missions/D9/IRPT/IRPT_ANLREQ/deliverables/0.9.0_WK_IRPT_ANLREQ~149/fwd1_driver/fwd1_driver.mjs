@@ -60,6 +60,11 @@ const ON_UNPLANNED_NO = 'no'
 const DIAG_SHOTS_MAX = 16
 const WAIT_SHOT_MS = 60000
 const PAGE_TEXT_MAX = 600
+// AR-y-374 (round 43, ZZ35): the form's own still-checking sentence (portal fcbf2bce, analysisRequest.ts STILL_CHECKING_MESSAGE). When it is
+// shown and no prompt is, the driver waits RESUBMIT_WAIT_MS and clicks the same Submit button again, at most RESUBMIT_MAX times.
+const STILL_CHECKING_TEXT = 'The file is still being checked after several tries; nothing was filed, and you can submit it again later.'
+const RESUBMIT_WAIT_MS = 60000
+const RESUBMIT_MAX = 4
 const GO_RE = /^IRPT_ANLREQ\.TO-RUN-FWD1\.\S+$/
 const ANALYTICS_RE = /\/analytics\/ingest$/
 const POST_ALLOWED = [
@@ -270,6 +275,17 @@ export function ticketWaitMs(withDecisions) {
   return withDecisions ? TICKET_WAIT_MS + ROUND_WAIT_MS * PROMPT_ROUNDS : TICKET_WAIT_MS
 }
 
+// AR-y-374: the pure rule for the still-checking sentence. The sentence is matched after whitespace is collapsed. A prompt always wins
+// (wait), an answered run only reads (wait); the sentence alone re-clicks while resubmits is below RESUBMIT_MAX, and stops at it.
+export function stillCheckingAction({ pageText, promptsVisible, answered, resubmits }) {
+  const shown = String(pageText ?? '').replace(/\s+/g, ' ').includes(STILL_CHECKING_TEXT)
+  if (!shown) return { action: 'wait' }
+  if (Number(promptsVisible) > 0) return { action: 'wait' }
+  if (answered) return { action: 'wait' }
+  if (Number(resubmits) >= RESUBMIT_MAX) return { action: 'stop', why: 'STILL-CHECKING after ' + RESUBMIT_MAX + ' resubmits; the run stops, nothing is guessed' }
+  return { action: 'resubmit' }
+}
+
 export async function answerAfterSubmit(page, decisions, answered, report, log, opts = {}) {
   const pollMs = opts.pollMs ?? PROMPT_POLL_MS
   const afterPressMs = opts.afterPressMs ?? 1000
@@ -308,6 +324,26 @@ export async function answerAfterSubmit(page, decisions, answered, report, log, 
     if (kind === 'wait') entry.last_upload = opts.lastUpload ? opts.lastUpload() : null
     report.form_waits.push(entry)
   }
+  // AR-y-374: the re-click state. resubmitN counts the clicks made; stillSince is when the sentence was first seen (or null); the
+  // records go to report.form_resubmits (only with an outDir, the --decisions path). A shot here takes one of the DIAG_SHOTS_MAX files.
+  const resubmitWaitMs = opts.resubmitWaitMs ?? RESUBMIT_WAIT_MS
+  let resubmitN = 0
+  let stillSince = null
+  if (diagOn && !Array.isArray(report.form_resubmits)) report.form_resubmits = []
+  // The whole filing area's visible text, for the sentence test only: NOT cut to PAGE_TEXT_MAX (the sentence may lie past the cut).
+  const filingFullText = async () => {
+    try {
+      let area = page.locator('xpath=//*[@data-slot="analysis-filing-hint"]/ancestor::*[.//button[normalize-space(.)="' + SUBMIT_LABEL + '"]][1]')
+      if ((await area.count()) === 0) area = page.locator('main')
+      return String(await area.first().innerText())
+    } catch { return '' }
+  }
+  const reserveShot = async (stem) => {
+    diagN += 1
+    const name = stem + '-' + String(diagN).padStart(2, '0') + '.png'
+    await page.screenshot({ path: path.join(opts.outDir, name), fullPage: true }).catch(() => {})
+    return name
+  }
   let nextWaitAt = Date.now() + waitShotMs
   for (let round = 1; round <= PROMPT_ROUNDS; round++) {
     let open = []
@@ -317,6 +353,27 @@ export async function answerAfterSubmit(page, decisions, answered, report, log, 
       if (open.length > 0) { nextWaitAt = Date.now() + waitShotMs; break }
       if (Date.now() >= deadline) throw new Error('NO-ANSWER neither the ticket answer nor a prompt within the wait bound (round ' + round + ')')
       if (Date.now() >= nextWaitAt) { nextWaitAt = Date.now() + waitShotMs; await diagShot('wait', 'wait', []) }
+      if (diagOn) {
+        // AR-y-374: the sentence shown, no prompt, not answered: after RESUBMIT_WAIT_MS since it was first seen (or since the last
+        // click) one more click of the SAME Submit button, shot first. The click is the only new action; the file input is not touched.
+        const act = stillCheckingAction({ pageText: await filingFullText(), promptsVisible: open.length, answered: answered(), resubmits: resubmitN })
+        if (act.action === 'stop') throw new Error(act.why)
+        if (act.action === 'wait') stillSince = null
+        else {
+          if (stillSince === null) stillSince = Date.now()
+          if (Date.now() - stillSince >= resubmitWaitMs) {
+            if (diagN >= DIAG_SHOTS_MAX) throw new Error('RESUBMIT-BUDGET the ' + DIAG_SHOTS_MAX + '-file screenshot bound is spent before resubmit ' + (resubmitN + 1) + '; the run stops, nothing is guessed')
+            const shot = await reserveShot('resubmit-' + (resubmitN + 1))
+            if (answered()) continue
+            resubmitN += 1
+            await page.getByRole('button', { name: SUBMIT_LABEL, exact: true }).click()
+            stillSince = null
+            await sleep(afterPressMs)
+            report.form_resubmits.push({ utc: iso(), n: resubmitN, shot, after_text: await pageTextOf() })
+            log('FORM-RESUBMIT ' + resubmitN + ' of ' + RESUBMIT_MAX + ': the still-checking sentence was shown with no prompt; the same Submit button was clicked again (shot ' + shot + ')')
+          }
+        }
+      }
       await sleep(pollMs)
     }
     for (const text of open) {
@@ -624,7 +681,8 @@ async function selftest() {
   check('the decisions loop is called after the Submit click in source order', callIdx.length === 1 && callIdx[0] > iSubmit)
   check('without --decisions no press path is reachable: the one loop call sits behind if (o.decisions) and is the only await call',
     callIdx.length === 1 && SRC_LINES[callIdx[0] - 1] === '    if (o.decisions) {' && awaitCalls === 1)
-  const fakeFormPage = (hints, presses, shots = { n: 0 }) => {
+  // AR-y-374: filing (optional) is { text(), onSubmit() }: the filing area's text, and a hook run on each Submit click; absent, the text is the AR-y-372 fake.
+  const fakeFormPage = (hints, presses, shots = { n: 0 }, filing = null) => {
     const remove = (h) => { hints.splice(hints.indexOf(h), 1) }
     const itemOf = (h) => ({
       locator: () => ({ first: () => ({ textContent: async () => h.text }) }),
@@ -646,8 +704,9 @@ async function selftest() {
       first: () => itemOf(list()[0]),
     })
     const page = {
-      locator: (sel) => (String(sel).startsWith('xpath=') ? { count: async () => 1, first: () => ({ innerText: async () => 'FAKE FILING AREA' }) } : view(() => hints)),
+      locator: (sel) => (String(sel).startsWith('xpath=') ? { count: async () => 1, first: () => ({ innerText: async () => (filing ? filing.text() : 'FAKE FILING AREA') }) } : view(() => hints)),
       waitForResponse: () => Promise.resolve({ status: () => 200 }),
+      getByRole: (role, o) => ({ click: async () => { presses.push('submit ' + o.name); if (filing) filing.onSubmit() } }),
       screenshot: async () => { shots.n += 1 },
     }
     return page
@@ -730,6 +789,60 @@ async function selftest() {
   await answerAfterSubmit(fakeFormPage([{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }], [], shotsC),
     [{ symbol: 'EFGH', answer: 'no', replacement: null }], () => false, repC, () => {}, { waitMs: 50, pollMs: 1 }).catch(() => null)
   check('without an outDir no diagnostic file or form_waits entry is written (the signed path)', shotsC.n === 0 && repC.form_waits === undefined)
+  // AR-y-374 (round 43, ZZ35): the still-checking sentence. The pure rule first; then the loop against the fake page, where the sentence
+  // stays shown until the fake Submit clicks change it. resubmitWaitMs is short here; the real bound is RESUBMIT_WAIT_MS (60000).
+  const STILL_SENTENCE = 'The file is still being checked after several tries; nothing was filed, and you can submit it again later.'
+  const sa = (o) => stillCheckingAction(o).action
+  check('still-checking: the sentence absent is wait', sa({ pageText: 'FAKE FILING AREA', promptsVisible: 0, answered: false, resubmits: 0 }) === 'wait')
+  check('still-checking: the sentence present with no prompt and 0 resubmits is resubmit', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: false, resubmits: 0 }) === 'resubmit')
+  check('still-checking: the sentence present with a prompt visible is wait (a prompt always wins)', sa({ pageText: STILL_SENTENCE, promptsVisible: 1, answered: false, resubmits: 0 }) === 'wait')
+  check('still-checking: the sentence present once answered is wait', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: true, resubmits: 0 }) === 'wait')
+  check('still-checking: the sentence present at 3 resubmits is resubmit', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: false, resubmits: 3 }) === 'resubmit')
+  check('still-checking: the sentence present at 4 resubmits is stop, with the error line', (() => {
+    const s = stillCheckingAction({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: false, resubmits: 4 })
+    return s.action === 'stop' && s.why === 'STILL-CHECKING after 4 resubmits; the run stops, nothing is guessed'
+  })())
+  check('still-checking: the constants equal 60000 and 4', RESUBMIT_WAIT_MS === 60000 && RESUBMIT_MAX === 4)
+  check('still-checking: STILL_CHECKING_TEXT equals the form sentence exactly', STILL_CHECKING_TEXT === STILL_SENTENCE)
+  check('still-checking: a near miss (Nothing with a capital N) is not the sentence: wait', sa({ pageText: STILL_SENTENCE.replace('nothing', 'Nothing'), promptsVisible: 0, answered: false, resubmits: 0 }) === 'wait')
+  check('still-checking: the match collapses whitespace in the page text', sa({ pageText: 'Upload\n\n ' + STILL_SENTENCE.replace(' after ', '  after '), promptsVisible: 0, answered: false, resubmits: 0 }) === 'resubmit')
+  check('still-checking: an answered run at 4 resubmits reads on (answered wins over stop)', sa({ pageText: STILL_SENTENCE, promptsVisible: 0, answered: true, resubmits: 4 }) === 'wait')
+  const stillCfg = { waitMs: 5000, pollMs: 1, afterPressMs: 0, resubmitWaitMs: 1, outDir: os.tmpdir(), waitShotMs: 600000 }
+  const fL1 = { clicks: 0, text: () => (fL1.clicks >= 2 ? 'The ticket is filed.' : STILL_SENTENCE), onSubmit: () => { fL1.clicks += 1 } }
+  const pL1 = []
+  const shotsL1 = { n: 0 }
+  const repL1 = { form_decisions: [] }
+  const rL1 = await answerAfterSubmit(fakeFormPage([], pL1, shotsL1, fL1), [], () => fL1.clicks >= 2, repL1, () => {}, stillCfg)
+    .catch((e) => ({ outcome: 'threw: ' + e.message, pressed: [] }))
+  check('still-checking: two re-clicks of the same Submit button, each recorded and shot, then the answer is read',
+    rL1.outcome === 'answered' && JSON.stringify(pL1) === JSON.stringify(['submit File Analysis Request', 'submit File Analysis Request'])
+    && repL1.form_resubmits.length === 2 && repL1.form_resubmits[1].n === 2 && /^resubmit-1-\d\d\.png$/.test(repL1.form_resubmits[0].shot) && shotsL1.n === 2)
+  const fL2 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL2.clicks += 1 } }
+  const pL2 = []
+  const shotsL2 = { n: 0 }
+  const repL2 = { form_decisions: [] }
+  const rL2 = await answerAfterSubmit(fakeFormPage([], pL2, shotsL2, fL2), [], () => false, repL2, () => {}, stillCfg).then(() => null, (e) => e.message)
+  check('still-checking: after 4 resubmits the sentence stops the run with the error line; no fifth click', rL2 === 'STILL-CHECKING after 4 resubmits; the run stops, nothing is guessed'
+    && fL2.clicks === 4 && repL2.form_resubmits.length === 4 && shotsL2.n === 4)
+  const hints3 = [{ text: 'EFGH was not found.', buttons: ['Replace', 'No'], resolveOn: 'No', open: false }]
+  const fL3 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL3.clicks += 1 } }
+  const pL3 = []
+  const repL3 = { form_decisions: [] }
+  const rL3 = await answerAfterSubmit(fakeFormPage(hints3, pL3, { n: 0 }, fL3), [{ symbol: 'EFGH', answer: 'no', replacement: null }], () => fL3.clicks >= 1, repL3, () => {}, stillCfg)
+    .catch((e) => ({ outcome: 'threw: ' + e.message, pressed: [] }))
+  check('still-checking: a prompt shown with the sentence is pressed first; the re-click follows only once no prompt is shown',
+    rL3.outcome === 'answered' && pL3.length === 2 && pL3[0] === 'No EFGH was not found.' && pL3[1] === 'submit File Analysis Request')
+  const fL4 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL4.clicks += 1 } }
+  const shotsL4 = { n: 0 }
+  const pL4 = []
+  const repL4 = { form_decisions: [] }
+  const rL4 = await answerAfterSubmit(fakeFormPage([], pL4, shotsL4, fL4), [], () => false, repL4, () => {},
+    { waitMs: 10000, pollMs: 1, afterPressMs: 0, resubmitWaitMs: 2000, waitShotMs: 1, outDir: os.tmpdir() }).then(() => null, (e) => e.message)
+  check('still-checking: the 16-file bound spent before a resubmit stops the run with RESUBMIT-BUDGET and no click',
+    typeof rL4 === 'string' && /RESUBMIT-BUDGET/.test(rL4) && fL4.clicks === 0 && shotsL4.n === 16 && repL4.form_resubmits.length === 0)
+  const fL5 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL5.clicks += 1 } }
+  const rL5 = await answerAfterSubmit(fakeFormPage([], [], { n: 0 }, fL5), [], () => false, { form_decisions: [] }, () => {}, { waitMs: 60, pollMs: 1 }).then(() => null, (e) => e.message)
+  check('still-checking: without an outDir (the signed path) the sentence is not acted on: no click, NO-ANSWER', fL5.clicks === 0 && typeof rL5 === 'string' && /NO-ANSWER/.test(rL5))
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n)
   for (const [n, ok] of cases) console.log((ok ? 'case PASS ' : 'case FAIL ') + n)
   if (failed.length === 0) {
