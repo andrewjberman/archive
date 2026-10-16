@@ -17,7 +17,7 @@ stripped = re.sub(r"(?m)^\s*#.*$", "", tf)
 blocks = re.findall(r'resource\s+"aws_iam_role_policy"\s+"[^"]+"\s*\{(.*?)\n\}', stripped, re.S)
 roles = [re.search(r'(?m)^\s*role\s*=\s*(\S+)', b) for b in blocks]
 internal = len(blocks) == 2 and all(r and re.search(r"int(ernal)?_?reader", r.group(1), re.I) and "aws_iam_role.gw." not in r.group(1) for r in roles)
-actions = sorted(set(re.findall(r'"(s3:[A-Za-z*]+)"', stripped)))
+actions = sorted(set(a for a in re.findall(r'"(s3:[A-Za-z*]+)"', stripped) if a != "s3:prefix"))
 actions_ok = actions == ["s3:GetObject", "s3:ListBucket"]
 star = bool(re.search(r'Resource\s*=\s*"\*"|Resource\s*=\s*\[\s*"\*"', stripped)) or "s3:*" in stripped
 root_obj = bool(re.search(r'arn:aws:s3:::opal-data-(?:etfs|mdpf)/\*"', stripped))
