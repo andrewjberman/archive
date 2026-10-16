@@ -221,17 +221,17 @@ def test_fwd5_driver_guard_refuses_other_host_and_unlisted_get(tmp_path):
         assert fake.seen == []
 
 
-def test_fwd5_driver_meeting_route_unreached_exits_two(tmp_path):
+def test_fwd5_driver_meeting_route_excluded_exits_zero(tmp_path):
     with Fake(refusing(403)) as fake:
         rc, out = run_main(tmp_path, fake.base)
     rep = read_report(out)
     meeting = by_route(rep, "meeting")
-    assert rc == 2
-    assert meeting["verdict"] == "UNREACHED"
-    assert meeting["reason"] == "guard refused before send"
-    assert by_route(rep, "commentary-draft")["verdict"] == "UNREACHED"
+    assert rc == 0
+    assert meeting["verdict"] == "EXCLUDED"
+    assert meeting["reason"]
+    assert by_route(rep, "commentary-draft")["verdict"] == "EXCLUDED"
     assert ("POST", "/api/scoped/tickets/" + TICKET + "/meeting") not in fake.seen
-    assert rep["guard_refused"] == ["meeting"]
+    assert rep["guard_refused"] == []
 
 
 def test_fwd5_driver_report_holds_no_body_cookie_token_or_password(tmp_path, capsys):

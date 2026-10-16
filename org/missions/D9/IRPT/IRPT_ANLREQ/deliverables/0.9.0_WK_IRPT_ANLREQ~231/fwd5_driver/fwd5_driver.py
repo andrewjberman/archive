@@ -8,22 +8,28 @@ under a pair, after 2.0.0_SA_COO~V2's release.
 
   --plan                      prints the plan and exits 0; no network, no stdin.
   --selftest                  offline checks of the guard and the verdicts; exits 0 when they hold.
-  --base URL --email ADDR --ticket ID --firm-a ID --firm-b ID --out DIR --go IRPT_ANLREQ.TO-RUN-FWD5.<id>
-                              [--request-id ID] [--job-id ID]
-                              the run. Without a --go matching ^IRPT_ANLREQ\\.TO-RUN-FWD5\\.\\S+$ it prints the plan
-                              and exits 0 with no request sent. The password is read from stdin as one JSON object
-                              {"password": "..."}; it is never printed, logged or written.
+  --base URL --email ADDR --ticket ID --firm-a ID --firm-b ID --request-id ID --job-id ID --out DIR
+                              --go IRPT_ANLREQ.TO-RUN-FWD5.<id>
+                              the run. --firm-b, --request-id and --job-id are REQUIRED for a run: a missing one
+                              exits 2 before any request is sent. Without a --go matching
+                              ^IRPT_ANLREQ\\.TO-RUN-FWD5\\.\\S+$ it prints the plan and exits 0 with no request sent.
+                              The password is read from stdin as one JSON object {"password": "..."}; it is never
+                              printed, logged or written.
 
-Verdicts (a closed set): REFUSED, LEAK, UNREACHED.
+Verdicts (a closed set): REFUSED, LEAK, UNREACHED, EXCLUDED.
   any 2xx on a ticket or package route           -> LEAK (a 2xx is never a refusal, an empty body included)
   a 2xx ticket-list whose JSON carries a tickets list and no marker -> REFUSED (the other firm's ticket is absent)
   any answer whose body carries a marker (the ticket id or the other firm's id, case-insensitive) -> LEAK
   401, 403 or 404 with no marker                  -> REFUSED
-  anything else: 3xx, 400, 405, 5xx, a dropped connection, a call the guard refused, a route with no
-  GET shape in the record, a missing request or job id                -> UNREACHED (not a pass)
-Exit: 0 every call REFUSED; 1 any LEAK; 2 any UNREACHED, or a run with bad arguments or no session.
-The report (fwd5_run_report.json in --out) holds, per call, the route name, the status, the verdict and the body
-length only. It never holds a body, a cookie, a token, a password or an address (the principal is a digest).
+  anything else a made call can answer: 3xx, 400, 405, 5xx, a dropped connection, a call the guard refused,
+  a route with no GET shape in the record, a missing id                -> UNREACHED (not a pass)
+  EXCLUDED: the meeting POST and the commentary draft. Never sent. Counted in neither the exit nor the pass;
+  the row carries its one-line reason.
+Exit (decided over the MADE calls only, every row but EXCLUDED): 0 every made call REFUSED; 1 any LEAK; 2 any
+UNREACHED, no made call at all, or a run with bad arguments or no session.
+The report (fwd5_run_report.json in --out) holds, per call, the route name, the status, the verdict, the body
+length and the one-line reason. It never holds a body, a cookie, a token, a password or an address (the principal
+is a digest).
 """
 from __future__ import annotations
 
@@ -45,7 +51,7 @@ EMAIL_SUFFIX = "@opal.invalid"
 FWD1_EMAIL = "fwd1-staff-r41b@opal.invalid"
 REPORT_NAME = "fwd5_run_report.json"
 TIMEOUT_S = 30
-VERDICTS = ("REFUSED", "LEAK", "UNREACHED")
+VERDICTS = ("REFUSED", "LEAK", "UNREACHED", "EXCLUDED")
 SEG = r"[A-Za-z0-9_-]+"
 
 # The guard: GET only to these path shapes (the ticket routes and the package-file routes the record lists),
@@ -59,7 +65,8 @@ GET_ALLOWED = (
 )
 POST_ALLOWED = (re.compile(r"/auth/login"),)
 
-# The calls, in order. method None = the record names no GET route for it (UNREAD; never sent).
+# The calls, in order. "excluded" = the row is EXCLUDED with its one-line reason and is never sent (ruled by the
+# issuer, TO-AR-tz-68). method None = the record names no GET route for it.
 ROUTES = (
     {"name": "ticket-read", "method": "GET", "template": "/api/scoped/tickets/{ticket}",
      "needs": ("ticket",), "list": False, "plan": "the ticket read (the whole record if it leaked)"},
@@ -78,13 +85,16 @@ ROUTES = (
      "needs": ("request_id", "firm_b"), "list": False, "plan": "the report PDF"},
     {"name": "commentary-draft", "method": None, "template": "",
      "needs": (), "list": False,
-     "plan": "UNREAD: no GET route for the draft is in the record; POST commentary-draft is outside the guard"},
+     "plan": "EXCLUDED: no GET route for the draft is in the record",
+     "excluded": "the commentary draft has no GET route; it rides the ticket read body, which the LEAK check inspects"},
     {"name": "commentary-pdf", "method": "GET",
      "template": "/api/scoped/investor-reporting/analysis/requests/{request_id}/commentary-pdf?selected_tenant={firm_b}",
      "needs": ("request_id", "firm_b"), "list": False, "plan": "the commentary PDF"},
     {"name": "meeting", "method": "POST", "template": "/api/scoped/tickets/{ticket}/meeting",
      "needs": ("ticket",), "list": False,
-     "plan": "a POST to a ticket route: the guard refuses it before send, so the call is UNREACHED"},
+     "plan": "EXCLUDED: a POST of a meeting is never sent",
+     "excluded": "a POST of a meeting is a write attempt on another firm's ticket, outside the DONE WHEN (its scope "
+                 "refusal is proved offline by infra/aws/lambda/ticket_center/tests/test_cross_firm_meeting_scope.py)"},
 )
 
 
@@ -170,10 +180,11 @@ def classify(is_list, status, body, markers):
 
 
 def exit_code(rows):
-    verdicts = [r["verdict"] for r in rows]
-    if "LEAK" in verdicts:
+    """Decided over the MADE calls only: every row whose verdict is not EXCLUDED."""
+    made = [r["verdict"] for r in rows if r["verdict"] != "EXCLUDED"]
+    if "LEAK" in made:
         return 1
-    if not verdicts or "UNREACHED" in verdicts:
+    if not made or "UNREACHED" in made:
         return 2
     return 0
 
@@ -200,16 +211,25 @@ def sign_in(base, email, password, opener):
     return token, "signed in"
 
 
+def _excluded_row(r):
+    """An EXCLUDED row: never sent, carries the one-line reason the issuer ruled."""
+    return {"route": r["name"], "method": r["method"] or "-", "status": None, "verdict": "EXCLUDED",
+            "body_len": 0, "reason": r["excluded"]}
+
+
 def run_calls(routes, base, opener, token, ctx, markers):
     """Every route, in order. Returns (rows, guard-refused route names). A row never holds a body."""
     rows = []
     refused = []
     for r in routes:
+        if r.get("excluded"):
+            rows.append(_excluded_row(r))
+            continue
         row = {"route": r["name"], "method": r["method"] or "-", "status": None,
                "verdict": "UNREACHED", "body_len": 0, "reason": ""}
         missing = [k for k in r["needs"] if not ctx.get(k)]
         if r["method"] is None:
-            row["reason"] = "UNREAD: no GET route for it in the record"
+            row["reason"] = "no GET route for it in the record"
         elif missing:
             row["reason"] = "no value supplied for " + ", ".join(missing)
         else:
@@ -274,19 +294,27 @@ def print_plan(routes=ROUTES):
     for i, r in enumerate(routes, 1):
         print("  %d. %-17s %-4s %s  -- %s" % (i, r["name"], r["method"] or "--", r["template"] or "(no route)",
                                              r["plan"]))
+    print("EXCLUDED rows (never sent, counted in neither the exit nor the pass):")
+    for r in routes:
+        if r.get("excluded"):
+            print("  - %s: %s" % (r["name"], r["excluded"]))
     print("guard: same origin; GET only to the five listed shapes; POST only to /auth/login; else refused before send")
-    print("verdicts: REFUSED, LEAK, UNREACHED. exit 0 every call REFUSED; 1 any LEAK; 2 any UNREACHED")
+    print("verdicts: REFUSED, LEAK, UNREACHED, EXCLUDED. exit 0 every made call REFUSED; 1 any LEAK; 2 any UNREACHED")
+    print("a run needs --firm-b <id> --request-id <id> --job-id <id> (all REQUIRED: a missing one exits 2 before any "
+          "request)")
     print("a run needs --go IRPT_ANLREQ.TO-RUN-FWD5.<id> and the password on stdin; --plan sends nothing")
 
 
 def _unreached_rows(routes, why):
-    return [{"route": r["name"], "method": r["method"] or "-", "status": None, "verdict": "UNREACHED",
+    return [_excluded_row(r) if r.get("excluded") else
+            {"route": r["name"], "method": r["method"] or "-", "status": None, "verdict": "UNREACHED",
              "body_len": 0, "reason": why} for r in routes]
 
 
 def do_run(ns, stdin, routes):
     required = (("--base", ns.base), ("--email", ns.email), ("--ticket", ns.ticket),
-                ("--firm-a", ns.firm_a), ("--firm-b", ns.firm_b), ("--out", ns.out))
+                ("--firm-a", ns.firm_a), ("--firm-b", ns.firm_b), ("--request-id", ns.request_id),
+                ("--job-id", ns.job_id), ("--out", ns.out))
     missing = [flag for flag, val in required if not val]
     if missing:
         print("ERROR: a run needs " + " ".join(missing))
@@ -296,8 +324,8 @@ def do_run(ns, stdin, routes):
                or ("--firm-a or --firm-b is not a firm id" if not (FIRM_RE.match(ns.firm_a)
                                                                     and FIRM_RE.match(ns.firm_b)) else None)
                or ("--firm-a and --firm-b must differ" if ns.firm_a == ns.firm_b else None)
-               or ("--request-id is not an id" if ns.request_id and not ID_RE.match(ns.request_id) else None)
-               or ("--job-id is not an id" if ns.job_id and not ID_RE.match(ns.job_id) else None))
+               or ("--request-id is not an id" if not ID_RE.match(ns.request_id) else None)
+               or ("--job-id is not an id" if not ID_RE.match(ns.job_id) else None))
     if problem:
         print("ERROR: " + problem)
         return 2
@@ -336,8 +364,12 @@ def do_run(ns, stdin, routes):
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2, sort_keys=True)
         fh.write("\n")
-    print("FWD5-RUN rc=%d REFUSED=%d LEAK=%d UNREACHED=%d of %d calls report=%s" % (
-        rc, report["counts"]["REFUSED"], report["counts"]["LEAK"], report["counts"]["UNREACHED"], len(rows), path))
+    for r in rows:
+        if r["verdict"] == "EXCLUDED":
+            print("EXCLUDED %s: %s" % (r["route"], r["reason"]))
+    print("FWD5-RUN rc=%d REFUSED=%d LEAK=%d UNREACHED=%d EXCLUDED=%d of %d rows report=%s" % (
+        rc, report["counts"]["REFUSED"], report["counts"]["LEAK"], report["counts"]["UNREACHED"],
+        report["counts"]["EXCLUDED"], len(rows), path))
     return rc
 
 
@@ -360,6 +392,10 @@ def selftest():
         ("exit 0 all refused", exit_code([{"verdict": "REFUSED"}]), 0),
         ("exit 1 leak", exit_code([{"verdict": "REFUSED"}, {"verdict": "LEAK"}]), 1),
         ("exit 2 unreached", exit_code([{"verdict": "UNREACHED"}]), 2),
+        ("exit 0 excluded rows ignored", exit_code([{"verdict": "REFUSED"}, {"verdict": "EXCLUDED"},
+                                                    {"verdict": "EXCLUDED"}]), 0),
+        ("exit 1 leak beats excluded", exit_code([{"verdict": "LEAK"}, {"verdict": "EXCLUDED"}]), 1),
+        ("exit 2 no made call", exit_code([{"verdict": "EXCLUDED"}]), 2),
     ]
     for name, got, want in checks:
         if got != want:
@@ -377,9 +413,12 @@ def main(argv=None, stdin=None, routes=None):
     p.add_argument("--email")
     p.add_argument("--ticket")
     p.add_argument("--firm-a", dest="firm_a")
-    p.add_argument("--firm-b", dest="firm_b")
-    p.add_argument("--request-id", dest="request_id")
-    p.add_argument("--job-id", dest="job_id")
+    p.add_argument("--firm-b", dest="firm_b",
+                   help="REQUIRED for a run: the other firm's id (also a LEAK marker)")
+    p.add_argument("--request-id", dest="request_id",
+                   help="REQUIRED for a run: the request id, sourced from the ticket the FWD-1 run files")
+    p.add_argument("--job-id", dest="job_id",
+                   help="REQUIRED for a run: the job id, sourced from the ticket the FWD-1 run files")
     p.add_argument("--out")
     p.add_argument("--go")
     ns = p.parse_args(argv)

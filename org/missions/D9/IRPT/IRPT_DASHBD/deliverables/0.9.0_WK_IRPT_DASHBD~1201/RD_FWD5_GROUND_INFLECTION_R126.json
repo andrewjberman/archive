@@ -1,0 +1,154 @@
+{
+  "as_of": "2026-10-16",
+  "firm": "inflection",
+  "targets": [
+    {
+      "target": "trade_date",
+      "source": "transDate",
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 194,
+      "words": "dates = frame['transDate'] (line 194) is the day key of flows_of (def line 179). The pull names transDate in its confirmed field set (pull line 100).",
+      "claim": "measured"
+    },
+    {
+      "target": "settle_date",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 191,
+      "words": "No settlement field: flows_of reads accountId, transactionDescription, transAmount, transDate and status (lines 191 to 195); the pull's confirmed set (pull lines 98 to 101) has none. comp-find -i over the 2 inflection adapter files for settle, asset_name, security_name, cusip, custod, txn_id and order_number: 8 hits in 2 files, none a settlement or name column. Nothing inferred.",
+      "claim": "absent"
+    },
+    {
+      "target": "action",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 192,
+      "words": "No action field among the columns read (lines 191 to 195). transTypeId (pull line 99, the Orion type id) is named in the confirmed set and is not read by flows_of; it could feed action (inferred, never the source).",
+      "claim": "absent"
+    },
+    {
+      "target": "txn_type",
+      "source": "transactionDescription",
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 192,
+      "words": "The description is the key the class is taken from (cls = classify(desc), line 207). TYPE_CLASS (line 54) is the transcribed Orion cashflow taxonomy, not the Opal closed enum. Reading the description as the Opal txn_type is inferred.",
+      "claim": "inferred"
+    },
+    {
+      "target": "symbol",
+      "source": "ticker",
+      "file": "data/inf/manual_api/pull_inflection_transactions_rest.py",
+      "line": 101,
+      "words": "ticker is named in the pull's confirmed field set (lines 98 to 101) and tested for presence in the pulled frame (line 561). The gold adapter does not read ticker. The claim is the pull's.",
+      "claim": "measured"
+    },
+    {
+      "target": "asset_name",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 192,
+      "words": "No name field: transactionDescription (line 192) is the type text. Inferred only, never a source: a name could be carried in description text, and no name column is read.",
+      "claim": "absent"
+    },
+    {
+      "target": "units",
+      "source": "noUnits",
+      "file": "data/inf/manual_api/pull_inflection_transactions_rest.py",
+      "line": 100,
+      "words": "noUnits is named in the pull's confirmed field set (lines 98 to 101) and tested for presence (line 561). The gold adapter does not read it. The claim is the pull's.",
+      "claim": "measured"
+    },
+    {
+      "target": "price",
+      "source": "navPrice",
+      "file": "data/inf/manual_api/pull_inflection_transactions_rest.py",
+      "line": 100,
+      "words": "navPrice is named in the pull's confirmed field set (lines 98 to 101) and tested for presence (line 561). The gold adapter does not read it. The claim is the pull's; it is the Orion nav price on the row.",
+      "claim": "measured"
+    },
+    {
+      "target": "amount",
+      "source": "transAmount",
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 193,
+      "words": "amts = frame['transAmount'] (line 193). flows_of takes abs of the amount, signed by the class (EXTERNAL_IN plus, EXTERNAL_OUT minus), and income takes it signed for INCOME rows; the null amount is counted (null_amount).",
+      "claim": "measured"
+    },
+    {
+      "target": "fee",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 317,
+      "words": "No fee field among the eleven confirmed fields or the five columns read. fee_amount is null by design (FEE_RAIL_UNUSED, line 317; schema line 120). Nothing inferred.",
+      "claim": "absent"
+    },
+    {
+      "target": "custodian",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_dim.py",
+      "line": 55,
+      "words": "The transaction frame carries no custodian field. The account-level roster carries custodian (ROSTER_FIELDS, line 55; read per account at line 228): a per-account value, not a transaction column. computed: inferred, method the firm constant FIRM (inflection_account_return_daily.py line 42, from the registry row through inflection_account_dim) or a join of the roster custodian by accountId; not a source.",
+      "claim": "absent"
+    },
+    {
+      "target": "flow_class",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 136,
+      "words": "computed: inferred, method classify(transactionDescription) (line 136; cls at line 207) through TYPE_CLASS (line 54) to the class, with the sign taken from the class in flows_of. The seven-class Opal enum is not in code.",
+      "claim": "absent"
+    },
+    {
+      "target": "source_txn_id",
+      "source": "id",
+      "file": "data/inf/manual_api/pull_inflection_transactions_rest.py",
+      "line": 541,
+      "words": "The pull dedupes merged rows on the id field (drop_duplicates subset id, line 541). id is named in the confirmed field set (line 99). The gold adapter does not read id. The claim is the pull's.",
+      "claim": "measured"
+    },
+    {
+      "target": "coverage",
+      "source": null,
+      "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+      "line": 195,
+      "words": "computed: inferred, method the status column (frame['status'], line 195) with the Complete filter (STATUS_COMPLETE, line 48). Rows not Complete are counted in excluded_status and not signed. No coverage vocabulary for account_transaction is in code.",
+      "claim": "absent"
+    }
+  ],
+  "absent_count": 7,
+  "pattern_producer": {
+    "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+    "line": 179,
+    "words": "flows_of(frame, accounts) reads one fact_transactions frame into flows, income and counts (lines 179 to 228). It is the transaction read to copy. The adapter writes nothing (module docstring line 22). The gold writer shape to copy is the Cottonwood run_day (line 554) and write_day (line 517) in cottonwood_bd_account_return_daily.py.",
+    "claim": "measured"
+  },
+  "silver_source": {
+    "file": "data/assets/scripts/gold/irpt_reporting/adapters/inflection_account_return_daily.py",
+    "line": 180,
+    "words": "flows_of takes one fact_transactions frame (line 180) read through InflectionSilverReader (inflection_account_dim.py line 82, which refuses prefixes outside the grant at line 97). The Orion silver root is ORION_SILVER (line 47). The gold folder does not name the Inflection transactions read: comp-find -i 'fact_transactions' over the irpt_reporting, data/inf and lib folders gives 11 hits in 1105 files, none an Inflection transactions read. The only caller of flows_of is a test file (test_inflection_account_return_daily.py lines 83 and 98). The Inflection transactions silver partition appears as silver/transactions in data/inf/scripts/gold/INF_build_canonical_prices.py line 432; the bronze write is pull line 585.",
+    "claim": "measured"
+  },
+  "address": {
+    "uri": "s3://opal-data-inflection/irpt/inflection/gold/account_transaction/date=2000-01-03",
+    "registry_row_exists": false,
+    "words": "opal_naming.address('irpt','inflection','gold','account_transaction','date=2000-01-03') returned this uri at rc 0 (LOCAL python -I call, no AWS). The builder did not refuse. Registry probe: comp-find 'account_transaction' over infra/logic/registry: 0 hits in 17 files. The same probe for account_class_daily also gives 0 hits, so the registry names no gold table and the zero does not show a missing row.",
+    "claim": "measured"
+  },
+  "emit_path": {
+    "file": "infra/aws/terraform/investor-reporting/holdings-performance/iam.tf",
+    "line": 200,
+    "words": "Touch-points for a third gold table for Inflection. (1) The Inflection holdings-performance role (iam.tf line 172, description: writes ONLY the two Inflection gold prefixes) has the statement WriteTheTwoInflectionGoldPrefixesOnly (line 200). An account_transaction prefix is not among them, so emitting it adds an ARN to a PutObject list, which widens the write set and needs the never-widen sign-off (CLAUDE.md section 5), or a new role. (2) reporting-gold locals.tf line 50 (irpt_rg_firm = one(distinct(...))) makes the reporting-gold role serve one firm (49F), so no reporting-gold role carries an Inflection class or transaction prefix. (3) The Inflection adapter writes nothing (module docstring line 22), so there is no Inflection gold writer to copy. Class prefix in the code's view: comp-find -i 'account_class_daily' over the 8 adapter files: 1 hit, the Cottonwood reader note (cottonwood_report_reader.py line 28); none names an Inflection class prefix. Nothing edited.",
+    "claim": "measured"
+  },
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
