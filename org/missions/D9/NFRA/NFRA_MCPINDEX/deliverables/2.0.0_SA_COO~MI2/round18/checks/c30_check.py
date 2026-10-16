@@ -17,6 +17,7 @@ import os
 import re
 import subprocess
 import sys
+import json
 import tempfile
 
 import yaml
@@ -29,6 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DELIV = "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables"
 PIN = DELIV + "/0.9.0_WK_NFRA_MCPINDEX~38"
 R17 = DELIV + "/2.0.0_SA_COO~MI/round17"
+R18 = DELIV + "/2.0.0_SA_COO~MI2/round18"
 RESEARCH_PREFIX = ("opal_data_etfs_", "opal_data_mdpf_", "opal_data_news_", "opal_data_portal_v2_", "dynamodb_")
 DROPPED = ("opal_data_portal_v2_platinum_advi_49financial_perfrp", "opal_data_portal_v2_platinum_advi_49financial_twins")
 S3_SPELLING = re.compile(r"^opal-data-[a-z0-9]+(-[a-z0-9]+)*$")
@@ -86,14 +88,21 @@ def bucket():
     print("DENOMINATOR research-set rows graded %d (harvest %d, portal %d, silver %d); rows outside the set %d"
           % (len(graded), sum(1 for k in graded if k[0] == "harvest_datasets"), sum(1 for k in graded if k[0] == "portal_datasets"),
              sum(1 for k in graded if k[0] == "silver_datasets"), len(outside)))
+    # round 18 (MX-c-31, MX-c-38): a linked row may also differ in the three link fields; the 34 excluded entities leave the catalog
+    links = json.load(open(R18 + "/read_links.json", encoding="utf-8"))["links"]
+    excl = json.load(open(R18 + "/entity_exclusions.json", encoding="utf-8"))["entities"]
+    link_fields = ("read_tool", "tools", "gap_owner")
     other_fields = [k[1] for k, r in graded.items() if k in bold and
-                    sorted(f for f in set(r) | set(bold[k]) if f not in ("bucket", "nl_tags", "nl_tags_basis") and r.get(f) != bold[k].get(f))]
+                    sorted(f for f in set(r) | set(bold[k]) if f not in ("bucket", "nl_tags", "nl_tags_basis") + (link_fields if k[1] in links else ()) and r.get(f) != bold[k].get(f))]
+    still_present = [k[1] for k in bnew if k[1] in excl]
+    n_dyn = 10 - len([e for e in excl if e.startswith("dynamodb_")])
     still_inferred = [k[1] for k, r in graded.items() if r.get("nl_tags_basis") == "inferred"]
     res = [("every research-set row's bucket is an opal-data-* name or a store name (%d do not)" % len(bad_spelling), not bad_spelling),
-           ("the 10 dynamodb rows say dynamodb (%d do not)" % len(dyn), not dyn and sum(1 for k in graded if k[1].startswith("dynamodb_")) == 10),
+           ("the %d dynamodb rows (10 less the excluded ones) say dynamodb (%d do not)" % (n_dyn, len(dyn)), not dyn and sum(1 for k in graded if k[1].startswith("dynamodb_")) == n_dyn),
+           ("none of the %d excluded entities is a row of the catalog (%d are)" % (len(excl), len(still_present)), not still_present),
            ("the 5 portal_datasets rows say opal-data-portal-v2 (%d do not)" % len(port), not port and sum(1 for k in graded if k[0] == "portal_datasets") == 5),
            ("every other research-set row keeps its base bucket (%d moved)" % len(moved), not moved),
-           ("the research rows differ from base only in bucket and the curated tags (%d rows differ elsewhere)" % len(other_fields), not other_fields),
+           ("the research rows differ from base only in bucket, the curated tags and, for the linked rows, the three link fields (%d rows differ elsewhere)" % len(other_fields), not other_fields),
            ("no research-set row still carries inferred tags (%d do)" % len(still_inferred), not still_inferred),
            ("every row outside the set differs from %s only in the ASSETS cells' keys (%d differ otherwise)" % (BASE_REF, len(drift)), not drift),
            ("the top-level sections other than the three row sections and the tool index (the ASSETS issuer's) are unchanged (%s)" % ",".join(top_diff), not top_diff)]
