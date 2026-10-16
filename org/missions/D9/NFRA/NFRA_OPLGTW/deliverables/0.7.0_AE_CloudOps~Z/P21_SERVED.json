@@ -200,8 +200,8 @@
   "news_and_published_served_through_internal_role": true,
   "non_opal_refused_zero_reads": true,
   "internal_reader_statements_live": true,
-  "old_instance_role_statements_gone": false,
-  "contract_staging_test_green": null,
+  "old_instance_role_statements_gone": true,
+  "contract_staging_test_green": true,
   "_caller_must_fill": [
    "internal_reader_statements_live (from get-role-policy on both new statements)",
    "old_instance_role_statements_gone (step 7, after the destroy)",
@@ -213,21 +213,28 @@
     "claim": "measured",
     "by": "0.7.0_AE_CloudOps~Z",
     "instrument": "live boto3 iam.get_role_policy on gateway-global-internal-reader-role for BOTH new statements, recorded whole in W/P21_IAM_POST_INVOKE.json: gateway-global-news-read-internal-policy (1 statement, dynamodb:GetItem+Query, 4 resources, canonical sha 09b69a98ccd4ba8c, byte-identical to the instance-role policy it mirrors) and gateway-global-harvest-published-invoke-policy (1 statement, lambda:InvokeFunction, 1 ARN). Both were ABSENT_NoSuchEntity in the pre-act probe W/P21_IAM_PREACT.json, so each is measured against a known-empty key."
+   },
+   "old_instance_role_statements_gone": {
+    "claim": "measured",
+    "by": "0.7.0_AE_CloudOps~Z",
+    "instrument": "live boto3 iam.get_role_policy on opal-gateway-role: gateway-global-news-read-policy now returns NoSuchEntity (it was PRESENT in the capture taken immediately before, W/P21_IAM_PRE_DESTROY.json), and gateway-global-harvest-published-invoke-policy returns NoSuchEntity there as it did BEFORE the release, so the old invoke statement was never on that role. Graded by diffing the two full captures: 31 policies before, 30 after across both roles, removed set exactly the one policy, added none, CHANGED-IN-PLACE NONE -- so the instance role's other 24 inline statements are byte-identical by canonical sha to the pre-destroy capture. The served read was then re-run whole (W/P21_SERVED_AFTER_DESTROY.json): all six tools still served, the assumed identity still reads gateway-global-internal-reader-role/ap21-identity-probe against an instance identity of opal-gateway-role/i-07dccb1615503ac99, both refusal seams still refuse, both counters still 0. With the instance-role grant gone, a news answer can only have come through the internal reader. Rollback kept replayable at W/P21_ROLLBACK_gw_news_read.policy.json (inner document, Version+Statement only, canonical sha 09b69a98ccd4ba8c)."
+   },
+   "contract_staging_test_green": {
+    "claim": "measured",
+    "by": "0.7.0_AE_CloudOps~Z",
+    "instrument": "python -m pytest tests/test_schwab_host_inputs.py::test_grant_writer_stages_the_contract_only_from_the_standard at the SHARED tree, run AFTER the standing-clauses manifest edit: 1 passed in 42.74s. The plane matters and is stated rather than glossed. At the RELEASE commit d577e0e729 this test cannot pass: it is the trunk-era test (one blob d192b07b39 at base, release and HEAD) paired with the base-era build_package.py (blob bcba173aaa at base AND release, 7d0412a308 at HEAD), so it raises AttributeError on _Source, and build_package.py is not among the release's 20 files -- no cut on this base can carry it. At the shared tree it was ALSO red until the manifest moved, with a DIFFERENT signature (AssertionError, byte diff at index 7913), because build_package.py:100 stages the contract from services.opal-gateway.deployed_commit and that field still read c4c106aea1, whose contract blob is 42bba721f1, against HEAD org/standards at 1d83cd7aa6. Landing deployed_commit=d577e0e729 -- whose contract blob IS 1d83cd7aa6 -- was predicted in row NFRA_OPLGTW-Z-S156 to turn it green, and the run above is that prediction tested, not assumed. The property the test guards is also provable without it: org/standards and deploy/ hold the SAME contract blob at the release (1d83cd7aa6), at the base (42bba721f1) and at HEAD (1d83cd7aa6)."
    }
   },
   "_ac2_clauses": {
    "registry_grew_by_one": true,
-   "old_instance_role_statements_gone": false,
+   "old_instance_role_statements_gone": true,
    "internal_reader_statements_live": true,
    "tools_ok": true,
    "person_reader_arms_ok": true,
-   "contract_staging_test_green": false
+   "contract_staging_test_green": true
   },
-  "_ac2_would_pass": false,
-  "_ac2_open_clauses": [
-   "contract_staging_test_green",
-   "old_instance_role_statements_gone"
-  ]
+  "_ac2_would_pass": true,
+  "_ac2_open_clauses": []
  },
  "_ssm": {
   "command_id": "d87a848e-a5d7-4553-b196-690da76565d3",
