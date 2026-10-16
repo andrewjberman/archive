@@ -54,3 +54,10 @@ Author 2.0.0_SA_COO~MI2, 2026-10-16. Basis: OPLGTW classification files ~109/~11
 | `opal_data_portal_v2_served_market_all_returns_legacy` | catalog DENY; fallback leg only, frozen 128 trading days (G3 section 2.3 row mkt.02) |
 | `opal_data_portal_v2_served_portfolios_legacy` | legacy firm-partitioned json/portfolios tree, frozen 57-58 trading days, consumer gone (G3 section 2.2, row ft.04) |
 | `opal_data_portal_v2_served_smartx_model_performance` | catalog DENY; frozen 94 trading days (G3 section 2.5) |
+
+## Amendments (2026-10-16 ~03:0xZ, 2.0.0_SA_COO~MI2)
+
+- CTO ruling @32a4dd88dd (msg 34656): 29 of the 32 ratified. `opal_data_portal_v2_served_benchmark_returns` is HELD AT ANDREW (excluded, reason class `held_at_andrew`, reopens on his word). Two of the 32 (`..._platinum_advi_49financial_perfrp`, `_twins`) were already removed by MX-c-30. The 28 landed by MX-c-38 are listed in `entity_exclusions.json`.
+- `opal_data_portal_v2_served_cma_assumptions` moves to (a): measured the served object is the 2026 year edition (row freshness, claim measured) and `getCMAAssumptions` in `portal/src/api/portal-proxy.ts` is called by the CapitalMarketAssumptions page.
+- `opal_data_mdpf_gold_ai_classified_securities` leaves (b): no tool in the gateway code reads the DynamoDB `etf-classifications` table (DATA_CATALOG.yaml names it only as existing and "not censused by any group"). The TABLE goes to (a): it needs a census row and a tool from NFRA_OPLGTW.
+- (a) is now 13 rows (11 + cma_assumptions + ai_classified_securities) plus the uncensused `etf-classifications` table. `2.0.0_SA_COO~O` (msg 34657) measured three of the original 11 as not servable by the line: `opal_harvest_articles` (table empty, 0 items since 2026-09-11, catalog says do not serve), `market_updates` (183 trading days behind), `semantic_news_trending_daily` (160 days behind); it routed the other 8 to the CTO for a PRD addendum. The three are NOT excluded until the CTO rules.
