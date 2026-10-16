@@ -93,7 +93,10 @@ def ac2():
     bad = []
     for e in NEW12:
         r = rows.get(e)
-        if r and not (r.get("bucket") == "opal-data-assets" and r.get("vendor") == "schwab" and r.get("firm") == "49financial" and r.get("read_tool") is None and r.get("gap_owner") == "NFRA_OPLGTW"
+        # a new dim row has no tool (gap_owner kept) or, once the ASSETS read links apply, a client_* tool with gap_owner cleared (9 of the 12: dim_position, dim_balance, dim_transaction x 3 masters)
+        no_tool = r and r.get("read_tool") is None and r.get("gap_owner") == "NFRA_OPLGTW"
+        linked = r and isinstance(r.get("read_tool"), str) and r["read_tool"].startswith("client_") and r.get("gap_owner") is None and r.get("tools") == [r["read_tool"]]
+        if r and not (r.get("bucket") == "opal-data-assets" and r.get("vendor") == "schwab" and r.get("firm") == "49financial" and (no_tool or linked)
                       and r.get("key_template") and r.get("retired") is False):
             bad.append(e)
     n_table = sum(1 for r in rows.values() if "contract" in r)
