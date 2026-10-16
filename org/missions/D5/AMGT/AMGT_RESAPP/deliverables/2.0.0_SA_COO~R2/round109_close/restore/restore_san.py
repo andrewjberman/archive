@@ -27,7 +27,7 @@ FILE = os.path.join(HERE, "SAN_FP_Equity.json")
 PRE = os.path.join(HERE, "pre_san.json")
 LOG = os.path.join(HERE, "san_write_log.json")
 COO_HALF = os.path.join(HERE, "..", "..", "..", "..", "ledger", "NEVER_WIDEN_ROUND109_AIFILL_HOLD_RESTORE_COO_HALF.md")
-COO_HALF_SHA = None  # set to the signed restore half's sha256 (the one the CTO half binds); write refuses while it is None
+COO_HALF_SHA = "d4281bce35cb60614086030ac68ca1e88c6a21a29eaf896acc03e28053d40e05"  # the signed restore half's sha256, the one the CTO half binds
 PREFIX = "amgt/harvest/gold/ai_fill/"
 
 
