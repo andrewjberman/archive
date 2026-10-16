@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-PACING.door-lookup-count-per-window-ib2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACING.door-lookup-count-per-window-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "1aea5e29e6"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R45_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACING.door-lookup-count-per-window-ib2.md",
+  "vintage_commit": "1aea5e29e6"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34g/PACED_READ.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the probe's stdout verbatim: 12 lookup lines (6 per phase, all CLEAN, status 200), one RESULT line, one VERDICT line; read-only on the host",
+   "artifact_covered_by": [
+    "PACING-AC1",
+    "PACING-AC2"
+   ],
+   "commit_or_etag": "bb06dae32c"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "PACING-AC1",
+   "invocation": "grep -c -E '^PACE (RESULT cutoff_A=|VERDICT )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34g/PACED_READ.txt",
+   "expect": "^2$",
+   "output_evidence": "2\nexit=0",
+   "denominator": "24 lines in the record, 2 matching: one RESULT and one VERDICT",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^PACE (RESULT cutoff_A=|VERDICT )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34g/PACED_READ.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "PACING-AC2",
+   "invocation": "grep -c -E 'crumb=[A-Za-z0-9]' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34g/PACED_READ.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1",
+   "denominator": "24 lines in the record, 0 carrying a crumb value (grep exits 1 on a zero count)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'crumb=[A-Za-z0-9]' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34g/PACED_READ.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the probe's sha256 checked against the order before sending; sent once as root through Systems Manager with ExecutionTimeout 3600; the saved output is the command's stdout",
+   "observed": "hash equal; command status Success, rc 0; the probe's own hash line and unit line printed",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the probe's 'PACE script sha256' line (b82c7206..)",
+   "reason": "that line is the hash of the python file the probe writes to /tmp, not of the .sh sent; the .sh was checked equal to 89883f15.. before sending"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34g/PACED_READ.txt",
+ "compiler_tools": [
+  {
+   "tool": "ssm_root.py with ExecutionTimeout 3600 (boto3 Systems Manager sender, hash-checked); pace_busy5.sh for the 5-minute busy read",
+   "invocation": "busy check, then one send of paced_lookup_probe.sh as root",
+   "result": "handled 0 in 5 minutes; probe rc 0; BOTH CLEAN"
+  }
+ ]
+}
