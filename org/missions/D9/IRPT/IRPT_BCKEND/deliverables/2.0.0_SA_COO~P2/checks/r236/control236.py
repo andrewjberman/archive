@@ -111,6 +111,26 @@ root = build(GOOD)
 for ac in ("AC1", "AC2", "AC3"):
     expect("clean", "IB236-1-" + ac, root, True)
 shutil.rmtree(root, ignore_errors=True)
+ACCEPTED = copy.deepcopy(GOOD)
+ACCEPTED["remeasure"] = {"49financial": {"verdict": "PUBLISHED_TWO_LISTED_ACCOUNTS_AMOUNT_ZERO", "listed_accounts": 2, "amount_added_usd": 0, "other_nodes_changed": 0, "evidence_values_per_exempted_account": 2},
+                         "cottonwood": {"verdict": "PUBLISHED_NO_LISTED_ACCOUNTS", "nodes_added": 0, "other_nodes_changed": 0},
+                         "inflection": {"verdict": "PUBLISHED_NO_LISTED_ACCOUNTS"}}
+ACCEPTED["exemption_after_read"]["cottonwood_listed_accounts"] = 0
+root = build(ACCEPTED)
+expect("accepted_counts_msg9538", "IB236-1-AC1", root, True)
+expect("accepted_counts_msg9538", "IB236-1-AC3", root, True)
+shutil.rmtree(root, ignore_errors=True)
+for label, fn in (
+    ("49f_two_amount_nonzero", mut(["remeasure", "49financial", "amount_added_usd"], 5)),
+    ("49f_two_other_nodes", mut(["remeasure", "49financial", "other_nodes_changed"], 1)),
+    ("49f_two_evidence_short", mut(["remeasure", "49financial", "evidence_values_per_exempted_account"], 1)),
+    ("49f_three_listed", mut(["remeasure", "49financial", "listed_accounts"], 3)),
+    ("cot_none_but_nodes_added", mut(["remeasure", "cottonwood", "nodes_added"], 2)),
+    ("cot_none_other_nodes", mut(["remeasure", "cottonwood", "other_nodes_changed"], 1)),
+):
+    root = build(fn(ACCEPTED))
+    expect(label, "IB236-1-AC1", root, False)
+    shutil.rmtree(root, ignore_errors=True)
 for label, ac, fn in NEGS:
     root = build(fn(GOOD))
     expect(label, "IB236-1-" + ac, root, False)
