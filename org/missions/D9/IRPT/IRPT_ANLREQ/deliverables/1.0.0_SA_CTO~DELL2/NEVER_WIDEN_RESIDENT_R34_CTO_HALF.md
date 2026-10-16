@@ -50,3 +50,22 @@ The classifier (C-SWAP step 3), any Lambda, IAM, queue, table or schema, and any
 candidates are not swapped by this release, and that is the expected result under v0.19.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RE-SIGN on the rebuilt packet R34B (2026-10-16 ~04:2xZ)
+
+The signature above (blob d18241a3b0) is **SUPERSEDED**. **SIGNED** now on
+`org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34B_20261016.md` (commit `49f29af269`), blob
+`f787a4eabcced9d53c96662e25605f69493c0fcf`, sha256 `2ed0b51b88586d0693f6b7ff1247cc372f048d94d22918418cb50c799a5b7742` (both re-measured
+by this seat). Pin `4aad96b3c0`; tar `861e6900...abe8`, 314 members (8 changed, 4 added).
+
+**Read: the diff against the signed packet.** It adds the door's yfinance checker (CTO msg 8968: `resident_session.py` changed,
+`intake/yfinance_check.py` added) and section 2c. The checker's bound per upload: at most 10 symbols, one history call each, 1 s apart,
+about 10 s added. A 401, 403 or 429 stops the batch. A symbol beyond the cap or stopped reads UNAVAILABLE, never absent. Only
+provider-NOT_FOUND, registry-unresolved symbols reach Yahoo. Accepted.
+
+**Every condition above stands,** plus:
+- **V2's checker call on SPY must read KEPT.** A missing library (`CheckerUnavailable`, so every symbol reads CHECK_FAILED) is a STOP
+  before the ledger closes, because it would silently turn every unknown ticker into a check failure.
+- **The two owed rows stand,** and the checker adds no cache on the resident. If repeated uploads show Yahoo pushback, the per-day KEPT
+  cache joins the negative cache as one row, owner `~G2`.
+
