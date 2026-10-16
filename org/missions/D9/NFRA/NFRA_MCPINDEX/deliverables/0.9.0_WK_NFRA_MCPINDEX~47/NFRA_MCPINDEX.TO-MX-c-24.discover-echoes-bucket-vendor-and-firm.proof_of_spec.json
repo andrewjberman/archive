@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-24",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "00113acb2f",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-24.discover-echoes-bucket-vendor-and-firm.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "00113acb2f"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~47",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py",
+      "kind": "script",
+      "commit_or_etag": "ad8b39c258",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_silver_answer: 6 lines added before return answer (for-loop over bucket, vendor, firm; a key only for a non-empty str and only when the answer does not already carry it). No deploy in this cell; branch wk-NFRA_MCPINDEX-47 LOCAL.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_discover_echo.py",
+      "kind": "test",
+      "commit_or_etag": "ad8b39c258",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests, run from the gateway root: PYTHONPATH=. python -m pytest -q -p no:cacheprovider tests/test_discover_echo.py -> 7 passed in 0.74s, rc=0.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "DENOMINATOR buckets probed 8; bucket echoed 8; every CHECK ok -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round19/checks/c24.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR rows carrying bucket 197 of 197 silver rows; answers not echoing it 0 | DENOMINATOR rows carrying vendor 136 of 197 silver rows; answers not echoing it 0 | DENOMINATOR rows carrying firm 136 of 197 silver rows; answers not echoing it 0 | CHECK ok : every silver row with a bucket echoes it in the answer (197 of 197) | CHECK ok : every silver row with a vendor echoes it in the answer (136 of 136) | CHECK ok : every silver row with a firm echoes it in the answer (136 of 136) | CHECK ok : no crash in the run | DENOMINATOR buckets probed 8; bucket echoed 8; assets+bd buckets 2, vendor and firm echoed 2 | CHECK ok : the discover probe serves and echoes the bucket on every bucket (8 of 8) | CHECK ok : the probe shows vendor and firm on the assets and bd matches (2 of 2) | RESULT: PASS | exit=0",
+      "denominator": "buckets probed 8 (bucket echoed 8 of 8); silver rows 197 carrying bucket, 136 carrying vendor and firm (answers echoing each 197 of 197 and 136 of 136); assets and bd buckets 2 (vendor and firm echoed 2 of 2)",
+      "status": "PASS",
+      "expect": "DENOMINATOR buckets probed 8; bucket echoed 8.*CHECK ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "DENOMINATOR answers 788; newly visible 0; altered base keys 0; every CHECK ok -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round19/checks/c24.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR answers 788 (rows 197 x principals 4); newly visible 0; altered base keys 0; answers gaining a key 247 | CHECK ok : the row sets and principals are equal (788 answers) | CHECK ok : no row becomes visible or hidden to any principal (changed 0, newly visible 0) | CHECK ok : every key of every base answer is byte-equal in the new one (altered 0) | CHECK ok : the only keys added are bucket, vendor, firm (other additions 0) | CHECK ok : some answers gained a key (247) | CHECK ok : no error in either run | RESULT: PASS | exit=0",
+      "denominator": "answers 788 (silver rows 197 x principals 4); newly visible 0 of 788; altered base keys 0 of every base key; answers gaining a key 247 of 788",
+      "status": "PASS",
+      "expect": "DENOMINATOR answers 788.*newly visible 0; altered base keys 0.*CHECK ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest rc=0 on test_discover_echo.py, test_opal_discover.py and test_firm_catalog_visibility.py; the new file holds at least 6 tests -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round19/checks/c24.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=1: 2 failed, 59 passed | new tests collected: 7 | CHECK FAIL: the three test files pass | CHECK ok : the new file holds at least 6 tests | RESULT: FAIL | exit=1. The two failures are tests/test_opal_discover.py::test_silver_row_fails_closed_on_cross_firm_visibility and tests/test_opal_discover.py::test_schwab_ask_names_a_real_schwab_tool; both fail at base 00113acb2f with no edit (control, worker session) and are not in this cell's <paths>.",
+      "denominator": "tests 61 collected across the three files (59 passed, 2 failed); new file 7 of 7 passed; new tests collected 7 (at least 6 required)",
+      "status": "FAIL",
+      "status_reason": "AC3 is refused as written (surprise NFRA_MCPINDEX-Z-W47-S2): its pytest rc=0 needs tests/test_opal_discover.py green, and that file carries two stale expectations that fail at base 00113acb2f before this cell's edit. The repair is outside <paths>. The new file's 7 tests pass; the at-least-6 clause holds.",
+      "expect": "pytest rc=0.*RESULT: PASS.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted row through the edited _silver_answer (internal principal): vendor set to the non-string 7 and firm and bucket set to None, then the same row with three real non-empty strings.",
+      "expected": "no bucket, vendor or firm key for the non-values; the three strings echoed as given.",
+      "observed": "PLANTED non-string vendor 7, firm None, bucket None -> echoed keys: []; PLANTED strings -> bucket='planted-bucket' vendor='planted-vendor' firm='planted-firm' (.scratch/ctrl_mutant.py, rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two runs of c24_answers.py on the gateway tree at ad8b39c258 into .scratch/ctrl_a.out and .scratch/ctrl_b.out, then cmp.",
+      "observed": "rc=0 on both runs; 1054311 bytes each; cmp: IDENTICAL.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC3 as written (pytest rc=0 over tests/test_opal_discover.py) is not met: 2 failures in that file exist at base 00113acb2f before any edit.",
+      "reason": "tests/test_opal_discover.py is outside this order's <paths>; repairing its two stale expectations is an edit the worker face does not grant. Surprise NFRA_MCPINDEX-Z-W47-S2 is BLOCKING on this criterion only."
+    },
+    {
+      "item": "The step-0 control (pytest over test_opal_discover.py and test_firm_catalog_visibility.py before the edit) is not green at base.",
+      "reason": "Recorded as run, not repaired; surprise NFRA_MCPINDEX-Z-W47-S1 (OBSERVATION, INERT)."
+    },
+    {
+      "item": "No deploy, no push, no catalog row, no entry file and no DATA_CATALOG.yaml change; no AWS call.",
+      "reason": "Bounds of the worker face (section 2 items 1 and 2); the cell is LOCAL-only by design."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W47-S1: The step-0 control is not green at base 00113acb2f: test_opal_discover.py and test_firm_catalog_visibility.py run 2 failed, 52 passed before any edit; the two failures are stale test expectations, not this diff.",
+    "NFRA_MCPINDEX-Z-W47-S2: MX-c-24 AC3 cannot pass as written: it needs pytest rc=0 on test_opal_discover.py, which carries those two failures and sits outside <paths>; criterion refused with its measurement (BLOCKING on AC3 only)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~47/session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "infra/aws/ec2/opal-gateway/tests/test_discover_echo.py",
+      "invocation": "cd infra/aws/ec2/opal-gateway && PYTHONPATH=. python -m pytest -q -p no:cacheprovider tests/test_discover_echo.py",
+      "result": "7 passed in 0.74s, rc=0"
+    }
+  ]
+}
