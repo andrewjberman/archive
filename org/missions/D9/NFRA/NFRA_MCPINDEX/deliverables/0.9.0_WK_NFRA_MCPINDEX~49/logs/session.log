@@ -1,0 +1,16 @@
+0.9.0_WK_NFRA_MCPINDEX~49 -- session log, TO NFRA_MCPINDEX.TO-MX-c-26 (worktree C:/tmp/wk-mx19-49, branch wk-NFRA_MCPINDEX-49)
+Times are UTC unless marked EDT (the aws CLI renders local time; the device clock is EDT, UTC-4).
+
+1. Premise: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-49; test -d org && test -d .tools -> TREE-OK.
+2. Sparse: git sparse-checkout add workflows lib .tools (rc 0). Later amended by the issuer (A1) to add infra/aws/ec2/opal-gateway/app/refs.
+3. Control before edits: pytest tests/test_c_group.py tests/test_silver_table_grain.py -> 2 failed, 44 passed (both DeclaredBucketSource tests; cause: infra/aws/ec2/opal-gateway not in the cone). After A1: 1 failed, 45 passed (test_every_declaration_in_the_committed_members_file_proves_its_source; app/ sources not in the cone). Surprise rows S2.
+4. Listings: 2026-10-16T13:59:45Z to 13:59:56Z, .tools/aws s3 ls --recursive s3://opal-data-bd/silver/<t>/ -> rc 0 for each of unrealized (77 lines), transactions (1931), allocations (135), fees (2008); stderr empty. Counted by listings/count_listings.py (listings/summary.json).
+5. Freshness (lib/trading_calendar, expected_last_trading_day 2026-10-16): unrealized 2026-10-09 behind 5; transactions 2026-10-16 behind 0; allocations 2026-10-09 behind 5; fees 2026-10-14 behind 2.
+6. Edits: emit_catalog_v02.py (SILVER_TABLE_OPTIONAL_FIELDS + address rule), validate_catalog_v02.py (address_duplicate_errors), tests/test_address_field.py (9 tests), 4 new entries, 8 legacy prefix lines, round18 group map (8 buckets), round19 live group map.
+7. Gates: validate_entry on the four new entries -> no errors; contract ids checked against sha256("opal-data-bd/silver/<t>/")[:12].
+8. validate_catalog_v02.py (as written, cone amended) -> rc 0, no FAIL line, 36 live rows: 27 KEY-OK, 9 FAMILY-OK, 0 mismatch; writes the gitignored catalog_v02/validation_report.json.
+9. Mutant control: address dropped from SILVER_TABLE_OPTIONAL_FIELDS -> pytest test_address_field 2 failed, 7 passed; file restored byte-exact (sha256 217eaf523b9c...), 9 passed.
+10. Determinism: count_listings.py re-run -> listings/summary.json sha256 0a2ee439f5e6... unchanged.
+11. Commits: 87e9436d63 (emitter, validator, tests; log logs/commit_i.log); 0d0063a308 (entries, group maps; log logs/commit_ii.log). Both LOCAL, not pushed.
+12. Criteria run in the same session: AC1 at 2026-10-16T14:15:36Z (FAIL: FROZEN clause), AC2 (PASS), AC3 (FAIL: pytest test_c_group).
+13. Surprise rows filed: NFRA_MCPINDEX-Z-W49-S1..S7 (investigations/INVESTIGATION_v1.md, appended inside the fenced json array).
