@@ -57,3 +57,21 @@ order is cut once hop 2's reader is merged. One release then carries hops 2 to 4
 on, and the after-read is one client's filled report through the route and through the export.
 
 **Conditions:** the draft's four stand. STEP 0's live read of the role decides whether this addendum is used at all.
+
+## ADDENDUM 2 -- the fence row of irpt-export-render-role (2026-10-16 ~16:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_2_FENCE_ROW_COO_HALF.md`
+(@f297992005), blob `b5c303ea69ffa4195ec441d455d9f1978c327678`, sha256 `a3ec0b339331eaedc2804ae8e78f1c67eff6b39a87b2d6639e484ed5125ca7e0`,
+5,031 bytes (re-measured). This implements the laptop CTO's correction in XA-20261016T154100Z-904f.
+
+**The two named points, ruled:**
+1. **Cross-product: prefer a SECOND registry row over widening the first.** One row for `irpt/49financial/platinum/reporting/` (builder
+   output) with `s3:GetObject` and `s3:GetObjectVersion`. The ownership-map row stays exactly as it is, so no key gains an action it does
+   not need. Only if the registry validator refuses two rows for one principal does the widened single row apply, with the cross-product
+   (GetObjectVersion on the ownership-map key) named in the receipt. The laptop ruling allows either.
+2. **A prefix in the fence is ACCEPTED.** The fence only permits; the role's reach is the intersection of the fence and its IAM grant.
+   Before Surface 2 the role holds no grant on that prefix, and after it the reach is `client=*/filled_report.json`. The fence row is never
+   the narrowing surface, and the receipt reads both.
+
+**Order and conditions:** the addendum's five stand. Surface 1 waits on `ADVI_FIRMBKTS.TO-FB-n-1`. The release of hops 2 to 4 waits on
+`~D2`'s hop 2 reader and on Surface 1 landing, read back.

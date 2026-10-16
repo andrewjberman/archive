@@ -1,7 +1,7 @@
 """r16_check.py -- the MX-r-16 release candidate against the LIVE catalog (round 18's v3, git ref BASE_REF), from the repo root.
 
   python r16_check.py ac1   the difference control: candidate catalog C16_CATALOG (default infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml) against the live one
-                            - the candidate holds every live row, and exactly four more: opal_data_bd_silver_{unrealized,transactions,allocations,fees}, each with bucket
+                            - the candidate holds every live row, and exactly four more: blackdiamond_live_{unrealized,transactions,allocations,fees}, each with bucket
                               opal-data-bd, prefix silver/<t>/, address blackdiamond/49f-live/silver/<t>/, read_tool the mapped client tool, vendor blackdiamond, firm 49financial;
                             - the eight frozen-copy rows (49financial_<t>_silver_legacy) differ from live in bucket (opal-data-bd -> opal-data-assets), prefix and key_template ONLY;
                             - every other live row is byte-equal, except the gold book row whose open_items lose exactly the MX-c-25 stale item (a row-level difference elsewhere is a defect, printed with its keys);
@@ -27,7 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VIS = os.path.join(HERE, "..", "..", "round17", "checks", "vis_matrix.py")
 TOOLS = {"unrealized": "client_get_holdings", "transactions": "client_get_transactions", "allocations": "client_get_allocation", "fees": "client_get_fees"}
 LEGACY = ["opal_data_assets_silver_49financial_%s_silver_legacy" % t for t in ("allocations", "assets", "fees", "prices", "realized", "transactions_enriched", "transactions", "unrealized")]
-NEW = ["opal_data_bd_silver_" + t for t in TOOLS]
+NEW = ["blackdiamond_live_" + t for t in TOOLS]
 SECS = ("silver_datasets", "portal_datasets", "harvest_datasets")
 
 
@@ -62,7 +62,7 @@ def ac1():
     res.append(("the candidate holds every live row and exactly the four live 49F rows more", not removed and added == sorted(NEW)))
     bad = []
     for t, tool in TOOLS.items():
-        r = c.get("opal_data_bd_silver_" + t) or {}
+        r = c.get("blackdiamond_live_" + t) or {}
         if not (r.get("bucket") == "opal-data-bd" and r.get("prefix") == "silver/%s/" % t and r.get("address") == "blackdiamond/49f-live/silver/%s/" % t
                 and r.get("read_tool") == tool and r.get("vendor") == "blackdiamond" and r.get("firm") == "49financial" and not r.get("retired")):
             bad.append(t)

@@ -102,3 +102,17 @@ signature in my R34 half (@5699c80f35). AMENDMENT 3's terms and my conditions on
 **The residual risk (its section 4) is ACCEPTED, with one condition:** the run continues after SET 3 only if SET 3's window shows ZERO
 `WAF_CHALLENGE` journal lines. The run's own uploads are posted the way SET 3 is, one in flight at a time. A WAF line in SET 3 ends the
 window unspent, and the run then waits for the bounded backoff change (`~G2`, its own pair).
+
+## AMENDMENT 7 -- R0e re-pinned to r34f; the run goes on SET 3's selection, no further probe (2026-10-16 ~16:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM3_AMENDMENT7_REPIN_R34F_COO_HALF.md`
+(COO half @1a907fdddf), blob `1355fd0c6d2c6203436a9923b595ff66e76b6c4d`, sha256 `06f71646069bf8db88b4247b89b4ddfb295d51b9aeb487b91c783726d9284c77`,
+5,276 bytes (re-measured). Its r34f binding (packet blob `e9ede8d67f`, tar `0d223e50...4a3f`) equals my r34f signature (@57f0938a30).
+
+**Section 3 RULED as proposed: no SET 4.** SET 3 met my stop: ZQXWVK read NOT_FOUND at the door. Its selection stands (U1 ALPPL, U2 APPL,
+U3 ZQXWVK). A further probe would spend the lookup budget the run needs. SET 3's WAF line ended that window under my AMENDMENT 6 condition;
+r34f is the backoff that condition waited for.
+
+**Conditions:** HOLD lifts only on ledger `irpt-resident-r34f-20261016` CLOSED with `V2S OK`, `V2S CONTROLS OK 4 of 4` and `V2S BACKOFF`
+from inside the service. The run's uploads go one in flight at a time. A row ending RESOLVE_RETRY_EXHAUSTED during the run stops the run and
+is reported, never retried in the window.
