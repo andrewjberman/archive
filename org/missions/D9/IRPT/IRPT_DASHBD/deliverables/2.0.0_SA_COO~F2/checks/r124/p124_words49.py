@@ -1,13 +1,15 @@
 """IRPT_DASHBD round 124, workstream F-SHIP ~F2 (issuer 2.0.0_SA_COO~F2) -- FWD-5: the REVISED words proposal, 49 Financial at tran_srcde grain.
 
   DB-f-1001 (~1001) the CTO's round-122 analysis (not ratified; the CVO's rule-24 grade holds) orders one record cell: 49 Financial
-                    mapped at tran_srcde grain (all 157 codes of the CRO classification table, each to one Opal type word or to
-                    UNMAPPED with a reason), state coherence per word, Cottonwood and Inflection carried over unchanged, and the
-                    census repeated.                                                     DBF124-1-AC1 (the subtraction and the carry-over), AC2 (the law record)
+                    mapped at tran_srcde grain, each code to one Opal type word or to UNMAPPED with a reason, state coherence per
+                    word, Cottonwood and Inflection carried over unchanged, and the census repeated. The round-123 analysis (msg 9064)
+                    makes the 49 Financial domain the UNION of the CRO table's codes and the codes in the LIVE silver (the issuer's
+                    census record, since a worker has no AWS access); a silver-only code gets its own row, a table-only code is
+                    marked not_observed.                                                  DBF124-1-AC1 (the subtraction and the carry-over), AC2 (the law record)
 
-The checker computes the 49 Financial denominator FROM THE CRO TABLE ITSELF (distinct tran_srcde), the carry-over from the round-122
+The checker computes the 49 Financial denominator FROM THE CRO TABLE AND THE CENSUS RECORD ITSELF, the carry-over from the round-122
 proposal, and the per-code CRO rules, so a missing code, a changed carried row, a code mapped over disagreeing CRO rules without a
-stated reason, or a census that does not match the mapping fails.
+stated reason, a membership flag that is wrong, or a census that does not match the mapping fails.
 
 Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
        python <this file> --selftest                        the pure helpers on synthetic arms
@@ -20,6 +22,7 @@ from pathlib import Path
 D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 CRO = "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json"
 OLD = D + "0.9.0_WK_IRPT_DASHBD~802/FWD5_WORDS_PROPOSAL_R121.json"
+LIVE = D + "2.0.0_SA_COO~F2/R124_LIVE_SILVER_CENSUS_49F.json"
 NEW = D + "0.9.0_WK_IRPT_DASHBD~1001/FWD5_WORDS_PROPOSAL_R124.json"
 CLAIMS = ("measured", "inferred", "held", "absent")
 UNMAPPED = "UNMAPPED"
@@ -59,12 +62,17 @@ def digits_ok(obj, key=""):
     return True
 
 
-def cro_codes(cro_rows):
-    """{tran_srcde: sorted list of distinct CRO rules} over the CRO table: the 49 Financial denominator."""
-    out = {}
+def cro_codes(cro_rows, live_codes=()):
+    """{tran_srcde: {"rules": sorted distinct CRO rules ([] for a silver-only code), "in_cro": bool, "in_live": bool}} over the UNION of
+    the CRO table and the live silver codes: the 49 Financial denominator."""
+    rules = {}
     for r in cro_rows:
-        out.setdefault(r["tran_srcde"], set()).add(r["rule"])
-    return {k: sorted(v) for k, v in out.items()}
+        rules.setdefault(r["tran_srcde"], set()).add(r["rule"])
+    live = set(live_codes)
+    out = {}
+    for c in set(rules) | live:
+        out[c] = {"rules": sorted(rules.get(c, ())), "in_cro": c in rules, "in_live": c in live}
+    return out
 
 
 def rows_of(prop, firm):
@@ -112,26 +120,43 @@ def row_problems(codes, prop):
         code = m.get("source_value")
         if code not in codes:
             continue
-        if m.get("cro_rules") != codes[code]:
-            pr.append("row %r: cro_rules is not the CRO table's distinct rules %r" % (code, codes[code]))
+        info = codes[code]
+        if m.get("cro_rules") != info["rules"]:
+            pr.append("row %r: cro_rules is not the CRO table's distinct rules %r" % (code, info["rules"]))
+        for flag, want in (("in_cro_table", info["in_cro"]), ("in_live_silver", info["in_live"]), ("not_observed", not info["in_live"])):
+            if m.get(flag) is not want:
+                pr.append("row %r: %s must be %r" % (code, flag, want))
         t = target_of(m)
         has_reason = isinstance(m.get("reason"), str) and m["reason"].strip() != ""
+        if not info["in_cro"] and not has_reason:
+            pr.append("row %r is a silver-only code and needs a reason (decided on its description words)" % code)
         if t == UNMAPPED:
             if not has_reason:
                 pr.append("row %r is UNMAPPED with no reason" % code)
         elif t not in type_words:
             pr.append("row %r uses an undefined type word %r" % (code, t))
-        elif len(codes[code]) > 1 and not has_reason:
-            pr.append("row %r spans %d CRO rules and is mapped to one word with no stated reason" % (code, len(codes[code])))
+        elif len(info["rules"]) > 1 and not has_reason:
+            pr.append("row %r spans %d CRO rules and is mapped to one word with no stated reason" % (code, len(info["rules"])))
     return pr
 
 
-def census_problems(codes, old, prop):
+def census_problems(codes, old, prop, live=None):
     pr = []
     c = prop["census"]
     if not isinstance(c, dict):
         return ["census form"]
     n49 = len(codes)
+    n_cro = sum(1 for v in codes.values() if v["in_cro"])
+    n_live = sum(1 for v in codes.values() if v["in_live"])
+    n_silver_only = sum(1 for v in codes.values() if not v["in_cro"])
+    n_table_only = sum(1 for v in codes.values() if not v["in_live"])
+    if (c.get("cro_distinct_tran_srcde"), c.get("live_silver_distinct_tran_srcde"), c.get("silver_only_count"),
+            c.get("table_only_count")) != (n_cro, n_live, n_silver_only, n_table_only):
+        pr.append("census must print cro_distinct_tran_srcde=%d, live_silver_distinct_tran_srcde=%d, silver_only_count=%d, "
+                  "table_only_count=%d" % (n_cro, n_live, n_silver_only, n_table_only))
+    if live is not None and c.get("live_read") != {"read_at_utc": live.get("read_at_utc"), "rows": live.get("rows"),
+                                                   "partitions": live.get("partitions")}:
+        pr.append("census.live_read must be {read_at_utc, rows, partitions} of the live census record")
     ncw = len(rows_of(prop, "cottonwood"))
     nin = len(rows_of(prop, "inflection"))
     if c.get("method") != "word-boundary":
@@ -140,8 +165,8 @@ def census_problems(codes, old, prop):
         pr.append("census.denominators is not {49financial: %d, cottonwood: %d, inflection: %d}" % (n49, ncw, nin))
     if c.get("denominator_total") != n49 + ncw + nin:
         pr.append("census.denominator_total is not %d" % (n49 + ncw + nin))
-    if c.get("cro_rows") is None or c.get("cro_distinct_tran_srcde") != n49:
-        pr.append("census.cro_distinct_tran_srcde is not %d" % n49)
+    if c.get("cro_rows") is None:
+        pr.append("census.cro_rows is missing")
     counts = {}
     for m in prop["mapping"]:
         if isinstance(m, dict) and m.get("field") in ("type", "tran_srcde"):
@@ -210,8 +235,13 @@ def form_problems(prop):
     return pr
 
 
+def union_codes(root):
+    live = load(root, LIVE)
+    return cro_codes(load(root, CRO), live["codes"].keys()), live
+
+
 def ac_subtraction(root):
-    codes = cro_codes(load(root, CRO))
+    codes, _ = union_codes(root)
     old, new = load(root, OLD), load(root, NEW)
     pr = form_problems(new)
     need(not pr, "; ".join(pr[:6]))
@@ -220,9 +250,9 @@ def ac_subtraction(root):
 
 
 def ac_law(root):
-    codes = cro_codes(load(root, CRO))
+    codes, live = union_codes(root)
     old, new = load(root, OLD), load(root, NEW)
-    pr = form_problems(new) + definition_problems(new) + census_problems(codes, old, new)
+    pr = form_problems(new) + definition_problems(new) + census_problems(codes, old, new, live)
     need(not pr, "; ".join(pr[:6]))
 
 
@@ -238,20 +268,28 @@ def selftest():
             print("SELFTEST FAIL %s: got %r want %r" % (name, got, want))
 
     cro = [{"tran_srcde": "A", "rule": "r1"}, {"tran_srcde": "A", "rule": "r2"}, {"tran_srcde": "B", "rule": "r1"}]
-    codes = cro_codes(cro)
-    arm("codes", codes, {"A": ["r1", "r2"], "B": ["r1"]})
+    codes = cro_codes(cro, ["A", "B", "C"])
+    arm("codes", {k: (v["rules"], v["in_cro"], v["in_live"]) for k, v in codes.items()},
+        {"A": (["r1", "r2"], True, True), "B": (["r1"], True, True), "C": ([], False, True)})
+    flags = lambda c: {"in_cro_table": codes[c]["in_cro"], "in_live_silver": codes[c]["in_live"],  # noqa: E731
+                       "not_observed": not codes[c]["in_live"]}
     row = lambda c, t, **k: dict({"firm": FIRM49, "field": "tran_srcde", "source_value": c, "opal_type": t,  # noqa: E731
-                                  "cro_rules": codes.get(c)}, **k)
-    prop = {"mapping": [row("A", "Fee", reason="rules disagree; fee wins"), row("B", UNMAPPED, reason="no meaning")],
+                                  "cro_rules": codes[c]["rules"], **flags(c)}, **k)
+    prop = {"mapping": [row("A", "Fee", reason="rules disagree; fee wins"), row("B", UNMAPPED, reason="no meaning"),
+                        row("C", UNMAPPED, reason="silver-only; description words give no single meaning")],
             "opal_types": [{"word": "Fee"}]}
     arm("sub-green", subtraction_49(codes, prop), [])
     arm("rows-green", row_problems(codes, prop), [])
-    arm("sub-missing", len(subtraction_49(codes, {"mapping": prop["mapping"][:1]})), 1)
+    arm("sub-missing", len(subtraction_49(codes, {"mapping": prop["mapping"][:2]})), 1)
     arm("sub-dup", len(subtraction_49(codes, {"mapping": prop["mapping"] + prop["mapping"][:1]})), 1)
     multi_noreason = {"mapping": [row("A", "Fee"), row("B", UNMAPPED, reason="x")], "opal_types": [{"word": "Fee"}]}
     arm("multi-rule-needs-reason", len(row_problems(codes, multi_noreason)), 1)
     wrong_rules = {"mapping": [dict(row("B", UNMAPPED, reason="x"), cro_rules=["zz"])], "opal_types": []}
     arm("cro-rules-checked", len(row_problems(codes, wrong_rules)), 1)
+    silver_noreason = {"mapping": [dict(row("C", UNMAPPED), reason="")], "opal_types": []}
+    arm("silver-only-needs-reason", len(row_problems(codes, silver_noreason)), 2)
+    wrong_flag = {"mapping": [dict(row("C", UNMAPPED, reason="x"), in_cro_table=True)], "opal_types": []}
+    arm("membership-flag-checked", len(row_problems(codes, wrong_flag)), 1)
     old = {"mapping": [{"firm": "cottonwood", "source_value": "Buy"}, {"firm": "inflection", "source_value": "X"}]}
     arm("carry-green", carry_over(old, old), [])
     arm("carry-red", len(carry_over(old, {"mapping": [{"firm": "cottonwood", "source_value": "Sale"}, old["mapping"][1]]})), 1)
