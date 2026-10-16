@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-113",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-113.status-lambda-source-rows-for-the-failure-code.md",
+    "group": "OTHER",
+    "vintage_commit": "23001ba3287d47c30dcdf3a48186a9044ce43703"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R31_G.md",
+    "vintage_commit": "23001ba3287d47c30dcdf3a48186a9044ce43703",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-113.status-lambda-source-rows-for-the-failure-code.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~254",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "06b02f0d18ffd727ea359afb94a96f2fe80fc65a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-status staged_from: durable_job.py pin 361c44fa9d -> 065652d3510b, sha256 afba08fefb -> 877929f205 (blob = HEAD blob 634975cbed); status.py pin 5ea4cab301 -> dad5c4530b, sha256 490a176ddd -> 4f781e532e (blob = HEAD blob fd1cea01c2); four lines changed, eight diff lines; no deploy, no AWS call, no terraform",
+      "artifact_covered_by": [
+        "AR113-g-AC1",
+        "AR113-g-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR113-g-AC1",
+      "criterion_verbatim": "AC1 diffs your map against the merge-base with box/dell2 and requires: only the two irpt-status rows change (identity, order and every other row, function and key identical); each new pin is a full commit, an ancestor of HEAD, whose blob's sha256 equals the row's and equals the tree's file and is the blob of the last commit touching the path; the edit is byte-preserving (only pin and sha256 lines change: eight changed lines in the diff, - and + together); and the generated irpt-status package differs from the base package in exactly durable_job.py and status.py.",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g113_checks.py g113",
+      "output_evidence": "AR-G113-OK 4 cases (rc=0; run at worktree HEAD 06b02f0d18 with the map commit)",
+      "denominator": "4 of 4 checker cases OK (the checker prints its case count, 4 cases)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR113-g-AC2",
+      "criterion_verbatim": "AC2 checks that your branch changes only the map and your own files (against the merge-base with box/dell2).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g113_checks.py scope",
+      "output_evidence": "AR-G113-SCOPE-OK 1 changed paths, all the cell's own (rc=0; run at worktree HEAD 06b02f0d18 with the map commit, before this instance and the status flip were committed)",
+      "denominator": "1 changed path of 1 (branch vs merge-base with box/dell2 at the map commit)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the checker's own four cases are the negative arms (wrong row, reformatted map, stale pin, sha of the tree instead of the blob).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- byte-level diff and sha256 of fixed blobs",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "Build and release of the irpt-status package carrying the new status.py and durable_job.py",
+      "reason": "The order is source-only: the next cell builds the package (BUILD ONLY) and a signed pair releases it; nothing is deployed here."
+    },
+    {
+      "item": "owned_status.py",
+      "reason": "A native member of the function, packaged from the tree; the order says it needs no edit."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g113_checks.py g113; python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g113_checks.py scope",
+      "result": "AR-G113-OK 4 cases (rc=0); AR-G113-SCOPE-OK 1 changed paths, all the cell's own (rc=0)"
+    },
+    {
+      "tool": "git",
+      "invocation": "git log -1 --format=%H -- <repo_path>; git show <pin>:<repo_path> | sha256sum",
+      "result": "status.py: pin dad5c4530b29739d417d2757df1eac4d0e3f8fc2, sha256 4f781e532e...da52a5 (equals HEAD blob fd1cea01c2); durable_job.py: pin 065652d3510b6cbc0ee17b85c83b267366388e80, sha256 877929f205...ce979 (equals HEAD blob 634975cbed); both pins are ancestors of HEAD"
+    }
+  ]
+}
