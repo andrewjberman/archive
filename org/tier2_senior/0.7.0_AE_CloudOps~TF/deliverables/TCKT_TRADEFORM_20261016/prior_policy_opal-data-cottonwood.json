@@ -1,0 +1,85 @@
+{
+ "Statement": [
+  {
+   "Action": "s3:*",
+   "Condition": {
+    "ArnNotLike": {
+     "aws:PrincipalArn": [
+      "arn:aws:iam::313476888478:role/*-cot-*",
+      "arn:aws:iam::313476888478:user/Andrew_Berman",
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:user/Opal_Terminal",
+      "arn:aws:iam::313476888478:role/irpt-holdings-role",
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+     ]
+    }
+   },
+   "Effect": "Deny",
+   "Principal": "*",
+   "Resource": [
+    "arn:aws:s3:::opal-data-cottonwood",
+    "arn:aws:s3:::opal-data-cottonwood/*"
+   ],
+   "Sid": "DenyForeignFirmPrincipals"
+  },
+  {
+   "Action": [
+    "s3:GetObject*",
+    "s3:GetObjectVersion*",
+    "s3:GetObjectAttributes",
+    "s3:GetObjectTagging"
+   ],
+   "Condition": {
+    "ArnNotLike": {
+     "aws:PrincipalArn": [
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+     ]
+    }
+   },
+   "Effect": "Deny",
+   "Principal": "*",
+   "Resource": "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+   "Sid": "DenyRestrictedReadExceptReaders"
+  },
+  {
+   "Action": "s3:ListBucket*",
+   "Condition": {
+    "ArnNotLike": {
+     "aws:PrincipalArn": [
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+     ]
+    },
+    "StringLike": {
+     "s3:prefix": [
+      "commonwealth/cottonwood/bronze/crm/",
+      "commonwealth/cottonwood/bronze/crm/*"
+     ]
+    }
+   },
+   "Effect": "Deny",
+   "Principal": "*",
+   "Resource": "arn:aws:s3:::opal-data-cottonwood",
+   "Sid": "DenyRestrictedListExceptReaders"
+  },
+  {
+   "Action": [
+    "s3:PutObject*",
+    "s3:DeleteObject*",
+    "s3:RestoreObject"
+   ],
+   "Condition": {
+    "ArnNotLike": {
+     "aws:PrincipalArn": "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+    }
+   },
+   "Effect": "Deny",
+   "Principal": "*",
+   "Resource": "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+   "Sid": "DenyRestrictedWriteExceptBreakglass"
+  }
+ ],
+ "Version": "2012-10-17"
+}
