@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-s-5",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1fb9ac96ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "e96996c705",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-s-5.demo-session-variant1.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/lib/trendGrouping.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "e206e06e",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit e206e06e on branch wk-MDPF_CANON-31-portal (LOCAL, nested repo at C:/dev/wk-MDPF_CANON-31/portal, on top of CN-s-4 commit af2ae947; base DEV 39dab87f3b). trendModeFor gains a second parameter demo (default false): Variant 1 for an internal session or the demo tenant. Not pushed to DEV; the client-facing landing is an approval row cut from PROD per CLAUDE.md (Portal), and the issuer holds it from any promote until the edge question is ruled."
+    },
+    {
+      "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "e206e06e",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit e206e06e on branch wk-MDPF_CANON-31-portal (LOCAL). Adds demoTenant and variant1Session, passes demoTenant to trendModeFor, gates the two single-firm reads and the trendStitch memo on variant1Session. Not pushed to DEV; landing as for trendGrouping.ts above."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs trendModeFor under bun (four arms) and reads the page as normalised text (six arms): r11_cn_s_4.py wiring. Expect: ROUND 11 CN-S-4 WIRING: 10 of 10 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py\" wiring; echo \"exit=$?\"",
+      "output_evidence": "  PASS P1 trendModeFor(false, true) is variant1 (the demo flag reaches the mode)  -- got variant1\n  PASS P2 control: trendModeFor(true, false) is variant1  -- got variant1\n  PASS P3 control: trendModeFor(false, false) is variant2  -- got variant2\n  PASS P4 control: trendModeFor(true, true) is variant1; one argument: trendModeFor(true) variant1, trendModeFor(false) variant2  -- got variant1 / variant1 / variant2\n  PASS W5 the page defines demoTenant from the demo tenant set and the claims firm  -- line present: True\n  PASS W6 the page defines variant1Session = internal || demoTenant  -- line present: True\n  PASS W7 the page derives the mode with trendModeFor(internal, demoTenant)  -- call present: True\n  PASS W8 both single-firm reads gate on variant1Session (2 found), none on bare internal (0 found)  -- variant1Session gates 2, bare internal gates 0\n  PASS W9 the trendStitch memo begins if (!variant1Session) return null and depends on [variant1Session, firm49MdpfData, inflectionMdpfData]  -- memo shape present: True\n  PASS W10 control: SHOW_BENCHMARK_TOGGLE = internal and effectiveFirmId = internal are unchanged  -- both lines present: True\nROUND 11 CN-S-4 WIRING: 10 of 10 arms\nexit=0",
+      "denominator": "10 of 10 arms (P1-P4 under bun; W5-W10 page text)",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-4 WIRING: 10 of 10 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the guard that CN-s-4's repair (the branch's first commit) still holds: r11_cn_s_4.py pure. Expect: ROUND 11 CN-S-4 PURE: 6 of 6 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py\" pure; echo \"exit=$?\"",
+      "output_evidence": "  PASS S0 control: before the boundary the band is drawn  -- 40 41\n  PASS S1 the band is not carried after the boundary\n  PASS S2 no row draws the band and the stack  -- rows with both: []\n  PASS S3 control: variant 1 draws no band\n  PASS S4 the primary lines still carry\n  PASS S5 control: input not mutated\nROUND 11 CN-S-4 PURE: 6 of 6 arms\nexit=0",
+      "denominator": "6 of 6 arms (S0-S5)",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-4 PURE: 6 of 6 arms"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded at the round close (never self-graded): the issuer renders the Global Trend for a demo-tenant claim set at a STATED portal commit on bun run dev:live --port 5174 and reports what the page draws and what the two single-firm reads return (the edge result named, never widened). The worker does not render.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- judgment criterion (no invocation the order could reduce to an expectation). The issuer renders the Global Trend for a demo-tenant claim set at a stated portal commit and reports the drawn Variant and the two single-firm reads at the round close.",
+      "output_evidence": "No output: the worker did not render (bounds 4: no browser launch). The judgment is recorded here as not performed by this worker.",
+      "denominator": "N/A -- judgment criterion; the drawn Variant and the two single-firm read results are read at the round close",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted defect = the base tree at af2ae947 (trendModeFor with one parameter, bare internal in the page), exported with git archive and run through the wiring check with R11_SRC. The named arms must fire.",
+      "expected": "wiring: P1 FAIL (the demo flag does not reach the mode) and W5 to W9 FAIL (no demoTenant, variant1Session, call, gates or memo guard)",
+      "observed": "Base wiring: 4 of 10 arms exit=1; FAIL P1, W5, W6, W7, W8, W9; PASS P2, P3, P4, W10.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "wiring and pure each run twice from the worktree root after the edit, stdout captured to .scratch/det5_<arm>_<1|2>.txt and compared with cmp.",
+      "observed": "wiring: IDENTICAL, 10 of 10 arms, rc=0 on both runs; pure: IDENTICAL, 6 of 6 arms, rc=0 on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC3 render: the Global Trend for a demo-tenant claim set on bun run dev:live --port 5174, and the live read of the two single-firm reads",
+      "reason": "Bounded out by the order (bounds 4: no browser launch, no AWS contact; AC3 is judgment graded at the round close)."
+    },
+    {
+      "item": "The live edge gate (auth-validator-edge, CN-q-1)",
+      "reason": "Known and not this order's: the order wires the page and never touches, widens or works around the gate. On PROD a demo session's two single-firm reads are refused (403) at the edge, so the stitch input stays empty. Named here, not fixed."
+    },
+    {
+      "item": "Repo-wide hygiene and the portal type check",
+      "reason": "Bounds 8: the issuer runs the type check and the real run at the drain. The edits keep the module's strict interfaces; no tsc or bun install was run."
+    },
+    {
+      "item": "Portal test files and the other portal source files",
+      "reason": "Bounds 1: only trendGrouping.ts (trendModeFor) and ModelPortfolios.tsx (the three edits) were changed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~31/MDPF_CANON.TO-CN-s-5.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r11_cn_s_4.py wiring (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py wiring",
+      "result": "ROUND 11 CN-S-4 WIRING: 10 of 10 arms, exit=0"
+    },
+    {
+      "tool": "r11_cn_s_4.py pure (issuer's check, read-only)",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_4.py pure",
+      "result": "ROUND 11 CN-S-4 PURE: 6 of 6 arms, exit=0"
+    },
+    {
+      "tool": "git archive af2ae947 src (base export for the mutant control)",
+      "invocation": "git -C portal archive af2ae947 src | tar -x -C .scratch/base_cns5; R11_SRC=.scratch/base_cns5/src r11_cn_s_4.py wiring",
+      "result": "ROUND 11 CN-S-4 WIRING: 4 of 10 arms, exit=1 (FAIL P1, W5, W6, W7, W8, W9)"
+    },
+    {
+      "tool": "git -C portal commit (nested portal repo, CN-s-5 commit)",
+      "invocation": "git -C C:/dev/wk-MDPF_CANON-31/portal commit --author \"0.9.0_WK_MDPF_CANON~31 <0.9.0_WK_MDPF_CANON~31@opal.agent>\" -F .scratch/cn_s_5_portal_msg.txt",
+      "result": "rc=0: e206e06e on wk-MDPF_CANON-31-portal, 2 files, 14 insertions(+), 12 deletions(-)"
+    }
+  ]
+}
