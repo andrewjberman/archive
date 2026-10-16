@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gy-1.the-producer-stamps-a-pass-block-cleared-at-write-when-no-hold-applies",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round113_aifill_prep/checks/check_gy1_stamp_at_write.py",
+    "group": "OTHER",
+    "vintage_commit": "249fb7992606a1f154850d11e0dbb8378849660e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "249fb7992606a1f154850d11e0dbb8378849660e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gy-1.the-producer-stamps-a-pass-block-cleared-at-write-when-no-hold-applies.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~487",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/validation.py",
+      "kind": "script",
+      "commit_or_etag": "bcd65ebd097cf8d714eaae2b295c86f80221c78f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: adds stamp_for_write(doc, now, hold=False) on top of stamp_validation(doc, now, state=\"HELD\"); PASS blocks promoted to CLEARED unless hold. Library code with no deploy target of its own; committed, not deployed.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/run.py",
+      "kind": "script",
+      "commit_or_etag": "bcd65ebd097cf8d714eaae2b295c86f80221c78f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: adds the --hold flag and the stamp call in main after contract.validate_document and before print or write. Library code, not deployed.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_gy1_stamp_at_write.py",
+      "kind": "test",
+      "commit_or_etag": "bcd65ebd097cf8d714eaae2b295c86f80221c78f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 8 offline test functions (planted PASS and REFUSED blocks, hold, no mutation, run.main file written CLEARED and HELD). Run inside AC2: 8 passed.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL GY-1 ARMS: YES (N of N)` with N equal to 12, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-487 && PYTHONPATH=C:/dev/wk-resapp-487 timeout 110 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round113_aifill_prep/checks/check_gy1_stamp_at_write.py\" \"C:/dev/wk-resapp-487\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM CONTROL: stamp_validation still defaults to HELD     PASS \nARM CONTROL: stamp_validation CLEARED over a REFUSED block still raises PASS ContractError\nARM CONTROL: validation.py and run.py stay ASCII         PASS \nAIFILL GY-1 ARMS: YES (12 of 12)\nexit=0",
+      "denominator": "12 of 12 arms (AIFILL GY-1 ARMS: YES (12 of 12)); full run of the same check (.scratch/ac1_full.out in the worktree): 12 PASS lines, 0 FAIL lines",
+      "status": "PASS",
+      "expect": "^(?:(?!FAIL)[\\s\\S])*AIFILL GY-1 ARMS: YES \\(12 of 12\\)[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a pytest summary line of the form `N passed` with N at least 6 and no `failed` or `error`; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-487 && PYTHONPATH=C:/dev/wk-resapp-487 timeout 110 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_gy1_stamp_at_write.py | tail -2; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.25s\nexit=0",
+      "denominator": "8 of 8 tests in lib/research/aifill/tests/test_gy1_stamp_at_write.py passed; 0 failed, 0 errors; threshold N >= 6. Also: the full lib/research/aifill suite reads 874 passed (866 base + 8 new), exit 0.",
+      "status": "PASS",
+      "expect": "\\b(?:[6-9]|[1-9][0-9]+) passed in [0-9.]+s\\s*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted mutant. The discriminating controls are the 3 'CONTROL' arms inside AC1's 12 arms (stamp_validation default HELD, CLEARED over REFUSED still raises, ASCII), plus the planted PASS and REFUSED arms, not a separate mutant run.",
+      "expected": "N/A: the order names no mutant; each CONTROL arm of AC1 must PASS alongside the rule arms.",
+      "observed": "No separate mutant run. AC1 full run: 12 PASS lines, 0 FAIL lines, including the 3 CONTROL arms.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 invocation run twice on the same committed bytes (commit bcd65ebd09): once in the tail form, once as full output to a file.",
+      "observed": "Both runs: AIFILL GY-1 ARMS: YES (12 of 12), exit 0, no FAIL line.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "run.py's existing BLOCK, summary and WROTE output lines, store.py, stamp_validation, contract.py, the grounding and block modules",
+      "reason": "Not edited. The order names only validation.py, run.py and the new test file; the existing suite passes unchanged (874 passed, 866 base plus 8 new)."
+    },
+    {
+      "item": "A live model call, an S3 write, and a run against the served store",
+      "reason": "Not in this cell. The cell is offline and makes no network, model or store call; the issuer's one real run at close is not a worker criterion."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~487/AMGT_RESAPP.TO-AMGT-gy-1.the-producer-stamps-a-pass-block-cleared-at-write-when-no-hold-applies.SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh (py_compile + ruff, via the commit gate)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/validation.py lib/research/aifill/run.py lib/research/aifill/tests/test_gy1_stamp_at_write.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s); each file reported 'All checks passed!' and 'OK: no unguarded strict-utf8 log reads.'"
+    },
+    {
+      "tool": "ASCII check",
+      "invocation": "python -c \"import sys;[print(p, open(p,'rb').read().isascii()) for p in sys.argv[1:]]\" <the 3 files>",
+      "result": "True for all 3 files"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (code commit bcd65ebd09)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~487 <0.9.0_WK_AMGT_RESAPP~487@opal.agent>\" -F .scratch/commit-msg-gy1.txt -- lib/research/aifill/validation.py lib/research/aifill/run.py lib/research/aifill/tests/test_gy1_stamp_at_write.py",
+      "result": "committed bcd65ebd09; [msg-verify] MATCH len=866"
+    }
+  ]
+}
