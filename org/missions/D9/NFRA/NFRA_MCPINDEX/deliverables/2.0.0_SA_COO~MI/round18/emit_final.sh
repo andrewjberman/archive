@@ -20,7 +20,8 @@ python workflows/atom_decomposition/emit_catalog_v02.py \
   --group-map $D/0.9.0_WK_NFRA_MCPINDEX~52/research_group_map_h1.json \
   --group-map $D/0.9.0_WK_NFRA_MCPINDEX~53/research_group_map_h2.json \
   --group-map $D/0.9.0_WK_NFRA_MCPINDEX~54/research_group_map_h3.json \
-  --group-map $D/0.9.0_WK_NFRA_MCPINDEX~55/research_group_map_p1.json \n  --group-map $D/2.0.0_SA_COO~MI/round19/live_bd_group_map.json > "$OUT/emit.log" 2>&1
+  --group-map $D/0.9.0_WK_NFRA_MCPINDEX~55/research_group_map_p1.json \
+  --group-map $D/2.0.0_SA_COO~MI/round19/live_bd_group_map.json > "$OUT/emit.log" 2>&1
 RC=$?
 grep -E "EMIT REFUSED|TOOL INDEX|GROUP-MAP|SILVER DATASET|HARVEST ROWS" "$OUT/emit.log" | cut -c1-240
 if [ $RC -ne 0 ]; then echo "ERROR: the emitter exited $RC; see $OUT/emit.log"; git checkout -- "$T"; exit 1; fi
