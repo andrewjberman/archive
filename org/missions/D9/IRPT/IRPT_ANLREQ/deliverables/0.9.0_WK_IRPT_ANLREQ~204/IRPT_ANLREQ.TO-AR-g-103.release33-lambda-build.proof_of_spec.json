@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-103",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R26_G.md",
+    "vintage_commit": "4a1980863f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-103.release33-lambda-build.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-103.release33-lambda-build.md",
+    "group": "OTHER",
+    "vintage_commit": "4a1980863f"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~204",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~204/r33/R33_BUILD.json",
+      "kind": "doc",
+      "commit_or_etag": "c97f9e336e4525f1c5ef9f9fc47f15592c06396b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "release-33 build record written by the issuer's driver at pin 927337a741f40a83e7daa9e09154436a813b05dd; driver line R33-BUILD-OK; BUILD ONLY, nothing uploaded, planned, applied or invoked; no AWS call. The two out-of-repo zips in C:/dev/irpt-release-r33 (not committed by design): irpt-ycharts-generate.zip sha256 9313848296eca64cb5d0f616436f32d3eed5d945c6dbcc21276ae231ae029131 size 638927 CodeSha256 kxOEgpbspky10PYWQ28y0+7V2UXG28whJ2riMa4CkTE=; irpt-status.zip sha256 38e7b3f184a6136d9bb4eab1dbcfdf25d2bdb3118d0c602e994e69309fbee92b size 366323 CodeSha256 OOez8YSmE22btOqx28/fJdK9sxGNDGAumU5pMJ++6Ss=; both built twice byte-identical",
+      "artifact_covered_by": [
+        "AR103-g-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR103-g-AC1",
+      "criterion_verbatim": "AC1 recomputes, from the two zips and the git objects: each zip's sha256 and CodeSha256 (base64 of the sha256); its members against the issuer's offline census build at the pin; the delta against each function's baseline build (exactly 8 members of irpt-ycharts-generate; exactly status.py of irpt-status); no live read claimed; and that your two CodeSha256 values equal the two given in the invocation. At base (no record) it FAILs.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g103_checks.py verify C:/dev/irpt-release-r33 org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~204/r33/R33_BUILD.json kxOEgpbspky10PYWQ28y0+7V2UXG28whJ2riMa4CkTE= OOez8YSmE22btOqx28/fJdK9sxGNDGAumU5pMJ++6Ss=",
+      "output_evidence": "AR-G103-OK irpt-ycharts-generate members=107 delta=8 code_sha256=kxOEgpbspky10PYWQ28y0+7V2UXG28whJ2riMa4CkTE=; irpt-status members=49 delta=1 code_sha256=OOez8YSmE22btOqx28/fJdK9sxGNDGAumU5pMJ++6Ss= | run under timeout 120, rc=0",
+      "denominator": "2 of 2 zips verified; ycharts 8 delta members of 107; status 1 delta member of 49",
+      "expect": "^AR-G103-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR103-g-AC2",
+      "criterion_verbatim": "AC2 checks that your branch changes nothing outside your own folder, your order, the channel file and the issuer's issuance files. At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g103_checks.py scope box/dell2 org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~204 org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-103.release33-lambda-build.md",
+      "output_evidence": "AR-G103-SCOPE-OK 1 changed paths, none outside the grant | run under timeout 120, rc=0",
+      "denominator": "1 changed path against box/dell2 (the record), 0 outside the grant",
+      "expect": "^AR-G103-SCOPE-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the driver's own refusals (non-identical double build, member census mismatch, wrong delta) are the negative arms and the driver is not edited.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the driver builds each package twice with the repository builder (BUILD_ONLY=1, private TMPDIR) and refuses unless the two builds are byte-identical",
+      "observed": "builds_identical=true for irpt-ycharts-generate and irpt-status in R33_BUILD.json",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "upload of the two zips to Lambda or S3",
+      "reason": "BUILD ONLY per TO-AR-g-103; nothing uploaded"
+    },
+    {
+      "item": "terraform plan or apply, any invoke, any live AWS read",
+      "reason": "BUILD ONLY per TO-AR-g-103; no AWS call of any kind"
+    },
+    {
+      "item": "commit of the zip files to git",
+      "reason": "the stage folder C:/dev/irpt-release-r33 is outside the repository by design; the zips are identified by sha256 in artifacts_produced"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/tier1_exec/2.0.0_SA_COO~G2/deliverables/r33/r33_build.py --pin 927337a741f40a83e7daa9e09154436a813b05dd --out C:/dev/irpt-release-r33 --record org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~204/r33/R33_BUILD.json",
+      "result": "R33-BUILD-OK irpt-ycharts-generate members=107 delta=8 code_sha256=kxOEgpbspky10PYWQ28y0+7V2UXG28whJ2riMa4CkTE=; irpt-status members=49 delta=1 code_sha256=OOez8YSmE22btOqx28/fJdK9sxGNDGAumU5pMJ++6Ss= (rc=0, about 5.5 minutes)"
+    }
+  ]
+}
