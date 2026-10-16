@@ -200,16 +200,23 @@ def key23(a):
     raw, d = _load(a.file, "KEY23")
     if d is None:
         return 1
-    p = _common(raw, d, ("order", "read_at", "floor_day", "key", "writer", "why", "last_version_at", "versions_on_floor_day", "calls", "claim"))
+    p = _common(raw, d, ("order", "read_at", "floor_day", "key", "writer", "publisher_condition", "why", "last_version_at", "publisher_window", "versions_in_publisher_window", "versions_on_floor_day_total", "calls", "claim"))
     if p and p[-1].startswith("missing"):
         print("KEY23: FAIL " + "; ".join(p))
         return 1
     _calls_ok(d, p)
-    for k in ("key", "writer", "why", "last_version_at"):
+    for k in ("key", "writer", "publisher_condition", "why", "last_version_at"):
         if not _s(d[k]):
             p.append("%s must be a non-empty string" % k)
-    if d["floor_day"] != "2026-10-16" or d["versions_on_floor_day"] != 0:
-        p.append("floor_day must be 2026-10-16 and versions_on_floor_day 0")
+    w = d["publisher_window"]
+    if d["floor_day"] != "2026-10-16" or not isinstance(w, dict) or w.get("from") != "2026-10-16T13:30:00Z" or w.get("to") != "2026-10-16T13:35:00Z":
+        p.append("floor_day must be 2026-10-16 and publisher_window 2026-10-16T13:30:00Z to 2026-10-16T13:35:00Z")
+    v = d["versions_in_publisher_window"]
+    if isinstance(v, bool) or v != 0:
+        p.append("versions_in_publisher_window must be 0")
+    t = d["versions_on_floor_day_total"]
+    if isinstance(t, bool) or not isinstance(t, int) or t < 0:
+        p.append("versions_on_floor_day_total must be an integer, 0 or more")
     return _finish("KEY23", p, "KEY23: OK key=%s" % d["key"])
 
 
