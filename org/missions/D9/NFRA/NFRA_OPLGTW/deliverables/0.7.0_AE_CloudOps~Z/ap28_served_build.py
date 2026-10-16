@@ -61,6 +61,19 @@ body = {
                "e10 drives the installed GuardMiddleware and ratelimit/audit code in-process with the bearer lookup stubbed to one synthetic stand-in (a real bearer needs a refresh family written to the access-state table, which the order forbids); the live service's limiter is untouched; the 429 row is captured at audit._emit, not read back from the lake",
                "e4: the BD49F and SmartX adapters carry weight_unit 'fraction' but currency null with currency_basis source_absent: neither adapter requests a currency column and the live BD unrealized table has none; schwab has no resolve source in the gateway; cottonwood, commonwealth and orion were not exercised"],
 }
+# A4 (the COO, msg 35177): arm e4 is weight_unit in {fraction, percent}, currency_basis in {source, source_absent}, currency non-null iff the basis is source.
+# Re-graded here on the counts the arms record already holds (no new host read, no redeploy); the raw arm in ap28_arms.json stays as measured (false, the old wording).
+bdu = D["e4_bd49f"].get("units") or []
+bdc = D.get("e4_bd_currency", {})
+basis = bdc.get("basis") or []
+types = bdc.get("types") or []
+e4_a4 = bool(bdu) and all(u in ("fraction", "percent") for u in bdu) and bool(basis) and all(b in ("source", "source_absent") for b in basis)     and (("source" in basis) == any(ty != "NoneType" for ty in types)) and ("source_absent" not in basis or all(ty == "NoneType" for ty in types))
+body["arms"] = dict(body["arms"])
+body["arms"]["e4_unit_currency"] = bool(e4_a4)
+body["e4_regrade"] = {"rule": "A4 (msg 35177): weight_unit in {fraction, percent}; currency_basis in {source, source_absent}; currency non-null iff basis is source",
+                      "raw_arm_in_ap28_arms_json_under_the_old_wording": arms["arms"]["e4_unit_currency"], "regraded": bool(e4_a4),
+                      "counts": {"bd49f_weight_units": bdu, "bd49f_currency_basis": basis, "bd49f_currency_value_types": types,
+                                 "smartx_weight_units": D.get("e4_smartx", {}).get("units"), "smartx_currency_basis": D.get("e4_smartx", {}).get("basis_distinct")}}
 rec = {"body": body}
 io.open(W + "CODE2_SERVED.json", "w", encoding="utf-8", newline="\n").write(json.dumps(rec, indent=1) + "\n")
 print(json.dumps({k: body[k] for k in ("live_commit", "health_status", "env_key_count", "reader_env_keys_present", "registry_count", "per_tool_good", "host_md5", "tools_list_before", "tools_list_after", "muse_env_present", "arms")}, indent=1))
