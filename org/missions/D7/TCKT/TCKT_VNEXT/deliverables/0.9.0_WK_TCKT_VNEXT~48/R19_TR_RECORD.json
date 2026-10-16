@@ -1,0 +1,49 @@
+{
+ "order": "TCKT_VNEXT.TO-R19-TR",
+ "cell": "R19-ev-4",
+ "row_discharged": "IRPT_ANLREQ-D2-S134 items 1 and 2 (CTO msg 8833, ADDENDUM 7)",
+ "file": "infra/aws/terraform/ticket-center/main.tf",
+ "base_commit": "b84a2ca293126a5343d49b6f3bcb06341b30d5ce",
+ "base_commit_basis": "the parent of 4f3b61768c, the first commit on branch wk-TCKT_VNEXT-48 (the earlier BLOCKING-row commit); the worktree was cut from b84a2ca293",
+ "lines_changed": {
+  "insertions": 8,
+  "deletions": 0,
+  "spots": [
+   "module opal_ticket_api environment_variables: ANALYST_INTAKE_ALLOWED_FIRMS, inserted after PACKAGE_ALLOWED_FIRMS, with a 2-line comment",
+   "module opal_ticket_api environment_variables: CLIENT_NOTICE_CONTACT_MAP, inserted after CLIENT_LINK_MAP, with a 4-line comment"
+  ],
+  "verbatim_added_lines": [
+   "    # TCKT_VNEXT R19-ev-4 (row IRPT_ANLREQ-D2-S134 item 2, CTO ADDENDUM 7): the firms the svc-analyst-intake principal may",
+   "    # list tickets for. Never \"ALL\" (the handler drops it). Unset or empty is NO firm, so this list is the only admission.",
+   "    ANALYST_INTAKE_ALLOWED_FIRMS = \"49financial,inflection,cottonwood\"",
+   "    # TCKT_VNEXT R19-ev-4 (row IRPT_ANLREQ-D2-S134 item 1, CTO ADDENDUM 7): the firm-keyed map of CLIENT-NOTICE contacts,",
+   "    # the address a client notice is sent to. DECLARED EMPTY ON PURPOSE: with no contact the notice is not sent and the",
+   "    # handler refuses loudly (WE_CLIENT_NO_CONTACT); it never falls back to a baked address. The membership is an open",
+   "    # input owned by 1.0.0_SA_CTO~DELL2; a row is added HERE, touching no code. Same string style as TICKET_DL_MAP.",
+   "    CLIENT_NOTICE_CONTACT_MAP = \"{}\""
+  ]
+ },
+ "values_decoded": {
+  "CLIENT_NOTICE_CONTACT_MAP": "{} (empty JSON object; no contact address was written)",
+  "ANALYST_INTAKE_ALLOWED_FIRMS": "49financial,inflection,cottonwood (three served firms; no ALL, no wildcard)"
+ },
+ "block_span": {
+  "base": "lines 336-447 at b84a2ca293 (12 keys)",
+  "worktree": "lines 336-455 (14 keys: the 12 base keys plus the 2 new ones)"
+ },
+ "terraform_fmt": {
+  "ran": false,
+  "reason": "the terraform binary is not installed on this box (which terraform: no terraform in PATH); the order allows fmt -check only if installed, so it is not claimed"
+ },
+ "checks": {
+  "AC1": "tf_shape_check_r19.py: TF-SHAPE-OK, rc=0, two runs byte-identical (cmp)",
+  "AC2": "mutant_check_r19.py: MUTANT-FIRES, rc=0; the mutant copy under .scratch/r19tr_mutant/ fails with TF-SHAPE-BAD (ALL added to the intake value)"
+ },
+ "not_read": [
+  "the live Lambda function environment (no AWS call)",
+  "the live contact list and any client-notice address (membership is an open input owned by 1.0.0_SA_CTO~DELL2)",
+  "the Lambda handler source that reads CLIENT_NOTICE_CONTACT_MAP and ANALYST_INTAKE_ALLOWED_FIRMS (TO-R19-L1 and TO-R19-L2 lane)",
+  "the svc-analyst-intake principal's IAM policy and the handler's ALL-drop code (outside this cell's grant)",
+  "no terraform plan, no terraform apply, no network or mail call"
+ ]
+}
