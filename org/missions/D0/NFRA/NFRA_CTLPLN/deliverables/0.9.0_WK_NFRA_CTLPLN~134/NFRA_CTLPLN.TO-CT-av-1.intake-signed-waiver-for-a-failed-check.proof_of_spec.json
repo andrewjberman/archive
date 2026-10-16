@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-av-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-av-1.intake-signed-waiver-for-a-failed-check.md",
+    "group": "OTHER",
+    "vintage_commit": "8ec35ee85f"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~134",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round27.md",
+    "vintage_commit": "8ec35ee85f",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-av-1.intake-signed-waiver-for-a-failed-check.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_check.py",
+      "kind": "script",
+      "commit_or_etag": "1193df6c73",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Waiver carriage: check_8 parses WAIVE lines for this exact file (parse_waivers); _derive carries a failed check 3 to 7 only on a matching waiver and returns released-with-waiver; checks 1 and 2 refused; check 6 records compared_across_platforms, installed_platform, held_platform and differ_after_crlf_normalisation with its verdict unchanged. Built in 11139cb7b5 and amended in 1193df6c73 (WAIVE_RE optional text after the colon).",
+      "artifact_covered_by": ["CTav1-AC1", "CTav1-AC2"]
+    },
+    {
+      "path_or_key": "org/devices/intake/intake_receive.py",
+      "kind": "script",
+      "commit_or_etag": "1193df6c73",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_record_problems accepts checked or released-with-waiver; a released-with-waiver record is re-derived by the standalone mirror _derive_waived (check 8 must read passed); verify prints one INTAKE-VERIFY-WAIVED line per waived check before the unchanged INTAKE-VERIFY last line.",
+      "artifact_covered_by": ["CTav1-AC3"]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_check.py",
+      "kind": "test",
+      "commit_or_etag": "1193df6c73",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stale case fixed in 68ad5e040d (case_check_8_signature_rules: a missing signature file reads awaiting); three behaviour cases added in 1193df6c73 (waiver releases a failed check 6; waiver for check 1 refused; check 6 cross-platform and CRLF evidence). Last line INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True.",
+      "artifact_covered_by": ["CTav1-AC2"]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_receive.py",
+      "kind": "test",
+      "commit_or_etag": "1193df6c73",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two waived-wheel cases added in 1193df6c73: a released-with-waiver pack verifies with the INTAKE-VERIFY-WAIVED line before the last line (checked=1 ok=True); four records that do not re-derive (no waiver line, list disagreeing, check 1 waived, an unwaived name) are refused. Last line INTAKE-RECEIVE-TEST cases=36/36 ok=True.",
+      "artifact_covered_by": ["CTav1-AC3"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round27_waiver.py",
+      "kind": "test",
+      "commit_or_etag": "1193df6c73",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library plus the two tools; synthetic wheels in temporary folders only; no network, no install. Arms (a), (b1), (b2), (c), (d1), (d2), (e), (f1), (f2), (f3), (g1), (g2), controls (k1) to (k5), positive control (p0), parse arm (p1) and parity arm (p2). Last line WAIVER arms=20/20 ok=True.",
+      "artifact_covered_by": ["CTav1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1193df6c73",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows, never edited: NFRA_CTLPLN-W134-S1 (OBSERVATION, INERT; committed 68ad5e040d) and NFRA_CTLPLN-W134-S2 (OBSERVATION, INERT; committed 1193df6c73). Both UNDER_INVESTIGATION.",
+      "artifact_covered_by": ["CTav1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTav1-AC1",
+      "criterion_verbatim": "a named, reasoned WAIVE line carries a failed check 3-7 to release, an unnamed or misdirected one never does, checks 1 and 2 are never waivable, and check 6 records the cross-platform comparison (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round27_waiver.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: WAIVER arms=20/20 ok=True. Deciding lines: PASS: arm_a_unwaived_failed_check_6_still_refuses_release; PASS: arm_b1_waiver_for_a_different_file_does_not_carry; PASS: arm_b2_waiver_for_a_different_check_does_not_carry; PASS: arm_c_waiver_line_in_a_file_without_the_check_8_marker_does_not_carry; PASS: arm_d1_waiver_of_check_1_is_refused_and_check_8_fails; PASS: arm_d2_waiver_of_check_2_is_refused_and_check_8_fails; PASS: arm_e_four_style_line_releases_with_waiver_and_check_6_still_reads_failed; PASS: arm_f1_released_waived_pack_verifies_with_the_waived_line_before_the_last_line; PASS: arm_f2_not_checked_record_still_refused_by_verify; PASS: arm_f3_waived_record_whose_waiver_was_stripped_is_refused_by_verify; PASS: arm_g1_cross_platform_check_6_records_the_comparison_and_the_crlf_count; PASS: arm_g2_same_platform_is_not_recorded_as_cross_platform; PASS: arm_k1_control_a_waiver_never_carries_failed_check_1; PASS: arm_k2_control_a_waiver_never_carries_failed_check_2; PASS: arm_k3_control_check_8_is_never_waivable; PASS: arm_k4_control_refused_waiver_on_check_8_blocks_every_carry; PASS: arm_k5_control_out_of_range_and_empty_waivers_carry_nothing; PASS: arm_p0_positive_control_the_synthetic_model_releases_with_a_waiver; PASS: arm_p1_parse_waivers_reads_only_the_exact_form_for_this_file; PASS: arm_p2_receive_mirror_agrees_with_the_check_tool_on_every_shape.",
+      "denominator": "20 of 20 arms passed: 12 behaviour arms (a to g), 5 control arms (k1 to k5), 1 positive control (p0), 2 parse and parity arms (p1, p2); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTav1-AC2",
+      "criterion_verbatim": "the check tool's own suite passes, its one stale case fixed (base: `INTAKE-CHECK-TEST cases=56/57 skipped=0 ok=False`, a red base); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_check.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True. Base before the cell (8ec35ee85f, measured in the worktree): INTAKE-CHECK-TEST cases=56/57 skipped=0 ok=False with FAIL case_check_8_signature_rules (the stale assertion, line 648). The stale assertion now reads awaiting; no other existing case changed.",
+      "denominator": "60 of 60 cases passed (57 at base plus 3 added for the waiver behaviour); skipped 0 of 60",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTav1-AC3",
+      "criterion_verbatim": "the receiving tool's suite passes with the waived-wheel cases added (base: `INTAKE-RECEIVE-TEST cases=34/34 ok=True`, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_receive.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-RECEIVE-TEST cases=36/36 ok=True. Base control (8ec35ee85f): INTAKE-RECEIVE-TEST cases=34/34 ok=True. Added: case_waived_wheel_verifies_and_prints_the_waived_line_before_the_last_line, case_waived_record_that_is_not_re_derived_is_refused.",
+      "denominator": "36 of 36 cases passed (34 at base plus 2 added)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutant copies in the worktree scratch folder (.scratch/mut1, .scratch/mut2), each the committed intake folder with one line changed, run against the unchanged test_round27_waiver.py: mut1 makes intake_check._derive carry a failed check 1 (the line that tests the failed check 3 to 7 carry is changed to also accept check 1); mut2 removes the check 8 verdict test from the receive mirror intake_receive._derive_waived.",
+      "expected": "each mutant turns the waiver suite red (ok=False) and the arm that names the mutated rule fails: mut1 fails arm_k1 (a waiver must never carry failed check 1); mut2 fails arm_k3 (check 8 is never waivable, mirror side)",
+      "observed": "mut1: WAIVER arms=18/20 ok=False; FAIL: arm_k1_control_a_waiver_never_carries_failed_check_1; FAIL: arm_p2_receive_mirror_agrees_with_the_check_tool_on_every_shape. mut2: WAIVER arms=18/20 ok=False; FAIL: arm_k3_control_check_8_is_never_waivable; FAIL: arm_p2_receive_mirror_agrees_with_the_check_tool_on_every_shape.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed state at 1193df6c73, same command, timeout 280; the PASS, FAIL, INTAKE- and WAIVER lines of the two runs compared with diff",
+      "observed": "AC1: identical (20 PASS lines, WAIVER arms=20/20 ok=True in both runs). AC2: identical (INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True in both runs). AC3: identical (INTAKE-RECEIVE-TEST cases=36/36 ok=True in both runs). Exit code 0 in every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the four WAIVE lines (curl_cffi, numpy, pandas, websockets) in the yfinance check-8 file and the real release of the four wheels",
+      "reason": "the cell changes the tools only; the CTO adds the four lines after this cell merges, and a later cell releases the four wheels (the CTO ruling, term 5)"
+    },
+    {
+      "item": "the receive-side verdict re-derivation for a record that reads 'checked' (checks 1 to 7 are not re-read by intake_receive.py)",
+      "reason": "outside this cell's write grant and widening it is forbidden; filed as observation row NFRA_CTLPLN-W134-S2 for the owner of intake_receive.py"
+    },
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-av-1 to complete",
+      "reason": "the order file is outside this worker's paths; the issuer flips it on a valid, all-PASS instance"
+    },
+    {
+      "item": "the real batch intake-20261016-yfinance-linux and everything under C:/opal-intake/; any release, pack or check against the real batch; any network request; any push, deploy or AWS write; the portal and the account-data check list",
+      "reason": "the cell's rules: synthetic wheels in temporary folders only; the portal gitlink and org/git-author-override-audit.laptop.log are not committed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W134-S1: the intake check suite was red at the base (cases=56/57, case_check_8_signature_rules asserting failed for a missing signature file that check_8 reads as awaiting); the one stale assertion now reads awaiting and the suite is 57/57 before the cell's additions.",
+    "NFRA_CTLPLN-W134-S2: intake_receive.py accepts a record whose verdict is 'checked' without re-reading the verdicts of checks 1 to 7 (a synthetic record with check 1 failed gives no problems); the cell did not change that branch."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~134/NFRA_CTLPLN.TO-CT-av-1.intake-signed-waiver-for-a-failed-check.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile org/devices/intake/intake_check.py org/devices/intake/intake_receive.py .tools/tests/test_round27_waiver.py org/devices/intake/test_intake_check.py org/devices/intake/test_intake_receive.py",
+      "result": "exit 0 (all five files compile under Python 3.12)"
+    },
+    {
+      "tool": "python",
+      "invocation": "timeout 280 python .tools/tests/test_round27_waiver.py | org/devices/intake/test_intake_check.py | org/devices/intake/test_intake_receive.py (run twice each, and the two mutant copies of the waiver suite)",
+      "result": "WAIVER arms=20/20 ok=True; INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True; INTAKE-RECEIVE-TEST cases=36/36 ok=True; mutants WAIVER arms=18/20 ok=False twice"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round21_check_device.py --device (regression: the check tool's device arm, temporary roots only)",
+      "result": "CHECK-DEVICE arms=6/6 ok=True"
+    }
+  ]
+}
