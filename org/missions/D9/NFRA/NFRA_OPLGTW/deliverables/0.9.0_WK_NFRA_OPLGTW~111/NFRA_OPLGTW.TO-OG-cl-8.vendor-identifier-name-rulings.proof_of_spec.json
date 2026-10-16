@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cl-8",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "deb7ff9952",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-8.vendor-identifier-name-rulings.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "deb7ff9952"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~111",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/name_rulings.json",
+      "kind": "doc",
+      "commit_or_etag": "8b687f449a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four none_owed rows appended, one per (name, type): bd_account_id, bd_account_number, fact_bd_allocation (hand-kept carrier) and market_value_profile (INSTANCE_PROFILE). No canonical row; 28 insertions, 0 deletions.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_core.py",
+      "kind": "script",
+      "commit_or_etag": "8b687f449a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The unread orion/4698 alias removed from the alias map and from the module docstring; 4698 kept. Code only.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl1.py",
+      "kind": "test",
+      "commit_or_etag": "8b687f449a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The canonical_firm assertion for orion/4698 now expects firm_not_canonical; 50 of 50 cl1 to cl6 tests pass.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl7.py",
+      "kind": "test",
+      "commit_or_etag": "8b687f449a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The alias-dict expectation follows the deletion: 49f and 4698 only.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~111/CL8_AFTER.txt",
+      "kind": "doc",
+      "commit_or_etag": "8b687f449a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The full-add naming gate in ENFORCE after the rows: 8 REFUSE of 9 graded, the same eight lines in client_adapter_bd49f.py.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8b687f449a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows appended in 8b687f449a: NFRA_OPLGTW-Z-W111-S11 to S14 (BLOCKING, INERT), one per refused (name, type). Existing rows untouched (insertions only).",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the client suites still pass and the modules still import in the host shape.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl7.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "client suites: pytest rc=0; passed 50 (want at least 49); failed 0\nhost-shaped import: client modules import without lib/opal_naming True\nRESULT: PASS\nexit=0",
+      "denominator": "50 of 50 tests pass in test_og_cl1 to test_og_cl6 (want at least 49); failed 0; host-shaped import True",
+      "status": "PASS",
+      "expect": "(?s)client suites: pytest rc=0; passed [0-9]+ \\(want at least 49\\); failed 0.*host-shaped import: client modules import without lib/opal_naming True.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the full-add naming gate in ENFORCE prints no REFUSE.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl7.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "naming gate over the client modules in ENFORCE: rc=1; REFUSE verdicts 8 (want 0); hand-kept firm literals 0 (want 0)\nRESULT: FAIL\nexit=1",
+      "denominator": "REFUSE verdicts 8 of 9 graded (want 0): all 8 in client_adapter_bd49f.py; hand-kept firm literals 0 (want 0)",
+      "status": "FAIL",
+      "status_reason": "The commit-time naming gate (.tools/naming-gate.py _judge, lines 2329-2376) does not consult infra/logic/registry/name_rulings.json, so the four none_owed rows do not clear the eight refusals: bd_account_id, bd_account_number and fact_bd_allocation (hand-kept carrier) and market_value_profile (INSTANCE_PROFILE). Filed as NFRA_OPLGTW-Z-W111-S11 to S14 (BLOCKING, INERT). Nothing was renamed or overridden, and the gate was not edited (bounds).",
+      "expect": "(?s)naming gate over the client modules in ENFORCE: rc=0; REFUSE verdicts 0 \\(want 0\\); hand-kept firm literals 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the four registry rows exist and the unread alias is gone.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/cl8.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "name_rulings: rows for the 4 identifiers 4 of 4 (none_owed, evidence file:line); unique per (name, type) True; orion/4698 alias gone True\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 rows for the four identifiers (none_owed, evidence naming client_adapter_bd49f.py:<line>); unique per (name, type) True; orion/4698 absent from client_core.py True",
+      "status": "PASS",
+      "expect": "(?s)name_rulings: rows for the 4 identifiers 4 of 4 \\(none_owed, evidence file:line\\); unique per \\(name, type\\) True; orion/4698 alias gone True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The rows are the control for AC2: the same full-add gate, run before and after the rows, prints the same eight refusals, so the rows did not change the verdict.",
+      "expected": "not applicable: the order names no mutant",
+      "observed": "No mutant planted. Before the rows (W/CL7_AFTER.txt): REFUSE 8 of 9 graded. After the rows (W/CL8_AFTER.txt): REFUSE 8 of 9 graded.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run once after the commit through the check script.",
+      "observed": "AC1: 'passed 50; failed 0' and RESULT: PASS. AC2: 'REFUSE verdicts 8 (want 0)' and RESULT: FAIL. AC3: '4 of 4; unique True; alias gone True' and RESULT: PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": ".tools/naming-gate.py",
+      "reason": "Listed in the surfaces as read; not edited (bounds: no edit to the gate). Its missing read of name_rulings.json is the BLOCKING finding (Surprises S11 to S14)."
+    },
+    {
+      "item": "The vendor column and table names in client_adapter_bd49f.py",
+      "reason": "Not renamed (bounds: no rename of a vendor column). Read exactly as the vendor publishes them."
+    },
+    {
+      "item": "test_ogch1_ac02 (test_og_ch1.py), failing at HEAD as a file run",
+      "reason": "Pre-existing (Surprise S10 of OG-cl-7); unchanged by this order."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W111-S11: the commit-time naming gate does not consult name_rulings.json; bd_account_id (hand-kept carrier) still REFUSEs after its row exists (BLOCKING, INERT; AC2 FAIL as written).",
+    "NFRA_OPLGTW-Z-W111-S12: the same for bd_account_number (hand-kept carrier) (BLOCKING, INERT).",
+    "NFRA_OPLGTW-Z-W111-S13: the same for fact_bd_allocation (hand-kept carrier) (BLOCKING, INERT).",
+    "NFRA_OPLGTW-Z-W111-S14: the same for market_value_profile (INSTANCE_PROFILE); the adapter emits it as its own response key (BLOCKING, INERT)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~111/NFRA_OPLGTW.TO-OG-cl-8.vendor-identifier-name-rulings.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python .tools/naming-gate.py --enforce",
+      "invocation": "python .tools/naming-gate.py --diff <full add of app/client_*.py> --staged-paths <9 paths + one NFRA_OPLGTW path> --enforce",
+      "result": "After the rows: REFUSE 8 of 9 graded, identical to before the rows; the gate does not read name_rulings.json."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest tests/test_og_cl1.py ... tests/test_og_cl7.py -q (from infra/aws/ec2/opal-gateway)",
+      "result": "cl1 to cl7: 55 passed; test_og_ch1.py: 5 passed, 1 failed (ac02, pre-existing)."
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cl-8.vendor-identifier-name-rulings.md",
+      "result": "Run after the record commit; see the validation line in the report."
+    }
+  ]
+}
