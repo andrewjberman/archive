@@ -42,7 +42,7 @@ for t in sorted(trunk_files):
     b = t.rsplit("/", 1)[-1]
     if t.startswith(G + "tests/") and (
             (b.startswith("test_og_") and b[len("test_og_"):-3] in (
-                "cl1", "cl2", "cl3", "cl4", "cl5", "cl6", "cl7", "cl8", "rv1", "rv2", "ch1", "gp1", "gf1", "sv1", "sv2", "ac2"))
+                "cl1", "cl2", "cl3", "cl4", "cl5", "cl6", "cl7", "cl8", "rv1", "rv2", "ch1", "gp1", "gf1", "sv1", "sv2", "ac2", "ad1", "bd3"))
             or b in (
             "test_admin_gateway_breakdown.py", "test_admin_people.py", "test_positioning_extension.py")):
         take.add(t)
