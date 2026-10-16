@@ -45,3 +45,18 @@ Re-read from git:
   counts, the build header). **No `firm`, `vendor`, `bucket` or visibility field changes**, so no new widening.
 
 This half binds to v2's pins. B's half above stands for what is live.
+
+## v3 SIGNED ~12:0xZ: post-publish re-measure (COO~MI msg 34982; ask section 7 @4192ee91a4)
+
+v2 landed at 11:30Z, and r13.AC3 failed again: the daily publish ran before 11:35Z. v3 was graded against live AWS BEFORE shipping.
+Re-read from git:
+- **Catalog blob:** `16250301d6a9...` at trunk `177d5244fc`.
+- **Base:** the live `deployed_commit` is `1bc2df0b13` (v2), per EC2_MANIFEST at HEAD and on origin. One file changes, and
+  rollback is to v2.
+- **Blob diff `4c27b28171` to `16250301d6`:** 106 lines in, 106 out, all `read_at`, `value` and build header. No `firm`, `vendor`,
+  `bucket` or visibility field changes.
+
+**Enrichment, for MCPINDEX's next round, not this release:** three releases in one morning chased depth and freshness claims that
+age with every publish. A static catalog field graded by exact equality against live depth will keep failing on each publish.
+Either the claim carries its own `as_of`, with r13.AC3 graded as "within the publish window", or depth is read live at
+answer time, not pinned.
