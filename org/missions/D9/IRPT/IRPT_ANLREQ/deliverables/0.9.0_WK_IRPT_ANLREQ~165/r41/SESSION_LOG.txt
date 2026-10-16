@@ -1,0 +1,26 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~165 on IRPT_ANLREQ.TO-AR-y-368 (base 2ba399d785, UTC 2026-10-16)
+
+Offline only: no live call, no network, no AWS, no driver main(), no browser, no push.
+
+1. Identity: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-165; test -d org and test -d .tools -> TREE-OK.
+2. Door source read from git HEAD (the worktree is sparse; infra/aws/lambda/investor-reporting is absent on disk):
+   git grep -c -E 'TICKER_NOT_FOUND|TICKER_DATA_NOT_ENTITLED|REPLACE_TICKER|REPLACE_FILE|FILE_UNRESOLVED|ACCEPT_SUGGESTION' HEAD -- infra/aws/lambda/investor-reporting/ | wc -l -> 20
+   git show HEAD:<path> | awk line-numbered reads of intake/portfolio.py, intake/security_resolution.py,
+   intake/upload_suggestions.py, intake/uploads.py, ycharts/session/resident_session.py, ycharts/generate/resident_worker.py,
+   intake/yfinance_check.py, and the tests and captures under intake/tests/ (lookup_capture 02, 03, 04).
+3. Production wiring: git grep -n -E 'YfinanceChecker\(|checker=' HEAD -- infra/aws/lambda/investor-reporting/ (non-test) -> none constructed
+   outside tests; security_resolution.py:204 default checker=None; resident_session.py:145-146 passes no checker.
+4. Measured TIMXX row: git show HEAD:org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md
+   lines 15636, 15641, 15648 (row IRPT_BCKEND-S287).
+5. Inputs written: fwd1_holdings_49financial_r41c.csv (84 bytes, sha256 59166311e5c18ebf78141f78ab0791504c68705014c30a1e4967c2531988347f);
+   fwd1_decisions_r41c.json (18 bytes, sha256 6c6be4a1106366608cdf886f2cdc28206cb066c7fe44a52fc5350ceafb77ddb9, {"decisions": []}).
+6. Validator: FWD_DRIVER=<signed fwd1_driver.mjs> FWD_DECISIONS=<decisions> node --input-type=module -e
+   "import ... m.readDecisionsFile(process.env.FWD_DECISIONS)" -> {"ok":true,"decisions":[]} rc=0; exports validateDecisions=function readDecisionsFile=function.
+   FWD_DRIVER and FWD_DECISIONS are env vars so the driver's main() guard (argv[1]) stays false.
+7. Checkers at their own paths in the worktree:
+   python inputs_check.py -> INPUTS-OK 3 rows, branches B, decisions valid, csv sha256 59166311e5c1; checks 46 of 46 passed; evidence quotes 27 of 27 at git HEAD (rc 0; second run byte-identical)
+   python base_check.py -> BASE-OK ... (rc 0)
+   python mutant_check.py -> MUTANT-FIRES ... (rc 0)
+8. Negative control: a bad quote on the B evidence (security_resolution.py:72) gives one evidence violation; the unmutated record gives 0.
+9. Bug fixed during the run: the checkers' repo root was parents[7]; the folder is parents[6] (ROOT computed from the deliverable folder). base_check.py and inputs_check.py corrected before any PASS was recorded.
+10. Surprise rows appended to INVESTIGATION_v1.md (IRPT_ANLREQ-D2-W165-S1..S4): 104 insertions, 0 deletions.
