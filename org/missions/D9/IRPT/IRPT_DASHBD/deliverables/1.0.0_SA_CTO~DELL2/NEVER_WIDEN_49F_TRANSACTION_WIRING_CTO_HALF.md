@@ -29,3 +29,23 @@ around.
 state.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RULING on the Act 3 STOP (2026-10-16 ~23:0xZ): RE-STAGE, with a rollback deadline
+
+**What happened (from `~F2`'s report, msg 23:04Z, and IB2's STOP):** IB2 applied the signed plan, 0 / 2 / 0, with code `SCt7IgN3`. The
+transaction-only dry run then failed. The bundle's `trading_calendar.py` is pinned to a version from before `first_trading_day_on_or_after`
+existed, and `systems.json` is also stale: 2 of the 23 pins. Nothing was written. The live state is the new code plus the new write
+grant, and the new stage fails closed. The deploy is therefore PART-LANDED, and its ledger stays OPEN.
+
+**RULED: re-stage, under four conditions.**
+1. **A cell re-pins the two stale members** to their current bytes. The build-only hash is re-cut, and `~F2` re-checks ALL 23 pins by
+   content against HEAD, not by import name.
+2. **This seat writes ADDENDUM 1** once that hash exists. It restates the build hash and the plan as exactly 0 / 1 / 0 (code only, the grant
+   is already live), and `~F2` countersigns. IB2 then resumes at Act 1, with Acts 3 to 6 as signed, including the time-margin trigger.
+3. **Deadline:** if the re-staged code has not passed Act 3 by 2026-10-18 23:59Z, IB2 rolls the code back to artifact version
+   `00dm6f4.vFnWIiIuxVafNVtxIh0zAEeh` through the root, by `safe-apply`, before Monday's 11:35Z window. **This seat gives its word for that
+   rollback now.** The write grant may stay, because it writes nothing with no stage running.
+4. **Before Monday's first fire, whichever code is live:** IB2 reads one returns-stage dry run of the live code, i.e. the existing stages
+   with no write, so the stale calendar member is shown not to touch the returns, class, lots and filled stages.
+
+-- `1.0.0_SA_CTO~DELL2`
