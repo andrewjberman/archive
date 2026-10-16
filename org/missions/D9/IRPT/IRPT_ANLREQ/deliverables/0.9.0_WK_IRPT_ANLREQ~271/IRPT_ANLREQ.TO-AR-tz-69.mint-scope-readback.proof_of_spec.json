@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-AR-tz-69",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-69.mint-scope-readback.md",
+  "group": "OTHER",
+  "vintage_commit": "f3e0d5b8d1"
+ },
+ "assignee": "0.9.0_WK_IRPT_ANLREQ~271",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R59_TX.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-69.mint-scope-readback.md",
+  "vintage_commit": "f3e0d5b8d1"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/fwd5_mint.py",
+   "kind": "script",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "cmd_mint reads back allowedFirmIds and the partition's entitlement rows after a READBACK-OK: prints MINT-SCOPE allowedFirmIds=<ids> entitlement_rows=<n>; rows != 0 gives MINT-OK READBACK-BAD entitlement and rc 1; a query error gives MINT-OK READBACK-BAD query <type> and rc 1; entitlement_rows(resp) counts SK != PROFILE; cmd_remove unchanged; no AWS call was made or run",
+   "artifact_covered_by": [
+    "AR69-tz-AC1"
+   ],
+   "commit_or_etag": "9e6718f4dd"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "kind": "test",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "25 offline test functions (15 base plus 10 test_scope_*); the two base exact-match green asserts now compare splitlines()[0]; pytest on the file: 25 passed, rc 0, twice",
+   "artifact_covered_by": [
+    "AR69-tz-AC1"
+   ],
+   "commit_or_etag": "9e6718f4dd"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one row IRPT_ANLREQ-D2-W271-S1 (OBSERVATION, INERT) appended after the last row; no earlier row edited; surprise-row-gate OK: 1 new row of 836 total",
+   "commit_or_etag": "6c951a723a"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR69-tz-AC1",
+   "criterion_verbatim": "AR69-tz-AC1 -- the tests pass and at least 20 pass. Expect: R46-TESTS-OK.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 20 --prefix=test_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "expect": "R46-TESTS-OK",
+   "output_evidence": "run at the worktree root C:/dev/wk-irpt-anlreq-271 at HEAD 6c951a723a: stdout \"R46-TESTS-OK passed=25\"; rc=0. Base before the cell (f3e0d5b8d1): \"R46-TESTS-FAIL only 15 test functions defined, need 20\"; rc=1",
+   "denominator": "25 passed of 25 test functions defined in the file (15 base + 10 test_scope_*); the checker requires at least 20 passed and at least 20 defined",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "PROFILE counted as an entitlement row in a scratch copy: the != SK comparison in entitlement_rows replaced by != \"NEVER\", so every item in the partition counts, PROFILE included; the copy's test file run against the copy's module",
+   "expected": "the scope tests that assert entitlement_rows=0 on a PROFILE-only partition fail",
+   "observed": "6 failed, 19 passed, rc=1: FAILED test_scope_line_printed_on_green_mint, test_scope_profile_only_items_count_as_zero, test_scope_non_profile_items_are_counted_and_profile_is_not, test_scope_entitlement_rows_refused_with_bad_word, test_scope_two_ids_comma_joined_and_one_id_bare, test_scope_query_keys_the_principal_partition_consistently",
+   "status": "FIRED-AS-EXPECTED",
+   "recorded_by": "0.9.0_WK_IRPT_ANLREQ~271 at commit 6c951a723a, in .scratch/mutant (not committed)"
+  },
+  "determinism": {
+   "method": "the real test file run twice with python -m pytest -q -p no:cacheprovider on the file; the pass lines compared",
+   "observed": "run 1: 25 passed in 4.51s; run 2: 25 passed in 4.47s; the pass counts are identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "any mint, remove, sign-in, AWS or DynamoDB call, any GSI, IAM or SSM value, any network call",
+   "reason": "the order forbids any AWS call, mint, run or deploy; the scope read-back is exercised only against the module's offline fake; the later live run is a separate WORLD act under its own pair"
+  },
+  {
+   "item": "the driver and cmd_remove",
+   "reason": "outside the order's grant; cmd_remove and FakeDDB.query are unchanged"
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-W271-S1: OBSERVATION -- the order's green-path scope line broke two existing exact-match stdout asserts (test_cross_firm_mint_two_emails_give_two_keys, test_cross_firm_mint_readback_ok_when_shape_matches); both now compare splitlines()[0] and keep the READBACK-OK expectation"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r46_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 20 --prefix=test_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "result": "rc=0, \"R46-TESTS-OK passed=25\" at HEAD 6c951a723a; the base at f3e0d5b8d1 read \"R46-TESTS-FAIL only 15 test functions defined, need 20\" rc=1"
+  },
+  {
+   "tool": "offline pytest (substitute, not the criterion)",
+   "invocation": "python -m pytest -q -p no:cacheprovider org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/test_cross_firm_mint.py",
+   "result": "25 passed, rc=0 (twice)"
+  },
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh <fwd5_mint.py> <test_cross_firm_mint.py>",
+   "result": "pre-commit gate clean for 2 of 2 file(s)"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~271 <0.9.0_WK_IRPT_ANLREQ~271@opal.agent>\" -F .scratch/msg_tz69_code.txt -- <2 paths>; then -F .scratch/msg_tz69_row.txt -- <channel>",
+   "result": "committed 9e6718f4dd (msg-verify MATCH); committed 6c951a723a (surprise-row-gate OK 1 new row of 836; msg-verify MATCH). The first row commit was killed by an outer timeout 120 at rc=124 with nothing committed; the retry under a 500 s bound committed it"
+  }
+ ]
+}
