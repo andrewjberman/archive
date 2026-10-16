@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cr-1",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round96.md",
+    "vintage_commit": "923f06e998ec4c731cbbaf38daace6ab51028227",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cr-1.measure-served-move-on-dell2-run-data.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cr-1.measure-served-move-on-dell2-run-data.md",
+    "group": "OTHER",
+    "vintage_commit": "923f06e998ec4c731cbbaf38daace6ab51028227"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~186",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~186/SERVED_MOVE_MEASURED_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "75ada2aaf9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement record; no S3 write, no serve, no apply; the served objects were read with get_object only",
+      "artifact_covered_by": [
+        "CB96cr1-AC1",
+        "CB96cr1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~186/SERVED_MOVE_MEASURED_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "75ada2aaf9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement record; no S3 write, no serve, no apply; the served objects were read with get_object only",
+      "artifact_covered_by": [
+        "CB96cr1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB96cr1-AC1",
+      "criterion_verbatim": "`CB96cr1-AC1` -- the record states the control result and the added columns, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~186/SERVED_MOVE_MEASURED_RECORD.json',encoding='utf-8'));m=d['measured'];print('SERVED-MOVE measured=%s' % m + ((' equal_tables=%d of 3 added_columns=%s' % (sum(1 for t in d['control'].values() if t['pre_existing_equal']), ','.join(sorted(set(c for t in d['added_columns'].values() if isinstance(t,dict) for c in t.get('columns_added',[])))))) if m else ' reason=%s' % d['reason']))\"",
+      "expect": "^SERVED-MOVE measured=(True equal_tables=[0-3] of 3 added_columns=[a-z_,]*|False reason=.+)$",
+      "output_evidence": "SERVED-MOVE measured=True equal_tables=3 of 3 added_columns=porting_verdict,use_class",
+      "denominator": "control: 3 of 3 tables pre_existing_equal (1,691,729 + 21,102,041 + 82,593 rows compared; 0 differing); added columns: 2 of 2 (use_class, porting_verdict) in each of 3 tables",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB96cr1-AC2",
+      "criterion_verbatim": "`CB96cr1-AC2` -- every label count adds up to the built row count of its table.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~186/SERVED_MOVE_MEASURED_RECORD.json',encoding='utf-8'));ok=(not d['measured']) or all(sum(t['use_class'].values())==d['control'][k]['built_rows'] and sum(t['porting_verdict'].values())==d['control'][k]['built_rows'] for k,t in d['added_columns'].items() if isinstance(t,dict));print('SERVED-MOVE-SUMS consistent=%s' % ok)\"",
+      "expect": "^SERVED-MOVE-SUMS consistent=True$",
+      "output_evidence": "SERVED-MOVE-SUMS consistent=True",
+      "denominator": "label sums: 3 tables x 2 label columns = 6 sums, each equal to its table's built row count (1,691,729 / 21,102,041 / 82,593)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB96cr1-AC3",
+      "criterion_verbatim": "`CB96cr1-AC3` -- the received folder still holds the 20,563 files and 4,478,568,892 bytes the manager sent (read directly, not from your record). The builder writes to `.scratch/cotbkf_r96_build`, outside the received tree, so this reading does not change when you build; run it BEFORE item 2 anyway and keep that line as the evidence.",
+      "method": "command",
+      "invocation": "python -c \"import os;n=0;b=0;r='C:/Dev/ajb_workspace/.scratch/advi_cotbkf'\nfor p,ds,fs in os.walk(r):\n    for f in fs:\n        n+=1;b+=os.path.getsize(os.path.join(p,f))\nprint('RECEIVED files=%d bytes=%d' % (n,b))\"",
+      "expect": "^RECEIVED files=20563 bytes=4478568892$",
+      "output_evidence": "RECEIVED files=20563 bytes=4478568892",
+      "denominator": "20,563 of 20,563 files expected; 4,478,568,892 of 4,478,568,892 bytes expected (read directly from the received folder)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "per-file hash of the received folder",
+      "reason": "the order's preflight checks it by file count and total bytes against the manager's report; no per-file hash was asked"
+    },
+    {
+      "item": "pinned VersionId reads of the served objects",
+      "reason": "the order reads the served keys at their current version and records each VersionId; a pinned read was not asked"
+    },
+    {
+      "item": "re-grade run (commonwealth_sweep_regrade.py) and any vendor call",
+      "reason": "forbidden by the order; the re-grade output was received in the r34 run data"
+    },
+    {
+      "item": "a served-label count to compare the NOT_FOR_ACTIVE count against",
+      "reason": "no served Yahoo-sourced row exists to label (zero yahoo_finance or linear_interpolation price_source in served and built); see ADVI_COTBKF-D1-W186-S1"
+    },
+    {
+      "item": "COTBKF_SWEEPS_CONFIG private config",
+      "reason": "not set on this box; the build ran without it and printed no refusal; its effect was not separately measured"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W186-S1: no served or rebuilt FWD-3 row carries a Yahoo-sourced price_source, so every use_class and porting_verdict label reads NOT_YAHOO and NOT_FOR_ACTIVE counts 0",
+    "ADVI_COTBKF-D1-W186-S2: the local --build does not finish inside the timeout 120 bound on this box; it ran under timeout 1500 and the departure is recorded in the row"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~186/ADVI_COTBKF.TO-CB-cr-1.measure-served-move-on-dell2-run-data.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (builder, commonwealth_fwd3_serve.py --build at the worktree path)",
+      "invocation": "python data/assets/scripts/silver/commonwealth_fwd3_serve.py --build --data-dir C:/Dev/ajb_workspace/.scratch/advi_cotbkf/r34 --grades C:/Dev/ajb_workspace/.scratch/advi_cotbkf/r34_out/month_grades_after.parquet --cache C:/Dev/ajb_workspace/.scratch/advi_cotbkf/cache --cash-leg method_r28 --price-basis as_traded --hold-cusips 05613L3H2,95000U2D4,651639AX4 --yahoo-active-policy interim --out C:/Dev/ajb_workspace/.scratch/cotbkf_r96_build",
+      "result": "FWD3-BUILD daily_rows=1691729 value_rows=21102041 month_rows=82593 cash_leg=method_r28 run_commit=923f06e998ec day_values_rows_checked=1691729 month_grades_rows_checked=82593 absent_months=5 price_basis=as_traded absent_reason=REGRESSED_UNDER_AS_TRADED hold_cusips=3 held_account_days=988 use_class_policy=interim; BUILD-RC=0"
+    },
+    {
+      "tool": "python (served control and label counts; worktree scratch helper, not committed)",
+      "invocation": "python .scratch/measure186.py (run from the worktree; reads the three served keys with get_object, compares with the local build)",
+      "result": "CONTROL daily_returns served_rows=1691729 built_rows=1691729 rows_differing=0 max_abs_diff=0.0 pre_existing_equal=True; account_day_value served_rows=21102041 built_rows=21102041 rows_differing=0 max_abs_diff=0.0 pre_existing_equal=True; month_grades served_rows=82593 built_rows=82593 rows_differing=0 max_abs_diff=0.0 pre_existing_equal=True; accounts_not_for_active=0"
+    }
+  ]
+}
