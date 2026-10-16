@@ -30,7 +30,8 @@ CONTRACT_REL = "org/standards/IRPT_DASHBD_SERIES_CONTRACT.json"
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~226"
 REC_REL = D + AUTHOR + "/RD_COT_PUBLISH_HANDLER_FACTS_R147.json"
 ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-280.cottonwood-series-publish-handler.md"
-GRANT_FILES = {HANDLER_REL, TEST_REL}
+PRIOR_CELL_FILES = {"infra/aws/lambda/investor-reporting/reporting-publish/publisher.py", "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_publisher_unreported.py"}  # DB-b-279, same worker, same branch, earlier in the chain
+GRANT_FILES = {HANDLER_REL, TEST_REL} | PRIOR_CELL_FILES
 GRANT_PREFIXES = (D + AUTHOR + "/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/", "infra/aws/lambda/investor-reporting/reporting-publish-cot/tests/")
 FLOOR = "2026-07-10"
 FIXED = "trading calendar minus present partitions"
@@ -332,7 +333,7 @@ def selftest():
             ("firm outside lookup", good + 'F = "cottonwood"\n'), ("switch", good.replace(" is True", " == True")), ("print", good.replace("len(acct)", "acct")), ("print wanted", good + "def g(wanted):\n    print(wanted)\n"))
     for label, src in arms:
         red(lambda: check_discipline(src, {"opal-data-x"}), label)
-    assert check_grant({HANDLER_REL, TEST_REL, D + AUTHOR + "/x.json"})
+    assert check_grant({HANDLER_REL, TEST_REL, D + AUTHOR + "/x.json", sorted(PRIOR_CELL_FILES)[0]})
     red(lambda: check_grant({HANDLER_REL, TEST_REL, "lib/x.py"}), "outside grant")
     red(lambda: check_grant({HANDLER_REL}), "no test")
     rec = {"floor_day": FLOOR, "dry_run_default": True, "upload_switch": "event upload is exactly True", "summary_keys": sorted(SUMMARY_KEYS), "reads_only_from_floor": True, "tests": 10, "words": "w" * 100}
