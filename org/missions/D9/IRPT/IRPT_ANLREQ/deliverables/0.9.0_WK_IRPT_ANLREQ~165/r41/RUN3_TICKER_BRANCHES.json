@@ -1,0 +1,102 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-368",
+  "cell": "AR-y-368",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~165",
+  "base_commit": "2ba399d785",
+  "door_source_read": "git show HEAD:<path> and git grep at 2ba399d785. The worktree is sparse: infra/aws/lambda/investor-reporting is absent on disk, so every door line was read from git HEAD. Every evidence quote below is verified by inputs_check.py against git HEAD at its cited line.",
+  "name_searches": [
+    "git grep -c -E 'TICKER_NOT_FOUND|TICKER_DATA_NOT_ENTITLED|REPLACE_TICKER|REPLACE_FILE|FILE_UNRESOLVED|ACCEPT_SUGGESTION' HEAD -- infra/aws/lambda/investor-reporting/ | wc -l => 20 files carry a ticker decision code",
+    "git grep -n -E 'PROVIDER_ENTITLEMENT_UNVERIFIED|EXACT_IDENTIFIER_ABSENT' HEAD -- infra/aws/lambda/investor-reporting/ (non-test) => producers: security_resolution.py:185 (NOT_FOUND), security_resolution.py:190 (entitlement); consumer: portfolio.py:532",
+    "git grep -n -E 'YfinanceChecker\\(|checker=' HEAD -- infra/aws/lambda/investor-reporting/ (non-test) => no production construction of YfinanceChecker; the default is checker=None at security_resolution.py:204; the only non-test SecurityResolver( construction is resident_session.py:145, which passes no checker",
+    "git grep -n -E 'suggest_for|advisory=' HEAD -- infra/aws/lambda/investor-reporting/ (non-test) => the only suggestion producer is resident_worker.py:821 calling upload_suggestions.suggest_for with advisory.call (the Kimi check)",
+    "git grep -l -E 'M:TIMXX|evergreenFundData' HEAD -- org/missions/D9/IRPT/ => 2 files: the cell's prior record (worker 159 RUN3_HOLDINGS.json) and the IRPT_BCKEND surprise investigation (the measured row IRPT_BCKEND-S287 is in the second)"
+  ],
+  "branches": {
+    "A1": {
+      "status": "UNESTABLISHED-OFFLINE",
+      "chosen_ticker": null,
+      "path": "A1 is a provider NOT_FOUND (portfolio.py:519, security_resolution.py:185) that the suggestion gate answers with a suggestion (upload_suggestions.py:58-86, Yes added first). The NOT_FOUND half is pinned for ALPPL and BREIT in the 2026-09-23 securities_info capture. The suggestion half is a live Kimi reply verified by a live securities_info read, so it is not settled offline.",
+      "evidence": [
+        {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 519, "quote": "elif state == \"NOT_FOUND\":"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 521, "quote": "emit(\"TICKER_NOT_FOUND\", coordinate, \"A\", actions=[\"REPLACE_FILE\", \"REPLACE_TICKER\", \"FILE_UNRESOLVED\"],"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 185, "quote": "result.update(state=\"NOT_FOUND\", reason=\"EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ\")"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py", "line": 58, "quote": "answer = advisory(\"check\", symbol, context_symbols=context, deadline=deadline)"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py", "line": 63, "quote": "if isinstance(suggestion, str) and suggestion.upper() != symbol:"},
+        {"file": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "line": 821, "quote": "shaped, counts = suggest_for(findings, template, advisory=advisory.call, clock=advisory.clock,"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py", "line": 35, "quote": "symbols = [\"AAPL\", \"ALPPL\", \"VNQ\", \"BREIT\", \"$:CASH\"]"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py", "line": 39, "quote": "[\"FOUND\", \"NOT_FOUND\", \"FOUND\", \"NOT_FOUND\", \"FOUND\"]"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py", "line": 47, "quote": "# A typeahead response is not a successful complete securities_info response."}
+      ],
+      "reason_if_unestablished": "No pinned file holds a suggestion. The door attaches one only when a live Kimi 'check' reply names a ticker that a live securities_info read then answers FOUND exactly (upload_suggestions.py:58-86). No pinned capture holds a Kimi reply. The two typeahead captures (03_suggest_ALPPL.json, 04_suggest_BREIT.json) are /search/suggest/main responses, not the suggestion path, and the source refuses a typeahead as a securities_info receipt (test_security_resolution.py:47-48). So whether any symbol draws a verified suggestion is not settled offline.",
+      "candidates_for_a_live_read": ["ALPPL", "APPL"],
+      "candidate_basis": "ALPPL: NOT_FOUND in the pinned 2026-09-23 securities_info read (capture 02 request line 3, ids AAPL, VNQ, $:CASH only; test line 39), and a typo case the repo already names. APPL: a one-letter transposition of AAPL, used as the typo example in test_y4_check_gate.py:224; its live provider state is NOT pinned."
+    },
+    "A2": {
+      "status": "UNESTABLISHED-OFFLINE",
+      "chosen_ticker": null,
+      "path": "A2 is a provider NOT_FOUND filed TICKER_NOT_FOUND with actions REPLACE_FILE, REPLACE_TICKER, FILE_UNRESOLVED (portfolio.py:521-522) and no suggestion attached. The NOT_FOUND half is pinned. The no-suggestion half is the absence of a verified live Kimi reply, which is live.",
+      "evidence": [
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 185, "quote": "result.update(state=\"NOT_FOUND\", reason=\"EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ\")"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 521, "quote": "emit(\"TICKER_NOT_FOUND\", coordinate, \"A\", actions=[\"REPLACE_FILE\", \"REPLACE_TICKER\", \"FILE_UNRESOLVED\"],"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/02_securities_info.json", "line": 3, "quote": "securities=AAPL%2CALPPL%2CVNQ%2CBREIT%2C%24%3ACASH"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py", "line": 39, "quote": "[\"FOUND\", \"NOT_FOUND\", \"FOUND\", \"NOT_FOUND\", \"FOUND\"]"}
+      ],
+      "reason_if_unestablished": "BREIT is absent from the pinned securities_info read (capture 02 ids are AAPL, VNQ, $:CASH; test_security_resolution.py:39 asserts BREIT NOT_FOUND), so the NOT_FOUND is pinned. Whether a Kimi reply verifies a suggestion for BREIT is live, and the answer is the difference between A1 and A2. A pinned file cannot settle it, so no A2 row and no A2 decision are written.",
+      "candidates_for_a_live_read": ["BREIT", "ALPPL"],
+      "candidate_basis": "BREIT: bare BREIT is absent from the pinned 2026-09-23 read; the nine gated BREIT rows in 04_suggest_BREIT.json are keyed BREIT.S, BREIT.L and so on, none bare (typeahead, not securities_info). ALPPL: as in A1."
+    },
+    "B": {
+      "status": "established",
+      "chosen_ticker": "TIMXX",
+      "path": "A securities_info row for the requested bare ticker, with a non-empty features_needed, is classified PROVIDER_ENTITLEMENT_UNVERIFIED (security_resolution.py:189-190). A fund row keyed M:<ticker> with display id and security_id matching counts as that ticker's row (security_resolution.py:70-73, 170). portfolio.py:532-535 then emits TICKER_DATA_NOT_ENTITLED with actions REVIEW and severity NOTICE, and portfolio.py:538 files the row UNRESOLVED. No live call is made for this path: the entitlement branch sets UNAVAILABLE and the yfinance checker is not consulted for it.",
+      "evidence": [
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 72, "quote": "if row.get(\"security_id\") != row.get(\"id\"):"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 170, "quote": "fund_rows = [c[0] for s, c in groups.items() if s not in fund_refused and len(c) == 1 and c[0][\"id\"] != s]"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 177, "quote": "gated=sum(1 for row in fund_rows if row[\"features_needed\"]),"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 189, "quote": "elif candidates[0][\"features_needed\"]:"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "line": 190, "quote": "result.update(reason=\"PROVIDER_ENTITLEMENT_UNVERIFIED\", candidates=copy.deepcopy(candidates))"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 532, "quote": "elif reason == \"PROVIDER_ENTITLEMENT_UNVERIFIED\":"},
+        {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 535, "quote": "emit(\"TICKER_DATA_NOT_ENTITLED\", coordinate, \"A\", actions=[\"REVIEW\"], value=named, severity=\"NOTICE\","},
+        {"file": "infra/aws/lambda/investor-reporting/intake/portfolio.py", "line": 538, "quote": "unresolved = True"},
+        {"file": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md", "line": 15636, "quote": "\"id\": \"IRPT_BCKEND-S287\","},
+        {"file": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md", "line": 15641, "quote": "S284 MEASURED (was inferred): YCharts answers TIMXX with its M:TIMXX fund row needing the feature mutualFundDataUSA"},
+        {"file": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md", "line": 15648, "quote": "matched=0 gated=1 features=mutualFundDataUSA=1"}
+      ],
+      "evidence_grade": "RECORDED MEASUREMENT plus door source. The TIMXX entitlement is a measured provider answer recorded in a git-pinned surprise row (IRPT_BCKEND-S287, resident journal 2026-10-03T00:20:39Z, gated=1 with feature mutualFundDataUSA). It is NOT a securities_info capture file in the door tree. gated=1 is counted only for a fund row that passed the display and security_id checks (security_resolution.py:72, 170, 177), so the measured count also confirms the row shape the classifier needs.",
+      "reason": "Established without a live call in this run, on the recorded measurement and the source path. The live entitlement at run time is not read (not_read)."
+    }
+  },
+  "clean": {
+    "status": "established",
+    "tickers": ["AAPL", "VNQ"],
+    "evidence": [
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/02_securities_info.json", "line": 13, "quote": "\"id\": \"AAPL\","},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/02_securities_info.json", "line": 16, "quote": "\"features_needed\": [],"},
+      {"file": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/02_securities_info.json", "line": 28, "quote": "\"id\": \"VNQ\","}
+    ],
+    "note": "AAPL and VNQ are FOUND in the pinned 2026-09-23 read with features_needed empty. They are not csv rows: the signed base rows are SPY and AGG, and SPY and AGG have no provider read pinned in the door tree (not_read)."
+  },
+  "established_branches": ["B"],
+  "csv_path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~165/fwd1_holdings_49financial_r41c.csv",
+  "csv_sha256": "59166311e5c18ebf78141f78ab0791504c68705014c30a1e4967c2531988347f",
+  "csv_bytes": 84,
+  "decisions_path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~165/fwd1_decisions_r41c.json",
+  "decisions_sha256": "6c6be4a1106366608cdf886f2cdc28206cb066c7fe44a52fc5350ceafb77ddb9",
+  "decisions_bytes": 18,
+  "decisions_note": "No A1 row and no A2 row, so the decisions list is empty. TIMXX files UNRESOLVED with the REVIEW notice and no prompt, so there is nothing to press.",
+  "validator_verdict": "node --input-type=module, with the signed driver fwd1_driver.mjs imported by env path (its main() is guarded and was not invoked): readDecisionsFile(fwd1_decisions_r41c.json) -> {\"ok\":true,\"decisions\":[]}, rc=0. The driver exports validateDecisions=function and readDecisionsFile=function.",
+  "claim": "At base 2ba399d785 the door classifies a requested bare ticker as TICKER_DATA_NOT_ENTITLED only when a securities_info fund row for that ticker is entitlement-gated (security_resolution.py:189-190 to portfolio.py:532-535). The one recorded instance in the estate is TIMXX (IRPT_BCKEND-S287). BREIT, SREIT and KPEC are not classified that way by any source line (a bare BREIT is NOT_FOUND on the pinned read). Run 3 is therefore: SPY and AGG (signed rows) and TIMXX (branch B). A1 and A2 are UNESTABLISHED-OFFLINE: the suggestion depends on a live Kimi reply and a live securities_info verify, so they get no csv row and no decision.",
+  "not_read": [
+    "The live door's answers for any symbol at run time: the Kimi check reply, the suggestion verify and the securities_info read.",
+    "The provider's entitlement for TIMXX on the account today (the measured feature mutualFundDataUSA is from the 2026-10-03 journal only).",
+    "The yfinance answer for any symbol: the checker is not constructed by production code, so no yfinance step runs in the HEAD source (surprise IRPT_ANLREQ-D2-W165-S2).",
+    "The registry (etf-classifications GetItem, resident_worker.py:44-70) at run time. The source attaches it as evidence only (security_resolution.py:292-294); portfolio.py has no registry reference.",
+    "The provider's answers for SPY and AGG (signed base rows; no pinned read for them in the door tree).",
+    "A typeahead-shaped securities_info row for BREIT.S or any gated BREIT row. The only pinned gated rows are typeahead responses, a different endpoint (surprise IRPT_ANLREQ-D2-W165-S3).",
+    "The deployed bytes of irpt-ycharts-generate and the intake Lambda. Only the source at git HEAD 2ba399d785 was read; nothing is deployed or inspected.",
+    "The portal form prompts (Did you mean, Replace, No, the replacement input). The portal is a gitlink in this worktree; the driver's constants (fwd1_driver.mjs:32-41) were read as words only.",
+    "The resident journal of 2026-10-03T00:20:39Z. It is cited only through the measured row IRPT_BCKEND-S287.",
+    "Worker 159's record as a source of truth: its line numbers predate release 33 (it quotes NAME_PROXY actions at portfolio.py:520 and 533) and were not reused."
+  ],
+  "surprises_filed": ["IRPT_ANLREQ-D2-W165-S1", "IRPT_ANLREQ-D2-W165-S2", "IRPT_ANLREQ-D2-W165-S3", "IRPT_ANLREQ-D2-W165-S4"]
+}

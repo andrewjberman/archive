@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-62",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R47_TX.md",
+    "vintage_commit": "3086b5fe82",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-62.fwd5-intake-list-scope-acceptance-tests.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-62.fwd5-intake-list-scope-acceptance-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "3086b5fe82"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~222",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py",
+      "kind": "test",
+      "commit_or_etag": "794415c168",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only. Nothing deployed, no AWS call, no source edit. Committed on the local branch wk-IRPT_ANLREQ-222 (LOCAL, not pushed).",
+      "artifact_covered_by": [
+        "AR62-tz-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR62-tz-AC1",
+      "criterion_verbatim": "the file exists, every test function is named test_cross_firm_*, at least 2 test(s) fail now and none errors out at collection or setup.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 2 infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py",
+      "output_evidence": "R46-RED-OK red=5 (rc=0). Pytest over the same file: 5 failed, 2 passed in 0.79s. Each of the five failures is an AssertionError in a test body (firm-c listed; ALL or unset or empty listing all six; firm-a,ALL listing all six), no collection or setup error.",
+      "denominator": "7 test functions in 1 file: 5 RED of which 5 fail and 0 error (requirement at least 2); 2 CONTROLS of which 2 pass.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The five red tests are the discriminating check: each fails on an assertion about the svc-analyst-intake result, so a handler that already implemented the scope would turn them green.",
+      "expected": "N/A: the order names no mutant control for this test-only cell",
+      "observed": "N/A: no mutant named by AR-tz-62",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Same test file run twice under two working directories: the worktree root (run B) and infra/aws/lambda/ticket_center (run C), plus the checker (run A). Each run compared on the set of failing test names and the counts.",
+      "observed": "Run B: 5 failed, 2 passed. Run C: 5 failed, 2 passed. Run A: R46-RED-OK red=5. The same five test names fail in B and C.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The ticket-service fix (contract rule 2: ANALYST_INTAKE_ALLOWED_FIRMS scoping of the svc-analyst-intake LIST) is not in the code under test; the five RED tests turn green only when the V2 release lands.",
+      "reason": "Expected by design. The fix is built by 2.0.0_SA_COO~V2 as TCKT_VNEXT round 19; this cell only writes the acceptance tests and edits no code under test."
+    },
+    {
+      "item": "The CTO ruling text (ADDENDUM 7 of CTO_RULING_DELL2_IRPT_ANLREQ_FOUR_LANES_END_TO_END_20261015.md) was not read from the worktree.",
+      "reason": "Its folder is outside the worktree sparse cone. The contract rule is taken from the worker face, which states it in full. Recorded as IRPT_ANLREQ-D2-W222-S1."
+    },
+    {
+      "item": "test_authz_matrix.py was not copied into the new file.",
+      "reason": "The list construction (PagedTable, users stub, handler load by path) is taken from test_list_scoped_firm.py, which the cell names as the list harness; the authz matrix adds no construction the list tests need."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W222-S1: the cited CTO ruling and the surprise-channel schema are outside the worktree sparse cone; the test file reads only the harness and lambda_function.py, so no criterion depends on them."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~222/AR-tz-62_session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py red",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 2 infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py",
+      "result": "R46-RED-OK red=5, rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/ticket_center/tests/test_cross_firm_intake_list.py",
+      "result": "5 failed, 2 passed in 0.79s, rc=1 (the red tests are expected to fail; the controls pass)"
+    }
+  ]
+}
