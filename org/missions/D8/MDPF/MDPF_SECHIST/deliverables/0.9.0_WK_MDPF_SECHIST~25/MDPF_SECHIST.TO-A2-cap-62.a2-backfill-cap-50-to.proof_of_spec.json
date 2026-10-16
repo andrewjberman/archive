@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "session_log": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.9.0_WK_MDPF_SECHIST~25/session_log.txt",
+  "to_id": "MDPF_SECHIST.TO-A2-cap-62",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_MDPF_SECHIST~25",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-A2-cap-62.a2-backfill-cap-50-to.md",
+    "group": "OTHER",
+    "vintage_commit": "252d15bc41"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/decompositions/MDPF_SECHIST_DECOMP.md",
+    "vintage_commit": "252d15bc41",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-A2-cap-62.a2-backfill-cap-50-to.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/pipeline/etf_daily_pull.py",
+      "kind": "script",
+      "commit_or_etag": "fd448b14d2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "A2-AC1",
+        "A2-AC2",
+        "A2-AC3"
+      ],
+      "deploy_evidence": "Committed locally on wk-MDPF_SECHIST-25 at fd448b14d2 (one line: BACKFILL_CAP 50 to 62). No deploy, no push, no S3 call, no merge: the order's section 2 forbids each. The scheduled pull runs the working tree once a deploy is made, which is outside this cell."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "A2-AC1",
+      "criterion_verbatim": "criterion A2-AC1: invocation r7a2_diff_check.py; expect A2-DIFF-OK (HEAD~1 to HEAD: exactly one line moved in etf_daily_pull.py)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R7A2_CHECKS/r7a2_diff_check.py",
+      "output_evidence": "A2-DIFF-OK paths=1 (rc=0), run at HEAD fd448b14d2",
+      "denominator": "1 of 1 changed path in HEAD~1..HEAD is integrations/bloomberg/pipeline/etf_daily_pull.py; numstat 1 insertion 1 deletion; add=BACKFILL_CAP = 62, del=BACKFILL_CAP = 50",
+      "expect": "A2-DIFF-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "A2-AC2",
+      "criterion_verbatim": "criterion A2-AC2: invocation r7a2_default_cap.py; expect A2-CAP-OK planned=62 capped=8",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R7A2_CHECKS/r7a2_default_cap.py",
+      "output_evidence": "A2-CAP-OK planned=62 capped=8 (rc=0); identical on the pre-commit working tree and at HEAD fd448b14d2",
+      "denominator": "1 printed result line; planned=62 and capped=8 both match the expected pair",
+      "expect": "A2-CAP-OK planned=62 capped=8",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "A2-AC3",
+      "criterion_verbatim": "criterion A2-AC3: invocation r7a2_pull_tests.py; expect A2-TESTS-OK passed=13",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R7A2_CHECKS/r7a2_pull_tests.py",
+      "output_evidence": "A2-TESTS-OK passed=13 (rc=0); identical on the pre-commit working tree and at HEAD fd448b14d2",
+      "denominator": "passed=13 as printed by the checker; the checker prints no failed count and rc=0",
+      "expect": "A2-TESTS-OK passed=13",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The negative arm (the constant left at 50) was not run by this worker.",
+      "expected": "not applicable: the order specifies no mutant",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 and AC3 each run twice at the same input: once on the pre-commit working tree and again at HEAD fd448b14d2. AC1 reads git-measured HEAD~1..HEAD and was run once at HEAD.",
+      "observed": "AC2: A2-CAP-OK planned=62 capped=8 on both runs. AC3: A2-TESTS-OK passed=13 on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Single-commit packaging of code, instance and status flip",
+      "reason": "Not met as written. A2-AC1 measures HEAD~1..HEAD and can pass only after the code commit exists, so the code went in alone at fd448b14d2 and the instance and status flip follow in a second commit. Filed as MDPF_SECHIST-W25-S1."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECHIST-W25-S1: A2-AC1 measures HEAD~1..HEAD, so it cannot pass before the code commit exists; the one-commit instruction (file, instance and flip together) was resolved as a code commit fd448b14d2 plus a second commit for the instance and flip.",
+    "MDPF_SECHIST-W25-S2: safe-commit's client-data check reported the hashed account-id list ABSENT on this box, so fd448b14d2 was not checked for client account ids (a WARN, not a refusal)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECHIST~25 <0.9.0_WK_MDPF_SECHIST~25@opal.agent>\" -F .scratch/msg_cap62.txt -- integrations/bloomberg/pipeline/etf_daily_pull.py",
+      "result": "commit fd448b14d2, 1 file changed, 1 insertion, 1 deletion; commit-gate all checks passed; msg-verify MATCH; client-data-check ABSENT (see MDPF_SECHIST-W25-S2)"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.9.0_WK_MDPF_SECHIST~25/MDPF_SECHIST.TO-A2-cap-62.a2-backfill-cap-50-to.proof_of_spec.json A2-AC1 A2-AC2 A2-AC3",
+      "result": "rc=0 VALID; acceptance rows=3, violations=0; coverage 3 of 3 expected ids; surprises 2 of 2 resolve to rows in INVESTIGATION_v1.md"
+    }
+  ]
+}
