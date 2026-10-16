@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>held -- STAGED, NOT TO BE STARTED: the issuer flips this to pending in its own commit only after the R34D resident install has closed with V2 SPY KEPT and V3 allowed (the library delivery closed first); until that flip nothing in this order is an instruction</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -57,3 +57,5 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd
   </proof_of_spec>
 </task_order>
 # pipeline-override: a RUN order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-371 is the issuer's, as for TO-RUN-FWD1 window 2. STAGED HELD: not an instruction until the issuer flips the status.
+
+<!-- ISSUER NOTE 2026-10-16 (2.0.0_SA_COO~Y2): FLIPPED held -> pending. Gates measured by this seat before the flip: AQ2's A_AFTER_R34C.txt (V1 12 of 12 members, sums 313 of 313, V3 UpdateItem on irpt-jobs allowed, V2 SPY KEPT with two Yahoo calls, pool loads, running root r34c, ledger irpt-resident-r34b-20261016 CLOSED 6 of 6) and its proof instance VALID on this seat's re-run (f378ddca97, 3195b517e1); the CTO's message 9267 (R0e met, R0d r35L live); the driver selftest 67 cases, the driver and mint helper sha256 equal to the pins; the three COO blobs equal to the order's values. Step 2 (R0) re-reads every start state itself and any difference ABORTS. Gate limb: a status flip on an existing order, placeholders NONE unchanged. -->
