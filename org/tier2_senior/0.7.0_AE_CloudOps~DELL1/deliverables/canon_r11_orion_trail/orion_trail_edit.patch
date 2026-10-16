@@ -1,0 +1,30 @@
+diff --git a/infra/aws/terraform/shared-infra/cloudtrail-organization-trail.tf b/infra/aws/terraform/shared-infra/cloudtrail-organization-trail.tf
+index 909bbf66cc..3ee069ad57 100644
+--- a/infra/aws/terraform/shared-infra/cloudtrail-organization-trail.tf
++++ b/infra/aws/terraform/shared-infra/cloudtrail-organization-trail.tf
+@@ -50,6 +50,13 @@ locals {
+     "opal-data-inf",
+   ]
+ 
++  # ADHOC.canon-r11-orion-reader-trail (MDPF_CANON CN-r-3 / E4 follow-up; dell1 CTO ruling msg 6957): ONE named
++  # prefix of ONE bucket, not a wildcard over opal-data-*. Time-boxed: REMOVE this local and its concat term within
++  # 72 hours of the apply, or as soon as the orion/ reader is named.
++  org_trail_read_logged_prefixes = [
++    "opal-data-assets/orion/",
++  ]
++
+   # DEC-12 (Andrew-direct 2026-10-13 ~20:0xZ; order ADVI_FIRMBKTS.TO-FB-j-15): the ONE list of buckets whose
+   # object WRITES this trail records -- FWD-6's instrument that nothing wrote to a legacy home in the quiet
+   # window. opal-data-49financial is deliberately NOT here (its served-key writes have their own trail).
+@@ -84,7 +91,10 @@ resource "aws_cloudtrail" "organization" {
+ 
+     data_resource {
+       type   = "AWS::S3::Object"
+-      values = [for b in local.org_trail_read_logged_buckets : "arn:aws:s3:::${b}/"]
++      values = concat(
++        [for b in local.org_trail_read_logged_buckets : "arn:aws:s3:::${b}/"],
++        [for p in local.org_trail_read_logged_prefixes : "arn:aws:s3:::${p}"],
++      )
+     }
+   }
+ 
