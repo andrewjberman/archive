@@ -10,6 +10,8 @@
 <risk>SERVED</risk>
 <proof_genre>DEPLOY</proof_genre>
 <placeholders>NONE</placeholders>
+<round>148</round>
+<workstream>B-CW</workstream>
 <preflight>
 comp-blast: DECLARED-NOT-APPLICABLE -- the blast radius is four commits (six files) on one page: the Investor Reporting dashboard's Performance tab gains one note for a series that carries unreported trading days (none served today), and the series mirror accepts two new optional names and a null income; no API, IAM, Lambda or data change.
 comp-routes: DECLARED-NOT-APPLICABLE -- no route is added or changed; step 6 reads the built bundle the site serves. comp-cache: DECLARED-NOT-APPLICABLE. comp-schedule: DECLARED-NOT-APPLICABLE. comp-iam: DECLARED-NOT-APPLICABLE -- no AWS act.
