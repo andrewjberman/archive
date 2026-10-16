@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-296",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8e46a4e31"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "e8e46a4e31",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-296.cottonwood-landing-explicit-rewrite.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~239",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~239/RD_COT_REWRITE_FACTS_R149.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "2cde0789d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "write_day(rewrite) and run_day(rewrite) committed; no S3 call, no deploy; the adapter's tests pass offline.",
+      "artifact_covered_by": ["DB164-1-AC1", "DB164-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/account-return-daily/handler.py",
+      "kind": "script",
+      "commit_or_etag": "2cde0789d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "landed_days, _run(rewrite), _rewrite and lambda_handler committed; the function is NOT updated; the scheduled, day and days paths unchanged in behaviour except the keyword pass in _run (see the surprise row).",
+      "artifact_covered_by": ["DB164-1-AC2", "DB164-1-AC3"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_rewrite.py",
+      "kind": "test",
+      "commit_or_etag": "2cde0789d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "27 passing tests, fake clients only, no AWS, no private data (checked: no 8+ digit run, ASCII only).",
+      "artifact_covered_by": ["DB164-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~239/RD_COT_REWRITE_FACTS_R149.json",
+      "kind": "config_data",
+      "commit_or_etag": "d8d309b20b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "event, cap 25, landed_days_only true, guard_unchanged true, deletes 0, tests 27; equals the checker recount.",
+      "artifact_covered_by": ["DB164-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d8d309b20b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_DASHBD-D2-W239-S1 appended as bytes (BLOCKING, INERT); the existing rows are untouched.",
+      "artifact_covered_by": ["DB164-1-AC3"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_history_scope_derivation.py",
+      "kind": "test",
+      "commit_or_etag": "0b826ea2c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 grant: the spy on run_day gains rewrite=False; one line changed, nothing else in the file.",
+      "artifact_covered_by": ["DB164-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB164-1-AC1",
+      "criterion_verbatim": "DB164-1-AC1 -- the adapter's run_day with rewrite overwrites exactly a landed day's two keys with the derived 21-column table (no other key, no delete); a plain landing of a landed day is still refused; a rewrite of an unlanded day, with no floor partition or with no floor day is refused before any put; a dry run writes nothing. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p164_cot_rewrite.py\" . DB164-1-AC1",
+      "output_evidence": "OK: the adapter's run_day with rewrite overwrites exactly a landed day's two keys with the derived 21-column table (no other key, no delete), a plain landing of a landed day is still refused, and a rewrite of an unlanded day, with no floor partition or with no floor day is refused before any put; a dry run writes nothing\nDB164-1-AC1 PASS",
+      "denominator": "1 of 1 criterion (the checker's check_adapter, one run, rc 0)",
+      "status": "PASS",
+      "expect": "DB164-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB164-1-AC2",
+      "criterion_verbatim": "DB164-1-AC2 -- the landing handler's rewrite event overwrites the named landed days (the four existing keys, 21 columns with the claim), refuses before any write a day not landed, a combination with day or days, a malformed spec, start after end, a start before the floor, a non-ISO date, a range of no trading day and a range over the cap, writes nothing on a dry run, and the named-day path keeps the no-overwrite guard. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p164_cot_rewrite.py\" . DB164-1-AC2",
+      "output_evidence": "OK: the landing handler's rewrite event overwrites the named landed days (the four existing keys, 21 columns with the claim), refuses before any write a day not landed, a combination with day or days, a malformed spec, start after end, a start before the floor, a non-ISO date, a range of no trading day and a range over the cap, writes nothing on a dry run, and the named-day path keeps the no-overwrite guard\nDB164-1-AC2 PASS",
+      "denominator": "1 of 1 criterion (the checker's check_handler, one run, rc 0)",
+      "status": "PASS",
+      "expect": "DB164-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB164-1-AC3",
+      "criterion_verbatim": "DB164-1-AC3 -- the new test file holds at least 10 passing tests; the whole gold tests directory (the one known pre-existing red deselected) and the landing handler's tests pass; the worker's commits change only the adapter, the landing handler, the new test file, the signature of one spy in `DB-b-294`'s test, the folder, the investigation file and task-order files; the facts record equals the checker's recount. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p164_cot_rewrite.py\" . DB164-1-AC3",
+      "output_evidence": "OK: 27 new tests pass; the whole gold tests directory (784, the one known pre-existing red deselected) and the landing handler's tests (16) pass; 6 files changed, all in the grant; the facts record equals the recount\nDB164-1-AC3 PASS",
+      "denominator": "the gold tests directory: 784 run, the one known pre-existing red deselected, all passing; the landing handler's tests: 16 passing; the new test file: 27 passing; the facts record tests field 27 equals the recount",
+      "status": "PASS",
+      "expect": "DB164-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; the checker's own clauses are the behaviour battery.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Re-ran the checker for AC1 and AC2 in two separate runs and compared the deciding lines.",
+      "observed": "Both runs of AC1 and AC2 exited rc 0 and printed the criterion's PASS line last (run files under .scratch/run2_AC1.txt and .scratch/run2_AC2.txt).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Lambda function update and the rewrite of the landed Cottonwood days.",
+      "reason": "Outside this cell (the order's WORLD floor): a later signed pair and the applier's act."
+    },
+    {
+      "item": "The rest of the DB-b-294 test file test_history_scope_derivation.py (only the spy signature is in the grant).",
+      "reason": "AMENDMENT 1 grants one signature change (rewrite=False on the spy); nothing else in that file changes."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W239-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p164_cot_rewrite.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p164_cot_rewrite.py . DB164-1-AC1 (and AC2, AC3)",
+      "result": "AC1 PASS rc 0; AC2 PASS rc 0; AC3 PASS rc 0 after AMENDMENT 1 (spy signature, commit 0b826ea2c5)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -I -m pytest -q data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_rewrite.py",
+      "result": "27 passed"
+    }
+  ]
+}
