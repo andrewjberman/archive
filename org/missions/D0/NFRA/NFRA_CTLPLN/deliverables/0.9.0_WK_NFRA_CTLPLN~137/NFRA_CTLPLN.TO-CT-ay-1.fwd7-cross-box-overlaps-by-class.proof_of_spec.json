@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ay-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ay-1.fwd7-cross-box-overlaps-by-class.md",
+    "group": "OTHER",
+    "vintage_commit": "7d4aef5b93"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~137",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round28.md",
+    "vintage_commit": "7d4aef5b93",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ay-1.fwd7-cross-box-overlaps-by-class.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/fwd7_classify.py",
+      "kind": "script",
+      "commit_or_etag": "baed654d2b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library only; reads the placement read's stdout (python .tools/placement-check.py run as a subprocess, cwd the worktree root, bound 200 s); no network, no write except its own report; classes each OVERLAP line CARRIER / NOT-SAME-FILE / PROJECT-SAME-FILE / UNCLASSIFIED, first match wins; prints the last line FWD7-CLASSES; --selftest feeds synthetic lines to classify() with no subprocess. py_compile rc 0 under Python 3.12.10.",
+      "artifact_covered_by": ["CTay1-AC1", "CTay1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/FWD7_PROJECT_PATH_OVERLAPS.md",
+      "kind": "doc",
+      "commit_or_etag": "09b6330807",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Written by fwd7_classify.py from the live read (62 OVERLAP lines, FINDINGS 62, 30 live projects). Top sentence: 'Project-path overlaps: 9 PROJECT-SAME-FILE line(s) name a shared file; they are listed per file below, and no fix is proposed (the CTO decides which become a cell).' Tables: PROJECT-SAME-FILE (9, all on infra/aws/lambda/ci/lambda-source-map.json and infra/aws/lambda/ci/record-terraform-deploy.sh), NOT-SAME-FILE (13), CARRIER counts by kind (deploy-ledger-sentinel 40; the other four kinds 0).",
+      "artifact_covered_by": ["CTay1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "03b4892fb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three appended rows, never edited: NFRA_CTLPLN-W137-S1 (OBSERVATION, ARMED, disarm 2.0.0_SA_COO~C: sparse set without org/missions read silently as empty), NFRA_CTLPLN-W137-S2 (OBSERVATION, INERT: cut count 64 vs live 62), NFRA_CTLPLN-W137-S3 (OBSERVATION, ARMED, disarm 1.0.0_SA_CTO: directory-claim lines classed NOT-SAME-FILE). All UNDER_INVESTIGATION. surprise-row-gate OK (3 new rows of 477 checked).",
+      "artifact_covered_by": ["CTay1-AC1", "CTay1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTay1-AC1",
+      "criterion_verbatim": "every cross-box overlap line the placement read prints is placed in exactly one class and the total equals the tool's own FINDINGS count (base: the script does not exist); report the whole last line and the report's top sentence.",
+      "method": "command",
+      "invocation": "python org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/fwd7_classify.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; whole last line verbatim: FWD7-CLASSES total=62 carrier=40 not_same_file=13 project_same_file=9 unclassified=0 findings_line=62 ok=True. Denominator line of the report: 'Denominator: 62 OVERLAP line(s) read from python .tools/placement-check.py (rc=0; live projects 30; unplaced/unreadable 0). The read's own FINDINGS line counts 62 cross-box write overlap(s) (agrees).' Report top sentence (FWD7_PROJECT_PATH_OVERLAPS.md @09b6330807): 'Project-path overlaps: 9 PROJECT-SAME-FILE line(s) name a shared file; they are listed per file below, and no fix is proposed (the CTO decides which become a cell).' Base: the script did not exist at the cut (the order's dry run). Two runs gave identical stdout (diff empty) and the regenerated report was byte-identical (git diff empty).",
+      "denominator": "62 of 62 OVERLAP lines placed in exactly one class (40 CARRIER + 13 NOT-SAME-FILE + 9 PROJECT-SAME-FILE + 0 UNCLASSIFIED = 62); the tool's own FINDINGS count 62; 30 live projects",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTay1-AC2",
+      "criterion_verbatim": "the classifier puts a carrier pair, a different-files pair, a same-file project pair and a malformed line each in its class (base: the script does not exist); report the whole last line, which must end ok=True.",
+      "method": "command",
+      "invocation": "python org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/fwd7_classify.py --selftest",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; whole last line verbatim: FWD7-SELFTEST arms=9/9 ok=True. Deciding lines: PASS: a sentinel pair is CARRIER -> CARRIER kind=deploy-ledger-sentinel; PASS: an open_calls pair is CARRIER -> CARRIER kind=open-calls; PASS: a surprise-channel pair is CARRIER -> CARRIER kind=surprise-channel; PASS: an audit-log pair is CARRIER -> CARRIER kind=audit-log; PASS: a crossbox pair is CARRIER -> CARRIER kind=crossbox; PASS: a directory-prefix parent of a different file is NOT-SAME-FILE -> NOT-SAME-FILE; PASS: two projects naming the same ordinary source file are PROJECT-SAME-FILE -> PROJECT-SAME-FILE; PASS: a carrier path beside a project file is not CARRIER (no rule places it) -> UNCLASSIFIED; PASS: a malformed line is UNCLASSIFIED and the run ok is False. Two runs identical.",
+      "denominator": "9 of 9 arms passed (6 required arms plus the carrier-beside-project guard and the audit-log and crossbox carrier kinds); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "FWD7-SELFTEST arms=",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of fwd7_classify.py in the worktree scratch folder (.scratch/mut_fwd7.py) with the carrier rule disabled (the line common = carrier_kinds(ra) & carrier_kinds(rb) replaced by common = set()), run with --selftest. The copy is used only for --selftest, which reads no file.",
+      "expected": "the carrier arms fail: sentinel, open_calls, surprise-channel, audit-log and crossbox pairs are no longer CARRIER; the selftest line reads ok=False",
+      "observed": "FAIL: a sentinel pair is CARRIER -> NOT-SAME-FILE; FAIL: an open_calls pair is CARRIER -> UNCLASSIFIED; FAIL: a surprise-channel pair is CARRIER -> PROJECT-SAME-FILE; FAIL: an audit-log pair is CARRIER -> PROJECT-SAME-FILE; FAIL: a crossbox pair is CARRIER -> NOT-SAME-FILE; FWD7-SELFTEST arms=4/9 ok=False; exit 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed state (script at baed654d2b, report at 09b6330807), same command, timeout 280; stdout compared with diff; the report regenerated on the second run and compared with git diff",
+      "observed": "AC1: identical stdout in both runs (last line FWD7-CLASSES total=62 carrier=40 not_same_file=13 project_same_file=9 unclassified=0 findings_line=62 ok=True), report byte-identical (git diff empty), exit 0 in both. AC2: identical stdout in both runs (FWD7-SELFTEST arms=9/9 ok=True), exit 0 in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-ay-1 to complete",
+      "reason": "the order file is outside this worker's paths; the issuer flips it on a valid, all-PASS instance"
+    },
+    {
+      "item": "any change to .tools/placement-check.py, the register, the project rows or any tool, and any fix for the shared files named in PROJECT-SAME-FILE (infra/aws/lambda/ci/lambda-source-map.json and infra/aws/lambda/ci/record-terraform-deploy.sh)",
+      "reason": "the cell's rules: the read is read-only, the CTO decides whether each non-zero count becomes a cell, and the worker proposes no fix"
+    },
+    {
+      "item": "the portal gitlink and org/git-author-override-audit.laptop.log",
+      "reason": "the cell's rules: not committed"
+    },
+    {
+      "item": "the sparse-checkout change (git sparse-checkout add org/missions) in this worktree",
+      "reason": "worktree-local, no tracked file changed; the silent under-read it fixed is recorded as surprise row NFRA_CTLPLN-W137-S1"
+    },
+    {
+      "item": "the client account-id check",
+      "reason": "the standing WARN-only state, ruled: safe-commit printed 'WARN: client-data-check: hashed account-id list ABSENT' on each commit; quoted here, no row filed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W137-S1: the worktree sparse set had no org/missions and placement-check.py read it as empty (1 live project, 0 overlaps, rc 0, no error); fixed in the worktree by git sparse-checkout add org/missions; ARMED, disarm owner 2.0.0_SA_COO~C.",
+    "NFRA_CTLPLN-W137-S2: the cell's cut count 64 does not match the live read (62 at 7d4aef5b93 with org/missions present); the classifier checks its total against the tool's own FINDINGS line and does not depend on 64; INERT.",
+    "NFRA_CTLPLN-W137-S3: 13 of the 62 lines are directory claims over a path under them, classed NOT-SAME-FILE by the reused prefix rule, so the directory-claim clause of PROJECT-SAME-FILE is unreachable; ARMED, disarm owner 1.0.0_SA_CTO."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/NFRA_CTLPLN.TO-CT-ay-1.fwd7-cross-box-overlaps-by-class.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~137/fwd7_classify.py",
+      "result": "exit 0 (Python 3.12.10)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/placement-check.py (read at the worktree root, under timeout 200 as a subprocess of the classifier)",
+      "result": "rc 0; live projects 30; FINDINGS: 0 unplaced/unreadable, 62 cross-box write overlap(s)"
+    },
+    {
+      "tool": "git",
+      "invocation": "git sparse-checkout add org/missions (worktree only, before the first live read)",
+      "result": "rc 0; before it the read printed live projects 1 and 0 overlaps; after it live projects 30 and 62 overlaps"
+    }
+  ]
+}
