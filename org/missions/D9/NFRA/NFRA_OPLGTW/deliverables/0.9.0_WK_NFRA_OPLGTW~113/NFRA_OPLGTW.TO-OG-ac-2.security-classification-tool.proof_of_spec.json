@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ac-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "869beac0fa",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ac-2.security-classification-tool.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/ETF_CLASS_SPEC.md",
+    "group": "OTHER",
+    "vintage_commit": "869beac0fa"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~113",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/mdpf_classification.py",
+      "kind": "script",
+      "commit_or_etag": "8a5b7be26d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the new module on the worktree branch: one get_item by the ticker key, no other DynamoDB call; no release, deploy or registration in this order",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_ac2.py",
+      "kind": "test",
+      "commit_or_etag": "8a5b7be26d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six offline tests on a recording fake client that answers get_item only; run by the AC1 invocation"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/probe_ac2.py",
+      "kind": "script",
+      "commit_or_etag": "8a5b7be26d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the real-table probe, run by the AC2 invocation with box credentials; prints two lines of booleans and the row's own as-of date",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d4abc0bd5f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended: NFRA_OPLGTW-Z-W113-S6 and NFRA_OPLGTW-Z-W113-S7"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the six named offline tests of mdpf_get_security_classification pass (test_ogac2_ac01 .. test_ogac2_ac06 in infra/aws/ec2/opal-gateway/tests/test_og_ac2.py)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ac2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 6 of 6; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "6 named tests of 6 (ac01..ac06)",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 6 of 6; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the module reads the table by get_item only (no scan, query, batch or write call), and the probe answered a real row and an absent ticker against the real table and refused a non-Opal principal with zero reads",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ac2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "module: tool defined 1 of 1; get_item calls 1 (want 1 or more); scan/query/batch/write calls 0 (want 0)\nprobe cls: mdpf_get_security_classification answered True as_of 2026-09-30 non_opal_refused True reads_on_refusal 0\nprobe cls: absent_ticker answered True absent_reason set True\nprobe: real row answered 1 of 1; absent ticker answered with absent_reason 1 of 1\nRESULT: PASS\nexit=0",
+      "denominator": "tool defined 1 of 1; get_item calls 1; scan/query/batch/write calls 0 of 0 wanted; real row answered 1 of 1; absent ticker answered 1 of 1",
+      "status": "PASS",
+      "expect": "(?s)module: tool defined 1 of 1; get_item calls [1-9]\\d* \\(want 1 or more\\); scan/query/batch/write calls 0 \\(want 0\\).*probe: real row answered 1 of 1; absent ticker answered with absent_reason 1 of 1.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the cell names no mutant; its criteria are the offline tests and the module and probe check",
+      "expected": "N/A -- the cell names no mutant",
+      "observed": "N/A -- the cell names no mutant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run before the commit and again after it on the same tests; both print 6 of 6 named tests passed. The probe reads the live table and is not in this comparison",
+      "observed": "STABLE for AC1 (both runs 6 of 6 PASS)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "registration of mdpf_get_security_classification in app/tools.py and app/data_entitlement.py, and the pinned tool count",
+      "reason": "the issuer's hookup at the merge (the order's bounds)"
+    },
+    {
+      "item": "the gateway role's GetItem grant on the table ARN, and any IAM or Terraform change",
+      "reason": "the grant is a later order with three signed halves; the order's preflight declares no IAM change"
+    },
+    {
+      "item": "a DynamoDB resource row in the catalog naming the table",
+      "reason": "the catalog edit is outside the bounds; recorded as surprise NFRA_OPLGTW-Z-W113-S6"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W113-S6: the catalog row for the classifier index carries no DynamoDB table name; the module holds the name as a constant citing the contract",
+    "NFRA_OPLGTW-Z-W113-S7: the internal_role DynamoDB helper is a low-level client, so the get_item key is typed; the test asserts the typed form"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/NFRA_OPLGTW.TO-OG-ac-2.security-classification-tool.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_ac2.py -q (from infra/aws/ec2/opal-gateway)",
+      "result": "6 passed"
+    },
+    {
+      "tool": "commit-gate via safe-commit",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~113 <0.9.0_WK_NFRA_OPLGTW~113@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "8a5b7be26d and d4abc0bd5f landed; all checks passed"
+    }
+  ]
+}
