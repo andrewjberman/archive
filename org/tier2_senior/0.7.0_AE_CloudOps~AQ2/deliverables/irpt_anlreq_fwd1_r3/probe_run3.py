@@ -137,6 +137,7 @@ def live(args):
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     tag = args.tag
+    order = [c.strip().upper() for c in args.order.split(",")] if args.order else list(CANDIDATES)
     addr = "irpt-%s-iv-%s@opal.invalid" % (tag, date)
     ddb = boto3.client("dynamodb", region_name=base.REGION)
     lam = boto3.client("lambda", region_name=base.REGION)
@@ -157,8 +158,8 @@ def live(args):
         return ddb.query(TableName=base.USERS, IndexName="email-index", KeyConditionExpression="email = :e",
                          ExpressionAttributeValues={":e": {"S": addr}}, Select="COUNT")["Count"]
 
-    def post(cand, tok):
-        wait = GAP - (time.time() - state["last"])
+    def post(cand, tok, gap=GAP):
+        wait = gap - (time.time() - state["last"])
         if wait > 0:
             time.sleep(wait)
         state["posts"] += 1
@@ -207,22 +208,32 @@ def live(args):
         exp = claims["exp"]
         del pem
         say("token minted (held in memory only) iat=%s exp=%s" % (base.iso(iat), base.iso(exp)))
-        for cand in CANDIDATES:
+        halted = None
+        for cand in order:
+            if halted:
+                say("PROBE %s NOT PROBED: %s" % (cand, halted))
+                results.append((cand, dict(status=None, label="NOT_PROBED", qualifies=False, suggestion=None, actions=[], sha=None, posts=0)))
+                continue
             if time.time() > exp - 150:
                 say("PROBE %s NOT PROBED: the token window is nearly spent" % cand)
                 results.append((cand, dict(status=None, label="NOT_PROBED", qualifies=False, suggestion=None, actions=[], sha=None, posts=0)))
                 continue
             tok = "irpt-%s-%s-%s" % (tag, cand.lower(), date)
             st, b, raw, _ = post(cand, tok)
+            state.setdefault("first_post", base.iso())
             label, q, sug, acts = describe(st, b, cand)
             n = 1
             if label == "RESOLVING":
                 say("PROBE %s first answer RESOLVING; the SAME upload is posted once more (amendment 2)" % cand)
-                st, b, raw, _ = post(cand, tok)
+                st, b, raw, _ = post(cand, tok, gap=args.repost_wait)
                 label, q, sug, acts = describe(st, b, cand)
                 n = 2
             say("PROBE %s status %s %s suggestion=%s%s actions=%s body_sha256 %s posts %d" % (cand, st, label, "yes" if sug else "no", (" " + sug) if sug else "", ",".join(acts), sha(raw), n))
             results.append((cand, dict(status=st, label=label, qualifies=q, suggestion=sug, actions=acts, sha=sha(raw), posts=n)))
+            state["last_answer"] = base.iso()
+            if args.zq_first and cand == "ZQXWVK" and (label != "NEEDS_CORRECTION:TICKER_NOT_FOUND" or sug):
+                halted = "ZQXWVK did not read NOT_FOUND without a suggestion (%s): the SET ends and the window STOPS" % label
+                say("STOP-GATE " + halted)
         after = list_store(s3)
     except Exception as e:  # noqa: BLE001 -- anything is a STOP; the row is still removed after exp
         stop = "STOP (%s): %s" % (type(e).__name__, str(e)[:300])
@@ -251,7 +262,8 @@ def live(args):
         rem = ["F1 ABSENT GSI %s" % addr if g else "F1 PRESENT GSI %s" % addr, "F1 ABSENT CONSISTENT %s" % addr if c else "F1 PRESENT CONSISTENT %s" % addr]
         sel = select(results) if results else {"U1": None, "U2": None, "U3": None}
         new = sorted(set(after[0]) - set(before[0])) if before and after else None
-        doc = {"results": [dict(candidate=c, **r) for c, r in results], "selection": sel, "removal": rem, "stop": stop,
+        doc = {"order": order, "first_post_utc": state.get("first_post"), "last_answer_utc": state.get("last_answer"), "repost_wait_s": args.repost_wait,
+               "results": [dict(candidate=c, **r) for c, r in results], "selection": sel, "removal": rem, "stop": stop,
                "intake_before": None if not before else {"versions": len(before[0]), "markers": before[1]},
                "intake_after": None if not after else {"versions": len(after[0]), "markers": after[1]},
                "new_objects": None if new is None else [{"key": k, "version_id": v, "size": after[0][(k, v)]} for k, v in new]}
@@ -271,6 +283,9 @@ def main(argv):
     ap.add_argument("--date", default=dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d"))
     ap.add_argument("--out", default="")
     ap.add_argument("--tag", default="r3p", help="viewer tag: r3p for SET 1, r3q for SET 2")
+    ap.add_argument("--order", default="", help="comma list of candidates in order (default ALPPL,APPL,BREIT,SREIT,ZQXWVK)")
+    ap.add_argument("--repost-wait", type=int, default=GAP, help="seconds from a candidate's first post to its one re-post (SET 3: 90)")
+    ap.add_argument("--zq-first", action="store_true", help="end the SET at ZQXWVK when it does not read NOT_FOUND without a suggestion")
     ap.add_argument("--life", type=int, default=LIFE, help="token life in seconds (at most 1200)")
     a = ap.parse_args(argv)
     if a.selftest:
