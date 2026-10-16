@@ -58,6 +58,7 @@ DAY = "2026-10-15"
 EARLIEST = "2024-07-08"
 MEM_LINE, DUR_LINE = 6553, 720000
 LAYER = "irpt-performance-native-layer"
+MAX_SILVER_ONLY = 20  # PARTIAL accounts whose first GOLD row is after the floor but whose first SILVER row is on it (the producer labels from silver first_seen)
 LATE_COLS = ("total_return_daily", "return_basis", "day_quality", "holdings_price_return", "holdings_price_return_reason", "guard_state")  # the columns that depend on inputs arriving after the first fire (CTO addendum 1)
 OTHER_TABLES = ["account_class_daily", "account_activity_daily", "account_lot_realized", "account_lot_unrealized_daily"]
 HEX12 = H.HEX12
@@ -146,7 +147,7 @@ def check_tail(rec):
     bb, ba = bf["before"], bf["after"]
     need(isinstance(bb, dict) and set(bb) == {"rows", "floor_start_with_row", "flow_columns_sha256", "other_tables_rows"} and is_int(bb["rows"]) and bb["rows"] > 0 and is_int(bb["floor_start_with_row"]) and 0 < bb["floor_start_with_row"] <= bb["rows"], "backfill.before: rows and the accounts with a row whose first row is on the floor day")
     need(isinstance(ba, dict) and set(ba) == {"rows", "partial", "full", "claim_inferred", "flow_columns_sha256", "changed_columns", "other_tables_rows"}, "backfill.after keys")
-    need(ba["rows"] == bb["rows"] and ba["claim_inferred"] == ba["rows"] and ba["partial"] == bb["floor_start_with_row"] and ba["partial"] + ba["full"] == ba["rows"], "backfill.after: same rows, the claim on every row, PARTIAL_HISTORY exactly the floor-start accounts, the rest FULL")
+    need(ba["rows"] == bb["rows"] and ba["claim_inferred"] == ba["rows"] and bb["floor_start_with_row"] <= ba["partial"] <= bb["floor_start_with_row"] + MAX_SILVER_ONLY and ba["partial"] + ba["full"] == ba["rows"], "backfill.after: same rows, the claim on every row, PARTIAL_HISTORY on the floor-start accounts (by first gold row) plus at most %d silver-first-seen accounts, the rest FULL" % MAX_SILVER_ONLY)
     need(ba["flow_columns_sha256"] == bb["flow_columns_sha256"] and re.fullmatch(r"[0-9a-f]{64}", str(ba["flow_columns_sha256"])), "backfill: market_value_eod and external_flow identical before and after (one hash; the CTO addendum 1)")
     cc = ba["changed_columns"]
     need(isinstance(cc, dict) and set(cc) <= set(LATE_COLS) and all(is_int(v) and 0 < v <= ba["rows"] for v in cc.values()), "backfill.after.changed_columns: only the late-input columns, each with a row count: %s" % (sorted(cc) if isinstance(cc, dict) else cc))
@@ -168,7 +169,7 @@ def check_tail(rec):
     n = rp["published"]
     need(is_int(n) and n >= 6949 and rp["refused"] == 0 and n == rp["returned"].get("accounts"), "republish: published equals the fan-out's account count, at least 6,949, 0 refused")
     need(rp["objects_after"] == {"series": n, "manifest": n}, "republish: series and manifests equal published")
-    need(rp["pair_count"] == bb["rows"] and rp["partial_with_pair"] == bb["floor_start_with_row"] and rp["no_claim_count"] == n - bb["rows"], "republish: the series with the pair equal the accounts with a row on the day, the PARTIAL_HISTORY ones equal Act 4's floor-start count, the rest carry no claim")
+    need(rp["pair_count"] == bb["rows"] and rp["partial_with_pair"] == ba["partial"] and rp["no_claim_count"] == n - bb["rows"], "republish: the series with the pair equal the accounts with a row on the day, the PARTIAL_HISTORY ones equal Act 4's PARTIAL count, the rest carry no claim")
     need(isinstance(rp["request_ids"], list) and rp["request_ids"], "republish: request ids")
     need(rec["ledger_closed"] is False and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0}, "the ledger must stay OPEN; reads block")
     scan = copy.deepcopy(rec)
@@ -297,7 +298,11 @@ def run(root, cid):
                             first[a] = d
         accts = [str(x) for x in tab["account_id"].to_pylist()]
         floor_with_row = sum(1 for a in set(accts) if first.get(a) == days[0])
-        need(days[0] == EARLIEST and floor_with_row == bf["before"]["floor_start_with_row"] == bf["after"]["partial"], "the accounts with a row on %s whose first row is on the floor day: live %d, record %d, PARTIAL rows %d" % (DAY, floor_with_row, bf["before"]["floor_start_with_row"], bf["after"]["partial"]))
+        silver_only = bf["after"]["partial"] - floor_with_row
+        need(days[0] == EARLIEST and floor_with_row == bf["before"]["floor_start_with_row"] and 0 <= silver_only <= MAX_SILVER_ONLY, "the accounts with a row on %s whose first gold row is on the floor day: live %d, record %d; PARTIAL rows %d, so %d account(s) are PARTIAL by silver first_seen only (at most %d)" % (DAY, floor_with_row, bf["before"]["floor_start_with_row"], bf["after"]["partial"], silver_only, MAX_SILVER_ONLY))
+        partial_accts = {str(a) for a, s in zip(tab["account_id"].to_pylist(), hs) if s == "PARTIAL_HISTORY"}
+        need(len([a for a in partial_accts if first.get(a) != days[0]]) == silver_only, "the PARTIAL accounts outside the first-gold-row set must number exactly the difference")
+        need(all((first.get(a) != days[0]) or (a in partial_accts) for a in set(accts)), "an account whose first gold row is on the floor day reads FULL")
         for t in OTHER_TABLES:
             tb = pa.concat_tables(read_day(s3, table_prefix(root, t), DAY)) if len(read_day(s3, table_prefix(root, t), DAY)) > 1 else read_day(s3, table_prefix(root, t), DAY)[0]
             need(tb.num_rows == bf["after"]["other_tables_rows"][t], "the %s day partition holds %d rows; the record says %d" % (t, tb.num_rows, bf["after"]["other_tables_rows"][t]))
@@ -321,7 +326,7 @@ def run(root, cid):
         need(pair == rec["republish"]["pair_count"] == bf["after"]["rows"] and partial == rec["republish"]["partial_with_pair"] == bf["after"]["partial"] and n - pair == rec["republish"]["no_claim_count"], "series with the pair %d (record %d), PARTIAL among them %d (record %d)" % (pair, rec["republish"]["pair_count"], partial, rec["republish"]["partial_with_pair"]))
         need((root / "org/critical_paths/.open_deploys" / (LEDGER_SLUG + ".json")).is_file(), "the ledger's open marker is missing: the ledger must stay OPEN")
         need(not (root / "org/critical_paths/.open_deploys" / (PUBLISH_LEDGER + ".json")).is_file(), "the publish pair's ledger %s must read CLOSED before Act 5 (the CTO's condition 2)" % PUBLISH_LEDGER)
-        print("OK: the day's returns partition holds %d rows with the claim on every row, %d PARTIAL_HISTORY (exactly the accounts with a row that day whose first row is on the floor day, recomputed from the gold) and %d FULL, market_value_eod and external_flow identical to the previous version and only the late-input columns changed (counts equal the record's), the other four tables' day row counts unchanged; %d of %d series carry the pair (%d PARTIAL), the rest none; the publish ledger is closed and this ledger stays open" % (tab.num_rows, hs.count("PARTIAL_HISTORY"), hs.count("FULL"), pair, n, partial))
+        print("OK: the day's returns partition holds %d rows with the claim on every row, %d PARTIAL_HISTORY (every account whose first gold row is on the floor day, plus the silver first-seen accounts the gold cannot show, at most 20, recomputed from the gold) and %d FULL, market_value_eod and external_flow identical to the previous version and only the late-input columns changed (counts equal the record's), the other four tables' day row counts unchanged; %d of %d series carry the pair (%d PARTIAL), the rest none; the publish ledger is closed and this ledger stays open" % (tab.num_rows, hs.count("PARTIAL_HISTORY"), hs.count("FULL"), pair, n, partial))
         return True
     raise Fail("unknown criterion %s" % cid)
 
