@@ -192,17 +192,38 @@ def top_folder(path):
     return path.split("/", 1)[0] if "/" in path else "(root file)"
 
 
-def map_shape(blob):
-    d = json.loads(blob.decode("utf-8"))
-    tops = list(d.keys())
-    funcs = d.get("functions", {})
+FOLDER_REL = "infra/aws/lambda/ci/function-map"
+
+
+def function_map_at_head():
+    """The function map at HEAD as ({name: entry}, total bytes of its files). CT-ca-1: the retired single file is absent at
+    HEAD after the split, so the shape is read from the one-file-per-function folder. A missing folder is an ERROR."""
+    rc, out, err = git(["ls-tree", "-r", "--name-only", "HEAD", FOLDER_REL + "/"])
+    if rc != 0:
+        raise SystemExit("ERROR: git ls-tree rc=%d" % rc)
+    names = sorted(x for x in out.decode("utf-8", "replace").splitlines() if x.endswith(".json"))
+    if not names:
+        raise SystemExit("ERROR: no function-map files at HEAD under %s" % FOLDER_REL)
+    funcs, nbytes = {}, 0
+    for path in names:
+        rc2, blob, _ = git(["cat-file", "-p", "HEAD:%s" % path])
+        if rc2 != 0 or not blob:
+            raise SystemExit("ERROR: cannot read %s at HEAD" % path)
+        nbytes += len(blob)
+        funcs[os.path.basename(path)[:-len(".json")]] = json.loads(blob.decode("utf-8"))
+    return funcs, nbytes
+
+
+def map_shape(funcs, nbytes):
+    """Shape of the function map ({name: entry}); the folder holds no top-level keys, so tops is empty."""
+    tops = []
     keyset = set()
     for v in funcs.values():
         keyset |= set(v.keys()) if isinstance(v, dict) else {"<non-object>"}
     sizes = [len(json.dumps(v, indent=2, ensure_ascii=True)) for v in funcs.values()]
     first_name = next(iter(funcs))
     return {
-        "bytes": len(blob), "tops": tops, "meta_keys": [k for k in tops if k != "functions"],
+        "bytes": nbytes, "tops": tops, "meta_keys": [],
         "functions": len(funcs), "keyset": sorted(keyset), "keysets_distinct": len(set(
             tuple(sorted(v.keys())) for v in funcs.values() if isinstance(v, dict))),
         "min": min(sizes), "median": statistics.median(sizes), "max": max(sizes),
@@ -287,10 +308,8 @@ def run_census(target=None):
         print("FOLDER %s files=%d %s" % (f, sum(fc.values()), " ".join("%s=%d" % (c.lower(), fc[c]) for c in CLASSES)))
 
     # map shape and the two function counts
-    mrc, mblob, merr = git(["cat-file", "-p", "HEAD:%s" % MAP_REL])
-    if mrc != 0 or not mblob:
-        raise SystemExit("ERROR: cannot read the map at HEAD")
-    shape = map_shape(mblob)
+    fmap, fbytes = function_map_at_head()
+    shape = map_shape(fmap, fbytes)
     tf_names = [p for p in names if p.endswith(".tf")]
     tf_lambda = 0
     for p in tf_names:
