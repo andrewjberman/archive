@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-286",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4fd78cac82"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "99783542eb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-286.class-producer-dated-read-and-sum-test.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~230",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+      "kind": "script",
+      "commit_or_etag": "3586222efd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-230 at 3586222efd; ClassTable(classifier=None, clock=None) with read_dates and as_of(identifiers=None); emit_class_day(..., classification_as_of=None) writes class_source.as_of and claim held; the eight pure functions (class_contribution, account_day_rows, classify_identifier, positions_by_class, check_class_rows, class_values, holding_identifier, unclassified_share) keep their exact source; nothing deployed, pushed or read from AWS",
+      "artifact_covered_by": [
+        "DB154-1-AC1",
+        "DB154-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "3586222efd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-230 at 3586222efd; one call site changed in emit_classes (the emit_class_day call now passes classification_as_of=acd.default_table().as_of()); no other line of the handler changed; the wiring is recorded as surprise row IRPT_DASHBD-D2-W230-S1",
+      "artifact_covered_by": [
+        "DB154-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_ACCOUNT_CLASS_DAILY_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "3586222efd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-230 at 3586222efd; contract_version 0.1.1; class_source gains exactly as_of (oldest GetItem read date, taken at run time, NOT the swap snapshot) and claim (held); every other key byte-identical, schema_hash unchanged",
+      "artifact_covered_by": [
+        "DB154-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_account_class_dated_and_sum.py",
+      "kind": "test",
+      "commit_or_etag": "3586222efd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-230 at 3586222efd; 13 passing tests on synthetic data (python -m pytest -q): six test_sum_* tests (the sum of market values to 1e-9, the class returns to the account return, a non-trade flow in cash, the prior-day denominator, a missed tie null with CLASS_VALUES_DO_NOT_SUM_TO_ACCOUNT, the identity over 300 seeded days) and seven dating tests; ruff check --target-version py39 clean; ASCII only",
+      "artifact_covered_by": [
+        "DB154-1-AC2",
+        "DB154-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~230/RD_CLASS_DATED_FACTS_R148.json",
+      "kind": "config_data",
+      "commit_or_etag": "ac110b1d70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-230 at ac110b1d70; five fields as the order names them; as_of_rule and claim as the contract states; mutants_killed 4; tests 13 equal to the recount; words one paragraph of 1364 characters with no long digit run",
+      "artifact_covered_by": [
+        "DB154-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "ac110b1d70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_DASHBD-230 at ac110b1d70; one row appended as bytes (IRPT_DASHBD-D2-W230-S1, BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~D2); the row is not dispositioned by the worker",
+      "artifact_covered_by": [
+        "DB154-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB154-1-AC1",
+      "criterion_verbatim": "`DB154-1-AC1` -- the dating: `as_of()` is the oldest GetItem read date (an injected clock; an absent item counts; a cached get never re-stamps; none read -> None); the manifest's `class_source` carries `as_of` and `claim` `held` (null `as_of` when not given); eight pure functions keep their exact source; the handler passes the date at every `emit_class_day` call of `emit_classes`; the class contract is 0.1.1 and gains exactly `as_of` and `claim`.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p154_classdated.py\" . DB154-1-AC1",
+      "output_evidence": "OK: dating: as_of() is the oldest GetItem read date (an injected clock; cached gets never re-stamp; none read -> None); the manifest's class_source carries as_of and claim held; 8 pure functions keep their exact source; the handler passes the date at 1 call site(s); the class contract 0.1.1 gains exactly as_of and claim | DB154-1-AC1 PASS (rc 0), run at HEAD ac110b1d70",
+      "denominator": "8 of 8 pure functions keep their exact source; 1 of 1 emit_class_day call in emit_classes passes classification_as_of; 2 of 2 new class_source keys (as_of, claim); 0 other contract keys changed beyond contract_version; 4 of 4 dating behaviours (oldest GetItem with an absent item counted, cached get never re-stamps, none read gives None, UTC default clock) checked by the checker's injected-clock arm",
+      "expect": "DB154-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DB154-1-AC2",
+      "criterion_verbatim": "`DB154-1-AC2` -- MUTATION: on a copy of the repo the checker runs your new test file, which passes on the module (at least six tests) and FAILS on each of four mutants of `class_contribution` (the tie dropped, the wrong denominator, no cash flow residual, cash not made exact).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p154_classdated.py\" . DB154-1-AC2",
+      "output_evidence": "OK: mutation: the new test file passes on the module (13 tests) and FAILS on each of 4 mutants of class_contribution (the tie dropped, the wrong denominator, no cash flow residual, cash not exact) | DB154-1-AC2 PASS (rc 0), run at HEAD ac110b1d70",
+      "denominator": "4 of 4 mutants fail the 13-test file; run ALONE (pytest -k test_sum_, six tests) each mutant is killed: the tie dropped by 1 of 6, the denominator by 4 of 6, the cash flow residual by 2 of 6, cash not exact by 3 of 6; the module passes 13 of 13",
+      "expect": "DB154-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DB154-1-AC3",
+      "criterion_verbatim": "`DB154-1-AC3` -- your new test file holds at least six passing tests, the existing class test file passes unedited, the worker's commits change only the module, the handler call site, the class contract, the new test, the folder, the investigation file and task-order files, and the facts record equals the recount.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p154_classdated.py\" . DB154-1-AC3",
+      "output_evidence": "OK: 13 new tests and the existing class file's 25 pass; 6 files changed, all in the grant; the facts record equals the recount | DB154-1-AC3 PASS (rc 0), run at HEAD ac110b1d70",
+      "denominator": "13 of 13 new tests pass (6 required); 25 of 25 existing class tests pass unedited (the existing file has no commit by this worker); 6 of 6 changed files inside the grant; 5 of 5 facts fields; facts tests 13 equals the recount 13",
+      "expect": "DB154-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own four mutants of class_contribution (MUTANTS) applied to a copy of the tree; the new test file is run whole and then run alone with -k test_sum_; each mutant must be refused",
+      "expected": "every mutant refused by the whole file; every mutant refused by at least one of the six test_sum_ tests run alone",
+      "observed": "whole file: AC2 PASS (each of 4 mutants refused). test_sum_ alone: tie dropped 1 failed, 5 passed; denominator 4 failed, 2 passed; no cash flow residual 2 failed, 4 passed; cash not exact 3 failed, 3 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the seeded random-day test uses random.Random(148); the dating default clock is compared against the UTC run-day read before and after the call",
+      "observed": "13 of 13 pass on the module at HEAD; the AC1 and AC2 checker runs were repeated at HEAD and gave the same OK lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the handler's runtime value of classification_as_of",
+      "reason": "class_days builds a fresh acd.ClassTable() and emit_classes reads acd.default_table(), which is never read on that path, so the value is None as wired; the order fixes the one-line call text and bounds handler edits to it; recorded as surprise row IRPT_DASHBD-D2-W230-S1 for the issuer to rule"
+    },
+    {
+      "item": "the deployed reporting-gold function writing class_source.as_of, and any reader of it",
+      "reason": "a later code-update pair of this seat's; no AWS call, deploy or push in this order"
+    },
+    {
+      "item": "the commit gate's client-data check against the hashed account-id list",
+      "reason": "the list is ABSENT on this box, so safe-commit printed WARN and did not check the commits; the worker scanned the staged content by hand for client figures and long digit runs (none found)"
+    },
+    {
+      "item": "the workspace portal gitlink",
+      "reason": "modified in the worktree before this order; never staged or committed by this worker"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W230-S1: the handler's emit_classes passes acd.default_table().as_of() but class_days reads through a fresh acd.ClassTable(), so as_of() is None on every emitted day as wired (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~D2)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~230/IRPT_DASHBD.TO-DB-b-286.class-producer-dated-read-and-sum-test.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "p154_classdated.py (criteria AC1, AC2, AC3)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r148/p154_classdated.py\" . DB154-1-AC1 (and AC2, AC3)",
+      "result": "PASS rc 0 (AC1); PASS rc 0 (AC2: 13 tests, 4 of 4 mutants refused); PASS rc 0 (AC3: 13 new tests, 25 existing)"
+    },
+    {
+      "tool": "pytest (new file and the existing class file)",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_account_class_dated_and_sum.py data/assets/scripts/gold/irpt_reporting/tests/test_account_class_daily.py",
+      "result": "13 passed (new file) and 25 passed (existing file), rc 0 each"
+    },
+    {
+      "tool": "ruff (target py39)",
+      "invocation": "ruff check --target-version py39 on account_class_daily.py, the new test file and handler.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
