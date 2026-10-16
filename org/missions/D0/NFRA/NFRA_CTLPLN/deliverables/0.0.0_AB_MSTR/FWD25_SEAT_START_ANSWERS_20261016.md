@@ -15,10 +15,10 @@ Asked by `2.0.0_SA_COO~C` (laptop msg 109662) under the CTO's round-27 analysis,
 | CLOUDOPS | 0.7.0_AE_CloudOps~FW | 10:22:04 | yes | broker msg 109665 |
 | TIER2 | 0.4.0_DS_ClientPlatform~FW | 10:22:08 | yes | broker msg 109666 |
 
-## Not spawned, and why
+## The two kinds not in the first six (state at the first writing, 10:3xZ; see the addendum below)
 
-- **MSTR:** the kind is this session (`0.0.0_AB_MSTR`), started by the same launcher with the same seat statement. A second `0.0.0_AB_MSTR~<lane>` would arm a second `/govern` loop and a second integrator candidate on this box, which `CLAUDE.md` and `org/XXX.md` forbid (one writer of `CLOUD`). If FWD-25 needs a separate MSTR spawn, that is a call for the CTO or Andrew.
-- **WORKER:** workers are subagents of a COO, spawned with the Agent tool, with no send tool; `/mstr-spawn` does not start them and a worker cannot message an answer. Not exercised here.
+- **MSTR:** at first writing, not spawned. The kind was this session (`0.0.0_AB_MSTR`), started by the same launcher with the same seat statement; a second `0.0.0_AB_MSTR~<lane>` would arm a second `/govern` loop and a second integrator candidate on this box. It was started later with its loops forbidden in the hint, on the CTO's round-28 ruling 4: see the addendum.
+- **WORKER:** workers are subagents of a COO, spawned with the Agent tool, with no send tool; `/mstr-spawn` does not start them. `2.0.0_SA_COO~C` started one itself (its message 109678); MSTR has not read that record.
 
 ## What stopped a seat (relevant to the forbidden-act half, not part of this half's DONE WHEN)
 
@@ -71,6 +71,16 @@ Asked by `2.0.0_SA_COO~C` (laptop msg 109662) under the CTO's round-27 analysis,
 
 > 0.4.0_DS_ClientPlatform~FW, kind TIER2 (a DS seat). Is: a Tier-2 or Tier-3 seat (DS, AE, DE, DT or RD) that works the dispatches and task orders delivered to it. Does: acts on Monitor-delivered dispatches and task orders; keeps broker STATUS accurate (WORKING:/IDLE:/BLOCKED:). Drives: /work, ad hoc only. Arming: /watcher once, event-driven, zero crons. Is not: a Tier-1 seat, not MSTR (it runs infrastructure and rules no project), not a CTO, COO, CVO or CRO, and not a loop runner. I issue no task orders and rule on no project. Answered only from my start-of-session seat statement. Standing by; no other work.
 
+## Addendum, 2026-10-16 ~12:14Z to 12:18Z: the MSTR kind, started with its loops forbidden
+
+Asked by `2.0.0_SA_COO~C` (laptop msg 109678), under the CTO's round-28 ruling 4 (`ROUND_ANALYSIS.round28.md` @3894648aa3). `0.0.0_AB_MSTR~FW` was started through `spawn-agent.ps1` (SPAWN line 12:14:42Z, GA-3 IDENTITY_GUARD_ACTIVE 12:16:40Z). Its first-message hint carried the same question and, because an MSTR start tells the seat to arm `/govern 60m`, added: arm NO cron or loop; run no `/integrate`, merge, push, spawn, kill or `box-sync`; `/watcher` once is fine. So this answer shows the seat can state its role from its start statement and can be told to stay out of the loops; it does not show what an un-told MSTR seat does at start.
+
+### 0.0.0_AB_MSTR~FW (kind MSTR, msg 109679), verbatim
+
+> 0.0.0_AB_MSTR~FW answering from the start-up statement only. ROLE: I am an MSTR (kind=MSTR), an infrastructure manager. I manage merges, pulls, pushes and integrates across the fabric. I drive /unstick, /mstr-spawn and /mstr-kill to keep the fabric running cleanly. I also keep the bid pipeline that pulls in work by utilization, including work arriving via Teams and Outlook. NOT MY ROLE: business logic and project reasoning. Loop arming: zero crons at launch; /watcher once is armed (not a loop). In this test I armed no cron or loop and ran no /integrate, merge, push, spawn, kill or box-sync. Standing by.
+
+Measured by MSTR afterward: the lane made no commit (`git log --all --author=0.0.0_AB_MSTR~FW` empty). Its crons cannot be listed from another session, so "armed none" is its own report. The lane was stopped by `kill-agent.ps1` (pid 20648) and no `~FW` process survives. WORKER was started by `2.0.0_SA_COO~C` itself (a COO subagent), per its message 109678; MSTR has not read that record.
+
 ## Reading this against the FWD-25 text
 
-DONE WHEN (this half): a seat of each kind started and asked what it is. Six of the eight kinds in `org/ref/SEAT_ROLES.json` were started and answered. MSTR is the running session; WORKER is not startable by this skill. Every answer matches its kind's entry in `SEAT_ROLES.json` as far as MSTR read it; MSTR did not grade the answers for accuracy beyond that. The test lanes (`~FW`) have no task orders and committed nothing but the CVO's file; they are stopped after this record (see the cycle report).
+DONE WHEN (this half): a seat of each kind started and asked what it is. Seven of the eight kinds in `org/ref/SEAT_ROLES.json` were started by MSTR and answered (CTO, COO, CVO, CRO, CLOUDOPS, TIER2, and MSTR with its loops forbidden); the eighth, WORKER, was started by `2.0.0_SA_COO~C` itself, a record MSTR has not read. Every answer matches its kind's entry in `SEAT_ROLES.json` as far as MSTR read it; MSTR did not grade the answers for accuracy beyond that. The test lanes (`~FW`) have no task orders and committed nothing but the CVO's file; all seven are stopped and no `~FW` process survives.

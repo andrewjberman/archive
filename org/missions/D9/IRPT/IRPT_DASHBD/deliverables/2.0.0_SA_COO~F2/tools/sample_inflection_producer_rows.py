@@ -1,6 +1,6 @@
 """IRPT_DASHBD (workstream F-SHIP, ~F2): the READ-ONLY sampler for the Inflection J2 criterion (DBF131-1-J2), under the CTO's natural-key ruling (msg 9192).
 
-  python <this file> <out.json> <hashed_out.json> [seed] [n]       defaults: seed 131, n 20
+  python <this file> <out.json> <hashed_out.json> [seed] [n]       defaults: seed 132, n 20 (round 132: ONE row is forced to be a ROLLED line)
 
 The comparison key is the source row's NATURAL KEY: account, trade date, transaction description, symbol, units and amount (`accountId`, `transDate`,
 `transactionDescription`, `ticker`, `noUnits`, `transAmount`). Only rows whose status is Complete are candidates (the producer's own row filter), and
@@ -31,6 +31,7 @@ sys.path.insert(0, str(ROOT / "lib"))
 sys.path.insert(0, str(ROOT / "data/assets/scripts/gold/irpt_reporting"))
 sys.path.insert(0, str(ROOT / "data/assets/scripts/gold/irpt_reporting/adapters"))
 import account_return_daily as ard  # noqa: E402
+import trading_calendar as tc  # noqa: E402
 
 
 def load(name, rel):
@@ -77,14 +78,29 @@ def read_day(day, columns=None):
     return pa.concat_tables(tables, promote_options="default").to_pandas() if tables else None
 
 
+_TRADING = {}
+
+
+def non_trading(value):
+    """True when the transDate is a non-trading day (the one business-date rule rolls it forward)."""
+    if value not in _TRADING:
+        _TRADING[value] = not tc.is_trading_day(dt.date.fromisoformat(str(value)))
+    return _TRADING[value]
+
+
+def rolled_mask(frame):
+    return frame["transDate"].map(non_trading)
+
+
 def complete_only(frame):
     return frame[frame["status"] == "Complete"].reset_index(drop=True)
 
 
-def main(out_path, hashed_path, seed=131, n=20):
+def main(out_path, hashed_path, seed=132, n=20):
     days = ard.partition_days(s3, BUCKET, PREFIX)
     rows_total = dup_rows = dup_keys = 0
     unique_by_day = {}
+    rolled_by_day = {}
     for day in days:
         frame = read_day(day, KEY_FIELDS + ["status"])
         if frame is None or not len(frame):
@@ -97,18 +113,21 @@ def main(out_path, hashed_path, seed=131, n=20):
         dup_keys += int((sizes > 1).sum())
         dup_rows += int(sizes[sizes > 1].sum())
         unique_by_day[day] = int((sizes == 1).sum())
+        rolled_by_day[day] = int((rolled_mask(frame) & ~frame.duplicated(KEY_FIELDS, keep=False)).sum())
     census = {"partitions": len(days), "rows_complete": rows_total, "rows_in_non_unique_keys": dup_rows, "non_unique_keys": dup_keys,
               "share_of_rows_non_unique": round(dup_rows / rows_total, 6) if rows_total else None,
-              "partitions_with_a_unique_row": sum(1 for v in unique_by_day.values() if v)}
+              "partitions_with_a_unique_row": sum(1 for v in unique_by_day.values() if v),
+              "unique_rolled_rows": sum(rolled_by_day.values()), "partitions_with_a_unique_rolled_row": sum(1 for v in rolled_by_day.values() if v)}
     print("duplicate census:", census, flush=True)
     rng = random.Random(seed)
-    picked = sorted(rng.sample(sorted(d for d, v in unique_by_day.items() if v), n))
+    roll_day = rng.choice(sorted(d for d, v in rolled_by_day.items() if v))
+    picked = sorted(rng.sample(sorted(d for d, v in unique_by_day.items() if v and d != roll_day), n - 1) + [roll_day])
     out = {"seed": seed, "n": n, "drawn_at_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "contract_version": CONTRACT["contract_version"], "natural_key": NATURAL_KEY_LABELS, "id_field": "id",
            "rule": "CTO msg 9192: compare by the natural key; the id only where non-null and unique within the partition; sample only from "
                    "Complete rows whose key is unique within the partition; a duplicate key is a finding, never a sample; no row locator",
            "duplicate_census_inflection": census, "rows": []}
-    hashed = {"doc": ("The Inflection J2 sample (DBF131-1-J2), committed WITHOUT client data: per sampled row the partition day, the sha256 of the "
+    hashed = {"doc": ("The Inflection J1 sample (DBF132-1-J1), committed WITHOUT client data: per sampled row the partition day, the sha256 of the "
                       "natural key (the day and the six key values joined by '|', str()) and the producer's non-figure results. No account id, "
                       "units, amount or symbol is written. Re-run: regenerate the draw with the same seed on the same source "
                       "(tools/sample_inflection_producer_rows.py) and compare the hashes. The un-hashed file stays untracked."),
@@ -118,7 +137,9 @@ def main(out_path, hashed_path, seed=131, n=20):
         frame = complete_only(read_day(day))
         keyed = frame[KEY_FIELDS]
         mask = ~keyed.duplicated(keep=False)
-        cand = [i for i in range(len(frame)) if bool(mask.iloc[i])]
+        if day == roll_day:
+            mask = mask & rolled_mask(frame).to_numpy()
+        cand = [i for i in range(len(frame)) if bool(mask.iloc[i] if hasattr(mask, "iloc") else mask[i])]
         i = cand[rng.randrange(len(cand))]
         one = frame.iloc[[i]].reset_index(drop=True)
         kept, _excluded = at.split_complete(one)
@@ -131,9 +152,11 @@ def main(out_path, hashed_path, seed=131, n=20):
                                "id_usable": True, "txn_type": prod["txn_type"], "action": prod["action"], "flow_class": prod["flow_class"],
                                "coverage": prod["coverage"], "settle_date_present": prod["settle_date"] is not None,
                                "fee_present": prod["fee"] is not None, "price_present": prod["price"] is not None,
+                               "rolled": str(prod["business_date"]) != str(prod["trade_date"]),
                                "source_txn_id_present": prod["source_txn_id"] is not None,
                                "source_action_raw_equals_source": prod["source_action_raw"] == plain(one.iloc[0]["transactionDescription"])})
         print("sampled", day, flush=True)
+    assert any(r["rolled"] for r in hashed["rows"]), "the sample must hold a rolled line"
     json.dump(out, open(out_path, "w", encoding="utf-8"), indent=1)
     text = json.dumps(hashed, indent=1)
     assert text.isascii()
@@ -145,4 +168,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 3:
         print(__doc__)
         sys.exit(2)
-    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 131, int(sys.argv[4]) if len(sys.argv) > 4 else 20)
+    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 132, int(sys.argv[4]) if len(sys.argv) > 4 else 20)

@@ -1,0 +1,17 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~481 on AMGT_RESAPP.TO-AMGT-bo-7.g4-event-reads-the-same-keys (round 108, G4PLAN, direct build)
+worktree C:/dev/wk-resapp-481 , branch wk-AMGT_RESAPP-481 , base fe0bbd0e37 (the issuance commit)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-481 ; test -d org && test -d .tools -> TREE-OK.
+2. Premises re-grounded: inputs.would_run ran the constant tasks.FILINGS_PLAN_ONLY with no keys; run.run_task passed no keys;
+   the filings batch accepts --security-key together with --plan-only (filings/batch.py main(), the plan is filtered before the plan-only loop).
+3. Pre-edit runs on the unchanged tree: AC1 exit=4 (file not found, no tests ran); AC2 exit=2 (unrecognized --print-plan-command);
+   AC3 46 passed, exit=0.
+4. Tests written first, run red: test_plan_only_keys.py 8 failed (would_run takes 1 positional argument; the run_task and
+   plan_command_for assertions failed; print-plan-command exited 2).
+5. Built: inputs.py (plan_argv + would_run(runner, keys=None)); run.py (plan_command_for, run_task passes keys.get(key) to would_run for a plan-only task,
+   --print-plan-command). One existing test updated: tests/test_security_keys.py T8 asserted the old unfiltered plan-only argv; its _Runner stub now matches the
+   keyed plan-only argv by prefix, and the T8 assertion carries the eight pairs. No other existing test changed.
+6. Post-edit runs: AC1 8 passed exit=0; AC2 the one LLM-BATCH line with the eight keys in order, exit=0 (two runs byte-identical);
+   AC3 54 passed exit=0; register --plan tail -1 PLAN: 3 task(s), 0 created.
+7. commit-gate.sh on the four .py files: pre-commit gate clean for 4 of 4 file(s). Package ASCII check: 0 non-ASCII files of 14.
+8. Code commit 8975bfe276 (LOCAL on wk-AMGT_RESAPP-481). Nothing registered, enabled or run; no AWS call; no batch run; no Windows task touched.

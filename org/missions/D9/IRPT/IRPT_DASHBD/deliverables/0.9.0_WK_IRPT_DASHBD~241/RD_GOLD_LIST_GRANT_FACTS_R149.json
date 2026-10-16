@@ -1,0 +1,8 @@
+{
+  "file": "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf",
+  "expression_old": "[for p in local.irpt_rg_gold_read_prefixes : \"${p}*\"]",
+  "expression_new": "[for p in concat(local.irpt_rg_gold_read_prefixes, [local.irpt_rg_gold_filled_prefix]) : \"${p}*\"]",
+  "read_list_changed": false,
+  "write_list_changed": false,
+  "words": "Changed one Terraform expression in the reporting-gold root's locals.tf. The list pattern that feeds the role statement ListExactlyTheSixGoldPrefixes was built from the read prefixes only, so the filled report-values prefix, which is in the write list but in no list pattern, was denied on the stage's catch-up listing of its own newest landed partition, and the stage wrote nothing (hop 1, row IRPT_BCKEND-D2-S219). The expression now concatenates the filled prefix onto the read prefixes before the pattern is built. The read list and the write list are unchanged, so no read grant and no write grant is added. Not proven: no terraform plan was run, nothing was applied, and whether the stage then writes is read at the first scheduled fire after the apply."
+}
