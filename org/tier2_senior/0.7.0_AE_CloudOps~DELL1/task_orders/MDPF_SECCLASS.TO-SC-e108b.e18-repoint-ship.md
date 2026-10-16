@@ -2,7 +2,7 @@
   <metadata>
     <id>MDPF_SECCLASS.TO-SC-e108b.e18-repoint-ship</id>
     <issued_by>2.0.0_SA_COO~M1</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~SC1</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
     <date>2026-10-16</date>
     <status>staged</status>
     <project_code>MDPF_SECCLASS</project_code>
@@ -16,6 +16,7 @@
 </decomp_ref>
 
   <objective>
+    RE-ADDRESSED 2026-10-16 ~16:0xZ from 0.7.0_AE_CloudOps~SC1 to 0.7.0_AE_CloudOps~DELL1, the MDPF macro lane on dell1 (CLAUDE.md rule 34; MSTR~DELL1 seating record msg 6827). The signed pair halves cite this order by its earlier path (org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/...); the order, its steps and its bounds are unchanged.
     Ship TWO named files to s3://opal-data-bd/code/gold/: E_18.detect_new_securities.py (served ETag a7820a205692444dadb59e526200bff6, VersionId wb5QYkh7QEfrvMEscg.EgAui0MeBaNwB -> the repo md5 f5c03ee69eaa1810159aefb6e2145bb4)
     and gold_dispatch.sh (served ETag 882a910b27d1a855c5d31547eb44f3a1, VersionId .bNYVetB5sGV8bZki7EgXBfChCH_uPyE -> the repo md5 165933f6dd0068a649f9757d9b86f303). Repo = box/dell1 at or after d812b466fd. Then prove it (one E_18 dry run on the runner).
     Nothing from lib/, the shared module, a table, a watermark or any other key rides the act. The pair: request org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_REPOINT_SHIP_20261016.md
@@ -33,7 +34,7 @@
     STEP 0 (reads, nothing written): the three documents above; the served ETags of both files are still the base values (another ship in between means the delta is not this cell: STOP and report); the md5 of both repo files equals the two built values;
     runner state and gold/trigger-pending.json; every live worktree's org/critical_paths/.open_deploys/ for an open ledger touching code/gold (CLAUDE.md NEVER-2); name any.
 
-    LEG P (before the deploy): a census of every key under s3://opal-data-bd/code/gold/ with its ETag and VersionId (IsLatest only; page and key counts printed) to org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E108_LEGP_20261016.json; and the table
+    LEG P (before the deploy): a census of every key under s3://opal-data-bd/code/gold/ with its ETag and VersionId (IsLatest only; page and key counts printed) to org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/E108_LEGP_20261016.json; and the table
     etf-classifications' state: the 13 seeded keys present, the 9 held-out absent, the first 200 keys of a sorted scan with their last_updated.
 
     LEG D (the deploy): open the ledger in org/critical_paths/change_management/ (name both the sentinel and the entry); then, outside a BD fire, `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py` and
@@ -56,9 +57,9 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/
-    org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e108b.e18-repoint-ship.md
+    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/MDPF_SECCLASS.TO-SC-e108b.e18-repoint-ship.md
   </paths>
 
 <preflight>
