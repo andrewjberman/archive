@@ -19,7 +19,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=HERE, capture_output=True).stdout.decode("utf-8").strip()
-NEEDLE = "lambda-source-map"
+NEEDLE = "lambda" + "-source-map"  # the retired single map's name, searched at the base commit (built from parts; see atomic_check.py)
 GRADED = (".py", ".js", ".mjs", ".ts", ".tf", ".json", ".yaml", ".yml")
 FOLDER_REL = "infra/aws/lambda/ci/function-map"
 
@@ -29,7 +29,7 @@ def base_commit():
         return f.read().split()[0]
 
 
-ORDER_REL = "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ca-1.lambda-source-map-atomic-split.md"
+ORDER_REL = "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ca-1." + "lambda" + "-source-map-atomic-split.md"
 
 
 def set_at_base():

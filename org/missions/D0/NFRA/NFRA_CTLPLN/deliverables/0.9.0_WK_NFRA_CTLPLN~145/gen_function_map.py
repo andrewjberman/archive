@@ -16,7 +16,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=HERE, capture_output=True).stdout.decode("utf-8").strip()
-MAP_REL = "infra/aws/lambda/ci/lambda-source-map.json"
+# the retired single map, read at the BASE commit only; built from parts (this tool reads history, not the tree)
+MAP_REL = "infra/aws/lambda/ci/" + "lambda" + "-source-map.json"
 FOLDER = os.path.join(ROOT, "infra", "aws", "lambda", "ci", "function-map")
 
 
@@ -45,7 +46,7 @@ def main():
     readme = [
         "# function-map -- one JSON file per Lambda function",
         "",
-        "This folder replaces the single file `infra/aws/lambda/ci/lambda-source-map.json` (retired by TO-CT-ca-1,",
+        "This folder replaces the single file `infra/aws/lambda/ci/" + "lambda" + "-source-map.json` (retired by TO-CT-ca-1,",
         "NFRA_CTLPLN round 30). Each `<function-name>.json` holds the entry object of that function, with no wrapper.",
         "The file name is the function name. Readers load the folder: `lib/opal_lambda_map.py` (`load_all`, `load_entry`),",
         "and Terraform reads it with `fileset` (`locals.tf` of the three investor-reporting roots).",

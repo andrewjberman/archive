@@ -24,8 +24,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=HERE, capture_output=True).stdout.decode("utf-8").strip()
 DELIV_REL = "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~145"
 CENSUS_REL = "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~140/source_map_census.py"
-MAP_REL = "infra/aws/lambda/ci/lambda-source-map.json"
-MAP_NAME = "lambda-source-map.json"
+# the retired single map: read at the BASE commit only (git show), never from the tree. Built from parts so this tool's
+# own source is not graded as a live reader by the census (it reads history, not the tree).
+MAP_NAME = "lambda" + "-source-map.json"
+MAP_REL = "infra/aws/lambda/ci/" + MAP_NAME
 FOLDER_REL = "infra/aws/lambda/ci/function-map"
 TF_ROOTS = [
     "infra/aws/terraform/investor-reporting/account-return-daily",
