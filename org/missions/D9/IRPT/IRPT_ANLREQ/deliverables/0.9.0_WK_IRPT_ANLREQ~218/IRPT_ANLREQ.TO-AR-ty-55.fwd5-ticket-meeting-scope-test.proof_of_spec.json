@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-ty-55",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-ty-55.fwd5-ticket-meeting-scope-test.md",
+    "group": "OTHER",
+    "vintage_commit": "9d0664b2ff"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~218",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R46_TX.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-ty-55.fwd5-ticket-meeting-scope-test.md",
+    "vintage_commit": "9d0664b2ff"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one BLOCKING row IRPT_ANLREQ-D2-W218-S1 appended; no source, no test, no AWS, no deploy",
+      "commit_or_etag": "PENDING-THIS-COMMIT"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR55-ty-AC1",
+      "criterion_verbatim": "AR55-ty-AC1 -- every file exists, every test function is named test_cross_firm_*, the tests pass, and at least 3 tests pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 3 infra/aws/lambda/ticket_center/tests/test_cross_firm_meeting_scope.py",
+      "expect": "R46-TESTS-OK",
+      "output_evidence": "python: can't open file 'C:\\dev\\wk-irpt-anlreq-218\\org\\tier1_exec\\2.0.0_SA_COO\\deliverables\\IRPT_ANLREQ_T2\\R46_CHECKS\\r46_checks.py': [Errno 2] No such file or directory; rc=2",
+      "denominator": "0 of 3 required passing tests; the test file was not written and the checker is absent from this worktree",
+      "status": "FAIL",
+      "status_reason": "BLOCKING: the checker path is tracked at 9d0664b2ff with the skip-worktree flag and outside the sparse cone (org/tier1_exec not in git sparse-checkout list). Per the worker bar the worktree was not rebuilt or widened; the surprise row IRPT_ANLREQ-D2-W218-S1 carries the BLOCKING."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own --self-test (green pair plus mutants refused), which the order names as the proof that the checker and the tests are live",
+      "expected": "R46-SELFTEST-OK; each mutant refused",
+      "observed": "NOT RUN: the checker file is absent from the worktree, and the test file is not written, so no guard was removed and no test was shown to fire on a mutant. This records a control that did not fire; it claims nothing about the tests.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "the acceptance invocation run twice; the two outputs compared byte for byte with cmp",
+      "observed": "both runs rc=2 with the same single line (python can't open file ... r46_checks.py: [Errno 2] No such file or directory); cmp IDENTICAL",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "writing infra/aws/lambda/ticket_center/tests/test_cross_firm_meeting_scope.py",
+      "reason": "the worker bar says a worktree lacking the named paths is BLOCKING and a stop; the criterion's checker is absent, so the test file was not authored to avoid a partial cut"
+    },
+    {
+      "item": "running the ticket service tests (python -m pytest) from infra/aws/lambda/ticket_center",
+      "reason": "no test file of this order exists to run; the existing neighbours were read, not executed"
+    },
+    {
+      "item": "sparse-checkout widening to materialise org/tier1_exec",
+      "reason": "forbidden by the worker bar (never rebuild, extract or reconstruct the tree) and by the write grant"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W218-S1: the AC1 checker named by the acceptance invocation is absent from the ~218 worktree; org/tier1_exec is outside the sparse cone, so the criterion cannot run"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py tests",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 3 infra/aws/lambda/ticket_center/tests/test_cross_firm_meeting_scope.py",
+      "result": "rc=2, python can't open file (absent from worktree); no R46-TESTS line printed"
+    },
+    {
+      "tool": "premise recheck (read, not run)",
+      "invocation": "sed -n '1950,1985p' infra/aws/lambda/ticket_center/lambda_function.py; sed -n '160,200p' infra/aws/lambda/ticket_center/tests/test_meeting_request.py",
+      "result": "lambda_function.py:1962 is the if cur is None or not _in_profile_scope(actor, ...) guard; test_meeting_request.py:179 is the def test_create_with_a_firm_outside_the_callers_scope test; both premises hold"
+    }
+  ]
+}
