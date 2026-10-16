@@ -1,59 +1,68 @@
-# CT-bf-1 AMENDMENT 1 -- regression sweep, head-anchored rule
+# CT-bf-1 AMENDMENT 2 -- regression sweep, source priority
 
-Denominator: 232 runs = 232 (project, round) pairs from `org/missions/D*/*/*/decompositions/*DECOMP.round<n>.md` (the two
-`IRPT_CUSTDY_DECOMP.round7.addendum*.md` files are not round files and are excluded, as in the first seating), over 9 tree
-projects. Each run: `python .tools/round-close-check.py --project <CODE> --round <n>`, timeout 120. Result: 0 timeouts, 0
-non-zero exits. Runner: `sweep_runner.py`; comparator: `sweep_compare.py` (both in this folder).
+Denominator: 232 runs = 232 (project, round) pairs from `org/missions/D*/*/*/decompositions/*DECOMP.round<n>.md` over 9 tree
+projects (the two `IRPT_CUSTDY_DECOMP.round7.addendum*.md` files are not round files and are excluded, as in every seating).
+Each run: `python .tools/round-close-check.py --project <CODE> --round <n>`, timeout 120 s. Result in both sweeps: 0 timeouts,
+0 non-zero exits. JUDGMENT lines: 177 criteria in each sweep, the same keys in both.
+
+COMPARISON BASE: the CT-be-1 checker as merged, commit `9a570bb671` (`git show 9a570bb671:.tools/round-close-check.py`), copied
+into the worktree for the baseline run and restored to the source-priority rule for the after run, both on the same real
+trees on the same day. Not the pre-CT-be-1 tool at `833181d311`, and not the head-anchored code of AMENDMENT 1. Drift control:
+the baseline rerun matches the earlier `SWEEP_BEFORE.txt` (the first seating's base) with 0 JUDGMENT and 0 ROUND-CLOSE
+differences; only the line order of the file differs.
 
 Files (this folder):
 
-- `SWEEP_BEFORE.txt` -- the CT-be-1 checker (`9a570bb671`), before any CT-bf-1 change (committed @749ad4afa5).
-- `SWEEP_AFTER.txt` -- the HEAD-ANCHORED rule (the rule is committed @b71565bc7e; this sweep ran 2026-10-16 ~14:41Z on that code).
-- `SWEEP_CLASSIFIED.txt` -- every changed line, paired by (project, round, order, criterion), with source before and after.
-- `SWEEP_AFTER_FIRST_RULE.txt`, `SWEEP_CLASSIFIED_FIRST_RULE.txt` -- the withdrawn first rule (committed @eb794aa37d), kept as record.
-- A drift control (the committed first-rule checker, rerun today) matched `SWEEP_AFTER_FIRST_RULE.txt` line for line: the
-  sweep reads the same trees with the same results, so the differences below are the rule's effect alone.
+- `SWEEP_BASE_9a570bb671.txt` -- the baseline: the CT-be-1 checker at `9a570bb671`.
+- `SWEEP_AFTER_SOURCE_PRIORITY.txt` -- the source-priority rule (committed @038bfea258).
+- `SWEEP_CLASSIFIED_SOURCE_PRIORITY.txt` -- `sweep_compare.py` output: every changed line, with the source before and after.
+- `sweep_runner.py`, `sweep_compare.py` -- the runner and the comparator (unchanged).
+- Earlier seatings, kept as record: `SWEEP_BEFORE.txt`, `SWEEP_AFTER.txt`, `SWEEP_CLASSIFIED.txt` (head-anchored rule),
+  `SWEEP_AFTER_FIRST_RULE.txt`, `SWEEP_CLASSIFIED_FIRST_RULE.txt`; `SWEEP_REPORT_AMENDMENT1.md` (the head-anchored report).
 
-Measured change (JUDGMENT lines, 177 judgment criteria in both sweeps):
+## Measured against the base (9a570bb671)
 
-- 8 lines differ.
-- 7 lines GRADED -> UNGRADED (the stop condition).
-- 1 line GRADED -> GRADED with the source changed (verdict NOT MET both sides): ADVI_COTBKF round 12 TO-CB-l-1 CB12l1-AC3,
-  investigation row ADVI_COTBKF-D2-S24 -> adjudication row ADVI_COTBKF-C-S17. Allowed (source change, verdict unchanged).
-- ROUND-CLOSE lines differ: 7. Verdict changes: 3 (MAY-CLOSE -> REFUSED: ADVI_COTBKF rounds 39, 51, 52). Other changed
-  lines: ADVI_COTBKF rounds 28 and 34 (REFUSED, graded 2 -> 1), ETFS_RIVALS rounds 8 and 9 (REFUSED, graded 1 -> 0).
+| measure | base | source priority |
+|---|---|---|
+| runs (projects) | 232 (9) | 232 (9) |
+| JUDGMENT readings GRADED / UNGRADED / SELF | 116 / 61 / 0 | 116 / 61 / 0 |
+| GRADED -> UNGRADED lines | -- | 0 |
+| MET / NOT MET verdict changes | -- | 0 |
+| changed JUDGMENT lines (any part) | -- | 5 |
+| changed JUDGMENT lines whose grade of record changes SOURCE | -- | 5 |
+| ROUND-CLOSE lines that differ | -- | 0 of 232 |
+| ROUND-CLOSE verdict changes | -- | 0 |
 
-## STOP CONDITION NOT MET -- the issuer rules
+Acceptance (AMENDMENT 2): zero GRADED->UNGRADED, zero ROUND-CLOSE verdict changes, zero MET / NOT MET reading changes. MET.
 
-The acceptance was zero GRADED -> UNGRADED lines and zero ROUND-CLOSE verdict changes. Both fail. Per the amendment, the
-80-character head is NOT widened. The seven flipped grades, each with its row id and the first 120 characters of its one_line
-(verbatim, from the row in the worktree at HEAD b71565bc7e):
+## The five changed lines (source only; the verdict is the same on both sides)
 
-1. round 28, TO-CB-ab-3 CB28ab3-AC3, row `ADVI_COTBKF-D2-S41`:
-   "L9 round 28: CB28ab1-AC3 NOT MET as written ('decided ... before the run' fails for one rule), but the post-run continui"
-   The head names CB28ab1-AC3 (another order); the CB28ab3-AC3 MET grade sits at character 476 ("AC3 MET: cap 0.5").
-2. round 34, TO-CB-ah-2 CB34ah2-AC3, row `ADVI_COTBKF-D2-S58`:
-   "L9 round 34: CB34ah1-AC2 MET -- rule commit e6544ecdfe (07:04 ET) precedes output 33b729fc1b (07:06); the class cross_fi"
-   The head names CB34ah1-AC2; the CB34ah2-AC3 MET grade sits at character 302 ("AC3 MET -- rule 2536c4fc09").
-3. round 39, TO-CB-am-1 CB39am1-AC2, row `ADVI_COTBKF-D2-S64`:
-   "L9 rounds 36 and 39: CB36aj1-AC2 MET -- other_rows_identical=True and the verify reads 38/38; the bond and diff rule com"
-   The head names CB36aj1-AC2; the CB39am1-AC2 MET grade sits at character 391. (Verdict MAY-CLOSE -> REFUSED.)
-4. round 51, TO-CB-ay-1 CB51ay1-AC2, row `ADVI_COTBKF-D2-S76`:
-   "L9 rounds 50-52: CB50ax1-AC2 MET (served writer and B_00 equal the repo bytes, no opal_naming import, own firm and 4 key"
-   The head names CB50ax1-AC2; the CB51ay1-AC2 grade sits at character 217. (Verdict MAY-CLOSE -> REFUSED.)
-5. round 52, TO-CB-az-1 CB52az1-AC2, row `ADVI_COTBKF-D2-S76`: the same one_line as item 4; the CB52az1-AC2 grade sits at
-   character 457. (Verdict MAY-CLOSE -> REFUSED.)
-6. round 8, TO-RIV-fc-1 J1, row `ETFS_RIVALS-Z-S47` (investigation file `INVESTIGATION_v1.Z.md`):
-   "The first organic full-day page (2026-10-06, batch ai-2026-10-06-517fd371, 13 of 13 funds updated) renders with holding "
-   The one_line carries no criterion token. The grade ("RIV-fc-1 J1 and RIV-ln-1 J1, both graded PASS-in-part") sits in
-   `spec_asserts`, which the amendment excludes (only the one_line is the head).
-7. round 9, TO-RIV-ln-1 J1, row `ETFS_RIVALS-Z-S47`: the same row as item 6.
+Each pair: the two competing CVO rows, id, source file, surfaced_at, verdict. The base picked the investigation row; the
+rule picks the adjudication row, because an adjudication row always outranks an investigation row.
 
-What the seven share: each is a real CVO prose grade in a multi-criterion investigation row. In items 1-5 the head of the one_line
-names a different criterion of the same round, and the grade for the named order is later in the row. In items 6-7 the grade is in
-`spec_asserts`. The head rule reads each row as the amendment specifies, so the rule is working as written and the flips are the
-open question for the issuer: re-grade these rows as `grades` entries, move the grade to the head of the row, or decide that the
-head is not the right boundary for multi-criterion rows. The rule was not widened here.
+1. ADVI_COTBKF round 12, TO-CB-l-1, CB12l1-AC3 -- investigation `ADVI_COTBKF-D2-S24` (INVESTIGATION_v1.md, 2026-10-07T15:05Z,
+   NOT MET) displaced by adjudication `ADVI_COTBKF-C-S17` (ADJUDICATION_v10.md, 2026-10-07T15:05Z, NOT MET).
+2. ADVI_COTBKF round 53, TO-CB-ba-1, CB53ba1-AC2 -- `ADVI_COTBKF-D2-S81` (INVESTIGATION_v1.md, 2026-10-11T03:22Z, NOT MET)
+   displaced by `ADVI_COTBKF-C-S44` (ADJUDICATION_v37.md, 2026-10-11T03:22:00Z, NOT MET).
+3. ADVI_COTBKF round 61, TO-CB-bi-2, CB61bi2-AC2 -- `ADVI_COTBKF-D2-S102` (INVESTIGATION_v1.md, 2026-10-11T08:40:26Z, MET)
+   displaced by `ADVI_COTBKF-C-S46` (ADJUDICATION_v39.md, 2026-10-11T08:40:26Z, MET).
+4. ADVI_COTBKF round 66, TO-CB-bn-1, CB66bn1-AC2 -- `ADVI_COTBKF-D2-S115` (INVESTIGATION_v1.md, 2026-10-11T12:20:43Z, NOT MET)
+   displaced by `ADVI_COTBKF-C-S50` (ADJUDICATION_v43.md, 2026-10-11T12:20:43Z, NOT MET).
+5. ADVI_COTBKF round 71, TO-CB-bs-1, CB71bs1-AC2 -- `ADVI_COTBKF-D2-S122` (INVESTIGATION_v1.md, 2026-10-11T18:22:31Z, MET)
+   displaced by `ADVI_COTBKF-C-S55` (ADJUDICATION_v48.md, 2026-10-11T18:22:31Z, MET).
 
-Filed: `NFRA_CTLPLN-W144-S3` (BLOCKING) in `org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md`,
-carrying this list.
+What the five share: in each pair the adjudication row and the investigation row carry the same verdict and the same
+surfaced_at (to the second, or to the minute). The base tie-break (the investigation rows are walked after the adjudication
+rows) picked the investigation row. Two of the adjudication rows state the verdict outside `one_line`: `C-S44` in `world_is`
+("CB53ba1-AC2 is NOT MET on the manifest damage"), and `C-S55` says its own `D2-S122` "is dismissed as a grade record" and
+restates MET in the same row. Both are read as before; the checker's prose reading of an adjudication row is unchanged.
+
+The stop condition in AMENDMENT 2 is not triggered: no MET / NOT MET reading changes, so the five source changes are listed
+and not stopped on. They are filed as `NFRA_CTLPLN-W144-S5` (OBSERVATION, INERT) in
+`org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md`, for the issuer's ruling on a source
+change at a tie of surfaced_at.
+
+## Not in this sweep
+
+- The site Z trees (`NFRA_OPLGTW`) are not in this worktree's sparse checkout, so the site Z case itself is covered by the
+  test's planted shape (arm a), not by a sweep run on the real tree.
