@@ -16,6 +16,9 @@ are counted apart. The same bucketing is printed for the events that have a posi
 Round 135 (CTO msg 9649): the events whose cash change on the event day is NOT about -X are RE-READ one trading day either side (the window shifted to the previous and to the
 next trading day: the cash change across that day, against the same X). `agreement` prints the events whose cash fell by about X on the event day, and the total once
 the shifted windows are counted; below 90 of the events stops the Inflection release.
+
+Round 135 (CTO msg 9659): `reinvestment_by_cash_group` counts, for each event group (cash fell by about X; cash flat; other), the events with a Complete `Income Reinvested` line, a
+Complete `Buy Exchange` line, either, or neither, on the SAME account and day with an absolute amount within one cent of X (one snapshot).
 """
 import datetime as dt
 import importlib.util
@@ -107,6 +110,10 @@ def main(out_path):
     out = {"latest_snapshot": latest, "events": len(events), "tolerance": TOL, "missing_positions": 0,
            "cash_change_vs_X": {"with_positive_income_partner": Counter(), "without_partner": Counter()},
            "total_change_vs_X": {"with_positive_income_partner": Counter(), "without_partner": Counter()}}
+    lines_by_day = {}
+    for r in c.itertuples():
+        lines_by_day.setdefault((r.accountId, r.transDate), []).append((r.transactionDescription, round(abs(float(r.transAmount)), 6)))
+    reinvest = {"cash_fell_by_about_X": Counter(), "cash_flat": Counter(), "other": Counter()}
     on_day = shifted_hit = shifted_miss = 0
     broad_on_day = broad_shifted = 0
     for acct, d, x in events:
@@ -117,6 +124,15 @@ def main(out_path):
             continue
         b1, b0 = float(pos[d1][2].get(acct, 0.0)), float(pos[d0][2].get(acct, 0.0))
         c1, c0 = float(pos[d1][1].get(acct, 0.0)), float(pos[d0][1].get(acct, 0.0))
+        group = {"-X": "cash_fell_by_about_X", "0": "cash_flat"}.get(bucket_of(c1 - c0, x), "other")
+        same_day = lines_by_day.get((acct, d), [])
+        has_ir = any(desc == "Income Reinvested" and abs(m - x) <= TOL for desc, m in same_day)
+        has_buy = any(desc == "Buy Exchange" and abs(m - x) <= TOL for desc, m in same_day)
+        reinvest[group]["events"] += 1
+        reinvest[group]["income_reinvested_line"] += 1 if has_ir else 0
+        reinvest[group]["buy_line"] += 1 if has_buy else 0
+        reinvest[group]["either"] += 1 if (has_ir or has_buy) else 0
+        reinvest[group]["neither"] += 0 if (has_ir or has_buy) else 1
         broad_hit_day = abs((b1 - b0) + x) <= TOL
         broad_on_day += 1 if broad_hit_day else 0
         if abs((c1 - c0) + x) <= TOL:
@@ -146,6 +162,7 @@ def main(out_path):
                         "broader_cash_definition": "custodial cash, money-market products and the Cash or Equivalent asset class",
                         "broader_cash_fell_by_about_X_on_the_event_day": broad_on_day, "broader_cash_agreeing_on_a_shifted_window_only": broad_shifted,
                         "broader_cash_agreeing_in_total": broad_on_day + broad_shifted}
+    out["reinvestment_by_cash_group"] = {g: dict(v) for g, v in reinvest.items()}
     for k in ("cash_change_vs_X", "total_change_vs_X"):
         out[k] = {p: dict(v) for p, v in out[k].items()}
     out["read_at_utc"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
