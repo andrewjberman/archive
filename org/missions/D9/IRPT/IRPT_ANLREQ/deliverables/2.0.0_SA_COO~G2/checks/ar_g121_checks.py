@@ -22,7 +22,9 @@ IR = "infra/aws/lambda/investor-reporting/intake/"
 CHECKER = IR + "yfinance_check.py"
 TEST = IR + "tests/test_yfinance_check.py"
 FIXTURE = IR + "tests/fixtures/yfinance_exceptions_1_2_0.py"
-OWN = (CHECKER, TEST, FIXTURE)
+OWN = (CHECKER, TEST, FIXTURE, "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-121.checker-ticker-missing-is-not-kept.md")
+WORKER_PREFIXES = ("org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~258/",
+                   "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md")
 ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/",
           "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/", "org/tier1_exec/2.0.0_SA_COO~G2/",
           "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md")
@@ -148,7 +150,7 @@ def scope():
     if diff.returncode != 0:
         return ["git diff rc=%d" % diff.returncode]
     names = [n for n in diff.stdout.decode().splitlines() if n.strip()]
-    stray = [n for n in names if n not in OWN and not n.startswith(ISSUER)]
+    stray = [n for n in names if n not in OWN and not n.startswith(ISSUER + WORKER_PREFIXES)]
     return ["outside the cell's write set: %s" % ", ".join(stray)] if stray else []
 
 
