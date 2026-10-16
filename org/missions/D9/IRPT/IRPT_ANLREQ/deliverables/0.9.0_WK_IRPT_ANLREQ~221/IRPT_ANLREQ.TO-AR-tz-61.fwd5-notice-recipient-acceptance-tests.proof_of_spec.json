@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-61",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-61.fwd5-notice-recipient-acceptance-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "ce0fefbdc685ab98ccc2ac014262dfa2c3504224"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R47_TX.md",
+    "vintage_commit": "ce0fefbdc685ab98ccc2ac014262dfa2c3504224",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-61.fwd5-notice-recipient-acceptance-tests.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~221",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_cross_firm_notice_recipient.py",
+      "kind": "test",
+      "commit_or_etag": "3499280b517c2d5fd2362f39980be245b5613dad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on branch wk-IRPT_ANLREQ-221 (worktree C:/dev/wk-irpt-anlreq-221); not pushed; a test file, no deploy. Seven test functions: five RED on the current code, two controls PASS.",
+      "artifact_covered_by": [
+        "AR61-tz-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR61-tz-AC1",
+      "criterion_verbatim": "the file exists, every test function is named test_cross_firm_*, at least 3 test(s) fail now and none errors out at collection or setup.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 3 infra/aws/lambda/ticket_center/tests/test_cross_firm_notice_recipient.py",
+      "output_evidence": "R46-RED-OK red=5 ; pytest tail on the same file: '5 failed, 2 passed in 0.89s' (a second run printed the identical tail line). Red set: test_cross_firm_notice_goes_only_to_the_contact_not_the_body_address (AssertionError: recipient must be the firm contact, got ['attacker@example.invalid']), test_cross_firm_ignored_body_address_is_logged_by_digest_never_by_address (AssertionError: an ignored body address must be logged), test_cross_firm_firm_absent_from_the_map_sends_nothing_and_logs_no_contact (sends=1), test_cross_firm_empty_contact_list_sends_nothing_and_logs_no_contact (sends=1), test_cross_firm_malformed_map_sends_nothing_and_logs_no_contact (sends=1). Controls PASS: test_cross_firm_stored_address_in_the_list_is_the_recipient, test_cross_firm_stored_ticket_keeps_the_body_requester_email_unchanged.",
+      "denominator": "5 red of 7 test functions in the file (the checker floor is at least 3 red); 0 collection or setup errors; 2 of 7 controls pass; all 7 functions named test_cross_firm_*",
+      "expect": "R46-RED-OK",
+      "status": "PASS",
+      "status_reason": "mechanical criterion: the checker output R46-RED-OK red=5 is the verdict, rc=0; the rc and the deciding line are in output_evidence"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the cell names no mutant; the discrimination is the five RED tests failing on the current send-to-body behaviour",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "the cell names no mutant and mints none; the red set itself is the discrimination (5 of 7 fail on the body-address behaviour the fix removes, 2 controls pass on the behaviour the fix keeps)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: pytest run twice on the same file from the worktree root, tail line compared",
+      "observed": "run 1 '5 failed, 2 passed in 0.89s'; run 2 '5 failed, 2 passed in 0.89s'; identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the V2 fix (TCKT_VNEXT round 19, R19-nr-1) is not in this worktree, so the five RED tests cannot pass here",
+      "reason": "by design per AR-tz-61: the tests are the acceptance of the fix written ahead of it; no code under test was edited; they turn green when 2.0.0_SA_COO~V2 lands"
+    },
+    {
+      "item": "the unset CLIENT_NOTICE_CONTACT_MAP case (the contract default {}) has no separate test function",
+      "reason": "the cell names the absent-firm, empty-list and malformed cases; an unset map resolves to the absent-firm path by construction, which the absent-firm test covers"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (no rows filed by 0.9.0_WK_IRPT_ANLREQ~221 on AR-tz-61)",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/lambda/ticket_center/tests/test_cross_firm_notice_recipient.py (from C:/dev/wk-irpt-anlreq-221)",
+      "result": "5 failed, 2 passed in 0.89s; rc=1 (the RED set is by design)"
+    },
+    {
+      "tool": "r46_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 3 infra/aws/lambda/ticket_center/tests/test_cross_firm_notice_recipient.py",
+      "result": "R46-RED-OK red=5; rc=0"
+    },
+    {
+      "tool": "r46_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "result": "R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused; rc=0"
+    }
+  ]
+}
