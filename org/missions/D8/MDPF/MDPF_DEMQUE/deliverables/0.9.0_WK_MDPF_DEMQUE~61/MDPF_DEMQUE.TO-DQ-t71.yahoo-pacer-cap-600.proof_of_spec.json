@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t71",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t71.yahoo-pacer-cap-600.md",
+    "group": "OTHER",
+    "vintage_commit": "1a9371885b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "1a9371885b",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t71.yahoo-pacer-cap-600.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~61",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/yahoo_pull.py",
+      "kind": "script",
+      "commit_or_etag": "e0c99c0341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pacer.__init__ daily_cap default 400 -> 600 (line 155). No other line changed; the identity lock, V2 gate, inactive-only rule, 8-12 second gap and pushback rule are untouched. No vendor call, no S3 write, no pacer state written.",
+      "artifact_covered_by": ["DQ9-t71-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/extend_frontier.py",
+      "kind": "script",
+      "commit_or_etag": "e0c99c0341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DAILY_CAP 400 -> 600 (line 76); TIER2_RESERVE stays 20, so _request_cap() reads 580. The module docstring CAP line names DAILY_CAP and states no number, so it follows the constant unedited.",
+      "artifact_covered_by": ["DQ9-t71-AC1", "DQ9-t71-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/inactive_request.py",
+      "kind": "script",
+      "commit_or_etag": "e0c99c0341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DAILY_CAP 400 -> 600 (line 41). NIGHTLY_CAP = 380 (line 42) is NOT changed: it is not one of the three named defaults; surfaced as MDPF_DEMQUE-D1-W61-S1.",
+      "artifact_covered_by": ["DQ9-t71-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_pacer_cap.py",
+      "kind": "test",
+      "commit_or_etag": "e0c99c0341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file. Two tests with the exact names of the order, offline: a temp state file and a no-op sleep; no network. Both PASSED by name at e0c99c0341.",
+      "artifact_covered_by": ["DQ9-t71-AC1"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_yahoo_gate.py",
+      "kind": "test",
+      "commit_or_etag": "e0c99c0341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four lines edited, 380 -> 580, and only the cap numbers: the comment at line 158, the two asserts at lines 160 and 161 (public cap and every slice request count), and the refusal match at line 167 (over the cap 580). The 237 day request and the 1,025-name negative control are unchanged. The folder run passes.",
+      "artifact_covered_by": ["DQ9-t71-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "e0c99c0341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W61-S1 and -S2 appended at the end of the array; no existing row edited; surprise-row-gate OK (2 new rows of 160 checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t71-AC1",
+      "criterion_verbatim": "`DQ9-t71-AC1` -- the two named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t71_tests.py",
+      "output_evidence": "test_demque_pacer_cap.py::test_the_pacer_stops_a_draw_at_six_hundred_requests_and_not_before PASSED [ 50%]\ntest_demque_pacer_cap.py::test_the_standing_extension_request_cap_is_the_daily_cap_less_the_tier_two_reserve PASSED [100%]\n2 passed in 4.99s\nCAP-OK   (second run, same output)",
+      "denominator": "2 of 2 named tests PASSED by name; folder: python -m pytest -q -p no:cacheprovider data/mdpf/scripts/demque = 240 passed, rc=0 at e0c99c0341 (baseline before the edits: 238 passed, rc=0)",
+      "status": "PASS",
+      "expect": "CAP-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t71-AC2",
+      "criterion_verbatim": "`DQ9-t71-AC2` -- the Pacer default is 600, `extend_frontier.DAILY_CAP` is 600 with a request cap of 580, `inactive_request.DAILY_CAP` is 600, and `daily_draw.py` builds its Pacer once with the default.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t71_check.py",
+      "output_evidence": "PACER-OK   (rc=0 with the criterion's exact invocation from the worktree root; second run cmp-identical to the first)",
+      "denominator": "4 of 4 checks in dq_t71_check.py: Pacer(temp state).daily_cap == 600; extend_frontier DAILY_CAP == 600 and _request_cap() == 580; inactive_request DAILY_CAP == 600; daily_draw.py holds one yp.Pacer(state) and no daily_cap argument on it",
+      "status": "PASS",
+      "expect": "PACER-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "each acceptance check run twice at e0c99c0341 and the outputs compared: AC1 pytest run twice, AC2 output compared with cmp",
+      "observed": "AC1 CAP-OK on both runs, 2 passed each; AC2 PACER-OK on both runs, cmp-identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the merge of box/dell1 and the push",
+      "reason": "order BOUNDS: do not merge anything; the issuer drains. The branch wk-MDPF_DEMQUE-61 carries the code, tests, investigation rows and this proof only."
+    },
+    {
+      "item": "any vendor call, S3 write, ledger, queue, price store or pacer state (~/.opal/demque), and any draw",
+      "reason": "order BOUNDS: NO vendor call and no write; the checks are offline on temp state files."
+    },
+    {
+      "item": "inactive_request.py NIGHTLY_CAP = 380 (the nights arithmetic)",
+      "reason": "not one of the three named defaults (Pacer, extend_frontier.DAILY_CAP, inactive_request.DAILY_CAP); left unchanged and surfaced as MDPF_DEMQUE-D1-W61-S1 for the issuer"
+    },
+    {
+      "item": "demand_queue.py --daily-cap default 400",
+      "reason": "demand_queue.py is outside this order's paths, so it is not edited; surfaced as MDPF_DEMQUE-D1-W61-S2 for the issuer"
+    },
+    {
+      "item": "daily_draw.py",
+      "reason": "order step 4: not edited; it builds yp.Pacer(state) with the default, and AC2 pins that it stays so"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W61-S1: inactive_request.py NIGHTLY_CAP = 380 is a fourth value of the shared pacer's daily request count, used by the nights arithmetic, and is not one of the three named defaults; left unchanged, so the nights figure now reads high against a 600 cap. OBSERVATION.",
+    "MDPF_DEMQUE-D1-W61-S2: demand_queue.py keeps the quote CLI default --daily-cap 400, outside this order's grant; the pacer path quotes with the Pacer's own cap (600), so a bare CLI quote and a Pacer-driven quote disagree. OBSERVATION."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~61/MDPF_DEMQUE.TO-DQ-t71.yahoo-pacer-cap-600.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~61 <0.9.0_WK_MDPF_DEMQUE~61@opal.agent>\" -F .scratch/commit_a_msg.txt -- <the six granted paths>",
+      "result": "commit e0c99c0341 landed on wk-MDPF_DEMQUE-61; commit-gate and surprise-row-gate OK (2 new rows of 160 checked); to-pipeline-gate OK (no task order in the commit); WARN client-data-check: hashed account-id list absent, so this commit was not checked for account ids (no account data in it); WARN one-writer: the investigation file is the unsuffixed file (WARN until C-QUEUE)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider data/mdpf/scripts/demque",
+      "result": "240 passed in 27.66s, rc=0 (baseline before the edits: 238 passed, rc=0 in 25.57s)"
+    }
+  ]
+}
