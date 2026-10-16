@@ -1,0 +1,16 @@
+{
+  "adapter_changed_functions": ["derive_rows", "derive"],
+  "parameter_old": "floor_values",
+  "parameter_new": "floor_accounts",
+  "contract_fields_changed": [
+    "series.fields.history_scope.sentence",
+    "conditional_columns[1].rule",
+    "rule24_record.v046"
+  ],
+  "new_first_row_tests": [
+    "test_first_row_zero_floor_value_reads_partial_history_with_the_claim",
+    "test_first_row_negative_or_unreadable_floor_value_reads_partial_history_with_the_claim",
+    "test_first_row_account_absent_from_the_floor_partition_reads_full_with_the_claim"
+  ],
+  "words": "derive_rows and derive in the Cottonwood adapter now read the floor day by row. The parameter floor_values, the floor day's account-to-value map, is replaced by floor_accounts, the set of accounts that hold a row on the floor day whatever that row's value. An account in the set reads PARTIAL_HISTORY with the claim inferred; an account outside the set, and an empty set, reads FULL with the claim; None keeps the legacy PARTIAL_HISTORY rows with no claim. The reason is the CTO ruling of round 149 (one meaning of history_scope across firms, as the 49 Financial producer reads it): before this change a zero, negative or unreadable floor row read FULL in the Cottonwood adapter. One sentence of the same meaning is appended to three contract fields (the series history_scope sentence, the account return daily conditional rule for history_scope_claim, and the rule24 v046 entry); no other byte of either contract moved. Three first_row tests were added to the history-scope test file. NOT PROVEN: no landed day was rewritten, nothing was deployed, no source map was re-pinned and no packet was re-signed; the 31 accounts that split the two rules (25 negative, 6 zero) are the issuer's offline count, not measured by this worker, and the rewrite waits for the re-pinned, re-signed packet."
+}
