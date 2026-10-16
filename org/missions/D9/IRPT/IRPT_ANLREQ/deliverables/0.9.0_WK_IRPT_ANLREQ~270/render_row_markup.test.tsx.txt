@@ -1,0 +1,29 @@
+import { test } from 'bun:test'
+const { GlobalRegistrator } = (await import('@happy-dom/global-registrator')) as { GlobalRegistrator: { register(): void; unregister(): Promise<void> } }
+GlobalRegistrator.register()
+const { createRoot } = await import('react-dom/client')
+const { act, createElement } = await import('react')
+const { AnalysisPackageRow } = await import('../src/pages/TicketCenter/AnalysisRequestParts')
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+const WORDS = 'The report package could not be built, so nothing was attached. Press Retry analysis request to build it again.'
+const base: any = { ticket_id: 'TKT-0031', ticket_type: 'analysis_request', status: 'in_progress', title: 'Smith overview', description: '',
+  requester: { email: '', name: '', firm: '' }, created_by: '', created_at: '', assignee: 'sam@opal', source: '',
+  routing: { primary: [], secondary: [], visibility: [] }, events: [], answers: { firm: 'fir_test' }, report_ref: { request_id: 'REQ-31', recorded_by: '', recorded_at: '' } }
+async function row(label: string, t: any, env: any) {
+  const table = document.createElement('table'); const tbody = document.createElement('tbody'); table.appendChild(tbody); document.body.appendChild(table)
+  const root = createRoot(tbody)
+  const ir = { getJobStatus: async () => env } as never
+  await act(async () => { root.render(createElement(AnalysisPackageRow, { ticket: t, ir })) })
+  await act(async () => { await new Promise<void>(r => setTimeout(r, 25)) })
+  console.log(`=== ${label} : tr count ${tbody.querySelectorAll('tr').length} ===`)
+  console.log(tbody.innerHTML)
+  await act(async () => { root.unmount() }); table.remove()
+}
+const failEnv = { publicReasonCode: 'COMMENTARY_DRAFT_FAILED', safeActions: [{ action: 'none', label: WORDS, reasonCode: 'COMMENTARY_DRAFT_FAILED' }] }
+const quietEnv = { publicReasonCode: null, safeActions: [{ action: 'none', label: 'The request is still being generated.', reasonCode: null }] }
+test('rows', async () => {
+  await row('no draft, no package, failure', { ...base }, failEnv)
+  await row('no draft, no package, no failure', { ...base }, quietEnv)
+  await row('draft, no package, failure', { ...base, draft_commentary: { text: 'Line one.', model: 'm', generated_at: 'x', status: 'DRAFT' } }, failEnv)
+  await GlobalRegistrator.unregister()
+})
