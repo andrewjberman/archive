@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-63",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-63.fwd5-profile-scope-fail-closed-acceptance-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "6df6c60552"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~223",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R47_TX.md",
+    "vintage_commit": "6df6c60552",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-63.fwd5-profile-scope-fail-closed-acceptance-tests.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_cross_firm_profile_scope.py",
+      "kind": "test",
+      "commit_or_etag": "45d143eef6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one new test file: seven test_cross_firm_* functions, 5 red (fail on the 200 answer) and 2 controls (pass); no source file and no other test edited; no deploy, no AWS call; doubles only from test_profile_firm_scope.py",
+      "artifact_covered_by": ["AR63-tz-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "177499e9b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one appended row IRPT_ANLREQ-D2-W223-S1 (OBSERVATION, INERT): test (5) passes at base as a control, not as a red test; the append is the only edit to the channel"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR63-tz-AC1",
+      "criterion_verbatim": "AR63-tz-AC1 -- the file exists, every test function is named test_cross_firm_*, at least 4 test(s) fail now and none errors out at collection or setup. The checker's --self-test (green pair plus four mutants refused, red mode plus three mutants refused) reads R46-SELFTEST-OK.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 4 infra/aws/lambda/ticket_center/tests/test_cross_firm_profile_scope.py",
+      "expect": "R46-RED-OK",
+      "output_evidence": "R46-RED-OK red=5 (rc 0); the same command run a second time gave byte-identical output; the checker --self-test printed R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused (rc 0)",
+      "denominator": "5 red of 7 test_cross_firm_* functions (minimum 4); 0 collection or setup errors; 2 controls pass (test_cross_firm_non_list_allowed_firms_malformed, test_cross_firm_non_empty_list_reads_listed_firm_only); 0 test names outside test_cross_firm_*",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own --self-test: a failing test, a mis-named test, too few tests and an absent file in green mode, and a passing test, a syntax error and an absent file in red mode, each must be refused",
+      "expected": "every mutant refused; the green pair and the one red-true case admitted",
+      "observed": "R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused (rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r46_checks.py red 4 run twice on the same file; the two outputs compared with cmp",
+      "observed": "both runs print R46-RED-OK red=5 with rc 0; cmp reports identical bytes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the fix to lambda_function.py _profile_scope (fix 3 of TCKT_VNEXT round 19)",
+      "reason": "the fix is built by 2.0.0_SA_COO~V2 and is not in this order; the code under test is not edited, by the grant"
+    },
+    {
+      "item": "the green run of the new tests",
+      "reason": "the tests turn green when V2's release lands; the order does not wait for it"
+    },
+    {
+      "item": "the test_no_row_refuses.py:104 pin",
+      "reason": "a neighbouring test, not in this order's grant; it is the other side of the same rule and is not edited here"
+    },
+    {
+      "item": "any AWS call, deploy, network call or secret",
+      "reason": "the order forbids them; the tests use doubles only"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W223-S1: AR-tz-63 test (5), a non-list allowedFirmIds refused malformed, is a control at base and not a red test; base lambda_function.py:418-426 already refuses every non-list non-null value with 403 firm scope malformed"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~223/r47/RUN_OUTPUT.txt",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py red",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py red 4 infra/aws/lambda/ticket_center/tests/test_cross_firm_profile_scope.py",
+      "result": "R46-RED-OK red=5 (rc 0)"
+    },
+    {
+      "tool": "r46_checks.py --self-test",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "result": "R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused (rc 0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q --color=no -p no:cacheprovider -rfp infra/aws/lambda/ticket_center/tests/test_cross_firm_profile_scope.py",
+      "result": "5 failed, 2 passed in 0.92s (rc 1, by design: red tests)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~223 <0.9.0_WK_IRPT_ANLREQ~223@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commits 45d143eef6 (test file; commit-gate OK 1 of 1 .py file, naming-gate PASS 0 graded) and 177499e9b3 (surprise row; surprise-row-gate passed; to-pipeline-gate OK)"
+    }
+  ]
+}
