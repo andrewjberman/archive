@@ -6,7 +6,7 @@ End of Day Updates channel keeps one parent post that everyone replies under) is
 @mention was never seen. The fix reads the replies of a bounded set of THREADS per channel through the gateway's replies
 route: the pinned End of Day parent, and every post with activity in the last THREAD_DAYS days.
 
-PASS needs all seven arms, against data/transcripts/scripts/teams_chat/channel_mentions.py as the repository holds it:
+PASS needs all eight arms, against data/transcripts/scripts/teams_chat/channel_mentions.py as the repository holds it:
   1. pinned_eod_reply   a reply that mentions Andrew under the End of Day parent (a.EOD_PARENT_ID in a.EOD_TEAM_ID /
                         a.EOD_CHANNEL_ID), which is on no page the poller reads, becomes ONE event, oid
                         "chan:<team>|<channel>|<parent>", event id "mention-<reply id>", kind teams.channel_mention;
@@ -18,8 +18,10 @@ PASS needs all seven arms, against data/transcripts/scripts/teams_chat/channel_m
                         nothing; the difference control (the same reply with his id added) sends one;
   6. stale_dropped      a post whose newest activity is older than THREAD_DAYS is not read through the replies route
                         (no replies call for it); the pinned parent is read whatever its age;
-  7. budget             one poll over many channels and threads makes at most cm.MAX_CALLS gateway calls.
-Prints one line per arm and N1-THREADS ok=True|False arms=<passed> of 7.
+  7. budget             one poll over many channels and threads makes at most cm.MAX_CALLS gateway calls;
+  8. thread_failure_isolated  a thread whose replies call keeps failing costs only that thread: the channel's new top-level
+                        mention is still sent once and its cursor still moves.
+Prints one line per arm and N1-THREADS ok=True|False arms=<passed> of 8.
 Finds the repository from the current directory's git toplevel, never from this file's location; the seam N1_ROOT points
 it at another copy (a scratch reference). No network, no AWS: the gateway, store, ldo.send and text sender are injected.
 """
@@ -88,6 +90,8 @@ class FakeGW:
     def replies(self, team_id, channel_id, message_id, page_token=None, page_size=50):
         self.calls += 1
         self.reply_reads.append(message_id)
+        if message_id in getattr(self, "fail_threads", ()):
+            raise a.GatewayError(404, "gone", "replies")
         return {"rows": copy.deepcopy(self.thread.get((team_id, channel_id, message_id), [])), "next_page_token": None}
 
 
@@ -198,9 +202,30 @@ def arm_budget():
     return worst <= cm.MAX_CALLS
 
 
+def _poll_quiet(gw, now):
+    """A poll that met a failed gateway call raises RuntimeError after saving its cursors; the arm reads the effects."""
+    try:
+        cm.poll(gw, ME, now)
+    except RuntimeError:
+        pass
+
+
+def arm_thread_failure_isolated():
+    """A thread whose replies call keeps failing (a deleted post: 404) costs only that thread: the channel's own new
+    top-level mention is still sent once, and the channel's cursor still moves (no repeat on the next poll)."""
+    w, gw = eod_world()
+    cm.poll(gw, ME, T0)
+    gw.fail_threads = {EOD[2]}
+    gw.posts[(EOD[0], EOD[1])] = [msg("top1", iso(at(250)), mentions=[ME])] + gw.posts[(EOD[0], EOD[1])]
+    _poll_quiet(gw, at(300))
+    _poll_quiet(gw, at(600))
+    return len(w.events) == 1 and w.events[0][3] == "mention-top1"
+
+
 ARMS = [("pinned_eod_reply", arm_pinned_eod_reply), ("recent_root_reply", arm_recent_root_reply),
         ("first_read_silent", arm_first_read_silent), ("no_repeat", arm_no_repeat), ("not_him", arm_not_him),
-        ("stale_dropped", arm_stale_dropped), ("budget", arm_budget)]
+        ("stale_dropped", arm_stale_dropped), ("budget", arm_budget),
+        ("thread_failure_isolated", arm_thread_failure_isolated)]
 
 
 def main():
