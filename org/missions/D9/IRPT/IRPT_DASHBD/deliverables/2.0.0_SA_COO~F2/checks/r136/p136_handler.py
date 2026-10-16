@@ -78,6 +78,13 @@ with mock.patch.object(h, "transaction_frame", lambda s3, firm, day: frame(day, 
     out["not_importable"] = [w, sorted(f), all("ImportError: no module named x" in v for v in f.values())]
     with mock.patch.object(h, "at49", At()), redirect_stdout(io.StringIO()):
         out["empty_days"] = list(h.emit_transactions(None, "49financial", [], True))
+def stages(ev):
+    try:
+        return h.backfill_stages(ev)
+    except SystemExit as e:
+        return "REFUSED:" + ("stages" if "stages" in str(e) else "?")
+out["stages"] = [stages({}), stages({"stages": ["lots"]}), stages({"stages": ["transaction"]}), stages({"stages": ["transaction", "lots"]}),
+                 stages({"stages": ["returns"]}), stages({"stages": []}), stages({"stages": "transaction"})]
 print("RESULT " + json.dumps(out, sort_keys=True))
 '''
 
@@ -108,6 +115,9 @@ def behaviour_problems(res):
         pr.append("when the producer did not import, every day fails with AT49_IMPORT_ERROR's text and nothing raises: %r" % (ni,))
     if res.get("empty_days") != [{}, {}]:
         pr.append("no days must return ({}, {})")
+    want = [["returns", "class", "lots"], ["lots"], ["transaction"], "REFUSED:stages", "REFUSED:stages", "REFUSED:stages", "REFUSED:stages"]
+    if res.get("stages") != want:
+        pr.append("backfill_stages must return the three stages for no key, [lots] and [transaction] for those selections, and refuse by name (the word stages) every other value: %r" % (res.get("stages"),))
     return pr
 
 
@@ -136,10 +146,12 @@ def wiring_problems(source):
         calls = [(c.lineno, c.func.id) for c in ast.walk(fn) if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)]
         tx = [ln for ln, nm in calls if nm == "emit_transactions"]
         fl = [ln for ln, nm in calls if nm in filled]
-        if len(tx) != 1:
-            pr.append("%s must call emit_transactions exactly once (found %d)" % (name, len(tx)))
-        elif fl and tx[0] <= max(fl):
-            pr.append("%s must call emit_transactions AFTER its filled-report stage (line %d is not after %d)" % (name, tx[0], max(fl)))
+        want_calls = 2 if name == "run_backfill" else 1
+        if len(tx) != want_calls:
+            pr.append("%s must call emit_transactions exactly %d time(s) (found %d)%s" % (name, want_calls, len(tx),
+                      " (the transaction-only branch and the full path after the filled stage)" if want_calls == 2 else ""))
+        elif fl and max(tx) <= max(fl):
+            pr.append("%s must call emit_transactions AFTER its filled-report stage (line %d is not after %d)" % (name, max(tx), max(fl)))
         keys = {k.value for d in ast.walk(fn) if isinstance(d, ast.Dict) for k in d.keys if isinstance(k, ast.Constant) and isinstance(k.value, str)}
         for k in ("transaction_rows", "transaction_failed"):
             if k not in keys:
@@ -199,17 +211,19 @@ def selftest():
             bad += 1
             print("SELFTEST FAIL %s: got %r want %r" % (name, got, want))
 
-    green = {"green": [{"2026-10-01": 3, "2026-10-02": 2}, {}, [["2026-10-01", 3, True], ["2026-10-02", 2, True]]],
+    green = {"stages": [["returns", "class", "lots"], ["lots"], ["transaction"], "REFUSED:stages", "REFUSED:stages", "REFUSED:stages", "REFUSED:stages"],
+             "green": [{"2026-10-01": 3, "2026-10-02": 2}, {}, [["2026-10-01", 3, True], ["2026-10-02", 2, True]]],
              "refused_day": [{"2026-10-01": 3, "2026-10-05": 4}, ["2026-10-02"], True, True],
              "emit_raises": [{"2026-10-05": 4}, ["2026-10-01"], True, [["2026-10-05", 4, False]]],
              "frame_raises": [{}, ["2026-10-01"]], "not_importable": [{}, ["2026-10-01", "2026-10-02"], True], "empty_days": [{}, {}]}
     arm("behaviour-green", behaviour_problems(green), [])
     arm("behaviour-red", len(behaviour_problems(dict(green, empty_days=[{"x": 1}, {}]))), 1)
+    arm("stages-red", len(behaviour_problems(dict(green, stages=[["returns", "class", "lots"], ["lots"], ["lots"]] + ["x"] * 4))), 1)
     src = ("try:\n    import account_transaction as at49\n    AT49_IMPORT_ERROR = None\nexcept Exception as _e:\n    at49 = None\n    AT49_IMPORT_ERROR = str(_e)\n"
            "def transaction_frame(s3, firm, day):\n    return None\n"
            "def emit_transactions(s3, firm, days, upload):\n    return {}, {}\n"
            "def run(s3):\n    filled_stage()\n    a, b = emit_transactions(s3, 1, [], True)\n    return {'transaction_rows': a, 'transaction_failed': b}\n"
-           "def run_backfill(s3):\n    filled_write()\n    a, b = emit_transactions(s3, 1, [], True)\n    return {'transaction_rows': a, 'transaction_failed': b}\n")
+           "def run_backfill(s3):\n    c, d = emit_transactions(s3, 1, [], True)\n    filled_write()\n    a, b = emit_transactions(s3, 1, [], True)\n    return {'transaction_rows': a, 'transaction_failed': b}\n")
     arm("wiring-green", wiring_problems(src), [])
     arm("wiring-before-filled", len(wiring_problems(src.replace("filled_stage()\n    a, b = emit_transactions(s3, 1, [], True)", "a, b = emit_transactions(s3, 1, [], True)\n    filled_stage()"))), 1)
     arm("wiring-missing-keys", len(wiring_problems(src.replace("'transaction_failed': b", "'x': b"))) >= 1, True)
