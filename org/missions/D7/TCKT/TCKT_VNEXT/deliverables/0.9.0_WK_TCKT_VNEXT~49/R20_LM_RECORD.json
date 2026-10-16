@@ -1,0 +1,49 @@
+{
+  "to_id": "TCKT_VNEXT.TO-R20-LM",
+  "cell": "R20-lm-2",
+  "row": "TCKT_VNEXT-C-S11",
+  "worker": "0.9.0_WK_TCKT_VNEXT~49",
+  "worktree": "C:/dev/wk-tckt-vnext-49",
+  "base_head": "430b378b8f",
+  "lines_changed": {
+    "file": "infra/aws/lambda/ticket_center/lambda_function.py",
+    "function": "attachment_open_ticket",
+    "diff": "+7 -1: the old firm = answers.firm line is replaced by req_firm = requester.firm; if req_firm != answers.firm, return the existing 404 'carries no attachment' body; firm = req_firm; every later use of firm (the existing shape check, the key-prefix check, the bucket and key formatting, the presign) is unchanged in text",
+    "untouched": "no other route, attachment_upload_ticket, create path, MATRIX, or scope function"
+  },
+  "tests_added": {
+    "file": "infra/aws/lambda/ticket_center/tests/test_attachment_open_same_member.py",
+    "cases": [
+      "test_open_refuses_a_ticket_whose_requester_firm_differs_from_answers_firm (sub-ticket a: key under answers firm cottonwood; sub-ticket b: key under requester firm inflection)",
+      "test_open_refuses_a_ticket_with_no_requester_firm",
+      "test_open_presigns_from_the_fenced_member_when_both_agree",
+      "test_open_still_refuses_a_caller_outside_the_firms_scope",
+      "test_open_still_refuses_a_key_outside_the_firms_prefix"
+    ]
+  },
+  "counts": {
+    "new_file_run_after_change": "5 passed in 0.48s (rc=0), invocation of AC1 verbatim",
+    "new_file_run_on_base_before_change": "2 failed, 3 passed (rc=1): the first two cases FAIL on the base, as the order expects; the base presigns the mismatched ticket (200)",
+    "folder_drain_check_base_before_change": "13 failed, 380 passed, 8 errors, rc=1 (with --continue-on-collection-errors); 2 of the 13 are the new same-member cases, so pre-existing is 11 failed + 8 errors",
+    "folder_drain_check_after_change": "11 failed, 382 passed, 8 errors, 59 subtests passed, rc=1 (with --continue-on-collection-errors); the 11 failures are test_cross_firm_global_register.py (7) and test_cross_firm_global_sites_widened.py (4), the 8 errors are collection errors on missing D9 IRPT and investor-reporting paths; none names attachment_open_ticket",
+    "adjacent_suites_after_change": "test_trade_form_attachment.py + test_authz_matrix.py: 61 passed, 11 subtests passed, rc=0"
+  },
+  "mutant": {
+    "checker": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~49/mutant_check.py",
+    "output": "CONTROL unmutated copy: rc=0 | 5 passed; MUTANT step-1 equality refusal removed: rc=1 | 1 failed, 4 passed; MUTANT-FIRES; exit 0",
+    "deciding_failure": "test_open_refuses_a_ticket_whose_requester_firm_differs_from_answers_firm (on sub-ticket b, the requester-prefix key)",
+    "note": "on the mutant, sub-ticket a passes because the existing key-prefix check refuses it; see surprise TCKT_VNEXT-D2-W49-S2"
+  },
+  "surprises": [
+    "TCKT_VNEXT-D2-W49-S1: the whole-folder drain run is not clean in this worktree (11 failures, 8 collection errors on paths outside the worktree; identical counts on base)",
+    "TCKT_VNEXT-D2-W49-S2: the step-2 presign plus step-1 removal does not fire on an answers-prefix key; the first case carries a requester-prefix sub-ticket so the mutant fires"
+  ],
+  "not_read": [
+    "infra/aws/terraform/ (read-only grant exclusion; not opened)",
+    "the deployed ticket-service function and any live ticket row (no live call; none made)",
+    "portal/ (not in grant; no portal folder touched)",
+    "the investor-reporting and D9 IRPT files named by the 11 failures and 8 errors (outside the worktree content; not investigated, per the grant)",
+    "attachment_upload_ticket, create path, MATRIX, scope functions (read only as context; not changed)"
+  ],
+  "deployed": "nothing. no deploy, apply, Terraform, invoke, AWS, network or mail call was made"
+}
