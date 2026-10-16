@@ -36,6 +36,16 @@
    "artifact_covered_by": [
     "AC3"
    ]
+  },
+  {
+   "path_or_key": "workflows/atom_decomposition/tests/test_gen_silver_rows.py",
+   "kind": "test",
+   "commit_or_etag": "a1e42d21dc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MX-c-29 amendment A1 (LOCAL on wk-NFRA_MCPINDEX-52, commit a1e42d21dc, order amendment b92fac349a): IntegrationTests.setUpClass writes a JSON list of every catalog-* key of the copied legacy_addresses.json into the temp folder and passes it as --allow-registry-drop. No assertion, no other test and no other file changed. The two IntegrationTests the guard had refused now pass: 60 of 60 across the three files.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
   }
  ],
  "acceptance": [
@@ -64,10 +74,9 @@
    "criterion_verbatim": "pytest rc=0 on test_registry_drop_guard.py, test_gen_silver_rows.py and test_regen_preserves.py; the new file holds at least 6 tests -- RESULT: PASS -- exit=0",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round21/checks/c29.AC3.sh; echo \"exit=$?\"",
-   "output_evidence": "pytest rc=1: [31m[31m[1m2 failed[0m, [32m58 passed[0m, [32m4 subtests passed[0m[31m in 2.07s[0m[0m\nnew tests collected: 9\nCHECK FAIL: the three test files pass\nCHECK ok  : the new file holds at least 6 tests\nRESULT: FAIL\nexit=1",
-   "denominator": "60 tests across the three files: 58 passed, 2 failed (both IntegrationTests in tests/test_gen_silver_rows.py, which run the generator with no allow file against the tracked registry); the 9 new tests all pass against a minimum of 6",
-   "status": "FAIL",
-   "status_reason": "Measured FAIL at 4e9017ac2f: the three-file run returns rc=1 with 2 failed and 58 passed. Both failures are IntegrationTests in tests/test_gen_silver_rows.py, which run the generator with no --allow-registry-drop against the tracked registry; the guard refuses the 36 drops and they exit 2. The 9 new tests and test_regen_preserves.py pass. Surprise NFRA_MCPINDEX-Z-W52-S3 (BLOCKING) carries it to the issuer.",
+   "output_evidence": "pytest rc=0: [32m[32m[1m60 passed[0m, [32m[1m4 subtests passed[0m[32m in 2.02s[0m[0m\nnew tests collected: 9\nCHECK ok  : the three test files pass\nCHECK ok  : the new file holds at least 6 tests\nRESULT: PASS\nexit=0",
+   "denominator": "60 tests across the three files at a1e42d21dc: 60 passed, 0 failed (the two IntegrationTests in tests/test_gen_silver_rows.py now pass with --allow-registry-drop on a temp copy of the allow list); the 9 new tests all pass against a minimum of 6",
+   "status": "PASS",
    "expect": "pytest rc=0: [\\s\\S]*new tests collected: [0-9]+[\\s\\S]*CHECK ok  : the new file holds at least 6 tests[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0"
   }
  ],
@@ -75,7 +84,7 @@
   "mutant": {
    "description": "Planted drop: the row catalog-planted-row-c29 appended to a temp copy of the tracked legacy registry, run with an allow file that names only the 36 real drops (the c29.AC2 arm).",
    "expected": "The planted row is refused and named alone; the run that also allows it succeeds.",
-   "observed": "DENOMINATOR planted run: exit 2; printed ['catalog-planted-row-c29']; RESULT: PASS (c29.AC2 output at 4e9017ac2f).",
+   "observed": "DENOMINATOR planted run: exit 2; printed ['catalog-planted-row-c29']; RESULT: PASS (c29.AC2 output at 4e9017ac2f, re-run at a1e42d21dc).",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
@@ -88,14 +97,10 @@
   {
    "item": "The expect fields are the order's prose as regular expressions, with the counts written as [0-9]+ where the count may differ.",
    "reason": "Disclosed per the order's section 5, step 1; the checker matches expect against output_evidence."
-  },
-  {
-   "item": "AC3 is recorded FAIL: tests/test_gen_silver_rows.py::IntegrationTests::test_contract_ids_are_hashed_and_registry_holds_one_entry_per_row and ::test_rc_zero_and_180_files_with_unique_names exit 2 with the guard's refusal (36 REGISTRY-DROP rows) on the tracked registry.",
-   "reason": "That test file is outside this order's paths, so it was not edited and no allow file was added to it. Surprise NFRA_MCPINDEX-Z-W52-S3 (BLOCKING, INERT) carries it to the issuer."
   }
  ],
  "surprises": [
-  "NFRA_MCPINDEX-Z-W52-S3: the two IntegrationTests in tests/test_gen_silver_rows.py run the generator with no --allow-registry-drop against the tracked registry, which the guard now refuses (36 drops), so AC3 cannot pass as written; the test file is outside the order's paths.",
+  "NFRA_MCPINDEX-Z-W52-S3: the two IntegrationTests in tests/test_gen_silver_rows.py ran the generator with no --allow-registry-drop against the tracked registry, which the guard refuses (36 drops), so AC3 could not pass as written. Dispositioned by amendment A1 (order commit b92fac349a): the test file is granted and the fixture remedy named; fixed at a1e42d21dc, AC3 re-run PASS.",
   "NFRA_MCPINDEX-Z-W52-S4: the investigation_item schema named by the surprise-channel rule is absent from the sparse worktree (org/surprise_channel), so the rows were not validated against it."
  ],
  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~52/session_log_MX-c-29.json",
@@ -103,12 +108,12 @@
   {
    "tool": "workflows/atom_decomposition/gen_silver_rows.py",
    "invocation": "python workflows/atom_decomposition/gen_silver_rows.py --g2 <G2_pinned.md> --g4 <G4_pinned.md> --g5 <G5_pinned.md> --g6 <G6_pinned.md> --g3 <G3_pinned.md> --g2f <G2f_pinned.md> --out <temp entries> --deployed-tools census --unskip <unskip_schwab_dim.json> --read-links <read_links.json> --read-links <assets_read_links.json> --firm-map <f1_firm_map.json> --hand-overlay <round20/hand_overlay.json> --registry-file <temp legacy copy> --fork-registry-file <temp fork copy> [--allow-registry-drop <allow.json>]",
-   "result": "Without an allow file, on the tracked registry: rc=2 with 36 REGISTRY-DROP lines, both registry copies byte-equal to before. With the 36 printed keys allowed: rc=0 and 36 rows dropped. Measured by c29.AC1 and c29.AC2 at 4e9017ac2f."
+   "result": "Without an allow file, on the tracked registry: rc=2 with 36 REGISTRY-DROP lines, both registry copies byte-equal to before. With the 36 printed keys allowed: rc=0 and 36 rows dropped. Measured by c29.AC1 and c29.AC2 at 4e9017ac2f; re-run at a1e42d21dc with the same result."
   },
   {
    "tool": "workflows/atom_decomposition/tests/test_registry_drop_guard.py",
    "invocation": "cd workflows/atom_decomposition && PYTHONPATH=. python -m pytest -q -p no:cacheprovider tests/test_gen_silver_rows.py tests/test_regen_preserves.py tests/test_registry_drop_guard.py",
-   "result": "60 tests: 58 passed, 2 failed (both IntegrationTests in tests/test_gen_silver_rows.py); the 9 new tests pass. The control on the two existing files before the change was 51 passed."
+   "result": "60 tests: 60 passed, 4 subtests passed at a1e42d21dc (control before the A1 edit at b92fac349a: 58 passed, 2 failed, the two IntegrationTests in tests/test_gen_silver_rows.py); the 9 new tests pass."
   }
  ]
 }
