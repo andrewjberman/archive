@@ -1,0 +1,139 @@
+# IRPT_DASHBD DB-b-7 -- EVERY BUCKET, PREFIX AND FIRM BELOW IS READ, NEVER TYPED (CLAUDE.md rule 30).
+#
+# The custody source declaration is the reporting gold producer's own file,
+# data/assets/scripts/gold/irpt_reporting/sources.json (the ONE place the channel lives; no firm token appears in it): the
+# silver bucket and its three prefixes (positions, balance, transactions) are read from it, and its `registry_key` (the
+# custody MASTER) resolves through infra/logic/registry/scopes.json to the firm and the firm's gold bucket, exactly as the
+# producer's own firm_scope() does with opal_naming.lookup(registry_key)['firm']. Terraform cannot call lib/opal_naming.py at
+# plan time, so this root reads the registry file directly.
+#
+# THE GOLD KEY SEGMENTS ("irpt" as the naming SOURCE, "gold" as the tier, the table names) are NOT re-derivable from Terraform
+# (opal_naming.address() has no Terraform-callable form). They are the producers' own committed constants, cited where they
+# live so a change to either side of the pin is visible on both:
+#   data/assets/scripts/gold/irpt_reporting/account_return_daily.py   TABLE_RETURNS = "account_return_daily"
+#     (and emit_day(): opal_naming.address("irpt", firm, "gold", TABLE_RETURNS, "date=<D>"))
+#   data/assets/scripts/gold/irpt_reporting/account_return_daily.py   HOLDINGS_TABLE (the guard's neighbour, read-only)
+#   data/assets/scripts/gold/irpt_reporting/account_class_daily.py    TABLE_CLASS (the class table, TO-DB-b-34; its partition is
+#     written by emit_class_day(): opal_naming.address("irpt", firm, "gold", TABLE_CLASS, "date=<D>"))
+#   data/assets/scripts/gold/irpt_reporting/account_activity_lots.py  TABLE_ACTIVITY, TABLE_REALIZED, TABLE_UNREALIZED (the three
+#     activity and lot tables, TO-DB-b-41; each partition is written by emit_day(): opal_naming.address("irpt", firm, "gold",
+#     <table>, "date=<D>"), and the producer's own builder_output() prints the three addresses)
+# The one real run this cell's ledger records is the verification that these mirrored prefixes are the ones the producer
+# addresses: a wrong prefix here fails the Lambda's first read or write with AccessDenied, not silently.
+#
+# THE CUSTODIAN'S LOT TABLES ARE READ FROM THE DECLARATION TOO (TO-DB-b-41, row IRPT_DASHBD-W20-S1): the custody entry's `lot_source`
+# names the silver lot tables (realized lots, the unrealized-lot slices, the closing-trade table); each is a sibling of the
+# transactions prefix, so the silver read set below gains the sibling prefixes derived from those names, never typed here.
+#
+# The filter is `try(v.registry_key, null) != null`, the repaired form (row IRPT_BCKEND-S258).
+
+locals {
+  irpt_rg_sources_declaration = jsondecode(
+    file("${path.module}/../../../../../data/assets/scripts/gold/irpt_reporting/sources.json")
+  )
+
+  irpt_rg_declared_sources = {
+    for k, v in local.irpt_rg_sources_declaration : k => v
+    if !startswith(k, "_") && try(v.registry_key, null) != null
+  }
+
+  irpt_rg_registry_scopes    = jsondecode(file("${path.module}/../../../../../infra/logic/registry/scopes.json")).scopes
+  irpt_rg_registry_scope_map = { for s in local.irpt_rg_registry_scopes : s.key => s }
+
+  # {source-key => scopes.json row}, registry-derived from each declared source's registry_key (the custody master).
+  irpt_rg_source_rows = {
+    for k, v in local.irpt_rg_declared_sources : k => local.irpt_rg_registry_scope_map[v.registry_key]
+  }
+
+  # Round 1 declares exactly one source and one firm; `one()` refuses loudly if a second ever resolves to a second firm or
+  # bucket (this single role would then need to become one role per firm).
+  irpt_rg_firm        = one(distinct([for k, r in local.irpt_rg_source_rows : r.firm]))
+  irpt_rg_gold_bucket = one(distinct([for k, r in local.irpt_rg_source_rows : r.bucket]))
+  irpt_rg_source      = one(values(local.irpt_rg_declared_sources))
+
+  irpt_rg_gold_table_returns  = "account_return_daily"
+  irpt_rg_gold_table_holdings = "holdings_performance_daily"
+  irpt_rg_gold_table_class    = "account_class_daily"
+
+  # TO-DB-b-41: the three activity and lot tables, mirrored ONCE each from the producer's constants (cited above).
+  irpt_rg_gold_table_activity   = "account_activity_daily"
+  irpt_rg_gold_table_realized   = "account_lot_realized"
+  irpt_rg_gold_table_unrealized = "account_lot_unrealized_daily"
+
+  # TO-DB-b-243 (round 121): the filled report-values table, mirrored ONCE from the producer's constant (cited like the others):
+  #   data/assets/scripts/gold/irpt_reporting/filled_report_values.py   TABLE = "filled_report_values"
+  #     (its partition is addressed by opal_naming.address("irpt", firm, "gold", TABLE, "date=<D>"))
+  irpt_rg_gold_table_filled = "filled_report_values"
+
+  # READ (silver): the three custody prefixes the producer reads, from the declaration, and the custodian's lot-table prefixes the
+  # activity and lot producer reads (siblings of the transactions prefix, named by the declaration's lot_source; distinct() folds
+  # the closing-trade table into the transactions prefix it already is).
+  irpt_rg_silver_bucket       = local.irpt_rg_source.bucket
+  irpt_rg_silver_tx_parts     = split("/", trimsuffix(local.irpt_rg_source.transactions_prefix, "/"))
+  irpt_rg_silver_root         = join("/", slice(local.irpt_rg_silver_tx_parts, 0, length(local.irpt_rg_silver_tx_parts) - 1))
+  irpt_rg_silver_lot_tables   = concat([local.irpt_rg_source.lot_source.realized.table], local.irpt_rg_source.lot_source.unrealized.tables, [local.irpt_rg_source.lot_source.closing_trade.table])
+  irpt_rg_silver_lot_prefixes = [for t in local.irpt_rg_silver_lot_tables : "${local.irpt_rg_silver_root}/${t}/"]
+  irpt_rg_silver_prefixes = distinct(concat(
+    [local.irpt_rg_source.positions_prefix, local.irpt_rg_source.balance_prefix, local.irpt_rg_source.transactions_prefix],
+    local.irpt_rg_silver_lot_prefixes,
+  ))
+  irpt_rg_silver_bucket_arn   = "arn:aws:s3:::${local.irpt_rg_silver_bucket}"
+  irpt_rg_silver_object_arns  = [for p in local.irpt_rg_silver_prefixes : "arn:aws:s3:::${local.irpt_rg_silver_bucket}/${p}*"]
+  irpt_rg_silver_list_pattern = [for p in local.irpt_rg_silver_prefixes : "${p}*"]
+
+  # READ (gold): the holdings-performance prefix (the guard's neighbour), the returns prefix (the handler lists it for the
+  # newest landed partition and reads that partition's account set), the class prefix (the same read of the class table's
+  # newest landed day) and the three activity and lot prefixes (the same listing, for the activity table's newest landed day).
+  irpt_rg_gold_bucket_arn      = "arn:aws:s3:::${local.irpt_rg_gold_bucket}"
+  irpt_rg_gold_returns_prefix  = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_returns}/"
+  irpt_rg_gold_holdings_prefix = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_holdings}/"
+  irpt_rg_gold_class_prefix    = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_class}/"
+  irpt_rg_gold_activity_prefix   = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_activity}/"
+  irpt_rg_gold_realized_prefix   = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_realized}/"
+  irpt_rg_gold_unrealized_prefix = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_unrealized}/"
+  irpt_rg_gold_lot_prefixes      = [local.irpt_rg_gold_activity_prefix, local.irpt_rg_gold_realized_prefix, local.irpt_rg_gold_unrealized_prefix]
+  irpt_rg_gold_read_prefixes     = concat([local.irpt_rg_gold_holdings_prefix, local.irpt_rg_gold_returns_prefix, local.irpt_rg_gold_class_prefix], local.irpt_rg_gold_lot_prefixes)
+  irpt_rg_gold_read_arns       = [for p in local.irpt_rg_gold_read_prefixes : "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${p}*"]
+  # TO-DB-b-299 (round 149, row IRPT_BCKEND-D2-S219): the filled report-values prefix is listed too, so the stage can list its
+  # own newest landed partition (catch-up). No read grant is added and the write list is unchanged.
+  irpt_rg_gold_list_pattern    = [for p in concat(local.irpt_rg_gold_read_prefixes, [local.irpt_rg_gold_filled_prefix]) : "${p}*"]
+
+  # TO-DB-b-243: the filled report-values prefix, built from the table constant above (the write list below carries it).
+  irpt_rg_gold_filled_prefix = "irpt/${local.irpt_rg_firm}/gold/${local.irpt_rg_gold_table_filled}/"
+
+  # WRITE: ONLY the returns prefix, the class prefix and the three activity and lot prefixes (date=<D>/{data.parquet,manifest.json}
+  # under each). Not dim_return_method (another cell's served row).
+  irpt_rg_gold_write_arns = [
+    "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_gold_returns_prefix}*",
+    "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_gold_class_prefix}*",
+    "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_gold_activity_prefix}*",
+    "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_gold_realized_prefix}*",
+    "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_gold_unrealized_prefix}*",
+    "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_gold_filled_prefix}*",
+  ]
+
+  # TO-DB-b-243 (round 121): THE SERVED MODEL SERIES, read from its adapter's own constants, never typed here (CLAUDE.md rule 30).
+  # The file is data/assets/scripts/gold/irpt_reporting/adapters/model_series_windows.py (SERVED_BUCKET and SERVED_KEY, one object).
+  irpt_rg_served_src        = file("${path.module}/../../../../../data/assets/scripts/gold/irpt_reporting/adapters/model_series_windows.py")
+  irpt_rg_served_bucket     = regex("(?m)^SERVED_BUCKET\\s*=\\s*\"([^\"]+)\"", local.irpt_rg_served_src)[0]
+  irpt_rg_served_key        = regex("(?m)^SERVED_KEY\\s*=\\s*\"([^\"]+)\"", local.irpt_rg_served_src)[0]
+  irpt_rg_served_object_arn = "arn:aws:s3:::${local.irpt_rg_served_bucket}/${local.irpt_rg_served_key}"
+
+  # TO-DB-b-243 (round 121): THE HOUSEHOLD CROSSWALK, mirrored from data/assets/scripts/gold/irpt_reporting/filled_report_values.py
+  # FirmAdapter.crosswalk_address() and crosswalk_prefix(): opal_naming.address("advi", firm, "gold", "household_crosswalk", ...).
+  # "advi", the firm, "gold" and "household_crosswalk" are that method's own segments. The crosswalk lives in the firm's gold bucket,
+  # the same bucket as the irpt gold tables (the issuer's checker recounts address() and confirms it).
+  irpt_rg_crosswalk_prefix       = "advi/${local.irpt_rg_firm}/gold/household_crosswalk/"
+  irpt_rg_crosswalk_object_arn   = "arn:aws:s3:::${local.irpt_rg_gold_bucket}/${local.irpt_rg_crosswalk_prefix}*"
+  irpt_rg_crosswalk_bucket_arn   = "arn:aws:s3:::${local.irpt_rg_gold_bucket}"
+  irpt_rg_crosswalk_list_pattern = ["${local.irpt_rg_crosswalk_prefix}*"]
+
+  # THE FIRE TIME IS READ FROM ITS RECORD, NEVER TYPED HERE. The record is the worker's measurement of the four inputs' landing
+  # times (REPORTING_GOLD_FIRE_TIME_R3.json). While the record carries no chosen_cron (the limb is STOPPED: an input landed after
+  # the latest admissible minute), no schedule is planned and the function alone is.
+  irpt_rg_fire_record = jsondecode(file("${path.module}/../../../../../org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/REPORTING_GOLD_FIRE_TIME_R3.json"))
+  # The schedule is a for_each over this map: one instance when the record carries a chosen_cron, none while it does not (a
+  # null or empty value reaching a count = 0 resource's required argument is still a plan error; a for_each value is not).
+  irpt_rg_fire_crons = try(local.irpt_rg_fire_record.chosen_cron, null) == null ? {} : { daily = local.irpt_rg_fire_record.chosen_cron }
+  irpt_rg_fire_count = length(local.irpt_rg_fire_crons)
+}

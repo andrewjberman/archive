@@ -1,0 +1,119 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-c-29",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+  "vintage_commit": "158de6411b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-29.regeneration-refuses-to-drop-a-registry-row.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "5ba12d1de5"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~52",
+ "artifacts_produced": [
+  {
+   "path_or_key": "workflows/atom_decomposition/gen_silver_rows.py",
+   "kind": "script",
+   "commit_or_etag": "4e9017ac2f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MX-c-29 guard (LOCAL on wk-NFRA_MCPINDEX-52, commit 4e9017ac2f): plan_registry and plan_fork_registry plan each registry document without writing; load_allow_drop reads --allow-registry-drop (a JSON list of row ids; a bad file exits 2); check_registry_drops and write_registries refuse a drop not named, print REGISTRY-DROP <file name> <row id> per row, write neither registry and exit 2; allowed drops print REGISTRY-DROP-ALLOWED n; a run that drops nothing prints REGISTRY-DROP none. write_registry and write_fork_registry keep their signatures and returns. Nothing was run into the repo registry or catalog_entries.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "workflows/atom_decomposition/tests/test_registry_drop_guard.py",
+   "kind": "test",
+   "commit_or_etag": "4e9017ac2f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "9 tests on temp-folder fixtures (LOCAL, commit 4e9017ac2f): a drop is refused and named; a refusal writes nothing; an allow file listing some rows refuses the rest naming exactly those; a fork-row drop is refused under its file name; an allowed drop passes and is summarised; an allowed id that is not dropped is ignored; a bad allow file exits 2; a run that drops nothing is byte-equal to plain write_registry. All 9 pass in the three-file run.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "workflows/atom_decomposition/tests/test_gen_silver_rows.py",
+   "kind": "test",
+   "commit_or_etag": "a1e42d21dc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MX-c-29 amendment A1 (LOCAL on wk-NFRA_MCPINDEX-52, commit a1e42d21dc, order amendment b92fac349a): IntegrationTests.setUpClass writes a JSON list of every catalog-* key of the copied legacy_addresses.json into the temp folder and passes it as --allow-registry-drop. No assertion, no other test and no other file changed. The two IntegrationTests the guard had refused now pass: 60 of 60 across the three files.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "run 1 (no allow file): exit 2; REGISTRY-DROP rows printed 36; run 2 (allow file = the printed keys): exit 0; rows really dropped from legacy_addresses.json 36; run 3 (allow file lacks one key): exit 2; every CHECK ok -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round21/checks/c29.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "DENOMINATOR run 1 (no allow file): exit 2; REGISTRY-DROP rows printed 36\nDENOMINATOR run 2 (allow file = the printed keys): exit 0; rows really dropped from legacy_addresses.json 36\nDENOMINATOR run 3 (allow file lacks one key): exit 2; printed ['catalog-opal-data-assets-silver-49financial-allocations-silver-legacy']\nCHECK ok  : without an allow file the regeneration REFUSES (exit 2), naming each dropped row (36)\nCHECK ok  : a refusal writes nothing: both registry copies are byte-equal to before\nCHECK ok  : with the allow file listing exactly the printed keys the regeneration succeeds and the rows really dropped equal the printed set\nCHECK ok  : an allow file that lacks one printed key refuses naming exactly that key\nRESULT: PASS\nexit=0",
+   "denominator": "36 REGISTRY-DROP rows printed on run 1 (of 143 tracked catalog-* rows); run 2 really dropped 36 rows, equal to the printed set; run 3 printed 1 row (the key its allow file lacks)",
+   "status": "PASS",
+   "expect": "DENOMINATOR run 1 \\(no allow file\\): exit 2; REGISTRY-DROP rows printed [0-9]+[\\s\\S]*DENOMINATOR run 2 \\(allow file = the printed keys\\): exit 0; rows really dropped from legacy_addresses\\.json [0-9]+[\\s\\S]*DENOMINATOR run 3 \\(allow file lacks one key\\): exit 2[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "planted run: exit 2; every CHECK ok -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round21/checks/c29.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "DENOMINATOR planted run: exit 2; printed ['catalog-planted-row-c29']\nCHECK ok  : the real drops are allowed, a planted catalog-* row is NOT: refusal naming the planted key alone\nCHECK ok  : the refusal wrote nothing\nCHECK ok  : with the planted key allowed too the regeneration succeeds\nRESULT: PASS\nexit=0",
+   "denominator": "1 planted row, refused and named alone (1 of 1 planted keys printed); the 36 real drops allowed by the allow file; the refusal wrote nothing; the run with the planted key allowed succeeds",
+   "status": "PASS",
+   "expect": "DENOMINATOR planted run: exit 2[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "pytest rc=0 on test_registry_drop_guard.py, test_gen_silver_rows.py and test_regen_preserves.py; the new file holds at least 6 tests -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round21/checks/c29.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0: [32m[32m[1m60 passed[0m, [32m[1m4 subtests passed[0m[32m in 2.02s[0m[0m\nnew tests collected: 9\nCHECK ok  : the three test files pass\nCHECK ok  : the new file holds at least 6 tests\nRESULT: PASS\nexit=0",
+   "denominator": "60 tests across the three files at a1e42d21dc: 60 passed, 0 failed (the two IntegrationTests in tests/test_gen_silver_rows.py now pass with --allow-registry-drop on a temp copy of the allow list); the 9 new tests all pass against a minimum of 6",
+   "status": "PASS",
+   "expect": "pytest rc=0: [\\s\\S]*new tests collected: [0-9]+[\\s\\S]*CHECK ok  : the new file holds at least 6 tests[\\s\\S]*RESULT: PASS[\\s\\S]*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted drop: the row catalog-planted-row-c29 appended to a temp copy of the tracked legacy registry, run with an allow file that names only the 36 real drops (the c29.AC2 arm).",
+   "expected": "The planted row is refused and named alone; the run that also allows it succeeds.",
+   "observed": "DENOMINATOR planted run: exit 2; printed ['catalog-planted-row-c29']; RESULT: PASS (c29.AC2 output at 4e9017ac2f, re-run at a1e42d21dc).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A-WITH-REASON: the guard's outputs are a refusal and a summary, not generated values; no two same-input runs are compared by this order. Its measured runs are c29.AC1 runs 1 to 3 and c29.AC2.",
+   "observed": "c29.AC1 run 1 refused with 36 REGISTRY-DROP rows and left both registry copies byte-equal to before.",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The expect fields are the order's prose as regular expressions, with the counts written as [0-9]+ where the count may differ.",
+   "reason": "Disclosed per the order's section 5, step 1; the checker matches expect against output_evidence."
+  }
+ ],
+ "surprises": [
+  "NFRA_MCPINDEX-Z-W52-S3: the two IntegrationTests in tests/test_gen_silver_rows.py ran the generator with no --allow-registry-drop against the tracked registry, which the guard refuses (36 drops), so AC3 could not pass as written. Dispositioned by amendment A1 (order commit b92fac349a): the test file is granted and the fixture remedy named; fixed at a1e42d21dc, AC3 re-run PASS.",
+  "NFRA_MCPINDEX-Z-W52-S4: the investigation_item schema named by the surprise-channel rule is absent from the sparse worktree (org/surprise_channel), so the rows were not validated against it."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~52/session_log_MX-c-29.json",
+ "compiler_tools": [
+  {
+   "tool": "workflows/atom_decomposition/gen_silver_rows.py",
+   "invocation": "python workflows/atom_decomposition/gen_silver_rows.py --g2 <G2_pinned.md> --g4 <G4_pinned.md> --g5 <G5_pinned.md> --g6 <G6_pinned.md> --g3 <G3_pinned.md> --g2f <G2f_pinned.md> --out <temp entries> --deployed-tools census --unskip <unskip_schwab_dim.json> --read-links <read_links.json> --read-links <assets_read_links.json> --firm-map <f1_firm_map.json> --hand-overlay <round20/hand_overlay.json> --registry-file <temp legacy copy> --fork-registry-file <temp fork copy> [--allow-registry-drop <allow.json>]",
+   "result": "Without an allow file, on the tracked registry: rc=2 with 36 REGISTRY-DROP lines, both registry copies byte-equal to before. With the 36 printed keys allowed: rc=0 and 36 rows dropped. Measured by c29.AC1 and c29.AC2 at 4e9017ac2f; re-run at a1e42d21dc with the same result."
+  },
+  {
+   "tool": "workflows/atom_decomposition/tests/test_registry_drop_guard.py",
+   "invocation": "cd workflows/atom_decomposition && PYTHONPATH=. python -m pytest -q -p no:cacheprovider tests/test_gen_silver_rows.py tests/test_regen_preserves.py tests/test_registry_drop_guard.py",
+   "result": "60 tests: 60 passed, 4 subtests passed at a1e42d21dc (control before the A1 edit at b92fac349a: 58 passed, 2 failed, the two IntegrationTests in tests/test_gen_silver_rows.py); the 9 new tests pass."
+  }
+ ]
+}
