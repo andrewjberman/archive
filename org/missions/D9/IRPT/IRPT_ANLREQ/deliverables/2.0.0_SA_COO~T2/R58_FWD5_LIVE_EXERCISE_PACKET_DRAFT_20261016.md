@@ -1,6 +1,6 @@
 # IRPT_ANLREQ workstream T -- DRAFT packet, COO half: the FWD-5 live cross-firm exercise (mint, drive, remove)
 
-**Status: DRAFT, NOT SIGNED, NOT FOR AN APPLIER.** Author `2.0.0_SA_COO~T2`, 2026-10-16 ~16:4xZ. Claim levels: *measured* = read from a named file; *held* = a message or ruling; *to measure* = read at the pin before signing. It becomes the packet when (a) `2.0.0_SA_COO~V2` messages that `TCKT_VNEXT.TO-R18-REL` (the combined R18/R19 release) has read back, and (b) every "to measure" line below is read and filled. Amending it voids a signed CTO half (re-sign on the new blob). Nothing here is run.
+**Status (18:5xZ update): COO HALF READY FOR THE CTO HALF; NOT FOR AN APPLIER UNTIL THE CTO HALF IS SIGNED ON THIS BLOB.** Section 7 holds the pins. Author `2.0.0_SA_COO~T2`, 2026-10-16 ~16:4xZ (first draft). Claim levels: *measured* = read from a named file; *held* = a message or ruling; *to measure* = read at the pin before signing. It becomes the packet when (a) `2.0.0_SA_COO~V2` messages that `TCKT_VNEXT.TO-R18-REL` (the combined R18/R19 release) has read back, and (b) every "to measure" line below is read and filled. Amending it voids a signed CTO half (re-sign on the new blob). Nothing here is run.
 
 ## 1. What the act is
 
@@ -40,3 +40,12 @@ One users row on DEV (self-expiring at 3 hours, removed by step 3); GET calls to
 ## 5. Who
 
 Pair: this COO half; the CTO half (`1.0.0_SA_CTO~DELL2`) signs the blob. Applier: the IRPT CloudOps lane under an order cut only after the signed half and V2's readback. No order is cut from this draft.
+
+## 7. Measured on 2026-10-16 ~18:5xZ (issuer; offline runs and git reads at HEAD 8d222ddade, nothing live)
+
+- Blob pins at HEAD (`git rev-parse HEAD:<path>`, paths under `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/`): `0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/fwd5_mint.py` = `ec8607ed57` (AR-tz-69 merged 59b330f528: prints `MINT-SCOPE allowedFirmIds=.. entitlement_rows=..`, refuses nonzero entitlement rows); `.../test_cross_firm_mint.py` = `4c9f115d4e`; `0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py` = `f59484af11`; `.../test_fwd5_driver_offline.py` = `8816670a56`; `0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py` = `76ac59cc3f`. The applier hashes the files it runs against these before any step.
+- Offline: `fwd5_driver.py --selftest` prints `FWD5-SELFTEST-OK checks=19`; `--plan` sends nothing and states the required ids and the `--go` token; `test_cross_firm_mint.py` R46-TESTS-OK passed=25; the driver's two test files R46-TESTS-OK passed=23.
+- Run inputs: ticket `TCK-20261015-944c84f8`, request and job `REQ-d47252fe74634d0c5cdd8067` (tenant `49financial`; the synthetic row, READY, `hop_failure` absent after t56), firm A `49financial`, firm B `cottonwood` (CTO half confirms), base `http://localhost:5174` (portal dev server started and stopped by the applier as in AR-v33). The password: 32 random bytes generated in the applier's memory and handed to the mint and to the driver on stdin only, as in AR-v33.
+- The release is live (held, V2 msg 9734); the applier's STOP list: any non-`REFUSED` answer is reported by route name only and the principal is removed first; a mint refusal or `READBACK-BAD` stops the run before any request; the principal's TTL is 3 hours.
+- Not claimed: that the driver has ever run against the live service (it has not); that the ticket service refuses firm A's ticket to a firm B principal (that is the run's result).
+- Order: after the CTO half, the run order `IRPT_ANLREQ.TO-RUN-FWD5.<id>` goes to the single IRPT CloudOps lane (`0.7.0_AE_CloudOps~IB2`, rule 34), cited in my GO.
