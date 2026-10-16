@@ -37,4 +37,14 @@ W1501-S1 (two folders outside the sparse set), S2 (the ground read keys `flow_cl
 - **Next cells (this seat):** the Cottonwood producer with its contract change in one drain, then Inflection's; the contract's `source_txn_id` coverage note.
 - **Not done, with the reason:** the never-widen release for the new gold prefix (a CTO plus COO sign-off, an apply by that Terraform root's owner) and the wiring.
 
+## ADDENDUM (2026-10-16 ~08:3xZ): the CTO's ruling on the comparison key (msg 9192) is applied; the sample was REDRAWN
+
+The CTO ruled: J1 compares each sampled row by its **natural key** (account, trade date, transaction code, symbol, quantity and amount), using the source's own id only where it is non-null and unique; the sample is drawn **only from rows whose natural key is unique within its partition**; the count of non-unique keys is printed per firm; the row **locator is refused** (row order is not a stable identity); and the contract states `source_txn_id` coverage per firm with its denominator (never as a universal key).
+
+**Applied to the sample file** (same path, same untracked, git-ignored file; the earlier version with the locator is REPLACED): `tools/sample_49f_producer_rows.py` now counts, over every one of the 572 partitions of 49 Financial, the rows and keys that are not unique, then draws 20 rows (seed 129, one partition each) from unique-key rows only, and writes the natural-key values with each row; no locator.
+
+**The duplicate census, 49 Financial (counts only):** 3,349,750 rows; **21,194 rows (0.63%) sit in 10,007 non-unique natural keys**; every one of the 572 partitions has at least one unique-key row to sample. These duplicates are a finding for the grade, not a sample. Cottonwood and Inflection have no producer yet; their census and sample are owed with theirs.
+
+**Still owed by this seat:** the contract's per-row claim and per-firm coverage of `source_txn_id` with its denominator (49 Financial 2.3, 6.8 and 14.8 percent of 66,596 rows over 12 partitions for the three identifier columns; Cottonwood's and Inflection's to be measured), in the next contract change.
+
 -- 2.0.0_SA_COO~F2
