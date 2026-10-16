@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R19-REL.ticket-service-release-for-the-four-cross-firm-admissions",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-R19-REL.ticket-service-release-for-the-four-cross-firm-admissions.md",
+  "group": "OTHER",
+  "vintage_commit": "a8972e5435"
+ },
+ "assignee": "0.7.0_AE_CloudOps~TV2",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R19.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-R19-REL.ticket-service-release-for-the-four-cross-firm-admissions.md",
+  "vintage_commit": "a8972e5435"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r19_rel/R19_REL_RESULT.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the same hashes as the R18 result plus mig_result path; ANALYST_INTAKE_ALLOWED_FIRMS and the empty contact map read live",
+   "artifact_covered_by": [
+    "R19REL-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T1748Z_tckt-vnext-r18-r19-ticket-service-release-20261016_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ledger tckt-vnext-r18-r19-ticket-service-release-20261016 CLOSED 5 of 5 legs S1 U1 P1 A1 V1 after both checks read REL-OK",
+   "artifact_covered_by": [
+    "R19REL-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R19REL-AC1",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_rel_check.py",
+   "expect": "^REL-OK ",
+   "output_evidence": "REL-OK code_sha256=JwdnACONAnxwqzhsVgqgU+nRoLdmS7MyLmzXmZuXsR4= contact_map_firms=0 intake_firms=3\nexit=0",
+   "denominator": "1 function configuration read: CodeSha256 equals the recorded after-hash; CLIENT_NOTICE_CONTACT_MAP is a JSON object with 0 firms; ANALYST_INTAKE_ALLOWED_FIRMS is exactly the 3 served firms; the migration result file exists",
+   "status": "PASS",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_CHECKS/r19_rel_check.py",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one apply by design, no retry. The check re-reads the live function, routes and role independently of the applier; the post-apply plan read No changes",
+   "observed": "the live CodeSha256 equals the package base64 sha256 JwdnACONAnxwqzhsVgqgU+nRoLdmS7MyLmzXmZuXsR4= in the result file and in the live read",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "TO-R18-RUN, TO-R18-REL's exercise of the routes, and the CTO's after-read",
+   "reason": "staged under their own pair; the CTO's after-read (zero WE_CLIENT_SENT and at least one WE_CLIENT_NO_CONTACT, events scanned printed) is read by the issuer from the apply-end timestamp 2026-10-16T17:57:19Z recorded in both result files"
+  },
+  {
+   "item": "client contacts for CLIENT_NOTICE_CONTACT_MAP",
+   "reason": "shipped exactly {} per the CTO ruling; requester ack and pickup notices are off until the firm contact map is set; the contacts are owed before the Ticket Center opens to clients, not before this release"
+  },
+  {
+   "item": "comp-iam as evidence",
+   "reason": "comp-iam service opal-ticket-api ran and mapped nothing (31 calls UNKNOWN across 0 statements, role not mapped); it is not cited; the role policy was read directly by r18_rel_check.py"
+  },
+  {
+   "item": "the build and upload used the ci script only for the BUILD_ONLY build",
+   "reason": "guard printed 8 at built_from_sha; the upload was a boto3 put_object of that exact zip with content-sha256 metadata, round-tripped; no upload ran inside the build script"
+  },
+  {
+   "item": "tag and push",
+   "reason": "the commits are LOCAL on box/dell2; only the integrator pushes the shared branch (hook LD-0367); no ticket-center-v tag was cut"
+  },
+  {
+   "item": "a first start on this release was held at precondition 2",
+   "reason": "r19_mig_check printed MIG-BAD at 16:5xZ because another seat's synthetic staff user row existed (internal rows 24 not 23); no write was made; the issuer held it (msg 9667) and cleared it (msg 9710); every precondition was re-measured before the ledger was opened"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T1748Z_tckt-vnext-r18-r19-ticket-service-release-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py, terraform plan and safe-apply, build-and-upload.sh (BUILD_ONLY), comp-iam",
+   "invocation": "ledger open S1 U1 P1 A1 V1 and close; BUILD_ONLY=1 build at de2fdb4a4f; plan -out then safe-apply of the planfile; plan again; comp-iam service opal-ticket-api",
+   "result": "plan 4 add 1 change 0 destroy equal to the pair; apply complete; post-apply plan No changes; ledger CLOSED 5 of 5; comp-iam mapped nothing (UNKNOWN 31), not cited"
+  }
+ ]
+}
