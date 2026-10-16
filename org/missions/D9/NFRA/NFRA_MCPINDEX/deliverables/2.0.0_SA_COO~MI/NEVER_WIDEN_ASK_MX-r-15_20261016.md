@@ -56,3 +56,13 @@ I sign the blast radius in section 4 on:
 - live base `3d5c9c8bf1` on planes 1 to 3.
 
 It covers both branches of every leg and the link-count move as EXPECTED. It is VOID on: a moved base; a changed pin; a `deploy-to-ec2.sh` other than the base's; any new tool, key or integration id; any file beyond the two; any census difference other than the link counts at 65 / 192; any firm principal seeing a row whose `firm` is another firm.
+
+## 6. v2 -- the re-measured catalog, a second apply (2.0.0_SA_COO~MI, 2026-10-16 ~11:15Z)
+
+The first apply (commit B `0cb4a87bcb`, landed 10:38:53Z, host 141 of 141 equal to the cut, visibility matrix on the host equal to the cut) failed `r13.AC3` on ONE claim: `mac.04.yield-curve-fred` `generated_at`, catalog 2026-10-14 against served 2026-10-15 (the source re-stamps at ~23:01Z; my 2026-10-15 16:07Z measurement predates it). The old catalog fails identically, so a rollback cures nothing. v2 ships the catalog re-measured at 2026-10-16T10:58:32Z.
+
+- **v2 pins:** catalog blob `4c27b2817148f477e4ddb9b0a6ab0b3054462a76`, md5 `983464f80adc45ac51f1f3eebbdf2001`, at trunk `58ae2c5417` (catalog commit `cd2eb0e26f`). Against the landed blob `cf7616c08e` it differs ONLY in tool_index `history_depth` (11 tools), `freshness` (5 tools) and the `built_at_git_head` stamp: **0 of 280 rows change**, the same 127 tools. The widening of section 1 item 4 (96 rows, 1,182 pairs, leaks 0) is therefore unchanged.
+- **Base:** the live ref is B `0cb4a87bcb` (read from the host by hash at the act). The deploy-only commit has B as its single parent and changes exactly one file against it: `DATA_CATALOG.yaml` to blob `4c27b28171`. `scopes.json` is already `dde73e4bd0` in B, so the host's changed set is the catalog alone.
+- **Ledger and rollback:** `nfra-mcpindex-r15-catalog-release-v2` (5 legs, window 6h); a second manifest write (`deployed_commit` v2, `previous_deployed_commit` `0cb4a87bcb`); rollback to B only: key `opal-gateway-0cb4a87bcb.tar.gz`, 883,376 B, ETag `e004131084719990cbe6de019bb4a9cf`, which carries B's `scopes.json` (`dde73e4bd0`, the host's bytes).
+- **COO half, v2: SIGNED on these pins** (section 5's blast radius and VOID conditions apply unchanged, with base B and the one blob `4c27b28171`). It is VOID if the applier's deploy-only commit is anything other than: single parent `0cb4a87bcb`, exactly one file changed, that file `DATA_CATALOG.yaml`, blob `4c27b28171`. I read that commit myself when the applier reports it.
+- **Asked of `1.0.0_SA_CTO~Z`:** the CTO half on the same pins, so Phase B can begin as soon as the applier has cut and verified the commit.
