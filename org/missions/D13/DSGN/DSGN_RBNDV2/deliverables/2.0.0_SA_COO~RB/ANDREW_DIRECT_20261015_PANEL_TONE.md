@@ -87,3 +87,13 @@ This answers `002b` (his earlier clause "The tooltips always need to appear to t
 
 "this one" = the Trending Topic drilldown modal, "too" = the same two changes `RV-o-1` made (a visible outline on the item containers; the canonical red and green on the signed figures). Measured in `DrilldownModal` (`ExecutiveSummary.tsx`): the signed figures (the +0.539 topic score and the +0.70 / -0.96 score on each source-article row) read `getSentimentColor`, the lighter `hsl(162, 79%, 46%)` / `hsl(355, 83%, 60%)`, while the numbers in the panel read `--delta-positive` / `--delta-negative`; the BULLISH pill and the 1, 2, 3 circles read `PALETTE.green700` / `red600`; the source-article rows are `bg-white/[0.03]` with no outline. `RV-s-1` makes the figures, the pill and the circles read the delta tokens and gives each source-article row the `--hairline` outline. It changes only `DrilldownModal`: `getSentimentColor` is shared with the Trending Topics rank numbers and arrows, which stay as they are until he answers the question put to him in the last message. The lead image gradient and the three-bar accent on the insights keep their colours.
 
+## 10. His tenth message, VERBATIM (after the three addendum-4 changes were merged and read live)
+
+> make this one have the same outline [Image #13]
+
+(The image is Andrew's own screenshot, `C:\Users\AndrewBerman\Pictures\Screenshots\Screenshot 2026-10-15 195503.png`: the Global RSI modal on its Ranked tab, light build. His file; not copied into the repository.)
+
+### The COO's read
+
+"this one" = the Ranked tab of the Global RSI modal, "the same outline" = the 1px `--hairline` (#C4CBDB) outline the Spotlight cards took in `RV-r-1`. In `RSIModal.tsx` each ranked line is a `RankedRow`: `flex items-center gap-3 px-3 py-2 rounded bg-white/[0.03]`, with no border (the original dark build drew none either). `RV-t-1` adds `border border-[hsl(var(--hairline))]` to that one class string. Its HOTTEST and COLDEST labels already read the delta tokens (`RV-r-1`). NOT in this step: the Full tab (he did not name it) and the score and status words (the five-band RSI scale).
+
