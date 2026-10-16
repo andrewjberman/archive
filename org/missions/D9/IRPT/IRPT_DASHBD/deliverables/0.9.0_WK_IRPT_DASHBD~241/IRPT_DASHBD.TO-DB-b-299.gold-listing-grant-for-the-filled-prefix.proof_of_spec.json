@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-299",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "7b059c9ab1b2da080052b347c0a7437401bba23f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-299.gold-listing-grant-for-the-filled-prefix.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "7b059c9ab1b2da080052b347c0a7437401bba23f"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~241",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "52ccabe3aa7b66919264fa2159daba00fbfdf291",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worktree branch wk-IRPT_DASHBD-241; not planned, not applied; the plan and apply are the applier's under a later signed pair",
+      "introduces": [
+        "concat(local.irpt_rg_gold_read_prefixes, [local.irpt_rg_gold_filled_prefix])"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~241/RD_GOLD_LIST_GRANT_FACTS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "52ccabe3aa7b66919264fa2159daba00fbfdf291",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "facts record for the one expression edit; no deploy scope"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB167-1-AC1",
+      "criterion_verbatim": "`locals.tf` differs from the base in exactly the one list-pattern expression (plus added comment lines); `iam.tf`, `lambda.tf`, `main.tf` and `schedule.tf` are byte-identical. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p167_gold_list_grant.py\" . DB167-1-AC1",
+      "output_evidence": "OK: locals.tf differs from the base in exactly the list-pattern expression (plus comments); iam.tf, lambda.tf, main.tf and schedule.tf are byte-identical\nDB167-1-AC1 PASS",
+      "denominator": "1 of 1 list-pattern expression line changed; 4 of 4 sibling files (iam.tf, lambda.tf, main.tf, schedule.tf) byte-identical to base",
+      "status": "PASS",
+      "expect": "DB167-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB167-1-AC2",
+      "criterion_verbatim": "the new list pattern is the earlier patterns in the same order and then the filled prefix; the read prefixes, the read arns and the write arns declarations are untouched (no read grant is added). Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p167_gold_list_grant.py\" . DB167-1-AC2",
+      "output_evidence": "OK: the new list pattern is the earlier patterns in the same order and then the filled prefix; the read prefixes, read arns and write arns declarations are untouched; no read grant is added\nDB167-1-AC2 PASS",
+      "denominator": "1 of 1 list pattern rebuilt (earlier patterns kept in order, filled prefix appended); 3 of 3 declarations (read prefixes, read arns, write arns) unchanged",
+      "status": "PASS",
+      "expect": "DB167-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB167-1-AC3",
+      "criterion_verbatim": "the facts record states the two expressions and that the read and write lists are unchanged, and the worker's commits change only `locals.tf`, the folder, the investigation file and task-order files. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p167_gold_list_grant.py\" . DB167-1-AC3",
+      "output_evidence": "OK: the facts record states the two expressions and that the read and write lists are unchanged; 2 files changed, all in the grant\nDB167-1-AC3 PASS",
+      "denominator": "6 of 6 facts-record keys as required; 2 of 2 files changed by the worker's own commits, all in the grant",
+      "status": "PASS",
+      "expect": "DB167-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker selftest carries red arms: an unchanged expression, another line changed, a line removed, read arns widened, a wrong expression, code appended, the order swapped, and eight facts-record arms plus two grant arms",
+      "expected": "every red arm refused; selftest PASS",
+      "observed": "selftest: diff+semantics (7 red arms), facts (8) and grant (2) clauses behave; selftest PASS rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three criteria run twice on the same committed input and the two outputs compared",
+      "observed": "run 1 and run 2 identical (DETERMINISM-SAME): AC1 PASS, AC2 PASS, AC3 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan and terraform apply of the reporting-gold root",
+      "reason": "out of this order; the plan and the apply are the applier's under a later signed pair"
+    },
+    {
+      "item": "whether the stage then writes its filled report-values partition",
+      "reason": "read at the first scheduled fire after the apply; not provable by this order"
+    }
+  ],
+  "surprises": [],
+  "session_log": "no session log written (the worker writes no telemetry; the record is the git history of branch wk-IRPT_DASHBD-241)",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> DB167-1-AC1,DB167-1-AC2,DB167-1-AC3",
+      "result": "exit code is the verdict; recorded in the worker report"
+    }
+  ]
+}
