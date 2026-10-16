@@ -10,7 +10,8 @@
       "e24facfa feat(TicketCenter): the ticket page reads a hop failure through the status route",
       "eafc9aee test(TicketCenter): hop-failure-read harness registers its own DOM as partner-view does",
       "f4e5cc18 fix(TicketCenter): the hop failure shows for a ticket with neither a draft nor a package, and no blank row (AMENDMENT 1)",
-      "f488e20a fix(TicketCenter): no status call unless the ticket is an analysis request with a request id and no package (AMENDMENT 2)"
+      "f488e20a fix(TicketCenter): no status call unless analysis_request with request id and no package (AMENDMENT 2)",
+      "69208b1e fix(TicketCenter): the generator words for ANALYSIS_FAILED, ANALYSIS_REQUIRES_ATTENTION, DELIVERIES_EXHAUSTED (AMENDMENT 4; the single commit the issuer applies to the PROD candidate)"
     ],
     "push_state": "not pushed (LOCAL only; no push by rule)"
   },
@@ -66,13 +67,12 @@
   "existing_tests_edited": [],
   "existing_tests_edited_note": "None. package-open.test.tsx, commentary-package.test.tsx and package-r2.test.tsx are unchanged. The six tests in hop-failure-read.test.tsx keep their text; the two AMENDMENT 1 tests were added.",
   "test_counts": {
-    "hop-failure-read.test.tsx, the six-test file (e24facfa)": "6 pass, 0 fail (rc=0)",
-    "hop-failure-read.test.tsx, the eight-test file (f4e5cc18)": "8 pass, 0 fail (rc=0)",
-    "hop-failure-read.test.tsx, the ten-test file (f488e20a)": "10 pass, 0 fail (rc=0); checker v31-failure: V31-FAILURE-OK pass=10",
-    "bun test src/pages/TicketCenter, before AMENDMENT 1": "189 pass, 0 fail, 31 files (183 existing + 6 new)",
-    "bun test src/pages/TicketCenter, after AMENDMENT 1": "191 pass, 0 fail, 31 files (183 existing + 8 new)",
-    "bun test src/pages/TicketCenter, after AMENDMENT 2 (f488e20a)": "193 pass, 0 fail, 31 files (183 existing + 10 new)",
-    "portal-tsc (bun x tsc -b) on the final tree (f488e20a)": "PORTAL-TSC-OK rc=0"
+    "hop-failure-read.test.tsx, six tests (e24facfa)": "6 pass",
+    "hop-failure-read.test.tsx, eight tests (f4e5cc18)": "8 pass",
+    "hop-failure-read.test.tsx, ten tests (f488e20a)": "10 pass",
+    "hop-failure-read.test.tsx, thirteen tests (69208b1e)": "13 pass, 0 fail (rc=0)",
+    "bun test src/pages/TicketCenter, after AMENDMENT 4 (69208b1e)": "196 pass, 0 fail, 31 files (183 existing + 13 new)",
+    "portal-tsc (bun x tsc -b) on 69208b1e": "PORTAL-TSC-OK rc=0"
   },
   "before_arm": {
     "measure": "git cat-file on portal base 03f92d82 (positive control: AnalysisRequestParts.tsx present)",
@@ -81,9 +81,10 @@
   "mutant": {
     "script": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/mutant_check.py",
     "rule": "AMENDMENT 3 (step 9): the mutant removes the package condition from the call gate in useHopFailureWords",
-    "result": "AC3 on f488e20a: MUTANT-FIRES (rc=0). Mutated run rc=1, 9 pass, 1 fail on 'makes no status call for a ticket whose package is attached'; restore sha256 3c393fa28ef8b36c0c6bac50ae529151d81e2d9ed85cefe1ade11c8ab4fba8c2 verified.",
+    "result": "AC3 on 69208b1e: MUTANT-FIRES (rc=0). Mutated run rc=1, 12 pass, 1 fail on 'makes no status call for a ticket whose package is attached'; restore sha256 8d847df9347f2ecb86b3d587e0db67aeb5509da9f9c121c91c1836fb453aa383 verified.",
     "superseded": "the AMENDMENT-2 mutant (the display guard, return ticket.package ? null : words) survived with rc=1 (MUTANT-SURVIVES, 10 pass, 0 fail); it is no longer AC3, because the call gate makes the guard unreachable. The guard stays in the source.",
-    "control_evidence_kept": "measured control at f488e20a, by hand (edit the one condition, run bun test on the file, restore, cmp byte-equal): 9 pass, 1 fail on 'makes no status call for a ticket whose package is attached'. The AC3 run reproduces it."
+    "control_evidence_kept": "measured control at f488e20a, by hand (edit the one condition, run bun test on the file, restore, cmp byte-equal): 9 pass, 1 fail on 'makes no status call for a ticket whose package is attached'. The AC3 run reproduces it.",
+    "superseded_by_amendment_4_note": "the sha256 changed with the AMENDMENT 4 code set; the mutant itself is unchanged (commit e556885471)"
   },
   "rendered_and_read": {
     "what": "AnalysisPackageRow rendered in happy-dom by React inside a table body (createRoot inside act, effects run), three cases: pre-draft failure (one row, failure block shown); no draft, no package, no failure (no row); draft with failure (one row).",
@@ -163,6 +164,22 @@
     "AC1": "V31-FAILURE-OK pass=10",
     "AC2": "PORTAL-TSC-OK rc=0; drain 193 pass, 0 fail",
     "source": "no portal change in this amendment; the display guard (shownFailure) stays in the source",
-    "status": "complete, when the validator prints VALID"
+    "status": "complete (AMENDMENT 3); superseded in the record by AMENDMENT 4"
+  },
+  "amendment_4": {
+    "order_step": "step 10 of the order file (commit 41cf315675); decomposition section AMENDMENT 4, item 8",
+    "change": "HOP_FAILURE_CODES adds ANALYSIS_FAILED, ANALYSIS_REQUIRES_ATTENTION, DELIVERIES_EXHAUSTED; the comment says the set is no longer only the hop codes and that DELIVERIES_EXHAUSTED is held against a producer that exposes it",
+    "tests": [
+      "shows the generator's words for ANALYSIS_FAILED",
+      "shows the generator's words for ANALYSIS_REQUIRES_ATTENTION",
+      "shows the generator's words for DELIVERIES_EXHAUSTED"
+    ],
+    "single_commit": "69208b1e, one new commit on the portal branch; no earlier commit amended",
+    "unchanged": "the call gate, clause 5, the quiet cases and the existing tests",
+    "checks": {
+      "AC1": "V31-FAILURE-OK pass=13",
+      "AC2": "PORTAL-TSC-OK rc=0; drain 196 pass, 0 fail",
+      "AC3": "MUTANT-FIRES: 12 pass, 1 fail on 'makes no status call for a ticket whose package is attached'"
+    }
   }
 }
