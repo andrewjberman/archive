@@ -66,3 +66,19 @@ nothing. The rule now:
 Same identity, same route, no new reach. The before/after listing of the intake prefix and the no-delete-in-window condition stand
 unchanged.
 
+
+## AMENDMENT 3 -- second probe set, the stored-object claim corrected, R0e re-pinned to r34d (2026-10-16 ~12:1xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM3_AMENDMENT3_SECOND_PROBE_R34D_COO_HALF.md`
+(msg 9332), blob `0975453cd1e992d8244ba9abccda90bb3e0f308b`, sha256 `6dbc6c5f32da09d6cfc403a6fefdcd68159caf67855f6fc3ec0b33ee7b5ca972`,
+7,812 bytes (re-measured). R0e's r34d binding equals the blob I signed for r34d (`60cf9b70bc`, section "SIGN on r34d" of my R34 half).
+
+**Read.** The correction is the one I asked for in msg 9288: "stores nothing" becomes MEASURED false, and every probe object is listed by key
+and VersionId. The second set repeats step 0 once with the same five candidates under a new viewer name, at most ten posts.
+
+**Conditions** (each a STOP):
+- **The order leaves HOLD only after ledger `irpt-resident-r34d-20261016` reads CLOSED with `V2S OK` from inside the service.**
+- **All five reading CHECK_FAILED again stops the window before the run user is minted.** No B-only run, and a third probe set needs a new
+  amendment.
+- **ZQXWVK must read NOT_FOUND.** If it does not, the fix did not reach the door: stop and report, whatever the other four read.
+- **Every SET 2 object goes into row dc59's source record the same session.** The delete stays Andrew's act, after run 3 is graded.
