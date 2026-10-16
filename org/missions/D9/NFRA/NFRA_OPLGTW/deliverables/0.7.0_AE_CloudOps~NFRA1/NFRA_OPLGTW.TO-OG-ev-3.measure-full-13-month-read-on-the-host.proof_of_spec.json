@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f4372fcac9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "f4372fcac9",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-3.measure-full-13-month-read-on-the-host.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/WINDOW_MEASURE.json",
+   "kind": "doc",
+   "commit_or_etag": "4af87abf90",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Seconds, counts and bytes only, assembled by ev3_build.py from the two host records. Transactions: 334 of 334 files, one complete run 239.888 s; fees: 396 of 396, five runs, p95 147.157 s; verdict outside.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "inside_threshold_seconds"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev3_measure.py",
+   "kind": "script",
+   "commit_or_etag": "4af87abf90",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The host measurement: ThreadPoolExecutor(16) through the installed adapter's ctx.read_rows with the adapter's own column lists, a memory monitor aborting above 80 percent, a 16-file pilot first.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "PILOT_STOP_PCT"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev3_transactions.json",
+   "kind": "doc",
+   "commit_or_etag": "4af87abf90",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The transactions host record: 1 complete run, run 2 stopped by the memory guard at 190 of 334 files.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "STOPPED-IN-RUN-2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev3_fees.json",
+   "kind": "doc",
+   "commit_or_etag": "4af87abf90",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The fees host record: 5 complete runs of 396 files.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "COMPLETE"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record is complete and self-consistent: the whole window of each table was read at concurrency 16, p50 at or below p95, the verdict follows the stated rule from the recorded p95s, and nothing but numbers and fixed words is in it (A1: fewer than 5 runs only when the verdict is outside and the fastest run is above 30 s).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ev3.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)transactions: partitions \\d+, files read \\d+, runs [1-9], p50 \\S+ s, p95 \\S+ s, bytes \\d+.*fees: partitions \\d+, files read \\d+, runs [1-9], p50 \\S+ s, p95 \\S+ s, bytes \\d+.*budget: ALB idle timeout 60 s, threshold 30 s, worst p95 \\S+ s, verdict (\\w+) \\(rule says \\1\\); concurrency 16 \\(want 16\\).*content hygiene: long digit runs 0 \\(want 0\\); e-mail addresses 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "transactions: partitions 334, files read 334, runs 1, p50 239.888 s, p95 239.888 s, bytes 317754041\nfees: partitions 396, files read 396, runs 5, p50 146.133 s, p95 147.157 s, bytes 32251262\nbudget: ALB idle timeout 60 s, threshold 30 s, worst p95 239.888 s, verdict outside (rule says outside); concurrency 16 (want 16)\ncontent hygiene: long digit runs 0 (want 0); e-mail addresses 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "transactions 334 of 334 window partitions read (1 complete run); fees 396 of 396 (5 complete runs); worst p95 239.888 s against the 30 s threshold.",
+   "status": "PASS",
+   "status_reason": "Passes the check as amended by the issuer (A1, msg 35292); it did not pass the original, which demanded 5 runs of every table and rejected the nine-digit bytes integer (row Z-S327)."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "AC1 outputs identical.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. The issuer's pre-cut controls and the original check's two refusals (runs, digit run) are the discriminating arms; AC1 read FAIL on this very record before A1 and PASS after it.",
+   "expected": "AC1 FAIL on the record under the original check, PASS under the amended check",
+   "observed": "FAIL (runs 1, digit runs 1) at 23:2xZ; PASS after A1",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "four more complete transactions runs",
+   "reason": "Run 2 hit the 80 percent memory guard (81.6 percent) on a host with no swap; the verdict is outside by a factor of 8 on the one complete run, and A1 admits fewer than 5 runs in that case."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S327: BLOCKING -- ev3.AC1 could not pass as written (5 runs, nine-digit bytes); corrected by the issuer's A1.",
+  "NFRA_OPLGTW-Z-S328: OBSERVATION -- every ctx.read_rows call lists the whole prefix first (0.4 of 0.55 s on fees)."
+ ],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, fourth order (msg 35288; A1 msg 35292). Pilot first, then 5 runs per table under a memory monitor; transactions stopped by the guard in run 2; fees complete; a single-threaded timing diagnostic of one read_rows call. Read-only; the host recovered to baseline and /health stayed 200.",
+ "compiler_tools": [
+  {
+   "tool": "pyarrow/boto3 via the installed adapter",
+   "invocation": "ev3_measure.py --host <table> (S3 -> SSM, Rule 12)",
+   "result": "PASS",
+   "note": "Seconds, counts and bytes only."
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+# IRPT_DASHBD round 123 (B-49F, DB-b-252) -- EVERY FIRM-SCOPED VALUE BELOW IS DERIVED, NEVER TYPED (CLAUDE.md rule 30).
+#
+# SOURCE OF THE FIRM: data/assets/scripts/gold/irpt_holdings_performance/sources.json, the declaration entry whose
+# registry_key names the vendor's firm-instance MASTER row (the same entry the holdings-performance root reads). The
+# MASTER row's `firm` in infra/logic/registry/scopes.json is the scope, exactly as the producer's firm_scope() derives it
+# (registry_key tried first, then the row's firm). No firm token is typed in this file.
+#
+# SOURCE OF THE BUCKETS: the gold bucket is the FIRM row's `bucket` in scopes.json; the silver bucket is the declaration's
+# `bucket`.
+#
+# SOURCE OF THE PREFIXES: the silver root is <monolith>/<firm>/silver/ from the declaration's monolith and the derived
+# firm (the declaration's positions_prefix template resolves to the same root, one table deeper). The gold prefix is
+# written inline in iam.tf as the producer's address form irpt/<firm>/gold/account_return_daily/, the segments being the
+# address builder's own constants (lib/opal_naming.py address()); Terraform cannot call that builder.
+#
+# SOURCE OF THE ARTIFACT KEY: lambda-source-map.json, the entry keyed by the function name the opal_name module
+# derives (never a typed name); its artifact_s3_key is the key the yang-lambda module reads.
+
+locals {
+  irpt_arc_sources = jsondecode(
+    file("${path.module}/../../../../../data/assets/scripts/gold/irpt_holdings_performance/sources.json")
+  )
+
+  irpt_arc_source_key = "blackdiamond_z09"
+  irpt_arc_source     = local.irpt_arc_sources[local.irpt_arc_source_key]
+
+  irpt_arc_registry_scope_map = {
+    for s in jsondecode(file("${path.module}/../../../../../infra/logic/registry/scopes.json")).scopes : s.key => s
+  }
+
+  # The firm long form: registry_key -> MASTER row -> firm.
+  irpt_arc_firm = local.irpt_arc_registry_scope_map[local.irpt_arc_source.registry_key].firm
+
+  # The gold bucket: the FIRM row's bucket.
+  irpt_arc_gold_bucket = local.irpt_arc_registry_scope_map[local.irpt_arc_firm].bucket
+
+  # The READ side: the declaration's silver bucket and the two Black Diamond silver tables this landing reads (T-1).
+  irpt_arc_silver_bucket       = local.irpt_arc_source.bucket
+  irpt_arc_silver_root         = "${local.irpt_arc_source.monolith}/${local.irpt_arc_firm}/silver/"
+  irpt_arc_silver_allocations  = "${local.irpt_arc_silver_root}fact_allocations/"
+  irpt_arc_silver_transactions = "${local.irpt_arc_silver_root}fact_transactions/"
+
+  # The artifact: the source-map entry the function name keys.
+  irpt_arc_source_map   = jsondecode(file("${path.module}/../../../lambda/ci/lambda-source-map.json"))
+  irpt_arc_artifact_key = local.irpt_arc_source_map.functions[module.irpt_account_return_daily_lambda_name.name].artifact_s3_key
+}
