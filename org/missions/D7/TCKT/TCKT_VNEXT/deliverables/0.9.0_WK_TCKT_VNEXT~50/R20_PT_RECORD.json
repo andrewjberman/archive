@@ -1,0 +1,88 @@
+{
+ "to_id": "TCKT_VNEXT.TO-R20-PT",
+ "serial": "0.9.0_WK_TCKT_VNEXT~50",
+ "cell": "R20-pt-1",
+ "outcome_ref": "FWD-11 (CTO rounds 18-19 rulings 2 and 4); row TCKT_VNEXT-D2-S57",
+ "portal_branch": "wk-TCKT_VNEXT-50-portal",
+ "portal_base": "fcbf2bce (portal DEV)",
+ "portal_commit": "8e4f088522685acf223c1054cb5e896df613cbeb (LOCAL, not pushed)",
+ "lines_changed": [
+  {
+   "file": "portal/src/pages/TicketCenter/MeetingRequestParts.tsx",
+   "change": "added exported showsMeetingOutcome(ticket): meeting_request only; true when status !== 'completed' or ticket.meeting is truthy",
+   "new_line": "return ticket.status !== 'completed' || Boolean(ticket.meeting)"
+  },
+  {
+   "file": "portal/src/pages/TicketCenter/MeetingRequestParts.tsx",
+   "change": "added exported viewerIsCoordinator(ticket, email): false for a non-string or blank email; else trimmed, lower-cased email equals one trimmed, lower-cased routing.primary entry (routing missing -> false)",
+   "new_line": "return primary.some(p => p.trim().toLowerCase() === who)"
+  },
+  {
+   "file": "portal/src/pages/TicketCenter/MeetingRequestParts.tsx",
+   "change": "header comment: MOUNT note now names showsMeetingOutcome and viewerIsCoordinator (comment only)"
+  },
+  {
+   "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+   "change": "import of showsMeetingOutcome and viewerIsCoordinator added (import block reflowed to one name per line)"
+  },
+  {
+   "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+   "change": "board meeting block condition: was t.ticket_type === 'meeting_request' && t.status !== 'completed'; now showsMeetingOutcome(t)",
+   "old_line": "{t.ticket_type === 'meeting_request' && t.status !== 'completed' && (",
+   "new_line": "{showsMeetingOutcome(t) && ("
+  },
+  {
+   "file": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+   "change": "controls mount: was {internal && <MeetingOutcomeControls .../>}; now mounted only for the coordinator",
+   "old_line": "{internal && <MeetingOutcomeControls ticket={t} onChanged={() => void refresh(activeTab)} />}",
+   "new_line": "{internal && viewerIsCoordinator(t, auth.user?.email) && (<MeetingOutcomeControls ticket={t} onChanged={() => void refresh(activeTab)} />)}"
+  },
+  {
+   "file": "portal/src/pages/TicketCenter/__tests__/meeting-outcome-visibility.test.tsx",
+   "change": "new file, 10 tests named verbatim, each mounting the board (TicketCenter) through react-dom/client; the pure functions asserted beside the rendered row"
+  }
+ ],
+ "existing_assertion_change": {
+  "file": "portal/src/pages/TicketCenter/__tests__/meeting-request.test.tsx",
+  "why": "the board test 'the board shows the outcome line and the controls for an open meeting ticket...' expects the controls; its useAuth mock carried no user, so the viewer was not in routing.primary. Measured: after the source change alone this one test failed (1 fail, 13 pass). Fixture only; no assertion changed; no other test changed.",
+  "old_line": "  useAuth: () => ({ isInternal: () => internalCaller, isDev: () => false }),",
+  "new_line": "  useAuth: () => ({ isInternal: () => internalCaller, isDev: () => false, user: { email: COORDINATOR } }),"
+ },
+ "test_counts": {
+  "new_file_meeting-outcome-visibility.test.tsx": "10 pass, 0 fail of 10 (AC1 pt-outcome: R20-PT-OK pass=10)",
+  "meeting-request.test.tsx": "14 pass, 0 fail of 14 (after the fixture change; 13 pass, 1 fail with the source change and no fixture change)",
+  "whole folder src/pages/TicketCenter": "206 pass, 0 fail of 206 across 32 files (bun test src/pages/TicketCenter, rc 0, 11.40 s)"
+ },
+ "before_arm": {
+  "run": "the new file against the BASE source (MeetingRequestParts.tsx and TicketCenter.tsx at fcbf2bce, before any source edit); bun test rc 1; 2 pass, 8 fail of 10",
+  "results": [
+   {"test": "shows the waiting words on an open meeting ticket with no outcome", "base": "PASS", "note": "unchanged-behaviour guard; does not exercise the change"},
+   {"test": "shows the confirmed outcome on a completed meeting ticket", "base": "FAIL", "note": "base draws no outcome line on a completed ticket (0 lines, expected 1)"},
+   {"test": "shows the proposed times on a completed meeting ticket", "base": "FAIL", "note": "same: 0 lines, expected 1"},
+   {"test": "shows nothing for a completed meeting ticket that has no meeting outcome", "base": "FAIL", "note": "board assertions pass at base; the failing line is the new pure-function call (TypeError: showsMeetingOutcome is not a function)"},
+   {"test": "shows the outcome line to a viewer who is not the coordinator", "base": "FAIL", "note": "base shows the controls to a non-coordinator (1 control, expected 0)"},
+   {"test": "shows the coordinator's controls to a viewer in routing.primary", "base": "PASS", "note": "unchanged-behaviour guard; the base shows the controls to everyone, so the coordinator sees them"},
+   {"test": "matches the viewer's email to routing.primary without regard to case", "base": "FAIL", "note": "board assertions pass at base; the failing line is the new viewerIsCoordinator call (TypeError)"},
+   {"test": "hides the coordinator's controls from a viewer who is not in routing.primary", "base": "FAIL", "note": "base shows the controls to a non-coordinator (1 control, expected 0)"},
+   {"test": "never shows the coordinator's controls on a completed ticket", "base": "FAIL", "note": "base draws no outcome line on the completed ticket (0 lines, expected 1)"},
+   {"test": "draws no outcome line for a ticket that is not a meeting request", "base": "FAIL", "note": "board assertions pass at base; the failing line is the new showsMeetingOutcome call (TypeError)"}
+  ],
+  "log": ".scratch/before_arm.txt (workspace worktree, scratch, not committed)"
+ },
+ "mutant": {
+  "check": "deliverables/0.9.0_WK_TCKT_VNEXT~50/mutant_check.py",
+  "mutation": "showsMeetingOutcome: 'return ticket.status !== completed || Boolean(ticket.meeting)' replaced by 'return ticket.status !== completed' (the old behaviour: a completed ticket never shows its outcome)",
+  "sha256_before": "5f17cd3a9284b8b985a985633023741fbea5b8699df3101fcb8afecb1a25ed39",
+  "result": "MUTANT-FIRES rc=1 fail=3 (the three completed-ticket outcome tests); RESTORED sha256 equal to SHA-BEFORE"
+ },
+ "render": "render_markup.txt beside this record: the MeetingOutcomeLine markup for a confirmed completed ticket",
+ "not_read": [
+  "the rendered page in a browser: no screenshot taken, no dev server run, no live endpoint called (the issuer's later live read renders it)",
+  "visual colour and layout of the new row: the row reuses the file's existing classes; no colour was added and none was judged by eye",
+  "the base-arm portal typecheck: R20PT-AC2 was run once on the changed tree (R20-TSC-OK), not at the base; the 'PASSES at the base' claim in the order was not re-measured",
+  "the full portal test suite beyond src/pages/TicketCenter: not run",
+  "the server's 403 and 409 behaviour: not called; the existing refusal tests were not changed",
+  "the one-line CRLF notice from git on the new test file: autocrlf is true in the portal repo; the notice is the Windows working-copy warning, and the blob was committed as git normalises it",
+  "R20PT-AC4J (judgment): not graded here; the output is carried for the CVO at L9, with no verdict"
+ ]
+}
