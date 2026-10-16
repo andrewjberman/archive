@@ -60,6 +60,7 @@ def grade(html, pdf_pages):
     sheets = read_sheets(html)
     n = len(sheets)
     need(n >= 9, "the export must hold at least nine sheets (eight sections and the disclosure sheet), found %d" % n)
+    need("49 Financial" in strip_tags(sheets[0][1]), "the first sheet must carry the 49 Financial title (the report is the 49 Financial one)")
     ids = [pid for pid, _ in sheets]
     need(ids.count("disclosures") == 1 and ids[-1] == "disclosures", "exactly one sheet is 'disclosures' and it is the LAST: %s" % ids[-3:])
     last = sheets[-1][1]
@@ -70,7 +71,7 @@ def grade(html, pdf_pages):
     need(POINTER.lower() not in text.lower(), "the pointer line must NOT print on the disclosure sheet itself")
     m = re.findall(r"Page (\d+) of (\d+)", text)
     need(m == [(str(n), str(n))], "the last sheet's footer must read Page %d of %d, read %s" % (n, n, m))
-    totals = {x for _, mk in sheets for x in re.findall(r"of (\d+)", strip_tags(mk)) if "Page" in strip_tags(mk)}
+    totals = {x for _, mk in sheets for x in re.findall(r"Page \d+ of (\d+)", strip_tags(mk))}
     need(totals == {str(n)}, "every sheet's page total must be %d, read %s" % (n, sorted(totals)))
     pointers = sum(1 for _, mk in sheets[:-1] if POINTER.lower() in strip_tags(mk).lower())
     need(pointers == n - 1, "the pointer line must print on each of the %d earlier sheets, read %d" % (n - 1, pointers))
@@ -100,17 +101,28 @@ def render(root):
     atexit.register(cleanup)
     hdir = tmp / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/render"
     hdir.mkdir(parents=True)
-    shutil.copy(str(root / HARNESS_REL), str(hdir / "render_sample.ts"))
+    # the harness prints the PDF through headless Edge; with another Edge or WebView2 process alive the spawned instance can hand off and never exit, so the COPY
+    # of the harness (never the committed file) gets its own throwaway profile directory, which makes the print a separate instance that exits
+    src = (root / HARNESS_REL).read_text(encoding="utf-8")
+    prof = (tmp / "edge_profile").as_posix()
+    need(src.count("'--headless', ") == 1, "the harness's Edge arguments are not the expected shape")
+    need(src.count("const FIRM_ID = 'inflection'") == 1, "the harness's firm id line is not the expected shape")
+    # the committed harness renders the Inflection title; the 49 Financial report is the same document under the firm id 49financial (the title is read from the registry by that id)
+    src = src.replace("const FIRM_ID = 'inflection'", "const FIRM_ID = '49financial'")
+    (hdir / "render_sample.ts").write_text(src.replace("'--headless', ", "'--headless', '--user-data-dir=%s', " % prof), encoding="utf-8")
     out = Path(OUT_DIR)
     shutil.rmtree(str(out), ignore_errors=True)
     b = shutil.which("bun")
     need(b, "bun is not on PATH")
-    p = subprocess.run([b, str(hdir / "render_sample.ts"), SAMPLE, str(out)], cwd=str(tmp), capture_output=True, text=True, timeout=900)
-    need(p.returncode == 0, "the harness failed (rc %d): %s" % (p.returncode, (p.stderr or p.stdout)[-300:].replace("\n", " | ")))
-    summary = json.loads(p.stdout[p.stdout.index("{"):])
-    html = (out / "FWD21_EXPORT_49F_SAMPLE.html").read_text(encoding="utf-8")
-    pdf_pages = summary.get("export_pdf_pages")
-    return html, pdf_pages
+    try:
+        p = subprocess.run([b, str(hdir / "render_sample.ts"), SAMPLE, str(out)], cwd=str(tmp), capture_output=True, text=True, timeout=600)
+        need(p.returncode == 0, "the harness failed (rc %d): %s" % (p.returncode, (p.stderr or p.stdout)[-300:].replace("\n", " | ")))
+    except subprocess.TimeoutExpired:
+        pass  # the print step can hang after both files are written: the files are read below and a missing or unreadable one fails the clause
+    hp, pp = out / "FWD21_EXPORT_49F_SAMPLE.html", out / "FWD21_EXPORT_49F_SAMPLE.pdf"
+    need(hp.is_file() and pp.is_file(), "the harness wrote no export HTML and PDF")
+    pdf_pages = len(re.findall(rb"/Type\s*/Page[^s]", pp.read_bytes()))
+    return hp.read_text(encoding="utf-8"), pdf_pages
 
 
 def run(root, record=False):
@@ -118,7 +130,7 @@ def run(root, record=False):
     res = grade(html, pdf_pages)
     if record:
         rec = {"claim": "measured", "check": "DB145-1-AC1", "candidate_commit": p144.CANDIDATE, "sample_sha256": SAMPLE_SHA256, "private_folder": OUT_DIR, **res,
-               "words": "The 49 Financial performance report was rendered from the candidate portal branch by commit with the committed harness and read: the export has %d sheets, the last is the disclosures sheet and prints the placeholder exactly once, "
+               "words": "The 49 Financial performance report (the household sample, under the firm id 49financial) was rendered from the candidate portal branch by commit with the committed harness and read: the export has %d sheets, the last is the disclosures sheet and prints the placeholder exactly once, "
                         "its footer reads Page %d of %d, the pointer line prints on each of the %d earlier sheets and not on the disclosure sheet, and the PDF has %d pages. Nothing from the sample is recorded." % (res["sheets"], res["sheets"], res["sheets"], res["sheets"] - 1, res["pdf_pages"])}
         Path(root, RECORD_REL).write_text(json.dumps(rec, indent=1) + "\n", encoding="ascii")
     return res
@@ -135,10 +147,11 @@ def selftest():
     def sheet(pid, n, total, body="", pointer=True):
         return ('<div class="ir-page" data-report-page="%s">%s<footer>Page %d of %d</footer>%s</div>' % (pid, body, n, total, ("<p>" + POINTER + "</p>") if pointer else ""))
     total = 9
-    ok = "".join(sheet("s%d" % i, i, total) for i in range(1, 9)) + sheet("disclosures", 9, total, '<div data-slot="disclosure" data-slot-state="unfilled"><p data-disclosure-placeholder="true">%s</p></div>' % WORDS, pointer=False)
+    ok = "".join(sheet("s%d" % i, i, total, "49 Financial Performance Report" if i == 1 else "") for i in range(1, 9)) + sheet("disclosures", 9, total, '<div data-slot="disclosure" data-slot-state="unfilled"><p data-disclosure-placeholder="true">%s</p></div>' % WORDS, pointer=False)
     assert grade(ok, 9)["sheets"] == 9
     red(lambda: grade(ok, 8), "pdf pages differ")
     red(lambda: grade(ok.replace(WORDS, "Disclosure page pendng"), 9), "placeholder words differ")
+    red(lambda: grade(ok.replace("49 Financial", "Inflection Wealth Management"), 9), "wrong firm title")
     red(lambda: grade(ok.replace("data-disclosure-placeholder", "x"), 9), "no placeholder mark")
     red(lambda: grade(ok.replace('data-slot-state="unfilled"', 'data-slot-state="filled"'), 9), "slot state")
     red(lambda: grade(ok.replace('data-report-page="disclosures"', 'data-report-page="s0"'), 9), "no disclosures sheet")

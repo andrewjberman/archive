@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-100",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-100.producer-runs-the-swap-pass.md",
+    "group": "OTHER",
+    "vintage_commit": "d98ff72fdf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R24_G.md",
+    "vintage_commit": "d98ff72fdf",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-100.producer-runs-the-swap-pass.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~202",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "cff76bd439",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_swap_stage (line 315), _read_stage swap branch (lines 340-356), produce swap disclosures and settings (lines 551-557); swap-less path unchanged; offline, no deploy",
+      "artifact_covered_by": ["AR100-g-AC1", "AR100-g-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_swap.py",
+      "kind": "test",
+      "commit_or_etag": "cff76bd439",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "eight named tests, 8 passed in test_opal_producer_swap.py run alone; offline fakes",
+      "artifact_covered_by": ["AR100-g-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR100-g-AC1",
+      "criterion_verbatim": "AR100-g-AC1: invocation `python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g100_checks.py g100`; expect output matching `^AR-G100-OK`. AC1 runs the producer on 25 cases, then checks your eight named tests exist and pass. At base it FAILs.",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g100_checks.py g100",
+      "output_evidence": "AR-G100-OK 25 cases, 8 named tests pass | bound: timeout 590 (not hit) | rc=0 | run on committed HEAD cff76bd439; the eight named tests are test_an_unresolved_holding_is_replaced_before_anything_is_classified, test_every_substitution_is_named_first_in_the_disclosures_and_the_settings_say_which_pool, test_a_holding_with_no_class_is_left_out_and_named_not_analysed_and_the_run_goes_on, test_a_run_with_nothing_analysable_left_refuses_before_any_write, test_without_a_swap_store_an_unresolved_holding_refuses_as_it_always_did_and_the_read_is_unchanged, test_a_run_with_the_swap_store_and_no_unresolved_holding_is_byte_for_byte_the_run_without_it, test_a_stale_pool_still_swaps_and_the_disclosure_and_settings_say_so, test_the_packager_path_reads_the_same_effective_rows_and_the_two_request_sizes_agree",
+      "denominator": "25 of 25 cases passed; 8 of 8 named tests exist and pass",
+      "expect": "^AR-G100-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR100-g-AC2",
+      "criterion_verbatim": "AR100-g-AC2: invocation `python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g100_checks.py regress`; expect output matching `^AR-G100-REGRESS-OK`. AC2 runs six existing test files one at a time (67 tests) and needs all of them to pass, and it needs your branch (against the merge-base with `box/dell2`) to change only your two files, your folder, your order and the channel file. At base it PASSes. Run it under `timeout 590`.",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g100_checks.py regress",
+      "output_evidence": "AR-G100-REGRESS-OK 67 tests in 6 files, 2 changed paths all the cell's own | bound: timeout 590 (not hit) | rc=0 | diff box/dell2...HEAD = opal_producer.py and tests/test_opal_producer_swap.py only (the checker's own-file set)",
+      "denominator": "67 passed (need at least 67) across 6 existing test files run one at a time; 2 of 2 changed paths are the cell's own",
+      "expect": "^AR-G100-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's own negative arms are tests: no swap store refuses an UNRESOLVED holding as before (test 5), and nothing analysable left refuses before any write (test 4).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "checker case W11-deterministic: the same request run twice with the same timer and the same fakes",
+      "observed": "W11-deterministic passed in the g100 run (two runs equal under sort_keys JSON)",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "A live run of the producer against a served request, and any deploy of the Lambda",
+      "reason": "The cell says no live call, no deploy, no AWS call, no network; the acceptance is offline on fakes."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider <one test file> (run per file, test_opal_producer_swap.py and the six regression files)",
+      "result": "test_opal_producer_swap.py 8 passed; regression set 67 passed in 6 files"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <each .py file>",
+      "result": "pre-commit gate clean for 1 of 1 file(s), twice"
+    }
+  ]
+}
