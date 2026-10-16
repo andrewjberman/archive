@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cv-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cv-1.completion-report-fwd-1-to-9.md",
+    "group": "OTHER",
+    "vintage_commit": "bd82a6b1f8643fb2a7d0f4faef3e9ef3525b5542"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~189",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round100.md",
+    "vintage_commit": "bd82a6b1f8643fb2a7d0f4faef3e9ef3525b5542",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cv-1.completion-report-fwd-1-to-9.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~189/COMPLETION_REPORT.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only completion record; no S3 write, no serve, no deploy",
+      "artifact_covered_by": [
+        "CB100cv1-AC1",
+        "CB100cv1-AC2",
+        "CB100cv1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~189/COMPLETION_REPORT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only table of the completion record; no S3 write, no deploy",
+      "artifact_covered_by": [
+        "CB100cv1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~189/ADVI_COTBKF.TO-CB-cv-1.completion-report-fwd-1-to-9.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "this proof instance; no S3 write, no deploy",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB100cv1-AC1",
+      "criterion_verbatim": "the report states nine rows and how many are REALIZED and NOT_REALIZED, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~189/COMPLETION_REPORT.json',encoding='utf-8'));m=d['measured'];r=d.get('rows') or [];print('COMPLETION-REPORT measured=%s' % m + ((' rows=%d realized=%d not_realized=%d' % (len(r),sum(1 for x in r if x['grade']=='REALIZED'),sum(1 for x in r if x['grade']=='NOT_REALIZED'))) if m else ' reason=%s' % d['reason']))\"",
+      "expect": "^COMPLETION-REPORT measured=(True rows=9 realized=\\d+ not_realized=\\d+|False reason=.+)$",
+      "output_evidence": "COMPLETION-REPORT measured=True rows=9 realized=3 not_realized=6",
+      "denominator": "9 rows of 9 FWD ids (FWD-1..FWD-9); 3 REALIZED, 6 NOT_REALIZED; every row graded",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB100cv1-AC2",
+      "criterion_verbatim": "the issuer's script (in your worktree; read it, do not edit it) checks the report's shape: exactly FWD-1..FWD-9 once each, every grade REALIZED or NOT_REALIZED, every row citing an artifact and the place its grade was read, and every NOT_REALIZED row naming an act and an owner.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cv1_ac2_report_shape_check.py",
+      "expect": "^REPORT-SHAPE rows=9 ids_ok=True grades_ok=True artifacts_ok=True grade_read_ok=True acts_ok=True$",
+      "output_evidence": "REPORT-SHAPE rows=9 ids_ok=True grades_ok=True artifacts_ok=True grade_read_ok=True acts_ok=True",
+      "denominator": "9 of 9 rows; 9 FWD ids once each; 3 REALIZED and 6 NOT_REALIZED rows, 6 of 6 NOT_REALIZED rows name an act and an owner",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB100cv1-AC3",
+      "criterion_verbatim": "the issuer's script checks that all nine cited artifacts exist at the cited version or commit (a VersionId that answers head-object; a commit or a file at a commit that git cat-file finds). Metadata and object existence only.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cv1_ac3_artifacts_exist_check.py",
+      "expect": "^ARTIFACTS exist=9 of 9$",
+      "output_evidence": "ARTIFACTS exist=9 of 9",
+      "denominator": "9 of 9 cited artifacts; all 9 are file_at_commit entries checked by git cat-file; no s3_key_version artifact is cited",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "the order names no determinism control"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the order's status flip to complete",
+      "reason": "the order file is outside the <paths> grant; see surprise ADVI_COTBKF-D1-W189-S1"
+    },
+    {
+      "item": "exercise of FWD-2, FWD-3, FWD-4, FWD-7, FWD-8 and FWD-9",
+      "reason": "the report grades them NOT_REALIZED and names the act; an exercise is not this cell's grant"
+    },
+    {
+      "item": "S3 object reads and head-object checks of the round-98 VersionIds",
+      "reason": "the criteria check the cited artifacts only; no S3 artifact is cited as a grade"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W189-S1: the order's status flip is outside the <paths> grant (the order file is not in the paths block); left pending for the issuer.",
+    "ADVI_COTBKF-D1-W189-S2: the CVO L9 grade files the report cites sit outside the worktree sparse checkout; read at HEAD with git show.",
+    "ADVI_COTBKF-D1-W189-S3: FWD-8 has a REALIZED endpoint grade and a CTO round-99 statement that it waits; the report grades NOT_REALIZED on the latest statement.",
+    "ADVI_COTBKF-D1-W189-S4: the FWD-3 NOT rests on a premise (no daily table in the store) that round 98 changed; the one-account read on the served table is still unrecorded."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~189/ADVI_COTBKF.TO-CB-cv-1.completion-report-fwd-1-to-9.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~189/COMPLETION_REPORT.json',encoding='utf-8'));m=d['measured'];r=d.get('rows') or [];print('COMPLETION-REPORT measured=%s' % m + ((' rows=%d realized=%d not_realized=%d' % (len(r),sum(1 for x in r if x['grade']=='REALIZED'),sum(1 for x in r if x['grade']=='NOT_REALIZED'))) if m else ' reason=%s' % d['reason']))\"",
+      "result": "COMPLETION-REPORT measured=True rows=9 realized=3 not_realized=6"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cv1_ac2_report_shape_check.py",
+      "result": "REPORT-SHAPE rows=9 ids_ok=True grades_ok=True artifacts_ok=True grade_read_ok=True acts_ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cv1_ac3_artifacts_exist_check.py",
+      "result": "ARTIFACTS exist=9 of 9"
+    }
+  ]
+}
