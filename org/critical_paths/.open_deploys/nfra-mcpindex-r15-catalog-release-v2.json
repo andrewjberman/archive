@@ -1,0 +1,56 @@
+{
+  "slug": "nfra-mcpindex-r15-catalog-release-v2",
+  "title": "NFRA_MCPINDEX MX-r-15 v2 (A3): the re-measured round 18 catalog (depth and freshness claims only; 0 of 280 rows change) released onto opal-gateway -- deploy-only commit 1bc2df0b13 on live 0cb4a87bcb (1 file)",
+  "author": "0.7.0_AE_CloudOps~MI",
+  "status": "OPEN",
+  "opened_at": "2026-10-16T11:28:24.095656+00:00",
+  "window_hours": 6.0,
+  "entry_path": "org/critical_paths/change_management/20261016T1128Z_nfra-mcpindex-r15-catalog-release-v2_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "s3-prefix",
+      "target": "s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/ -- opal-gateway-1bc2df0b13.tar.gz + -latest.tar.gz",
+      "proof_required": "head-object on BOTH new keys showing git-ref = 1bc2df0b1383e424571aaa19c195928f449be31b, AND the rollback key opal-gateway-0cb4a87bcb.tar.gz still 883376 B ETag e004131084719990cbe6de019bb4a9cf -- read BEFORE this leg closes",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "activation",
+      "target": "SSM pull + systemctl restart opal-gateway on i-07dccb1615503ac99",
+      "proof_required": "/health 200; running bytes sha-equal to the BUILD INPUT (the cut) with the live tree B as a discriminating negative control (expect DIFFER 1 = catalog); censuses: tools 127=127 names equal, .env KEY set 64=64, ENABLED_INTEGRATIONS 7=7, MC Portal per-tool link counts EXACTLY 65 tools / 192 links read on the host by the real module",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verify",
+      "target": "r13.AC2 on the deployed bytes",
+      "proof_required": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round12/checks/r13.AC2.sh -- RESULT: PASS exit=0 (expected sum 127 of 127)",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "r13.AC3 and r15.AC4 on the deployed bytes",
+      "proof_required": "r13.AC3.sh (the criterion that failed at B) and round18/checks/r15.AC4.sh -- each RESULT: PASS exit=0 (AC4: host md5 983464f80adc45ac51f1f3eebbdf2001 equals the tree md5, rows 280, inferred 0, bucket 280, vendor 136, firm 136, tool_bucket 127, serves 7)",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "git",
+      "target": "infra/aws/ec2/EC2_MANIFEST.json services.opal-gateway on box/sitez",
+      "proof_required": "deployed_commit=1bc2df0b1383e424571aaa19c195928f449be31b, previous_deployed_commit=0cb4a87bcb8df4adbb71d095f0818b0f50c562f1, mcportal 090b9cdc85 unmoved, AND a release_note naming MX-r-15 v2 prepended in the SAME write as the commit fields",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261016T112824Z OPENED by 0.7.0_AE_CloudOps~MI with 5 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "sitez"
+}
