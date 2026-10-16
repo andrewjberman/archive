@@ -92,3 +92,13 @@ signature in my R34 half (@5699c80f35). AMENDMENT 3's terms and my conditions on
 
 **Condition:** HOLD lifts only after ledger `irpt-resident-r34e-20261016` reads CLOSED with both `V2S OK SPY KEPT and ZQXWVK NOT_KEPT` and
 `V2S CONTROLS OK 4 of 4` from inside the service. SET 2's ZQXWVK must read NOT_FOUND at the door, or the window stops.
+
+## AMENDMENT 6 -- one SET 3 (ZQXWVK first, one in flight, 90 s re-post wait) (2026-10-16 ~14:1xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM3_AMENDMENT6_SET3_COO_HALF.md`
+(COO half @73e3ccb390), blob `53decf2ba991ee9e258650ca62968bf2040d6b88`, sha256 `8d1f46e75eb440b66b850099df952fd03460fbda010d86b2416c720d9963c0fd`,
+5,384 bytes (re-measured). Only the probe set changes; it is my msg 9446 as written.
+
+**The residual risk (its section 4) is ACCEPTED, with one condition:** the run continues after SET 3 only if SET 3's window shows ZERO
+`WAF_CHALLENGE` journal lines. The run's own uploads are posted the way SET 3 is, one in flight at a time. A WAF line in SET 3 ends the
+window unspent, and the run then waits for the bounded backoff change (`~G2`, its own pair).
