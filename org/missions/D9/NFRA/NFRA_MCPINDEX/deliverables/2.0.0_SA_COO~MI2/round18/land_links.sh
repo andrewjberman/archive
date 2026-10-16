@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# land_links.sh <deployed-tools.json> [out-dir] -- the issuer's release-day step: regenerate the silver rows with the RELEASED tool list, the 34 read links, the ASSETS issuer's 31 (assets_read_links.json, 74e243fe48) and the
+# land_links.sh <deployed-tools.json or the word census> [out-dir] -- the issuer's release-day step: regenerate the silver rows with the RELEASED tool list, the 34 read links, the ASSETS issuer's 31 (assets_read_links.json, 74e243fe48) and the
 # ASSETS issuer's unskip file (2.0.0_SA_COO~MI msg 34772: without it the 12 Schwab dim tables are skipped and never get a read_tool), in the repo, print what changed, then grade it with c40.
 # With no out-dir it LANDS in workflows/atom_decomposition/catalog_entries/ (the working tree). A DRY RUN names a temp out-dir: nothing in the repo is written, the change list is the temp
 # folder's row count. Nothing is committed here: review `git status`, then commit the changed rows with safe-commit.
@@ -9,7 +9,7 @@ ROOT="$(git -C "$D" rev-parse --show-toplevel)" || exit 9
 cd "$ROOT" || exit 9
 DEP="${1:?usage: land_links.sh <deployed-tools.json> [out-dir]}"
 OUT="${2:-}"
-[ -f "$DEP" ] || { echo "ERROR: $DEP not found"; exit 9; }
+[ "$DEP" = census ] || [ -f "$DEP" ] || { echo "ERROR: $DEP not found (a JSON list file, or the word census = the tool census at the manifest deployed_commit, which is the release-day form)"; exit 9; }
 R=org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables
 PIN=$R/0.9.0_WK_NFRA_MCPINDEX~38
 LAND=0
