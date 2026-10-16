@@ -57,9 +57,12 @@ def rd(root, rel):
     return p.read_bytes()
 
 
-def cut_first_block(text):
-    i, j = text.find(BEGIN), text.find(END)
-    need(0 <= i < j, "the FILLED-REPORT-A block markers are missing or out of order")
+def cut_block(text, index=0):
+    """(the text without the index-th FILLED-REPORT-A block's body, that body). The markers themselves stay in the outside text."""
+    starts = [m.start() for m in re.finditer(re.escape(BEGIN), text)]
+    ends = [m.start() for m in re.finditer(re.escape(END), text)]
+    need(len(starts) == len(ends) and len(starts) > index and all(s < e for s, e in zip(starts, ends)), "the FILLED-REPORT-A block markers are missing or out of order")
+    i, j = starts[index], ends[index]
     return text[:i] + text[j:], text[i:j]
 
 
@@ -74,8 +77,8 @@ def check_diff(root):
     new_h, old_h = rd(root, HANDLER).decode("utf-8"), git_show(root, HANDLER).decode("utf-8")
     need("\r" not in new_h, "handler.py must keep LF line endings")
     need(new_h.count(BEGIN) == old_h.count(BEGIN) == 2 and new_h.count(END) == old_h.count(END) == 2, "the two FILLED-REPORT-A blocks must both remain")
-    out_new, in_new = cut_first_block(new_h)
-    out_old, in_old = cut_first_block(old_h)
+    out_new, in_new = cut_block(new_h, 0)
+    out_old, in_old = cut_block(old_h, 0)
     need(out_new == out_old, "handler.py differs from the base outside the first FILLED-REPORT-A block (module imports, summaries pass, the inline event branch and the lambda handler stay byte for byte)")
     for name in ("FILLED_REPORT_SWITCH = ", "class NotYetAvailable(Exception):", "def filled_report_enabled(", "def run_filled_report(", "def filled_report_fire(", "def read_filled_report_gold("):
         need(name in in_new, "the block must still define %s" % name.split("(")[0].split(" =")[0])
@@ -84,10 +87,10 @@ def check_diff(root):
     need("the filled-report gold table is not built yet" not in in_new, "the stub's raise must be gone")
     new_p, old_p = rd(root, PUBLISHER).decode("utf-8"), git_show(root, PUBLISHER).decode("utf-8")
     need("\r" not in new_p, "publisher.py must keep LF line endings")
-    need(new_p.count(BEGIN) == old_p.count(BEGIN) == 1 and new_p.count(END) == old_p.count(END) == 1, "publisher.py keeps its one FILLED-REPORT-A block")
-    pout_new, pin_new = cut_first_block(new_p)
-    pout_old, pin_old = cut_first_block(old_p)
-    need(pout_new == pout_old, "publisher.py differs from the base outside its FILLED-REPORT-A block (PUBLISHER_VERSION and the series path stay byte for byte)")
+    need(new_p.count(BEGIN) == old_p.count(BEGIN) == 2 and new_p.count(END) == old_p.count(END) == 2, "publisher.py keeps its two FILLED-REPORT-A blocks")
+    pout_new, pin_new = cut_block(new_p, 1)
+    pout_old, pin_old = cut_block(old_p, 1)
+    need(pout_new == pout_old, "publisher.py differs from the base outside the body of its second FILLED-REPORT-A block (PUBLISHER_VERSION and the series path stay byte for byte)")
     for name in ("FILLED_HOUSEHOLD_FIELDS = ", "FILLED_ACCOUNT_FIELDS = ", "FILLED_WINDOW_STATUS = ", "FILLED_ABSENT_KINDS = ", "def validate_filled_report(", "def publish_filled_report(", "def report_address("):
         need(name in pin_new, "publisher.py: the block must still define %s" % name.split("(")[0].split(" =")[0])
     for head in ("def publish_filled_report(", "def report_address(", "def _filled_value_ok(", "def _filled_absent_ok("):
@@ -316,10 +319,10 @@ def selftest(ref_root):
     handler = ref / HANDLER
     original = handler.read_bytes()
     muts = {
-        "reads the oldest partition": (b"days[-1]", b"days[0]"),
-        "returns an empty document on absent": (b"raise NotYetAvailable(\"no filled partition", b"return {}  # \""),
-        "lets ValueError escape": (b"except ValueError as exc:", b"except KeyError as exc:"),
-        "writes an object": (b"s3.get_object(", b"s3.put_object(Bucket='x', Key='y', Body=b'');s3.get_object("),
+        "reads the oldest partition": (b"sorted(days)[-1]", b"sorted(days)[0]"),
+        "returns an empty document on absent": (b'raise NotYetAvailable("the filled-report gold table holds no partition yet")', b"return {}"),
+        "lets ValueError escape": (b"except (ValueError, KeyError, TypeError) as exc:", b"except KeyError as exc:"),
+        "writes an object": (b"body = s3.get_object(", b's3.put_object(Bucket=bucket, Key="x", Body=b"")\n    body = s3.get_object('),
     }
     n = 0
     try:
