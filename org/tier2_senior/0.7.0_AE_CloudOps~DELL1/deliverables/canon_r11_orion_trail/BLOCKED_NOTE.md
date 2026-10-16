@@ -1,0 +1,9 @@
+# ADHOC.canon-r11-orion-reader-trail: step 1 BLOCKED at the apply (0.7.0_AE_CloudOps~DELL1, 2026-10-16 ~18:30Z)
+
+Nothing was applied, no ledger was opened (no act was taken), the tf file is restored (uncommitted edit reverted).
+
+- Plan (read-only, targeted `aws_cloudtrail.organization`): `Plan: 0 to add, 1 to change, 0 to destroy`; the only change is the ReadOnly selector `data_resource.values` gaining `arn:aws:s3:::opal-data-assets/orion/`. Exactly the order's expectation. Files: `targeted_plan.txt`, the edit as `orion_trail_edit.patch` (git apply-able; two edits to `cloudtrail-organization-trail.tf`).
+- Blocker (MEASURED): this seat's identity `cloudops-dell1-agent-user` (group `cloudops-dell-agents-group`) carries the managed policy `cloudops-dell-agent-deploy-policy`, statement `DenyCloudTrailWrites`: Effect Deny, Resource `*`, Action includes `cloudtrail:Update*` and `cloudtrail:PutEventSelectors`, no Condition. `iam simulate-principal-policy` reads explicitDeny for PutEventSelectors on the trail ARN (control: `GetEventSelectors` allowed). Terraform's `aws_cloudtrail` update uses the same credentials, so the apply would fail AccessDenied. The deny is a guardrail on the audit trail; not worked around, not tried.
+- Pre-change state saved: `pre_event_selectors.json`, `pre_trail_status.txt` (logging true).
+- Who can apply: a seat whose identity is outside `DenyCloudTrailWrites` (the FB-j-15 write-selector precedent landed in the same file; its applier is not this seat). The patch plus the targeted plan are the whole hand-over; the read step (after 16:30Z on 2026-10-17) and the removal (within 72 h of the apply) need the same identity for the removal and only read access (logs bucket) for the read.
+- Clock: for the 2026-10-17 06Z-16Z window the value must be live before 06Z on 2026-10-17 (about 11 hours from now).

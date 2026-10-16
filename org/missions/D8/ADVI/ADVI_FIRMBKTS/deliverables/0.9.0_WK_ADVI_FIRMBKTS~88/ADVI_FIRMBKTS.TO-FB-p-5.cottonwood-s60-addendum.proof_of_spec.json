@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-p-5.cottonwood-s60-addendum",
+  "firm": "COT",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-5.cottonwood-s60-addendum.md",
+    "group": "OTHER",
+    "vintage_commit": "ab8081bfdd"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~88",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R9.md",
+    "vintage_commit": "ab8081bfdd",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-5.cottonwood-s60-addendum.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; AC1 grades the record's shape and discipline (retire entry R7 names the secret, delete_by andrew, delete_performed false, census with roles scanned)",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the AC1 invocation was run twice: once for the record commit and once from the worktree root",
+      "observed": "ADDENDUM: OK consumers=0 delete=andrew, rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "Any delete, rotate, put or update of the secret, and get-secret-value", "reason": "Bound (order section 2, item 1): metadata reads only. The delete is Andrew's act and was not performed (delete_performed false)."},
+    {"item": "The 304-role simulation", "reason": "Carried from the CRO census Q-C at 1b7cad0123, named as carried in the record census.source; not re-measured in this order."},
+    {"item": "Edits to PLAN_COTTONWOOD.json", "reason": "Bound (order section 1): the plan is another worker's committed deliverable; the R7 entry is written as an addendum record."},
+    {"item": "The task-order status flip", "reason": "The task-order file is outside the order's <paths> write grant; recorded as surprise row ADVI_FIRMBKTS-D1-W88-S2 (BLOCKING), left for the issuer."}
+  ],
+  "artifacts_produced": [
+    {"path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~88/COTTONWOOD_PLAN_ADDENDUM_S60.json", "kind": "doc", "commit_or_etag": "e17ed5c8e3", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "addendum record only; the Cottonwood plan file is not edited and nothing is deployed"},
+    {"path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md", "kind": "doc", "commit_or_etag": "PENDING-THIS-COMMIT", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "two rows ADVI_FIRMBKTS-D1-W88-S1 and -S2 appended; no existing row edited"}
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape and discipline.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 60 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py addendum --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~88/COTTONWOOD_PLAN_ADDENDUM_S60.json",
+      "output_evidence": "ADDENDUM: OK consumers=0 delete=andrew",
+      "denominator": "1 addendum record checked; 1 retire entry (R7); roles_scanned 304 carried from the CRO census (not re-measured); consumers 0 from the served-graph search of 2972 nodes plus an absent resource policy",
+      "status": "PASS",
+      "expect": "^ADDENDUM: OK consumers=[0-9]+ delete=andrew$",
+      "judgment": false
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W88-S1: the CRO census cited by row D1-S60 is tracked at HEAD but absent from the sparse worktree on disk; read via git show 1b7cad0123. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "ADVI_FIRMBKTS-D1-W88-S2: the order asks the worker to flip the task-order status to complete, but the task-order file is outside the <paths> write grant; the flip is not committed here. BLOCKING, INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~88/COTTONWOOD_PLAN_ADDENDUM_S60.json (no separate session log; the calls as run are in its calls field)",
+  "compiler_tools": [
+    {"tool": ".tools/aws secretsmanager", "invocation": "describe-secret and get-resource-policy on opal/bd/cottonwood/credentials, each under timeout 120", "result": "describe-secret rc=0: one version (AWSCURRENT), no rotation field, no tags field, LastAccessedDate 2026-05-26 (day grain); get-resource-policy rc=0: no resource policy"},
+    {"tool": "comp-find --corpus aws", "invocation": "comp-find --corpus aws 'cottonwood/credentials' ; comp-find --corpus aws 'bd/cottonwood/credentials|ml9vNM'", "result": "1 hit across 2972 aws nodes scanned in each call (the secret itself); vintage 2026-10-16 16:35:39 UTC; rc=0"}
+  ]
+}
