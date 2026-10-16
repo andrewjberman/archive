@@ -6,9 +6,11 @@ no network, no write outside this folder. It reads the COMMITTED tree (HEAD) thr
 sparse working copy cannot shrink the answer.
 
 Usage:
-  python source_map_census.py             write LAMBDA_SOURCE_MAP_CONSUMER_CENSUS.md, print the census line
-  python source_map_census.py --selftest  planted temporary files only, print the selftest line
-  python source_map_census.py --show CLASS  print the first hit of every file in CLASS (exploration aid)
+  python source_map_census.py                 read-only (CT-ca-1): print the census line, WRITE NOTHING
+  python source_map_census.py --out PATH      also write the markdown to PATH (outside any tracked path)
+  python source_map_census.py --write         keep the stage-1 behaviour: write LAMBDA_SOURCE_MAP_CONSUMER_CENSUS.md
+  python source_map_census.py --selftest      planted temporary files only, print the selftest line
+  python source_map_census.py --show CLASS    print the first hit of every file in CLASS (exploration aid)
 
 Classes (what the file DOES with the map):
   READ_WHOLE  loads the whole JSON (jsondecode(file()), json.load(s), jq, fromjson, JSON.parse, readFileSync)
@@ -225,7 +227,20 @@ def md_cell(s):
     return ascii_only(str(s)).replace("|", "/").replace("\n", " ")
 
 
-def run_census():
+def output_target(argv):
+    """Where the census markdown goes. DEFAULT: nowhere -- a census read changes no tracked file (C-S102).
+    --out PATH writes there; --write keeps the stage-1 behaviour and writes CENSUS_MD."""
+    if "--out" in argv:
+        i = argv.index("--out")
+        if i + 1 >= len(argv):
+            raise SystemExit("ERROR: --out needs a path")
+        return argv[i + 1]
+    if "--write" in argv:
+        return CENSUS_MD
+    return None
+
+
+def run_census(target=None):
     names = grep_set()
     g = len(names)
     blobs = read_blobs(names)
@@ -410,8 +425,10 @@ def run_census():
         lines_out.append("| %s | %s | %s | %d: %s |" % (cls, md_cell(p), basis, ln, md_cell(hit)))
     lines_out.append("")
     body = "\n".join(lines_out)
-    with open(CENSUS_MD, "w", encoding="ascii", newline="\n") as f:
-        f.write(body)
+    if target:
+        with open(target, "w", encoding="ascii", newline="\n") as f:
+            f.write(body)
+        print("CENSUS-MARKDOWN written to %s" % target)
 
     for p, pc, rcl in disagree:
         print("DISAGREE %s pattern=%s reading=%s" % (p, pc, rcl))
@@ -473,6 +490,10 @@ def selftest():
             "final=%s" % final_cls)
         mini_other = sum(1 for c in [final_cls] if c == "OTHER")
         arm("arm_i_other_count_blocks_ok", (mini_other == 0) is False, "other=%d" % mini_other)
+        # CT-ca-1: a plain census run names no markdown target, so it writes no tracked file
+        arm("arm_j_default_writes_nothing", output_target([]) is None
+            and output_target(["--write"]) == CENSUS_MD and output_target(["--out", "x.md"]) == "x.md",
+            "default=%s" % output_target([]))
     k = sum(1 for _, c in arms if c)
     n = len(arms)
     print("SOURCEMAP-SELFTEST arms=%d/%d ok=%s" % (k, n, k == n))
@@ -496,4 +517,4 @@ if __name__ == "__main__":
         sys.exit(selftest())
     if "--show" in sys.argv:
         sys.exit(show(sys.argv[sys.argv.index("--show") + 1]))
-    sys.exit(run_census())
+    sys.exit(run_census(output_target(sys.argv[1:])))
