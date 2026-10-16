@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aw-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aw-1.intake-check-6-platform-aware.md",
+    "group": "OTHER",
+    "vintage_commit": "9b62d6d181"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~135",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round28.md",
+    "vintage_commit": "7d4aef5b93",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aw-1.intake-check-6-platform-aware.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_check.py",
+      "kind": "script",
+      "commit_or_etag": "03e01a85b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "check_6 applies the platform rule only when compared_across_platforms is true. _remove_blocks removes each delvewheel start-to-end block with up to DELVEWHEEL_PAD = 4 empty lines directly before and up to 4 directly after (CTO msg 109671), and records one seam per removed block. _collapse_seam (CTO msg 109673, amendment 2) collapses the run of empty lines at a seam on the side that carries no block there, up to 4 from the run's start and up to 4 from its end. _platform_rule compares the two normalised sides exactly: equal -> platform_normalised_equal; residual path in CHECK6_BUILD_METADATA_FILES = (numpy/__config__.py,) -> build_metadata_residual; any other residual stays in py_differing and fails. py_differing_count is the raw count; py_differing_after_platform_rules decides the verdict. Same-platform comparisons take the base path and never call the rule. Built in 8144b24967 and 0577033587; the seam collapse carried by 03e01a85b2.",
+      "artifact_covered_by": ["CTaw1-AC1", "CTaw1-AC2"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round28_check6_platform.py",
+      "kind": "test",
+      "commit_or_etag": "03e01a85b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library plus org/devices/intake/intake_check.py; synthetic wheels and installed copies in temporary folders; no network, no install. Arms a to g as in dc48c3b47f; arms h to k as in 0577033587; amendment 2 adds arm l (a non-empty line at the seam on one side fails, the split run is not collapsed) and arm m (the real pandas seam shape passes). --real4 is read only: it builds each context in memory and writes nothing. Last lines CHECK6-PLATFORM arms=14/14 ok=True and REAL4 passed=4/4 ok=True.",
+      "artifact_covered_by": ["CTaw1-AC1", "CTaw1-AC2"]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_check.py",
+      "kind": "test",
+      "commit_or_etag": "0577033587",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One existing case re-expected under amendment 1 (W135-S1 ruling, committed 0577033587): case_check_6_records_the_cross_platform_comparison_and_the_crlf_count now asserts check 6 passed and platform_normalised_equal lists the file, keeping its compared_across_platforms, installed_platform, held_platform, py_differing_count = 1 and differ_after_crlf_normalisation = 0 checks. No other existing case changed; no case added by this seating. Last line INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True, measured on the committed state.",
+      "artifact_covered_by": ["CTaw1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "99f7c74c88",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows appended, never edited: NFRA_CTLPLN-W135-S1 and NFRA_CTLPLN-W135-S2 (first seating, commit 9e91c5b375, untouched), NFRA_CTLPLN-W135-S3 (BLOCKING, INERT; committed a5caea51cf, untouched; the seam collapse of 03e01a85b2 clears its one residual line), and NFRA_CTLPLN-W135-S4 (OBSERVATION, INERT; committed 99f7c74c88). All UNDER_INVESTIGATION.",
+      "artifact_covered_by": ["CTaw1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaw1-AC1",
+      "criterion_verbatim": "across platforms a CRLF-only difference, a delvewheel block and the one listed build-metadata file stop failing check 6, while a planted edited line, an unlisted file and every same-platform comparison still fail (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round28_check6_platform.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: CHECK6-PLATFORM arms=14/14 ok=True. Deciding lines: PASS arm_a_crlf_only_cross_platform_passes; PASS arm_b_delvewheel_block_cross_platform_passes; PASS arm_c_numpy_build_metadata_file_passes_and_other_file_fails; PASS arm_d_planted_edit_fails_across_platforms; PASS arm_e_same_platform_is_unchanged; PASS arm_e2_no_installed_wheel_tag_is_not_cross_platform; PASS arm_f_scripts_data_and_oversize_keep_failing; PASS arm_g_controls; PASS arm_h_blank_line_far_from_block_fails; PASS arm_i_blank_line_inside_reach_with_a_real_edit_fails; PASS arm_j_block_padded_by_empty_lines_on_both_sides_passes; PASS arm_k_no_block_no_blank_line_leniency; PASS arm_l_non_empty_line_at_the_seam_on_one_side_fails; PASS arm_m_pandas_seam_shape_passes. Measured at 03e01a85b2; identical across two runs (cmp).",
+      "denominator": "14 of 14 arms passed (a, b, c, d, e, e2, f, g, h, i, j, k, l, m); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaw1-AC2",
+      "criterion_verbatim": "the four real yfinance wheels pass check 6 on the new rule with no waiver, read-only (base: the test does not exist); report all five lines.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round28_check6_platform.py --real4",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; all five lines verbatim: REAL4 curl_cffi check6=passed compared_across_platforms=True residual=0 metadata=0 | REAL4 numpy check6=passed compared_across_platforms=True residual=0 metadata=1 | REAL4 pandas check6=passed compared_across_platforms=True residual=0 metadata=0 | REAL4 websockets check6=passed compared_across_platforms=True residual=0 metadata=0 | last line verbatim: REAL4 passed=4/4 ok=True. Read only: the context is built in memory, check_3 then check_6 run, nothing is written under C:/opal-intake/ and no record, copy or sidecar is created. No waiver is used. Identical across two runs (cmp).",
+      "denominator": "4 of 4 wheels passed (curl_cffi, numpy, pandas, websockets); residual 0 files on every wheel; the one build-metadata file cleared is numpy/__config__.py (numpy metadata=1)",
+      "status": "PASS",
+      "expect": "REAL4 passed=4/4",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTaw1-AC3",
+      "criterion_verbatim": "the check tool's own suite passes with the new cases added (base: `INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True`, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_check.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True. The one re-expected case (case_check_6_records_the_cross_platform_comparison_and_the_crlf_count, amendment 1) reads PASS under the ruled rule. Identical PASS and FAIL lines across two runs (cmp).",
+      "denominator": "60 of 60 cases passed; skipped 0 of 60; no case added by this seating",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-suite mutant, arm g2 of .tools/tests/test_round28_check6_platform.py: intake_check._platform_rule is replaced in-process by a function returning 'equal' for every file; no copy of the tool is written. Arm d (a planted edit fails) and arm l (a non-empty line at the seam fails) are the other teeth for the rule.",
+      "expected": "under the mutant the planted edit VALUE = 2 against VALUE = 1 reads passed (the arm's teeth); the real rule fails it (arm d)",
+      "observed": "arm_g_controls PASS at 03e01a85b2: the mutant read the planted edit as passed, and the real rule fails it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed code state at 03e01a85b2 (the surprise row at 99f7c74c88), same command, timeout 280; raw outputs compared with cmp (AC1, AC2, AC3)",
+      "observed": "AC1: identical (CHECK6-PLATFORM arms=14/14 ok=True, exit 0 both runs). AC2: identical (REAL4 passed=4/4 ok=True, exit 0 both runs). AC3: identical (INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True, exit 0 both runs).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real batch intake-20261016-yfinance-linux and every record, waiver and copy under C:/opal-intake/ and org/devices/intake/records/",
+      "reason": "read only in this cell: the --real4 arm reads the four wheels and the fetch records and writes nothing; the four waiver records stay as issued"
+    },
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-aw-1 to complete",
+      "reason": "the order file is outside this worker's paths and the flip is the issuer's; this instance carries no FAIL row"
+    },
+    {
+      "item": "the portal gitlink and org/git-author-override-audit.laptop.log",
+      "reason": "not committed by this cell"
+    },
+    {
+      "item": "the client-data check",
+      "reason": "WARN only, standing ruled state: the hashed account-id list is absent at C:\\Users\\AndrewBerman\\.opal\\account_id_hashes.txt; no row filed for it"
+    },
+    {
+      "item": "the schema folder org/surprise_channel/schemas (read for the row's enumerations)",
+      "reason": "added to this worktree's sparse checkout with git sparse-checkout add (local working copy only); nothing from it is committed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W135-S1: the existing suite case case_check_6_records_the_cross_platform_comparison_and_the_crlf_count asserted check 6 failed for a cross-platform CRLF-only difference that the ruled rule reads as passed; re-expected under amendment 1 (the one permitted change), the suite reads 60/60.",
+    "NFRA_CTLPLN-W135-S2: with the first-seating rule, numpy/__init__.py and pandas/__init__.py kept empty lines around the delvewheel block; the ruled padding removal and the seam collapse clear both.",
+    "NFRA_CTLPLN-W135-S3: under the amendment 1 padding rule the real arm read 3 of 4 (pandas/__init__.py keeps one empty line at the block seam); the amendment 2 seam collapse on the wheel side clears it, and --real4 reads 4 of 4.",
+    "NFRA_CTLPLN-W135-S4: the ruled seam collapse has no before and after split on the wheel side, where the wheel carries no block; the cell takes up to 4 empty lines from the run's start and up to 4 from its end. No real file takes the case where the two splits differ."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~135/NFRA_CTLPLN.TO-CT-aw-1.intake-check-6-platform-aware.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile org/devices/intake/intake_check.py org/devices/intake/test_intake_check.py .tools/tests/test_round28_check6_platform.py",
+      "result": "exit 0 under Python 3.12.10"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh (commit-gate, naming gate, to-pipeline gate, surprise-row gate, missions-tree-check) on 03e01a85b2 and 99f7c74c88",
+      "result": "commit-gate All checks passed on the two .py files at 03e01a85b2; surprise-row gate OK on the investigation row at 99f7c74c88 (1 new row); the standing client-data WARN was printed and not filed"
+    }
+  ]
+}

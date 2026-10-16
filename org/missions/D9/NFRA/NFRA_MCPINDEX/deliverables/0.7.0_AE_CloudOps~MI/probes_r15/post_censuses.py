@@ -11,17 +11,17 @@ def section(txt, start, end):
     return txt.split(start, 1)[1].split(end, 1)[0].split()
 
 
-served = open(p + "/served_names_host_r13.txt", encoding="utf-8").read()
+served = open(p + "/served_names_host_r15.txt", encoding="utf-8").read()
 host_names = set(served.split("---SERVED\n", 1)[1].split("\n---", 1)[0].split())
-cut = json.load(open(p + "/tools_cut_r13.json"))
-live = json.load(open(p + "/tools_live_r13.json"))
+cut = json.load(open(p + "/tools_cut_r15.json"))
+live = json.load(open(p + "/tools_live_r15.json"))
 print("(1) TOOLS: host served %d; cut %d; live-before %d" % (len(host_names), cut["total"], live["total"]))
 print("    host == cut names: %s; host == live-before names: %s" % (host_names == set(cut["all"]), host_names == set(live["all"])))
 neg = sorted(host_names)[0]
 print("    NEGATIVE CONTROL (drop %r from the host set): equal to cut reads %s" % (neg, (host_names - {neg}) == set(cut["all"])))
 
-pre = open(p + "/host_read_r13_PREAPPLY.txt", encoding="utf-8").read()
-post = open(p + "/host_read_r13_POST.txt", encoding="utf-8").read()
+pre = open(p + "/host_read_r15_PREAPPLY.txt", encoding="utf-8").read()
+post = open(p + "/host_read_r15_POST.txt", encoding="utf-8").read()
 kb = section(pre, "---ENVKEYS\n", "---ENVLINES")
 ka = section(post, "---ENVKEYS\n", "---ENVLINES")
 print("(2) .env KEYS: before %d, after %d; dropped %s; added %s" % (len(kb), len(ka), sorted(set(kb) - set(ka)), sorted(set(ka) - set(kb))))
@@ -46,7 +46,7 @@ bumped[sorted(bumped)[0]] += 1
 print("    NEGATIVE CONTROL (bump one host count): equal reads %s" % (bumped == cut_lc))
 ok = (
     host_names == set(cut["all"]) and set(kb) == set(ka) and eb == ea and host_lc == cut_lc
-    and (len(host_lc), sum(host_lc.values())) == (33, 112) and len(host_names) == 93 and len(ka) == 57
+    and (len(host_lc), sum(host_lc.values())) == (65, 192) and len(host_names) == 127 and len(ka) == 64
 )
-print("EXPECTED (93 tools equal, 57 keys equal, 7 ids equal, 33 tools / 112 links): %s" % ("MATCH" if ok else "MISMATCH"))
+print("EXPECTED (127 tools equal, 64 keys equal, 7 ids equal, 65 tools / 192 links): %s" % ("MATCH" if ok else "MISMATCH"))
 sys.exit(0 if ok else 1)

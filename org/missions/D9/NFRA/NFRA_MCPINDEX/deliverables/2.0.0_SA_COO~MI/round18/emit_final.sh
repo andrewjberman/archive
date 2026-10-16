@@ -31,6 +31,11 @@ for a in c23.AC1 c23.AC2 c23.AC3 c23.AC4 c21.AC1 c21.AC2; do
   echo "$a: $(grep -E '^RESULT' "$OUT/ev/$a.out" | head -1)"
   grep -q "RESULT: PASS" "$OUT/ev/$a.out" || FAIL=1
 done
+# r13.AC3 (depth and answer-time claims against LIVE AWS, read-only): it graded two shipped catalogs FAIL because a source re-stamped between the
+# measure and the apply (2026-10-16: yield-curve 23:01Z, the daily publish before 11:35Z). Run it on the candidate so a stale claim is found before the release.
+{ bash "$D/2.0.0_SA_COO~MI/round12/checks/r13.AC3.sh" 2>&1; echo "exit=$?"; } > "$OUT/ev/r13.AC3.out"
+echo "r13.AC3: $(grep -E '^RESULT' "$OUT/ev/r13.AC3.out" | tail -1)"
+grep -q "RESULT: PASS" "$OUT/ev/r13.AC3.out" || FAIL=1
 git checkout -- "$T"
 git diff --quiet -- "$T" && echo "tracked catalog restored" || echo "WARN: tracked catalog still differs"
 [ $FAIL -eq 0 ] && echo "EMIT-FINAL: all six criteria PASS" || echo "EMIT-FINAL: a criterion FAILED; read $OUT/ev"

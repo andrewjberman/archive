@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-rr-3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "ac50d673a2",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rr-3.apply-cro-ruling-refs.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rr-3.apply-cro-ruling-refs.md",
+    "group": "OTHER",
+    "vintage_commit": "ac50d673a2"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~117",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/name_rulings.json",
+      "kind": "config_data",
+      "commit_or_etag": "5060b9fc413ca7a03bf3764dcd5de7b6d294c59d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a registry data file on the worktree branch wk-NFRA_OPLGTW-117 (LOCAL); no schedule, trigger or deploy (order preflight: DECLARED-NOT-APPLICABLE)"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~117/RR3_UNRESOLVED.json",
+      "kind": "doc",
+      "commit_or_etag": "5060b9fc413ca7a03bf3764dcd5de7b6d294c59d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the unresolved list, empty ({\"unresolved\": []}) because all 110 CRO refs resolved by git cat-file -e; a worktree file, no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the CRO's 110 refs are on the registry rows exactly and all 135 refs in the file resolve; the one null row stays without one.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "name_rulings: rows 136; carrying a ruling_ref 135, unresolved 0 (want 0); CRO refs applied equal 110 of 110, differing 0 (want 0); rows without a ref 1 (CRO null rows 1); ref where the CRO file has none 0 (want 0); rows neither in the CRO file nor carrying a ref 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "136 registry rows: 135 carrying a ref (all 135 resolve, 0 unresolved); 110 of 110 CRO refs applied, 0 differing; 1 row without a ref = the 1 CRO null row; 0 rows neither in the CRO file nor carrying a ref",
+      "status": "PASS",
+      "expect": "(?s)name_rulings: rows 136; carrying a ruling_ref 135, unresolved 0 \\(want 0\\); CRO refs applied equal 110 of 110, differing 0 \\(want 0\\); rows without a ref 1 \\(CRO null rows 1\\); ref where the CRO file has none 0 \\(want 0\\); rows neither in the CRO file nor carrying a ref 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: nothing else in the file changed.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "name_rulings vs ecd2aad5d0: rows 136 to 136; rows moved 0 (want 0); rows with another field changed 0 (want 0); existing ruling_ref changed 0 (want 0); keys added other than ruling_ref 0 (want 0); _about equal True; ruling_ref newly added on 110 rows\nRESULT: PASS\nexit=0",
+      "denominator": "136 rows vs pin ecd2aad5d0: 136 to 136; 0 moved; 0 with another field changed; 0 existing refs changed; 0 keys added other than ruling_ref; _about equal; ruling_ref newly added on 110 rows",
+      "status": "PASS",
+      "expect": "(?s)name_rulings vs ecd2aad5d0: rows 136 to 136; rows moved 0 \\(want 0\\); rows with another field changed 0 \\(want 0\\); existing ruling_ref changed 0 \\(want 0\\); keys added other than ruling_ref 0 \\(want 0\\); _about equal True; ruling_ref newly added on 110 rows.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "rr3.AC1 and rr3.AC2 run on the committed file at 5060b9fc41; plus the apply script's dry run (denominators read before the write) and a git diff of name_rulings.json against its parent",
+      "observed": "git diff --stat: 220 insertions, 110 deletions; 110 added ruling_ref lines and 110 trailing-comma edits on the previous line; no other line changed; AC1 and AC2 re-run after the write read the same counts",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the order names no mutant control (section 4 names AC1 and AC2 only); the AC1 counts (unresolved 0, differing 0, null rows 1) and the AC2 counts (moved 0, changed 0, existing refs changed 0) are the discriminating reads",
+      "expected": "not applicable: no mutant named in the order",
+      "observed": "no planted mutant was run in this cell",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the naming gate (not touched; the order's bounds; the later cell OG-rr-2 runs the gate check)",
+      "reason": "the order's bounds: not the naming gate"
+    },
+    {
+      "item": "opal-data-ycharts (S3_BUCKET) row left without a ruling_ref",
+      "reason": "the CRO's null row (disposition NOT RULED); its grade is unchanged, per the order"
+    },
+    {
+      "item": "the CRO's ruling itself (the 110 refs' correctness as rulings)",
+      "reason": "the refs are the CRO's rulings; the cell applies them verbatim and does not re-resolve them; the CVO reads whether the CRO records are sound ruling_refs (order issuer notes)"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W117-S1: path grant - the order's <paths> lists the registry file and the investigation file, yet section 5 flips the order's own <status> tag, a file outside <paths>; the flip is made in the closing commit and its lane gate result is stated in the report"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~117/RR3_UNRESOLVED.json",
+  "compiler_tools": [
+    {
+      "tool": "rr3.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr3.AC1.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (rows 136; carrying 135; unresolved 0; applied 110 of 110; differing 0; null rows 1)"
+    },
+    {
+      "tool": "rr3.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr3.AC2.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (moved 0; changed 0; existing refs changed 0; extra keys 0; _about equal; newly added 110)"
+    },
+    {
+      "tool": "git cat-file -e (run by rr3.AC1.sh over each registry ref)",
+      "invocation": "git cat-file -e <commit>:<path> per ref, from the worktree",
+      "result": "135 of 135 refs resolve in the worktree; the CRO file's 110 refs resolve (dry run 110 of 110)"
+    }
+  ]
+}

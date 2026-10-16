@@ -1,0 +1,51 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~479 on AMGT_RESAPP.TO-AMGT-bo-5.g4-first-fire-security-keys-as-data
+Worktree C:/dev/wk-resapp-479, branch wk-AMGT_RESAPP-479, base 41f1b2bba7 (issuance commit).
+Raw outputs, ANSI colour codes stripped, in the order run. Each block: the invocation, its output lines, exit code.
+
+[T0] git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-479 ; test -d org && test -d .tools -> TREE-OK
+
+[PRE-EDIT, unchanged tree]
+AC1  python -m pytest lib/research/llm_batch/tests/test_security_keys.py -q
+     ERROR: file or directory not found: lib/research/llm_batch/tests/test_security_keys.py
+     no tests ran in 0.00s
+     exit=4
+AC2  python -m lib.research.llm_batch.run filings --print-command
+     LLM-BATCH task=filings command=python -m lib.research.filings.batch --universe newest --write-pool --limit 20
+     exit=0
+AC3  python -m pytest lib/research/llm_batch/tests -q
+     32 passed in 0.92s
+     exit=0
+
+[RED, tests written before the build]
+     python -m pytest lib/research/llm_batch/tests/test_security_keys.py -q
+     13 failed, 1 passed in 1.05s
+     exit=1
+
+[BUILD] first_fire_limit.json, run.py (load_security_keys, command_for keys=, run_task keys=, main), tests/test_first_fire_limit.py T4 line.
+Commit 628ee9c96e (safe-commit, commit-gate clean for 3 of 3 .py/.json files).
+
+[POST-EDIT]
+AC1  python -m pytest lib/research/llm_batch/tests/test_security_keys.py -q
+     14 passed in 0.80s
+     exit=0
+AC2  python -m lib.research.llm_batch.run filings --print-command
+     LLM-BATCH task=filings command=python -m lib.research.filings.batch --universe newest --write-pool --security-key ASML_US_Equity --security-key BA_US_Equity --security-key COST_US_Equity --security-key HAL_US_Equity --security-key HD_US_Equity --security-key INTU_US_Equity --security-key KMB_US_Equity --security-key VLO_US_Equity
+     exit=0
+AC3  python -m pytest lib/research/llm_batch/tests -q
+     46 passed in 0.86s
+     exit=0
+REG  python -m lib.research.llm_batch.register --plan | tail -1
+     PLAN: 3 task(s), 0 created
+
+[CONTROL -- mutant] run.py copied to .scratch/run.py.good (sha256 48bf1737f36badd163726cdf9bf3fd255a53aba698caa48eeb1641b173828bfb).
+     Mutant: the keys loop in command_for replaced by an empty loop (keys never reach argv).
+     python -m pytest lib/research/llm_batch/tests/test_security_keys.py -q
+     3 failed, 11 passed in 1.07s   (T1, T2, T8 failed)
+     exit=1
+     Restored from .scratch/run.py.good: sha256 48bf1737f36badd163726cdf9bf3fd255a53aba698caa48eeb1641b173828bfb, cmp identical.
+
+[CONTROL -- determinism] the security-key suite run twice on the committed source:
+     14 passed in 0.82s
+     14 passed in 0.81s
+
+[SURPRISE CHANNEL] no row filed. Premises re-grounded against live state: run.py command_for and load_limits as the order describes; filings/batch.py carries the --security-key filter (filter_plan_by_security_keys, line 227).

@@ -6,6 +6,8 @@
 
 `C30_CATALOG=C:/tmp/mi-final/DATA_CATALOG.final.yaml` (md5 9519ebce3a1b92cee07a5507d1912dd3, emitted by `2.0.0_SA_COO~MI` on HEAD 76eb302faf with my landing 58660556d3, deployed commit 3d5c9c8bf1, N=127 tools) through `bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI2/round18/checks/c30.DRAIN.sh`: **RESULT PASS**, 9 of 9 checks. Denominator: 144 research-set rows (78 harvest, 5 portal_datasets, 61 silver), 136 rows outside the set. Counted from the same file with the check's own `in_set`: **144 of 144 research-set rows carry a `read_tool`; 0 null**; 0 carry `nl_tags_basis: inferred`; the 34 excluded entities are not rows. The tools are live: OG-ap-23 deployed at 3d5c9c8bf1, `CODE_SERVED.json` served 27 of 27 added tools, ledger closed 09:21:54Z (msg 34882).
 
+**Re-graded on the v2 catalog (2026-10-16 ~11:2xZ).** `2.0.0_SA_COO~MI` re-measured depth and freshness (the r15 catalog failed `r13.AC3` on one stale claim, `2c9cabebe5`) and placed catalog v2 (blob 4c27b28171, md5 983464f80adc45ac51f1f3eebbdf2001; `58ae2c5417`; CTO half `b8b3d0bd30`: a freshness-only diff). `c30.DRAIN.sh` on the tracked `DATA_CATALOG.yaml` at HEAD, which is that blob: **RESULT PASS**, the same 144 research-set rows, **read_tool null 0** (280 rows in all, 188 with a `read_tool`). The first final catalog above (md5 9519ebce...) is superseded by v2 for the live release; the live host holds `0cb4a87bcb` (blob cf7616c08e) until the v2 apply under the MX-r-15 ledger.
+
 ## 2. The orders (all complete and merged; each re-graded by the issuer on the merged tree)
 
 | order | what | merge / commit | grade at close |

@@ -1,0 +1,138 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-16/ev1_answer_bodies.md",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "3b056fd12e",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-1.answer-bodies-for-cvo-grade.md"
+ },
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record holds one projected answer body per named marker for all five releases (16 or more), each a non-empty JSON value of at most 12000 bytes, with no long digit run and no raw account number.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ev1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)answer bodies: releases 5 of 5; bodies (?:1[5-9]|[2-9]\\d); releases short of their minimum 0 \\(want 0\\); empty or non-JSON bodies 0 \\(want 0\\); bodies over 12000 bytes 0 \\(want 0\\); digit runs of 8 or more 0 \\(want 0\\); raw account_number keys 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "answer bodies: releases 5 of 5; bodies 16; releases short of their minimum 0 (want 0); empty or non-JSON bodies 0 (want 0); bodies over 12000 bytes 0 (want 0); digit runs of 8 or more 0 (want 0); raw account_number keys 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "16 bodies over 5 of 5 releases (ap-18 3, ap-19 3, ap-20 3, ap-21 3, ap-23 4), each a non-empty JSON object at most 12000 bytes, 0 digit runs of 8 or more and 0 account_number keys in the file; read 2026-10-16T10:36Z from release 3d5c9c8bf1 on i-07dccb1615503ac99 through the registered tools. The check is MECHANICAL: it proves the record's existence and hygiene, not that a body shows its marker. Two markers do not show as worded and are named with a note and a row: ap-19 data_status on a quiet day (Z-S168) and ap-23 Schwab masters never summed (Z-S169). The grade is the CVO's.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "The harness ran twice on the same installed release; the first run's record is kept apart (not committed) and the second is the record. Every argument was derived from the host's own answers or catalog at call time, never typed from a docstring, and the scrub ran on the host before anything left it.",
+   "observed": "run 1 gave 15 bodies (no fourth ap-23 body, because no Schwab reference can be minted) and chose the quiet name by row count; run 2 gave 16 and chose the quietest by articles in the window (0 over 30 days). The 12 other bodies were chosen by the same rules in both runs.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. Negative arms stand in its place: (a) the hygiene check is run on the record AFTER a second local scrub, and the UUID scan reads 0 left against 30 replaced; (b) the discovery file was scanned with the same digit-run and e-mail patterns before it was committed; (c) a call that cannot show a marker is recorded with its real answer and a note, never replaced by a different call.",
+   "expected": "the hygiene counts read 0 in the committed files; a marker that cannot be shown is named",
+   "observed": "digit runs 0, e-mails 0, account_number keys 0, UUIDs 0 left; two markers named as not showable (rows Z-S168, Z-S169) and two observations (Z-S170, Z-S171)",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ANSWER_BODIES.json",
+   "kind": "config_data",
+   "commit_or_etag": "573d610fd0033b384bce63dda978058669c51f11",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record: read_at, live_commit 3d5c9c8bf1, releases ap-18..ap-23 with 16 bodies; post-scrubbed (30 UUID-shaped ids masked)",
+   "introduces": [
+    "post_scrub"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ev1_answer_bodies.py",
+   "kind": "script",
+   "commit_or_etag": "7c7b2979e97de823666a5c711225f02e04c4a7b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the host harness, pulled from S3 and run once per record under /opt/opal-gateway/.venv/bin/python; read-only, audit sink stubbed",
+   "introduces": [
+    "EV1_BODIES_B64"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ev1_final_run.py",
+   "kind": "script",
+   "commit_or_etag": "7c7b2979e97de823666a5c711225f02e04c4a7b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "uploads the harness, runs one SSM command, decodes the compressed block and writes the record",
+   "introduces": [
+    "ANSWER_BODIES.json"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ev1_meta.json",
+   "kind": "config_data",
+   "commit_or_etag": "7c7b2979e97de823666a5c711225f02e04c4a7b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the run's notes, attempts and blocked list",
+   "introduces": [
+    "limit_bytes_used"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ev1_post_scrub.py",
+   "kind": "script",
+   "commit_or_etag": "573d610fd0033b384bce63dda978058669c51f11",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the local second scrub of UUID-shaped identifiers",
+   "introduces": [
+    "UUID"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "the served read, answer-body form",
+   "invocation": "python W/ev1_final_run.py (uploads W/ev1_answer_bodies.py, one SSM command)",
+   "result": "16 bodies, base64 block 18764 characters under the ~24000 SSM stdout cap, limit 12000 bytes per body unreduced"
+  },
+  {
+   "tool": "ev1.AC1",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ev1.AC1.sh; echo \"exit=$?\"",
+   "result": "PASS exit 0 after the post-scrub"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S168: the AC3 marker 'data_status on a quiet day' of OG-ap-19 cannot be shown: the portal and news tools carry no data_status field.",
+  "NFRA_OPLGTW-Z-S169: the AC3 marker 'Schwab masters never summed' of OG-ap-23 cannot be shown: the installed client tools answer no_catalog_row for Schwab.",
+  "NFRA_OPLGTW-Z-S170: news_for_security applies a 30-day cap where OG-ap-19's AC3 names a 14-day cap.",
+  "NFRA_OPLGTW-Z-S171: harvest_get_published_analysis answered harvest_published_unavailable once for sections=peers."
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the grade of any body",
+   "reason": "The CVO's judgment (AC3 of OG-ap-18, 19, 20, 21, 23); this cell proves the record's existence and hygiene only."
+  },
+  {
+   "item": "the client-data account-id hash check",
+   "reason": "The hashed account-id list is absent on this box (~/.opal/account_id_hashes.txt), so the commit hook could not check the record for client account ids; absent is not empty. The record holds masked references and position data of one client account and should be read once before it is pushed or relayed."
+  }
+ ]
+}

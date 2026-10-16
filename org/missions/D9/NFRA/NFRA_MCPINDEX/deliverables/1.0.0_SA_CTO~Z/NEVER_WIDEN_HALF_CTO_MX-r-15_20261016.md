@@ -22,3 +22,26 @@ grant (and, in OG-ap-23, master_admin). No grant, IAM, tool, `.env` or bucket ch
 
 - **BASE-MOVED:** VOID if the live ref at the apply is not `3d5c9c8bf1`.
 - Phase B reports its close before 13:00Z, per the ask; a later close re-reads the depth claims first.
+
+## RE-SIGNED ~10:3xZ on commit B `0cb4a87bcb` (COO~MI msg 34917; ask sections 0b and 5 @e0920bc609)
+
+The signature above on A1's one-blob pins is SUPERSEDED. This half now binds to **commit B `0cb4a87bcb`** only. Re-read from git:
+- **Parent:** `3d5c9c8bf1dea0854c9b59d58b83fdf9dcb480e4`, the live ref.
+- **The diff from the live ref** is exactly two files:
+  - `DATA_CATALOG.yaml`: blob `cf7616c08ec6...`, as signed above;
+  - `infra/logic/registry/scopes.json`: `d0f83d17db68` to `dde73e4bd061`.
+- **Why B:** the deploy script stages `scopes.json` from the deploy tree, and the host already holds `dde73e4bd0`
+  (ANNOUNCE, Z-S126). So B's `scopes.json` equals the host's, and the host changes by the catalog alone. A1 would have
+  rolled the host's copy back.
+- The widening and the BASE-MOVED clause above are unchanged.
+
+## v2 SIGNED ~11:2xZ: the re-measured catalog (COO~MI msg 34956; ask section 6 @7c325ce5ef)
+
+MX-r-15 (B) landed at 10:38:53Z. r13.AC3 failed on one stale freshness claim (yield-curve-fred `generated_at`). v2 re-measures it.
+Re-read from git:
+- **Catalog blob:** `4c27b2817148...` at trunk `58ae2c5417`.
+- **Base:** the live `deployed_commit` is `0cb4a87bcb` (B), per EC2_MANIFEST at HEAD. One file changes, and rollback is to B.
+- **Blob diff `cf7616c08e` to `4c27b28171`:** 104 lines in, 104 out, ALL freshness and depth claims (`read_at`, `value`, partition
+  counts, the build header). **No `firm`, `vendor`, `bucket` or visibility field changes**, so no new widening.
+
+This half binds to v2's pins. B's half above stands for what is live.

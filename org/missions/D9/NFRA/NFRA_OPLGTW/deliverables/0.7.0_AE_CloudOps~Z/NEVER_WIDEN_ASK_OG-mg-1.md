@@ -1,11 +1,17 @@
 # NEVER-WIDEN ASK -- OG-mg-1: the two r30 grant writes, Andrew's profile and the Bloomberg mirror
 
-To: `1.0.0_SA_CTO~Z` and `2.0.0_SA_COO~O`. From: `0.7.0_AE_CloudOps~Z`.
+To: `1.0.0_SA_CTO~Z`, `2.0.0_SA_COO~O` and `3.0.0_SA_CVO~Z`. From: `0.7.0_AE_CloudOps~Z`.
 Phase A of `NFRA_OPLGTW.TO-OG-mg-1`, under amendments A1 (the IAM preflight), A2 (the deny-email
 sources) and A3 (route (i): the `operations` branch is struck). **NO WRITE RAN.** `prepare()` writes
 nothing and `activate()` was never called.
 
-Records: `MG1_BEFORE.json`, `MG1_PREFLIGHT.md`, `MG1_CANDIDATES.json`. Instruments: `mg1_before.py`,
+**RE-ISSUED 2026-10-16** (msg 34916) at the live release `3d5c9c8bf1`; the first issue was at `189bbbb8d2`
+on r30. The COO half of 2026-10-14 refused because a restricted profile ended master_admin's access to
+`blackdiamond_list_fees`. That ground is gone: `OG-bd-3` is live in `3d5c9c8bf1`, and section 1b shows it on
+the live bytes. The store and the mirror were read again (section 0); nothing in them moved. **Any write
+waits for all three halves to sign at THIS hash.**
+
+Records: `MG1_BEFORE.json`, `MG1_PREFLIGHT.md`, `MG1_CANDIDATES.json`, `MG1_FEE_ACCESS.txt`. Instruments: `mg1_before.py`,
 `mg1_candidates.py`. **No address appears in this file** -- identifiers live only in
 `%LOCALAPPDATA%/opal/og-salt/mg1/`, asserted at run time to resolve outside the worktree, and the
 repo carries each one's source, `sha256(lower(...))[:10]` and domain.
@@ -20,9 +26,13 @@ contract-maximal grant, with identity replaced and nothing else changed -- which
 | **R1** | Andrew's master-admin | `a18b74486b` | **NONE** | **NONE** | profile revision 1, grant revision 1, `restricted` |
 | **R2** | the Bloomberg concierge | `3c1d2597c9` | **NONE** | **NONE** | the same, the mirror |
 
-Denominator for those "NONE"s: a strongly consistent, fully paginated scan -- **1510 items, 17
-POLICY# partitions, 4 `principal_profile`, 4 `data_entitlement`**. Exactly one profile is active and
-it is Alyssa's (`2c61471b14`, revision 4, grant_revision 4, `restricted`). DynamoDB's own
+Denominator for those "NONE"s, **read again 2026-10-16**: a strongly consistent, fully paginated scan --
+**1714 items over 1 page, 17 POLICY# partitions, 4 `principal_profile`, 4 `data_entitlement`**. (The first
+issue read 1510 items; the 17, the 4 and the 4 are unchanged, so the table grew in other partitions only.)
+Exactly one profile is active and it is Alyssa's (`2c61471b14`, revision 4, grant_revision 4,
+`restricted`), unchanged. The candidates were rebuilt: `prepare()` accepts R1, R2 and the struck-branch candidate (kept for the record), each
+with `base_profile_revision` and `base_grant_revision` `None`, the template diff against Alyssa's
+revision-4 scope changes **no key**, and R2's scope equals R1's with **zero** differing keys. DynamoDB's own
 `ItemCount` was not used: it refreshes about every six hours and read 1493 against a live 1504.
 
 ## 1. What each record grants, and who gains what
@@ -39,15 +49,41 @@ of each. There is no wider grant this contract admits, so R1 cannot be widened f
 changing the contract.
 
 **Who gains:** Andrew's principal, from no profile and no grant at all, to the full approved width.
-Under OG-pf-1 (shipping in r30) a `restricted` profile confines only the data-grant family, so this
-grant is what admits the Schwab tools while leaving every non-data tool to its own gate.
+Under OG-pf-1 (live since r30; the r30 ledger `nfra-oplgtw-gateway-release-r30` is CLOSED) a `restricted`
+profile confines only the data-grant family, so this grant is what admits the Schwab tools while leaving
+every non-data tool to its own gate.
 
 **R2 -- the Bloomberg concierge principal gains the same, as the mirror** (PRD v2.3 item 1,
 Andrew-direct 2026-10-09). Measured: R2's scope is **equal to R1's with zero differing keys**,
-identity aside. Its Teams surface stays under the Opal-users-only gate that OG-tg-1 ships in r30,
+identity aside. Its Teams surface stays under the Opal-users-only gate that OG-tg-1 shipped in r30,
 which is the condition v2.3 item 4 sets -- item 2 ships with item 1 or neither ships. **That coupling
 matters here:** r30 also unscopes that principal's tool set to Andrew's, so the Opal-users-only gate
-is what bounds who can drive it. R2 should not land while r30 is unlanded.
+is what bounds who can drive it. r30 is landed and its ledger CLOSED (2026-10-14T11:40:46Z), so the
+condition that R2 not land before r30 is met.
+
+## 1b. The master_admin caller's fee access is KEPT (the ground of the COO refusal, answered)
+
+The refusal read: a restricted profile ended master_admin's access to `blackdiamond_list_fees`. At the
+release the refusal was made against (r30, OG-bd-2) that was true: a profile confined a master_admin
+exactly as it confines anyone, and the tier test applied only to an unprofiled principal. **`OG-bd-3`
+(CTO ruling msg 33941, route (a)) changed it, and it is live in `3d5c9c8bf1`** (the data_entitlement
+module's bytes on the host equal the release's: the OG-ap-23 md5 walk read 141 of 141). Read on those
+bytes, offline, in `MG1_FEE_ACCESS.txt` (11 of 11 tests pass):
+
+- **`test_ogbd3_ac01`:** a master_admin with an ACTIVE restricted profile whose grant does not name
+  `blackdiamond_list_fees` is **allowed it**; with the profile REVOKED it is still allowed it and is still
+  denied a non-tier tool. `tool_denial` and `visible_tools` agree.
+- **`test_ogbd3_ac03`:** a profiled master_admin still needs the grant for a **Schwab** tool, so R1's
+  grant is what admits Andrew to those, as section 1 says.
+- **`test_ogad1_ac04`:** the same holds for the five `client_*` tools: with an active profile whose grant
+  omits the tool, master_admin passes 5 of 5 and a standard employee is denied 5 of 5.
+- **`test_ogbd3_ac02`:** a profiled principal at tier standard or unknown is denied the fee tool, so the
+  tier, not the profile, is what keeps it.
+
+**So R1 changes nothing about Andrew's fee access: it was admitted by tier before the write and is admitted
+by tier after it.** R2 is not master_admin, so R2 holds no fee access before or after (an unprofiled
+non-admin was already denied it since OG-bd-2); R2's profile adds the Schwab family only. The writer-count
+claim of section 4 and the rollback of section 2 are unchanged.
 
 **Who loses: nobody.** Neither record removes anything from anyone, and Alyssa's record is not read
 for writing or touched -- AC2 checks it is unchanged.
@@ -145,8 +181,11 @@ exercise.
 
 ## 6. What Phase B will do on the GO, and its two refusal conditions
 
-Only on the issuer's GO naming both halves signed, and only after OG-ap-14's ledger
-`nfra-oplgtw-gateway-release-r30` is CLOSED (the writes are inert before OG-pf-1 is served). Ledger
+Only on the issuer's GO naming all three halves signed at this hash. OG-ap-14's ledger
+`nfra-oplgtw-gateway-release-r30` is already CLOSED, so the writes are no longer inert-before-served. The
+operator role's policy was re-read on 2026-10-16 and is as `MG1_PREFLIGHT.md` records it (two inline
+policies, no attached ones; `GetItem` unconditioned; `PutItem` and `UpdateItem` conditioned on
+`LeadingKeys` `POLICY#*`); the 2026-10-14 simulations were not re-run. Ledger
 `nfra-oplgtw-r30-grant-writes`, entry and sentinel first; `activate()` under the operator role with
 `--approver` and `--source-authorization` naming the preflight's records; then a live read-back of
 both, and the mirror check that R2's scope equals R1's.
