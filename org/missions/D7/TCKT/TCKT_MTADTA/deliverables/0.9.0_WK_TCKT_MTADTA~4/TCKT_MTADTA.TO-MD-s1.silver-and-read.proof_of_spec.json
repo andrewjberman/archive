@@ -15,11 +15,36 @@
   "assignee": "0.9.0_WK_TCKT_MTADTA~4",
   "artifacts_produced": [
     {
-      "path_or_key": "org/missions/D7/TCKT/TCKT_MTADTA/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "kind": "doc",
-      "commit_or_etag": "810b2804d8",
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/silver_builder.py",
+      "kind": "script",
+      "artifact_covered_by": ["MD1-s1-AC1"],
+      "commit_or_etag": "a6bf481190",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "BLOCKED build order: the only artifacts are the surprise row TCKT_MTADTA-D1-W4-S1 and the session log, committed on wk-TCKT_MTADTA-4. No code was built and nothing was deployed."
+      "deploy_evidence": "build order, no deploy: the function is called inside the door Lambda by MD-a-1; nothing is deployed or invoked live (WORLD excluded by the order's bounds)"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py",
+      "kind": "test",
+      "artifact_covered_by": ["MD1-s1-AC1"],
+      "commit_or_etag": "a6bf481190",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest suite run locally: 7 passed, rc=0; no deploy"
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/read_day.py",
+      "kind": "script",
+      "artifact_covered_by": ["MD1-s1-AC2"],
+      "commit_or_etag": "a6bf481190",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build order, no deploy: a CLI run by an access-group member; the real boto3 invoker in main() is not exercised in round 1"
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_read_day.py",
+      "kind": "test",
+      "artifact_covered_by": ["MD1-s1-AC2"],
+      "commit_or_etag": "a6bf481190",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest suite run locally: 9 passed, rc=0; no deploy"
     }
   ],
   "acceptance": [
@@ -28,63 +53,71 @@
       "criterion_verbatim": "bronze events become a sorted parquet table with the ruled columns and Eastern-date partition.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py silver",
-      "output_evidence": "SILVER-REFUSED missing C:\\tmp\\wk-tckt-mtadta-4\\infra\\aws\\lambda\\globgrph-trino-access\\silver_builder.py (rc=1; expected S1-SILVER-OK; run under timeout 120)",
-      "denominator": "1 invocation; 0 of 4 assertion groups reached (columns, sort order, partition dates, partition_date edges): refused at file load",
-      "status": "FAIL",
-      "status_reason": "silver_builder.py is absent: infra/aws is outside this worktree's sparse cone and the tree was not widened or rebuilt. Refusal clause applied; surprise TCKT_MTADTA-D1-W4-S1."
+      "output_evidence": "S1-SILVER-OK rows=4 (rc=0; run under timeout 120)",
+      "denominator": "1 invocation; 4 of 4 assertion groups passed (columns, sort order, partition dates, partition_date edges); 4 of 4 rows",
+      "status": "PASS"
     },
     {
       "criterion_id": "MD1-s1-AC2",
       "criterion_verbatim": "one person's day is fetched through an injected invoker, rendered in time order in Eastern time, and a non-member never reaches the door.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py readday",
-      "output_evidence": "READDAY-REFUSED missing C:\\tmp\\wk-tckt-mtadta-4\\data\\m365_metadata\\scripts\\silver\\read_day.py (rc=1; expected S1-READDAY-OK; run under timeout 120)",
-      "denominator": "1 invocation; 0 of 4 assertion groups reached (invoke payload, time order, Eastern render, non-member refusal): refused at file load",
-      "status": "FAIL",
-      "status_reason": "read_day.py is absent: data/ is outside this worktree's sparse cone and the tree was not widened or rebuilt. Refusal clause applied; surprise TCKT_MTADTA-D1-W4-S1."
+      "output_evidence": "S1-READDAY-OK (rc=0; run under timeout 120)",
+      "denominator": "1 invocation; 4 of 4 assertion groups passed (invoke payload, time order, Eastern render, non-member refusal with 1 door call)",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "no assertion was mutated: no build output exists to mutate, and each check refused at file load before any assertion ran",
-      "expected": "N/A",
-      "observed": "no code built; both checks refused at file load",
-      "status": "N/A-SPEC-NAMES-NONE"
+      "description": "partition_date switched to the UTC calendar date in a scratch copy of the Lambda folder; the silver test suite must fail on the Eastern boundary",
+      "expected": "boundary and date-column tests fail",
+      "observed": "python -m pytest <mutant>/tests/test_silver_builder.py -q: 2 failed, 5 passed (test_partition_date_eastern_boundary, test_date_column_carries_eastern_date_at_boundary)",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "N/A-WITH-REASON: no build output exists to run twice; each check ran once",
-      "observed": "single run each, rc=1 for both",
-      "status": "N/A-WITH-REASON"
+      "method": "the same silver build run twice on the same bronze input, sha256 of the parquet bytes compared",
+      "observed": "run1 348c9998328ed33542b5156d3f9b773fe191a260e32968d440b4f9740ec82550 == run2 348c9998328ed33542b5156d3f9b773fe191a260e32968d440b4f9740ec82550",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "silver_builder.py, tests/test_silver_builder.py, read_day.py and tests/test_read_day.py (the four build files of TO-MD-s1)",
-      "reason": "not built: the write-path folders infra/aws/lambda/globgrph-trino-access and data/m365_metadata are outside this worktree's sparse cone; refusal clause, surprise TCKT_MTADTA-D1-W4-S1"
-    },
-    {
-      "item": "pytest runs of the two test files",
-      "reason": "not run: the test files were not created, so there is no suite to run"
+      "item": "handler.py, build.sh and tests/test_handler.py in the Lambda folder",
+      "reason": "belong to the MD-a-1 cell; never created or edited here"
     },
     {
       "item": "live door invocation of get_day and the boto3 invoker in main()",
-      "reason": "WORLD operation excluded by the order's bounds for round 1; no AWS call was made"
+      "reason": "WORLD operation excluded by the order's bounds for round 1; no AWS call, no S3 access, no Lambda invoke"
+    },
+    {
+      "item": "deploy of globgrph-trino-access",
+      "reason": "build order; the Lambda is deployed by its own cell's act, not by MD-s-1"
     }
   ],
   "surprises": [
-    "TCKT_MTADTA-D1-W4-S1: worktree is a sparse checkout whose cone omits infra/aws and data; both TO-MD-s1 acceptance checks refuse as missing files (BLOCKING, INERT)"
+    "TCKT_MTADTA-D1-W4-S1: worktree sparse cone omitted infra/aws and data; the issuer widened the cone and the build proceeded; the row stays as filed (BLOCKING, INERT)"
   ],
   "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.9.0_WK_TCKT_MTADTA~4/TCKT_MTADTA.TO-MD-s1.session_log.txt",
   "compiler_tools": [
     {
       "tool": "r1_check_s1.py",
-      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py silver",
-      "result": "SILVER-REFUSED missing ...silver_builder.py, rc=1"
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py silver",
+      "result": "S1-SILVER-OK rows=4, rc=0"
     },
     {
       "tool": "r1_check_s1.py",
-      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py readday",
-      "result": "READDAY-REFUSED missing ...read_day.py, rc=1"
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py readday",
+      "result": "S1-READDAY-OK, rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py -q",
+      "result": "7 passed, rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/m365_metadata/scripts/tests/test_read_day.py -q",
+      "result": "9 passed, rc=0"
     }
   ]
 }
