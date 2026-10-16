@@ -1,0 +1,26 @@
+{
+  "root": "infra/aws/terraform/investor-reporting/reporting-publish-iso/",
+  "names": [
+    "irpt-cot-reporting-publish-lambda",
+    "irpt-cot-reporting-publish-execution-role",
+    "irpt-cot-reporting-publish-execution-policy"
+  ],
+  "resources": [
+    "module.irpt_reporting_publish_iso.aws_lambda_function.this",
+    "module.irpt_reporting_publish_iso.aws_cloudwatch_log_group.lambda",
+    "aws_iam_role.irpt_reporting_publish_iso_execution",
+    "aws_iam_role_policy.irpt_reporting_publish_iso_execution"
+  ],
+  "expected_plan": {
+    "add": 4,
+    "change": 0,
+    "destroy": 0,
+    "claim": "inferred"
+  },
+  "memory": {
+    "memory_mb": 1024,
+    "basis": "the sizing of the existing reporting-publish root, which holds the same shape of work: one list of the gold table, a thread pool of twelve reads, and one small document per account. The Lambda runtime was not measured here; its first event is the reading.",
+    "claim": "inferred"
+  },
+  "words": "The root reporting-publish-iso declares one yang-lambda function (handler.lambda_handler, python3.12, timeout 900 s, memory 1024 MB, the existing native pyarrow layer through a read-only data source, no reserved concurrency, no environment variable, no schedule), one execution role and one execution policy with exactly six statement ids: a list of the gold returns table and the platinum reporting prefix, a read of the returns table only, the one PutObject on the platinum reporting prefix, a read back of that prefix, the function's own log group, and the assume-role statement. Three checks were run: the root's HCL grades PASS; the real naming gate grades the three names CONFORMANT and the build-only package of the source-map entry, unpacked, passes the publish handler's behaviour check on a fake S3; and the source-map entry pins twelve closure members to ancestor commits with matching hashes. NOT proven: no plan, no apply, no invoke, and the Lambda runtime's memory and time, which the first event will measure."
+}
