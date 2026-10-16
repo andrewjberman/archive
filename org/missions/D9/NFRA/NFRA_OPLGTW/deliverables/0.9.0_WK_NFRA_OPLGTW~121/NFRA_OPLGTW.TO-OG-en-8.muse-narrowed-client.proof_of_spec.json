@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-8",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "e08686be6a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-8.muse-narrowed-client.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-8.muse-narrowed-client.md",
+    "group": "OTHER",
+    "vintage_commit": "e08686be6a"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~121",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "6f8a884aa0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the muse client gate (muse_tool_denial, muse_route_denial, MUSE_M365_TOOLS, MUSE_ROUTES) on branch wk-NFRA_OPLGTW-121 (LOCAL); no release, deploy or IAM change (order preflight: comp-schedule, comp-iam DECLARED-NOT-APPLICABLE)"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/config.py",
+      "kind": "script",
+      "commit_or_etag": "6f8a884aa0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one optional setting MUSE_CLIENT_ID, empty by default (inert); the configuration act is a later applier order"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en8.py",
+      "kind": "test",
+      "commit_or_etag": "6f8a884aa0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three offline tests (test_ogen8_ac01 to ac03), run in the gateway test harness; no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass: muse refused outside the allowlist, Andrew's client unchanged, the setting unset changes nothing.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en8.py test_ogen8_ac01 test_ogen8_ac02 test_ogen8_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 named tests of 3 (test_ogen8_ac01, test_ogen8_ac02, test_ogen8_ac03): 3 passed; failed/error lines 0",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the entitlement code and tests named.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~121 '^infra/aws/ec2/opal-gateway/(app/(data_entitlement|access_state|tier|server|config|tools)\\.py|tests/(test_og_(en8|bd3|ad1)|test_data_entitlement_family|test_data_entitlement_guard|test_entitlement_admin)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~121: files touched 3; product files 3; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "product files 3 of 3 touched by this serial's code commit (data_entitlement.py, config.py, test_og_en8.py); outside the allowed set 0 (want 0); the record paths (channel rows, this deliverables folder, the order flip) are standing record paths of the bound",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~121: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant control (section 4 names AC1 and AC2 only); the discriminating reads are the named tests' own asserts, which the pre-change tree could not pass (the test file was absent at base)",
+      "expected": "not applicable: no mutant named in the order",
+      "observed": "no planted mutant was run in this cell",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "three same-input runs of tests/test_og_en8.py at the code commit 6f8a884aa0: pytest -v -s, pytest -q after the test-domain change, and the _named.sh check; each reports 3 of 3 passed",
+      "observed": "3 of 3 PASS in each of the three runs; the -v -s run printed 118 registered tools and 708 verdicts equal to the pre-change verdicts, and the derived allowlist of 20 names",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the release, the configuration act that sets MUSE_CLIENT_ID on the host, and the never-widen ask (halves: CTO, COO, CVO)",
+      "reason": "the cell's bounds: this cell is code and offline tests only; the release is a later applier order"
+    },
+    {
+      "item": "tests/test_data_entitlement_guard.py::test_ogz1_ac08 fails before and after this cell at line 756",
+      "reason": "predates the cell; recorded on the channel as NFRA_OPLGTW-Z-W121-S3; no named criterion includes it; not edited"
+    },
+    {
+      "item": "the REST route /query/v0 is refused to the muse client, which the cell's BUILD does not name",
+      "reason": "the intro's 'no other source' applied to a second channel; recorded as NFRA_OPLGTW-Z-W121-S1 for the issuer to confirm; one membership change reverses it"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W121-S1: the muse narrowing also refuses the bearer REST route /query/v0 (only /teams/poll stays open); the cell's BUILD names tools and visible_tools only",
+    "NFRA_OPLGTW-Z-W121-S2: 'attachments' under mail is ambiguous; save_email_attachment_to_site (a write into a SharePoint site) and the calendar and meeting tools are left out of the muse set",
+    "NFRA_OPLGTW-Z-W121-S3: test_ogz1_ac08 in tests/test_data_entitlement_guard.py fails at base and after the change, at the same line; not touched",
+    "NFRA_OPLGTW-Z-W121-S4: an HTTP tools/call makes discovery-list POLICY reads through the MCP SDK before the denial; the denial itself reads no store, and the test measures it on the direct call"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~121/session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "_named.sh (AC1 check, named tests)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en8.py test_ogen8_ac01 test_ogen8_ac02 test_ogen8_ac03; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (named tests passed 3 of 3; failed/error lines 0)"
+    },
+    {
+      "tool": "_wkbound.sh (AC2 check, write-set bound)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~121 '<allowed regex>'; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (product files 3; outside the allowed set 0)"
+    }
+  ]
+}
