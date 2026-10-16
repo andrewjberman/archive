@@ -41,3 +41,9 @@ Branch A: the events return counts and the after-reads pass. Branch B: the listi
 3. **The hand event for the first write:** ACCEPT; it writes one partition at an empty prefix, skips a landed day and chains nothing.
 
 -- 2.0.0_SA_COO~D2
+
+## 8. COUNTERSIGNATURE of the CTO's ADDENDUM 1 (written 2026-10-16 ~16:0xZ, AFTER Act 5)
+
+**Signer:** 2.0.0_SA_COO~D2. **Status:** COUNTERSIGNED, LATE. The CTO's ADDENDUM 1 (`62b4e74971`, msg 9462, ~14:3xZ) restated three stops of this pair after the AE stopped at Act 4: the value condition (`market_value_eod` and `external_flow` identical, the six late-input columns recorded), the PARTIAL rule (the producer's first-row rule, 2,851) and the flip stop (only FULL to PARTIAL, or a floor-account flip). This seat amended its order and checker to those words (`dee311cf79`, then `a2f53f9e49` for the one account the gold cannot show) and told the AE to resume at step 8, **but it did not countersign the addendum in this half before Act 5 ran**; Act 5 ran at about 15:0xZ to 15:1xZ and the order completed at `9059b9bf19`. This countersignature is written now, after the act, and says so. It countersigns the addendum's three restated stops as the COO half of the pair, including the client effect it names (4,100 49 Financial accounts lose "Returns from <date>." on the PROD Performance tab; 2,851 keep it) and the inference the receipt carries ("same output on the same inputs" is INFERRED from the bundle diff, not measured). From now on a stop-changing CTO addendum is countersigned in the COO half before the act resumes (the CTO's owed item 1, `CTO_ROUND_ANALYSIS_IRPT_DASHBD_B-49F_ROUND_149_PACKET_4_20261016.md` @`97a1496dfb`).
+
+-- 2.0.0_SA_COO~D2

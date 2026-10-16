@@ -1,6 +1,6 @@
 """IRPT_DASHBD (workstream F-SHIP, ~F2): the READ-ONLY sampler for the CVO's judgment criterion DBF129-1-J1, as the CTO ruled it (msg 9192).
 
-  python <this file> <out.json> [hashed_out.json] [seed] [n]       defaults: no hashed form, seed 132, n 20
+  python <this file> <out.json> [hashed_out.json] [seed] [n]       defaults: no hashed form, seed 134, n 20
 
 Round 132 (DBF132-1-J2): ONE of the n rows is forced to be a ROLLED line (its trade_date falls on a non-trading day, so the one business-date rule moves
 its business_date to the next trading day); `hashed_out.json`, when given, is the committed form: per row the day, the sha256 of the natural key and the
@@ -149,13 +149,14 @@ def main(out_path, hashed_path=None, seed=132, n=20):
         hashed["rows"].append({"day": day, "natural_key_sha256": hashlib.sha256("|".join([day] + key_values).encode("utf-8")).hexdigest(),
                                "id_usable": bool(id_value), "txn_type": produced["txn_type"], "action": produced["action"],
                                "flow_class": produced["flow_class"], "coverage": produced["coverage"],
-                               "rolled": str(produced["business_date"]) != str(produced["trade_date"]),
+                               "rolled": str(produced["business_date"]) != str(produced["trade_date"]), "business_date_claim": produced["business_date_claim"],
                                "source_business_date_equals_trade_date": plain(one.iloc[0].get("business_date")) == plain(one.iloc[0].get("trade_date")),
                                "settle_date_present": produced["settle_date"] is not None, "fee_present": produced["fee"] is not None,
                                "source_txn_id_present": produced["source_txn_id"] is not None,
                                "source_action_raw_equals_source": produced["source_action_raw"] == plain(one.iloc[0].get("tran_srcde"))})
         print("sampled", day, flush=True)
-    assert any(r["rolled"] for r in hashed["rows"]), "the sample must hold a rolled line"
+    assert any(r["rolled"] for r in hashed["rows"]) and any(not r["rolled"] for r in hashed["rows"]), "the sample must hold a rolled line and a measured line"
+    assert all((r["business_date_claim"] == "inferred") == r["rolled"] for r in hashed["rows"]), "the claim must read inferred exactly on the rolled lines"
     json.dump(out, open(out_path, "w", encoding="utf-8"), indent=1)
     if hashed_path:
         text = json.dumps(hashed, indent=1)
@@ -168,4 +169,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(2)
-    main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None, int(sys.argv[3]) if len(sys.argv) > 3 else 132, int(sys.argv[4]) if len(sys.argv) > 4 else 20)
+    main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None, int(sys.argv[3]) if len(sys.argv) > 3 else 134, int(sys.argv[4]) if len(sys.argv) > 4 else 20)
