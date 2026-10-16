@@ -13,7 +13,7 @@
 <placeholders>NONE</placeholders>
 <decomp_ref>
 <decomp_doc>org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R18.md</decomp_doc> (round 18): cells `R18-mt-5` and `R18-tf-6`, ONE sitting.
-<owned_cells>R18-mt-5 R18-tf-6</owned_cells>
+<owned_cells>R18-mt-5</owned_cells>
 </decomp_ref>
 
   <objective>
