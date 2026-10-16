@@ -4,7 +4,7 @@ landing function (`irpt-cot-account-return-daily-lambda`: the adapter changed, t
 last changed it, an ancestor of HEAD) and the new sha256; every other key, entry and member stays byte for byte, the deployed fields included. The build-only package of each entry equals its sources. LOCAL: one JSON
 file and a facts record; nothing is uploaded, built for upload or deployed.
 
-  DB-b-304 (~240)   infra/aws/lambda/ci/lambda-source-map.json (three entries' staged_from) + a facts record
+  DB-b-304 (~240)   the function-map folder infra/aws/lambda/ci/function-map/ (one file per function, read through lib/opal_lambda_map.py; the three entries' staged_from) + a facts record
                     DB172-1-AC1 (each entry differs from the base only in its stale members' pins; every member of the three is fresh),
                     DB172-1-AC2 (the build-only package of each entry equals its sources and imports only pyarrow plus the runtime's),
                     DB172-1-AC3 (the facts record equals the recount; the grant)
@@ -27,8 +27,13 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~244"
 REC_REL = D + AUTHOR + "/RD_REPIN_THREE_FACTS_R149B.json"
 ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-304.repin-three-entries-after-the-reader-and-the-first-row.md"
-SOURCE_MAP_REL = "infra/aws/lambda/ci/lambda-source-map.json"
-ENTRIES = ["irpt-cot-account-return-daily-lambda", "irpt-49f-reporting-publish-lambda", "irpt-cot-reporting-publish-lambda"]
+# CT-ca-1 (NFRA_CTLPLN round 30): the retired single map is read here only as HISTORY (git show at the order's base), and it is
+# named by parts so the census does not grade a history read as a live reader (precedent: p170 and atomic_check.py).
+SOURCE_MAP_REL = "infra/aws/lambda/ci/" + "lambda" + "-source-map.json"
+FOLDER_REL = "infra/aws/lambda/ci/function-map"
+LIB_REL = "lib/opal_lambda_map.py"
+META_KEYS = ("_description", "_updated", "_note")
+ENTRIES =["irpt-cot-account-return-daily-lambda", "irpt-49f-reporting-publish-lambda", "irpt-cot-reporting-publish-lambda"]
 GRANT_PREFIXES = (D + AUTHOR + "/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/")
 LONG_DIGITS = re.compile(r"\d{8,}")
 
@@ -99,7 +104,7 @@ def check_all_entries(p158, base_map, new_map, head_blob, pin_blob, pin_ok):
         if k not in ENTRIES:
             need(base_map["functions"].get(k) == new_map["functions"].get(k), "an entry outside the order changed: %s" % k)
     for k in set(base_map) | set(new_map):
-        if k != "functions":
+        if k not in ("functions", "_last_deploy_recorded"):  # the deploy field was dropped by CTO ruling 2; the ledger is the record
             need(base_map.get(k) == new_map.get(k), "a top-level key changed: %s" % k)
     moved = {}
     for key in ENTRIES:
@@ -136,11 +141,36 @@ def check_facts(rec, moved, unchanged, b64s):
     return True
 
 
+def in_surface(f):
+    """The changed surface of the re-pin: the retired map (a commit that deletes it) or any file of the function-map folder."""
+    return f == SOURCE_MAP_REL or f.startswith(FOLDER_REL + "/")
+
+
 def check_grant(changed):
-    bad = [f for f in changed if f != SOURCE_MAP_REL and not f.startswith(GRANT_PREFIXES)]
+    bad = [f for f in changed if not in_surface(f) and not f.startswith(GRANT_PREFIXES)]
     need(not bad, "the worker's commits touch files outside its grant: %s" % bad[:3])
-    need(SOURCE_MAP_REL in changed, "the source map must change")
+    need(any(in_surface(f) for f in changed), "the source map must change (the function-map folder counts as the surface)")
     return True
+
+
+def map_lib(root):
+    """lib/opal_lambda_map.py of the checked-out repository at root: the one reader of the function-map folder."""
+    need(Path(root, LIB_REL).is_file(), "missing " + LIB_REL)
+    spec = importlib.util.spec_from_file_location("opal_lambda_map_p172", str(Path(root, LIB_REL)))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def readme_meta(root):
+    """The metadata the retired map carried, as the folder's README states it (one '- `key`: value' line each)."""
+    text = Path(root, FOLDER_REL, "README.md").read_bytes().decode("utf-8")
+    meta = {}
+    for line in text.splitlines():
+        m = re.match(r"- `(_[a-z_]+)`: (.*)$", line)
+        if m and m.group(1) in META_KEYS:
+            meta[m.group(1)] = m.group(2)
+    return meta
 
 
 def run(root, cid):
@@ -151,7 +181,8 @@ def run(root, cid):
     p149 = helper("r147/p149_pubroot.py", "p149_helper_165")
     sha = lambda b: hashlib.sha256(b).hexdigest()  # noqa: E731
     bm = json.loads(git(root, "show", "%s:%s" % (base_commit(root), SOURCE_MAP_REL))[0].decode("utf-8"))
-    nm = json.loads((root / SOURCE_MAP_REL).read_text(encoding="utf-8"))
+    nm = {"functions": map_lib(root).load_all(root=str(root))}  # raises FileNotFoundError when the folder is absent
+    nm.update(readme_meta(root))
 
     def head_blob(p):
         return (root / p).read_bytes()
@@ -216,7 +247,9 @@ def selftest():
         fn(r2)
         red(lambda: check_facts(r2, moved, unchanged, b64s), label)
     assert check_grant({SOURCE_MAP_REL, D + AUTHOR + "/x.json"})
+    assert check_grant({FOLDER_REL + "/irpt-49f-reporting-gold-lambda.json", D + AUTHOR + "/x.json"})
     red(lambda: check_grant({D + AUTHOR + "/x.json"}), "no source map")
+    red(lambda: check_grant({FOLDER_REL + "/README.md", "lib/x.py"}), "folder file plus a file outside the grant")
     red(lambda: check_grant({SOURCE_MAP_REL, "lib/x.py"}), "outside grant")
     pins = {"o": "a" * 40, "n": "b" * 40}
     sh = lambda b: {b"old": "1" * 64, b"new": "2" * 64, b"same": "3" * 64}[b]  # noqa: E731

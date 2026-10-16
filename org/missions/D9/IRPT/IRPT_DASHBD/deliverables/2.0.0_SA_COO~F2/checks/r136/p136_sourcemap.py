@@ -1,6 +1,6 @@
 """IRPT_DASHBD round 136, workstream F-SHIP ~F2 (issuer 2.0.0_SA_COO~F2) -- FWD-5: the 49 FINANCIAL GOLD LAMBDA'S BUNDLE gains the transaction producer (W2b).
 
-  DB-f-2203 (~2203) `infra/aws/lambda/ci/lambda-source-map.json`, the entry `irpt-49f-reporting-gold-lambda`: `files` gains `account_transaction.py` and `transaction_words.json` (the
+  DB-f-2203 (~2203) the function-map folder `infra/aws/lambda/ci/function-map/` (one file per function; the retired single map was split by TO-CT-ca-1), the entry `irpt-49f-reporting-gold-lambda`: `files` gains `account_transaction.py` and `transaction_words.json` (the
                     two paths below, appended LAST, in that order) and `staged_from` gains the two matching pins (commit, sha256 of the file at that commit and now). Every other key of
                     the entry, and every other function of the file, is untouched. The producer's imports (account_return_daily, opal_naming, trading_calendar, pandas, pyarrow) are
                     already members or the layer. The pins of the members already in the entry are NOT re-pinned here (another lane's act); the build and the apply are the applier's.
@@ -11,12 +11,18 @@ Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or 
 """
 import ast
 import hashlib
+import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 
-SOURCE_MAP = "infra/aws/lambda/ci/lambda-source-map.json"
+# CT-ca-1 (NFRA_CTLPLN round 30): the map is one JSON file per function. The entry is read through lib/opal_lambda_map.py
+# (load_entry raises when the file is absent); the metadata the retired map carried is stated by the folder's README.
+FOLDER_REL = "infra/aws/lambda/ci/function-map"
+LIB_REL = "lib/opal_lambda_map.py"
+META_KEYS = ("_description", "_updated", "_note")
 BASE = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/sourcemap_base_entry.json"
 ENTRY = "irpt-49f-reporting-gold-lambda"
 PRODUCER = "data/assets/scripts/gold/irpt_reporting/account_transaction.py"
@@ -79,19 +85,34 @@ def import_problems(source, members):
     return pr
 
 
+def map_lib(root):
+    """lib/opal_lambda_map.py of the checked-out repository at root: the one reader of the function-map folder."""
+    need(Path(root, LIB_REL).is_file(), "missing " + LIB_REL)
+    spec = importlib.util.spec_from_file_location("opal_lambda_map_p136", str(Path(root, LIB_REL)))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def readme_keys(root):
+    """The metadata keys the folder's README states (one '- `key`: ' line each)."""
+    text = Path(root, FOLDER_REL, "README.md").read_bytes().decode("utf-8")
+    return set(re.findall(r"^- `(_[a-z_]+)`: ", text, re.M))
+
+
 def load(root):
-    sm = Path(root, SOURCE_MAP)
-    need(sm.is_file(), "missing " + SOURCE_MAP)
-    doc = json.loads(sm.read_text(encoding="utf-8"))
-    entry = doc.get("functions", {}).get(ENTRY)
-    need(isinstance(entry, dict), "the source map has no entry " + ENTRY)
+    try:
+        entry = map_lib(root).load_entry(ENTRY, root=str(root))
+    except FileNotFoundError as e:
+        raise Fail(str(e))
+    need(isinstance(entry, dict), "the function map has no entry " + ENTRY)
     bp = Path(root, BASE)
     need(bp.is_file(), "missing the pinned base entry " + BASE)
-    return doc, entry, json.loads(bp.read_text(encoding="utf-8"))
+    return entry, json.loads(bp.read_text(encoding="utf-8"))
 
 
 def ac1(root):
-    _doc, entry, base = load(root)
+    entry, base = load(root)
     pr = entry_problems(entry, base)
     need(not pr, "; ".join(pr))
     pins = {s["repo_path"]: s for s in entry["staged_from"][-2:]}
@@ -107,14 +128,14 @@ def ac1(root):
 
 
 def ac2(root):
-    doc, entry, _base = load(root)
+    entry, _base = load(root)
     need(PRODUCER in entry["files"] and WORDS in entry["files"], "the entry's files must hold the producer and its words file (the closure is graded over the entry)")
     src = Path(root, PRODUCER).read_text(encoding="utf-8")
     pr = import_problems(src, entry["files"])
     need(not pr, "; ".join(pr))
-    need(isinstance(doc.get("functions"), dict) and ENTRY in doc["functions"], "the functions map lost the entry")
-    need(all(k in doc for k in ("_description", "_updated", "_note", "functions")), "a top-level key of the source map is missing")
-    need(Path(root, SOURCE_MAP).read_bytes().decode("utf-8").isascii(), "the source map must stay ASCII")
+    listed = readme_keys(root)
+    need(all(k in listed for k in META_KEYS), "a metadata key of the function map is missing from its README: %s" % [k for k in META_KEYS if k not in listed])
+    need(Path(root, FOLDER_REL, ENTRY + ".json").read_bytes().decode("utf-8").isascii(), "the function file of the entry must stay ASCII")
 
 
 def selftest():

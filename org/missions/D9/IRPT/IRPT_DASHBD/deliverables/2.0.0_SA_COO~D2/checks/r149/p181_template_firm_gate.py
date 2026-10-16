@@ -33,6 +33,8 @@ BASE = "75a71ae39089baf9fdddcc34cd3075dea4b31701"
 TAB = IR + "tabs/reporting/ReportingTab.tsx"
 TESTS = IR + "__tests__/irpt-dashbd/"
 TEST_PREFIX = "performance-template-firm-gate"
+PANELS = IR + "tabs/reporting/PerformanceHoldingsPanels.tsx"  # AMENDMENT 1 (DB-b-316): the folded-in panels component and its tests are admitted
+PANELS_TEST_PREFIX = "performance-holdings-panels"
 
 
 def check_diff(root):
@@ -46,7 +48,7 @@ def check_diff(root):
     p175.need(rc == 0, "cannot diff against %s" % BASE[:8])
     changed = {x for x in out.splitlines() if x.strip()}
     p175.need(changed, "nothing changed since the DB-b-309 head")
-    extra = [f for f in changed if f != TAB and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith(TEST_PREFIX))]
+    extra = [f for f in changed if f not in (TAB, PANELS) and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith((TEST_PREFIX, PANELS_TEST_PREFIX)))]
     p175.need(not extra, "portal files outside the agreed write set changed: %s" % extra[:4])
     p175.need(TAB in changed and any(f.startswith(TESTS + TEST_PREFIX) for f in changed), "ReportingTab.tsx and a test file named %s* must both be in the diff" % TEST_PREFIX)
     stat, _ = p175.git(p, "diff", "--numstat", BASE, "HEAD", "--", TAB)
