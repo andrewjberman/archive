@@ -35,7 +35,21 @@
       "kind": "test",
       "commit_or_etag": "0a18a57a24",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the non-data pin 113 -> 108 and its two comments; test_ogpf1_ac04's family pin follows the new truth (count 6 -> 11)"
+      "deploy_evidence": "the non-data pin 113 -> 108 and its two comments; test_ogpf1_ac04's family pin follows the new truth (count 6 -> 11), approved by the issuer"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py",
+      "kind": "test",
+      "commit_or_etag": "432f273f7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_ogz2_ac08: CLIENT_TOOLS added to the registered-name union and its length to the equality; the 122 pin unchanged (order amendment A1)"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py",
+      "kind": "test",
+      "commit_or_etag": "432f273f7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_ogz1_ac06, ac07 and ac11 follow the five client tools' new truth with the smallest edit; test_ogz1_ac08 left alone (red before this cell); order amendment A1"
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
@@ -61,10 +75,9 @@
       "criterion_verbatim": "the five named tests pass (test_ogad1_ac01 .. test_ogad1_ac05) and the entitlement suites that pin the sets still pass (the family pin moves by exactly five; the registered-tool count of test_entitlement_admin is unchanged)",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ad1.AC2.sh; echo \"exit=$?\"",
-      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nentitlement suites: pytest rc=1; passed 18; failed 1 (want 0)\nRESULT: FAIL\nexit=1",
-      "denominator": "named tests 5 of 5; entitlement suite tests 18 passed of 19 (1 failed)",
-      "status": "FAIL",
-      "status_reason": "the entitlement suites are red on test_entitlement_admin.py::test_ogz2_ac08 (assert 117 == 122): the registered count is the set union NATIVE|INTEGRATION|INDEX, which the move takes down by five; the order forbids editing that file. Recorded as surprise NFRA_OPLGTW-Z-W113-S8 (BLOCKING). The order stays pending.",
+      "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nentitlement suites: pytest rc=0; passed 19; failed 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "named tests 5 of 5; entitlement suite tests 19 passed of 19 (test_data_entitlement_family, test_entitlement_admin, test_og_bd2, test_og_bd3)",
+      "status": "PASS",
       "expect": "(?s)pytest rc=0; named tests passed 5 of 5; failed/error lines 0.*entitlement suites: pytest rc=0; passed \\d+; failed 0 \\(want 0\\).*RESULT: PASS.*exit=0"
     }
   ],
@@ -76,19 +89,15 @@
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "the AC1 decision table is a pure read of the committed sets and the decide() function; the AC2 suites were run on the committed tree and on the working tree, with the same red test in both",
-      "observed": "N/A-WITH-REASON: the decision read is deterministic; the only nondeterminism is the full-directory order dependence (surprise NFRA_OPLGTW-Z-W113-S10), which is outside AC1 and AC2",
+      "method": "the AC1 decision table is a pure read of the committed sets and the decide() function; the AC2 suites were run on the committed tree before the follow commit (red on test_ogz2_ac08) and after it (green)",
+      "observed": "N/A-WITH-REASON: the decision read is deterministic; the full-directory order dependence (surprise NFRA_OPLGTW-Z-W113-S10) lies outside AC1 and AC2",
       "status": "N/A-WITH-REASON"
     }
   },
   "declared_exclusions": [
     {
-      "item": "tests/test_entitlement_admin.py test_ogz2_ac08 (the registered count 122)",
-      "reason": "the order names the file do-not-change; the move takes the union to 117; the fix is two edits in that file (surprise NFRA_OPLGTW-Z-W113-S8, BLOCKING)"
-    },
-    {
-      "item": "tests/test_data_entitlement_guard.py test_ogz1_ac06, ac07 and ac11 (the NATIVE membership pins)",
-      "reason": "outside this order's write grant; named for the issuer to add to the order (surprise NFRA_OPLGTW-Z-W113-S9, BLOCKING)"
+      "item": "tests/test_data_entitlement_guard.py test_ogz1_ac08 (route-class pin)",
+      "reason": "red BEFORE this cell (three routes missing from the route-class pin); left alone by order amendment A1 and listed in the session log"
     },
     {
       "item": "app/tools.py and app/destructive_ops.py",
@@ -96,25 +105,25 @@
     },
     {
       "item": "the gateway release",
-      "reason": "the later applier order OG-ap-23; the release is gated on this order and on S8 and S9"
+      "reason": "the later applier order OG-ap-23; the release is gated on this order (now AC1 and AC2 PASS) and on the issuer's ruling of S8 and S9 as recorded"
     }
   ],
   "surprises": [
-    "NFRA_OPLGTW-Z-W113-S8: BLOCKING -- test_entitlement_admin test_ogz2_ac08 pins the registered count at 122; the move takes the union to 117; AC2 is red on that one test",
-    "NFRA_OPLGTW-Z-W113-S9: BLOCKING -- three guard-suite tests (test_ogz1_ac06, ac07, ac11) pin the old NATIVE membership and are outside the grant",
-    "NFRA_OPLGTW-Z-W113-S10: OBSERVATION -- the full gateway directory reads 63 failed and 1012 passed; test_ogpf1_ac01 is order-dependent on test_schwab_wiring.py"
+    "NFRA_OPLGTW-Z-W113-S8: BLOCKING, followed by order amendment A1 and commit 432f273f7e (test_ogz2_ac08: CLIENT_TOOLS in the union and its length in the equality; 122 unchanged)",
+    "NFRA_OPLGTW-Z-W113-S9: BLOCKING, followed by order amendment A1 and commit 432f273f7e (test_ogz1_ac06, ac07, ac11 follow the new truth; ac08 left red as before)",
+    "NFRA_OPLGTW-Z-W113-S10: OBSERVATION -- the full gateway directory reads 63 failed and 1012 passed; the issuer compares against the trunk baseline; test_ogpf1_ac01 is order-dependent on test_schwab_wiring.py"
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~113/NFRA_OPLGTW.TO-OG-ad-1.client-tools-data-grant-class.session_log.txt",
   "compiler_tools": [
     {
       "tool": "pytest",
-      "invocation": "python -m pytest tests/test_og_ad1.py tests/test_data_entitlement_family.py tests/test_entitlement_admin.py tests/test_og_bd2.py tests/test_og_bd3.py tests/test_data_entitlement_guard.py tests/test_og_hv1.py tests/test_og_sh1.py tests/test_og_ab1_carry.py -q (from infra/aws/ec2/opal-gateway)",
-      "result": "5 failed, 42 passed before the rows; the failures are test_ogz2_ac08 and test_ogz1_ac06, ac07, ac11, plus the pre-existing test_ogz1_ac08"
+      "invocation": "python -m pytest tests/test_og_ad1.py tests/test_data_entitlement_family.py tests/test_entitlement_admin.py tests/test_og_bd2.py tests/test_og_bd3.py -q (from infra/aws/ec2/opal-gateway), and tests/test_data_entitlement_guard.py alone",
+      "result": "entitlement suites 19 passed, 0 failed; the guard file 11 passed, 1 failed (test_ogz1_ac08, red before this cell)"
     },
     {
       "tool": "commit-gate via safe-commit",
       "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~113 <0.9.0_WK_NFRA_OPLGTW~113@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "0a18a57a24 landed; surprise-row-gate passed the three rows in f056db0c7e"
+      "result": "0a18a57a24, f056db0c7e and 432f273f7e landed; the surprise-row gate passed the three rows"
     }
   ]
 }
