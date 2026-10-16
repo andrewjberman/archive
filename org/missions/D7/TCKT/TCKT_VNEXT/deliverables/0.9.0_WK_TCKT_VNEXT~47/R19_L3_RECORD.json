@@ -1,0 +1,70 @@
+{
+  "to_id": "TCKT_VNEXT.TO-R19-L3",
+  "cell": "R19-ps-3",
+  "assignee": "0.9.0_WK_TCKT_VNEXT~47",
+  "branch": "wk-TCKT_VNEXT-47",
+  "source_commit": "028ee030b9",
+  "channel_row_commit": "fb20355654",
+  "base_commit": "b84a2ca293",
+  "scope_of_change": "lambda_function.py: _profile_scope only (both hunks lie inside the function; _resolve_scope, _in_profile_scope and every caller unedited)",
+  "lines_changed": [
+    {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "hunk": "docstring and tail, old 391-401 -> new 391-404", "function": "_profile_scope"},
+    {"file": "infra/aws/lambda/ticket_center/lambda_function.py", "hunk": "tail after the status test, old 415-429 -> new 418-438", "function": "_profile_scope"}
+  ],
+  "rule_as_built": {
+    "a_list": "non-empty list of non-empty strings: (frozenset, None); a list together with the marker: malformed (d)",
+    "b_marker": "scope_all_firms is exactly True and NO allowedFirmIds attribute: (None, None)",
+    "c_not_configured": "no list and no marker; an empty list without the marker; a marker of any other type (\"true\", 1, False, None): 403 firm scope not configured, one FIRM-SCOPE-NONE-CONFIGURED line that carries no address and no row key",
+    "d_malformed": "a list together with the marker; allowedFirmIds present but not a list (NULL included); a list with a non-string or empty member: 403 firm scope malformed"
+  },
+  "interpretive_reading": "An EMPTY list together with the marker reads as 'a list and the marker present' under (d): 403 firm scope malformed. Rule (c) also names an empty list, but it is stated for the list alone. No test names this combination; the issuer may rule otherwise.",
+  "test_counts": {
+    "new_file_alone": "tests/test_profile_scope_fail_closed.py: 20 passed (10 functions, 3 parametrized into 13 cases; AC1)",
+    "scratch_folder_working_tree": "403 passed, 42 subtests passed, 0 failed (383 base + 20 new); scratch copy of the working-tree infra folder plus the one out-of-sparse fixture restored byte for byte from HEAD",
+    "scratch_folder_base_at_HEAD": "383 passed, 42 subtests passed, 0 failed (git archive of HEAD before this cell, same fixture restored)",
+    "worktree_folder_as_invoked": "325 passed, 0 failed, 8 errors during collection (--continue-on-collection-errors); the 8 modules are test_no_row_refuses, test_package_409_codes, test_package_env_firms, test_package_i5p_i7, test_package_principal, test_package_request_id, test_package_route, test_status_active; each imports test_package_route.py, whose line 37 reads org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/I7_SAMPLE.json, which the sparse checkout omits (surprise row TCKT_VNEXT-D2-W47-S2)"
+  },
+  "before_arm": {
+    "description": "the new test file run against the BASE lambda_function.py (b84a2ca293), in scratch",
+    "result": "8 failed, 12 passed",
+    "failing": [
+      "test_no_attribute_and_no_marker_is_not_configured_and_logged",
+      "test_empty_list_is_not_configured",
+      "test_marker_that_is_not_bool_true_is_not_configured[true]",
+      "test_marker_that_is_not_bool_true_is_not_configured[1]",
+      "test_marker_that_is_not_bool_true_is_not_configured[False]",
+      "test_marker_that_is_not_bool_true_is_not_configured[None]",
+      "test_list_and_marker_together_is_malformed",
+      "test_allowed_firm_ids_that_is_not_a_list_is_malformed[None]"
+    ]
+  },
+  "mutant": {
+    "file": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~47/mutant_check.py",
+    "description": "a scratch copy (system temp, outside the product tree) with the pre-R19 tail restored: a missing or empty allowedFirmIds returns (None, None)",
+    "result": "MUTANT-FIRES: 8 failed, 12 passed, pytest rc=1 (the same eight tests as the before-arm)",
+    "determinism": "two runs compared: identical verdict and identical failing set; only the pytest elapsed seconds differ"
+  },
+  "re_pins": [
+    {"file": "tests/test_authz_matrix.py", "where": "_EmptyUsers.get_item", "old": "        return {\"Item\": {\"PK\": kw[\"Key\"][\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\"}}", "new": "        return {\"Item\": {\"PK\": kw[\"Key\"][\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\", \"scope_all_firms\": True}}", "kind": "fixture marker only; docstring of the class also extended (no assertion touched)"},
+    {"file": "tests/test_commentary_same_ticket.py", "where": "line 87, _Users.get_item bare row", "old": "        return {\"Item\": {\"PK\": Key[\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\"}}", "new": "        return {\"Item\": {\"PK\": Key[\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\", \"scope_all_firms\": True}}", "kind": "fixture marker only"},
+    {"file": "tests/test_list_scoped_firm.py", "where": "line 124, _UsersStub.get_item", "old": "        return {\"Item\": {\"PK\": kw[\"Key\"][\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\"}}", "new": "        return {\"Item\": {\"PK\": kw[\"Key\"][\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\", \"scope_all_firms\": True}}", "kind": "fixture marker only"},
+    {"file": "tests/test_package_route.py", "where": "line 85, _PackagerUsers.get_item bare row", "old": "        return {\"Item\": {\"PK\": Key[\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\"}}   # a bare row: no allowedFirmIds, so it reads every firm", "new": "        return {\"Item\": {\"PK\": Key[\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\", \"scope_all_firms\": True}}   # a bare row: no allowedFirmIds, the explicit global marker, so it reads every firm", "kind": "fixture marker only; this double is shared by the eight package modules listed above"},
+    {"file": "tests/test_meeting_request.py", "where": "lines 78-79, _Users.get_item (else branch added)", "old": "        if email in self.SCOPE_OF:\n            item[\"allowedFirmIds\"] = self.SCOPE_OF[email]\n        return {\"Item\": item}", "new": "        if email in self.SCOPE_OF:\n            item[\"allowedFirmIds\"] = self.SCOPE_OF[email]\n        else:\n            item[\"scope_all_firms\"] = True   # the explicit global marker: a bare row reads every firm (R19-ps-3)\n        return {\"Item\": item}", "kind": "fixture marker only, on the bare branch; a scoped email still carries its list and no marker"},
+    {"file": "tests/test_trade_form_attachment.py", "where": "lines 73-74, _Users.get_item (else branch added)", "old": "        if email in _Users.SCOPE_OF:\n            item[\"allowedFirmIds\"] = _Users.SCOPE_OF[email]\n        return {\"Item\": item}", "new": "        if email in _Users.SCOPE_OF:\n            item[\"allowedFirmIds\"] = _Users.SCOPE_OF[email]\n        else:\n            item[\"scope_all_firms\"] = True   # the explicit global marker: a bare row reads every firm (R19-ps-3)\n        return {\"Item\": item}", "kind": "fixture marker only, on the bare branch"},
+    {"file": "tests/test_no_row_refuses.py", "where": "line 106, test_internal_caller_with_a_row_and_no_firm_list_still_reads_every_firm", "old": "    t, users = P.setup(P.profile(CALLER))   # a PROFILE row, no allowedFirmIds attribute", "new": "    t, users = P.setup(P.profile(CALLER, scope_all_firms=True))   # a PROFILE row, no allowedFirmIds attribute, the global marker", "kind": "fixture marker only"},
+    {"file": "tests/test_no_row_refuses.py", "where": "lines 122-134, test renamed to test_internal_caller_with_a_row_and_an_empty_firm_list_is_not_configured (was ..._still_reads_every_firm)", "old": "    assert code == 200 and b[\"count\"] == 3, (code, b)  /  assert code == 200 and b[\"ticket\"][\"requester\"][\"firm\"] == firm, (firm, code, b)  /  assert code == 201, (firm, code, b)", "new": "    assert code == 403 and b == {\"error\": \"firm scope not configured\"}, (code, b)  /  assert code == 403 and b == {\"error\": \"firm scope not configured\"}, (firm, code, b)  /  assert code == 403 and b == {\"error\": \"firm scope not configured\"}, (firm, code, b)", "kind": "assertion re-pin: the empty-list rule itself changed (step 1-4 of the order)"},
+    {"file": "tests/test_no_row_refuses.py", "where": "line 8-9, module docstring", "old": "A row with NO allowedFirmIds, or with an EMPTY list, still reads every firm. Clients and the service subjects never reach", "new": "A row with the explicit global marker scope_all_firms=True (and NO allowedFirmIds) reads every firm; a row with NO allowedFirmIds and no marker, or with an EMPTY list, is refused 403 \"firm scope not configured\" (TCKT_VNEXT R19-ps-3). Clients and the service subjects never reach", "kind": "docstring"},
+    {"file": "tests/test_profile_firm_scope.py", "where": "line 56, Users.get_item bare row", "old": "            return {\"Item\": {\"PK\": Key[\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\"}}", "new": "            return {\"Item\": {\"PK\": Key[\"PK\"], \"SK\": \"PROFILE\", \"status\": \"active\", \"scope_all_firms\": True}}", "kind": "fixture marker only"},
+    {"file": "tests/test_profile_firm_scope.py", "where": "lines 146-157, test_empty_list_keeps_today renamed test_empty_list_and_no_attribute_are_not_configured_and_null_is_malformed", "old": "    for row in (scoped([]), profile(SCOPED_EMAIL), scoped(None)):   /   assert code == 201, (row, firm, code, b)   /   assert code == 200, (code, b)", "new": "    for row, answer in ((scoped([]), \"firm scope not configured\"), (profile(SCOPED_EMAIL), \"firm scope not configured\"), (scoped(None), \"firm scope malformed\")):   /   assert code == 403 and b == {\"error\": answer}, (row, firm, code, b)   /   assert code == 403 and b == {\"error\": answer}, (code, b)", "kind": "assertion re-pin: the old test asserted the empty-list and no-attribute rule that the order removes; a marker cannot express 'empty list keeps today'"},
+    {"file": "tests/test_profile_firm_scope.py", "where": "lines 29-30, Users docstring", "old": "    which is how an internal caller who reads every firm is held; bare=False models a users table with no row for it.\"\"\"", "new": "    which is how an internal caller who reads every firm is held (the explicit global marker scope_all_firms=True: a row\n    with neither a list nor the marker is refused since TCKT_VNEXT R19-ps-3); bare=False models a users table with no row for it.\"\"\"", "kind": "docstring"},
+    {"file": "tests/test_status_active.py", "where": "lines 137-150, test renamed test_an_active_row_with_the_global_marker_keeps_every_firm (was ..._keeps_every_firm_list_behaviour); the empty-list row now asserts the refusal", "old": "    for row in (_row(\"active\"), _row(\"active\", allowedFirmIds=[])):  (no-list row and empty-list row read every firm)", "new": "    t, users = P.setup(_row(\"active\", scope_all_firms=True), bare=False)  (marker row reads every firm); then t, users = P.setup(_row(\"active\", allowedFirmIds=[]), bare=False) asserts (403, {\"error\": \"firm scope not configured\"})", "kind": "assertion re-pin: the no-list row takes the marker; the empty-list row is refused"}
+  ],
+  "not_read": [
+    "live AWS, network, mail, SES, DynamoDB and Terraform: none called (conftest guard active; no deploy, apply or invoke)",
+    "the users table rows and the marker migration (TO-R19-MIG): not read, not touched",
+    "infra/aws/terraform/: read only as far as the order names it; no edit",
+    "other R19 cells' hunks in lambda_function.py (TO-R19-L1, TO-R19-L2): not in this worktree, not touched",
+    "the eight package modules in the worktree: not collected there (surprise S2); their result is taken from the scratch copy only",
+    "the risk-reflex HOLD citations printed at commit 028ee030b9 (inf-gold-trigger, other lambdas): not relevant to _profile_scope; the commit proceeded"
+  ]
+}
