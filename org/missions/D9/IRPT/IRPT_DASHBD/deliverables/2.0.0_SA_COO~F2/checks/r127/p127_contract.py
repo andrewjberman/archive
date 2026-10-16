@@ -120,8 +120,9 @@ def form_problems(con):
             pr.append("enums.flow_class must be the brief's seven classes, in this order: " + ", ".join(FLOW))
         if tuple(en["coverage"]) != COVERAGE:
             pr.append("enums.coverage must be " + ", ".join(COVERAGE))
-    if con["unmapped_display"] != "Other" or con["new_code_reason"] != "CODE_NOT_IN_MAPPING":
-        pr.append("unmapped_display must be Other and new_code_reason CODE_NOT_IN_MAPPING (CTO round-124 ruling)")
+    if con["unmapped_display"] != "Unclassified" or con["new_code_reason"] != "CODE_NOT_IN_MAPPING":
+        pr.append("unmapped_display must be Unclassified (CTO round-125 ruling, replacing Other) and new_code_reason "
+                  "CODE_NOT_IN_MAPPING (CTO round-124 ruling)")
     if con["firms_served"] != [FIRM49]:
         pr.append("firms_served must be [49financial]")
     fp = con["firms_pending"]
