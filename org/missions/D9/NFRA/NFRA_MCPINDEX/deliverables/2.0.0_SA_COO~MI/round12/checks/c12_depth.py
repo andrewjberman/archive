@@ -21,6 +21,15 @@ the same value, read at answer time; AND the two rows the CVO read as carrying d
 mp.01.aum-metrics and etfs.01.positioning-data, are among the measured rows (issuer anchors, so AC3 cannot pass on the
 one row that was already measured at base).
 Only dates are printed.
+
+ROUND 19 (2.0.0_SA_COO~MI, E4, CTO msg 35012 "stop pinning depth claims that age with each publish"): the tolerance is chosen by the env var
+C12_TOLERANCE, and the grade always prints which one it used.
+  strict       (the DEFAULT; what emit_final.sh uses on a candidate within minutes of the measure) the served value equals the claim.
+  one-publish  the served value equals the claim OR the claim is exactly the previous trading day of the served value.
+  monotone     (what a POST-release grade of a shipped catalog uses) the served value equals the claim OR is later than it: a measured claim is a
+               point-in-time fact, a source only moves forward, so a claim BEHIND the served value is stale but was true when measured; a claim AHEAD of
+               the served value was never true and fails in every mode. The wrong-when-measured case is what `strict` at the emit catches.
+The count of claims equal to the served value and the count tolerated are printed beside the verdict. `python c12_depth.py selftest` is the negative control.
 """
 import json
 import os
@@ -29,10 +38,53 @@ import subprocess
 import sys
 import tempfile
 
-mode, gw, cat_path = sys.argv[1], os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3])
-aws = sys.argv[4] if len(sys.argv) > 4 else ""
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}")
 import yaml  # noqa: E402
+
+ROOT = os.getcwd()
+
+
+TOL = os.environ.get("C12_TOLERANCE", "strict")
+
+
+def one_behind(claim, served, tol=None):
+    """True iff `claim` is tolerated as OLDER than `served` under the tolerance (never for equal or ahead): see the docstring."""
+    tol = tol or TOL
+    c, v = str(claim)[:10], str(served)[:10]
+    if tol == "strict" or not (DATE.match(c) and DATE.match(v)) or c >= v:
+        return False
+    if tol == "monotone":
+        return True
+    if tol == "one-publish":
+        sys.path.insert(0, ROOT)
+        from lib import trading_calendar as tc
+        try:
+            return str(tc.prev_trading_day(v)) == c
+        except Exception:
+            return False
+    return False
+
+
+def _selftest():
+    cases = [("one-publish", "2026-10-14", "2026-10-15", True, "claim one trading day behind"), ("one-publish", "2026-10-15", "2026-10-15", False, "equal is strict, not tolerated"),
+             ("one-publish", "2026-10-13", "2026-10-15", False, "two publishes behind fails"), ("one-publish", "2026-10-16", "2026-10-15", False, "a claim ahead of the served value fails"),
+             ("one-publish", "2026-10-16", "2026-10-19", True, "Friday claim, Monday served (weekend skipped)"), ("one-publish", "2026-10-15", "2026-10-19", False, "Thursday claim, Monday served is two behind"),
+             ("one-publish", "n/a", "2026-10-15", False, "a non-date claim fails"),
+             ("monotone", "2026-10-13", "2026-10-15", True, "monotone: a claim behind the served value is tolerated"), ("monotone", "2026-10-16", "2026-10-15", False, "monotone: a claim AHEAD still fails"),
+             ("monotone", "2026-10-15", "2026-10-15", False, "monotone: equal is the strict case, not counted as tolerated"), ("strict", "2026-10-14", "2026-10-15", False, "strict tolerates nothing")]
+    bad = 0
+    for tol, c, v, want, why in cases:
+        got = one_behind(c, v, tol)
+        print("SELFTEST %-5s [%s] %s (%s vs %s -> %s)" % ("ok" if got == want else "FAIL", tol, why, c, v, got))
+        bad += got != want
+    print("SELFTEST %d of %d" % (len(cases) - bad, len(cases)))
+    sys.exit(1 if bad else 0)
+
+
+if len(sys.argv) > 1 and sys.argv[1] == "selftest":
+    _selftest()
+mode, gw, cat_path = sys.argv[1], os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3])
+aws = sys.argv[4] if len(sys.argv) > 4 else ""
 
 doc = yaml.safe_load(open(cat_path, encoding="ascii"))
 keys = {}
@@ -106,6 +158,7 @@ def any_date(obj):
 
 if mode == "catalog":
     ok_tools = 0
+    strict_claims = behind_claims = 0
     for e in tools:
         cs = claims_of(e)
         res = []
@@ -114,8 +167,11 @@ if mode == "catalog":
             if k == "measured":
                 obj, key = fetch(c)
                 got = dig(obj, c.get("field")) if obj is not None else None
-                good = (c.get("method") in ("body-field", "series-first", "snapshot-asof") and got is not None
-                        and got == str(c.get("value"))[:10])
+                same = got is not None and got == str(c.get("value"))[:10]
+                behind = (not same) and got is not None and one_behind(c.get("value"), got)
+                strict_claims += 1 if same else 0
+                behind_claims += 1 if behind else 0
+                good = (c.get("method") in ("body-field", "series-first", "snapshot-asof") and (same or behind))
                 res.append((good, "measured %s field=%s catalog=%s aws=%s" % (c.get("row"), c.get("field"),
                                                                               c.get("value"), got)))
             elif k == "inferred":
@@ -134,6 +190,7 @@ if mode == "catalog":
         ok_tools += tool_ok
         print("TOOL %-30s %s %s" % (e.get("tool"), "OK " if tool_ok else "BAD", " | ".join(t for _, t in res)))
     print("DEPTH (a) tools graded %d of %d; valid %d of %d" % (len(tools), len(tools), ok_tools, len(tools)))
+    print("DEPTH-CLAIMS tolerance=%s; measured claims equal to the served value %d; behind it and tolerated %d" % (TOL, strict_claims, behind_claims))
     sys.exit(0 if tools and ok_tools == len(tools) else 1)
 
 sys.path.insert(0, gw)
@@ -142,7 +199,7 @@ from app.graphql_plumbing import catalog_gate as g  # noqa: E402
 from app.integrations.opal_discover import integration as od  # noqa: E402
 
 measured = [(e.get("tool"), c) for e in tools for c in claims_of(e) if c.get("claim") == "measured"]
-seen, ok = set(), 0
+seen, ok, eq, bh = set(), 0, 0, 0
 for tool, c in measured:
     row = str(c.get("row") or "")
     if row in seen:
@@ -151,10 +208,15 @@ for tool, c in measured:
     r = od.discover(row, g.OPAL_INTERNAL, exact=True)
     ms = [m for m in (r.get("matches") or []) if (m.get("property") or {}).get("entity") == row or m.get("dataset") == row]
     hd = (ms[0].get("history_depth") or {}) if ms else {}
-    good = hd.get("claim") == "measured" and str(hd.get("value"))[:10] == str(c.get("value"))[:10]
+    same = str(hd.get("value"))[:10] == str(c.get("value"))[:10]
+    behind = (not same) and one_behind(c.get("value"), hd.get("value"))
+    good = hd.get("claim") == "measured" and (same or behind)
+    eq += 1 if (good and same) else 0
+    bh += 1 if (good and behind) else 0
     ok += good
     print("ANSWER %-38s claim=%s value=%s catalog=%s %s" % (row, hd.get("claim"), hd.get("value"), c.get("value"),
                                                             "OK" if good else "BAD"))
+print("ANSWER-TIME-CLAIMS tolerance=%s; answered value equal to the claim %d; claim behind it and tolerated %d" % (TOL, eq, bh))
 ANCHORS = ("mp.01.aum-metrics", "etfs.01.positioning-data")
 anc = sum(1 for a in ANCHORS if a in seen)
 print("ANSWER-TIME measured rows %d; answered measured and equal %d of %d; anchors measured %d of %d"
