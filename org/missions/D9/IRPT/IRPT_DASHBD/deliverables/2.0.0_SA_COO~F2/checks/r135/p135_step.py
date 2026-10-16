@@ -52,7 +52,7 @@ class FakeS3:
         data = Body.read() if hasattr(Body, "read") else Body
         self.store[(Bucket, Key)] = data
         self.puts.append((Bucket, Key))
-        return {"ETag": "x", "VersionId": "v"}
+        return {"ETag": '"%s"' % hashlib.md5(data).hexdigest(), "VersionId": "v"}  # a single-part S3 put returns the body MD5
 
     def get_object(self, Bucket, Key, **kw):  # noqa: N803
         if (Bucket, Key) not in self.store:
@@ -325,7 +325,8 @@ def selftest():
     s3.put_object("b", "x/date=2026-01-02/part.parquet", Body=b"2")
     r = s3.list_objects_v2("b", Prefix="x/", Delimiter="/")
     arm("fake-prefixes", [p["Prefix"] for p in r["CommonPrefixes"]], ["x/date=2026-01-01/", "x/date=2026-01-02/"])
-    arm("fake-get", s3.get_object("b", "x/date=2026-01-01/part.parquet")["Body"].read(), b"1")
+    arm("fake-etag-is-the-body-md5", s3.put_object("b", "y", Body=b"1")["ETag"], '"%s"' % hashlib.md5(b"1").hexdigest())
+    arm("fake-get",s3.get_object("b", "x/date=2026-01-01/part.parquet")["Body"].read(), b"1")
     pages = list(s3.get_paginator("list_objects_v2").paginate(Bucket="b", Prefix="x/"))
     arm("fake-paginate", len(pages[0]["Contents"]), 2)
     arm("sequence-green", sequence_problems([("d1", {"source_txn_id": "A"}), ("d2", {"source_txn_id": "B"})]), [])
