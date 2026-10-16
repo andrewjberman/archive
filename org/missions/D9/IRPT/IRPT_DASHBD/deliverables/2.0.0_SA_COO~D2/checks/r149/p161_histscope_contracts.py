@@ -37,7 +37,7 @@ GRANT_PREFIXES = (D + AUTHOR + "/", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-c
 METHOD = "first value day vs source floor"
 CLAIM = "inferred"
 SRC_ENTRY_KEYS = {"name", "type", "nullable", "meaning", "values", "method", "applies_to", "rule", "since_schema_version"}
-MAX_EARLIER_LINES = 28
+MAX_EARLIER_LINES = 60
 LONG_DIGITS = re.compile(r"\d{8,}")
 
 
