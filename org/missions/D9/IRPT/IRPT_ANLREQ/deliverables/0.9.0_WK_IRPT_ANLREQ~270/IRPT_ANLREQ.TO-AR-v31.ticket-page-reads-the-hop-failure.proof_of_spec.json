@@ -51,9 +51,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/mutant_check.py",
       "kind": "test",
-      "commit_or_etag": "4a8897c268",
+      "commit_or_etag": "e556885471",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the mutant checker, last changed in commit 4a8897c268 (AMENDMENT 1 pins its gate); it restores the file it mutates and verifies the restore by sha256",
+      "deploy_evidence": "the mutant checker of AMENDMENT 3 (the call-gate package condition), committed in e556885471; it restores the file it mutates and verifies the restore by sha256",
       "artifact_covered_by": [
         "AR31-v-AC3"
       ]
@@ -82,14 +82,13 @@
     },
     {
       "criterion_id": "AR31-v-AC3",
-      "criterion_verbatim": "a mutant that fires: the clause-5 guard removed, the new test file fails, the file restored byte-for-byte (MUTANT-FIRES)",
+      "criterion_verbatim": "the mutant of AMENDMENT 3: the package condition removed from the call gate in useHopFailureWords; the run must fail on 'makes no status call for a ticket whose package is attached' (MUTANT-FIRES)",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-270/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/mutant_check.py",
-      "output_evidence": "MUTATED RUN rc=0; RESTORED sha256=3c393fa28ef8b36c0c6bac50ae529151d81e2d9ed85cefe1ade11c8ab4fba8c2 verified=True; 10 pass, 0 fail; MUTANT-SURVIVES the mutated run did not fail on 'shows no failure once a package is attached'",
-      "denominator": "1 mutant; 0 fired; 0 of 10 tests fail on the mutated tree (10 of 10 pass); restore verified by sha256",
+      "output_evidence": "MUTATED RUN rc=1; RESTORED sha256=3c393fa28ef8b36c0c6bac50ae529151d81e2d9ed85cefe1ade11c8ab4fba8c2 verified=True; 9 pass, 1 fail; MUTANT-FIRES the mutated run failed on 'makes no status call for a ticket whose package is attached'; the restore verified",
+      "denominator": "1 mutant; 1 fired; 1 of 10 tests fails on the mutated tree (9 of 10 pass); restore verified by sha256",
       "expect": "MUTANT-FIRES",
-      "status": "FAIL",
-      "status_reason": "the clause-5 display guard (shownFailure) is unreachable under AMENDMENT 2: the call gate makes no status read for a package-attached ticket, so removing the guard changes no observable behaviour and the named mutant survives. The order stays pending. Surprise IRPT_ANLREQ-D2-W270-S4 (BLOCKING, committed bf1eb13) is filed for the issuer, who decides which mutant AC3 names. A measured control with the call gate's package condition removed fires; see controls.mutant."
+      "status": "PASS"
     },
     {
       "criterion_id": "AR31-v-AC4J",
@@ -105,14 +104,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Measured control, NOT the AC3 mutant: the call gate's package condition removed (wanted = enabled && analysis_request, the !ticket.package term removed). The test file fails on 'makes no status call for a ticket whose package is attached' (9 pass, 1 fail); the source was restored and compared byte-equal. The AC3 display-guard mutant survives: see AC3 and IRPT_ANLREQ-D2-W270-S4.",
+      "description": "The AC3 mutant of AMENDMENT 3 (the call gate's package condition removed): the run must fail on 'makes no status call for a ticket whose package is attached'. This is the same mutant that was measured as the control at f488e20a (hand edit, restored byte-equal).",
       "expected": "the test file fails on 'makes no status call for a ticket whose package is attached'",
-      "observed": "FIRED (call-gate control): 9 pass, 1 fail on that test; the AC3 display-guard mutant (mutant_check.py): MUTANT-SURVIVES, 10 pass, 0 fail",
+      "observed": "MUTANT-FIRES (mutant_check.py, AMENDMENT 3): 9 pass, 1 fail on that test; restore sha256 verified. Earlier measured control at f488e20a: 9 pass, 1 fail on the same test.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "the test file run on each tree that carried it: 6 tests (before AMENDMENT 1), 8 tests (after AMENDMENT 1), 10 tests (after AMENDMENT 2, alone and inside the 193-test directory run); each compared on the per-test results",
-      "observed": "every run of each tree gave the same per-test results",
+      "observed": "every run of each tree gave the same per-test results; the AC3 mutant run and its measured control gave 9 pass, 1 fail each",
       "status": "STABLE"
     }
   },
@@ -138,7 +137,7 @@
     "IRPT_ANLREQ-D2-W270-S1: a hop failure reached the ticket page only through the draft-and-package block, so a ticket with a request id and neither a draft nor a package never read the status and never showed its failure words; addressed by TO AMENDMENT 1 (commit f4e5cc18: AnalysisPackageRow reads the status and renders no blank row); the row stays for the CVO's disposition",
     "IRPT_ANLREQ-D2-W270-S2: the order names the requester firm for the status read, but the file's own reads take the firm from ticket.answers; the read follows the file",
     "IRPT_ANLREQ-D2-W270-S3: the adapter maps the wire actions WAIT and NONE to the same safe action 'none', so the page cannot tell a NONE words entry from a WAIT entry",
-    "IRPT_ANLREQ-D2-W270-S4: the AC3 named mutant (remove the clause-5 display guard) survives under AMENDMENT 2, because the call gate makes that guard unreachable; the order stays pending for the issuer's decision"
+    "IRPT_ANLREQ-D2-W270-S4: the AC3 named mutant (remove the clause-5 display guard) survived under AMENDMENT 2; dispositioned by AMENDMENT 3, which replaces the mutant with the call-gate package condition (fires); the display guard stays in the source"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/R3_V_RECORD.json",
   "compiler_tools": [
@@ -165,17 +164,7 @@
     {
       "tool": "python",
       "invocation": "python C:/dev/wk-irpt-anlreq-270/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/mutant_check.py",
-      "result": "MUTANT-SURVIVES (rc=1): the display-guard mutant did not fail the suite; restore verified"
-    },
-    {
-      "tool": "bash",
-      "invocation": "hand measurement of the call-gate control: edit the one condition, run bun test on the file, restore, cmp byte-equal",
-      "result": "9 pass, 1 fail on 'makes no status call for a ticket whose package is attached'; restored byte-equal"
-    },
-    {
-      "tool": "bash",
-      "invocation": "bash .tools/safe-commit.sh ... (surprise row S4)",
-      "result": "committed bf1eb13; surprise-row-gate OK: 1 new row carries its step-7/step-10 fields"
+      "result": "MUTANT-FIRES (rc=0); restore verified"
     }
   ]
 }
