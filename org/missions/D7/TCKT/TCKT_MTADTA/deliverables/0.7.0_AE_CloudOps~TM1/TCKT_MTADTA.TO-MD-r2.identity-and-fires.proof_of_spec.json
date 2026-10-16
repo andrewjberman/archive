@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_MTADTA.TO-MD-r2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/decompositions/TCKT_MTADTA_DECOMP_R2.md",
+    "vintage_commit": "21da981e7c",
+    "to_ref": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-r2.identity-and-fires.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/prd/TCKT_MTADTA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2614b497ed"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TM1",
+  "acceptance": [
+    {
+      "criterion_id": "MD2-r2-AC1",
+      "criterion_verbatim": "MD2-r2-AC1 -- the credential secret holds a JSON value with tenant_id, client_id and client_secret, and the subject-key secret holds a value of 32 characters or more (only the key names are printed).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r2.py app",
+      "output_evidence": "R2-APP-OK keys=tenant_id,client_id,client_secret   (rc=0)",
+      "denominator": "2 secrets read (the credential JSON by key names, the subject key by length); the check printed REFUSED on the subject key before it was written (the negative arm); run at 13:2xZ and 15:4xZ, identical",
+      "status": "PASS",
+      "expect": "R2-APP-OK"
+    },
+    {
+      "criterion_id": "MD2-r2-AC2",
+      "criterion_verbatim": "MD2-r2-AC2 -- the Management API lists exactly the three subscriptions enabled: Audit.Exchange, Audit.General, Audit.SharePoint.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r2.py subs",
+      "output_evidence": "R2-SUBS-OK Audit.Exchange,Audit.General,Audit.SharePoint   (rc=0); the starts returned HTTP 200 x3 at 2026-10-16T13:22:40Z",
+      "denominator": "3 subscriptions listed by the API with the app's own token; the sign-in feed is not among them; 3 starts, 3 HTTP 200",
+      "status": "PASS",
+      "expect": "R2-SUBS-OK"
+    },
+    {
+      "criterion_id": "MD2-r2-AC3",
+      "criterion_verbatim": "MD2-r2-AC3 -- at least two scheduled collector invocations since the time in fires_since.txt (the redeploy of item 5a), none of them a timeout or an error.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r2.py fires org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.7.0_AE_CloudOps~TM1/fires_since.txt",
+      "output_evidence": "R2-FIRES-OK invocations_since_start=2 (pages=1) function_errors=0 timeouts=0   (rc=0). Fire 1 14:31:22Z: fetched=1124 bronze_objects=24 failed=0 complete=True, 774 s. Fire 2 15:31:22Z: fetched=26 bronze_objects=3 failed=0 complete=True, 25 s. CloudWatch Errors 0 for 14Z and 15Z",
+      "denominator": "2 REPORT lines since 2026-10-16T14:02:59Z (the check follows nextToken, pages=1), 0 with Status timeout or error, 0 error lines; CloudWatch Errors read for the two hours, 0 each; the same check against the earlier start time refuses with 5 invocations and 3 timed out",
+      "status": "PASS",
+      "expect": "R2-FIRES-OK"
+    },
+    {
+      "criterion_id": "MD2-r2-AC5",
+      "criterion_verbatim": "MD2-r2-AC5 -- (a fourth mechanical criterion, with this reason: the CTO's ruling, msg 6614, moved the admin GetObject probe here because it needs an object that exists) an admin GetObject on the existing cursor key reads AccessDenied.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_r1.py getobject",
+      "output_evidence": "R1-GETOBJECT-OK   (rc=0); raw: GetObject as cloudops-dell1-agent-user on the cursor key -> AccessDenied, HeadObject -> 403",
+      "denominator": "1 key (the cursor, written by fire 1); a missing key read NoSuchKey for this identity before the first fire, so AccessDenied here is a refusal of an existing object",
+      "status": "PASS",
+      "expect": "R1-GETOBJECT-OK"
+    },
+    {
+      "criterion_id": "MD2-r2-AC4",
+      "criterion_verbatim": "MD2-r2-AC4 -- JUDGMENT, graded by the CVO at L9, never by you: Andrew names one of the eight and a trading day and reads that person's Microsoft 365 day in order from collection that is actually running, and recognises it as that person's day (PRD FWD-1). You do not run, grade or claim this one.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- judgment criterion (no invocation the order could reduce to an expectation). Andrew reads one person's day through the door with his MFA session; the CVO grades.",
+      "output_evidence": "No output: this seat did not run, grade or claim it.",
+      "denominator": "N/A -- judgment criterion",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded by the CVO at L9",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same fires check against subs_started_at.txt (13:22:40Z), a window that holds the three timed-out invocations of the first collector build, is the negative arm.",
+      "expected": "R2-FIRES-REFUSED with timed-out reports counted",
+      "observed": "R2-FIRES-REFUSED invocations_since_start=5 (pages=1) timed_out_or_errored_reports=3 function_error_lines=0   (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the fires check run twice against fires_since.txt; stdout compared byte for byte",
+      "observed": "STABLE: R2-FIRES-OK invocations_since_start=2 (pages=1) function_errors=0 timeouts=0",
+      "status": "STABLE"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/trino/collector.tf",
+      "kind": "terraform",
+      "commit_or_etag": "d386f84f49",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0, 0 added 1 changed 0 destroyed at 2026-10-16T14:02:53Z; live Timeout 900 and CodeSha256 equal to the built zip",
+      "artifact_covered_by": [
+        "MD2-r2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.7.0_AE_CloudOps~TM1/subs_started_at.txt",
+      "kind": "doc",
+      "commit_or_etag": "8cf9350e7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the start time of the three subscriptions; a record, not a deployed thing"
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.7.0_AE_CloudOps~TM1/fires_since.txt",
+      "kind": "doc",
+      "commit_or_etag": "0ecd6fb8e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the apply time AC3 reads; a record, not a deployed thing",
+      "artifact_covered_by": [
+        "MD2-r2-AC3"
+      ]
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "MD2-r2-AC4 (Andrew's live read of one person's day)",
+      "reason": "JUDGMENT, graded by the CVO at L9; not run, graded or claimed here."
+    },
+    {
+      "item": "MD2-r2-AC5 admin GetObject on the existing cursor key",
+      "reason": "It belongs to the r1 check script; its row is below under the criterion id of this order."
+    },
+    {
+      "item": "Unified audit logging (RUNBOOK step 1)",
+      "reason": "Never run: no Exchange role is held. The first fire fetched content, which suggests it is on; that is not the check."
+    }
+  ],
+  "surprises": [
+    "TCKT_MTADTA-D1-S9: OBSERVATION -- Andrew_Berman holds two MFA devices, one named for another person; the door's MFA gate admits either.",
+    "TCKT_MTADTA-D1-S11: OBSERVATION -- the collector's first scheduled fire timed out at 300 s and the fires check read OK on it; both repaired by the issuer (row D1-S12, TO-MD-x2 reopened)."
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.7.0_AE_CloudOps~TM1/TCKT_MTADTA.TO-MD-r2.report.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/trino apply <plan>",
+      "result": "rc=0, 0 added 1 changed 0 destroyed"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg / hold / close on two entries",
+      "result": "secret-values-and-subscriptions entry HELD on the timeout, then the redeploy entry closed; see the report"
+    },
+    {
+      "tool": "aws logs filter-log-events",
+      "invocation": "unfiltered and filtered reads of the collector log group",
+      "result": "the filtered call returned a partial page; the unfiltered read found both fires"
+    }
+  ]
+}
