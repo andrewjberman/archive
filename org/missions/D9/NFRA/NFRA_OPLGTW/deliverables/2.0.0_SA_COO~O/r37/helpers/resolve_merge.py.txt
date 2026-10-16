@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+"""Resolve an open safe-merge of a worker branch: the append-only channel by id-union (ours + the worker's NEW whole rows),
+and the worker's own order file = ours with the status the worker set. Usage: python resolve_merge.py <order-path> <worker-status>"""
+import json
+import re
+import subprocess
+import sys
+
+CH = "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md"
+ORDER, STATUS = sys.argv[1], sys.argv[2]
+
+
+def stage(n, path):
+    r = subprocess.run(["git", "show", ":%d:%s" % (n, path)], capture_output=True)
+    return r.stdout.decode("utf-8") if r.returncode == 0 else None
+
+
+BLOCK = re.compile(r"(?m)^([ ]*)```json[ ]*\n(.*?)\n[ ]*```[ ]*$", re.S)
+
+
+def rows(t):
+    out = {}
+    for m in BLOCK.finditer(t):
+        try:
+            d = json.loads(m.group(2))
+        except Exception:
+            continue
+        if isinstance(d, dict) and d.get("id"):
+            out[d["id"]] = m.group(0)
+        elif isinstance(d, list):
+            for x in d:
+                if isinstance(x, dict) and x.get("id"):
+                    out.setdefault(x["id"], None)
+    return out
+
+
+ours, theirs = stage(2, CH), stage(3, CH)
+if ours is not None and theirs is not None:
+    have = set(rows(ours))
+    new = [(k, v) for k, v in rows(theirs).items() if k not in have and v]
+    text = ours.rstrip("\n") + "\n"
+    for k, v in new:
+        text += "\n" + v.strip("\n") + "\n"
+    open(CH, "w", encoding="utf-8", newline="").write(text)
+    print("channel: ours + %d new row(s) from the worker: %s" % (len(new), ", ".join(k for k, _ in new)))
+o = stage(2, ORDER)
+if o is not None:
+    for st in ("<status>pending</status>", "<status>complete</status>"):
+        if o.count(st) == 1:
+            o = o.replace(st, "<status>%s</status>" % STATUS)
+            break
+    open(ORDER, "w", encoding="utf-8", newline="").write(o)
+    print("order: ours with status", STATUS)
+subprocess.run(["git", "add", CH, ORDER])
