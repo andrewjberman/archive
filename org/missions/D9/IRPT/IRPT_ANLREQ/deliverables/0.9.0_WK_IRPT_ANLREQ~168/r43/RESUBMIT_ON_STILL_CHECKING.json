@@ -1,0 +1,61 @@
+{
+  "schema": "irpt_anlreq_r43_resubmit_on_still_checking/1",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-374",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~168",
+  "workstream": "ZZ35 round 43",
+  "cell": "AR-y-374 (decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md)",
+  "base": "00949e10d4",
+  "driver_path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/fwd1_driver.mjs",
+  "driver_sha256_before": "7dc7e04d32bf35ad6964497ae9143a4a98ed4d470b5f27070d25d90c6c3a3aa9",
+  "driver_sha256_after": "ed128153ad062f1340da4a3fc7279ddceb7962f1e8c810e6e8af4e33b4073d4e",
+  "bytes_before": 55073,
+  "bytes_after": 65342,
+  "driver_sha256_note": "the window-4 addendum pins this sha256 in a later pair (the CTO's half); this record does not pin it",
+  "post_allowed_identical": true,
+  "post_allowed_evidence": "labels_check rule (c): the POST_ALLOWED block (11 lines) is identical to 9c82e9d091 and to 2b0a50b912",
+  "cases_before": 87,
+  "cases_after": 103,
+  "cases_new": 16,
+  "selftest_output": "SELFTEST-OK 103 cases (rc 0); 103 case PASS lines, 0 case FAIL",
+  "selftest_command": "node org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/fwd1_driver.mjs --selftest",
+  "change": {
+    "constants": "STILL_CHECKING_TEXT (the form sentence, verbatim, portal fcbf2bce analysisRequest.ts line 254); RESUBMIT_WAIT_MS = 60000; RESUBMIT_MAX = 4",
+    "pure_helper": "export function stillCheckingAction({ pageText, promptsVisible, answered, resubmits }): wait when the sentence is not shown, a prompt is visible, or the run is answered; stop with 'STILL-CHECKING after 4 resubmits; the run stops, nothing is guessed' when the sentence is shown at 4 resubmits; otherwise resubmit",
+    "loop": "answerAfterSubmit, inside the existing prompt poll and only when the diagnostics are on (the --decisions path): the sentence is read from the whole filing area (not cut); after RESUBMIT_WAIT_MS since it was first seen or since the last click, a screenshot (resubmit-N, from the same 16-file bound), an answered() re-check, then one click of the Submit button named File Analysis Request (exact), and report.form_resubmits.push({ utc, n, shot, after_text })",
+    "budget": "when the 16-file bound is already spent the resubmit does not click: the run throws RESUBMIT-BUDGET (surprise IRPT_ANLREQ-D2-W168-S1)",
+    "new_actions": "one .click( (the Submit button); no fill, press, check, selectOption, setInputFiles or page.request added (labels_check rule f2)",
+    "guard": "POST_ALLOWED byte-identical; the guard admit() unchanged; the file input is not touched again",
+    "unchanged": "every AR-y-372 line, the fall-through, the diagnostics, ticketWaitMs (240 s, plus 90 s per round at 6 rounds), the six rounds, the 16-file bound, and the 87 signed cases"
+  },
+  "checker_outputs": {
+    "labels_check_py": "LABELS-OK 9 labels, POST_ALLOWED identical, nothing before the Submit, exactly one new click, still-checking text in the form source (denominator: 9 labels; 15 region lines compared (a); POST_ALLOWED 11 lines (c); 3 presses and 135 run() lines ordered (b); 274 selftest lines excluded (d); .click( base 00949e10d4 7, amended 8 (f2, one more click, others equal); STILL_CHECKING_TEXT at form source fcbf2bce line 254 (g)) rc 0; a second run is byte-identical",
+    "mutant_check_py": "MUTANT-FIRES stillCheckingAction made to return wait always in a scratch copy: the copy --selftest FAILS (rc 1; 8 of the 16 new cases fail, named in the output); positive control PASSES (rc 0, SELFTEST-OK 103 cases) rc 0"
+  },
+  "action_tokens": {
+    "base_00949e10d4": {".click(": 7, ".fill(": 6, ".press(": 0, ".check(": 0, ".selectOption(": 3, ".setInputFiles(": 1, "page.request": 0},
+    "amended": {".click(": 8, ".fill(": 6, ".press(": 0, ".check(": 0, ".selectOption(": 3, ".setInputFiles(": 1, "page.request": 0}
+  },
+  "verification_method": "offline only: the selftest, the labels checker and the mutant checker; the mutant runs in a system temp folder outside the product tree; the portal sources were read with git show from portal commits 0ba0cb13 and fcbf2bce",
+  "source_read_for_cause": {
+    "analysisRequest.ts": "fileAnalysisRequest re-posts a RESOLVING upload at most UPLOAD_MAX_TRIES = 5 times, UPLOAD_WAIT_MS = 3000 apart (lines 80, 82, 375-377), then returns state RESOLVING with STILL_CHECKING_MESSAGE (sentence at line 254, returned at line 392)",
+    "TicketCenter.tsx": "the upload token is made once when the file is chosen (line 264, token tv-<uuid>); the Submit handler passes analysisFile.token into prepareUpload (line 431), so a second Submit posts the same upload token",
+    "analysisRequest_source_reading": "a second Submit re-posts the same upload: READ IN THE SOURCE, NOT OBSERVED LIVE"
+  },
+  "guards_added": [
+    "the sentence is read from the whole filing area, not from the 600-character diagnostic text, so a sentence past the cut is not missed",
+    "answered() is checked again after the screenshot and before the click; a ticket that arrived during the shot is not re-posted",
+    "the re-click is taken only inside the --decisions path (answerAfterSubmit), which the order's cell names; a run without --decisions does not re-click (surprise IRPT_ANLREQ-D2-W168-S2)"
+  ],
+  "surprises": ["IRPT_ANLREQ-D2-W168-S1", "IRPT_ANLREQ-D2-W168-S2"],
+  "not_read": [
+    "any live run of the driver: no --go, no browser, no mint, no sign-in, no Submit, no poll, no POST, no network and no AWS call were made",
+    "the rendered Ticket Center page: whether the still-checking sentence is drawn inside the area the detection reads (the message sits in UploadFindings beside the hints; the detection reads the Submit-ancestor of a hint, or main)",
+    "whether a second Submit click on the live form re-posts the same upload exactly as the source says: the source reading is recorded above, the live door was not called",
+    "whether the Submit button is enabled while the form retries a RESOLVING answer, and what a click on it does during the retries",
+    "whether the sentence reappears about 15 s after a re-click, and whether a door answer resolves inside the 60 s wait",
+    "whether the ticket listener sees a filing that the client has not yet received when the still-checking sentence is shown (the answered() re-check narrows this window; it does not close it)",
+    "the run 3 step log (org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/run/step_log.txt), which is not in this worktree",
+    "the window-4 addendum, the decisions file, the pins, and the IB2 order: other seats' work, not in this cell"
+  ],
+  "judgment_note": "AR374-y-AC4J is a judgment criterion graded at L9 by 3.0.0_SA_CVO; this record does not grade it"
+}
