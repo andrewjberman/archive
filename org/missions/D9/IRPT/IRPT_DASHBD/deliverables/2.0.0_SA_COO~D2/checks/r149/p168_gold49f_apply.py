@@ -58,10 +58,11 @@ DAY = "2026-10-15"
 EARLIEST = "2024-07-08"
 MEM_LINE, DUR_LINE = 6553, 720000
 LAYER = "irpt-performance-native-layer"
+LATE_COLS = ("total_return_daily", "return_basis", "day_quality", "holdings_price_return", "holdings_price_return_reason", "guard_state")  # the columns that depend on inputs arriving after the first fire (CTO addendum 1)
 OTHER_TABLES = ["account_class_daily", "account_activity_daily", "account_lot_realized", "account_lot_unrealized_daily"]
 HEX12 = H.HEX12
 digit_runs = H.digit_runs
-H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("request_ids", "value_columns_sha256", "value_columns_sha256_before", "value_columns_sha256_after")
+H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("request_ids", "flow_columns_sha256")
 
 
 def b64_of_hex(h):
@@ -138,20 +139,24 @@ def check_tail(rec):
     check_report(fw["report"], "first_write")
     need(fw["filled_partitions_after"] == [DAY] and nes(fw["request_id"]), "first write: exactly the one filled partition %s afterwards" % DAY)
     bf = rec["backfill"]
-    need(isinstance(bf, dict) and set(bf) == {"payload", "invoked_utc", "status_code", "function_error", "report", "before", "after", "request_id"}, "backfill keys")
+    need(isinstance(bf, dict) and set(bf) == {"payload", "invoked_utc", "status_code", "function_error", "report", "before", "after", "previous_version_id", "request_id"}, "backfill keys")
     need(bf["payload"] == {"backfill": {"start": DAY, "end": DAY}, "accounts": "population"} and bf["status_code"] == 200 and bf["function_error"] is None and H.UTC.match(str(bf["invoked_utc"])) and bf["invoked_utc"] >= fw["invoked_utc"] and not in_window(bf["invoked_utc"], "11:35", "12:00"),
          "backfill: the one-day event on %s, 200, no error, after the first write, outside the fire window" % DAY)
     check_report(bf["report"], "backfill")
     bb, ba = bf["before"], bf["after"]
-    need(isinstance(bb, dict) and set(bb) == {"rows", "floor_start_with_row", "value_columns_sha256", "other_tables_rows"} and is_int(bb["rows"]) and bb["rows"] > 0 and is_int(bb["floor_start_with_row"]) and 0 < bb["floor_start_with_row"] <= bb["rows"], "backfill.before: rows and floor-start accounts with a row")
-    need(isinstance(ba, dict) and set(ba) == {"rows", "partial", "full", "claim_inferred", "value_columns_sha256", "other_tables_rows"}, "backfill.after keys")
+    need(isinstance(bb, dict) and set(bb) == {"rows", "floor_start_with_row", "flow_columns_sha256", "other_tables_rows"} and is_int(bb["rows"]) and bb["rows"] > 0 and is_int(bb["floor_start_with_row"]) and 0 < bb["floor_start_with_row"] <= bb["rows"], "backfill.before: rows and the accounts with a row whose first row is on the floor day")
+    need(isinstance(ba, dict) and set(ba) == {"rows", "partial", "full", "claim_inferred", "flow_columns_sha256", "changed_columns", "other_tables_rows"}, "backfill.after keys")
     need(ba["rows"] == bb["rows"] and ba["claim_inferred"] == ba["rows"] and ba["partial"] == bb["floor_start_with_row"] and ba["partial"] + ba["full"] == ba["rows"], "backfill.after: same rows, the claim on every row, PARTIAL_HISTORY exactly the floor-start accounts, the rest FULL")
-    need(ba["value_columns_sha256"] == bb["value_columns_sha256"] and re.fullmatch(r"[0-9a-f]{64}", str(ba["value_columns_sha256"])), "backfill: every value column identical before and after (one hash)")
+    need(ba["flow_columns_sha256"] == bb["flow_columns_sha256"] and re.fullmatch(r"[0-9a-f]{64}", str(ba["flow_columns_sha256"])), "backfill: market_value_eod and external_flow identical before and after (one hash; the CTO addendum 1)")
+    cc = ba["changed_columns"]
+    need(isinstance(cc, dict) and set(cc) <= set(LATE_COLS) and all(is_int(v) and 0 < v <= ba["rows"] for v in cc.values()), "backfill.after.changed_columns: only the late-input columns, each with a row count: %s" % (sorted(cc) if isinstance(cc, dict) else cc))
+    need(nes(bf.get("previous_version_id")), "backfill.previous_version_id: the version the day held before the event")
     need(isinstance(bb["other_tables_rows"], dict) and sorted(bb["other_tables_rows"]) == sorted(OTHER_TABLES) and ba["other_tables_rows"] == bb["other_tables_rows"], "backfill: the other tables' row counts for the day unchanged")
     need(nes(bf["request_id"]), "backfill.request_id")
     fl = rec["flips"]
-    need(isinstance(fl, dict) and set(fl) == {"full_to_partial", "partial_to_full", "unchanged", "non_floor_flips"} and all(is_int(fl[k]) for k in fl), "flips keys: counts only")
-    need(fl["non_floor_flips"] == 0, "any flip on an account whose first value day is not the source floor STOPS Act 5 (the CTO's condition 1)")
+    need(isinstance(fl, dict) and set(fl) == {"full_to_partial", "partial_to_full", "unchanged", "floor_account_flips", "served_before_full"} and all(is_int(fl[k]) for k in fl), "flips keys: counts only")
+    need(fl["served_before_full"] == 0 and fl["full_to_partial"] == 0 and fl["floor_account_flips"] == 0, "Act 5 stops only on a FULL to PARTIAL flip or a PARTIAL to FULL flip of an account whose first row is on or before the floor; the served series read PARTIAL_HISTORY before (the CTO addendum 1)")
+    need(fl["partial_to_full"] == ba["full"] and fl["unchanged"] == ba["partial"], "flips: PARTIAL to FULL equals the FULL rows and unchanged equals the PARTIAL rows of the day")
     rp = rec["republish"]
     ck = {"payload", "invoked_utc", "status_code", "function_error", "returned", "shard_reports", "published", "refused", "objects_after", "pair_count", "partial_with_pair", "no_claim_count", "request_ids"}
     need(isinstance(rp, dict) and set(rp) == ck, "republish keys differ")
@@ -214,9 +219,9 @@ def live(root):
             "artifact_version": ver.get("VersionId"), "s3": s3}
 
 
-def value_hash(tab):
-    cols = [c for c in tab.column_names if c not in ("history_scope", "history_scope_claim")]
-    rows = sorted(zip(*[tab[c].to_pylist() for c in cols]), key=lambda r: str(r[cols.index("account_id")]))
+def flow_hash(tab):
+    cols = ["account_id", "market_value_eod", "external_flow"]
+    rows = sorted(zip(*[tab[c].to_pylist() for c in cols]), key=lambda r: str(r[0]))
     return hashlib.sha256(json.dumps(rows, default=str, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
@@ -260,22 +265,39 @@ def run(root, cid):
         cl, hs = tab["history_scope_claim"].to_pylist(), tab["history_scope"].to_pylist()
         need(all(x == "inferred" for x in cl), "every row of the rewritten day must carry history_scope_claim = inferred")
         need(hs.count("PARTIAL_HISTORY") == bf["after"]["partial"] and hs.count("FULL") == bf["after"]["full"], "PARTIAL_HISTORY and FULL counts differ from the record")
-        need(value_hash(tab) == bf["after"]["value_columns_sha256"], "the value columns of the rewritten day differ from the record's hash")
+        key = [k for k in [o["Key"] for p in s3.get_paginator("list_objects_v2").paginate(Bucket=BUCKET, Prefix="%sdate=%s/" % (rp, DAY)) for o in p.get("Contents", [])] if k.endswith(".parquet")][0]
+        vers = sorted([v for p in s3.get_paginator("list_object_versions").paginate(Bucket=BUCKET, Prefix=key) for v in p.get("Versions", []) if v["Key"] == key], key=lambda v: v["LastModified"])
+        need(len(vers) >= 2 and vers[0]["VersionId"] == bf["previous_version_id"], "the day's data.parquet must hold its previous version (the recorded one) beside the new one")
+        import io as _io
+        import pyarrow.parquet as pq
+        old = pq.read_table(_io.BytesIO(s3.get_object(Bucket=BUCKET, Key=key, VersionId=vers[0]["VersionId"])["Body"].read()))
+        need(flow_hash(tab) == flow_hash(old) == bf["after"]["flow_columns_sha256"], "market_value_eod and external_flow of the rewritten day differ from the previous version or the record")
+        oi = {a: i for i, a in enumerate(old["account_id"].to_pylist())}
+        need(set(oi) == set(tab["account_id"].to_pylist()), "the rewritten day holds a different account set than its previous version")
+        chg = {}
+        for c in old.column_names:
+            if c in ("history_scope", "history_scope_claim"):
+                continue
+            ov, nv = old[c].to_pylist(), tab[c].to_pylist()
+            n_chg = sum(1 for j, a in enumerate(tab["account_id"].to_pylist()) if ov[oi[a]] != nv[j])
+            if n_chg:
+                chg[c] = n_chg
+        need(chg == bf["after"]["changed_columns"] and set(chg) <= set(LATE_COLS), "columns changed against the previous version: live %s, record %s (allowed: %s)" % (chg, bf["after"]["changed_columns"], list(LATE_COLS)))
         first = {}
         days = sorted({k.split("date=")[1][:10] for p in s3.get_paginator("list_objects_v2").paginate(Bucket=BUCKET, Prefix=rp) for k in [o["Key"] for o in p.get("Contents", [])] if "date=" in k})
 
         def one(d):
-            return d, [t.select(["account_id", "market_value_eod"]).to_pylist() for t in read_day(s3, rp, d)]
+            return d, [t.select(["account_id"]).to_pylist() for t in read_day(s3, rp, d)]
         with ThreadPoolExecutor(max_workers=12) as pool:
             for d, tl in pool.map(one, days):
                 for rows in tl:
                     for r in rows:
                         a = str(r["account_id"])
-                        if r["market_value_eod"] is not None and r["market_value_eod"] > 0 and a not in first:
+                        if a not in first:
                             first[a] = d
         accts = [str(x) for x in tab["account_id"].to_pylist()]
         floor_with_row = sum(1 for a in set(accts) if first.get(a) == days[0])
-        need(days[0] == EARLIEST and floor_with_row == bf["before"]["floor_start_with_row"] == bf["after"]["partial"], "the floor-start accounts with a row on %s: live %d, record %d, PARTIAL rows %d" % (DAY, floor_with_row, bf["before"]["floor_start_with_row"], bf["after"]["partial"]))
+        need(days[0] == EARLIEST and floor_with_row == bf["before"]["floor_start_with_row"] == bf["after"]["partial"], "the accounts with a row on %s whose first row is on the floor day: live %d, record %d, PARTIAL rows %d" % (DAY, floor_with_row, bf["before"]["floor_start_with_row"], bf["after"]["partial"]))
         for t in OTHER_TABLES:
             tb = pa.concat_tables(read_day(s3, table_prefix(root, t), DAY)) if len(read_day(s3, table_prefix(root, t), DAY)) > 1 else read_day(s3, table_prefix(root, t), DAY)[0]
             need(tb.num_rows == bf["after"]["other_tables_rows"][t], "the %s day partition holds %d rows; the record says %d" % (t, tb.num_rows, bf["after"]["other_tables_rows"][t]))
@@ -299,7 +321,7 @@ def run(root, cid):
         need(pair == rec["republish"]["pair_count"] == bf["after"]["rows"] and partial == rec["republish"]["partial_with_pair"] == bf["after"]["partial"] and n - pair == rec["republish"]["no_claim_count"], "series with the pair %d (record %d), PARTIAL among them %d (record %d)" % (pair, rec["republish"]["pair_count"], partial, rec["republish"]["partial_with_pair"]))
         need((root / "org/critical_paths/.open_deploys" / (LEDGER_SLUG + ".json")).is_file(), "the ledger's open marker is missing: the ledger must stay OPEN")
         need(not (root / "org/critical_paths/.open_deploys" / (PUBLISH_LEDGER + ".json")).is_file(), "the publish pair's ledger %s must read CLOSED before Act 5 (the CTO's condition 2)" % PUBLISH_LEDGER)
-        print("OK: the day's returns partition holds %d rows with the claim on every row, %d PARTIAL_HISTORY (exactly the floor-start accounts with a row that day, recomputed from the gold) and %d FULL, the value columns identical to the record's hash, the other four tables' day row counts unchanged; %d of %d series carry the pair (%d PARTIAL), the rest none; the publish ledger is closed and this ledger stays open" % (tab.num_rows, hs.count("PARTIAL_HISTORY"), hs.count("FULL"), pair, n, partial))
+        print("OK: the day's returns partition holds %d rows with the claim on every row, %d PARTIAL_HISTORY (exactly the accounts with a row that day whose first row is on the floor day, recomputed from the gold) and %d FULL, market_value_eod and external_flow identical to the previous version and only the late-input columns changed (counts equal the record's), the other four tables' day row counts unchanged; %d of %d series carry the pair (%d PARTIAL), the rest none; the publish ledger is closed and this ledger stays open" % (tab.num_rows, hs.count("PARTIAL_HISTORY"), hs.count("FULL"), pair, n, partial))
         return True
     raise Fail("unknown criterion %s" % cid)
 
@@ -335,9 +357,9 @@ def selftest():
                 "first_write": {"payload": {"day": DAY}, "invoked_utc": "2026-10-16T14:15:00Z", "status_code": 200, "function_error": None, "returned": {"day": DAY, "result": {"day": DAY, "rows": 6900}, "next": None},
                                 "report": rp, "filled_partitions_after": [DAY], "request_id": "r1"},
                 "backfill": {"payload": {"backfill": {"start": DAY, "end": DAY}, "accounts": "population"}, "invoked_utc": "2026-10-16T14:25:00Z", "status_code": 200, "function_error": None, "report": rp,
-                             "before": {"rows": 6946, "floor_start_with_row": 2849, "value_columns_sha256": "ab" * 32, "other_tables_rows": {t: 100 for t in OTHER_TABLES}},
-                             "after": {"rows": 6946, "partial": 2849, "full": 4097, "claim_inferred": 6946, "value_columns_sha256": "ab" * 32, "other_tables_rows": {t: 100 for t in OTHER_TABLES}}, "request_id": "r2"},
-                "flips": {"full_to_partial": 6946, "partial_to_full": 0, "unchanged": 0, "non_floor_flips": 0},
+                             "before": {"rows": 6946, "floor_start_with_row": 2849, "flow_columns_sha256": "ab" * 32, "other_tables_rows": {t: 100 for t in OTHER_TABLES}},
+                             "after": {"rows": 6946, "partial": 2849, "full": 4097, "claim_inferred": 6946, "flow_columns_sha256": "ab" * 32, "changed_columns": {"guard_state": 6700, "holdings_price_return": 6700}, "other_tables_rows": {t: 100 for t in OTHER_TABLES}}, "previous_version_id": "pv1", "request_id": "r2"},
+                "flips": {"full_to_partial": 0, "partial_to_full": 4097, "unchanged": 2849, "floor_account_flips": 0, "served_before_full": 0},
                 "republish": {"payload": {}, "invoked_utc": "2026-10-16T14:35:00Z", "status_code": 200, "function_error": None, "returned": {"ok": True, "accounts": 6949, "fanned_out": 7}, "shard_reports": [dict(shard) for _ in range(7)],
                               "published": 6949, "refused": 0, "objects_after": {"series": 6949, "manifest": 6949}, "pair_count": 6946, "partial_with_pair": 2849, "no_claim_count": 3, "request_ids": ["r3"]},
                 "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}}
@@ -353,8 +375,8 @@ def selftest():
                 ("fw payload", lambda r: r["first_write"].update(payload={"day": "2026-10-14"})), ("fw rows", lambda r: r["first_write"]["returned"]["result"].update(rows=0)), ("fw next", lambda r: r["first_write"]["returned"].update(next="2026-10-16")),
                 ("fw memory line", lambda r: r["first_write"]["report"].update(max_memory_used_mb=7000)), ("fw partitions", lambda r: r["first_write"].update(filled_partitions_after=[DAY, "2026-10-14"])),
                 ("bf payload", lambda r: r["backfill"].update(payload={"backfill": {"start": "2026-10-14", "end": DAY}, "accounts": "population"})), ("bf rows", lambda r: r["backfill"]["after"].update(rows=6900)),
-                ("bf claim", lambda r: r["backfill"]["after"].update(claim_inferred=6000)), ("bf partial", lambda r: r["backfill"]["after"].update(partial=2000, full=4946)), ("bf values", lambda r: r["backfill"]["after"].update(value_columns_sha256="cd" * 32)),
-                ("bf other tables", lambda r: r["backfill"]["after"]["other_tables_rows"].update({OTHER_TABLES[0]: 5})), ("flip non floor", lambda r: r["flips"].update(non_floor_flips=1)), ("rp payload", lambda r: r["republish"].update(payload={"summaries": True})),
+                ("bf claim", lambda r: r["backfill"]["after"].update(claim_inferred=6000)), ("bf partial", lambda r: r["backfill"]["after"].update(partial=2000, full=4946)), ("bf flows", lambda r: r["backfill"]["after"].update(flow_columns_sha256="cd" * 32)), ("bf changed col", lambda r: r["backfill"]["after"]["changed_columns"].update(market_value_eod=5)), ("bf changed empty count", lambda r: r["backfill"]["after"]["changed_columns"].update(guard_state=0)), ("bf prev", lambda r: r["backfill"].update(previous_version_id="")),
+                ("bf other tables", lambda r: r["backfill"]["after"]["other_tables_rows"].update({OTHER_TABLES[0]: 5})), ("flip f2p", lambda r: r["flips"].update(full_to_partial=1)), ("flip floor account", lambda r: r["flips"].update(floor_account_flips=1)), ("flip served full", lambda r: r["flips"].update(served_before_full=2)), ("flip p2f sum", lambda r: r["flips"].update(partial_to_full=4000)), ("flip unchanged", lambda r: r["flips"].update(unchanged=2000)), ("rp payload", lambda r: r["republish"].update(payload={"summaries": True})),
                 ("rp shards", lambda r: r["republish"]["shard_reports"].pop()), ("rp refused", lambda r: r["republish"].update(refused=1)), ("rp pair", lambda r: r["republish"].update(pair_count=6000)), ("rp partial", lambda r: r["republish"].update(partial_with_pair=1)),
                 ("rp in window", lambda r: r["republish"].update(invoked_utc="2026-10-16T12:30:00Z")), ("ledger", lambda r: r.update(ledger_closed=True)), ("extra", lambda r: r.update(z=1)))
         for label, fn in arms:
