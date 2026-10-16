@@ -18,6 +18,7 @@ from pathlib import Path
 CAND = "42a1539b183adf19efd4ded2ead8642f48ddb3d0"
 IR = "src/pages/InvestorReporting/"
 VIEW = IR + "tabs/reporting/PerformanceTemplateView.tsx"
+STORE = IR + "tabs/reporting/templateState.ts"
 TAB = IR + "tabs/reporting/ReportingTab.tsx"
 EDITS = {IR + "tabs/reporting/ReportingTab.tsx", IR + "export/Preview.tsx", IR + "render/PrintEntry.tsx", IR + "render/manifest.ts", IR + "export/ExportButton.tsx"}
 FORBIDDEN = {IR + "dashboard/DashboardPerformance.tsx", IR + "dashboard/seriesContract.ts", IR + "dashboard/coverageWords.ts"}
@@ -42,7 +43,7 @@ def run(cmd, cwd, timeout=900):
 
 
 def portal(root):
-    p = Path(root) / "portal"
+    p = Path(root).resolve() / "portal"  # absolute: git -C <p> with cwd=<p> must not resolve portal/portal (worker row W246-S1)
     need((p / "package.json").is_file(), "no portal checkout at %s" % p)
     return p
 
@@ -75,11 +76,11 @@ def check_diff(root):
     out, _ = git(p, "diff", "--name-only", base, "HEAD")
     changed = {x for x in out.splitlines() if x.strip()}
     cand = candidate_files(p)
-    allowed = set(cand) | EDITS | {VIEW}
+    allowed = set(cand) | EDITS | {VIEW, STORE}
     extra = [f for f in changed if f not in allowed and not f.startswith(TESTS)]
     need(not extra, "portal files outside the agreed write set changed: %s" % extra[:4])
     need(not (changed & FORBIDDEN), "a forbidden file changed: %s" % sorted(changed & FORBIDDEN))
-    need(VIEW in changed, "the new view %s is missing" % VIEW)
+    need(VIEW in changed and STORE in changed, "the new view %s or the shared state module %s is missing" % (VIEW, STORE))
     for f in cand:
         a, rc = git(p, "show", "%s:%s" % (CAND, f))
         b, rc2 = git(p, "show", "HEAD:%s" % f)
@@ -92,6 +93,8 @@ def check_diff(root):
     for f in (IR + "render/manifest.ts",):
         need("PerformanceReportDocument" in (p / f).read_text(encoding="utf-8"), "%s must reference PerformanceReportDocument" % f.rsplit("/", 1)[-1])
     need(any("PerformanceReportDocument" in (p / f).read_text(encoding="utf-8") for f in (IR + "export/Preview.tsx", IR + "render/PrintEntry.tsx")), "Preview.tsx or PrintEntry.tsx must reference PerformanceReportDocument")
+    need(any("templateState" in (p / f).read_text(encoding="utf-8") for f in (IR + "export/Preview.tsx", IR + "render/PrintEntry.tsx")), "the export (Preview.tsx or PrintEntry.tsx) must read the tab's template state from templateState")
+    need("templateState" in (p / VIEW).read_text(encoding="utf-8"), "the view must publish its state through templateState")
     return True
 
 
@@ -100,8 +103,18 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { PerformanceTemplateBody, SYNTHETIC_PREVIEW_BANNER, resolveTemplate } from '../../tabs/reporting/PerformanceTemplateView'
 import { SYNTHETIC_REPORT_ALPHA } from '../../dashboard/report/fixtures/syntheticReport'
+import { publishTemplateState, readTemplateState } from '../../tabs/reporting/templateState'
 
 describe('p175 probe', () => {
+  test('the shared state: what the view publishes is what the export reads', () => {
+    publishTemplateState(null)
+    expect(readTemplateState()).toBeNull()
+    const s = resolveTemplate(SYNTHETIC_REPORT_ALPHA, null)
+    publishTemplateState(s)
+    expect(readTemplateState()).toEqual(s)
+    publishTemplateState(null)
+    expect(readTemplateState()).toBeNull()
+  })
   test('the banner words', () => {
     expect(SYNTHETIC_PREVIEW_BANNER).toBe('SYNTHETIC PREVIEW')
   })
