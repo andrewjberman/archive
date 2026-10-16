@@ -109,6 +109,16 @@ def check_all_entries(p158, base_map, new_map, head_blob, pin_blob, pin_ok):
     return moved
 
 
+def check_layer_imports(p149, third_party):
+    """The bundle's third-party imports (besides boto3/botocore) are only pyarrow and pandas, and the layer holds each (the 49 Financial gold function imports pandas; p149's clause allowed pyarrow alone)."""
+    extra = set(third_party) - p149.RUNTIME_PROVIDED
+    need(extra <= {"pyarrow", "pandas"}, "the bundle's third-party imports must be pyarrow and pandas only, read %s" % sorted(extra))
+    names = p149.layer_names(p149.latest_layer_version())
+    for pkg in sorted(extra):
+        need("python/%s/__init__.py" % pkg in names, "the layer zip does not hold python/%s/__init__.py" % pkg)
+    return True
+
+
 def check_fresh(entry, head_blob, sha):
     stale = [s["repo_path"] for s in entry["staged_from"] if sha(head_blob(s["repo_path"])) != s["sha256"]]
     need(not stale, "stale members remain: %s" % stale[:3])
@@ -166,7 +176,7 @@ def run(root, cid):
         zpath = p160.build_only(root)
         sources = {f: p160.source_of(root, entry, f).read_text(encoding="utf-8") for f in entry["files"] if f.endswith(".py")}
         mods = {Path(f).stem for f in sources} | {"lib"}
-        p149.check_imports(p149.third_party(sources, mods), lambda n: n in p149.layer_names(p149.latest_layer_version()))
+        check_layer_imports(p149, p149.third_party(sources, mods))
         with zipfile.ZipFile(zpath) as z:
             p149.check_package([n for n in z.namelist() if not n.endswith("/")], entry["files"], lambda mem: z.read(mem), lambda mem: p160.source_of(root, entry, mem).read_bytes())
             b64s[key] = base64.b64encode(hashlib.sha256(Path(zpath).read_bytes()).digest()).decode("ascii")
@@ -226,6 +236,16 @@ def selftest():
         red(lambda: check_repin_entry("k", be, e2, lambda p: head[p], pb, lambda pin: True, sh), label)
     red(lambda: check_repin_entry("k", be, ne, lambda p: head[p], pb, lambda pin: False, sh), "pin not an ancestor")
     entry = {"staged_from": [{"repo_path": "a", "sha256": "1"}, {"repo_path": "b", "sha256": "2"}]}
+    class P149:
+        RUNTIME_PROVIDED = {"boto3", "botocore"}
+        layer_names = staticmethod(lambda v: {"python/pyarrow/__init__.py", "python/pandas/__init__.py"})
+        latest_layer_version = staticmethod(lambda: 1)
+    assert check_layer_imports(P149, ["boto3", "pandas", "pyarrow"]) and check_layer_imports(P149, ["pyarrow"])
+    red(lambda: check_layer_imports(P149, ["pyarrow", "requests"]), "a foreign import")
+
+    class P149Thin(P149):
+        layer_names = staticmethod(lambda v: {"python/pyarrow/__init__.py"})
+    red(lambda: check_layer_imports(P149Thin, ["pandas", "pyarrow"]), "the layer lacks pandas")
     assert check_fresh(entry, lambda p: {"a": b"x", "b": b"y"}[p], lambda b: {b"x": "1", b"y": "2"}[b])
     red(lambda: check_fresh(entry, lambda p: {"a": b"x", "b": b"z"}[p], lambda b: {b"x": "1", b"z": "9"}[b]), "a stale member remains")
     print("selftest: facts (%d red arms), grant (2) and freshness (1) clauses behave; the entry clause is the proven p158 check_repin applied to each entry" % len(farms))
