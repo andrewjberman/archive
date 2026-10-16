@@ -68,12 +68,16 @@ def ac1(r):
     if dg["49financial"].get("cusip_lines") != 12 or dg["49financial"].get("cusip_lines_live") != 12:
         fail("49financial: cusip_lines and cusip_lines_live must both read 12 (row S206: a reversal is a STOP)")
     rm = firms(r, "remeasure")
-    if rm["49financial"].get("verdict") not in ("REFUSED_NO_NODE_MOVES", "PUBLISHED_ONE_LISTED_ACCOUNT"):
-        fail("remeasure.49financial.verdict must read REFUSED_NO_NODE_MOVES or PUBLISHED_ONE_LISTED_ACCOUNT (the two signed branches)")
-    if rm["cottonwood"].get("verdict") != "PUBLISHED_FOUR_LISTED_ACCOUNTS" or rm["cottonwood"].get("nodes_added") != 4 or rm["cottonwood"].get("other_nodes_changed") != 0:
-        fail("remeasure.cottonwood must read PUBLISHED_FOUR_LISTED_ACCOUNTS, nodes_added 4 and other_nodes_changed 0 (any other is a STOP for Cottonwood)")
+    fv = rm["49financial"]
+    if fv.get("verdict") not in ("REFUSED_NO_NODE_MOVES", "PUBLISHED_ONE_LISTED_ACCOUNT", "PUBLISHED_TWO_LISTED_ACCOUNTS_AMOUNT_ZERO"):
+        fail("remeasure.49financial.verdict must read REFUSED_NO_NODE_MOVES, PUBLISHED_ONE_LISTED_ACCOUNT or PUBLISHED_TWO_LISTED_ACCOUNTS_AMOUNT_ZERO (the signed branches and the CTO-accepted count, msg 9538)")
+    if fv.get("verdict") == "PUBLISHED_TWO_LISTED_ACCOUNTS_AMOUNT_ZERO" and (fv.get("listed_accounts") != 2 or fv.get("amount_added_usd") != 0 or fv.get("other_nodes_changed") != 0 or fv.get("evidence_values_per_exempted_account") != 2):
+        fail("remeasure.49financial at two listed accounts must read listed_accounts 2, amount_added_usd 0, other_nodes_changed 0 and one evidence value per exempted account (2)")
+    cv = rm["cottonwood"]
+    if cv.get("verdict") not in ("PUBLISHED_FOUR_LISTED_ACCOUNTS", "PUBLISHED_NO_LISTED_ACCOUNTS") or cv.get("nodes_added") != (4 if cv.get("verdict") == "PUBLISHED_FOUR_LISTED_ACCOUNTS" else 0) or cv.get("other_nodes_changed") != 0:
+        fail("remeasure.cottonwood must read PUBLISHED_FOUR_LISTED_ACCOUNTS with nodes_added 4, or PUBLISHED_NO_LISTED_ACCOUNTS with nodes_added 0, and other_nodes_changed 0 (any other is a STOP for Cottonwood)")
     iv = rm["inflection"].get("verdict")
-    if iv not in ("REFUSED_SOURCE_FRONTIER_OLDER_NO_NODE_MOVES", "PUBLISHED_LISTED_ACCOUNTS_AMOUNT_ZERO", "STOP_INFLECTION_ONLY"):
+    if iv not in ("REFUSED_SOURCE_FRONTIER_OLDER_NO_NODE_MOVES", "PUBLISHED_LISTED_ACCOUNTS_AMOUNT_ZERO", "PUBLISHED_NO_LISTED_ACCOUNTS", "STOP_INFLECTION_ONLY"):
         fail("remeasure.inflection.verdict must be one of the three signed readings (CTO half: any other verdict is a STOP for Inflection only)")
     if iv == "STOP_INFLECTION_ONLY" and (r.get("mints") or {}).get("inflection"):
         fail("an Inflection STOP means Inflection is not minted")
