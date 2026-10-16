@@ -36,7 +36,8 @@ TESTS = IR + "__tests__/irpt-dashbd/"
 ALLOWED_EXACT = {TAB, PANELS}
 PROBE = TESTS + "_p180_probe.test.tsx"
 WORDS = ["Largest positions", "Loading this client's holdings.", "This client's holdings could not be loaded.",
-         "Allocation over time is not published for this client yet.", "Attribution is not published for this client yet."]
+         "Allocation over time is not published for this client yet.", "Attribution is not published for this client yet.",
+         "Sector breakdown is not published for this client yet."]
 IMPORTS = ["classTotalsView", "ClassTotals", "securityRowsFrom", "foldSecurityRows"]
 
 
@@ -106,6 +107,7 @@ describe('p180 probe', () => {
     const t = text(render(served, false))
     expect(t).toContain('Allocation over time is not published for this client yet.')
     expect(t).toContain('Attribution is not published for this client yet.')
+    expect(t).toContain('Sector breakdown is not published for this client yet.')
   })
 })
 """

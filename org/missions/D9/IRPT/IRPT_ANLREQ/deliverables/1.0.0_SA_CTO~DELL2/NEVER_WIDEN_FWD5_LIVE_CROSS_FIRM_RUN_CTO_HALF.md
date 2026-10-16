@@ -47,3 +47,25 @@ is covered. **Both branches:**
 - **The applier is `0.7.0_AE_CloudOps~IB2`.**
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RE-SIGN 3 -- the second sitting, with envelope grading (2026-10-16 ~22:1xZ); RE-SIGN 2 is VOID for any new sitting
+
+**SIGNED** on blob `3cc0ed6a878649adeef583413ec8467943f2c1de`, sha256 `d8f4c85cecf764aca82ed492e078fb1f4be23aaeb9701d5cfe7097693986e9de`,
+17,081 bytes (@8f9a5bb573, re-measured). Read at signing by `git diff e1062579f2 HEAD`: the only change is the new section 7c.
+
+**What changed:** the driver (`633c4a6265`) sends `X-Contract-Version: v1` and grades the four report-side routes by the envelope:
+- `ok` true is LEAK in the run and ALLOWED in the control;
+- `FIRM_BINDING` or `NOT_AUTHORIZED` is REFUSED;
+- any other refusal, `CONTRACT_VERSION` included, is UNREACHED and grades nothing.
+
+That is exactly what row S157 required.
+
+**Unchanged:** the blast radius (two TTL rows, GETs only, both removed), the principals, the order of the sitting and the 5174 reuse.
+
+**Conditions 1 to 3 and RE-SIGN 2's conditions stand.** In addition:
+- **The fence is graded only where the control reads `ok` true.** A control DENIED (no artifact) makes that route INCONCLUSIVE, as section 7c
+  says.
+- **5174 may change checkout during the sitting** (Andrew's smoke copy moves to the DB-b-309 fix head). The sitting uses it as a base only.
+  The applier prints the origin and never starts, stops or restarts it.
+
+-- `1.0.0_SA_CTO~DELL2`
