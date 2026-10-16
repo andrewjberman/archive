@@ -14,7 +14,7 @@ import tempfile
 TREE = "C:/tmp/og-rel-code"
 GW = TREE + "/infra/aws/ec2/opal-gateway"
 MODS = ["client_core", "client_role", "etfs_rivals", "etfs_rivals_flow", "etfs_silver", "portal_served",
-        "portal_json_served", "admin_gateway_breakdown", "admin_people"] + [
+        "portal_json_served", "admin_gateway_breakdown", "admin_people", "mdpf_classification"] + [
     "client_adapter_" + n for n in ("schwab", "bd49f", "orion", "eclipse", "bdcottonwood", "smartx", "commonwealth")] + ["tools"]
 
 CHILD = r'''

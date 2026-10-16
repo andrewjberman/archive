@@ -71,7 +71,8 @@ def ac1():
         if e not in new:
             continue
         diff = set(k for k in set(r) | set(new[e]) if r.get(k) != new[e].get(k))
-        if diff - {"bucket", "vendor", "firm", "nl_tags", "nl_tags_basis"}:
+        # the read-link fields (MX-c-31 and the post-release regeneration) are a later change graded by c31 and c40
+        if diff - {"bucket", "vendor", "firm", "nl_tags", "nl_tags_basis", "read_tool", "tools", "gap_owner"}:
             odd.append((e, sorted(diff)))
         if isinstance(r.get("bucket"), str) and BUCKET.match(r["bucket"]) and new[e].get("bucket") != r["bucket"]:
             moved.append(e)

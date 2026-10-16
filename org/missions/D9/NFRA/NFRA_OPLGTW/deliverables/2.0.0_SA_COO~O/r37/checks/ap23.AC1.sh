@@ -4,7 +4,7 @@
 #  - base..release differs only in the allowed set; no Terraform;
 #  - every tool function trunk_sha adds to app/tools.py beyond the base is registered in the release's app/tools.py, and the release adds none trunk_sha does not;
 #  - each added tool is in the release's SAFE_TOOLS (destructive_ops.py) and NATIVE_TOOLS (data_entitlement.py);
-#  - the release stages lib/opal_naming.py and app/refs/scopes.json byte-equal to trunk_sha's infra/logic/registry/scopes.json (the CL-7 deploy fact).
+#  - the release does NOT commit app/refs/partner_roster.json or app/refs/scopes.json (the gate grades a new data copy's firm tokens as new carriers); its deploy-to-ec2.sh stages lib/opal_naming.py, partner_roster.json and scopes.json into the bundle at build time from the repo sources, which exist at trunk_sha.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 REC="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap23_release.json"
 [ -f "$REC" ] || { echo "ap23_release.json absent"; echo "RESULT: FAIL"; exit 1; }
@@ -12,7 +12,7 @@ read -r base rel trunk mcp <<<"$(python -c "import json,sys;d=json.load(open(sys
 git cat-file -e "${rel}^{commit}" && git cat-file -e "${trunk}^{commit}" || { echo "release_sha ${rel:-EMPTY} or trunk_sha ${trunk:-EMPTY} is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
 live=$dep; [ "$dep" = "$rel" ] && live=$prev
-ALLOW="^($GW/(app/(client_[a-z0-9_]+|etfs_rivals|etfs_rivals_flow|etfs_silver|portal_served|portal_json_served|tools|destructive_ops|data_entitlement|admin_gateway_breakdown|admin_people)\.py|app/integrations/portal_index/integration\.py|app/refs/(partner_roster|scopes)\.json|deploy-to-ec2\.sh|tests/test_[a-z0-9_]+\.py)|lib/opal_naming\.py|infra/aws/ec2/EC2_MANIFEST\.json)$"
+ALLOW="^($GW/(app/(client_[a-z0-9_]+|etfs_rivals|etfs_rivals_flow|etfs_silver|portal_served|portal_json_served|mdpf_classification|tools|destructive_ops|data_entitlement|admin_gateway_breakdown|admin_people)\.py|app/integrations/portal_index/integration\.py|deploy-to-ec2\.sh|tests/test_[a-z0-9_]+\.py)|lib/opal_naming\.py|infra/aws/ec2/EC2_MANIFEST\.json)$"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); outside=$(printf '%s\n' "$files" | grep -vE "$ALLOW" | grep -c .)
 tf=$(git diff --name-only "$base" "$rel" | grep -c '\.tf$' | tr -d '\r')
 read -r want have extra safe native <<<"$(python - "$base" "$rel" "$trunk" <<'PYEOF2'
@@ -33,8 +33,10 @@ na = sum(1 for x in added_trunk if '"%s"' % x in native or "'%s'" % x in native)
 print(len(added_trunk), have, extra, sa, na)
 PYEOF2
 )"
-sc=$(git show "$rel:lib/opal_naming.py" 2>/dev/null | wc -c | tr -d ' \r')
-rs=$(git show "$rel:$GW/app/refs/scopes.json" 2>/dev/null | md5sum | cut -d' ' -f1); ts=$(git show "$trunk:infra/logic/registry/scopes.json" 2>/dev/null | md5sum | cut -d' ' -f1)
+stg=$(git show "$rel:$GW/deploy-to-ec2.sh" 2>/dev/null)
+dep_on=$(printf '%s\n' "$stg" | grep -cE "opal_naming\.py"); dep_ro=$(printf '%s\n' "$stg" | grep -cE "partner_roster\.json"); dep_sc=$(printf '%s\n' "$stg" | grep -cE "scopes\.json")
+src_ok=yes; for p in lib/opal_naming.py infra/logic/registry/scopes.json data/mdpf/config/partner_roster.json; do git cat-file -e "$trunk:$p" 2>/dev/null || src_ok=no; done
+cm=$(git ls-tree -r --name-only "$rel" -- "$GW/app/refs/partner_roster.json" "$GW/app/refs/scopes.json" | grep -c .)
 mcp_ok=no
 if [ -n "$mcp" ] && git -C mcportal cat-file -e "${mcp}^{commit}" 2>/dev/null && git -C mcportal merge-base --is-ancestor 421f8fbe8446650881a178fbac82a6432bb5d6ca "$mcp" 2>/dev/null; then
   mcp_ok=$(python - "$base" "$rel" "$mcp" <<'PYEOF3'
@@ -54,6 +56,6 @@ echo "base ${base:0:10} is the live ref before this release: $([ "$base" = "$liv
 echo "files differing $(printf '%s\n' "$files" | grep -c .); outside the batch set $outside (want 0); terraform files differing $tf (want 0)"
 echo "tools added by trunk $want; registered in the release $have of $want; extra tools in the release $extra (want 0); SAFE $safe of $want; NATIVE $native of $want"
 echo "mcportal bundle: manifest mcportal_commit equals the GO's, descends from 421f8fbe84, only that manifest field changed $mcp_ok"
-echo "staged for the host shape: lib/opal_naming.py bytes ${sc:-0}; app/refs/scopes.json byte-equal to the registry $([ -n "$rs" ] && [ "$rs" = "$ts" ] && echo yes || echo no)"
-[ "$base" = "$live" ] && [ "$outside" = 0 ] && [ "$tf" = 0 ] && [ "${want:-0}" -ge 20 ] && [ "$have" = "$want" ] && [ "$extra" = 0 ] && [ "$safe" = "$want" ] && [ "$native" = "$want" ] && [ "${sc:-0}" -gt 0 ] && [ "$rs" = "$ts" ] && [ "$mcp_ok" = yes ] && { echo "RESULT: PASS"; exit 0; }
+echo "bundle staging: deploy script stages opal_naming $dep_on, partner_roster $dep_ro, scopes $dep_sc line(s) (want 1 or more each); sources exist at trunk $src_ok; data copies committed in the release $cm (want 0)"
+[ "$base" = "$live" ] && [ "$outside" = 0 ] && [ "$tf" = 0 ] && [ "${want:-0}" -ge 20 ] && [ "$have" = "$want" ] && [ "$extra" = 0 ] && [ "$safe" = "$want" ] && [ "$native" = "$want" ] && [ "$dep_on" -ge 1 ] && [ "$dep_ro" -ge 1 ] && [ "$dep_sc" -ge 1 ] && [ "$src_ok" = yes ] && [ "$cm" = 0 ] && [ "$mcp_ok" = yes ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1

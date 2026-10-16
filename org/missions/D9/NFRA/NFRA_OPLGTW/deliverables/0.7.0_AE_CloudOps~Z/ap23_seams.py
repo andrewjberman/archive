@@ -33,7 +33,7 @@ trunk_files = ls(TRUNK, G + "app/") | ls(TRUNK, G + "tests/") | {"lib/opal_namin
 live_files = ls(LIVE, G + "app/") | ls(LIVE, G + "tests/") | {"lib/trading_calendar.py"}
 
 whole = ["client_core", "client_role", "etfs_rivals", "etfs_rivals_flow", "etfs_silver", "portal_served",
-         "portal_json_served", "admin_gateway_breakdown", "admin_people"]
+         "portal_json_served", "admin_gateway_breakdown", "admin_people", "mdpf_classification"]
 whole += ["client_adapter_" + n for n in
           ("schwab", "bd49f", "orion", "eclipse", "bdcottonwood", "smartx", "commonwealth")]
 take = {G + "app/%s.py" % m for m in whole}
@@ -42,7 +42,7 @@ for t in sorted(trunk_files):
     b = t.rsplit("/", 1)[-1]
     if t.startswith(G + "tests/") and (
             (b.startswith("test_og_") and b[len("test_og_"):-3] in (
-                "cl1", "cl2", "cl3", "cl4", "cl5", "cl6", "cl7", "cl8", "rv1", "rv2", "ch1", "gp1", "gf1", "sv1", "sv2"))
+                "cl1", "cl2", "cl3", "cl4", "cl5", "cl6", "cl7", "cl8", "rv1", "rv2", "ch1", "gp1", "gf1", "sv1", "sv2", "ac2"))
             or b in (
             "test_admin_gateway_breakdown.py", "test_admin_people.py", "test_positioning_extension.py")):
         take.add(t)
