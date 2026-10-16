@@ -327,7 +327,7 @@ def run(root, cid):
             with zipfile.ZipFile(zpath) as z:
                 hh.check_package([n for n in z.namelist() if not n.endswith("/")], entry["files"], lambda mem: z.read(mem), lambda mem: source_of(root, entry, mem).read_bytes())
                 z.extractall(tmp)
-            r = subprocess.run([sys.executable, "-I", str(Path(__file__).resolve()), "--unpacked", str(tmp), str(root)], capture_output=True, text=True, timeout=600, cwd=str(tmp))
+            r = subprocess.run([sys.executable, "-I", str(Path(__file__).resolve()), "--unpacked", str(tmp), str(Path(root).resolve())], capture_output=True, text=True, timeout=600, cwd=str(tmp))
             need(r.returncode == 0 and "UNPACKED PASS" in r.stdout, "the unpacked handler failed the behaviour clause: %s" % (r.stdout + r.stderr)[-300:].replace("\n", " | "))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
