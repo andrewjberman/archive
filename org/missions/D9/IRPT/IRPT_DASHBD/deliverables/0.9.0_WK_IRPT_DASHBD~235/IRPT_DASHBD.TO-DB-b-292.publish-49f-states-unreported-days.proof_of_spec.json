@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-292",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "bc709d6a5a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "bc709d6a5a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-292.publish-49f-states-unreported-days.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~235",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~235/RD_PUB49F_UNREPORTED_FACTS_R149.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "23571f5675e9b77f5d58a852d05c24d0c13af073",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The handler edit: the calendar import, _calendar_source, the two keyword parameters of _publish_one and their use in run. Read at the commit by DB160-1-AC1 (the fake-S3 behaviour). Nothing is built for upload, uploaded, invoked or deployed.",
+      "artifact_covered_by": ["DB160-1-AC1", "DB160-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_handler_unreported.py",
+      "kind": "test",
+      "commit_or_etag": "23571f5675e9b77f5d58a852d05c24d0c13af073",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ten self-contained tests over in-memory synthetic gold; 10 of 10 pass under pytest at the commit (DB160-1-AC3).",
+      "artifact_covered_by": ["DB160-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "23571f5675e9b77f5d58a852d05c24d0c13af073",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The entry irpt-49f-reporting-publish-lambda gains lib/trading_calendar.py as a pinned member and twelve stale pins are moved; every other key stays byte for byte. The build-only run in DB160-1-AC2 reads this committed file. The artifact_sha256 and deployed fields are unchanged.",
+      "artifact_covered_by": ["DB160-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~235/RD_PUB49F_UNREPORTED_FACTS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "83fb0328ae4f88767cc4c9913df0c58780344280",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The facts record: the entry, the added member, the twelve re-pinned paths, the test count (10) and the words. DB160-1-AC3 checks it against the recount.",
+      "artifact_covered_by": ["DB160-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB160-1-AC1",
+      "criterion_verbatim": "DB160-1-AC1: python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p160_pub49f.py\" . DB160-1-AC1 -> DB160-1-AC1 PASS. On a fake S3 holding synthetic 49 Financial gold, the handler's series validate against the series contract; with every trading day present each carries the explicit empty unreported list and its basis text; with one day absent each lists exactly that day (the gold's missing days, not the account's own); the manifest names the calendar that answered (publisher 0.3.0); numeric income writes no claim.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p160_pub49f.py\" . DB160-1-AC1",
+      "output_evidence": "WARN: trading_calendar: pandas_market_calendars absent; answering from the hardcoded NYSE fallback NYSE/hardcoded-fallback-2010-2027 (covers 2010-2027; regenerate with lib/tests/gen_nyse_closures.py --write before 2028)\nOK: on a fake S3 holding synthetic 49 Financial gold the handler publishes series that validate against the series contract; with every trading day present each carries the EXPLICIT empty unreported list and its basis text, with 2026-07-15 absent each lists exactly that day (the gold's missing days, not the account's own), the manifest names the calendar that answered (publisher 0.3.0), and numeric income writes no claim\nDB160-1-AC1 PASS",
+      "denominator": "2 arms (complete gold: 15 trading-day partitions; one day absent: 14 partitions); 3 of 3 accounts published and validated against the series contract in each arm; 3 of 3 accounts carry the pair and its basis in each arm; 3 of 3 manifests name the calendar that answered; 0 of 3 accounts carry income_claim",
+      "status": "PASS",
+      "expect": "DB160-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB160-1-AC2",
+      "criterion_verbatim": "DB160-1-AC2: same invocation with DB160-1-AC2 -> DB160-1-AC2 PASS. The entry gained the calendar (listed once in files, pinned in staged_from with a sha256 equal to git show pin:path and the file at HEAD), stale pins moved and nothing else changed; the BUILD_ONLY package holds exactly the entry's files with every member's bytes equal to its source, its third-party imports are pyarrow plus the runtime's, and the handler UNPACKED from the package passes AC1's behaviour.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p160_pub49f.py\" . DB160-1-AC2",
+      "output_evidence": "FAIL: the unpacked handler failed the behaviour clause: UNPACKED FAIL: FileNotFoundError (No such file or directory) on org/standards/IRPT_DASHBD_SERIES_CONTRACT.json inside the unpacked package\nDB160-1-AC2 FAIL\nrc=1 (the entry, the calendar member and the build-only and import steps raised no fault before the unpacked step)",
+      "denominator": "1 unpacked-handler step of 1 failed; the entry clause, the BUILD_ONLY run, the import check and the package check raised no fault before it (the checker prints no count for these steps)",
+      "status": "FAIL",
+      "status_reason": "The unpacked-handler step reads org/standards/IRPT_DASHBD_SERIES_CONTRACT.json from the unpacked package root, and the entry's files list (fixed by this criterion as the base list plus lib/trading_calendar.py) does not package that contract. Filed as IRPT_DASHBD-D2-W235-S2 (BLOCKING); the order stays open and nothing was repaired or widened.",
+      "expect": "DB160-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB160-1-AC3",
+      "criterion_verbatim": "DB160-1-AC3: same invocation with DB160-1-AC3 -> DB160-1-AC3 PASS. The test file holds at least 8 passing tests that assert the empty list, a listed day and calendar_source; your commits change only the handler, its test file, the source map, your folder, the investigation file and task-order files; the facts record equals the checker's recount.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p160_pub49f.py\" . DB160-1-AC3",
+      "output_evidence": "OK: 10 tests pass and assert the empty list, a listed day and calendar_source; 3 files changed, all in the grant; the facts record equals the recount\nDB160-1-AC3 PASS",
+      "denominator": "10 of 10 tests pass (at least 8 required); 3 of 3 files changed by the worker's commits are in the grant; 12 of 12 re-pinned paths equal the recount; facts record keys 5 of 5",
+      "status": "PASS",
+      "expect": "DB160-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own selftest injects five faults into the behaviour clause (pair dropped, empty present dates, the account's own dates as present dates, calendar_source dropped from the manifest, calendar_source wrong) and runs the clause on the handler at HEAD.",
+      "expected": "the clause is green on the handler at HEAD and red on each of the 5 injected faults",
+      "observed": "selftest: the behaviour clause is green on the handler at HEAD and red on 5 injected faults / selftest PASS (rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the behaviour clause ran twice on the same handler at HEAD: once in the DB160-1-AC1 invocation and once inside --selftest; the entry and facts clauses read committed bytes.",
+      "observed": "DB160-1-AC1 PASS in its run; the selftest behaviour clause green on the same handler; the two runs agree",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any upload, deploy, invoke, republish, Terraform command, AWS write, push or S3 read of client data",
+      "reason": "Outside the order: the risk class WORLD floor binds python and one JSON edit in a branch; the build, upload, apply and republish are a later signed pair."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W235-S1: two existing UnionTests in test_publisher_account_union.py fail with a TypeError on the new keyword call to _publish_one (their stubs take six positional arguments); that file is outside the grant, filed and not edited",
+    "IRPT_DASHBD-D2-W235-S2: DB160-1-AC2 cannot pass as written: its unpacked-handler step reads the series contract, which the fixed files list does not package; BLOCKING, not repaired",
+    "IRPT_DASHBD-D2-W235-S3: lambda_handler calls run() with no contract, so the deployed publish path skips the contract check; pre-existing at the base commit, ARMED for the issuer before any republish"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "bash .tools/safe-commit.sh (the gate on the staged investigation file at commit 83fb0328ae)",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields"
+    },
+    {
+      "tool": "safe-commit msg-verify",
+      "invocation": "bash .tools/safe-commit.sh --author 0.9.0_WK_IRPT_DASHBD~235 -F <msgfile> -- <paths> (commits 23571f5675 and 83fb0328ae)",
+      "result": "MATCH: the committed subject and body equal the message file; the client-data list is ABSENT on this box, so the scan was made by the worker (no client figure and no long digit run in the staged lines)"
+    }
+  ]
+}
