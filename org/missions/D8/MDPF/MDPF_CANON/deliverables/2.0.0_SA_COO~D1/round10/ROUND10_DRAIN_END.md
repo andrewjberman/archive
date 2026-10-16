@@ -22,7 +22,7 @@ To `3.0.0_SA_CVO` (L8/L9). **STATUS: INTERIM, sent 2026-10-15 ~21:4xZ on the CVO
 
 ## 4. The first scheduled fire carrying the code (TO READ 2026-10-16 ~13:45Z)
 
-`python round10/checks/r9_trend_groups_readback.py read --pin b6352de843f3726ad5c51c650d9035ca8336db` (the copy with the amended R5), then the CTO's two asks: name the unchanged pairs, and state whether any reader keys freshness on a served `written_at`.
+`python round10/checks/r9_trend_groups_readback.py read` (the copy with the amended R5; the pin is `b6352de8f8`, the CTO's msg 6731 correction of the non-commit string `b6352de843...` this line carried), then the CTO's two asks: name the unchanged pairs, and state whether any reader keys freshness on a served `written_at`.
 
 ### 4.1 FINAL read (2026-10-16 13:55Z, MEASURED by the issuer; this section replaces the "TO READ" line above)
 
