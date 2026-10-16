@@ -123,8 +123,8 @@ def main(stage, record_path, want_tar=None):
         if sorted(k for k in bnew if k in bold and bnew[k] != bold[k]) != ["opal_pricing", "provenance"]:
             fail("binding keys changed: %s" % sorted(k for k in bnew if k in bold and bnew[k] != bold[k]))
         prov = sorted(k for k in set(bnew["provenance"]) | set(bold["provenance"]) if bnew["provenance"].get(k) != bold["provenance"].get(k))
-        if prov != ["package_pin"] or bnew["provenance"]["package_pin"] != pin:
-            fail("provenance differs beyond package_pin (or package_pin is not the record pin): %s" % prov)
+        if prov != ["files_from_count", "files_from_sha256", "package_pin"] or bnew["provenance"]["package_pin"] != pin:
+            fail("provenance differs beyond package_pin and the files-from list's count and sha256 (or package_pin is not the record pin): %s" % prov)
         for key, member in (("opal_map", "overview_map.json"), ("opal_map_comparison", "comparison_map.json"), ("opal_map_multicomp", "multi_map.json"),
                             ("opal_swap_pool", "swap_pool.json")):
             want = {"path": "../ycharts/research/" + member, "sha256": wnew["ycharts/research/" + member]}
