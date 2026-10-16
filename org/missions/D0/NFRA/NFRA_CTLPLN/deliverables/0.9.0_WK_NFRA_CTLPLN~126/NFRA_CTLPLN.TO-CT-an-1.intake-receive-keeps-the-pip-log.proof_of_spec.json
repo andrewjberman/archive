@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-an-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-an-1.intake-receive-keeps-the-pip-log.md",
+    "group": "OTHER",
+    "vintage_commit": "67d0509936"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~126",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round24.md",
+    "vintage_commit": "67d0509936",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-an-1.intake-receive-keeps-the-pip-log.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_receive.py",
+      "kind": "script",
+      "commit_or_etag": "7a5d1e28f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_pip keeps its (rc, last_line) return and also records the whole captured run in LAST_PIP_RUN; write_pip_log writes receipts/<wheel>.prove-pip.<device>.log or receipts/<wheel>.install-pip.<device>.log (INTAKE-PIP-LOG schema=1 header, command=, env_pins=, inherited_pip_vars_removed= names only, rc=, pip text capped at PIP_LOG_CAP=200000 bytes); the prove and install receipts gain pip_log {file, sha256, bytes} only when pip ran. The HONEST LIMIT comment (the log is not a network trace) is in write_pip_log. Last changed in 7a5d1e28f3; no deploy; run from the worktree.",
+      "artifact_covered_by": [
+        "CTan1-AC1",
+        "CTan1-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round24_pip_log.py",
+      "kind": "test",
+      "commit_or_etag": "ed6212adcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Arms (a)-(g) run intake_receive against temporary packs with the real pip and synthetic local wheels (--no-index); no network. Arm (b) recomputes the log and wheel SHA-256 in the test; arm (d) sets PIP_INDEX_URL and PIP_FIND_LINKS in the parent environment; arm (e) is the instrument control (a hand-made log holding an index line must FAIL the check); arm (f) is a refused prove with no log and no pip_log key; arm (g) deletes pip_log and the receipt still clears install --dry-run. Last changed in ed6212adcb; no deploy.",
+      "artifact_covered_by": [
+        "CTan1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_receive.py",
+      "kind": "test",
+      "commit_or_etag": "5f3bcfe8a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new cases added to the existing suite (case_prove_writes_pip_log_the_receipt_names, case_parent_pip_index_url_never_in_log); the suite grew from 32 to 34 cases and runs green. Last changed in 5f3bcfe8a2; no deploy.",
+      "artifact_covered_by": [
+        "CTan1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTan1-AC1",
+      "criterion_verbatim": "prove and install write a pip log beside the receipt, the receipt names it with a matching SHA-256, no inherited index value reaches the log, and a refused run writes none (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round24_pip_log.py",
+      "output_evidence": "PIP-LOG arms=7/7 ok=True (rc=0; timeout 280 python .tools/tests/test_round24_pip_log.py from the worktree root on the committed state at 5f3bcfe8a2; the surprise-row commit 37de3417f1 after it changes only the investigation file). Arm lines: PASS arm_a_prove_writes_log, PASS arm_b_receipt_names_the_log_with_matching_hashes, PASS arm_c_install_writes_install_log_and_receipt_names_it, PASS arm_d_parent_index_values_never_reach_the_log, PASS arm_e_control_the_check_sees_an_index_line, PASS arm_f_refused_run_writes_no_log_and_no_key, PASS arm_g_receipt_without_pip_log_still_clears_dry_run.",
+      "denominator": "7 arms run: 7 PASS, 0 SKIP, 0 FAIL; ok counts passed plus skipped = 7 of 7",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTan1-AC2",
+      "criterion_verbatim": "the receiving tool's own suite passes with the two new cases (base: INTAKE-RECEIVE-TEST cases=32/32 ok=True; the count must grow); report the whole last line.",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_receive.py",
+      "output_evidence": "INTAKE-RECEIVE-TEST cases=34/34 ok=True (rc=0; timeout 280 python org/devices/intake/test_intake_receive.py from the worktree root on the committed state at 5f3bcfe8a2). The two new cases printed PASS: case_prove_writes_pip_log_the_receipt_names and case_parent_pip_index_url_never_in_log. Base count was 32; now 34.",
+      "denominator": "34 cases run: 34 PASS, 0 FAIL (base 32, grew by the two new cases)",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arm (e) of .tools/tests/test_round24_pip_log.py: a hand-made log text holding the line 'Looking in indexes: http://127.0.0.1:9/simple' is passed to check_log with the forbidden values [PIP_URL, 127.0.0.1]. The check must return FAIL with a reason beginning 'index line present' and a reason naming a forbidden value.",
+      "expected": "check_log returns ok=False; the reasons include 'index line present' and 'forbidden value'",
+      "observed": "PASS: arm_e_control_the_check_sees_an_index_line in the run of the test at 5f3bcfe8a2 (both runs); the assertions in arm (e) hold, so the check does see an index line",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each suite run twice on the committed state at 5f3bcfe8a2 by this worker (second run after the first, same command); outputs compared with diff",
+      "observed": "PIP-LOG arms=7/7 ok=True identical on both runs (diff empty, all 7 arm lines identical); INTAKE-RECEIVE-TEST cases=34/34 ok=True identical on both runs (diff empty)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_CTLPLN-W126-S1: the client-data check of safe-commit.sh found its hashed account-id list ABSENT on this box (C:\\Users\\AndrewBerman\\.opal\\account_id_hashes.txt; OPAL_ACCOUNT_ID_HASHES unset), so commit 7a5d1e28f3 was not checked for client account ids; the commit went through as the gate allows. Disposition UNDER_INVESTIGATION; hazard ARMED, disarm owner 0.0.0_AB_MSTR (the worker's reading, not a ruling). Row committed in 37de3417f1 at org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~126/NFRA_CTLPLN.TO-CT-an-1.intake-receive-keeps-the-pip-log.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~126 on 2026-10-15; the session's final message is the WORKER REPORT; the first session died after commits 7a5d1e28f3, ed6212adcb and 5f3bcfe8a2, and this session re-ran the criteria without changing code)",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round24_pip_log.py",
+      "result": "PIP-LOG arms=7/7 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_receive.py",
+      "result": "INTAKE-RECEIVE-TEST cases=34/34 ok=True"
+    }
+  ]
+}
