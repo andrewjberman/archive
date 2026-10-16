@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-308",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-308.apply-cottonwood-landing-r2-code-update-rewrite.md",
+  "group": "OTHER",
+  "vintage_commit": "db8c6caae1"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-308.apply-cottonwood-landing-r2-code-update-rewrite.md",
+  "vintage_commit": "031e610eff"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-cot-account-return-daily-lambda.zip (a new version)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "build-only sha256 +iYXakKx7.. equal to the packet; landed bytes equal the built zip (fa26176a42b1..); import smoke rc 0; the previously running version UnMNWDhc.. kept as the rollback target",
+   "artifact_covered_by": [
+    "DBC176-1-AC1"
+   ],
+   "commit_or_etag": "VersionId 6tFJSAqDjN0GqFkYj.DgT6.TkSmlwAuh"
+  },
+  {
+   "path_or_key": "lambda:irpt-cot-account-return-daily-lambda (code only, via Terraform account-return-daily)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "plan 0/1/0 on the function by code attributes only; ONE safe-apply 19:27:51Z to 19:29:49Z; post-apply plan No changes; CodeSha256 +iYXakKx7.. memory 1024 timeout 900 reserved concurrency 1 one layer no environment; five policy statements byte-identical; schedule ENABLED untouched",
+   "artifact_covered_by": [
+    "DBC176-1-AC1",
+    "DBC176-2-AC1"
+   ],
+   "commit_or_etag": "Apply complete 0 added 1 changed 0 destroyed"
+  },
+  {
+   "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/ (66 landed days, data.parquet and manifest.json each, a second version at the same key)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ten rewrite events, each after-read clean (rows equal, account_id and market_value_eod identical, allowance days only at the table's 844 and 798 rows, claim inferred, no FULL to PARTIAL flip); Act 5: 3325 history days (6650 keys) equal the before key list and digest, one version each; 3 held days absent",
+   "artifact_covered_by": [
+    "DBC176-3-AC1"
+   ],
+   "commit_or_etag": "event request ids in the record"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~IB2/COT_LANDING_REWRITE_R2_RECORD.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record with gates, before, build, plan, apply, dry run A, the ten events and Act 5 (words file COT_LANDING_REWRITE_R2_WORDS.txt beside it)",
+   "artifact_covered_by": [
+    "DBC176-1-AC1",
+    "DBC176-2-AC1",
+    "DBC176-3-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DBC176-1-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p176_cot_landing_r2_apply.py\" . DBC176-1-AC1",
+   "expect": "DBC176-1-AC1 PASS",
+   "output_evidence": "OK: gates (packet, both halves SIGNED, ancestry, one change at a time), ledger irpt-dashbd-cottonwood-landing-codeupdate-rewrite-r2-20261016, applier named, build fa26176a42b1 equals the packet's and landed as a NEW version, plan 0 add / 1 change / 0 destroy on the function by code attributes only, the apply outside the fire window\nDBC176-1-AC1 PASS\nexit=0",
+   "denominator": "1 record; 96 worktrees read, 0 markers naming the surface",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p176_cot_landing_r2_apply.py\" . DBC176-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DBC176-2-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p176_cot_landing_r2_apply.py\" . DBC176-2-AC1",
+   "expect": "DBC176-2-AC1 PASS",
+   "output_evidence": "OK: live: the function runs the NEW code; the five-statement policy and the schedule are untouched; the artifact's current version is the recorded one; the dry run (3 days, 0 held, inside 819 MB / 720 s) and the ten events (0 held, no FULL to PARTIAL flip) hold every clause of the packet and the CTO's half\nDBC176-2-AC1 PASS\nexit=0",
+   "denominator": "fresh live reads: 1 function, 1 role policy (5 statements), 1 schedule, 1 artifact key; 10 events",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p176_cot_landing_r2_apply.py\" . DBC176-2-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DBC176-3-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p176_cot_landing_r2_apply.py\" . DBC176-3-AC1",
+   "expect": "DBC176-3-AC1 PASS",
+   "output_evidence": "OK: the 66 landed days (10 ranges) each hold two versions of both keys; the 3325 history days' keys and version ids equal the record's, one version each; the three held days are absent\nDBC176-3-AC1 PASS\nexit=0",
+   "denominator": "66 landed days read against their oldest versions; 3325 history days (6650 keys) read",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p176_cot_landing_r2_apply.py\" . DBC176-3-AC1",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (the checker's selftest has a green arm and red arms).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "every event after-read compares each landed day to its oldest version and to the pre-event snapshot; the checker re-reads the world fresh",
+   "observed": "each event reads PROBLEMS none; the checker's three criteria PASS on fresh reads",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the packet's Act 3 25-day dry run and its four events",
+   "reason": "the 25-day dry run hit the 900 s timeout and wrote nothing (rows IRPT_DASHBD-D2-S129); addendum 1 (CTO countersigned) replaced it with two small dry runs and ten events over the same 66 days; the checker was amended to match"
+  },
+  {
+   "item": "the ledger close",
+   "reason": "the order forbids it: the issuer verifies and closes"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T1907Z_irpt-dashbd-cottonwood-landing-codeupdate-rewrite-r2-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "cot308.py (boto3 reads, one synchronous invoke per act, after-reads), terraform 1.15.8 via safe-apply, build-and-upload.sh",
+   "invocation": "gates, before, build, plan, apply, dry runs, ten events, act5, compile",
+   "result": "all three criteria PASS"
+  }
+ ]
+}
