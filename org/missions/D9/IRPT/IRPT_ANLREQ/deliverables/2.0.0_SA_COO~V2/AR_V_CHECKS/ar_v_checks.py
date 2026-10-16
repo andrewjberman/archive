@@ -8,6 +8,9 @@
                            commentary_ref as I7 canonical JSON
   v21-page     AR21-v-AC2  portal (round 2): the PDF opens through analysis-request-pdf; the I5' sentence; I7 refs shown, never
                            linked by guess                                                                       [--portal <dir>]
+  v31-failure  AR31-v-AC1  portal (round 3, workstream TICKET): the ticket page READS the hop failure through the existing
+                           status route and shows its words only while no package is attached (C-HOP-FAILURE v0.21)
+                                                                                                                  [--portal <dir>]
   regress      AR-v-AC2    the whole ticket_center tests directory passes (>= 131 passed, 0 failed)
   portal-tsc   AR-v-AC3    `bun x tsc -b` in the portal worktree exits 0                                          [--portal <dir>]
 
@@ -39,6 +42,13 @@ BUN_TESTS = {
     "v13-open": (Path("src/pages/TicketCenter/__tests__/package-open.test.tsx"),
                  ["lists the four package files on the ticket", "opens the report and the PDF through the owned reader",
                   "names a file with no reader instead of linking it", "makes no call for a ticket without a package"]),
+    "v31-failure": (Path("src/pages/TicketCenter/__tests__/hop-failure-read.test.tsx"),
+                    ["shows the failure's words while no package is attached",
+                     "shows no failure once a package is attached",
+                     "reads the status by the ticket's request id with the ticket's firm",
+                     "makes no status call for a ticket with no request id",
+                     "shows nothing extra when the status carries no words",
+                     "a failed status call shows no failure and does not break the ticket page"]),
     "v21-page": (Path("src/pages/TicketCenter/__tests__/package-r2.test.tsx"),
                  ["the real client opens the branded PDF through analysis-request-pdf",
                   "shows the custody sentence when original_ref is null", "shows an I7 ref by its artifact id",
@@ -105,7 +115,7 @@ def _tsc(portal):
 
 def main(argv):
     if not argv:
-        print("usage: ar_v_checks.py {v11-form|v12-packager|v13-open|v21-package|v21-page|regress|portal-tsc} [--portal <dir>]")
+        print("usage: ar_v_checks.py {v11-form|v12-packager|v13-open|v21-package|v21-page|v31-failure|regress|portal-tsc} [--portal <dir>]")
         return 2
     sub = argv[0]
     portal = argv[argv.index("--portal") + 1] if "--portal" in argv else None
