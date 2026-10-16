@@ -15,7 +15,7 @@ import sys
 
 REGION = "us-east-1"
 USERS = "opal-users-v2"
-ADDRS = ("fwd1-staff-r41b@opal.invalid", "irpt-r3p-iv-%s@opal.invalid")
+ADDRS = ("fwd1-staff-r41b@opal.invalid", "irpt-r3p-iv-%s@opal.invalid", "irpt-r3q-iv-%s@opal.invalid")
 STATUS_ZIP_SHA = "f937190d69b013bbafdec530a2cdbe8e7d656cac908a42bed779cd0730faab80"
 WANT = {"irpt-ycharts-generate": "kxOEgpbspky10PYWQ28y0+7V2UXG28whJ2riMa4CkTE=", "irpt-status": "+TcZDWmwE7uv3sUwos2+jn1lbKyQikK+13nNBzD6q4A="}
 BUCKET = "opal-313476888478-lambda-artifacts"

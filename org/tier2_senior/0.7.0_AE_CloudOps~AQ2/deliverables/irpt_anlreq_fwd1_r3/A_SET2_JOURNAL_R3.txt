@@ -1,0 +1,32 @@
+FWD-1 RUN 3 (window 3), AMENDMENT 5 (b) and (c): the resident unit's journal 13:36Z to 13:44Z (SET 2 probed 13:38:30Z to 13:41:01Z), the queue count and the restart count. Read only, redacted, bounded (sent as root by Systems Manager command 036d5ef4-549f-41b4-bc74-bad4614229ff). The script's output follows verbatim, then the analysis.
+S2J window lines total: 42; first: Oct 16 13:36:07 ip-172-31-87-2.ec2.inter; last: Oct 16 13:43:46 ip-172-31-87-2.ec2.inter
+S2J POLL lines: 22; RESOLVE lines: 8
+S2J matching lines: 16
+S2J Oct 16 13:38:42 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=BEFORE_CALL prompt_chars=344 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:39:43 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=AFTER_CALL outcome=OK elapsed_seconds=60.41177239990793 prompt_chars=344 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:39:43 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=READY code=-
+S2J Oct 16 13:39:45 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=BEFORE_CALL prompt_chars=343 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:39:57 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=AFTER_CALL outcome=OK elapsed_seconds=11.662754842080176 prompt_chars=343 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:39:57 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=READY code=-
+S2J Oct 16 13:39:59 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=BEFORE_CALL prompt_chars=344 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:40:18 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=AFTER_CALL outcome=OK elapsed_seconds=18.46729872887954 prompt_chars=344 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:40:18 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=READY code=-
+S2J Oct 16 13:40:20 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=BEFORE_CALL prompt_chars=344 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:40:37 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_KIMI kind=check attempt=1 state=AFTER_CALL outcome=OK elapsed_seconds=17.198809016030282 prompt_chars=344 max_[REDACTED] [REDACTED]
+S2J Oct 16 13:40:37 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=READY code=-
+S2J Oct 16 13:40:45 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=RETRY code=PROVIDER_READ_UNAVAILABLE:WAF_CHALLENGE
+S2J Oct 16 13:41:46 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=RETRY code=PROVIDER_READ_UNAVAILABLE:WAF_CHALLENGE
+S2J Oct 16 13:42:46 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=RETRY code=PROVIDER_READ_UNAVAILABLE:WAF_CHALLENGE
+S2J Oct 16 13:43:46 ip-172-31-87-2.ec2.internal python3.12[1104497]: IRPT_RESIDENT_RESOLVE state=ATTENTION code=RESOLVE_RETRY_EXHAUSTED
+S2J tracebacks in the window: 0
+S2J queue visible/in-flight: 0	0
+S2J unit active MainPID=1104497 NRestarts=0 ActiveEnter=Fri 2026-10-16 13:28:25 UTC
+
+ANALYSIS (written by 0.7.0_AE_CloudOps~AQ2; claim words: MEASURED = a printed line above; INFERRED = said so)
+WHY THE FIVE ANSWERS STAYED RESOLVING:
+ MEASURED: in the SET 2 window the resident ran one IRPT_RESIDENT_KIMI kind=check call per candidate, one after another, each BEFORE_CALL to AFTER_CALL with outcome=OK and elapsed_seconds 60.4 (from 13:38:42Z), 11.7 (13:39:45Z), 18.5 (13:39:59Z) and 17.2 (13:40:20Z); the first four resolves ended IRPT_RESIDENT_RESOLVE state=READY code=- at 13:39:43Z, 13:39:57Z, 13:40:18Z and 13:40:37Z. In the SET 1 window of 10:29Z to 10:32Z the journal held no KIMI line (CHECKFAIL record): there the checker had failed before any advice was asked for.
+ INFERRED (from the lines and from intake/upload_suggestions.py in the repository): the r34e fix makes an unknown symbol read TICKER_NOT_FOUND at the checker, and for each such row the resident now asks the advisory (Kimi) for a suggestion before it answers. That call took 11.7 s to 60.4 s and the resident handles the five uploads one at a time, so a re-post 16 s after the first post (the amended probe's only re-post) met a resolve still running or queued behind another: RESOLVING, five times. The wait, not an exception, is what the lines support for candidates 1 to 4.
+ MEASURED: the fifth upload (ZQXWVK, the last in the order) logged IRPT_RESIDENT_RESOLVE state=RETRY code=PROVIDER_READ_UNAVAILABLE:WAF_CHALLENGE at 13:40:45Z, 13:41:46Z and 13:42:46Z (a retry about every 60 s), then state=ATTENTION code=RESOLVE_RETRY_EXHAUSTED at 13:43:46Z. No KIMI line follows it. So that resolve did not reach READY inside the window and ended in ATTENTION.
+ NOT TOLD BY THE LINES: which provider returned the WAF challenge (the line names the code, not the host); the findings the four READY resolves produced (their code is '-'); whether a re-read after 13:43:46Z would show final answers for the first four and an attention state for ZQXWVK. This seat made no further post.
+THE ZQXWVK SYMBOL HAS A DIFFERENT STORY FROM THE OTHER FOUR in the journal: four resolves finished READY within 60 s, one never did.
+QUEUE AND UNIT (MEASURED, line S2J queue and S2J unit above): irpt-generation visible 0 in flight 0 at the read; the unit active, MainPID 1104497, NRestarts 0, ActiveEnter 13:28:25Z (r34e); 0 tracebacks in the window.
