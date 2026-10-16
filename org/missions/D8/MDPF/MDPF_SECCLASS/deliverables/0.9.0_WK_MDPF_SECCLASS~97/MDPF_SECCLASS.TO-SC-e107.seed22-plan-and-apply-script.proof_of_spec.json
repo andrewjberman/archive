@@ -6,11 +6,11 @@
   "spec_ref": {
     "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md",
     "group": "OTHER",
-    "vintage_commit": "479867946b76b0dd63fb4533a67c09818675ca38"
+    "vintage_commit": "13b4c04fc0"
   },
   "decomp_ref": {
     "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R27.md",
-    "vintage_commit": "479867946b76b0dd63fb4533a67c09818675ca38",
+    "vintage_commit": "13b4c04fc0",
     "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md"
   },
   "assignee": "0.9.0_WK_MDPF_SECCLASS~97",
@@ -18,9 +18,9 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7db826a659",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Three subcommands over the shared etf_classification_scheduled module (imported, not copied): plan (read-only), apply (writes only under a signed pair; built and selftested, never run against AWS by this worker), selftest (stub tables, no AWS). apply writes with its own conditional put because the shared write() drops source_table and source_last_updated.",
+      "deploy_evidence": "Three subcommands over the shared etf_classification_scheduled module (imported, not copied). plan (read-only; amendment 1 adds --fold-map, which seeds the map's 9 seed tickers with the ruled class, provenance and fold_* audit and holds out the map's 9 held_out tickers to seed_pending). apply (writes only under a signed pair; built and selftested, never run against AWS by this worker) writes with its own conditional put attribute_not_exists(ticker), carrying source_table, source_last_updated and the fold_* audit attributes, because the shared write() drops them. selftest (stub tables, no AWS) now includes fold-map cases (vi) and (vii).",
       "artifact_covered_by": [
         "SC27-e107-AC1"
       ]
@@ -28,30 +28,31 @@
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7db826a659",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Plan file from one read-only run of seed22.py plan at 2026-10-16 (base 479867946b): firm 49financial, 22 candidates, planned=4 ($15,777.17), unresolved=18 ($397,564.42), seed_pending=0. No S3 or DynamoDB write was made.",
+      "deploy_evidence": "Plan file from one read-only run of seed22.py plan --fold-map (amendment 1, base 13b4c04fc0, read_at 2026-10-16T05:00:42Z): firm 49financial, 22 candidates, planned=13 ($170,529.30: equity 15,777.17, fixed_income 120,888.00, alternatives 11,855.56, commodities 22,008.57), seed_pending=9 ($242,812.29), unresolved=0. Total dollars 413,341.59. No S3 or DynamoDB write was made.",
       "artifact_covered_by": [
-        "SC27-e107-AC2"
+        "SC27-e107-AC2",
+        "SC27-e107-AC3"
       ]
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7db826a659",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Appended one row, MDPF_SECCLASS-D1-W97-S1 (the plan_rows direct-match rule plans 4 of the 22, not 22). Append only; no existing row edited. Parsed as JSON at the append; surprise-row-gate run at the commit.",
+      "deploy_evidence": "Appended one row this round, MDPF_SECCLASS-D1-W97-S2 (AC2 and AC3 cannot both pass: five null-sub-class seeds fail check_seed22_plan.py 'class incomplete'). Append only (30 insertions, no existing row edited). Parsed as JSON at the append. MDPF_SECCLASS-D1-W97-S1 (the earlier plan_rows direct-match finding) is left as written.",
       "artifact_covered_by": []
     }
   ],
   "acceptance": [
     {
       "criterion_id": "SC27-e107-AC1",
-      "criterion_verbatim": "the stub run shows the plan, the provenance attributes, the conditional put and the refusals, including the difference control (iii).",
+      "criterion_verbatim": "the stub run shows the plan, the provenance attributes, the conditional put and the refusals, including the difference control (iii), and now the fold-map cases (vi) and (vii).",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22.py selftest",
-      "output_evidence": "SEED22-SELFTEST (i) plan on the three-ticker fixture: PASS planned AAAX; PASS AAAX carries source_table; PASS AAAX carries source_last_updated; PASS AAAX input is legacy-fork; PASS BBBX (needs_review) unresolved; PASS CCCX (canonical stub) refused, not planned; PASS partition exact. (ii) apply on the stub: PASS apply rc 0; PASS conditional put issued attribute_not_exists(ticker); PASS item has source_table; PASS item has source_last_updated; PASS only AAAX attempted; PASS input tag not persisted. (iii) difference control: 'SEED22-APPLY REFUSED pair=ABSENT' PASS missing pair rc 2; PASS missing pair writes nothing. (iv) PASS existing planned ticker rc 2; PASS existing planned ticker not written. (v) PASS firm mismatch rc 2 and nothing written. Final line: SEED22-SELFTEST ok=True fails=[] ; exit rc=0.",
-      "denominator": "18 checks in selftest groups (i) to (v): 18 PASS, 0 FAIL; the stub apply wrote 1 of 1 planned fixture row",
+      "output_evidence": "SEED22-SELFTEST (i) plan on the three-ticker fixture: PASS planned AAAX; PASS AAAX carries source_table; PASS AAAX carries source_last_updated; PASS AAAX input is legacy-fork; PASS BBBX (needs_review) unresolved; PASS CCCX (canonical stub) refused, not planned; PASS partition exact. (ii) apply on the stub: PASS apply rc 0; PASS conditional put issued attribute_not_exists(ticker); PASS item has source_table; PASS item has source_last_updated; PASS only AAAX attempted; PASS input tag not persisted. (iii) difference control: 'SEED22-APPLY REFUSED pair=ABSENT' PASS missing pair rc 2; PASS missing pair writes nothing. (iv) PASS existing planned ticker rc 2; PASS existing planned ticker not written. (v) PASS firm mismatch rc 2 and nothing written. (vi) fold map: PASS DDDX planned from the map; PASS DDDX takes the map's classes; PASS DDDX provenance source_table; PASS DDDX provenance source_last_updated; PASS DDDX fold_rule and fold_note; PASS DDDX input is fold-map; PASS DDDX source_sub_asset_class audit; PASS EEEX planned, null sub-class omitted; PASS FFFX held out to seed_pending, not planned; PASS fixture partition exact; PASS fold apply rc 0 attempted=['DDDX', 'EEEX', 'GGGX']; PASS fold apply never attempts held-out FFFX; PASS fold apply writes no sub_asset_class for EEEX; PASS fold apply writes fold_rule, source_asset_class, source_sub_asset_class. (vii) OVERRIDE: PASS GGGX planned with the map's commodities class; PASS GGGX fold_note keeps the OVERRIDE text; PASS GGGX written with the OVERRIDE note. Final line: SEED22-SELFTEST ok=True fails=[] ; exit rc=0.",
+      "denominator": "35 checks: 35 PASS, 0 FAIL (groups (i) 7, (ii) 6, (iii) 2, (iv) 2, (v) 1, (vi) 14, (vii) 3); the stub apply wrote 1 of 1 planned fixture row in (ii) and 3 of 3 planned fixture rows in (vi)",
       "status": "PASS",
       "expect": "SEED22-SELFTEST ok=True"
     },
@@ -60,17 +61,27 @@
       "criterion_verbatim": "the real plan covers exactly the 22 baseline tickers once each, every planned row carries provenance equal to the live old row, none is in the canonical table now, and the dollars equal the baseline total within $1.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
-      "output_evidence": "SEED22-PLAN ok=True planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=[] ; exit rc=0. Negative arm (a scratch copy with the source_table of planned row AEMGX removed): SEED22-PLAN ok=False planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=['AEMGX provenance'] ; rc=1.",
-      "denominator": "22 baseline tickers = 4 planned + 18 unresolved + 0 seed_pending, each exactly once; 4 of 4 planned rows carry source_table bd-securities and a source_last_updated equal to the live old row (4 get_item reads); 0 of 4 planned tickers in etf-classifications; dollars 413341.59 vs baseline 413341.59, delta 0.00",
+      "output_evidence": "SEED22-PLAN ok=True planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=[] ; exit rc=0. Run 2026-10-16 by 0.9.0_WK_MDPF_SECCLASS~97 at HEAD 97b5a2a2c8, under timeout 120, after the issuer amended the check at 72d63fef7f (amendment 2): check_seed22_plan.py no longer demands a non-empty sub_asset_class on every planned row; it still requires an asset_class and the provenance on each planned row. HISTORY, kept as written: the run BEFORE that amendment read 'SEED22-PLAN ok=False planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=['CPXIX class incomplete', 'HPI class incomplete', 'LCFYX class incomplete', 'PFF class incomplete', 'VRP class incomplete'] ; exit rc=1'. That failure was the issuer's defect (the check's single rule 'a planned row must carry a non-empty sub_asset_class'), filed as MDPF_SECCLASS-D1-W97-S2; the commit message of 72d63fef7f names row MDPF_SECCLASS-D1-S43 as disarming it. The check was amended by the issuer, not by this worker.",
+      "denominator": "22 baseline tickers = 13 planned + 0 unresolved + 9 seed_pending = 22, each exactly once; dollars 413341.59 vs baseline 413341.59, delta 0.00",
       "status": "PASS",
       "expect": "SEED22-PLAN ok=True"
+    },
+    {
+      "criterion_id": "SC27-e107-AC3",
+      "criterion_verbatim": "(amendment 1) the plan seeds exactly the 4 equity tickers and the map's 9, holds out exactly the map's 9, leaves nothing unresolved, takes each seeded class from the map, records the HODL override, and carries the dollars of the baseline.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_fold.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
+      "output_evidence": "SEED22-FOLD ok=True planned=13 seed_pending=9 unresolved=0 problems=[] ; exit rc=0. Negative arm (a scratch copy with the HODL fold_note prefix removed, .scratch/plan_noover.json): SEED22-FOLD ok=False planned=13 seed_pending=9 unresolved=0 problems=['HODL override not recorded'] ; rc=1.",
+      "denominator": "13 planned = 4 equity + 9 map seed (13 of 13 classes match the map, 9 of 9 fold_rule match); 9 seed_pending = 9 map held_out (9 of 9); 0 unresolved; 22 of 22 dollars match the baseline within $0.01",
+      "status": "PASS",
+      "expect": "SEED22-FOLD ok=True"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the real plan with the source_table attribute removed from one planned row (AEMGX), fed to the check: the provenance arm must fire",
-      "expected": "ok=False and rc=1, problems naming AEMGX provenance",
-      "observed": "SEED22-PLAN ok=False planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=['AEMGX provenance'] ; rc=1",
+      "description": "the amendment-1 plan with the HODL fold_note prefix removed, fed to check_seed22_fold.py: the override arm must fire",
+      "expected": "ok=False and rc=1, problems naming the HODL override",
+      "observed": "SEED22-FOLD ok=False planned=13 seed_pending=9 unresolved=0 problems=['HODL override not recorded'] ; rc=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -81,12 +92,12 @@
   },
   "declared_exclusions": [
     {
-      "item": "the 18 unresolved tickers (BALCX, CIMAX, CPXIX, CUBE, DODBX, EZET, FSNQX, GLPI, HBLFX, HODL, HPI, JBAWX, KAMIX, LCFYX, PCEF, PFF, TRRNX, VRP)",
-      "reason": "Not planned and not folded. plan_rows accepts a source row only on a direct canonical vocabulary match; the old-list sub-classes are not canonical members, and PCEF's needs_review is not a canonical sub-class. Recorded as surprise row MDPF_SECCLASS-D1-W97-S1 for the issuer and the CTO."
+      "item": "the 9 held_out tickers (BALCX, CIMAX, DODBX, FSNQX, HBLFX, JBAWX, KAMIX, PCEF, TRRNX)",
+      "reason": "Not planned, not folded. Held out to seed_pending by the CTO fold ruling (CTO_RULING_MDPF_SECCLASS_SEED22_FOLDS_20261016.md), each with the map's reason and its baseline dollars. The apply step never writes a seed_pending entry."
     },
     {
       "item": "the shared write() for the apply step",
-      "reason": "write() copies only _WRITE_FIELDS and sets last_updated, so it drops source_table and source_last_updated. apply uses the same _WRITE_FIELDS keys with a conditional put on attribute_not_exists(ticker) and adds the two provenance attributes."
+      "reason": "write() copies only _WRITE_FIELDS and sets last_updated, so it drops the provenance and fold_* attributes. apply uses the same _WRITE_FIELDS keys with a conditional put on attribute_not_exists(ticker) and adds source_table, source_last_updated and the fold_* audit attributes."
     },
     {
       "item": "running apply against AWS",
@@ -94,14 +105,20 @@
     }
   ],
   "surprises": [
-    "MDPF_SECCLASS-D1-W97-S1: the R27 seed22 plan, built on the shared plan_rows as ordered, plans 4 of the 22 old-list tickers ($15,777.17) and leaves 18 ($397,564.42) unresolved, because their old-list sub-classes are not canonical vocabulary members and plan_rows does not fold. The CTO ruling that old-list classes are accepted as source rows cannot be met by plan_rows as built. BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~M1."
+    "MDPF_SECCLASS-D1-W97-S1: the R27 seed22 plan, built on the shared plan_rows as ordered, plans 4 of the 22 old-list tickers and leaves 18 unresolved, because plan_rows does not fold. Amendment 1 resolves the 18 through the CTO fold map (9 seeded, 9 held out). The S1 row itself is not edited; its disarm owner 2.0.0_SA_COO~M1 is unchanged.",
+    "MDPF_SECCLASS-D1-W97-S2: AC2 (check_seed22_plan.py line 48) requires every planned row to carry a non-empty sub_asset_class, and AC3 (check_seed22_fold.py line 40) requires the five null-sub map rows (HPI, LCFYX, PFF, VRP, CPXIX) to carry none. The two cannot both pass for the ruled plan. The issuer amended check_seed22_plan.py at 72d63fef7f (amendment 2); AC2 now reads PASS (SEED22-PLAN ok=True) and the issuer's commit names row MDPF_SECCLASS-D1-S43 as disarming S1 and S2. The S2 row itself is not edited."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md",
   "compiler_tools": [
     {
       "tool": "check_seed22_plan.py (R27_CHECKS, read-only)",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
-      "result": "SEED22-PLAN ok=True planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=[]; rc=0. Negative arm ok=False problems=['AEMGX provenance']; rc=1."
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
+      "result": "SEED22-PLAN ok=True planned=13 unresolved=0 seed_pending=9 dollars=413341.59 problems=[]; rc=0 (after the issuer's amendment 2 at 72d63fef7f; the earlier rc=1 run is recorded under AC2)."
+    },
+    {
+      "tool": "check_seed22_fold.py (R27_CHECKS, read-only)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_fold.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
+      "result": "SEED22-FOLD ok=True planned=13 seed_pending=9 unresolved=0 problems=[]; rc=0."
     },
     {
       "tool": "surprise-row-gate (.tools/surprise-row-gate.py)",
