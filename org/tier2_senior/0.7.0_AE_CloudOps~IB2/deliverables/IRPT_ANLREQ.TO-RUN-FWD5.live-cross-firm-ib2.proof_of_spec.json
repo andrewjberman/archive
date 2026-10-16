@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-ib2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "4aca09a82d"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R61_T.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-ib2.md",
+  "vintage_commit": "4aca09a82d"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "aws:dynamodb opal-users-v2 two synthetic principals (digests 28cb5947d068 and 7b925797fd61), each minted once and removed once",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "both MINT-OK READBACK-OK with their MINT-SCOPE lines; both removed (REMOVE-OK) and read ABSENT by the email GSI and a ConsistentRead; r56_checks absent R56-ABSENT-OK",
+   "artifact_covered_by": [
+    "AR71-tz-AC2"
+   ],
+   "commit_or_etag": "two rows minted and removed in one sitting (20261016, about 21:15Z)"
+  },
+  {
+   "path_or_key": "aws:ticket-center control and firm-B reports on the reused 5174 server (fwd5_control_report.json, fwd5_run_report.json under the IB2 irpt_anlreq_fwd5 deliverables folder)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "control exit 0 (ALLOWED 6, DENIED 1, EXCLUDED 2); firm-B exit 1 (REFUSED 3, LEAK 4, EXCLUDED 2); route names and statuses only",
+   "artifact_covered_by": [
+    "AR71-tz-AC1",
+    "AR71-tz-AC3"
+   ],
+   "commit_or_etag": "reports written by the driver in the sitting"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR71-tz-AC1",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py fence",
+   "expect": "R56-FENCE-OK",
+   "output_evidence": "R56-FENCE-FAIL run report: counts are {'REFUSED': 3, 'LEAK': 4, 'UNREACHED': 0, 'EXCLUDED': 2}, not 7/0/0/2",
+   "denominator": "2 reports (control rc 0, firm-B rc 1); 9 route rows each",
+   "status": "FAIL",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py fence",
+   "method": "command",
+   "status_reason": "the firm-B principal read 200 on four routes of the other firm's ticket (original-upload, opal-report, report-pdf, commentary-pdf): the fence does not hold on those artifact routes; the control read ALLOWED on ticket-read and ticket-list so the finding is the fence, not a broken route"
+  },
+  {
+   "criterion_id": "AR71-tz-AC2",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py absent",
+   "expect": "R56-ABSENT-OK",
+   "output_evidence": "R56-ABSENT-OK both principals: no PROFILE row (consistent), index count 0",
+   "denominator": "2 principals, each read by ConsistentRead and the email index",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py absent",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AR71-tz-AC3",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py report",
+   "expect": "R56-REPORT-OK",
+   "output_evidence": "R56-REPORT-FAIL counts are {'REFUSED': 3, 'LEAK': 4, 'UNREACHED': 0, 'EXCLUDED': 2}, not 7/0/0/2",
+   "denominator": "9 route rows: 3 REFUSED, 4 LEAK, 0 UNREACHED, 2 EXCLUDED",
+   "status": "FAIL",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py report",
+   "method": "command",
+   "status_reason": "the firm-B run report reads 3 REFUSED and 4 LEAK, not 7 REFUSED and 0 LEAK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (its comp-adversary arm names the false-LEAK and broken-control cases; the driver selftest FWD5-SELFTEST-OK checks=36).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the positive control ran first as an entitled identity on the same routes and read ALLOWED on ticket-read and ticket-list; both principals read ABSENT after",
+   "observed": "control exit 0; ABSENT for both",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the commentary-draft and meeting rows",
+   "reason": "EXCLUDED by the driver in both runs (commentary-draft rides the ticket read body; meeting is a write attempt outside the DONE WHEN)"
+  },
+  {
+   "item": "the 7/0/0/2 expectation of AC3",
+   "reason": "the firm-B run read 3 REFUSED and 4 LEAK; the instance records the honest FAIL and the sitting stopped at the LEAK with both principals removed first, as the order directs"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T2110Z_irpt-fwd5-live-cross-firm-r60-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "fwd5_sitting.py (one process holding both passwords in memory) running fwd5_mint.py, fwd5_driver.py (--control and the firm-B run) and r56_checks.py",
+   "invocation": "mint both, poll the index, control, firm-B, checks, remove both, absent",
+   "result": "control rc 0; firm-B rc 1 LEAK 4; both ABSENT"
+  }
+ ]
+}
