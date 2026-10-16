@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gs-1.a-contradicted-sentence-records-its-source-and-quote",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "18c2a2607a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gs-1.a-contradicted-sentence-records-its-source-and-quote.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gs-1.a-contradicted-sentence-records-its-source-and-quote.md",
+    "group": "OTHER",
+    "vintage_commit": "18c2a2607a"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~481",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/grounding.py",
+      "kind": "script",
+      "commit_or_etag": "df2528dce8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib module on the wk-AMGT_RESAPP-481 branch; no deploy, no AWS call, no network; the CONTRADICTED record reaches a served block only through the orchestrator, which this order does not touch"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_grounding.py",
+      "kind": "test",
+      "commit_or_etag": "df2528dce8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module; one assertion pair changed in test_contradicted_is_dropped_and_recorded_as_such; 47 tests collected before and after the new module"
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_grounding_contradicted.py",
+      "kind": "test",
+      "commit_or_etag": "df2528dce8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module, 10 tests; every model call a stub, every source a hand-made dict"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL GS-1 ARMS: YES (N of N)` with N equal to 11, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-481 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round107_aifill_prep/checks/check_gs1_contradicted.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM the system prompt still begins with its words and asks for the source label and quote of a CONTRADICTED verdict PASS Answer with JSON only and nothing else, in this form: {\"verdicts\":[{\"n\":1,\"verdict\":\"SUPPORTED\",\"source\":\"S1\",\"quote\":\"...\"}]} with one row per sentence number.\nARM the contract accepts a record whose CONTRADICTED sentence carries a source and a quote PASS []\nARM grounding.py stays ASCII with no network import      PASS non-ASCII or a forbidden import\nAIFILL GS-1 ARMS: YES (11 of 11)\nexit=0",
+      "denominator": "11 of 11 arms; the summary line AIFILL GS-1 ARMS: YES (11 of 11) is the printed count; a full second run printed 11 PASS lines and 0 FAIL lines",
+      "status": "PASS",
+      "status_reason": "the deciding line AIFILL GS-1 ARMS: YES (11 of 11) is printed, no FAIL arm line exists in the full run, and exit=0.",
+      "expect": "AIFILL GS-1 ARMS: YES \\(11 of 11\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least 51) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-481 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_grounding.py lib/research/aifill/tests/test_grounding_contradicted.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": ".........................................................                [100%]\n57 passed in 0.14s\nexit=0",
+      "denominator": "57 passed of 57 collected; 0 failed; 0 errors; 47 from test_grounding.py and 10 from test_grounding_contradicted.py; 57 is at least the 51 the criterion names",
+      "status": "PASS",
+      "status_reason": "the last non-empty line before exit= is 57 passed in 0.14s; 57 is at least 51; no failed or error line in the last three; exit=0.",
+      "expect": "[0-9]+ passed in [0-9.]+s\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant; the two criteria grade the built module against its own stub-model arms",
+      "expected": "N/A",
+      "observed": "no mutant named by the order",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: both criteria are offline and deterministic; AC1 and AC2 were each run twice on the committed bytes",
+      "observed": "AC1 printed AIFILL GS-1 ARMS: YES (11 of 11) on both runs with zero FAIL lines; AC2 printed 57 passed on both runs (0.21s then 0.14s)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real model call and any live source fetch through the grounding pass",
+      "reason": "order egress class NONE: the model and the sources are arguments; every test uses a stub model and hand-made source dicts"
+    },
+    {
+      "item": "the 200-character limit on a returned CONTRADICTED quote",
+      "reason": "the order states the limit as a prompt instruction only; the mechanical check verifies a quote by its presence in the shown source's text, which does not depend on its length"
+    },
+    {
+      "item": "any change to contract.py, orchestrate.py or the builders",
+      "reason": "the order names them as other cells' surfaces; contract.py already skips every sentence that is not SUPPORTED, so the CONTRADICTED record passes its shape check unchanged (AC1 arm 10)"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W481-S1: the order's CONTRADICTED condition is a bare substring test of the normalised quote, which a punctuation-only quote of 12 or more characters satisfies (the empty string is a substring of every text); the module adds the non-empty guard the SUPPORTED path carries. OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R2."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~481/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "check_gs1_contradicted.py",
+      "invocation": "PYTHONPATH=<worktree> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round107_aifill_prep/checks/check_gs1_contradicted.py",
+      "result": "AIFILL GS-1 ARMS: YES (11 of 11); exit=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=<worktree> python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_grounding.py lib/research/aifill/tests/test_grounding_contradicted.py",
+      "result": "57 passed in 0.14s; exit=0"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/grounding.py lib/research/aifill/tests/test_grounding.py lib/research/aifill/tests/test_grounding_contradicted.py",
+      "result": "pre-commit gate clean for 3 of 3 file(s)"
+    }
+  ]
+}
