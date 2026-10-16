@@ -1,0 +1,34 @@
+0.9.0_WK_NFRA_MCPORTAL~39 on NFRA_MCPORTAL.TO-MP-pf-10 (MP-pf-10, decomposition PF7.1)
+worktree C:/tmp/mp-pf-39   branch wk-NFRA_MCPORTAL-39   commit 7e169a1c112f79804a4fbac3d8a17dbbf3eadfa2 (LOCAL, not pushed)
+EGRESS CLASS none: no network call made.
+
+1. first act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPORTAL-39 ; test -d org && test -d .tools -> TREE-OK
+2. baseline, two files, before any edit:
+   cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_admin_gateway_breakdown.py tests/test_admin_people.py -q --color=no -p no:cacheprovider
+   -> 6 failed, 37 passed, 1 warning in 54.68s
+   FAILED test_every_live_tool_in_exactly_one_channel
+   FAILED test_real_server_tool_inventory
+   FAILED test_people_lists_every_candidate_even_holding_nothing
+   FAILED test_cadence_reads_absent_with_reason
+   FAILED test_real_server_people_inventory
+   FAILED test_people_principal_never_leaks_into_other_fields
+3. edits (two test files only), commit 7e169a1c11 via safe-commit.sh: 2 files changed, 14 insertions(+), 6 deletions(-)
+4. same two files after the edits:
+   -> 43 passed, 1 warning in 42.37s
+5. AC1: timeout 120 bash .../pf/checks/pf10.AC1.sh; echo exit=$?
+   breakdown: ======================= 33 passed, 1 warning in 36.40s ========================; named tests PASSED 2 of 2
+   RESULT: PASS
+   people: ======================== 10 passed, 1 warning in 5.66s ========================; named tests PASSED 4 of 4
+   RESULT: PASS
+   breakdown rc=0 people rc=0
+   RESULT: PASS
+   exit=0
+6. AC3: timeout 120 bash .../pf/checks/pf10.AC3.sh; echo exit=$?
+   base=a9e75741c921; files under infra/ changed since: 2; outside the two test files: 0
+   RESULT: PASS
+   exit=0
+7. AC2 (run alone): timeout 120 bash .../pe/checks/pf3.AC2.sh; echo exit=$?
+   admin suite: 116 passed, 3 warnings in 43.83s; passed=116 failed=0; seam test failures=0
+   RESULT: PASS
+   exit=0
+8. no network call, no push, no deploy, no edit outside the two test files and this deliverables folder. No real index name or account number printed.

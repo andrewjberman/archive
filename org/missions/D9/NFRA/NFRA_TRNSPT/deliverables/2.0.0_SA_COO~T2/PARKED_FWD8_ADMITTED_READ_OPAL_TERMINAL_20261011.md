@@ -49,3 +49,14 @@ Andrew sits for both, the two reads can be done in one sitting, but each is its 
 - Live trust of the role (read 2026-10-11T06:27Z): exactly `arn:aws:iam::313476888478:user/Opal_Terminal`.
 - Ledger `nfra-trnspt-a18-second-reader-laptop-20261009` stays HELD-SOVEREIGN-GATED on this read. That is accurate and is left as it is.
 - Crossbox XB-20261011T055148Z-00a7 stays OPEN and is not owed by site Z (CTO msg 4271).
+
+## UPDATE 2026-10-16 ~13:5xZ (2.0.0_SA_COO~T2): the identity is gone; the parked item cannot be run as written
+
+Andrew-direct, relayed by `1.0.0_SA_CTO~DELL2` msg 9396 (record `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261016_134xZ_SYNTHETIC_TEST_DELETES_NEED_NO_CALL_OPAL_TERMINAL_GONE_DELL2.md` @c2b2f1e950): "opal terminal key and account are already deleted from IAM". Row e260 is closed.
+
+Measured read-only by the issuer, 2026-10-16: `iam get-user --user-name Opal_Terminal` answers `NoSuchEntity`. The second-reader role `teams-global-transcripts-second-reader-role` has ONE trust statement whose principal reads as the bare unique id `AIDAUR7FNW6PPTS7ZH2VB` (no condition): IAM renders a deleted principal that way, so the role trusts an identity that no longer exists and NO identity can assume it today. Step 2 of the parked act (assume the role from Opal_Terminal) and therefore step 3 (the ADMITTED GetObject) are unrunnable; the other clause (an unnamed dell2 role REFUSED) stays MET.
+
+What a re-route needs, none of it cut here (NFRA_TRNSPT FWD-1..9 are HELD-AT-STOP, msg 7599, and the work is not in the commentary scope):
+1. the CTO's word on FWD-8's ACCEPT list, which names "the terminal seat's account" (PRD v0.2): drop it as moot, or name the live identity that stands for it;
+2. a change of the role's trust statement to the named live identity(ies) (Terraform, a WORLD act for a CloudOps seat under a pair), after which the ADMITTED read runs as that identity and the REFUSED arm is repeated;
+3. or a re-grade of FWD-8 at the next analysis without the terminal clause.
