@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-129",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-129.resolve-waf-backoff.md",
+    "group": "OTHER",
+    "vintage_commit": "446f9788a0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R42_G.md",
+    "vintage_commit": "1e702788a0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-129.resolve-waf-backoff.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~263",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "175596f205",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "inherited from worker 262, not changed by worker 263 (the order says do not change it): the resolve hop's RETRY visibility (WAF schedule 150, 300, 450 s; every other cause 60 s; journal names visibility=<s>); no deploy and no AWS call; the resident carries it in the next release",
+      "artifact_covered_by": [
+        "AR129-g-AC1",
+        "AR129-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resolve_upload.py",
+      "kind": "test",
+      "commit_or_etag": "464cee2b12",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker 263's test fix (7 lines changed, existing tests untouched): CountingQueue and the three new tests that asserted the whole timeout list now assert timeouts[-1:], because the real assembly's heartbeat (VisibilityTimeout 900) precedes the RETRY back-off. Run in this worktree (full checkout): test_resolve_upload.py 31 passed; test_frozen_worker.py 21 passed",
+      "artifact_covered_by": [
+        "AR129-g-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d063c6cbf2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "inherited from worker 262: one row IRPT_ANLREQ-D2-W262-S1 (class BLOCKING, hazard_standing INERT, disposition UNDER_INVESTIGATION); worker 263 appended no row"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR129-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py build",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py build",
+      "output_evidence": "AR-G129-OK build: all arms (run in worktree C:/dev/wk-irpt-anlreq-263 at 464cee2b12 under timeout 120 s, rc=0; output file .scratch/ac1.out). The checker prints no count; its arms are the issuer's: 3 receives (1, 2, 3) x 3 checks each (direct call, poll_once visibility, journal line) + receive 4 ending + 3 cap checks (schedule tuple, sum 900 at most REDRIVE_SECONDS, RESOLVE_MAX_RECEIVES below 5)",
+      "denominator": "arms as listed in the checker (no count printed); 0 failed; rc=0",
+      "expect": "^AR-G129-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR129-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py guard",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py guard",
+      "output_evidence": "AR-G129-OK guard: all arms (run in worktree C:/dev/wk-irpt-anlreq-263 at 464cee2b12 under timeout 120 s, rc=0; output file .scratch/ac2.out). The checker prints no count; its arms are the issuer's: flat 60 check (1) + 9 non-WAF codes x 3 receives direct calls + 4 codes x 3 receives poll_once runs (visibility [60], no delete, no send) + BUSY class 1 (re-send, no visibility call)",
+      "denominator": "arms as listed in the checker (no count printed); 0 failed; rc=0",
+      "expect": "^AR-G129-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR129-g-AC3",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py regress",
+      "output_evidence": "AR-G129-REGRESS-OK (run in worktree C:/dev/wk-irpt-anlreq-263 at 464cee2b12 under timeout 590 s, rc=0; output file .scratch/ac3.out; the two test files run one at a time by the checker: tests/test_resolve_upload.py 31 passed, tests/test_frozen_worker.py 21 passed)",
+      "denominator": "2 of 2 regress test files run to completion: 52 passed, 0 failed, 0 errors (31 + 21)",
+      "expect": "^AR-G129-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The worker face names no mutant; the negative arm is the base run of the same checks at the issuer's base 1e702788a0 (recorded by worker 262, not re-run here).",
+      "expected": "build FAILs at base; guard PASSes at base",
+      "observed": "recorded by worker 262: build AR-G129-FAIL at base 1e702788a0; guard AR-G129-OK at base 1e702788a0",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes; each check was run once in this worktree after the test fix",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "Live effect of a longer WAF spacing on YCharts",
+      "reason": "not claimed by the cell and not measurable offline; no deploy, no AWS call, no vendor call in this order."
+    },
+    {
+      "item": "Base-state negative arm re-run by worker 263",
+      "reason": "the worker face does not require it; the issuer's base run is recorded in worker 262's instance (7f0e78bcb7) and is not re-measured here."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resolve_upload.py",
+      "result": "rc=0: All checks passed; pre-commit gate clean for 1 of 1 file"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_resolve_upload.py (cwd infra/aws/lambda/investor-reporting)",
+      "result": "31 passed, rc=0 (before the fix: 10 failed, 21 passed)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_frozen_worker.py (cwd infra/aws/lambda/investor-reporting)",
+      "result": "21 passed, rc=0"
+    }
+  ]
+}
