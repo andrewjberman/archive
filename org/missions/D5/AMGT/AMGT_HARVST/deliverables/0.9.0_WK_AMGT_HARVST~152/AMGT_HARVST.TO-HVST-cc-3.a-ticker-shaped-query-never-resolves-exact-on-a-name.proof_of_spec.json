@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cc-3.a-ticker-shaped-query-never-resolves-exact-on-a-name",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-3.a-ticker-shaped-query-never-resolves-exact-on-a-name.md",
+    "group": "OTHER",
+    "vintage_commit": "4516893b3b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "4516893b3b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-3.a-ticker-shaped-query-never-resolves-exact-on-a-name.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~152",
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~152/session.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_identity.py",
+      "kind": "script",
+      "commit_or_etag": "5c7e701162",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only, 5 insertions and 0 deletions. TICKER_SHAPE = ^[A-Z]{1,5}([.-][A-Z]{1,2})?$ (fullmatch on the whitespace-normalised raw query). In harvest_resolve_security, directly after the named list is built: a ticker-shaped query with named hits returns _candidates(named, name) with reason 'no ticker matches <raw>; these companies have a name that starts with it' and status candidates, never exact. Every other query keeps its path. Not deployed; no S3, AWS or box touched; the served read is HVST-cc-7.",
+      "introduces": [
+        "TICKER_SHAPE",
+        "TICKER_SHAPE.fullmatch(raw) and named"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_cc3_ticker_shaped_never_exact_on_name.py",
+      "kind": "test",
+      "commit_or_etag": "5c7e701162",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New offline test file, 6 tests: arm1 PG candidates not exact (PCG listed, matched_on name, reason names PG); arm2 PCG, PCG US and PCG_US_Equity exact at ticker or identifier level; arm3 PG&E and PG&E Corp exact on name; arm4 Kimberly Clark exact KMB, visa exact V on name, V exact on ticker; arm5 VISA candidates and the reason names the query; arm6 mutant with TICKER_SHAPE disabled: PG answers exact again and arm1's assertion raises AssertionError. Fixture: PCG US, KMB US, V US, no Procter & Gamble. Fakes only.",
+      "introduces": [
+        "test_cc3_arm1_pg_is_candidates_not_exact",
+        "test_cc3_arm6_mutant_with_branch_disabled_fails_arm1"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b2cee61dd0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_HARVST-D1-W152-S1 inserted by bytes at the array head: 21 insertions, 0 deletions; the fenced array parses with 444 rows; the one duplicate id is the pre-existing AMGT_HARVST-Z-S106 pair named in the order and carried by the commit override line.",
+      "introduces": [
+        "AMGT_HARVST-D1-W152-S1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc3_ticker_shaped_never_exact_on_name.py -q -p no:cacheprovider --color=no expects (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cc3_ticker_shaped_never_exact_on_name.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^\\d+ passed in",
+      "output_evidence": "6 passed in 1.05s (rc 0; run under timeout 120). Repeat runs: 6 passed in 1.20s rc 0; 6 passed in 1.32s rc 0.",
+      "denominator": "6 of 6 tests in tests/test_cc3_ticker_shaped_never_exact_on_name.py pass, 0 failed (arms 1-5 and the arm-6 mutant)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no expects (?m)^16 passed in",
+      "method": "test_suite",
+      "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^16 passed in",
+      "output_evidence": "16 passed in 3.01s (rc 0; run under timeout 120). Before the edit (base 4516893b3b): 16 passed in 3.47s rc 0. Repeat runs after the edit: 16 passed in 2.81s rc 0; 16 passed in 3.22s rc 0.",
+      "denominator": "16 of 16 tests in the three named suites pass, 0 failed (the base count was 16, unchanged)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TICKER_SHAPE monkeypatched to a pattern that never matches (re.compile(r'(?!)')), so the new branch is dead; test_cc3_arm6_mutant_with_branch_disabled_fails_arm1 asserts PG answers exact PCG again and that the arm-1 assertion raises AssertionError.",
+      "expected": "the mutant test PASSES: under the disabled branch PG answers exact PCG_US_Equity on name, and the arm-1 check raises AssertionError",
+      "observed": "test_cc3_arm6_mutant_with_branch_disabled_fails_arm1 passed inside the 6 passed of AC1: the disabled branch returned exact PCG on name and the arm-1 check raised AssertionError",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times (once after the code commit, twice after the surprise-row commit); AC2 run three times (base run before the edit, twice after the code commit)",
+      "observed": "AC1: 6 passed in each run (1.05s, 1.20s, 1.32s), rc 0 each; AC2: 16 passed in each run (3.47s base, 3.01s, 2.81s, 3.22s), rc 0 each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Task-order status flip to complete",
+      "reason": "The order states the issuer flips its status (Do not edit this order file); the order file is outside <paths>, so the worker does not edit it."
+    },
+    {
+      "item": "Served read of harvest_resolve_security('PG') after the fix",
+      "reason": "The cell is LOCAL in its acts; the deploy is HVST-cc-7 (staged) and its served read is the issuer's close condition. No AWS, S3 or box was touched here."
+    },
+    {
+      "item": "Adding Procter & Gamble to the universe",
+      "reason": "Ruled out of this cell by the CTO (ERRATUM 1 at round-87 analysis); the cell is the ticker-shaped rule only."
+    },
+    {
+      "item": "The named residual: a real all-capitals company name that matches no ticker slot (for example VISA) now answers candidates, not exact",
+      "reason": "This is the ruled behaviour in the order's issuer notes; it is tested in arm 5 and not treated as a defect here."
+    },
+    {
+      "item": "Read of .claude/agents/worker-light.md, the standing-rules file the worker face names as its first read",
+      "reason": "The file is absent from the worktree (sparse set carries no .claude entry); the standing rules were taken from the worker's own context. Filed as AMGT_HARVST-D1-W152-S1."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W152-S1: the standing-rules file .claude/agents/worker-light.md named by the worker face is absent from the worktree C:/dev/wk-harvst-152; the cell proceeded on the worker's own context (OBSERVATION, INERT)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (code commit 5c7e701162)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~152 <0.9.0_WK_AMGT_HARVST~152@opal.agent>\" -F .scratch/msg_code.txt -- infra/aws/ec2/opal-gateway/app/harvest_identity.py infra/aws/ec2/opal-gateway/tests/test_cc3_ticker_shaped_never_exact_on_name.py",
+      "result": "committed 5c7e701162 (2 files, 156 insertions); commit-gate: py_compile and ds-precommit clean on 2 of 2 files; to-pipeline-gate OK; surprise-row-gate OK (no rows in this commit)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (surprise row commit b2cee61dd0)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~152 <0.9.0_WK_AMGT_HARVST~152@opal.agent>\" -F .scratch/msg_row.txt -- org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "committed b2cee61dd0 (1 file, 21 insertions); surprise-row-gate OK: 1 new row of 444 total checked; surprise-corpus clean against the baseline (4 known, 0 new); override line present for the pre-existing AMGT_HARVST-Z-S106 pair"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~152/AMGT_HARVST.TO-HVST-cc-3.a-ticker-shaped-query-never-resolves-exact-on-a-name.proof_of_spec.json AC1,AC2 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-3.a-ticker-shaped-query-never-resolves-exact-on-a-name.md",
+      "result": "VALID (rc=0): acceptance rows=2, violations=0; artifact-resolution 3 resolved at pin; surprises 1 resolves to channel row AMGT_HARVST-D1-W152-S1"
+    }
+  ]
+}
