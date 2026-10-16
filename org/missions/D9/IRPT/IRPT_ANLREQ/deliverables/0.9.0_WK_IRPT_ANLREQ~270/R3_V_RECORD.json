@@ -9,7 +9,8 @@
     "commits_LOCAL": [
       "e24facfa feat(TicketCenter): the ticket page reads a hop failure through the status route",
       "eafc9aee test(TicketCenter): hop-failure-read harness registers its own DOM as partner-view does",
-      "f4e5cc18 fix(TicketCenter): the hop failure shows for a ticket with neither a draft nor a package, and no blank row (AMENDMENT 1)"
+      "f4e5cc18 fix(TicketCenter): the hop failure shows for a ticket with neither a draft nor a package, and no blank row (AMENDMENT 1)",
+      "f488e20a fix(TicketCenter): no status call unless the ticket is an analysis request with a request id and no package (AMENDMENT 2)"
     ],
     "push_state": "not pushed (LOCAL only; no push by rule)"
   },
@@ -18,8 +19,11 @@
     "branch": "wk-IRPT_ANLREQ-270",
     "commits_LOCAL": [
       "9f36cf0c88 surprise(IRPT_ANLREQ TO-AR-v31): three rows on the ticket page's hop-failure read",
-      "ea0456a67f amend(IRPT_ANLREQ TO-AR-v31 AMENDMENT 1): the amended order, checks and decomposition, put on this branch by the issuer (inherited)",
-      "7b9583c96d complete(IRPT_ANLREQ TO-AR-v31): first-session record (superseded by the AMENDMENT 1 record)"
+      "7b9583c96d complete(IRPT_ANLREQ TO-AR-v31): first-session record (superseded)",
+      "ea0456a67f amend(AMENDMENT 1) by the issuer (inherited)",
+      "4a8897c268 complete(AMENDMENT 1) record and instance (superseded by the AMENDMENT 2 record)",
+      "1daecb2e19 amend(AMENDMENT 2) by the issuer (inherited)",
+      "bf1eb13f3c surprise(IRPT_ANLREQ TO-AR-v31 AMENDMENT 2): IRPT_ANLREQ-D2-W270-S4"
     ],
     "push_state": "not pushed (LOCAL only; no push by rule)"
   },
@@ -63,10 +67,12 @@
   "existing_tests_edited_note": "None. package-open.test.tsx, commentary-package.test.tsx and package-r2.test.tsx are unchanged. The six tests in hop-failure-read.test.tsx keep their text; the two AMENDMENT 1 tests were added.",
   "test_counts": {
     "hop-failure-read.test.tsx, the six-test file (e24facfa)": "6 pass, 0 fail (rc=0)",
-    "hop-failure-read.test.tsx, the eight-test file (f4e5cc18)": "8 pass, 0 fail (rc=0); checker v31-failure: V31-FAILURE-OK pass=8",
+    "hop-failure-read.test.tsx, the eight-test file (f4e5cc18)": "8 pass, 0 fail (rc=0)",
+    "hop-failure-read.test.tsx, the ten-test file (f488e20a)": "10 pass, 0 fail (rc=0); checker v31-failure: V31-FAILURE-OK pass=10",
     "bun test src/pages/TicketCenter, before AMENDMENT 1": "189 pass, 0 fail, 31 files (183 existing + 6 new)",
-    "bun test src/pages/TicketCenter, after AMENDMENT 1 (f4e5cc18)": "191 pass, 0 fail, 31 files (183 existing + 8 new)",
-    "portal-tsc (bun x tsc -b) on the final tree (f4e5cc18)": "PORTAL-TSC-OK rc=0"
+    "bun test src/pages/TicketCenter, after AMENDMENT 1": "191 pass, 0 fail, 31 files (183 existing + 8 new)",
+    "bun test src/pages/TicketCenter, after AMENDMENT 2 (f488e20a)": "193 pass, 0 fail, 31 files (183 existing + 10 new)",
+    "portal-tsc (bun x tsc -b) on the final tree (f488e20a)": "PORTAL-TSC-OK rc=0"
   },
   "before_arm": {
     "measure": "git cat-file on portal base 03f92d82 (positive control: AnalysisRequestParts.tsx present)",
@@ -74,7 +80,8 @@
   },
   "mutant": {
     "script": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~270/mutant_check.py",
-    "result": "MUTANT-FIRES (amended tree f4e5cc18): the clause-5 gate in shownFailure removed; mutated run rc=1, 7 pass, 1 fail on 'shows no failure once a package is attached'; restore sha256 fb7b6314efdae48bcd1cf6fd18f55b165b4be77e8dd234dbe1c2bf630c743eba verified"
+    "result": "AC3 (the named display-guard mutant) on f488e20a: MUTANT-SURVIVES (rc=1). Mutated run rc=0, 10 pass, 0 fail; restore sha256 3c393fa28ef8b36c0c6bac50ae529151d81e2d9ed85cefe1ade11c8ab4fba8c2 verified. The mutant's target is unreachable under AMENDMENT 2.",
+    "measured_control": "the call gate's package condition removed (hand edit, restored byte-equal): 9 pass, 1 fail on 'makes no status call for a ticket whose package is attached'. This is a control, not the AC3 mutant."
   },
   "rendered_and_read": {
     "what": "AnalysisPackageRow rendered in happy-dom by React inside a table body (createRoot inside act, effects run), three cases: pre-draft failure (one row, failure block shown); no draft, no package, no failure (no row); draft with failure (one row).",
@@ -93,8 +100,8 @@
   },
   "not_read": [
     "no PNG screenshot was taken or read (ui-smoke was not run; see rendered_and_read.ui_smoke)",
-    "the page in a browser: the render is happy-dom, not a browser layout, so widths, wrap and colour are read from the classes, not from pixels",
-    "the live arm of FWD-4 (each hop failure driven against the released status route): not this cell's, per the decomposition"
+    "the page in a browser: the render is happy-dom, not a browser layout",
+    "the live arm of FWD-4: not this cell's, per the decomposition"
   ],
   "surprise_rows_filed": [
     {
@@ -116,6 +123,12 @@
       "hazard": "INERT",
       "what": "the adapter maps WAIT and NONE to the same safe action 'none'",
       "note": "stands as filed (AMENDMENT 1 keeps it)"
+    },
+    {
+      "id": "IRPT_ANLREQ-D2-W270-S4",
+      "class": "BLOCKING",
+      "hazard": "INERT",
+      "what": "the AC3 named mutant (remove the clause-5 display guard) survives under AMENDMENT 2: the call gate makes the guard unreachable. Committed bf1eb13. The issuer decides which mutant AC3 names."
     }
   ],
   "row_id_note": "The order names the row form IRPT_ANLREQ-W270-S<k>. The row gate on dell2 refused that form (a dell2 row carries the D2 coordinate: IRPT_ANLREQ-D2-W270-S<k>), so the rows were minted in the gate's form. The rows were committed as 9f36cf0c88.",
@@ -129,5 +142,16 @@
     "gap": "a ticket with neither a draft nor a package never showed the failure: AnalysisDraftAndPackage returned nothing, and the board rendered the row only for a draft or a package",
     "fix": "the status read moves to useHopFailureWords; shownFailure keeps the clause-5 gate; AnalysisPackageRow reads the failure and renders NO tr when there is no draft, no package and no failure; AnalysisDraftAndPackage takes an optional failure (undefined reads it itself, so the existing call pattern of the six tests is kept)",
     "grant_used": "TicketCenter.tsx: the row's condition and its tr (lines 908-912 at 03f92d82) replaced by <AnalysisPackageRow .../>, and the import name; nothing else in the file"
+  },
+  "amendment_2": {
+    "order_step": "step 8 of the order file (commit 1daecb2e19); decomposition section AMENDMENT 2, item 7",
+    "fix": "useHopFailureWords makes the call only when the ticket is an analysis_request, has a request id and carries no package; AnalysisDraftAndPackage follows through the hook. Two tests with the exact names assert the call count is 0 through the calls spy.",
+    "checks": {
+      "AC1": "V31-FAILURE-OK pass=10 (rc=0)",
+      "AC2": "PORTAL-TSC-OK rc=0; drain 193 pass, 0 fail",
+      "AC3": "MUTANT-SURVIVES (rc=1): the named display-guard mutant does not fail the suite, because the call gate makes the guard unreachable (surprise S4)"
+    },
+    "new_tests_fail_on_amendment_1_source": "both new tests fail (2 fail, 8 pass) on f4e5cc18's source and pass on f488e20a's",
+    "status": "pending: AC3 is FAIL, so the order is not complete"
   }
 }
