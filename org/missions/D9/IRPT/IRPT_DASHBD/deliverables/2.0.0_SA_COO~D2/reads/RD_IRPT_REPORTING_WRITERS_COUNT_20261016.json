@@ -1,0 +1,78 @@
+{
+ "claim": "measured",
+ "what": "every EventBridge Scheduler schedule (list_schedules, all pages, 40 in the account in us-east-1) and every EventBridge rule (0 target any of the five) whose target is one of the five IRPT reporting functions, read live at 2026-10-16T16:4xZ; counts, names, states and crons only",
+ "denominators": {
+  "schedules_in_account": 40,
+  "eventbridge_rules_targeting_these_functions": 0
+ },
+ "writers": {
+  "irpt-49f-reporting-publish-lambda": {
+   "enabled_schedules": 2,
+   "schedules": [
+    {
+     "name": "irpt-49f-reporting-publish-daily",
+     "state": "ENABLED",
+     "cron": "cron(15 8 ? * MON-FRI *)",
+     "input": "kind irpt_reporting_publish_daily"
+    },
+    {
+     "name": "irpt-49f-reporting-publish-summaries-daily",
+     "state": "ENABLED",
+     "cron": "cron(45 8 ? * MON-FRI *)",
+     "input": "summaries true"
+    }
+   ],
+   "other_writers": "manual invokes by an applier under a signed pair; the shard fan-out invokes itself"
+  },
+  "irpt-49f-reporting-gold-lambda": {
+   "enabled_schedules": 1,
+   "schedules": [
+    {
+     "name": "irpt-49f-reporting-gold-daily",
+     "state": "ENABLED",
+     "cron": "cron(41 7 ? * MON-FRI *)",
+     "input": "kind irpt_reporting_gold_daily"
+    }
+   ],
+   "other_writers": "manual invokes by an applier under a signed pair"
+  },
+  "irpt-cot-account-return-daily-lambda": {
+   "enabled_schedules": 1,
+   "schedules": [
+    {
+     "name": "irpt-cot-account-return-daily-daily",
+     "state": "ENABLED",
+     "cron": "cron(15 8 ? * MON-FRI *)",
+     "input": "note only"
+    }
+   ],
+   "other_writers": "manual invokes by an applier under a signed pair (reserved concurrency 1)"
+  },
+  "irpt-cot-reporting-publish-lambda": {
+   "enabled_schedules": 0,
+   "schedules": [
+    {
+     "name": "irpt-cot-reporting-publish-daily",
+     "state": "DISABLED",
+     "cron": "cron(30 9 ? * MON-FRI *)",
+     "input": "upload true"
+    }
+   ],
+   "other_writers": "manual invokes by an applier under a signed pair"
+  },
+  "irpt-cot-reporting-gold-lambda": {
+   "enabled_schedules": 0,
+   "schedules": [
+    {
+     "name": "irpt-cot-reporting-gold-daily",
+     "state": "DISABLED",
+     "cron": "cron(15 9 ? * MON-FRI *)",
+     "input": "note only"
+    }
+   ],
+   "other_writers": "manual invokes by an applier under a signed pair"
+  }
+ },
+ "enabled_49_financial_schedules_total": 3,
+ "words": "The 49 Financial reporting surface has THREE enabled schedules (gold 07:41, publish 08:15, publish-summaries 08:45, New York weekdays) plus manual acts under signed pairs; Cottonwood has ONE enabled schedule (the landing function at 08:15) and two DISABLED ones. This is the writer count the CTO's packet template asks for (round 149 packet 4 analysis, item 3)."
+}

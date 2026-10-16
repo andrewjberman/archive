@@ -1,7 +1,19 @@
-B1 job_row tenant=49financial state=READY hop_failure=ABSENT source=t55 leg A PRE read 15:44Z before the invoke (this order's own read at 15:56Z found the failure standing, line A1)
+B1 job_row tenant=49financial state=READY hop_failure=ABSENT source=t55 leg A PRE read 15:44Z before the invoke (attempt 2 pre-read at 16:2xZ found the failure standing, line A1)
 B2 ticket TCK-20261015-944c84f8 status=in_progress package=ABSENT
 A1 job_row hop_failure code=COMMENTARY_DRAFT_REFUSED at=2026-10-16T15:44:44Z
+U1 users_row role=user userType=test-filer firmId=opal-capital entitlement_rows=0 status=active
+D1 sign-in landed on path=/market
+D2 Ticket Center opened by the sidebar link (client-side navigation, link found by name), landed on path=/ticket-center
+D3 board list request path=/api/scoped/tickets status_query=open http=200 count=1 (Open); status_query=in_progress http=200 count=2 (In Progress); status_query=completed http=200 count=28 (Completed)
+D4 Open rows=2 error_banner=NO; In Progress rows=2 error_banner=NO; Completed rows=29 error_banner=NO
+D5 Open: TCK-20261014-2965a5e0 | In Progress: TCK-20261015-944c84f8 TCK-20260821-0d2a2024 | Completed: 28 ids (listed in ar_v32_facts.json)
+D6 internal_view New Ticket control present=YES
+S1 http=200 public_reason_code=ANALYSIS_REQUIRES_ATTENTION action=NONE
+P1 ticket=TCK-20261015-944c84f8 words_shown=NO step_named=NO page_intact=YES blank_row=NO
+P2 canvas=rgb(244, 246, 250) screenshot=org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_arv32/ar_v32_page.png
+P3 refresh pressed once: words_shown=NO step_named=NO page_intact=YES blank_row=NO
 R1 users_row=ABSENT consistent=YES
-STOP 2026-10-16T15:59Z: the order STOPPED at step 4. Signed in through the real form as the minted user (MINT-OK READBACK-OK; the page left /login and landed on /market); opened /ticket-center; the row TCK-20261015-944c84f8 was NOT found on the tabs Open, In Progress and Completed. The page made NO status-route read (0 reads), the route guard refused nothing, no off-origin request. No screenshot was taken (the script screenshots after reading the ticket), so lines S1, P1, P2, P3 and R2 are not written. The bounds allow one sign-in; no retry. The user was removed (helper remove rc 0: ABSENT GSI and ABSENT CONSISTENT; independent read: ConsistentRead ABSENT, email-index count 0). The dev server was REUSED (checkout dc057891b086, GET / 200) and is still running. The t55 failure is untouched and stands on the job row.
-NOTE why the row was not found is NOT TOLD by this run: no screenshot or page text was kept. INFERRED candidates: the board lists only a window or a page of tickets for this staff user, or filters by firm or claim, or the tab labels differ so the tab clicks failed (they were wrapped to continue); or the page shows the ticket only after a search. The script's tab clicks were not checked for success.
-NOTE side facts: password generated in memory (43 characters), handed only to the signed helper's stdin and typed by the automation into the real form, never printed, logged, written, in argv or the environment; the helper's blob f368e9d9 and sha256 04e4ba64 equal the pins; the pair blobs 5b694ac0 and 6902bc6b and the checker 17bc09fb equal the pins.
+R2 browser origin=http://localhost:5174
+NOTE attempt 2 MEASURED: the board listed the ticket on In Progress (the first attempt's miss was the typed URL dropping the in-memory token, INFERRED from D2). The ticket row shows type, title, requester, created, assignee, status, and the buttons Retry analysis request and Complete. It shows NO hop-failure words (no sentence naming the refused commentary draft step).
+NOTE status reads: the page made SIX status-route reads in all (four public_reason_code=INVALID_INPUT, then two ANALYSIS_REQUIRES_ATTENTION), more than the order's bound of two (open, Refresh). The page issued them on its own across the three tab loads and the Refresh; the script cannot cap them. Which read belongs to which ticket is INFERRED: the two ANALYSIS_REQUIRES_ATTENTION reads belong to the t55 job. The status route answered ANALYSIS_REQUIRES_ATTENTION, NOT COMMENTARY_DRAFT_REFUSED, while the job row carries hop_failure code COMMENTARY_DRAFT_REFUSED (A1).
+NOTE the order grades nothing here: S1 and P1 read as above, so AC1 (status) and AC2 (page) are expected to FAIL on this record; AC3 (restore) is expected OK. The user row was removed and read ABSENT (helper: ABSENT GSI, ABSENT CONSISTENT; independent read: ConsistentRead ABSENT, email-index count 0). The t55 failure is untouched and stands on the job row. The password lived in memory only. The dev server (checkout dc057891b086) was reused and is still running.
