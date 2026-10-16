@@ -7,7 +7,7 @@
 | step | seat | what moves | takes effect (ET) | commit | status |
 |---|---|---|---|---|---|
 | A4 price axis, step 0 to 1 (30 to 90 days) | `2.0.0_SA_COO~R1` | PX_LAST reach, about +4,250 observations a day | not set (follows R1's day-0 read; R1 says the earliest is 2026-10-17, a Saturday, so read as the first trading day after) | | pending |
-| A2 `BACKFILL_CAP` 50 to 62 | `2.0.0_SA_COO~H1` | tickers a run asked for history backfill | not set | | pending (order being cut) |
+| A2 `BACKFILL_CAP` 50 to 62 | `2.0.0_SA_COO~H1` | tickers a run asked for history backfill | the first 7:00 AM ET pull after site Z takes `8f56c423dd` (site Z takes the tree at its restore task after the 7:00 AM pull: Mon Oct 19 if CLOUD carries it before Fri Oct 16's restore, else Tue Oct 20); H1 reads and reports the day at the take. Until H1 reports it, COO~R1 does not take Mon Oct 19 for A4 | `8f56c423dd` (merged on box/dell1, local) | merged; day pending H1's report |
 | History ceiling ramp, step 1 (11,716 cells) | `2.0.0_SA_COO~Q1` | the drawer's daily room | earliest Sat 2026-10-24: the ramp cell is cut at the round-10 issuance after `TO-DQ-t34` is terminal | | not started |
 | History ceiling ramp, step 2 (23,432) | `2.0.0_SA_COO~Q1` | the drawer's daily room | one completed day after step 1 | | not started |
 | History ceiling ramp, step 3 (29,290) | `2.0.0_SA_COO~Q1` | the drawer's daily room | one completed day after step 2 | | not started |
