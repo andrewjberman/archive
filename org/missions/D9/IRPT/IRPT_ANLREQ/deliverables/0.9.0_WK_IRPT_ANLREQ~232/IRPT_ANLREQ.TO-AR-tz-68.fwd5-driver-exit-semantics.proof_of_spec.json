@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-68",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-68.fwd5-driver-exit-semantics.md",
+    "group": "OTHER",
+    "vintage_commit": "24fafdff4f"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~232",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R53_TX.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-68.fwd5-driver-exit-semantics.md",
+    "vintage_commit": "24fafdff4f"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py",
+      "kind": "script",
+      "commit_or_etag": "9e479d702d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the offline driver: --plan exits 0 and sends nothing and lists the three required ids; --selftest prints FWD5-SELFTEST-OK checks=19 with no request; the real run is a later WORLD act under a pair and was not made",
+      "introduces": ["def _excluded_row(r):", "REQUIRED for a run"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py",
+      "kind": "test",
+      "commit_or_etag": "9e479d702d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 offline tests against a local fake server on 127.0.0.1; the one test that asserted the old UNREACHED meeting behaviour is rewritten and renamed test_fwd5_driver_meeting_route_excluded_exits_zero; all 13 pass",
+      "introduces": ["def test_fwd5_driver_meeting_route_excluded_exits_zero"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py",
+      "kind": "test",
+      "commit_or_etag": "9e479d702d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 new test instances (8 test functions, the missing-id test parametrized over three flags) against a local fake server on 127.0.0.1; all pass; no network beyond the fake server, no AWS, no secret",
+      "introduces": ["def test_fwd5_driver_all_made_refused_and_excluded_exits_zero", "def test_fwd5_driver_missing_id_exits_two_sends_nothing"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR68-tz-AC1",
+      "criterion_verbatim": "AR68-tz-AC1 -- the new test file exists, every test function is named test_fwd5_driver_*, the tests of both files pass and at least 6 pass. Dry-run at box/dell2 4e7c72d5a8: R46-TESTS-FAIL absent: ... -- FAIL as expected.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 --prefix=test_fwd5_driver_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py",
+      "expect": "R46-TESTS-OK",
+      "output_evidence": "R46-TESTS-OK passed=23 (run from the worktree root at 9e479d702d; the checker's own pytest run over both files, no failure or error)",
+      "denominator": "23 passed of 23 collected instances, from 21 test functions defined (13 in test_fwd5_driver_offline.py, 8 in test_fwd5_driver_exit_semantics.py; the missing-id test parametrized over 3 flags); minimum 6",
+      "status": "PASS",
+      "status_reason": "the checker's own output at the worktree root of wk-IRPT_ANLREQ-232 at commit 9e479d702d; the dry-run base at box/dell2 4e7c72d5a8 was the FAIL the order records and was not re-run"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the driver's own --selftest (guard refusals, verdict mapping, exit codes including EXCLUDED rows ignored and no-made-call exits 2, offline); plus the negative arms: a made call dropped gives exit 2, a LEAK gives exit 1 even with the two EXCLUDED rows, a missing id gives exit 2 with zero requests, and the meeting path is never sent",
+      "expected": "selftest prints FWD5-SELFTEST-OK and exits 0; each negative arm exits with its ruled code; no request reaches the meeting path",
+      "observed": "FWD5-SELFTEST-OK checks=19 (offline: no request, no AWS, no browser) rc=0; the 10 new instances and the rewritten meeting test pass within the 23",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the same 23 tests run twice at 9e479d702d: once as a direct pytest run over both files, once through r46_checks.py tests 6 with the order's invocation",
+      "observed": "both runs green with 23 passed at 9e479d702d; the --plan output was not compared byte for byte across runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the run: sign-in on DEV, the ticket and package GETs, the mint and remove",
+      "reason": "BUILD ONLY by the order; the run is a later WORLD act by the applier under a pair after 2.0.0_SA_COO~V2's release"
+    },
+    {
+      "item": "any AWS call, any users-table read, any DEV or PROD request, any sign-in",
+      "reason": "the order forbids AWS, the mint and any real sign-in; the tests use a local fake server only"
+    },
+    {
+      "item": "the meeting POST and the commentary draft as calls",
+      "reason": "EXCLUDED by the issuer's ruling (TO-AR-tz-68): the meeting is a write attempt on another firm's ticket, outside the DONE WHEN; the commentary draft has no GET route in the record. Never sent; counted in neither the exit nor the pass"
+    },
+    {
+      "item": "disposition of the issuer-owned rows IRPT_ANLREQ-D2-W231-S1 and IRPT_ANLREQ-D2-W231-S2 in the channel",
+      "reason": "the rows are not edited by this worker (never edit an existing row); the issuer records their disposition, and this commit carries the code the ruling requires"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py tests",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 --prefix=test_fwd5_driver_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py",
+      "result": "R46-TESTS-OK passed=23"
+    },
+    {
+      "tool": "fwd5_driver.py --selftest",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py --selftest",
+      "result": "FWD5-SELFTEST-OK checks=19 (offline: no request, no AWS, no browser)"
+    }
+  ]
+}
