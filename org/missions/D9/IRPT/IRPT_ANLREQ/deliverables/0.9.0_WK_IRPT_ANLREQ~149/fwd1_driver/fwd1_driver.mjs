@@ -6,7 +6,7 @@
 //   node fwd1_driver.mjs --plan
 //   node fwd1_driver.mjs --selftest                       (offline: no browser, no network, no AWS, no boto3)
 //   node fwd1_driver.mjs --base http://localhost:5174 --firm <firm-id> --holdings <csv> --out <dir>
-//                        [--poll-minutes 20] --go IRPT_ANLREQ.TO-RUN-FWD1.<id>
+//                        [--poll-minutes 20] [--advisor-email <synthetic address at opal.invalid>] --go IRPT_ANLREQ.TO-RUN-FWD1.<id>
 // Without --go the driver prints the plan and exits 0. The run is AQ2's order under a never-widen pair, not the worker's.
 // The driver never writes the password, the hash, a token or a cookie to the console, the report or any file.
 import { createRequire } from 'node:module'
@@ -142,7 +142,7 @@ export function findTicketId(node, depth = 0) {
 const pathOf = (url) => { try { return new URL(url).pathname } catch { return '(unparsed)' } }
 
 export function parseArgs(argv) {
-  const o = { base: 'http://localhost:5174', firm: null, holdings: null, out: null, pollMinutes: 20, plan: false, selftest: false, go: null, decisionsPath: null }
+  const o = { base: 'http://localhost:5174', firm: null, holdings: null, out: null, pollMinutes: 20, plan: false, selftest: false, go: null, decisionsPath: null, advisorEmail: null }
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     const next = () => argv[++i]
@@ -155,13 +155,40 @@ export function parseArgs(argv) {
     else if (a === '--plan') o.plan = true
     else if (a === '--selftest') o.selftest = true
     else if (a === '--decisions') o.decisionsPath = next() ?? null
+    else if (a === '--advisor-email') o.advisorEmail = next() ?? ''
     else return { error: 'unknown argument ' + a }
   }
   return { o }
 }
 
-function printPlan(base) {
+// ---- AR-y-379 (round 43, ZZ40): the advisor login email option. Pure parts first; only a synthetic opal.invalid address is admitted. ----
+const ADVISOR_EMAIL_DOMAIN = 'opal.invalid'
+const ADVISOR_EMAIL_LOCAL = /^[a-z0-9][a-z0-9._-]*$/
+export function validateAdvisorEmail(s) {
+  if (typeof s !== 'string') return { error: 'the address must be a string' }
+  if (s.length < 6 || s.length > 80) return { error: 'the address must be 6 to 80 characters' }
+  if (s !== s.toLowerCase()) return { error: 'the address must be lower-case' }
+  const parts = s.split('@')
+  if (parts.length !== 2) return { error: 'the address must carry exactly one @' }
+  const [local, domain] = parts
+  if (domain !== ADVISOR_EMAIL_DOMAIN) return { error: 'only a synthetic @' + ADVISOR_EMAIL_DOMAIN + ' address is admitted' }
+  if (!ADVISOR_EMAIL_LOCAL.test(local)) return { error: 'the local part must match ^[a-z0-9][a-z0-9._-]*$' }
+  return { ok: true, address: s }
+}
+
+// shown: whether the page carries the advisor login field. Shown and given: fill it. Shown and not given: the form asks, the run stops
+// before the Submit click. Not shown: nothing is typed, whatever the option says.
+export function advisorFillAction(shown, advisorEmail) {
+  if (!shown) return { action: 'absent' }
+  if (advisorEmail === null || advisorEmail === undefined) {
+    return { action: 'needed', why: 'ADVISOR-EMAIL-NEEDED the form asks for the advisor login email and --advisor-email was not given' }
+  }
+  return { action: 'fill', value: advisorEmail }
+}
+
+function printPlan(base, advisorEmail = null) {
   console.log('PLAN IRPT_ANLREQ FWD-1 driver (AR-y-345); base ' + base + '; plan mode launches nothing')
+  if (advisorEmail !== null) console.log('PLAN advisor-email option (AR-y-379): ' + advisorEmail + ', typed only where the form shows the field')
   for (const s of STEPS) console.log(s)
 }
 
@@ -497,6 +524,16 @@ async function run(o) {
     if ((await firmSel.inputValue()) !== o.firm) throw new Error('the firm control did not take the chosen firm id')
     await page.locator('select[aria-label="Report type"]').selectOption('Overview')
     await page.locator('input[aria-label="Holdings file"]').setInputFiles(o.holdings)
+    // AR-y-379 (round 43, ZZ40): the advisor login field is shown only to a staff filer whose profile lists the firm (portal AR-y-378). Shown and
+    // given: one fill, before the Submit click. Shown and not given: the run stops here. Not shown: nothing is typed.
+    const advisorField = page.locator('input[aria-label="Advisor login email"]')
+    const advisorAct = advisorFillAction((await advisorField.count()) > 0, o.advisorEmail)
+    if (advisorAct.action === 'needed') throw new Error(advisorAct.why)
+    if (advisorAct.action === 'fill') {
+      await advisorField.fill(advisorAct.value)
+      log('STEP-4 the advisor login field took the synthetic advisor address ' + advisorAct.value)
+    }
+    report.advisor_email_field = advisorAct.action === 'fill' ? 'filled' : 'absent'
     const submit = page.getByRole('button', { name: SUBMIT_LABEL, exact: true })
     await submit.waitFor({ state: 'visible', timeout: 30000 })
     for (let i = 0; i < 30 && !(await submit.isEnabled()); i++) await sleep(1000)
@@ -843,6 +880,26 @@ async function selftest() {
   const fL5 = { clicks: 0, text: () => STILL_SENTENCE, onSubmit: () => { fL5.clicks += 1 } }
   const rL5 = await answerAfterSubmit(fakeFormPage([], [], { n: 0 }, fL5), [], () => false, { form_decisions: [] }, () => {}, { waitMs: 60, pollMs: 1 }).then(() => null, (e) => e.message)
   check('still-checking: without an outDir (the signed path) the sentence is not acted on: no click, NO-ANSWER', fL5.clicks === 0 && typeof rL5 === 'string' && /NO-ANSWER/.test(rL5))
+  // AR-y-379 (round 43, ZZ40): the advisor login email option and its one fill. Offline: no browser, no mint, no network.
+  const ADV_OK = 'irpt-w5-advisor-20261016@opal.invalid'
+  check('advisor email: validateAdvisorEmail admits irpt-w5-advisor-20261016@opal.invalid', validateAdvisorEmail(ADV_OK).ok === true && validateAdvisorEmail(ADV_OK).address === ADV_OK)
+  check('advisor email: a real-domain address is refused', validateAdvisorEmail('advisor@49financial.com').error !== undefined)
+  check('advisor email: an upper-case address is refused', validateAdvisorEmail('Irpt-W5@opal.invalid').error !== undefined)
+  check('advisor email: an address with two @ is refused', validateAdvisorEmail('a@b@opal.invalid').error !== undefined)
+  check('advisor email: an empty string is refused', validateAdvisorEmail('').error !== undefined)
+  check('advisor email: an overlong address (83 characters) is refused', validateAdvisorEmail('a'.repeat(70) + '@opal.invalid').error !== undefined)
+  check('advisor email: a local part starting with a dot is refused', validateAdvisorEmail('.abc@opal.invalid').error !== undefined)
+  check('advisor email: a subdomain of opal.invalid is refused (the domain is exact)', validateAdvisorEmail('x@mail.opal.invalid').error !== undefined)
+  check('advisor email: a non-string is refused', validateAdvisorEmail(null).error !== undefined)
+  check('advisor email: parseArgs reads --advisor-email into o.advisorEmail', parseArgs(['--advisor-email', 'a@opal.invalid']).o.advisorEmail === 'a@opal.invalid')
+  check('advisor email: parseArgs without the option leaves o.advisorEmail null', parseArgs([]).o.advisorEmail === null)
+  check('advisor email: the field shown and the option given fills the address', (() => { const a = advisorFillAction(true, ADV_OK); return a.action === 'fill' && a.value === ADV_OK })())
+  check('advisor email: the field not shown fills nothing (absent), with or without the option', advisorFillAction(false, ADV_OK).action === 'absent' && advisorFillAction(false, null).action === 'absent')
+  check('advisor email: the field shown and the option not given stops the run (needed, ADVISOR-EMAIL-NEEDED)', (() => { const a = advisorFillAction(true, null); return a.action === 'needed' && a.why.startsWith('ADVISOR-EMAIL-NEEDED') })())
+  const badAdvRun = spawnSync(process.execPath, [SELF, '--base', B, '--firm', '49financial', '--holdings', SELF, '--out', os.tmpdir(), '--go', 'IRPT_ANLREQ.TO-RUN-FWD1.x', '--advisor-email', 'X@REAL.example'], { encoding: 'utf8', timeout: 60000 })
+  check('advisor email: a bad option refuses the run with rc 2 before any step (RUN-REFUSED advisor-email)', badAdvRun.status === 2 && /RUN-REFUSED advisor-email/.test(badAdvRun.stdout) && !/STEP-1 password generated/.test(badAdvRun.stdout))
+  const okAdvPlan = spawnSync(process.execPath, [SELF, '--base', B, '--firm', '49financial', '--holdings', SELF, '--out', os.tmpdir(), '--advisor-email', ADV_OK], { encoding: 'utf8', timeout: 60000 })
+  check('advisor email: a valid option without --go is plan only (rc 0) and the plan names the option', okAdvPlan.status === 0 && /PLAN advisor-email option/.test(okAdvPlan.stdout) && /RUN-REFUSED no --go/.test(okAdvPlan.stdout))
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n)
   for (const [n, ok] of cases) console.log((ok ? 'case PASS ' : 'case FAIL ') + n)
   if (failed.length === 0) {
@@ -858,8 +915,13 @@ export async function main(argv) {
   const parsed = parseArgs(argv)
   if (parsed.error) { console.log('REFUSED ' + parsed.error); return 2 }
   const o = parsed.o
+  // AR-y-379: a bad --advisor-email refuses the run here, before the plan, any mint or any browser.
+  if (o.advisorEmail !== null) {
+    const adv = validateAdvisorEmail(o.advisorEmail)
+    if (adv.error) { console.log('RUN-REFUSED advisor-email: ' + adv.error); return 2 }
+  }
   if (o.plan || !o.go) {
-    printPlan(o.base)
+    printPlan(o.base, o.advisorEmail)
     if (!o.plan) console.log('RUN-REFUSED no --go order token: plan only, nothing launched')
     return 0
   }
@@ -869,7 +931,7 @@ export async function main(argv) {
   if (!o.firm || !o.holdings || !o.out) { console.log('RUN-REFUSED --firm, --holdings and --out are required'); return 2 }
   if (!fs.existsSync(o.holdings)) { console.log('RUN-REFUSED the holdings file does not exist'); return 2 }
   if (!(o.pollMinutes > 0 && o.pollMinutes <= 60)) { console.log('RUN-REFUSED --poll-minutes must be in (0, 60]'); return 2 }
-  printPlan(o.base)
+  printPlan(o.base, o.advisorEmail)
   return run(o)
 }
 
