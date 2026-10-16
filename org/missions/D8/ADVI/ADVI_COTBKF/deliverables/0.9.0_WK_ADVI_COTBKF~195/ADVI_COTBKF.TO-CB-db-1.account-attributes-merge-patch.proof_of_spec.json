@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-db-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-db-1.account-attributes-merge-patch.md",
+    "group": "OTHER",
+    "vintage_commit": "1e8d53cb83"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~195",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round105.md",
+    "vintage_commit": "1e8d53cb83ae324382d4a5f874d72d785c30bfbb",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-db-1.account-attributes-merge-patch.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/SSM_ACCOUNT_ATTRIBUTES.patch",
+      "kind": "terraform",
+      "commit_or_etag": "3c72ee60639c2b2589aa99472b77b522e626b3b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "patch only: one added line, not applied to ssm.tf and not served; applying it is a later seat under a sign-off pair"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/measure_account_attributes_drift.py",
+      "kind": "script",
+      "commit_or_etag": "3c72ee60639c2b2589aa99472b77b522e626b3b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker measurement script, counts only; two runs over the same inputs give identical output",
+      "artifact_covered_by": [
+        "CB105db1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/ACCOUNT_ATTRIBUTES_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "3c72ee60639c2b2589aa99472b77b522e626b3b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "counts, file names and roles only; no account identifier, name or dollar value"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/ACCOUNT_ATTRIBUTES_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "3c72ee60639c2b2589aa99472b77b522e626b3b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record narrative: counts, file names and the not-established list"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB105db1-AC1",
+      "criterion_verbatim": "`CB105db1-AC1` -- the patch is one added line in `ssm.tf`: the `account_attributes` step in the non-gating brace-group shape, before `--finalize`, and it applies to the tree at HEAD.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/db1_patch_check.py shape org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/SSM_ACCOUNT_ATTRIBUTES.patch",
+      "output_evidence": "PATCH-SHAPE files=1 removed=0 added=1 table_line=True nongating=True before_finalize=True applies=True",
+      "denominator": "1 patch file; 1 added line and 0 removed lines against infra/aws/terraform/cot-pipeline/ssm.tf at base 1e8d53cb83 (415 lines; holdings step at line 251, CHAIN-FIX comment at line 252)",
+      "status": "PASS",
+      "expect": "^PATCH-SHAPE files=1 removed=0 added=1 table_line=True nongating=True before_finalize=True applies=True$"
+    },
+    {
+      "criterion_id": "CB105db1-AC2",
+      "criterion_verbatim": "`CB105db1-AC2` -- a read-only `terraform plan` of the cot-pipeline root with the patch applied to a throwaway copy reads one in-place change, to `aws_ssm_document.cot_silver_run`, and nothing else.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/db1_patch_check.py plan org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/SSM_ACCOUNT_ATTRIBUTES.patch",
+      "output_evidence": "PATCH-PLAN add=0 change=1 destroy=0 address=aws_ssm_document.cot_silver_run",
+      "denominator": "1 planned change of 1 planned action on the cot-pipeline root with the patch applied to a throwaway copy (1 in-place update, 0 adds, 0 destroys); the plan at HEAD baseline not re-read by the worker",
+      "status": "PASS",
+      "expect": "^PATCH-PLAN add=0 change=1 destroy=0 address=aws_ssm_document\\.cot_silver_run$"
+    },
+    {
+      "criterion_id": "CB105db1-AC3",
+      "criterion_verbatim": "`CB105db1-AC3` -- your own measurement of the drift between the stale silver partition and the 2026-10-15 bronze pull states the same counts the issuer measured (62 accounts added, none removed, 45 billable changes, 130 portfolio-group changes, 171 accounts changed in any column, 122 multi-book accounts, none whose flags disagree).",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/ACCOUNT_ATTRIBUTES_RECORD.json',encoding='utf-8'));m=d['measured'];r=d.get('drift') or {};print('DRIFT-RECORD measured=%s' % m + ((' bronze=%s added=%d removed=%d changed_billable=%d changed_portfolio_group=%d changed_any=%d multibook_new=%d flag_disagree=%d' % (d['bronze_object'].rsplit('_',1)[-1],r['added'],r['removed'],r['changed_billable'],r['changed_portfolio_group'],r['changed_any'],r['multibook_new'],r['multibook_flag_disagree_new'])) if m else ' reason=%s' % d['reason']))\"",
+      "output_evidence": "DRIFT-RECORD measured=True bronze=2026-10-15.xlsx added=62 removed=0 changed_billable=45 changed_portfolio_group=130 changed_any=171 multibook_new=122 flag_disagree=0",
+      "denominator": "1127 bronze rows and 1004 bronze accounts against 943 silver rows and 942 silver accounts (942 shared); changed_any counts the 942 shared accounts over four columns",
+      "status": "PASS",
+      "expect": "^DRIFT-RECORD measured=True bronze=2026-10-15\\.xlsx added=62 removed=0 changed_billable=45 changed_portfolio_group=130 changed_any=171 multibook_new=122 flag_disagree=0$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "gating-form variant of the patch (the account_attributes step as a bare command joined by && with no non-gating brace group), written to scratch and run through the shape check, which must read nongating=False",
+      "expected": "nongating=False",
+      "observed": "PATCH-SHAPE files=1 removed=0 added=1 table_line=True nongating=False before_finalize=True applies=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "measure_account_attributes_drift.py run twice over the same two scratch copies; stdout compared byte for byte",
+      "observed": "the two outputs are identical; sha256 d4d4d354b35e1266566dfda2b34641f7e1a520d03491ef0c7b725badcf60868e on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live SSM document opal-cot-silver-run and the applied Terraform state",
+      "reason": "not applied, not served, not edited; read-only order bounds; applying the patch is a later seat under a sign-off pair"
+    },
+    {
+      "item": "deliverables/2.0.0_SA_COO~C1/db1_attr_drift_recompute.py",
+      "reason": "not run or read: the order requires an independent measurement"
+    },
+    {
+      "item": "the served gold dimension and its consumers",
+      "reason": "read-only bounds; no served output was read, so the effect on served numbers is not measured"
+    },
+    {
+      "item": "bronze days other than 2026-10-15 and any silver partition newer than 2026-08-19",
+      "reason": "the order pins one bronze object; later days were not measured"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W195-S1: the 2026-10-15 bronze pull holds 122 multi-row accounts against 1 in the stale silver partition, so the first-row book rule decides their dimension book; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/ADVI_COTBKF.TO-CB-db-1.account-attributes-merge-patch.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "db1_patch_check.py shape (issuer script, run unmodified)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/db1_patch_check.py shape org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/SSM_ACCOUNT_ATTRIBUTES.patch",
+      "result": "PATCH-SHAPE files=1 removed=0 added=1 table_line=True nongating=True before_finalize=True applies=True (rc=0)"
+    },
+    {
+      "tool": "db1_patch_check.py plan (issuer script, run unmodified)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/db1_patch_check.py plan org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/SSM_ACCOUNT_ATTRIBUTES.patch",
+      "result": "PATCH-PLAN add=0 change=1 destroy=0 address=aws_ssm_document.cot_silver_run (rc=0)"
+    },
+    {
+      "tool": "make_patch.py (scratch, outside the repository)",
+      "invocation": "python -I C:/Dev/ajb_workspace/.scratch/cotbkf_r105/w195/make_patch.py",
+      "result": "WROTE SSM_ACCOUNT_ATTRIBUTES.patch added=1 removed=0"
+    },
+    {
+      "tool": "measure_account_attributes_drift.py (committed evidence)",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~195/measure_account_attributes_drift.py <silver copy> <bronze copy>",
+      "result": "drift counts equal the AC3 expectation; identical output on re-run"
+    },
+    {
+      "tool": ".tools/aws.cmd (read-only s3 ls and s3 cp of the named objects)",
+      "invocation": "cmd //c .tools\\aws.cmd s3 ls / s3 cp (two objects, one listing each prefix)",
+      "result": "silver prefix holds one partition; bronze newest pull is the 2026-10-15 file; both copies rc=0"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "measured": true,
+  "silver_object": "s3://opal-data-cot/silver/account_attributes/2026-08-19.parquet",
+  "bronze_object": "s3://opal-data-cot/forwardfill_v2/account_attributes/ACCOUNT_ATTRIBUTES_DAILY_2026-10-15.xlsx",
+  "drift": {
+    "old_rows": 943,
+    "new_rows": 1127,
+    "old_accounts": 942,
+    "new_accounts": 1004,
+    "added": 62,
+    "removed": 0,
+    "both": 942,
+    "multibook_old": 1,
+    "multibook_new": 122,
+    "changed_supervised": 0,
+    "changed_billable": 45,
+    "changed_position_only": 0,
+    "changed_portfolio_group": 130,
+    "changed_any": 171,
+    "multibook_flag_disagree_new": 0
+  },
+  "multibook_rule": "A_00 load_account_attributes (data/cot/scripts/gold/A_00.accounts_dimension.py:371-432) loads the single latest silver partition (the sorted-last key under silver/account_attributes/, :403) and reduces it to one row per account. At a multi-book account the three flag columns (account_supervised, account_billable, position_only) must agree across that account's rows: any disagreement raises SystemExit and refuses the build (:413-425). portfolio_group is not asserted: the dimension keeps the FIRST row's book in partition order (drop_duplicates keep='first', :432), and each multi-book account is printed as a NOTE (:426-430). join_account_attributes (:439-467) then left-joins that one-row-per-account frame onto the dimension by account_id.",
+  "gold_readers": {
+    "scripts_scanned": 97,
+    "readers": ["D_05.supervised_split.py", "test_cot_supervised_tieout.py"],
+    "writers": ["A_00.accounts_dimension.py"]
+  },
+  "partition_order_dependence": {
+    "answer": "yes",
+    "evidence": "data/cot/scripts/gold/A_00.accounts_dimension.py:432 drop_duplicates(subset=['account_id'], keep='first') over the latest silver partition: the portfolio_group kept at a multi-book account is the first row in partition order. data/cot/scripts/silver/cot_silver_merge.py:489 dedups keep='first' and :498 writes the parquet with no sort, so partition order is the bronze row order."
+  },
+  "partition_naming": "silver/account_attributes/<data date>.parquet, where the data date is read from the xlsx Timestamps sheet, falling back to the YYYY-MM-DD in the bronze filename (cot_silver_merge.py:476-483, :496, :500). With a date (the SSM RunDate, passed as DATE_ARG at infra/aws/terraform/cot-pipeline/ssm.tf:237-238) one run reads only ACCOUNT_ATTRIBUTES_DAILY_<date>.xlsx (cot_silver_merge.py:533-553). With no date the run is incremental: it lists every bronze file and processes each whose etag is new or changed since the manifest (:559-577), so one run can read several bronze days. The table has no FORWARDFILL_QUARANTINE entry.",
+  "what_this_shows": "One bronze pull (2026-10-15: 1127 rows, 1004 accounts) against the stale silver partition (2026-08-19: 943 rows, 942 accounts) shows 62 accounts added, none removed, and 171 of the 942 shared accounts changed in at least one of the four columns (130 portfolio-group, 45 billable, no supervised or position-only change). The bronze pull holds 122 accounts with more than one row, and none of them carries a supervised, billable or position_only disagreement.",
+  "not_established": [
+    "Only one bronze day (2026-10-15) was measured; no other bronze day and no silver partition newer than 2026-08-19 exists or was measured.",
+    "The served gold dimension and its consumers were not read or run, so the effect on served numbers is not measured.",
+    "The live SSM document was not read; the plan check (AC2) reads one in-place change against the Terraform copy at HEAD, so whether the live document equals the held copy is not established.",
+    "The multi-book count is by raw bronze rows per account, not by distinct portfolio group.",
+    "A_00 was read, not run; the portfolio_group a multi-book account receives after the change is not computed.",
+    "Reader and writer classification is a grep of the four column names plus a read of the matching lines; a reader that reaches the columns under another name is not seen. Non-.py gold_validate_config.yaml is a config check, not a script, and is not counted."
+  ]
+}

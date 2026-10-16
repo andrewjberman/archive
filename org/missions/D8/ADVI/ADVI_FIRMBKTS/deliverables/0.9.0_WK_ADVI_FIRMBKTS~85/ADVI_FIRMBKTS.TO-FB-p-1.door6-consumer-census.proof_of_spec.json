@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-p-1.door6-consumer-census",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-1.door6-consumer-census.md",
+    "group": "OTHER",
+    "vintage_commit": "3a9b155680"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R9.md",
+    "vintage_commit": "3a9b155680",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-1.door6-consumer-census.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~85",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~85/DOOR6_CENSUS.json",
+      "kind": "config_data",
+      "commit_or_etag": "8bc7527287",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census record of the Door 6 marker key; no AWS write and no deploy; committed LOCAL on wk-ADVI_FIRMBKTS-85",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the order invocation (door6census --file DOOR6_CENSUS.json), expecting ^DOOR6CENSUS: OK consumers=[0-9]+ live_other=[0-9]+$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 60 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py door6census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~85/DOOR6_CENSUS.json",
+      "output_evidence": "DOOR6CENSUS: OK consumers=9 live_other=5 (rc=0)",
+      "denominator": "1 record file checked; 9 consumer rows, of which 5 carry status LIVE_OTHER, 1 RETIRING, 3 ABSENT_LIVE; the record's own denominators: 1 S3 notification entry, 1 event bus, 156 default-bus rules, 2972 aws nodes, 4 repo dirs",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the census is read-only and AC1 grades the record shape only",
+      "expected": "n/a -- no mutant named by the order",
+      "observed": "n/a -- no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 checker, outputs compared",
+      "observed": "run 1 and run 2 both printed DOOR6CENSUS: OK consumers=9 live_other=5 with rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the order's <status> flip to complete",
+      "reason": "the worker face of the order carries no <status> element (surprise row ADVI_FIRMBKTS-W85-S3); the record face was not read, by the worker bound, so the flip was not made and is left open for the issuer"
+    },
+    {
+      "item": "the live copies of run-gold-layer.sh and orion-gold-dispatch.sh under the runner code prefix in the INF bucket",
+      "reason": "the writer evidence is the repository copy; the deployed copy was not read, and the read is outside the order's named scope"
+    },
+    {
+      "item": "the 13 roles attached to the fence policy: their own policies",
+      "reason": "only the policy document and the attachment count were in scope"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-W85-S1: the writer of gold/meta/pipeline-complete.json sits in data/inf/scripts/gold/orion-gold-dispatch.sh:1906, outside the infra/ lib/ integrations/ .tools/ paths the order's search names, which hold no writer.",
+    "ADVI_FIRMBKTS-W85-S2: the surprise-row schema the worker bar names is absent from this worktree; row shape was copied from the channel's sibling rows.",
+    "ADVI_FIRMBKTS-W85-S3: the order's worker face says to flip <status> to complete but carries no <status> element; the flip was not made."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~85/DOOR6_CENSUS.json",
+  "compiler_tools": [
+    {
+      "tool": "r9_checks.py door6census",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 60 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py door6census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~85/DOOR6_CENSUS.json",
+      "result": "DOOR6CENSUS: OK consumers=9 live_other=5 (rc=0)"
+    }
+  ]
+}
