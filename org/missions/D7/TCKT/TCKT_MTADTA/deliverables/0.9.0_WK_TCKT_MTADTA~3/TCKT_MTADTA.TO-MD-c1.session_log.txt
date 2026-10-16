@@ -1,0 +1,28 @@
+SESSION LOG -- 0.9.0_WK_TCKT_MTADTA~3 on TCKT_MTADTA.TO-MD-c1 (worktree /c/tmp/wk-tckt-mtadta-3, branch wk-TCKT_MTADTA-3)
+
+1. Premise: first act printed branch wk-TCKT_MTADTA-3 and TREE-OK. The worktree sparse cone excluded data/ and infra/aws/.
+   Blocking row TCKT_MTADTA-D1-W3-S1 filed and committed (d015b80655). Stopped; nothing graded.
+2. Issuer ruling (coordinator message): cone widened to data/m365_metadata, infra/aws/lambda/globgrph-trino-access,
+   infra/aws/lambda/m365-metadata-collector, infra/aws/terraform/trino. Verified with git sparse-checkout list and
+   git sparse-checkout check-rules: the granted paths are admitted.
+3. Naming builder: python lib/opal_naming.address('m365-metadata','trino','bronze','audit_events','date=20261015', object=...)
+   -> ValueError: source 'm365-metadata' is not a systems.json key. name('globgrph', None, 'trino-access', 'lambda')
+   -> globgrph-trino-access-lambda. Literal prefixes used; row TCKT_MTADTA-D1-W3-S2.
+4. Build: code written under data/m365_metadata/scripts/collector/, handler and build.sh under
+   infra/aws/lambda/m365-metadata-collector/, collector.tf under infra/aws/terraform/trino/. Code commit 42c5a6a6ee.
+5. Defect caught by the check run: collect.py dropped the LOST_AFTER_DAYS import while still using it. Restored; the
+   collect check then printed C1-COLLECT-OK.
+6. Check runs (cwd = worktree root, timeout 120):
+   python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_c1.py guard    -> C1-GUARD-OK kept=4 dropped={'SharePoint': 1}  rc=0
+   python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_c1.py coverage -> C1-COVERAGE-OK  rc=0
+   python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_c1.py collect  -> C1-COLLECT-OK bronze_objects=2  rc=0
+7. pytest: python -m pytest data/m365_metadata/scripts/tests/test_collector.py -q -p no:cacheprovider -> 11 passed in 0.05s  rc=0
+8. Mutant control: a scratch copy with the population drop disabled (if False in _reduce) -> C1-GUARD-REFUSED
+   kept ids ['in-1', 'mail-1', 'mail-2', 'out-1', 'via-1']  rc=1 (the mutant fired; scratch removed).
+9. Determinism: each check run twice, outputs compared byte for byte: STABLE for guard, coverage and collect.
+10. Lambda package: bash infra/aws/lambda/m365-metadata-collector/build.sh -> built (7 files); zip root holds
+    access_client.py collect.py coverage_record.py filter.py handler.py population.json source_client.py.
+    The build output was removed after the listing (build/ is gitignored).
+11. Not run: no Microsoft, AWS or S3 call; no terraform init, plan or apply.
+12. Surprise rows: TCKT_MTADTA-D1-W3-S2 (builder refusal), S3 (coverage key overwrite, ARMED), S4 (seen trim), S5 (per-day
+    attribution), committed 7936de4da7.
