@@ -1,7 +1,7 @@
 """c40_check.py -- grades the LANDING of the read links (NFRA_MCPINDEX round 18, workstream RESEARCH; the issuer's direct act after OG-ap-23 is live). Run from the repo root.
 
   python c40_check.py landed   all 34 links of read_links.json are in the committed row files (read_tool == the linked tool, tools == [tool], gap_owner null); a fresh generator
-                               run with the deployed list changes NO committed row (so the rows are what the released list produces); and no RESEARCH row (every row outside
+                               run with the deployed list changes NO committed row outside opal_data_assets_ (so the rows are what the released list produces); and no RESEARCH row (every row outside
                                opal_data_assets_) has a null read_tool (the 34 excluded entities are not rows).
   env C40_DEPLOYED   the deployed-tools list file (default: round18/deployed_future.json; on release day: the live list)
 Exit 0 PASS, 1 FAIL, 9 no run. c31.AC1 and c31.AC2 are MX-c-31's own gates (6 rows differ from base; 28 rows still to land) and read FAIL by design once the links land.
@@ -53,7 +53,7 @@ def landed():
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=100)
     fresh = rows(tmp)
     unlinked = [e for e, t in links.items() if not (e in com and com[e].get("read_tool") == t and com[e].get("tools") == [t] and com[e].get("gap_owner") is None)]
-    differ = [e for e in fresh if fresh[e] != com.get(e)]
+    differ = [e for e in fresh if not e.startswith(ASSETS) and fresh[e] != com.get(e)]   # the ASSETS rows carry the other issuer's links (assets_read_links.json), which this run does not pass
     nulls = [e for e, d in com.items() if not e.startswith(ASSETS) and e in fresh and d.get("read_tool") is None]
     print("DENOMINATOR links %d; committed rows %d; fresh rows %d (rc=%d); deployed list %s" % (len(links), len(com), len(fresh), r.returncode, DEPLOYED))
     return report([("the generator exits 0", r.returncode == 0),

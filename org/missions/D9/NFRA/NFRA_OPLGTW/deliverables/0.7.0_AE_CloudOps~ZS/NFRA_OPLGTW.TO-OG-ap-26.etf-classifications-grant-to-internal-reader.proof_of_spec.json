@@ -1,0 +1,132 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-26",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~ZS",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7656f484ab"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "93d752d55b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-26.etf-classifications-grant-to-internal-reader.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/etf_classification_read_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "52b0ff8f89",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The role line of the one aws_iam_role_policy changed from aws_iam_role.gw.id to aws_iam_role.int_reader.id; .tf at sha256-16 867087958bac89b9 (re-hashed before the apply; ask 69466be19798). Applied through safe-apply, targeted: plan 1 add / 0 change / 1 destroy, 'Apply complete! Resources: 1 added, 0 changed, 1 destroyed'. Targeted re-plan: No changes.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "iam:role-policy/gateway-global-internal-reader-role/gateway-global-etf-classification-read-policy",
+   "kind": "aws_resource",
+   "commit_or_etag": "d2e1fd6cef",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live on the internal reader role: one statement, Allow, dynamodb:GetItem only, Resource equal to the describe-table ARN; document sha256-16 609426e6a083440b, equal to the document OG-ap-25 put on the instance role. The role's inline policies 6 -> 7. Recorded in W/CLS2_APPLIED.json. Absent from opal-gateway-role (25 -> 24).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZS/NEVER_WIDEN_ASK_OG-ap-26.md",
+   "kind": "doc",
+   "commit_or_etag": "52b0ff8f89",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The three-half ask, sha256 69466be19798; halves signed CTO 4d0a8d3c0d, COO 90b589c58f, CVO f2cf55e41e, each at the .tf hash 867087958bac89b9.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T0631Z_nfra-oplgtw-grants-ap26_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "d2e1fd6cef",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ledger nfra-oplgtw-grants-ap26 opened (entry and sentinel committed) before the apply, 3 legs (P1 both ends read back, S1 simulator and table existence, V1 re-plan), all proven, CLOSED; sentinel removed in the same commit as CLS2_APPLIED.json.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (Phase A): the one .tf file puts the policy on the internal reader role, GetItem only on the table ARN, and the plan is a one-for-one replacement.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap26.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "terraform: policies 1 (want 1); role is the internal reader True (role expr aws_iam_role.int_reader.id); dynamodb actions ['dynamodb:GetItem']; table arn ok True; wildcard False (want False)\nplan: 1 to add, 0 to change, 1 to destroy True; ask has the three halves True\nRESULT: PASS\nexit=0",
+   "denominator": "1 policy in the .tf; the plan figure is read from the stored W/CLS2_PLAN.txt (the Phase A plan), and after the apply a fresh targeted plan reads No changes.",
+   "status": "PASS",
+   "status_reason": "Re-run after the apply at the Phase B commit; same output as Phase A.",
+   "expect": "(?s)terraform: policies 1 \\(want 1\\); role is the internal reader True \\(role expr \\S+\\); dynamodb actions \\['dynamodb:GetItem'\\]; table arn ok True; wildcard False \\(want False\\).*plan: 1 to add, 0 to change, 1 to destroy True; ask has the three halves True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (Phase B): the policy is live on the internal reader role, gone from the instance role, GetItem allowed and Scan not allowed by the simulator, and the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap26.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0; internal reader holds policy gateway-global-etf-classification-read-policy shape ok; instance role still holds it 0 (want 0); simulate internal reader GetItem allowed, Scan implicitDeny (negative control); instance role GetItem implicitDeny\nRESULT: PASS\nexit=0",
+   "denominator": "1 policy: re-read from IAM by the script itself on both roles (get-role-policy on the internal reader, list-role-policies on the instance role), plus the simulator on the exact table ARN from CLS2_APPLIED.json.",
+   "status": "PASS",
+   "status_reason": "Run at d2e1fd6cef on the shared tree, and again when the instance was generated: ledger CLOSED, sentinel 0 at HEAD, shape ok, instance role no longer holds it, GetItem allowed / Scan implicitDeny, instance role GetItem implicitDeny.",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0; internal reader holds policy \\S+ shape ok; instance role still holds it 0 \\(want 0\\); simulate internal reader GetItem allowed, Scan (?:implicitDeny|explicitDeny) \\(negative control\\); instance role GetItem (?:implicitDeny|explicitDeny).*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative arm: iam simulate-principal-policy on the table ARN, one call each: the internal reader's Scan, and the instance role's GetItem (which the grant just left), plus a positive control for the deny reads in a separate invocation.",
+   "expected": "Internal reader GetItem allowed; internal reader Scan not allowed; instance role GetItem not allowed; the control principal's Scan allowed.",
+   "observed": "Internal reader GetItem allowed; internal reader Scan implicitDeny; instance role GetItem implicitDeny; the caller principal's Scan on the same ARN allowed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Targeted re-plan after the apply; AC1 and AC2 each run twice (AC1 at the Phase A commit and when the instance was generated; AC2 at the Phase B commit and when the instance was generated).",
+   "observed": "Re-plan No changes; AC1 and AC2 each PASS exit=0 with the same figures. AC2 was not run as a negative arm: its refusal of an absent CLS2_APPLIED.json is read from the script, and the issuer measured the pre-cut FAIL.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "CVO condition: OG-ap-23's served read shows the call going through the internal reader.",
+   "reason": "Not exercised: no code is deployed in this act. It is the code release's proof."
+  },
+  {
+   "item": "That the gateway can actually read an item from the table as the internal reader.",
+   "reason": "The applier cannot assume the role or call DynamoDB as it, so the IAM branch is read by the simulator only (GetItem allowed on the table ARN, whose existence describe-table confirmed). No item was read."
+  },
+  {
+   "item": "That the grant was never exercised during the replacement window.",
+   "reason": "Terraform destroyed the old policy and created the new one within about one second; for that moment neither role held the grant. Nothing serves the tool yet, and the ask named the window; no call was looked for."
+  }
+ ],
+ "surprises": [],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. Phase A 2026-10-16 06:18Z-06:23Z (GO 34754); Phase B 06:31Z-06:45Z (GO 34769). Log: org/tier2_senior/0.7.0_AE_CloudOps~ZS/logs/2026-10-16/ (extended in the same commit as this instance).",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway apply -auto-approve -var market_update_s3_root=<address() output> -target=aws_iam_role_policy.gw_etf_classification_read",
+   "result": "PASS",
+   "notes": "rc 0; 1 added, 1 destroyed in one apply, the destroy first and the create about a second later."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (3 legs), close-leg x3, close",
+   "result": "PASS",
+   "notes": "open commits itself; close leaves the closed entry and the sentinel deletion uncommitted, so they went in the Phase B commit."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "--drift --budget 420",
+   "result": "PASS",
+   "notes": "scanned 6 of 6 carriers within budget (253 s); no schedule or trigger is added by this order."
+  }
+ ]
+}
