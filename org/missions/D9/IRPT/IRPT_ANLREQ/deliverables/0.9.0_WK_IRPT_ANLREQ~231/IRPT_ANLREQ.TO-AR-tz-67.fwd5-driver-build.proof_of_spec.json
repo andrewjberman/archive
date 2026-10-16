@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tz-67",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-67.fwd5-driver-build.md",
+    "group": "OTHER",
+    "vintage_commit": "c43f8fc13a"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~231",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R52_TX.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tz-67.fwd5-driver-build.md",
+    "vintage_commit": "c43f8fc13a"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py",
+      "kind": "script",
+      "commit_or_etag": "b1c964ad0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the offline driver: --plan exits 0 and sends nothing; --selftest prints FWD5-SELFTEST-OK checks=16 with no request; the real run is a later WORLD act under a pair and was not made",
+      "introduces": ["GET_ALLOWED", "def classify"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py",
+      "kind": "test",
+      "commit_or_etag": "b1c964ad0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 offline tests against a local fake server on 127.0.0.1; no network beyond it, no AWS, no secret; all 13 passed in the criterion run",
+      "introduces": ["def test_fwd5_driver_guard_refuses_put_and_post_to_ticket_route"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR67-tz-AC1",
+      "criterion_verbatim": "AR67-tz-AC1 -- the test file exists, every test function is named test_fwd5_driver_*, the tests pass and at least 8 pass. Dry-run at box/dell2 ac2ce8a2d7: R46-TESTS-FAIL absent: ... -- FAIL as expected.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 --prefix=test_fwd5_driver_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py",
+      "expect": "R46-TESTS-OK",
+      "output_evidence": "R46-TESTS-OK passed=13",
+      "denominator": "13 passed of 13 test functions defined in test_fwd5_driver_offline.py (all named test_fwd5_driver_*); minimum 8",
+      "status": "PASS",
+      "status_reason": "the checker's own output at the worktree root of wk-IRPT_ANLREQ-231 at commit b1c964ad0b; the base at box/dell2 ac2ce8a2d7 was the FAIL the order records"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the driver's own --selftest (guard refusals, verdict mapping and exit codes, offline); plus the negative arm: the production plan with the meeting POST is refused by the guard before send, so the run is UNREACHED and exits 2, not 0 (test_fwd5_driver_meeting_route_unreached_exits_two)",
+      "expected": "selftest prints FWD5-SELFTEST-OK and exits 0; the meeting-route run exits 2 with meeting UNREACHED and guard_refused naming meeting",
+      "observed": "FWD5-SELFTEST-OK checks=16 (offline: no request, no AWS, no browser) rc=0; the meeting-route test passes within the 13",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r46_checks.py tests run twice on the same file, and fwd5_driver.py --plan run twice, the outputs compared byte for byte with cmp",
+      "observed": "both criterion runs print R46-TESTS-OK passed=13 and the plan outputs are identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the run: sign-in on DEV, the ticket and package GETs, the mint and remove",
+      "reason": "BUILD ONLY by the order; the run is a later WORLD act by the applier under a pair after 2.0.0_SA_COO~V2's release (target Oct 20)"
+    },
+    {
+      "item": "any AWS call, any users-table read, any DEV or PROD request",
+      "reason": "the order forbids AWS, the mint and any real sign-in; the tests use a local fake server only"
+    },
+    {
+      "item": "the meeting route as a call",
+      "reason": "a POST to a ticket route, which the order's guard refuses; recorded in surprise row IRPT_ANLREQ-D2-W231-S1, not widened"
+    },
+    {
+      "item": "a GET route for the commentary draft",
+      "reason": "the record names none; listed UNREAD in the plan per the refusal clause; surprise row IRPT_ANLREQ-D2-W231-S3"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W231-S1: the meeting route is a POST to a ticket route, which the order's guard refuses, so the run cannot exit 0 as specified (BLOCKING)",
+    "IRPT_ANLREQ-D2-W231-S2: the package-file routes need the ticket's report and request ids, which the refused ticket read cannot supply; the order names no source (BLOCKING)",
+    "IRPT_ANLREQ-D2-W231-S3: the record names no GET route for the commentary draft; listed UNREAD (OBSERVATION)",
+    "IRPT_ANLREQ-D2-W231-S4: the ticket list answers 200 by design, so the any-2xx-is-LEAK rule is graded by the absence reading for the list only (OBSERVATION)",
+    "IRPT_ANLREQ-D2-W231-S5: the run needs --firm-b, --request-id and --job-id, which the order's run arguments do not name (OBSERVATION)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py",
+  "compiler_tools": [
+    {
+      "tool": "r46_checks.py tests",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 8 --prefix=test_fwd5_driver_ org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/test_fwd5_driver_offline.py",
+      "result": "R46-TESTS-OK passed=13"
+    },
+    {
+      "tool": "fwd5_driver.py --selftest",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py --selftest",
+      "result": "FWD5-SELFTEST-OK checks=16 (offline: no request, no AWS, no browser)"
+    }
+  ]
+}
