@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e107",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md",
+    "group": "OTHER",
+    "vintage_commit": "479867946b76b0dd63fb4533a67c09818675ca38"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R27.md",
+    "vintage_commit": "479867946b76b0dd63fb4533a67c09818675ca38",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~97",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three subcommands over the shared etf_classification_scheduled module (imported, not copied): plan (read-only), apply (writes only under a signed pair; built and selftested, never run against AWS by this worker), selftest (stub tables, no AWS). apply writes with its own conditional put because the shared write() drops source_table and source_last_updated.",
+      "artifact_covered_by": [
+        "SC27-e107-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Plan file from one read-only run of seed22.py plan at 2026-10-16 (base 479867946b): firm 49financial, 22 candidates, planned=4 ($15,777.17), unresolved=18 ($397,564.42), seed_pending=0. No S3 or DynamoDB write was made.",
+      "artifact_covered_by": [
+        "SC27-e107-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appended one row, MDPF_SECCLASS-D1-W97-S1 (the plan_rows direct-match rule plans 4 of the 22, not 22). Append only; no existing row edited. Parsed as JSON at the append; surprise-row-gate run at the commit.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC27-e107-AC1",
+      "criterion_verbatim": "the stub run shows the plan, the provenance attributes, the conditional put and the refusals, including the difference control (iii).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22.py selftest",
+      "output_evidence": "SEED22-SELFTEST (i) plan on the three-ticker fixture: PASS planned AAAX; PASS AAAX carries source_table; PASS AAAX carries source_last_updated; PASS AAAX input is legacy-fork; PASS BBBX (needs_review) unresolved; PASS CCCX (canonical stub) refused, not planned; PASS partition exact. (ii) apply on the stub: PASS apply rc 0; PASS conditional put issued attribute_not_exists(ticker); PASS item has source_table; PASS item has source_last_updated; PASS only AAAX attempted; PASS input tag not persisted. (iii) difference control: 'SEED22-APPLY REFUSED pair=ABSENT' PASS missing pair rc 2; PASS missing pair writes nothing. (iv) PASS existing planned ticker rc 2; PASS existing planned ticker not written. (v) PASS firm mismatch rc 2 and nothing written. Final line: SEED22-SELFTEST ok=True fails=[] ; exit rc=0.",
+      "denominator": "18 checks in selftest groups (i) to (v): 18 PASS, 0 FAIL; the stub apply wrote 1 of 1 planned fixture row",
+      "status": "PASS",
+      "expect": "SEED22-SELFTEST ok=True"
+    },
+    {
+      "criterion_id": "SC27-e107-AC2",
+      "criterion_verbatim": "the real plan covers exactly the 22 baseline tickers once each, every planned row carries provenance equal to the live old row, none is in the canonical table now, and the dollars equal the baseline total within $1.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
+      "output_evidence": "SEED22-PLAN ok=True planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=[] ; exit rc=0. Negative arm (a scratch copy with the source_table of planned row AEMGX removed): SEED22-PLAN ok=False planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=['AEMGX provenance'] ; rc=1.",
+      "denominator": "22 baseline tickers = 4 planned + 18 unresolved + 0 seed_pending, each exactly once; 4 of 4 planned rows carry source_table bd-securities and a source_last_updated equal to the live old row (4 get_item reads); 0 of 4 planned tickers in etf-classifications; dollars 413341.59 vs baseline 413341.59, delta 0.00",
+      "status": "PASS",
+      "expect": "SEED22-PLAN ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the real plan with the source_table attribute removed from one planned row (AEMGX), fed to the check: the provenance arm must fire",
+      "expected": "ok=False and rc=1, problems naming AEMGX provenance",
+      "observed": "SEED22-PLAN ok=False planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=['AEMGX provenance'] ; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the plan reads live lots and live tables at a clock time; a rerun reads later state and need not reproduce the same bytes.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the 18 unresolved tickers (BALCX, CIMAX, CPXIX, CUBE, DODBX, EZET, FSNQX, GLPI, HBLFX, HODL, HPI, JBAWX, KAMIX, LCFYX, PCEF, PFF, TRRNX, VRP)",
+      "reason": "Not planned and not folded. plan_rows accepts a source row only on a direct canonical vocabulary match; the old-list sub-classes are not canonical members, and PCEF's needs_review is not a canonical sub-class. Recorded as surprise row MDPF_SECCLASS-D1-W97-S1 for the issuer and the CTO."
+    },
+    {
+      "item": "the shared write() for the apply step",
+      "reason": "write() copies only _WRITE_FIELDS and sets last_updated, so it drops source_table and source_last_updated. apply uses the same _WRITE_FIELDS keys with a conditional put on attribute_not_exists(ticker) and adds the two provenance attributes."
+    },
+    {
+      "item": "running apply against AWS",
+      "reason": "Outside the grant (AWS read-only for this worker). apply is built and selftested; a CloudOps seat runs it under a signed pair."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W97-S1: the R27 seed22 plan, built on the shared plan_rows as ordered, plans 4 of the 22 old-list tickers ($15,777.17) and leaves 18 ($397,564.42) unresolved, because their old-list sub-classes are not canonical vocabulary members and plan_rows does not fold. The CTO ruling that old-list classes are accepted as source rows cannot be met by plan_rows as built. BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~M1."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e107.seed22-plan-and-apply-script.md",
+  "compiler_tools": [
+    {
+      "tool": "check_seed22_plan.py (R27_CHECKS, read-only)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_seed22_plan.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~97/SEED22_PLAN.json",
+      "result": "SEED22-PLAN ok=True planned=4 unresolved=18 seed_pending=0 dollars=413341.59 problems=[]; rc=0. Negative arm ok=False problems=['AEMGX provenance']; rc=1."
+    },
+    {
+      "tool": "surprise-row-gate (.tools/surprise-row-gate.py)",
+      "invocation": "python .tools/surprise-row-gate.py (run by safe-commit at the commit)",
+      "result": "see the commit's gate output"
+    }
+  ]
+}

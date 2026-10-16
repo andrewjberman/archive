@@ -1,0 +1,342 @@
+diff --git a/data/black_diamond/scripts/gold/E_18.detect_new_securities.py b/data/black_diamond/scripts/gold/E_18.detect_new_securities.py
+index ce8c8b9ac9..a8eb418803 100644
+--- a/data/black_diamond/scripts/gold/E_18.detect_new_securities.py
++++ b/data/black_diamond/scripts/gold/E_18.detect_new_securities.py
+@@ -1,23 +1,26 @@
+ """
+-detect_new_securities.py -- Detect newly-seen client securities not in bd-securities.
++detect_new_securities.py -- Detect newly-seen client securities not in the canonical
++etf-classifications table.
+ 
+-Reads the latest holdings_lots parquet, compares with bd-securities DynamoDB table (a READ,
+-used only for dedup/prefix-matching against names already known there -- see MDPF_SECCLASS
+-below for why it is never written again).
++Reads the latest holdings_lots parquet and compares its (ticker, asset_name) pairs with the
++canonical etf-classifications table's own key set (a READ, through the scheduled module's
++existing_tickers; NAME:: keys included). MDPF_SECCLASS round 27 (SC-e-108): this script no
++longer reads the retired old list at all -- no known-set read from it, no name-prefix read from
++it, and no lookup from it into the planner. A ticker that only the retired old list classified
++is therefore planned from the other class sources or listed unresolved, never guessed.
+ 
+ Resolution-aware (ADVI_TICKID.004): when ticker_resolution.parquet exists,
+-already-resolved names are skipped. Also auto-attempts prefix matching against
+-bd-securities for truncated BD names. Only truly unresolved securities get stubs.
+-
+-MDPF_SECCLASS FWD-7 (cell SC-k-1, Andrew-direct 2026-09-29, verbatim: "the canonical table
+-should not be overwritten by anything in bd-securities"): this script's `--upload` path no
+-longer writes a stub into `bd-securities` (that table is retiring, FWD-5). Instead, every
+-truly-unresolved (ticker, asset_name) pair with a REAL ticker (not a `NAME::` pseudo-key -- a
+-canonical row needs a ticker to key on) is fed to
++already-resolved names are skipped. Only truly unresolved securities are fed to the scheduled
++classification below.
++
++MDPF_SECCLASS FWD-7 (cell SC-k-1, Andrew-direct 2026-09-29): the canonical table must not be
++overwritten by anything from the retired old list. This script's `--upload` path writes no stub
++to any old table. Instead, every truly-unresolved (ticker, asset_name) pair with a REAL ticker
++(not a `NAME::` pseudo-key -- a canonical row needs a ticker to key on) is fed to
+ `infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py`, which plans and, on
+ `--upload`, conditionally writes a NEW row in the canonical `etf-classifications` table --
+-never touching a ticker that already has one. Detection itself, and the resolution-aware /
+-prefix-matching skip logic, are unchanged. Still does NOT call OpenAI.
++never touching a ticker that already has one. Detection itself, and the resolution-aware skip
++logic, are unchanged. Still does NOT call OpenAI.
+ 
+ Usage:
+   python detect_new_securities.py [--upload]
+@@ -41,7 +44,6 @@ logger = logging.getLogger(__name__)
+ 
+ from lib.config import S3_BUCKET as DATA_BUCKET  # noqa: E402
+ HOLDINGS_PREFIX = 'gold/holdings_lots/'
+-BD_SECURITIES_TABLE = 'bd-securities'
+ RESOLUTION_KEY = 'gold/dimensions/ticker_resolution.parquet'
+ 
+ # SC-e-13 (row MDPF_SECCLASS-S5): the shared modules (etf_classification_scheduled.py and the
+@@ -115,20 +117,6 @@ def get_latest_parquet_key(bucket, prefix):
+     return latest['Key'] if latest else None
+ 
+ 
+-def load_known_tickers(table):
+-    """Scan bd-securities and return a set of all known PK values."""
+-    known = set()
+-    resp = table.scan(ProjectionExpression='ticker')
+-    known.update(item['ticker'] for item in resp.get('Items', []))
+-    while 'LastEvaluatedKey' in resp:
+-        resp = table.scan(
+-            ProjectionExpression='ticker',
+-            ExclusiveStartKey=resp['LastEvaluatedKey'],
+-        )
+-        known.update(item['ticker'] for item in resp.get('Items', []))
+-    return known
+-
+-
+ def _load_resolution_table() -> set:
+     """Load resolved asset_name_normalized values from ticker_resolution.parquet.
+ 
+@@ -147,33 +135,9 @@ def _load_resolution_table() -> set:
+         return set()
+ 
+ 
+-def _scan_db_asset_names(table) -> dict:
+-    """Scan bd-securities for asset_name_raw values on ticker-keyed items.
+-
+-    Returns {normalized_name: ticker} for prefix matching.
+-    """
+-    name_to_ticker = {}
+-    resp = table.scan(ProjectionExpression='ticker, asset_name_raw')
+-    for item in resp.get('Items', []):
+-        ticker = item.get('ticker', '')
+-        raw = item.get('asset_name_raw', '')
+-        if ticker and not ticker.startswith('NAME::') and raw:
+-            name_to_ticker[_normalize_asset_name(raw)] = ticker
+-    while 'LastEvaluatedKey' in resp:
+-        resp = table.scan(
+-            ProjectionExpression='ticker, asset_name_raw',
+-            ExclusiveStartKey=resp['LastEvaluatedKey'],
+-        )
+-        for item in resp.get('Items', []):
+-            ticker = item.get('ticker', '')
+-            raw = item.get('asset_name_raw', '')
+-            if ticker and not ticker.startswith('NAME::') and raw:
+-                name_to_ticker[_normalize_asset_name(raw)] = ticker
+-    return name_to_ticker
+-
+-
+ def normalize_key(ticker, asset_name):
+-    """Return the bd-securities PK for this pair."""
++    """Return the canonical etf-classifications key for this pair: the ticker when it is a real
++    one, else a NAME:: key built from the asset name."""
+     if ticker:
+         t = str(ticker).strip().upper()
+         if t and t not in ('NONE', 'NAN', '') and t.isalpha() and 1 <= len(t) <= 5:
+@@ -193,10 +157,19 @@ def detect_new_securities(upload=False):
+         logger.error('REFUSED: detect_new_securities() not run -- shared modules unavailable (see above).')
+         return False
+     from etf_classification_scheduled import (  # noqa: E402
+-        ETFClassifier, TableVocabulary, default_bd_securities_lookup, existing_tickers, plan_rows,
++        ETFClassifier, TableVocabulary, existing_tickers, plan_rows,
+         write as scheduled_write,
+     )
+ 
++    # The known set is the canonical etf-classifications key set (NAME:: keys included), read once
++    # through the scheduled module's own classifier. The same classifier serves the vocabulary
++    # built below; nothing else in this script reads a table.
++    classifier = ETFClassifier()
++    known = existing_tickers(classifier)
++    # The planner's absence test is a snapshot of the canonical table as read here. --upload adds
++    # candidates to `known` in the loop below; the planner must not see those as already present.
++    existing = set(known)
++
+     latest_key = get_latest_parquet_key(DATA_BUCKET, HOLDINGS_PREFIX)
+     if not latest_key:
+         logger.error('No holdings parquet found at %s/%s', DATA_BUCKET, HOLDINGS_PREFIX)
+@@ -211,12 +184,6 @@ def detect_new_securities(upload=False):
+     # Resolution-aware filtering (ADVI_TICKID.004)
+     resolved_names = _load_resolution_table()
+ 
+-    table = dynamodb.Table(BD_SECURITIES_TABLE)
+-    known = load_known_tickers(table)
+-
+-    # Load db asset names for prefix matching
+-    db_asset_names = _scan_db_asset_names(table) if resolved_names else {}
+-
+     # Identify tickerless holdings
+     open_holdings['_has_ticker'] = (
+         open_holdings['ticker'].notna()
+@@ -227,7 +194,6 @@ def detect_new_securities(upload=False):
+ 
+     # Stats
+     already_resolved = 0
+-    prefix_resolved = 0
+     truly_unresolved_names = []
+     truly_unresolved_mv = {}
+ 
+@@ -253,20 +219,9 @@ def detect_new_securities(upload=False):
+             already_resolved += 1
+             continue
+ 
+-        # Auto-prefix matching against bd-securities
+-        if norm_name and len(norm_name) >= 20 and db_asset_names:
+-            matched = False
+-            for db_norm, db_ticker in db_asset_names.items():
+-                if db_norm.startswith(norm_name) and len(db_norm) > len(norm_name):
+-                    prefix_resolved += 1
+-                    matched = True
+-                    break
+-            if matched:
+-                continue
+-
+-        # Truly unresolved by BD's own dedup -- MDPF_SECCLASS FWD-7 candidate (never a bd-securities
+-        # stub write, which retires under FWD-5). A NAME:: pseudo-key has no real ticker to key a
+-        # canonical row on, so it stays a detection-only finding (unchanged from before this cell).
++        # Truly unresolved -- MDPF_SECCLASS FWD-7 candidate (no stub is written to any old table).
++        # A NAME:: pseudo-key has no real ticker to key a canonical row on, so it stays a
++        # detection-only finding.
+         new_count += 1
+         truly_unresolved_names.append(asset_name)
+         truly_unresolved_mv[str(asset_name)] = float(mv) if pd.notna(mv) else 0.0
+@@ -277,18 +232,15 @@ def detect_new_securities(upload=False):
+ 
+     # MDPF_SECCLASS FWD-7: plan (and, on --upload, conditionally write) new etf-classifications
+     # rows for the real-ticker candidates. Never touches a ticker that already has a row (the
+-    # write is `attribute_not_exists(ticker)`); a ticker bd-securities cannot classify directly
+-    # against the canonical vocabulary -- without a fold -- is listed unresolved, not guessed.
++    # write is `attribute_not_exists(ticker)`); a ticker the scheduled classifier cannot classify
++    # directly against the canonical vocabulary -- without a fold -- is listed unresolved, not guessed.
+     scheduled_written = scheduled_refused = 0
+     scheduled_unresolved = []
+     scheduled_seed_pending = []
+     if canonical_candidates:
+-        classifier = ETFClassifier()
+         vocab = TableVocabulary.from_live_table(classifier)
+-        existing = existing_tickers(classifier)
+         plan, scheduled_unresolved, scheduled_seed_pending = plan_rows(
+             canonical_candidates, vocab=vocab, existing_tickers=existing,
+-            bd_securities_lookup=default_bd_securities_lookup(BD_SECURITIES_TABLE),
+             updated_by='e18-scheduled',
+         )
+         if upload and plan:
+@@ -302,12 +254,11 @@ def detect_new_securities(upload=False):
+     print('\n  Detection summary (resolution-aware):')
+     print(f'    Total tickerless holdings (unique names): {total_tickerless:,}')
+     print(f'    Already resolved (in resolution table):   {already_resolved:,}')
+-    print(f'    Newly resolved (prefix match):            {prefix_resolved:,}')
+     print(f'    Scheduled-classification candidates:      {len(canonical_candidates):,}')
+     print(f'    Scheduled rows written / refused:         {scheduled_written:,} / {scheduled_refused:,}')
+     print(f'    Scheduled-classification seed_pending:    {len(scheduled_seed_pending):,}')
+     print(f'    Scheduled-classification unresolved:      {len(scheduled_unresolved):,}')
+-    print(f'    Truly unresolved (BD-local, no bd-securities stub written): {new_count:,}')
++    print(f'    Truly unresolved (no stub written):       {new_count:,}')
+ 
+     if truly_unresolved_mv:
+         print('\n  Top 10 unresolved by market value:')
+@@ -329,7 +280,8 @@ def detect_new_securities(upload=False):
+ def main():
+     parser = argparse.ArgumentParser(description='Detect new unclassified securities')
+     parser.add_argument('--upload', action='store_true',
+-                        help='Write stub records to bd-securities DynamoDB table')
++                        help='Plan, and conditionally write (absent tickers only), new '
++                             'etf-classifications rows for real-ticker candidates')
+     args = parser.parse_args()
+     if detect_new_securities(upload=args.upload) is False:
+         sys.exit(2)
+diff --git a/data/black_diamond/scripts/gold/gold_dispatch.sh b/data/black_diamond/scripts/gold/gold_dispatch.sh
+index b660567386..2b4d9abd74 100644
+--- a/data/black_diamond/scripts/gold/gold_dispatch.sh
++++ b/data/black_diamond/scripts/gold/gold_dispatch.sh
+@@ -43,10 +43,10 @@
+ #   full          = dimensions + canonical + downstream
+ #                   (daily -- A through D). Auto-runs silver-prep BEFORE
+ #                   the freshness gate.
+-#   canonical     = B_00 B_01 B_01b E_18 B_02 B_03 C_00 C_01 C_02 C_04
++#   canonical     = B_00 B_01 E_18 B_02 B_03 C_00 C_01 C_02 C_04
+ #   downstream    = C_03 C_05 C_07 C_06 C_08 D_00 D_00b D_00c D_00f D_01 D_02 D_03 D_04
+ #   dimensions    = A_00 A_01 A_02 A_03 A_04
+-#   holdings-seed = B_01 B_01b  (standalone only -- must run after B_00)
++#   holdings-seed = B_01  (standalone only -- must run after B_00)
+ #   silver-prep   = S_00 (build_canonical_prices_v2.py)
+ #                   Rebuilds silver/prices/canonical_prices.parquet with the
+ #                   4-tier hierarchy (T1 txn, T2 yfinance, T3 interp, T4 carry).
+@@ -141,25 +141,25 @@ CHAIN_SILVER_PREP="S_00"
+ # "foundation" misled operators -- it mixed dimensions with holdings-seed work.)
+ CHAIN_DIMENSIONS="A_00 A_01 A_02 A_03 A_04"
+ 
+-# Holdings seed: standalone alias for B_01 B_01b. Kept for manual targeted
++# Holdings seed: standalone alias for B_01. Kept for manual targeted
+ # re-runs only (e.g. after a DynamoDB classification backfill). MUST be run
+ # after B_00 (canonical_holdings) when invoked standalone -- B_01 reads
+ # gold/canonical/holdings/{date} for HLOT2 reopen/topup coverage.
+-# NOT included in CHAIN_FULL; B_01 B_01b are sequenced inside CHAIN_CANONICAL.
+-CHAIN_HOLDINGS_SEED="B_01 B_01b"
++# NOT included in CHAIN_FULL; B_01 is sequenced inside CHAIN_CANONICAL.
++CHAIN_HOLDINGS_SEED="B_01"
+ 
+-# Canonical: B_00 first (canonical_holdings), then B_01/B_01b which read its
+-# output, then lots/gains/performance. B_01b runs after B_01 (DynamoDB
+-# classification) so C_00+ see fully classified securities.
+-# (B_01 B_01b moved here from CHAIN_HOLDINGS_SEED at bd-v2.24.3 --
++# Canonical: B_00 first (canonical_holdings), then B_01 which reads its
++# output, then lots/gains/performance.
++# (B_01 moved here from CHAIN_HOLDINGS_SEED at bd-v2.24.3 --
+ # correct dependency order: B_01 reads gold/canonical/holdings from B_00.)
+ #
+ # E_18 (MDPF_SECCLASS FWD-7, the scheduled classification of newly seen tickers) takes the
+-# slot after B_01b: it reads the holdings_lots B_01 just wrote and adds a row to the canonical
++# slot after B_01: it reads the holdings_lots B_01 just wrote and adds a row to the canonical
+ # etf-classifications table only for a ticker that has none, before the classifying readers
+-# (C_06, D_03, D_04) run. It is a NON-FATAL step (NONFATAL_IDS below): a classification-detection
++# (C_06, D_03, D_04) run. It reads the canonical table only (MDPF_SECCLASS round 27, SC-e-108).
++# It is a NON-FATAL step (NONFATAL_IDS below): a classification-detection
+ # failure must not stop the day's gold chain. run_script prints its exit code either way.
+-CHAIN_CANONICAL="B_00 B_01 B_01b E_18 B_02 B_03 C_00 C_01 C_02 C_04"
++CHAIN_CANONICAL="B_00 B_01 E_18 B_02 B_03 C_00 C_01 C_02 C_04"
+ 
+ # Script IDs whose non-zero exit is logged and does NOT abort a chain (run_script).
+ NONFATAL_IDS="E_18"
+@@ -174,7 +174,7 @@ CHAIN_FULL="$CHAIN_DIMENSIONS $CHAIN_CANONICAL $CHAIN_DOWNSTREAM"
+ 
+ # Groups (run every script whose ID starts with the letter)
+ GROUP_A="A_00 A_01 A_02 A_03 A_04"
+-GROUP_B="B_00 B_01 B_01b B_02 B_03"
++GROUP_B="B_00 B_01 B_02 B_03"
+ GROUP_C="C_00 C_01 C_02 C_03 C_04 C_05 C_06 C_07 C_08"
+ GROUP_D="D_00 D_00b D_00c D_00f D_01 D_02 D_03 D_04"
+ 
+@@ -553,13 +553,13 @@ run_chain_parallel() {
+         wait_phase PHASE_A2
+     fi
+ 
+-    # PHASES B1-B5 serialize B_00 -> B_01 -> B_01b -> B_02 because:
++    # PHASES B1-B4 serialize B_00 -> B_01 -> B_02 because:
+     #   (a) B_01's HLOT2 reopen reads gold/canonical/holdings/{today}.parquet
+     #       (written by B_00, dynamic f-string read invisible to comp-pipescript).
+     #       Running B_01 || B_00 silently degrades HLOT2 coverage every nightly
+     #       (2026-04-22 diagnostic: docs/briefs/bd-gold-dag-memory-diagnostic-2026-04-22.md).
+-    #   (b) B_01b must run between B_01 and B_02 (classifies new securities into
+-    #       DynamoDB bd-securities that B_02 reads).
++    #   (b) B_02 runs after B_01 in this chain; B_01b is no longer in the chain
++    #       (MDPF_SECCLASS round 27, SC-e-108).
+     #   (c) Concurrent B_00 || B_01 in prior DAG stacked summed-RSS to ~1.38 TB
+     #       on a 128 GB box, pushing B_01 wall from 117s isolated -> 542s
+     #       concurrent (4.6x slowdown from paging pressure). 2026-04-17 QA run
+@@ -573,11 +573,7 @@ run_chain_parallel() {
+     run_background B_01
+     wait_phase PHASE_B2
+ 
+-    echo "--- PHASE_B3: B_01b ---"
+-    run_background B_01b
+-    wait_phase PHASE_B3
+-
+-    # E_18 alone, between B_01b and B_02 (see CHAIN_CANONICAL). Non-fatal: run_script
++    # E_18 alone, between B_01 and B_02 (see CHAIN_CANONICAL). Non-fatal: run_script
+     # returns 0 for a NONFATAL_IDS member, so wait_phase never aborts on it.
+     echo "--- PHASE_B3b: E_18 ---"
+     run_background E_18
+@@ -916,7 +912,7 @@ gold_dispatch.sh -- Gold Layer Launcher
+                 canonical_prices is always fresh (including weekends and
+                 market holidays when A/B/C/D may still skip).
+                 A_00 A_01 A_02 A_03 A_04
+-                B_00 B_01 B_01b E_18 B_02 B_03 C_00 C_01 C_02 C_04
++                B_00 B_01 E_18 B_02 B_03 C_00 C_01 C_02 C_04
+                 C_03 C_05 C_07 C_06 C_08 D_00 D_00b D_00c D_00f D_01 D_02 D_03 D_04
+                 (E_18 is non-fatal: its exit code is logged, the chain continues.)
+ 
+@@ -930,9 +926,9 @@ gold_dispatch.sh -- Gold Layer Launcher
+                 pre-bd-v2.24.2 (ADVI_ROLLUP.DH-1).
+                 A_00 A_01 A_02 A_03 A_04
+ 
+-  holdings-seed B_01 B_01b standalone re-run alias. Must run AFTER canonical
++  holdings-seed B_01 standalone re-run alias. Must run AFTER canonical
+                 (B_00) -- B_01 reads gold/canonical/holdings output from B_00.
+-                B_01 B_01b
++                B_01
+ 
+   silver-prep   S_00 (build_canonical_prices_v2.py) -- rebuilds
+                 silver/prices/canonical_prices.parquet with T1-T4 hierarchy.
+@@ -954,7 +950,6 @@ gold_dispatch.sh -- Gold Layer Launcher
+ 
+   B  Holdings     B_00 canonical_holdings
+                   B_01 holdings_lots
+-                  B_01b classify_new_securities
+                   B_02 canonical_lots
+                   B_03 account_gains
+ 
