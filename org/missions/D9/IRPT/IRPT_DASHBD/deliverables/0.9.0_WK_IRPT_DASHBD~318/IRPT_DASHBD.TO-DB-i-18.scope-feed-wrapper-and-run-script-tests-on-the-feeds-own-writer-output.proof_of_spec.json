@@ -18,20 +18,20 @@
     {
       "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
       "kind": "test",
-      "commit_or_etag": "2e5b09d5fc",
+      "commit_or_etag": "8c1a16b129",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One new pytest file, 7 tests, 253 lines. Every feed partition comes from the feed's own run() over the feed's own offline fakes (test_scope_feed_daily_factor). Runs under python -I -m pytest -q: 7 passed. No AWS, no network, no vendor call; output only to pytest's temp area; synthetic accounts 7001 to 7005.",
+      "deploy_evidence": "One new pytest file, 9 tests (the amendment's DIM_IDS constant, a ten-calendar-day feed run chain test, and a rows_present test naming NO_EOD_VALUE, added to the seven of the first pass). Every feed partition comes from the feed's own run() over the feed's own offline fakes (test_scope_feed_daily_factor). Runs under python -I -m pytest -q: 9 passed. No AWS, no network, no vendor call; output only to pytest's temp area; synthetic accounts 7001 to 7005.",
       "artifact_covered_by": ["DBI131-1-AC1", "DBI131-1-AC2", "DBI131-1-AC3"]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "DBI131-1-AC1",
-      "criterion_verbatim": "`DBI131-1-AC1` -- control: the wrapper on partitions written by the feed's own run() is accepted and the invariants hold (15 rows, valid, 0 unaccounted, reasons inside the contract's eight). Base: PASS (round 130 landed); it must still PASS.",
+      "criterion_verbatim": "`DBI131-1-AC1` -- control: the wrapper on partitions written by the feed's own run() is accepted and the invariants hold (15 rows, valid, 0 unaccounted, reasons inside the contract's eight), and on the MULTI-DAY fixture the series account is PRESENT on all 8 trading days with the chain equal to the silver's own factors. Base: PASS (round 130 landed); it must still PASS.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC1",
-      "output_evidence": "DBI131-1-AC1 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC1 PASS'). Feed partitions written by the feed's run(): DAYS: complete=3 skipped=0.",
-      "denominator": "1 of 1 criterion PASS (3 feed partitions; 15 account-day rows checked by the checker)",
+      "output_evidence": "DBI131-1-AC1 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC1 PASS'). The checker's own 3-day fixture (DAYS: complete=3 skipped=0) and its multi-day fixture (grade_multiday: 8 trading days, PRESENT, carried_days 10, chain within 1e-12).",
+      "denominator": "1 of 1 criterion PASS (checker sub-grades: the 3-day wrapper invariants, the 15 contract-valid rows, and the 8-day multi-day chain)",
       "expect": "DBI131-1-AC1 PASS",
       "status": "PASS"
     },
@@ -47,11 +47,11 @@
     },
     {
       "criterion_id": "DBI131-1-AC3",
-      "criterion_verbatim": "`DBI131-1-AC3` -- the new test file builds its feed frames ONLY by calling the feed's run(), holds no hand-built feed frame, reads the feed's own silver addresses, passes with at least 6 tests and names a mutant test. Base: FAIL (no test file).",
+      "criterion_verbatim": "`DBI131-1-AC3` -- the new test file imports the feed module, builds its feed frames only by running the feed's run() (directly or through the feed's own harness), holds no hand-built feed frame, reads the feed's own silver addresses, passes with at least 6 tests, names a mutant test, defines the `DIM_IDS` constant and names `NO_EOD_VALUE` and `rows_present`. Base: FAIL (no test file); after the first pass, FAIL on the amendment until the constant and the multi-day test exist.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC3",
-      "output_evidence": "DBI131-1-AC3 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC3 PASS'). Base before the file existed: 'REASON: no test file at data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py' / 'DBI131-1-AC3 FAIL'.",
-      "denominator": "1 of 1 criterion PASS (the checker's pytest run of the file: 7 passed, at least 6 required; 1 test named test_mutant_)",
+      "output_evidence": "DBI131-1-AC3 PASS (rc 0; run twice, identical; last line 'DBI131-1-AC3 PASS'). Before the test file existed: 'REASON: no test file at data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py' / 'DBI131-1-AC3 FAIL'.",
+      "denominator": "1 of 1 criterion PASS (the checker's pytest run of the file: 9 passed, at least 6 required; 1 test named test_mutant_; DIM_IDS present; NO_EOD_VALUE and rows_present present)",
       "expect": "DBI131-1-AC3 PASS",
       "status": "PASS"
     }
@@ -60,12 +60,12 @@
     "mutant": {
       "description": "test_mutant_partition_check_comparing_pull_date_refuses_the_feed_partitions: the wrapper source text is copied with its partition check changed to compare pull_date, executed as a module with the real __file__; it must refuse the feed's own partitions, and the unmutated wrapper must accept the same frames.",
       "expected": "the mutated copy raises ValueError 'partition keys refused: 10 row' (the 10-12 and 10-13 partitions; the 10-14 partition's pull date equals its day and passes), and writes nothing; the unmutated wrapper accepts all 15 rows",
-      "observed": "mutant selection: 1 passed, 6 deselected; the mutant refused with 'partition keys refused: 10 row(s) name a day other than their partition's'; the control accepted 15 rows",
+      "observed": "mutant selection: 1 passed, 8 deselected; the mutant refused with 'partition keys refused: 10 row(s) name a day other than their partition's'; the control accepted 15 rows",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs of the three r131 criteria in this worktree, with their PASS lines compared; the new file run twice under python -I -m pytest",
-      "observed": "DBI131-1-AC1 PASS, DBI131-1-AC2 PASS, DBI131-1-AC3 PASS, each rc 0 on both runs; 7 passed on both pytest runs",
+      "method": "two same-input runs of the three r131 criteria in this worktree, with their PASS lines compared; the new file run under python -I -m pytest",
+      "observed": "DBI131-1-AC1 PASS, DBI131-1-AC2 PASS, DBI131-1-AC3 PASS, each rc 0 on both runs; 9 passed on both pytest runs",
       "status": "STABLE"
     }
   },
@@ -90,19 +90,20 @@
   "surprises": [
     "IRPT_DASHBD-D2-W318-S1: a single feed run cannot skip a middle day alone for a household failure (it skips every day its accounts are held on); the skipped-day case is built from three feed runs, OBSERVATION, INERT.",
     "IRPT_DASHBD-D2-W318-S2: the worktree carries no org/surprise_channel/ folder; the row schema was read from the base checkout, read only, OBSERVATION, INERT.",
-    "IRPT_DASHBD-D2-W318-S3: the round-127 wrapper's module docstring still names a pull-date refusal the code no longer makes; the code and the tests follow the round-130 rule, OBSERVATION, INERT."
+    "IRPT_DASHBD-D2-W318-S3: the round-127 wrapper's module docstring still names a pull-date refusal the code no longer makes; the code and the tests follow the round-130 rule, OBSERVATION, INERT.",
+    "IRPT_DASHBD-D2-W318-S4: the issuer's amendment 1 (commit 4e13c27d91) is applied in the test file: DIM_IDS, a multi-day chain test, and a rows_present test naming NO_EOD_VALUE; OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~318/SESSION_LOG_DB_I18.json",
   "compiler_tools": [
     {
-      "tool": "p131_feedwriter.py (issuer checker, DBI131-1-AC1 to AC3)",
+      "tool": "p131_feedwriter.py (issuer checker, DBI131-1-AC1 to AC3, amended at 4e13c27d91)",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r131/p131_feedwriter.py\" . DBI131-1-AC1 (AC2 and AC3 the same way)",
       "result": "DBI131-1-AC1 PASS, DBI131-1-AC2 PASS, DBI131-1-AC3 PASS, each rc 0 on two runs"
     },
     {
       "tool": "pytest (the new test file)",
       "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
-      "result": "7 passed (rc 0), on two runs"
+      "result": "9 passed (rc 0), on two runs"
     },
     {
       "tool": "commit-gate (py_compile, ds-precommit, ruff)",
