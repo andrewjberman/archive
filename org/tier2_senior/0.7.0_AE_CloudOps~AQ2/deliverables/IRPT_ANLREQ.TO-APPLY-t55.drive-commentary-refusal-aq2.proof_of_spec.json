@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-APPLY-t55.drive-commentary-refusal-aq2",
+ "phase": "DEPLOY",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-t55.drive-commentary-refusal-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "a83a9fe7e3"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R57_T.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-APPLY-t55.drive-commentary-refusal-aq2.md",
+  "vintage_commit": "a83a9fe7e3"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "irpt-jobs 49financial REQ-d47252fe74634d0c5cdd8067 (attribute hop_failure)",
+   "kind": "ddb-attribute",
+   "deployed_state": "RESTORED",
+   "deploy_evidence": "leg A set hop_failure {COMMENTARY, COMMENTARY_DRAFT_REFUSED, 2026-10-16T15:44:44Z} (A_LEG_A_T55.txt); read between the legs with state READY; leg B one conditional REMOVE, read back ABSENT, state READY, item sha256 equals PRE 501b5a95eb53aa18f05458f702132726604076e996c032bc9968ed198f21bbee (A_LEG_B_T55.txt)",
+   "artifact_covered_by": [
+    "AR78-tf-AC1",
+    "AR78-tf-AC2"
+   ],
+   "commit_or_etag": "a83a9fe7e3"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T1542Z_irpt-t55-commentary-refusal-20261016_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ledger irpt-t55-commentary-refusal-20261016 CLOSED, 2 of 2 legs proven",
+   "artifact_covered_by": [
+    "AR78-tf-AC2"
+   ],
+   "commit_or_etag": "a83a9fe7e3"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR78-tf-AC1",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hoplog",
+   "expect": "R55-HOPLOG-OK",
+   "output_evidence": "R55-HOPLOG-OK events_with_line=1\nexit=0",
+   "denominator": "the commentary function's log events carrying the HOP-FAILURE-REPORTED line since the invoke: 1",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hoplog",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AR78-tf-AC2",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hopabsent",
+   "expect": "R55-HOPABSENT-OK",
+   "output_evidence": "R55-HOPABSENT-OK row exists, hop_failure absent\nexit=0",
+   "denominator": "the one job row",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hopabsent",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The checker's own selftest: green plus three mutants refused.",
+   "expected": "R55-SELFTEST-OK",
+   "observed": "R55-SELFTEST-OK green plus three mutants refused",
+   "status": "PASS"
+  },
+  "determinism": {
+   "method": "AC2 reads FAIL between the legs by the order's own text (the row carried the attribute) and OK after leg B; the leg B read-back was a ConsistentRead with the item sha256 equal to PRE",
+   "observed": "hop_failure ABSENT, hash equals PRE",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the between-legs row read",
+   "reason": "recorded in A_LEG_A_T55.txt (hop_failure keys, at, state READY, hash without the attribute equals PRE); AC1 and AC2 were graded at the two ends of the window, not between"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T1542Z_irpt-t55-commentary-refusal-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "t55_leg_a.py, t55_leg_b.py (committed, selftests OK), r55_checks.py",
+   "invocation": "one invoke, one conditional REMOVE",
+   "result": "leg A set the attribute, leg B removed it; row equals PRE"
+  }
+ ]
+}
