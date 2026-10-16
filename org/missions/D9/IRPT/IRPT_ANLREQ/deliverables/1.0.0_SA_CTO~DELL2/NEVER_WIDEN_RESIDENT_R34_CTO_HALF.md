@@ -69,3 +69,23 @@ provider-NOT_FOUND, registry-unresolved symbols reach Yahoo. Accepted.
 - **The two owed rows stand,** and the checker adds no cache on the resident. If repeated uploads show Yahoo pushback, the per-day KEPT
   cache joins the negative cache as one row, owner `~G2`.
 
+## RE-SIGN on R34D, r34c under its own names (2026-10-16 ~06:4xZ)
+
+R34B's signature is **SUPERSEDED** (rolled back at V2: no yfinance on the host). R34C was **REFUSED**: its pre-read and D1 could not pass
+over the kept r34 root and keys. **SIGNED** now on
+`org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34D_20261016.md` (commit `d83bd3f12e`), blob
+`6feb7b728c7bddf8ffb21db1533e0654cee5f498`, sha256 `52dfdd69eb8626652a3d415f98e604a4af6b4990c785cd61813873ef547e1afd` (re-measured).
+Pin `bc9f2d0c44`; tar `272d5c54...2ff8` (`irpt-resident-0485393f3a-r34c.tar.gz`), 314 members (10 changed, 4 added).
+
+**Read: the diff against R34C.** It changes the release names to r34c (root, tar, sums, host script), and the pre-read checks the r34c root
+absent. The first attempt's r34 root and its three S3 objects are untouched and are never deleted by this release. The content is otherwise
+R34C's: the swap, the pool, the door's yfinance checker, and the hop_failure writers (2d) with V3. r35L, the reader, is live (AQ2 msg 9129),
+so the writers land behind a reader that exists.
+
+**Conditions:** every condition above stands, plus:
+- **Step 1 is a hard gate:** the yfinance 1.2.0 closure is installed under its own signed pair, which this seat approves by its exact
+  name==version list, before D1.
+- **V2 SPY must read KEPT.**
+- **V3, the host role's UpdateItem on `irpt-jobs`, must be allowed.** Either failing is a STOP, and the release rolls back to r32 the
+  same session, never left half-landed (NEVER-2).
+
