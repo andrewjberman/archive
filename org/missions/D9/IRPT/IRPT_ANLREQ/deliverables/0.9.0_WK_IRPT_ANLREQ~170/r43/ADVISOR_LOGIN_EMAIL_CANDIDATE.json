@@ -1,0 +1,70 @@
+{
+  "cell": "AR-y-378",
+  "order": "IRPT_ANLREQ.TO-AR-y-378",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~170",
+  "round": 43,
+  "workstream": "ZZ39",
+  "risk": "WORLD",
+  "state": "CANDIDATE, LOCAL, NOT PUSHED, lands on DEV only by .tools/portal-merge-forward.sh on an approved row",
+  "branch": "cand/dell2/anlreq-advisor-login-email",
+  "worktree_branch": "wk-IRPT_ANLREQ-170-portal",
+  "base_sha": "fcbf2bce (origin/DEV, read with git rev-parse --short origin/DEV)",
+  "commit": "9355392a9337f9e2eea741d85434643889568215",
+  "files_changed": [
+    "src/api/endpoints/investor-reporting.ts",
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/__tests__/advisor-email.test.tsx",
+    "src/pages/TicketCenter/analysisRequest.ts"
+  ],
+  "diff_stat": "git -C portal diff --stat fcbf2bce 9355392a: 5 files changed, 291 insertions(+), 16 deletions(-)",
+  "tests": {
+    "passed": 7,
+    "failed": 0,
+    "folders": [
+      "src/pages/TicketCenter/__tests__/advisor-email.test.tsx (new file, 7 cases: a, b, c, d, e, f and the refusal-body shape)",
+      "src/pages/TicketCenter (folder run, 32 files): 203 pass, 0 fail"
+    ],
+    "run": "cd portal && bun test src/pages/TicketCenter/__tests__/advisor-email.test.tsx"
+  },
+  "before_arm": {
+    "what": "the new test file run on the unchanged base (fcbf2bce, before any source edit)",
+    "result": "1 pass, 6 fail (7 tests)",
+    "failing": [
+      "(a) a filer whose list includes the selected firm cannot file with the login email empty",
+      "(b) a login email with no @ is refused with the second sentence and nothing is posted",
+      "(c) a valid login email is trimmed and lower-cased, sent as advisor_email on every post, and a RESOLVING re-post sends the same value",
+      "(e) a refused upload shows the refusal code under the failure line and files nothing",
+      "(f) a staff filer who lists the firm names the advisor by login email and a wrong email is refused by the door, not guessed",
+      "the refused response body carries a closed code, never message text (AR.uploadRefusalCode is absent on the base)"
+    ],
+    "passing": [
+      "(d) a filer whose list does not include the firm sees no field, and its upload request carries no advisor_email key (the control: today's behaviour)"
+    ],
+    "as_expected": "(a), (c) and (f) FAIL on the base, as the cell requires"
+  },
+  "what_a_person_sees": {
+    "staff_filer_whose_list_holds_the_firm": "Beside the Advisor name box, a box labelled Advisor login email (placeholder Advisor login email (required)), with the line The email the advisor signs in with. Submit with it empty shows: Advisor login email is required. Submit with no @ or a space shows: Enter the advisor's login email, like name@firm.com. A valid value is trimmed and lower-cased and sent as advisor_email on every post of the upload. A refused upload shows the usual failure sentence, then the closed code the response carried (for example NOT_AUTHORIZED) on its own line.",
+    "any_other_filer": "No new box, no advisor_email key on the upload. A refused upload still shows the closed code under the failure sentence (step 4 is generic; see surprise row IRPT_ANLREQ-D2-W170-S5).",
+    "not_seen": "The rendered page was not driven in a browser or a mounted TicketCenter; the form parts were rendered to static markup and the staff submit was exercised through fileAnalysisRequest and the live client's URL."
+  },
+  "claim": "On the candidate, a staff filer whose served list holds the selected firm is asked for the advisor's login email; the value is sent as the query member advisor_email on every post of the upload, and the form refuses an empty or malformed value before any post. For any other filer the new field is absent and the upload carries no advisor_email key. A refused upload shows the closed code its body carries. Nothing was pushed or merged.",
+  "not_read": [
+    "the live door's refusal body (no live call was made; the body shape is read from served.py refuse() and status_envelope(), not from a response)",
+    "whether the gateway forwards the advisor_email query member to the door (the portal URL carries it; the gateway's routing was not read)",
+    "the rendered page in a browser or a mounted TicketCenter with the real auth context",
+    "the unrestricted-profile case: a staff filer with no allowedFirmIds attribute looks identical to a listed one from the client (surprise row IRPT_ANLREQ-D2-W170-S4)",
+    "the directory picker route (a later enrichment, not in this cell)",
+    "the DEV approval row and any merge-forward (other seats' and later)"
+  ],
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit), run once as the order says",
+    "rc": 2,
+    "errors_on_that_run": [
+      "src/pages/TicketCenter/__tests__/advisor-email.test.tsx(99,20): TS2339 Property 'message' does not exist on type 'FileOutcome'",
+      "src/pages/TicketCenter/__tests__/advisor-email.test.tsx(111,20): TS2339 (same)",
+      "src/pages/TicketCenter/__tests__/advisor-email.test.tsx(119,19): TS2339 (same)"
+    ],
+    "after_that_run": "the three reads were narrowed (outcome.filed ? null : outcome.message) in the new test file before the commit; the typecheck was not run a second time (the order says once), so the committed tree's typecheck rc is UNREAD"
+  }
+}
