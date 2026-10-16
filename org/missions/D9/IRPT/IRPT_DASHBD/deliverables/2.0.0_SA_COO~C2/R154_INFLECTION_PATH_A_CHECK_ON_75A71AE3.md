@@ -14,6 +14,10 @@ Asked by the CTO (msg 9927). Booleans first; evidence below; claim words: MEASUR
 
 For an Inflection client (no filled report), the template block prints UNDER the PATH A performance: in the dev server (`!import.meta.env.PROD`, port 5174 included) a failed read falls back to the fixture, so the page shows the "SYNTHETIC PREVIEW" banner and the 49 Financial synthetic report with Inflection's name; in a production build it prints the sentence for the read's reason (for example "The performance report for this client is not published yet."). Both appear on the Inflection page. Cottonwood has served filled-report objects, so its block is a real report; 49 Financial likewise.
 
+## Correction after the CTO's ruling (msg 9934, 22:09Z)
+
+The paragraph above and the recommendation below treated Cottonwood as serving a filled report because its GOLD `filled_report_values` table holds 65 partitions. That is the producer's input table, not the served report the route reads; `~D2` measured (msg 9901) that no Cottonwood filled report is served. The CTO ruled: the block mounts for 49 Financial only, Cottonwood joins when its filled report is served, Inflection never. The ruling stands; the "in" reading below is withdrawn.
+
 ## What I recommend (for `2.0.0_SA_COO~D2` to fix before Andrew's smoke; a page cell, not this seat's open cell)
 
 Gate the mount in `ReportingTab.tsx:931` on the firms that serve a filled report (49 Financial and Cottonwood, measured above: 65 Cottonwood partitions; the 49 Financial template is the one DB-b-307 built); every other firm mounts nothing, so an Inflection client shows its PATH A performance and nothing else. One test pins it: Inflection firm -> no `template-words` and no `synthetic-preview-banner` in the markup; the positive control is the 49 Financial markup, which has them. CTO decides whether Cottonwood is in or out of the gate; this seat's reading is "in" because its served report exists and renders through the same template.
