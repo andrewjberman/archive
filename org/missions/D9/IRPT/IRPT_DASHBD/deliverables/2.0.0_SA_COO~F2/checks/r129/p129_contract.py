@@ -1,0 +1,352 @@
+"""IRPT_DASHBD round 129, workstream F-SHIP ~F2 (issuer 2.0.0_SA_COO~F2) -- FWD-5: the TRANSACTION CONTRACT 0.2.0.
+
+  DB-f-1501 (~1501) replaces the DRAFT 0.1.0 (CTO round-127 analysis, msg 9162): every target's source column per firm from the three ground
+                    reads that read their sources (round 128), `fee` as a stated sum with a `fee_basis` naming its columns, the ratified
+                    words for 49 Financial and Inflection (Cottonwood's re-cut words are not ratified and are not in the contract), the
+                    Inflection id with no live rows marked not_observed, and a rule-24 record with a computed census for each value set
+                    the contract adds (coverage; the flow-class rule).        DBF129-1-AC1 (form), AC2 (bindings to the records and the data file)
+
+The checker recomputes: the schema hash; every source from the ground-read records; the fee basis; the mapping words from the ratified
+proposal; each 49 Financial code's flow class from the contract's own rule over the CRO table; the Inflection not_observed set from the
+live census; and the censuses of the two rule-24 records from the mapping.
+
+Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
+       python <this file> --selftest                        the pure helpers on synthetic arms
+"""
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
+CONTRACT = "org/standards/IRPT_DASHBD_ACCOUNT_TRANSACTION_CONTRACT.json"
+DATA = "data/assets/scripts/gold/irpt_reporting/transaction_words.json"
+PROPOSAL = D + "0.9.0_WK_IRPT_DASHBD~1001/FWD5_WORDS_PROPOSAL_R124.json"
+CENSUS49 = D + "2.0.0_SA_COO~F2/R124_LIVE_SILVER_CENSUS_49F.json"
+CENSUS3 = D + "2.0.0_SA_COO~F2/R128_LIVE_SOURCE_CENSUS_3FIRMS.json"
+CRO = "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json"
+GROUND = {"49financial": D + "0.9.0_WK_IRPT_DASHBD~1401/RD_FWD5_GROUND_49FINANCIAL_R128.json",
+          "cottonwood": D + "0.9.0_WK_IRPT_DASHBD~1401/RD_FWD5_GROUND_COTTONWOOD_R128.json",
+          "inflection": D + "0.9.0_WK_IRPT_DASHBD~1401/RD_FWD5_GROUND_INFLECTION_R128.json"}
+FIRM49 = "49financial"
+UNMAPPED = "UNMAPPED"
+CLAIMS = ("measured", "inferred", "held", "absent")
+FLOW = ("EXTERNAL_IN", "EXTERNAL_OUT", "INCOME", "FEE", "INTERNAL", "CORPORATE_ACTION", "UNRESOLVED")
+COLUMNS = ("firm", "account_id", "business_date", "trade_date", "settle_date", "action", "txn_type", "symbol", "asset_name", "units",
+           "price", "amount", "fee", "custodian", "flow_class", "source_txn_id", "coverage")
+BRIEF14 = COLUMNS[3:]
+TYPES = ("string", "date32[day]", "double")
+COVERAGE = ("MEASURED", "CODE_NOT_IN_MAPPING", "UNMAPPED_BY_TABLE")
+KEYS = ("contract_version", "supersedes", "project", "prd", "authored_by", "authored_under", "table", "grain", "partition", "producer",
+        "columns", "sources", "fee_basis", "enums", "type_action", "flow_class_rule", "source_mapping", "unmapped_display",
+        "new_code_reason", "firms_served", "firms_pending", "rule24_records", "schema_hash", "schema_hash_basis", "served", "served_note")
+POSTULATES = ("mece", "same_grain", "intent_coherence", "state_coherence")
+EXPECTED_RULE = {
+    ("CONDITIONAL-BY-COUNTERPARTY", "acct-transfer"): "UNRESOLVED", ("CONDITIONAL-BY-COUNTERPARTY", "journals"): "UNRESOLVED",
+    ("CONDITIONAL-BY-COUNTERPARTY", "shares-delivered"): "UNRESOLVED", ("EXTERNAL", "checks-classified"): "UNRESOLVED",
+    ("EXTERNAL", "returned-deposits"): "UNRESOLVED", ("EXTERNAL-IN", "deposits"): "EXTERNAL_IN",
+    ("EXTERNAL-OUT", "ira-withholding"): "EXTERNAL_OUT", ("EXTERNAL-OUT", "schwab-checks-out"): "EXTERNAL_OUT",
+    ("EXTERNAL-OUT", "withdrawals"): "EXTERNAL_OUT", ("FEE-ADMIN", "adr-fee"): "FEE", ("FEE-ADMIN", "service-fees"): "FEE",
+    ("FEE-MANAGEMENT", "advisor-fee-explicit"): "FEE", ("FEE-MANAGEMENT", "advisory-fee"): "FEE",
+    ("FEE-MANAGEMENT-VERIFIED", "advisor-fee-verified"): "FEE", ("INTERNAL", "alt-income"): "INCOME",
+    ("INTERNAL", "cash-in-lieu"): "CORPORATE_ACTION", ("INTERNAL", "corp-actions"): "CORPORATE_ACTION",
+    ("INTERNAL", "corp-actions-ic"): "CORPORATE_ACTION", ("INTERNAL", "corp-misc"): "CORPORATE_ACTION",
+    ("INTERNAL", "dividends"): "INCOME", ("INTERNAL", "foreign-tax"): "INTERNAL", ("INTERNAL", "int-adj-fc"): "INCOME",
+    ("INTERNAL", "interest"): "INCOME", ("INTERNAL", "reinvest"): "INTERNAL", ("INTERNAL", "sweeps"): "INTERNAL",
+    ("INTERNAL", "trades"): "INTERNAL", ("INTERNAL", "withholding"): "INTERNAL", ("UNRESOLVED", "no-rule"): "UNRESOLVED",
+    ("UNRESOLVED-PENDING-SPECIMEN", "lending-misc-ic"): "UNRESOLVED", ("UNRESOLVED-PENDING-SPECIMEN", "misc-adj"): "UNRESOLVED",
+}
+SILVER_ONLY_FLOW = {"EXWT": "CORPORATE_ACTION", "RDPC": "CORPORATE_ACTION", "SQDAJ": "UNRESOLVED"}
+FIXED_POINTS = {"IRAWH": "EXTERNAL_OUT", "MCE": "EXTERNAL_OUT"}
+
+
+class Fail(Exception):
+    pass
+
+
+def need(cond, msg):
+    if not cond:
+        raise Fail(msg)
+
+
+def load(root, rel):
+    p = Path(root) / rel
+    need(p.is_file(), "missing file " + rel)
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def schema_hash(columns):
+    return hashlib.sha256("\n".join(sorted("%s:%s" % (c["name"], c["type"]) for c in columns)).encode("ascii")).hexdigest()
+
+
+def column_problems(cols, rec49):
+    """The 17 columns in order; the claim of each brief column equals the 49 Financial ground read's claim for that target."""
+    if not (isinstance(cols, list) and [c.get("name") if isinstance(c, dict) else None for c in cols] == list(COLUMNS)):
+        return ["columns must be exactly, in order: " + ", ".join(COLUMNS)]
+    want = {t["target"]: t["claim"] for t in rec49["targets"]}
+    pr = []
+    for c in cols:
+        n = c["name"]
+        if c.get("type") not in TYPES or not isinstance(c.get("nullable"), bool):
+            pr.append("%s: type or nullable" % n)
+        if c.get("claim") not in CLAIMS or not (isinstance(c.get("meaning"), str) and c["meaning"].strip()):
+            pr.append("%s: claim or meaning" % n)
+        if c.get("claim") == "inferred" and not (isinstance(c.get("method"), str) and c["method"].strip()):
+            pr.append("%s: an inferred column needs a method" % n)
+        if n in want and c.get("claim") != want[n]:
+            pr.append("%s: claim %r differs from the 49 Financial ground read's %r" % (n, c.get("claim"), want[n]))
+        if c.get("claim") == "absent" and c.get("nullable") is not True:
+            pr.append("%s: an absent column is nullable" % n)
+    return pr
+
+
+def rule24_problems(rec):
+    pr = []
+    if not (isinstance(rec, dict) and sorted(rec.keys()) == ["coverage", "flow_class_rule"]):
+        return ["rule24_records must hold exactly coverage and flow_class_rule"]
+    for name, r in rec.items():
+        po = r.get("postulates") if isinstance(r, dict) else None
+        if not (isinstance(po, dict) and sorted(po.keys()) == sorted(POSTULATES)
+                and all(isinstance(po[k], str) and len(po[k].strip()) >= 40 for k in POSTULATES)):
+            pr.append("%s: postulates must be exactly %r, each 40+ characters" % (name, POSTULATES))
+        c = r.get("census") if isinstance(r, dict) else None
+        if not (isinstance(c, dict) and c.get("method") == "word-boundary" and isinstance(c.get("denominator"), int)
+                and isinstance(c.get("per_value"), dict)):
+            pr.append("%s: census must carry method word-boundary, an integer denominator and per_value" % name)
+    return pr
+
+
+def form_problems(con, rec49):
+    if not isinstance(con, dict) or sorted(con.keys()) != sorted(KEYS):
+        return ["contract fields are not exactly " + repr(KEYS)]
+    pr = []
+    if con["contract_version"] != "0.2.0" or not str(con["supersedes"]).startswith("0.1.0"):
+        pr.append("contract_version must be 0.2.0 and supersedes name 0.1.0 (the draft)")
+    if con["table"] != "account_transaction" or con["partition"] != "date=YYYY-MM-DD":
+        pr.append("table / partition")
+    pr += column_problems(con["columns"], rec49)
+    if isinstance(con["columns"], list) and all(isinstance(c, dict) and "name" in c and "type" in c for c in con["columns"]):
+        if con["schema_hash"] != schema_hash(con["columns"]):
+            pr.append("schema_hash is not the sha256 over the sorted name:type lines")
+    en = con["enums"]
+    if not (isinstance(en, dict) and sorted(en.keys()) == ["action", "coverage", "flow_class", "txn_type"]):
+        pr.append("enums must hold exactly txn_type, action, flow_class, coverage")
+    elif tuple(en["flow_class"]) != FLOW or tuple(en["coverage"]) != COVERAGE:
+        pr.append("enums.flow_class / enums.coverage are not the seven classes / three coverage values in order")
+    if con["unmapped_display"] != "Unclassified" or con["new_code_reason"] != "CODE_NOT_IN_MAPPING":
+        pr.append("unmapped_display Unclassified and new_code_reason CODE_NOT_IN_MAPPING")
+    if con["firms_served"] != [FIRM49]:
+        pr.append("firms_served must be [49financial]")
+    fp = con["firms_pending"]
+    if not (isinstance(fp, list) and sorted(x.get("firm") for x in fp if isinstance(x, dict)) == ["cottonwood", "inflection"]
+            and all(isinstance(x.get("reason"), str) and x["reason"].strip() for x in fp)):
+        pr.append("firms_pending must name cottonwood and inflection, each with a reason")
+    pr += rule24_problems(con["rule24_records"])
+    if con["served"] is not False:
+        pr.append("served must be false")
+    if not json.dumps(con, ensure_ascii=False).isascii():
+        pr.append("non-ASCII text")
+    return pr
+
+
+def source_problems(con, recs):
+    pr = []
+    src = con["sources"]
+    if not (isinstance(src, dict) and sorted(src.keys()) == sorted(GROUND)):
+        return ["sources must hold exactly the three firms"]
+    for firm, rec in recs.items():
+        got = {s.get("target"): s for s in src[firm]} if isinstance(src[firm], list) else {}
+        for t in rec["targets"]:
+            want = {"target": t["target"], "source": t["source"], "from_columns": t["from_columns"], "claim": t["claim"],
+                    "method": t["method"]}
+            g = got.get(t["target"])
+            if g is None or {k: g.get(k) for k in want} != want:
+                pr.append("%s %s: source entry differs from the ground read" % (firm, t["target"]))
+        if sorted(got) != sorted(BRIEF14):
+            pr.append("%s: sources must hold exactly the 14 brief targets" % firm)
+    fb = con["fee_basis"]
+    want_fb = {}
+    for firm, rec in recs.items():
+        fee = next(t for t in rec["targets"] if t["target"] == "fee")
+        want_fb[firm] = fee["from_columns"] if fee["from_columns"] else ([fee["source"]] if fee["source"] else None)
+    if not (isinstance(fb, dict) and sorted(fb.keys()) == sorted(GROUND)):
+        pr.append("fee_basis must hold exactly the three firms")
+    else:
+        for firm, cols in want_fb.items():
+            e = fb[firm]
+            if cols is None:
+                if e is not None:
+                    pr.append("fee_basis %s must be null (the firm's table has no fee column)" % firm)
+            elif not (isinstance(e, dict) and e.get("columns") == cols and isinstance(e.get("rule"), str) and e["rule"].strip()):
+                pr.append("fee_basis %s must name exactly the ground read's fee columns %r and state the rule" % (firm, cols))
+    return pr
+
+
+def rule_problems(con):
+    got = {}
+    for r in con["flow_class_rule"] if isinstance(con["flow_class_rule"], list) else []:
+        if isinstance(r, dict):
+            got[(r.get("partition"), r.get("rule"))] = (r.get("flow_class"), r.get("reason"))
+    if set(got) != set(EXPECTED_RULE):
+        return ["flow_class_rule must hold exactly the 30 (partition, rule) pairs"]
+    pr = []
+    for k, want in EXPECTED_RULE.items():
+        if got[k][0] != want or not (isinstance(got[k][1], str) and got[k][1].strip()):
+            pr.append("flow_class_rule %r must be %s with a reason" % (k, want))
+    return pr
+
+
+def expected_flow(cro_rows):
+    cls = {}
+    for r in cro_rows:
+        cls.setdefault(r["tran_srcde"], set()).add(EXPECTED_RULE[(r["partition"], r["rule"])])
+    return {c: (next(iter(s)) if len(s) == 1 else "UNRESOLVED") for c, s in cls.items()}
+
+
+def mapping_problems(con, prop, cro_rows, census49, census3):
+    pr = []
+    types = [t["word"] for t in prop["opal_types"]]
+    acts = [a["word"] for a in prop["opal_actions"]]
+    en = con["enums"]
+    if sorted(en["txn_type"]) != sorted(types) or sorted(en["action"]) != sorted(acts):
+        pr.append("enums.txn_type / enums.action are not the ratified proposal's words")
+    if con["type_action"] != {t["word"]: t["action"] for t in prop["opal_types"]}:
+        pr.append("type_action is not the ratified proposal's table")
+    rows = con["source_mapping"]
+    if not (isinstance(rows, list) and rows):
+        return pr + ["source_mapping is empty"]
+    got = {}
+    for m in rows:
+        key = (m.get("firm"), m.get("source_value"))
+        if key in got:
+            pr.append("duplicate source_mapping row %r" % (key,))
+        got[key] = m
+    want = {(m["firm"], m["source_value"]): m["opal_type"] for m in prop["mapping"] if m["firm"] != "cottonwood"}
+    if any(k[0] == "cottonwood" for k in got):
+        pr.append("Cottonwood rows must not be in the contract: its re-cut words are not ratified")
+    if {k: v["opal_type"] for k, v in got.items()} != want:
+        pr.append("source_mapping words differ from the ratified proposal for 49 Financial and Inflection (%d rows against %d)"
+                  % (len(got), len(want)))
+    ef = expected_flow(cro_rows)
+    ef.update(SILVER_ONLY_FLOW)
+    live_inf = set(census3["firms"]["inflection"]["values"]["transactionDescription"])
+    for (firm, code), m in got.items():
+        if firm == FIRM49:
+            if m.get("flow_class") != ef.get(code):
+                pr.append("49financial %r: flow_class %r, the rule gives %r" % (code, m.get("flow_class"), ef.get(code)))
+        else:
+            if m.get("flow_class") is not None:
+                pr.append("%s %r: flow_class must be null until that firm's producer lands" % (firm, code))
+            if m.get("not_observed") is not (code not in live_inf):
+                pr.append("inflection %r: not_observed must be %r (the live census has %d descriptions)" % (code, code not in live_inf, len(live_inf)))
+    for code, cls in FIXED_POINTS.items():
+        if got.get((FIRM49, code), {}).get("flow_class") != cls:
+            pr.append("%s must be %s" % (code, cls))
+    if sum(1 for k in got if k[0] == FIRM49) != len(census49["codes"]):
+        pr.append("49financial rows are not the live census's %d codes" % len(census49["codes"]))
+    return pr
+
+
+def census_problems(con):
+    """The two rule-24 censuses equal the counts computed from the mapping."""
+    pr = []
+    rows49 = [m for m in con["source_mapping"] if m.get("firm") == FIRM49]
+    flow = {}
+    for m in rows49:
+        flow[m.get("flow_class")] = flow.get(m.get("flow_class"), 0) + 1
+    cov = {"MEASURED": sum(1 for m in rows49 if m.get("opal_type") != UNMAPPED),
+           "UNMAPPED_BY_TABLE": sum(1 for m in rows49 if m.get("opal_type") == UNMAPPED), "CODE_NOT_IN_MAPPING": 0}
+    r24 = con["rule24_records"]
+    if r24["flow_class_rule"]["census"].get("per_value") != flow or r24["flow_class_rule"]["census"].get("denominator") != len(rows49):
+        pr.append("rule24_records.flow_class_rule.census must be the per-class counts of the %d 49 Financial codes" % len(rows49))
+    if r24["coverage"]["census"].get("per_value") != cov or r24["coverage"]["census"].get("denominator") != len(rows49):
+        pr.append("rule24_records.coverage.census must be %r over the %d codes (CODE_NOT_IN_MAPPING is 0 in the live read)" % (cov, len(rows49)))
+    return pr
+
+
+def data_problems(con, data):
+    if not isinstance(data, dict):
+        return ["data file form"]
+    pr = []
+    if data.get("source_mapping") != con["source_mapping"] or data.get("type_action") != con["type_action"]:
+        pr.append("transaction_words.json differs from the contract's source_mapping / type_action")
+    if data.get("contract_version") != con["contract_version"]:
+        pr.append("transaction_words.json contract_version differs")
+    return pr
+
+
+def ac_form(root):
+    con = load(root, CONTRACT)
+    pr = form_problems(con, load(root, GROUND[FIRM49]))
+    need(not pr, "; ".join(pr[:6]))
+
+
+def ac_bindings(root):
+    con = load(root, CONTRACT)
+    recs = {f: load(root, p) for f, p in GROUND.items()}
+    need(not form_problems(con, recs[FIRM49]), "the contract's form must pass DBF129-1-AC1 first")
+    pr = source_problems(con, recs) + rule_problems(con)
+    pr += mapping_problems(con, load(root, PROPOSAL), load(root, CRO), load(root, CENSUS49), load(root, CENSUS3))
+    pr += census_problems(con) + data_problems(con, load(root, DATA))
+    need(not pr, "; ".join(pr[:6]))
+
+
+def selftest():
+    bad = 0
+    count = 0
+
+    def arm(name, got, want):
+        nonlocal bad, count
+        count += 1
+        if got != want:
+            bad += 1
+            print("SELFTEST FAIL %s: got %r want %r" % (name, got, want))
+
+    arm("rule-pairs", len(EXPECTED_RULE), 30)
+    cro = [{"tran_srcde": "A", "partition": "INTERNAL", "rule": "dividends"}]
+    arm("expected-flow", expected_flow(cro), {"A": "INCOME"})
+    rec49 = {"targets": [{"target": n, "claim": "measured"} for n in BRIEF14]}
+    cols = [{"name": n, "type": "string", "nullable": False, "meaning": "m", "claim": "measured"} for n in COLUMNS]
+    arm("columns-green", column_problems(cols, rec49), [])
+    drift = [dict(c) for c in cols]
+    drift[4]["claim"] = "absent"
+    arm("claim-must-match-ground", len(column_problems(drift, rec49)) >= 1, True)
+    arm("hash-order", schema_hash(cols) == schema_hash(list(reversed(cols))), True)
+    po = {k: "x" * 41 for k in POSTULATES}
+    good24 = {n: {"postulates": po, "census": {"method": "word-boundary", "denominator": 1, "per_value": {}}} for n in ("coverage", "flow_class_rule")}
+    arm("rule24-green", rule24_problems(good24), [])
+    arm("rule24-red", len(rule24_problems({"coverage": good24["coverage"]})), 1)
+    arm("fee-basis-form", source_problems({"sources": {"x": []}, "fee_basis": {}}, {}), ["sources must hold exactly the three firms"])
+    arm("form-red", form_problems({"a": 1}, rec49)[0].startswith("contract fields"), True)
+    arm("fixed-points", sorted(FIXED_POINTS), ["IRAWH", "MCE"])
+    print("selftest %s" % ("FAIL" if bad else "PASS (%d arms)" % count))
+    return 1 if bad else 0
+
+
+def main(argv):
+    if len(argv) == 2 and argv[1] == "--selftest":
+        return selftest()
+    if len(argv) != 3:
+        print(__doc__)
+        return 2
+    root, ac = argv[1], argv[2]
+    table = {"DBF129-1-AC1": ac_form, "DBF129-1-AC2": ac_bindings}
+    if ac not in table:
+        print("%s FAIL (unknown criterion)" % ac)
+        return 1
+    try:
+        table[ac](root)
+    except Fail as e:
+        print("reason: %s" % e)
+        print("%s FAIL" % ac)
+        return 1
+    except Exception as e:  # noqa: BLE001
+        print("reason: %s: %s" % (type(e).__name__, e))
+        print("%s FAIL" % ac)
+        return 1
+    print("%s PASS" % ac)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
