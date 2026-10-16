@@ -91,8 +91,11 @@ function selftest() {
 
 async function run(shotPath, factsPath) {
   const secrets = []
-  const facts = { started_utc: new Date().toISOString(), origin: null, server_reused: true, status_reads: [], minted: false, remove_lines: [], remove_rc: null, errors: [] }
+  const facts = { started_utc: new Date().toISOString(), attempt: 2, origin: null, server_reused: true, status_reads: [], lists: [], minted: false, remove_lines: [], remove_rc: null, errors: [] }
   const log = (s) => console.log(redact(s, secrets))
+  const dir = path.dirname(shotPath)
+  const shotTo = async (pg, name) => { fs.mkdirSync(dir, { recursive: true }); await pg.screenshot({ path: path.join(dir, name), fullPage: true }).catch(() => {}) }
+  let currentTab = 'signin'
   let browser = null
   let password = null
   try {
@@ -123,12 +126,20 @@ async function run(shotPath, factsPath) {
       return route.abort('blockedbyclient')
     })
     page.on('response', async (res) => {
-      let p = ''
-      try { p = new URL(res.url()).pathname } catch { return }
-      if (!STATUS_PATH.test(p)) return
-      const rec = { http: res.status(), public_reason_code: null, actions: [] }
-      try { Object.assign(rec, closedFields(await res.json())) } catch { /* body not JSON: keep the status only */ }
-      facts.status_reads.push(rec)
+      let u
+      try { u = new URL(res.url()) } catch { return }
+      const p = u.pathname
+      if (STATUS_PATH.test(p)) {
+        const rec = { http: res.status(), public_reason_code: null, actions: [] }
+        try { Object.assign(rec, closedFields(await res.json())) } catch { /* body not JSON: keep the status only */ }
+        facts.status_reads.push(rec)
+        return
+      }
+      if (/ticket/i.test(p) && res.request().method() === 'GET' && res.request().resourceType() !== 'document' && !/\.(js|css|tsx?|map|png|svg|woff2?)$/i.test(p) && !/^\/(src|node_modules|@)/.test(p)) {
+        const rec = { tab: currentTab, path: p, status_query: u.searchParams.get('status'), http: res.status(), count: null }
+        try { const j = await res.json(); const arr = Array.isArray(j) ? j : (j && (j.tickets || j.items || (j.data && (j.data.tickets || j.data.items || j.data)))); rec.count = Array.isArray(arr) ? arr.length : null } catch { /* count stays null */ }
+        facts.lists.push(rec)
+      }
     })
 
     await page.goto(BASE + '/login', { waitUntil: 'domcontentloaded', timeout: 30000 })
@@ -137,19 +148,51 @@ async function run(shotPath, factsPath) {
     await page.click('button[type=submit]')
     await page.waitForURL((u) => !/\/login/.test(u.pathname), { timeout: 30000 }).catch(() => {})
     if (/\/login/.test(new URL(page.url()).pathname)) throw new Error('sign-in did not leave /login')
-    log('STEP signed in through the real form, now at ' + new URL(page.url()).pathname)
-
-    await page.goto(BASE + '/ticket-center', { waitUntil: 'domcontentloaded', timeout: 30000 })
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {})
-    let cell = page.getByRole('cell', { name: TICKET, exact: true })
+    facts.d1 = new URL(page.url()).pathname
+    log('D1 sign-in landed on ' + facts.d1)
+    await shotTo(page, 'ar_v32_signin.png')
+
+    // D2: the Ticket Center is opened through the app's own sidebar link (client-side navigation); a typed URL would drop the in-memory token.
+    let link = page.getByRole('link', { name: /ticket center/i })
+    let how = 'sidebar link by name'
+    if ((await link.count()) === 0) { link = page.locator('a[href*="ticket-center"]'); how = 'sidebar link by href' }
+    facts.d2 = (await link.count()) > 0 ? how : 'NO sidebar link found'
+    log('D2 ' + facts.d2)
+    if ((await link.count()) === 0) throw new Error('no sidebar link to the Ticket Center was found')
+    await link.first().click()
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {})
+    await page.waitForTimeout(2500)
+    facts.d2_path = new URL(page.url()).pathname
+    facts.d6_new_ticket_control = (await page.getByRole('button', { name: /new ticket/i }).count()) > 0
+
+    facts.d4 = {}
+    facts.d5 = {}
     facts.tab = null
     for (const tab of TABS) {
-      if (tab !== 'Open') await page.getByRole('button', { name: tab, exact: true }).click().catch(() => {})
+      currentTab = tab
+      const btn = page.getByRole('button', { name: tab, exact: true })
+      const have = (await btn.count()) > 0
+      if (tab !== 'Open' && have) await btn.click().catch(() => {})
       await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {})
-      if ((await cell.count()) > 0) { facts.tab = tab; break }
+      await page.waitForTimeout(1500)
+      const rowsN = await page.locator('table tbody tr').count()
+      const alerts = await page.locator('[role="alert"]').allInnerTexts().catch(() => [])
+      const banner = alerts.length ? alerts[0].trim().split(/\s+/).slice(0, 4).join(' ') : null
+      const text = await page.locator('table').first().innerText().catch(() => '')
+      const ids = [...new Set(text.match(/TCK-\d{8}-[0-9a-f]{8}/g) || [])]
+      facts.d4[tab] = { tab_button_found: have || tab === 'Open', rows: rowsN, error_banner: banner !== null, banner_first_four_words: banner }
+      facts.d5[tab] = ids
+      await shotTo(page, 'ar_v32_tab_' + tab.toLowerCase().replace(' ', '_') + '.png')
+      log('D4 tab ' + tab + ': rows=' + rowsN + ' banner=' + (banner !== null) + ' ids=' + ids.length)
+      if (!facts.tab && ids.includes(TICKET)) facts.tab = tab
     }
-    facts.row_found = (await cell.count()) > 0
-    if (!facts.row_found) throw new Error('the ticket row was not found on any tab')
+    facts.row_found = !!facts.tab
+    if (!facts.row_found) throw new Error('the ticket id is not listed on any tab (D5)')
+    currentTab = 'read'
+    if (facts.tab !== 'Open') await page.getByRole('button', { name: facts.tab, exact: true }).click().catch(() => {})
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {})
+    let cell = page.getByRole('cell', { name: TICKET, exact: true })
     log('STEP ticket row found on tab ' + facts.tab)
     await cell.first().scrollIntoViewIfNeeded().catch(() => {})
     await cell.first().click().catch(() => {})
