@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-pf-4",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "d55475e5451d47885a832f93d1ea1df51e1f67c5",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pf-4.segments-read-tool-index-only-planted-arm-and-real-catalog.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-pf-4.segments-read-tool-index-only-planted-arm-and-real-catalog.md",
+    "group": "OTHER",
+    "vintage_commit": "d55475e5451d47885a832f93d1ea1df51e1f67c5"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~34",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_gateway_breakdown.py",
+      "kind": "test",
+      "commit_or_etag": "LOCAL on wk-NFRA_MCPORTAL-34 (hash in the workspace report)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two tests appended after test_missing_serves_reads_unresolved_pair: test_channel_row_firm_key_never_makes_a_segment (negative arm) and test_tool_index_serves_pair_makes_a_segment (positive arm); no deploy, no push, no network call"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_gateway_breakdown.py",
+      "kind": "handler_unchanged",
+      "commit_or_etag": "not modified",
+      "deployed_state": "NOT-CHANGED",
+      "deploy_evidence": "the handler was not changed: the new negative test passes on the handler as it stands at d55475e545 (_segment_fields_for reads tool_index only). A temporary mutant was planted for the mutant control and the file was restored byte-identical from .scratch/handler.orig.py (cmp equal; git status clean for app/)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pf/checks/pf4.AC1.sh; echo \"exit=$?\" -- expect: named tests PASSED 2 of 2.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pf/checks/pf4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "planted owning-firm arms: ======================= 33 passed, 1 warning in 29.96s ========================; named tests PASSED 2 of 2\nRESULT: PASS\nexit=0   (second same-input run: 33 passed, 1 warning in 34.64s; named tests PASSED 2 of 2; RESULT: PASS; exit=0)",
+      "denominator": "named tests PASSED 2 of 2; the file tests/test_admin_gateway_breakdown.py runs 33 of 33 passed, 0 failed (two runs)",
+      "status": "PASS",
+      "expect": "named tests PASSED 2 of 2.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pf/checks/pf4.AC2.sh; echo \"exit=$?\" -- expect: firm_keys_outside_tool_index=[1-9][0-9]* .*extra_pairs=0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pf/checks/pf4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "real catalog: tool_index_rows=99 firm_keys_outside_tool_index=273 pairs_from_tool_index=0 pairs_returned=0 extra_pairs=0\nRESULT: PASS\nexit=0   (identical line on the baseline run and on the second run)",
+      "denominator": "99 tool_index rows; 273 owning-firm firm: keys outside tool_index; 0 pairs from tool_index serves; 0 pairs returned; extra_pairs 0 of 0 returned. The positive side is vacuous at this vintage: no tool_index row of the real catalog carries a serves object or a source_group (zero of each), so the probe proves the no-extra arm only (see the session log)",
+      "status": "PASS",
+      "expect": "firm_keys_outside_tool_index=[1-9][0-9]* .*extra_pairs=0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a temporary planted line in _segment_fields_for of app/admin_gateway_breakdown.py (before its return): for each channel_artifacts row whose read_tool is a wanted tool, append (unresolved, firm) with that row's firm key. The file was restored byte-identical after the run.",
+      "expected": "test_channel_row_firm_key_never_makes_a_segment fails under the mutant",
+      "observed": "pytest on that single test under the mutant: '1 failed, 1 warning'; pytest rc=1. The handler was then restored from .scratch/handler.orig.py and cmp reported byte-identical.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of pf4.AC1.sh compared, and two runs of pf4.AC2.sh compared, on the same tree before the commit",
+      "observed": "AC1 run A: 33 passed, named 2 of 2, RESULT PASS, exit=0; AC1 run B: 33 passed, named 2 of 2, RESULT PASS, exit=0. AC2 run A and run B: identical line 'real catalog: tool_index_rows=99 firm_keys_outside_tool_index=273 pairs_from_tool_index=0 pairs_returned=0 extra_pairs=0', RESULT PASS, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "task-order <status> flip to complete",
+      "reason": "the worker face (section 2, item 2) overrides the worker rule: the order file is outside the write grant and the issuer flips it. Not flipped."
+    },
+    {
+      "item": "the served arm (pf4.served.sh, the live page after the gateway release)",
+      "reason": "the face section 2 item 4 names it not a criterion of this cell and not the worker's"
+    },
+    {
+      "item": "network, deploy and push",
+      "reason": "EGRESS CLASS none, no deploy in this order; the branch is local to wk-NFRA_MCPORTAL-34"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~34/session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd C:/tmp/mp-pf-34/infra/aws/ec2/opal-gateway && python -m pytest tests/test_admin_gateway_breakdown.py -v -p no:cacheprovider --color=no (via pf4.AC1.sh)",
+      "result": "33 passed, 1 warning; rc 0 on the file; named 2 of 2 PASSED"
+    },
+    {
+      "tool": "pytest (mutant control)",
+      "invocation": "cd C:/tmp/mp-pf-34/infra/aws/ec2/opal-gateway && python -m pytest tests/test_admin_gateway_breakdown.py::test_channel_row_firm_key_never_makes_a_segment -p no:cacheprovider --color=no -q",
+      "result": "1 failed under the planted mutant (rc 1); handler restored byte-identical"
+    },
+    {
+      "tool": "real-catalog seam probe",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/pf/checks/pf4.AC2.sh",
+      "result": "real catalog: tool_index_rows=99 firm_keys_outside_tool_index=273 pairs_from_tool_index=0 pairs_returned=0 extra_pairs=0; RESULT PASS"
+    }
+  ]
+}
