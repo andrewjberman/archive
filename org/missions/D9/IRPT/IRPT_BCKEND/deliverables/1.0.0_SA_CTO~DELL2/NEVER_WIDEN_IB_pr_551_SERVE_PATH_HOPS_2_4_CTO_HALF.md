@@ -38,3 +38,22 @@ The IRPT_DASHBD PRD's medallion contract (C-TIERS) binds it: **GOLD is parquet i
 **CTO half -- `1.0.0_SA_CTO~DELL2`: SIGNED** on sha256 `7daa29f0fe10e0a7...`, with the source ruling above as its input.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## ADDENDUM 1 -- the export's read of the filled object (2026-10-16 ~15:4xZ)
+
+**SIGNED, conditional on STEP 0,** on `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_1_EXPORT_FILLED_READ_GRANT_DRAFT.md`
+(@83eefc761f), blob `9462b5ad35af646c96ede013f03d4449e8815033`, sha256 `99969b2a44b080900f1da5002213d4f3f0702e154bd540d606b879aaa0b0a682`,
+4,593 bytes (re-measured). The COO half must sign the same blob.
+
+**The open point, ruled: the `client=*` segment inside the one object name, own firm only.** The statement is `s3:GetObject` and
+`s3:GetObjectVersion` on 49 Financial's builder address `irpt/49financial/platinum/reporting/client=*/filled_report.json` in
+`opal-data-49financial`, and nothing else. The export reads a server-pinned body by VersionId (msg 8840), which is a direct read by design.
+Routing it through the reporting route would add a code change and a second network hop to reach the same object. The wildcard is bounded
+to one segment of one object name in one firm's bucket, which is the narrowest statement a read-by-client can have.
+
+**Sequencing, ruled: hops 3 and 4 deploy together with hop 2, not before.** `filled_report.json` is written only by hop 2's filled-report
+pass, whose reader is the stub `~D2` is now building (msg 9438), so a release of 3 and 4 alone could not be read end to end. The deploy
+order is cut once hop 2's reader is merged. One release then carries hops 2 to 4, the switch-on pair (signed separately) turns the pass
+on, and the after-read is one client's filled report through the route and through the export.
+
+**Conditions:** the draft's four stand. STEP 0's live read of the role decides whether this addendum is used at all.
