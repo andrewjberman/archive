@@ -17,6 +17,13 @@ A release pair applies code and Terraform that DO NOT EXIST yet. The 49 Financia
 
 Open reading: the Terraform sid name says "Five" while the role already writes six prefixes; the sid stays on purpose (a renamed sid reads as a NEW statement to the issuer's checker).
 
+## What W1 has to read (measured by reading the handler, 2026-10-16 ~20:4xZ)
+
+- The handler's `compute()` already builds `src` (bucket and `transactions_prefix`) and `trn_days = ard.partition_days(s3, src["bucket"], src["transactions_prefix"])`, and keeps them in the module global `_CLASS_CONTEXT` for the class stage. The transaction stage reuses that context: for each returns day it reads the day's `fact_trn` partition (the producer's `SOURCE_COLUMNS`), calls `account_transaction.normalize_trn(frame, firm)` and `emit_transaction_day(s3, rows, firm, day, upload=upload)`, in the shape of `emit_classes` (never raises; returns written and failed; prints `TRANSACTION_SKIPPED <day> <reason>`).
+- `account_transaction` is imported GUARDED like `account_class_daily` (an import failure is logged by name and can never stop the returns, the class or the lots tables).
+- The 49 Financial table is a per-day table (a business date from the trade date), not a cumulative snapshot: the transaction day is the partition day, and the producer's writer refuses a row under another partition day.
+- The bundle gains `account_transaction.py` and `transaction_words.json` (and the closure the round-135 bundle manifest lists for the Inflection producer: `lib/opal_naming.py`, `lib/trading_calendar.py` and the registry files the naming reader opens), as `staged_from` pins.
+
 ## What this changes in the plan
 
 - W1 and W2 touch the same function and root `~D2` just closed; `~D2` has no open ledger on them, so there is no two-pairs-on-one-function collision. Re-read the open ledgers (every live worktree) at the cut.
