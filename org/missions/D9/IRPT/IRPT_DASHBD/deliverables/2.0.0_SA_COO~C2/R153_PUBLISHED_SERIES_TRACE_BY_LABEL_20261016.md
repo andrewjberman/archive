@@ -12,7 +12,7 @@ Asked by CTO msgs 9754 and 9817; ids supplied by `2.0.0_SA_COO~D2` by broker und
 ## What it says
 
 - **Cottonwood:** both accounts are served. The data starts 2026-07-10 (`first_data_date` equals the first series day), so the page's "where the data starts" and the three-day unreported sentence both have real inputs; `calendar_source` is `fallback_2010_2027` (the fallback calendar). A client that still shows empty on the Performance tab after DB-b-309 is NOT explained by absence in the series.
-- **Inflection:** the empty Performance series is the measured, expected PATH A state: the firm publishes holdings but no reporting series. The Performance tab must say so in words (worded absent), not stay blank; that is covered by the DB-b-309 template worded states and `~D2`'s panel cells.
+- **Inflection:** no published reporting series (measured). CORRECTED 22:1xZ (CTO msg 9927; Andrew's screenshot 3 showed Andersen's performance): the Performance tab renders that client from PATH A (the account's own performance report), not from a series, and must keep doing so. An earlier line here said the tab "needs worded absent"; that was wrong and is withdrawn. See R154 for the check on `75a71ae3`.
 - **49 Financial:** unchanged from the earlier trace: the empty page Andrew saw was the Global refusal, not absence.
 
 ## Instrument notes (so the numbers carry their limits)
