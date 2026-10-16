@@ -83,6 +83,9 @@ def ac1(r):
         fail("gates.one_change_at_a_time and gates.act_1_ledger_closed must be true (no other apply on the root; Act 1's ledger closed by the issuer)")
     if g.get("deployed_handler_date_line_present") is not True or g.get("producer_date_parameter_present") is not True:
         fail("the DEPLOYED handler's date line and the producer's --date parameter must be present before the first invoke (CTO condition 1: absence is a STOP)")
+    cen = g.get("schema_reader_census") or {}
+    if cen.get("done") is not True or cen.get("readers_refusing_1_2") != 0:
+        fail("gates.schema_reader_census must read done true and readers_refusing_1_2 0 (CTO rule A, msg 9476: a reader that refuses schema 1.2 stops the run before day 2)")
     want = days()
     if g.get("days_equal_signed_record") is not True or g.get("delta_record_sha256") != hashlib.sha256((P6.ROOT / DELTA).read_bytes()).hexdigest():
         fail("gates.days_equal_signed_record must be true and gates.delta_record_sha256 must equal the sha256 of %s" % DELTA)
@@ -104,6 +107,8 @@ def ac2(r):
             fail("%s: the prior version id must be recorded BEFORE the write and the new version must differ from it" % d)
         if x.get("rows_changed") != changed or x.get("rows_changed_expected") != changed:
             fail("%s: rows_changed must equal the signed per-day count %d (read %r)" % (d, changed, x.get("rows_changed")))
+        if x.get("columns_compared") != 19 or x.get("schema_new") != "1.2":
+            fail("%s: the comparison runs over the 19 columns of the prior key and the new key reads schema 1.2 (CTO rule A)" % d)
         if x.get("other_rows_changed") != 0 or x.get("comparison_ok") is not True or x.get("changed_only_split_holders") is not True:
             fail("%s: only accounts that held a split security at t-1 may change (other_rows_changed 0, changed_only_split_holders true, comparison_ok true)" % d)
     if next(x for x in rows if x["day"] == "2026-04-21")["rows_changed"] != 985:
