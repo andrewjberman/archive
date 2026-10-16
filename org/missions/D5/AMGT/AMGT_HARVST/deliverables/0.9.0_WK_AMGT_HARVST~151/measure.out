@@ -1,0 +1,104 @@
+# measure.out -- HVST-cc-2 step 1 (read-only S3, bucket opal-data-harvest, via .tools/aws)
+# branch wk-AMGT_HARVST-151, worktree C:/dev/wk-harvst-151
+
+## 1a. Prefix and field list
+canonical prefix amgt/harvest/silver/research_report/ holds NO key (list rc=0, 0 objects);
+live spelling amgt/harvest/silver/research-report/ (ruling A1 hyphen spelling) holds 5 parquet parts, 133,462 bytes, IsTruncated none.
+parts (LastModified order): date=2026-09-23/part-20260923T044515Z 39382 B; date=2026-09-24/part-20260924T121349Z 32401 B;
+  date=2026-09-24/part-20260924T214637Z 22743 B; date=2026-09-25/part-20260925T050517Z 29078 B; date=2026-09-26/part-20260926T004147Z 9858 B
+silver row FIELDS (25, pyarrow schema): security_key, report_id, bronze_key, extract_key, fetched_at, file_ext, source_relpath, size_bytes,
+  words_or_pages, report_class, class_evidence, fund, fund_evidence, fund_absent_reason, sector_as_written, sector_evidence,
+  sector_absent_reason, period, period_source, period_evidence, period_absent_reason, author, author_evidence, author_absent_reason, record_hash
+NOT STORED in any silver row: the report body / header text, the report title as a field (only inside source_relpath), any exchange-qualified ticker field.
+parts_read=5 parts_total=5; rows 355 in total, 355 distinct (security_key, report_id), 94 distinct security_key.
+
+## 1b. KMB_US_Equity report fbd50086c4065785 -- every stored field (text cut at 600)
+part=silver\part1.parquet
+  author = 
+  author_absent_reason = no author/analyst label or byline found in extracted text
+  author_evidence = 
+  bronze_key = s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=KMB_US_Equity/fbd50086c4065785/Kimberly Clark Mexico Q2 2026 Earnings Update.docx
+  class_evidence = MAINTAIN 2.25% POSITION IN IDVZ | content
+  extract_key = s3://opal-data-harvest/amgt/harvest/bronze/research-report-extract/security_key=KMB_US_Equity/fbd50086c4065785/extract.json
+  fetched_at = 2026-09-23 03:01:52+00:00
+  file_ext = docx
+  fund = IDVZ
+  fund_absent_reason = 
+  fund_evidence = RECOMMENDATION: MAINTAIN 2.25% POSITION IN IDVZ
+  period = 2026-Q2
+  period_absent_reason = 
+  period_evidence = Q2 2026
+  period_source = filename
+  record_hash = 421e7e23d278d6168ee26e2ac418e697f582987432a2a457b9ec11754dbe7943
+  report_class = B
+  report_id = fbd50086c4065785
+  sector_absent_reason = no 'Sector:' label found in extracted text
+  sector_as_written = 
+  sector_evidence = 
+  security_key = KMB_US_Equity
+  size_bytes = 522024
+  source_relpath = Kimberly Clark KMB/Kimberly Clark Mexico Q2 2026 Earnings Update.docx
+  words_or_pages = 545
+
+## 1b (cont). 4 other rows under KMB_US_Equity (the folder 'Kimberly Clark KMB' holds 5 silver rows; row 1a3b56044db679a5 carries the same title as a .pdf, body not read)
+-- report_id=1a3b56044db679a5 source_relpath=Kimberly Clark KMB/Kimberly Clark Mexico Q2 2026 Earnings Update.pdf report_class=B fund=IDVZ period=2026-Q2
+   fund_evidence=RECOMMENDATION: MAINTAIN 2.25% POSITION IN IDVZ class_evidence=MAINTAIN 2.25% POSITION IN IDVZ | content
+-- report_id=1ad7aeda5f72cf41 source_relpath=Kimberly Clark KMB/KIMBERLY CLARK ONE PAGER 2026 02 09_v1.xlsx report_class=OTHER fund=None period=2026-02-09
+   fund_evidence= class_evidence=type=xlsx is not a narrative docx/pdf report | filename
+-- report_id=4e764c250cca98a2 source_relpath=Kimberly Clark KMB/PR2Q26.pdf report_class=OTHER fund=None period=2026-Q2
+   fund_evidence= class_evidence=no class A-D signal in filename 'PR2Q26.pdf' or content | content
+-- report_id=a7875630a03f9cda source_relpath=Kimberly Clark KMB/KIMBERLY CLARK ONE PAGER 2026 02 09_v1.pdf report_class=OTHER fund=None period=2026-02-09
+   fund_evidence= class_evidence=no class A-D signal in filename 'KIMBERLY CLARK ONE PAGER 2026 02 09_v1.pdf' or content | content
+
+## 1b (extract). KMB misfiled report, bronze extraction object named by the stored extract_key (1 GET, 8677 B)
+  headings: ['RECOMMENDATION: MAINTAIN 2.25% POSITION IN IDVZ', 'Segment and Operational Highlights', 'Broker Comments and Sentiment', 'PERFORMANCE VS FUND', 'EARNINGS ESTIMATE PROGRESSION']
+  non-empty paragraphs: 25; first 3 cut at 600:
+    RECOMMENDATION: MAINTAIN 2.25% POSITION IN IDVZ
+    A strong quarter in a Mexican economy that is recovering but subdued. My biggest issue with this position is the lack of liquidity of the ADR. At some point we may consider moving to the local shares. For now, it just means there are days where there are extreme moves and you have to look at the bid/ask to understand what is happening. 
+    Kimberly-Clark de Mexico SAB (KCM) reported a strong Q2 2026 with record-high revenues and 10% EPS exceeding most analyst expectations. The results were helped by structural cost savings, allowing the company to maintain its industry-leading margins despite mixed market conditions.
+  identity text in body: 'Kimberly-Clark de Mexico SAB (KCM)'; 'KIMBERA MM' present: False; any exchange-qualified token: False
+
+## 1c. CENSUS over all silver rows (parts_read=5 of parts_total=5)
+header ticker source: the title carried in source_relpath (the only stored field with an exchange-qualified token)
+rows with an exchange-qualified token in any stored text field: 199; by field: {'source_relpath': 199, 'class_evidence': 4}
+with_header_ticker=199 mismatched=22 (strict string inequality of the title ticker and the key ticker)
+mismatched rows, ALL 22 (the first 10 are the reader's check list):
+   1 bf410e6c790c70fd security_key=NG/_LN_Equity key_ticker=NG/ LN title_ticker=NG LN source_relpath=National Grid NG LN/National Grid plc One Pager 2025 07 23_v1.xlsx
+   2 09d5153423d3e250 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/petrobras_production_2006_2030.xlsx
+   3 1e6980c8a41013f0 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Petrobras Research Pack Template 2026 04 09_v1.docx
+   4 21a5ead718472836 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Petrobras Q2 2026 Earnings Update.docx
+   5 2e3664bd2905cd4f security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Petrobras Q2 2026 Earnings Update.pdf
+   6 4bdf25c2e50382c1 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Valuation (1).png
+   7 656a1d12a2f99cf4 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Petrobras International Dividend One Pagers.xlsx
+   8 6f632dc23ca951cb security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/petrobras_production_2006_2025.xlsx
+   9 b26c1a33f500bd66 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Petrobras FactSet Based ONE PAGER TEMPLATE 2026 04 15_v1.xlsx
+  10 bbe37fc3a1846887 security_key=PBR_US_Equity key_ticker=PBR US title_ticker=PETR3 BZ source_relpath=Petrobras PETR3 BZ/Petrobras Research Pack Template 2026 04 09_v1.pdf
+  11 89f42955cb2c72f5 security_key=RWE_GR_Equity key_ticker=RWE GR title_ticker=RWE GY source_relpath=RWE AG RWE GY/RWE One Pager 2025 07 16_v1.xlsx
+  12 5341d36ad0642296 security_key=WALMEX*_MM_Equity key_ticker=WALMEX* MM title_ticker=WALMEX MM source_relpath=Walmart de Mexico WALMEX MM/Walmex Q2 2026 Earnings Update.docx
+  13 b441879799bbb1b1 security_key=WALMEX*_MM_Equity key_ticker=WALMEX* MM title_ticker=WALMEX MM source_relpath=Walmart de Mexico WALMEX MM/Walmex Q2 2026 Earnings Update.pdf
+  14 e15f09b7ac627472 security_key=WALMEX*_MM_Equity key_ticker=WALMEX* MM title_ticker=WALMEX MM source_relpath=Walmart de Mexico WALMEX MM/Walmex 2Q26 Earnings Release.pdf
+  15 f3f27aaf22876197 security_key=WALMEX*_MM_Equity key_ticker=WALMEX* MM title_ticker=WALMEX MM source_relpath=Walmart de Mexico WALMEX MM/Walmart de Mexico International Dividend One Pagers.xlsx
+  16 09583e868ba565fc security_key=JD_US_Equity key_ticker=JD US title_ticker=9618 HK source_relpath=JD.com 9618 HK/JD.com Q2 2026 Earnings.pdf
+  17 2426b85a8bd6e9a8 security_key=JD_US_Equity key_ticker=JD US title_ticker=9618 HK source_relpath=JD.com 9618 HK/JD. com FactSet Based ONE PAGER TEMPLATE 2026 04 22_v1.xlsx
+  18 99e18b128941fa40 security_key=JD_US_Equity key_ticker=JD US title_ticker=9618 HK source_relpath=JD.com 9618 HK/JD.com Q2 2026 Earnings.docx
+  19 feb08f3d35ee1b8c security_key=JD_US_Equity key_ticker=JD US title_ticker=9618 HK source_relpath=JD.com 9618 HK/JD.com Research Pack Template 2026 04 22_v1.docx
+  20 5831ab67482370c8 security_key=AMXB_MM_Equity key_ticker=AMXB MM title_ticker=AXMB MM source_relpath=America Movil AXMB MM/America Movil 2025 07 11.xlsx
+  21 672f6ee5c3ee5e61 security_key=AMXB_MM_Equity key_ticker=AMXB MM title_ticker=AXMB MM source_relpath=America Movil AXMB MM/America Movil Q2 2026 Earnings Update.pdf
+  22 dfb3217e874ea4b0 security_key=AMXB_MM_Equity key_ticker=AMXB MM title_ticker=AXMB MM source_relpath=America Movil AXMB MM/America Movil Q2 2026 Earnings Update.docx
+
+## 1c (read). The 22 strict mismatches are one issuer listed under another exchange line, not a misfile, by name:
+  PBR_US (Petrobras ADR) vs title 'Petrobras ... PETR3 BZ'; JD_US vs '9618 HK'; WALMEX*_MM (key with an asterisk) vs 'WALMEX MM';
+  AMXB_MM vs 'AXMB MM'; RWE_GR vs 'RWE GY'; NG/_LN vs 'NG LN'. A rule that compares the title ticker to the key ticker as a string fires on these.
+
+## 1c (KMB). Kimberly Clark KMB folder, 5 rows: title ticker present in none of them.
+  rows under KMB_US_Equity with no title ticker: 5 of 5 -> ['1a3b56044db679a5', '1ad7aeda5f72cf41', '4e764c250cca98a2', 'a7875630a03f9cda', 'fbd50086c4065785']
+
+## STOP (order step 1g). The guard cannot be built from what a stored row carries:
+  - the measured misfile (fbd50086c4065785) stores NO exchange-qualified token in any field; its only identity-bearing
+    stored text is fund_evidence 'RECOMMENDATION: MAINTAIN 2.25% POSITION IN IDVZ' (IDVZ is a fund, not the report's security)
+    and its title 'Kimberly Clark Mexico Q2 2026 Earnings Update.docx' (a company name, no ticker).
+  - its report body names 'Kimberly-Clark de Mexico SAB (KCM)' and carries no 'KIMBERA MM'; it is read through extract_key, which the row stores as a pointer only.
+  - a rule on the title ticker alone returns 'unknown' for it (served), so arm (1) cannot pass, and the strict rule adds 22 false mismatches.
+  Step 2 is NOT built. A surprise row is filed (AMGT_HARVST-D1-W151-S1).
+
+MEASURE rows_scanned=355 with_header_ticker=199 mismatched=22 parts_read=5 parts_total=5 gets=11 bytes=142139
