@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-R34POOL.classification-table-export-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-R34POOL.classification-table-export-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "4a1980863f"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R26_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-R34POOL.classification-table-export-aq2.md",
+  "vintage_commit": "4a1980863f"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/POOL_RESULT.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the seven POOL_ lines of a completed read: rows 4419, skipped 6943, classes 37, max class 1229, requests per holding 25, as of 2026-10-16, sha256 bf047533...",
+   "artifact_covered_by": [
+    "R34POOL-AC1"
+   ],
+   "commit_or_etag": "dcdc6cb3d1"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/swap_pool.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the pool snapshot written by the repo's build_swap_pool.py from the export; its sha256 on disk equals the builder's SWAP-POOL line; it loads through swap_pass.load_pool and claims held",
+   "artifact_covered_by": [
+    "R34POOL-AC2"
+   ],
+   "commit_or_etag": "dcdc6cb3d1"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/etf_classifications_export.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the whole table as the scan returned it: 3 pages (4616, 4587, 2159), 11362 items, the last page without LastEvaluatedKey, 0 items with an attribute other than ticker, asset_class and sub_asset_class",
+   "artifact_covered_by": [
+    "R34POOL-AC1",
+    "R34POOL-AC2"
+   ],
+   "commit_or_etag": "dcdc6cb3d1"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R34POOL-AC1",
+   "invocation": "grep -c -E '^(POOL_ROWS [0-9]+|POOL_SKIPPED [0-9]+|POOL_CLASSES [0-9]+|POOL_MAX_CLASS [0-9]+|POOL_REQUESTS_PER_HOLDING [0-9]+|POOL_AS_OF [0-9]{4}-[0-9]{2}-[0-9]{2}|POOL_SHA256 [0-9a-f]{64}|DENIED .+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/POOL_RESULT.txt",
+   "expect": "^(7|1)$",
+   "output_evidence": "7\nexit=0",
+   "denominator": "7 lines of a completed read (no denial line)",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(POOL_ROWS [0-9]+|POOL_SKIPPED [0-9]+|POOL_CLASSES [0-9]+|POOL_MAX_CLASS [0-9]+|POOL_REQUESTS_PER_HOLDING [0-9]+|POOL_AS_OF [0-9]{4}-[0-9]{2}-[0-9]{2}|POOL_SHA256 [0-9a-f]{64}|DENIED .+)$' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/POOL_RESULT.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R34POOL-AC2",
+   "invocation": "python -c \"import sys; sys.path.insert(0, 'infra/aws/lambda/investor-reporting/ycharts/research'); import swap_pass; p = swap_pass.load_pool('org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/swap_pool.json', '2099-12-31'); print('POOL-LOADS', p['rows_count'], p['pool_claim'])\"",
+   "expect": "^POOL-LOADS [0-9]+ held$",
+   "output_evidence": "POOL-LOADS 4419 held\nexit=0",
+   "denominator": "1 committed pool; 4419 rows; claim held",
+   "status": "PASS",
+   "criterion_verbatim": "python -c \"import sys; sys.path.insert(0, 'infra/aws/lambda/investor-reporting/ycharts/research'); import swap_pass; p = swap_pass.load_pool('org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/swap_pool.json', '2099-12-31'); print('POOL-LOADS', p['rows_count'], p['pool_claim'])\"",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the scan is a live table read, so it is not repeatable bit for bit; the builder reads no clock, no environment and no network, and the pool's sha256 on disk equals the builder's printed value",
+   "observed": "pages 3 summed 11362 items, equal to the items collected; rows 4419 plus skipped 6943 equal 11362",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the table's ApproximateItemCount",
+   "reason": "describe-table read 11362 (approximate); the count used is the scan's, with the page count and the absence of LastEvaluatedKey as the denominator"
+  },
+  {
+   "item": "the skipped items",
+   "reason": "6943 are skipped by the builder: BAD_TICKER 6858 (alias keys CUSIP:, BBG: and NAME:: that are not tickers) and NO_CLASS 85 (well-formed tickers with no sub_asset_class); the builder's own rules, not changed"
+  },
+  {
+   "item": "no customer-managed key question beyond describe-table",
+   "reason": "describe-table showed no SSEDescription (the default key); no kms call was made"
+  },
+  {
+   "item": "any write, any second principal",
+   "reason": "none made; the order bounds one describe-table and one paginated scan"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/POOL_RESULT.txt",
+ "compiler_tools": [
+  {
+   "tool": "aws dynamodb describe-table and scan (paginated by LastEvaluatedKey); build_swap_pool.py",
+   "invocation": "one describe-table; scan --projection-expression 'ticker, asset_class, sub_asset_class' --select SPECIFIC_ATTRIBUTES, 3 pages; build_swap_pool.py --items <export> --as-of 2026-10-16 --out <pool>",
+   "result": "11362 items, 0 with another attribute; SWAP-POOL rows=4419 skipped=6943 classes=37 max_class=1229 max_requests_per_holding=25 as_of=2026-10-16 sha256=bf047533..."
+  }
+ ]
+}
