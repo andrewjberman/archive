@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cs-1",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round97.md",
+    "vintage_commit": "14793ce1882921b8da023c99e9512879d0d451c1",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cs-1.relabel-served-move-with-the-yahoo-source.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cs-1.relabel-served-move-with-the-yahoo-source.md",
+    "group": "OTHER",
+    "vintage_commit": "14793ce1882921b8da023c99e9512879d0d451c1"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~187",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~187/SERVED_MOVE_RELABEL_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "0f5c12f93e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement record; no S3 write, no serve, no apply; the three served objects were read with one get each",
+      "artifact_covered_by": [
+        "CB97cs1-AC1",
+        "CB97cs1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~187/SERVED_MOVE_RELABEL_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "0f5c12f93e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement record; counts only; no S3 write, no serve, no apply",
+      "artifact_covered_by": [
+        "CB97cs1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB97cs1-AC1",
+      "criterion_verbatim": "`CB97cs1-AC1` -- the record states the control result and the added columns, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~187/SERVED_MOVE_RELABEL_RECORD.json',encoding='utf-8'));m=d['measured'];print('RELABEL measured=%s' % m + ((' equal_tables=%d of 3 added_columns=%s' % (sum(1 for t in d['control'].values() if t['pre_existing_equal']), ','.join(sorted(set(c for t in d['added_columns'].values() if isinstance(t,dict) for c in t.get('columns_added',[])))))) if m else ' reason=%s' % d['reason']))\"",
+      "expect": "^RELABEL measured=(True equal_tables=[0-3] of 3 added_columns=[a-z_,]*|False reason=.+)$",
+      "output_evidence": "RELABEL measured=True equal_tables=3 of 3 added_columns=porting_verdict,use_class",
+      "denominator": "control: 3 of 3 tables pre_existing_equal (1,691,729 + 21,102,041 + 82,593 served rows compared; 0 rows differing); added columns: 2 of 2 (use_class, porting_verdict) in each of 3 tables",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB97cs1-AC2",
+      "criterion_verbatim": "`CB97cs1-AC2` -- (AMENDMENT 1, 57cb0245b5) the issuer's script joins the built account_day_value to the regrade's per-point source and compares the Yahoo-point rows with the rows labelled not NOT_YAHOO; at least one Yahoo-point row is required.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cs1_ac2_label_check.py",
+      "expect": "^LABELS adv_rows=\\d+ yahoo_point_rows=[1-9]\\d* labelled_rows=\\d+ equal=(True|False)$",
+      "output_evidence": "LABELS adv_rows=21102041 yahoo_point_rows=3709042 labelled_rows=3709042 equal=True",
+      "denominator": "account_day_value rows 21,102,041; priced non-cash rows whose (cusip, date) point names yahoo_finance or linear_interpolation in the price file 3,709,042; rows whose use_class is not NOT_YAHOO 3,709,042; re-graded by the issuer 2.0.0_SA_COO~C1 on the amended text (57cb0245b5) over worker ~187's outputs; the first text read built price_source, which carries the store name by builder design (row ADVI_COTBKF-D1-W187-S1)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB97cs1-AC3",
+      "criterion_verbatim": "`CB97cs1-AC3` -- the received folder still holds exactly the 20,563 files and 4,478,568,892 bytes (read directly).",
+      "method": "command",
+      "invocation": "python -c \"import os;n=0;b=0;r='C:/Dev/ajb_workspace/.scratch/advi_cotbkf'\nfor p,ds,fs in os.walk(r):\n    for f in fs:\n        n+=1;b+=os.path.getsize(os.path.join(p,f))\nprint('RECEIVED files=%d bytes=%d' % (n,b))\"",
+      "expect": "^RECEIVED files=20563 bytes=4478568892$",
+      "output_evidence": "RECEIVED files=20563 bytes=4478568892",
+      "denominator": "20,563 files; 4,478,568,892 bytes",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "per-file hash of the received folder",
+      "reason": "the order's receipt check reads count and bytes only (CB97cs1-AC3); no per-file hash was asked"
+    },
+    {
+      "item": "run_commit column in the control",
+      "reason": "excluded by the order; counted separately: served 6f70d5cc01bb2e196266799a657be6d0b2dc8a16 against built 14793ce1882921b8da023c99e9512879d0d451c1 on every row of all three tables"
+    },
+    {
+      "item": "before arm (store basis) comparison",
+      "reason": "the order builds from the after arm only; the before arm was regraded and not compared with any table"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W187-S1: CB97cs1-AC2 reads price_source for a Yahoo name, but the builder writes the store name there by design (served and built equal on every row), so yahoo_source_rows is 0 and AC2 fails as written; the labels reconcile to the Yahoo-keyed priced non-cash rows"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~187/ADVI_COTBKF.TO-CB-cs-1.relabel-served-move-with-the-yahoo-source.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (regrade, commonwealth_sweep_regrade.py at the worktree path)",
+      "invocation": "COTBKF_SWEEPS_CONFIG=<private config, sha256 verified> python data/assets/scripts/silver/commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg method_r28 --after-cash-leg method_r28 --before-price-basis store --after-price-basis as_traded --data-dir .scratch/cotbkf_r97/regrade --out .scratch/cotbkf_r97/regrade_out --cache .scratch/advi_cotbkf/cache --price-cache .scratch/cotbkf_r97/price_cache --price-input-out .scratch/cotbkf_r97/price_input.parquet --split-store-as-of 2026-10-09T11:52:52Z --yahoo-cache .scratch/advi_cotbkf/yahoo_census (rc 0)",
+      "result": "PRICE-BASIS arm=AFTER price_basis=as_traded substituted_tickers=911 points_replaced=1049193 days_rederived=477980; SPLIT-STORE listed=32 held=32; PRICE-CACHE-PIN files=3580"
+    },
+    {
+      "tool": "python (builder, commonwealth_fwd3_serve.py --build at the worktree path)",
+      "invocation": "python data/assets/scripts/silver/commonwealth_fwd3_serve.py --build --data-dir .scratch/cotbkf_r97/regrade --grades .scratch/cotbkf_r97/regrade_out/month_grades_after.parquet --grades-before .scratch/cotbkf_r97/regrade_out/month_grades_before.parquet --cache .scratch/advi_cotbkf/cache --cash-leg method_r28 --price-basis as_traded --hold-cusips 05613L3H2,95000U2D4,651639AX4 --yahoo-active-policy interim --out .scratch/cotbkf_r97/build (rc 0; no --apply)",
+      "result": "FWD3-BUILD daily_rows=1691729 value_rows=21102041 month_rows=82593 cash_leg=method_r28 run_commit=14793ce18829 absent_months=5 price_basis=as_traded hold_cusips=3 held_account_days=988 use_class_policy=interim"
+    }
+  ]
+}
