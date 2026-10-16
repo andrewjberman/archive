@@ -12,6 +12,10 @@ Three steps, one actor (the single IRPT CloudOps lane under rule 34; the lane is
 2. **Drive** `.../0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py --base <DEV origin> --email <that address> --ticket <firm A ticket> --firm-a <firm A> --firm-b <firm B> --request-id <firm A request> --job-id <firm A job> --out <applier deliverables dir> --go IRPT_ANLREQ.TO-RUN-FWD5.<id>` (measured header: signs in, makes each listed call for ONE ticket of the OTHER firm, verdicts REFUSED / LEAK / UNREACHED / EXCLUDED; exit 0 only if every made call is REFUSED; report `fwd5_run_report.json` holds no body, cookie, token, password or address).
 3. **Remove** the principal: `fwd5_mint.py remove --email <that address>`; read `ABSENT GSI` and `ABSENT CONSISTENT`.
 
+## 1a. Scope of the minted principal (held: CTO ruling msg 9670, relayed by V2 msg 9673, 2026-10-16 ~17:0xZ)
+
+After the combined ticket-service release a staff row with neither `allowedFirmIds` nor the global marker is refused (403, firm scope not configured). The ruling: synthetic staff users minted after the release carry `allowedFirmIds` = [the ONE firm the run files under], never `scope_all_firms`; the mint's read-back prints the scope and the entitlement rows; each helper lands that as an amendment to its own helper's pair, which the CTO signs. For this act: `fwd5_mint.py` already writes `allowedFirmIds` as a list of strings from `--allowed-firm-ids` (measured header). To measure at the pin: (a) the mint's read-back does NOT yet print the scope and entitlement rows (header: output is only `MINT-OK READBACK-OK` / `MINT-REFUSED`), so an amendment cell is owed before this packet is signed; (b) the principal is a firm-B principal (its own firm), so its `allowedFirmIds` is [firm B] and it must be refused every call on firm A's ticket.
+
 ## 2. To measure before signing
 
 - V2's readback message for TO-R18-REL (code and env released; the ticket service carries the fence); the DEV origin the driver is aimed at (the ticket service's address, not a client page).
