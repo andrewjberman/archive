@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-be-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-be-1.round-close-check-takes-the-grade-of-record.md",
+    "group": "OTHER",
+    "vintage_commit": "98eba74fb5"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~143",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round29.md",
+    "vintage_commit": "98eba74fb5",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-be-1.round-close-check-takes-the-grade-of-record.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/round-close-check.py",
+      "kind": "script",
+      "commit_or_etag": "3b09f3ec39",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "grade_criterion collects every CVO-kind non-doer row that grades the criterion (after the same strict and verdict tests) and returns the grade of record via grade_of_record: the latest surfaced_at; a row with no parseable surfaced_at sorts first; a tie keeps file order and the later file/row wins; a row a later candidate names in supersedes or adjudicates is not the record. A self-grade never competes and reads SELF only when no CVO-kind non-doer row grades the criterion. The return shape is unchanged; the detail gains a suffix only when more than one row grades. The real NFRA_CTLPLN round 29 output is byte-identical before and after.",
+      "artifact_covered_by": ["CTbe1-AC1", "CTbe1-AC2"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round29_grade_of_record.py",
+      "kind": "test",
+      "commit_or_etag": "c702d56f95",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard library plus the checker; temporary project trees only; no network; ASCII output. Arms (a) to (g) plant a tree and run check() end to end; arm (h) runs the checker on the real round 29. Last line GRADE-OF-RECORD arms=8/8 ok=True at 3b09f3ec39; GRADE-OF-RECORD arms=4/8 ok=False against the unfixed checker (the test was first run at c702d56f95, which carried the test and not the fix).",
+      "artifact_covered_by": ["CTbe1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "31a89444ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows, never edited: NFRA_CTLPLN-W143-S1 (OBSERVATION, INERT) and NFRA_CTLPLN-W143-S2 (OBSERVATION, INERT). Both UNDER_INVESTIGATION. The surprise-row gate passed 2 new rows of 485 total at 31a89444ef.",
+      "artifact_covered_by": ["CTbe1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTbe1-AC1",
+      "criterion_verbatim": "a newer CVO row supersedes an older one for the same criterion in both directions, a self-grade never supersedes, and a row without a date loses (base: the test does not exist); report the whole last line with its denominator.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round29_grade_of_record.py",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0 (run twice on the committed state at 31a89444ef, outputs identical); last line verbatim: GRADE-OF-RECORD arms=8/8 ok=True. Deciding lines: PASS (a) older NOT MET then newer MET -> MET (row TEST_PROJ-C-S2, verdict MET); PASS (b) older MET then newer NOT MET -> NOT MET (row TEST_PROJ-C-S2, verdict NOT MET); PASS (c) three rows, newest in the middle -> newest wins (row TEST_PROJ-C-S2, verdict NOT MET); PASS (d) newer self-grade does not supersede older CVO row (row TEST_PROJ-C-S1); PASS (e) another order's AC3 never competes (row TEST_PROJ-C-S1); PASS (f) no CVO-kind row -> UNGRADED; PASS (g) undated row loses to a dated row (row TEST_PROJ-C-S2, verdict MET); PASS (h) real NFRA_CTLPLN round 29 rc=0 -> ROUND-CLOSE project=NFRA_CTLPLN device=laptop reviewer=present orders=5 judgment=0 graded=0 ungraded=0 self_graded=0 verdict=MAY-CLOSE. Base (c702d56f95, unfixed checker): GRADE-OF-RECORD arms=4/8 ok=False with FAIL (a), (b), (c) and (g).",
+      "denominator": "8 of 8 arms passed (a to g, and h); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTbe1-AC2",
+      "criterion_verbatim": "the checker's own selftest stays green (run it at the base in your worktree first and report the base's whole last line; the expectation is a green last line ending `ok=True` before and after).",
+      "method": "command",
+      "invocation": "python .tools/round-close-check.py --selftest",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0. Base at 98eba74fb5, measured in this worktree before the change: last line verbatim ROUND-CLOSE-SELFTEST cases=30/30 ok=True. After the change, at 3b09f3ec39 and again at 31a89444ef (two runs, outputs identical): last line verbatim ROUND-CLOSE-SELFTEST cases=30/30 ok=True.",
+      "denominator": "30 of 30 selftest cases passed, before and after the change; 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The unfixed checker (the first-row reading at 98eba74fb5, the tree the test was first run against at commit c702d56f95, which carried the test and not the fix), run unchanged against the grade-of-record test.",
+      "expected": "arms (a), (b), (c) and (g) fail, because the first CVO row is read rather than the row of record; arms (d), (e), (f) and (h) pass as they did at base",
+      "observed": "GRADE-OF-RECORD arms=4/8 ok=False. FAIL (a): reads TEST_PROJ-C-S1 (verdict NOT MET) for an older NOT MET then a newer MET. FAIL (b): reads TEST_PROJ-C-S1 (verdict MET). FAIL (c): reads TEST_PROJ-C-S1 (verdict MET) with the newest in the middle. FAIL (g): reads the undated TEST_PROJ-C-S1 (verdict NOT MET). PASS (d), (e), (f), (h).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed state at 31a89444ef (the checker last changed at 3b09f3ec39), same command, timeout 280; the two outputs compared with diff",
+      "observed": "AC1: identical (8 PASS lines, 0 FAIL lines, GRADE-OF-RECORD arms=8/8 ok=True in both runs). AC2: identical (ROUND-CLOSE-SELFTEST cases=30/30 ok=True in both runs). Exit code 0 in every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-be-1 to complete",
+      "reason": "the order file is outside this worker's paths; the issuer flips it on a valid, all-PASS instance"
+    },
+    {
+      "item": "the portal gitlink and org/git-author-override-audit.laptop.log",
+      "reason": "not committed, per the cell's rules; both were already modified in the worktree and are outside the order's paths"
+    },
+    {
+      "item": "the verdict rule for a grade of record that reads NOT MET (NFRA_CTLPLN-W143-S1)",
+      "reason": "outside the cell's ask, which is the grade of record and the row it reads; filed as an observation for the CVO to decide"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W143-S1: round-close-check counts a grade of record of NOT MET as GRADED (graded=, not ungraded=), and the verdict is not tested for it; the verdict rule was not changed by this cell. Filed as an observation for the CVO.",
+    "NFRA_CTLPLN-W143-S2: the worktree's sparse checkout omitted org/tier0, so test_round_close_and_research read CLOSE-GATES-TEST cases=23/24 ok=False until org/tier0 was added with git sparse-checkout add (rc=0); the suite reads cases=24/24 ok=True after it."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~143/NFRA_CTLPLN.TO-CT-be-1.round-close-check-takes-the-grade-of-record.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile .tools/round-close-check.py .tools/tests/test_round29_grade_of_record.py",
+      "result": "exit 0 (both files compile under Python 3.12.10)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/round-close-check.py --project NFRA_CTLPLN --round 29",
+      "result": "rc 0; last line ROUND-CLOSE project=NFRA_CTLPLN device=laptop reviewer=present orders=5 judgment=0 graded=0 ungraded=0 self_graded=0 verdict=MAY-CLOSE; the output is byte-identical to the base output"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round_close_and_research.py (neighbouring suite that imports the checker's surface)",
+      "result": "CLOSE-GATES-TEST cases=24/24 ok=True after git sparse-checkout add org/tier0; 23/24 before that add (see NFRA_CTLPLN-W143-S2)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round_close_decomp_round.py (neighbouring suite)",
+      "result": "ROUND-CLOSE-DECOMP-ROUND arms=6/6 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_round19_seat_record.py (neighbouring suite)",
+      "result": "SEAT-RECORD seats=6 named=6 idle_flagged=2 round_close_reviewer=present ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_wk_sparse_provision.py (neighbouring suite)",
+      "result": "WK-SPARSE-PROVISION arms=7/7 ok=True"
+    }
+  ]
+}
