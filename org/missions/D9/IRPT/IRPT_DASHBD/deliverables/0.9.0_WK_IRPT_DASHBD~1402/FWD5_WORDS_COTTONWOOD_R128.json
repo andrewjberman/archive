@@ -1,0 +1,983 @@
+{
+  "as_of": "2026-10-16",
+  "claim": "inferred",
+  "postulates": {
+    "mece": "Declared domain: the 33 distinct Transaction Type and Transaction Sub Type pairs of the live census (16 Transaction Type values, 31 Transaction Sub Type values, read from 125 partitions), subtracted by pair: pairs with no mapping row 0, rows naming a pair the census lacks 0, duplicate rows 0. The Action domain is the 87 distinct vendor Action values, subtracted the same way; the action word is read from the value, never typed from the type.",
+    "same_grain": "Grain: one row per Transaction Type and Transaction Sub Type pair, the finest vendor code that changes meaning, so the Transaction Sub Type grain is the one used; the type alone merges lines that mean different things (Buy with Dividend Reinvestment against Buy with Buy). The action is one row per Action value, the vendor's own column.",
+    "intent_coherence": "One axis: the Opal type word says what a line IS (a purchase, a dividend, a fee); the flow class is a separate per-row axis read from the vendor's External Flow column; the action word says what kind of value event it is, read from the Action column and never typed from the type.",
+    "state_coherence": "Values one remedy does NOT move: remapping one pair moves no other pair's row, no Action row and no 49 Financial or Inflection row; the UNMAPPED rows stay on the page with their reasons and are counted in every denominator."
+  },
+  "opal_types_added": [],
+  "opal_actions_added": [],
+  "external_flow_rule": {
+    "Contribution": "EXTERNAL_IN",
+    "Withdrawal": "EXTERNAL_OUT"
+  },
+  "unmapped_display": "Unclassified",
+  "mapping": [
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Buy | Buy",
+      "opal_type": "Buy",
+      "flow_class_none": "INTERNAL",
+      "reason": "Buy type and Buy sub type: a purchase of a security. Contribution rows are EXTERNAL_IN by the rule, None rows INTERNAL."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Buy | Dividend Reinvestment",
+      "opal_type": "Reinvestment",
+      "flow_class_none": "INTERNAL",
+      "reason": "Buy type with a Dividend Reinvestment sub type: income used to buy more of the same holding; no cash leaves the account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Capital Gains | Long-Term",
+      "opal_type": "Capital gain",
+      "flow_class_none": "INCOME",
+      "reason": "Capital Gains type, Long-Term sub type: a long-term capital gain distribution."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Capital Gains | Short-Term",
+      "opal_type": "Capital gain",
+      "flow_class_none": "INCOME",
+      "reason": "Capital Gains type, Short-Term sub type: a short-term capital gain distribution."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Cash Deposit | Cash Deposit",
+      "opal_type": "Deposit",
+      "flow_class_none": null,
+      "reason": "Cash added to the account from outside; all rows are Contribution, so EXTERNAL_IN by the rule."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Cash Withdrawal | Cash Withdrawal",
+      "opal_type": "Withdrawal",
+      "flow_class_none": null,
+      "reason": "Cash paid out of the account to the client; all rows are Withdrawal, so EXTERNAL_OUT by the rule."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Cash in Lieu",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: cash paid in lieu of a fractional share from an issuer event."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Conversion In",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: a conversion into the holding, caused by the issuer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Conversion Out",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: a conversion out of the holding, caused by the issuer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Merger",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: a merger of holdings, caused by the issuer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Reverse Split",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: a reverse split, caused by the issuer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Spinoff",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: a spin-off, caused by the issuer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Corporate Action | Split",
+      "opal_type": "Corporate action",
+      "flow_class_none": "CORPORATE_ACTION",
+      "reason": "Corporate Action type: a split, caused by the issuer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Dividend | Dividend",
+      "opal_type": "Dividend",
+      "flow_class_none": "INCOME",
+      "reason": "Dividend type and sub type: a dividend paid by a holding."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Dividend | Non-Taxable",
+      "opal_type": "Dividend",
+      "flow_class_none": "INCOME",
+      "reason": "Dividend type with a Non-Taxable sub type: a dividend with a tax status, still a dividend."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Dividend | Qualified",
+      "opal_type": "Dividend",
+      "flow_class_none": "INCOME",
+      "reason": "Dividend type with a Qualified sub type: a dividend with a tax status, still a dividend."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Dividend Reinvestment | Dividend Reinvestment",
+      "opal_type": "Reinvestment",
+      "flow_class_none": "INTERNAL",
+      "reason": "Dividend paid and reinvested in the same holding; no cash leaves the account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Expense | Buy of Accrued Interest",
+      "opal_type": "UNMAPPED",
+      "flow_class_none": "UNRESOLVED",
+      "reason": "Expense type with a Buy of Accrued Interest sub type: the vendor words do not say whether the row is a trading cost, an income item or a cost-basis movement, so it is left undecided rather than guessed."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Expense | Expense",
+      "opal_type": "Fee",
+      "flow_class_none": "FEE",
+      "reason": "Expense type: a charge against the account. Withdrawal rows are EXTERNAL_OUT by the rule, None rows FEE."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Expense | Tax Withholding",
+      "opal_type": "Tax withheld",
+      "flow_class_none": null,
+      "reason": "Tax Withholding sub type: tax taken from the account; all rows are Withdrawal, so EXTERNAL_OUT by the rule. The ratified Tax withheld word is INTERNAL; the conflict is filed as a surprise row."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Income | Income",
+      "opal_type": "Other income",
+      "flow_class_none": "INCOME",
+      "reason": "Income type: income paid to the account that is not a dividend, interest or capital gain."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Interest | Buy of Accrued Interest",
+      "opal_type": "UNMAPPED",
+      "flow_class_none": "UNRESOLVED",
+      "reason": "Interest type with a Buy of Accrued Interest sub type: the buyer pays accrued interest, which the vendor words do not place as income or as a cost-basis movement, so it is left undecided rather than guessed."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Interest | Interest",
+      "opal_type": "Interest",
+      "flow_class_none": "INCOME",
+      "reason": "Interest type and sub type: interest credited or paid."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Interest | Sale of Accrued Interest",
+      "opal_type": "Interest",
+      "flow_class_none": "INCOME",
+      "reason": "Interest type with a Sale of Accrued Interest sub type: accrued interest received on a sale, read as interest."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Interest | Tax-Exempt",
+      "opal_type": "Interest",
+      "flow_class_none": "INCOME",
+      "reason": "Interest type with a Tax-Exempt sub type: municipal bond interest, interest with a tax status only."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Journal | Journal",
+      "opal_type": "Journal",
+      "flow_class_none": "INTERNAL",
+      "reason": "Journal type and sub type: a book entry between accounts or sub-accounts."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Management Fee | Management Fee",
+      "opal_type": "Management fee",
+      "flow_class_none": null,
+      "reason": "Management Fee type: a fee for management; all rows are Withdrawal, so EXTERNAL_OUT by the rule."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Management Fee | Rebate",
+      "opal_type": "Fee credit",
+      "flow_class_none": null,
+      "reason": "Management Fee type with a Rebate sub type: a reversal that returns part of a fee; all rows are Contribution, so EXTERNAL_IN by the rule."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Return of Capital | Return of Capital",
+      "opal_type": "Return of capital",
+      "flow_class_none": "INTERNAL",
+      "reason": "Return of Capital type: a repayment of principal, not income; it lowers cost basis."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Sale | Redemption",
+      "opal_type": "Sell",
+      "flow_class_none": "INTERNAL",
+      "reason": "Sale type with a Redemption sub type: a holding sold back to its issuer or fund."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Sale | Sale",
+      "opal_type": "Sell",
+      "flow_class_none": "INTERNAL",
+      "reason": "Sale type and sub type: a sale of a security. Withdrawal rows are EXTERNAL_OUT by the rule, None rows INTERNAL."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Transfer In | Transfer In",
+      "opal_type": "Transfer in",
+      "flow_class_none": null,
+      "reason": "Transfer In type and sub type; all rows are Contribution, so EXTERNAL_IN by the rule."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type_pair",
+      "source_value": "Transfer Out | Transfer Out",
+      "opal_type": "Transfer out",
+      "flow_class_none": "UNRESOLVED",
+      "reason": "Transfer Out type and sub type. The word is an EXTERNAL_OUT word, but the 25 None rows are not marked external and no non-external class is decidable from the pair, so UNRESOLVED."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "044S - 021",
+      "opal_action": "UNMAPPED",
+      "reason": "A code with no description in the value; the value names no kind of event."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "10 - TFR~",
+      "opal_action": "Transfer",
+      "reason": "TFR in the value reads as a transfer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "ACAT In",
+      "opal_action": "Transfer",
+      "reason": "ACAT is an account transfer between institutions, inbound."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "ADR tax/fee",
+      "opal_action": "UNMAPPED",
+      "reason": "The value names both a tax and a fee; the vendor words do not say which the row is."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Bank Interest",
+      "opal_action": "Income",
+      "reason": "Interest credited on cash."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Buy",
+      "opal_action": "Trade",
+      "reason": "A purchase of a security."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Buy Money Market ",
+      "opal_action": "Trade",
+      "reason": "A purchase of a money market holding (trailing space kept)."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Buy of Accrued Interest",
+      "opal_action": "Trade",
+      "reason": "A purchase; the accrued interest paid on it is part of the purchase."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "CREDIT - ",
+      "opal_action": "UNMAPPED",
+      "reason": "A credit with no kind stated (trailing space kept)."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Cancelled Dividend Reinvestment",
+      "opal_action": "Adjustment",
+      "reason": "A cancelled reinvestment is a reversal, a bookkeeping change."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Cash Deposit",
+      "opal_action": "Contribution",
+      "reason": "Cash in from outside the firm."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Cash Withdrawal",
+      "opal_action": "Withdrawal",
+      "reason": "Cash out to the client."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Cash in Lieu of Fractional Shares",
+      "opal_action": "Adjustment",
+      "reason": "A corporate-action cash item; the ratified Corporate action word takes the Adjustment action."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Check Paid",
+      "opal_action": "Withdrawal",
+      "reason": "A check paid out of the account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Check Paid Adjustment",
+      "opal_action": "Adjustment",
+      "reason": "A correction to a check paid."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Check Received",
+      "opal_action": "Contribution",
+      "reason": "A check received into the account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Contribution",
+      "opal_action": "Contribution",
+      "reason": "The vendor word Contribution."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Corporate/Government Bond Interest",
+      "opal_action": "Income",
+      "reason": "Interest on a bond holding."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Corporate/Government Bond Interest Adjustment",
+      "opal_action": "Adjustment",
+      "reason": "A correction to bond interest."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Current Year Contribution",
+      "opal_action": "Contribution",
+      "reason": "A contribution for the current year."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "DST Other Fee",
+      "opal_action": "Fee",
+      "reason": "A fee."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "DST TRANSFER IN",
+      "opal_action": "Transfer",
+      "reason": "A transfer in."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Direct Deposit",
+      "opal_action": "Contribution",
+      "reason": "A deposit into the account from outside."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Direct Deposit Adjustment",
+      "opal_action": "Adjustment",
+      "reason": "A correction to a direct deposit."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Direct Rollover Cash",
+      "opal_action": "Transfer",
+      "reason": "A rollover of cash from another plan or account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Dividend",
+      "opal_action": "Income",
+      "reason": "A dividend paid by a holding."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Dividend Adjustment",
+      "opal_action": "Adjustment",
+      "reason": "A correction to a dividend."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Dividend Reinvestment",
+      "opal_action": "Income",
+      "reason": "Income used to buy more of the same holding."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Dividend Reversal",
+      "opal_action": "Adjustment",
+      "reason": "A reversal of a dividend, a bookkeeping change."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "EF Transfer In",
+      "opal_action": "Transfer",
+      "reason": "An electronic funds transfer in, read as a transfer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "EF Transfer Out",
+      "opal_action": "Transfer",
+      "reason": "An electronic funds transfer out, read as a transfer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Exchange",
+      "opal_action": "Trade",
+      "reason": "An exchange of one holding for another: a sale and a purchase."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Exchange To Fund",
+      "opal_action": "Trade",
+      "reason": "An exchange into a fund: a sale and a purchase."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Exchange from Fund",
+      "opal_action": "Trade",
+      "reason": "An exchange out of a fund: a sale and a purchase."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "FT Withheld",
+      "opal_action": "Tax",
+      "reason": "Foreign tax withheld."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Federal Tax Withholding",
+      "opal_action": "Tax",
+      "reason": "Federal tax withheld."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Fee Charged",
+      "opal_action": "Fee",
+      "reason": "A charge against the account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Foreign Dividend",
+      "opal_action": "Income",
+      "reason": "A dividend from a foreign holding."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Foreign Dividend Adjustment",
+      "opal_action": "Adjustment",
+      "reason": "A correction to a foreign dividend."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Foreign Tax Paid",
+      "opal_action": "Tax",
+      "reason": "Foreign tax paid."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Funds Received from Bank Acount",
+      "opal_action": "Contribution",
+      "reason": "Money received from an outside bank (the vendor spelling is kept)."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Funds Sent to Bank Account",
+      "opal_action": "Withdrawal",
+      "reason": "Money sent to an outside bank."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "IRA Transfer - Cash",
+      "opal_action": "Transfer",
+      "reason": "A cash transfer between IRA accounts or institutions."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Interest",
+      "opal_action": "Income",
+      "reason": "Interest credited or paid."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Journal",
+      "opal_action": "Transfer",
+      "reason": "A book entry between accounts; the ratified Journal word takes the Transfer action."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Long Term Capital Gains",
+      "opal_action": "Income",
+      "reason": "A long-term capital gain distribution."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "MGFEE - DEBIT",
+      "opal_action": "Fee",
+      "reason": "A management fee debit."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Management Fee",
+      "opal_action": "Fee",
+      "reason": "A management fee."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Management Fee Adjustment",
+      "opal_action": "Adjustment",
+      "reason": "A correction to a management fee."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Management Fee Reversal",
+      "opal_action": "Fee",
+      "reason": "A reversal of a fee; the ratified Fee credit word takes the Fee action."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Merger",
+      "opal_action": "Adjustment",
+      "reason": "A corporate action, non-cash."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Normal Distribution",
+      "opal_action": "Withdrawal",
+      "reason": "A distribution paid out to the client."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "OID Amount Calculated",
+      "opal_action": "Income",
+      "reason": "An original issue discount accrual."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "OTHER - ",
+      "opal_action": "UNMAPPED",
+      "reason": "A value with no kind stated (trailing space kept)."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Other Activity",
+      "opal_action": "UNMAPPED",
+      "reason": "A generic label with no kind stated."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Other Fee",
+      "opal_action": "Fee",
+      "reason": "A fee."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Partial Distribution",
+      "opal_action": "Withdrawal",
+      "reason": "A partial distribution paid out."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Premature Distribution",
+      "opal_action": "Withdrawal",
+      "reason": "A distribution paid out before the due date."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Principal Payment",
+      "opal_action": "Adjustment",
+      "reason": "A return of principal, read as the ratified Return of capital word."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "QDV - DEBIT",
+      "opal_action": "UNMAPPED",
+      "reason": "A code with no vendor description; the value does not name its kind."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Redemption",
+      "opal_action": "Trade",
+      "reason": "A holding sold back to its issuer or fund."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Return of Capital",
+      "opal_action": "Adjustment",
+      "reason": "A repayment of principal, as the ratified Return of capital word."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Reverse Split",
+      "opal_action": "Adjustment",
+      "reason": "A corporate action, non-cash."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Roth Conversion",
+      "opal_action": "Transfer",
+      "reason": "A movement between account types."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Royalty Trust Payment",
+      "opal_action": "Income",
+      "reason": "A royalty trust payment."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Sale",
+      "opal_action": "Trade",
+      "reason": "A sale of a security."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Sale of Accrued Interest",
+      "opal_action": "Income",
+      "reason": "Accrued interest received on a sale, read as interest income."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Sep-IRA Contribution",
+      "opal_action": "Contribution",
+      "reason": "A contribution to a SEP-IRA."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Short Term Capital Gains",
+      "opal_action": "Income",
+      "reason": "A short-term capital gain distribution."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Special Memorandum Account",
+      "opal_action": "Adjustment",
+      "reason": "A memo entry with no cash flow."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Spinoff",
+      "opal_action": "Adjustment",
+      "reason": "A corporate action, non-cash."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Split",
+      "opal_action": "Adjustment",
+      "reason": "A corporate action, non-cash."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Systematic Withdrawal Plan",
+      "opal_action": "Withdrawal",
+      "reason": "A scheduled withdrawal paid out to the client."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "TOA - LONG",
+      "opal_action": "UNMAPPED",
+      "reason": "A code with no vendor description; the value does not spell out its kind."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Tax-Exempt Municipal Bond Interest",
+      "opal_action": "Income",
+      "reason": "Municipal bond interest."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer Cash to Custodian",
+      "opal_action": "Transfer",
+      "reason": "A cash transfer to a custodian."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer In",
+      "opal_action": "Transfer",
+      "reason": "A transfer in."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer In of Accrued Interest",
+      "opal_action": "Transfer",
+      "reason": "A transfer in carrying accrued interest."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer Memo",
+      "opal_action": "Adjustment",
+      "reason": "A memo entry with no value of its own."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer Out",
+      "opal_action": "Transfer",
+      "reason": "A transfer out."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer Purchase",
+      "opal_action": "Trade",
+      "reason": "A purchase made by transfer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Transfer Redemption",
+      "opal_action": "Trade",
+      "reason": "A sale made by transfer."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Valuation Decrease",
+      "opal_action": "Adjustment",
+      "reason": "A revaluation with no cash flow."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Wire Transfer",
+      "opal_action": "Transfer",
+      "reason": "A wire between institutions; its direction is not in the value (the External Flow column carries it)."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "Wire Transfer to Bank",
+      "opal_action": "Withdrawal",
+      "reason": "A wire to an outside bank."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "exc-in",
+      "opal_action": "Adjustment",
+      "reason": "A conversion in: the non-cash corporate-action word."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "action",
+      "source_value": "exc-out",
+      "opal_action": "Adjustment",
+      "reason": "A conversion out: the non-cash corporate-action word."
+    }
+  ],
+  "state_coherence_by_word": {
+    "Buy": "A pair moved into or out of Buy changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Capital gain": "A pair moved into or out of Capital gain changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Corporate action": "A pair moved into or out of Corporate action changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Deposit": "A pair moved into or out of Deposit changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Dividend": "A pair moved into or out of Dividend changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Fee": "A pair moved into or out of Fee changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Fee credit": "A pair moved into or out of Fee credit changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Interest": "A pair moved into or out of Interest changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Journal": "A pair moved into or out of Journal changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Management fee": "A pair moved into or out of Management fee changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Other income": "A pair moved into or out of Other income changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Reinvestment": "A pair moved into or out of Reinvestment changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Return of capital": "A pair moved into or out of Return of capital changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Sell": "A pair moved into or out of Sell changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Tax withheld": "A pair moved into or out of Tax withheld changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Transfer in": "A pair moved into or out of Transfer in changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "Transfer out": "A pair moved into or out of Transfer out changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes.",
+    "UNMAPPED": "A pair moved into or out of UNMAPPED changes no other pair's word and no Action row; the UNMAPPED pairs keep their reasons and stay in the denominator.",
+    "Withdrawal": "A pair moved into or out of Withdrawal changes no other pair's word, no Action row and no other firm's row; the other type words keep their own words and flow classes."
+  },
+  "state_coherence_by_action": {
+    "Adjustment": "An Action value moved into or out of Adjustment changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "Contribution": "An Action value moved into or out of Contribution changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "Fee": "An Action value moved into or out of Fee changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "Income": "An Action value moved into or out of Income changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "Tax": "An Action value moved into or out of Tax changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "Trade": "An Action value moved into or out of Trade changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "Transfer": "An Action value moved into or out of Transfer changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows.",
+    "UNMAPPED": "An Action value moved into or out of UNMAPPED changes no other Action row and no pair's word; the UNMAPPED values keep their reasons and stay in the denominator.",
+    "Withdrawal": "An Action value moved into or out of Withdrawal changes no other Action row, no other pair's word and no other firm's row; the other action words keep their own rows."
+  },
+  "census": {
+    "method": "word-boundary",
+    "denominators": {
+      "type_pairs": 33,
+      "actions": 87
+    },
+    "distinct": {
+      "transaction_type": 16,
+      "transaction_sub_type": 31,
+      "action": 87
+    },
+    "per_type_word": {
+      "Buy": 1,
+      "Reinvestment": 2,
+      "Capital gain": 2,
+      "Deposit": 1,
+      "Withdrawal": 1,
+      "Corporate action": 7,
+      "Dividend": 3,
+      "UNMAPPED": 2,
+      "Fee": 1,
+      "Tax withheld": 1,
+      "Other income": 1,
+      "Interest": 3,
+      "Journal": 1,
+      "Management fee": 1,
+      "Fee credit": 1,
+      "Return of capital": 1,
+      "Sell": 2,
+      "Transfer in": 1,
+      "Transfer out": 1
+    },
+    "per_action_word": {
+      "UNMAPPED": 7,
+      "Transfer": 14,
+      "Income": 12,
+      "Trade": 10,
+      "Adjustment": 20,
+      "Contribution": 7,
+      "Withdrawal": 8,
+      "Fee": 6,
+      "Tax": 3
+    },
+    "unmapped": {
+      "type_pairs": 2,
+      "actions": 7
+    }
+  },
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
