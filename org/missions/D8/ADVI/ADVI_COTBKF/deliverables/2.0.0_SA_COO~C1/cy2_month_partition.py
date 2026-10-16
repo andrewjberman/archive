@@ -8,7 +8,7 @@ exactly one category, assigned in this order:
   blank_and_reported  the month has blank days and a reported-side clause
   reported_only       the month has no blank day and a reported-side clause
   other               anything else (expected 0)
-A reported-side clause is any of: 'no reported monthly return', 'reported span', 'reported rows disagree', 'not finite' (the month_grades reason text).
+A reported-side clause is any of: 'no reported monthly return', 'reported span', 'reported rows disagree', 'not finite', 'reported value is null' (the month_grades reason text; the fifth was added after worker ~193 found the module emits it at commonwealth_monthly_grade.py line 118; 0 served months carry it).
 Blank days come from daily_returns (return null), by month = the first 7 characters of the date.
   python cy2_month_partition.py                -> MONTH-PARTITION ungradable=<n> no_daily=<a> blank_only_unpriced=<b> blank_only_other=<c>
                                                   blank_and_reported=<d> reported_only=<e> other=<f> sum_equals=<bool> text_blank_mismatch=<g>
@@ -28,7 +28,7 @@ import pyarrow.parquet as pq
 BUCKET = "opal-data-assets"
 BASE = "commonwealth/cottonwood/silver/%s/date=2026-06-23/part-00000.parquet"
 VERSIONS = {"daily_returns": "lNzQMjfx6uX2zdFdWKsDANboShtDUz2N", "month_grades": "nkTE.F82uFSboXr9PEamIENCwFL9cwcC"}
-REPORTED = ("no reported monthly return", "reported span", "reported rows disagree", "not finite")
+REPORTED = ("no reported monthly return", "reported span", "reported rows disagree", "not finite", "reported value is null")
 
 
 def read(s3, t, cols):
