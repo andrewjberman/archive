@@ -1,0 +1,30 @@
+NFRA_OPLGTW.TO-OG-ch-1 -- client core hookup fix -- session log
+Worker: 0.9.0_WK_NFRA_OPLGTW~111   Branch: wk-NFRA_OPLGTW-111   Code commit: b19745d35b (LOCAL; push state LOCAL)
+Base: 705ef2c190 (trunk at cut). Worktree root: C:/tmp/wk-oplgtw-111. Host: Windows, Git Bash, Python 3.14.8, pytest 9.1.1.
+
+1. Grounding
+   - rev-parse --abbrev-ref HEAD: wk-NFRA_OPLGTW-111; org/ and .tools/ present (TREE-OK).
+   - Baseline cl1..cl6 at 705ef2c190: 50 passed.
+   - Repo roster data/mdpf/config/partner_roster.json: 3 partners; firm_id 49financial, inflection, cottonwood; one advisor_name each; no name maps to None.
+   - Adapter VENDOR/FIRMS: schwab (49financial), orion (inflection), eclipse (inflection), smartx (49financial), commonwealth (cottonwood), bd49f (blackdiamond, 49financial), bdcottonwood (blackdiamond, cottonwood). Seven modules, six vendors.
+
+2. Edits (three fixes, nothing else)
+   - app/client_role.py: FIRM_KEYED_VENDORS, role_key(vendor, segment).
+   - app/client_core.py: register_adapter list per vendor with disjoint FIRMS; _adapter(vendor, firm); holders list; Ctx._scope passes role_key; roster_name_map and Ctx.firm_roster.
+   - tests/test_og_ch1.py: five named tests.
+   - W/probe_ch1.py: the probe.
+
+3. Regression after the core edits
+   - cl1..cl6 (python -m pytest, from infra/aws/ec2/opal-gateway): 50 passed.
+   - tests/test_og_ch1.py (pytest -v): 4 passed, 1 failed (test_ogch1_ac04, the assertion on a None name in the repo roster).
+
+4. Probe run (python W/probe_ch1.py from the worktree root): rc 0
+   probe ch1: adapters_registered_equals_files True; bd_split True; role_keys_distinct True; roster_names_mapped True
+
+5. Criteria, run exactly as written, each twice (timeout 120 wrapper), outputs compared with cmp
+   - AC1 run 1 and run 2 (identical): pytest rc=1; named tests passed 4 of 5; failed/error lines 1 / RESULT: FAIL / exit=1
+   - AC2 run 1 and run 2 (identical): probe ch1 line as above / probe rc 0; digit runs of 8 or more in the output 0 (want 0) / RESULT: PASS / exit=0
+
+6. Surprise rows filed in INVESTIGATION_v1.md: NFRA_OPLGTW-Z-W111-S1 (BLOCKING), NFRA_OPLGTW-Z-W111-S2 (OBSERVATION), NFRA_OPLGTW-Z-W111-S3 (OBSERVATION).
+
+7. Status: the order stays pending (AC1 FAIL). No status flip.
