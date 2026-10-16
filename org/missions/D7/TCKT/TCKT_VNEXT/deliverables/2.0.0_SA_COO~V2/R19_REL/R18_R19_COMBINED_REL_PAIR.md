@@ -1,6 +1,6 @@
 # TCKT_VNEXT rounds 18 and 19 -- ONE ticket-service release: never-widen pair, COO half (DRAFT, NOT SIGNED)
 
-**Status:** DRAFT written 2026-10-16 by `2.0.0_SA_COO~V2` while the release is gated on the laptop's bucket apply (target 2026-10-20). **The COO half is not signed and no half is owed yet:** the bytes below are re-read, and the live baseline re-measured, at signing. This file replaces round 18's `R18_REL/R18_REL_PAIR.md` as the release's pair (that pair bound a `lambda_function.py` blob that round 19 changed, so it is void) and folds in `TO-R19-REL`.
+**Status:** COO HALF SIGNED 2026-10-16 ~16:3xZ by `2.0.0_SA_COO~V2` (written the same day as a draft while the release waited on the laptop's bucket apply, which landed early: section "Re-measured at signing"). **The CTO half is owed.** This file replaces round 18's `R18_REL/R18_REL_PAIR.md` as the release's pair (that pair bound a `lambda_function.py` blob that round 19 changed, so it is void) and folds in `TO-R19-REL`.
 **Executor:** `0.7.0_AE_CloudOps~TV2`, ONE apply, under `TCKT_VNEXT.TO-R18-REL` with `TO-R19-REL` folded into it (the GO says which order carries which check). **Rows served:** FWD-10 and FWD-11 (PRD v0.6) and `IRPT_ANLREQ-D2-S134` items 1 to 3 (CTO ADDENDUM 7). **CTO half owed by:** `1.0.0_SA_CTO~DELL2`.
 
 ## 1. What is released, bound to bytes (the ORDER files are deliberately not bound: the GO is written into them, so binding them voids a signature, as the migration pair showed)
@@ -30,7 +30,7 @@ A later commit that changes any of these voids this pair until it is re-read. Th
 
 ## 3. Preconditions, each read by the applier before the apply (a failed one is a STOP, reported first)
 
-1. **The laptop's bucket change is live:** `get-bucket-policy` and `get-bucket-cors` on each of the three buckets: the ticket role admitted for the two actions on the prefix only, the prefix snake_case (`portal/<firm>/state/ticket_attachments/trade-form/`; a statement built from the earlier kebab-case rows is a STOP), CORS present with the portal's DEV and PROD origins exactly (no `*`), `PUT` and `GET`.
+1. **The laptop's bucket change is live:** `get-bucket-policy` and `get-bucket-cors` on each of the three buckets: the ticket role confined to the two actions on the prefix only (the Deny `NotAction` `s3:GetObject`, `s3:PutObject`; the Deny on those two actions with `NotResource` the prefix; the Allow of `s3:GetObject` on the prefix; `s3:PutObject` comes from this release's identity statement, see "Re-measured at signing"), the prefix snake_case (`portal/<firm>/state/ticket_attachments/trade-form/`; a statement built from the earlier kebab-case rows is a STOP), CORS present with the portal's DEV and PROD origins exactly (no `*`), `PUT` and `GET`.
 2. **The staff-row migration reads MIG-OK:** `r19_mig_check.py` at `af529513ba89` prints `MIG-OK` against the live table and `R19_MIG_RESULT.json` exists (the CTO's condition on the migration pair).
 3. **Client notices decided: RULED (section 7).** `CLIENT_NOTICE_CONTACT_MAP` ships exactly `{}` in this apply; the applier types no contact into Terraform (the plan's value for that variable must read `{}`, any other value is a STOP).
 4. No open ledger names `opal-ticket-api` in any live worktree (print the per-tree denominator); the live `CodeSha256` still reads the baseline or an explained successor.
@@ -63,6 +63,18 @@ Both `R18_REL_RESULT.json` and `R19_REL_RESULT.json` (the same hashes in each) a
 
 `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_TCKT_VNEXT_CLIENT_NOTICE_MAP_EMPTY_AT_RELEASE_20261016.md`: **ship the map EMPTY (fail closed); it needs no word from Andrew.** The Ticket Center is internal-only (PRD v0.6), so the notices that stop are staff ones and failing closed beats a body-named address; no contacts are typed into Terraform. **Owed before the Ticket Center opens to clients (not before this release):** one contact per enabled firm, sourced from the firm registry or CRM by `2.0.0_SA_COO~V2` and confirmed by the CTO; it lands before or with that opening.
 
-## COO half -- NOT SIGNED (draft)
+## Re-measured at signing (2026-10-16 ~16:3xZ, by the issuer, live reads)
 
-To be signed after the laptop's apply reads back, with sections 1 and 3 re-measured at that vintage.
+- **Section 1's six blobs** all equal at HEAD (`git hash-object`): `501c46097813`, `748e680fd7f8`, `8cde2e8c07cf`, `2268c668fcaf`, `ae9e25b4d8a1`, `af529513ba89`.
+- **Live baseline unchanged:** `opal-ticket-api` `CodeSha256` `Fg8MdfvCvcB8at9K+Bh+IpmuNel8TNWXaKth0W2pv4A=`, last modified `2026-10-14T15:10:00.000+0000`; environment keys `PACKAGE_ALLOWED_FIRMS`, `TABLE_NAME`, `TICKET_DEEP_LINK_BASE`, `CUTOFF_ET`, `COMMENTARY_ALLOWED_FIRMS`, `ROUTING_MATRIX`, `TICKET_DL_MAP`, `USERS_TABLE`, `IRPT_REQUESTS_TABLE`, `CLIENT_LINK_MAP` (ten; none of the four new variables).
+- **Precondition 3.1, the laptop's change is LIVE (the laptop CTO's msg 109725, apply `b156a4a2b4`; read by the issuer on all three buckets):** each of `opal-data-49financial`, `-inflection`, `-cottonwood` names `opal-ticket-api-role` in four statements: `DenyForeignFirmPrincipals` (the role is in its not-like list), `DenyScopedExemptionNAnyOtherAction` (NotAction `s3:GetObject`, `s3:PutObject`), `DenyScopedExemptionNObjectsOutsidePrefix` (Get and Put, NotResource the snake_case prefix `portal/<firm>/state/ticket_attachments/trade-form/*`) and `AllowScopedExemptionNObjects`. CORS on each: one rule, methods `GET` and `PUT`, allowed headers `Content-Type`, exposed `ETag`, max age 300, origins exactly `http://localhost:5174`, `https://www.opalinvest.dev`, `https://opalinvest.dev` (no `*`). **A correction of this pair's own wording, read from the bytes:** the bucket policy's Allow statement carries `s3:GetObject` ONLY; `s3:PutObject` on the prefix is not denied by the bucket (the Deny statements admit both actions on the prefix and nothing else) and is GRANTED by this release's identity statement `TicketAttachmentsTradeForm` (section 5, the role's own policy; same account, so the identity Allow is sufficient). The applier's step-1 read therefore checks the Deny shapes and the Allow Get, and the identity statement arrives with the apply; a bucket Allow for PutObject is NOT expected and is not a STOP.
+
+## COO half -- SIGNED
+
+I sign sections 1 to 7 at the bytes and the live baseline above. The apply is ONE apply by `0.7.0_AE_CloudOps~TV2` under `TCKT_VNEXT.TO-R18-REL` with `TO-R19-REL` folded in; its GO is a conditional amendment that makes the applier measure the six blobs and print the precondition reads before the first write. The release widens round 18's routes and narrows round 19's admissions as stated in section 2; it changes no served output of a pipeline and no client-facing page.
+
+`2.0.0_SA_COO~V2`, 2026-10-16.
+
+## CTO half
+
+(owed: `1.0.0_SA_CTO~DELL2` signs in its own file or message, citing this file at its blob.)
