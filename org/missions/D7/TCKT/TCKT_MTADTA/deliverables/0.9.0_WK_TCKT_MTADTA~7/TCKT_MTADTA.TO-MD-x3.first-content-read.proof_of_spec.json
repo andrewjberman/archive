@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_MTADTA.TO-MD-x3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-x3.first-content-read.md",
+    "group": "OTHER",
+    "vintage_commit": "a49927b4d1"
+  },
+  "assignee": "0.9.0_WK_TCKT_MTADTA~7",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_MTADTA/decompositions/TCKT_MTADTA_DECOMP_R2.md",
+    "vintage_commit": "a49927b4d1",
+    "to_ref": "org/missions/D7/TCKT/TCKT_MTADTA/task-orders/TCKT_MTADTA.TO-MD-x3.first-content-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/first_content.py",
+      "kind": "script",
+      "commit_or_etag": "039b5a57d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source only: report() reads through the member door with an injected invoke; main() builds the boto3 invoker and is not exercised; nothing deployed, no AWS, S3 or Lambda call",
+      "artifact_covered_by": ["MD2-x3-AC1", "MD2-x3-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_first_content.py",
+      "kind": "test",
+      "commit_or_etag": "039b5a57d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest 11 passed on synthetic rows; nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MD2-x3-AC1",
+      "criterion_verbatim": "volume per person, the event-type histogram and the summed id-only count are printed, and no file name, folder, site, participant or subject hash is.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x3.py reads",
+      "output_evidence": "run under timeout 120: X3-READS-OK lines=13 (rc=0); a second identical run printed the same line and rc=0",
+      "denominator": "8 of 8 get_day calls made once each; 5 of 5 forbidden needles absent from the report (recon-synthetic, Synthetic, synthetic.example, abababab, internal-other); id-only sum 2 + 1 = 3 over 2 coverage objects",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MD2-x3-AC2",
+      "criterion_verbatim": "a day with nothing reads as quiet, never blank, and a refused door raises.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x3.py quiet",
+      "output_evidence": "run under timeout 120: X3-QUIET-OK (rc=0); a second identical run printed the same line and rc=0",
+      "denominator": "2 of 2 assertions: the quiet-day text is non-blank and carries 'no activity collected'; the refused door raised RuntimeError",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Dry-run before first_content.py existed: both check invocations must refuse on the missing script, so the green result is not a pass by default.",
+      "expected": "X3-READS-REFUSED missing ...first_content.py (rc=1); X3-QUIET-REFUSED missing ...first_content.py (rc=1)",
+      "observed": "X3-READS-REFUSED missing C:\\tmp\\wk-tckt-mtadta-7\\data\\m365_metadata\\scripts\\silver\\first_content.py (rc=1); X3-QUIET-REFUSED missing C:\\tmp\\wk-tckt-mtadta-7\\data\\m365_metadata\\scripts\\silver\\first_content.py (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: reads twice, quiet twice, and the pytest suite twice; output lines and rc compared",
+      "observed": "reads run 1 and run 2: X3-READS-OK lines=13 rc=0 both; quiet run 1 and run 2: X3-QUIET-OK rc=0 both; pytest run 1 and run 2: 11 passed both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running main() against the live door: boto3 lambda invoke of globgrph-trino-access-lambda on the member alias",
+      "reason": "order BOUNDS: LOCAL, nothing run live; no AWS, S3 or Lambda call; main() is not exercised in round 2 by any worker"
+    },
+    {
+      "item": "A real day's counts printed",
+      "reason": "order BOUNDS: SYNTHETIC rows only; the sample report was printed on a synthetic day and not committed"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D7/TCKT/TCKT_MTADTA/deliverables/0.9.0_WK_TCKT_MTADTA~7/TCKT_MTADTA.TO-MD-x3.session.log",
+  "compiler_tools": [
+    {
+      "tool": "r2_check_x3.py",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R2_CHECKS/r2_check_x3.py reads; ... quiet",
+      "result": "X3-READS-OK lines=13 (rc=0); X3-QUIET-OK (rc=0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "timeout 120 python -m pytest data/m365_metadata/scripts/tests/test_first_content.py -q",
+      "result": "11 passed in 0.05s (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "timeout 120 python -m ruff check --target-version py39 data/m365_metadata/scripts/silver/first_content.py data/m365_metadata/scripts/tests/test_first_content.py",
+      "result": "All checks passed! (rc=0)"
+    }
+  ]
+}
