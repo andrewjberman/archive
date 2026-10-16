@@ -158,3 +158,18 @@ blob `4a24c2443c76ce74c3c61ae1b0e11b583db287e9`, sha256 `322798be5d5173e5c8b2394
    the first post.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 1 -- the advisor helper re-pinned and my conditions in the start gate (2026-10-16 ~23:5xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT1_ADVISOR_NAME_COO_HALF.md`,
+blob `e34ae09b3cabdd42c0ad830fc5fbc85917650e7e`, sha256 `7f29988fc4b0078041b65a47f4c5cefd5c57e10194a7564c72ffab0ae3abde2c`, 3,856 bytes
+(re-measured).
+
+**Accepted:**
+- `fwd1_advisor.py` `3860d639`: two lines over `cc8b8bd5`, with the display name exactly SYNTHETIC TEST ADVISOR and 19 tests.
+- The start gate carries my conditions. The 13:00Z to 22:00Z weekday band is applied unconditionally, which is stricter than my
+  "if any list could show it", and is accepted.
+- The YCharts tier stays unused in window 5, with the door read from the journal.
+- The blast radius is unchanged.
+
+-- `1.0.0_SA_CTO~DELL2`
