@@ -1,0 +1,28 @@
+{
+  "order": "FB-p-6",
+  "read_at": "2026-10-16T18:44:45Z",
+  "floor_day": "2026-10-16",
+  "key": "platinum/advisors/inflection_wealth_management/top_holdings.json",
+  "writer": "data/inf/scripts/gold/INF_D_02b.top_holdings.py:333-361 (the daily gold step; under --upload it writes platinum/advisors/{advisor_key}/top_holdings.json for every advisor key, lines 358-361; its 2026-10-16 version is dated 12:52:32Z, before the publisher run)",
+  "publisher_condition": "infra/aws/lambda/inf-portal-advisor-publisher/lambda_function.py:1200-1201 writes top_holdings.json only when top_h is not None; top_h = _build_top_holdings(advisor_key, holdings, data_as_of) at line 1171 returns None (lines 810-814) when the holdings frame is empty or has no rows with advisor_key equal to this advisor. On 2026-10-16 the holdings input (gold/canonical/holdings_2026-10-16.parquet, loaded at line 1049; log line 13:30:50Z) had 12710 rows over 4 distinct advisor_key values and 0 rows for this advisor, so top_h was None and the write was skipped",
+  "why": "The publisher's 13:30Z run gave this key no new version because its holdings input had no rows for this advisor, so its top_holdings builder returned None and the conditional write did not run. The run log (13:31:12Z) shows book.json, summary.json and timeseries.json written for this advisor and no top_holdings.json line. This is expected under the code as written, which writes nothing when there is nothing to aggregate. Why the holdings partition carries no rows for this advisor was not read. The 12:52Z gold write is a different writer and does not count as the publisher's",
+  "last_version_at": "2026-10-16T12:52:32Z",
+  "publisher_window": {"from": "2026-10-16T13:30:00Z", "to": "2026-10-16T13:35:00Z"},
+  "versions_in_publisher_window": 0,
+  "versions_on_floor_day_total": 1,
+  "calls": [
+    "for each of the 23 keys named in ACT3_BASELINE_VERSIONS.json: .tools/aws s3api list-object-versions --bucket opal-data-inf --prefix <key> --output json (23 of 23 rc=0; saved to .scratch/k23/)",
+    "python -I .scratch/k23/analyze.py (counts per key; 23 of 23 keys have at least one version dated 2026-10-16, the 23rd key has 1)",
+    "comp-find -i \"top_holdings\" (repo search; 16 hits)",
+    "comp-read infra/aws/lambda/inf-portal-publisher/lambda_function.py --for \"Which S3 keys does this publisher write\" (firm snapshots written at lines 877-882 and 1067-1069; advisor keys fanned out to the advisor publisher)",
+    "comp-read data/inf/scripts/gold/INF_D_02b.top_holdings.py --for \"Which step writes platinum/advisors/<advisor>/top_holdings.json\"",
+    "Read data/inf/scripts/gold/INF_D_02b.top_holdings.py lines 253-375; Read infra/aws/lambda/inf-portal-advisor-publisher/lambda_function.py lines 808-837, 1046-1085, 1120-1210 and 195-201 (no write)",
+    "aws logs describe-log-groups --log-group-name-prefix /aws/lambda/inf-portal --query logGroups[].logGroupName --output text (2 groups)",
+    "aws logs filter-log-events --log-group-name /aws/lambda/inf-portal-advisor-publisher --start-time <2026-10-16T13:25:00Z in epoch ms> --end-time <2026-10-16T13:45:00Z in epoch ms> --output json (200 events, nextToken absent; 143 connection-pool warnings, 57 other lines read)",
+    "aws s3api select-object-content --bucket opal-data-inf --key gold/canonical/holdings_2026-10-16.parquet --expression SELECT COUNT(*) FROM S3Object s (3 variants; each refused with MethodNotAllowed, rc 254)",
+    "aws s3api head-object --bucket opal-data-inf --key gold/canonical/holdings_2026-10-16.parquet --query ContentLength LastModified --output json (ContentLength 230808, LastModified 2026-10-16T12:20:16Z)",
+    "aws s3api get-object --bucket opal-data-inf --key gold/canonical/holdings_2026-10-16.parquet .scratch/k23/holdings_2026-10-16.parquet --output json (rc 0; read into scratch, no write)",
+    "python -I pyarrow row count of advisor_key over .scratch/k23/holdings_2026-10-16.parquet (12710 rows, 4 distinct advisor_key values, 0 rows for this advisor, 0 null)"
+  ],
+  "claim": "measured"
+}
