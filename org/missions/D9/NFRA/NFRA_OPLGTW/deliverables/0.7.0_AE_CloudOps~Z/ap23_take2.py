@@ -40,12 +40,16 @@ whole = ["client_core", "client_role", "etfs_rivals", "etfs_rivals_flow", "etfs_
          "portal_json_served", "admin_gateway_breakdown", "admin_people"]
 whole += ["client_adapter_" + n for n in ("schwab", "bd49f", "orion", "eclipse", "bdcottonwood", "smartx", "commonwealth")]
 whole.append("mdpf_classification")   # A2: the security-classification tool (OG-ac-2)
+whole.append("data_entitlement")      # A7: WHOLE from trunk_sha (OG-bd-3's decide() branch and tier lines, OG-ad-1's client admission)
 paths = [G + "app/%s.py" % m for m in whole] + ["lib/opal_naming.py"]   # A2: the roster and the registry copy are NOT committed
-cells = ("cl1", "cl2", "cl3", "cl4", "cl5", "cl6", "cl7", "cl8", "rv1", "rv2", "ch1", "gp1", "gf1", "sv1", "sv2", "ac2")
+cells = ("cl1", "cl2", "cl3", "cl4", "cl5", "cl6", "cl7", "cl8", "rv1", "rv2", "ch1", "gp1", "gf1", "sv1", "sv2", "ac2", "ad1", "bd3")
 for t in ls(TRUNK, G + "tests/"):
     b = t.rsplit("/", 1)[-1]
     if (b.startswith("test_og_") and b[8:-3] in cells) or b in (
-            "test_admin_gateway_breakdown.py", "test_admin_people.py", "test_positioning_extension.py"):
+            "test_admin_gateway_breakdown.py", "test_admin_people.py", "test_positioning_extension.py",
+            # A7: data_entitlement.py is whole from trunk (OG-bd-3, and OG-ad-1 moving the client tools out of NATIVE_TOOLS into
+            # CLIENT_TOOLS), so the four tests that pin that module's membership are taken whole as well: their follow-ups are trunk's own
+            "test_entitlement_admin.py", "test_data_entitlement_family.py", "test_data_entitlement_guard.py", "test_og_bd2.py"):
         paths.append(t)
 for p in paths:
     d = show(TRUNK, p)
@@ -76,7 +80,7 @@ ADDED = ["etfs_get_peer_group_members", "etfs_get_rival_fund_holdings", "etfs_wh
          "portal_get_model_portfolio_timeseries", "portal_get_peer_performance", "portal_get_trending",
          "portal_get_cma_assumptions", "mdpf_get_security_classification"]
 
-for fn in ("destructive_ops.py", "data_entitlement.py"):
+for fn in ("destructive_ops.py",):   # A7: data_entitlement.py is taken WHOLE (above), it carries OG-bd-3 and OG-ad-1
     p = G + "app/" + fn
     base = show(LIVE, p).decode("utf-8")
     tr = show(TRUNK, p).decode("utf-8")
@@ -114,7 +118,8 @@ taken.append(p)
 
 # the two pin tests: re-derived against the base, plus the added tools (86 -> 86+26, 95 -> 95+26)
 K = len(ADDED)
-for fn, old, new in (("test_data_entitlement_family.py", 86, 86 + K), ("test_entitlement_admin.py", 95, 95 + K)):
+# non_data = registered tools outside DATA_GRANT_TOOLS: the 27 added, less the 5 client_* tools that PRD v3.14 puts in the data-grant family
+for fn, old, new in ():   # A7: the two pin tests are now taken whole above (their pins are trunk's: 108 and 122)
     p = G + "tests/" + fn
     b = show(LIVE, p).decode("utf-8")
     if fn == "test_data_entitlement_family.py":
@@ -175,6 +180,22 @@ arg_head = b'"${ADVI_MARKET_UPDATE_S3_ROOT}" "${ADVI_FEE_STATEMENT_S3_ROOT}" | s
 assert b.count(arg_head) == 1
 b = b.replace(arg_head, b'"${READER_ARN_BD49F}" "${READER_ARN_BDCOTTONWOOD}" "${READER_ARN_ORION}" "${READER_ARN_ECLIPSE}" '
               b'"${READER_ARN_COMMONWEALTH}" "${READER_ARN_SMARTX}" ' + arg_head)
+# the tar line (the CTO's refusal, msg 34788): the staged app/refs copies ship FROM THE BUNDLE and the same two names are excluded from
+# the $SRC side. GNU tar --exclude is cumulative from where it appears, so the bundle group goes FIRST and the two excludes sit between
+# the groups; the existing excludes stay ahead of both groups and so still apply to both (tested: one entry per name, bundle content).
+tar_old = (b'tar -czf "$TMP/$ART" -C "$SRC" \\\n'
+           b"    --exclude='.env' --exclude='audit.jsonl' --exclude='*.log' --exclude='__pycache__' \\\n"
+           b"    --exclude='.token_cache' --exclude='infra' --exclude='dev_smoke.py' --exclude='make_diagram.py' \\\n"
+           b'    app deploy requirements.txt identity_tool_allowlist.txt \\\n'
+           b'    -C "$TMP/bundle" "$DASHBOARD_BUNDLE_DIR" lib\n')
+assert b.count(tar_old) == 1
+tar_new = (b'tar -czf "$TMP/$ART" -C "$TMP/bundle" \\\n'
+           b"    --exclude='.env' --exclude='audit.jsonl' --exclude='*.log' --exclude='__pycache__' \\\n"
+           b"    --exclude='.token_cache' --exclude='infra' --exclude='dev_smoke.py' --exclude='make_diagram.py' \\\n"
+           b'    "$DASHBOARD_BUNDLE_DIR" lib app/refs/partner_roster.json app/refs/scopes.json \\\n'
+           b"    --exclude='app/refs/partner_roster.json' --exclude='app/refs/scopes.json' \\\n"
+           b'    -C "$SRC" app deploy requirements.txt identity_tool_allowlist.txt\n')
+b = b.replace(tar_old, tar_new)
 put(p, b)
 taken.append(p)
 
