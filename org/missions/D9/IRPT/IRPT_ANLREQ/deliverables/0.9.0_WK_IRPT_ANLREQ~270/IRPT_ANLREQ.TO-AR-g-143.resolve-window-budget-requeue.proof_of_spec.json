@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-143",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-143.resolve-window-budget-requeue.md",
+    "group": "OTHER",
+    "vintage_commit": "536c462f54"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R47_G.md",
+    "vintage_commit": "536c462f54",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-143.resolve-window-budget-requeue.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~270",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "2b2bce7deb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "RESOLVE_WINDOW_CLASS = \":OPERATION_WINDOW_BUDGET\" beside RESOLVE_BUSY_CLASS; the poll_once busy test is detail code endswith (RESOLVE_BUSY_CLASS, RESOLVE_WINDOW_CLASS); clamp, send-before-delete, deadline and journal unchanged; offline, no deploy",
+      "artifact_covered_by": ["AR143-g-AC1", "AR143-g-AC2", "AR143-g-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resolve_upload.py",
+      "kind": "test",
+      "commit_or_etag": "2b2bce7deb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "appended LeaseQueue and _retry_poll over the real poll_once: budget re-send for retry_after 120, none, 5000 and 0 (4 parametrized arms), past-deadline ends RESOLVE_PROVIDER_BUSY, a code that only contains the class keeps visibility 60, no requested_at keeps 60; file 38 passed; existing tests untouched",
+      "artifact_covered_by": ["AR143-g-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "21c05028a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two OBSERVATION rows appended: IRPT_ANLREQ-D2-W270-S5 (client-data-check WARN, list absent on this device) and IRPT_ANLREQ-D2-W270-S6 (sparse worktree holds no on-disk copy of a cited CLOSED deploy record); surprise-row-gate OK on 2 new rows",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR143-g-AC1",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g143_checks.py build",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g143_checks.py build",
+      "output_evidence": "AR-G143-OK build: all arms  (6 arms through the REAL poll_once: budget re-send at retry_after 120, none, 5000, 0; past the busy deadline ends RESOLVE_PROVIDER_BUSY; journal names OPERATION_WINDOW_BUDGET. Run at 2b2bce7deb, rc=0, timeout 120 bound. Run twice: identical line.)",
+      "denominator": "6 arms, 0 failed (b1 x4 retry_after values, b2 deadline, b3 journal class)",
+      "expect": "^AR-G143-OK",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AR143-g-AC2",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g143_checks.py guard",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g143_checks.py guard",
+      "output_evidence": "AR-G143-OK guard: all arms  (BUSY keeps its re-send at 120; WAF keeps 150, 300, 450; STATUS_503, a code containing the class with _EXTRA, a reversed code, None and 7 keep flat 60; budget code with no requested_at keeps flat 60. Run at 2b2bce7deb, rc=0, timeout 120 bound.)",
+      "denominator": "20 arms, 0 failed (g1 BUSY x1, g2 WAF receives 1-3 x3, g3 5 non-class codes x receives 1-3 x15, g4 no requested_at x1)",
+      "expect": "^AR-G143-OK",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AR143-g-AC3",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g143_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g143_checks.py regress",
+      "output_evidence": "AR-G143-REGRESS-OK  (test_resolve_upload.py 38 passed; test_frozen_worker.py 21 passed; scope against the merge-base 8f9c005e8f: 3 changed files pre-proof, all in the write set; rc=0, timeout 600 bound)",
+      "denominator": "2 test files: 38 passed + 21 passed, 0 failed; scope 3 of 3 changed files inside the write set",
+      "expect": "^AR-G143-REGRESS-OK",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverse the cell: AC1 run on the base tree 8f9c005e8f, where poll_once tests only the OPERATION_BUSY class; the window-class arms must FAIL",
+      "expected": "AR-G143-FAIL build with the b1 arms (sent [] visibility [60]) and b2 (busy-ended 0) failing",
+      "observed": "AR-G143-FAIL build: b1 retry_after 120: sent [] deleted [] visibility [60] busy-ended 0; b1 retry_after None, 5000, 0 likewise; b2 past the busy deadline: busy-ended 0; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of AC1 on 2b2bce7deb compared",
+      "observed": "both runs printed AR-G143-OK build: all arms with rc=0; lines identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W270-S5",
+    "IRPT_ANLREQ-D2-W270-S6"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resolve_upload.py",
+      "result": "38 passed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_frozen_worker.py",
+      "result": "21 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check resident_worker.py tests/test_resolve_upload.py --select E,F,W --line-length 200",
+      "result": "All checks passed!"
+    }
+  ]
+}
