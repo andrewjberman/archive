@@ -1,6 +1,6 @@
 """c27_check.py -- grades MX-c-27 (R20-1: a regeneration by gen_silver_rows.py loses no hand-set field and no registry row it does not own), from the repo root.
 
-The regeneration is run in a TEMP folder (nothing in the repo is written) with the exact inputs of round18/land_links.sh (the pinned G2..G6 and G2f files, the unskip file, the two read-links files, the f1 firm map,
+The regeneration is run in a TEMP folder (nothing in the repo is written) with the exact inputs of round18/land_links.sh plus --hand-overlay round20/hand_overlay.json (the issuer's overlay, an explicit option with no default) (the pinned G2..G6 and G2f files, the unskip file, the two read-links files, the f1 firm map,
 `--deployed-tools census`) PLUS both registry flags pointed at temp COPIES of infra/logic/registry/legacy_addresses.json and catalog_fork_keys.json.
 
   python c27_check.py ac1   the entries: every regenerated entry equals the tracked entry of the same name (0 differ; the base differs in the `prefix` of the eight 49financial *_silver_legacy entries); the
@@ -47,7 +47,8 @@ def regen(out, legacy_copy, fork_copy, extra=()):
            "--read-links", os.path.join(D, "2.0.0_SA_COO~MI2", "round18", "read_links.json"),
            "--read-links", os.path.join(D, "2.0.0_SA_COO~MI", "round18", "assets_read_links.json"),
            "--firm-map", os.path.join(D, "2.0.0_SA_COO~MI", "round17", "f1_firm_map.json"),
-           "--registry-file", legacy_copy, "--fork-registry-file", fork_copy] + list(extra)
+           "--registry-file", legacy_copy, "--fork-registry-file", fork_copy,
+           "--hand-overlay", os.path.join(D, "2.0.0_SA_COO~MI", "round20", "hand_overlay.json")] + list(extra)
     r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=280)
     if r.returncode != 0:
         print("ERROR: gen_silver_rows rc %d: %s" % (r.returncode, (r.stderr or r.stdout)[-400:]))
