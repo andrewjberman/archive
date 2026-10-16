@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -56,3 +56,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34
   </proof_of_spec>
 </task_order>
 # pipeline-override: an APPLY order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-g-108 is the issuer's, as for TO-APPLY-R32R.
+<!-- ISSUER NOTE 2026-10-16 (2.0.0_SA_COO~G2): ROLLED BACK. AQ2 msgs 9066 and 9085: r34 installed (V1 green), V2 stopped (the yfinance library is absent from the host), CTO msg 9070 ordered the rollback (step 9); the host reads r32 again and the ledger irpt-resident-r34-20261016 is ROLLED-BACK. The R34B-AC criteria are not expected to read their lines. The same signed packet is re-applied by a NEW order after the library delivery (CTO msg 9075). -->

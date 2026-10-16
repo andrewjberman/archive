@@ -24,7 +24,8 @@ IR = "infra/aws/lambda/investor-reporting/"
 MAPS = "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/"
 POOL_SRC = "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r34/swap_pool.json"
 CHANGED = sorted(["SHA256SUMS", "reports/resident_bindings.json", "intake/portfolio.py", "intake/uploads.py", "ops/status.py",
-                  "reports/resident_installed.py", "ycharts/research/opal_producer.py", "ycharts/session/resident_session.py"])
+                  "reports/resident_installed.py", "ycharts/research/opal_producer.py", "ycharts/session/resident_session.py",
+                  "ycharts/generate/durable_job.py", "ycharts/generate/resident_worker.py"])
 ADDED = sorted(["intake/yfinance_check.py", "ycharts/research/swap_pass.py", "ycharts/research/swap_pool.json", "ycharts/research/yahoo_history_days.py"])
 FROM_MAP = {"ycharts/research/overview_map.json": MAPS + "overview_map.json", "ycharts/research/comparison_map.json": MAPS + "comparison_map.json",
             "ycharts/research/multi_map.json": MAPS + "multi_map.json", "lib/trading_calendar.py": "lib/trading_calendar.py",

@@ -1,0 +1,19 @@
+NFRA_OPLGTW.TO-OG-ac-2 -- session log -- 0.9.0_WK_NFRA_OPLGTW~113 -- worktree C:/tmp/wk-oplgtw-113, branch wk-NFRA_OPLGTW-113, base 869beac0fa (OG-ac-1 merged at a69cf430b1)
+
+1. Re-ground. Branch wk-NFRA_OPLGTW-113; TREE-OK. The worker face (sections 1 to 5) was read; the record face was not used.
+
+2. The spec (W/ETF_CLASS_SPEC.md, sections Tool and Refused) and the census (W/ETF_CLASS_CENSUS.json) were read as the order names. The catalog row opal_data_mdpf_gold_ai_classified_securities carries no table name, so the module holds TABLE = etf-classifications as a constant citing the contract (surprise NFRA_OPLGTW-Z-W113-S6).
+
+3. Module app/mdpf_classification.py: one get_item by the hash key with a projection of the row's fields; no scan, query, batch or write in the module source; refusals before any read (admit_scope for the principal, then the ticker and as_of arms, each audited once as a denied row); the envelope with as_of from last_updated, the lag in trading days, the model fields only on model rows, the classified_by and identifier_namespace defaults; a row over 50 KB answers harvest_over_cap.
+
+4. The low-level client (internal_role.dynamodb_client) takes typed key values, so the key is {ticker: {S: ...}} (surprise NFRA_OPLGTW-Z-W113-S7).
+
+5. Tests: tests/test_og_ac2.py, six named tests (ac01 to ac06) on a recording fake client that answers get_item only; 6 passed. Commit 8a5b7be26d (module, tests, probe).
+
+6. Probe (W/probe_ac2.py), against the real table with box credentials and the Opal stand-in: the first ticker in SPY, AGG, QQQ with a row answered (one get_item per tried ticker, at most three); the non-Opal call made zero reads; ZZNOSUCHKEY9 answered with absent_reason. No row content printed.
+
+7. Surprise rows S6 and S7 committed as d4abc0bd5f.
+
+8. AC1 (ac2.AC1.sh): pytest rc=0, 6 of 6, RESULT: PASS, exit=0. AC2 (ac2.AC2.sh): module tool defined 1 of 1, get_item calls 1, scan/query/batch/write calls 0; probe real row answered 1 of 1; absent ticker answered with absent_reason 1 of 1; RESULT: PASS, exit=0.
+
+9. Registrations for the issuer, not made here: the app/tools.py import and registration of mdpf_get_security_classification; app/data_entitlement.py per the family pattern; the pinned tool count re-pinned at the merge. The grant (GetItem on the table ARN) is the separate grant order with its three halves.
