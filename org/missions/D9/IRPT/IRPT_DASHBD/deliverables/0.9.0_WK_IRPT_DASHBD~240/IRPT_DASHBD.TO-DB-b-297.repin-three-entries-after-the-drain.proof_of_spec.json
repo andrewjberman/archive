@@ -31,7 +31,7 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~240/RD_REPIN_THREE_FACTS_R149.json",
       "kind": "doc",
-      "commit_or_etag": "c8f0cc9311",
+      "commit_or_etag": "5d0a63f562",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Facts record: the three entry names, the re-pinned paths per entry, the unchanged-member counts (10, 13, 11), the BUILD_ONLY base64 sha256 of each entry at the committed source map, and one paragraph of words. The checker's recount is not reached (AC2 and AC3 refuse on the import clause), so the record is the worker's measurement, not a checker-confirmed one.",
       "artifact_covered_by": [
@@ -55,10 +55,9 @@
       "criterion_verbatim": "DB165-1-AC2 -- the BUILD_ONLY package of each of the three entries holds exactly the entry's files with every member's bytes equal to its source, and its third-party imports are pyarrow plus the runtime's (the layer holds it). Base: FAIL.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p165_repin_three.py\" . DB165-1-AC2",
-      "output_evidence": "FAIL: the bundle's third-party imports (any statement, besides boto3/botocore) must be exactly pyarrow, read ['pandas', 'pyarrow']\nDB165-1-AC2 FAIL",
-      "denominator": "1 of 3 entries clears the package and import path in run order (irpt-cot-reporting-publish-lambda); irpt-49f-reporting-gold-lambda is refused on its third-party set (pandas and pyarrow read, only pyarrow admitted); irpt-cot-account-return-daily-lambda is not reached; the worker's own BUILD_ONLY runs exited 0 for 3 of 3 entries (measurement outside the checker)",
-      "status": "FAIL",
-      "status_reason": "The import clause admits only pyarrow, but the 49F bundle also imports pandas, which the shared layer irpt-performance-native-layer holds (a GET, version 1, holds python/pandas/__init__.py). Filed as IRPT_DASHBD-D2-W240-S2; the criterion cannot pass as written.",
+      "output_evidence": "OK: the build-only package of each of the three entries equals its sources byte for byte and imports only pyarrow plus the runtime's\nDB165-1-AC2 PASS",
+      "denominator": "3 of 3 entries: build-only package equals its sources byte for byte; third-party imports are pyarrow and pandas only (boto3 and botocore excluded), both held by irpt-performance-native-layer; the checker run uses the issuer's fixed p165 (file copy f86d63befd carried by 5eaa003c1a)",
+      "status": "PASS",
       "expect": "DB165-1-AC2 PASS"
     },
     {
@@ -66,10 +65,9 @@
       "criterion_verbatim": "DB165-1-AC3 -- the facts record equals the checker's recount (the re-pinned paths per entry, the unchanged counts, the three build-only hashes) and the worker's commits change only the source map, the folder, the investigation file and task-order files. Base: FAIL.",
       "method": "command",
       "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p165_repin_three.py\" . DB165-1-AC3",
-      "output_evidence": "FAIL: the bundle's third-party imports (any statement, besides boto3/botocore) must be exactly pyarrow, read ['pandas', 'pyarrow']\nDB165-1-AC3 FAIL",
-      "denominator": "0 of 5 facts-record keys checked by the checker (the recount halts at the import clause); 0 of 3 build-only hashes recounted by the checker; the worker's commits (ebe2302322, 376689568e, c8f0cc9311) touch the source map, the folder and the investigation file, all inside the grant, by the worker's own read",
-      "status": "FAIL",
-      "status_reason": "The checker halts at the import clause (IRPT_DASHBD-D2-W240-S2) before check_facts and the grant check. The recount was not reached.",
+      "output_evidence": "OK: the facts record equals the recount (re-pinned members, unchanged counts, the three build-only hashes); 4 files changed, all in the grant\nDB165-1-AC3 PASS",
+      "denominator": "5 of 5 facts-record keys equal the recount; 3 of 3 build-only hashes equal the checker's own rebuild; 14 re-pinned paths (2 + 8 + 4) and unchanged counts (10, 13, 11) equal the recount; 4 of 4 worker-changed files in the grant (source map, folder, investigation file)",
+      "status": "PASS",
       "expect": "DB165-1-AC3 PASS"
     }
   ],
@@ -81,8 +79,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1, AC2 and AC3 run twice each on the committed tree (first at f4f95492d7 with the pre-fix checker, then at c8f0cc9311 with the fixed checker from f86d63befd); AC2 and AC3 refuse on the same import line both times.",
-      "observed": "At c8f0cc9311: DB165-1-AC1 PASS; DB165-1-AC2 and DB165-1-AC3 each print FAIL: the bundle's third-party imports (any statement, besides boto3/botocore) must be exactly pyarrow, read ['pandas', 'pyarrow']",
+      "method": "AC1, AC2 and AC3 run twice each on the committed tree (first at c8f0cc9311 with the fixed p165 carried at f86d63befd, then at 5d0a63f562 with the import fix carried at 5eaa003c1a); the first run's AC2 and AC3 refusal was the import clause, cleared by 5eaa003c1a.",
+      "observed": "At 5d0a63f562 under the fixed checker: DB165-1-AC1, DB165-1-AC2 and DB165-1-AC3 each print PASS on the repeat, with the same deciding lines as the first run.",
       "status": "STABLE"
     }
   },
@@ -101,8 +99,8 @@
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W240-S1: the p165 form clause refuses the unchanged 49F member whose packaged_as differs from its repo_path (cleared by the issuer's fixed checker, f86d63befd; AC1 now PASS)",
-    "IRPT_DASHBD-D2-W240-S2: the p165 import clause admits only pyarrow, but the 49F bundle also imports pandas, which the shared layer holds, so AC2 and AC3 fail as written"
+    "IRPT_DASHBD-D2-W240-S1: the p165 form clause refuses the unchanged 49F member whose packaged_as differs from its repo_path (a checker defect, cleared by the issuer's fixed checker carried at f86d63befd)",
+    "IRPT_DASHBD-D2-W240-S2: the p165 import clause admits only pyarrow, but the 49F bundle also imports pandas, which the shared layer holds (a checker defect, cleared by the issuer's fixed checker carried at 5eaa003c1a)"
   ],
   "compiler_tools": [
     {
