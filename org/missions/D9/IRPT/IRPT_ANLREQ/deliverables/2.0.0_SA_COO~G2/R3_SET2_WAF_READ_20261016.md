@@ -2,6 +2,13 @@
 
 Asked by `2.0.0_SA_COO~Y2` (msg 9406) after AQ2's record `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/A_SET2_JOURNAL_R3.txt`. READ ONLY: code at HEAD and that record; no host, no Yahoo, no YCharts call was made. Claim words: MEASURED = a line in AQ2's record; CODE = read in the repository at HEAD; INFERRED = said so; NOT KNOWN = nothing read tells it.
 
+
+## ERRATUM (issuer, 2026-10-16 ~14:1xZ) -- READ THIS FIRST: the door's lookup is SESSIONLESS
+
+Sections 1 and 3 below say the lookup runs "through the resident's stored YCharts session" and infer a stale session token. That is WRONG. CODE (re-read after the CTO's decision on this file): `ResidentSession.template_resolver` builds the lookup with `acquire_sessionless` (`ycharts/session/resident_session.py` lines 120-131; CTO rulings batch 72 item 12): "a fenced transport with NO session: no secret read, no cookie, nothing to persist". It is a plain `urllib` request with a Windows user-agent and an empty cookie jar (`Transport.from_bundle` with `cookies: []`); `SessionlessTransport` REFUSES a bundle that carries a cookie (`operation_lease.py` 298-317). The WAF action is read from the reply header `x-amzn-waf-action` (`generate/transport.py` line 502).
+
+What this changes: there is no session to refresh for this hop, so "WAF on the resolve hop triggers the session-refresh path" cannot clear it; the stale-token reading in section 3 is withdrawn. What stays: the provider is YCharts; the checker and the advisory run after the lookup answers; ZQXWVK's four receives were each challenged; four READY resolves before it answered. What the challenge depends on is the WAF's view of this host or request (source address, request rate, client fingerprint): NOT KNOWN from anything read, intermittent on the evidence (SET 1: five clean lookups). Section 4 step 3 (one lookup now) must be ONE cookieless lookup made the door's own way; a lookup through the stored session would test a different path.
+
 ## 1. Which provider returned the WAF challenge
 
 - **YCharts.** CODE: the door's first step for every symbol is the provider lookup `GET /securities/securities_info?securities=<symbols>` through the resident's stored YCharts session (`intake/resolution_broker.py` lines 15 and 102, `BrokerSecurityCheck._lookup`). The checker (yfinance, Yahoo) and the advisory (Kimi) run only AFTER that lookup answers, so neither could have returned a WAF challenge here.
