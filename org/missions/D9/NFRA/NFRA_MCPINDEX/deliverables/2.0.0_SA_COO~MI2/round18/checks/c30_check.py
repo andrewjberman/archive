@@ -7,7 +7,7 @@ CONTRACT C-GROUP item 1 `bucket` on the RESEARCH row set. Run from the repo root
   python c30_check.py tests    AC2: the new test file exists, passes, and collects at least 5 tests
   python c30_check.py bucket   DRAIN (the issuer's, on the catalog emitted with the ASSETS emitter MX-c-21 and its group map): every RESEARCH-set row carries a
                                `bucket` in the C-GROUP spelling (an S3 bucket name `opal-data-*`, or the store name `dynamodb`); the 10 dynamodb rows say `dynamodb`;
-                               the 5 portal_datasets rows say `opal-data-portal-v2`; every other RESEARCH row keeps its base value; every row outside the set differs
+                               the 5 portal_datasets rows say `opal-data-portal-v2`; every other RESEARCH row keeps its base value; no RESEARCH row is still `inferred` (the curated tags replace them); every row outside the set differs
                                from BASE_REF only in the keys the ASSETS cells add (bucket, vendor, firm, nl_tags, nl_tags_basis, read_tool, tools, gap_owner)
 
 C30_CATALOG overrides the emitted catalog path, C30_ENTRIES the row folder (planted arms). Exit 0 PASS, 1 FAIL, 9 no run.
@@ -87,12 +87,14 @@ def bucket():
           % (len(graded), sum(1 for k in graded if k[0] == "harvest_datasets"), sum(1 for k in graded if k[0] == "portal_datasets"),
              sum(1 for k in graded if k[0] == "silver_datasets"), len(outside)))
     other_fields = [k[1] for k, r in graded.items() if k in bold and
-                    sorted(f for f in set(r) | set(bold[k]) if f != "bucket" and r.get(f) != bold[k].get(f))]
+                    sorted(f for f in set(r) | set(bold[k]) if f not in ("bucket", "nl_tags", "nl_tags_basis") and r.get(f) != bold[k].get(f))]
+    still_inferred = [k[1] for k, r in graded.items() if r.get("nl_tags_basis") == "inferred"]
     res = [("every research-set row's bucket is an opal-data-* name or a store name (%d do not)" % len(bad_spelling), not bad_spelling),
            ("the 10 dynamodb rows say dynamodb (%d do not)" % len(dyn), not dyn and sum(1 for k in graded if k[1].startswith("dynamodb_")) == 10),
            ("the 5 portal_datasets rows say opal-data-portal-v2 (%d do not)" % len(port), not port and sum(1 for k in graded if k[0] == "portal_datasets") == 5),
            ("every other research-set row keeps its base bucket (%d moved)" % len(moved), not moved),
-           ("the research rows differ from base only in `bucket` (%d rows differ elsewhere)" % len(other_fields), not other_fields),
+           ("the research rows differ from base only in bucket and the curated tags (%d rows differ elsewhere)" % len(other_fields), not other_fields),
+           ("no research-set row still carries inferred tags (%d do)" % len(still_inferred), not still_inferred),
            ("every row outside the set differs from %s only in the ASSETS cells' keys (%d differ otherwise)" % (BASE_REF, len(drift)), not drift),
            ("the top-level sections other than the three row sections and the tool index (the ASSETS issuer's) are unchanged (%s)" % ",".join(top_diff), not top_diff)]
     return report(res)

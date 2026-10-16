@@ -1,0 +1,36 @@
+{
+  "base_commit": "40850a4f7d11f37f1ff90b933bd99ec1972cb1c3",
+  "changed_paths": [
+    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "data/assets/scripts/gold/investor_reporting/tests/test_absent_at_source_smartx_evidence.py"
+  ],
+  "negative_tests": [
+    "smartx_present_account_absent_two_days_is_exempt_with_evidence",
+    "account_absent_one_day_is_not_exempt_even_with_a_smartx_row",
+    "account_with_positions_on_either_day_is_not_exempt_with_a_smartx_row",
+    "an_account_the_obtained_map_does_not_show_gets_evidence_smartx_map_absent",
+    "a_failed_smartx_read_gives_evidence_unread_with_a_reason_and_changes_no_decision",
+    "a_missing_or_empty_map_gives_evidence_unread_with_a_reason",
+    "the_unread_reason_is_a_category_with_no_identifier",
+    "every_exempted_account_carries_exactly_one_of_the_three_evidence_values",
+    "a_firm_with_no_smartx_reader_has_a_byte_unchanged_manifest",
+    "the_evidence_id_form_matches_the_custody_id_form",
+    "the_floor_and_the_two_day_threshold_are_unchanged"
+  ],
+  "tests_total": 12,
+  "tests_passed": 12,
+  "mutant_tests_failed": 11,
+  "notes": [
+    "Integration: data/assets/scripts/gold/investor_reporting/holdings_snapshot.py carries three ABSENT-AT-SOURCE-D spans. Span 1 holds the reader (_absent_smartx_map_ids, _absent_add_smartx_evidence); its header comment now names the third value. Span 2 is the one call inside _absent_provider. Span 3 is the listing hook in _absent_scope_listing, which gained the elif that writes smartx_map_absent when smartx_map_ids is present and the account is not in it.",
+    "Byte check: with the three spans removed in memory, holdings_snapshot.py equals the file at e2700915d2 character for character (216409 characters each). Measured by the scratch script .scratch/ib609_mutant_run.py, which is not committed.",
+    "Tests: test_account_not_in_smartx_is_exempt_without_an_evidence_key is replaced by two tests (smartx_map_absent and every-exempted-account). A helper exempted_entries builds two exempted entries from base code only. The other eleven test functions keep names and bodies; no assertion of any other file changed. The regression files pass unchanged: 80 passed across the six files, 12 of them in the new file.",
+    "Mutant run: the three spans removed in memory, the new test file run: 11 failed, 1 passed, 0 collection or import errors. The one pass is the one-day refusal test, which reads no evidence key. Sparse directories added locally, never committed: infra/aws/lambda/investor-reporting, data/mdpf/scripts/gold, data/mdpf/scripts/silver, data/assets/scripts/silver, infra/aws/lambda/v2_portal/_shared, docs/contracts/investor-reporting. data/firm_registry.json was not added; the six-file run passed without it.",
+    "Not done: nothing run against AWS, no sign-in, no producer run, no served prefix, no publication. The in-memory bucket holds synthetic ids only; no real account id or security identifier appears in any tracked file."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "rows_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}

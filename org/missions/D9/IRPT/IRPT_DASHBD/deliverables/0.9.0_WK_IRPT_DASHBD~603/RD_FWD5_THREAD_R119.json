@@ -1,0 +1,90 @@
+{
+  "as_of": "2026-10-15",
+  "gold_table": {
+    "applied": false,
+    "words": "No contract for account_transaction exists under org/standards: a content search of the 121 files of that folder returns 0 hits, and the folder holds 11 IRPT_DASHBD contracts (account_activity_daily, account_class_daily, account_dim, account_lot_realized, account_lot_unrealized_daily, account_return_daily, client_summary, dim_return_method, household_return_daily, performance_report, series), none for this table. No builder writes it: the account producers under data/assets/scripts/gold/irpt_reporting are account_activity_lots, account_class_daily, account_return_daily and household_return_daily, and none names an account_transaction output (git grep at HEAD). The PRD C-SHAPE row (line 234) names the table, and FIRM_READINESS (deliverables 0.9.0_WK_IRPT_DASHBD~155, line 136) records it as having no gold prefix and no established source. Whether any object of the table sits in the bucket is cloud-only and was not read (no AWS call); a read-only listing of the gold account_transaction prefix settles it, owner 2.0.0_SA_COO~D2 (gold and contract owner).",
+    "claim": "absent"
+  },
+  "producer": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+    "line": 336,
+    "words": "The class producer reads the custodian transaction partitions through the declared transactions_prefix of the 49 Financial custody entry in sources.json at this line. It writes account_class_daily, not account_transaction: no producer in the repo writes account_transaction, so the producer slot for the table is empty.",
+    "claim": "measured"
+  },
+  "series_contract": {
+    "carries_class_keys": false,
+    "words": "No served shape the repo declares carries transactions: IRPT_DASHBD_SERIES_CONTRACT.json and IRPT_DASHBD_CLIENT_SUMMARY_CONTRACT.json hold 0 transaction tokens (git grep at HEAD, exit 1), and the portal readers seriesContract.ts and reportingRead.ts hold 0 (grep). The live platinum bytes in the bucket were not read (no AWS call), so the false flag rests on the declared shapes only.",
+    "claim": "inferred"
+  },
+  "served_path": {
+    "file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts",
+    "line": 4,
+    "words": "The smallest existing route to extend is the reporting read route GET reporting/{account_id}/{which}, whose which set is manifest or series today. A transactions value in that set is the smallest serve change. The API client row for the route is portal/src/api/endpoints/investor-reporting.ts line 258 (status ROUTED_ELSEWHERE, wired by the reporting-read Terraform root). The client holds no transactions operation (0 transaction tokens in that file). The reader's header names the route's owner as 2.0.0_SA_COO~P. The publisher of the platinum series and manifest is not named in the files read.",
+    "claim": "measured"
+  },
+  "portal_reuse": {
+    "file": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx",
+    "line": 64,
+    "words": "Best existing table filter and sort component: the Securities list keeps a sort and filter key on each row (sleeveKey, with a NOT_SUPPLIED option) and its pure fold and filter helpers in the same file can be reused unchanged for the filter and sort logic. Not reusable as is: no export and no virtualised list exist in the InvestorReporting folder (the export folder holds the report-document export, not a row export). AccountFilter.tsx and the AccountsTable.tsx filter at its line 28 are the second and third reuse.",
+    "claim": "measured"
+  },
+  "proposed_shape": {
+    "words": "One paged platinum file per account and window, read through the reporting read route with which set to transactions. Each file carries a page envelope (account reference, window start and end, page, page size, total rows, total pages, as of) and rows in Opal's own words. The page is fetched once per window change; filter (action, type, symbol), sort on any column and export act on the rows the page already holds, so no server call happens per keystroke. Page size bounds the rows the table mounts, and total rows lets the table show the count and the pager without reading the whole window, which is what keeps a long window scrolling without a stall. The action and type values are Opal closed enums named only in the account_transaction row of the reporting dashboard backend brief in docs/briefs (its line 78); no file read defines them (see IRPT_DASHBD-D2-W603-S2).",
+    "fields": ["account_ref", "window_start", "window_end", "page", "page_size", "total_rows", "total_pages", "as_of", "date", "asset", "action", "type", "symbol", "units", "price", "amount", "custodian", "flow_class", "coverage"]
+  },
+  "hops": [
+    {
+      "hop": 1,
+      "what": "The custodian transactions land in the custody silver and bronze stores: the 49 Financial silver fact_trn named by the custody entry's transactions_prefix in sources.json, Cottonwood's Black Diamond silver fact_transactions read by adapters/cottonwood_bd_account_return_daily.py, and Inflection's transaction history pull (data/inf/manual_api/pull_inflection_transactions_rest.py). The custodian's own codes (tr_cd, sb_cd, tran_srcde; Transaction Type words; Orion type ids) are read here.",
+      "owner": "UNOWNED",
+      "risk": "WORLD",
+      "exists_today": true
+    },
+    {
+      "hop": 2,
+      "what": "A contract file for account_transaction under org/standards carrying Opal's action, txn_type and flow_class vocabulary and the eight-table C-SHAPE columns, and a builder that normalises the custodian rows into Opal's words (the 49 Financial fact_trn through the classification table, the Cottonwood and Inflection rows through their adapters).",
+      "owner": "2.0.0_SA_COO~D2",
+      "risk": "LOCAL",
+      "exists_today": false
+    },
+    {
+      "hop": 3,
+      "what": "Apply the builder: write the gold account_transaction date partitions at the address() path for each firm, with the coverage vocabulary, under a scheduled producer and a readiness check.",
+      "owner": "0.7.0_AE_CloudOps~DB2",
+      "risk": "SERVED",
+      "exists_today": false
+    },
+    {
+      "hop": 4,
+      "what": "A paged platinum publisher writing one file per account and window (page envelope and rows), and the reporting read route accepting a transactions value in its which set beside manifest and series.",
+      "owner": "2.0.0_SA_COO~P",
+      "risk": "WORLD",
+      "exists_today": false
+    },
+    {
+      "hop": 5,
+      "what": "The portal client: a transactions value on the reporting read path in dashboard/reportingRead.ts and a typed route row beside reporting-read in portal/src/api/endpoints/investor-reporting.ts.",
+      "owner": "2.0.0_SA_COO~F2",
+      "risk": "LOCAL",
+      "exists_today": false
+    },
+    {
+      "hop": 6,
+      "what": "The portal transactions section: browse by window, filter by action, type and symbol, sort any column, export the held rows to a file, reusing the SecurityList filter and sort keys; the export writer and the paged table are new.",
+      "owner": "2.0.0_SA_COO~F2",
+      "risk": "LOCAL",
+      "exists_today": false
+    }
+  ],
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
