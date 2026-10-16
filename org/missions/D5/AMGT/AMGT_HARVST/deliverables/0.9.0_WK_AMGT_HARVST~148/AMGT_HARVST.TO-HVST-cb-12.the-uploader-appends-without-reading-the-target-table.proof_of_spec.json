@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cb-12.the-uploader-appends-without-reading-the-target-table",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cb-12.the-uploader-appends-without-reading-the-target-table.md",
+    "group": "OTHER",
+    "vintage_commit": "18b728a307"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "18b728a307",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cb-12.the-uploader-appends-without-reading-the-target-table.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~148",
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~148/session.txt",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/store.py",
+      "kind": "script",
+      "commit_or_etag": "a14134ea40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only: silver_append gains known= (opt-in, S3 not read when a mapping is given) and returns written_hashes in both modes. Not deployed; no publisher, S3 or box touched.",
+      "introduces": [
+        "known=None",
+        "written_hashes"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "a14134ea40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only: _silver_append_retrying_object_name gains known_db= (loads once, notes after a returned call, returns the three keys); HarvestUploader's article and listing_hit call sites pass known_db=self.db. Not deployed.",
+      "introduces": [
+        "known_db=None"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/silver_known.py",
+      "kind": "script",
+      "commit_or_etag": "a14134ea40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New stdlib module: ensure, encode_key, decode_key, load, note over the silver_known table in the progress database. Not deployed.",
+      "introduces": [
+        "def load(db, source, table)",
+        "def note(db, source, table, written_hashes)"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_cb12_uploader_known_hashes.py",
+      "kind": "test",
+      "commit_or_etag": "a14134ea40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 passed: known-mode writes and skips, default path reads silver_latest once, silver_known round trip with the datetime limit pinned, the wrapper records then writes nothing on a repeat, nothing recorded before a put succeeds, and the note-disabled mutant. No network, no S3.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1560f4c800",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows AMGT_HARVST-D1-W148-S1, S2 and S3 appended by bytes (68 insertions, 0 deletions); the fenced array parses with 432 rows.",
+      "introduces": [
+        "AMGT_HARVST-D1-W148-S1",
+        "AMGT_HARVST-D1-W148-S2",
+        "AMGT_HARVST-D1-W148-S3"
+      ],
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_cb12_uploader_known_hashes.py -q -p no:cacheprovider --color=no expects (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_cb12_uploader_known_hashes.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^\\d+ passed in",
+      "output_evidence": "9 passed in 0.49s (rc 0; run under timeout 120; re-run: 9 passed in 0.50s, rc 0)",
+      "denominator": "9 of 9 tests in test_cb12_uploader_known_hashes.py, 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/research/harvest/tests/test_store.py lib/research/harvest/tests/test_o3_silver_tie_break.py lib/research/harvest/test_at4_silver_union_keys.py lib/opal_data_harvest/test_ai5_batched_silver_append.py lib/opal_data_harvest/test_at1_batched_listing_upload.py lib/opal_data_harvest/test_eg1_silver_cache.py lib/opal_data_harvest/test_retrieval_provenance.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_au1_upload_timeout.py -q -p no:cacheprovider --color=no expects (?m)^110 passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_store.py lib/research/harvest/tests/test_o3_silver_tie_break.py lib/research/harvest/test_at4_silver_union_keys.py lib/opal_data_harvest/test_ai5_batched_silver_append.py lib/opal_data_harvest/test_at1_batched_listing_upload.py lib/opal_data_harvest/test_eg1_silver_cache.py lib/opal_data_harvest/test_retrieval_provenance.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_au1_upload_timeout.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^110 passed in",
+      "output_evidence": "10 failed, 100 passed in 7.16s (rc 1). Failing: test_ai5_batched_silver_append.py::test_batched_reads_silver_prefix_once_per_source, ::test_mutant_per_row_grouping_fails_the_once_per_source_check, ::test_type_conflict_row_does_not_strand_the_batch, ::test_cross_row_type_conflict_is_isolated_locally; test_at1_batched_listing_upload.py::test_silver_prefix_read_once_per_source_new_n_old, ::test_untableable_page_is_isolated_and_pending_while_the_rest_upload, ::test_cross_page_type_conflict_is_isolated_locally, ::test_no_column_the_per_page_path_kept_is_lost_across_pages, ::test_failing_append_pends_the_batch_with_no_per_page_retry, ::test_mutant_per_group_appends_fails_the_once_per_source_check. Each stops at its first read-count assertion (assert [] == ['seeking-alpha']).",
+      "denominator": "100 of 110 tests in the 10-file set pass; 10 fail, all on the once-per-source silver prefix read count (base: 110 of 110 passed, 5.64s)",
+      "status": "FAIL",
+      "status_reason": "The cell removes the S3 silver read from HarvestUploader by design, so these 10 tests pin behaviour the cell retires; they sit outside <paths> and were not edited. The 110-passed count cannot hold with the cell as written. Filed as surprise AMGT_HARVST-D1-W148-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~W1)."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Updating the 10 read-count tests in test_ai5_batched_silver_append.py and test_at1_batched_listing_upload.py to the known-mode behaviour",
+      "reason": "Outside <paths>; the write grant does not reach them. Filed as surprise AMGT_HARVST-D1-W148-S1 for the issuer's ruling."
+    },
+    {
+      "item": "Task-order status flip to complete",
+      "reason": "AC2 is FAIL, so the order stays open; the issuer flips status. The file is outside <paths>."
+    },
+    {
+      "item": "Verification that direct silver_append callers' results reach a JSON writer",
+      "reason": "Not verified within the cell's scope; filed as surprise AMGT_HARVST-D1-W148-S3."
+    },
+    {
+      "item": "Any run against a publisher, S3, Secrets Manager, a box's progress.sqlite3, or a browser",
+      "reason": "Order section 2 forbids it; the cell is local code and fakes."
+    },
+    {
+      "item": "Read of org/surprise_channel/schemas/investigation_item.schema.json from the worktree",
+      "reason": "The sparse worktree does not carry org/surprise_channel/; the schema was read from HEAD with git show. A read, not a rebuild."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W148-S1: AC2 expects 110 passed; 10 tests pin the once-per-source silver prefix read that known_db mode removes by design.",
+    "AMGT_HARVST-D1-W148-S2: the wrapper returns the three keys, not written_hashes (a date key is not JSON in the run receipt); a deviation from 'return result'.",
+    "AMGT_HARVST-D1-W148-S3: direct silver_append callers now receive written_hashes; their JSON paths are unverified."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~148 <0.9.0_WK_AMGT_HARVST~148@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "committed a14134ea40 (code, 4 files, 296 insertions, 10 deletions) and 1560f4c800 (surprise rows, 68 insertions)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "silver_known.note monkeypatched to a no-op; the wrapper's second call with the same rows must then write them again (test_mutant_note_disabled_makes_the_second_call_write_again).",
+      "expected": "the mutant test PASSES: the second call reports written_rows 2 and makes a second put",
+      "observed": "9 passed; the mutant test asserts written_rows == 2 and two put_object calls, and passes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times (once before the commit, twice after)",
+      "observed": "9 passed in each run, rc 0",
+      "status": "STABLE"
+    }
+  }
+}
