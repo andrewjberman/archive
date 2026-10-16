@@ -31,6 +31,9 @@ COTTONWOOD_REC = D + "0.9.0_WK_IRPT_DASHBD~1402/FWD5_WORDS_COTTONWOOD_R128.json"
 READS = D + "0.9.0_WK_IRPT_DASHBD~1501/RD_READS_R129.json"
 TRANSFER_OUT_PAIR = "Transfer Out | Transfer Out"
 CW_TRANSFER_OUT_RULING = "EXTERNAL_OUT"  # the CTO's round-128 ruling (msg 9175), the one change to the ratified record
+CW_TRANSFER_OUT_REASON = ("Transfer Out type and sub type. By the CTO's round-128 ruling (msg 9175) the 25 lines whose Action is None derive "
+                          "their action word from the pair, and the pair's class for lines marked None is EXTERNAL_OUT; no line is dropped "
+                          "or left blank.")
 CW_ACTION_DERIVATION = ("A Cottonwood line whose vendor Action is None derives its action word from its (Transaction Type, Transaction Sub "
                         "Type) pair through the type table (type_action), the same rule as a 49 Financial code with no action field.")
 CENSUS124 = D + "2.0.0_SA_COO~F2/R124_LIVE_SILVER_CENSUS_49F.json"
@@ -285,7 +288,8 @@ def main():
     # Cottonwood's ratified words (round 128, msg 9175), copied by script; the one change is the Transfer Out pair's flow class.
     cw_type_pairs = [{"source_value": m["source_value"], "opal_type": m["opal_type"],
                       "flow_class_none": (CW_TRANSFER_OUT_RULING if m["source_value"] == TRANSFER_OUT_PAIR else m["flow_class_none"]),
-                      "reason": m["reason"]} for m in cw["mapping"] if m["field"] == "type_pair"]
+                      "reason": (CW_TRANSFER_OUT_REASON if m["source_value"] == TRANSFER_OUT_PAIR else m["reason"])}
+                     for m in cw["mapping"] if m["field"] == "type_pair"]
     cw_actions = [{"source_value": m["source_value"], "opal_action": m["opal_action"], "reason": m["reason"]}
                   for m in cw["mapping"] if m["field"] == "action"]
     assert len(cw_type_pairs) == 33 and len(cw_actions) == 87, (len(cw_type_pairs), len(cw_actions))
