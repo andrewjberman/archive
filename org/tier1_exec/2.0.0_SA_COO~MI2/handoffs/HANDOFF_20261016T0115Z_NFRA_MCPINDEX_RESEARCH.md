@@ -33,3 +33,7 @@ Candidates for (b) from the classification reasons: hand-maintained configs, raw
 ## Instruments
 
 All checks are in `org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI2/round18/checks/`: `c30.AC1/AC2/DRAIN.sh`, `c31.AC1/AC2/AC3.sh`, `ct.{h1,h2,h3,p1}.sh`, `plant_c30.py` (8 of 8), `plant_ct.py` (12 of 12). Decomposition: `decompositions/NFRA_MCPINDEX_DECOMP.round18-RESEARCH.md`.
+
+## Addendum ~01:3xZ -- worker ~56 state at the stop
+
+Worker ~56 was stopped by the issuer at the wind-down. Its branch `wk-NFRA_MCPINDEX-56` had one commit (fdf950da08, the generator and tests). Its last message: `c31.AC3` PASS (18 tests); `c31.AC2` FAILED on two arms, which it recorded as FAIL; it had not yet filed its surprise rows or the proof instance. Do not merge it as is: read the branch, run `c31.AC1/2/3.sh` there, find why AC2's two arms fail (likely the rows the generator links against the future list versus the committed rows, or a link already given by a contract proposal), then re-seat slot 56 on the same order naming fdf950da08 as inherited state.
