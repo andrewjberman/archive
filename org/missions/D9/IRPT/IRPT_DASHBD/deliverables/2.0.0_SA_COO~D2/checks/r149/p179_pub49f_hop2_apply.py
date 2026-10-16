@@ -133,7 +133,7 @@ def check_tail(rec):
 
 
 def digit_runs(rec):
-    skip = {"zip_sha256", "zip_sha256_b64", "content_sha256", "landed_version_id", "request_id", "request_ids", "policy", "function_code_sha256", "code_sha256", "artifact_version_id", "invoked_utc", "apply_finished_utc", "packet_blob", "packet_sha256"}
+    skip = {"zip_sha256", "zip_sha256_b64", "content_sha256", "landed_version_id", "request_id", "request_ids", "policy", "function_code_sha256", "code_sha256", "artifact_version_id", "invoked_utc", "apply_finished_utc", "packet_blob", "packet_sha256", "ledger_entry", "layer_arn"} | set(SIDS)  # the ledger slug carries a date; a policy hash sits under its statement id
     out = []
 
     def walk(x, key=""):
