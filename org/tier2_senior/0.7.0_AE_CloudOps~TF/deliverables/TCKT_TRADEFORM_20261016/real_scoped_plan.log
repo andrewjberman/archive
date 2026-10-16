@@ -1,0 +1,558 @@
+data.aws_iam_user.restricted_console: Reading...
+aws_s3_bucket.lgic_firm["cottonwood"]: Refreshing state... [id=opal-data-cottonwood]
+aws_s3_bucket.lgic_firm["inflection"]: Refreshing state... [id=opal-data-inflection]
+aws_s3_bucket.opal_data_49financial: Refreshing state... [id=opal-data-49financial]
+data.aws_iam_user.restricted_console: Read complete after 0s [id=AIDAUR7FNW6PC7P64KCTW]
+aws_s3_bucket_public_access_block.lgic_firm["inflection"]: Refreshing state... [id=opal-data-inflection]
+aws_s3_bucket_public_access_block.lgic_firm["cottonwood"]: Refreshing state... [id=opal-data-cottonwood]
+aws_s3_bucket_public_access_block.opal_data_49financial: Refreshing state... [id=opal-data-49financial]
+aws_s3_bucket_policy.lgic_firm["inflection"]: Refreshing state... [id=opal-data-inflection]
+aws_s3_bucket_policy.lgic_firm["cottonwood"]: Refreshing state... [id=opal-data-cottonwood]
+aws_s3_bucket_policy.opal_data_49financial: Refreshing state... [id=opal-data-49financial]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_s3_bucket_cors_configuration.ticket_trade_form["opal-data-49financial"] will be created
+  + resource "aws_s3_bucket_cors_configuration" "ticket_trade_form" {
+      + bucket = "opal-data-49financial"
+      + id     = (known after apply)
+
+      + cors_rule {
+          + allowed_headers = [
+              + "Content-Type",
+            ]
+          + allowed_methods = [
+              + "GET",
+              + "PUT",
+            ]
+          + allowed_origins = [
+              + "http://localhost:5174",
+              + "https://opalinvest.dev",
+              + "https://www.opalinvest.dev",
+            ]
+          + expose_headers  = [
+              + "ETag",
+            ]
+            id              = null
+          + max_age_seconds = 300
+        }
+    }
+
+  # aws_s3_bucket_cors_configuration.ticket_trade_form["opal-data-cottonwood"] will be created
+  + resource "aws_s3_bucket_cors_configuration" "ticket_trade_form" {
+      + bucket = "opal-data-cottonwood"
+      + id     = (known after apply)
+
+      + cors_rule {
+          + allowed_headers = [
+              + "Content-Type",
+            ]
+          + allowed_methods = [
+              + "GET",
+              + "PUT",
+            ]
+          + allowed_origins = [
+              + "http://localhost:5174",
+              + "https://opalinvest.dev",
+              + "https://www.opalinvest.dev",
+            ]
+          + expose_headers  = [
+              + "ETag",
+            ]
+            id              = null
+          + max_age_seconds = 300
+        }
+    }
+
+  # aws_s3_bucket_cors_configuration.ticket_trade_form["opal-data-inflection"] will be created
+  + resource "aws_s3_bucket_cors_configuration" "ticket_trade_form" {
+      + bucket = "opal-data-inflection"
+      + id     = (known after apply)
+
+      + cors_rule {
+          + allowed_headers = [
+              + "Content-Type",
+            ]
+          + allowed_methods = [
+              + "GET",
+              + "PUT",
+            ]
+          + allowed_origins = [
+              + "http://localhost:5174",
+              + "https://opalinvest.dev",
+              + "https://www.opalinvest.dev",
+            ]
+          + expose_headers  = [
+              + "ETag",
+            ]
+            id              = null
+          + max_age_seconds = 300
+        }
+    }
+
+  # aws_s3_bucket_policy.lgic_firm["cottonwood"] will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "lgic_firm" {
+        id     = "opal-data-cottonwood"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (6 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                    {
+                        Action    = [
+                            "s3:GetObject*",
+                            "s3:GetObjectVersion*",
+                            "s3:GetObjectAttributes",
+                            "s3:GetObjectTagging",
+                        ]
+                        Condition = {
+                            ArnNotLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+                                    "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+                        ]
+                        Sid       = "DenyRestrictedReadExceptReaders"
+                    },
+                    # (1 unchanged element hidden)
+                    {
+                        Action    = [
+                            "s3:PutObject*",
+                            "s3:DeleteObject*",
+                            "s3:RestoreObject",
+                        ]
+                        Condition = {
+                            ArnNotLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+                        ]
+                        Sid       = "DenyRestrictedWriteExceptBreakglass"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:PutObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-cottonwood",
+                          + "arn:aws:s3:::opal-data-cottonwood/*",
+                        ]
+                      + Sid       = "DenyScopedExemption1AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                          + "s3:PutObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-cottonwood/portal/cottonwood/state/ticket_attachments/trade-form/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption1ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/opal-ticket-api-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-cottonwood/portal/cottonwood/state/ticket_attachments/trade-form/*",
+                        ]
+                      + Sid       = "AllowScopedExemption1Objects"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_s3_bucket_policy.lgic_firm["inflection"] will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "lgic_firm" {
+        id     = "opal-data-inflection"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (7 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                    {
+                        Condition = {
+                            ArnLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        NotAction = [
+                            "s3:GetObject",
+                            "s3:ListBucket",
+                        ]
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-inflection",
+                            "arn:aws:s3:::opal-data-inflection/*",
+                        ]
+                        Sid       = "DenyScopedExemption1AnyOtherAction"
+                    },
+                    # (1 unchanged element hidden)
+                    {
+                        Action    = [
+                            "s3:ListBucket",
+                        ]
+                        Condition = {
+                            ArnLike       = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                            StringNotLike = {
+                                "s3:prefix" = [
+                                    "irpt/inflection/gold/holdings_performance_daily/*",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-inflection",
+                        ]
+                        Sid       = "DenyScopedExemption1ListingOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:PutObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-inflection",
+                          + "arn:aws:s3:::opal-data-inflection/*",
+                        ]
+                      + Sid       = "DenyScopedExemption2AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                          + "s3:PutObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-inflection/portal/inflection/state/ticket_attachments/trade-form/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption2ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-inflection/irpt/inflection/gold/holdings_performance_daily/*",
+                        ]
+                      + Sid       = "AllowScopedExemption1Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "irpt/inflection/gold/holdings_performance_daily/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-inflection",
+                        ]
+                      + Sid       = "AllowScopedExemption1Listing"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/opal-ticket-api-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-inflection/portal/inflection/state/ticket_attachments/trade-form/*",
+                        ]
+                      + Sid       = "AllowScopedExemption2Objects"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_s3_bucket_policy.opal_data_49financial will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "opal_data_49financial" {
+        id     = "opal-data-49financial"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (28 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:role/exec-summary-generator-role",
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                    {
+                        Condition = {
+                            ArnLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/lambda-edge-execution-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        NotAction = [
+                            "s3:GetObject",
+                        ]
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial",
+                            "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                        Sid       = "DenyScopedExemption1AnyOtherAction"
+                    },
+                    # (18 unchanged elements hidden)
+                    {
+                        Action    = [
+                            "s3:ListBucket",
+                        ]
+                        Condition = {
+                            ArnLike       = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/exec-summary-generator-role",
+                                ]
+                            }
+                            StringNotLike = {
+                                "s3:prefix" = [
+                                    "advi/49financial/platinum/advisors/*",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial",
+                        ]
+                        Sid       = "DenyScopedExemption9ListingOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:PutObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption10AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                          + "s3:PutObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/opal-ticket-api-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/portal/49financial/state/ticket_attachments/trade-form/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption10ObjectsOutsidePrefix"
+                    },
+                    {
+                        Action    = [
+                            "s3:GetObject",
+                        ]
+                        Effect    = "Allow"
+                        Principal = {
+                            AWS = "arn:aws:iam::313476888478:role/lambda-edge-execution-role"
+                        }
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                        Sid       = "AllowScopedExemption1Objects"
+                    },
+                    # (9 unchanged elements hidden)
+                    {
+                        Action    = [
+                            "s3:ListBucket",
+                        ]
+                        Condition = {
+                            StringLike = {
+                                "s3:prefix" = [
+                                    "advi/49financial/platinum/advisors/*",
+                                ]
+                            }
+                        }
+                        Effect    = "Allow"
+                        Principal = {
+                            AWS = "arn:aws:iam::313476888478:role/exec-summary-generator-role"
+                        }
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial",
+                        ]
+                        Sid       = "AllowScopedExemption9Listing"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/opal-ticket-api-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/portal/49financial/state/ticket_attachments/trade-form/*",
+                        ]
+                      + Sid       = "AllowScopedExemption10Objects"
+                    },
+                    {
+                        Action    = [
+                            "s3:GetObject",
+                        ]
+                        Effect    = "Allow"
+                        Principal = {
+                            AWS = "arn:aws:iam::313476888478:role/irpt-holdings-role"
+                        }
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                        Sid       = "AllowGrant1Objects"
+                    },
+                    # (1 unchanged element hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+Plan: 3 to add, 3 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to:
+C:/Users/ANDREW~1/AppData/Local/Temp/claude/C--Users-AndrewBerman-Desktop-ajb-workspace/271350c8-402f-4d3f-8a89-e39ef8db5e8d/scratchpad/tckt.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/Users/ANDREW~1/AppData/Local/Temp/claude/C--Users-AndrewBerman-Desktop-ajb-workspace/271350c8-402f-4d3f-8a89-e39ef8db5e8d/scratchpad/tckt.tfplan"

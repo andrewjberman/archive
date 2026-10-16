@@ -1,0 +1,74 @@
+{
+ "Statement": [
+  {
+   "Action": "s3:*",
+   "Condition": {
+    "ArnNotLike": {
+     "aws:PrincipalArn": [
+      "arn:aws:iam::313476888478:role/*-inf-*",
+      "arn:aws:iam::313476888478:user/Andrew_Berman",
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:user/Opal_Terminal",
+      "arn:aws:iam::313476888478:role/irpt-holdings-role",
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+      "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+     ]
+    }
+   },
+   "Effect": "Deny",
+   "Principal": "*",
+   "Resource": [
+    "arn:aws:s3:::opal-data-inflection",
+    "arn:aws:s3:::opal-data-inflection/*"
+   ],
+   "Sid": "DenyForeignFirmPrincipals"
+  },
+  {
+   "Condition": {
+    "ArnLike": {
+     "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+    }
+   },
+   "Effect": "Deny",
+   "NotAction": [
+    "s3:GetObject",
+    "s3:ListBucket"
+   ],
+   "Principal": "*",
+   "Resource": [
+    "arn:aws:s3:::opal-data-inflection",
+    "arn:aws:s3:::opal-data-inflection/*"
+   ],
+   "Sid": "DenyScopedExemption1AnyOtherAction"
+  },
+  {
+   "Action": "s3:GetObject",
+   "Condition": {
+    "ArnLike": {
+     "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+    }
+   },
+   "Effect": "Deny",
+   "NotResource": "arn:aws:s3:::opal-data-inflection/irpt/inflection/gold/holdings_performance_daily/*",
+   "Principal": "*",
+   "Sid": "DenyScopedExemption1ObjectsOutsidePrefix"
+  },
+  {
+   "Action": "s3:ListBucket",
+   "Condition": {
+    "ArnLike": {
+     "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+    },
+    "StringNotLike": {
+     "s3:prefix": "irpt/inflection/gold/holdings_performance_daily/*"
+    }
+   },
+   "Effect": "Deny",
+   "Principal": "*",
+   "Resource": "arn:aws:s3:::opal-data-inflection",
+   "Sid": "DenyScopedExemption1ListingOutsidePrefix"
+  }
+ ],
+ "Version": "2012-10-17"
+}
