@@ -25,9 +25,9 @@
     {
       "path_or_key": "infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py",
       "kind": "test",
-      "commit_or_etag": "8957fed16b",
+      "commit_or_etag": "d79e18f75d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "test file, run under pytest only; no deploy in scope"
+      "deploy_evidence": "test file, run under pytest only; no deploy in scope; first built at 8957fed16b, amendment 1 at d79e18f75d (stub marker and docstring)"
     },
     {
       "path_or_key": "infra/aws/lambda/ticket_center/tests/test_list_scoped_firm.py",
@@ -41,21 +41,21 @@
       "kind": "test",
       "commit_or_etag": "1b6cf437c7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AC2 checker; reads the product tree only and runs the new test file against a scratch copy"
+      "deploy_evidence": "AC2 checker; reads the product tree only and runs the new test file against a scratch copy; unchanged by amendment 1"
     },
     {
       "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~46/R19_L2_RECORD.json",
       "kind": "doc",
-      "commit_or_etag": "1b6cf437c7",
+      "commit_or_etag": "amendment record commit (git log -1 -- this path)",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the build record: lines changed, counts, before-arm, re-pinned lines, not_read"
+      "deploy_evidence": "the build record: lines changed, counts, before-arm, re-pinned lines, amendment 1, not_read"
     },
     {
       "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "1b6cf437c7",
+      "commit_or_etag": "amendment record commit (git log -1 -- this path)",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "appended rows TCKT_VNEXT-D2-W46-S2 and -S3 (binary-mode append; earlier rows untouched); S1 left as filed"
+      "deploy_evidence": "appended rows TCKT_VNEXT-D2-W46-S2, -S3 (first session) and -S4 (amendment 1); binary-mode append, prefix sha256 unchanged; earlier rows untouched"
     }
   ],
   "acceptance": [
@@ -64,7 +64,7 @@
       "criterion_verbatim": "the new test file passes with every case of step 4 named in a test, no failures or errors",
       "method": "test_suite",
       "invocation": "python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "7 passed in 0.49s  (run 1, rc=0)\n7 passed in 0.62s  (run 2, rc=0, the determinism run)",
+      "output_evidence": "7 passed in 0.60s  (amendment run 1, rc=0)\n7 passed in 0.52s  (amendment run 2, the determinism run, rc=0)\nfolder drain check (same worktree, not the criterion): 374 passed, 59 subtests passed, 7 failed, 8 collection errors, rc=1; the 7 failures are test_cross_firm_global_register.py (surprise TCKT_VNEXT-D2-W46-S4), the 8 errors are the known collection set (surprise TCKT_VNEXT-D2-W46-S2)",
       "denominator": "7 passed of 7 collected: the 7 step-4 cases, one named test each (intake lists two firms; unset or empty; ALL never a wildcard; no requester firm dropped; INTERNAL unchanged; status/assignee/ticket_type filters; cutoff_et and count)",
       "status": "PASS",
       "expect": "^[0-9]+ passed",
@@ -75,7 +75,7 @@
       "criterion_verbatim": "you write mutant_check.py: it copies lambda_function.py to a scratch folder OUTSIDE the product tree with the intake principal's firm filter removed, runs the new test file against the copy with pytest, and prints MUTANT-FIRES only when that run FAILS",
       "method": "command",
       "invocation": "python C:/dev/wk-tckt-vnext-46/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~46/mutant_check.py",
-      "output_evidence": "mutant run (copy of lambda_function.py with the intake firm filter removed, file test_analyst_intake_scoped.py):\n  pytest rc=1  summary: 6 failed, 1 passed in 0.88s\nMUTANT-FIRES",
+      "output_evidence": "mutant run (copy of lambda_function.py with the intake firm filter removed, file test_analyst_intake_scoped.py):\n  pytest rc=1  summary: 6 failed, 1 passed in 1.05s\nMUTANT-FIRES",
       "denominator": "1 mutant (intake firm filter removed) against 7 cases: 6 of 7 fail on the mutant; the 1 passing case is the INTERNAL non-regression guard",
       "status": "PASS",
       "expect": "MUTANT-FIRES",
@@ -86,7 +86,7 @@
       "criterion_verbatim": "svc-analyst-intake can list only the tickets of the firms named in its configuration, an unset or empty configuration shows it nothing, ALL is never a wildcard, and no other principal's LIST changed",
       "method": "manual_read_with_citation",
       "invocation": "git show 8957fed16b -- infra/aws/lambda/ticket_center/lambda_function.py (read by the L9 adjudicator; not graded by the worker)",
-      "output_evidence": "lambda_function.py line 90: ANALYST_INTAKE_ALLOWED_FIRMS = frozenset(f.strip() for f in os.environ.get(\"ANALYST_INTAKE_ALLOWED_FIRMS\", \"\").split(\",\") ... if f.strip() and f.strip().upper() != \"ALL\")\nlambda_function.py lines 1418-1421: if pc == SVC_ANALYST_INTAKE: items = [i for i in items if isinstance(firm, str) and firm in ANALYST_INTAKE_ALLOWED_FIRMS]\ngit show --stat 8957fed16b: lambda_function.py 8 insertions, 0 deletions, two hunks (the constant and the list_tickets filter); no other hunk",
+      "output_evidence": "lambda_function.py line 90: ANALYST_INTAKE_ALLOWED_FIRMS = frozenset(f.strip() for f in os.environ.get(\"ANALYST_INTAKE_ALLOWED_FIRMS\", \"\").split(\",\") ... if f.strip() and f.strip().upper() != \"ALL\")\nlambda_function.py lines 1418-1421: if pc == SVC_ANALYST_INTAKE: items = [i for i in items if isinstance(firm, str) and firm in ANALYST_INTAKE_ALLOWED_FIRMS]\ngit show --stat 8957fed16b: lambda_function.py 8 insertions, 0 deletions, two hunks (the constant and the list_tickets filter); no other hunk. Amendment 1 (d79e18f75d) touches the test fixture only.",
       "denominator": "1 judgment item; the code read against the cell contract: 4 claims (configured set only, unset or empty = none, ALL never a wildcard, other principals unchanged)",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO, never by the worker; no worker verdict recorded",
@@ -97,19 +97,24 @@
     "mutant": {
       "description": "the intake firm filter removed (if False) in list_tickets; the new test file run against that copy; MUTANT-FIRES expected",
       "expected": "MUTANT-FIRES",
-      "observed": "MUTANT-FIRES: pytest rc=1, 6 failed, 1 passed in 0.88s",
+      "observed": "MUTANT-FIRES: pytest rc=1, 6 failed, 1 passed in 1.05s (post-amendment)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the new test file run twice in the same worktree state; counts compared",
-      "observed": "run 1: 7 passed in 0.49s; run 2: 7 passed in 0.62s; same counts",
+      "method": "the new test file run twice in the same worktree state after amendment 1; counts compared",
+      "observed": "run 1: 7 passed in 0.60s; run 2: 7 passed in 0.52s; same counts",
       "status": "STABLE"
+    },
+    "amendment_baseline": {
+      "description": "the new test file on the merged tip 535b02a627, before the stub fix",
+      "observed": "1 failed, 6 passed: test_an_internal_caller_is_unchanged_by_the_set, AssertionError ([], 403, {'error': 'firm scope not configured'}) at line 219",
+      "status": "FAIL-AS-REPORTED-THEN-FIXED"
     }
   },
   "declared_exclusions": [
     {
-      "item": "the whole-folder pytest run of infra/aws/lambda/ticket_center/tests/ (312 passed, 42 subtests passed, 8 collection errors, rc=1)",
-      "reason": "8 modules (test_no_row_refuses, test_package_409_codes, test_package_env_firms, test_package_i5p_i7, test_package_principal, test_package_request_id, test_package_route, test_status_active) cannot be imported in this worktree: test_package_route.py reads org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/I7_SAMPLE.json, outside the sparse cone; their tests were not run; recorded as TCKT_VNEXT-D2-W46-S2"
+      "item": "the whole-folder pytest run of infra/aws/lambda/ticket_center/tests/ (374 passed, 59 subtests passed, 7 failed, 8 collection errors, rc=1)",
+      "reason": "8 modules (test_no_row_refuses, test_package_409_codes, test_package_env_firms, test_package_i5p_i7, test_package_principal, test_package_request_id, test_package_route, test_status_active) cannot be imported in this sparse worktree: test_package_route.py reads org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/I7_SAMPLE.json, outside the sparse cone; their tests were not run; recorded as TCKT_VNEXT-D2-W46-S2. The 7 failures in test_cross_firm_global_register.py read investor-reporting/_scope/interactive_access.py, outside the sparse cone and outside this grant; not investigated; recorded as TCKT_VNEXT-D2-W46-S4"
     },
     {
       "item": "R19L2-AC3J verdict",
@@ -130,30 +135,31 @@
   ],
   "surprises": [
     "TCKT_VNEXT-D2-W46-S1: TO-R19-L2 BLOCKING from the earlier session (sparse cone omitted infra/); left as filed; its cause no longer holds in this session, the cell was built in place at 8957fed16b",
-    "TCKT_VNEXT-D2-W46-S2: the whole-folder run of tests/ cannot collect 8 modules because I7_SAMPLE.json sits outside the sparse cone; the folder count is 312 passed with 8 collection errors, not a clean run",
-    "TCKT_VNEXT-D2-W46-S3: the before-arm gives 6 of 7 FAIL, not 7: the INTERNAL-unchanged case passes on the base by design"
+    "TCKT_VNEXT-D2-W46-S2: the whole-folder run of tests/ cannot collect 8 modules because I7_SAMPLE.json sits outside the sparse cone; the folder count is 374 passed with 8 collection errors and 7 failures, not a clean run",
+    "TCKT_VNEXT-D2-W46-S3: the before-arm gives 6 of 7 FAIL, not 7: the INTERNAL-unchanged case passes on the base by design",
+    "TCKT_VNEXT-D2-W46-S4: the 7 failures of test_cross_firm_global_register.py read a sparse-cone fixture outside the grant; not caused by this order's edit"
   ],
   "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~46/R19_L2_RECORD.json",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py -q -p no:cacheprovider --color=no",
-      "result": "7 passed in 0.49s; rc=0 (run 2: 7 passed in 0.62s)"
+      "result": "7 passed in 0.60s; rc=0 (run 2: 7 passed in 0.52s)"
     },
     {
       "tool": "pytest (folder, drain check)",
-      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/ -q -p no:cacheprovider --color=no --continue-on-collection-errors",
-      "result": "312 passed, 42 subtests passed, 8 errors during collection; rc=1"
+      "invocation": "timeout 120 python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/ -q -p no:cacheprovider --color=no --continue-on-collection-errors",
+      "result": "374 passed, 59 subtests passed, 7 failed, 8 errors during collection; rc=1"
     },
     {
       "tool": "pytest (before-arm, HEAD copy in scratch)",
       "invocation": "python -m pytest C:/dev/wk-tckt-vnext-46/.scratch/base_arm/ticket_center/tests/test_analyst_intake_scoped.py -q -p no:cacheprovider --color=no -rA",
-      "result": "6 failed, 1 passed in 0.87s; rc=1"
+      "result": "6 failed, 1 passed in 0.87s; rc=1 (first session)"
     },
     {
       "tool": ".tools/commit-gate.sh",
-      "invocation": "bash .tools/commit-gate.sh <file> for each changed .py file",
-      "result": "pre-commit gate clean for 1 of 1 file(s), four files, rc=0 each"
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py",
+      "result": "pre-commit gate clean for 1 of 1 file(s), rc=0"
     }
   ]
 }
