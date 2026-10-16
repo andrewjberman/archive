@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cw-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cw-1.fwd3-one-account-exercise.md",
+    "group": "OTHER",
+    "vintage_commit": "fe0d5fb005"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~190",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round101.md",
+    "vintage_commit": "fe0d5fb005",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cw-1.fwd3-one-account-exercise.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/FWD3_EXERCISE_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only exercise record; no S3 write, no serve, no deploy",
+      "artifact_covered_by": [
+        "CB101cw1-AC1",
+        "CB101cw1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/FWD3_EXERCISE_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "short table beside the record; no S3 write, no deploy",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/cw1_fwd3_exercise_read.py",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; get_object at pinned VersionIds only, no put, no serve",
+      "artifact_covered_by": [
+        "CB101cw1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cw1_fwd3_recompute.py",
+      "kind": "doc",
+      "commit_or_etag": "6ab75c75cc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "issuer's independent recompute, read and run unchanged",
+      "artifact_covered_by": [
+        "CB101cw1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB101cw1-AC1",
+      "criterion_verbatim": "the record names the account (8 hex digits only) and states the days, the months and how they split, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/FWD3_EXERCISE_RECORD.json',encoding='utf-8'));m=d['measured'];print('FWD3-EXERCISE measured=%s' % m + ((' account=%s days=%d months=%d match=%d differ=%d ungradable=%d' % (d['account_hash8'],d['days'],d['months'],d['matches_reported'],d['differ'],d['ungradable'])) if m else ' reason=%s' % d['reason']))\"",
+      "expect": "^FWD3-EXERCISE measured=(True account=[0-9a-f]{8} days=\\d+ months=\\d+ match=\\d+ differ=\\d+ ungradable=\\d+|False reason=.+)$",
+      "output_evidence": "FWD3-EXERCISE measured=True account=e4fe52f8 days=1763 months=85 match=82 differ=0 ungradable=3",
+      "denominator": "1 account of 1,533 (picked by rule); 1,763 days; 85 months (82 match, 0 differ, 3 ungradable)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB101cw1-AC2",
+      "criterion_verbatim": "the issuer's script recomputes the same exercise from the served objects and the record equals it: the account is the one the rule picks, and the days, months, strung-equals-served, matched, differing, ungradable and population counts agree.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cw1_fwd3_recompute.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/FWD3_EXERCISE_RECORD.json",
+      "expect": "^FWD3-CROSS selected_by_rule=True days_equal=True months_equal=True strung_equal=True matched_equal=True differ_equal=True ungradable_equal=True population_equal=True$",
+      "output_evidence": "FWD3-CROSS selected_by_rule=True days_equal=True months_equal=True strung_equal=False matched_equal=True differ_equal=True ungradable_equal=True population_equal=True",
+      "denominator": "8 of 8 comparisons printed; 7 True, strung_equal False: the record counts both-absent months as equal (85), the issuer's recompute counts present-and-equal only (83); see channel row ADVI_COTBKF-D1-W190-S1",
+      "status": "FAIL",
+      "status_reason": "strung_equal reads False: the record counts the 2 both-absent months as equal (85, the order's item 3(a)); the issuer's recompute counts present-and-equal only (83). The record is not adjusted to the script; channel row ADVI_COTBKF-D1-W190-S1 asks for a ruling."
+    },
+    {
+      "criterion_id": "CB101cw1-AC3",
+      "criterion_verbatim": "the cell wrote nothing: the three served keys still carry the VersionIds the round-98 apply left (the issuer's script reads object metadata only).",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cu1_ac3_served_unchanged_check.py",
+      "expect": "^SERVED-UNCHANGED versions_equal=3 of 3$",
+      "output_evidence": "SERVED-UNCHANGED versions_equal=3 of 3",
+      "denominator": "3 of 3 served keys (daily_returns, account_day_value, month_grades) at the round-98 VersionIds, head-object metadata only",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "the order names no determinism control"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the order's status flip to complete",
+      "reason": "AC2 reads FAIL (strung_equal=False on the definition of the both-absent months); a FAIL row leaves the order open"
+    },
+    {
+      "item": "grading FWD-3",
+      "reason": "the order says the CTO grades FWD-3; this record reports what the data shows only"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W190-S1: the strung-equals-served count has two definitions (order item 3(a) counts both-absent months as equal: 85; the issuer's recompute counts present-and-equal only: 83); AC2 reads strung_equal=False.",
+    "ADVI_COTBKF-D1-W190-S2: 5 served month_grades rows carry a null verdict outside the population verdict counts (3,678 + 288 + 78,622 = 82,588 of 82,593)."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/ADVI_COTBKF.TO-CB-cw-1.fwd3-one-account-exercise.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/FWD3_EXERCISE_RECORD.json',encoding='utf-8'));m=d['measured'];print('FWD3-EXERCISE measured=%s' % m + ((' account=%s days=%d months=%d match=%d differ=%d ungradable=%d' % (d['account_hash8'],d['days'],d['months'],d['matches_reported'],d['differ'],d['ungradable'])) if m else ' reason=%s' % d['reason']))\"",
+      "result": "FWD3-EXERCISE measured=True account=e4fe52f8 days=1763 months=85 match=82 differ=0 ungradable=3"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cw1_fwd3_recompute.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~190/FWD3_EXERCISE_RECORD.json",
+      "result": "FWD3-CROSS selected_by_rule=True days_equal=True months_equal=True strung_equal=False matched_equal=True differ_equal=True ungradable_equal=True population_equal=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cu1_ac3_served_unchanged_check.py",
+      "result": "SERVED-UNCHANGED versions_equal=3 of 3"
+    }
+  ]
+}
