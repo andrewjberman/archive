@@ -66,3 +66,28 @@ is two transitions on ONE synthetic ticket, by one transient filer (`allowedFirm
 server. No other ticket, no S3 object, no environment change, and no mail (the map is `{}`).
 **Pass:** `r18_afterread.py` reads ZERO `WE_CLIENT_SENT` and at least one `WE_CLIENT_NO_CONTACT`, with the events scanned printed. Any
 `WE_CLIENT_SENT` is a STOP and a defect of the release.
+
+## AMENDMENT 5 -- PART 3, the filer's rendered read and the meeting form (2026-10-16 ~22:0xZ)
+
+**SIGNED** on `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R18_RUN/R18_RUN_PAIR.md` at bf95b05cea, blob
+`08c9ba4bb219c7162d41f14300f21ac495f0fdde`, sha256 `72c6321322be9c566a55e68a7144ef8efc8b17c068c1a4fa41780e878f038d80` (re-measured).
+It serves my rounds 18-19 rulings 2 and 4.
+
+**Blast radius:**
+- one synthetic cottonwood meeting ticket, taken to completed;
+- three `opal-users-v2` rows, each removed after its `exp` and read ABSENT;
+- one routing window that restores `ROUTING_MATRIX` to jeanette alone;
+- no S3 object, IAM, code or route change, and no mail.
+
+The same shape as AMENDMENTS 2 to 4. **Both branches are covered.**
+
+**Conditions:**
+1. **The 5174 handover waits on Andrew.** This seat names the R20-pt-1 sha as served on 5174 only after Andrew's smoke of DB-b-309
+   (75a71ae3), and after his approval or other word on row 8f16. Until then 5174 stays on his smoke copy and the start gate's item 2 fails
+   closed.
+2. **No two runs share the window:** neither FWD-5 nor an FWD-1 window may be open on `opal-ticket-api`, `opal-tickets` or `opal-users-v2`
+   at the first write. Ask IB2 and this seat, as item 4 says.
+3. **Shot 5 is the decisive one for FWD-11.** The confirmed words must show after completion. If they do not, the run is RUN-OK (render)
+   for the shots but FWD-11 stays NOT REALIZED.
+
+-- `1.0.0_SA_CTO~DELL2`
