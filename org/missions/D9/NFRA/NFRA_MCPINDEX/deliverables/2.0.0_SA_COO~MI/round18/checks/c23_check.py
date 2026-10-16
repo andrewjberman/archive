@@ -104,7 +104,8 @@ def ac2():
     for e, r in base.items():
         if e in rows:
             diff = set(k for k in set(r) | set(rows[e]) if r.get(k) != rows[e].get(k))
-            if diff - {"bucket", "vendor", "firm", "nl_tags", "nl_tags_basis"}:
+            # the read-link fields (MX-c-31 and the post-release regeneration) are a later, graded change of their own (c31.AC1/AC2)
+            if diff - {"bucket", "vendor", "firm", "nl_tags", "nl_tags_basis", "read_tool", "tools", "gap_owner"}:
                 odd.append((e, sorted(diff)))
     extra = sorted(set(rows) - set(base) - set(NEW12))
     print("DENOMINATOR new rows present %d of 12; wrong %d; table rows %d (base %d + 12 - removed %d); base rows changed outside bucket/vendor/firm %d; unexpected new rows %d" %
@@ -113,7 +114,7 @@ def ac2():
         print("  ODD %s" % (o,))
     return report([("the 12 Schwab dim_* rows are present", not missing), ("each carries the expected fields", not bad), ("the table rows number the base's plus 12 minus the removed (%d)" % len(removed), n_table == base_table + 12 - len([e for e in removed if "contract" in base[e]])),
                    ("no ASSETS row was removed (%d)" % len(removed_assets), not removed_assets),
-                   ("every other row differs from the base only in bucket, vendor, firm and the curated tags", not odd), ("no other row was added", not extra)])
+                   ("every other row differs from the base only in bucket, vendor, firm, the curated tags and the read-link fields", not odd), ("no other row was added", not extra)])
 
 
 def matrix(root):
