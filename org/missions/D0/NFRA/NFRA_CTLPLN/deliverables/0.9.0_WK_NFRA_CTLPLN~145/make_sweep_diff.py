@@ -110,13 +110,21 @@ def main(argv):
     elif rev == "work":
         sources = []
         absent = 0
+        retired = {"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_rtf_1.py"}  # git rm'd by the cell
+        sparse_base = 0
         for p in names:
             full = os.path.join(ROOT, p)
             if os.path.isfile(full):
                 with open(full, "rb") as f:
                     sources.append((p, f.read(), "work"))
+            elif p not in retired and subprocess.run(["git", "cat-file", "-e", "%s:%s" % (base_commit(), p)],
+                                                     cwd=ROOT, capture_output=True).returncode == 0:
+                # not held by this sparse worktree, outside the cell's <paths>: graded at its base bytes, which the cell does not change
+                sources.append((p, read_base(p), "base-unchanged"))
+                sparse_base += 1
             else:
                 absent += 1
+        print("WORK sparse-held-at-base=%d (graded at base bytes)" % sparse_base)
         fdir = os.path.join(ROOT, FOLDER_REL)
         extra = 0
         if os.path.isdir(fdir):

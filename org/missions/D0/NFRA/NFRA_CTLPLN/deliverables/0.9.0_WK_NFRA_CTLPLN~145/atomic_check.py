@@ -307,6 +307,9 @@ def check_tf():
         if clean:
             fmt_clean += 1
         path = os.path.join(ROOT, rel, "locals.tf")
+        # diagnostic only (not in ok): fmt of the one file this cell edits, so a root-level failure in another file is named
+        rf = subprocess.run(["terraform", "fmt", "-check", os.path.join(rel, "locals.tf")], cwd=ROOT, capture_output=True, timeout=120)
+        print("TF-LOCALS-FILE-FMT %s rc=%d" % (rel, rf.returncode))
         with open(path, "rb") as f:
             text = f.read().decode("utf-8", "replace")
         fs = "fileset(" in text and "function-map" in text
