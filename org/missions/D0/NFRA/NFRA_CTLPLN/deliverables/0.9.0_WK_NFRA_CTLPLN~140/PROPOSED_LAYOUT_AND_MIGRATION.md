@@ -2,7 +2,7 @@
 
 Worker 0.9.0_WK_NFRA_CTLPLN~140, read at HEAD 833181d311. Read-only: nothing here applies anything, no `terraform` command was run, and for every Terraform step a plan (never an apply) is the check. Counts come from `LAMBDA_SOURCE_MAP_CONSUMER_CENSUS.md` in this folder.
 
-Census in one line: 2521 files name the map; classes read_whole=174, write=6, test=21, doc=2320, read_one=0, other=0; 240 function entries; the deploy script has 27 commits, 13 by non-owners (12 CODE, 1 DATA).
+Census in one line (at HEAD 76890af416): 2524 files name the map; classes read_whole=175, write=6, test=21, doc=2322, read_one=0, other=0; 240 function entries; the deploy script has 27 commits, 13 by non-owners (12 CODE, 1 DATA).
 
 ## (a) Folder, file names, one real entry
 
@@ -59,8 +59,8 @@ Shell and node. No shared shell helper is proposed. `jq . function-map/<name>.js
 
 - Step 0, additive, no consumer changes. Generate the 240 files from HEAD's map; check each file equals `functions[stem]` and that the count is 240. The map stays. Terraform plan change: none. Risk: low. The real risk is a writer that updates one copy only (see (e)).
 - Step 1, the atomic commit in (d). Live readers switch to the folder, live writers write one file, and the map is deleted, all in one commit. Terraform plan change: the three `locals.tf` roots change expression, not resources. The check is `terraform plan` on each root showing zero resource diffs. Risk: high. It touches every live reader, the commit-time naming gate and the deploy path.
-- Step 2, closed-round deliverables: 130 readers and writers under `org/missions/` (128 read, 2 write). Not migrated. A re-run after the split fails loud on the missing file, except `battery_ib_rtf_1.py`, which would re-create the aggregate; retire that file in Step 1. Terraform plan change: none. Risk: low at run time.
-- Step 3, documents: 2320 DOC files, text only. Terraform plan change: none. Risk: none at run time.
+- Step 2, closed-round deliverables: 131 readers and writers under `org/missions/` (129 read, 2 write; the census script is one of the 129). Not migrated. A re-run after the split fails loud on the missing file, except `battery_ib_rtf_1.py`, which would re-create the aggregate; retire that file in Step 1. Terraform plan change: none. Risk: low at run time.
+- Step 3, documents: 2322 DOC files, text only. Terraform plan change: none. Risk: none at run time.
 
 Only Step 1 changes a Terraform plan.
 
