@@ -1,0 +1,17 @@
+0.9.0_WK_NFRA_OPLGTW~127 on NFRA_OPLGTW.TO-OG-en-14 -- session log (commands and their verdicts, in order)
+
+tree check      : git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-127 ; test -d org && test -d .tools -> TREE-OK
+baseline        : pytest tests/test_email_deny.py tests/test_owner_gate.py tests/test_login_admit_r24.py tests/test_scoped_consent_r253.py tests/test_og_en8.py -> 33 passed, rc=0
+new tests, red  : not run as a separate red step; the mutant control below is the discrimination evidence
+new tests, green: pytest tests/test_og_en14.py -v -> test_ogen14_ac01 PASSED, test_ogen14_ac02 PASSED, test_ogen14_ac03 PASSED (3 passed, rc=0)
+regression      : pytest on the 5 suites above + tests/test_og_en14.py + tests/test_data_entitlement_guard.py -> 1 failed, 47 passed
+                  the one failure is test_data_entitlement_guard.py::test_ogz1_ac08 (route table: four app routes not in ROUTE_CLASS)
+                  same failure with app/data_entitlement.py and app/server.py at HEAD 29fcd5d688 in a scratch copy -> pre-existing,
+                  filed as NFRA_OPLGTW-Z-W127-S1 (not this order's file; not a criterion)
+commit 1        : 366bd9d3aa impl(...) -- app/data_entitlement.py, app/server.py, tests/test_og_en14.py,
+                  tests/test_login_admit_r24.py (stub signature), tests/test_scoped_consent_r253.py (stub signature)
+commit 2        : 40dac3c69f surprise(...) -- investigation rows NFRA_OPLGTW-Z-W127-S1 and -S2 (surprise-row-gate OK, 2 new rows)
+AC1             : _named.sh tests/test_og_en14.py test_ogen14_ac01 test_ogen14_ac02 test_ogen14_ac03 -> pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS; exit=0
+AC2             : _wkbound.sh 0.9.0_WK_NFRA_OPLGTW~127 '<allowed regex>' -> files touched 6; product files 5; outside the allowed set 0 (want 0); RESULT: PASS; exit=0
+mutant control  : PYTHONPATH=<deliverables folder> python -m pytest tests/test_og_en14.py -p og_en14_mutant_ignores_class -> ac01 FAILED, ac02 PASSED, ac03 FAILED (2 failed, 1 passed)
+determinism     : AC1 run twice on 366bd9d3aa (the code commit; the tree is unchanged between the runs) -> identical summary and RESULT PASS, exit=0
