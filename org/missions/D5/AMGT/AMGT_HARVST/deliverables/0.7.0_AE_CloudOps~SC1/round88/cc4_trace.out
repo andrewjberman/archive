@@ -1,0 +1,43 @@
+HVST-cc-4 trace of the bbg page closure, written by 0.7.0_AE_CloudOps~SC1, 2026-10-16T16:50Z. Harness: cc4_harness.py (hooks listed in its header; no pin file edited). Command: cc4_command.txt.
+Every number below is read from the arm's own trace file (cc4_arm_<X>.jsonl, monotonic seconds from the harness start) or the run record named; claim words: measured = read from that file, inferred = reasoned from measured values, not shown.
+
+=== ARM C (the control, security-b0fe721e1f2a0d8b "Hon Hai", Arm A's settings) -- cc4_arm_C.jsonl, run 20261016T161321Z-run-03342e31
+ (i) vendor requests: sitemap /sitemaps/news/2026-10.xml 200 class ok. NO article request was made (the job found no article matching this name). (measured, cc4_arm_C_run_record.json)
+ (ii) page close / crash events: the only page.close_event (7.050) and context.close_event (7.092) follow two RUNNER_CLOSE_CALL records (7.015, 7.016: TabSession.close, BrowserContext.close from the job's own end); no crash.
+ (iii) minimise: setWindowBounds_returned at 2.268, 5 s before the first close; the window stayed open.
+ (iv) exception: none. job status no_new_articles.
+ (v) browser process: chrome main first seen 1.841, gone 7.406 after the runner's close.
+ NOTE (declared): this arm ran WITHOUT the S3-write suppression and wrote one run-record object (row AMGT_HARVST-D1-S34; step 10 of the order). It requested no article, so it never reached a challenge: it shows that the harness and the account read cleanly, not that the challenge path is clean.
+
+=== ARM A (the case as the runner ran it, minimised; harness stops BEFORE any hold -- my addition) -- cc4_arm_A.jsonl, run 20261016T162436Z-run-8e3a7413
+ (i) sitemap 200 ok; article /opinion/articles/2026-10-15/bp-can-solve-its-debt-problem-once-and-for-all 403 class bot_check signature bloomberg_press_and_hold. (measured, run record)
+ (ii) page close / crash / context close events: none until the runner's own close at 28.253 (RUNNER_CLOSE_CALL x2), then page.close_event 28.270, context.close_event 28.315; crash 0.
+ (iii) minimise: cdp session ok 2.79, getWindowForTarget ok 2.79, Browser.setWindowBounds returned 2.804 (before the 403 by 19 s).
+ (iv) exception: HarnessStop at verification._press_and_hold_box (28.196) -- the harness's own stop after the control was FOUND with page.is_closed() False (box 310 x 100). No TargetClosedError in this arm.
+ (v) chrome main: first seen 2.288, gone 28.751 after the runner's close.
+ READ: the page was alive and the control was on it 6.6 s after the 403 (solve.enter 21.585, first locate 21.617-22.668 found=False, goto + 5000 ms wait, second locate 28.009-28.194 found=True). The arm never held the control, so it could not reach the step that failed in the runner.
+
+=== ARM A' (the case THROUGH the hold, as the runner does it; issuer msg 6866) -- cc4_arm_Aprime.jsonl, run 20261016T164059Z-run-c581ff22
+ (i) sitemap 200 ok; the same article 403 bot_check bloomberg_press_and_hold (measured, run record).
+ (ii) timeline (harness seconds): solve.enter 27.745; first locate exit found=False 28.871 (page.url still https://www.bloomberg.com/); solve navigates to the article and waits 5 s;
+      second locate found=True 34.587; capture_page 34.587-34.710; HOLD.enter 34.710, HOLD.exit 49.565 (14.85 s; page.is_closed False, url = the article); runner's wait_for_timeout(4000);
+      main frame navigates AGAIN to the article URL at 52.873 and 53.222 (a reload, 3.3 s after the hold ended); third locate (the second hold-loop pass) enter 53.577, RAISED 55.770 after 2.19 s;
+      first page.close_event 55.882, AFTER the runner's own close call at 55.829. page.crash_event 0, popup 0, new page 0 events. (measured)
+ (iii) minimise: Browser.setWindowBounds returned 3.136, 46 s before the failure.
+ (iv) exception: TargetClosedError('Locator.count: Target page, context or browser has been closed') raised in verification._press_and_hold_box -> control.count() (verification.py:286) on the second hold-loop pass (verification.py:303-312);
+      the full traceback is in cc4_arm_Aprime.jsonl (ev press_and_hold_box.raised). page.is_closed() read False at _solve_press_and_hold.raised (55.772). (measured)
+ (v) chrome main: first seen 2.752, alive until the runner's close; gone 56.489.
+ THE RUNNER'S OWN TWO FAILED JOBS fit this timeline: 403 (challenge_presented) -> error 25.508 s and 25.613 s later (events.jsonl), against 28.0 s here (27.745 -> 55.770); the difference is the hold's length (adaptive, up to HOLD_MAX_S 12 s) and the capture. (inferred)
+
+=== ARM B / B' (no minimise): NOT RUN. The order's amended rule runs B' only if A' ends with the page closed; A' ended with the page NOT closed (no close event, no crash, is_closed False at the raise).
+
+CLOSED_BY=other
+EVIDENCE=No page closure occurred in the case that reproduced the failure (Arm A'): page.is_closed() was False at the raise, no page.close_event preceded the runner's own close call (55.829 -> 55.882), no crash, the chrome main process lived until the runner closed it, and the minimise call had returned 46 s earlier.
+EVIDENCE=The TargetClosedError was raised by Locator.count on the SECOND hold-loop pass, 3.3 s after the vendor's post-hold reload of the article (main-frame navigations 52.873 and 53.222) and while that reload was loading (the count call blocked 2.19 s, 53.577 -> 55.770). (measured)
+EVIDENCE=Read against the code: _press_and_hold_box walks page.frames and calls frame.get_by_role(...).count() on each; a cross-process frame destroyed by the reload between listing and counting is the reading that fits a TargetClosedError with a live page. (inferred; the frame URL being counted was NOT recorded)
+EVIDENCE=The runner's minimise is not the closer on this evidence: it returned long before, and nothing in the window state is involved in the failing call. Arm B' was not run to show a no-minimise difference.
+CONTROL_ARM_C=PASS
+ARM_B_DIFFERS=not_run
+NOT_ESTABLISHED=Which frame's count() raised (its URL/target was not recorded); whether the hold PASSED the challenge (the reload to the article URL fits an accepted hold, but the page content after it was not read, and a hold on the account is the runner's own behaviour, not graded here); whether a non-minimised window behaves the same (B' not run); whether the same failure follows a hold on any other bbg article (one article, three runs: two runner jobs and A').
+NOT_ESTABLISHED=Arm C requested no article, so it does not show the challenge path is clean for another name; it shows the harness and the account read cleanly.
+NOT_ESTABLISHED=The enum word: none of vendor_page, runner_minimise, runner_timeout names "no page closure; a frame-query error during the vendor's post-hold reload". The nearest is vendor_page (the vendor's reload caused it) -- this seat chose other because the page was not closed.

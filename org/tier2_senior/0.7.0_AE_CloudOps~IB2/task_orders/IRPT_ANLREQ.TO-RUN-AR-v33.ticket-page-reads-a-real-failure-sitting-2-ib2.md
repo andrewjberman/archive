@@ -1,0 +1,83 @@
+<task_order>
+  <metadata>
+    <id>IRPT_ANLREQ.TO-RUN-AR-v33.ticket-page-reads-a-real-failure-sitting-2-ib2</id>
+    <issued_by>2.0.0_SA_COO~V2</issued_by>
+    <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
+    <date>2026-10-16</date>
+    <status>staged</status>
+    <project_code>IRPT_ANLREQ</project_code>
+  </metadata>
+<risk>WORLD</risk>
+<proof_genre>DEPLOY</proof_genre>
+<round>4</round>
+<workstream>TICKET</workstream>
+<placeholders>NONE</placeholders>
+<decomp_ref>
+<decomp_doc>org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R4_V.md</decomp_doc>
+<owned_cells>AR-v-32</owned_cells>
+<decomp_context>Round 4, workstream TICKET, cell AR-v-32, SITTING 2 (sitting 1 was IRPT_ANLREQ.TO-RUN-AR-v32 under 0.7.0_AE_CloudOps~AQ2: the page showed no words because the FWD-1 window-2 ticket carries no report_ref, so the page made no status call for it). Sitting 2: with a hand-written report_ref on that ticket (the CTO's msg 9651) and a real COMMENTARY failure standing on its job row, read the Ticket Center page (arm A); in the same sitting read a PACKAGED ticket whose job row also carries a failure (arm B).</decomp_context>
+</decomp_ref>
+
+  <objective>
+    STAGED. No GO until the issuer adds a CONDITIONAL GO amendment on the signed pair `AR_V33_PAIR.md` (both halves). On the GO, with `IRPT_ANLREQ.TO-APPLY-t56` leg A reported by `2.0.0_SA_COO~T2` (a hop_failure COMMENTARY_DRAFT_REFUSED standing on the job rows of REQ-d47252fe74634d0c5cdd8067 and REQ-28a5ca6be3b7f438a9ca8217, tenant 49financial): write ONE fixture attribute `report_ref` on the synthetic ticket TCK-20261015-944c84f8; mint ONE staff-only synthetic user; on the DEV dev server (http://localhost:5174) read the page for that ticket (arm A) and for the packaged ticket TCK-20261014-2965a5e0 (arm B), take a screenshot of each; remove the user and the fixture attribute and read both ABSENT. Write one record file. The issuer looks at the screenshots itself. You write nothing else.
+  </objective>
+
+  <context>
+    Authority: the CTO's msg 9651 (fixture write approved under a small pair; applier IB2; arm B in the same sitting; the staff-only user condition of XA-20261016T160537Z-f98b stands) and msg 9637; the round-3 analysis `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_IRPT_ANLREQ_TICKET_ROUND_3_20261016.md` @90926d9683; Andrew's word on synthetic objects. The DEV build is served on localhost:5174 (no hosted DEV exists, msg 9218).
+    WHY THE FIXTURE: sitting 1 (`~AQ2`, record `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_arv32/A_RUN_AR_V32.txt`) listed the ticket on In Progress and found NO failure words: the landed page takes the request id from `ticket.report_ref.request_id` and this ticket never got one (the filing's step 4 did not land; the row on why is owed separately). Retry is unusable (the ticket's creator is fwd1-staff-r41a, the helper mints r41b; a Retry would file a NEW request). The fixture writes what step 4 would have written, shape quoted from `infra/aws/lambda/ticket_center/lambda_function.py` lines 1768 to 1779: `{"request_id": "REQ-d47252fe74634d0c5cdd8067", "revision": "1", "recorded_by": "fixture:AR-v-32-s2", "recorded_at": <UTC>}`. THE GRADE NAMES THE LINK AS HAND-WRITTEN; only the page's status read and the failure on the job row are real.
+    THE FAILURES: written by `IRPT_ANLREQ.TO-APPLY-t56` (2.0.0_SA_COO~T2, your queue, leg A). This order starts only after leg A is reported; it must NOT remove them: leg B is `~T2`'s message, sent after this order's report.
+    THE USER: the helper `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/fwd1_mint.py` (git blob `f368e9d95c62dc9fce1e6d5e04cd7fe6f79c444a`, sha256 `04e4ba64ddb74895442a7b291e14862fc9b395b65cc814c75bb737b8445ec5d4`; a different value is a STOP) mints ONE users row `fwd1-staff-r41b@opal.invalid` (firm opal-capital, role user, userType test-filer, exp 3 hours) from a password on STDIN, and removes it. The password is a fresh 32-byte url-safe random value held in memory only; never printed, logged, written, in argv or the environment; your report says so in words. Sitting 1's script `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_arv32/ar_v32_run.mjs` is the model for the sign-in and the page read (the sidebar link, never a typed URL: a typed URL reloads the page and drops the in-memory token).
+  </context>
+
+  <the_act>
+    GO is the issuer's conditional amendment; without it STOP at step 0.
+    0. NEVER-2: read the ledger (every live worktree, `ls-tree`) and open ONE change-ledger entry naming this order, the one users row, the one ticket attribute and the dev server; it closes at step 9. STOP if the amendment is absent, any blob it names differs, or the t56 ledger is not OPEN with leg A reported. Verify `python .tools/xadj.py show --id XA-20261016T160537Z-f98b` prints `State: RULED`.
+    1. READ BEFORE, no write: job row of REQ-d47252fe74634d0c5cdd8067 (state READY, hop_failure COMMENTARY_DRAFT_REFUSED with its `at`; line A1) and of REQ-28a5ca6be3b7f438a9ca8217 (hop_failure COMMENTARY_DRAFT_REFUSED; line A2); ticket TCK-20261015-944c84f8 (analysis_request, in_progress, NO package, NO report_ref; line B2) and print its sha256 over the `get-item` JSON with sorted keys (PRE); ticket TCK-20261014-2965a5e0 (a package PRESENT; line B3); the users row for fwd1-staff-r41b@opal.invalid ABSENT (a consistent get; PRESENT is a STOP). The job row of arm A read BEFORE the failure (line B1) is `~T2`'s leg A record: cite it. Any mismatch is a STOP, nothing written.
+    2. THE FIXTURE: ONE `update-item` on `opal-tickets` key `{ticket_id: TCK-20261015-944c84f8}`: `SET report_ref = :ref` with `ConditionExpression attribute_not_exists(report_ref)` and `:ref` as in the context (no event is appended). Read it back (`report_ref.request_id` equals REQ-d47252fe74634d0c5cdd8067, `recorded_by` begins `fixture:`). Line F1 (`F1 fixture ticket=TCK-20261015-944c84f8 request_id=REQ-d47252fe74634d0c5cdd8067 written=YES recorded_by=fixture:AR-v-32-s2`).
+    3. The dev server of the portal DEV checkout (HEAD contains dc057891b086) on port 5174 only: reuse one already listening there (check `git merge-base --is-ancestor dc057891b086 HEAD` in its checkout; leave it running), else start `bun run dev --port 5174` (resolve bun by the profile; stop it at step 6). The browser origin must read exactly http://localhost:5174; any other is a STOP.
+    4. MINT the user with the helper's `mint`; it must print `MINT-OK READBACK-OK`. Read the row back and print ONE line U1 before any removal: `U1 users_row role=<role> userType=<userType> firmId=<firmId> entitlement_rows=<count of other rows under that PK> status=<status>`; role user, userType test-filer, firmId opal-capital and 0 are required, anything else is a STOP (remove the user, undo the fixture, report, grade nothing).
+    5. ARM A: sign in through the real login page; open the Ticket Center by the sidebar link; open the In Progress tab and the ticket TCK-20261015-944c84f8. Wait for the page to settle. Record every request the page makes to the status route (http status, `public_reason_code`, action kinds; line S1 for the one answered for REQ-d47252fe74634d0c5cdd8067, and the TOTAL count of status reads on a line S2). Read the page: words shown under the ticket (words_shown), the first sentence names the step (step_named), the page intact (page_intact), no blank row (blank_row). Take ONE full-page screenshot `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_arv33/ar_v33_a_page.png`. Lines P1 and P2 (`P2 canvas=<the resolved page canvas colour> screenshot=<path>`), line R2 (`R2 browser origin=http://localhost:5174`).
+    6. ARM B (the same session): open the Open tab and the packaged ticket TCK-20261014-2965a5e0. Record whether failure words show (words_shown NO is the expected reading) and whether the package block shows (package_block YES), the page intact. Take ONE full-page screenshot `.../ar_v33_b_page.png`. Line P3 (`P3 page ticket=TCK-20261014-2965a5e0 words_shown=NO package_block=YES page_intact=YES screenshot=<path>`).
+    7. STOP the dev server only if this order started it. REMOVE the user with the helper's `remove`; it must print ABSENT lines for the consistent read and the email index. Line R1 (`R1 users_row=ABSENT consistent=YES`).
+    8. REMOVE THE FIXTURE: ONE `update-item` REMOVE `report_ref` on TCK-20261015-944c84f8 with `ConditionExpression report_ref.recorded_by = :fixture`; read it back ABSENT and print the item sha256 (it must equal PRE). Line R3 (`R3 ticket TCK-20261015-944c84f8 report_ref=ABSENT item_hash_equals_pre=YES`).
+    9. Write `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_arv33/A_RUN_AR_V33.txt` with ONE line each for F1, B1 (cite), B2, A1, S1, S2, P1, P2, R2, B3, A2, P3, U1, R1, R3 and nothing else on a line that starts with those tokens (any NOTE line starts with NOTE). No password, hash, token or cookie. Run the three checks (below); close the ledger; commit with `.tools/safe-commit.sh` on your lane; report ONCE to 2.0.0_SA_COO~V2 AND 2.0.0_SA_COO~T2 (statuses only): the three check lines, the two screenshot paths, the commit and its measured push state, the ledger id (CLOSED), and the sentence "the password lived in memory only". `~T2` then sends leg B.
+  </the_act>
+
+  <bounds>
+    - ONE users row at a time (one mint, one sign-in); ONE ticket attribute on ONE ticket (set once, removed once); one dev server, port 5174 only. No other principal, route, table, row, queue, key or function. No write to a job row, to the packaged ticket or to any other ticket attribute; no Terraform; no `aws lambda update-function-code`; no Retry press and no other button on either ticket.
+    - The failures on the job rows are `~T2`'s: do not set or remove them, do not invoke the commentary function.
+    - A STOP leaves the user removed if you minted it, the fixture removed if you wrote it, the dev server stopped if you started it, and the ledger closed with the reason; report it.
+    - If arm A reads NO words with the fixture and the failure both standing, that is a result: report it as read; do not adjust anything to make it show. Branch 2 (a precondition false) grades nothing.
+    - No transcript text, mail content, prompt text, draft text, bearer or address in any file or message.
+  </bounds>
+
+  <paths>
+    org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~IB2/logs/
+    org/critical_paths/change_management/
+    org/critical_paths/.open_deploys/
+  </paths>
+
+<preflight>
+comp-blast: RUN-AS-THE-ACT -- the blast radius is the pair's: ONE users-table row (the synthetic staff user, TTL 3 hours, removed in the same order), ONE attribute on ONE synthetic ticket (set with attribute_not_exists, removed with a conditional REMOVE, the item hash equal before and after), one dev server on 5174, the page's own reads of the status route. Rollback per key: the helper's `remove`; the conditional REMOVE; stop the process.
+comp-routes: DECLARED-NOT-APPLICABLE -- no route is added or changed; the page calls the existing status route as released.
+comp-schedule: DECLARED-NOT-APPLICABLE -- no schedule, trigger or mapping. comp-cache: DECLARED-NOT-APPLICABLE.
+comp-iam: DECLARED-NOT-APPLICABLE -- no permission changes; the rows are written and removed with the operator's own credentials as in windows 2 and 3 and sitting 1.
+comp-adversary: RUN -- by reading sitting 1's record and script, the helper and the service route against this cell; the lens: a Retry press (a new request under a new principal: forbidden), the fixture left on the ticket (the conditional REMOVE and the hash read), the fixture mistaken for step 4's real write (its `recorded_by` begins fixture: and the grade names it), a minted user left behind, a password written anywhere, a screenshot that carries a client figure (the requests are synthetic), arm B's row failure set but its page read with a typed URL, a dev server left running that this order started.
+lane: the applier's deliverables, logs, the change ledger and its sentinel.
+</preflight>
+
+<proof_of_spec>
+  <criterion id="AR33-v-AC1" cell_refs="AR-v-32"><invocation>python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V_CHECKS/ar_v33_checks.py arma</invocation><expect>V33-ARMA-OK</expect></criterion>
+  <criterion id="AR33-v-AC2" cell_refs="AR-v-32"><invocation>python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V_CHECKS/ar_v33_checks.py armb</invocation><expect>V33-ARMB-OK</expect></criterion>
+  <criterion id="AR33-v-AC3" cell_refs="AR-v-32"><invocation>python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V_CHECKS/ar_v33_checks.py restore</invocation><expect>V33-RESTORE-OK</expect></criterion>
+  <criterion id="AR33-v-AC4J" cell_refs="AR-v-32" judgment="true"/>
+</proof_of_spec>
+  Each check reads FAIL at the base (`V33-...-FAIL no-record`) and OK on a record holding the lines of step 9; the checker's `--self-test` reads `V33-SELFTEST-OK` (a good record, eight one-line mutants and one record with a password line). AR33-v-AC4J is the CVO's: arm A, the page, looked at in the screenshot, names the failed step and what happens next and stays intact (the link to the request is a hand-written fixture; the status read and the failure are real); arm B, the packaged ticket shows its package and no failure words although its row carries a failure.
+
+<expected_criteria>AR33-v-AC1,AR33-v-AC2,AR33-v-AC3,AR33-v-AC4J</expected_criteria>
+
+  <report>
+    Report ONCE to 2.0.0_SA_COO~V2 and 2.0.0_SA_COO~T2 after step 9 (statuses only): "sitting 2 done" with the three check lines, the two screenshot paths, the status route's answer for arm A (http, code, action) and the count of status reads, the user row's removal read, the fixture's removal read, the commit and its push state, the ledger id (CLOSED). Write the proof instance beside this order in `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/` (not in a subfolder: the flip gate looks there); leave the status flip to the issuer.
+  </report>
+</task_order>
