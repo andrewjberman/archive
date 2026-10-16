@@ -24,6 +24,7 @@ CAT = os.environ.get("C21_CATALOG") or GW + "/app/refs/DATA_CATALOG.yaml"
 SECS = ("silver_datasets", "portal_datasets", "harvest_datasets")
 KEYS = ("depth_kind", "measured_at")
 SERIES_FIELDS = ("total.series_start", "as_of_first")
+MOVED = tuple((os.environ.get("R21_DEF_MOVED") or "opal_describe,opal_discover").split(","))   # tools whose definition LINE moved with the 4be300110e release (MX-c-24 added 6 lines above them); path must still match
 READ = ("read_at",)   # a fresh measure moves only the read stamps; every value must still equal the live one
 
 
@@ -74,6 +75,12 @@ def ac1():
         if "freshness" in b2:
             b2["freshness"] = strip(b2["freshness"])
         a = dict(a)
+        if a.get("tool") in MOVED:
+            same_path = str(a.get("definition", "")).rsplit(":", 1)[0] == str(b2.get("definition", "")).rsplit(":", 1)[0]
+            if not same_path:
+                diff.append(a["tool"])
+            a.pop("definition", None)
+            b2.pop("definition", None)
         for hk in ("history_depth", "freshness"):
             if hk in a:
                 a[hk] = strip(a[hk])

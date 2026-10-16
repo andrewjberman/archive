@@ -1,0 +1,53 @@
+{
+  "cell": "AR-y-378",
+  "base": "origin/DEV fcbf2bce (portal worktree C:/dev/wk-irpt-anlreq-170/portal)",
+  "workspace_head_read": "9f1e81226a",
+  "finding": {
+    "question": "How does the Ticket Center know the signed-in filer's firm list, and when does the advisor login email apply?",
+    "firm_list_reader": {
+      "file": "src/pages/TicketCenter/TicketCenter.tsx",
+      "lines": "104-121",
+      "function": "loadAllowedFirms(client, internal)",
+      "internal_caller": "client.resolveDirectoryContext({ tenant: 'bootstrap', selectedTenant: 'global', requested }); keeps resolved.firms where state === 'READY' (line 114) and maps each to { id: tenant, label }",
+      "partner_caller": "client.resolveDirectoryContext({ tenant: 'bootstrap', requested }); returns resolved.permittedFirms filtered by selectable (line 120)",
+      "state_held_at": "src/pages/TicketCenter/TicketCenter.tsx lines 249-251 (firms, firmsFailed) and the read at 315-330"
+    },
+    "session_carries_allowed_firm_ids": false,
+    "session_evidence": "git grep allowedFirmIds fcbf2bce -- src (excluding tests) returns two comment lines only: src/api/endpoints/advisor-intelligence.ts:5 and src/contexts/AuthContext.tsx:828. AuthContext exposes claims (firmId, userType) and the isInternal (line 786-788, firmId 'opal-capital') and isDev (line 800-802) predicates.",
+    "server_narrowing": {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py (HEAD 9f1e81226a)",
+      "global_selection": "lines 1225-1233: selected_tenant 'global' returns global_context(...) for an internal caller",
+      "per_firm_selection_for_internal_caller": "lines 1249-1260: the users row's allowedFirmIds (_internal_allowed_firms, lines 1154-1193) narrows the selection; a firm outside a non-empty list is refused FIRM_BINDING",
+      "unrestricted": "lines 1179-1193: no attribute, a null value or an empty list returns None, which is UNCHANGED (no narrowing)",
+      "global_members": "infra/aws/lambda/investor-reporting/directory/entry.py lines 414-456: each tenant is resolved through the guarded boundary; a refused member is UNAVAILABLE with its reason, a READY member carries its scope"
+    },
+    "applies_when": "auth.isInternal() || auth.isDev() (the form's staff predicate, TicketCenter.tsx:211) AND the firm the form files under is one of the READY firms (advisorLoginEmailApplies in AnalysisRequestParts.tsx). A partner is never asked: the door's rule is documented for an internal subject's CREATE (served.py:1063-1073).",
+    "caveat": "An internal caller whose users row carries no allowedFirmIds (or an empty list) is unrestricted: every firm is READY, so the client cannot tell that filer from a listed one. Its door would not demand an advisor, and a present advisor_email would change the owner to the named advisor. Filed as surprise row IRPT_ANLREQ-D2-W170-S4 (ARMED, disarm owner 1.0.0_SA_CTO).",
+    "stop_check": "The form does have a way to read the filer's list (the served READY set, which the portal's own comment at TicketCenter.tsx:96-99 calls the profile's allowed firms), so no STOP was taken. The caveat above is the residue."
+  },
+  "refusal_body": {
+    "source": "infra/aws/lambda/investor-reporting/_authz/served.py (HEAD 9f1e81226a): refuse() at line 453, status_envelope() at line 339, REFUSAL_STATE at line 199; the upload handler's except clause (just above line 1062) maps a ProspectOwnershipRefused to the code NOT_AUTHORIZED and then calls refuse()",
+    "shape": {
+      "ok": false,
+      "contract_version": "the server's CONTRACT_VERSION (present)",
+      "operation": "the operation id (present)",
+      "firm_id": "carried when known, omitted when not",
+      "status": {
+        "operation": "{ operation_id, operation_kind, revision }",
+        "state": "UNAVAILABLE (REFUSAL_STATE)",
+        "source_dates": "{ source_completion_date }",
+        "actions": "the safe action list (default)",
+        "public_reason_code": "a closed code, e.g. NOT_AUTHORIZED"
+      }
+    },
+    "not_in_body": [
+      "any message text (the door's reason words, for example 'an on-behalf upload must name the firm advisor' or 'advisor profile absent, disabled or of another firm', are written to the server log by _record and are not returned)",
+      "internal_correlation_id (removed from the public status)"
+    ],
+    "http_status": "refuse() returns a dict with ok false and no statusCode, which the HTTP API passes as 200 (the S157 row, IRPT_ANLREQ-D2-S157, world_is, cites served.py:483-499 for this)",
+    "client_path": "src/api/endpoints/investor-reporting.ts send() (about line 1059): an envelope-shaped body is parsed; a refused one throws IrRequestError(message, operation, httpStatus, publicReasonCode) (class at line 938); the publicReasonCode is the closed code",
+    "form_path": "analysisRequest.ts uploadRefusalCode(e) returns the code from FilingStepError(step 'upload').original; TicketCenter.tsx sets uploadReport.refusal; UploadFindings renders it under the failure sentence UPLOAD_FAILED_SENTENCE",
+    "consequence": "The refusal the form can show is the closed code only. A wrong login email and every other NOT_AUTHORIZED refusal look the same to the filer; the door's own words are not shown, because the body does not carry them. Not exercised against the live door."
+  },
+  "gateway": "Whether the gateway forwards the advisor_email query member to the door was not read (not_read)."
+}
