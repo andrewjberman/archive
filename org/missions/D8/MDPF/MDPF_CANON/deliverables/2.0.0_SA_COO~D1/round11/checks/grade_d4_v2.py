@@ -20,6 +20,11 @@ VOLATILE = ("/_provenance/process_time", "/_provenance/trigger", "/_provenance/s
 res = []
 
 
+def vol(p):
+    """a volatile path: the named ones, or any nested generated_at timestamp"""
+    return p in VOLATILE or p.endswith("/generated_at")
+
+
 def arm(name, ok, note=""):
     res.append(bool(ok))
     print("  %-4s %s %s" % (name, "PASS" if ok else "FAIL", note))
@@ -106,7 +111,7 @@ def main():
     for s in ("49financial", "inflection"):
         for t in TYPES:
             for p in diffs(old[(s, t)], new[(s, t)]):
-                if p in VOLATILE or p.startswith("/nodes/Models/children/Custom/members"):
+                if vol(p) or p.startswith("/nodes/Models/children/Custom/members"):
                     continue
                 odd.append((s, t, p))
     arm("V9", not odd, "49financial/inflection differ only in volatile fields and the Custom members list (%d other)" % len(odd))
@@ -115,7 +120,7 @@ def main():
         other = []
         for key in new:
             for p in diffs(prev[key], new[key]):
-                if p not in VOLATILE:
+                if not vol(p):
                     other.append((key, p))
         arm("V10", not other and set(prev) == set(new), "identical to the earlier graded response except volatile paths (%d other)" % len(other))
     ok = all(res)
