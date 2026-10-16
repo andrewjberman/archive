@@ -1,6 +1,6 @@
 """c26_check.py -- grades MX-c-26 (the 49F live opal-data-bd tables: four NEW catalog rows, the eight frozen-copy rows back in their own bucket, the `address` field), from the repo root.
 
-  python c26_check.py ac1   the four NEW live rows (unrealized, transactions, allocations, fees): entry file opal_data_bd_silver_<t>.yaml with prefix silver/<t>/, table <t>, layer silver,
+  python c26_check.py ac1   the four NEW live rows (unrealized, transactions, allocations, fees): entry file blackdiamond_live_<t>.yaml with prefix silver/<t>/, table <t>, layer silver,
                             `address` blackdiamond/49f-live/silver/<t>/, read_tool the mapped client tool, not retired, no gap_owner, and not the legacy open item "do not build a tool on this prefix" (a live row MAY point at the frozen copy, as the face requires); freshness.latest_partition EQUAL
                             to the newest YYYY-MM-DD.parquet the aws CLI lists under s3://opal-data-bd/silver/<t>/ now, claim measured, trading_days_behind_t1 equal to the trading calendar's;
                             the issuer's group map round19/live_bd_group_map.json maps the four to bucket opal-data-bd, vendor blackdiamond, firm 49financial
@@ -62,7 +62,7 @@ def ac1():
     gm = (json.load(open(LIVE_MAP, encoding="utf-8")).get("rows") or {}) if os.path.exists(LIVE_MAP) else {}
     res, found = [], 0
     for t, tool in TOOLS.items():
-        ent = "opal_data_bd_silver_" + t
+        ent = "blackdiamond_live_" + t
         e = entry(ent)
         if e is None:
             res.append(("%s: entry file present" % ent, False))
@@ -92,10 +92,10 @@ def ac1():
     import emit_catalog_v02 as em
     rows, ents = [], {}
     for t in TOOLS:
-        e = entry("opal_data_bd_silver_" + t)
+        e = entry("blackdiamond_live_" + t)
         if e is not None:
-            ents["opal_data_bd_silver_" + t] = e
-            rows.append(em.silver_catalog_row("opal_data_bd_silver_" + t, e))
+            ents["blackdiamond_live_" + t] = e
+            rows.append(em.silver_catalog_row("blackdiamond_live_" + t, e))
     spec, gerrs = em.load_group_maps([LIVE_MAP]) if os.path.exists(LIVE_MAP) else ({}, ["live map absent"])
     applied, unused, conflicts = em.apply_group_map({"silver_datasets": rows, "portal_datasets": [], "harvest_datasets": []}, spec)
     good = [r for r in rows if r.get("bucket") == "opal-data-bd" and r.get("vendor") == "blackdiamond" and r.get("firm") == "49financial"
