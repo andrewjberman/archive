@@ -2,6 +2,7 @@
 scope and tests grade the real tree (a fresh generator run, the new test file), so their PASS arm is not plantable; the base FAIL is the arm for those.
 Prints one line per arm and `PLANTED k of n`. Exit 0 when every arm behaves."""
 import copy
+import json
 import os
 import subprocess
 import sys
@@ -14,6 +15,7 @@ sys.path.insert(0, HERE)
 import c30_check as c  # noqa: E402
 
 base = c.base_catalog()
+EXCL = json.load(open(c.R18 + "/entity_exclusions.json", encoding="utf-8"))["entities"]
 
 
 def good():
@@ -23,7 +25,7 @@ def good():
             r["bucket"] = "dynamodb"
     for r in d["portal_datasets"]:
         r["bucket"] = "opal-data-portal-v2"
-    d["silver_datasets"] = [r for r in d["silver_datasets"] if r["entity"] not in c.DROPPED]
+    d["silver_datasets"] = [r for r in d["silver_datasets"] if r["entity"] not in c.DROPPED and r["entity"] not in EXCL]
     for sec in ("portal_datasets", "harvest_datasets"):
         for r in d[sec]:
             if r.get("nl_tags_basis") == "inferred":
@@ -46,7 +48,7 @@ arms = []
 g = good()
 arms.append(("good catalog passes bucket", run(g) == 0))
 x = copy.deepcopy(g)
-x["silver_datasets"][[r["entity"] for r in x["silver_datasets"]].index("dynamodb_opal_tickets")]["bucket"] = "none (DynamoDB us-east-1)"
+x["silver_datasets"][[r["entity"] for r in x["silver_datasets"]].index("dynamodb_dynamodb_opal_keyword_intelligence")]["bucket"] = "none (DynamoDB us-east-1)"
 arms.append(("a prose dynamodb bucket fails", run(x) != 0))
 x = copy.deepcopy(g)
 x["portal_datasets"][0].pop("bucket")
@@ -68,6 +70,9 @@ x["silver_datasets"][0]["business_meaning"] = "changed"
 if x["silver_datasets"][0]["entity"].startswith(c.RESEARCH_PREFIX):
     x["silver_datasets"][1]["business_meaning"] = "changed"
 arms.append(("a changed non-bucket field fails", run(x) != 0))
+x = copy.deepcopy(g)
+x["silver_datasets"].append(copy.deepcopy(next(r for r in base["silver_datasets"] if r["entity"] in EXCL)))
+arms.append(("an excluded entity still in the catalog fails", run(x) != 0))
 x = copy.deepcopy(g)
 x["needs"] = x["needs"][:-1]
 arms.append(("a changed top-level section (needs) fails", run(x) != 0))
