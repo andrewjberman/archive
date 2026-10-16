@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cb-11.a-job-derives-its-backfill-bound-from-local-state",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cb-11.a-job-derives-its-backfill-bound-from-local-state.md",
+    "group": "OTHER",
+    "vintage_commit": "3467e51337"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "3467e51337",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cb-11.a-job-derives-its-backfill-bound-from-local-state.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~147",
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~147/session.log",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/harvest_grammar.py",
+      "kind": "script",
+      "commit_or_etag": "40db997c81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only: backfill_bound gains local_watermark (sentinel _NOT_GIVEN keeps the S3 watermark path when unset). Not deployed; no publisher, S3 or box touched.",
+      "introduces": [
+        "local_watermark"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/worker.py",
+      "kind": "script",
+      "commit_or_etag": "40db997c81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only: _local_watermark and _note_local_watermark added; the backfill call site reads the local mark; the mark is noted only after an article is stored. Not deployed.",
+      "introduces": [
+        "_note_local_watermark"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_cb11_local_watermark.py",
+      "kind": "test",
+      "commit_or_etag": "40db997c81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 passed: the three backfill_bound arms, the S3-path arm, the no-silver job arm, the stored/held/raising mark arms, the never-backward arm, and the mutant arm; no network, no S3, no browser.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b865a983b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_HARVST-D1-W147-S1 appended by bytes (23 insertions, 0 deletions); the fenced array parses with 425 rows.",
+      "introduces": [
+        "AMGT_HARVST-D1-W147-S1"
+      ],
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_cb11_local_watermark.py -q -p no:cacheprovider --color=no expects (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_cb11_local_watermark.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^\\d+ passed in",
+      "output_evidence": "13 passed in 0.45s (rc 0; run under timeout 120, also run before the commit)",
+      "denominator": "13 of 13 tests in test_cb11_local_watermark.py, 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest test_worker, test_br2_cycle_runner, test_bv1_cycle_continues_past_pair_errors, test_eg1_silver_cache, test_bf1_job_record, test_o1_run_record_reach, test_n1_received_bytes_and_run_record, test_bh8_job_finished_at, test_ae4_backfill_driver -q -p no:cacheprovider --color=no expects (?m)^125 passed, 4 subtests passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_br2_cycle_runner.py lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py lib/opal_data_harvest/test_eg1_silver_cache.py lib/opal_data_harvest/test_bf1_job_record.py lib/opal_data_harvest/test_o1_run_record_reach.py lib/opal_data_harvest/test_n1_received_bytes_and_run_record.py lib/opal_data_harvest/test_bh8_job_finished_at.py lib/opal_data_harvest/test_ae4_backfill_driver.py -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^125 passed, 4 subtests passed in",
+      "output_evidence": "125 passed, 4 subtests passed in 19.89s (rc 0; run under timeout 120)",
+      "denominator": "125 of 125 tests across the 9 named files, 4 of 4 subtests, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any run against a publisher, S3, Secrets Manager, any box's progress.sqlite3, or a browser",
+      "reason": "Order section 2 forbids it; the cell is local code and fakes."
+    },
+    {
+      "item": "Seeding the local mark for pairs with pre-change articles, and the pairs whose candidates are all already held",
+      "reason": "Not in the order; filed as surprise AMGT_HARVST-D1-W147-S1 for the issuer's ruling."
+    },
+    {
+      "item": "__main__.py plan --with-watermark S3 read",
+      "reason": "Order section 1.a: deliberately left on the S3 path; __main__.py is outside <paths>."
+    },
+    {
+      "item": "Task-order status flip to complete",
+      "reason": "The order says the issuer flips its status; the file is outside <paths>."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W147-S1: a pair with no local wm| mark (a pre-change progress database, or a pair whose candidates are all already held) is bounded at the floor and re-pages on every job."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~147 <0.9.0_WK_AMGT_HARVST~147@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "committed 40db997c81 (build, 3 files, 251 insertions, 5 deletions) and b865a983b3 (surprise row, 23 insertions)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Wrapper replacing harvest_grammar.backfill_bound ignores local_watermark and calls the original watermark path; the no-silver job arm must then fail.",
+      "expected": "test_mutant_that_ignores_local_watermark_fails_arm_3 PASSES: the arm-3 assertion raises AssertionError and the silver read is recorded",
+      "observed": "13 passed with the mutant test included; the mutant's silver read is recorded (self.silver_reads non-empty) and arm 3 raises",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice (before and after the commit); AC2 run once after the commit and once before it",
+      "observed": "AC1 13 passed both runs; AC2 125 passed, 4 subtests passed both runs",
+      "status": "STABLE"
+    }
+  }
+}
