@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cu-1",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round99.md",
+    "vintage_commit": "a3e1619245",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cu-1.store-derived-yahoo-set-vs-served-labels.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cu-1.store-derived-yahoo-set-vs-served-labels.md",
+    "group": "OTHER",
+    "vintage_commit": "a3e1619245"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~188",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~188/STORE_DERIVED_YAHOO_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement record; no S3 write, no serve, no apply; counts only",
+      "artifact_covered_by": [
+        "CB99cu1-AC1",
+        "CB99cu1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~188/STORE_DERIVED_YAHOO_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "short record beside the JSON; counts only",
+      "artifact_covered_by": [
+        "CB99cu1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB99cu1-AC1",
+      "criterion_verbatim": "`CB99cu1-AC1` -- the record states the store-derived and served set sizes and whether they are equal, or states plainly why nothing could be measured.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~188/STORE_DERIVED_YAHOO_RECORD.json',encoding='utf-8'));m=d['measured'];s=d.get('sets') or {};print('STORE-DERIVED measured=%s' % m + ((' x=%d s=%d a=%d b=%d equal=%s' % (s['X'],s['S'],s['A'],s['B'],d['equal'])) if m else ' reason=%s' % d['reason']))\"",
+      "expect": "^STORE-DERIVED measured=(True x=\\d+ s=\\d+ a=\\d+ b=\\d+ equal=(True|False)|False reason=.+)$",
+      "output_evidence": "STORE-DERIVED measured=True x=475103 s=2034027 a=471379 b=471195 equal=False",
+      "denominator": "stores fresh-read (6 of 6, cache=False); X=475103 S=2034027 A=471379 B=471195 A-and-B=471195 A-minus-B=184 B-minus-A=0; served VersionId matches; 21102041 served rows read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB99cu1-AC2",
+      "criterion_verbatim": "`CB99cu1-AC2` -- the set arithmetic closes: A and B each split into the shared part and their own remainder, `equal` agrees with both remainders being zero, and when they differ the listed categories add up to the whole difference.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~188/STORE_DERIVED_YAHOO_RECORD.json',encoding='utf-8'));s=d.get('sets') or {};ok=(not d['measured']) or (s['A']==s['A_and_B']+s['A_minus_B'] and s['B']==s['A_and_B']+s['B_minus_A'] and d['equal']==(s['A_minus_B']==0 and s['B_minus_A']==0) and (d['equal'] or sum(c['points'] for c in d['difference_categories'])==s['A_minus_B']+s['B_minus_A']));print('STORE-DERIVED-SUMS consistent=%s' % ok)\"",
+      "expect": "^STORE-DERIVED-SUMS consistent=True$",
+      "output_evidence": "STORE-DERIVED-SUMS consistent=True",
+      "denominator": "A=A_and_B+A_minus_B (471379=471195+184); B=A_and_B+B_minus_A (471195=471195+0); equal=False agrees with the two remainders; categories 151+33=184 = A_minus_B+B_minus_A",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB99cu1-AC3",
+      "criterion_verbatim": "`CB99cu1-AC3` -- the cell wrote nothing: the three served keys still carry the VersionIds the round-98 apply left. The issuer's script reads object metadata only; read it, do not edit it.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cu1_ac3_served_unchanged_check.py",
+      "expect": "^SERVED-UNCHANGED versions_equal=3 of 3$",
+      "output_evidence": "SERVED-UNCHANGED versions_equal=3 of 3",
+      "denominator": "3 of 3 served keys carry the round-98 VersionIds (metadata read only)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the as-traded substitution",
+      "reason": "the order says not to apply it; the 184 differing points are reported with the store frame's own labels"
+    },
+    {
+      "item": "store content comparison with round 97",
+      "reason": "the order forbids reusing the round-97 cache; only the six row counts were compared"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W188-S1: 151 served priced points (79 securities) that the fresh store frame credits to the silver canonical store as linear_interpolation carry a NOT_YAHOO served label, because the round-97 price file credits the same day to the gold holdings store (bd_snapshot) and the served row is priced from it; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W188-S2: 33 points (3 securities), the same pattern with the bbg testpull store (bloomberg_stored); OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~188/ADVI_COTBKF.TO-CB-cu-1.store-derived-yahoo-set-vs-served-labels.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -I cu1_derive.py store (scratch, off git; the regrade's own loaders from the worktree)",
+      "invocation": "python -I C:/Dev/ajb_workspace/.scratch/cotbkf_r99/cu1_derive.py store",
+      "result": "UNIVERSE securities=4634; STORE rows 2138920 / 594318 / 209 / 132015 / 0 / 0, cache=False; FRAME rows=2123860"
+    },
+    {
+      "tool": "python -I cu1_derive.py compare (scratch, off git)",
+      "invocation": "python -I C:/Dev/ajb_workspace/.scratch/cotbkf_r99/cu1_derive.py compare",
+      "result": "SERVED VersionId_match=True rows_read=21102041; SETS X=475103 S=2034027 A=471379 B=471195 A_and_B=471195 A_minus_B=184 B_minus_A=0"
+    },
+    {
+      "tool": "python -I write_record.py (scratch, off git)",
+      "invocation": "python -I C:/Dev/ajb_workspace/.scratch/cotbkf_r99/write_record.py",
+      "result": "RECORD-WRITTEN categories=2 equal=False"
+    }
+  ]
+}
