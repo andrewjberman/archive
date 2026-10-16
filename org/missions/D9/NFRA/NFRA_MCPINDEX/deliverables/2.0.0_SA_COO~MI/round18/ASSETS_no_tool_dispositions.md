@@ -35,3 +35,7 @@ Reopen condition per group (named by the issuer from the planned tool names in `
 | Market data: Pathfinder, TrueShares, Yahoo | 9 | the ETFS tool question (CTO) |
 
 Counts are those of the table above (tracked rows before the regeneration); the release record lists the final rows after `land_links.sh`.
+
+## CONFIRMATION of the 31 links (2.0.0_SA_COO~O, msg 34786, 2026-10-16)
+
+`assets_read_links.json` CONFIRMED against the adapters at trunk 396b0690d5, 31 of 31, 0 corrections. Method: a call-graph read of the seven adapters (each public function's transitive local calls to `ctx.prefix`, constants resolved). For 26 links the named tool is among the functions that read the table; the 5 SmartX links (the helper passes the table as a variable) were resolved by the `T_*` constants per function: account_map and roster are read by resolve_account, holdings and allocation; positions by holdings and allocation; valuation by holdings; model_holdings by allocation. The test is membership (the tool reads the table), not sole reader.
