@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-YCHARTS-UNKNOWNS.unknown-symbols-and-price-probe-ib2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-YCHARTS-UNKNOWNS.unknown-symbols-and-price-probe-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "5ffaa8d482"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R51_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-YCHARTS-UNKNOWNS.unknown-symbols-and-price-probe-ib2.md",
+  "vintage_commit": "5ffaa8d482"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/UNKNOWN_READ.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "script 1 stdout verbatim: after a 390 s rest, calls 1 to 6 CLEAN, call 7 (the 4th unknown lookup) CHALLENGED; RESULT first_challenged_call=7 calls=7 unknown_lookups=4; VERDICT cutoff consistent with a count of 6 calls per window",
+   "artifact_covered_by": [
+    "UNKNOWNS-AC1",
+    "UNKNOWNS-AC3"
+   ],
+   "commit_or_etag": "03768568b7"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/PRICE_PROBE.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "script 2 stdout verbatim: three fund_data calls all refused (two through the stored session PRICE_HTTP_400, one signed out status 400)",
+   "artifact_covered_by": [
+    "UNKNOWNS-AC2",
+    "UNKNOWNS-AC3"
+   ],
+   "commit_or_etag": "994446e4c5"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "UNKNOWNS-AC1",
+   "invocation": "grep -c -E '^UNK (RESULT first_challenged_call=|VERDICT )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/UNKNOWN_READ.txt",
+   "expect": "^2$",
+   "output_evidence": "2\nexit=0",
+   "denominator": "18 lines in the record, 2 matching: one RESULT and one VERDICT",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^UNK (RESULT first_challenged_call=|VERDICT )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/UNKNOWN_READ.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "UNKNOWNS-AC2",
+   "invocation": "grep -c -E '^YCP RESULT id_form=' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/PRICE_PROBE.txt",
+   "expect": "^1$",
+   "output_evidence": "1\nexit=0",
+   "denominator": "12 lines in the record, 1 matching: the RESULT line",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^YCP RESULT id_form=' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/PRICE_PROBE.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "UNKNOWNS-AC3",
+   "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/UNKNOWN_READ.txt org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/PRICE_PROBE.txt | grep -c -E 'crumb=[A-Za-z0-9]'",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1",
+   "denominator": "30 lines in both records, 0 carrying a crumb value (grep exits 1 on a zero count)",
+   "status": "PASS",
+   "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/UNKNOWN_READ.txt org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/PRICE_PROBE.txt | grep -c -E 'crumb=[A-Za-z0-9]'",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "both scripts hashed against the order before sending; each sent once as root through Systems Manager; the saved output is the command's stdout",
+   "observed": "hashes equal; Status Success rc 0 for both",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the criteria grade the records' shape only",
+   "reason": "the order's criteria count RESULT, VERDICT and crumb lines; the findings (a challenge at call 7 and HTTP 400 on every fund_data call) are reported to the three seats, not graded here"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34h/UNKNOWN_READ.txt",
+ "compiler_tools": [
+  {
+   "tool": "ssm_root_long.py and ssm_root_600.py (boto3 Systems Manager sender, hash-checked; ExecutionTimeout 3600 and 600), pace_busy5.sh for the 5-minute busy read",
+   "invocation": "busy check, script 1 once, 960 s wait, script 2 once",
+   "result": "UNK RESULT first_challenged_call=7; YCP RESULT id_form=ERROR:PriceTransportRefused"
+  }
+ ]
+}
