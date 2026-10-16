@@ -1,0 +1,28 @@
+{
+  "root": "infra/aws/terraform/investor-reporting/reporting-publish-iso/",
+  "new_names": [
+    "irpt-cot-reporting-publish-scheduler-role",
+    "irpt-cot-reporting-publish-scheduler-policy",
+    "irpt-cot-reporting-publish-daily"
+  ],
+  "new_resources": [
+    "aws_iam_role.irpt_reporting_publish_iso_scheduler",
+    "aws_iam_role_policy.irpt_reporting_publish_iso_scheduler",
+    "aws_scheduler_schedule.irpt_reporting_publish_iso"
+  ],
+  "expected_plan": {
+    "add": 3,
+    "change": 0,
+    "destroy": 0,
+    "claim": "inferred"
+  },
+  "schedule": {
+    "cron": "cron(30 9 ? * MON-FRI *)",
+    "zone": "America/New_York",
+    "state": "DISABLED",
+    "input": {
+      "upload": true
+    }
+  },
+  "words": "The root reporting-publish-iso declares, on top of its base, a scheduler role, one role policy and one schedule. The role's policy grants lambda:InvokeFunction on the publish function's ARN and nothing else. The schedule fires cron(30 9 ? * MON-FRI *) in America/New_York with the flexible window OFF, targets the function ARN with the input {\"upload\": true}, and is created in state DISABLED. main.tf, locals.tf and lambda.tf are byte-identical to the base; iam.tf keeps its base text as a prefix and only appends; schedule.tf is new. The checker proved the HCL shape (AC1), that the real naming gate grades the three builder names CONFORMANT in plan mode (AC2), and that this record equals the recount (AC3). The appended HCL takes its scope from the root's existing firm local, not the local the face named (surprise row IRPT_DASHBD-D2-W232-S1). NOT PROVEN: no terraform plan was run, so the 3 add / 0 change / 0 destroy is inferred; nothing was applied, uploaded or invoked; the schedule has never fired; enabling it is a separate word and a later one-line change under its own pair."
+}
