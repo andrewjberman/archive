@@ -1,0 +1,170 @@
+aws_iam_role.gw: Refreshing state... [id=opal-gateway-role]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_iam_role.bdlive_read will be created
+  + resource "aws_iam_role" "bdlive_read" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/opal-gateway-role"
+                        }
+                      + Sid       = "OnlyOpalGatewayRole"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "gateway-49f-blackdiamond-live-read-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Name"    = "gateway-49f-blackdiamond-live-read-role"
+          + "Project" = "NFRA_OPLGTW"
+          + "Purpose" = "client-blackdiamond49f-live-silver-read"
+        }
+      + tags_all              = {
+          + "Environment" = "Production"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "gateway-49f-blackdiamond-live-read-role"
+          + "Project"     = "NFRA_OPLGTW"
+          + "Purpose"     = "client-blackdiamond49f-live-silver-read"
+          + "System"      = "OpalGateway"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.bdlive_read will be created
+  + resource "aws_iam_role_policy" "bdlive_read" {
+      + id          = (known after apply)
+      + name        = "gateway-49f-blackdiamond-live-read-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                          + "s3:ListBucket",
+                        ]
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-bd",
+                          + "arn:aws:s3:::opal-data-bd/silver/unrealized/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/transactions/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/allocations/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/fees/*",
+                        ]
+                      + Sid       = "DenyNonReadS3Actions"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-bd/silver/unrealized/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/transactions/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/allocations/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/fees/*",
+                        ]
+                      + Sid         = "DenyReadsOutsideTheApprovedPrefixes"
+                    },
+                  + {
+                      + Action      = "s3:ListBucket"
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-bd",
+                        ]
+                      + Sid         = "DenyListingOtherBuckets"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringNotLike = {
+                              + "s3:prefix" = [
+                                  + "silver/unrealized/*",
+                                  + "silver/transactions/*",
+                                  + "silver/allocations/*",
+                                  + "silver/fees/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + Resource  = "arn:aws:s3:::opal-data-bd"
+                      + Sid       = "DenyListingOutsideTheApprovedPrefixes"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-bd/silver/unrealized/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/transactions/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/allocations/*",
+                          + "arn:aws:s3:::opal-data-bd/silver/fees/*",
+                        ]
+                      + Sid      = "AllowApprovedObjectReads"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "silver/unrealized/*",
+                                  + "silver/transactions/*",
+                                  + "silver/allocations/*",
+                                  + "silver/fees/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-bd"
+                      + Sid       = "AllowApprovedPrefixListing"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + opal_gateway_bdlive_read_role_arn = (known after apply)
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
