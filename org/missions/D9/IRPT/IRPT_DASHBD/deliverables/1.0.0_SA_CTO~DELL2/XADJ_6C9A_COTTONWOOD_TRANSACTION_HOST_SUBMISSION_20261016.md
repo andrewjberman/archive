@@ -25,3 +25,13 @@ Nothing is out of pattern; option (1) is the 49 Financial shape. Only the host f
 - (3) first: the cleanest blast radius, but a new function, root and schedule when an existing writer of the same firm's day may fit. It is
   kept as the fallback.
 - (2): rejected, for the reason above.
+
+## UPDATE (2026-10-16 ~22:5xZ): the sizing read is in, and option (1) meets both conditions
+`~F2`'s record `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/R137_COTTONWOOD_SIZING_READ.md` @8790956ee0:
+- the landing function's role already lists and reads Cottonwood's `fact_transactions` silver, so no new read grant is needed;
+- the last scheduled fire took 10.7 s at 331 MB of 1,024 MB;
+- one real day run offline took 8,512 rows, 3.1 s and about 70 MB more.
+
+The one grant is a PutObject on the new `account_transaction` prefix, as a NEW statement of its own: the existing statement is named for
+exactly one prefix ("...OneAccountReturnDailyGoldPrefixOnly"), and a second resource under that name would make it false. Position
+unchanged: (1).
