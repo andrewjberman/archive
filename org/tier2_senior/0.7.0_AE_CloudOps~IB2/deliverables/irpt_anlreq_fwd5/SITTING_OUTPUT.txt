@@ -1,0 +1,31 @@
+MINT run MINT-OK READBACK-OK
+MINT run MINT-SCOPE allowedFirmIds=cottonwood entitlement_rows=0
+MINT run rc=0 verdict=OK
+MINT control MINT-OK READBACK-OK
+MINT control MINT-SCOPE allowedFirmIds=49financial entitlement_rows=0
+MINT control rc=0 verdict=OK
+INDEX run email-index count 1 after 0 s
+INDEX control email-index count 1 after 0 s
+CONTROL CONTROL IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-ib2 principal=7b925797fd61 firm-a=opal-capital firm-b=49financial
+CONTROL EXCLUDED commentary-draft: the commentary draft has no GET route; it rides the ticket read body, which the LEAK check inspects
+CONTROL EXCLUDED meeting: a POST of a meeting is a write attempt on another firm's ticket, outside the DONE WHEN (its scope refusal is proved offline by infra/aws/lambda/ticket_center/tests/test_cross_firm_meeting_scope.py)
+CONTROL FWD5-CONTROL rc=0 ticket-read=ALLOWED ticket-list=ALLOWED ALLOWED=6 DENIED=1 UNREACHED=0 EXCLUDED=2 of 9 rows report=org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_fwd5/fwd5_control_report.json
+CONTROL exit=0
+FIRM-B RUN IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-ib2 principal=28cb5947d068 firm-a=cottonwood firm-b=49financial
+FIRM-B EXCLUDED commentary-draft: the commentary draft has no GET route; it rides the ticket read body, which the LEAK check inspects
+FIRM-B EXCLUDED meeting: a POST of a meeting is a write attempt on another firm's ticket, outside the DONE WHEN (its scope refusal is proved offline by infra/aws/lambda/ticket_center/tests/test_cross_firm_meeting_scope.py)
+FIRM-B FWD5-RUN rc=1 REFUSED=3 LEAK=4 UNREACHED=0 EXCLUDED=2 of 9 rows report=org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_fwd5/fwd5_run_report.json
+FIRM-B exit=1 (0 all REFUSED; 1 a LEAK; 2 an UNREACHED call)
+CHECK control R56-CONTROL-OK ticket-read ALLOWED, ticket-list ALLOWED, rc 0; commentary-draft=EXCLUDED,commentary-pdf=ALLOWED,form-as-filled=DENIED,meeting=EXCLUDED,opal-report=ALLOWED,original-upload=ALLOWED,report-pdf=ALLOWED,ticket-list=ALLOWED,ticket-read=ALLOWED
+CHECK report R56-REPORT-FAIL counts are {'REFUSED': 3, 'LEAK': 4, 'UNREACHED': 0, 'EXCLUDED': 2}, not 7/0/0/2
+CHECK fence R56-FENCE-FAIL run report: counts are {'REFUSED': 3, 'LEAK': 4, 'UNREACHED': 0, 'EXCLUDED': 2}, not 7/0/0/2
+REMOVE REMOVE-OK deleted
+REMOVE ABSENT GSI <principal>
+REMOVE ABSENT CONSISTENT <principal>
+REMOVE rc=0
+REMOVE REMOVE-OK deleted
+REMOVE ABSENT GSI <principal>
+REMOVE ABSENT CONSISTENT <principal>
+REMOVE rc=0
+CHECK absent R56-ABSENT-OK both principals: no PROFILE row (consistent), index count 0
+EXITS control=0 firm_b=1
