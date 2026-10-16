@@ -103,7 +103,16 @@ def check_handler(src):
         kw = {k.arg: k.value for k in c.keywords}
         need("classification_as_of" in kw, "an emit_class_day call in emit_classes does not pass classification_as_of")
         seg = ast.get_source_segment(src, kw["classification_as_of"]) or ""
-        need("as_of" in seg, "classification_as_of must come from the class table's as_of(), read %r" % seg[:60])
+        need("_CLASS_TABLE" in seg and "as_of" in seg and "default_table" not in seg,
+             "classification_as_of must come from the ClassTable THIS RUN read through (module global _CLASS_TABLE.as_of()), never default_table(); read %r" % seg[:80])
+    cd = next((n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "class_days"), None)
+    need(cd is not None, "the handler has no class_days")
+    need(any(isinstance(n, ast.Global) and "_CLASS_TABLE" in n.names for n in ast.walk(cd)), "class_days must declare `global _CLASS_TABLE`")
+    sets = [n for n in ast.walk(cd) if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "_CLASS_TABLE" for t in n.targets)]
+    need(sets, "class_days must assign _CLASS_TABLE the table it passes to compute_classes")
+    passes = [k for n in ast.walk(cd) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "compute_classes" for k in n.keywords if k.arg == "table"]
+    need(passes and all("ClassTable()" not in (ast.get_source_segment(src, k.value) or "") for k in passes), "compute_classes must receive the SAME table object that _CLASS_TABLE holds, not a fresh ClassTable() expression")
+    need(any(isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "_CLASS_TABLE" for t in n.targets) for n in tree.body), "the module must define _CLASS_TABLE at top level (None until class_days runs)")
     return len(calls)
 
 
@@ -285,11 +294,18 @@ def selftest():
     assert check_unchanged(base_src, base_src.replace("return 9", "return 90") + "\ndef extra():\n    return 0\n") == len(UNCHANGED)
     for nm in UNCHANGED:
         red(lambda: check_unchanged(base_src, base_src.replace("def %s():\n    return" % nm, "def %s():\n    return 100 +" % nm)), "changed " + nm)
-    h = "def emit_classes(s3, firm, days, upload):\n    for day in days:\n        res = acd.emit_class_day(s3, rows[day], firm, day, upload=upload, classification_as_of=acd.default_table().as_of())\n"
+    h = ("_CLASS_TABLE = None\n\n\ndef class_days(s3, firm, days):\n    global _CLASS_TABLE\n    table = acd.ClassTable()\n    _CLASS_TABLE = table\n    return acd.compute_classes(s3, 1, firm, days, table=table)\n\n\ndef emit_classes(s3, firm, days, upload):\n    for day in days:\n        res = acd.emit_class_day(s3, rows[day], firm, day, upload=upload, classification_as_of=(_CLASS_TABLE.as_of() if _CLASS_TABLE is not None else None))\n")
+    ARG = ", classification_as_of=(_CLASS_TABLE.as_of() if _CLASS_TABLE is not None else None)"
+    EXPR = "(_CLASS_TABLE.as_of() if _CLASS_TABLE is not None else None)"
     assert check_handler(h) == 1
-    red(lambda: check_handler(h.replace(", classification_as_of=acd.default_table().as_of()", "")), "no kw")
-    red(lambda: check_handler(h.replace("acd.default_table().as_of()", "'2026-01-01'")), "typed date")
-    red(lambda: check_handler("def other():\n    pass\n"), "no emit_classes")
+    red(lambda: check_handler(h.replace(ARG, "")), "no kw")
+    red(lambda: check_handler(h.replace(EXPR, "acd.default_table().as_of()")), "default_table")
+    red(lambda: check_handler(h.replace(EXPR, "'2026-01-01'")), "typed date")
+    red(lambda: check_handler(h.replace("    global _CLASS_TABLE" + chr(10), "")), "no global")
+    red(lambda: check_handler(h.replace("    _CLASS_TABLE = table" + chr(10), "")), "no assign")
+    red(lambda: check_handler(h.replace("table=table)", "table=acd.ClassTable())")), "fresh table passed")
+    red(lambda: check_handler(h.replace("_CLASS_TABLE = None" + chr(10) + chr(10) + chr(10), "", 1)), "no module global")
+    red(lambda: check_handler("def other():" + chr(10) + "    pass" + chr(10)), "no emit_classes")
     base = {"contract_version": "0.1.0", "class_source": {"table": "t", "key": "k", "read": "GetItem"}, "x": 1}
     good = copy.deepcopy(base)
     good["contract_version"] = "0.1.1"
@@ -313,7 +329,7 @@ def selftest():
         r2 = copy.deepcopy(rec)
         fn(r2)
         red(lambda: check_facts(r2, 7), label)
-    print("selftest: unchanged (%d red arms), handler (3), contract (%d), grant (2) and facts (%d) clauses behave" % (len(UNCHANGED), len(arms), len(farms)))
+    print("selftest: unchanged (%d red arms), handler (8), contract (%d), grant (2) and facts (%d) clauses behave" % (len(UNCHANGED), len(arms), len(farms)))
     print("selftest PASS")
 
 
