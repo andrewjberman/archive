@@ -28,8 +28,9 @@ def load_p175():
 
 
 IR = "src/pages/InvestorReporting/"
-BRANCH = "cand/dell2/irpt-performance-holdings-panels"
-BASE = "75a71ae39089baf9fdddcc34cd3075dea4b31701"
+# AMENDMENT 1 (2026-10-16 ~23:3xZ, CTO ruling A, DB-b-316): the panels are folded into the smoke branch, so the branch is the template-mount branch and the base is its head 355b3bf8
+BRANCH = "cand/dell2/irpt-49f-performance-template-mount"
+BASE = "355b3bf85fd2e565ae121c5be6562668a9c94072"
 TAB = IR + "tabs/reporting/ReportingTab.tsx"
 PANELS = IR + "tabs/reporting/PerformanceHoldingsPanels.tsx"
 TESTS = IR + "__tests__/irpt-dashbd/"
