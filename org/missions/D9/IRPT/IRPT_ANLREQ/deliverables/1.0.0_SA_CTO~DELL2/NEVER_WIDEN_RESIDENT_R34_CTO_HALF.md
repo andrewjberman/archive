@@ -89,3 +89,21 @@ so the writers land behind a reader that exists.
 - **V3, the host role's UpdateItem on `irpt-jobs`, must be allowed.** Either failing is a STOP, and the release rolls back to r32 the
   same session, never left half-landed (NEVER-2).
 
+
+## SIGN on r34d, the checker fix (2026-10-16 ~12:1xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34D_CHECKER_FIX_20261016.md`
+(commit `2e31c78618`, msg 9328), blob `60cf9b70bcf5cb159881d708db2001bd44c576a3`, sha256 `1961c68f13d0f2b4df47ae2dab4052c23f7a81be519b0b78af60dfcb96b152df`, 8,431 bytes (re-measured). Pin `11e0751415`; tar
+`9a088a5c...78ab`, 314 members, 3 changed (the checker, the bindings' package pin, the sums). The r34c root stays and is the rollback.
+
+**Read at signing.** The code change (merge `b535f41cb8`) is the one I set in msg 9291: `default_history` returns no rows only when the
+exception's MRO holds the exact class name `YFTickerMissingError`, and re-raises every other exception, so a rate limit, a timeout or a
+connection error stays CHECK_FAILED. The V2 script's sha256 equals the packet's `90802b18...7940` (re-measured).
+
+**Conditions** (each a STOP):
+- **Every host script is sent AS ROOT;** the pre-read must find `0485393f3a-r34c` running (exit 40 otherwise).
+- **V2 runs in the service's own environment and must print `V2S OK SPY KEPT and ZQXWVK NOT_KEPT`.** Anything else rolls back to r34c
+  the same session (NEVER-2), and the ledger closes ROLLED-BACK.
+- **Run 3's hold stays until this ledger reads CLOSED.** The re-probe then goes under AMENDMENT 3 of the run-3 pair, which I sign
+  separately; its probe objects join row dc59's delete list.
+- **The known limit stands as accepted:** a transient "no price data" on a real symbol now reads NOT_KEPT and offers Replace or No.
