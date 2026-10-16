@@ -1,0 +1,30 @@
+Session log, 0.9.0_WK_TCKT_MTADTA~4 on TCKT_MTADTA.TO-MD-s1 (round 1, MD-s-1). Worktree /c/tmp/wk-tckt-mtadta-4, branch wk-TCKT_MTADTA-4.
+
+1. First act
+   $ git rev-parse --abbrev-ref HEAD
+   wk-TCKT_MTADTA-4
+   $ test -d org && test -d .tools && echo TREE-OK
+   TREE-OK
+
+2. Premise re-ground
+   $ ls -d infra/aws/lambda            -> No such file or directory
+   $ ls data                           -> No such file or directory
+   $ git sparse-checkout list          -> 9 cone entries: .tools, infra/logic/registry, lib, org/devices,
+                                          org/missions/D7/TCKT/TCKT_MTADTA, org/modules/graph, org/ref, org/standards,
+                                          org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS
+   $ git ls-files infra/aws/lambda | wc -l   -> 7434 (tracked at HEAD, absent from this checkout)
+   $ git ls-files data/m365_metadata | wc -l -> 0 (new path of this round)
+   Decision: BLOCKING under the worker refusal clause. The sparse cone omits infra/aws and data; the tree was not
+   widened or rebuilt.
+
+3. Criteria, run under timeout 120 from the worktree root
+   $ python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py silver
+   SILVER-REFUSED missing C:\tmp\wk-tckt-mtadta-4\infra\aws\lambda\globgrph-trino-access\silver_builder.py
+   rc=1   (expected S1-SILVER-OK)
+   $ python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/TCKT_MTADTA_R1_CHECKS/r1_check_s1.py readday
+   READDAY-REFUSED missing C:\tmp\wk-tckt-mtadta-4\data\m365_metadata\scripts\silver\read_day.py
+   rc=1   (expected S1-READDAY-OK)
+
+4. Surprise row filed: TCKT_MTADTA-D1-W4-S1 (BLOCKING, INERT) in
+   org/missions/D7/TCKT/TCKT_MTADTA/surprise-channel/investigations/INVESTIGATION_v1.md.
+   No file was created or edited under infra/ or data/. No commit touches those paths.
