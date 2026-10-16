@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e108",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e108.e18-repoint-and-b01b-out-of-chain.md",
+    "group": "OTHER",
+    "vintage_commit": "479867946b76b0dd63fb4533a67c09818675ca38"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R27.md",
+    "vintage_commit": "479867946b76b0dd63fb4533a67c09818675ca38",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e108.e18-repoint-and-b01b-out-of-chain.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~98",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/E_18.detect_new_securities.py",
+      "kind": "script",
+      "commit_or_etag": "c7fd33b654",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-MDPF_SECCLASS-98 only (not pushed). Nothing deployed: the ship is a later CloudOps order under a signed never-widen pair, after the seed of the 22 tickers. 37 insertions, 85 deletions; 339 lines at base, 291 now.",
+      "artifact_covered_by": ["SC27-e108-AC1", "SC27-e108-AC3"]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "c7fd33b654",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-MDPF_SECCLASS-98 only (not pushed). Nothing deployed. CHAIN_CANONICAL, CHAIN_HOLDINGS_SEED and GROUP_B name no B_01b; the PHASE_B3 block is deleted; the B_01b registry row and the B_01b script file stay. 20 insertions, 25 deletions.",
+      "artifact_covered_by": ["SC27-e108-AC2"]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_e18_known_set_r27.py",
+      "kind": "test",
+      "commit_or_etag": "c7fd33b654",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, 6 tests, stubs only (no AWS, no network). Committed LOCAL on wk-MDPF_SECCLASS-98.",
+      "artifact_covered_by": ["SC27-e108-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~98/SC-e-108.E_18-and-gold_dispatch.patch",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git show c7fd33b654 for E_18 and gold_dispatch.sh, saved as a patch (342 lines). Record of the diff only.",
+      "artifact_covered_by": ["SC27-e108-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended: MDPF_SECCLASS-D1-W98-S1 (OBSERVATION, INERT). Append-only.",
+      "artifact_covered_by": ["SC27-e108-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC27-e108-AC1",
+      "criterion_verbatim": "the new test passes, including the difference control (d).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_e18_known_set_r27.py -q --tb=short",
+      "output_evidence": "6 passed in 1.04s (rc=0); difference control test_d_difference_control_recorder_flags_a_deliberate_retired_table_call passes",
+      "denominator": "6 of 6 tests pass",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "SC27-e108-AC2",
+      "criterion_verbatim": "the canonical chain, the holdings-seed alias and group B no longer name B_01b, no phase runs it, E_18 is still dispatched and non-fatal, and bash -n accepts the file.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_chain_without_b01b.py",
+      "output_evidence": "CHAIN-NO-B01B ok=True problems=[] (rc=0)",
+      "denominator": "7 checks (CHAIN_CANONICAL, CHAIN_HOLDINGS_SEED, GROUP_B, no run_background B_01b, E_18 dispatched, E_18 in NONFATAL_IDS, bash -n), 0 problems",
+      "status": "PASS",
+      "expect": "CHAIN-NO-B01B ok=True"
+    },
+    {
+      "criterion_id": "SC27-e108-AC3",
+      "criterion_verbatim": "E_18 names the old list nowhere (17 lines at the base).",
+      "method": "command",
+      "invocation": "bash -c 'git grep -n -i -E \"bd-securities|BD_SECURITIES_TABLE|bd_securities|default_bd_securities_lookup\" -- data/black_diamond/scripts/gold/E_18.detect_new_securities.py | wc -l'",
+      "output_evidence": "0 (rc=0); positive control on the base blob git show 479867946b:E_18 | grep -c -i -E (same pattern) = 17",
+      "denominator": "0 of 339 base lines (17 matching lines at base, 0 now); 291 lines now",
+      "status": "PASS",
+      "expect": "0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the new test file run against the base E_18 (git show 479867946b:data/black_diamond/scripts/gold/E_18.detect_new_securities.py copied into .scratch/neg/gold, with the same test file and lib/config.py)",
+      "expected": "the test does not pass against the old E_18 (behavioural failures, not a load error)",
+      "observed": "5 failed, 1 passed in 0.84s (rc=1); the failures are AssertionError: table bd-securities was read: scan. Only the difference control (d) passes, which does not depend on E_18.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run three times on the final committed code, outputs and exit codes compared",
+      "observed": "AC1 runs 1-3: 6 passed (rc=0) each. AC2 runs 1-3: CHAIN-NO-B01B ok=True problems=[] (rc=0) each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The shared module infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py (default_bd_securities_lookup stays, unused by E_18)",
+      "reason": "Ruling of the issuer for round 27: the shared module is NOT edited this round; the lookup remains there."
+    },
+    {
+      "item": "B_01b script file and its registry row B_01b|...|--upload in gold_dispatch.sh",
+      "reason": "Ruling of the issuer: the file stays dead until the shipped chain is proven; the registry row stays."
+    },
+    {
+      "item": "The dynamodb resource global in E_18 (boto3.resource) and the PHASE_B3b label in gold_dispatch.sh",
+      "reason": "Kept deliberately: the order names the s3/dynamodb stubs and does not name these lines; no retired-table name is in either."
+    },
+    {
+      "item": "Any deploy, push, AWS call, or ship of E_18 or gold_dispatch.sh",
+      "reason": "Order BOUNDS: nothing is deployed; the ship is a later CloudOps order after the seed of the 22 tickers."
+    },
+    {
+      "item": "The sibling gold suites are not fully green in this sparse worktree (7 of 203 collected tests fail or error on absent paths)",
+      "reason": "Pre-existing sparse-checkout gap, not a change of this order. Filed as row MDPF_SECCLASS-D1-W98-S1; the drain should run those suites on a full checkout. The E_18-adjacent suites (22 of 22) pass here."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W98-S1: the drain's third verification (sibling gold suites stay green) cannot pass in this sparse worktree: test_lambda_seam_parity reads infra/aws/lambda/exec-summary-generator/served_seam.py (outside the sparse checkout) and test_schwab_trn_nna_gold needs convert_schwab_trn_to_nna_silver (tracked at HEAD, not materialised). Row OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e108.e18-repoint-and-b01b-out-of-chain.md",
+  "compiler_tools": [
+    {
+      "tool": "check_chain_without_b01b.py (R27 SC-e-108 check, read-only)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/check_chain_without_b01b.py",
+      "result": "CHAIN-NO-B01B ok=True problems=[] (rc=0) on the committed dispatcher; ok=False with the GROUP_B mutant (B_01b kept)"
+    },
+    {
+      "tool": "pytest (test_e18_known_set_r27.py, and the full gold tests folder)",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests -q",
+      "result": "196 passed, 1 failed, 6 errors of 203 collected: the seven are the sparse-checkout gap in row MDPF_SECCLASS-D1-W98-S1; the 22 E_18-adjacent tests pass"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh (py_compile, ds-precommit, ruff; bash -n for .sh)",
+      "invocation": "bash .tools/commit-gate.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py data/black_diamond/scripts/gold/gold_dispatch.sh data/black_diamond/scripts/gold/tests/test_e18_known_set_r27.py",
+      "result": "pre-commit gate clean for 2 of 2 python files and the shell file; no non-ASCII in the three edited files"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~98 <0.9.0_WK_MDPF_SECCLASS~98@opal.agent>\" -F <msgfile> -- <paths>",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~98 <0.9.0_WK_MDPF_SECCLASS~98@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "c7fd33b654 committed LOCAL on wk-MDPF_SECCLASS-98; msg-verify MATCH; all gates in the commit output passed"
+    }
+  ]
+}
