@@ -108,6 +108,10 @@ def door6census(a):
     return _finish("DOOR6CENSUS", p, "DOOR6CENSUS: OK consumers=%d live_other=%d" % (len(cs) if isinstance(cs, list) else 0, live))
 
 
+def _bad(o, keys):
+    return [k for k in keys if not isinstance(o, dict) or not _s(o.get(k))]
+
+
 def door6retire(a):
     raw, d = _load(a.file, "DOOR6RETIRE")
     if d is None:
@@ -121,28 +125,82 @@ def door6retire(a):
     dc = d["decision"]
     if not isinstance(dc, dict) or not _s(dc.get("text")) or not _s(dc.get("replaced_by")):
         p.append("decision needs text and replaced_by ('nothing' or what replaced it)")
-    st = d["steps"]
-    if not isinstance(st, dict):
-        p.append("steps must be an object")
-    else:
-        r = st.get("accelerator_rule")
-        if not isinstance(r, dict) or r.get("read_after") != "ResourceNotFound":
-            p.append("accelerator_rule.read_after must be ResourceNotFound")
-        m = st.get("marker")
-        if not isinstance(m, dict) or m.get("copy_saved") is not True or m.get("read_after") != "404" or not _s(m.get("copy_path")):
-            p.append("marker needs copy_saved true, copy_path and read_after 404")
-        w = st.get("writer")
-        if not isinstance(w, dict) or w.get("stopped") is not True or not _s(w.get("evidence")):
-            p.append("writer needs stopped true and evidence (no new marker version after the next chain day)")
     pair = d["pair"]
     if not isinstance(pair, dict) or not _s(pair.get("coo_half")) or not _s(pair.get("cto_half")):
         p.append("pair needs coo_half and cto_half commits")
     rb = d["rollback"]
     if not isinstance(rb, dict) or rb.get("recorded") is not True or not _s(rb.get("how")):
         p.append("rollback needs recorded true and how")
+    st = d["steps"]
+    if not isinstance(st, dict):
+        p.append("steps must be an object")
+        return _finish("DOOR6RETIRE", p, "")
+    look, catch, stop = st.get("second_look"), st.get("catch_up"), st.get("marker_writer")
+    for nm, o in (("second_look", look), ("catch_up", catch), ("marker_writer", stop)):
+        if not isinstance(o, dict) or not _s(o.get("done_at")):
+            p.append("steps.%s needs an object with done_at (ISO UTC)" % nm)
+    if p:
+        return _finish("DOOR6RETIRE", p, "")
+    if a.part == "look":
+        p += ["second_look.%s must be a non-empty string" % k for k in _bad(look, ("schedule_name", "readiness_check", "first_fire_at", "accelerator_disabled_at"))]
+        if look.get("expression") != "cron(8 13 * * ? *)":
+            p.append("second_look.expression must be cron(8 13 * * ? *)")
+        if look.get("plan") != "add=1 change=0 destroy=0":
+            p.append("second_look.plan must read add=1 change=0 destroy=0")
+        if look.get("accelerator_plan") != "add=0 change=1 destroy=0":
+            p.append("second_look.accelerator_plan must read add=0 change=1 destroy=0")
+        if look.get("schedule_state_after") != "ENABLED":
+            p.append("second_look.schedule_state_after must be ENABLED")
+        if not ("2026-10-18T13:09:00Z" <= look["done_at"] <= "2026-10-19T13:00:00Z"):
+            p.append("the schedule must be applied between 2026-10-18T13:09:00Z and 2026-10-19T13:00:00Z so Monday 2026-10-19 is its first live day (CTO 6983)")
+        if _s(look.get("first_fire_at")) and look["first_fire_at"] < "2026-10-19T13:08:00Z":
+            p.append("first_fire_at must be the 2026-10-19 13:08Z fire or later")
+        if look.get("first_fire_outcome") not in ("dispatched", "NOT-YET"):
+            p.append("first_fire_outcome must be dispatched or NOT-YET, read in the trigger's log")
+        if look.get("accelerator_state_before") != "ENABLED" or look.get("accelerator_state_after") != "DISABLED":
+            p.append("the accelerator must read ENABLED before and DISABLED after")
+        if _s(look.get("accelerator_disabled_at")) and _s(look.get("first_fire_at")) and look["accelerator_disabled_at"] <= look["first_fire_at"]:
+            p.append("the accelerator is disabled only AFTER the second look's first live fire (CTO order: second look first)")
+        return _finish("DOOR6RETIRE", p, "DOOR6RETIRE: OK part=look schedule=%s first_fire=%s" % (look["schedule_name"], look["first_fire_outcome"]))
+    if a.part == "catch":
+        p += ["catch_up.%s must be a non-empty string" % k for k in _bad(catch, ("d1_read_ref", "date", "dispatch_command_id"))]
+        if catch.get("dispatch_status") != "Success":
+            p.append("catch_up.dispatch_status must be Success")
+        if catch.get("floor_rerun") not in ("wrote", "A7-refused"):
+            p.append("catch_up.floor_rerun must be wrote or A7-refused")
+        if catch.get("prior_versions_recorded") is not True:
+            p.append("catch_up.prior_versions_recorded must be true")
+        if catch.get("per_date_re_dispatch") is not False:
+            p.append("catch_up.per_date_re_dispatch must be false (CTO 6986)")
+        gap = catch.get("gap_after")
+        if not isinstance(gap, dict) or sorted(gap) != ["2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16"] or any(v != "absent" for v in gap.values()):
+            p.append("catch_up.gap_after must list 2026-10-13..16 each 'absent' (the gap stays a gap)")
+        if not isinstance(catch.get("listing_denominator"), int) or catch["listing_denominator"] <= 0:
+            p.append("catch_up.listing_denominator must be the aggregate listing's object count")
+        return _finish("DOOR6RETIRE", p, "DOOR6RETIRE: OK part=catch date=%s floor=%s" % (catch["date"], catch["floor_rerun"]))
+    cr = stop.get("census_rerun")
+    if not isinstance(cr, dict) or not _s(cr.get("done_at")):
+        p.append("marker_writer.census_rerun needs done_at")
+    else:
+        for k in ("functions_listed", "zip_scanned"):
+            if not isinstance(cr.get(k), int) or cr[k] <= 0:
+                p.append("census_rerun.%s must be a positive integer" % k)
+        if cr.get("errors") != 0 or cr.get("hits_reading_key") != 0:
+            p.append("census_rerun needs errors 0 and hits_reading_key 0 (a live reader found gets its own step first)")
+    if stop.get("deployed_copy_path") != "code/gold/orion-gold-dispatch.sh":
+        p.append("marker_writer.deployed_copy_path must be code/gold/orion-gold-dispatch.sh")
+    p += ["marker_writer.%s must be a non-empty string" % k for k in _bad(stop, ("deployed_sha256_before", "deployed_sha256_after", "evidence", "gold_staging", "rebuild"))]
+    if _s(stop.get("deployed_sha256_before")) and stop.get("deployed_sha256_before") == stop.get("deployed_sha256_after"):
+        p.append("the deployed copy did not change (sha256 before equals after)")
+    for k, want in (("diff_only_marker_block", True), ("repo_source_changed", True), ("located_by_content", True), ("stopped", True), ("marker_object_deleted", False)):
+        if stop.get(k) is not want:
+            p.append("marker_writer.%s must be %s" % (k, str(want).lower()))
+    if isinstance(cr, dict) and _s(cr.get("done_at")) and _s(look.get("accelerator_disabled_at")):
+        if not (look["accelerator_disabled_at"] < cr["done_at"] <= stop["done_at"]):
+            p.append("the order of the steps is wrong: second_look.accelerator_disabled_at < census_rerun.done_at <= marker_writer.done_at is required")
     if d["ledger_closed"] is not True:
         p.append("the ledger entry is not closed")
-    return _finish("DOOR6RETIRE", p, "DOOR6RETIRE: OK steps=3 replaced_by=%s" % d["decision"]["replaced_by"] if not p else "")
+    return _finish("DOOR6RETIRE", p, "DOOR6RETIRE: OK part=stop replaced_by=%s" % d["decision"]["replaced_by"])
 
 
 def planq(a):
@@ -257,8 +315,11 @@ def triage(a):
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for nm in ("door6census", "door6retire", "addendum", "key23"):
+    for nm in ("door6census", "addendum", "key23"):
         sub.add_parser(nm).add_argument("--file", required=True)
+    r = sub.add_parser("door6retire")
+    r.add_argument("--file", required=True)
+    r.add_argument("--part", choices=("look", "catch", "stop"), required=True)
     q = sub.add_parser("planq")
     q.add_argument("--file", required=True)
     q.add_argument("--first", type=int, required=True)
