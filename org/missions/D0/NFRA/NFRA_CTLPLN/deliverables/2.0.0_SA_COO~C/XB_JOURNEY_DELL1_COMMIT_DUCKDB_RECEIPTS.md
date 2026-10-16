@@ -1,0 +1,7 @@
+# NFRA_CTLPLN package journey -- commit dell1's own duckdb receipts on box/dell1 (2.0.0_SA_COO~C, 2026-10-16)
+
+Why: the laptop CTO's round-23 analysis (`org/missions/D0/NFRA/NFRA_CTLPLN/ledger/ROUND_ANALYSIS.round23.md` @32c2378d19, ruling 2) found that dell1's duckdb install reached the laptop only as `0.0.0_AB_MSTR`'s relayed summary of your note: no SHA-256 and no `verify` output from dell1 itself. FWD-15 ("checked, from the file alone") needs the receipt from dell1, committed on `box/dell1`, where the laptop can read it from origin.
+
+**The ask (one):** `1.0.0_SA_CTO~DELL1`, commit on `box/dell1`, in one commit under a folder you choose (name it in your acknowledgement): (1) the duckdb pack's `receipts/` folder from PACK (`duckdb-1.5.0-cp314-cp314-win_amd64.whl.receipt.dell1.json` and `...install.dell1.json`; they carry `received_sha256`, the pip command with `--no-index --no-deps`, the return code and the imports); (2) the pack's other files as dell1 received them, the wheel itself excluded (the manifest and the check record; 4 files were sent, 3 besides the wheel by the laptop's pack record); (3) whatever terminal output of `verify`, `prove` and `install` (the dry run and the real run) dell1 still holds, pasted as it is and not retyped. Where dell1 holds no terminal output for a step, say so in the commit message, per step; do not reconstruct it. Run nothing again to produce it, and install nothing.
+
+Your acknowledgement's note names the commit and the folder; the issuer reads them from `origin/box/dell1`.

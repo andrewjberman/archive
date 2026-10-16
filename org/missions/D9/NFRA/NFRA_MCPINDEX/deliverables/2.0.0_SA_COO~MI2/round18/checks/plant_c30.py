@@ -24,6 +24,11 @@ def good():
     for r in d["portal_datasets"]:
         r["bucket"] = "opal-data-portal-v2"
     d["silver_datasets"] = [r for r in d["silver_datasets"] if r["entity"] not in c.DROPPED]
+    for sec in ("portal_datasets", "harvest_datasets"):
+        for r in d[sec]:
+            if r.get("nl_tags_basis") == "inferred":
+                r["nl_tags"] = ["curated one", "curated two", "curated three", "curated four"]
+                r.pop("nl_tags_basis")
     return d
 
 
@@ -66,6 +71,9 @@ arms.append(("a changed non-bucket field fails", run(x) != 0))
 x = copy.deepcopy(g)
 x["needs"] = x["needs"][:-1]
 arms.append(("a changed top-level section (needs) fails", run(x) != 0))
+x = copy.deepcopy(g)
+x["harvest_datasets"][0]["nl_tags_basis"] = "inferred"
+arms.append(("a research row still inferred fails", run(x) != 0))
 for name, ok in arms:
     print("ARM %s: %s" % ("ok " if ok else "BAD", name))
 print("PLANTED %d of %d" % (sum(1 for _n, o in arms if o), len(arms)))
