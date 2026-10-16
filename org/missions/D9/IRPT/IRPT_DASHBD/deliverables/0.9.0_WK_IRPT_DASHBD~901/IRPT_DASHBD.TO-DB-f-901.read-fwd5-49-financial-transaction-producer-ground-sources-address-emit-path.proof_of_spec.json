@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-901",
+  "genre": "BUILD",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4fd78cac82"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R123_F.md",
+    "vintage_commit": "ef2e1b0ecc",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-901.read-fwd5-49-financial-transaction-producer-ground-sources-address-emit-path.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~901",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~901/RD_FWD5_PRODUCER_GROUND_R123.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The FWD-5 producer ground record in the form of cell DB-f-901 step 6: as_of 2026-10-16; firm 49financial; targets is the 14 brief columns in the brief's order, each with source, file, line, words and claim; absent_count 7 (the seven null sources: settle_date, asset_name, fee, custodian, flow_class, source_txn_id, coverage); pattern_producer, silver_source, address (uri built locally by opal_naming.address, registry_row_exists false) and emit_path each cite a line; reads all zero; files_in_repo, served_values_changed, pushed and deployed false. The checker DBF123-1-AC1 PASS on this commit. No AWS call, no network, no vendor call."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows IRPT_DASHBD-D2-W901-S1 to S4 appended as bytes (the file grows by four rows and no existing row is edited); the surprise-row gate reads the committed file at the safe-commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF123-1-AC1",
+      "criterion_verbatim": "`DBF123-1-AC1` -- `RD_FWD5_PRODUCER_GROUND_R123.json` has exactly the form of step 6; the 14 targets are exactly the brief's columns in the brief's order; a target with a source cites a line that holds that column name, and a target without one is `absent` with a null source; `absent_count` equals the count the checker computes; `pattern_producer`, `silver_source` and `emit_path` cite lines holding their tokens; `address.uri` is an s3 uri for 49financial and account_transaction with `registry_row_exists` a boolean; every claim is in the four-word set; the reads block is all zero, the flags false and no run of 8 or more digits stands outside the exempt fields. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r123/p123_ground.py\" . DBF123-1-AC1",
+      "output_evidence": "last line of the checker run from the worktree root on the record as committed: DBF123-1-AC1 PASS, rc 0. Base run before the record existed: reason: missing record ...RD_FWD5_PRODUCER_GROUND_R123.json; DBF123-1-AC1 FAIL, rc 1.",
+      "denominator": "1 of 1 criterion; 14 of 14 targets in the brief's order; 7 of 14 with a source whose cited line holds the column token; 7 of 14 with a null source and claim absent; absent_count 7 equal to the computed 7; 4 of 4 pattern, silver, address and emit citations hold their tokens; reads 5 of 5 zero; 4 of 4 flags false; 0 digit-run violations outside the exempt fields",
+      "status": "PASS",
+      "status_reason": "PASS by output: the checker's form, citation, claim-set, absent-count, reads, flag and digit arms all held on the record. The base run FAILED for the missing record, as the order states. The checker's own self-test ran 9 of 9 arms PASS.",
+      "expect": "DBF123-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same checker run against an empty scratch root that holds no deliverable folder.",
+      "expected": "DBF123-1-AC1 FAIL (missing record)",
+      "observed": "reason: missing record org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~901/RD_FWD5_PRODUCER_GROUND_R123.json; DBF123-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the checker on the committed record compared (the output line and rc)",
+      "observed": "run 1: DBF123-1-AC1 PASS rc 0; run 2: DBF123-1-AC1 PASS rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live transaction bytes in the 49 Financial custody silver, the naming registry's remote state and any AWS or vendor read.",
+      "reason": "no AWS call, no network, no vendor call and no secret read by this worker; the cell is a read of the repository and one LOCAL naming-builder call, so the column facts are what the code and declarations name, and a column the live silver holds that no file names is recorded as absent, never guessed."
+    },
+    {
+      "item": "Opal's own closed words for action and txn_type, and the seven flow-class words.",
+      "reason": "not ratified and defined in no file read; the targets cite the inferred Schwab code columns and record the words as not used."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W901-S1: the round-120 14-column list is the account-return read set only; account_activity_lots.py closing_trades also reads fact_trn trade_date, order_number, quantity and net_amount (OBSERVATION, INERT).",
+    "IRPT_DASHBD-D2-W901-S2: the claim set has no value for a derived target, and the checker binds a null source to absent, so flow_class, coverage and custodian read as missing (OBSERVATION, INERT).",
+    "IRPT_DASHBD-D2-W901-S3: the brief's seven flow classes are not the producer's five finals; INCOME and CORPORATE_ACTION are not final classes and EXTERNAL does not split in the code (OBSERVATION, INERT).",
+    "IRPT_DASHBD-D2-W901-S4: opal_naming.address accepts account_transaction with no registry row, and no registry file names any gold table, so a missing row cannot surface as a refusal (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~901/IRPT_DASHBD.TO-DB-f-901.read-fwd5-49-financial-transaction-producer-ground-sources-address-emit-path.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "p123_ground.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r123/p123_ground.py\" . DBF123-1-AC1",
+      "result": "DBF123-1-AC1 PASS rc 0 on the record; FAIL rc 1 on an empty root (the mutant); PASS on a second run (determinism); --selftest 9 of 9 arms PASS"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "the safe-commit gate on the investigation file at the commit that carries this instance",
+      "result": "read at the commit; see the commit log line"
+    }
+  ]
+}
