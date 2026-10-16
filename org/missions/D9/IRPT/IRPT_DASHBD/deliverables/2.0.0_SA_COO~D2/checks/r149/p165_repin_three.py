@@ -71,6 +71,28 @@ def own_commits(root):
     return out.decode().split()
 
 
+HEX40, HEX64 = re.compile(r"[0-9a-f]{40}$"), re.compile(r"[0-9a-f]{64}$")
+
+
+def check_repin_entry(key, be, ne, head_blob, pin_blob, pin_ok, sha):
+    """p158's check_repin for ONE entry, except that a member keeps its OWN packaged_as (a staged file may be packaged under another name)."""
+    need({k: v for k, v in be.items() if k != "staged_from"} == {k: v for k, v in ne.items() if k != "staged_from"}, "%s: the entry changed beyond staged_from (the deployed fields must be untouched)" % key)
+    bs, ns = be["staged_from"], ne["staged_from"]
+    need([s["repo_path"] for s in bs] == [s["repo_path"] for s in ns], "%s: staged_from must list the same members in the same order" % key)
+    moved = []
+    for b, n in zip(bs, ns):
+        need(set(n) == {"repo_path", "pin", "packaged_as", "sha256"} and n["packaged_as"] == b["packaged_as"] and n["repo_path"] == b["repo_path"], "%s: member form: %s" % (key, n.get("repo_path")))
+        need(isinstance(n["pin"], str) and HEX40.match(n["pin"]) and isinstance(n["sha256"], str) and HEX64.match(n["sha256"]), "%s: pin or sha256 form: %s" % (key, n["repo_path"]))
+        need(pin_ok(n["pin"]), "%s: pin of %s is not an ancestor commit" % (key, n["repo_path"]))
+        need(sha(pin_blob(n["pin"], n["repo_path"])) == n["sha256"] == sha(head_blob(n["repo_path"])), "%s: sha256 of %s differs from git show pin:path or from the file at HEAD" % (key, n["repo_path"]))
+        if b["sha256"] == sha(head_blob(b["repo_path"])):
+            need(n == b, "%s: member %s is not stale and must stay byte-identical" % (key, b["repo_path"]))
+        else:
+            need(n["pin"] != b["pin"] and n["sha256"] != b["sha256"], "%s: stale member %s must get a new pin and sha256" % (key, b["repo_path"]))
+            moved.append(b["repo_path"])
+    return moved
+
+
 def check_all_entries(p158, base_map, new_map, head_blob, pin_blob, pin_ok):
     """The p158 re-pin clause applied to each of the three entries in turn; every OTHER entry must equal the base."""
     for k in set(base_map["functions"]) | set(new_map["functions"]):
@@ -82,13 +104,8 @@ def check_all_entries(p158, base_map, new_map, head_blob, pin_blob, pin_ok):
     moved = {}
     for key in ENTRIES:
         need(key in base_map["functions"] and key in new_map["functions"], "entry %s is missing" % key)
-        sub_b = {"functions": {key: base_map["functions"][key]}}
-        sub_n = {"functions": {key: new_map["functions"][key]}}
-        p158.ENTRY_KEY = key
-        try:
-            moved[key] = p158.check_repin(sub_b, sub_n, head_blob, pin_blob, pin_ok)
-        except p158.Fail as e:
-            raise Fail("%s: %s" % (key, e)) from None
+        import hashlib
+        moved[key] = check_repin_entry(key, base_map["functions"][key], new_map["functions"][key], head_blob, pin_blob, pin_ok, lambda b: hashlib.sha256(b).hexdigest())
     return moved
 
 
@@ -191,6 +208,23 @@ def selftest():
     assert check_grant({SOURCE_MAP_REL, D + AUTHOR + "/x.json"})
     red(lambda: check_grant({D + AUTHOR + "/x.json"}), "no source map")
     red(lambda: check_grant({SOURCE_MAP_REL, "lib/x.py"}), "outside grant")
+    pins = {"o": "a" * 40, "n": "b" * 40}
+    sh = lambda b: {b"old": "1" * 64, b"new": "2" * 64, b"same": "3" * 64}[b]  # noqa: E731
+
+    def mem(path, pin, content, packaged=None):
+        return {"repo_path": path, "pin": pins[pin], "packaged_as": packaged or path, "sha256": sh(content)}
+    be = {"artifact_sha256": "x", "staged_from": [mem("a", "o", b"old", "pk/a"), mem("b", "o", b"same")]}
+    ne = {"artifact_sha256": "x", "staged_from": [mem("a", "n", b"new", "pk/a"), mem("b", "o", b"same")]}
+    head = {"a": b"new", "b": b"same"}
+    pb = lambda pin, path: head[path]  # noqa: E731
+    assert check_repin_entry("k", be, ne, lambda p: head[p], pb, lambda pin: True, sh) == ["a"]
+    for label, fn in (("deployed field", lambda e: e.update(artifact_sha256="y")), ("order", lambda e: e["staged_from"].reverse()), ("packaged_as moved", lambda e: e["staged_from"][0].update(packaged_as="zz")),
+                      ("fresh member touched", lambda e: e["staged_from"][1].update(pin=pins["n"])), ("stale kept", lambda e: e["staged_from"].__setitem__(0, dict(be["staged_from"][0]))),
+                      ("bad sha", lambda e: e["staged_from"][0].update(sha256="9" * 64))):
+        e2 = copy.deepcopy(ne)
+        fn(e2)
+        red(lambda: check_repin_entry("k", be, e2, lambda p: head[p], pb, lambda pin: True, sh), label)
+    red(lambda: check_repin_entry("k", be, ne, lambda p: head[p], pb, lambda pin: False, sh), "pin not an ancestor")
     entry = {"staged_from": [{"repo_path": "a", "sha256": "1"}, {"repo_path": "b", "sha256": "2"}]}
     assert check_fresh(entry, lambda p: {"a": b"x", "b": b"y"}[p], lambda b: {b"x": "1", b"y": "2"}[b])
     red(lambda: check_fresh(entry, lambda p: {"a": b"x", "b": b"z"}[p], lambda b: {b"x": "1", b"z": "9"}[b]), "a stale member remains")
