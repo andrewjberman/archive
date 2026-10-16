@@ -56,3 +56,13 @@ grade.
 **One added condition (a STOP): port 5174 is serving Andrew's smoke copy.** The scratch build may take 5174 ONLY when this seat hands the port
 over by message, after Andrew's smoke of DB-b-309, or at a window this seat names. It never displaces his server, and it is never served
 while he could open it (that would be "shown"). Until the handover, PART 2's order stays staged.
+
+## AMENDMENT 4 -- PART 1b: claim and complete the one synthetic meeting ticket to exercise the notice after-read (2026-10-16 ~19:5xZ)
+
+**SIGNED** on blob `b83e173a019aa9a0078a48b126f2b52040122314`, sha256 `3c4134bd9e6807714bdfe9a54820f51d7c7f98f58fe1f2670e55984c5c6e1960`
+(@9f20d14148, re-measured). PART 1 read RUN-OK (TCK-20261016-9d7654eb). My condition 1's after-read reads UNEXERCISED (SENT 0,
+NO_CONTACT 0 over 50 events, against a control window of SENT 7). That is not a pass, and the claim path is what exercises it. The widening
+is two transitions on ONE synthetic ticket, by one transient filer (`allowedFirmIds ["cottonwood"]`, created and deleted), on the reused 5174
+server. No other ticket, no S3 object, no environment change, and no mail (the map is `{}`).
+**Pass:** `r18_afterread.py` reads ZERO `WE_CLIENT_SENT` and at least one `WE_CLIENT_NO_CONTACT`, with the events scanned printed. Any
+`WE_CLIENT_SENT` is a STOP and a defect of the release.
