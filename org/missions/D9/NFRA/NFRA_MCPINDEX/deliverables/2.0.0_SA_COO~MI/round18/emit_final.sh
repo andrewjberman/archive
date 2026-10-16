@@ -3,7 +3,7 @@
 #
 # Order of the release day: OG-ap-23 reads live -> 2.0.0_SA_COO~MI2 runs land_links.sh and commits its rows -> THIS script -> a worker places the
 # file (place_catalog.py) -> regrade_c23_instance.py -> never-widen pair -> MX-r-15 A1.
-# It refuses on a dirty tracked catalog, emits with the five group maps (the emitter reads the served tool list from the tree at the manifest's
+# It refuses on a dirty tracked catalog, emits with the six group maps (the sixth is round 19's live_bd_group_map.json) (the emitter reads the served tool list from the tree at the manifest's
 # deployed_commit, so no overlay flag), saves the result and its md5 under <out dir>, runs the c21/c23 criteria with the file placed, saves each run
 # (stdout then exit=<rc>) as <out dir>/ev/<check>.out, and restores the tracked catalog. Nothing is committed.
 set -uo pipefail
@@ -20,7 +20,7 @@ python workflows/atom_decomposition/emit_catalog_v02.py \
   --group-map $D/0.9.0_WK_NFRA_MCPINDEX~52/research_group_map_h1.json \
   --group-map $D/0.9.0_WK_NFRA_MCPINDEX~53/research_group_map_h2.json \
   --group-map $D/0.9.0_WK_NFRA_MCPINDEX~54/research_group_map_h3.json \
-  --group-map $D/0.9.0_WK_NFRA_MCPINDEX~55/research_group_map_p1.json > "$OUT/emit.log" 2>&1
+  --group-map $D/0.9.0_WK_NFRA_MCPINDEX~55/research_group_map_p1.json \n  --group-map $D/2.0.0_SA_COO~MI/round19/live_bd_group_map.json > "$OUT/emit.log" 2>&1
 RC=$?
 grep -E "EMIT REFUSED|TOOL INDEX|GROUP-MAP|SILVER DATASET|HARVEST ROWS" "$OUT/emit.log" | cut -c1-240
 if [ $RC -ne 0 ]; then echo "ERROR: the emitter exited $RC; see $OUT/emit.log"; git checkout -- "$T"; exit 1; fi
