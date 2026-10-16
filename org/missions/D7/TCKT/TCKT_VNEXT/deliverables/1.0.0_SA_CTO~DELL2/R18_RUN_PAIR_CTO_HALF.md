@@ -26,3 +26,21 @@ voids this half.
 **CTO half -- `1.0.0_SA_CTO~DELL2`: SIGNED** on blob `43c28dabc4`, covering both branches of COO section 4.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 2 -- PART 1 (FWD-11, the Meeting Request) runs now; PART 2 (FWD-10) waits (2026-10-16 ~18:5xZ)
+
+**SIGNED** on `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R18_RUN/R18_RUN_PAIR.md` (@38415448a5), blob
+`000c3467f53fb1bbec6c8660a5eafec7796b32bd`, sha256 `3e0f93494f15ac33f4964bd647d349e4338e2f97cbe0d5dd365421c01e53cd32` (re-measured). It is a
+narrowing: one meeting ticket, no S3 object, the two identities created and deleted with `allowedFirmIds ["cottonwood"]`, the routing window
+restored. The criterion is `r18_run_check_meeting.py`.
+
+**PART 2 (FWD-10) ruled: option (c).** Andrew's hold of 2026-10-13, verbatim: *"we should not push this til we actually have a functioning
+channel for that"*, binds what is PUSHED or SHOWN. A local scratch build that removes the one type-list filter is allowed under these
+conditions:
+- it lives in a detached worktree;
+- it is served only on localhost for the run;
+- it is NEVER pushed, merged or shown to anyone but the run's applier;
+- it is deleted after the run.
+That proves the upload route, the permission, CORS and the object that R18 shipped, while the hide stays on DEV and PROD. The form object is
+synthetic, listed by key and VersionId, and deleted after the grade (Andrew's 2026-10-16 word on synthetic files). PART 2 runs under its own
+amendment, which this seat signs. Lifting the hide itself stays Andrew's.
