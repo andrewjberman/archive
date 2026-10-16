@@ -40,13 +40,18 @@ for mod in mods:
 registered = sum(len(held) for held in core._adapters.values())
 adapters_registered_equals_files = registered == len(files) and len(files) > 0
 
-# (b) the two Black Diamond firms route to different modules
+# (b) the two Black Diamond firms route to different modules, and the fence names one segment for each over the repo
+# catalog read through the core's own loader (app/refs/DATA_CATALOG.yaml, query_v0._catalog)
 try:
     bd_49 = core._adapter("blackdiamond", "49financial")
     bd_cw = core._adapter("blackdiamond", "cottonwood")
     bd_split = bd_49 is not bd_cw
 except core.CoreRefusal:
     bd_split = False
+# the loader returns {"catalog": <the YAML document>, "rows_by_key": ...}; the probe passes the document's own "catalog" key
+catalog_ctx = core.Ctx(catalog_doc=core._runtime_catalog()["catalog"])
+bd_split = (bd_split and catalog_ctx.firm_segments("blackdiamond", "49financial") == ["49f"]
+            and catalog_ctx.firm_segments("blackdiamond", "cottonwood") == ["cottonwood"])
 
 # (c) the two firm role keys differ, and neither equals the other's environment variable name
 key_49 = client_role.role_key("blackdiamond", "49f")
