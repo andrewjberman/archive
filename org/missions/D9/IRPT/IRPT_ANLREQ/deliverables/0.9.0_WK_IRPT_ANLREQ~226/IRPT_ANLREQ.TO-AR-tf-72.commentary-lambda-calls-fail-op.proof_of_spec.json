@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tf-72",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-72.commentary-lambda-calls-fail-op.md",
+    "group": "OTHER",
+    "vintage_commit": "cd692a3b94"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R48_TX.md",
+    "vintage_commit": "cd692a3b94",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-72.commentary-lambda-calls-fail-op.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~226",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/lambda_handler.py",
+      "kind": "script",
+      "commit_or_etag": "c5cba6eeb9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline only; fakes only; no deploy, no apply; the draft store fail op (AR-tf-71) and the writer (TO-AR-g-109) are not in this worktree",
+      "artifact_covered_by": [
+        "AR72-tf-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_hop_failure_calls.py",
+      "kind": "test",
+      "commit_or_etag": "c5cba6eeb9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline, 11 tests named test_hop_failure_*, synthetic names firm-a and req-1",
+      "artifact_covered_by": [
+        "AR72-tf-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR72-tf-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 --prefix=test_hop_failure_ data/transcripts/scripts/tests/test_hop_failure_calls.py",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 6 --prefix=test_hop_failure_ data/transcripts/scripts/tests/test_hop_failure_calls.py",
+      "output_evidence": "R46-TESTS-OK passed=11 (rc=0; run twice on the committed tree, identical)",
+      "denominator": "11 passed of 11 test_hop_failure_* tests in data/transcripts/scripts/tests/test_hop_failure_calls.py; the criterion requires at least 6",
+      "expect": "R46-TESTS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Five guards removed one at a time in a scratch copy of lambda_handler.py (usable-id guard, try around the report, outcome condition, failed code value, report on the vendor-word stop); each mutant is run against test_hop_failure_calls.py and must fail at least one test.",
+      "expected": "each of the five mutants fails at least one test_hop_failure_* test; the file is restored byte-identical afterwards",
+      "observed": "M1 no usable-id guard: 1 failed (test_hop_failure_no_usable_id_and_vendor_word_stop_make_no_call); M2 no try around report: 1 failed (test_hop_failure_raising_report_keeps_result_and_logs_one_line); M3 no outcome condition: 3 failed (post_failed, raising_report, success_outcomes); M4 wrong failed code: 2 failed (draft_step_raise, post_failed); M5 report on vendor-word stop: 1 failed (no_usable_id_and_vendor_word_stop); restore cmp identical",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: r46_checks.py tests 6 run twice on the committed tree, plus pytest on the same file",
+      "observed": "run A: R46-TESTS-OK passed=11 (rc=0); run B: R46-TESTS-OK passed=11 (rc=0); pytest: 11 passed",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W226-S1: the order asks to keep CRLF endings; INVESTIGATION_v1.md has zero CR bytes, so the row was appended in LF by a binary append",
+    "IRPT_ANLREQ-D2-W226-S2: the worktree is sparse (core.sparseCheckout=true); infra/aws/terraform/transcripts and infra/aws/lambda/transcripts-pull are absent on disk and three existing commentary tests fail with FileNotFoundError, not caused by this cell"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "mark_hop_failure, the set-once hop_failure writer in durable_job.py (TO-AR-g-109)",
+      "reason": "owned by 2.0.0_SA_COO~G2 and not merged at this base (grep count 0 at HEAD cd692a3b94); this cell calls only the draft store fail op and fakes the store in its tests"
+    },
+    {
+      "item": "the draft store fail op itself (cell AR-tf-71)",
+      "reason": "a sibling cell's build; not in this worktree; the tests answer the contract event with a fake, and the closed-set refusal is exercised by the fake"
+    },
+    {
+      "item": "whether the real DynamoGenerationStore is packaged in the draft-store zip",
+      "reason": "NOT VERIFIED by this worker: membership was not traced; this cell does not package, deploy or change the zip"
+    },
+    {
+      "item": "the stream-path write_draft_ticket outcome and the draft_exists stop",
+      "reason": "not among the four failures the order names; no fail call is made for them, by the order's enumeration"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_hop_failure_calls.py -q -p no:cacheprovider --color=no",
+      "result": "11 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 data/transcripts/scripts/commentary/lambda_handler.py data/transcripts/scripts/tests/test_hop_failure_calls.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "r46_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py --self-test",
+      "result": "R46-SELFTEST-OK green plus four mutants refused, red mode plus three mutants refused"
+    }
+  ]
+}
