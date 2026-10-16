@@ -1,0 +1,69 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Deny",
+            "NotAction": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:ListBucket"
+            ],
+            "Resource": "*",
+            "Sid": "DenyAllNonReadActions"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Deny",
+            "NotResource": [
+                "arn:aws:s3:::opal-data-bd/silver/fees/*"
+            ],
+            "Sid": "DenyReadsOutsideTheFeesPrefix"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Effect": "Deny",
+            "NotResource": "arn:aws:s3:::opal-data-bd",
+            "Sid": "DenyListingOtherBuckets"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringNotLike": {
+                    "s3:prefix": [
+                        "silver/fees/*"
+                    ]
+                }
+            },
+            "Effect": "Deny",
+            "Resource": "arn:aws:s3:::opal-data-bd",
+            "Sid": "DenyListingOutsideTheFeesPrefix"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-bd/silver/fees/*"
+            ],
+            "Sid": "AllowFeesObjectReads"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "silver/fees/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-bd",
+            "Sid": "AllowFeesPrefixListing"
+        }
+    ]
+}
