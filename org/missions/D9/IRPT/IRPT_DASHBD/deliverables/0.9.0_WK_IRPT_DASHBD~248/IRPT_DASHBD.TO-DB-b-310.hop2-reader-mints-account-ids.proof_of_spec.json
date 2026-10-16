@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-310",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-310.hop2-reader-mints-account-ids.md",
+    "group": "OTHER",
+    "vintage_commit": "4be8d5f14d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "4be8d5f14d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-310.hop2-reader-mints-account-ids.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~248",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~248/RD_FILLED_READER_MINT_FACTS_R149.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "96ba8dc8ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Inside the first FILLED-REPORT-A block only: read_filled_report_gold returns _filled_mint(_filled_compose(...), firm); new private helper _filled_mint added after _filled_compose. _filled_compose, _filled_partition_index, the switch, filled_report_enabled, run_filled_report, filled_report_fire and the event branch are unchanged; publisher.py and locals.tf unchanged. Nothing built for upload, uploaded, invoked or deployed; the switch stays OFF.",
+      "artifact_covered_by": [
+        "DB178-1-AC1",
+        "DB178-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py",
+      "kind": "test",
+      "commit_or_etag": "96ba8dc8ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven existing reader tests now expect the minted form through a new _minted helper; five new tests carry mint in their names (test_mint_*); a new _account_doc helper. 51 tests pass across the two filled-report test files.",
+      "artifact_covered_by": [
+        "DB178-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~248/RD_FILLED_READER_MINT_FACTS_R149.json",
+      "kind": "doc",
+      "commit_or_etag": "96ba8dc8ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Facts record with the four fields the order lists: where, rule, tests_added (five names) and words (one paragraph with what is NOT proven). No client figure.",
+      "artifact_covered_by": [
+        "DB178-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB178-1-AC1",
+      "criterion_verbatim": "DB178-1-AC1 -- handler.py differs from the base only in read_filled_report_gold, _filled_compose and new functions of the first FILLED-REPORT-A block; publisher.py and locals.tf are byte-identical. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p178_filled_reader_mints_ids.py\" . DB178-1-AC1",
+      "output_evidence": "OK: handler.py differs from the base only in read_filled_report_gold, _filled_compose and new functions of the first block; publisher.py and locals.tf are byte-identical\nDB178-1-AC1 PASS",
+      "denominator": "2 of 2 files byte-identical to the base (publisher.py, locals.tf); 2 of 2 FILLED-REPORT-A marker pairs kept; the checker compares every other base function of the first block byte for byte (count not printed by the checker); the base run at the unchanged tree printed FAIL (neither read_filled_report_gold nor _filled_compose changed)",
+      "status": "PASS",
+      "expect": "DB178-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB178-1-AC2",
+      "criterion_verbatim": "DB178-1-AC2 -- behaviour over a fake S3: the composed document equals the contract document with its account ids minted (account_id, the account-grain by_row keys, the account-named chart lines); no raw id remains in the serialized document; the allocation's class keys and a Total line are untouched; the minted document validates; the partition is fetched once; no match and an unknown client raise NotYetAvailable; accounts spanning two households raise PublishRefused; 400 clients over 200 thousand rows finish inside the limit; the pass writes one object. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p178_filled_reader_mints_ids.py\" . DB178-1-AC2",
+      "output_evidence": "OK: account_id, the account-grain by_row keys and the account-named chart lines are minted; the class keys and other lines are not; no raw id remains in the serialized document; one fetch, two households refused, speed inside the limit\nDB178-1-AC2 PASS",
+      "denominator": "the checker's behaviour clauses in one pass over the fake S3: 1 composed household equal to the minted contract document, 1 minted-document validation, 2 of 2 raw ids absent from the serialized text, 1 class-key check, 1 Total-line check, 1 account-grain by_row key check, 1 second household equal to its minted document, 2 of 2 NotYetAvailable arms (no match, unknown client), 1 PublishRefused arm, 1 partition fetch count, 1 repeat read without a second fetch, 1 speed arm (400 clients, limit 25 s on the read loop, whole-process wall 25.9 s by shell time), 1 pass arm writing one and recording one refused and one unavailable; the base run of this criterion was not performed by the worker (the base FAIL of AC1 was measured)",
+      "status": "PASS",
+      "expect": "DB178-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB178-1-AC3",
+      "criterion_verbatim": "DB178-1-AC3 -- at least four NEW tests carry mint in their name, and both filled-report test files pass under pytest. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p178_filled_reader_mints_ids.py\" . DB178-1-AC3",
+      "output_evidence": "OK: four or more new mint tests exist, the block mints with the handler's own ids.opaque_account, and both filled-report test files pass\nDB178-1-AC3 PASS",
+      "denominator": "5 of 5 new tests carry mint in their names (threshold 4; all 5 in the reader file, 0 in the publish file); 1 opaque_account mint in the block; pytest 51 passed of 51 across the two filled-report test files (reader and publish)",
+      "status": "PASS",
+      "expect": "DB178-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control. The checker's --selftest (five handler mutants and one diff mutant) was run once by the worker as an extra control: it aborted at its first anchor check with rc=1, 'selftest: the reference lacks the anchor for account_id is left raw', before any mutant was written. The handler bytes were not written (infra/ clean after the run). Not a deciding control; surfaced as IRPT_DASHBD-D2-W248-S1.",
+      "expected": "every mutant red and the selftest prints PASS (rc=0), if the spec named mutants",
+      "observed": "selftest rc=1 at the first anchor check; no mutant applied",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run again on the committed tree at 96ba8dc8ce (after the artifact commit), together with pytest on both filled-report test files.",
+      "observed": "DB178-1-AC1 PASS (rc=0); DB178-1-AC2 PASS (rc=0); DB178-1-AC3 PASS (rc=0); pytest 51 passed in 1.34 s (rc=0); the same deciding lines as the first run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any Terraform plan or apply, any AWS call, any upload or invoke, and any push",
+      "reason": "Outside the grant (the order's BOUNDS). The reader was exercised against a fake S3 only; the real partition and directory were not read here."
+    },
+    {
+      "item": "Whether every real by_row member of the real filled_report_values table is keyed by an account or by a class",
+      "reason": "Named by the order as NOT proven; the synthetic fixtures carry account-grain and class-grain members only."
+    },
+    {
+      "item": "The client-data scan of the commit gate (hashed account-id list absent on this box)",
+      "reason": "The order makes the scan the worker's own. The staged text holds code, synthetic ids (SYN-prefixed and BIG-prefixed raw ids and their minted forms), paths, counts and words only; no client figure is present."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W248-S1: the checker's --selftest aborts at its first anchor check on this equivalent minting implementation (its anchors are the issuer's reference text); AC1, AC2 and AC3 pass. OBSERVATION, INERT; the issuer decides."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p178_filled_reader_mints_ids.py (criteria)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p178_filled_reader_mints_ids.py\" . DB178-1-AC1 (and AC2, AC3)",
+      "result": "AC1 PASS, AC2 PASS, AC3 PASS (rc=0 each)"
+    },
+    {
+      "tool": "pytest on the two filled-report test files",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py",
+      "result": "51 passed (rc=0)"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_DASHBD~248 <0.9.0_WK_IRPT_DASHBD~248@opal.agent>\" -F <msgfile> -- <grant paths>",
+      "result": "commit gates OK on 96ba8dc8ce (artifact; msg-verify MATCH; surprise-row-gate clean; to-pipeline-gate OK) and on 4848d8a4b7 (row; msg-verify MATCH). client-data-check WARN (hashed list absent on this box), scanned by the worker instead. one-writer WARN: the unsuffixed investigation file written from dell2, per-box file convention WARN until C-QUEUE."
+    }
+  ]
+}
