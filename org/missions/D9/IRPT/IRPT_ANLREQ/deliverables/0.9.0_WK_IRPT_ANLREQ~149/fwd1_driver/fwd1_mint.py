@@ -2,7 +2,8 @@
 
 mint    reads ONE JSON object {"password": "..."} on STDIN (never argv, a file or the environment), hashes it with
         bcrypt at cost 12 and writes ONE users row with ConditionExpression attribute_not_exists(PK). Stdout carries
-        only MINT-OK READBACK-OK, MINT-OK READBACK-BAD or MINT-REFUSED <word>.
+        only MINT-OK READBACK-OK (then one SCOPE line: the firm list and the absent markers, never the hash),
+        MINT-OK READBACK-BAD or MINT-REFUSED <word>.
 remove  deletes that row (attribute_exists(PK)), then polls a ConsistentRead get_item and the email-index GSI for up
         to 300 s and prints ABSENT/PRESENT GSI and CONSISTENT lines; exit 1 while either is still present.
 
@@ -23,6 +24,7 @@ EMAIL = "fwd1-staff-r41b@opal.invalid"
 PK = "USER#" + EMAIL
 SK = "PROFILE"
 FIRM = "opal-capital"
+RUN_FIRM = "49financial"  # AR-y-373: the one firm the run files under; the row's allowedFirmIds list holds exactly this
 TTL_HOURS = 3
 COST = 12
 MIN_PW = 24
@@ -60,11 +62,25 @@ def item_for(hashed):
         "passwordHash": {"S": hashed},
         "status": {"S": "active"},
         "firmId": {"S": FIRM},
+        "allowedFirmIds": {"L": [{"S": RUN_FIRM}]},
         "role": {"S": "user"},
         "userType": {"S": "test-filer"},
         "name": {"S": "IRPT_ANLREQ FWD-1 synthetic staff"},
         "exp": {"N": str(int(time.time()) + TTL_HOURS * 3600)},
     }
+
+
+def readback_ok(row):
+    """Pure, no AWS. True only for the one-firm scope shape the FWD-1 ticket reader admits: status exactly active,
+    firmId exactly opal-capital, a passwordHash present, allowedFirmIds exactly a DynamoDB list (L) of ONE string
+    member RUN_FIRM, and none of mfaEnabled, mfaChannel or the global marker scope_all_firms present."""
+    if not isinstance(row, dict):
+        return False
+    return (row.get("status") == {"S": "active"}
+            and row.get("firmId") == {"S": FIRM}
+            and "passwordHash" in row
+            and row.get("allowedFirmIds") == {"L": [{"S": RUN_FIRM}]}
+            and not any(k in row for k in ("mfaEnabled", "mfaChannel", "scope_all_firms")))
 
 
 def cmd_mint():
@@ -96,10 +112,15 @@ def cmd_mint():
     except Exception as e:  # noqa: BLE001
         print("MINT-OK READBACK-BAD read " + type(e).__name__)
         return 1
-    ok = (row.get("status", {}).get("S") == "active" and row.get("firmId", {}).get("S") == FIRM
-          and "passwordHash" in row and not any(k in row for k in ("mfaEnabled", "mfaChannel", "allowedFirmIds")))
-    print("MINT-OK READBACK-OK" if ok else "MINT-OK READBACK-BAD shape")
-    return 0 if ok else 1
+    if not readback_ok(row):
+        print("MINT-OK READBACK-BAD shape")
+        return 1
+    print("MINT-OK READBACK-OK")
+    members = [m.get("S", "?") for m in row["allowedFirmIds"]["L"]]
+    print("SCOPE allowedFirmIds=" + ",".join(members)
+          + " scope_all_firms=" + ("present" if "scope_all_firms" in row else "absent")
+          + " mfa=" + ("present" if any(k in row for k in ("mfaEnabled", "mfaChannel")) else "absent"))
+    return 0
 
 
 def cmd_remove():
