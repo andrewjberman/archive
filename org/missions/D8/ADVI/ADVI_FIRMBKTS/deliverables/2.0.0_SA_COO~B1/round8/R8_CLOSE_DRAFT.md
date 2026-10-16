@@ -1,5 +1,7 @@
 # ADVI_FIRMBKTS round 8 -- L8 PACKET (DRAFT, written 2026-10-14 ~14:5xZ while the guard's first organic run and act 3 are dated waits) -- 2.0.0_SA_COO~B1
 
+**SUPERSEDED 2026-10-16 by `R8_L8_PACKET.md` (the final packet); this draft is stale (7 orders, two of them then pending) and is kept only as the 10-14 record.**
+
 STATUS: DRAFT. Not sent. The round is NOT counted finished: `FB-m-2` (arm (a) due 2026-10-15 about 13:00Z, read by 14:00Z) and `FB-l-5` (act 3, then the first-day reads 2026-10-16 by 18:00Z) are open.
 This file carries what is measured so far; the CVO packet is cut from it when both orders are terminal (or when the CTO carries act 3 to round 9).
 
