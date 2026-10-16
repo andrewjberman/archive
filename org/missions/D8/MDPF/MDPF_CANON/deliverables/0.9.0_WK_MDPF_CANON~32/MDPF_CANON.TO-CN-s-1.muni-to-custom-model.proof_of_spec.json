@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-s-1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1fb9ac96ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "e96996c705",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-s-1.muni-to-custom-model.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~32",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/build_cottonwood_mdpf_slice.py",
+      "kind": "script",
+      "commit_or_etag": "a95888f372aea88ac5986267db5ba518237a4af3",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "introduces": ["\"Opal_Muni_Income\": \"opal_muni_income\","],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit a95888f372 on wk-MDPF_CANON-32 (LOCAL, not pushed). Source only; the worker wrote no AWS. The gold package deploy is CloudOps's, in its own window, after a never-widen pair."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_revamp_model_crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "a95888f372aea88ac5986267db5ba518237a4af3",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "introduces": ["ModelEntry(\"opal_muni_income\", None, \"Opal Municipal Bonds\", \"model\", False),"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit a95888f372 on wk-MDPF_CANON-32 (LOCAL, not pushed). Source only; the worker wrote no AWS. The gold package deploy is CloudOps's, after a never-widen pair."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-daily-emitter/mdpf_revamp_model_crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "a95888f372aea88ac5986267db5ba518237a4af3",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "introduces": ["ModelEntry(\"opal_muni_income\", None, \"Opal Municipal Bonds\", \"model\", False),"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit a95888f372 on wk-MDPF_CANON-32 (LOCAL, not pushed). Byte-identical to the data/mdpf copy (cmp, S1). The daily-emitter Lambda deploy is CloudOps's, after a never-widen pair."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/tests/test_cottonwood_custom_and_sma.py",
+      "kind": "test",
+      "commit_or_etag": "a95888f372aea88ac5986267db5ba518237a4af3",
+      "artifact_covered_by": ["AC3"],
+      "introduces": ["def test_the_muni_account_is_a_registered_custom_model_and_nothing_else_moves("],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit a95888f372 on wk-MDPF_CANON-32 (LOCAL, not pushed). Test source only; the 27 existing tests are unedited and 28 pass."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (CN-s-1): the producer's routing code on synthetic fixtures, run as cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_1.py\" pure; echo \"exit=$?\". Expect: ROUND 11 CN-S-1 PURE: 6 of 6 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_1.py\" pure; echo \"exit=$?\"",
+      "output_evidence": "root: C:/dev/wk-MDPF_CANON-32\n  PASS A0 control: Opal_Muni_Sleeve lands under opal_muni_sleeve  [display 'Opal Muni Sleeve' values [12345678.9, 12345678.9]]\n  PASS A1 Opal_Muni_Income lands in by_model under a new key, out of the residual  [key opal_muni_income values [63241218.96, 63241218.96] residual [2749334.3, 2749334.3] muni-in-residual [False, False]]\n  PASS A2 Opal Hewitt Moderate Income stays in the residual, not in by_model  [residual detail [1749334.3, 1749334.3]; by_model and model_aua identical with and without Hewitt: True]\n  PASS A3 new key differs from opal_muni_sleeve; sleeve unchanged; no double count  [new key opal_muni_income; sleeve unchanged True; model_aua delta [63241218.96, 63241218.96]]\n  PASS A4 control: model_aua + residual = fixture total  [model_aua + residual = fixture total on 3 runs x 2 dates]\n  PASS A5 control: Opal_Muni_Income_2 is not routed to the new key  [Opal_Muni_Income_2 residual [1000000.0, 1000000.0]; key opal_muni_income values [63241218.96, 63241218.96]]\nROUND 11 CN-S-1 PURE: 6 of 6 arms\nexit=0",
+      "denominator": "6 arms (A0 to A5) of 6",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-1 PURE: 6 of 6 arms.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (CN-s-1): the registration read across the producer, the crosswalk and its Lambda copy, and GLOBAL_MODEL_KEYS, run as cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_1.py\" seams; echo \"exit=$?\". Expect: ROUND 11 CN-S-1 SEAMS: 4 of 4 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_1.py\" seams; echo \"exit=$?\"",
+      "output_evidence": "root: C:/dev/wk-MDPF_CANON-32\n  PASS S1 control: the two crosswalk copies are byte-identical  [data/mdpf copy 24362 bytes, Lambda copy 24362 bytes, identical]\n  PASS S2 both crosswalk copies define ModelEntry, custom-list row and display-map row  [data/mdpf: ModelEntry True, custom list True, display map True; Lambda: ModelEntry True, custom list True, display map True]\n  PASS S3 GLOBAL_MODEL_KEYS holds opal_muni_income and still holds opal_muni_sleeve  [tuple True; opal_muni_income in it True; opal_muni_sleeve in it True; 19 keys]\n  PASS S4 producer maps Opal_Muni_Income to the new key, displays it, agrees with the crosswalk  [producer maps Opal_Muni_Income -> opal_muni_income True; displays 'Opal Municipal Bonds' True; Opal_Muni_Sleeve still maps to opal_muni_sleeve True; crosswalk agrees True]\nROUND 11 CN-S-1 SEAMS: 4 of 4 arms\nexit=0",
+      "denominator": "4 arms (S1 to S4) of 4",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-1 SEAMS: 4 of 4 arms.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (CN-s-1): regression guard, the custom-model test file with the added test, run as cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python -m pytest data/assets/scripts/gold/tests/test_cottonwood_custom_and_sma.py -q; echo \"exit=$?\". Expect: no failure, at least 28 passed (27 pass at the base) -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python -m pytest data/assets/scripts/gold/tests/test_cottonwood_custom_and_sma.py -q; echo \"exit=$?\"",
+      "output_evidence": "............................                                             [100%]\n28 passed in 1.15s\nexit=0",
+      "denominator": "28 passed of 28 collected (27 existing, unedited, plus 1 added)",
+      "status": "PASS",
+      "expect": "28 passed.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant arms are the issuer's selftest, not a worker criterion; this order names none for the worker.",
+      "expected": "N/A -- the order's proof_of_spec names AC1 to AC3 only",
+      "observed": "not run by the worker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- AC1 and AC2 read fixed synthetic fixtures and fixed registration files; AC3 is a test-suite run",
+      "observed": "not run twice on the same input",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The gold package deploy and the daily-emitter Lambda deploy (Terraform), and the read of the served Cottonwood and Global objects after a fire",
+      "reason": "Out of this cell by the order (BOUNDS 1): no AWS contact. CloudOps's deploy, after a never-widen pair; the issuer reads the served objects after the fire."
+    },
+    {
+      "item": "The never-widen pair, the Happyland identity flag, the per-key rollback and the writers count",
+      "reason": "Owned by the COO and CTO halves of the never-widen pair, not by the worker."
+    },
+    {
+      "item": "Any change to opal_muni_sleeve, to the residual rule, to the Hewitt account, and to the dim file dim_mdpf_aggregate_aua_timeseries.py",
+      "reason": "Not in the cell (BOUNDS 1 and 2; section 1 step 4). GLOBAL_MODEL_KEYS picks up the key through COTTONWOOD_CUSTOM_MODEL_KEYS, read by S3."
+    },
+    {
+      "item": "The Cottonwood Trend page (CN-s-3) and the portal chain",
+      "reason": "Other cells of round 11 (ORDER CN-s-3, CN-s-4, CN-s-5); no shared file with this cell."
+    },
+    {
+      "item": "A push of the branch",
+      "reason": "Order section 5 says no push. Commits are LOCAL on wk-MDPF_CANON-32."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~32/MDPF_CANON.TO-CN-s-1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r11_cn_s_1.py pure and seams (issuer's check, read-only, run at its own path in the worktree)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 120 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_1.py\" pure|seams; echo \"exit=$?\"",
+      "result": "pure 6 of 6 arms exit=0; seams 4 of 4 arms exit=0 (base before the cell: pure 4 of 6, seams 1 of 4, as the order predicts)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "timeout 120 python -m pytest data/assets/scripts/gold/tests/test_cottonwood_custom_and_sma.py -q --color=no -p no:cacheprovider",
+      "result": "28 passed in 1.21s, exit=0 (base before the cell: 27 passed)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (commit gate: py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~32 <0.9.0_WK_MDPF_CANON~32@opal.agent>\" -F .scratch/msg_cn_s_1_code.txt -- <4 paths>",
+      "result": "rc=0: committed a95888f372, 4 files, 45 insertions(+), 2 deletions(-); commit-gate All checks passed"
+    }
+  ]
+}
