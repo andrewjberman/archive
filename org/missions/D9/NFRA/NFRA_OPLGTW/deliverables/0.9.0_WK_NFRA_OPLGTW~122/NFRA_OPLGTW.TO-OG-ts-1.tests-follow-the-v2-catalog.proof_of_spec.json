@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ts-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "0cc50b3652"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~122",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gp1.py",
+      "kind": "test",
+      "commit_or_etag": "7a01aad9ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_oggp1_ac01 rewritten to the frozen-set pin: each of the 32 classified keys is (a) present with a read_tool naming a def in app/ (14) or (b) absent and named in ABSENT_FROM_V2_CATALOG (18); pin passes; 13 of 13 in the three-file run.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_gf1.py",
+      "kind": "test",
+      "commit_or_etag": "7a01aad9ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_oggf1_ac01 rewritten to the same pin for the 15 gf1 keys: (a) 6, (b) 9 in ABSENT_FROM_V2_CATALOG; pin passes.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_ts1.py",
+      "kind": "test",
+      "commit_or_etag": "7a01aad9ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "difference controls test_ogts1_control_gp1 and test_ogts1_control_gf1: each plants one unclassified key and asserts the pin reports it (pytest.raises AssertionError matching the planted key); both PASS.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "0cc50b3652",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ts-1.tests-follow-the-v2-catalog.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: both gp1 and gf1 suites pass, both ac01 pins pass, and the difference controls exist and pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ts1.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)gp1 and gf1 suites: pytest rc=0; passed [1-9]\\d*; failed 0 \\(want 0\\); named: ac01 pins 2 of 2, controls [1-9]\\d* \\(want 1 or more\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "gp1 and gf1 suites: pytest rc=0; passed 13; failed 0 (want 0); named: ac01 pins 2 of 2, controls 2 (want 1 or more)\nRESULT: PASS\nexit=0",
+      "denominator": "13 of 13 tests in test_og_gp1.py, test_og_gf1.py and test_og_ts1.py passed; 0 failed; ac01 pins 2 of 2; controls 2",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only those test files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~122 '^infra/aws/ec2/opal-gateway/tests/test_og_(gp1|gf1|ts1)\\.py$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~122: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~122: files touched 4; product files 3; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 files touched by this serial's commits (3 product test files, 1 surprise-channel row); 0 outside the allowed set",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-process planted classification key (opal_data_ts1_planted_unclassified_key) that is in neither (a) nor (b), fed to each pin helper (test_ogts1_control_gp1, test_ogts1_control_gf1).",
+      "expected": "each pin reports the planted key in neither and raises AssertionError naming it",
+      "observed": "13 passed including test_ogts1_control_gp1 PASSED and test_ogts1_control_gf1 PASSED (pytest.raises matched the planted key in both)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the named pins run standalone through ts1.AC1.sh and again inside the full gateway suite run",
+      "observed": "standalone: ac01 pins 2 of 2, RESULT: PASS; full suite after the change: tests/test_og_gp1.py::test_oggp1_ac01 and tests/test_og_gf1.py::test_oggf1_ac01 not in the failing set",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The read_tool registration check is a def search over app/**/*.py, not a text search of app/tools.py",
+      "reason": "5 of the 14 still-present gp1 read_tools are defined under app/integrations/portal_index/ and named in app/tools.py only as a category (surprise NFRA_OPLGTW-Z-W122-S1); the existing COVERED check in the same file uses the same def search"
+    },
+    {
+      "item": "The gf1 absent list (9 keys) was measured live from DATA_CATALOG.yaml at HEAD, not read from an issuer file",
+      "reason": "the issuer measurement CLASSIFIED_ROWS_ABSENT_FROM_V2_CATALOG_20261016.json covers gp1 only; the order asks gf1 for 'its own measured list'"
+    },
+    {
+      "item": "client-data-check on commit 7a01aad9ee: WARN, hashed account-id list absent on this device",
+      "reason": "absent is not empty; the commit's diff holds test identifiers and a surprise row, no account data, and the check was not run against the list"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W122-S1: OG-ts-1 criterion (a) names app/tools.py as the registry of read_tools, but 5 of the 14 still-present gp1 read_tools (etfs_get_positioning, mdpf_get_aum_metrics, mdpf_get_account_distribution, mdpf_get_aggregate_aua, mdpf_get_model_benchmarks) are defined only under app/integrations/portal_index/."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~122/ac_runs.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_gp1.py tests/test_og_gf1.py tests/test_og_ts1.py -v (from infra/aws/ec2/opal-gateway)",
+      "result": "13 passed"
+    },
+    {
+      "tool": "pytest (full gateway suite)",
+      "invocation": "python -m pytest tests -q -p no:cacheprovider (from infra/aws/ec2/opal-gateway), run at HEAD 0cc50b3652 and at 7a01aad9ee",
+      "result": "before: 67 failed, 1008 passed; after: 65 failed, 1012 passed; nothing entered the failing set; test_oggp1_ac01 and test_oggf1_ac01 left it"
+    },
+    {
+      "tool": "pin_split (the helper in test_og_gp1.py and test_og_gf1.py, run by test_oggp1_ac01 and test_oggf1_ac01)",
+      "invocation": "python -m pytest tests/test_og_gp1.py::test_oggp1_ac01 tests/test_og_gf1.py::test_oggf1_ac01",
+      "result": "gp1: (a) 14, (b) 18, neither 0 of 32; gf1: (a) 6, (b) 9, neither 0 of 15"
+    }
+  ]
+}
