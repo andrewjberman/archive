@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ng-2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "9104dc611a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ng-2.gate-reads-name-rulings.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ng-2.gate-reads-name-rulings.md",
+    "group": "OTHER",
+    "vintage_commit": "9104dc611a"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~114",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/naming-gate.py",
+      "kind": "script",
+      "commit_or_etag": "b7cbb3e93f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a commit-time gate tool on the worktree branch wk-NFRA_OPLGTW-114; it runs from the checkout on each commit and has no deploy"
+    },
+    {
+      "path_or_key": ".tools/tests/test_naming_gate_rulings.py",
+      "kind": "test",
+      "commit_or_etag": "b7cbb3e93f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a pytest file for the gate's rulings path (six in-process cases); run by the battery and has no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the self-test is green and carries the three arms.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ng2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "gate self-test: rc=0; PASS lines 1 (want 1); name-rulings arms admit 1, no-row control 1, other-type control 1 (want 1 or more each); failing arms 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "1 PASS line of 1 self-test run; 3 name-rulings arms of 3 present; 0 failing arms of the self-test's arms",
+      "status": "PASS",
+      "expect": "(?s)gate self-test: rc=0; PASS lines 1 \\(want 1\\); name-rulings arms admit [1-9]\\d*, no-row control [1-9]\\d*, other-type control [1-9]\\d* \\(want 1 or more each\\); failing arms 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the ten refused lines are graded RULED and the full-add gate prints no REFUSE in ENFORCE.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ng2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "full-add naming gate over the client modules and portal_json_served in ENFORCE: rc=0; REFUSE verdicts 0 (want 0); RULED verdicts 10 (want 10); NAMING-GATE: PASS 10 graded\nRESULT: PASS\nexit=0",
+      "denominator": "10 RULED of 10 graded literals in the full add of 9 client modules and portal_json_served (0 REFUSE; the pre-change run read 10 REFUSE of the same 10)",
+      "status": "PASS",
+      "expect": "(?s)full-add naming gate over the client modules and portal_json_served in ENFORCE: rc=0; REFUSE verdicts 0 \\(want 0\\); RULED verdicts (?:1\\d|[2-9]\\d) \\(want 10\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the diff outside org/ is naming-gate.py and at most one new test file.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ng2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "files differing from the base outside org/: 2; outside the allowed two files: 0 (want 0); naming-gate.py changed: 1 (want 1)\nRESULT: PASS\nexit=0",
+      "denominator": "2 files differing from the base outside org/ (.tools/naming-gate.py, .tools/tests/test_naming_gate_rulings.py) of 2; 0 outside the allowed two",
+      "status": "PASS",
+      "expect": "(?s)outside the allowed two files: 0 \\(want 0\\); naming-gate.py changed: 1 \\(want 1\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "planted: the (name, type) row removed for the planted NEW carrier bd_account_id; its RULED must flip to REFUSE",
+      "expected": "RULED -> PASS with the none_owed row present; REFUSE -> REFUSE with the row absent",
+      "observed": "self-test arm admit RULED -> PASS with the row; arm no-row REFUSE -> REFUSE without it; arm other-type REFUSE -> REFUSE under another type (self-test: NAMING-GATE-SELF-TEST: PASS)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the full-add gate in ENFORCE run twice on the same input (.scratch/ng2_after/all.diff) and compared byte for byte with W/NG2_AFTER.txt",
+      "observed": "identical bytes, 24 lines, rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "org/missions/D9/NFRA/NFRA_OPLGTW/registry name_rulings.json rows (not edited; the order's surface is read only)",
+      "reason": "the order's bounds: no registry edit; all five rows were present and matched the gate's type words, so no row was missing"
+    },
+    {
+      "item": "a RULED name as a placement candidate (surprise NFRA_OPLGTW-Z-W114-S2)",
+      "reason": "the placement step is not named by the order; the client modules have no mapped root, so no placement answer is read; left for the CTO to read"
+    },
+    {
+      "item": "NAMING_PLACE_PREVIEW=1 run (surprise NFRA_OPLGTW-Z-W114-S1)",
+      "reason": "the placement step errors on a sparse checkout; the default run skips the step and the AC runs never set the preview"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W114-S1: with NAMING_PLACE_PREVIEW=1 the placement step errors on the sparse worktree (a missing .tf file); the default run skips it",
+    "NFRA_OPLGTW-Z-W114-S2: a RULED name stays a placement candidate, because RULED is not in _NOT_A_NAME_VERDICTS; no mapped root is touched by the client modules",
+    "NFRA_OPLGTW-Z-W114-S3: the commit-time client-data check reads ABSENT on this device, so the code commit was not checked for client account ids",
+    "NFRA_OPLGTW-Z-W114-S4: the worktree shows a modified portal gitlink the order did not touch; the code commit does not stage it"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~114/NG2_AFTER.txt",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py --self-test",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "result": "NAMING-GATE-SELF-TEST: PASS; the three name-rulings arms each print ok (rc=0)"
+    },
+    {
+      "tool": "pytest test_naming_gate_rulings.py",
+      "invocation": "python -m pytest .tools/tests/test_naming_gate_rulings.py -q -p no:cacheprovider",
+      "result": "6 passed"
+    },
+    {
+      "tool": "naming-gate.py full-add ENFORCE (BEFORE and AFTER)",
+      "invocation": "python .tools/naming-gate.py --diff <full add of app/client_*.py and portal_json_served.py> --staged-paths <paths> --enforce",
+      "result": "BEFORE: NAMING-GATE: REFUSE 10 graded, rc=1 (W/NG2_BEFORE.txt); AFTER: NAMING-GATE: PASS 10 graded, rc=0 (W/NG2_AFTER.txt)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~114 <0.9.0_WK_NFRA_OPLGTW~114@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "b7cbb3e93f committed on wk-NFRA_OPLGTW-114 (LOCAL); msg-verify MATCH"
+    }
+  ]
+}
