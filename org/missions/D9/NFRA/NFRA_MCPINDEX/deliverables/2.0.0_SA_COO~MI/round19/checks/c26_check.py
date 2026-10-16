@@ -86,6 +86,24 @@ def ac1():
         m = gm.get(ent) or {}
         res.append(("%s: live group map bucket opal-data-bd, vendor blackdiamond, firm 49financial" % ent,
                     m.get("bucket") == "opal-data-bd" and m.get("vendor") == "blackdiamond" and m.get("firm") == "49financial"))
+    # the emitter's own path: each new entry built into a row by the emitter's row builder, then the live group map applied with the emitter's own rule
+    # (a map firm that differs from the row's firm is a CONFLICT and the row is left without a bucket: the 2026-10-16 trial emit crashed there)
+    sys.path.insert(0, AD)
+    import emit_catalog_v02 as em
+    rows, ents = [], {}
+    for t in TOOLS:
+        e = entry("opal_data_bd_silver_" + t)
+        if e is not None:
+            ents["opal_data_bd_silver_" + t] = e
+            rows.append(em.silver_catalog_row("opal_data_bd_silver_" + t, e))
+    spec, gerrs = em.load_group_maps([LIVE_MAP]) if os.path.exists(LIVE_MAP) else ({}, ["live map absent"])
+    applied, unused, conflicts = em.apply_group_map({"silver_datasets": rows, "portal_datasets": [], "harvest_datasets": []}, spec)
+    good = [r for r in rows if r.get("bucket") == "opal-data-bd" and r.get("vendor") == "blackdiamond" and r.get("firm") == "49financial"
+            and r.get("address") == "blackdiamond/49f-live/silver/%s/" % r["entity"].rsplit("_", 1)[-1] and r.get("read_tool")]
+    print("DENOMINATOR emitter path: rows built %d; group map applied %d of %d; conflicts %d; map errors %d; rows complete %d"
+          % (len(rows), applied, len(spec), len(conflicts), len(gerrs), len(good)))
+    res.append(("the emitter builds the four rows and the live group map applies with no conflict (bucket, vendor, firm, address, read_tool on each)",
+                len(rows) == 4 and applied == 4 and not conflicts and not gerrs and len(good) == 4))
     print("DENOMINATOR live rows present %d of %d; live group map entries %d" % (found, len(TOOLS), len(gm)))
     return report(res)
 
