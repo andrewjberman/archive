@@ -1,0 +1,98 @@
+# MDPF_CANON round 11 -- never-widen pair for the gold-package AND daily-emitter deploys that ship CN-s-1 (the account `Opal_Muni_Income` becomes the registered custom model "Opal Municipal Bonds"), for the first scheduled fire after the window (no earlier than 2026-10-17 13:30Z)
+
+**COO half DRAFTED here and signed at the end by the COO seat; CTO half OWED.** Every claim is MEASURED (read or run by the issuer in this session), INFERRED (read from code or a record, not run) or UNVERIFIED. Nothing here is deployed.
+**Deployer:** `0.7.0_AE_CloudOps~DELL1`, on an ADHOC order (`ADHOC.canon-r11-muni-custom-deploy`, to be drafted from this pair; not issued).
+**Halves:** CTO half = `1.0.0_SA_CTO~DELL1`, recorded at `ledger/NEVER_WIDEN_R11_CN_S_1_CTO_HALF.md`; COO half = `2.0.0_SA_COO~D1`.
+**Reused by reference, unchanged since round 10 (`round10/NEVER_WIDEN_PAIR_R10_CN_R_1.md`):** the leaf list of a gold run (21 writes), the state-write table, the D1/D2/D4 mechanics of a gold-package deploy, the first-fire readback `r9_trend_groups_readback.py`. This file states only what CN-s-1 changes.
+**Rulings and records this pair carries:** Andrew-direct 2026-10-15 ~15:2xZ ("Muni is in Custom Models, yes") and ~18:4xZ ("the happyland ventures Muni portfolio should be considered a Custom Model, Opal Municipal Bonds; it's with Cottonwood. It should be included in the Aggregate Custom Models group in the global view"; "Nothing wider is ruled", item 3 of the record); PRD v2.23 FWD-9 head (g); the CTO's round-10 analysis msg 6731 item 3; decomposition v11 rulings 4 and 5.
+**Code:** CN-s-1 merged `66ae82d62d` (worker `0.9.0_WK_MDPF_CANON~32`, commits `a95888f372` and `7e93d79aa2`; order `task-orders/MDPF_CANON.TO-CN-s-1.muni-to-custom-model.md`, complete, instance VALID). Re-run by the issuer on the merged tree: `round11/checks/r11_cn_s_1.py` pure 6 of 6, seams 4 of 4; `pytest data/assets/scripts/gold/tests/test_cottonwood_custom_and_sma.py data/mdpf/tests/canon` 77 passed; both crosswalk copies pass their own self-test (21 models: 7 served, 5 core, 2 sma, 2 blend) and are byte-identical; ruff clean.
+**Pin:** `66ae82d62d7eac16d64a812ab41dc36cd51a2c30` (`66ae82d62d`), or a descendant carrying the package members below byte-equal to it. **Push state: on origin** (MEASURED at 16:2xZ: `ls-remote origin box/dell1` read `a42841c3d46a`; `git merge-base --is-ancestor 66ae82d62d origin/box/dell1` rc 0 after a fetch).
+
+## 1. Code and the two packages
+
+- **What CN-s-1 changes (MEASURED, `git diff e96996c705 66ae82d62d`):** `build_cottonwood_mdpf_slice.py` +2 lines (a `CUSTOM_KEY` row `Opal_Muni_Income` -> `opal_muni_income`, a `CUSTOM_DISPLAY_NAME` row "Opal Municipal Bonds"); `mdpf_revamp_model_crosswalk.py` and its Lambda copy, identical edits +7 -1 each (a `ModelEntry`, the key in `COTTONWOOD_CUSTOM_MODEL_KEYS`, a `GLOBAL_ACCOUNT_DIST_DISPLAY` row); the test +31 (not shipped). `dim_mdpf_aggregate_aua_timeseries.py` is NOT edited: its `GLOBAL_MODEL_KEYS` ends with `+ COTTONWOOD_CUSTOM_MODEL_KEYS` read from the crosswalk, so Global sums the new key through the crosswalk edit (arm S3 of the check reads the resulting tuple). The match is on the NORMALISED vendor name (`_norm`, the producer's own lookup), so `Opal_Muni_Income_2` and `Opal Hewitt Moderate Income` do not match (arm A5 and A2).
+- **The gold package (`build_package.py`, 46 members; both pins built by the issuer):** between the round-10 pin `b6352de8f8` (the live function's `MDPF_GOLD_COMMIT`) and `66ae82d62d` SEVEN members differ (MEASURED, member-blob compare of two builds):
+
+| member | change | class |
+|---|---|---|
+| `build_cottonwood_mdpf_slice.py` | CN-s-1 | the cell |
+| `mdpf_revamp_model_crosswalk.py` | CN-s-1 | the cell |
+| `BUILD_MANIFEST.json` | regenerated | expected |
+| `infra/logic/registry/legacy_addresses.json` | 179 -> 205 rows: +26 (all reader `NFRA_OPLGTW`), 0 removed, 0 changed by key | ADDITIVE DATA |
+| `infra/logic/registry/scopes.json`, `systems.json` | +1 row each, 0 removed, 0 changed | ADDITIVE DATA |
+| `trading_calendar.py` (`lib/`) | +14 lines: one new function `first_trading_day_on_or_after` (IRPT_DASHBD round 132, commit `f25618c0b4`); no existing function edited | ADDITIVE CODE, unused by the gold path (INFERRED: nothing in the gold path calls it) |
+
+  The other 39 members are blob-equal to the round-10 package. The order's leg (b) re-reads all of this at the final pin and re-runs `lib.opal_naming.validate()`.
+- **The emitter package (`opal-assets-daily-emitter`, Terraform-built from its own directory; BUILD_MANIFEST declares `mdpf_revamp_model_crosswalk.py` "vendored VERBATIM ... re-vendor on any spine crosswalk change"):** one member changes, the vendored crosswalk (the same edits). Live baseline (MEASURED 14:34Z): `CodeSha256` `GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A=`, `LastModified` 2026-10-09T02:43:17Z. What the emitter reads from it (MEASURED by search): `ADVISOR_49F`, `ROSTER_OPEN_STATUS`, `build_rmid_bridge`, `resolve_rmid`, `CORE_MODEL_KEYS`, `resolve_eclipse_id`, `UnknownModelError`. The new key is NOT in `CORE_MODEL_KEYS` (MEASURED) and the emitter reads neither `COTTONWOOD_CUSTOM_MODEL_KEYS` nor the display map, so the emitter's outputs are expected NOT to move (INFERRED; `build_rmid_bridge` already carries the sleeve's rmid-less entry as precedent). The order confirms with `comp-pipescript io` that the package is built from that file before anything is applied.
+- **PROBE D, the DELTA on the REAL inputs (MEASURED 2026-10-16 ~16:3xZ; read-only S3 GETs, cached so both builds read identical bytes):** the Cottonwood producer's in-memory builds (`build_composed`, no S3 write) and the pair builder's `build_artifacts` (assignment date 2026-10-16) were run at the BASE (`e96996c705`, before CN-s-1) and at `66ae82d62d`, and diffed leaf by leaf (axis 498 dates, 2024-11-01 .. 2026-10-15, equal; 253 reads). 53 leaf differences, ALL of them in the Muni account's footprint:
+  - **Cottonwood `aggregate-aua-timeseries` (slice):** `by_model.opal_muni_income` ADDED; `model_aua` 7 cells and `non_model_aua` 7 cells differ, dates 2026-10-07, 10-08, 10-09, 10-12, 10-13, 10-14, 10-15 (the seven trading days on which the account holds a value; nothing before 2026-10-07); `meta.custom_residual_detail` (7 date entries) and `meta.income_non_model_residual` (the residual's by-date counts and members) differ; `partner_custody_total` and every other array are EQUAL.
+  - **Cottonwood `account-distribution` (pair artifact):** `by_model."Opal Municipal Bonds"` ADDED and `meta.account_count_by_model_key.opal_muni_income` ADDED; the `total` block's account count, active-account count, histogram, max, mean, median and percentiles differ (the $63M account now counts among the model accounts), plus `generated_at`.
+  - **Cottonwood `aum-metrics`:** `by_model` 12 -> 13 entries; `total.model_aum`, `total.non_model_aum`, `total.account_count` differ; plus `last_updated`.
+  - **Cottonwood `account-units`:** the new key's unit values ADDED and `total_unit_values` 384 -> 385 entries; plus `generated_at`.
+  - **NOT measured (needs the consolidator): the Global fold, the four category-views and the gold parquet.** Predicted BY RULE and UNVERIFIED: Global `by_model` gains `opal_muni_income` (through `GLOBAL_MODEL_KEYS`), Global `model_aua` rises and `non_model_aua` falls by the account's value on the same 7 dates, `opal_aggregate_aua` is equal, and the Trend arrays derived from `non_model_aua` (`client_supervised_aua`; `etf_strategies_aua` and `alt_strategies_aua` do not read it) fall by that value on those dates; the Cottonwood and Global `category-views` Custom group may gain the new member. The order's D4 (`qa_local`, in memory, before the fire) measures all 16 served objects and the 5 overwrite keys against the baselines and the set above; a leaf outside the set, or any move on a date before 2026-10-07, is a STOP.
+
+## 2. Deploy acts (one change-management entry opened before the first)
+
+| # | act | home | rollback |
+|---|---|---|---|
+| D1 | the named gold scripts through `safe-deploy.sh`, ONLY IF the order's leg (g) reads the runner has no `lib/` and no runner module imports it; else NOT deployed and `mdpf-code-equality` keeps printing DIFFER (a stated fact, round 9 and 10 precedent) | `s3://opal-data-mdpf/code/scripts/gold/` | re-copy the key's prior VersionId |
+| D2 | `build_package.py --pin <pin>`, upload, ONE targeted `safe-apply` on `mdpf-gold-lambda` whose plan moves the function's code and the single environment value `MDPF_GOLD_COMMIT` and nothing else | the gold function | section 4 |
+| D2b | the emitter package rebuilt from its directory, ONE targeted `safe-apply` on `opal-assets-daily-emitter` whose plan moves the function's code only | the emitter function | section 4 |
+| D3 | NOT DEPLOYED: every other `code/` name; the publisher | -- | none owed |
+| D4 | the one on-demand `qa_local` invoke of `mdpf-gold-lambda`, after D2, graded on `errors` empty, `a4_objects_built` 16, and the leaf set of section 1 (nothing else moves, nothing before 2026-10-07 moves) | the function | none: it writes no served object |
+
+- **Sequencing.** Starts only on (i) the CTO half signed, (ii) the COO half signed, (iii) the issuer's written GO naming a pin that is ON ORIGIN and carries `66ae82d62d`. **Window: D2, D2b and D4 finish by 12:44Z on 2026-10-17** (never within 45 minutes before the 13:30Z fire, never while the runner dispatch or the gold lambda runs). **One change per fire holds:** round 10's change fired and was read on 2026-10-16 (readback 11 of 11, publisher run `20261016T135047Z-4049fa98` all 22 pairs published); CN-s-1 is the only gold change in the 2026-10-17 window; D2b is a different function (the emitter) and is applied in the same window, before D2, so the two share no fire-attribution question: the emitter's outputs are expected not to move, and the first fire after both is read for CN-s-1 alone. No open deploy sentinel may name `mdpf-gold-lambda`, `opal-assets-daily-emitter` or `code/scripts/gold/` (the order re-reads `org/critical_paths/.open_deploys/` in every live worktree at its start).
+- **Precondition (the identity flag, decomposition ruling 5): MATCH = TRUE** (MEASURED 2026-10-16 ~15:0xZ, read-only, flags and counts only; `round11/draft/CN_S_1_DEPLOY_BASELINE_20261016.md`): in the newest `fact_model_assignment` partition (2026-10-16, 998 rows) exactly ONE account carries the strategy `Opal_Muni_Income`, and it is one of the 3 accounts whose name contains "happyland"; no other account carries it. The order re-reads it at its start; a mismatch STOPS the deploy.
+
+## 3. Writers of the moved leaves (N, MEASURED by search at HEAD)
+
+**P1: `by_model.opal_muni_income`, `model_aua`, `non_model_aua` and the residual meta of the Cottonwood slice.** N = 1 writer of the values: `build_slice` (`build_cottonwood_mdpf_slice.py`), wrapped by `build_composed` and written by `main`; `compose_cottonwood_leg` rewrites only the pre-measured backfill window (before 2026-07-20), which the account does not reach. Registration consumers (read, never write, the key set): `COTTONWOOD_CUSTOM_MODEL_KEYS` is read by `dim_mdpf_aggregate_aua_timeseries.py` (the Global fold's key tuple), the crosswalk and its Lambda copy and one test (census: 7 hits in 4 files, MEASURED); `CUSTOM_KEY` / `CUSTOM_MODEL_KEYS` by the slice, the pair builder, the dim, the crosswalk and its copy, and one test (22 hits in 6 files).
+**P2: the Cottonwood `account-distribution`, `aum-metrics`, `account-units` pair artifacts.** N = 1 writer: `build_pair` / `build_artifacts` in `build_cottonwood_mdpf_pair.py` (it imports the slice's `CUSTOM_KEY`, so the registration reaches it with no edit of its own: PROBE D).
+**P3: Global `by_model`, `model_aua`, `non_model_aua` and the Trend arrays.** UNVERIFIED count (the consolidator was not run in the probe): by the round-10 recount of the same Global leaves N = 3 writers for the Trend keys (`compute_trend_groups`, `apply_global_trend_groups`, `emit_gold_parquet`); the Global fold in `dim_mdpf_aggregate_aua_timeseries.py` is the writer of `by_model`/`model_aua`. The order's leg (a) recounts at the pin and prints N.
+
+## 4. Leaf-by-leaf disjointness, combined blast radius, rollback per change
+
+| leaf / surface | CN-s-1 can move | what else is in flight on that leaf | intersection |
+|---|---|---|---|
+| Cottonwood `aggregate-aua-timeseries` | `by_model` +1 key; `model_aua` and `non_model_aua` on 7 dates; residual meta (PROBE D) | nothing: round 10's change is deployed and read; CN-s-3 reads the object but writes none | EMPTY |
+| Cottonwood `account-distribution`, `aum-metrics` (served) and `account-units` (staged) | the Muni account joins the model population (PROBE D) | nothing | EMPTY |
+| Global `aggregate-aua-timeseries`, `aum-metrics`, `account-distribution` | predicted by rule: `by_model` +1 key, `model_aua`/`non_model_aua` and the derived Trend arrays on the same 7 dates; distribution statistics (UNVERIFIED, D4) | nothing (no other gold change in the window) | EMPTY |
+| the four `category-views` | the Custom group may gain the new member (UNVERIFIED, D4) | nothing | EMPTY |
+| the gold parquet families | the same cells and columns as the objects they project | nothing | EMPTY |
+| the emitter's outputs | expected none (INFERRED, section 1) | nothing | EMPTY |
+| the publisher, the portal (CN-s-3 is a read-side change on the Cottonwood Trend), the edge | nothing | CN-s-4 and CN-s-3 land on the portal on Andrew's word; neither touches a gold object | no shared surface |
+| run manifest | `run.code.commit` | moves with any deploy | not a content leaf |
+
+**Verdict: the CN-s-1 field set is disjoint from every other change in flight; it moves served bytes at two firms (Cottonwood and Global) on the seven dates 2026-10-07 .. 10-15 of the NEW objects, and nothing before 2026-10-07.** Every dated object already served is write-once and is not touched. **Combined blast radius at the first fire after the window:** the Cottonwood and Global leaves above for those dates, the new as-of date's ordinary append, `run.code.commit`. **Cannot move:** any dated object already served, `partner_custody_total` and every headline total, any other scope's per-model values, the Hewitt account (stays in Other, arm A2), the sleeve `opal_muni_sleeve` (a different key, arm A3), the portal, publisher, edge.
+**What the pair accepts (priced):** on a client-facing page ("Client Holdings" distribution and the Custom Models band) the Cottonwood and Global views will show roughly $63M to $64M ($64.12M on value date 2026-10-07, $63.47M on 2026-10-15, per the model dim) moved from Other AUM into Custom Models on those seven dates, and the account-distribution statistics (count, mean, median, percentiles, max) change with the account joining the model population.
+**Rollback PER CHANGE.**
+- **Gold function:** (1) edit `gold-lambda.tf` `MDPF_GOLD_COMMIT` back to **`b6352de8f843f3726ad5c51c650d9035ca8336db`** (the round-10 pin, MEASURED live 14:34Z); (2) restore the package object `s3://opal-data-assets/portal/gold/mdpf/_code/mdpf-gold-lambda.zip` to its prior VersionId (READ by the order at its start and written into its ledger; the round-10 package's VersionId was not re-read here); (3) plan + ONE targeted `safe-apply` on `mdpf-gold-lambda`; `CodeSha256` returns to **`vNRXwWymIRmgptYv8+PEyFWH73IpIVHOpdT5mL/B7uk=`** (MEASURED live 14:34Z); (4) re-copy the D1 key(s) from their recorded VersionIds if D1 ran.
+- **Emitter:** restore the prior package and re-apply; `CodeSha256` returns to **`GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A=`** (MEASURED 14:34Z).
+- **Write-once objects** (every dated served object, every parquet partition, the manifest) have no prior version and are not rolled back. A bad first object is answered by the readback, the code revert above and the next fire's new date; never a delete. **The overwrite keys** (`gold/mdpf_revamp/cottonwood/*.json`, the Global ones, the control key) move at every fire; their prior VersionIds are read by the order at its start (they change with each fire, so none is recorded here).
+
+## 5. Expected outcome, read from the producer's own rule (both branches)
+
+- **Branch A, the account holds a value on a date** (the seven dates and every later one while it is assigned): its dollars appear under `by_model.opal_muni_income` inside `model_aua`, leave `non_model_aua` and the residual; the Total is unchanged (the W-2b identity `total == model + non_model` holds, gate in `build_composed`: it passed on the new code over the real inputs in PROBE D).
+- **Branch B, the account holds no value on a date** (every date before 2026-10-07, any weekend or holiday, any day the strategy is unassigned): the key's value reads null, `model_aua` and `non_model_aua` equal today's. The key itself is in `by_model` from the first fire.
+- **Suppression count.** None: this change suppresses no value and adds no one-firm-backed aggregate beyond the Cottonwood figure the account already contributed to Other; the Global Custom group now includes a one-account line from Cottonwood (a one-contributor figure inside a larger aggregate, as every Cottonwood custom model already is). The CTO half is asked to read whether the XA-6cad principle ("a one-contributor aggregate is that firm's value under another name") reaches the Global `by_model.opal_muni_income` entry itself; Andrew's word of 10-15 ~18:4xZ ("included in the aggregate Custom Models group in the global view") names the inclusion.
+
+## 6. Acceptance after the act (the issuer reads; never a leg of the CloudOps order)
+
+On the first SCHEDULED fire after the window (2026-10-17 13:30Z gold, 13:50Z publisher), denominators printed:
+1. The Cottonwood served object: `by_model.opal_muni_income` present with display "Opal Municipal Bonds"; `model_aua`/`non_model_aua` differ from the prior object only on the seven dates; `partner_custody_total` equal everywhere; the W-2b identity on every dated row.
+2. The Global object and `category-views` leaves per the predicted set; the Trend arrays' partition identity (`r9_trend_groups_readback.py`, 11 arms) still passes with the new `non_model_aua`.
+3. The run manifest: `errors` empty, `a4_objects_built` 16, `run.code.commit` equals the pin; the publisher manifest `all_present` True.
+4. `/seams` and the portal render of the Cottonwood and Global Custom Models band (the CVO's, after Andrew lands CN-s-3 and CN-s-4).
+
+## 7. What the COO half asks the CTO half to read
+
+1. **Section 1, PROBE D:** the pair artifacts (`account-distribution`, `aum-metrics`, `account-units`) move with the slice, which the cell's text did not name; and the NOT-measured set (Global fold, category-views, parquet): accept D4 as the measurement before the fire, or ask for the consolidator run first.
+2. **Section 5, the suppression question.**
+3. **Section 2, two lambdas:** the emitter is a second deploy surface applied in the same window; accept "expected not to move" (INFERRED) with D4 as the gate, or hold D2b.
+4. **Pin:** `66ae82d62d` is on origin; the GO can name it.
+
+## COO half -- OWED SIGNATURE by 2.0.0_SA_COO~D1 (a line in a commit by that seat, after the CTO half's questions are answered or accepted)
+
+## CTO half -- OWED (`1.0.0_SA_CTO~DELL1`)
+
+Sign, or refuse naming what is missing; a signature is a line in a commit by that seat, and no message carries it.
