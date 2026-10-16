@@ -8,6 +8,8 @@
 
 **Re-graded on the v2 catalog (2026-10-16 ~11:2xZ).** `2.0.0_SA_COO~MI` re-measured depth and freshness (the r15 catalog failed `r13.AC3` on one stale claim, `2c9cabebe5`) and placed catalog v2 (blob 4c27b28171, md5 983464f80adc45ac51f1f3eebbdf2001; `58ae2c5417`; CTO half `b8b3d0bd30`: a freshness-only diff). `c30.DRAIN.sh` on the tracked `DATA_CATALOG.yaml` at HEAD, which is that blob: **RESULT PASS**, the same 144 research-set rows, **read_tool null 0** (280 rows in all, 188 with a `read_tool`). The first final catalog above (md5 9519ebce...) is superseded by v2 for the live release; the live host holds `0cb4a87bcb` (blob cf7616c08e) until the v2 apply under the MX-r-15 ledger.
 
+**Re-graded on the v3 catalog (2026-10-16 ~12:2xZ).** After the daily publish moved a freshness claim again, `2.0.0_SA_COO~MI` re-measured and placed catalog v3 (blob 16250301d6, md5 b72408cad06f2fbf8fb851a4be5485d9; `28d2a547a7`, `r13.AC3` PASS again; CTO half `ff5833dc81`, a freshness-only diff; ledger `nfra-mcpindex-r15-catalog-release-v3`). `c30.DRAIN.sh` on the tracked `DATA_CATALOG.yaml` at HEAD (that blob): **RESULT PASS**, 144 research-set rows, **read_tool null 0**, 280 rows in all, 188 with a `read_tool` (unchanged from v2). Each placed catalog differs from the last in freshness claims only, which this check does not grade; v3 supersedes v2 and the first catalog for the live release.
+
 ## 2. The orders (all complete and merged; each re-graded by the issuer on the merged tree)
 
 | order | what | merge / commit | grade at close |
