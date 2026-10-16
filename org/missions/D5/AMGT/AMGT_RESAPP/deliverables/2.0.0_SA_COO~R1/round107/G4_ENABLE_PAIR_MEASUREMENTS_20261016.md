@@ -26,6 +26,8 @@ Prep for the separate enable pair the CTO ruled (`ledger/CTO_RULING_G4_CUT_BN6_2
 - **First-fire bound, inferred:** at most 14 x 2 = 28 Lusha credits if every one of the 14 is CALLED (10 were on the last stored run); 14 SERP queries. No dollar figure: the Lusha credit price and the SERP price are not in the repository files read here.
 - **Correction to my bn-6 grade note and the card:** "only filings and management make model calls" holds for management only through that CEO-search path; the recorded spend of a management build is Lusha credits and a SERP query. The price of a Lusha credit and of a SERP query is not in the repository files read here.
 
+- **The price is not in the repository, and the repository says why (read 2026-10-16 ~03:0xZ):** `data/find/imo/config/cost-budgets-v0.1.json` (a DRAFT, 2026-05-27) holds `Q4_lusha_per_imo_ceiling` and `Q-L4_lusha_monthly_credit_budget` as `DRAFT-DEFERRED ... (Andrew-gate post-account-tier-resolution)` and the Bright Data per-call cost as unconfirmed (Q7). So the dollar price of a Lusha credit and of a SERP call waits on the Lusha plan tier, an Andrew-gated answer; until then the management half of the enable pair's figure is stated in CREDITS (at most 28) and QUERIES (14), not dollars. A `comp-find` for a price sentence read 24 hits across 102,087 files; only the draft budget file was read, so "no price sentence exists" is NOT shown: the other hits (a cost-gate design, a ratify brief, a doc and round-107 task orders) were not read.
+
 ## What the pair still needs before the enable
 
 1. The management batch's spend as a figure: the Lusha credit price and the SERP price (not read), and whether a real run calls the Anthropic CEO-search path; the credit counts are read (14 of 14).
