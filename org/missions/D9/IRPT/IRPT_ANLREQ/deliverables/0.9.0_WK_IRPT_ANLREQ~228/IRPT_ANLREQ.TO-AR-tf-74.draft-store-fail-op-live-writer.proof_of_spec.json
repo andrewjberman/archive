@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-tf-74",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R49_TX.md",
+    "vintage_commit": "337f92b74a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-74.draft-store-fail-op-live-writer.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-tf-74.draft-store-fail-op-live-writer.md",
+    "group": "OTHER",
+    "vintage_commit": "337f92b74a"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~228",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py",
+      "kind": "script",
+      "commit_or_etag": "eea0a80661",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit eea0a80661 on wk-IRPT_ANLREQ-228 (LOCAL). Not deployed, packaged, applied or invoked. compose_ports supplies the live jobs factory over mark_hop_failure_keyed; the stub is removed. Packaging of durable_job.py into the function is surprise IRPT_ANLREQ-D2-W228-S2.",
+      "artifact_covered_by": [
+        "AR74-tf-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_hop_failure_live_writer.py",
+      "kind": "test",
+      "commit_or_etag": "eea0a80661",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit eea0a80661 on wk-IRPT_ANLREQ-228 (LOCAL). Fakes only: 12 cases pass, 8 test functions named test_hop_failure_*.",
+      "artifact_covered_by": [
+        "AR74-tf-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "eea0a80661",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit eea0a80661 (LOCAL): rows IRPT_ANLREQ-D2-W228-S1 to -S3 appended (binary append, LF file, 3 rows).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR74-tf-AC1",
+      "criterion_verbatim": "`AR74-tf-AC1` -- the test file exists, every test function is named `test_hop_failure_*`, the tests pass and at least 5 pass. Dry-run at box/dell2 c71e9b0310: `R46-TESTS-FAIL absent: ...` -- FAIL as expected. The checker's `--self-test` reads `R46-SELFTEST-OK`.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 5 --prefix=test_hop_failure_ infra/aws/lambda/investor-reporting/reports/tests/test_hop_failure_live_writer.py",
+      "output_evidence": "R46-TESTS-OK passed=12",
+      "denominator": "12 of 12 collected cases pass (8 test functions named test_hop_failure_*, 4 of them parametrized; the checker requires at least 5 passed)",
+      "status": "PASS",
+      "expect": "R46-TESTS-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Six guards of the new code removed or altered one at a time in the worktree file (wiring back to the stub, table not passed to the writer, port binding the job id as tenant, writer LeaseRefused not mapped to INVALID_REQUEST, written flag forced true, table name hard-wired to the default), each run against the new test file, and the file restored byte-identical after (sha256 verified). The _extend_path import guard was not mutated: the test's own sys.path insert hides it (surprise IRPT_ANLREQ-D2-W228-S1).",
+      "expected": "each mutant fails at least one test; the unmutated control passes all cases",
+      "observed": "CONTROL 12 passed; G1 stub wiring 11 failed, 1 passed; G2 table not passed 1 failed, 11 passed; G3 tenant binding 4 failed, 8 passed; G4 LeaseRefused not mapped 1 failed; G5 written forced true 2 failed, 10 passed; G6 table hard-wired 1 failed, 11 passed; every mutant rc=1; restored sha256 match=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the new test file run by pytest, the fail-op test file (AR-tf-71) and the new file together, and the checker run, on the committed bytes",
+      "observed": "12 passed in 0.22s (control); 27 passed in 2.98s (new file plus the 15 AR-tf-71 cases, together); checker R46-TESTS-OK passed=12 rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "packaging of ycharts/generate/durable_job.py into irpt-commentary-draft-store-lambda",
+      "reason": "not in the source-map entry's files[] or staged_from[]; the order says report and file a row, not edit the map. Surprise IRPT_ANLREQ-D2-W228-S2 (OBSERVATION, INERT)."
+    },
+    {
+      "item": "the integration check of the live factory against the real function, and any deploy, apply, IAM change or live AWS call",
+      "reason": "the order forbids them: no network, no AWS, no secret, no deploy, no apply; fakes only. Surprise IRPT_ANLREQ-D2-W228-S3 (ARMED, disarm 2.0.0_SA_COO~T2)."
+    },
+    {
+      "item": "the _extend_path import guard of the live factory",
+      "reason": "the test file inserts ycharts/generate on sys.path itself, so a missing guard is not observable here. Surprise IRPT_ANLREQ-D2-W228-S1 (OBSERVATION, INERT)."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W228-S1: the live factory imports the keyed writer as the flat module durable_job, not ycharts.generate.durable_job as the order states, so the writer's LeaseRefused and the op's catch are one class (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W228-S2: the source-map entry irpt-commentary-draft-store-lambda does not package ycharts/generate/durable_job.py; the map was not edited (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W228-S3: the source-level disarm of IRPT_ANLREQ-D2-W225-S1 is in place, but the integration check against the real function was not run (OBSERVATION, ARMED, disarm 2.0.0_SA_COO~T2)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~228/IRPT_ANLREQ.TO-AR-tf-74.draft-store-fail-op-live-writer.proof_of_spec.json AR74-tf-AC1",
+      "result": "run on the instance bytes before the flip; see the worker report"
+    },
+    {
+      "tool": "R46 checker",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R46_CHECKS/r46_checks.py tests 5 --prefix=test_hop_failure_ infra/aws/lambda/investor-reporting/reports/tests/test_hop_failure_live_writer.py",
+      "result": "R46-TESTS-OK passed=12 (rc 0)"
+    },
+    {
+      "tool": "commit-gate.sh via safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~228 <0.9.0_WK_IRPT_ANLREQ~228@opal.agent>\" -F <msgfile> -- <2 .py paths and channel>",
+      "result": "commit eea0a80661: py_compile, ds-precommit and ruff clean on the two .py files; surprise-row gate OK (3 new rows); msg-verify MATCH"
+    }
+  ]
+}
