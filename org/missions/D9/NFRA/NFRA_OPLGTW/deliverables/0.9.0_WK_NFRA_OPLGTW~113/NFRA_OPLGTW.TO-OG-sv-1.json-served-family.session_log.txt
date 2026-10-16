@@ -1,0 +1,27 @@
+NFRA_OPLGTW.TO-OG-sv-1 -- session log -- 0.9.0_WK_NFRA_OPLGTW~113 -- worktree C:/tmp/wk-oplgtw-113, branch wk-NFRA_OPLGTW-113, base 7c8c1ee4db
+
+1. Re-ground. Branch wk-NFRA_OPLGTW-113; TREE-OK (org and .tools present). The order file was read whole; its ISSUER NOTES section was in the same read and was not acted on.
+
+2. Seam read (no edits): app/typed_scope.py, app/harvest_typed.py, app/harvest_read.py, app/portal_served.py (the model for the catalog helper), app/portal_macro.py (the JSON read path, the freshness rule), app/portal_models.py, app/integrations/portal_index/integration.py (runtime_catalog), app/refs/DATA_CATALOG.yaml (the seven rows: prefix, key_template, bucket, retired), lib/trading_calendar.py.
+
+3. Step 1 MEASURE (read only, box credentials, INTERNAL_READER_ROLE_ARN unset). T-1 on the UTC clock is 2026-10-15; the latest completed month-end is 2026-09-30. Each object's own data_as_of read by get_object, no content printed:
+   correlation_data as-of 2026-10-14, 1 trading day behind T-1 (BUILT)
+   etf_returns as-of 2026-10-14, 1 (BUILT)
+   factor_tilts, three parts, each as-of 2026-10-14, 1 (BUILT)
+   model_portfolio_timeseries as-of 2026-10-14, 1 (BUILT)
+   model_portfolios_views newest partition 202606, LastModified 2026-06-01, 95 trading days behind T-1 (RULED_OUT)
+   peer_performance as-of 2026-09-30 = latest completed month-end, not stale, 11 trading days behind T-1 (BUILT)
+   trending_latest as-of 2026-10-15, 0 (BUILT)
+   The catalog's lags were measured at its cut; the daily lags read 1 now because T-1 has moved on.
+
+4. Step 2 BUILD: app/portal_json_served.py (six tools; catalog-only keys; served_prefixes() and factor_parts() read the rows); tests/test_og_sv1.py (eight parametrised cases under six names). The factor part names come from the catalog key template's brace group; the correlation window names come from the object. Projection to 50 KB: dated series keep their newest points, a top-level dated list is listed newest first, the trending topics keep five articles each; every cut is named in columns_dropped.
+
+5. Commit 35848c8689 (code, tests, SV1_ROWS.json, probe). The first attempt was refused by the commit gate on one unused import in the test file (ruff F401); removed and re-committed. The naming gate issued two REFUSE verdicts on the served field name 'etfs' in WARN window; the commit landed; recorded as NFRA_OPLGTW-Z-W113-S1.
+
+6. Step 3 PROBE: W/probe_sv1.py run against the real bucket: six tools answered, each non-Opal call refused with zero reads, nine object reads in total, no content printed.
+
+7. Surprise rows: NFRA_OPLGTW-Z-W113-S1 (the naming verdict) and NFRA_OPLGTW-Z-W113-S2 (the row schema named by the order is not in this sparse worktree). Commit 6d31ea24a5.
+
+8. AC1 (sv1.AC1.sh): pytest rc=0, 6 of 6 named tests, RESULT: PASS, exit=0. AC2 (sv1.AC2.sh): rows 7 of 7, built 6, ruled out 1, probe lines 6 of 6, RESULT: PASS, exit=0.
+
+9. Registrations for the issuer, not made here: app/tools.py import and the six tool registrations; app/data_entitlement.py and app/destructive_ops.py per the family pattern; the pinned tool counts re-pinned in one commit at the merge.

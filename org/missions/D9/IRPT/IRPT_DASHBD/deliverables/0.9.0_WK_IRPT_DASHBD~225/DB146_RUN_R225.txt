@@ -1,0 +1,34 @@
+DB-b-278 (TO-DB-b-278), worker 0.9.0_WK_IRPT_DASHBD~225 -- the decisive lines of the issuer checker and the tests, verbatim (ANSI colour codes removed; synthetic data only; no client value)
+
+Contract commit: 2fd42fcb40 (contract + test). Surprise row commit: f4f3108481.
+
+[1] python -I "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r146/p146_series030.py" . DB146-1-AC1
+OK: series contract 0.3.0: the sections and the 16 earlier fields are byte-identical; series.optional gains ['unreported_trading_days', 'unreported_trading_days_basis']; the lineage appends the 0.2.0 bytes; the rule is in words; 3 files changed, all in the grant
+DB146-1-AC1 PASS   (rc=0)
+
+[2] python -I "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r146/p146_series030.py" . DB146-1-AC2
+OK: behaviour: a validator driven only by the contract accepts 4 series (an earlier one, [] with the basis, one and two unreported days) and rejects 11 (a lone field, wrong basis, null, non-ISO, outside the window, a present day, duplicate, unsorted, a string)
+DB146-1-AC2 PASS   (rc=0)
+
+[3] python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_series_contract_030.py
+22 passed   (rc=0)
+
+[4] python -I -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reporting-publish/tests/test_publisher.py
+13 passed   (rc=0)
+
+[5] cd portal && bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-124.series-contract.test.ts
+VERDICT: SERIES-CONTRACT-FAIL ARM(a): series.optional: page ["class_names","class_value","class_weight"] != contract ["class_names","class_value","class_weight","unreported_trading_days","unreported_trading_days_basis"]
+0 pass, 1 fail   (rc=1)
+
+[6] python -I "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r146/p146_series030.py" . DB146-1-AC3
+(the checker's own line, verbatim except that the U+2717 glyph of the bun output is written as x; the line is the checker's tail of that output, so it starts mid-string)
+FAIL: the portal's series-contract test failed against the new contract: 0m) | x IV-e-124 -- the page reads the SERIES contract shape and refuses a broken document (C-SEAM) > every arm holds [4.15ms] |  |  0 pass |  1 fail |  1 expect() calls | Ran 1 test across 1 file. [59.00ms] |
+DB146-1-AC3 FAIL   (rc=1)
+
+Control (mutant): the contract copy with series.optional cut to the three earlier names, run through [2]:
+FAIL: series.optional must be the three earlier names then ['unreported_trading_days', 'unreported_trading_days_basis']
+DB146-1-AC2 FAIL   (rc=1) -- fired as expected.
+
+Determinism: [2] run twice on the same input; the two outputs are identical (2 lines).
+
+Not written: the facts record RD_SERIES_CONTRACT_030_FACTS_R146.json (stopped at the BLOCKING row IRPT_DASHBD-D2-W225-S1).

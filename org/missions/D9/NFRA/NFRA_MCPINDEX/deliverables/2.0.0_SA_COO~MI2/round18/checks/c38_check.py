@@ -1,8 +1,8 @@
-"""c38_check.py -- grades MX-c-38 (NFRA_MCPINDEX round 18, workstream RESEARCH-EXCL): the 28 catalog rows the CTO ruled out of the finish line leave the
+"""c38_check.py -- grades MX-c-38 (NFRA_MCPINDEX round 18, workstream RESEARCH-EXCL): the 34 catalog rows the CTO ruled out of the finish line leave the
 row files, and the row generator reads an entity-exclusions file so a regeneration does not bring them back. Run from the repo root.
 
-  python c38_check.py scope   AC1: none of the 28 entities of entity_exclusions.json is a row file; a fresh generator run (the generator's own default
-                              exclusions, no extra argument) exits 0, writes exactly 186 rows, none of the 28, prints one `excluded <entity>: <reason>`
+  python c38_check.py scope   AC1: none of the 34 entities of entity_exclusions.json is a row file; a fresh generator run (the generator's own default
+                              exclusions, no extra argument) exits 0, writes exactly 183 rows, none of the 34, prints one `excluded <entity>: <reason>`
                               line per entity, and every row it writes equals the committed row of the same name outside read_tool/tools/gap_owner
                               (MX-c-31's three fields; the control that no OTHER row moves)
   python c38_check.py tests   AC2: the new test file exists, passes, and collects at least 5 tests
@@ -25,7 +25,7 @@ PIN = DELIV + "/0.9.0_WK_NFRA_MCPINDEX~38"
 R17 = DELIV + "/2.0.0_SA_COO~MI/round17"
 R18 = DELIV + "/2.0.0_SA_COO~MI2/round18"
 EXCL = R18 + "/entity_exclusions.json"
-WRITTEN = 186
+WRITTEN = 180
 LINK_FIELDS = ("read_tool", "tools", "gap_owner")
 NEW_TESTS = ("workflows/atom_decomposition/tests/test_entity_exclusions.py",)
 

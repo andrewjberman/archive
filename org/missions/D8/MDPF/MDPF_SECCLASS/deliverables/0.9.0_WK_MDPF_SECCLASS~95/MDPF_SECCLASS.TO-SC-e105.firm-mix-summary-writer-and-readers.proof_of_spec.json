@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e105",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e105.firm-mix-summary-writer-and-readers.md",
+    "group": "OTHER",
+    "vintage_commit": "d63495282e481bb354bf117eaa0149e216136405"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R26.md",
+    "vintage_commit": "d63495282e481bb354bf117eaa0149e216136405",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e105.firm-mix-summary-writer-and-readers.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~95",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~95/FIRM_MIX_SUMMARY_WRITER_AND_READERS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record document only. Names the writer of platinum/firm/mix_summary.json (data/black_diamond/scripts/gold/D_04.client_portal_summary.py:578), the 8-file reader census with one row each (all ORDER-DEPENDENT: no), and the decision NO-ORDER-DEPENDENT-READER. No code, no deploy, no AWS call.",
+      "artifact_covered_by": [
+        "SC26-e105-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appended two rows, MDPF_SECCLASS-D1-W95-S1 (writer bucket helpers untracked at HEAD) and MDPF_SECCLASS-D1-W95-S2 (census cannot take rows for census-missed readers). Append only; no existing row edited. surprise-row-gate run at the commit.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC26-e105-AC1",
+      "criterion_verbatim": "the writer line opens on mix_summary.json, every census reader has a row, no row names a file outside the census, and the decision follows from the rows.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_firm_mix_summary_record.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~95/FIRM_MIX_SUMMARY_WRITER_AND_READERS.md",
+      "output_evidence": "FIRMMIX-RECORD ok=True writer_ok=True census=8 rows=8 missing=[] extra=[] decision=NO-ORDER-DEPENDENT-READER consistent=True ; exit rc=0. Negative arm (one row flipped to ORDER-DEPENDENT: yes, decision left NO-ORDER-DEPENDENT-READER): FIRMMIX-RECORD ok=False ... consistent=False ; rc=1.",
+      "denominator": "8 census files, 8 rows, 0 missing, 0 extra",
+      "status": "PASS",
+      "expect": "FIRMMIX-RECORD ok=True"
+    },
+    {
+      "criterion_id": "SC26-e105-AC2",
+      "criterion_verbatim": "the control that you changed no code.",
+      "method": "command",
+      "invocation": "bash -c 'git diff --name-only box/dell1...HEAD -- data infra lib | wc -l'",
+      "output_evidence": "0 (printed by wc -l; the command exited 0)",
+      "denominator": "0 changed files under data/ infra/ lib/ between box/dell1 and HEAD",
+      "status": "PASS",
+      "expect": "0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the record with one reader row flipped to ORDER-DEPENDENT: yes while the decision stays NO-ORDER-DEPENDENT-READER, fed to the check: the consistency arm must fire",
+      "expected": "consistent=False and rc=1",
+      "observed": "FIRMMIX-RECORD ok=False writer_ok=True census=8 rows=8 missing=[] extra=[] decision=NO-ORDER-DEPENDENT-READER consistent=False ; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the check reads the record and git grep at HEAD; no clock, randomness or network.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any change to data/black_diamond/scripts/gold/D_04.client_portal_summary.py (adding sort_keys=True at line 270 or elsewhere)",
+      "reason": "Not made. The decision is NO-ORDER-DEPENDENT-READER, so no sort is ordered and no served object's bytes move."
+    },
+    {
+      "item": "the bucket of the Black Diamond and cottonwood D_04 writes (lib.platinum_dest.destination and lib.config.S3_BUCKET)",
+      "reason": "Those modules are untracked at HEAD and absent from the main checkout, so the bucket is read from the readers instead. Recorded as surprise row MDPF_SECCLASS-D1-W95-S1; the decision does not depend on it."
+    },
+    {
+      "item": "census-missed readers (DATA_CATALOG.yaml brace template, firm-config.mjs comment, d00_served_shape_census.py listing reader, ClientsTab.tsx indirect consumer, AuthContext.tsx prefetch)",
+      "reason": "Recorded in prose in the record with verdicts, not as rows: the check refuses rows for files outside its census as extra. Recorded as surprise row MDPF_SECCLASS-D1-W95-S2."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W95-S1: the 49financial and cottonwood D_04 writers resolve their output bucket through lib.platinum_dest.destination and lib.config.S3_BUCKET; neither module is tracked at HEAD or present in the main checkout. The 49financial bucket is read from the readers (d06:246, opal-data-bd). OBSERVATION, INERT.",
+    "MDPF_SECCLASS-D1-W95-S2: the order says to add a row for a census-missed reader, but the check refuses rows for files outside its census as extra; the census-missed readers are recorded in prose with verdicts, none order-dependent. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e105.firm-mix-summary-writer-and-readers.md",
+  "compiler_tools": [
+    {
+      "tool": "check_firm_mix_summary_record.py (R26_CHECKS, read-only)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R26_CHECKS/check_firm_mix_summary_record.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~95/FIRM_MIX_SUMMARY_WRITER_AND_READERS.md",
+      "result": "FIRMMIX-RECORD ok=True ... census=8 rows=8 missing=[] extra=[] consistent=True; rc=0. Negative arm consistent=False; rc=1."
+    },
+    {
+      "tool": "surprise-row-gate (.tools/surprise-row-gate.py)",
+      "invocation": "python .tools/surprise-row-gate.py (run by safe-commit at the commit)",
+      "result": "see the commit's gate output"
+    }
+  ]
+}
