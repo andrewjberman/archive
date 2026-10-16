@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-R19-L2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R19.md",
+    "vintage_commit": "b84a2ca293",
+    "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R19-L2.analyst-intake-list-scoped-to-an-explicit-firm-list.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R19-L2.analyst-intake-list-scoped-to-an-explicit-firm-list.md",
+    "group": "OTHER",
+    "vintage_commit": "b84a2ca293"
+  },
+  "assignee": "0.9.0_WK_TCKT_VNEXT~46",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cc54cc0fb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "source-only order; the only artifact is the BLOCKING surprise row TCKT_VNEXT-D2-W46-S1 (no deploy in scope for this order)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R19L2-AC1",
+      "criterion_verbatim": "the new test file passes with every case of step 4 named in a test, no failures or errors",
+      "method": "test_suite",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "ERROR: file or directory not found: C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py ... no tests ran in 0.00s (rc=4)",
+      "denominator": "0 of 7 step-4 cases present; 0 tests run (the test file is absent from the worktree)",
+      "status": "FAIL",
+      "status_reason": "BLOCKING TCKT_VNEXT-D2-W46-S1: infra/aws is outside the worktree sparse cone, so the test file was never written and the criterion cannot run to a verdict",
+      "expect": "^[0-9]+ passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "R19L2-AC2",
+      "criterion_verbatim": "you write mutant_check.py: it copies lambda_function.py to a scratch folder OUTSIDE the product tree with the intake principal's firm filter removed, runs the new test file against the copy with pytest, and prints MUTANT-FIRES only when that run FAILS",
+      "method": "command",
+      "invocation": "python C:/dev/wk-tckt-vnext-46/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~46/mutant_check.py",
+      "output_evidence": "can't open file 'C:\\dev\\wk-tckt-vnext-46\\org\\missions\\D7\\TCKT\\TCKT_VNEXT\\deliverables\\0.9.0_WK_TCKT_VNEXT~46\\mutant_check.py': [Errno 2] No such file or directory (rc=2)",
+      "denominator": "0 of 1 mutant run (mutant_check.py was not written; lambda_function.py is absent to copy)",
+      "status": "FAIL",
+      "status_reason": "BLOCKING TCKT_VNEXT-D2-W46-S1: lambda_function.py is absent from the worktree, so the mutant cannot be built or fired",
+      "expect": "MUTANT-FIRES",
+      "judgment": false
+    },
+    {
+      "criterion_id": "R19L2-AC3J",
+      "criterion_verbatim": "svc-analyst-intake can list only the tickets of the firms named in its configuration, an unset or empty configuration shows it nothing, ALL is never a wildcard, and no other principal's LIST changed",
+      "method": "manual_read_with_citation",
+      "invocation": "L9 read of the svc-analyst-intake LIST scope against the cell contract (not executed by the worker)",
+      "output_evidence": "not executed: no lambda_function.py in the worktree, so the scope change could not be read; graded at L9 only",
+      "denominator": "0 of 1 judgment item read (the cell was not built)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion graded at L9 by 3.0.0_SA_CVO, never by the worker; no worker reading recorded",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the intake firm filter removed from list_tickets, the new test file run against the copy, MUTANT-FIRES expected",
+      "expected": "MUTANT-FIRES",
+      "observed": "not run: no lambda_function.py and no test file in the worktree (BLOCKING TCKT_VNEXT-D2-W46-S1)",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "N/A -- nothing was built or executed, so two same-input runs cannot be compared",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the cell's source change (ANALYST_INTAKE_ALLOWED_FIRMS and the list_tickets scope), the new test file, mutant_check.py",
+      "reason": "BLOCKING: infra/aws absent from the worktree sparse cone; not rebuilt, extracted or reconstructed per the WORKER FACE; the cone was not widened"
+    },
+    {
+      "item": "re-pin of test_list_scoped_firm.py near line 240",
+      "reason": "the file is absent from the worktree (same BLOCKING row)"
+    },
+    {
+      "item": "R19L2-AC3J",
+      "reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO"
+    }
+  ],
+  "surprises": [
+    "TCKT_VNEXT-D2-W46-S1: TO-R19-L2 BLOCKING -- the worktree carries org/ and .tools/ but not infra/aws (sparse cone omits infra/); the cell was not built and no mechanical criterion ran to a verdict"
+  ],
+  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~46/R19_L2_RECORD.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest C:/dev/wk-tckt-vnext-46/infra/aws/lambda/ticket_center/tests/test_analyst_intake_scoped.py -q -p no:cacheprovider --color=no",
+      "result": "ERROR: file or directory not found; no tests ran in 0.00s; rc=4"
+    },
+    {
+      "tool": "shell absence check",
+      "invocation": "ls infra/aws ; git config --get core.sparseCheckout ; git sparse-checkout list",
+      "result": "infra/aws: No such file or directory; core.sparseCheckout=true; cone = .tools, infra/logic/registry, lib, org/devices, org/missions/D7/TCKT/TCKT_VNEXT, org/modules/graph, org/ref, org/standards"
+    }
+  ]
+}
