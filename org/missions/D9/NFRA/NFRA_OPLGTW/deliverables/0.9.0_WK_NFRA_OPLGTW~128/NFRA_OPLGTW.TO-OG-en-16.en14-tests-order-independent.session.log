@@ -1,0 +1,12 @@
+0.9.0_WK_NFRA_OPLGTW~128 -- NFRA_OPLGTW.TO-OG-en-16 -- session log (worktree C:/tmp/wk-oplgtw-128, branch wk-NFRA_OPLGTW-128)
+
+1. Tree check: rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-128; test -d org && test -d .tools -> TREE-OK.
+2. Base reproduction at a10173850b, cd infra/aws/ec2/opal-gateway && python -m pytest -q -p no:cacheprovider tests/test_og_en4.py tests/test_og_en12.py tests/test_og_en14.py
+   -> 1 failed, 10 passed. FAILED tests/test_og_en14.py::test_ogen14_ac03 - RuntimeError: Missing required env var: TENANT_ID,
+      raised at app/config.py:17 via app/server.py:72 (_cfg.validate()) during the test body's importlib.import_module("app.server").
+3. Edit: tests/test_og_en14.py, fixture mods: monkeypatch.setenv("MOCK_GRAPH", "1") first; cached cfg MOCK_GRAPH set True with monkeypatch.setattr; MASTER_ADMIN_EMAILS unchanged.
+4. commit-gate.sh on the test file -> rc 0 (pre-commit gate clean for 1 of 1 file(s)).
+5. After edit, same invocation -> 11 passed, 0 failed. Reverse order (en14, en12, en4) -> 11 passed. en14 alone -> 3 passed.
+6. safe-commit d0d41d101d (test file + investigation rows S1, S2) -> rc 0, msg-verify committed.
+7. en16.AC1.sh -> forward order passed 11 failed 0; reverse order passed 11 failed 0; RESULT: PASS exit=0.
+8. _wkbound.sh 0.9.0_WK_NFRA_OPLGTW~128 '^infra/aws/ec2/opal-gateway/tests/test_og_en14\.py$' -> files touched 2; product files 1; outside 0; RESULT: PASS exit=0.
