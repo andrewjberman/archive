@@ -1,0 +1,132 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-25",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~ZS",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7656f484ab"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "93d752d55b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-25.etf-classifications-read-grant.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/etf_classification_read_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "31f5f961c1",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "One aws_iam_role_policy on opal-gateway-role at sha256-16 c51c268d41b63e8f (re-hashed before the apply; ask 01861a288d2b). Applied through safe-apply, targeted: plan 1 add / 0 change / 0 destroy, 'Apply complete! Resources: 1 added, 0 changed, 0 destroyed'. get-role-policy read back: one statement, Allow, dynamodb:GetItem only, Resource equal to the describe-table ARN; policy sha256-16 609426e6a083440b; the role's inline policies 24 -> 25. Targeted re-plan: No changes.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "iam:role-policy/opal-gateway-role/gateway-global-etf-classification-read-policy",
+   "kind": "aws_resource",
+   "commit_or_etag": "3ba4af364d",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live in IAM and recorded in W/CLS_APPLIED.json. Simulator on the table ARN, one call each: GetItem allowed; Scan, Query and PutItem implicitDeny. Positive control in its own invocation (the caller principal, Scan on the same ARN): allowed, so the denies are the role's and not the instrument's. describe-table: ACTIVE, hash key ticker.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZS/NEVER_WIDEN_ASK_OG-ap-25.md",
+   "kind": "doc",
+   "commit_or_etag": "31f5f961c1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The three-half ask, sha256 01861a288d2b; halves signed CTO 9fc726f92a, COO d87f790253, CVO be6d23b7f6, each at the .tf hash c51c268d41b63e8f.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T0513Z_nfra-oplgtw-grants-ap25_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "3ba4af364d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ledger nfra-oplgtw-grants-ap25 opened (entry and sentinel committed) before the apply, 3 legs (P1 apply and read-back, S1 simulator and table existence, V1 re-plan), all proven, CLOSED; sentinel removed in the same commit as CLS_APPLIED.json.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (Phase A): the one .tf file grants exactly dynamodb:GetItem on the table ARN, the plan adds exactly one policy, the ask has three halves.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap25.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "terraform: policies 1 (want 1); dynamodb actions ['dynamodb:GetItem'] (want ['dynamodb:GetItem']); table arn ends table/etf-classifications True; wildcard action or resource False (want False); other resources 0 (want 0)\nplan: 1 to add, 0 to change, 0 to destroy True; ask has the three halves True\nRESULT: PASS\nexit=0",
+   "denominator": "1 policy in the .tf; the plan figure is read from the stored W/CLS_PLAN.txt (the Phase A plan), and after the apply a fresh targeted plan reads No changes.",
+   "status": "PASS",
+   "status_reason": "Re-run after the apply at the Phase B commit; same output as Phase A.",
+   "expect": "(?s)terraform: policies 1 \\(want 1\\); dynamodb actions \\['dynamodb:GetItem'\\] \\(want \\['dynamodb:GetItem'\\]\\); table arn ends table/etf-classifications True; wildcard action or resource False \\(want False\\); other resources 0 \\(want 0\\).*plan: 1 to add, 0 to change, 0 to destroy True; ask has the three halves True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (Phase B): the policy is live on the gateway role, allows GetItem, denies Scan by the simulator, and the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap25.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0; policy gateway-global-etf-classification-read-policy shape ok; simulate GetItem allowed, Scan (negative control) implicitDeny\nRESULT: PASS\nexit=0",
+   "denominator": "1 policy: re-read from IAM by the script itself (get-role-policy), plus the simulator for GetItem and Scan on the exact table ARN from CLS_APPLIED.json.",
+   "status": "PASS",
+   "status_reason": "Run at 3ba4af364d on the shared tree: ledger CLOSED, sentinel 0 at HEAD, policy shape ok, GetItem allowed, Scan implicitDeny.",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0; policy \\S+ shape ok; simulate GetItem allowed, Scan \\(negative control\\) (?:implicitDeny|explicitDeny).*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative arm: iam simulate-principal-policy on the table ARN for the three actions the grant must not carry (Scan, Query, PutItem), one call each, plus a positive control for the deny reads in a separate invocation.",
+   "expected": "GetItem allowed; Scan, Query and PutItem not allowed; the control principal's Scan allowed.",
+   "observed": "GetItem allowed; Scan implicitDeny; Query implicitDeny; PutItem implicitDeny; the caller principal's Scan on the same ARN allowed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Targeted re-plan after the apply; AC1 and AC2 each run twice (at the Phase A commit and the Phase B commit for AC1; at the Phase B commit and again when the instance was generated for AC2).",
+   "observed": "Re-plan No changes; AC1 and AC2 each PASS exit=0 with the same figures. AC2 was not run as a negative arm: its refusal of an absent CLS_APPLIED.json is read from the script, and the issuer measured the pre-cut FAIL.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "That the tool mdpf_get_security_classification reads through this policy, or that a non-Opal refusal makes zero DynamoDB calls.",
+   "reason": "Not exercised: no code is deployed in this act. The policy stays unused until the OG-ac-2 release (after OG-ap-23). The CVO condition on the zero-call refusal is OG-ac-2's proof."
+  },
+  {
+   "item": "That the gateway role can actually read an item from the table.",
+   "reason": "The applier cannot call DynamoDB as the gateway role, so the IAM branch is read by the simulator only (GetItem allowed on the table ARN, whose existence describe-table confirmed). No item was read."
+  },
+  {
+   "item": "The census's limits.",
+   "reason": "Attribute names come from a 200-item sample, and the contract row count (3,507) is older than the table's 11,362 (row Z-W113-S5); the grant is by item, not by attribute."
+  }
+ ],
+ "surprises": [],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. Phase A 2026-10-16 04:53Z-05:03Z; Phase B 05:12Z-05:22Z on GO msg 34744. Log: org/tier2_senior/0.7.0_AE_CloudOps~ZS/logs/2026-10-16/ (written after this commit).",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway apply -auto-approve -var market_update_s3_root=<address() output> -target=aws_iam_role_policy.gw_etf_classification_read",
+   "result": "PASS",
+   "notes": "rc 0, 1 added. The new opal_name module call needed one terraform init in Phase A before any plan would run ('Module not installed'); it changed no tracked file."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (3 legs), close-leg x3, close",
+   "result": "PASS",
+   "notes": "open commits itself; close leaves the closed entry and the sentinel deletion uncommitted, so they went in the Phase B commit."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "--drift --budget 420",
+   "result": "PASS",
+   "notes": "scanned 6 of 6 carriers within budget (211 s); no schedule or trigger is added by this order. C4 and C5 read PARTIAL_OR_BLIND and were not read as zero."
+  }
+ ]
+}
