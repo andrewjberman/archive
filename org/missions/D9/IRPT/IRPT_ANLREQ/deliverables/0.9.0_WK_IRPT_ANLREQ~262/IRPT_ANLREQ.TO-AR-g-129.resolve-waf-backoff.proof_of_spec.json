@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-129",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-129.resolve-waf-backoff.md",
+    "group": "OTHER",
+    "vintage_commit": "1e702788a0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R42_G.md",
+    "vintage_commit": "1e702788a0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-129.resolve-waf-backoff.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~262",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "175596f205",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline source change to the resolve hop's RETRY visibility (WAF schedule 150, 300, 450 s; every other cause 60 s; journal names visibility=<s>); no deploy and no AWS call; the resident carries it in the next release",
+      "artifact_covered_by": [
+        "AR129-g-AC1",
+        "AR129-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resolve_upload.py",
+      "kind": "test",
+      "commit_or_etag": "175596f205",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five new offline test functions (12 cases) appended after the existing tests, which are untouched; NOT EXECUTED in this worktree because collection is blocked by docs/ (row IRPT_ANLREQ-D2-W262-S1)",
+      "artifact_covered_by": [
+        "AR129-g-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d063c6cbf2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one row appended: IRPT_ANLREQ-D2-W262-S1 (class BLOCKING, hazard_standing INERT, disposition UNDER_INVESTIGATION)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR129-g-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py build",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py build",
+      "output_evidence": "AR-G129-OK build: all arms (run at 175596f205 under timeout 120 s, rc=0). Negative arm at base 1e702788a0 under the same check: AR-G129-FAIL build: resident_worker has no _resolve_retry_visibility / RESOLVE_WAF_BACKOFF_S",
+      "denominator": "3 receives (1, 2, 3) x 3 checks each (direct call, poll_once visibility, journal line) + receive 4 ending + 3 cap checks (schedule tuple, sum 900 at most REDRIVE_SECONDS, RESOLVE_MAX_RECEIVES below 5); 0 failed",
+      "expect": "^AR-G129-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR129-g-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py guard",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py guard",
+      "output_evidence": "AR-G129-OK guard: all arms (run at 175596f205 under timeout 120 s, rc=0). The same check at base 1e702788a0 also printed AR-G129-OK guard: all arms",
+      "denominator": "flat 60 check (1) + 9 non-WAF codes x 3 receives = 27 direct calls + 4 codes x 3 receives = 12 poll_once runs (visibility [60], no delete, no send) + BUSY class 1 (re-send, no visibility call); 0 failed",
+      "expect": "^AR-G129-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR129-g-AC3",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g129_checks.py regress",
+      "output_evidence": "AR-G129-REGRESS-FAIL test_resolve_upload.py: rc=2 ['1 error in 3.11s']; test_frozen_worker.py: rc=2 ['1 error in 2.63s'] (run at 175596f205 under timeout 590 s, rc=1). The collection error is FileNotFoundError on C:/dev/wk-irpt-anlreq-262/docs/contracts/investor-reporting/v1/AnalysisReport.schema.json, raised from reports/tests/test_repository.py:19. Scope arm run alone at 175596f205: AR-G129-SCOPE-OK",
+      "denominator": "0 tests collected: 2 of 2 regress files errored at collection (1 error each); 0 passed, 0 failed",
+      "expect": "^AR-G129-REGRESS-OK",
+      "status": "FAIL",
+      "status_reason": "The two regress test files cannot be collected in this worktree: its sparse cone omits docs/, which HEAD tracks and the test chain reads (BLOCKING row IRPT_ANLREQ-D2-W262-S1). Not weakened, not worked around; docs/ was not materialised because it is outside the grant. The order stays open."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The worker face names no mutant; the negative arm is the base run of the same checks, taken before the change.",
+      "expected": "build FAILs at base; guard PASSes at base",
+      "observed": "build: AR-G129-FAIL build: resident_worker has no _resolve_retry_visibility / RESOLVE_WAF_BACKOFF_S; guard: AR-G129-OK guard: all arms (both at 1e702788a0)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes; each check was run once after the change and once at base",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W262-S1: the worktree's sparse cone omits docs/, so tests/test_resolve_upload.py and tests/test_frozen_worker.py fail at collection and AR129-g-AC3 cannot pass here."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "AR129-g-AC3 regress run: both test files executed",
+      "reason": "docs/ is outside the worktree's sparse cone; the two files fail at collection before any test runs (row IRPT_ANLREQ-D2-W262-S1). Not materialised: outside the grant and the rule against reconstructing the tree."
+    },
+    {
+      "item": "Execution of the five new test functions in tests/test_resolve_upload.py",
+      "reason": "same collection block. The build and guard arms drive the same real poll_once path and pass; the new test functions are not claimed as run."
+    },
+    {
+      "item": "Live effect of a longer WAF spacing on YCharts",
+      "reason": "not claimed by the cell and not measurable offline; no deploy, no AWS call, no vendor call in this order."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/commit-gate.sh on resident_worker.py and on tests/test_resolve_upload.py",
+      "result": "rc=0 for both: All checks passed; pre-commit gate clean for 1 of 1 file each"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/test_resolve_upload.py (cwd ycharts/generate)",
+      "result": "1 error during collection, rc=2 (docs/ outside the sparse cone); not executed"
+    }
+  ]
+}

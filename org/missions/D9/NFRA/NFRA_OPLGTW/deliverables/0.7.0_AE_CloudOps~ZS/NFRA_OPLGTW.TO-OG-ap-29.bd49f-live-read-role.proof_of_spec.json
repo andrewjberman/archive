@@ -1,0 +1,154 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-29",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~ZS",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "b758457a14",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-29.bd49f-live-read-role.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/blackdiamond_live_reader_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "6fea315091",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "One aws_iam_role and one aws_iam_role_policy at sha256-16 5604d8577f68a50d (re-hashed before the apply; ask 369a8e7a12f7), the S3 addresses read from the four registry rows. Applied through safe-apply, targeted at both: plan 2 add / 0 change / 0 destroy, 'Apply complete! Resources: 2 added, 0 changed, 0 destroyed'. Targeted re-plan: No changes.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "iam:role/gateway-49f-blackdiamond-live-read-role (+ inline policy gateway-49f-blackdiamond-live-read-policy)",
+   "kind": "aws_resource",
+   "commit_or_etag": "50e9252cc5",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live in IAM and recorded in W/BDLIVE_APPLIED.json. Trust: one statement, Principal only the Gateway instance role's ARN, no Condition. Policy sha256-16 39a137ba628e6ae0, 6 statements (4 Deny, 2 Allow) equal to the file; 1 inline policy, 0 attached. The instance role is unchanged (24 inline policies, does not hold the new policy); gateway-49f-blackdiamond-read-role's policy still sha256-16 ceb6ae001918528d. Simulator, one call each: GetObject allowed 4 of 4 tables, ListBucket allowed 4 of 4, four out-of-scope controls explicitDeny; positive controls (caller principal) allowed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/logic/registry/legacy_addresses.json",
+   "kind": "config_data",
+   "commit_or_etag": "bd93455796",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Four read rows gateway-client-bdlive-{unrealized,transactions,allocations,fees} (bucket opal-data-bd, template silver/<t>/, reader NFRA_OPLGTW), second-reader attributions on pairs NFRA_MCPINDEX's catalog rows already carry; 40 lines added, none removed; committed first and on their own under the audited override GIT_COMMIT_AUTHOR_OVERRIDE=PLATFORM_LOGIC_DOCS. They authorize no write.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZS/NEVER_WIDEN_ASK_OG-ap-29.md",
+   "kind": "doc",
+   "commit_or_etag": "6fea315091",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The three-half ask, sha256 369a8e7a12f7; halves signed CTO 7877e044d7, COO b6c6de7fbe, CVO 6b7d6ef48d, each at the .tf hash 5604d8577f68a50d.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T1442Z_nfra-oplgtw-grants-ap29_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "50e9252cc5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ledger nfra-oplgtw-grants-ap29 opened (entry and sentinel committed) before the apply, 3 legs (P1 apply and read-back, S1 simulator and existence counts, V1 re-plan), all proven, CLOSED; sentinel removed in the same commit as BDLIVE_APPLIED.json.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (Phase A): the one .tf creates one role and one policy, read-only on the four prefixes of opal-data-bd, trusting only the instance role, and the plan is two additions (and at most one named change).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ap29.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "terraform: roles 1 (want 1); policies 1 (want 1); trust names the instance role True; put/delete/star actions [] (want none); wildcard False (want False); bucket-root object arn False (want False); other bucket named False (want False)\nprefixes: the four silver tables in GetObject resources True; in ListBucket s3:prefix values True\nplan: 2 to add, 0 or 1 to change, 0 to destroy True; ask has the three halves True\nRESULT: PASS\nexit=0",
+   "denominator": "1 role and 1 policy in the .tf; the plan figure is read from the stored W/BDLIVE_PLAN.txt (the Phase A plan), and after the apply a fresh targeted plan reads No changes.",
+   "status": "PASS",
+   "status_reason": "Run after the issuer's script fix (the first run read FAIL on the two prefix checks, row Z-S294) and again when the instance was generated; the .tf and the plan are unchanged since Phase A.",
+   "expect": "(?s)terraform: roles 1 \\(want 1\\); policies 1 \\(want 1\\); trust names the instance role True; put/delete/star actions \\[\\] \\(want none\\); wildcard False \\(want False\\); bucket-root object arn False \\(want False\\); other bucket named False \\(want False\\).*prefixes: the four silver tables in GetObject resources True; in ListBucket s3:prefix values True.*plan: 2 to add, 0 or 1 to change, 0 to destroy True; ask has the three halves True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (Phase B): the role is live, trusts only the instance role, the simulator allows the four prefixes and refuses the four negative controls, and the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ap29.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0; role exists yes; trust is only the instance role 1 (1 = yes); simulate GetObject allowed 4 of 4, ListBucket allowed 4 of 4; negative controls not allowed 4 of 4\nRESULT: PASS\nexit=0",
+   "denominator": "1 role named in BDLIVE_APPLIED.json, re-read from IAM by the script itself (get-role, trust principals against the instance role's ARN), 4 in-scope GetObject probes, 4 in-scope ListBucket prefixes, 4 negative controls.",
+   "status": "PASS",
+   "status_reason": "Run at 50e9252cc5 on the shared tree, and again when the instance was generated: ledger CLOSED, sentinel 0 at HEAD, role exists, trust only the instance role, GetObject 4 of 4 and ListBucket 4 of 4 allowed, negative controls 4 of 4 not allowed.",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0; role exists yes; trust is only the instance role 1 \\(1 = yes\\); simulate GetObject allowed 4 of 4, ListBucket allowed 4 of 4; negative controls not allowed 4 of 4.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative arm: iam simulate-principal-policy as the new role, one call each: GetObject on an out-of-scope key of opal-data-bd, GetObject on an opal-data-assets key, PutObject on an allowed prefix, ListBucket with an out-of-scope s3:prefix; plus a positive control for the deny reads: the caller principal on the same PutObject, GetObject and ListBucket, each in its own invocation.",
+   "expected": "The four in-scope reads and four in-scope listings allowed; the four negative controls not allowed; the control principal's calls allowed.",
+   "observed": "GetObject allowed 4 of 4 and ListBucket allowed 4 of 4; the four negative controls explicitDeny; the caller principal's PutObject, GetObject and ListBucket on the same targets allowed, so the denies are the role's and not the instrument's.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Targeted re-plan after the apply; AC1 and AC2 each run twice (AC1 on the Phase A files after the issuer's script fix and when the instance was generated; AC2 at the Phase B commit and when the instance was generated).",
+   "observed": "Re-plan No changes; AC1 and AC2 each PASS exit=0 with the same figures. AC1's first run read FAIL on the two prefix checks (row NFRA_OPLGTW-Z-S294, fixed by the issuer in the script only). AC2 was not run as a negative arm: its refusal of an absent BDLIVE_APPLIED.json is read from the script, and the issuer measured the pre-cut FAIL.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "That the instance role can actually assume the new role.",
+   "reason": "Not exercised: only the instance role can, and the order's bounds name no act on the gateway host. The trust names its role ARN, which in the same account is sufficient by the AWS rule; the real AssumeRole is the batched release's proof (its served 49F read, which closes row Z-S292)."
+  },
+  {
+   "item": "That the four tools read through this role, or that the routing change ships with it.",
+   "reason": "No code is deployed in this act and no object was read (existence counts only, KeyCount 1 each). The CVO's condition: role_key still strips -live at HEAD, so the routing change must ship in the same release."
+  },
+  {
+   "item": "That no other firm's rows sit in the four tables.",
+   "reason": "The keys have no firm segment and the catalog rows are named 49financial; the CVO measured z08 on 100% of the newest object of each table (0 z09). This seat read no object."
+  },
+  {
+   "item": "The master_admin gate and the tool-to-prefix routing.",
+   "reason": "The code cell OG-en-12 and PRD v3.14; this seat did not read the tool code."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S294"
+ ],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. Phase A 2026-10-16 13:49Z-14:19Z (GO 35045); Phase B 14:40Z-14:57Z (GO 35070). Log: org/tier2_senior/0.7.0_AE_CloudOps~ZS/logs/2026-10-16/ (extended in the same commit as this instance).",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway apply -auto-approve -var market_update_s3_root=<address() output> -target=aws_iam_role.bdlive_read -target=aws_iam_role_policy.bdlive_read",
+   "result": "PASS",
+   "notes": "rc 0, 2 added."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (3 legs), close-leg x3, close",
+   "result": "PASS",
+   "notes": "open commits itself; close leaves the closed entry and the sentinel deletion uncommitted, so they went in the Phase B commit."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "--drift --budget 420",
+   "result": "PASS",
+   "notes": "scanned 6 of 6 carriers within budget (288 s); no schedule or trigger is added by this order."
+  },
+  {
+   "tool": "safe-commit.sh naming limb",
+   "invocation": "the Phase A .tf, first draft with typed S3 addresses",
+   "result": "REFUSED",
+   "notes": "LGIC_ENFORCE DEC-6 refused 15 typed addresses; the .tf was rewritten to read the four registry rows. The registry commit needed GIT_COMMIT_AUTHOR_OVERRIDE=PLATFORM_LOGIC_DOCS (audited)."
+  }
+ ]
+}
