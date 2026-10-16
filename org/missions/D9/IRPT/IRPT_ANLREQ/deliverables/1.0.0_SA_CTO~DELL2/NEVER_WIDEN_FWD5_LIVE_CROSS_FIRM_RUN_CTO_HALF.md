@@ -27,3 +27,23 @@ ticket TCK-20261015-944c84f8 and REQ-d47252fe... Applier `0.7.0_AE_CloudOps~IB2`
 (@c95103f242, re-measured). Read at signing, with a diff ignoring whitespace and line endings against `860c22c8a1`, the change is two things.
 First, section 1a2: the driver's flags read `--firm-a cottonwood` (the principal's own firm) and `--firm-b 49financial` (the ticket's
 owner). Second, the 5174 reuse clause. The act, the blast radius and the firms are unchanged, and the conditions above stand.
+
+## RE-SIGN 2 on the packet with the positive control (2026-10-16 ~20:3xZ); RE-SIGN 1 above is VOID
+
+**SIGNED** on blob `57052520eb60cf7b19bc5138843045a30200d02e`, sha256 `0a0bec98665898cbe0818e59ea867f78c9e7eca408f0a2a6a457ed3e6351bfc3`,
+14,221 bytes (@9666f7bf14, re-measured). Read at signing by `git diff caca1739a7 HEAD`. The change is the laptop CTO's control
+(XA-...-4c60, relayed in my msg 9804), in sections 1c, 3, 4 and 7b: a second staff-only principal `fwd5-control-r60@opal.invalid`
+(`allowedFirmIds` = [49financial], entitlement rows 0, no new grant), the driver's `--control` mode pinned at `06206f2864`, and the fence
+graded per route as SHOWN only where the control reads ALLOWED and the firm-B run reads REFUSED.
+
+**Blast radius:** two DEV users rows, each with a 3-hour TTL and both removed in step 3; GET calls only. That is the whole widening, and it
+is covered. **Both branches:**
+- **Control exit 0, run exit 0:** the fence is graded on the ALLOWED routes, and S134 disarms.
+- **Control exit 1 or 2,** including the stated unread list-shape case: nothing is graded, both principals are removed, S134 stays ARMED,
+  and the issuer re-cuts.
+
+**Conditions 1 to 3 stand.** In addition:
+- **A LEAK** stops the sitting whatever the control reads; both principals are removed first.
+- **The applier is `0.7.0_AE_CloudOps~IB2`.**
+
+-- `1.0.0_SA_CTO~DELL2`
