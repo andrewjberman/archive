@@ -1,0 +1,94 @@
+{
+ "body": {
+  "read_at": "2026-10-16T18:29:21Z",
+  "live_commit": "bf9d23b518527e0e5f9a26aa240fd5af72af6c11",
+  "health_status": 200,
+  "env_key_count": 65,
+  "reader_env_keys_present": 7,
+  "registry_count": 103,
+  "per_tool_good": 27,
+  "host_md5": {
+   "equal": 139,
+   "differ": 0,
+   "missing_on_host": 0,
+   "expected_files": 139,
+   "host_files": 141
+  },
+  "tools_list_before": 103,
+  "tools_list_after": 103,
+  "muse_env_present": false,
+  "arms": {
+   "e12_bd49f_live": true,
+   "e4_unit_currency": true,
+   "e5_news_floor": true,
+   "e6_chatter_lag": true,
+   "e8_muse_inert": true,
+   "e9_not_found_404": true,
+   "e10_429_audited": true
+  },
+  "arm_counts": {
+   "e12_rows_per_tool": {
+    "client_get_holdings": 34,
+    "client_get_transactions": 2,
+    "client_get_allocation": 7,
+    "client_get_fees": 2
+   },
+   "e12_all_four_bucket_opal_data_bd": true,
+   "e12_all_four_newest_dated_file": true,
+   "e12_dedicated_role_on_all_four": true,
+   "e12_allocation_also_reads_the_assets_copy_profile_through_the_legacy_49f_role": true,
+   "e12_non_admin_refused": true,
+   "e12_non_admin_s3_client_requests": 0,
+   "e4_weight_unit_values": [
+    "fraction"
+   ],
+   "e4_bd49f_currency_basis": [
+    "source_absent"
+   ],
+   "e4_bd49f_unrealized_currency_like_columns": [],
+   "e4_smartx_currency_basis": [
+    "source_absent"
+   ],
+   "e4_smartx_weight_units": [
+    "fraction"
+   ],
+   "e10_limit_per_window": [
+    120,
+    60.0
+   ],
+   "e10_posts": 130,
+   "e10_n_429": 10,
+   "e10_audit_rows": 1,
+   "tools_list_after_with_app_server_imported_in_the_arms_harness": 120,
+   "e8_teams_poll_status": 401,
+   "e9_http_status": 404
+  },
+  "limits": [
+   "tools_list_before and tools_list_after are the SAME measure (the registry's async list_tools() to a master_admin stand-in with app.tools imported, before and after the deploy: 103 and 103, ap28_toolslist.json and ap28_toolslist_after.json). The arms harness imports app.server, which registers the integration tools too, and reads 120; that is a different measure and is recorded apart (arm_counts), not as a change",
+   "e10 drives the installed GuardMiddleware and ratelimit/audit code in-process with the bearer lookup stubbed to one synthetic stand-in (a real bearer needs a refresh family written to the access-state table, which the order forbids); the live service's limiter is untouched; the 429 row is captured at audit._emit, not read back from the lake",
+   "e4: the BD49F and SmartX adapters carry weight_unit 'fraction' but currency null with currency_basis source_absent: neither adapter requests a currency column and the live BD unrealized table has none; schwab has no resolve source in the gateway; cottonwood, commonwealth and orion were not exercised"
+  ],
+  "e4_regrade": {
+   "rule": "A4 (msg 35177): weight_unit in {fraction, percent}; currency_basis in {source, source_absent}; currency non-null iff basis is source",
+   "raw_arm_in_ap28_arms_json_under_the_old_wording": false,
+   "regraded": true,
+   "counts": {
+    "bd49f_weight_units": [
+     "fraction"
+    ],
+    "bd49f_currency_basis": [
+     "source_absent"
+    ],
+    "bd49f_currency_value_types": [
+     "NoneType"
+    ],
+    "smartx_weight_units": [
+     "fraction"
+    ],
+    "smartx_currency_basis": [
+     "source_absent"
+    ]
+   }
+  }
+ }
+}
