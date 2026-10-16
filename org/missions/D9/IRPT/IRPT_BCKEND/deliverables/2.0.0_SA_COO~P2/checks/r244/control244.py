@@ -22,7 +22,7 @@ DELTA_SHA = hashlib.sha256((REAL / P.DELTA).read_bytes()).hexdigest()
 
 def good():
     return {
-        "gates": {"pair_sha256": P.PAIR_SHA256, "addendum_blob": P.ADD_BLOB, "addendum_2_blob": P.ADD2_BLOB, "both_halves_signed": True,
+        "gates": {"pair_sha256": P.PAIR_SHA256, "addendum_blob": P.ADD_BLOB, "addendum_2_blob": P.ADD2_BLOB, "addendum_3_blob": P.ADD3_BLOB, "both_halves_signed": True,
                   "act_1": {"order_complete": True, "first_scheduled_run_read": True, "manifest_split_adjust_declared": True},
                   "function_code_sha256": P.CAND, "one_change_at_a_time": True, "act_1_ledger_closed": True,
                   "deployed_handler_date_line_present": True, "producer_date_parameter_present": True,
@@ -31,11 +31,11 @@ def good():
         "days": [{"day": d, "prior_version_id": "p%d" % i, "new_version_id": "n%d" % i, "rows_changed": c, "rows_changed_expected": c,
                   "other_rows_changed": 0, "changed_only_split_holders": True, "comparison_ok": True} for i, (d, c, _) in enumerate(DAYS)],
         "totals": {"days_run": 47, "account_days_changed": 1291, "invokes": 47, "ratio_absent_named_total": sum(x for _, _, x in DAYS)},
-        "event_keys_sent": ["date"],
+        "event_keys_sent": ["date", "source"], "event_source": P.SOURCE, "source_read_from_schedule": True, "refused_invokes": 1,
         "window": {"minutes_clear_before_fire_min": 45, "minutes_clear_after_fire_min": 40},
         "siblings_invoked": 0,
         "rollback_performed": False,
-        "counters": {"lambda_invokes": 47, "version_deletes": 0, "iam_changes": 0, "schedule_changes": 0, "artifact_uploads": 0, "other_keys_written": 0,
+        "counters": {"lambda_invokes": 48, "version_deletes": 0, "iam_changes": 0, "schedule_changes": 0, "artifact_uploads": 0, "other_keys_written": 0,
                      "markers_closed": 0},
     }
 
@@ -55,7 +55,7 @@ def build(mut=None, cto_ok=True, alter_pair=False):
         f.parent.mkdir(parents=True, exist_ok=True)
         b = (REAL / rel).read_bytes()
         f.write_bytes(b + b"x" if alter_pair and rel == P.COO_HALF else b)
-    cto = "%s %s %s\n" % (P.PAIR_SHA256[:12], P.ADD_BLOB[:12], P.ADD2_BLOB[:10])
+    cto = "%s %s %s %s\n" % (P.PAIR_SHA256[:12], P.ADD_BLOB[:12], P.ADD2_BLOB[:10], P.ADD3_BLOB[:10])
     for rel in (P.CTO_HALF, P.CTO_ADD, P.CTO_ADD2):
         f = root / rel
         f.parent.mkdir(parents=True, exist_ok=True)
@@ -120,13 +120,18 @@ NEGS = [
     ("april_21_typed_920", "AC2", lambda r: [x.update(rows_changed=920, rows_changed_expected=920) for x in r["days"] if x["day"] == "2026-04-21"]),
     ("totals_wrong", "AC3", put(["totals", "account_days_changed"], 1290)),
     ("ratio_absent_names_wrong", "AC3", put(["totals", "ratio_absent_named_total"], 99)),
-    ("event_has_source_override", "AC3", put(["event_keys_sent"], ["date", "source"])),
+    ("event_date_only", "AC3", put(["event_keys_sent"], ["date"])),
+    ("event_has_extra_key", "AC3", put(["event_keys_sent"], ["date", "source", "dry_run"])),
+    ("source_is_a_sibling", "AC3", put(["event_source"], "orion")),
+    ("source_not_read_from_schedule", "AC3", put(["source_read_from_schedule"], False)),
+    ("refused_invoke_not_recorded", "AC3", put(["refused_invokes"], 0)),
+    ("addendum_3_blob_wrong", "AC1", put(["gates", "addendum_3_blob"], "0" * 40)),
     ("window_too_close_before", "AC3", put(["window", "minutes_clear_before_fire_min"], 10)),
     ("window_too_close_after", "AC3", put(["window", "minutes_clear_after_fire_min"], 5)),
     ("sibling_invoked", "AC3", put(["siblings_invoked"], 1)),
     ("rollback", "AC3", put(["rollback_performed"], True)),
     ("version_deleted", "AC3", put(["counters", "version_deletes"], 1)),
-    ("invoke_count_wrong", "AC3", put(["counters", "lambda_invokes"], 48)),
+    ("invoke_count_wrong", "AC3", put(["counters", "lambda_invokes"], 47)),
 ]
 root = build()
 for ac in ("AC1", "AC2", "AC3"):

@@ -43,3 +43,15 @@ The Cottonwood and Inflection split corrections (no split key is declared for th
 date outside the 47.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## ADDENDUM 3 -- Act 2's invoke names its source (2026-10-16 ~14:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/NEVER_WIDEN_49F_SPLIT_ADJUST_PAIR_ADDENDUM_3_COO_HALF.md`
+(@341d1b66e6), blob `82d849a97c086fb1cb20e761eafad2e79b5a5843`, sha256 `ae363ea37b2530f6bea0b762b3a29ec70ac6486741e34ccd388427f7c81a4d63`,
+4,516 bytes (re-measured). **Condition 1 now reads:** Act 2 invokes `irpt-holdings-performance-lambda` with EXACTLY
+`{"date": "<D>", "source": "schwab_08335338"}`, once per named date. The source value is read from the schedule's `Target.Input` before the
+first invoke, and any other value STOPS. My original wording ("no `source` override") was meant to keep the invoke off the siblings. Naming
+49 Financial's own source does that more tightly, because the producer then resolves one firm's address only.
+
+**One added STOP:** the first resumed day's written row count must equal the harness's signed count for that day. If the harness ran
+without `--source` and its counts cannot be matched, the run stops at day 1 and comes back here (`~P2`'s section 5 leaves that unread).

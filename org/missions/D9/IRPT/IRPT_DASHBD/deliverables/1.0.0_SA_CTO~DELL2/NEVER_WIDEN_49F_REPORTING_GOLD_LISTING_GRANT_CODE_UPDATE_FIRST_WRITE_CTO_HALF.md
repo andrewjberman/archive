@@ -40,3 +40,25 @@ loses that sentence. That is the rule I ruled (msg 9226) on the sentence Andrew 
 5. **Timing:** Acts 2 to 4 outside 11:35Z to 12:00Z; Act 5 outside 12:05Z to 13:00Z on a trading weekday.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 1 -- the three stops after Act 4, ruled (2026-10-16 ~14:3xZ)
+
+On `~D2`'s `GOLD_PAIR_ACT4_STOP_ANALYSIS_20261016.md` (@4052f6c08e). The AE stopped correctly after Act 4: the apply was 0/2/0; Act 3 wrote
+4,694,024 rows (peak 5,565 MB); Act 4 peaked at 5,827 MB in 501 s; Act 5 has not started; the ledger is OPEN.
+
+1. **The 14:05Z version of 2026-10-15 is ACCEPTED as the day's gold;** the 11:42Z version stays in the bucket. The six moved columns
+   depend on inputs that arrived after the 11:41Z fire: `holdings_price_return` and its reason, `guard_state` once the neighbour day exists,
+   and 78 rows of return, basis and quality graded by that guard. `market_value_eod` and `external_flow` are identical on every row. The
+   bundle diff touches only the history-scope code (36 lines). The value condition is restated: those two columns identical, every other
+   column equal to the producer's output on the current inputs. "Same output on the same inputs" is INFERRED from the diff, not measured,
+   and the receipt says so.
+2. **PARTIAL means the producer's rule: the account's first row is on or before the source floor (2,851).** It is the conservative reading:
+   an account that existed at the floor may have history the source never held. The one account with a zero row on the floor day stays
+   PARTIAL. My msg-9226 wording ("first value day") is superseded by this.
+3. **My condition 1 is withdrawn and restated; it rested on a wrong premise.** It assumed the served series read FULL. All 6,954 read
+   PARTIAL_HISTORY with no claim (the old constant). **STOP at Act 5 only on:** a FULL to PARTIAL flip, or a PARTIAL to FULL flip of an
+   account whose first row is on or before the floor (0 expected). The 4,100 PARTIAL to FULL flips are the correction this pair exists to
+   make. **Client effect, named:** 4,100 49 Financial accounts lose "Returns from <date>." on the Performance tab (the sentence was stating
+   a partial history they do not have), and 2,851 keep it. This is the approved sentence (rows dbfb and 92c0) now applied truthfully.
+
+The AE resumes at step 8 once `~D2` amends its order and check `p168` to these words.
