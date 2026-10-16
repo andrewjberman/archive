@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # MP-pf-9, the issuer's REAL RUN of the outcome (not a worker criterion): after the bundle release, the SERVED breakdown body (read over SSM, holders redacted) is rendered through the real GatewayView
 # and the CSS of mcportal c66ca82952 (the deployed bundle's sha256 equals a build of it, pf9.AC2.sh) and measured in a real browser at 390 and 1280 px.
+# usage: [MP_REAL_WANT=<full mcportal commit>] [MP_REAL_CUE=1] pf9.real.sh [keep]   -- WANT defaults to c66ca82952 (MP-pf-9); after the release that carries MP-pf-11 set it to 59e802a4185a62129bf28ebb4df6eda9b70e03ff and MP_REAL_CUE=1, which also requires every p.gateway-indexes of the served body to carry the table scroll cue (_gw_cue.cjs).
+# (old usage line follows)
 # usage: pf9.real.sh [keep]   -- with `keep` the rendered html is left at $RENDER_OUT for the issuer to screenshot and READ before anything is committed; it is never committed.
 # Prints counts and widths only: no index name, no holder, no account number.
 . "$(dirname "$0")/../../pc/checks/_root.sh"
 MC="${MP_PF9_MC:-C:/tmp/mp-pf-render}"
 [ -f "$MC/src/pages/gateway/GatewayView.tsx" ] || { echo "$MC/src/pages/gateway/GatewayView.tsx absent"; echo "RESULT: FAIL"; exit 1; }
 head=$(git -C "$MC" rev-parse HEAD 2>&1 | tr -d '\r')
-[ "$head" = c66ca82952c01575968d16cc736cdabe36606572 ] || { echo "render checkout at $head, want c66ca82952c0..."; echo "RESULT: FAIL"; exit 1; }
+WANT="${MP_REAL_WANT:-c66ca82952c01575968d16cc736cdabe36606572}"
+[ "$head" = "$WANT" ] || { echo "render checkout at $head, want ${WANT:0:12}..."; echo "RESULT: FAIL"; exit 1; }
 PW="$(git worktree list --porcelain | sed -n '1s/^worktree //p')/portal/node_modules/playwright-core"
 [ -d "$PW" ] || { echo "playwright-core absent at $PW"; echo "RESULT: FAIL"; exit 1; }
 BUN="$(command -v bun || ls "$HOME"/AppData/Local/Microsoft/WinGet/Packages/Oven-sh.Bun_*/bun-windows-x64/bun.exe 2>/dev/null | head -1)"
@@ -23,8 +26,10 @@ echo "$r"
 m390=$(timeout 90 node "$CK/_gw_measure.cjs" "$(cygpath -m "$PW")" "$Tw/page.html" 390 2>&1 | tail -1)
 m1280=$(timeout 90 node "$CK/_gw_measure.cjs" "$(cygpath -m "$PW")" "$Tw/page.html" 1280 2>&1 | tail -1)
 echo "served body at 390: $m390"; echo "served body at 1280: $m1280"
+cue=""; if [ "$MP_REAL_CUE" = 1 ]; then cue=$(timeout 90 node "$CK/_gw_cue.cjs" "$(cygpath -m "$PW")" "$Tw/page.html" 390 2>&1 | tail -1); echo "served body cue at 390: $cue"; fi
 if [ "$1" = keep ]; then mkdir -p /c/tmp/mp-pf9-real && cp "$T/page.html" /c/tmp/mp-pf9-real/page.html && echo "kept: C:/tmp/mp-pf9-real/page.html (NOT to be committed)"; fi
 rm -rf "$T"
 ok() { printf '%s' "$1" | grep -q 'ok=yes' && printf '%s' "$1" | grep -q 'offenders=0'; }
-if printf '%s' "$r" | grep -q '^rendered served body' && ok "$m390" && ok "$m1280"; then echo "RESULT: PASS"; exit 0; fi
+cueok=yes; [ "$MP_REAL_CUE" = 1 ] && { printf '%s' "$cue" | grep -q 'ok=yes' || cueok=no; }
+if printf '%s' "$r" | grep -q '^rendered served body' && ok "$m390" && ok "$m1280" && [ "$cueok" = yes ]; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
