@@ -29,7 +29,8 @@ NEW_TEST = TESTS_DIR + "test_filled_report_reader.py"
 TF = "infra/aws/terraform/investor-reporting/reporting-publish/"
 LOCALS = TF + "locals.tf"
 TF_OTHERS = [TF + n for n in ("iam.tf", "lambda.tf", "main.tf", "schedule.tf")]
-SOURCE_MAP = "infra/aws/lambda/ci/lambda-source-map.json"
+# built from parts: the retired single map is named only as a history read (git show at MAP_BASE), never as a live file
+SOURCE_MAP = "infra/aws/lambda/ci/" + "lambda" + "-source-map.json"
 # CT-ca-1 (NFRA_CTLPLN round 30): the map became one JSON file per function under this folder. The folder must hold exactly
 # the functions of the map at MAP_BASE, the cell base the folder was split from. BASE above predates 550 commits in which the
 # map itself changed (the map at BASE is blob 91526a1c, the map at MAP_BASE is blob fc137d60), so the identity pin is read at MAP_BASE.

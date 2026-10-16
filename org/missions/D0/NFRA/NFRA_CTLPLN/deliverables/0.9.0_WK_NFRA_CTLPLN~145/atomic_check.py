@@ -42,7 +42,6 @@ NAMED_WRITERS = [
 ]
 # The "can follow" list of the cell (proposal section (d)); the cell does not edit these.
 CAN_FOLLOW = [
-    "org/modules/graph/lambdamap_cli.py",
     "org/modules/graph/comp_closure.py",
     "org/modules/graph/extract_lambda_routes.py",
     "rcg/bin/lexicon.py",
@@ -304,14 +303,14 @@ def check_tf():
     uses_fileset = 0
     per_root_equal = []
     for rel in TF_ROOTS:
-        r = subprocess.run(["terraform", "fmt", "-check", rel], cwd=ROOT, capture_output=True, timeout=120)
+        # CT-ca-1 amendment 1: the three locals.tf FILES are fmt-checked, not the root directories (iam.tf is unformatted
+        # at the base in all three roots, outside the grant). Only `terraform fmt -check <file>` is run.
+        lf = rel + "/locals.tf"
+        r = subprocess.run(["terraform", "fmt", "-check", lf], cwd=ROOT, capture_output=True, timeout=120)
         clean = r.returncode == 0
         if clean:
             fmt_clean += 1
-        path = os.path.join(ROOT, rel, "locals.tf")
-        # diagnostic only (not in ok): fmt of the one file this cell edits, so a root-level failure in another file is named
-        rf = subprocess.run(["terraform", "fmt", "-check", os.path.join(rel, "locals.tf")], cwd=ROOT, capture_output=True, timeout=120)
-        print("TF-LOCALS-FILE-FMT %s rc=%d" % (rel, rf.returncode))
+        path = os.path.join(ROOT, lf)
         with open(path, "rb") as f:
             text = f.read().decode("utf-8", "replace")
         fs = "fileset(" in text and "function-map" in text
@@ -326,7 +325,7 @@ def check_tf():
         same = sum(1 for k, v in funcs.items() if k in obj and obj[k] == v)
         per_root_equal.append(same)
         print("TF-ROOT %s fmt_rc=%d fmt_clean=%s uses_fileset=%s names_map_file=%s built_keys=%d equal=%d/%d"
-              % (rel, r.returncode, clean, fs, names_map, len(obj), same, n))
+              % (lf, r.returncode, clean, fs, names_map, len(obj), same, n))
         if r.stdout.strip() or r.stderr.strip():
             print("TF-FMT-OUT %s" % ascii_only((r.stdout + r.stderr).decode("utf-8", "replace").strip().replace("\n", " ; "))[:300])
     e = min(per_root_equal) if per_root_equal else 0
