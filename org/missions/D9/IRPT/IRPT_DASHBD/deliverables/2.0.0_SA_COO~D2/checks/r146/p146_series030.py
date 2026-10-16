@@ -2,12 +2,12 @@
 (PRD ADDENDUM v0.16 item 4, CTO msg 8796): two fields, `unreported_trading_days` (the ISO dates of the window's trading days the source did not report; always present on a series that carries the
 statement, `[]` when there are none) and `unreported_trading_days_basis` (the fixed text "trading calendar minus present partitions"), written from the report-build output's statement.
 They enter `series.optional`, so every earlier series (every other firm's, written without a statement) still validates; on a series from a source that carries the statement they are a PAIR and are
-never omitted. The contract and its first writer (the first Cottonwood series publish, a later cell of the contract's own issuer after the CTO's msg 8803) land in ONE drain. LOCAL: one JSON standard and one new test file.
+never omitted. AMENDMENT 1 (round 146): the `income` array becomes number-or-null, null exactly where the source row carries no income_received (the Black Diamond-computed method separates no income). The contract and its first writer (the first Cottonwood series publish, a later cell of the contract's own issuer after the CTO's msg 8803) land in ONE drain. LOCAL: one JSON standard and one new test file.
 
   DB-b-278 (~225)   org/standards/IRPT_DASHBD_SERIES_CONTRACT.json (0.3.0) + data/assets/scripts/gold/irpt_reporting/tests/test_series_contract_030.py + a facts record
                     DB146-1-AC1 (the contract's declarations, pure, and the grant),
                     DB146-1-AC2 (BEHAVIOUR: a reference validator driven ONLY by the contract's declarations accepts four series and rejects eleven),
-                    DB146-1-AC3 (the worker's tests pass beside the publisher's tests and the portal's series-contract test; the facts record equals the contract)
+                    DB146-1-AC3 (the worker's tests pass beside the publisher's tests; the facts record equals the contract; the portal's page mirror is NOT graded here, it is the page's cell)
 
 Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or "<id> FAIL" last
        python <this file> --selftest                       the pure clauses on synthetic arms
@@ -17,7 +17,6 @@ import datetime as dt
 import hashlib
 import json
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -26,7 +25,6 @@ D = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 CONTRACT_REL = "org/standards/IRPT_DASHBD_SERIES_CONTRACT.json"
 TEST_REL = "data/assets/scripts/gold/irpt_reporting/tests/test_series_contract_030.py"
 PUBLISHER_TEST = "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_publisher.py"
-PORTAL_TEST = "src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-124.series-contract.test.ts"
 REC_REL = D + "0.9.0_WK_IRPT_DASHBD~225/RD_SERIES_CONTRACT_030_FACTS_R146.json"
 ORDER_REL = "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-278.series-contract-030-unreported-trading-days-fields.md"
 AUTHOR = "0.9.0_WK_IRPT_DASHBD~225"
@@ -35,7 +33,7 @@ GRANT_PREFIXES = (D + "0.9.0_WK_IRPT_DASHBD~225/", "org/missions/D9/IRPT/IRPT_DA
 BASE_FILE_SHA = "2f0cb189ad07bef091269d5db9b36ccf23748c836af0fa7b3791f1df2f9764ea"  # the bytes of 0.2.0, the lineage entry this edit appends
 SHA = {"required": "89b3ca0d4407d41970dfd3f576f99df590d729df9b107a7e4f5bed4f206d3906", "array_keys": "bc5e84d735776497f55e649d3ee17c4b019874e26fbcf741fd9381172d5976ab",
        "optional": "3db2c3678792570743d1d145ddd0589d175a703dbd652dc3e817c50158ac3b4b", "shape": "f121017b9ffc8be7662ee47cb404dba10670c254fa3b5c068aa107a4837d9513",
-       "fields": "e7aba83b3debfe711598df1c54c657cc279723e336ff84acf5be1c35d379199d", "manifest": "d7fd5284ed0eef52b0d07e8cbef468821221b14cc13046297664dcfc928cf8b3",
+       "fields_ex_income": "4c6ac43b51b084e92b0638cb40bd413068f8dd50ede952964408f6e44997b03b", "manifest": "d7fd5284ed0eef52b0d07e8cbef468821221b14cc13046297664dcfc928cf8b3",
        "model_windows": "e64a4513caae6ec0ebe349212f11918e704b0163f548dfa5199212328a632dce", "open_changes": "b1b4702a8ba79a8db0e26328f1f0a5c37d4cd7e789f52e406b17233e2fe0579d",
        "files": "9ff0692a5cdb2fb70609460dfd954810ab339c4051e3f5d7e075680a60d0a3d2", "change_rule": "bcc5e64cc95aa71a3d9a4d3ff554fbd95426724195f6a0d76d102feac3b9e2e2",
        "lineage": "1164cf54532032aef6799dbf67d6975a0c3573fbc6e605def89c88900f71388c", "prd_contracts": "7d1ea253a04bb693830f6b29ef814d28daa3d687491a67e43e4a941435186522", "source_table_contract": "6e1ae666a3b12ba3c610d8ebc606a258127c981ac102c62798542a78fa6889ac",
@@ -94,7 +92,10 @@ def check_contract(c):
         need(sha(s[k]) == SHA[k], "series.%s changed" % k)
     need(s["optional"] == ["class_value", "class_weight", "class_names"] + list(NEW), "series.optional must be the three earlier names then %s" % list(NEW))
     f = s["fields"]
-    need(isinstance(f, dict) and all(k in f for k in NEW) and sha({k: v for k, v in f.items() if k not in NEW}) == SHA["fields"], "an earlier series field changed, or a new field is missing or another was added")
+    need(isinstance(f, dict) and all(k in f for k in NEW) and sha({k: v for k, v in f.items() if k not in NEW and k != "income"}) == SHA["fields_ex_income"], "an earlier series field other than income changed, or a new field is missing or another was added")
+    inc = f.get("income")
+    need(isinstance(inc, dict) and set(inc) == {"kind", "source", "sentence"} and inc["kind"] == "per-day array of number or null" and inc["source"] == "income_received", "income: kind 'per-day array of number or null', source income_received, sentence")
+    need(nes(inc["sentence"]) and "never null" not in inc["sentence"] and all(w in inc["sentence"] for w in ("null", "income_received", "zero")), "income.sentence must say null exactly where income_received is null, never read as zero, and no longer say 'never null'")
     u, b = f[NEW[0]], f[NEW[1]]
     need(isinstance(u, dict) and set(u) == {"kind", "source", "sentence"} and u["kind"] == "scalar list of string", "%s: kind 'scalar list of string', source, sentence" % NEW[0])
     need("unreported_days" in u["source"] and "report-build" in u["source"], "%s.source must name the report-build output's statement and its key unreported_days" % NEW[0])
@@ -121,6 +122,9 @@ def series_problems(c, series):
     has = [k in series for k in NEW]
     if any(has) and not all(has):
         out.append("the two unreported-days fields are a pair: both or neither")
+    inc = series.get("income")
+    if isinstance(inc, list) and not all(x is None or (isinstance(x, (int, float)) and not isinstance(x, bool)) for x in inc):
+        out.append("income entries are numbers or null")
     fixed = c["series"]["fields"][NEW[1]]["fixed_value"]
     if NEW[1] in series and series[NEW[1]] != fixed:
         out.append("the basis must read exactly %r" % fixed)
@@ -158,7 +162,8 @@ def check_behaviour(c):
         return x
     good = [("an earlier series (neither field)", mk()), ("a series with [] and the basis", mk(unreported_trading_days=[], unreported_trading_days_basis=FIXED)),
             ("a series with one unreported day", mk(unreported_trading_days=["2026-08-19"], unreported_trading_days_basis=FIXED)),
-            ("a series with two unreported days", mk(date=["2026-08-17", "2026-08-21"], unreported_trading_days=["2026-08-18", "2026-08-20"], unreported_trading_days_basis=FIXED))]
+            ("a series with two unreported days", mk(date=["2026-08-17", "2026-08-21"], unreported_trading_days=["2026-08-18", "2026-08-20"], unreported_trading_days_basis=FIXED)),
+            ("an income array with null entries", mk(income=[None, None, None, None]))]
     bad = [("the list without the basis", mk(unreported_trading_days=["2026-08-19"])), ("the basis without the list", mk(unreported_trading_days_basis=FIXED)),
            ("a basis of other words", mk(unreported_trading_days=[], unreported_trading_days_basis="calendar")), ("a null list", mk(unreported_trading_days=None, unreported_trading_days_basis=FIXED)),
            ("a non-ISO date", mk(unreported_trading_days=["19 Aug 2026"], unreported_trading_days_basis=FIXED)),
@@ -167,7 +172,8 @@ def check_behaviour(c):
            ("a date that is a present day", mk(unreported_trading_days=["2026-08-18"], unreported_trading_days_basis=FIXED)),
            ("a duplicated date", mk(date=["2026-08-17", "2026-08-21"], unreported_trading_days=["2026-08-19", "2026-08-19"], unreported_trading_days_basis=FIXED)),
            ("an unsorted list", mk(date=["2026-08-17", "2026-08-21"], unreported_trading_days=["2026-08-20", "2026-08-18"], unreported_trading_days_basis=FIXED)),
-           ("a string for the list", mk(unreported_trading_days="2026-08-19", unreported_trading_days_basis=FIXED))]
+           ("a string for the list", mk(unreported_trading_days="2026-08-19", unreported_trading_days_basis=FIXED)),
+           ("a string inside the income array", mk(income=[1.0, "x", 0.0, None]))]
     for label, row in good:
         p = series_problems(c, row)
         need(not p, "%s must validate: %s" % (label, p))
@@ -184,9 +190,9 @@ def check_grant(changed):
 
 
 def check_facts(rec, c):
-    exp = {"contract_version", "lineage_sha256", "optional", "fixed_value", "words"}
+    exp = {"contract_version", "lineage_sha256", "optional", "fixed_value", "income_kind", "words"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
-    need(rec["contract_version"] == "0.3.0" and rec["lineage_sha256"] == BASE_FILE_SHA and rec["optional"] == c["series"]["optional"] and rec["fixed_value"] == FIXED, "version, lineage sha256, optional list or fixed value differ from the contract")
+    need(rec["contract_version"] == "0.3.0" and rec["lineage_sha256"] == BASE_FILE_SHA and rec["optional"] == c["series"]["optional"] and rec["fixed_value"] == FIXED and rec["income_kind"] == c["series"]["fields"]["income"]["kind"], "version, lineage sha256, optional list, fixed value or income kind differ from the contract")
     need(nes(rec["words"]) and 80 <= len(rec["words"]) <= 1800 and not LONG_DIGITS.findall(rec["words"]), "words must be one paragraph of 80 to 1800 characters with no long digit run")
     return True
 
@@ -198,15 +204,6 @@ def run_pytest(root, files):
     return int(m.group(1))
 
 
-def run_portal_test(root):
-    portal = Path(root) / "portal"
-    need((portal / PORTAL_TEST).is_file(), "the portal's series-contract test %s is missing" % PORTAL_TEST)
-    b = shutil.which("bun")
-    need(b, "bun is not on PATH")
-    r = subprocess.run([b, "test", PORTAL_TEST], cwd=str(portal), capture_output=True, text=True, timeout=300)
-    need(r.returncode == 0, "the portal's series-contract test failed against the new contract: %s" % (r.stdout + r.stderr)[-300:].replace("\n", " | "))
-
-
 def run(root, cid):
     root = Path(root)
     c = load_json(root, CONTRACT_REL)
@@ -216,21 +213,20 @@ def run(root, cid):
         for cm in own_commits(root):
             changed |= set(git(root, "show", "--name-only", "--format=", cm).split())
         check_grant(changed)
-        print("OK: series contract 0.3.0: the sections and the 16 earlier fields are byte-identical; series.optional gains %s; the lineage appends the 0.2.0 bytes; the rule is in words; %d files changed, all in the grant" % (list(NEW), len(changed)))
+        print("OK: series contract 0.3.0: the sections and the 15 earlier fields other than income are byte-identical, income reads number-or-null; series.optional gains %s; the lineage appends the 0.2.0 bytes; the rule is in words; %d files changed, all in the grant" % (list(NEW), len(changed)))
         return True
     if cid == "DB146-1-AC2":
         check_contract(c)
         g, b = check_behaviour(c)
-        print("OK: behaviour: a validator driven only by the contract accepts %d series (an earlier one, [] with the basis, one and two unreported days) and rejects %d (a lone field, wrong basis, null, non-ISO, outside the window, a present day, duplicate, unsorted, a string)" % (g, b))
+        print("OK: behaviour: a validator driven only by the contract accepts %d series (an earlier one, [] with the basis, one and two unreported days, a null income array) and rejects %d (a string in income, a lone field, wrong basis, null, non-ISO, outside the window, a present day, duplicate, unsorted, a string)" % (g, b))
         return True
     if cid == "DB146-1-AC3":
         need((root / TEST_REL).is_file(), "no %s" % TEST_REL)
         n_new = run_pytest(root, [TEST_REL])
         need(n_new >= 10, "the new test file holds %d passing tests, at least 10 are owed" % n_new)
         n_pub = run_pytest(root, [PUBLISHER_TEST])
-        run_portal_test(root)
         check_facts(load_json(root, REC_REL), c)
-        print("OK: %d new tests, the publisher's %d tests and the portal's series-contract test pass against the new contract; facts record equals the contract" % (n_new, n_pub))
+        print("OK: %d new tests, the publisher's %d tests pass against the new contract; facts record equals the contract" % (n_new, n_pub))
         return True
     raise Fail("unknown criterion %s" % cid)
 
@@ -244,7 +240,7 @@ def selftest():
         raise AssertionError("red arm passed: " + label)
     c = {"series": {"required": ["date", "first_data_date", "as_of", "value"], "fields": {NEW[1]: {"fixed_value": FIXED}}}}
     g, b = check_behaviour(c)
-    assert (g, b) == (4, 11), (g, b)
+    assert (g, b) == (5, 12), (g, b)
     c2 = copy.deepcopy(c)
     c2["series"]["fields"][NEW[1]]["fixed_value"] = "other"
     red(lambda: check_behaviour(c2), "a different fixed value rejects the packet's basis")
@@ -252,10 +248,10 @@ def selftest():
     red(lambda: check_grant({CONTRACT_REL, TEST_REL, "lib/x.py"}), "outside grant")
     red(lambda: check_grant({CONTRACT_REL}), "no test")
     red(lambda: check_grant({TEST_REL}), "no contract")
-    rec = {"contract_version": "0.3.0", "lineage_sha256": BASE_FILE_SHA, "optional": ["class_value", "class_weight", "class_names"] + list(NEW), "fixed_value": FIXED, "words": "w" * 100}
-    cc = {"series": {"optional": list(rec["optional"])}}
+    rec = {"contract_version": "0.3.0", "lineage_sha256": BASE_FILE_SHA, "optional": ["class_value", "class_weight", "class_names"] + list(NEW), "fixed_value": FIXED, "income_kind": "per-day array of number or null", "words": "w" * 100}
+    cc = {"series": {"optional": list(rec["optional"]), "fields": {"income": {"kind": "per-day array of number or null"}}}}
     assert check_facts(rec, cc)
-    arms = (("version", lambda r: r.update(contract_version="0.2.0")), ("lineage", lambda r: r.update(lineage_sha256="0" * 64)), ("optional", lambda r: r.update(optional=[])), ("fixed", lambda r: r.update(fixed_value="x")),
+    arms = (("version", lambda r: r.update(contract_version="0.2.0")), ("lineage", lambda r: r.update(lineage_sha256="0" * 64)), ("optional", lambda r: r.update(optional=[])), ("fixed", lambda r: r.update(fixed_value="x")), ("income_kind", lambda r: r.update(income_kind="per-day array of number")),
             ("words", lambda r: r.update(words="short")), ("extra", lambda r: r.update(z=1)), ("digits", lambda r: r.update(words="w" * 100 + " 123456789")))
     for label, fn in arms:
         r2 = dict(rec)
@@ -263,7 +259,7 @@ def selftest():
         red(lambda: check_facts(r2, cc), label)
     d = dt.date(2026, 8, 19)
     assert d.isoformat() == "2026-08-19"
-    print("selftest: behaviour (1 red arm, 4 good and 11 bad series), grant (3) and facts (%d red arms) clauses behave" % len(arms))
+    print("selftest: behaviour (1 red arm, 5 good and 12 bad series), grant (3) and facts (%d red arms) clauses behave" % len(arms))
     print("selftest PASS")
 
 
