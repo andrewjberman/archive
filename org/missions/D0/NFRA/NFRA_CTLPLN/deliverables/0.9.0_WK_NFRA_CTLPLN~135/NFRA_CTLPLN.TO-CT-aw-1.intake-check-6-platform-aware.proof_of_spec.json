@@ -5,38 +5,46 @@
   "spec_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aw-1.intake-check-6-platform-aware.md",
     "group": "OTHER",
-    "vintage_commit": "7d4aef5b93"
+    "vintage_commit": "159f5f55b4"
   },
   "assignee": "0.9.0_WK_NFRA_CTLPLN~135",
   "decomp_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round28.md",
-    "vintage_commit": "7d4aef5b93",
+    "vintage_commit": "159f5f55b4",
     "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aw-1.intake-check-6-platform-aware.md"
   },
   "artifacts_produced": [
     {
       "path_or_key": "org/devices/intake/intake_check.py",
       "kind": "script",
-      "commit_or_etag": "8144b24967",
+      "commit_or_etag": "0577033587",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "check_6 applies the platform rule only when compared_across_platforms is true: _platform_normalise (CRLF to LF, then remove each delvewheel start-to-end block on both sides) and _platform_rule (equal -> platform_normalised_equal; a residual in CHECK6_BUILD_METADATA_FILES = (numpy/__config__.py,) -> build_metadata_residual; any other residual stays in py_differing and fails). py_differing_count stays the raw count; py_differing_after_platform_rules decides the verdict; the passed summary names platform-normalised-equal and build-metadata-residual when non-zero. Same-platform comparisons take the base path unchanged. Committed as a work-in-progress commit; no later commit touches this file.",
-      "artifact_covered_by": ["CTaw1-AC1", "CTaw1-AC2", "CTaw1-AC3"]
+      "deploy_evidence": "check_6 applies the platform rule only when compared_across_platforms is true. _platform_normalise (CRLF to LF; then, for each delvewheel start-to-end block, the block with up to DELVEWHEEL_PAD = 4 empty lines directly before and up to 4 directly after, per the CTO ruling in msg 109671) and _platform_rule (equal -> platform_normalised_equal; residual path in CHECK6_BUILD_METADATA_FILES = (numpy/__config__.py,) -> build_metadata_residual; any other residual stays in py_differing and fails). py_differing_count is the raw count; py_differing_after_platform_rules decides the verdict; the passed summary names the two counts when non-zero. Same-platform comparisons take the base path. Carried by 8144b24967 (rule), then 0577033587 (amendment 1: block padding); no later commit touches this file.",
+      "artifact_covered_by": ["CTaw1-AC1", "CTaw1-AC2"]
     },
     {
       "path_or_key": ".tools/tests/test_round28_check6_platform.py",
       "kind": "test",
-      "commit_or_etag": "dc48c3b47f",
+      "commit_or_etag": "0577033587",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Standard library plus org/devices/intake/intake_check.py; synthetic wheels and installed copies in temporary folders; no network, no install. Arms a (CRLF-only passes), b (delvewheel block either side passes), c (numpy/__config__.py passes and is listed; an unlisted file fails), d (planted edit fails: plain, CRLF with block, ordinary module), e (same platform: CRLF-only and numpy/__config__.py still fail; rule never consulted), e2 (no installed WHEEL tag is not cross-platform), f (.data/scripts and .data/data and over-size files keep failing), g (controls: the rule clears no planted edit; a mutant rule that clears everything makes arm d red; the constant holds one entry). --real4 is read only: it builds the context in memory for the four real wheels and writes nothing. Last lines CHECK6-PLATFORM arms=8/8 ok=True and REAL4 passed=2/4 ok=False.",
+      "deploy_evidence": "Standard library plus org/devices/intake/intake_check.py; synthetic wheels and installed copies in temporary folders; no network, no install. Arms a to g as in dc48c3b47f; amendment 1 adds h (an empty line far from the block, or five before it, fails), i (an empty line inside the reach of a block beside a real edit fails), j (a block padded by empty lines on both sides passes, on either side), k (a file with no block gets no blank-line leniency). --real4 is read only: it builds each context in memory and writes nothing. Last lines CHECK6-PLATFORM arms=12/12 ok=True and REAL4 passed=3/4 ok=False.",
       "artifact_covered_by": ["CTaw1-AC1", "CTaw1-AC2"]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_check.py",
+      "kind": "test",
+      "commit_or_etag": "0577033587",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One existing case re-expected under amendment 1 (W135-S1 ruling): case_check_6_records_the_cross_platform_comparison_and_the_crlf_count now asserts check 6 passed and platform_normalised_equal lists the file, keeping its compared_across_platforms, installed_platform, held_platform, py_differing_count = 1 and differ_after_crlf_normalisation = 0 checks. No other existing case changed; no case added. Last line INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True.",
+      "artifact_covered_by": ["CTaw1-AC3"]
     },
     {
       "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "9e91c5b375",
+      "commit_or_etag": "a5caea51cf",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Two appended rows, never edited: NFRA_CTLPLN-W135-S1 (the existing case case_check_6_records_the_cross_platform_comparison_and_the_crlf_count pins the base cross-platform verdict the rule reverses; BLOCKING, INERT) and NFRA_CTLPLN-W135-S2 (numpy/__init__.py and pandas/__init__.py keep empty lines the delvewheel block leaves; 2 of 4 real wheels; BLOCKING, INERT). Both UNDER_INVESTIGATION.",
-      "artifact_covered_by": ["CTaw1-AC2", "CTaw1-AC3"]
+      "deploy_evidence": "Rows appended, never edited: NFRA_CTLPLN-W135-S1 and NFRA_CTLPLN-W135-S2 (filed by the first seating, commit 9e91c5b375, untouched) and NFRA_CTLPLN-W135-S3 (BLOCKING, INERT; committed a5caea51cf). All UNDER_INVESTIGATION.",
+      "artifact_covered_by": ["CTaw1-AC2"]
     }
   ],
   "acceptance": [
@@ -45,8 +53,8 @@
       "criterion_verbatim": "across platforms a CRLF-only difference, a delvewheel block and the one listed build-metadata file stop failing check 6, while a planted edited line, an unlisted file and every same-platform comparison still fail (base: the test does not exist); report the whole last line with its denominator.",
       "method": "command",
       "invocation": "python .tools/tests/test_round28_check6_platform.py",
-      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: CHECK6-PLATFORM arms=8/8 ok=True. Deciding lines: PASS arm_a_crlf_only_cross_platform_passes; PASS arm_b_delvewheel_block_cross_platform_passes; PASS arm_c_numpy_build_metadata_file_passes_and_other_file_fails; PASS arm_d_planted_edit_fails_across_platforms; PASS arm_e_same_platform_is_unchanged; PASS arm_e2_no_installed_wheel_tag_is_not_cross_platform; PASS arm_f_scripts_data_and_oversize_keep_failing; PASS arm_g_controls. Identical across three runs.",
-      "denominator": "8 of 8 arms passed (a, b, c, d, e, e2, f, g); 0 FAIL lines",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: CHECK6-PLATFORM arms=12/12 ok=True. Deciding lines: PASS arm_a_crlf_only_cross_platform_passes; PASS arm_b_delvewheel_block_cross_platform_passes; PASS arm_c_numpy_build_metadata_file_passes_and_other_file_fails; PASS arm_d_planted_edit_fails_across_platforms; PASS arm_e_same_platform_is_unchanged; PASS arm_e2_no_installed_wheel_tag_is_not_cross_platform; PASS arm_f_scripts_data_and_oversize_keep_failing; PASS arm_g_controls; PASS arm_h_blank_line_far_from_block_fails; PASS arm_i_blank_line_inside_reach_with_a_real_edit_fails; PASS arm_j_block_padded_by_empty_lines_on_both_sides_passes; PASS arm_k_no_block_no_blank_line_leniency. Identical across two runs (cmp of the two outputs).",
+      "denominator": "12 of 12 arms passed (a, b, c, d, e, e2, f, g, h, i, j, k); 0 FAIL lines",
       "status": "PASS",
       "expect": "ok=True",
       "judgment": false
@@ -56,10 +64,10 @@
       "criterion_verbatim": "the four real yfinance wheels pass check 6 on the new rule with no waiver, read-only (base: the test does not exist); report all five lines.",
       "method": "command",
       "invocation": "python .tools/tests/test_round28_check6_platform.py --real4",
-      "output_evidence": "run from the worktree root under timeout 280; exit code 1; all lines verbatim: REAL4 curl_cffi check6=passed compared_across_platforms=True residual=0 metadata=0 | REAL4 numpy check6=failed compared_across_platforms=True residual=1 metadata=1 | REAL4 pandas check6=failed compared_across_platforms=True residual=1 metadata=0 | REAL4 websockets check6=passed compared_across_platforms=True residual=0 metadata=0 | last line verbatim: REAL4 passed=2/4 ok=False. Residual files (read by a diagnostic outside the suite, in memory): numpy/__init__.py (installed side keeps 3 empty lines around its delvewheel block after normalisation) and pandas/__init__.py (2 empty lines). No waiver, record or folder under C:/opal-intake/ was written. Identical across three runs.",
-      "denominator": "2 of 4 wheels passed (curl_cffi, websockets); numpy and pandas failed on one residual file each",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 1; all five lines verbatim: REAL4 curl_cffi check6=passed compared_across_platforms=True residual=0 metadata=0 | REAL4 numpy check6=passed compared_across_platforms=True residual=0 metadata=1 | REAL4 pandas check6=failed compared_across_platforms=True residual=1 metadata=0 | REAL4 websockets check6=passed compared_across_platforms=True residual=0 metadata=0 | last line verbatim: REAL4 passed=3/4 ok=False. Residual file: pandas/__init__.py. Read-only census (.scratch/diag_pandas.py at 0577033587, in memory): the installed copy has 2 empty lines before its delvewheel block and 1 after; the wheel has one empty line directly after 'from __future__ import annotations' (wheel line 2), where after the ruled removal the installed side has none; both sides then differ by that one line (wheel 368 lines, installed 367). numpy/__init__.py now compares equal after the rule. No waiver, record or folder under C:/opal-intake/ was written; identical across two runs.",
+      "denominator": "3 of 4 wheels passed (curl_cffi, numpy, websockets); pandas/__init__.py is the one residual file (1 empty line)",
       "status": "FAIL",
-      "status_reason": "numpy/__init__.py and pandas/__init__.py still differ from the installed copies after the ruled rule: the difference is empty lines the installed delvewheel block keeps around itself, which the ruled normalisation does not remove. The rule was not widened; filed as NFRA_CTLPLN-W135-S2 for a CTO ruling.",
+      "status_reason": "pandas/__init__.py keeps one empty line that the ruled padding removal (up to 4 empty lines either side of the block, then exact comparison) does not reproduce; the rule was not widened, per the order. Filed as NFRA_CTLPLN-W135-S3 (BLOCKING) for a CTO ruling on the seam. The order is not met until that ruling lands.",
       "expect": "REAL4 passed=4/4",
       "judgment": false
     },
@@ -68,60 +76,60 @@
       "criterion_verbatim": "the check tool's own suite passes with the new cases added (base: `INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True`, a control); report the whole last line.",
       "method": "command",
       "invocation": "python org/devices/intake/test_intake_check.py",
-      "output_evidence": "run from the worktree root under timeout 280; last line verbatim: INTAKE-CHECK-TEST cases=59/60 skipped=0 ok=False. The one FAIL line: FAIL case_check_6_records_the_cross_platform_comparison_and_the_crlf_count (the existing case asserts check 6 failed for a cross-platform CRLF-only difference; the ruled rule reads it passed; the order says change no existing case, so the case was left unchanged; filed as NFRA_CTLPLN-W135-S1). Base control measured at 7d4aef5b93 in the worktree after the sparse-checkout add of org/tier1_exec/1.0.0_SA_CTO/deliverables and docs/briefs: INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True. Identical across three runs.",
-      "denominator": "59 of 60 cases passed; 1 FAIL; 0 skipped",
-      "status": "FAIL",
-      "status_reason": "the existing case case_check_6_records_the_cross_platform_comparison_and_the_crlf_count pins the base verdict that the ruled rule reverses (the order's own arm a); the order forbids changing an existing case, so the suite stays red until the issuer or the CTO rules. Filed as NFRA_CTLPLN-W135-S1.",
+      "output_evidence": "run from the worktree root under timeout 280; exit code 0; last line verbatim: INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True. The one re-expected case (case_check_6_records_the_cross_platform_comparison_and_the_crlf_count) reads PASS under the ruled rule. Old assertion (first seating, 8144b24967 base line): assert record[\"checks\"][5][\"verdict\"] == \"failed\", \"the verdict of check 6 does not change\". New assertion: assert record[\"checks\"][5][\"verdict\"] == \"passed\" plus platform_normalised_equal == [SYN_NAME + \"/__init__.py\"] and py_differing_after_platform_rules == 0. Identical PASS and FAIL lines across two runs.",
+      "denominator": "60 of 60 cases passed (60 at base, no case added); skipped 0 of 60",
+      "status": "PASS",
       "expect": "ok=True",
       "judgment": false
     }
   ],
   "controls": {
     "mutant": {
-      "description": "A mutant rule in-process inside arm g2 of the new test file: intake_check._platform_rule is replaced by a function that returns 'equal' for every file. No copy of the tool is written to disk.",
-      "expected": "the planted-edit arm fails: under the mutant the planted edit VALUE = 2 against VALUE = 1 must read passed, which arm d requires to be failed, so a rule that passes an edit is caught",
-      "observed": "arm g2 measured check 6 under the mutant: the planted edit reads passed, the value arm d would have to reject; the control asserts this, so the suite is red for that mutant. Real rule: arm d passes (planted edit failed).",
+      "description": "In-suite mutant, arm g2 of .tools/tests/test_round28_check6_platform.py: intake_check._platform_rule is replaced in-process by a function returning 'equal' for every file; no copy of the tool is written. Arm k (no block, no blank-line leniency) and arm h (a far blank line fails) are the other teeth for the padding rule.",
+      "expected": "under the mutant the planted edit VALUE = 2 against VALUE = 1 reads passed (the arm's teeth); the real rule fails it (arm d)",
+      "observed": "arm_g_controls PASS in the run at 0577033587: the mutant read the planted edit as passed, and the real rule fails it.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "each criterion run three times on the committed state at 9e91c5b375, same command, timeout 280; output files compared with cmp (AC1, AC2) and diff of the PASS, FAIL and INTAKE-CHECK-TEST lines (AC3)",
-      "observed": "AC1: identical in 3 runs (CHECK6-PLATFORM arms=8/8 ok=True). AC2: identical in 3 runs (REAL4 passed=2/4 ok=False). AC3: identical in 3 runs (INTAKE-CHECK-TEST cases=59/60 skipped=0 ok=False). Exit codes 0, 1 and 1 in every run.",
+      "method": "each criterion run twice on the committed state at 0577033587 (AC2 with the same command), timeout 280; outputs compared with cmp (AC1, AC2) and diff of the PASS and FAIL lines (AC3)",
+      "observed": "AC1: identical (CHECK6-PLATFORM arms=12/12 ok=True, exit 0 both). AC2: identical (REAL4 passed=3/4 ok=False, exit 1 both). AC3: identical (INTAKE-CHECK-TEST cases=60/60 skipped=0 ok=True, exit 0 both).",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "org/devices/intake/test_intake_check.py: no change in this cell",
-      "reason": "the order says change no existing case and add only the cases the change needs; the new arms live in .tools/tests/test_round28_check6_platform.py; the one existing case that conflicts with the ruled rule is filed as NFRA_CTLPLN-W135-S1 for the issuer or the CTO to rule on"
-    },
-    {
-      "item": "the four records under org/devices/intake/records/intake-20261016-yfinance-linux/ and every waiver under C:/opal-intake/; the real batch release folder",
-      "reason": "read only in this cell: the --real4 arm reads the fetch records and the four wheels and writes nothing; the four waivers stay on their records as issued"
+      "item": "the real batch intake-20261016-yfinance-linux and every record and waiver under C:/opal-intake/ and org/devices/intake/records/",
+      "reason": "read only in this cell: the --real4 arm reads the four wheels and the fetch records and writes nothing; the four waiver records stay as issued"
     },
     {
       "item": "the status flip of NFRA_CTLPLN.TO-CT-aw-1 to complete",
-      "reason": "the order file is outside this worker's paths and the flip is the issuer's; this instance carries two FAIL rows, so the order is not met"
+      "reason": "the order file is outside this worker's paths and the flip is the issuer's; this instance carries one FAIL row (CTaw1-AC2), so the order is not met"
     },
     {
       "item": "the portal gitlink and org/git-author-override-audit.laptop.log",
       "reason": "not committed by this cell"
+    },
+    {
+      "item": "the client-data check",
+      "reason": "WARN only, standing ruled state: the hashed account-id list is absent at C:\\Users\\AndrewBerman\\.opal\\account_id_hashes.txt; no row filed for it"
     }
   ],
   "surprises": [
-    "NFRA_CTLPLN-W135-S1: the existing suite case case_check_6_records_the_cross_platform_comparison_and_the_crlf_count asserts check 6 failed for a cross-platform CRLF-only difference that the ruled rule (arm a) reads as passed; the case is unchanged and the suite reads 59/60.",
-    "NFRA_CTLPLN-W135-S2: with the ruled rule, the real arm reads 2 of 4 wheels passed; numpy/__init__.py and pandas/__init__.py still differ by empty lines the delvewheel block leaves behind; the rule was not widened."
+    "NFRA_CTLPLN-W135-S1: the existing suite case case_check_6_records_the_cross_platform_comparison_and_the_crlf_count asserted check 6 failed for a cross-platform CRLF-only difference that the ruled rule reads as passed; re-expected under amendment 1 (the one permitted change), the suite reads 60/60.",
+    "NFRA_CTLPLN-W135-S2: with the first-seating rule, numpy/__init__.py and pandas/__init__.py kept empty lines around the delvewheel block; amendment 1's padding rule clears numpy/__init__.py but not pandas/__init__.py (see W135-S3).",
+    "NFRA_CTLPLN-W135-S3: under the ruled padding rule the real arm reads 3 of 4 (pandas/__init__.py keeps one empty line at the block seam); the rule was not widened and the row needs a CTO ruling."
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~135/NFRA_CTLPLN.TO-CT-aw-1.intake-check-6-platform-aware.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "python",
-      "invocation": "python .tools/safe-commit.sh commit-gate (py_compile, ruff py39) on org/devices/intake/intake_check.py (commit 8144b24967) and .tools/tests/test_round28_check6_platform.py (commit dc48c3b47f, after one ruff F401 fix)",
-      "result": "All checks passed on both commits; the standing client-data WARN (hashed account-id list absent) was printed and not filed"
+      "invocation": "python -m py_compile org/devices/intake/intake_check.py org/devices/intake/test_intake_check.py .tools/tests/test_round28_check6_platform.py",
+      "result": "exit 0 under Python 3.12.10"
     },
     {
-      "tool": "python",
-      "invocation": "python -I .scratch/diag_residual.py (diagnostic, in the worktree scratch folder; reads the wheel and the installed numpy and pandas __init__.py; writes nothing outside the scratch folder)",
-      "result": "numpy: installed normalised side has 3 extra empty lines after wheel line 87; pandas: 2 extra empty lines at line 2"
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh (commit-gate, naming gate, to-pipeline gate, surprise-row gate, missions-tree-check) on 0577033587 and a5caea51cf",
+      "result": "commit-gate All checks passed on the three .py files; surprise-row gate OK on the investigation rows; the standing client-data WARN was printed and not filed"
     }
   ]
 }
