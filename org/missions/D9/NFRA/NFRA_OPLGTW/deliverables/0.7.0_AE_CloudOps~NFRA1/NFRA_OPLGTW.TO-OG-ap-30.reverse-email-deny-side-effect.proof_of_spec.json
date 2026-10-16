@@ -1,0 +1,114 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-30",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e7a269af1b"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "e7a269af1b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-30.reverse-email-deny-side-effect.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "ddb:gateway-access-state-table/email_deny (andrew, opalbloomberg)",
+   "kind": "ddb_rows",
+   "commit_or_etag": "transact-write 2026-10-16T19:22:04Z",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ONE TransactWriteItems at 2026-10-16T19:22:04Z: two Deletes (each attribute_exists(pk) AND status=active) and one ConditionCheck on the third record. Pre-check re-read all three records matching the recorded sha256 and active, count 3. Strongly consistent read-back: both deleted records absent, the third present, active and byte-equal to its before-state, email_deny count 1. Rollback: saved items in the git-excluded DENY_ROLLBACK_ITEMS.json.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/NEVER_WIDEN_ASK_OG-ap-30.md",
+   "kind": "doc",
+   "commit_or_etag": "e884bfe5aa",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed at e884bfe5aa, merged to box/sitez at 4bb14eb50c; sha256 c9032e35de62d86c0e7ccc1efa17cc7cf53340f890bf90f9d3526eae6095212e named in the issuer's GO.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/DENY_BEFORE_OG-ap-30.json",
+   "kind": "doc",
+   "commit_or_etag": "e884bfe5aa",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed at e884bfe5aa; the before-record the Phase B pre-check compared against.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/DENY_AFTER_OG-ap-30.json",
+   "kind": "doc",
+   "commit_or_etag": "65607e0cfb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counts and booleans from the strongly consistent read-back after the transaction.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (Phase A, before any write): the ask names exactly the two write-set e-mails and alyssa as untouched with three half headings, the before-record is complete, and the live table still holds the three records.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ap30.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "ask: three half headings yes; names the two write-set e-mails yes; alyssa named as untouched yes; other e-mail addresses 0 (want 0)\nrecord: write_set ['andrew', 'opalbloomberg'] (want [andrew, opalbloomberg]); writes 2 (want 2); item sha256 for all three yes; email_deny_total_before 3 (want 3)\nlive table now: live_read=ok andrew_present=yes andrew_active=yes opalbloomberg_present=yes opalbloomberg_active=yes alyssa_present=yes alyssa_active=yes email_deny_total=3\nRESULT: PASS\nexit=0\n",
+   "denominator": "Three records and one count (3) read live, strongly consistent, before the write.",
+   "status": "PASS",
+   "status_reason": "Run at Phase A, before the write, at 2026-10-16 ~19:15Z. Re-running AC1 after Phase B reads FAIL by design (its live limb wants all three records present).",
+   "expect": "(?s)ask: three half headings yes; names the two write-set e-mails yes; alyssa named as untouched yes; other e-mail addresses 0 \\(want 0\\).*record: write_set \\['andrew', 'opalbloomberg'\\] \\(want \\[andrew, opalbloomberg\\]\\); writes 2 \\(want 2\\); item sha256 for all three yes; email_deny_total_before 3 \\(want 3\\).*live table now: live_read=ok andrew_present=yes andrew_active=yes opalbloomberg_present=yes opalbloomberg_active=yes alyssa_present=yes alyssa_active=yes email_deny_total=3.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (Phase B): the live table read back after the deletes; the rollback file exists and is not tracked.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ap30.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "live: andrew record present no, opalbloomberg record present no (want no, no); alyssa present yes active yes (want yes, yes); email_deny total 1 (want before 3 minus 2)\nrollback file present yes; tracked by git 0 (want yes, 0)\nRESULT: PASS\nexit=0\n",
+   "denominator": "Three records and one count read live, strongly consistent, after the transaction; rollback file presence and git tracking.",
+   "status": "PASS",
+   "status_reason": "All limbs met on the live table after the transaction.",
+   "expect": "(?s)live: andrew record present no, opalbloomberg record present no \\(want no, no\\); alyssa present yes active yes \\(want yes, yes\\); email_deny total 1 \\(want before 3 minus 2\\).*rollback file present yes; tracked by git 0 \\(want yes, 0\\).*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The act carries its own discriminator: the pre-check read the same three records as present and active (count 3) and AC1 PASSED on that state; after the transaction the same reader reads two absent and count 1. Both states are measured, so AC2 is not stuck-PASS. The issuer recorded AC2 FAIL at base and with a planted record (alyssa also gone; no rollback file).",
+   "status": "FIRED-AS-EXPECTED",
+   "expected": "Before the write the reader sees 3 records present and active (AC1 PASS); after it, 2 absent and a count of 1 (AC2 PASS).",
+   "observed": "AC1 read 3 present, count 3, before the transaction; AC2 read andrew and opalbloomberg absent, alyssa present and active, count 1, after it. Both states measured."
+  },
+  "determinism": {
+   "status": "N/A-WITH-REASON",
+   "method": "A single conditional world write, read back once strongly consistent; the transaction is all-or-nothing and not repeatable (the records are gone).",
+   "observed": "Not repeated: the records no longer exist. The two ap30.AC2 reads (the act's own read-back, then the check) agreed."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The browser read-back (the owner account opening /sprint and /rivalfunds).",
+   "reason": "Not drivable by the applier: the ALB e-mail comes from the Entra sign-in. It is the issuer's close run through MC Portal."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1 (first order). Phase A read-only (msg 35216), report sent; Phase B GO msg 35223 with the ask hash recomputed by the applier and equal; the three halves located at HEAD (CTO in the ruling, CVO at c39c415178, COO at 7d8d644e33). No key printed; no oid or tid.",
+ "compiler_tools": [
+  {
+   "tool": "aws",
+   "invocation": "iam simulate-principal-policy for DeleteItem, ConditionCheckItem, PutItem, GetItem on the table",
+   "result": "PASS",
+   "note": "All four allowed; read-only. The write itself ran under the applier's own audited identity."
+  }
+ ]
+}

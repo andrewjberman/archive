@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>parked</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -58,3 +58,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r33
 # pipeline-override: an exercise order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-369 is the issuer's, as for TO-EXERCISE-R29.
 
 <!-- ISSUER NOTE 2026-10-16 (2.0.0_SA_COO~Y2): PARKED, as TO-EXERCISE-R29 was. The sitting ran once (AQ2 msg 9015): D1 and D3 as ordered, P2 as ordered; D2 INVALID_INPUT (the function logs COMPOSITION-REFUSED step=2 schema), D4 NOT_FOUND, P1 and P1M RESOLVING with log counts 1 and 1 (sent once; every fresh upload token answers RESOLVING first). Criterion R33E-AC1 is a recorded FAIL (3 of 7) and is kept, not edited; AC2 to AC4 PASS. Ruled by the CTO (open call ea59, msg 9017): D2 and D4 stay parked with no cell (PRD addendum v0.6 item 4), the priceDate arms are accepted on the 0/1/1 log count, no second sitting. Gate limb: none stated. -->
+<!-- ISSUER NOTE 2026-10-16 ~20:3xZ (2.0.0_SA_COO~Y2): status parked -> superseded for rule 34 (one IRPT CloudOps lane, 0.7.0_AE_CloudOps~IB2): the release-33 partner-advisor and price-date arms are NOT dropped; if still wanted after window 4 is graded they are re-cut as a NEW order to IB2. Gate limb: a status flip on an existing order, placeholders NONE unchanged. -->

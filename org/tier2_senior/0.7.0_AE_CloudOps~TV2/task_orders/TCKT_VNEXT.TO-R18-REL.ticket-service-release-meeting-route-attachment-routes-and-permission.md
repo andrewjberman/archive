@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -38,7 +38,8 @@
   </context>
 
   <go>
-    STAGED. The GO is an AMENDMENT to this order citing the signed pair, written by the issuer. Then, in order:
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~V2, 2026-10-16 ~16:5xZ; gate limb: none graded this modification; it narrows and names the GO, no placeholder, no path widened). CONDITIONAL GO. THE PAIR IS NOW the COMBINED pair (it supersedes `R18_REL/R18_REL_PAIR.md`, which is VOID: it bound a `lambda_function.py` blob round 19 changed): COO half in `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_REL/R18_R19_COMBINED_REL_PAIR.md` (git blob `643ba43746582b1a50c91923a58a23b9a7979715`, sha256 `fc1bf170a8a42d2b0e02679d581e7268ea153b132b7f3b650005bb245e60589b`; @c2802ebfb2), CTO half in `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/1.0.0_SA_CTO~DELL2/R18_R19_COMBINED_REL_PAIR_CTO_HALF.md` (git blob `2f52cca81d01d28bae2b4637a5f6a2463148560b`, @6bdc8ef4f4, msg 9624). `built_from_sha` = `de2fdb4a4f01520fd166dca8abb21f4541446f47` (its `lambda_function.py` blob is `501c46097813`, its `main.tf` blob `748e680fd7f8`). BEFORE STEP 1 measure with `git hash-object` the pair's two files above and the six files of the pair's section 1 (`lambda_function.py`, `main.tf`, `ATTACH_ADDRESS.json`, `r18_rel_check.py`, `r19_rel_check.py`, `r19_mig_check.py`) at the working tree you build from and at `built_from_sha`; any difference is a STOP and no GO. ONE APPLY carries both rounds: `TO-R19-REL` is folded into this apply (it gets its own result file and check from the SAME apply, never a second apply). The pair's sections 3 and 4 are your preconditions and expected plan (precondition 2 needs `python .../r19_mig_check.py` printing `MIG-OK` and `R19_MIG_RESULT.json` present; precondition 3.1 reads the three buckets as the pair's corrected wording says: the bucket Allow carries `s3:GetObject` only and `s3:PutObject` comes from this release's identity statement, so a missing bucket Allow for PutObject is NOT a STOP). THE CTO'S THREE CONDITIONS bind: (1) the after-read after `TO-R18-RUN` is zero `WE_CLIENT_SENT` AND at least one `WE_CLIENT_NO_CONTACT` with the events scanned printed (the issuer reads it; you record the apply-end timestamp it reads from); (2) your receipt carries this sentence VERBATIM: "requester ack and pickup notices are off until the firm contact map is set"; (3) a rollback goes RELEASE first, then markers. Results: `R18_REL_RESULT.json` (as below) AND `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r19_rel/R19_REL_RESULT.json` (the same hashes in each); both checks (`r18_rel_check.py`, `r19_rel_check.py`) must print `REL-OK` before the ledger closes.
+    The GO's other steps are unchanged:
     1. STEP 0: open the NEVER-2 ledger entry (`deploy_ledger.py open`, leg per step below) and keep it open until the read-backs pass.
     2. STEP 1: build the package from `built_from_sha`; print its member list and sha256; compare with the live package; the members that differ must be exactly the ticket Lambda's source.
     3. STEP 2: confirm the laptop's bucket policy and CORS exist (read-only `get-bucket-policy`, `get-bucket-cors` on EACH of the three firm buckets of `ATTACH_ADDRESS.json`); any one absent: STOP. Read the statements' PREFIX too: it must be `portal/<firm>/state/ticket_attachments/trade-form/` (snake_case); a bucket policy built from the earlier kebab-case rows (`ticket-attachments`, which existed for a short window in exemptions.json on box/dell1) is a STOP, whatever else reads correct.

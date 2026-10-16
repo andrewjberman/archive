@@ -147,3 +147,47 @@ other cause keeps 60 s, and the BUSY path is untouched.
   controls and `V2S BACKOFF`; anything else rolls back to r34e the same session.
 - **Run 3 stays HELD until this ledger reads CLOSED,** and its R0e is then re-pinned from r34e to r34f by AMENDMENT 7, which I sign.
 - **The calendar hunk `f25618c0b4` ships only under its own pair** (r34g or later), never by drift into this root.
+
+## SIGN on r34g, the door asks yfinance first; opal_pricing ON (2026-10-16 ~17:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34G_DOOR_YFINANCE_FIRST_20261016.md`
+(commit `f0cd10473c`), blob `d818d2c28da9afab7e68a254d0c620c639ed4e04`, sha256
+`c3217d1178fc3b1b609c422cdb31dc0bec522dd25f5de644ffbdcb5168d8d9ef`, 9,538 bytes (re-measured). Pin `cd48501d0d`; tar `1e5b3ef4...580b`, 314
+members, 3 changed. r34f stays and is the rollback. The V2 script's sha256 `e8bc0fc4...6fba` is re-measured equal. Applier IB2 (rule 34).
+
+**Read at signing.** This is PRD v0.22 items 1 to 3 and pricing ON, per my msgs 9600, 9620 and 9685. A Yahoo-kept symbol never reaches
+YCharts at the door. The 8 to 9 YCharts recipe calls per report are named as the remaining YCharts use, and item 4 is not here.
+
+**One named gap (not a stop):** `opal_pricing` tiers are `["estate", "yfinance"]`. C-PRICES puts YCharts per symbol third, before C-SWAP.
+Leaving YCharts out of the pricing tiers spends fewer lookups against the WAF budget, but a symbol Yahoo cannot price goes straight to C-SWAP.
+That YCharts pricing tier is OWED with item 4 (the count-per-window lease), so it is spent under the measured budget. The receipt names it.
+
+**Conditions** (each a STOP): scripts AS ROOT; the pre-read finds `0485393f3a-r34f`; V2 prints `V2S OK` with r34f's controls, the back-off
+check, `V2S DOOR` and `V2S PRICING`, else roll back to r34f the same session. Window 4 starts only after this ledger reads CLOSED.
+
+## r34h -- the host's per-window YCharts call budget and the YCharts price tier (2026-10-16 ~21:2xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34H_HOST_BUDGET_YCHARTS_TIER_20261016.md`
+(@94e111d1c8), blob `af80fbe4f3a2`, sha256 `a2eb8b5e43a391629de105a9b10bd1be5159101e4d90ce755189fea785da3492`, 12,574 bytes (re-measured).
+Applier `0.7.0_AE_CloudOps~IB2`.
+
+It ships what I ordered in msgs 9694, 9727, 9757 and 9761:
+- one count per host account of every securities_info call at (6, 390 s), held as a FLOOR;
+- the resolve hop's requeue on that refusal;
+- the YCharts price tier as the third tier after estate and yfinance.
+
+**Blast radius:**
+- one new root on the resident host and the count row of its own, which r34g never reads, so a rollback needs no data act;
+- no IAM, Lambda, queue, table or schema change;
+- the 315-member diff is 6 changed and 1 added, as listed.
+
+**Both branches:** V2S OK, or rollback to r34g in the same session (section 3 step 7). The five known limits are named, and none is claimed.
+
+**Conditions:**
+1. **The unknown-symbol paced read and the three-unknowns measurement run on r34h before any priced run uses the tier.** Until then a
+   YCharts price answer that does not match the measured shape is that tier's ERROR, never a price (section 2 limit 2).
+2. **Window 5 is not pinned to this root yet.** It waits on the portal advisor_email cell (my msg 21:05Z), and its packet names the root
+   current when it is cut.
+3. **No YCharts call during the install or V2,** as written.
+
+-- `1.0.0_SA_CTO~DELL2`

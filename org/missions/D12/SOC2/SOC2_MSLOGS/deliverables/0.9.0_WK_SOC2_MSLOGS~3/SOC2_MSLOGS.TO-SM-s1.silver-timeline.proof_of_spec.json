@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-SM-s1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP.md",
+    "vintage_commit": "09a7732aab",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-s1.silver-timeline.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-s1.silver-timeline.md",
+    "group": "OTHER",
+    "vintage_commit": "09a7732aab"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/silver_builder.py",
+      "kind": "script",
+      "commit_or_etag": "6e5e9fe4d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL cell: committed on wk-SOC2_MSLOGS-3 only; not deployed to the Lambda (no AWS call in this order)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py",
+      "kind": "test",
+      "commit_or_etag": "6e5e9fe4d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL cell: committed on wk-SOC2_MSLOGS-3 only; synthetic records, no deploy."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/read_timeline.py",
+      "kind": "script",
+      "commit_or_etag": "6e5e9fe4d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL cell: committed on wk-SOC2_MSLOGS-3 only; the real invoker is not run here (no network, no AWS call).",
+      "artifact_covered_by": ["SM1-s1-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_read_timeline.py",
+      "kind": "test",
+      "commit_or_etag": "6e5e9fe4d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL cell: committed on wk-SOC2_MSLOGS-3 only; fake boto3 client, no network."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SM1-s1-AC1",
+      "criterion_verbatim": "`SM1-s1-AC1` -- raw records become a sorted parquet partition with the stable column set, Eastern dates, lower-cased accounts, the ip and item fallbacks and the whole record in `raw_json`; `only_date` keeps one Eastern day; an empty input builds an empty table; the Ticket Center era files are gone.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_s1.py silver",
+      "output_evidence": "S1-SILVER-OK rows=4 (exit code 0); the check prints the OK token only when its refusal list is empty.",
+      "denominator": "1 of 1 check invocation exits 0; its refusal list is empty (the mutant run of the same check was refused, 1 of 1, rc=1)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SM1-s1-AC2",
+      "criterion_verbatim": "`SM1-s1-AC2` -- one account's window through an injected invoker prints in time order in Eastern, never blank (an empty window says so), says when truncated, refuses a bad account before any call, and the real invoker names the member alias.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_s1.py timeline",
+      "output_evidence": "S1-TIMELINE-OK (exit code 0); the check prints the OK token only when its refusal list is empty.",
+      "denominator": "1 of 1 check invocation exits 0; its refusal list is empty",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "silver_builder.py ET zone set to UTC (Eastern dates broken); the silver check must refuse.",
+      "expected": "S1-SILVER-REFUSED naming the Eastern dates, rc=1",
+      "observed": "S1-SILVER-REFUSED Eastern dates {'s-1': '2026-10-15', 'e-2': '2026-10-15', 'a-1': '2026-10-16', 'o-1': '2026-10-16'}; only_date must keep one Eastern date; partition_date edge; rc=1. File restored to the committed bytes afterwards.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the silver check run twice on the same committed tree, outputs compared",
+      "observed": "S1-SILVER-OK rows=4 rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy of silver_builder.py to the globgrph-trino-access Lambda",
+      "reason": "LOCAL cell; the order calls nothing live (no AWS call, no network, no Terraform)."
+    },
+    {
+      "item": "handler.py, access.tf and the collector",
+      "reason": "other cells' files; outside this order's paths."
+    },
+    {
+      "item": "real invoker run against the door",
+      "reason": "tests use an injected invoker and a fake boto3 client only; main is not exercised."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~3/SOC2_MSLOGS.TO-SM-s1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python s1_check_s1.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_s1.py silver | timeline",
+      "result": "S1-SILVER-OK rows=4 rc=0; S1-TIMELINE-OK rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py data/m365_metadata/scripts/tests/test_read_timeline.py -q",
+      "result": "31 passed in 0.72s, rc=0"
+    }
+  ]
+}

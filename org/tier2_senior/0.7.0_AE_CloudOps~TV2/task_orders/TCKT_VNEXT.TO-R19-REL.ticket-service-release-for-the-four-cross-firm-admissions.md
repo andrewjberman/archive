@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-16</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -36,7 +36,7 @@
   </context>
 
   <go>
-    STAGED. The GO is an AMENDMENT to this order citing the signed pair, written by the issuer. Then, in order:
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~V2, 2026-10-16 ~16:5xZ; gate limb: none graded this modification; it narrows, no placeholder, no path widened). FOLDED, NO SECOND APPLY. This order is CARRIED BY THE ONE APPLY of `TCKT_VNEXT.TO-R18-REL` under the COMBINED pair `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R19_REL/R18_R19_COMBINED_REL_PAIR.md` (blob `643ba43746582b1a50c91923a58a23b9a7979715`, signed by both halves; the CTO half blob `2f52cca81d01d28bae2b4637a5f6a2463148560b`, @6bdc8ef4f4). Its GO is the one written in that order's AMENDMENT 1 (the same measured blobs, `built_from_sha` `de2fdb4a4f01520fd166dca8abb21f4541446f47`, the CTO's three conditions); this order's steps 1 and 2 below (the migration check and the read of the live state) are PRECONDITIONS of that apply, run once. After the apply, run `r19_rel_check.py` (it must print `REL-OK`), write `R19_REL_RESULT.json` with the same hashes as the R18 result, write this order's proof instance, and flip it. Then, in order:
     1. STEP 0: open the NEVER-2 ledger entry and keep it open until the read-backs pass.
     2. STEP 1: confirm `TO-R19-MIG`'s result file reads MIG-OK (run the issuer's migration check); any other reading is a STOP (the release would lock staff out).
     3. STEP 2: build the package from `built_from_sha`; print its member list and sha256; the members that differ from the live package must be exactly the ticket Lambda's source.

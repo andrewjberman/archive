@@ -1,0 +1,37 @@
+{
+ "order": "FB-l-5",
+ "read_at": "2026-10-16T16:40:00Z",
+ "trigger": "inf-portal-publisher",
+ "trigger_note": "the Inflection publisher trigger (plan moves M01, M03, M04 steps 1-2): from the opal-data-inf S3 notification on gold/meta/ + pipeline-complete.json to the Scheduler floor advi-inf-publish-daily cron(30 13 * * ? *) UTC with Input {} and the catch-up advi-inf-publish-catchup-daily cron(30 16 * * ? *) UTC with Input {}",
+ "old_target_present": false,
+ "old_target_read": "get-bucket-notification-configuration on opal-data-inf read 2026-10-16T13:37Z and again after the 16:30Z fire: ONE entry, the silver entry (silver/_silver_complete/ + .json -> inf-silver-aggregator); the gold/meta/ entry is absent. The marker gold/meta/pipeline-complete.json was written 2026-10-16T12:56:43Z and inf-portal-publisher had NO invocation after it (its only invocations on 2026-10-16 are 13:30:28Z and 16:30:12Z).",
+ "new_target_present": true,
+ "new_target_read": "get-schedule 2026-10-16T13:37Z: advi-inf-publish-daily ENABLED cron(30 13 * * ? *) Input {}; advi-inf-publish-catchup-daily ENABLED cron(30 16 * * ? *) Input {}; same target, dead-letter queue advi-inf-publish-dlq, retry 1 / 3600 s, flexible window OFF.",
+ "exercised": {
+  "event": "the first floor fire, schedule advi-inf-publish-daily at 2026-10-16T13:30Z (organic, nothing invoked by hand), then the catch-up fire advi-inf-publish-catchup-daily at 2026-10-16T16:30Z. The pre-switch at() exercise (advi-inf-publish-exercise-daily, 2026-10-14T13:30Z, EXERCISE_RECORD.json) preceded the switch and found the Scheduler-event defect that Input {} fixed.",
+  "result": "fired",
+  "evidence": "13:30Z: inf-portal-publisher START 13:30:28Z, 'READINESS OK: client_perf=2026-10-16 holdings=2026-10-16 canonical_nna=2026-10-15 served=2026-10-15 reason=frontier-after-served', Event {}, fan-out to inf-portal-advisor-publisher, whose log reads 'COMPLETE: 5 published, 0 errors' (run date 2026-10-16); 22 of the 23 named keys got new VersionIds (the 3 snapshots at 13:30:48Z and 19 advisor files 13:31:10Z-13:31:13Z), the 23rd (inflection_wealth_management/top_holdings.json) is written by the gold chain, not the publisher; 0 versions under platinum/ outside the named set; CloudFront invalidation issued. 16:30Z: START 16:30:12Z, 'READINESS HALT: client_perf=2026-10-16 holdings=2026-10-16 canonical_nna=2026-10-15 served=2026-10-16 reason=not-after-served', the advisor publisher not invoked, 0 versions written after 13:35Z, 0 delete markers, advisor objects 32 before and after (FIRSTDAY_BEFORE_1630.json). The versions count under platinum/ fell from 79959 to 77338 with no write: the bucket rule expire-noncurrent-versions-14d expires noncurrent versions, so the 'counts equal' clause is read as 'zero writes', not as an equal version count. The 2026-10-15 post-switch fires (13:30Z and 16:30Z) also halted not-after-served."
+ },
+ "completion_series": {
+  "basis": "gold/meta/pipeline-complete.json version history, trading days by lib/trading_calendar.py, window 2026-09-25..2026-10-14 (EXERCISE_RECORD.json act2_m03.cron_basis): 11 trading-day completions, the last 10 between 12:45:19Z and 12:59:59Z, margin to the 13:30Z cron 30 min 1 s",
+  "latest": "2026-10-16 marker 12:56:43Z (margin 33 min 17 s); 2026-10-15 marker 12:56:44Z",
+  "claim": "measured"
+ },
+ "written_keys": {
+  "list": "ACT3_BASELINE_VERSIONS.json (the 23 named keys with the VersionIds as of the apply) and rollback_versions_l5.json (the same keys with their prior VersionIds); the 2026-10-16 fire wrote 22 of them",
+  "claim": "measured"
+ },
+ "early_fire_statement": "With the readiness guard live (FB-m-1 code, deployed by FB-m-2), an early or repeated fire loads the three dated frontiers and halts unless the frontier is after the served date: the 16:30Z fire and both 2026-10-15 post-switch fires halted with zero writes. A gold day that finishes after 16:30Z publishes nothing that day and the next 13:30Z fire publishes it (stated in the signed addendum, not guarded).",
+ "pair": {
+  "coo_half": "a6e2df30dc (half) and b72692a2bf (addendum 1)",
+  "cto_half": "1709a6e779 (half) and 52d04a8269 (addendum 1)"
+ },
+ "apply": "2026-10-15T13:09:22Z bash .tools/safe-apply.sh on the saved scoped plan, 'Plan: 1 to add, 2 to change, 0 to destroy', 'Apply complete! Resources: 1 added, 2 changed, 0 destroyed'; Terraform commit 61989d5895; ledger commit 3ab9c9e299",
+ "rollback": {
+  "recorded": true,
+  "how": "set advi-inf-publish-daily and advi-inf-publish-catchup-daily DISABLED (or delete), restore the gold/meta/ + pipeline-complete.json entry in the opal-data-inf bucket notification (Terraform revert of 61989d5895 through a scoped bash .tools/safe-apply.sh); if a day's publish is missed or half-written, ONE manual invoke of the publisher after that day's gold is read complete, with the named keys' prior VersionIds from ACT3_BASELINE_VERSIONS.json recorded first. Saved prior state: PRIOR_STATE_ACT3.json."
+ },
+ "ledger_closed": true,
+ "ledger": "org/critical_paths/change_management/20261015T1307Z_advi-firmbkts-fb-l-5-act3-switch-publisher-trigger-20261015_deploy_completion.md CLOSED 2026-10-16 after L4",
+ "claim": "measured"
+}

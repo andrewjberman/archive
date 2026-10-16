@@ -1,0 +1,2128 @@
+#!/usr/bin/env bash
+# =========================================================================
+# orion-gold-dispatch.sh -- Orion Gold Layer Launcher
+# =========================================================================
+#
+# AGENT QUICK REFERENCE (read this, then run one command):
+#
+#   Full chain (most common):
+#     bash /tmp/orion-gold-dispatch.sh --chain full --bg
+#
+#   Incremental D-chain only (assumes A/B/C outputs exist):
+#     bash /tmp/orion-gold-dispatch.sh --chain incremental --bg
+#
+#   Resume from a specific script:
+#     bash /tmp/orion-gold-dispatch.sh --from INF_D_00 --bg
+#
+#   Re-run one script:
+#     bash /tmp/orion-gold-dispatch.sh --single INF_D_00c
+#
+#   Dry run (compute, don't write):
+#     bash /tmp/orion-gold-dispatch.sh --chain full --dry-run
+#
+#   Check status / tail logs:
+#     bash /tmp/orion-gold-dispatch.sh --status
+#
+#   Kill everything:
+#     bash /tmp/orion-gold-dispatch.sh --kill
+#
+#   SSM one-liner (copy-paste to EC2):
+#     aws s3 cp s3://opal-data-inf/code/gold/orion-gold-dispatch.sh /tmp/orion-gold-dispatch.sh \
+#       && bash /tmp/orion-gold-dispatch.sh --chain full --bg
+#
+# Full flag/mode/chain reference: run `bash orion-gold-dispatch.sh --help`.
+# Flag docs live in `show_help` only -- two-source truth drifts.
+#
+# CHAINS:
+#   full        API pulls + silver builds + A_* + B_* + C_* + D_* + INF_09 (all 40 scripts, sequential)
+#   incremental API pulls + silver builds + D-chain only
+#               Assumes A/B/C gold outputs already exist in S3.
+#
+# EXECUTION MODEL:
+#   Sequential only -- no parallelism. Read-during-write race condition risk
+#   eliminated. Each script must complete before the next starts.
+#
+# WATCHDOG:
+#   5-min grace-window pattern (11478af7). Handled by systemd timer
+#   (watchdog-shutdown.sh on the EC2 instance). NOT GOLD_KEEP_ALIVE.
+#   Do NOT modify this script to add keep-alive markers.
+#
+# SCRIPT-LOAD CONTRACT (EAGER — do NOT assume lazy per-step):
+#   sync_scripts() is called ONCE at run_chain() entry (line ~281). It does a
+#   single bulk boto3 download of ALL code/gold/ + code/silver/ + code/bronze/
+#   scripts to /tmp/orion_gold_scripts/ before any script executes.
+#   Post-boot S3 uploads to code/gold/ will NOT propagate to a running chain.
+#   Deploy scripts to S3 BEFORE invoking inf-gold-trigger, not during.
+#   --single and --from modes also call sync_scripts() at their entry points.
+#
+# =========================================================================
+set -e
+
+# ---------------------------------------------------------------------------
+# Environment
+# ---------------------------------------------------------------------------
+INF_S3_BUCKET="${INF_S3_BUCKET:-opal-data-inf}"
+SCRIPTS="/tmp/orion_gold_scripts"
+# GLDRNS.B1 forensics hotfix (2026-07-16, CTO GO 000444Z): /tmp is tmpfs on the runner -- a chain
+# that dies before its completion-upload leaves NO log after the watchdog's power cycle (tonight's
+# +13s death was unreadable for exactly this reason; 07-11/07-12 likely the same). Logs now live on
+# persistent EBS, and the EXIT trap ships the newest log to S3 unconditionally (crash or complete).
+LOGDIR="/var/log/orion_gold_logs"
+RUN_DATE=$(date -u +%Y-%m-%d)
+
+mkdir -p "$SCRIPTS" "$LOGDIR"
+
+# ---------------------------------------------------------------------------
+# Telemetry bootstrap (opal-telemetry.sh + telemetry-sync.sh from opal-runner-shared)
+# ADHC_TELEM_WIRE 2026-05-13: structured telemetry library + 30s S3 push loop.
+# Pushes live runner state to s3://opal-data-inf/telemetry/inf-gold-layer-runner/status.json
+# (Andrew canonical real-time status path -- replaces SSM/CloudWatch poll).
+# Soft-fail: chain proceeds without telemetry if bootstrap fails (no-op stubs).
+# ---------------------------------------------------------------------------
+TELEM_AVAILABLE=0
+TELEM_SYNC_PID=""
+TELEM_SERVICE="${TELEM_SERVICE:-inf-gold-layer-runner}"
+
+# /var/run requires root; runner runs as root per `sudo shutdown` at end.
+# Pre-create world-writable as belt-and-suspenders for non-root invocations.
+mkdir -p /var/run/opal-telemetry 2>/dev/null \
+    || sudo mkdir -p /var/run/opal-telemetry 2>/dev/null \
+    || true
+chmod 1777 /var/run/opal-telemetry 2>/dev/null \
+    || sudo chmod 1777 /var/run/opal-telemetry 2>/dev/null \
+    || true
+
+if aws s3 cp s3://opal-runner-shared/code/shared/opal-telemetry.sh "$SCRIPTS/opal-telemetry.sh" --quiet 2>/dev/null \
+   && aws s3 cp s3://opal-runner-shared/code/shared/telemetry-sync.sh "$SCRIPTS/telemetry-sync.sh" --quiet 2>/dev/null; then
+    chmod +x "$SCRIPTS/telemetry-sync.sh"
+    # shellcheck disable=SC1091
+    if source "$SCRIPTS/opal-telemetry.sh" 2>/dev/null; then
+        TELEM_AVAILABLE=1
+        echo "Telemetry: opal-telemetry.sh sourced from opal-runner-shared (status JSON will push every 30s)"
+    fi
+fi
+
+if [ "$TELEM_AVAILABLE" != "1" ]; then
+    echo "WARN: opal-telemetry.sh bootstrap failed -- status JSON will NOT push to S3 (chain proceeds)"
+    # no-op stubs so subsequent calls don't error
+    telem_init()       { :; }
+    telem_step_begin() { :; }
+    telem_step_done()  { :; }
+    telem_update()     { :; }
+    telem_warn()       { :; }
+    telem_error()      { :; }
+    telem_complete()   { :; }
+fi
+
+# Trap-driven cleanup: kill background sync loop on dispatcher exit + do
+# one final telemetry-sync.sh push so terminal-state JSON archives correctly.
+_telem_cleanup() {
+    if [ -n "$TELEM_SYNC_PID" ]; then
+        kill "$TELEM_SYNC_PID" 2>/dev/null || true
+    fi
+    if [ "$TELEM_AVAILABLE" = "1" ]; then
+        bash "$SCRIPTS/telemetry-sync.sh" >/dev/null 2>&1 || true
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# BRONZE-FIX #7: FATAL loud channel (2026-06-12 P0 follow-up f).
+# A fail-closed guard (sync_scripts collision FATAL) that dies SILENTLY
+# defeats itself: 13:00Z->20:37Z the chain was dead, the dispatch lock was
+# held by a dead process, and nothing blared until a human noticed stale
+# ADVI. This trap makes any pre-completion non-zero exit LOUD:
+#   1. CW metric Inflection/GoldChain.ChainFailed=1 -- this is the EXISTING
+#      live convention: alarm inf-gold-chain-failed (alarms.tf) already
+#      watches exactly {namespace=Inflection/GoldChain, metric=ChainFailed,
+#      dims Service=inf-gold-layer-runner} -> opal-infrastructure-alerts,
+#      and iam.tf scopes PutMetricData to THIS namespace. The alarm + IAM
+#      landed earlier but the script-side emitter was never added (the
+#      half-deploy class again) -- THIS is the missing emitter. A clean
+#      complete emits ChainFailed=0 (mdpf finish() parity).
+#   2. Dispatch-lock self-release -- a dead chain must not strand the lock
+#      (the trigger's stale-TTL clear took 8.1h; this makes it immediate).
+#   3. SNS direct publish to opal-critical-surface-alerts -- best-effort
+#      belt-and-suspenders (no sns:Publish grant today; the alarm in (1) is
+#      the live loud path; topic disposition = AE/CTO per TO).
+# Alert egress runs BEFORE log upload / telemetry cleanup -- the 13:00Z
+# FATAL died pre-log-upload, so anything sequenced after uploads inherits
+# the exact blindness this fixes. Correlation token in the SNS body:
+# lock:<run_id> (joins to inf-gold-trigger logs + deploy_ledger --proof,
+# format pinned in .tools/deploy_ledger.py 307f7d44e).
+# ---------------------------------------------------------------------------
+ALERT_SNS_TOPIC="${ALERT_SNS_TOPIC:-arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts}"
+ALERT_CW_NAMESPACE="Inflection/GoldChain"
+ALERT_CW_SERVICE="inf-gold-layer-runner"
+ALERT_PIPELINE="inf"
+CHAIN_STARTED=0
+
+_alert_instance_id() {
+    local tok
+    tok=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>/dev/null || true)
+    curl -s -H "X-aws-ec2-metadata-token: $tok" \
+        "http://169.254.169.254/latest/meta-data/instance-id" 2>/dev/null \
+        || echo "unknown-instance"
+}
+
+fatal_alert() {
+    local rc="$1"
+    echo "FATAL-ALERT: dispatch exiting rc=$rc before completion -- firing loud channel (BRONZE-FIX #7)"
+    # 1) CW metric first: fires the EXISTING inf-gold-chain-failed alarm
+    #    (dims must be EXACTLY Service=inf-gold-layer-runner to match it).
+    aws cloudwatch put-metric-data --namespace "$ALERT_CW_NAMESPACE" \
+        --metric-name ChainFailed --value 1 --unit Count \
+        --dimensions "Service=$ALERT_CW_SERVICE" \
+        2>/dev/null || echo "WARN: ChainFailed put-metric-data failed"
+    # 2) Capture + self-release the dispatch lock (dead holder must not block retriggers).
+    local lock_json lock_run_id
+    lock_json=$(aws s3 cp "s3://${INF_S3_BUCKET}/gold/dispatch-lock.json" - 2>/dev/null || true)
+    lock_run_id=$(echo "$lock_json" | grep -oE '"run_id": *"[^"]*"' | cut -d'"' -f4)
+    if [ -n "$lock_json" ]; then
+        aws s3 rm "s3://${INF_S3_BUCKET}/gold/dispatch-lock.json" 2>/dev/null \
+            && echo "FATAL-ALERT: dispatch lock self-released (lock:${lock_run_id:-unparsed})" \
+            || echo "WARN: dispatch lock self-release failed (lock:${lock_run_id:-unparsed})"
+    fi
+    # 3) SNS publish (best-effort; CW metric above is the guaranteed floor).
+    local log_tail=""
+    if [ -n "${CURRENT_LOG_FILE:-}" ] && [ -f "${CURRENT_LOG_FILE:-}" ]; then
+        log_tail=$(tail -8 "$CURRENT_LOG_FILE" 2>/dev/null || true)
+    fi
+    aws sns publish --topic-arn "$ALERT_SNS_TOPIC" \
+        --subject "RED: ${ALERT_PIPELINE} gold dispatch FATAL rc=${rc} (${CHAIN_LABEL:-unknown})" \
+        --message "RED alert-not-block (BRONZE-FIX #7 FATAL loud channel)
+pipeline: ${ALERT_PIPELINE}
+chain: ${CHAIN_LABEL:-unknown}
+rc: ${rc}
+run_date: ${RUN_DATE}
+instance: $(_alert_instance_id)
+lock:${lock_run_id:-none} (self-released by this trap if present)
+log tail:
+${log_tail:-<none captured>}" \
+        2>/dev/null || echo "WARN: sns publish failed/denied -- ChainFATAL CW metric is the floor signal (sns:Publish grant rides AE wiring)"
+}
+
+_on_exit() {
+    local rc=$?
+    if [ "$CHAIN_STARTED" = "1" ]; then
+        if [ "$rc" -ne 0 ]; then
+            fatal_alert "$rc"
+        else
+            # Clean complete: ChainFailed=0 (mdpf finish() parity; keeps the
+            # alarm's Maximum>=1 semantics + a daily heartbeat datapoint).
+            aws cloudwatch put-metric-data --namespace "$ALERT_CW_NAMESPACE" \
+                --metric-name ChainFailed --value 0 --unit Count \
+                --dimensions "Service=$ALERT_CW_SERVICE" \
+                2>/dev/null || true
+        fi
+    fi
+    _telem_cleanup
+}
+trap _on_exit EXIT
+
+# ---------------------------------------------------------------------------
+# Script catalog -- single source of truth for every runnable INF script
+# ---------------------------------------------------------------------------
+# Format: ID|filename|default_flags
+# default_flags: space-separated flags always passed (--upload, etc.)
+# Scripts that take no --upload flag (validators) use empty flags.
+#
+# DATE-CAPABILITY CONTRACT (ADVI_INFETL.RUNDATE-DISPATCH-IMPL E1, CTO-ruled
+# Option 1b): a step is "date-capable" iff its default_flags field contains the
+# literal {date} token. The {date}-token presence IS the date-capability
+# contract -- there is no separate date_param column. Do NOT add {date} to a
+# row whose script ignores it, and do NOT omit it from a row whose script
+# requires a date arg -- either desyncs the contract from script behavior. The
+# validate_rundate_coherence guard reads this token (via step_is_date_capable)
+# to reject an incoherent --run-date + date-agnostic-step combination.
+
+read -r -d '' CATALOG << 'CATALOG_END' || true
+INF_A_0|INF_A_0.aor_resolver.py|--upload
+INF_A_-1|INF_A_-1.materialize_txn_cache.py|
+INF_A_00|INF_A_00.accounts_dimension.py|--upload
+INF_A_01|INF_A_01.advisor_assignments.py|--upload
+INF_A_02|INF_A_02.fee_rate_history.py|--upload
+INF_A_03|INF_A_03.positions_cube.py|--upload
+INF_A_04|INF_A_04.client_dimension.py|--upload
+INF_B_00|INF_B_00.canonical_holdings.py|--upload
+INF_B_01|INF_B_01.holdings_lots.py|--upload
+INF_B_01b|INF_B_01b.classify_new_securities.py|--upload
+INF_B_02|INF_B_02.canonical_lots.py|--upload
+INF_B_03|INF_B_03.account_gains.py|--upload
+INF_C_00|INF_C_00.canonical_performance.py|--upload
+INF_C_01|INF_C_01.canonical_nna.py|--upload
+INF_C_01b|INF_C_01b.role_aua_backfill.py|--upload
+INF_C_02|INF_C_02.client_performance.py|--upload
+INF_C_03|INF_C_03.account_performance.py|--upload
+INF_C_04|INF_C_04.validate_aua.py|
+INF_C_05|INF_C_05.client_tax_liability.py|--upload
+INF_C_06|INF_C_06.client_mix_timeseries.py|--upload
+INF_C_07|INF_C_07.advisor_attribution.py|--upload
+INF_C_08|INF_C_08.advisor_fee_efficiency.py|--upload
+INF_C_09|INF_C_09.fee_status_audit.py|--upload
+INF_D_00|INF_D_00.portal_aggregates.py|--upload
+INF_D_00b|INF_D_00b.portal_timeseries.py|--upload
+INF_D_00d|INF_D_00d.cumulative_chart.py|--upload
+INF_D_00c|INF_D_00c.portal_leaderboard.py|--upload
+INF_D_00f|INF_D_00f.advisor_nna_canonical.py|--upload
+INF_D_02|INF_D_02.advisor_client_detail.py|--upload
+INF_D_02b|INF_D_02b.top_holdings.py|--upload
+INF_D_03|INF_D_03.composition_artifacts.py|--upload
+INF_D_02d|INF_D_02d.firm_mix_summary.py|--upload
+INF_D_02c|INF_D_02c.client_directory.py|--upload
+INF_D_04b|INF_D_04b.client_publishers.py|--upload
+INF_D_04|INF_D_04.client_portal_summary.py|--upload
+INF_09|INF_09.generate_partner_analytics.py|--upload --skip-sub-scripts
+INF_D_09|INF_D_09.account_timeseries.py|--upload
+INF_D_10|INF_D_10.aor_conformance.py|--mode advisory
+INF_D_11|INF_D_11.aor_attribution_drift.py|
+INF_D_05|INF_D_05.client_top_holdings.py|--upload
+INF_D_06|INF_D_06.client_timeseries.py|--upload
+INF_D_07|INF_D_07.concentration_risk.py|--upload
+INF_D_07a|INF_D_07a.firm_concentrations.py|--upload
+INF_D_08|INF_D_08.nmec_nmnc_nna.py|--upload
+INF_D_05a|INF_D_05.activity_scan.py|--upload
+INF_D_06a|INF_D_06.cash_drag.py|--upload
+INF_API_PULL_REPS|pull_inflection_representatives.py|--upload-bronze
+INF_API_SILVER_REPS|convert_orion_api_to_silver.py|--dim representatives --upload --snapshot-date {date}
+INF_API_SILVER_HHREP|convert_orion_api_to_silver.py|--dim household_rep_mapping --upload --snapshot-date {date}
+INF_API_PULL_NEW_PORTFOLIO|pull_inflection_new_portfolio.py|--upload-bronze --with-roster
+INF_API_SILVER_ACCOUNTS_V2|convert_orion_api_to_silver.py|--dim accounts_v2 --upload --snapshot-date {date}
+INF_API_PULL_ASSETS_V2|pull_inflection_assets_v2.py|--upload-bronze
+INF_API_SILVER_ASSETS_V2|convert_assets_v2_to_silver.py|--upload --date {date}
+INF_API_PULL_POSITIONS_DAILY|pull_inflection_positions_daily.py|--upload-bronze
+INF_API_SILVER_POSITIONS_MV|convert_orion_api_to_silver.py|--dim positions_mv --upload --snapshot-date {date}
+INF_API_PULL_TXN|pull_inflection_transactions_rest.py|--upload
+INF_API_SILVER_TXN|convert_transactions_to_silver.py|--upload --pull-date {date}
+INF_API_PULL_PERF|pull_inflection_performance_rest.py|--upload
+INF_API_SILVER_PERF|convert_performance_to_silver.py|--upload --pull-date {date}
+INF_API_PULL_SCOPE_ACCTS|pull_inflection_scope_account_returns.py|--upload
+INF_API_PULL_UNIFIED|pull_unified_account_dim.py|--upload-bronze
+INF_API_PULL_TAX|orion_tax_dim.py|--upload-bronze
+INF_API_SILVER_TAX|build_tax_dim.py|--snapshot-date {date} --upload
+INF_API_PULL_BILLING|orion_billing_dim.py|--upload-bronze
+# RETIRED 2026-08-30 as a SCHEDULED WRITER (INF-ONEWRITER Step 2): removed from CHAIN_PULL
+# only -- the row is RETAINED so rollback is re-adding the id to the chain. Ground: the
+# silver chain Lambda is now the single writer of silver/api_dims/billing; DS~V two-arm read
+# 87455/87456 measured DELTA=0 same-day (15,487 cells, 17=17 cols) against this writer.
+# DO NOT invoke this id ad-hoc on a PRODUCTION date without the issuer's word: the row still
+# carries --upload, so an ad-hoc run re-creates a second writer for that day and confounds
+# the single-writer read (CTO 87575).
+INF_API_SILVER_BILLING|build_billing_dim.py|--snapshot-date {date} --upload
+INF_API_PULL_PERF_DIM|pull_inflection_performance_dim.py|--upload-bronze --window 3y
+INF_API_SILVER_PERF_DIM|convert_orion_api_to_silver.py|--dim performance --upload --snapshot-date {date}
+INF_S_00|INF_build_canonical_prices.py|
+INF_ECLIPSE_PULL|pull_eclipse_portfolios.py|--date {date}
+INF_ECLIPSE_SILVER|convert_eclipse_portfolios_to_silver.py|--date {date} --upload
+INF_E_00|INF_E_00.eclipse_model_portfolios.py|--date {date} --upload
+CATALOG_END
+
+# ---------------------------------------------------------------------------
+# Chain definitions -- ordered lists of script IDs
+# ---------------------------------------------------------------------------
+
+# Silver prep: rebuild silver/prices/canonical_prices.parquet with the 4-tier
+# hierarchy (T1 transaction_observed, T2 yahoo_finance, T3 linear_interpolation,
+# T4 carry_forward). Runs BEFORE the freshness gate in the full chain so
+# weekend/holiday gap dates are filled regardless of new data. INF equivalent
+# of BD's S_00 (ADHC_COMPIL.013 staleness remediation -- gap introduced
+# 2026-04-22 when INF_build_canonical_prices.py was never wired into dispatch).
+# Not in CHAIN_FULL: runs via run_chain BEFORE the freshness gate, separately.
+CHAIN_SILVER_PREP="INF_S_00"
+
+# ADVI_INFREF P1 LEG-2 Step-1 (2026-06-30, CTO arch-gated 5bc21a0b1): the PULL/COMPUTE module split.
+# CHAIN_PULL = the front-of-chain single PULL stage (all Orion REST pulls + their silver converters).
+# CHAIN_COMPUTE = A/B/C/D + INF_09 (no pulls). CHAIN_FULL = pull-then-compute in ONE process; the
+# boundary marker is gold/meta/pull-complete.json (written at --stage pull; --stage compute asserts it).
+# The positions pull (INF_API_PULL_POSITIONS_DAILY/SILVER_POSITIONS_MV) is REORDERED to the pull stage
+# (front) -- dependency-safe: A-stage derives positions_cube from silver/transactions, NOT positions_mv;
+# B_00 (the positions_mv consumer) runs in COMPUTE, after the pull stage. So CHAIN_FULL is the SAME script
+# set, pulls grouped front = PARITY-NEUTRAL (CSV-dims land raw unchanged; silver reads unchanged). Each
+# PULL step keeps the timeout(-k30,600s)+tolerate (9ea447b3a, run_script INF_API_PULL_* branch); COMPUTE
+# stays hard-fail under set -e.
+# ADVI_INFREF LEG-2 3-cron-dim move (2026-06-30, full-send): the 3 cron-only dims now pull IN the stage
+# (decommission their crons post-parity). UNIFIED is FIRST (silver dim builders read unified_account_dim
+# from bronze -- must precede them); tax+billing (pull+silver) are LEAF (consumed only by COMPUTE: INF_C_05
+# tax / INF_C_09 billing) so they land at the END. Pull scripts already exist (orion_tax_dim.py /
+# orion_billing_dim.py / pull_unified_account_dim.py --upload-bronze; build_tax_dim.py / build_billing_dim.py
+# standalone silver). (Trading/Models still deferred per the design.)
+CHAIN_PULL="INF_API_PULL_UNIFIED INF_API_PULL_REPS INF_API_SILVER_REPS INF_API_SILVER_HHREP INF_API_PULL_ASSETS_V2 INF_API_SILVER_ASSETS_V2 INF_API_PULL_NEW_PORTFOLIO INF_API_SILVER_ACCOUNTS_V2 INF_API_PULL_TXN INF_API_SILVER_TXN INF_API_PULL_PERF INF_API_SILVER_PERF INF_API_PULL_POSITIONS_DAILY INF_API_SILVER_POSITIONS_MV INF_API_PULL_SCOPE_ACCTS INF_API_PULL_TAX INF_API_SILVER_TAX INF_API_PULL_BILLING INF_API_PULL_PERF_DIM INF_API_SILVER_PERF_DIM"
+# C-chain order (advisor-of-record single-source, F1): C_03 + C_07 precede C_02, because C_02's
+# household re-key reads gold/views/account_team.parquet which C_07 writes. comp-pipescript io deps:
+# C_07<-{A_00,C_03}; C_02<-{C_00,A_00,account_team=C_07}; C_04/C_06<-C_02; C_08<-C_07. So the order
+# C_00 C_01 C_01b C_03 C_07 C_02 C_04 C_05 C_06 C_08 C_09 satisfies every edge (no cycle). Do NOT
+# move C_02 back before C_07 -- that reintroduces a one-nightly household-headline lag.
+# GLDRNS.B1 serve-lift RESTORE (CTO ruling 20260716T172125Z; the window exclusion was 194d3d674,
+# landed d9e74e097): INF_D_02c / INF_D_04 / INF_09 re-added at their original positions here (and in
+# CHAIN_INCREMENTAL + CHAIN_GOLD_D) -- full record at the CHAIN_GOLD_D block.
+CHAIN_COMPUTE="INF_A_-1 INF_A_00 INF_A_01 INF_A_02 INF_A_03 INF_A_04 INF_B_00 INF_B_01 INF_B_01b INF_B_02 INF_B_03 INF_C_00 INF_C_01 INF_C_01b INF_C_03 INF_C_07 INF_C_02 INF_C_04 INF_C_05 INF_C_06 INF_C_08 INF_C_09 INF_D_00 INF_D_00b INF_D_00d INF_D_00c INF_D_00f INF_D_02 INF_D_02b INF_D_03 INF_D_02d INF_D_02c INF_D_04b INF_D_04 INF_09 INF_D_09 INF_D_05 INF_D_06 INF_D_07 INF_D_07a INF_D_08 INF_D_05a INF_D_06a INF_D_10"
+# Full chain = pull stage THEN compute stage (one process; sequential, no parallelism).
+CHAIN_FULL="$CHAIN_PULL $CHAIN_COMPUTE"
+
+# Incremental chain: API pulls + silver rebuilds + D-chain. Assumes A/B/C gold outputs exist in S3.
+# GLDRNS.B1 serve-lift RESTORE (CTO ruling 20260716T172125Z): the same three IDs re-added here.
+CHAIN_INCREMENTAL="INF_API_PULL_REPS INF_API_SILVER_REPS INF_API_SILVER_HHREP INF_API_PULL_ASSETS_V2 INF_API_SILVER_ASSETS_V2 INF_API_PULL_NEW_PORTFOLIO INF_API_SILVER_ACCOUNTS_V2 INF_API_PULL_TXN INF_API_SILVER_TXN INF_API_PULL_PERF INF_API_SILVER_PERF INF_API_PULL_POSITIONS_DAILY INF_API_SILVER_POSITIONS_MV INF_API_PULL_SCOPE_ACCTS INF_D_00 INF_D_00b INF_D_00d INF_D_00c INF_D_00f INF_D_02 INF_D_02b INF_D_03 INF_D_02d INF_D_02c INF_D_04b INF_D_04 INF_09 INF_D_09"
+
+# Group-stage chains: run only one stage. Assume upstream stages already complete in S3.
+# Invoke via Lambda payload {"mode":"gold-cd"} or --chain gold-cd on the CLI.
+CHAIN_GOLD_A="INF_A_-1 INF_A_00 INF_A_01 INF_A_02 INF_A_03 INF_A_04"
+CHAIN_GOLD_B="INF_B_00 INF_B_01 INF_B_01b INF_B_02 INF_B_03"
+CHAIN_GOLD_C="INF_C_00 INF_C_01 INF_C_01b INF_C_03 INF_C_07 INF_C_02 INF_C_04 INF_C_05 INF_C_06 INF_C_08 INF_C_09"
+# GLDRNS.B1 serve-lift RESTORE (CTO ruling 20260716T172125Z): the window exclusion (194d3d674,
+# landed d9e74e097) held INF_D_02c / INF_D_04 / INF_09 out of every chain while their DEPLOYED
+# copies were pre-round-8-consumer-migration and would have served PRE-CANONICAL attribution under
+# fold-ON. The restore condition ("NOT before their consumer migration") is met at source:
+#   INF_D_04  @ 8bd1d1b62  household_headline_map(expect_nonempty=True)      :62 import / :3348 call
+#   INF_D_02c @ dbd10d7aa  household_headline_map(expect_nonempty=True)      :61 import / :180 call
+#   INF_09    @ 5581c0de1  apply_resolution_fold + load_resolution chokepoint :73 import / :406 call
+# All three inherit the C_07-stamped canonical resolution; zero live resolve_household_advisor calls
+# remain (comment references only). Deployed in the same bundle as this dispatcher edit.
+CHAIN_GOLD_D="INF_D_00 INF_D_00b INF_D_00d INF_D_00c INF_D_00f INF_D_02 INF_D_02b INF_D_03 INF_D_02d INF_D_02c INF_D_04b INF_D_04 INF_09 INF_D_09 INF_D_05 INF_D_06 INF_D_07 INF_D_07a INF_D_08 INF_D_05a INF_D_06a INF_D_10"
+CHAIN_GOLD_CD="$CHAIN_GOLD_C $CHAIN_GOLD_D"
+
+# =============================================================================================
+# ADVISOR-OF-RECORD chain entry (round-8.2 R5/R2/R3, CTO ruling 2026-07-13). MUST come AFTER every
+# raw chain literal above -- CHAIN_GOLD_CD composes C+D, so the resolver is injected ONCE, here, into
+# each already-composed chain rather than into C and D separately (which would run it twice).
+#
+#   INF_A_0  = the SINGLE-POINT RESOLVER, FIRST (resolves AoR once off silver's advisor_of_record_raw;
+#              emits the canonical aor_resolution every AoR view inherits + the APPEND event ledger).
+#   INF_D_11 = the drift detector, LAST (reads the ledger, surfaces change/relabel for a human via the
+#              'AOR-DRIFT-ALERT:' token; exit 0 ALWAYS -- never blocks the nightly).
+#
+# R5 -- DE-MULTIPLEX THE SWITCH. `INF_AOR_FOLD_ACTIVE` used to gate the chain ENTRY. It was doing TWO
+# unrelated jobs, and that multiplexing WAS the bug:
+#   Job 1 SEMANTIC (fold-vs-servicing = the resolver's OUTPUT) -- already implemented, correctly, INSIDE
+#     the resolver: under OFF build_advisor_of_record_fold() returns ({},{}) -> servicing-only, and a
+#     FRESH resolution with a current as_of is STILL written. INF_A_0 never reads the switch to decide
+#     whether to RUN. The switch stays, untouched, doing exactly this.
+#   Job 2 DEPLOYMENT (may this script be in the chain at all?) -- a deployment guard wearing the switch's
+#     clothes. THAT is what the entry gate actually was, and a deployment question is answered by
+#     DEPLOYMENT STATE, not by a semantic flag.
+# Conflating them broke the documented rollback: flipping the switch OFF dropped the RESOLVER from the
+# chain entirely, so the intended rollback (resolver keeps running -> resolution reverts to servicing ->
+# fresh artifact, as_of advances) could never happen. The gate manufactured the frozen artifact.
+#
+# R2/R3 -- ENTRY IS GATED ON SCRIPT PRESENCE, and applied to EVERY chain that carries an AoR consumer.
+# The 10 load_resolution() callers are INF_A_00, INF_A_01, INF_B_00, INF_C_01, INF_C_07, INF_D_00c,
+# INF_D_00d, INF_D_00f, INF_D_02b, INF_09 -- they appear across CHAIN_COMPUTE, CHAIN_INCREMENTAL and
+# CHAIN_GOLD_A/B/C/D/CD. A recovery run (`--chain incremental` / `--chain gold-*`) is EXACTLY what gets
+# reached for after a bad night, and it used to run those consumers with NO resolver in the chain.
+#
+# WHY PRESENCE AND NOT "UNCONDITIONAL": presence makes the entry ORDER-INDEPENDENT with respect to
+# deployment. Deployed before INF_A_0.aor_resolver.py reaches code/gold/ -> absent -> not in the chain ->
+# the nightly runs exactly as it does today (harmless). Deployed after -> present -> runs. Skew in EITHER
+# direction is harmless, so no deploy-atomicity proof is required -- the hazard stops existing instead of
+# being proven away. (An UNCONDITIONAL entry would abort run_script :563-568 `exit 1` at step 1 of
+# CHAIN_COMPUTE while the resolver is MISSING_ON_S3, killing the ENTIRE INF nightly.)
+#
+# *** THIS PRESENCE-GATE IS ONLY SAFE PAIRED WITH THE CHOKEPOINT ASSERTION IN load_resolution().
+# *** NEVER SHIP ONE WITHOUT THE OTHER. Alone, a silent skip-when-absent is a FAIL-OPEN: RESOLUTION_KEY is
+# *** overwrite-latest and nothing deletes it, so consumers would sail on, reading a FROZEN resolution and
+# *** attributing off it as if current.
+# ***
+# *** WHAT THE GUARD ACTUALLY ASSERTS (lib/aor_resolution.py, load_resolution): the resolution's
+# *** (source_digest, fold_mode, code_digest) -- i.e. EVERYTHING THE ARTIFACT IS A FUNCTION OF. The
+# *** resolution is f(accounts_v2 CONTENT, AOR_FOLD_ACTIVE, THE CODE), and all three are stamped into the
+# *** artifact and checked on every read. That closes the carried-over-resolution hole, including the
+# *** same-partition re-run case (an ACTIVE-built artifact consumed by an OFF run RAISES on fold_mode;
+# *** an in-place partition rewrite RAISES on source_digest -- exercised RED through this dispatch).
+# ***
+# *** `as_of` (INF_AOR_ASOF) IS DELIBERATELY **NOT** ASSERTED. It is retained for human diagnosis only. It
+# *** is a PROXY that UNDER-fires: the partition is one fixed key, so a re-emit overwrites content IN PLACE
+# *** and the DATE REPEATS ACROSS DIFFERENT BYTES (6 of 69 accounts_v2 partitions were rewritten after
+# *** their own snapshot_date). Do not "restore" an as_of assertion; it cannot see the thing that matters.
+# ***
+# *** >> A RUN-IDENTITY STAMP (run_id) WAS CONSIDERED AND **WITHDRAWN**. DO NOT BUILD IT. <<
+# *** It OVER-fires. The resolution is a PURE FUNCTION of its inputs, so a run that reuses an artifact with
+# *** identical inputs is reusing a CORRECT CACHE, not a stale one. Asserting the invocation would
+# *** HARD-ABORT every legitimate recovery run -- including `--single INF_D_00c`, the documented example in
+# *** this script's own --help -- at precisely the moment recovery runs matter most. A guard that condemns
+# *** the correct answer gets switched off by the operator it condemns. This is written here because the
+# *** remedy LOOKS right on first reading, and it is not.
+# ***
+# *** R4 (the structural test) COVERS ONLY THE CHAIN LITERALS, AND THAT IS CORRECT -- DO NOT "FIX" IT.
+# *** An invocation path (`--single` / `--from`) HAS NO CHAIN LITERAL, so R4 structurally cannot see it and
+# *** does not need to: THE CHOKEPOINT covers the invocation surface (the guard runs on every read, however
+# *** the script was invoked), and R4 covers the dispatch surface (no chain literal may carry an AoR
+# *** consumer without a presence-gated resolver). Together they close both. Widening R4 to chase the
+# *** invocation axis would weaken it for no gain.
+_aor_script_deployed() {  # $1 = basename under code/gold/ ; the same prefix sync_scripts pulls from
+    aws s3api head-object --bucket "$INF_S3_BUCKET" --key "code/gold/$1" >/dev/null 2>&1
+}
+AOR_RESOLVER_ID=""
+AOR_DETECTOR_ID=""
+if _aor_script_deployed "INF_A_0.aor_resolver.py"; then
+    AOR_RESOLVER_ID="INF_A_0"
+else
+    echo "INFO: AoR resolver (INF_A_0.aor_resolver.py) is NOT deployed to code/gold/ -- omitting it from every chain. Any AoR consumer that runs will FAIL CLOSED at load_resolution() (the run-as-of assertion), never attribute off a stale resolution."
+fi
+if _aor_script_deployed "INF_D_11.aor_attribution_drift.py"; then
+    AOR_DETECTOR_ID="INF_D_11"
+else
+    echo "INFO: AoR drift detector (INF_D_11.aor_attribution_drift.py) is NOT deployed to code/gold/ -- omitting it from the compute chain."
+fi
+
+if [ -n "$AOR_RESOLVER_ID" ] || [ -n "$AOR_DETECTOR_ID" ]; then
+    # Resolver FIRST in every consumer-carrying chain; detector LAST in the full compute chain only
+    # (it reads the ledger the resolver just appended -- a group-stage recovery run has nothing new
+    # for it to read, and it must never turn a recovery run into an alerting surface).
+    CHAIN_COMPUTE="$AOR_RESOLVER_ID $CHAIN_COMPUTE $AOR_DETECTOR_ID"
+    CHAIN_FULL="$CHAIN_PULL $CHAIN_COMPUTE"
+    CHAIN_INCREMENTAL="$AOR_RESOLVER_ID $CHAIN_INCREMENTAL"
+    CHAIN_GOLD_A="$AOR_RESOLVER_ID $CHAIN_GOLD_A"
+    CHAIN_GOLD_B="$AOR_RESOLVER_ID $CHAIN_GOLD_B"
+    CHAIN_GOLD_C="$AOR_RESOLVER_ID $CHAIN_GOLD_C"
+    CHAIN_GOLD_D="$AOR_RESOLVER_ID $CHAIN_GOLD_D"
+    CHAIN_GOLD_CD="$AOR_RESOLVER_ID $CHAIN_GOLD_CD"
+    echo "INFO: AoR chain entry (presence-gated): resolver='${AOR_RESOLVER_ID:-<absent>}' detector='${AOR_DETECTOR_ID:-<absent>}' -- semantic fold switch INF_AOR_FOLD_ACTIVE=${INF_AOR_FOLD_ACTIVE:-0} (fold-vs-servicing OUTPUT only; it does NOT control chain entry)."
+fi
+# =============================================================================================
+
+# Eclipse model-portfolios -- standalone manual/test chain. The eclipse trio ALSO
+# runs automatically as a BEST-EFFORT, POST-SENTINEL block at the end of --chain
+# full / incremental (see the eclipse block after the pipeline-complete.json
+# write). It is deliberately NOT in CHAIN_FULL / CHAIN_INCREMENTAL -- Andrew
+# directive 2026-05-15: portal publish must never be gated on Eclipse (the
+# pipeline is new and largely untested). `--chain eclipse` runs via normal
+# run_chain (fatal-on-failure) -- intended for manual/test runs where you DO
+# want to see failures; pair with --force --no-freshness-check for ad-hoc runs.
+CHAIN_ECLIPSE="INF_ECLIPSE_PULL INF_ECLIPSE_SILVER INF_E_00"
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+log_ts() {
+    date -u '+%Y-%m-%dT%H:%M:%SZ'
+}
+
+# ---------------------------------------------------------------------------
+# Data freshness check
+# ---------------------------------------------------------------------------
+check_freshness() {
+    local silver_latest gold_as_of
+    silver_latest=$(aws s3 ls "s3://${INF_S3_BUCKET}/silver/aum_snapshot/" 2>/dev/null \
+        | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort | tail -1)
+    gold_as_of=$(aws s3 cp "s3://${INF_S3_BUCKET}/gold/artifacts/header_metrics.json" - 2>/dev/null \
+        | python3 -c 'import json,sys; print(json.load(sys.stdin).get("data_as_of", ""))' 2>/dev/null)
+
+    if [ -z "$silver_latest" ]; then
+        echo "  WARN: Could not determine silver latest date -- proceeding."
+        return 0
+    fi
+    if [ -z "$gold_as_of" ]; then
+        echo "  No prior gold data_as_of found -- proceeding (first run)."
+        return 0
+    fi
+
+    if [ "$silver_latest" \> "$gold_as_of" ]; then
+        echo "  Data freshness: silver=$silver_latest > gold=$gold_as_of -- proceeding."
+        return 0
+    fi
+
+    echo "============================================================"
+    echo "SKIP: No new silver data since last gold run."
+    echo "  Silver latest:   $silver_latest"
+    echo "  Gold data_as_of: $gold_as_of"
+    echo "  Pass --force to override and run anyway."
+    echo "============================================================"
+    return 1
+}
+
+sync_scripts() {
+    echo "Syncing scripts from s3://${INF_S3_BUCKET}/code/gold/ ..."
+    # sync_scripts() flattens four S3 code/ prefixes into one working dir
+    # keyed by basename. A bare last-write-wins flatten silently runs whichever
+    # same-named copy downloaded last -- ADVI_INFETL.SYNC-COLLISION 2026-05-18:
+    # a stale code/bronze/ copy clobbered the INFINC.006 deploy to
+    # code/manual_api/ for 3 days, undetected. This sync now DETECTS basename
+    # collisions and FAILS LOUD on any with differing content.
+    local sync_rc
+    python3 - <<PYEOF
+import boto3, hashlib, os, sys
+
+bucket   = '${INF_S3_BUCKET}'
+prefixes = ['code/gold/', 'code/manual_api/', 'code/silver/', 'code/bronze/']
+dest     = '${SCRIPTS}'
+
+# Declared precedence for INTENTIONALLY multi-homed basenames: basename ->
+# ordered prefix list (highest-precedence first). Empty by default --
+# ADVI_INFETL.SYNC-COLLISION Phase 0 found NO intentional multi-homing; every
+# historical collision was accidental deploy cruft and was normalized to
+# byte-identical copies in Phase 1. A future genuinely-shared script gets an
+# explicit entry here; anything else that collides with DIFFERING content
+# fails loud below instead of silently picking a last-write-wins coin flip.
+DECLARED_PRECEDENCE = {}
+
+# Python package markers legitimately recur across prefixes and carry no
+# chain logic -- exempt from collision detection.
+COLLISION_EXEMPT = {'__init__.py'}
+
+os.makedirs(dest, exist_ok=True)
+s3  = boto3.client('s3', region_name='us-east-1')
+pag = s3.get_paginator('list_objects_v2')
+
+# Pass 1 -- inventory every object keyed by basename (the flat-dir key).
+inventory = {}
+for prefix in prefixes:
+    for page in pag.paginate(Bucket=bucket, Prefix=prefix):
+        for obj in page.get('Contents', []):
+            fname = obj['Key'].split('/')[-1]
+            if not fname:
+                continue
+            body = s3.get_object(Bucket=bucket, Key=obj['Key'])['Body'].read()
+            inventory.setdefault(fname, []).append({
+                'prefix': prefix,
+                'key': obj['Key'],
+                'body': body,
+                'sha': hashlib.sha256(body).hexdigest(),
+                'size': obj['Size'],
+                'mtime': obj['LastModified'].isoformat(),
+            })
+
+# Pass 2 -- a basename in 2+ prefixes with DIFFERING content would silently
+# run whichever copy downloaded last. Detect it; fail loud unless declared.
+collisions = []
+for fname, copies in sorted(inventory.items()):
+    if len(copies) < 2 or fname in COLLISION_EXEMPT:
+        continue
+    if len({c['sha'] for c in copies}) == 1:
+        print(f'  collision OK (identical x{len(copies)}): {fname}')
+        continue
+    if fname in DECLARED_PRECEDENCE:
+        print(f'  collision RESOLVED (declared precedence): {fname}')
+        continue
+    collisions.append((fname, copies))
+
+if collisions:
+    sys.stderr.write(
+        '\nFATAL: sync_scripts() basename collision -- the same script name '
+        'exists in 2+ code/ prefixes with DIFFERENT content. A flat-dir sync '
+        'would silently run whichever copy downloaded last. Refusing to sync.\n'
+    )
+    for fname, copies in collisions:
+        sys.stderr.write(f'  COLLISION: {fname}\n')
+        for c in copies:
+            sys.stderr.write(
+                f'    {c["key"]}  size={c["size"]}  mtime={c["mtime"]}  '
+                f'sha256={c["sha"][:16]}\n'
+            )
+    sys.stderr.write(
+        'Resolution: re-deploy the canonical copy over every prefix so all '
+        'copies are byte-identical, OR add a DECLARED_PRECEDENCE entry if the '
+        'multi-homing is intentional.\n'
+    )
+    sys.exit(1)
+
+# Pass 3 -- write one copy per basename. Declared-precedence collisions take
+# the highest-precedence prefix; everything else is collision-free or proven
+# byte-identical, so any copy is correct.
+n = 0
+for fname, copies in inventory.items():
+    chosen = copies[0]
+    order = DECLARED_PRECEDENCE.get(fname)
+    if order:
+        for pfx in order:
+            match = [c for c in copies if c['prefix'] == pfx]
+            if match:
+                chosen = match[0]
+                break
+    with open(os.path.join(dest, fname), 'wb') as fh:
+        fh.write(chosen['body'])
+    n += 1
+print(f'Synced {n} files to {dest}')
+PYEOF
+    sync_rc=$?
+    if [ "$sync_rc" -ne 0 ]; then
+        echo "FATAL: sync_scripts() aborted (rc=$sync_rc) -- basename collision or S3 error. The chain will not run on stale/ambiguous code; see above." >&2
+        exit 1
+    fi
+    echo "Synced: $(ls "$SCRIPTS"/*.py 2>/dev/null | wc -l) scripts"
+
+    # Pull gold_prof.py from canonical opal-runner-shared bucket (cross-pipeline
+    # telemetry profiler). Overrides any legacy copy from ${INF_S3_BUCKET}/code/gold/
+    # in the sync above. Safe-fallback: if pull fails, the legacy copy remains.
+    # ADHC 2026-05-13.
+    if aws s3 cp s3://opal-runner-shared/code/gold/gold_prof.py "${SCRIPTS}/gold_prof.py" 2>/dev/null; then
+        echo "gold_prof.py pulled from opal-runner-shared (canonical)"
+    else
+        echo "WARN: opal-runner-shared pull failed for gold_prof.py — using legacy copy from ${INF_S3_BUCKET}"
+    fi
+}
+
+run_script() {
+    local id="$1"
+
+    local entry
+    entry=$(echo "$CATALOG" | grep "^${id}|" || true)
+    if [ -z "$entry" ]; then
+        echo "ERROR: unknown script ID '$id'"
+        echo "Valid IDs: $(echo "$CATALOG" | cut -d'|' -f1 | tr '\n' ' ')"
+        exit 1
+    fi
+
+    local filename default_flags
+    filename=$(echo "$entry" | cut -d'|' -f2)
+    default_flags=$(echo "$entry" | cut -d'|' -f3)
+    default_flags="${default_flags//\{date\}/$RUN_DATE}"
+
+    if [ "$DRY_RUN" = "1" ]; then
+        default_flags="${default_flags//--upload/--dry-run}"
+    fi
+
+    if [ ! -f "$SCRIPTS/$filename" ]; then
+        echo "ERROR: script not found in S3 sync: $filename"
+        echo "  Expected: $SCRIPTS/$filename"
+        echo "  Upload to: s3://${INF_S3_BUCKET}/code/gold/$filename"
+        exit 1
+    fi
+
+    local _marker_key="gold/artifacts/${id}/${RUN_DATE}"
+    if [ "$SKIP_EXISTING" = "1" ]; then
+        if aws s3api head-object --bucket "$INF_S3_BUCKET" --key "$_marker_key" >/dev/null 2>&1; then
+            echo "SKIP: $id -- artifact exists for $RUN_DATE"
+            return 0
+        fi
+    fi
+
+    echo ""
+    echo "========================================"
+    echo "  $id  ($filename)"
+    echo "  $(log_ts)"
+    if [ -n "$default_flags" ]; then
+        echo "  flags: $default_flags"
+    fi
+    echo "========================================"
+
+    telem_step_begin "$id" 2>/dev/null || true
+
+    # ADVI_BREAKS pull-durability (2026-06-30): the Orion REST dimension pulls
+    # (INF_API_PULL_*) hang PERSISTENTLY with no server-side timeout --
+    # pull_inflection_performance_rest.py hung 103min then 41min on Orion's perf
+    # endpoint, blocking the whole chain under `set -e` (a kill aborts the chain
+    # before D-stage). Mirror run_eclipse_step: bound each PULL with a timeout and
+    # TOLERATE failure so a hung/slow pull fails fast and the chain still reaches
+    # B_00 -> D. Safe by construction: these inline pulls are REDUNDANT re-pulls of
+    # dims the scheduled cron Lambdas already land in today's bronze (12:30-13:40Z),
+    # so a tolerated pull falls back to the cron's fresh bronze for that dim; and the
+    # served AUA derives from positions/holdings, so even a stale perf still yields a
+    # fresh-AUA rich header. NON-pull steps (silver/A/B/C/D) still hard-fail as before.
+    local _is_pull=0
+    case "$id" in
+        INF_API_PULL_*) _is_pull=1 ;;
+    esac
+
+    local _run_rc=0
+    if [ "$_is_pull" = "1" ]; then
+        GOLD_CHAIN_LABEL="$CHAIN_LABEL" timeout -k 30 "${PULL_STEP_TIMEOUT:-600}" \
+            python3 "$SCRIPTS/gold_prof.py" "$SCRIPTS/$filename" $default_flags
+        _run_rc=$?
+        if [ "$_run_rc" -ne 0 ]; then
+            echo "  WARN: $id pull timed out/failed (exit=$_run_rc, timeout=${PULL_STEP_TIMEOUT:-600}s) -- TOLERATING; chain proceeds on prior/cron bronze for this dim (ADVI_BREAKS pull-durability)"
+            telem_error "$id pull tolerated (exit=$_run_rc)" 2>/dev/null || true
+            telem_step_done "$id" --output "$id pull tolerated (exit=$_run_rc)" --status warn 2>/dev/null || true
+            return 0
+        fi
+    else
+        GOLD_CHAIN_LABEL="$CHAIN_LABEL" python3 "$SCRIPTS/gold_prof.py" "$SCRIPTS/$filename" $default_flags
+        _run_rc=$?
+    fi
+
+    if [ "$_run_rc" -eq 0 ]; then
+        telem_step_done "$id" --output "$id complete" --status ok 2>/dev/null || true
+        echo "  $id done"
+    else
+        telem_error "$id failed with exit=$_run_rc" 2>/dev/null || true
+        telem_step_done "$id" --output "$id failed (exit=$_run_rc)" --status fail 2>/dev/null || true
+        echo "  $id FAILED (exit=$_run_rc)"
+        return "$_run_rc"
+    fi
+
+    if [ "$SKIP_EXISTING" = "1" ]; then
+        aws s3 cp /dev/null "s3://${INF_S3_BUCKET}/${_marker_key}" --quiet 2>/dev/null || true
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# run_eclipse_step -- BEST-EFFORT eclipse step runner (ADVI_ECLDAT, Andrew
+# directive 2026-05-15). Used ONLY by the post-sentinel eclipse block. Unlike
+# run_script:
+#   - timeout-bounded (ECLIPSE_STEP_TIMEOUT, default 600s) so a hung eclipse
+#     step cannot stall the runner / delay auto-shutdown.
+#   - NEVER returns non-zero -- an eclipse failure must not abort the chain or
+#     change chain_exit. Failures + timeouts are logged + recorded in
+#     ECLIPSE_RESULTS for the observability marker.
+# ---------------------------------------------------------------------------
+ECLIPSE_STEP_TIMEOUT="${ECLIPSE_STEP_TIMEOUT:-600}"
+ECLIPSE_RESULTS=""
+
+run_eclipse_step() {
+    local id="$1"
+    local entry filename default_flags
+    entry=$(echo "$CATALOG" | grep "^${id}|" || true)
+    if [ -z "$entry" ]; then
+        echo "  SKIP: eclipse step '$id' not in CATALOG"
+        ECLIPSE_RESULTS="$ECLIPSE_RESULTS $id:missing"
+        return 0
+    fi
+    filename=$(echo "$entry" | cut -d'|' -f2)
+    default_flags=$(echo "$entry" | cut -d'|' -f3)
+    default_flags="${default_flags//\{date\}/$RUN_DATE}"
+    if [ "$DRY_RUN" = "1" ]; then
+        default_flags="${default_flags//--upload/--dry-run}"
+    fi
+    if [ ! -f "$SCRIPTS/$filename" ]; then
+        echo "  WARN: eclipse script not found in sync: $filename (skipping, chain unaffected)"
+        ECLIPSE_RESULTS="$ECLIPSE_RESULTS $id:missing"
+        return 0
+    fi
+
+    echo ""
+    echo "  --- $id ($filename) $(log_ts) ---"
+    if [ -n "$default_flags" ]; then
+        echo "  flags: $default_flags"
+    fi
+
+    local rc=0
+    timeout -k 60 "$ECLIPSE_STEP_TIMEOUT" \
+        python3 "$SCRIPTS/gold_prof.py" "$SCRIPTS/$filename" $default_flags || rc=$?
+
+    if [ "$rc" -eq 0 ]; then
+        echo "  $id done (eclipse best-effort)"
+        ECLIPSE_RESULTS="$ECLIPSE_RESULTS $id:ok"
+    elif [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
+        echo "  WARN: $id TIMED OUT after ${ECLIPSE_STEP_TIMEOUT}s -- eclipse best-effort, chain UNAFFECTED"
+        ECLIPSE_RESULTS="$ECLIPSE_RESULTS $id:timeout"
+    else
+        echo "  WARN: $id FAILED exit=$rc -- eclipse best-effort, chain UNAFFECTED"
+        ECLIPSE_RESULTS="$ECLIPSE_RESULTS $id:fail($rc)"
+    fi
+    # BRONZE-FIX #7 AC5: best-effort CANNOT fatal by design (COO~B ruling),
+    # so a failed/timed-out eclipse step gets its own metric instead -- a
+    # silently-dark eclipse leg froze Model Portfolios in the 06-12 P0 (L4).
+    # (Same IAM-scoped namespace; no alarm yet -- alarm spec rides AE wiring.)
+    if [ "$rc" -ne 0 ]; then
+        aws cloudwatch put-metric-data --namespace "$ALERT_CW_NAMESPACE" \
+            --metric-name EclipseStepFailed --value 1 --unit Count \
+            --dimensions "Service=$ALERT_CW_SERVICE,Step=$id" 2>/dev/null || true
+    fi
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# step_is_date_capable -- ADVI_INFETL.RUNDATE-DISPATCH-IMPL E1 (CTO RATIFY
+# 20260515T193422Z, Element 1 = Option 1b). A catalog step is date-capable iff
+# its default_flags field carries the literal {date} token (the only thing
+# --run-date can substitute into). Date-agnostic steps have no {date} token --
+# they ignore --run-date and pull current/full-history data. See the
+# DATE-CAPABILITY CONTRACT comment at the CATALOG block.
+# Returns 0 = date-capable, 1 = date-agnostic (also 1 for an unknown ID, so the
+# guard errs toward rejecting --run-date -- never toward a silent mixed-date run).
+# ---------------------------------------------------------------------------
+step_is_date_capable() {
+    local id="$1"
+    local entry flags
+    entry=$(echo "$CATALOG" | grep "^${id}|" || true)
+    if [ -z "$entry" ]; then
+        return 1
+    fi
+    flags=$(echo "$entry" | cut -d'|' -f3)
+    case "$flags" in
+        *'{date}'*) return 0 ;;
+        *)          return 1 ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------
+# validate_rundate_coherence -- ADVI_INFETL.RUNDATE-DISPATCH-IMPL E2. The
+# reject-incoherent-combination guard. --run-date shifts the single global
+# RUN_DATE, but only date-capable steps honor it; date-agnostic steps ignore it
+# and pull current/full-history data. A resolved chain that mixes the two under
+# --run-date is a category error -> a mixed-date artifact (or, more usually, a
+# bronze-not-found failure). Accept --run-date ONLY if every resolved step is
+# date-capable; else REJECT loudly (exit non-zero), naming the offending
+# date-agnostic step(s). Active only when RUN_DATE_OVERRIDE is non-empty.
+# Evaluated after chain resolution, before run_chain / the --bg re-invoke -- the
+# single dispatcher chokepoint catching the inf-gold-trigger Lambda, SSM-direct
+# dispatch, and manual CLI alike.
+# ---------------------------------------------------------------------------
+validate_rundate_coherence() {
+    [ -z "$RUN_DATE_OVERRIDE" ] && return 0
+    local id agnostic=""
+    for id in $SCRIPT_IDS; do
+        if ! step_is_date_capable "$id"; then
+            agnostic="$agnostic $id"
+        fi
+    done
+    agnostic="${agnostic# }"
+    if [ -n "$agnostic" ]; then
+        echo "ERROR: --run-date $RUN_DATE_OVERRIDE rejected -- incoherent step combination."
+        echo "  The resolved chain contains date-agnostic step(s): $agnostic"
+        echo "  Date-agnostic steps pull current/full-history data and ignore --run-date,"
+        echo "  while date-capable steps would be pinned to $RUN_DATE_OVERRIDE -- this produces a mixed-date artifact."
+        echo "  --run-date is valid only for a chain composed entirely of date-capable steps"
+        echo "  (e.g. --single INF_API_SILVER_TXN --run-date $RUN_DATE_OVERRIDE, against an existing bronze pull)."
+        echo "  For a normal full run, use --chain full with no --run-date."
+        exit 1
+    fi
+}
+
+merge_perf_report() {
+    local perf_dir="/tmp/perf_scripts"
+    local out="/tmp/perf_report.json"
+    [ -d "$perf_dir" ] || return
+    python3 - <<'PYEOF'
+import json, os, glob, time
+perf_dir = "/tmp/perf_scripts"
+out = "/tmp/perf_report.json"
+files = sorted(glob.glob(os.path.join(perf_dir, "*.json")))
+if not files:
+    exit(0)
+scripts = []
+for f in files:
+    try:
+        with open(f) as fh:
+            scripts.append(json.load(fh))
+    except Exception:
+        pass
+report = {
+    "chain_label": scripts[0].get("chain_label", "unknown") if scripts else "unknown",
+    "run_date": scripts[0].get("run_date", "") if scripts else "",
+    "instance_type": "c6i.4xlarge",
+    "scripts": scripts,
+    "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+}
+with open(out, "w") as f:
+    json.dump(report, f, indent=2)
+print(f"perf_report.json: {len(scripts)} script(s) merged")
+PYEOF
+}
+
+run_chain() {
+    local chain_name="$1"
+    local script_ids="$2"
+
+    echo "================================================================"
+    echo "  CHAIN: $chain_name"
+    echo "  Started: $(log_ts)"
+    echo "  Scripts: $script_ids"
+    echo "================================================================"
+
+    # BRONZE-FIX #7: arm the FATAL loud channel BEFORE sync_scripts -- the
+    # 2026-06-12 13:00Z silent outage died INSIDE sync_scripts; arming after
+    # it would miss the exact failure class this exists for.
+    CHAIN_STARTED=1
+
+    sync_scripts
+
+    # Run ID format matches BD precedent: {chain-label}_{YYYYMMDD_HHMMSS}
+    # Computed unconditionally so INFINC_CHAIN_RUN_ID is exported into every
+    # child run_script invocation — partition_provenance.collect() reads it via
+    # os.environ.get('INFINC_CHAIN_RUN_ID') for forensic audit-trail in every
+    # Pattern A+B partition write (DS~D d88b7a7a4 contract, RAVC2 gap-fix).
+    local _telem_run_id
+    _telem_run_id="${chain_name//[^A-Za-z0-9_-]/_}_$(date -u +%Y%m%d_%H%M%S)"
+    export INFINC_CHAIN_RUN_ID="$_telem_run_id"
+
+    # Telemetry: init + start 30s push loop (gated on TELEM_AVAILABLE)
+    if [ "$TELEM_AVAILABLE" = "1" ]; then
+        local _telem_mode _telem_step_count _telem_step_names
+        _telem_mode="${chain_name#chain:}"  # strip "chain:" prefix to get full/incremental/gold-d/etc.
+        _telem_step_count=$(echo "$script_ids" | wc -w | tr -d ' ')
+        _telem_step_names=$(echo "$script_ids" | tr ' ' ',')
+        telem_init "$TELEM_SERVICE" "$_telem_run_id" \
+            --mode "$_telem_mode" \
+            --steps "$_telem_step_count" \
+            --step-names "$_telem_step_names" \
+            --s3-bucket "$INF_S3_BUCKET" 2>/dev/null || true
+        # Background 30s push loop.
+        # CRITICAL: close stdin/stdout/stderr in the subshell so it doesn't
+        # inherit run_chain's pipe-to-tee write end. If we leave stdout open,
+        # the chain-wrap-up `run_chain | tee log` in main() deadlocks: this
+        # forever-loop never closes stdout, so tee never gets EOF, so main()
+        # waits forever for tee to exit. Empirical: chain #28 hung 10min in
+        # do_wait until SSM-killed (2026-05-13). Redirect all 3 FDs to /dev/null.
+        (
+            exec </dev/null >/dev/null 2>&1
+            while true; do
+                sleep 30
+                bash "$SCRIPTS/telemetry-sync.sh" || true
+            done
+        ) &
+        TELEM_SYNC_PID=$!
+        disown "$TELEM_SYNC_PID" 2>/dev/null || true
+    fi
+
+    local _chain_rc=0
+    for id in $script_ids; do
+        # --- ADHC_VALGATE.001 Phase 4 -- Class-C data-correctness gate ---
+        # Fire the C-1 (row-count) + C-2 (classification-distribution) gate
+        # post-D-chain / pre-platinum-emit: immediately before INF_09, the
+        # portal/platinum emit. v1 is WARN-not-BLOCK (PRD section 7-Q1): the
+        # gate's [VALGATE-C] verdict lines surface to the chain log; it does
+        # NOT block the chain. NON-FATAL by construction (COO~B ruling
+        # 2026-05-20, option a) -- a non-zero exit is swallowed with a WARN.
+        # Rationale: a v1 WARN-only gate, and especially its own infra error,
+        # must never fail the platinum emit. valgate_gate.py is not yet
+        # crash-safe (an infra error exits non-zero, ambiguous with a real
+        # BLOCK verdict), so a literal exit-code-gated wire is unsafe in v1.
+        # The WARN->BLOCK ratchet is a 3-change sequence (GATE_VERDICT_POLICY
+        # flip + valgate_gate.py crash-safety [HARD prerequisite] + this wire
+        # flipped to fatal) -- see the ADHC_VALGATE.001 ratchet-readiness
+        # checklist.
+        if [ "$id" = "INF_09" ]; then
+            echo ""
+            echo "  [VALGATE-C] Class-C gate (C-1 row-count / C-2 distribution / C-3 sentinel-rows / C-4 cross-source parity) -- silver/transactions @ ${RUN_DATE}, pre-platinum-emit"
+            if [ -f "$SCRIPTS/valgate_gate.py" ]; then
+                python3 "$SCRIPTS/valgate_gate.py" --artifact silver/transactions --date "$RUN_DATE" \
+                    || echo "  [VALGATE-C] WARN: gate exited non-zero -- v1 is WARN-not-BLOCK; non-fatal, chain continues. Investigate the gate (infra error, or -- post-ratchet -- a BLOCK verdict)."
+            else
+                echo "  [VALGATE-C] WARN: valgate_gate.py absent from $SCRIPTS -- Class-C gate skipped (non-fatal)."
+            fi
+        fi
+        # CRITICAL: do NOT use `if ! run_script`. The `!` operator inverts
+        # the exit code, so `$?` after captures 0 (the inverted code), not
+        # run_script's real failure code. Chain #29 INF_D_00c (2026-05-13)
+        # failed with exit=1 but logged "FAILED at INF_D_00c (exit=0)" and
+        # wrote pipeline-complete.json (false-positive success sentinel),
+        # which auto-fired the publisher Lambda on incomplete data.
+        # Use `|| rc=$?` pattern to capture the real exit code.
+        local _script_rc=0
+        run_script "$id" || _script_rc=$?
+        if [ "$_script_rc" -ne 0 ]; then
+            _chain_rc=$_script_rc
+            echo ""
+            echo "================================================================"
+            echo "  CHAIN $chain_name FAILED at $id (exit=$_chain_rc)"
+            echo "  Aborted: $(log_ts)"
+            echo "================================================================"
+            return "$_chain_rc"
+        fi
+        # RE-PIN THE AoR SOURCE THE MOMENT THE PULL REWRITES IT (round-8.2). The pre-chain pin was taken
+        # BEFORE this script ran, so it names the partition this script just superseded (first run of the
+        # day) or OVERWROTE IN PLACE (any same-day re-run). Left alone, the first case silently reads a
+        # day-stale roster and the second RAISES on a healthy nightly and kills the whole chain. Pin what
+        # the resolver will ACTUALLY read.
+        if [ "$id" = "INF_API_SILVER_ACCOUNTS_V2" ]; then
+            _repin_aor_source_after_pull
+        fi
+    done
+
+    echo ""
+    echo "================================================================"
+    echo "  CHAIN $chain_name COMPLETE"
+    echo "  Finished: $(log_ts)"
+    echo "================================================================"
+}
+
+upload_log() {
+    local lf="$1"
+    aws s3 cp "$lf" "s3://${INF_S3_BUCKET}/gold/logs/$(basename "$lf")" --quiet 2>/dev/null || true
+}
+
+do_status() {
+    echo "=== INF Gold Layer Status ==="
+    echo ""
+    echo "Latest logs:"
+    ls -lt "$LOGDIR"/*.log 2>/dev/null | head -5 || echo "  (none)"
+    echo ""
+    echo "Running gold processes:"
+    ps aux | grep "orion_gold_scripts" | grep -v grep || echo "  (none)"
+    echo ""
+    local latest
+    latest=$(ls -t "$LOGDIR"/*.log 2>/dev/null | head -1)
+    if [ -n "$latest" ]; then
+        echo "Tail of $latest:"
+        tail -30 "$latest"
+    fi
+}
+
+do_kill() {
+    echo "Killing all Orion gold layer processes..."
+    pkill -f orion_gold_scripts 2>/dev/null || true
+    pkill -f orion-gold-dispatch 2>/dev/null || true
+    echo "Done."
+}
+
+# ---------------------------------------------------------------------------
+# check_partial_deps -- ADHC_COMPIL.002
+# For each script in the partial chain, calls comp-pipescript postdeps and
+# checks that all [BLOCKING] Must run: dependencies are also in the chain.
+# Returns 0 if satisfied; prints error + suggested command and returns 1 if not.
+# Skips gracefully (returns 0) if comp-pipescript is not in PATH.
+# ---------------------------------------------------------------------------
+check_partial_deps() {
+    local partial_ids="$1"
+
+    if ! command -v comp-pipescript >/dev/null 2>&1; then
+        echo "  WARN: comp-pipescript not found -- skipping postdeps gate."
+        return 0
+    fi
+
+    local missing=""
+    for id in $partial_ids; do
+        local postdeps_out
+        postdeps_out=$(comp-pipescript postdeps "$id" 2>/dev/null || true)
+
+        while IFS= read -r line; do
+            if echo "$line" | grep -q '\[BLOCKING\] Must run:'; then
+                local dep_file
+                dep_file=$(echo "$line" | sed 's/.*\[BLOCKING\] Must run: *//')
+                local dep_id
+                dep_id=$(echo "$CATALOG" | awk -F'|' -v fn="$dep_file" '$2 == fn {print $1; exit}')
+                if [ -n "$dep_id" ] && ! echo " $partial_ids " | grep -q " $dep_id "; then
+                    if ! echo " $missing " | grep -q " $dep_id "; then
+                        missing="$missing $dep_id"
+                    fi
+                fi
+            fi
+        done <<< "$postdeps_out"
+    done
+
+    missing="${missing# }"
+    if [ -z "$missing" ]; then
+        return 0
+    fi
+
+    echo "ERROR: --chain partial missing required post-step scripts:"
+    local all_needed="$partial_ids $missing"
+    for m in $missing; do
+        echo "  $m"
+    done
+    echo ""
+    local ordered=""
+    for id in $CHAIN_FULL; do
+        if echo " $all_needed " | grep -q " $id "; then
+            ordered="$ordered $id"
+        fi
+    done
+    echo "Suggested corrected command:"
+    echo "  bash $(basename "$0") --chain partial${ordered}"
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# log_bypass_entry -- ADHC_COMPIL.002
+# Appends --no-deps-check bypass record to org/compiler-tools-log.md.
+# ---------------------------------------------------------------------------
+log_bypass_entry() {
+    local dispatcher="$1"
+    local chain="$2"
+    local ts
+    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    local operator="${SUDO_USER:-${USER:-unknown}}"
+    local entry="[ADHC_COMPIL.002] BYPASS: $ts | $dispatcher | $chain | $operator"
+    echo "  WARN: $entry"
+
+    local _ws
+    _ws=$(git rev-parse --show-toplevel 2>/dev/null || true)
+    if [ -n "$_ws" ] && [ -f "$_ws/org/compiler-tools-log.md" ]; then
+        echo "$entry" >> "$_ws/org/compiler-tools-log.md"
+        echo "  Bypass appended to org/compiler-tools-log.md."
+    else
+        echo "  NOTE: org/compiler-tools-log.md not reachable; bypass in stdout/dispatch log only."
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# log_freshness_bypass_entry -- ADHC_COMPIL.013
+# Appends --no-freshness-check bypass record to org/compiler-tools-log.md.
+# Non-suppressible: the log entry is the accountability trail for ops review.
+# ---------------------------------------------------------------------------
+log_freshness_bypass_entry() {
+    local dispatcher="$1"
+    local chain="$2"
+    local reason="${3:-}"
+    local ts
+    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    local operator="${SUDO_USER:-${USER:-unknown}}"
+    local reason_str="${reason:-(no reason given)}"
+    local entry="[ADHC_COMPIL.013] FRESHNESS-BYPASS: $ts | $dispatcher | $chain | $operator | $reason_str"
+    echo "  WARN: $entry"
+
+    local _ws
+    _ws=$(git rev-parse --show-toplevel 2>/dev/null || true)
+    if [ -n "$_ws" ] && [ -f "$_ws/org/compiler-tools-log.md" ]; then
+        echo "$entry" >> "$_ws/org/compiler-tools-log.md"
+        echo "  Bypass appended to org/compiler-tools-log.md."
+    else
+        echo "  NOTE: org/compiler-tools-log.md not reachable; bypass in stdout/dispatch log only."
+    fi
+}
+
+show_help() {
+    cat << 'HELP'
+orion-gold-dispatch.sh -- Orion Gold Layer Launcher
+
+=== Modes ===
+  --chain <name>    Run a preset chain of scripts
+  --single <id>     Run one script by ID (e.g. INF_C_01, INF_D_00c)
+  --from <id>       Run the given script and every subsequent script in the
+                    full chain. E.g. `--from INF_D_00` runs INF_D_00 through INF_09.
+
+=== Flags ===
+  --bg                    Run in background (nohup), returns immediately
+  --dry-run               Compute only, do not write to S3
+  --no-shutdown           Skip auto-shutdown after chain completes
+  --cancel-shutdown       Idempotently cancel a pending auto-shutdown (BRONZE-FIX #9;
+                          prints SHUTDOWN-CANCELLED or NO-SHUTDOWN-PENDING, exit 0)
+  --force                 Override freshness gate; run chain even if no new silver data
+  --run-date YYYY-MM-DD   Override RUN_DATE for all scripts (default: today UTC).
+  --no-freshness-check    Skip the comp-freshness pre-dispatch gate (ADHC_COMPIL.013).
+                          For emergency debug, planned-outage bypass, or when AWS is
+                          unreachable. ALWAYS appends a FRESHNESS-BYPASS entry to
+                          org/compiler-tools-log.md. Applies to --chain modes only.
+  --bypass-reason "<text>"  Audit reason stored in the FRESHNESS-BYPASS log entry.
+                          Only meaningful with --no-freshness-check. Omit for no reason.
+                          Use for historical backfills / DIAGFIX re-runs on a specific date.
+  --skip-existing         Before running each script, check for a dispatch marker at
+                          s3://opal-data-inf/gold/artifacts/{SCRIPT_ID}/{RUN_DATE}.
+                          If the marker exists: skip with SKIP: line and continue.
+                          If missing: run normally and write the marker on success.
+                          Safe for backfill re-runs and idempotent chain dispatches.
+                          Works with --bg, --from, --chain partial, --single.
+  --rebuild               INFINC Phase 1: force re-write of all partitions in scope
+                          (Pattern A scripts). Without this flag, Pattern A consumers
+                          skip per-partition writes when output is current. With
+                          INFINC_PHASE1=0 in env (default), the skip-gate is no-op
+                          and --rebuild is structurally inert — Phase 1 safety gate.
+                          Lib lives at d88b7a7a4. ADVI_INFINC.001.
+  --rebuild-start-date YYYY-MM-DD
+                          Lower bound (inclusive) for --rebuild scope. Only partitions
+                          on or after this date are re-written. Default: empty (no
+                          lower bound). Validates ISO format.
+  --rebuild-end-date YYYY-MM-DD
+                          Upper bound (inclusive) for --rebuild scope. Only partitions
+                          on or before this date are re-written. Default: empty (no
+                          upper bound). Validates ISO format. If both --rebuild-start-date
+                          and --rebuild-end-date are set, start must be <= end.
+  --rebuild-advisor-attribution-only
+                          INFINC Phase 4 hook: future Pattern C consumers will re-write
+                          partitions affected by accounts_dimension_latest advisor_key
+                          changes only (no silver-input re-compute). v1 default is
+                          point-in-time-correct freezing per CTO Q1 ruling 2026-05-14.
+                          Operational runbook: brief §4.3.
+
+=== Chains ===
+  full          All 40 scripts in order: API pulls + silver builds -> A -> B -> C -> D -> INF_09 (daily run)
+                Auto-runs silver-prep BEFORE the freshness gate so canonical_prices
+                is always fresh (including weekends and market holidays).
+                Sequential execution -- no parallelism.
+                INF_API_PULL_REPS INF_API_SILVER_REPS INF_API_SILVER_HHREP
+                INF_API_PULL_ASSETS_V2 INF_API_SILVER_ASSETS_V2 INF_API_PULL_NEW_PORTFOLIO INF_API_SILVER_ACCOUNTS_V2
+                INF_API_PULL_TXN INF_API_SILVER_TXN INF_API_PULL_PERF INF_API_SILVER_PERF
+                INF_A_-1 INF_A_00 INF_A_01 INF_A_02 INF_A_03 INF_A_04
+                INF_API_PULL_POSITIONS_DAILY INF_API_SILVER_POSITIONS_MV
+                INF_B_00 INF_B_01 INF_B_01b INF_B_02 INF_B_03
+                INF_C_00 INF_C_01 INF_C_01b INF_C_03 INF_C_07 INF_C_02 INF_C_04 INF_C_05 INF_C_06 INF_C_08 INF_C_09
+                INF_D_00 INF_D_00b INF_D_00d INF_D_00c INF_D_02 INF_D_02b INF_D_03 INF_D_02d INF_D_04 INF_09
+
+  incremental   API pulls + silver builds + D-chain (assumes A/B/C gold outputs exist in S3)
+                INF_API_PULL_REPS INF_API_SILVER_REPS INF_API_SILVER_HHREP
+                INF_API_PULL_ASSETS_V2 INF_API_SILVER_ASSETS_V2 INF_API_PULL_NEW_PORTFOLIO INF_API_SILVER_ACCOUNTS_V2
+                INF_API_PULL_TXN INF_API_SILVER_TXN INF_API_PULL_PERF INF_API_SILVER_PERF
+                INF_API_PULL_POSITIONS_DAILY INF_API_SILVER_POSITIONS_MV
+                INF_D_00 INF_D_00b INF_D_00d INF_D_00c INF_D_02 INF_D_02b INF_D_03 INF_D_02d INF_D_04 INF_09
+
+  silver-prep   INF_S_00 (INF_build_canonical_prices.py) -- rebuilds
+                silver/prices/canonical_prices.parquet with T1-T4 hierarchy.
+                Run manually if you need a canonical_prices refresh without
+                touching A/B/C/D. `full` auto-invokes this first.
+
+  gold-a        A-stage only (assumes silver complete): INF_A_-1 INF_A_00..INF_A_04
+  gold-b        B-stage only (assumes A complete): INF_B_00..INF_B_03
+  gold-c        C-stage only (assumes B complete): INF_C_00..INF_C_09
+  gold-d        D-stage + portal scripts (assumes C complete): INF_D_00..INF_D_06a + INF_09
+  gold-cd       C+D combined (assumes A+B complete) -- fastest targeted rerun (~20min vs ~47min)
+                Invoke via Lambda payload: {"mode":"gold-cd","snapshot_date":"YYYY-MM-DD"}
+  eclipse       Eclipse model-portfolios trio only: INF_ECLIPSE_PULL INF_ECLIPSE_SILVER INF_E_00
+                Standalone manual/test runs (fatal-on-failure). The trio also runs
+                automatically as a best-effort POST-SENTINEL block at the end of
+                --chain full / incremental -- it is NOT in those chain strings, so
+                an eclipse failure can never gate the portal publish. For ad-hoc
+                runs pair with --force --no-freshness-check.
+
+=== Operations ===
+  --status      Show running processes + tail latest log
+  --kill        Kill all Orion gold layer processes
+
+=== Examples ===
+  bash orion-gold-dispatch.sh --chain full
+  bash orion-gold-dispatch.sh --chain full --bg
+  bash orion-gold-dispatch.sh --chain incremental --bg
+  bash orion-gold-dispatch.sh --chain full --dry-run
+  bash orion-gold-dispatch.sh --from INF_D_00 --bg
+  bash orion-gold-dispatch.sh --single INF_D_00c
+  bash orion-gold-dispatch.sh --status
+
+=== SSM dispatch ===
+  aws s3 cp s3://opal-data-inf/code/gold/orion-gold-dispatch.sh /tmp/orion-gold-dispatch.sh \
+    && bash /tmp/orion-gold-dispatch.sh --chain full --bg
+HELP
+}
+
+# ---------------------------------------------------------------------------
+# Parse arguments
+# ---------------------------------------------------------------------------
+MODE=""
+TARGET=""
+BG=0
+DRY_RUN=0
+NO_SHUTDOWN=0
+FORCE=0
+NO_DEPS_CHECK=0
+NO_FRESHNESS_CHECK=0
+SKIP_EXISTING=0
+BYPASS_REASON="${FRESHNESS_BYPASS_REASON:-}"
+PARTIAL_IDS=""
+RUN_DATE_OVERRIDE=""
+
+# INFINC Phase 1 — env-var contract with DS~D skip-gate lib at d88b7a7a4
+# (skip_gate.py / empty_sentinel.py / schema_version.py / partition_provenance.py
+#  read these; INFINC_PHASE1=1 is the master enable). ADVI_INFINC.001.
+REBUILD=0
+REBUILD_START=""
+REBUILD_END=""
+REBUILD_ADVISOR_ATTRIBUTION_ONLY=0
+
+require_arg() {
+    local flag="$1"
+    local val="$2"
+    if [ -z "$val" ] || [[ "$val" == --* ]]; then
+        echo "ERROR: $flag requires an argument (got '${val:-<empty>}')."
+        echo "Run with --help for usage."
+        exit 1
+    fi
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --chain)
+            require_arg "$1" "${2:-}"; MODE="chain"; TARGET="$2"; shift 2
+            if [ "$TARGET" = "partial" ]; then
+                while [ $# -gt 0 ] && [[ "$1" != --* ]]; do
+                    PARTIAL_IDS="$PARTIAL_IDS $1"; shift
+                done
+                PARTIAL_IDS="${PARTIAL_IDS# }"
+                if [ -z "$PARTIAL_IDS" ]; then
+                    echo "ERROR: --chain partial requires at least one script ID."
+                    echo "  Example: --chain partial INF_B_03 INF_C_00"
+                    exit 1
+                fi
+            fi
+            ;;
+        --single)   require_arg "$1" "${2:-}"; MODE="single"; TARGET="$2"; shift 2 ;;
+        --from)     require_arg "$1" "${2:-}"; MODE="from";   TARGET="$2"; shift 2 ;;
+        --stage)    require_arg "$1" "${2:-}"; MODE="stage";  TARGET="$2"; shift 2 ;;  # ADVI_INFREF P1 LEG-2: pull | compute (separately-invocable PULL/COMPUTE module)
+        --bg)          BG=1;          shift ;;
+        --dry-run)     DRY_RUN=1;     shift ;;
+        --no-shutdown) NO_SHUTDOWN=1; shift ;;
+        --no-deps-check) NO_DEPS_CHECK=1; shift ;;
+        --no-freshness-check) NO_FRESHNESS_CHECK=1; shift ;;
+        --bypass-reason) require_arg "$1" "${2:-}"; BYPASS_REASON="$2"; shift 2 ;;
+        --force)       FORCE=1;       shift ;;
+        --run-date) require_arg "$1" "${2:-}"; RUN_DATE_OVERRIDE="$2"; shift 2 ;;
+        --rebuild)              REBUILD=1; shift ;;
+        --rebuild-start-date)   require_arg "$1" "${2:-}"; REBUILD_START="$2"; shift 2 ;;
+        --rebuild-end-date)     require_arg "$1" "${2:-}"; REBUILD_END="$2"; shift 2 ;;
+        --rebuild-advisor-attribution-only) REBUILD_ADVISOR_ATTRIBUTION_ONLY=1; shift ;;
+        --skip-existing) SKIP_EXISTING=1; shift ;;
+        --status)   do_status; exit 0 ;;
+        --kill)     do_kill;   exit 0 ;;
+        --cancel-shutdown)
+            # BRONZE-FIX #9 AC4: first-class IDEMPOTENT cancel (what DS did
+            # ad-hoc at 21:27Z during the P0 recovery). Safe to run whether or
+            # not a shutdown is pending.
+            if sudo shutdown -c 2>/dev/null; then
+                echo "SHUTDOWN-CANCELLED instance=$(hostname) $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            else
+                echo "NO-SHUTDOWN-PENDING instance=$(hostname) $(date -u +%Y-%m-%dT%H:%M:%SZ) (cancel is idempotent)"
+            fi
+            exit 0 ;;
+        --help|-h)  show_help; exit 0 ;;
+        *)
+            echo "ERROR: unknown argument '$1'"
+            echo "Run with --help for usage."
+            exit 1
+            ;;
+    esac
+done
+
+if [ -n "$RUN_DATE_OVERRIDE" ]; then
+    if ! echo "$RUN_DATE_OVERRIDE" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+        echo "ERROR: --run-date must be YYYY-MM-DD (got '$RUN_DATE_OVERRIDE')"
+        exit 1
+    fi
+    RUN_DATE="$RUN_DATE_OVERRIDE"
+    echo "INFO: RUN_DATE overridden to $RUN_DATE via --run-date"
+fi
+
+# ---------------------------------------------------------------------------
+# INFINC Phase 1 — rebuild flag validation + env-var exports for skip-gate lib
+# (DS~D d88b7a7a4 reads INFINC_REBUILD / INFINC_REBUILD_START / INFINC_REBUILD_END /
+#  INFINC_REBUILD_ADVISOR_ATTRIBUTION_ONLY via os.environ.get).
+# INFINC_PHASE1=1 is the master enable; without it the skip-gate is no-op
+# and these flags are structurally inert (Phase 1 safety gate). ADVI_INFINC.001.
+# ---------------------------------------------------------------------------
+if [ -n "$REBUILD_START" ]; then
+    if ! echo "$REBUILD_START" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+        echo "ERROR: --rebuild-start-date must be YYYY-MM-DD (got '$REBUILD_START')"
+        exit 1
+    fi
+fi
+if [ -n "$REBUILD_END" ]; then
+    if ! echo "$REBUILD_END" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+        echo "ERROR: --rebuild-end-date must be YYYY-MM-DD (got '$REBUILD_END')"
+        exit 1
+    fi
+fi
+if [ -n "$REBUILD_START" ] && [ -n "$REBUILD_END" ]; then
+    if [ "$REBUILD_START" \> "$REBUILD_END" ]; then
+        echo "ERROR: --rebuild-start-date ($REBUILD_START) must be <= --rebuild-end-date ($REBUILD_END)"
+        exit 1
+    fi
+fi
+
+# Rebuild-dispatch silent-trap guard (0.6.1 Error-2, 2026-07-06): the export below clobbers any
+# env-set INFINC_REBUILD to $REBUILD (0 without --rebuild). So `INFINC_REBUILD=1 bash dispatch`
+# WITHOUT --rebuild silently ran as APPEND (a full-rebuild dispatch degraded to append, caught only
+# by value-verifying the output). The --rebuild FLAG is canonical (it sets REBUILD=1 and survives
+# the --bg nohup re-exec); an env-only set is NOT honored. Make that LOUD, not silent. We keep the
+# clobber (preserves stale-env protection for the nightly) and WARN rather than fail-closed (avoids
+# breaking the --bg re-exec / a stale nightly env). Truthy set matches skip_gate.rebuild_requested().
+case "${INFINC_REBUILD:-}" in
+    1|true|TRUE|True|yes|YES|on|ON)
+        if [ "$REBUILD" != "1" ]; then
+            echo "WARN: INFINC_REBUILD is env-set truthy ('${INFINC_REBUILD}') but the --rebuild FLAG was NOT passed."
+            echo "WARN: --rebuild is CANONICAL (env-only is ignored) -> this run is APPEND, not rebuild."
+            echo "WARN: to rebuild, re-dispatch with '--single <SCRIPT> --rebuild' (or '--rebuild'). Env-set alone does nothing."
+        fi
+        ;;
+esac
+export INFINC_REBUILD="$REBUILD"
+[ -n "$REBUILD_START" ] && export INFINC_REBUILD_START="$REBUILD_START"
+[ -n "$REBUILD_END" ]   && export INFINC_REBUILD_END="$REBUILD_END"
+[ "$REBUILD_ADVISOR_ATTRIBUTION_ONLY" = "1" ] && export INFINC_REBUILD_ADVISOR_ATTRIBUTION_ONLY="1"
+
+# S5 (ADVI advisor-of-record daily fold, CTO~B /code-review ws1dwp0dx): pin a RUN-LEVEL as-of so all 10
+# fold producers derive off the SAME accounts_v2 partition (a mid-chain silver re-emit would otherwise
+# split NNA(P') from AUA(P)). The gold-lib loader reads INF_AOR_ASOF (exact YYYY-MM-DD) and pins that
+# partition; unset -> per-process latest (the loader's own walk-back). INERT while INF_AOR_FOLD_ACTIVE is
+# OFF -- the loader never reads accounts_v2 under OFF. Auto-set only if not already provided; a failed or
+# malformed lookup leaves it UNSET (never a wrong pin -- the loader falls back to its walk-back).
+if [ -z "${INF_AOR_ASOF:-}" ]; then
+    _aor_asof="$(aws s3 ls "s3://opal-data-inf/silver/api_dims/accounts_v2/" 2>/dev/null \
+        | grep -oE 'snapshot_date=[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort | tail -1 | sed 's/snapshot_date=//' || true)"
+    if printf '%s' "$_aor_asof" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+        export INF_AOR_ASOF="$_aor_asof"
+        echo "INFO: INF_AOR_ASOF pinned to $INF_AOR_ASOF (advisor-of-record SOURCE as-of -- the accounts_v2 partition, NOT a run identity)."
+    else
+        echo "WARN: could not resolve the latest accounts_v2 partition for INF_AOR_ASOF -- leaving UNSET. The AoR resolver/consumers will FAIL CLOSED (they refuse to fabricate a wall-clock as-of; round-8.2 R1b)."
+    fi
+fi
+
+# INF_AOR_SRC_ETAG -- THE SOURCE CONTENT PIN (round-8.2, CTO ruling 2026-07-13).
+#
+# INF_AOR_ASOF above is the partition DATE. It locates the object and it is a useful human-readable
+# vintage -- but it is NOT an identity and NOTHING asserts on it. The partition is a single fixed key
+# (snapshot_date=<d>/data.parquet), so a re-emit OVERWRITES CONTENT IN PLACE and the date REPEATS ACROSS
+# DIFFERENT BYTES: 6 of 69 accounts_v2 objects were rewritten AFTER their own snapshot_date (all on
+# 2026-05-11, a backfill). A date-keyed guard cannot see that, and would pass a resolution derived from
+# content that no longer exists.
+#
+# The resolution's identity is (source_digest, fold_mode, code_digest) -- the CONTENT it came from, the
+# SEMANTICS it was derived under, and the CODE that derived it. INF_A_0 stamps all three;
+# load_resolution() asserts all three (lib/aor_resolution.py).
+#
+# PIN THE CONTENT DIGEST ONCE, HERE, AND EXPORT IT -- consumers compare against this pin and NEVER HEAD S3
+# themselves. load_resolution() runs inside per-snapshot / 32-worker loops, so a live HEAD per call would
+# cost a round-trip per worker AND make the guard NON-DETERMINISTIC: a partition rewritten mid-chain would
+# make one consumer pass and the next raise, in the SAME run, with no bug present. An instrument whose
+# verdict depends on when you asked it is not an instrument. Pin once; compare many.
+# (The resolver stamps the ETag of the object it ACTUALLY READ -- taken off the GET that produced the
+# frame -- and asserts it against this pin ONCE. If the loader walked back, that is a real condition and
+# it is loud.)
+#
+# A run IDENTITY was considered and WITHDRAWN: it over-fires. The resolution is a pure function of its
+# inputs, so a prior run's artifact with identical inputs is a CORRECT CACHE, not staleness -- run-id
+# would hard-abort `--single INF_D_00c`, the documented example in this script's own help text.
+if [ -z "${INF_AOR_SRC_ETAG:-}" ] && [ -n "${INF_AOR_ASOF:-}" ]; then
+    _aor_etag="$(aws s3api head-object --bucket "$INF_S3_BUCKET" \
+        --key "silver/api_dims/accounts_v2/snapshot_date=${INF_AOR_ASOF}/data.parquet" \
+        --query 'ETag' --output text 2>/dev/null | tr -d '"' || true)"
+    if [ -n "$_aor_etag" ] && [ "$_aor_etag" != "None" ]; then
+        export INF_AOR_SRC_ETAG="$_aor_etag"
+        echo "INFO: INF_AOR_SRC_ETAG pinned to $INF_AOR_SRC_ETAG (advisor-of-record SOURCE CONTENT digest -- the identity the resolution is asserted against)."
+    else
+        echo "WARN: could not HEAD the accounts_v2 partition for INF_AOR_SRC_ETAG -- leaving UNSET. The AoR resolver/consumers will FAIL CLOSED (they refuse to skip the content check rather than fabricate one)."
+    fi
+fi
+
+# =============================================================================================
+# >> RE-PIN AFTER THE PULL. THIS IS NOT AN OPTIMISATION -- IT IS WHAT KEEPS THE GUARD FROM BECOMING
+# >> AN OUTAGE, AND WHAT KEEPS THE ROSTER FROM BEING A DAY STALE. (round-8.2, CVO~B/CTO)
+#
+# THE PIN ABOVE IS TAKEN AT SCRIPT LOAD -- i.e. BEFORE `CHAIN_PULL` RUNS. And CHAIN_PULL contains
+# INF_API_SILVER_ACCOUNTS_V2, which WRITES silver/api_dims/accounts_v2/snapshot_date=$RUN_DATE. So the
+# thing we pinned is the thing the pull is about to supersede or overwrite. Both branches are broken, and
+# they are broken in OPPOSITE directions:
+#
+#   FIRST FULL RUN OF THE DAY -- today's partition does not exist yet, so `s3 ls | tail -1` pins
+#     YESTERDAY. The pull then writes TODAY. The resolver (and A_00/A_01/C_07, which now honour the pin)
+#     all read YESTERDAY'S ROSTER while today's fresh one sits there unused. Silent staleness -- and it is
+#     round-8.2's F2 fix that dragged the consumers onto the stale pin (before it, they walked back to the
+#     LATEST partition and read today's). Fixing the skew by aligning everyone onto the WRONG partition is
+#     not fixing it.
+#
+#   ANY SAME-DAY RE-RUN (a recovery run -- exactly when this matters most) -- today's partition EXISTS, so
+#     we pin it and take its ETag E1. The pull then REWRITES that same fixed key -> E2. The resolver reads
+#     it, stamps E2, and asserts E2 == the pin E1 -> MISMATCH -> RAISE -> INF_A_0 is FIRST in the chain ->
+#     THE ENTIRE NIGHTLY DIES. A guard built to stop silent corruption becomes a TOTAL OUTAGE THAT READS
+#     AS A CORRECT FAIL-CLOSED. That is the C_07 lesson inverted: an instrument that fires on the healthy
+#     case is not a guard, it is an outage with a good explanation.
+#
+# THE FIX IS THE ORDERING, NOT THE GUARD: PIN WHAT THE RESOLVER WILL ACTUALLY READ. Re-pin immediately
+# after the accounts_v2 silver rebuild lands, so the pin names the partition that now exists. Both branches
+# then collapse to the same correct behaviour: the pin, the resolver's stamp, and every consumer's
+# expectation all name the SAME bytes -- the ones the pull just wrote.
+#
+# An OPERATOR-SUPPLIED pin is never clobbered: re-pinning applies only when we derived the pin ourselves.
+# =============================================================================================
+if [ -z "${INF_AOR_PIN_OPERATOR:-}" ]; then
+    INF_AOR_PIN_AUTO=1
+fi
+
+_repin_aor_source_after_pull() {
+    # Called from run_chain immediately after INF_API_SILVER_ACCOUNTS_V2 succeeds.
+    [ "${INF_AOR_PIN_AUTO:-0}" = "1" ] || return 0
+    local _d _e
+    _d="$(aws s3 ls "s3://${INF_S3_BUCKET}/silver/api_dims/accounts_v2/" 2>/dev/null \
+        | grep -oE 'snapshot_date=[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort | tail -1 | sed 's/snapshot_date=//' || true)"
+    if ! printf '%s' "$_d" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+        echo "WARN: RE-PIN after the accounts_v2 pull could not resolve a partition -- the AoR guard will FAIL CLOSED rather than assert against a pre-pull pin."
+        unset INF_AOR_ASOF INF_AOR_SRC_ETAG
+        return 0
+    fi
+    _e="$(aws s3api head-object --bucket "$INF_S3_BUCKET" \
+        --key "silver/api_dims/accounts_v2/snapshot_date=${_d}/data.parquet" \
+        --query 'ETag' --output text 2>/dev/null | tr -d '"' || true)"
+    if [ -z "$_e" ] || [ "$_e" = "None" ]; then
+        echo "WARN: RE-PIN after the accounts_v2 pull could not HEAD snapshot_date=${_d} -- unsetting the pin so the AoR guard FAILS CLOSED rather than asserting against stale bytes."
+        unset INF_AOR_ASOF INF_AOR_SRC_ETAG
+        return 0
+    fi
+    if [ "${INF_AOR_ASOF:-}" != "$_d" ] || [ "${INF_AOR_SRC_ETAG:-}" != "$_e" ]; then
+        echo "INFO: RE-PINNED the AoR source AFTER the accounts_v2 pull -- as-of ${INF_AOR_ASOF:-<unset>} -> ${_d}, digest ${INF_AOR_SRC_ETAG:-<unset>} -> ${_e}. The pre-pull pin named the partition the pull was about to supersede/overwrite; the resolver and every consumer now assert against the bytes the pull ACTUALLY wrote."
+    fi
+    export INF_AOR_ASOF="$_d"
+    export INF_AOR_SRC_ETAG="$_e"
+}
+
+if [ "$REBUILD" = "1" ] || [ -n "$REBUILD_START" ] || [ -n "$REBUILD_END" ] || [ "$REBUILD_ADVISOR_ATTRIBUTION_ONLY" = "1" ]; then
+    echo "INFO: INFINC rebuild flags set — REBUILD=$REBUILD START=$REBUILD_START END=$REBUILD_END ADVISOR_ONLY=$REBUILD_ADVISOR_ATTRIBUTION_ONLY"
+    if [ "${INFINC_PHASE1:-0}" != "1" ]; then
+        echo "INFO: INFINC_PHASE1=0 (master gate disabled) — rebuild flags are structurally inert until INFINC_PHASE1=1"
+    fi
+fi
+
+if [ -z "$MODE" ]; then
+    show_help
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# Resolve target to a list of script IDs
+# ---------------------------------------------------------------------------
+SCRIPT_IDS=""
+CHAIN_LABEL=""
+
+case "$MODE" in
+    single)
+        SCRIPT_IDS="$TARGET"
+        CHAIN_LABEL="single:$TARGET"
+        ;;
+    from)
+        # Slice CHAIN_FULL starting at TARGET
+        _seen=0
+        SCRIPT_IDS=""
+        for _s in $CHAIN_FULL; do
+            if [ "$_s" = "$TARGET" ]; then _seen=1; fi
+            if [ "$_seen" = "1" ]; then SCRIPT_IDS="$SCRIPT_IDS $_s"; fi
+        done
+        SCRIPT_IDS="${SCRIPT_IDS# }"
+        if [ "$_seen" = "0" ]; then
+            echo "ERROR: script '$TARGET' not found in full chain."
+            echo "  Full chain: $CHAIN_FULL"
+            exit 1
+        fi
+        CHAIN_LABEL="from:$TARGET"
+        unset _seen _s
+        ;;
+    chain)
+        case "$TARGET" in
+            full)        SCRIPT_IDS="$CHAIN_FULL";        CHAIN_LABEL="chain:full" ;;
+            incremental) SCRIPT_IDS="$CHAIN_INCREMENTAL"; CHAIN_LABEL="chain:incremental" ;;
+            silver-prep) SCRIPT_IDS="$CHAIN_SILVER_PREP"; CHAIN_LABEL="chain:silver-prep" ;;
+            gold-a)      SCRIPT_IDS="$CHAIN_GOLD_A";      CHAIN_LABEL="chain:gold-a" ;;
+            gold-b)      SCRIPT_IDS="$CHAIN_GOLD_B";      CHAIN_LABEL="chain:gold-b" ;;
+            gold-c)      SCRIPT_IDS="$CHAIN_GOLD_C";      CHAIN_LABEL="chain:gold-c" ;;
+            gold-d)      SCRIPT_IDS="$CHAIN_GOLD_D";      CHAIN_LABEL="chain:gold-d" ;;
+            gold-cd)     SCRIPT_IDS="$CHAIN_GOLD_CD";     CHAIN_LABEL="chain:gold-cd" ;;
+            eclipse)     SCRIPT_IDS="$CHAIN_ECLIPSE";     CHAIN_LABEL="chain:eclipse" ;;
+            partial)
+                SCRIPT_IDS="$PARTIAL_IDS"
+                CHAIN_LABEL="chain:partial:$(echo "$PARTIAL_IDS" | tr ' ' '+')"
+                ;;
+            *)
+                echo "ERROR: unknown chain '$TARGET' (valid: full, incremental, silver-prep, gold-a, gold-b, gold-c, gold-d, gold-cd, eclipse, partial)"
+                exit 1
+                ;;
+        esac
+        ;;
+    stage)
+        # ADVI_INFREF P1 LEG-2 Step-1: separately-invocable PULL / COMPUTE stages (parallel-run + ops).
+        case "$TARGET" in
+            pull)    SCRIPT_IDS="$CHAIN_PULL";    CHAIN_LABEL="stage:pull" ;;
+            compute)
+                # Assert the PULL stage ran for THIS run-date (backfill-safe: sentinel.run_date == $RUN_DATE,
+                # NOT literal today -- CTO refinement; permits manual --stage compute --run-date X backfills).
+                # Mirrors the G-R1 partition-freshness stale-guard: never compute on a stale/absent pull.
+                _pc=$(aws s3 cp "s3://${INF_S3_BUCKET}/gold/meta/pull-complete.json" - 2>/dev/null || echo "")
+                _pc_date=$(printf '%s' "$_pc" | grep -oE '"run_date"[[:space:]]*:[[:space:]]*"[0-9-]+"' | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
+                if [ "$_pc_date" != "$RUN_DATE" ]; then
+                    echo "ERROR: --stage compute requires a fresh gold/meta/pull-complete.json for run_date=$RUN_DATE (found '${_pc_date:-none}'). Run --stage pull (for this run-date) first."
+                    exit 1
+                fi
+                SCRIPT_IDS="$CHAIN_COMPUTE"; CHAIN_LABEL="stage:compute"
+                unset _pc _pc_date
+                ;;
+            *) echo "ERROR: unknown stage '$TARGET' (valid: pull, compute)"; exit 1 ;;
+        esac
+        ;;
+esac
+
+# ---------------------------------------------------------------------------
+# NFRA_INFRPT.GUARD-REFILE leg-B (0.7.0_AE_CloudOps, 2026-07-08): re-arm the
+# watchdog-shutdown timer via an EXIT trap as soon as a real chain-bearing
+# dispatch commits (this point is only reached past the argument-parsing
+# loop's --status/--kill/--cancel-shutdown/--help exits, so CHAIN_LABEL is
+# always set here) -- closing #9-F1 (a crashed dispatch that never reaches
+# the Layer-1 arm block below previously left the instance with NO shutdown
+# path at all, since run-gold-layer.sh DELETES the watchdog unit files at
+# boot). "Re-arm" here means RECREATE the unit files (identical content to
+# user-data.sh's bootstrap block) since the files are gone, not merely
+# stopped, then enable+start the timer. Safe on a normal completion: the
+# Layer-1 `shutdown -h +2` below fires first (2min grace) and the instance
+# is down long before the watchdog's own 5min cycle + 300s grace could act;
+# the watchdog script's OWN pgrep-based activity check (Check 1) also skips
+# any cycle where a gold process is genuinely still running, so an early
+# re-arm cannot kill an in-flight chain (mirrors the #9 concurrency-aware
+# guard's own reasoning below).
+# ---------------------------------------------------------------------------
+_rearm_watchdog_timer() {
+    sudo tee /etc/systemd/system/watchdog-shutdown.service >/dev/null << 'SVC' || true
+[Unit]
+Description=Gold Runner Watchdog Shutdown
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/watchdog-shutdown.sh
+SVC
+    sudo tee /etc/systemd/system/watchdog-shutdown.timer >/dev/null << 'TMR' || true
+[Unit]
+Description=Run watchdog every 5 minutes
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+TMR
+    sudo systemctl daemon-reload 2>/dev/null || true
+    sudo systemctl enable watchdog-shutdown.timer 2>/dev/null || true
+    sudo systemctl start watchdog-shutdown.timer 2>/dev/null || true
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] WATCHDOG_REARMED chain=$CHAIN_LABEL -- crash-path auto-reap net restored (#9-F1 closed)."
+    # GLDRNS.B1 forensics hotfix: ship the newest chain log to S3 on EVERY exit -- crash or
+    # complete -- so a death is never unreadable again. || true throughout: a trap must not fail.
+    _newest_log=$(ls -t "$LOGDIR"/*.log 2>/dev/null | head -1) || true
+    if [ -n "$_newest_log" ]; then
+        aws s3 cp "$_newest_log" "s3://${INF_S3_BUCKET}/diagnostic/chain_logs/$(basename "$_newest_log")" 2>/dev/null || true
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] EXIT-TRAP log shipped: $(basename "$_newest_log") -> s3 diagnostic/chain_logs/" || true
+    fi
+}
+if [ "$DRY_RUN" = "0" ]; then
+    trap _rearm_watchdog_timer EXIT
+fi
+
+# ---------------------------------------------------------------------------
+# Partial chain dep gate -- ADHC_COMPIL.002
+# Runs only for --chain partial. Full/named chains are definition-complete.
+# ---------------------------------------------------------------------------
+if [ "$TARGET" = "partial" ]; then
+    if [ "$NO_DEPS_CHECK" = "1" ]; then
+        echo "WARN: --no-deps-check bypasses required post-step gate (ADHC_COMPIL.002)."
+        log_bypass_entry "$(basename "$0")" "$CHAIN_LABEL"
+    else
+        if ! check_partial_deps "$SCRIPT_IDS"; then
+            exit 1
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# --run-date coherence guard -- ADVI_INFETL.RUNDATE-DISPATCH-IMPL E2.
+# Runs after chain resolution, before the --bg re-invoke and any work, so an
+# incoherent --run-date is rejected loudly in the parent process (not silently
+# in a backgrounded child's log). No-op when --run-date was not passed.
+# ---------------------------------------------------------------------------
+validate_rundate_coherence
+
+# ---------------------------------------------------------------------------
+# Background re-invoke: handled before any work so freshness gate doesn't
+# run in the wrapper process.
+# ---------------------------------------------------------------------------
+if [ -n "${INF_DISPATCH_LOG_FILE:-}" ]; then
+    log_file="$INF_DISPATCH_LOG_FILE"
+    _in_bg_child=1
+else
+    log_file="$LOGDIR/${CHAIN_LABEL//[:\/]/_}_$(date +%Y%m%d_%H%M%S).log"
+    _in_bg_child=0
+fi
+
+if [ "$BG" = "1" ]; then
+    args=""
+    [ -n "$MODE" ]             && args="$args --$MODE $TARGET"
+    [ "$TARGET" = "partial" ]  && args="$args $PARTIAL_IDS"
+    [ "$DRY_RUN" = "1" ]       && args="$args --dry-run"
+    [ "$NO_SHUTDOWN" = "1" ]   && args="$args --no-shutdown"
+    [ "$NO_DEPS_CHECK" = "1" ]      && args="$args --no-deps-check"
+    [ "$NO_FRESHNESS_CHECK" = "1" ] && args="$args --no-freshness-check"
+    [ "$FORCE" = "1" ]              && args="$args --force"
+    [ -n "$RUN_DATE_OVERRIDE" ]     && args="$args --run-date $RUN_DATE_OVERRIDE"
+    [ "$SKIP_EXISTING" = "1" ]      && args="$args --skip-existing"
+    [ "$REBUILD" = "1" ]            && args="$args --rebuild"
+    [ -n "$REBUILD_START" ]         && args="$args --rebuild-start-date $REBUILD_START"
+    [ -n "$REBUILD_END" ]           && args="$args --rebuild-end-date $REBUILD_END"
+    [ "$REBUILD_ADVISOR_ATTRIBUTION_ONLY" = "1" ] && args="$args --rebuild-advisor-attribution-only"
+
+    echo "Starting in background (log: $log_file)"
+    INF_DISPATCH_LOG_FILE="$log_file" FRESHNESS_BYPASS_REASON="$BYPASS_REASON" nohup bash "$0" $args > "$log_file" 2>&1 &
+    echo "PID: $!"
+    echo "Poll: bash /tmp/orion-gold-dispatch.sh --status"
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# Silver prep pre-gate: auto-run INF_S_00 (INF_build_canonical_prices.py)
+# before the freshness gate for --chain full so canonical prices are always
+# current -- including weekends and market holidays where no new data lands.
+# Mirrors BD's silver-prep-pre pattern (gold_dispatch.sh). Fixes the
+# ADHC_COMPIL.013 gap: INF_build_canonical_prices.py was never dispatched
+# after DS authored it 2026-04-22 -- silver/prices/canonical_prices.parquet
+# was 199.6h stale when the gap was detected.
+# Scope: full chain only; silver-prep/single/--from are manual flows.
+# ---------------------------------------------------------------------------
+_should_run_silver_prep=0
+if [ "$MODE" = "chain" ] && [ "$TARGET" = "full" ]; then
+    _should_run_silver_prep=1
+fi
+
+if [ "$_should_run_silver_prep" = "1" ]; then
+    echo "=== Silver prep (pre-gate, $(log_ts)) ==="
+    echo "  Rebuilding silver/prices/canonical_prices.parquet before freshness gate."
+    if [ "$_in_bg_child" = "1" ]; then
+        # Guarded for the same set -e reason as the chain-execute call site:
+        # unguarded, a silver-prep failure kills the bg child before the
+        # ERROR line below ever prints.
+        _silver_prep_rc=0
+        run_chain "silver-prep-pre" "$CHAIN_SILVER_PREP" || _silver_prep_rc=$?
+    else
+        # tee swallows the run_chain exit code under set -e; capture PIPESTATUS[0]
+        # and fail loud before the freshness gate. Chain #26 INF_S_00 failure was
+        # masked by this pipe-exit-code swallow until we read the runner log.
+        run_chain "silver-prep-pre" "$CHAIN_SILVER_PREP" 2>&1 | tee -a "$log_file"
+        _silver_prep_rc=${PIPESTATUS[0]}
+    fi
+    if [ "$_silver_prep_rc" != "0" ]; then
+        echo "ERROR: silver-prep-pre FAILED (exit=$_silver_prep_rc); aborting full chain before freshness gate"
+        exit "$_silver_prep_rc"
+    fi
+    echo ""
+fi
+
+# ---------------------------------------------------------------------------
+# Freshness gate: applies to full and incremental chains.
+# Single-script and --from runs bypass the gate.
+# ---------------------------------------------------------------------------
+_should_check_freshness=0
+if [ "$MODE" = "chain" ] && [ "$FORCE" = "0" ]; then
+    _should_check_freshness=1
+fi
+
+if [ "$_should_check_freshness" = "1" ]; then
+    echo "=== Freshness check ($(log_ts)) ==="
+    if ! check_freshness; then
+        if [ "$DRY_RUN" = "1" ]; then
+            echo "  DRY RUN: freshness gate would skip chain. Proceeding with simulation."
+        else
+            mkdir -p "$LOGDIR"
+            echo "Chain skipped at $(log_ts): no new silver data" > "$log_file"
+            upload_log "$log_file" 2>/dev/null || true
+            if [ "$NO_SHUTDOWN" = "0" ]; then
+                echo "Auto-shutdown in 2 minutes (no work to do)."
+                sudo shutdown -h +2 2>/dev/null || true
+            fi
+            exit 0
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# comp-freshness gate -- ADHC_COMPIL.013
+# Check input artifact ages before chain dispatch. Fires only for --chain mode
+# (single/from are ad-hoc; freshness is a chain-dispatch concern).
+# Runs AFTER the silver-date gate above (which exits early on no-new-data).
+# Exit 0 (PASS/WARN): proceed. Exit 1 (FAIL): block + print remediation.
+# Exit 2 (config/AWS error): block + distinct error (tooling failure, not staleness).
+# Sequence: deployed check -> .002 cascade gate -> .013 freshness gate -> dispatch.
+# ---------------------------------------------------------------------------
+if [ "$MODE" = "chain" ]; then
+    if [ "$NO_FRESHNESS_CHECK" = "1" ]; then
+        log_freshness_bypass_entry "$(basename "$0")" "$CHAIN_LABEL" "$BYPASS_REASON"
+    elif ! command -v comp-freshness >/dev/null 2>&1; then
+        echo "  WARN: comp-freshness not found in PATH -- freshness gate skipped."
+    else
+        echo "=== comp-freshness gate ($(log_ts)) ==="
+        _freshness_exit=0
+        comp-freshness chain inf || _freshness_exit=$?
+        if [ "$_freshness_exit" = "1" ]; then
+            echo ""
+            echo "DISPATCH BLOCKED: comp-freshness FAIL -- one or more input artifacts are stale."
+            echo "  Next steps:"
+            echo "    1. Re-run the upstream silver/bronze backfill for the failing artifact(s)."
+            echo "    2. If an Orion API dim feed, check the INF bronze pull scripts and API status."
+            echo "    3. Once inputs are fresh, re-dispatch normally."
+            echo "  Emergency bypass (planned outage / operator override):"
+            echo "    Add: --no-freshness-check [--bypass-reason \"<reason>\"]"
+            exit 1
+        elif [ "$_freshness_exit" = "2" ]; then
+            echo ""
+            echo "DISPATCH BLOCKED: comp-freshness config error or AWS unreachable (exit 2)."
+            echo "  This is a tooling failure -- NOT a data-staleness FAIL."
+            echo "  Remediate: verify AWS credentials, check cadence config YAML, then retry."
+            echo "  To bypass during infra repair:"
+            echo "    Add: --no-freshness-check --bypass-reason \"infra repair in progress\""
+            exit 2
+        fi
+        echo "  comp-freshness gate: PASS (exit 0)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Execute chain
+# ---------------------------------------------------------------------------
+chain_exit=0
+if [ "$_in_bg_child" = "1" ]; then
+    # `|| chain_exit=$?` (the :983 house pattern), NOT a bare call + `$?`: under
+    # set -e an unguarded run_chain failure kills the script HERE, so the
+    # sentinel block below (pipeline-failed.json) never runs. That is how the
+    # 2026-07-17 14:53Z INF_C_01 guard abort died with no failure stamp -- the
+    # bg child took this branch; the tee branch below survives because the
+    # pipeline exits with tee's code.
+    run_chain "$CHAIN_LABEL" "$SCRIPT_IDS" || chain_exit=$?
+else
+    run_chain "$CHAIN_LABEL" "$SCRIPT_IDS" 2>&1 | tee "$log_file"
+    chain_exit=${PIPESTATUS[0]}
+fi
+
+# Telemetry: emit terminal status before background sync push.
+# telem_complete sets status=complete; telem_error sets status=failed.
+# trap _telem_cleanup on EXIT will fire the final sync push to S3 archive.
+if [ "$TELEM_AVAILABLE" = "1" ]; then
+    if [ "$chain_exit" -eq 0 ]; then
+        telem_complete 2>/dev/null || true
+    else
+        telem_error "chain exit code $chain_exit" 2>/dev/null || true
+    fi
+fi
+
+upload_log "$log_file"
+
+merge_perf_report
+if [ -f "/tmp/perf_report.json" ]; then
+    aws s3 cp /tmp/perf_report.json "s3://${INF_S3_BUCKET}/gold/perf_report.json" --quiet 2>/dev/null || true
+    echo "perf_report.json uploaded to s3://${INF_S3_BUCKET}/gold/perf_report.json"
+fi
+
+# ---------------------------------------------------------------------------
+# Pull-stage sentinel -- ADVI_INFREF P1 LEG-2 (2026-06-30)
+# Write gold/meta/pull-complete.json at --stage pull success. It is the assert
+# target that makes --stage compute safely separately-invocable (compute asserts
+# sentinel.run_date == its own RUN_DATE). Not written for dry-run / other modes.
+# (per-dim outcome enrichment = follow; run_date is the load-bearing assert field.)
+# ---------------------------------------------------------------------------
+# Fire whenever the PULL stage RAN successfully: --stage pull, --chain full, OR --chain incremental
+# (all run CHAIN_PULL). Writing it on --chain full/incremental too lets a follow-on manual
+# `--stage compute` for the same run-date pass (0.6.1 edge-catch -- the sentinel only marks that the
+# pull ran for the date; the run_date field is what --stage compute asserts).
+case "$MODE:$TARGET" in
+    stage:pull|chain:full|chain:incremental) _ran_pull_stage=1 ;;
+    *) _ran_pull_stage=0 ;;
+esac
+if [ "$_ran_pull_stage" = "1" ] && [ "$DRY_RUN" = "0" ] && [ "${chain_exit:-1}" -eq 0 ]; then
+    _pull_ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    _pull_sha=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    _pull_json=$(printf '{"stage":"pull","run_date":"%s","completed_at":"%s","git_sha":"%s","domains":"orion-api"}' \
+        "$RUN_DATE" "$_pull_ts" "$_pull_sha")
+    if echo "$_pull_json" \
+        | aws s3 cp - "s3://${INF_S3_BUCKET}/gold/meta/pull-complete.json" \
+            --content-type application/json; then
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [dispatch] Pull sentinel OK: s3://${INF_S3_BUCKET}/gold/meta/pull-complete.json written ($RUN_DATE)"
+    else
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [dispatch] WARN: pull-complete.json write FAILED -- --stage compute will not pass for $RUN_DATE" >&2
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Chain-complete sentinel -- ADVI_INFETL.002
+# Write gold/meta/pipeline-complete.json at --chain full success only.
+# Downstream S3 ObjectCreated rule (TO-5) fires inf-portal-publisher on this key.
+# Not written for dry-run, --single, --from, or --chain incremental.
+# ---------------------------------------------------------------------------
+if [ "$MODE" = "chain" ] && [ "$TARGET" = "full" ] && [ "$DRY_RUN" = "0" ]; then
+    _sent_ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    _sent_sha=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    _sent_imds_tok=$(curl -s -m2 -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>/dev/null || true)
+    _sent_iid=$(curl -s -m2 \
+        -H "X-aws-ec2-metadata-token: $_sent_imds_tok" \
+        "http://169.254.169.254/latest/meta-data/instance-id" 2>/dev/null || echo "unknown")
+    if [ "$chain_exit" -eq 0 ]; then
+        _sent_json=$(printf '{"chain":"full","run_date":"%s","completed_at":"%s","git_sha":"%s","instance_id":"%s"}' \
+            "$RUN_DATE" "$_sent_ts" "$_sent_sha" "$_sent_iid")
+        if echo "$_sent_json" \
+            | aws s3 cp - "s3://${INF_S3_BUCKET}/gold/meta/pipeline-complete.json" \
+                --content-type application/json; then
+            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [dispatch] Sentinel OK: s3://${INF_S3_BUCKET}/gold/meta/pipeline-complete.json written ($RUN_DATE)"
+        else
+            _sent_rc=$?
+            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [dispatch] WARN: sentinel write FAILED with exit=$_sent_rc -- chain completion signal not delivered (publisher trigger may not fire)" >&2
+        fi
+    else
+        _fail_json=$(printf '{"chain":"full","run_date":"%s","failed_at":"%s","exit_code":%s,"git_sha":"%s","instance_id":"%s"}' \
+            "$RUN_DATE" "$_sent_ts" "$chain_exit" "$_sent_sha" "$_sent_iid")
+        echo "$_fail_json" \
+            | aws s3 cp - "s3://${INF_S3_BUCKET}/gold/meta/pipeline-failed.json" \
+                --content-type application/json 2>/dev/null || true
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [dispatch] Chain failed (exit=$chain_exit); NOT writing pipeline-complete.json sentinel (pipeline-failed.json written)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# ADHC_CDNCOHT.001-INTERIM -- post-chain CloudFront invalidation
+# Fires only when --chain full | incremental succeeds (chain_exit==0). Path-
+# scoped to /api/scoped/advisor-intelligence/* (the four CF behaviors carrying
+# the shared-advisor-router routes to opal-data-inf/opal-data-bd platinum
+# artifacts -- ref PRD docs/architecture/ADHC_CDNCOHT.md v0.1 §6). Layer-2
+# immediate fix for the 2026-05-14 ~19:4XZ 18hr CDN staleness anchor on
+# Inflection NNA bell-curve surface; structural class-eliminator is TO-001
+# L@E success-path Cache-Control injection (AE 0.7 lane). Failure -> WARN,
+# chain continues (transient invalidation failure is recoverable next run;
+# AC5 -- invalidation MUST NOT introduce a chain-failure regression class).
+# IAM: cloudfront:CreateInvalidation granted via inf_gold_layer_cloudfront_invalidate
+# scoped to distribution EVTSA9VEHNZVH (portal-auth).
+# ---------------------------------------------------------------------------
+if [ "$MODE" = "chain" ] \
+   && { [ "$TARGET" = "full" ] || [ "$TARGET" = "incremental" ]; } \
+   && [ "$DRY_RUN" = "0" ] \
+   && [ "$chain_exit" -eq 0 ]; then
+    _cdncoht_dist_id="${CDNCOHT_DIST_ID:-EVTSA9VEHNZVH}"
+    _cdncoht_paths="${CDNCOHT_PATHS:-/api/scoped/advisor-intelligence/*}"
+    _cdncoht_caller_ref="inf-gold-${RUN_DATE}-$(date -u +%H%M%S)"
+    echo ""
+    echo "================================================================"
+    echo "  CDNCOHT post-chain invalidation  $(log_ts)"
+    echo "  distribution=$_cdncoht_dist_id paths=$_cdncoht_paths"
+    echo "================================================================"
+    _cdncoht_out=$(aws cloudfront create-invalidation \
+        --distribution-id "$_cdncoht_dist_id" \
+        --paths "$_cdncoht_paths" \
+        --query 'Invalidation.{Id:Id,Status:Status,CreatedAt:CreateTime}' \
+        --output text 2>&1) && _cdncoht_rc=0 || _cdncoht_rc=$?
+    if [ "$_cdncoht_rc" -eq 0 ]; then
+        echo "  CDNCOHT invalidation OK: $_cdncoht_out"
+    else
+        echo "  WARN: CDNCOHT invalidation FAILED (exit=$_cdncoht_rc) -- chain UNAFFECTED. Recoverable next run."
+        echo "  $_cdncoht_out"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Gold-chain hard-fail CloudWatch metric -- ADVI_INFALM.001
+# Emit Inflection/GoldChain.ChainFailed = 1 on any non-zero chain exit, 0 on a
+# clean complete, for production chain runs (--chain full | incremental,
+# non-dry-run). Concrete metric -> no CloudWatch-Logs-agent dependency on the
+# runner. inf-pipeline/alarms.tf watches ChainFailed Maximum >= 1 ->
+# opal-infrastructure-alerts SNS. chain_exit is the FINAL exit after all
+# in-chain JWTRES auto-recovery, so this fires only on a true unrecovered
+# hard-fail (reconciliation ERROR / non-zero dispatch / sentinel-not-written
+# all surface as chain_exit != 0) -- no transient-retry alarm-fatigue. Mirrors
+# mdpf-daily-dispatch.sh finish() (MDPF/DailyChain.ChainFailed). --single /
+# --from / dry-run runs do NOT emit (manual/partial runs are not the daily
+# production chain).
+# ---------------------------------------------------------------------------
+if [ "$MODE" = "chain" ] && [ "$DRY_RUN" = "0" ]; then
+    _chainfail_mval=1
+    [ "$chain_exit" -eq 0 ] && _chainfail_mval=0
+    aws cloudwatch put-metric-data --namespace "Inflection/GoldChain" \
+        --metric-name ChainFailed --value "$_chainfail_mval" --unit Count \
+        --dimensions Service=inf-gold-layer-runner >/dev/null 2>&1 || true
+    if [ "$_chainfail_mval" -eq 1 ]; then
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [dispatch] INF_GOLD_CHAIN_FAILED chain=$TARGET exit=$chain_exit run_date=$RUN_DATE -- emitted Inflection/GoldChain.ChainFailed=1"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Eclipse model-portfolios -- BEST-EFFORT, POST-SENTINEL block (ADVI_ECLDAT).
+# Andrew directive 2026-05-15: "we cannot pause portal updates if eclipse has
+# an issue, that is absolutely unacceptable." This block runs AFTER
+# gold/meta/pipeline-complete.json is written (inf-portal-publisher has already
+# fired off that sentinel) and BEFORE auto-shutdown. Because the sentinel is
+# already persisted, an eclipse failure OR hang here cannot abort the chain,
+# change chain_exit, or delay the portal publish -- the publish is gated ONLY
+# on A/B/C/D. Each step runs via run_eclipse_step (timeout-bounded + non-fatal).
+# Scope: --chain full + --chain incremental, non-dry-run. Manual eclipse-only
+# runs use `--chain eclipse` (normal run_chain, fatal-on-failure).
+# Observability: per-step results -> gold/eclipse/_meta/dispatch_eclipse_status.json
+# (latest-wins, pollable for alerting) + telem_warn on degraded.
+# ---------------------------------------------------------------------------
+if [ "$MODE" = "chain" ] \
+   && { [ "$TARGET" = "full" ] || [ "$TARGET" = "incremental" ]; } \
+   && [ "$DRY_RUN" = "0" ]; then
+    echo ""
+    echo "================================================================"
+    echo "  ECLIPSE-BLOCK (best-effort, post-sentinel)  $(log_ts)"
+    echo "  Portal publish already gated + fired on A/B/C/D. Eclipse outcome"
+    echo "  below does NOT affect chain_exit ($chain_exit) or the publisher."
+    echo "================================================================"
+    ECLIPSE_RESULTS=""
+    for _ecl_id in $CHAIN_ECLIPSE; do
+        run_eclipse_step "$_ecl_id"
+    done
+    ECLIPSE_RESULTS="${ECLIPSE_RESULTS# }"
+
+    _eclipse_overall="ok"
+    case "$ECLIPSE_RESULTS" in
+        *:fail* | *:timeout* | *:missing*) _eclipse_overall="degraded" ;;
+    esac
+    echo ""
+    echo "  ECLIPSE-BLOCK $_eclipse_overall -- results: ${ECLIPSE_RESULTS:-none}"
+
+    # Observability marker -- latest-wins, pollable for alerting.
+    _ecl_status_json=$(printf '{"overall":"%s","results":"%s","run_date":"%s","chain":"%s","chain_exit":%s,"completed_at":"%s"}' \
+        "$_eclipse_overall" "$ECLIPSE_RESULTS" "$RUN_DATE" "$TARGET" "$chain_exit" \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ)")
+    if echo "$_ecl_status_json" \
+        | aws s3 cp - "s3://${INF_S3_BUCKET}/gold/eclipse/_meta/dispatch_eclipse_status.json" \
+            --content-type application/json 2>/dev/null; then
+        echo "  ECLIPSE-BLOCK status -> s3://${INF_S3_BUCKET}/gold/eclipse/_meta/dispatch_eclipse_status.json"
+    else
+        echo "  WARN: ECLIPSE-BLOCK status marker upload failed (non-fatal)"
+    fi
+
+    if [ "$TELEM_AVAILABLE" = "1" ] && [ "$_eclipse_overall" != "ok" ]; then
+        telem_warn "eclipse-block degraded: $ECLIPSE_RESULTS" 2>/dev/null || true
+    fi
+
+    upload_log "$log_file" 2>/dev/null || true
+fi
+
+# ---------------------------------------------------------------------------
+# Auto-shutdown: fires after all modes (chain/single/from), not dry-run.
+# Watchdog-shutdown.sh handles unexpected exits; this handles normal
+# completion. 2-minute grace period so S3 uploads can finish.
+#
+# Tag-aware branch: if this instance carries Tier=qa, skip Layer 1 shutdown.
+# QA runners are manually managed -- auto-halt after a test run loses the
+# instance state before the operator can inspect it.
+#
+# BRONZE-FIX #9 (the 21:25Z near-miss): the arm is now CONCURRENCY-AWARE.
+# During the 2026-06-12 P0 recovery, a `--chain eclipse` dispatch completed
+# and armed this shutdown WHILE the full recovery chain was still in flight
+# on the same instance -- DS caught + cancelled it at 21:27Z, else the
+# shutdown would have killed the live recovery. The guard below detects
+# OTHER in-flight dispatch processes (by process GROUP -- each SSM
+# RunCommand invocation runs in its own process group, while this dispatch's
+# subshells/tee/telemetry children and the nohup'd --bg child share OURS)
+# and DEFERS: the LAST dispatch to complete sees no others and arms.
+#
+# PRECISION MATTERS HERE: run-gold-layer.sh REMOVES the watchdog timer at
+# boot (unit files deleted), so this arm is the instance's ONLY normal
+# shutdown path -- a false "in-flight" reading (e.g. a transient --status
+# poll counted as a chain) would defer the arm with NO successor and strand
+# the instance running. The filter therefore excludes non-chain invocations
+# (--status/--kill/--cancel-shutdown/--help/--dry-run) by cmdline. The
+# converse (crashed dispatch never arms) is a PRE-EXISTING exposure of the
+# watchdog removal, unchanged by this guard -- flagged as #9-F1.
+# Alert-egress-before-arm (DS constraint 3): the arm/defer decision is
+# logged + emitted as a CW metric BEFORE any shutdown command runs.
+# ---------------------------------------------------------------------------
+
+_other_dispatch_pids() {
+    # PIDs of CHAIN-BEARING orion-gold-dispatch.sh processes OUTSIDE our
+    # process group. pgrep/ps exist on Amazon Linux (EC2-side; Rule-16 N/A).
+    _my_pgid=$(ps -o pgid= -p $$ 2>/dev/null | tr -d ' ')
+    for _pid in $(pgrep -f '[o]rion-gold-dispatch\.sh' 2>/dev/null); do
+        _pgid=$(ps -o pgid= -p "$_pid" 2>/dev/null | tr -d ' ')
+        [ -z "$_pgid" ] || [ "$_pgid" = "$_my_pgid" ] && continue
+        _args=$(ps -o args= -p "$_pid" 2>/dev/null)
+        case "$_args" in
+            *--status*|*--kill*|*--cancel-shutdown*|*--help*|*--dry-run*)
+                continue ;;  # transient/non-chain invocation -- never defer on it
+        esac
+        printf '%s ' "$_pid"
+    done
+}
+
+_emit_shutdown_metric() {
+    # AC2 observability: Inflection/GoldRunner ShutdownArmed|ShutdownDeferred
+    aws cloudwatch put-metric-data --namespace "Inflection/GoldRunner" \
+        --metric-name "$1" --value 1 --unit Count \
+        --dimensions Service=inf-gold-layer-runner >/dev/null 2>&1 || true
+}
+if [ "$DRY_RUN" = "0" ] && [ "$NO_SHUTDOWN" = "0" ]; then
+    _IMDS_TOKEN=$(curl -s -m2 -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>/dev/null || true)
+    _INSTANCE_ID=$(curl -s -m2 \
+        -H "X-aws-ec2-metadata-token: $_IMDS_TOKEN" \
+        "http://169.254.169.254/latest/meta-data/instance-id" 2>/dev/null || true)
+    if [ -n "$_INSTANCE_ID" ]; then
+        _TIER_TAG=$(aws ec2 describe-tags \
+            --filters "Name=resource-id,Values=$_INSTANCE_ID" "Name=key,Values=Tier" \
+            --query 'Tags[0].Value' --output text 2>/dev/null || true)
+        if [ "$_TIER_TAG" = "qa" ]; then
+            echo "Tier=qa tag detected -- skipping Layer 1 self-shutdown (QA runner)."
+            NO_SHUTDOWN=1
+        fi
+    fi
+fi
+if [ "$DRY_RUN" = "0" ] && [ "$NO_SHUTDOWN" = "0" ]; then
+    # BRONZE-FIX #9 AC1+AC3: in-flight chain on this instance -> DO NOT arm.
+    _INFLIGHT_PIDS=$(_other_dispatch_pids)
+    if [ -n "$_INFLIGHT_PIDS" ]; then
+        echo ""
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] SHUTDOWN_DEFERRED chain=$CHAIN_LABEL other_dispatch_pids=${_INFLIGHT_PIDS% } -- NOT arming; the last chain-bearing dispatch to complete arms. The 21:25Z near-miss class is guarded."
+        _emit_shutdown_metric ShutdownDeferred
+    else
+        echo ""
+        # AC2: arm signal egresses (log + metric) BEFORE the shutdown command
+        # (DS constraint 3 -- alert egress must not race the arm).
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] SHUTDOWN_ARMED chain=$CHAIN_LABEL grace=2m -- cancel: 'orion-gold-dispatch.sh --cancel-shutdown' (idempotent) or 'sudo shutdown -c'."
+        _emit_shutdown_metric ShutdownArmed
+        sudo shutdown -h +2 2>/dev/null || true
+    fi
+fi
+
+exit "$chain_exit"

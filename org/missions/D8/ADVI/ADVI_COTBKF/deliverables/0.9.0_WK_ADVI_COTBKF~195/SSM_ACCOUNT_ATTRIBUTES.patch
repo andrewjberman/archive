@@ -1,0 +1,10 @@
+--- a/infra/aws/terraform/cot-pipeline/ssm.tf
++++ b/infra/aws/terraform/cot-pipeline/ssm.tf
+@@ -249,6 +249,7 @@
+           # (CHAINFIX intent preserved). Runs right before --finalize so gold reads fresh holdings.
+           # L4 serve-time vintage-alert is the backstop if holdings ever re-stalls.
+           "  { python3.11 /tmp/cot_silver_merge.py --table holdings $DATE_ARG || echo 'WARN: holdings refresh failed -- NON-GATING, sentinel-decoupled (ADVI_COTETL daily holdings leg)'; } &&",
++          "  { python3.11 /tmp/cot_silver_merge.py --table account_attributes $DATE_ARG || echo 'WARN: account_attributes refresh failed -- NON-GATING'; } &&",
+           # ADVI_COTETL.CHAIN-FIX: LAST step -- --finalize verifies all silver/{table}/{run_date}.parquet
+           # present, then writes silver/{run_date}/_meta/silver_complete.json (the sentinel cot-silver-complete
+           # fires on -> gold). emit-only-on-verified-success: a partial silver chain skips this -> no sentinel

@@ -1,0 +1,18 @@
+{
+  "join": "A client's directory ids.account_ids (minted opaque account ids) are matched to the account.last4 rows of the newest filled_report_values partition, whose row_key is the raw custodial account id minted with the handler's own ids.opaque_account, and the one household those accounts belong to is composed.",
+  "cache": "Keyed by (bucket, key, ETag from list_objects_v2 of the data.parquet key) in _FILLED_CACHE[\"entry\"], it saves one get_object, one parquet read and one index build per object version, so a pass over N clients fetches the partition once instead of N times.",
+  "memory": "The partition is read with pq.read_table(read_dictionary=the twelve string columns), so its strings are dictionary-encoded, and indexed with numpy: a stable argsort of the household codes, bincount and cumsum offsets, and a dict from minted account id to household codes; each client takes only its own household's rows.",
+  "tests_added": [
+    "test_absent_newest_partition_without_rows_for_the_accounts_raises_not_yet_available",
+    "test_absent_client_without_account_ids_raises_before_any_read",
+    "test_accounts_two_accounts_in_one_household_get_that_household_document",
+    "test_accounts_matching_no_household_raise_not_yet_available",
+    "test_accounts_spanning_two_households_raise_publish_refused",
+    "test_accounts_raw_table_ids_in_the_directory_never_match",
+    "test_accounts_partition_is_fetched_once_across_several_clients",
+    "test_accounts_partition_rewritten_under_the_same_key_is_re_read",
+    "test_accounts_index_is_keyed_by_minted_ids_and_maps_each_to_its_household",
+    "test_accounts_pass_writes_one_and_records_the_refused_and_unavailable_clients"
+  ],
+  "words": "The hop-2 reader no longer maps a client through the directory's relationship id and sha256; that rule matched none of the 4,012 households of the real partition. It maps a client through the account ids the directory carries, which are minted opaque ids. The newest filled_report_values partition's account.last4 rows hold the RAW custodial account id as row_key, and the reader mints each one with the handler's own ids.opaque_account, so the minted ids match the directory's. A client whose accounts match no household is NotYetAvailable; a client whose accounts span two households is PublishRefused, because households are never merged; exactly one household is composed by the existing _filled_compose. The partition is read once per object version: the index is cached in a module-level dictionary keyed by bucket, key and the ETag from list_objects_v2, and holds the dictionary-encoded rows and a stable index by household code. The filled-report switch, run_filled_report and filled_report_fire are byte for byte; publisher.py and locals.tf are unchanged; the reader tests were rewritten to the account join, and ten tests are new, nine of them with accounts in the name. NOT PROVEN: nothing was deployed and the switch stays OFF; the join was measured by the issuer on the real partition and directory, but this reader has not run against real S3; the 1,024 MB and 300 s Lambda limits for a whole pass are not exercised; numpy's presence in the reporting-publish package is not verified; and the composed document carries the raw custodial account id as account_id (surprise IRPT_DASHBD-D2-W247-S1)."
+}

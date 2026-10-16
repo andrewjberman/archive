@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-l-4",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-4.one-real-retirement.md",
+  "group": "OTHER",
+  "vintage_commit": "cc781f974a"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R8.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-4.one-real-retirement.md",
+  "vintage_commit": "cc781f974a"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/inf-pipeline/eventbridge.tf",
+   "kind": "terraform",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "three resource blocks and one DLQ-policy SourceArn line removed; safe-apply on the saved scoped plan 2026-10-14T12:44:50Z: Apply complete! Resources: 0 added, 1 changed, 3 destroyed; scoped plan after: No changes",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "af9e04d94a"
+  },
+  {
+   "path_or_key": "EventBridge rule inf-gold-full-on-bronze-complete (retired), its target and the invoke permission on inf-gold-trigger, and the rule's SourceArn in the inf-gold-trigger-dlq policy",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "describe-rule ResourceNotFoundException at 2026-10-14T12:46:31Z; lambda policy 2 statements; DLQ policy 2 SourceArns; inf-gold-trigger config and the other two rules identical before and after",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "af9e04d94a"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/RETIRE_RECORD.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "36202f5749"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "cd C:/dev/ajb_workspace && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py retire --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/RETIRE_RECORD.json",
+   "expect": "^RETIRE: OK target=.+ consumers=0$",
+   "output_evidence": "RETIRE: OK target=inf-gold-full-on-bronze-complete consumers=0",
+   "denominator": "one target; re-census over 2929 AWS nodes (1 hit, the rule itself) read 2026-10-14T12:35:39Z, consumers 0",
+   "status": "PASS",
+   "criterion_verbatim": "cd C:/dev/ajb_workspace && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py retire --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/RETIRE_RECORD.json",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. The control: the same live reads before the change (rule DISABLED, one target) against after (ResourceNotFoundException).",
+   "expected": "present before, absent after",
+   "observed": "describe-rule returned the rule at 12:35:39Z and ResourceNotFoundException at 12:46:31Z",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one apply; the plan was saved and applied unchanged",
+   "observed": "the applied counts equal the planned counts (0/1/3)",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a rollback test",
+   "reason": "held: re-creating the rule is a write to the world and the pair names no non-world test"
+  },
+  {
+   "item": "a full plan of inf-pipeline after the apply",
+   "reason": "the plan was scoped to the named addresses by the pair; a scoped post-apply plan over the changed DLQ policy and the two surviving rules and permission read No changes"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r8_checks.py retire",
+   "invocation": "as quoted",
+   "result": "RETIRE: OK target=inf-gold-full-on-bronze-complete consumers=0"
+  }
+ ]
+}

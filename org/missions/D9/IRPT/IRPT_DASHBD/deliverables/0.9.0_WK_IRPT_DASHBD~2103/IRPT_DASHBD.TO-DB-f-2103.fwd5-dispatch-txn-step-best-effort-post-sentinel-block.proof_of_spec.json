@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2103",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0cd10473c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R135_F.md",
+    "vintage_commit": "f0cd10473c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2103.fwd5-dispatch-txn-step-best-effort-post-sentinel-block.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2103",
+  "session_log": "No separate session log. The drive is the worker branch wk-IRPT_DASHBD-2103 on issuance base f0cd10473c. Commit c973be5435 carries the catalog row, CHAIN_TXN, TXN_STEP_TIMEOUT and run_txn_step, the --chain txn case entry, its help line, the unknown-chain message word, the TXN-BLOCK, and the first 28-test file. Commit 92ed9d18b4 carries the amended test (test_syntax_added_lines_are_ascii_against_base), on the issuer's amendment d58c1dda9c; the amended checker p135_dispatch.py is a read-only copy of the trunk file and is in no commit of this order. The mutant of step 3 was made and reverted byte-for-byte (sha256 70b5774422c65f87dce8, equal to the committed script) and is not a commit. Commit f89ea3364c carries the first proof instance and rows S1-S3; the commit that carries this refreshed instance carries row S4. The order is NOT flipped by the worker: the issuer flips it. Worker tool calls are not recorded here.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/inf/scripts/gold/orion-gold-dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "c973be5435",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT DEPLOYED: offline edit; the release pair uploads it. A pure insertion over dispatch_base.sh.txt but for the unknown-chain line gaining txn. bash -n passes. The INF_G_01 launcher is a sibling order and is absent in this tree, so a --chain txn run would report the row as missing until it lands.",
+      "artifact_covered_by": [
+        "DBF135-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/inf/scripts/gold/tests/test_dispatch_txn_block.py",
+      "kind": "test",
+      "commit_or_etag": "92ed9d18b4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "28 offline tests; the syntax test compares the lines this edit adds against the pinned base and asserts each is ASCII (issuer amendment d58c1dda9c). No AWS call; run_txn_step runs under bash with a stub timeout first on PATH.",
+      "artifact_covered_by": [
+        "DBF135-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF135-3-AC1",
+      "criterion_verbatim": "`DBF135-3-AC1` -- the dispatch edit in one verdict: the diff against the pinned base copy is a pure insertion but for the unknown-chain line gaining `txn`; the catalog row exactly once after INF_E_00; `CHAIN_TXN`; no other chain carries INF_G_01; `run_txn_step` and its timeout; the case entry and help line; the TXN-BLOCK between the ECLIPSE-BLOCK and the auto-shutdown with its guards and marker; `bash -n` passes; ASCII; at least 12 tests with the named words, and those plus the three existing dispatch-related test files pass. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r135/p135_dispatch.py\" . DBF135-3-AC1",
+      "output_evidence": "At 92ed9d18b4 (script at c973be5435): the amended checker prints 'DBF135-3-AC1 PASS', rc 0, run twice, identical. Its ASCII clause now reads every line the edit ADDS is ASCII (base non-ASCII lines stay), per issuer amendment d58c1dda9c. The checker's ac1 runs the diff, block, bash -n, ASCII, name-count and pytest legs; all pass. --selftest PASS (9 arms). Measured in test_dispatch_txn_block.py: all 28 pass, including test_syntax_added_lines_are_ascii_against_base and test_insertion_added_lines_are_ascii. The three existing dispatch-related files pass: test_aor_resolution.py 64, test_aor_fold_derivation.py 22, test_pull_inflection_scope_account_returns.py 19.",
+      "denominator": "1 of 1 criterion. Test names: 28 in test_dispatch_txn_block.py, with catalog, chain, block, sentinel, shutdown, insertion, syntax and date all present (the checker requires at least 12). Tests: 28 of 28 pass in the new file; 105 of 105 pass across the three existing files.",
+      "status": "PASS",
+      "expect": "DBF135-3-AC1 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One temporary mutant on orion-gold-dispatch.sh: run_txn_step ends with return $rc in place of return 0. Reverted from a backup, byte-for-byte (sha256 70b5774422c65f87dce8 before and after; grep for the return-rc token returns 0).",
+      "expected": "At least one test fails under the mutant.",
+      "observed": "Measured on c973be5435 (the three named tests are unchanged in 92ed9d18b4): three tests fail: test_run_txn_step_static_bounded_recorded_and_zero_return (the return-rc token is present), test_run_txn_step_failure_returns_zero (rc non-zero under set -e) and test_run_txn_step_timeout_returns_zero (rc non-zero). The ok path returns 0 under the mutant and passes, as expected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: p135_dispatch.py run twice at c973be5435 (same tree, no edits between runs)",
+      "expected": "Identical output and rc each run.",
+      "observed": "Both runs at 92ed9d18b4: 'DBF135-3-AC1 PASS', rc 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, listing or upload of any kind; the script is not deployed.",
+      "reason": "The order states NO AWS in this order; the release pair uploads the script."
+    },
+    {
+      "item": "The base lines that are not ASCII (10 lines of the pinned base copy).",
+      "reason": "Not in this edit's scope: the issuer's amendment d58c1dda9c makes the ASCII clause cover only the lines the edit adds; the base lines stay as they are."
+    },
+    {
+      "item": "A CloudWatch failure metric for the txn step, as run_eclipse_step puts.",
+      "reason": "A new metric is a new alarm surface; the standing moratorium forbids building it without Andrew's word. Reported as IRPT_DASHBD-D2-W2103-S2."
+    },
+    {
+      "item": "The INF_G_01 launcher file.",
+      "reason": "A sibling order; the order says it does not exist yet and must not be touched here."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W2103-S1: BLOCKING, INERT. RESOLVED by the issuer's amendment d58c1dda9c: the pinned base holds 10 non-ASCII lines of its own; the ASCII clause now covers the lines the edit adds (see IRPT_DASHBD-D2-W2103-S4).",
+    "IRPT_DASHBD-D2-W2103-S2: OBSERVATION, INERT. run_txn_step omits the Eclipse EclipseStepFailed CloudWatch metric, so a txn failure is visible only in the status marker.",
+    "IRPT_DASHBD-D2-W2103-S3: OBSERVATION, INERT. The pre-commit risk reflex printed an open HOLD on orion-gold-dispatch.sh (HOLD_INF_CANONICAL_NNA_REBUILD_20260713.md:78); this cell's diff leaves the collision check's content unchanged and nothing is uploaded.",
+    "IRPT_DASHBD-D2-W2103-S4: OBSERVATION, INERT. Records the resolution of S1 by the issuer's amendment d58c1dda9c; the amended checker prints DBF135-3-AC1 PASS on this tree."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p135_dispatch.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r135/p135_dispatch.py\" . DBF135-3-AC1",
+      "result": "DBF135-3-AC1 PASS, rc 0 (amended checker, run twice). --selftest: 'selftest PASS (9 arms)', rc 0."
+    },
+    {
+      "tool": "pytest (the new dispatch test file)",
+      "invocation": "python -m pytest data/inf/scripts/gold/tests/test_dispatch_txn_block.py -q -p no:cacheprovider",
+      "result": "28 passed; rc 0."
+    },
+    {
+      "tool": "pytest (the three existing dispatch-related files)",
+      "invocation": "python -m pytest data/inf/scripts/gold/tests/test_aor_resolution.py | test_aor_fold_derivation.py | data/inf/manual_api/test_pull_inflection_scope_account_returns.py -q -p no:cacheprovider",
+      "result": "64 passed; 22 passed; 19 passed; each rc 0."
+    },
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n data/inf/scripts/gold/orion-gold-dispatch.sh",
+      "result": "rc 0."
+    }
+  ]
+}

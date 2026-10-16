@@ -1,0 +1,62 @@
+# MDPF_CANON round 11 -- never-widen pair V2 (COO half) for the gold-function deploy that ships CN-s-1 (the account `Opal_Muni_Income` becomes the registered custom model "Opal Municipal Bonds"), for the first scheduled fire after the window (no earlier than 2026-10-17 13:30Z)
+
+**Why V2.** The first pair (`NEVER_WIDEN_PAIR_R11_CN_S_1.md`, sha256 `e6b2ea36ad5e...`, CTO half `ledger/NEVER_WIDEN_R11_CN_S_1_CTO_HALF.md` @ac8c4c5b3d) predicted the Global leaves by rule and named `opal_aggregate_aua` EQUAL. D4 (the dry run that returns the built bodies, run by CloudOps at 16:24Z on the deployed pin) MEASURED otherwise, the CTO's hard STOP fired, and the CTO ruled (msg 6876, 16:35Z) that the Global rise is the fold's own rule, that no fold change is made, and that a NEW pair names it. This file is that new COO half. It SUPERSEDES the first pair's section 1 Global prediction, its "Cannot move: ... every headline total" line and its section 5/6 Global expectations; everything else in the first pair stands by reference (pin, code, the seven package members, section 2 acts D1/D2/D4 and their sequencing and preconditions, section 3 writers, the rollback text, the identity flag). **D2b (the emitter) stays HELD.**
+**Status: COO half DRAFTED here; signature owed by `2.0.0_SA_COO~D1` after commit; CTO half OWED.** The CTO half binds the sha256 of this file; any edit after the CTO signs voids it, and a correction travels in an addendum file.
+**Deployer:** `0.7.0_AE_CloudOps~DELL1` (the MDPF lane, rule 34), order `ADHOC.canon-r11-muni-custom-deploy` (`org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/ADHOC.canon-r11-muni-custom-deploy.md` @75b5505c06). **Pin:** `66ae82d62d7eac16d64a812ab41dc36cd51a2c30`, unchanged. **State at this draft:** D2 landed 16:22Z and D4 ran 16:24Z; the issuer sent D4-STOP at 16:32Z and the section 4 rollback of the first pair runs; the redeploy happens only on both V2 halves signed and a fresh issuer GO.
+**Measurement basis (all MEASURED by the issuer):** the saved D4 response `C:/dev/_deploy_artifacts/canon_r11_muni/d4_response.json` (2,031,968 B, sha256 `30d39b0410324d4fbe13493c262b240fc327a463c7ac40029e469e5d4c2bdf89`; 16 bodies; `status` green, `errors` empty, `a4_objects_built` 16; outside the repo, client-scale) against the 16 baselines CloudOps saved before D2 (`.../baseline/<scope>__<type>.json`), diffed by `round11/checks/diff_d4.py` (tested on four controls) and a probe that prints aggregates only. Row `MDPF_CANON-D1-S32`.
+
+## 1. The leaf set V2 accepts (replaces the first pair's section 1 prediction)
+
+Per scope, `diff` = the paths that differ between the baseline body and the D4 body of the SAME as-of date 2026-10-15 (the dry run wrote nothing). Every dated cell that differs is among the seven dates **2026-10-07, 10-08, 10-09, 10-12, 10-13, 10-14, 10-15**; no cell before 2026-10-07 differs (the one cell `diff_d4.py` flagged, `cottonwood meta.registered_custom_models.keys`, is an unordered key list that gained a key, not a dated cell).
+
+**Always differing, not content (every scope):** `_provenance.process_time`, `_provenance.trigger`, `_provenance.source_vintage_age_hours`, the object's `generated_at` / `last_updated` / `meta.generated_at`.
+
+**Cottonwood `aggregate-aua-timeseries`:** `by_model.opal_muni_income` ADDED; `model_aua` and `non_model_aua` differ on the seven dates (opposite signs, equal magnitude, table below); `partner_custody_total` delta 0.0 on all seven dates (EQUAL); `account_count_total` and `account_count_total_raw` +1 on 2026-10-15; `meta.registered_custom_models.keys` gains `opal_muni_income`; `meta.latest_cross_section.{model_aua,non_model_aua}`; `meta.custom_residual_detail` and `meta.income_non_model_residual` lose the account's entries on the seven dates (REMOVED / VALUE).
+**Cottonwood `account-distribution`:** `by_model."Opal Municipal Bonds"` ADDED, `meta.account_count_by_model_key.opal_muni_income` ADDED, and the `total` block's account count, active-account count, histogram bins and counts, max, mean, median, percentiles, std_dev, total_aum differ (the account now counts among the model accounts). **`aum-metrics`:** `by_model` +1 entry; `total.model_aum` +X, `total.non_model_aum` -X, `total.account_count` 384 -> 385. **`category-views`:** `nodes.Client.aum` and the Custom node `aum` and `nodes.Models.aum` move by X; the Custom group's `members` list gains one entry. (The `account-units` staged object is read by the order only if D4 returns it; the first pair's PROBE D already measured it.)
+
+**Global `aggregate-aua-timeseries`:** NO new `by_model` key. `model_aua`, `opal_aggregate_aua` and `base_excluding_tax_aua` each rise by X on the seven dates; `by_model.other_models.model_value` rises by X and `by_model.other_models.account_count` by 1 on the seven dates; `account_count_total` and `account_count_total_raw` +1 on the seven dates; `non_model_assets_detail.time_series` (7 cells) and `non_model_assets_detail.latest` (`model_aum` +X, `enterprise_total` +X, `non_model_pct` 14.590115 -> 14.170734); `meta.latest_cross_section.{model_aua,opal_aggregate_aua}`. **Global `aum-metrics`:** `total.aum`, `total.model_aum`, `total.q0..q3` change and growth rise or follow by X on the frontier figures (`total.aum` 2,174,027,397.88 -> 2,237,501,378.84; `total.model_aum` 1,831,839,685.32 -> 1,895,313,666.28), `total.account_count` 8715 -> 8716, `meta.fee_basis_components.cottonwood.value` 205,049,392.06 -> 268,523,373.02, `non_model_assets_detail.latest.*` as above. **Global `category-views`:** `nodes.Models.aum` and the Custom node `aum` +X, `sums.{gold_plane,total_aua,view_plane}` +X, the Custom `members` list gains one entry. **Global `account-distribution`:** only provenance and `generated_at` differ (no statistic moves).
+**49financial and inflection:** only the four `category-views` Custom `members` list gains one UNSERVED registry entry (`served` False, `aum` null, like the existing unserved members) and the always-differing fields; no value, no count, no total moves.
+
+**EQUAL (named, MEASURED):** Cottonwood `partner_custody_total` on every date (delta 0.0 on the seven; the whole array is not in the diff); **Global `non_model_aua`** (not in the diff) and `non_model_assets_detail.latest.non_model_aum`; every dated cell before 2026-10-07 in every scope; every value in 49financial and inflection; the Global `account-distribution` statistics.
+
+**X per date (the Cottonwood and Global model leg delta; MEASURED, dollars):**
+
+| date | X |
+|---|---|
+| 2026-10-07 | 64,119,753.85 |
+| 2026-10-08 | 63,033,668.16 |
+| 2026-10-09 | 63,106,070.07 |
+| 2026-10-12 | 63,132,539.75 |
+| 2026-10-13 | 63,259,474.58 |
+| 2026-10-14 | 63,241,218.96 |
+| 2026-10-15 | 63,473,980.96 |
+
+## 2. Why Global moves (read from the producer's own rule, not predicted from the input)
+
+`apply_sma_sleeve_overlay` (`data/mdpf/scripts/gold/mdpf_gold_consolidator.py`, docstring at L1837): "Global takes a firm leg's MODEL dollars only." A Cottonwood account in the NON-model population is in no Global leg. Registering the account as a custom model moves its dollars into the Cottonwood model leg, so the Global fold, which sums each firm's model dollars (the key tuple `GLOBAL_MODEL_KEYS` ends with `+ COTTONWOOD_CUSTOM_MODEL_KEYS`), adds them. Global's non-model leg comes from the separate non-model source and has no Cottonwood term, so it does not fall. Writers of the moved Global leaves: N = 3 for the Trend keys and the Global fold for `by_model`/`model_aua`/`opal_aggregate_aua` (the first pair's section 3, P3); the order's leg (a) recounts at the pin and prints N. **The first pair's "opal_aggregate_aua equal" was the issuer's error;** Andrew's word of 2026-10-15 ~18:4xZ ("It should be included in the Aggregate Custom Models group in the global view") is what this rule carries out.
+
+## 3. Both branches
+
+- **Branch A, the account holds a value v(d) on a date d** (the seven dates and every later date while it is assigned): Cottonwood `model_aua(d)` += v(d), `non_model_aua(d)` -= v(d), `partner_custody_total(d)` equal; Global `model_aua(d)`, `opal_aggregate_aua(d)`, `base_excluding_tax_aua(d)` and `other_models.model_value(d)` += v(d), `account_count_total(d)` and `other_models.account_count(d)` += 1, `non_model_aua(d)` equal. A new as-of date appends by the same rule (the account's value on that date, if any).
+- **Branch B, the account holds no value on a date** (every date before 2026-10-07, weekends and holidays, any day the strategy is unassigned): every figure above equals today's.
+- Which branch each of the seven dates takes was MEASURED by D4 (the table above; the account holds a value on all seven).
+
+## 4. Deploy acts, window, rollback (the first pair's section 2 and section 4 stand, with these changes)
+
+- **Order of events:** the rollback (running) -> both V2 halves signed -> a fresh issuer GO naming the pin -> D2 (gold package at `66ae82d62d`, the one `.tf` value, ONE targeted `safe-apply`) -> D4 again with `qa_local` + `qa_return_bodies` -> the issuer diffs the 16 bodies against the baselines taken AFTER the rollback (read again by CloudOps, the same 16 keys) against THIS file's section 1 -> `D4-PASS` / `D4-STOP`. **Hard STOP, restated against V2:** a leaf outside section 1, a dated cell before 2026-10-07, a Cottonwood `partner_custody_total` or Global `non_model_aua` that differs, a delta other than X(d) on a named leaf, or an `errors` entry stops the deploy before the fire and D2 rolls back. **Window: D2 and D4 finish by 12:44Z on 2026-10-17.** If they cannot, the pair takes the 2026-10-18 fire.
+- **D1:** NOT DONE under leg 2.g(ii) (runner modules import both scripts), as CloudOps recorded; `mdpf-code-equality` keeps printing DIFFER for those names (a stated fact).
+- **D2b (the emitter) HELD**, the CTO's condition 3 of the first half stands: the emitter is not an act of this pair.
+- **Rollback per change:** unchanged from the first pair's section 4 (`MDPF_GOLD_COMMIT` back to `b6352de8f843f3726ad5c51c650d9035ca8336db`, `CodeSha256` back to `vNRXwWymIRmgptYv8+PEyFWH73IpIVHOpdT5mL/B7uk=`); a bad first object after the fire is answered by the readback, the code revert and the next fire's new date, never by a delete.
+
+## 5. Blast radius and what is priced
+
+**What moves:** the section 1 leaves at Cottonwood and Global on the seven dates 2026-10-07 .. 10-15 of the NEW objects; the Custom `members` list at all four scopes; the new as-of date's ordinary append; `run.code.commit`. **Cannot move:** any dated object already served (write-once), Cottonwood `partner_custody_total`, Global `non_model_aua`, any value at 49financial or inflection, the Hewitt account (stays in Other) and the sleeve `opal_muni_sleeve` (a different key), the publisher, the portal, the edge.
+**What this pair accepts (priced, client-facing):** the Global view's total AUM rises by 63.47M on 2026-10-15 (2.92% of 2,174.03M; model AUM +3.47%; enterprise total +2.96%; non-model share 14.59% -> 14.17%), and by 63.0M to 64.1M on the other six dates; the Cottonwood view moves the same dollars from Other AUM to Custom Models with its total unchanged; the Global and Cottonwood Custom Models groups show the account; the Cottonwood Client Holdings distribution statistics change. **Andrew sees this as a headline change at Global; the CTO half is asked to say whether it reaches him before the fire.**
+
+## 6. Acceptance after the fire (the issuer reads; never a leg of the CloudOps order)
+
+On the 2026-10-17 13:30Z gold fire and 13:50Z publisher run, denominators printed: (1) Cottonwood: `by_model.opal_muni_income` present with display "Opal Municipal Bonds", `partner_custody_total` equal to the prior object on every date, the W-2b identity on every dated row; (2) Global: `model_aua`, `opal_aggregate_aua` and `base_excluding_tax_aua` differ from the prior object by X(d) on the seven dates and nowhere else, `non_model_aua` equal everywhere, `r9_trend_groups_readback.py` (11 arms) passes; (3) the run manifest: `errors` empty, `a4_objects_built` 16, `run.code.commit` equals the pin; the publisher manifest `all_present` True; (4) `/seams` and the portal render of the Cottonwood and Global Custom Models bands (the CVO's, now that CN-s-3 and CN-s-4 are on DEV and wait for the PROD promote).
+
+## COO half -- OWED SIGNATURE by 2.0.0_SA_COO~D1 (a line in a commit by that seat)
+
+## CTO half -- OWED (`1.0.0_SA_CTO~DELL1`), binding the sha256 of this file as committed

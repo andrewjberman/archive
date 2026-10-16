@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-l-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-5.first-moved-trigger.md",
+  "group": "OTHER",
+  "vintage_commit": "61765b4519"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R8.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-l-5.first-moved-trigger.md",
+  "vintage_commit": "61765b4519"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/inf-pipeline/inf-portal-publisher-floor.tf",
+   "kind": "script",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "scoped safe-apply 2026-10-15T13:09:22Z, plan 1 to add, 2 to change, 0 to destroy, applied 1/2/0; read back 2026-10-16T13:37Z and 16:40Z: floor advi-inf-publish-daily ENABLED Input {}, catch-up advi-inf-publish-catchup-daily ENABLED cron(30 16 * * ? *) Input {}",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "61989d5895"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/inf-pipeline/s3-notifications.tf",
+   "kind": "script",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "same apply; read back 2026-10-16T13:37Z and 16:40Z: the opal-data-inf notification holds the silver entry alone, the gold/meta/ entry absent",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "61989d5895"
+  },
+  {
+   "path_or_key": "EventBridge Scheduler advi-inf-publish-daily and advi-inf-publish-catchup-daily; opal-data-inf bucket notification",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the first floor day 2026-10-16: 13:30Z fire published (22 of 23 named keys, 0 outside), 16:30Z fire halted with 0 writes, no marker-triggered invocation",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "3ab9c9e299"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/MOVE_RECORD.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "dc05178afa"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "cd C:/dev/ajb_workspace && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py move --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/MOVE_RECORD.json",
+   "expect": "^MOVE: OK trigger=.+$",
+   "output_evidence": "MOVE: OK trigger=inf-portal-publisher",
+   "denominator": "one trigger (inf-portal-publisher), one floor day: 2 scheduled fires (13:30Z published, 16:30Z halted), 1 marker write with 0 invocations after it",
+   "status": "PASS",
+   "criterion_verbatim": "cd C:/dev/ajb_workspace && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py move --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/MOVE_RECORD.json",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. The control: the same schedule target on two fires one day apart in effect, the 13:30Z fire (frontier after served, publishes) against the 16:30Z fire (frontier equals served, halts), and the 2026-10-15 post-switch fires (both halted).",
+   "expected": "publish when the dated frontier is after the served date, halt otherwise",
+   "observed": "2026-10-16 13:30:33Z READINESS OK; 16:30:17Z READINESS HALT not-after-served",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "two live fires on one day and two on the day before",
+   "observed": "the guard decided each as its rule states",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "M04 steps (3) to (6) (mdpf-feeder-accelerator, the marker object and its S3 delete, the fence Deny)",
+   "reason": "not in this order or its addenda; each needs a new half"
+  },
+  {
+   "item": "a count-equal clause on the platinum/ version listing",
+   "reason": "the bucket rule expire-noncurrent-versions-14d removed noncurrent versions between the before and after reads (79959 to 77338) with 0 writes; read as zero writes (versions with LastModified after 13:35Z: 0, delete markers: 0, advisor objects 32 and 32)"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r8_checks.py move",
+   "invocation": "as quoted",
+   "result": "MOVE: OK trigger=inf-portal-publisher"
+  },
+  {
+   "tool": "deploy_ledger.py close-leg / close",
+   "invocation": "--slug advi-firmbkts-fb-l-5-act3-switch-publisher-trigger-20261015 (leg L4, then close)",
+   "result": "OK: CLOSED deploy ledger, all 4 legs proven; sentinel removed"
+  }
+ ]
+}

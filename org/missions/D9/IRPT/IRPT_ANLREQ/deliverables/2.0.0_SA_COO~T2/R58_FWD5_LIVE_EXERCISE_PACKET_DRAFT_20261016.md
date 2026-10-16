@@ -1,0 +1,71 @@
+# IRPT_ANLREQ workstream T -- DRAFT packet, COO half: the FWD-5 live cross-firm exercise (mint, drive, remove)
+
+**Status (18:5xZ update): COO HALF READY FOR THE CTO HALF; NOT FOR AN APPLIER UNTIL THE CTO HALF IS SIGNED ON THIS BLOB.** Section 7 holds the pins. Author `2.0.0_SA_COO~T2`, 2026-10-16 ~16:4xZ (first draft). Claim levels: *measured* = read from a named file; *held* = a message or ruling; *to measure* = read at the pin before signing. It becomes the packet when (a) `2.0.0_SA_COO~V2` messages that `TCKT_VNEXT.TO-R18-REL` (the combined R18/R19 release) has read back, and (b) every "to measure" line below is read and filled. Amending it voids a signed CTO half (re-sign on the new blob). Nothing here is run.
+
+## 1. What the act is
+
+Authority (held): CTO Move 2 (msg 8742): FWD-5's DONE WHEN is a seat-driven exercise; the cross-firm tests (AR-tz-61..64) and the driver exist; the run follows V2's release. Row `IRPT_ANLREQ-D2-S134` stays ARMED until this run reads back.
+
+Three steps, one actor (the single IRPT CloudOps lane under rule 34; the lane is named by the CTO, `0.7.0_AE_CloudOps~AQ2` while it holds the macro), on portal DEV only:
+
+1. **Mint** one scoped second-firm principal: `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/fwd5_mint.py mint --email <name>@opal.invalid --firm <firm B> --allowed-firm-ids <firm B>` (measured header: one users row in `opal-users-v2`, conditional write, bcrypt cost 12, password read from stdin as one JSON object, TTL 3 hours, output only `MINT-OK READBACK-OK` / `MINT-REFUSED <word>`). The address is not the FWD-1 helper's (`fwd1-staff-r41b@opal.invalid`).
+2. **Drive** `.../0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py --base <DEV origin> --email <that address> --ticket <the ticket of the OTHER firm> --firm-a <the PRINCIPAL's own firm> --firm-b <the OTHER firm, the ticket's owner> --request-id <that firm's request> --job-id <that firm's job> --out <applier deliverables dir> --go IRPT_ANLREQ.TO-RUN-FWD5.<id>` (measured header: signs in, makes each listed call for ONE ticket of the OTHER firm, verdicts REFUSED / LEAK / UNREACHED / EXCLUDED; exit 0 only if every made call is REFUSED; report `fwd5_run_report.json` holds no body, cookie, token, password or address).
+3. **Remove** each principal (the run principal and the control, section 1c): `fwd5_mint.py remove --email <that address>`; read `ABSENT GSI` and `ABSENT CONSISTENT` for each.
+
+## 1a. Scope of the minted principal (held: CTO ruling msg 9670, relayed by V2 msg 9673, 2026-10-16 ~17:0xZ)
+
+After the combined ticket-service release a staff row with neither `allowedFirmIds` nor the global marker is refused (403, firm scope not configured). The ruling: synthetic staff users minted after the release carry `allowedFirmIds` = [the ONE firm the run files under], never `scope_all_firms`; the mint's read-back prints the scope and the entitlement rows; each helper lands that as an amendment to its own helper's pair, which the CTO signs. For this act: `fwd5_mint.py` already writes `allowedFirmIds` as a list of strings from `--allowed-firm-ids` (measured header). To measure at the pin: (a) the mint's read-back does NOT yet print the scope and entitlement rows (header: output is only `MINT-OK READBACK-OK` / `MINT-REFUSED`), so an amendment cell is owed before this packet is signed; (b) the principal is a firm-B principal (its own firm), so its `allowedFirmIds` is [firm B] and it must be refused every call on firm A's ticket.
+
+## 1a2. CORRECTION 19:1xZ (issuer; flag naming) -- the packet's "firm A / firm B" and the driver's `--firm-a / --firm-b` are OPPOSITE labels
+
+In this packet "firm A" = the ticket's owner (`49financial`) and "firm B" = the principal's firm (`cottonwood`). The driver's flags mean the reverse (measured: `TO-AR-tz-67` line 29, "--ticket <ticket id of ANOTHER firm> --firm-a <the principal's firm>"; the driver sends `selected_tenant={firm_b}` and scans the answers for the ticket id and `firm_b`): `--firm-a` = the principal's own firm = `cottonwood`; `--firm-b` = the other firm, the ticket's owner = `49financial`. The exact run line is therefore `--ticket TCK-20261015-944c84f8 --firm-a cottonwood --firm-b 49financial --request-id REQ-d47252fe74634d0c5cdd8067 --job-id REQ-d47252fe74634d0c5cdd8067`, and the mint line is `--firm cottonwood --allowed-firm-ids cottonwood`. The blast radius is unchanged (one users row for cottonwood; GET calls to the 49financial ticket; no write); only the flag labels in step 2 of section 1 are corrected. The first CTO half (@32dbd895e3) was signed on the uncorrected blob 5fbb9aaf24; this text voids it and asks for a re-sign.
+
+## 1c. POSITIVE CONTROL (held: laptop CTO ruling of XA-20261016T191116Z-4c60 at 19:36:16Z, relayed by `1.0.0_SA_CTO~DELL2` msg 9804; BINDING)
+
+The same run carries a positive control: the same GET list issued by an identity ENTITLED to the ticket, no new grant, which must read ALLOWED, so each firm-B REFUSED is shown to be the fence and not a broken route. All-refused without the control grades nothing. Design (this packet's amendment):
+
+- A SECOND principal, the control, minted by the same helper and the same kind of row as `2.0.0_SA_COO~V2`'s staff-only user (measured in `ar_v33_run.mjs`: `role=user userType=test-filer firmId=opal-capital entitlement_rows=0`): `fwd5_mint.py mint --email fwd5-control-r60@opal.invalid --firm opal-capital --allowed-firm-ids 49financial`. Its scope names the ONE firm of the ticket (`allowedFirmIds` = [49financial]); the mint's read-back prints `MINT-SCOPE allowedFirmIds=49financial entitlement_rows=0` and refuses otherwise. The run principal's address is `fwd5-cottonwood-r60@opal.invalid`.
+- The driver's new `--control` mode (order `IRPT_ANLREQ.TO-AR-tz-70`, to be merged and pinned in section 7): the same non-excluded routes, verdicts ALLOWED / DENIED / UNREACHED / EXCLUDED, exit 0 only when `ticket-read` and `ticket-list` are both ALLOWED (the list must carry the ticket id), report `fwd5_control_report.json`. The package-file routes are REPORTED (the ticket has no package, so an owner's 404 is a true answer) and do not change the exit.
+- The grade per route: the fence is SHOWN on a route iff the control reads ALLOWED there and the firm-B run reads REFUSED there. A route where the control is not ALLOWED is INCONCLUSIVE for the fence (reported, not claimed).
+
+## 1b. Gate state at 18:1xZ (measured from a message, not read live by this seat)
+
+The combined ticket-service release is LIVE (held: `2.0.0_SA_COO~V2` msg 9734: `opal-ticket-api` CodeSha `JwdnACONAnxw...`, modified 17:57:13Z; TV2's ledger closed 18:01:43Z; V2 ran `r18_rel_check.py` and `r19_rel_check.py` itself: REL-OK both). This is the readback the draft waited on. The base for the driver is the portal dev server on port 5174 as in V2's AR-v33 (measured in `ar_v33_run.mjs`: `BASE = http://localhost:5174`); the applier REUSES the server already on 5174 (Andrew's smoke copy, `C:/dev/smoke-template-5174`) and NEVER starts, stops or restarts it (CTO condition 1, msg 9779). Firm A is `49financial` (ticket `TCK-20261015-944c84f8`, request and job `REQ-d47252fe74634d0c5cdd8067`: the synthetic row, now restored by t56). Firm B is another firm whose id the ticket service knows. Measured in `infra/aws/lambda/ticket_center/lambda_function.py:1124-1131` (comment): the portal knows 4 firms, `49financial`, `cottonwood`, `demo`, `inflection`; `inflection` is the one not reachable by `/submit-request`. Proposed firm B = `cottonwood` (a partner firm with a real filing path, so a refusal on firm A's ticket is a real cross-firm refusal and not an access gap of the firm itself); `inflection` is the alternative. The CTO half confirms the choice. The principal is firm B's own principal: `firmId` = firm B and `allowedFirmIds` = [firm B].
+
+## 2. To measure before signing
+
+- V2's readback message for TO-R18-REL (code and env released; the ticket service carries the fence); the DEV origin the driver is aimed at (the ticket service's address, not a client page).
+- Firm A and firm B: two real firms on DEV, one ticket, request and job of firm A that already exist (no creation by this act). Which firm is B, and that the principal's `allowedFirmIds` is B only.
+- The password source: one stdin object supplied by the applier from its own session; nothing typed into a file or the order.
+- The N writers of the `opal-users-v2` row for this email: one (the mint); the remove is the only delete.
+- A dry run of `fwd5_driver.py --plan` and `--selftest` at the pin (offline; both must exit 0), and `test_fwd5_driver_offline.py` plus the exit-semantics test green at the pin.
+
+## 3. Expected outcomes (both branches)
+
+- The control first or second in the same sitting (both principals minted before either runs): control exit 0 (`ticket-read` and `ticket-list` ALLOWED) AND the firm-B run exit 0 (all 7 made calls REFUSED): FWD-5's seat-driven exercise is graded OK on every route where the control read ALLOWED; S134 disarms via its `disarm_owner`.
+- Control exit 1 or 2 (the control is broken or unreached): the run grades NOTHING; both principals are removed; the fence is not shown, S134 stays ARMED, and the issuer decides the next order. A firm-B run that reads a LEAK is the stop below whatever the control reads.
+- Any LEAK (exit 1): STOP at once, remove the principal first, report the route name only (never a body); the release is the defect and goes to V2 and the CTO. Any UNREACHED (exit 2): not a pass; report which call, remove the principal, no retry without the issuer's order.
+
+## 4. Blast radius and rollback
+
+Two users rows on DEV (the run principal and the control, each self-expiring at 3 hours, removed by step 3); GET calls to one ticket service on DEV; no write to any ticket, request or job; no S3 key, no schedule, no Terraform, no Lambda code. Rollback = step 3, and the row's TTL if the applier is interrupted. A NEVER-2 ledger entry opens at start and closes at step 3; the order's `<paths>` name the deliverables folder, the ledger and the sentinel.
+
+## 5. Who
+
+Pair: this COO half; the CTO half (`1.0.0_SA_CTO~DELL2`) signs the blob. Applier: the IRPT CloudOps lane under an order cut only after the signed half and V2's readback. No order is cut from this draft.
+
+## 7. Measured on 2026-10-16 ~18:5xZ (issuer; offline runs and git reads at HEAD 8d222ddade, nothing live)
+
+- Blob pins at HEAD (`git rev-parse HEAD:<path>`, paths under `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/`): `0.9.0_WK_IRPT_ANLREQ~219/fwd5_driver/fwd5_mint.py` = `ec8607ed57` (AR-tz-69 merged 59b330f528: prints `MINT-SCOPE allowedFirmIds=.. entitlement_rows=..`, refuses nonzero entitlement rows); `.../test_cross_firm_mint.py` = `4c9f115d4e`; `0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py` = `f59484af11`; `.../test_fwd5_driver_offline.py` = `8816670a56`; `0.9.0_WK_IRPT_ANLREQ~232/fwd5_driver/test_fwd5_driver_exit_semantics.py` = `76ac59cc3f`. The applier hashes the files it runs against these before any step.
+- Offline: `fwd5_driver.py --selftest` prints `FWD5-SELFTEST-OK checks=19`; `--plan` sends nothing and states the required ids and the `--go` token; `test_cross_firm_mint.py` R46-TESTS-OK passed=25; the driver's two test files R46-TESTS-OK passed=23.
+- Run inputs: ticket `TCK-20261015-944c84f8`, request and job `REQ-d47252fe74634d0c5cdd8067` (tenant `49financial`; the synthetic row, READY, `hop_failure` absent after t56), firm A `49financial`, firm B `cottonwood` (CTO half confirms), base `http://localhost:5174` (the smoke server that is already running: reused, never stopped or restarted; if it lacks a checkout the driver needs, the run waits and asks the CTO). The password: 32 random bytes generated in the applier's memory and handed to the mint and to the driver on stdin only, as in AR-v33.
+- The release is live (held, V2 msg 9734); the applier's STOP list: any non-`REFUSED` answer is reported by route name only and the principal is removed first; a mint refusal or `READBACK-BAD` stops the run before any request; the principal's TTL is 3 hours.
+- Not claimed: that the driver has ever run against the live service (it has not); that the ticket service refuses firm A's ticket to a firm B principal (that is the run's result).
+- Order: after the CTO half, the run order `IRPT_ANLREQ.TO-RUN-FWD5.<id>` goes to the single IRPT CloudOps lane (`0.7.0_AE_CloudOps~IB2`, rule 34), cited in my GO.
+
+## 7b. Control mode pins (measured 2026-10-16 ~20:4xZ at HEAD 83470ec8a2; AR-tz-70 merged 8815bee2b0)
+
+- `0.9.0_WK_IRPT_ANLREQ~231/fwd5_driver/fwd5_driver.py` is now `06206f2864` (REPLACES the `f59484af11` pin in section 7: the `--control` mode, +138/-15; run mode byte-identical without the flag); `0.9.0_WK_IRPT_ANLREQ~272/fwd5_driver/test_fwd5_driver_control.py` = `2186cd2731`. `fwd5_mint.py` stays `ec8607ed57`, `test_cross_firm_mint.py` `4c9f115d4e`, the two older driver test files unchanged.
+- Offline: `test_fwd5_driver_control.py` R46-TESTS-OK passed=14; the two older driver test files passed=23 (unchanged); `fwd5_driver.py --selftest` prints `FWD5-SELFTEST-OK checks=36`. Control exit: 0 only if `ticket-read` AND `ticket-list` are ALLOWED (the list must carry the ticket id, an exact case-insensitive match on a string value of a `tickets` entry); 1 if either is DENIED (DENIED beats UNREACHED); 2 if either is UNREACHED, no session, or an id missing. Surprise rows W272-S1..S3 disposed (S153).
+- Order of the sitting: mint BOTH principals (the run principal and the control, each `MINT-OK READBACK-OK` plus `MINT-SCOPE ... entitlement_rows=0`), run `--control` first as the control principal, run the firm-B driver, remove BOTH (ABSENT GSI and CONSISTENT for each). The issuer's checks (`R56_CHECKS/r56_checks.py`, committed): `control`, `report`, `fence` (the CTO's grade: fence SHOWN iff control ALLOWED and run REFUSED on `ticket-read` and `ticket-list`), `absent` (both principals).
+- Caveat stated: the live `ticket-list` entry shape is unread by this seat; a shape the match does not see reads DENIED, the control exits 1, nothing is graded, both principals are removed (the safe failure, one re-cut).

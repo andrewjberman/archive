@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-144",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-144.ycharts-price-tier-and-host-budget-binding.md",
+    "group": "OTHER",
+    "vintage_commit": "1167fe7384"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R48_G.md",
+    "vintage_commit": "1167fe7384",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-144.ycharts-price-tier-and-host-budget-binding.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~271",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "e50032bd47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-271 (code commit e50032bd47); no deploy, no AWS call, no push; the shipped r34g bindings carry neither the ycharts tier nor the budget, so the running resident is unchanged",
+      "artifact_covered_by": ["AR144-g-AC1", "AR144-g-AC2", "AR144-g-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/price_transport_ycharts.py",
+      "kind": "script",
+      "commit_or_etag": "e50032bd47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new module committed LOCAL (code commit e50032bd47); imported only by the ycharts branch of _pricing_extras, which no shipped binding reaches",
+      "artifact_covered_by": ["AR144-g-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_ycharts_price_tier.py",
+      "kind": "test",
+      "commit_or_etag": "e50032bd47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file (fake sessions, no network), 22 tests pass at HEAD cede9c7931",
+      "artifact_covered_by": ["AR144-g-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_transport_ycharts.py",
+      "kind": "test",
+      "commit_or_etag": "e50032bd47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file (fake sessions and facades), 12 tests pass at HEAD cede9c7931",
+      "artifact_covered_by": ["AR144-g-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_opal_pricing_binding.py",
+      "kind": "test",
+      "commit_or_etag": "e50032bd47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one line removed: the ycharts entry leaves the refused-tiers list (the tier is now valid); 19 tests pass at HEAD cede9c7931",
+      "artifact_covered_by": ["AR144-g-AC2", "AR144-g-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cede9c7931",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (IRPT_ANLREQ-D2-W271-S2 and IRPT_ANLREQ-D2-W271-S3), append-only, 47 insertions and 0 deletions; surprise-row-gate OK",
+      "artifact_covered_by": ["AR144-g-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR144-g-AC1",
+      "criterion_verbatim": "AC1 runs the real `load_bindings`, the new transport and `_pricing_extras` over fake sessions: a valid tier and budget load; twelve malformed budgets are refused with RESIDENT_WINDOW_BUDGET_BINDING; the transport returns the parsed answer, encodes the request path as the research runner does, acquires once per call and closes the facade even when the call raises, and raises on an exception, a non-200 reply and a body that is not JSON; the ycharts reader is built from a session and returns rows; a ycharts tier with no session is refused; `build_resident_runtime` passes `window_budget` to its `ResidentSession` and `session=` to `_pricing_extras` (read from the source). The fixture is the r34g package's own bindings file at `C:/dev/irpt-release-r34m/x34/reports/resident_bindings.json`. At base it FAILs.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g144_checks.py build",
+      "output_evidence": "AR-G144-OK build: all arms | rc=0 (timeout 120 bound) | run twice at HEAD cede9c7931, the two outputs byte-identical | base run before the code commit: AR-G144-FAIL build, 14 failures (b1 valid tier refused RESIDENT_PRICING_BINDINGS; 12 budgets not refused; b2 price_transport_ycharts missing)",
+      "denominator": "4 of 4 build groups ran: b1 bindings (2 valid loads; 12 of 12 malformed budgets refused with RESIDENT_WINDOW_BUDGET_BINDING); b2 transport (3 passing checks; 4 of 4 refusing arms raise and close the facade); b3 reader (1 of 1 built from the session; 1 of 1 no-session refusal); b4 runtime (2 of 2 source keyword checks)",
+      "expect": "^AR-G144-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR144-g-AC2",
+      "criterion_verbatim": "AC2 holds what must not move: the shipped bindings still load, an unknown tier is still refused, a disabled pricing binding gives no extras, a two-tier binding works with no session. At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g144_checks.py guard",
+      "output_evidence": "AR-G144-OK guard: all arms | rc=0 (timeout 120 bound) | at HEAD cede9c7931 | base run before the code commit: AR-G144-OK guard: all arms",
+      "denominator": "4 of 4 guard arms: g1 shipped r34g bindings load; g2 unknown tier refused RESIDENT_PRICING_BINDINGS; g3 disabled pricing binding gives no extras; g4 two-tier binding with no session gives a callable",
+      "expect": "^AR-G144-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR144-g-AC3",
+      "criterion_verbatim": "AC3 runs each existing pricing, price-source, adapter and session test file on its own (`test_opal_pricing_binding.py`, `test_resident_r32_source.py`, `test_price_source.py`, `test_price_adapter_ycharts.py`, `ycharts/session/tests/test_resident_session.py`) and then that the branch changed only your files, your folder, the order and the channel file (against the merge-base with `box/dell2`). At base it PASSes (after the AR-g-142 merge).",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g144_checks.py regress",
+      "output_evidence": "AR-G144-REGRESS-OK | rc=0 (timeout 120 bound) | at HEAD cede9c7931 | base run before the code commit: AR-G144-REGRESS-OK",
+      "denominator": "5 of 5 existing test files pass on their own (test_opal_pricing_binding.py, test_resident_r32_source.py, test_price_source.py, test_price_adapter_ycharts.py, ycharts/session/tests/test_resident_session.py); scope: 6 of 6 committed paths against the merge-base 9519215745 inside the grant, 0 outside",
+      "expect": "^AR-G144-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arm in a scratch copy (.scratch/mut): price_transport_ycharts.make_transport closes the facade only on a successful request (no finally); the transport test file must refuse it. The worktree module is not touched.",
+      "expected": "the arm that raises inside request fails on the facade-closed assertion",
+      "observed": "1 failed, 11 passed: test_a_raising_request_propagates_unchanged_and_the_facade_is_still_closed (assert closed is False). The non-200 and non-JSON arms still pass, as they should: the reply returns normally before the status check, so the close still runs.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 build run twice at HEAD cede9c7931; the two stdout captures compared byte for byte",
+      "observed": "identical: AR-G144-OK build: all arms, rc=0 in both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any live YCharts call: the answer to id:<TICKER> for a plain holding ticker, the served single-ticker fund_data shape at zoom max, and whether the price route answers the signed-in session",
+      "reason": "the order's bounds are offline (no network); the scope record AR-g-141 lists all three as NOT seen; they are measured after the window, not in this cell"
+    },
+    {
+      "item": "the r34h release: the bindings that carry the ycharts tier and ycharts_window_budget (6 calls, 390 s)",
+      "reason": "the cell moves nothing deployed (risk WORLD floor); the release runs under its own never-widen pair and sets the budget in the bindings, not in code"
+    },
+    {
+      "item": "build_resident_package.py default (opal_pricing enabled false, tiers estate and yfinance) and the overview map",
+      "reason": "outside the <paths> grant; the default is left unchanged on purpose, so no install gains the tier"
+    },
+    {
+      "item": "the price stage's per-run call count (opal_producer.py lines 282 and 295, one call per holding plus SPY and BIL) against the 6-call window",
+      "reason": "the scope record names this as a gap for the price stage; the order bounds the cell to the budget binding and the transport, and the window budget itself refuses over-budget calls as the lease's OPERATION_WINDOW_BUDGET"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W271-S2: TO-AR-g-144 keeps its RECORD FACE in the same file as its WORKER FACE; a whole-file Read returned both. The RECORD FACE text was not acted on.",
+    "IRPT_ANLREQ-D2-W271-S3: the commit gate client-data-check printed WARN (hashed account-id list absent on this device) and did not check commit e50032bd47."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g144_checks.py build|guard|regress",
+      "result": "AR-G144-OK build, AR-G144-OK guard, AR-G144-REGRESS-OK (rc=0 each, at HEAD cede9c7931)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider on the two new test files and reports/tests/test_opal_pricing_binding.py",
+      "result": "22 passed (test_ycharts_price_tier.py), 12 passed (test_price_transport_ycharts.py), 19 passed (test_opal_pricing_binding.py)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 on the five code and test files",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "git",
+      "invocation": "git diff --name-only $(git merge-base HEAD box/dell2) HEAD",
+      "result": "6 paths, all inside the grant"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields"
+    }
+  ]
+}

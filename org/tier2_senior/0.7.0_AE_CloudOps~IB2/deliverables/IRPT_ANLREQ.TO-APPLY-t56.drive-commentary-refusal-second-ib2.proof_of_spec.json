@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-APPLY-t56.drive-commentary-refusal-second-ib2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-APPLY-t56.drive-commentary-refusal-second-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "35cccb7516"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R58_T.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-APPLY-t56.drive-commentary-refusal-second-ib2.md",
+  "vintage_commit": "35cccb7516"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "dynamodb:irpt-jobs item (tenant 49financial, the synthetic job row of the t55 request): attribute hop_failure, set then removed",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "leg A 2026-10-16T17:08:24Z: one direct invoke of outlook-global-commentary-draft-lambda with the refused-body record, the live fail op wrote hop_failure COMMENTARY / COMMENTARY_DRAFT_REFUSED at 2026-10-16T17:08:33Z, the log line HOP-FAILURE-REPORTED written=true a second time (R55-HOPLOG2-OK events_with_line=2 need=2); leg B 2026-10-16T17:29Z: one conditional REMOVE of that attribute, read back ABSENT, state READY, item sha256 equal to PRE (R55-HOPABSENT-OK)",
+   "artifact_covered_by": [
+    "AR79-tf-AC1",
+    "AR79-tf-AC2"
+   ],
+   "commit_or_etag": "PRE item sha256 e7ff82b5dc0725f1 restored"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR79-tf-AC1",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hoplog2",
+   "expect": "R55-HOPLOG2-OK",
+   "output_evidence": "R55-HOPLOG2-OK events_with_line=2 need=2\nexit=0",
+   "denominator": "1 log group filtered for the HOP-FAILURE-REPORTED line: 2 events (t55's and t56's)",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hoplog2",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AR79-tf-AC2",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hopabsent",
+   "expect": "R55-HOPABSENT-OK",
+   "output_evidence": "R55-HOPABSENT-OK row exists, hop_failure absent\nexit=0",
+   "denominator": "1 consistent get-item of the one job row: hop_failure absent, state READY, 11 attributes",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R55_CHECKS/r55_checks.py hopabsent",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the item hash without the attribute is compared with PRE before the invoke, after it, and after the removal",
+   "observed": "equal at all three reads",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the SQS redelivery and dead-letter path",
+   "reason": "a direct invoke: no SQS message exists, so nothing was redelivered and no dead-letter entry was made"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261016T1707Z_irpt-t56-commentary-refusal-second-20261016_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "aws lambda invoke / dynamodb get-item and update-item, r55_checks.py",
+   "invocation": "hopabsent before, one invoke, hoplog2, hopabsent after leg B",
+   "result": "R55-HOPLOG2-OK events_with_line=2 need=2; R55-HOPABSENT-OK"
+  }
+ ]
+}

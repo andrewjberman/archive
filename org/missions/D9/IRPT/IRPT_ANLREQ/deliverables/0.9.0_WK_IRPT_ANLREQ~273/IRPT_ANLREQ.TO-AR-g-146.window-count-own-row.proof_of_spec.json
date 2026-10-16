@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-146",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-146.window-count-own-row.md",
+    "group": "OTHER",
+    "vintage_commit": "a8527535bdb2fecbe7fb136924449ffb2876a17b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R49_G.md",
+    "vintage_commit": "a8527535bdb2fecbe7fb136924449ffb2876a17b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-146.window-count-own-row.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~273",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py",
+      "kind": "script",
+      "commit_or_etag": "3af31c94ca9bdb9a6abd0befd4d11b6508d48607",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline stdlib lease module, committed on wk-IRPT_ANLREQ-273 only; nothing deployed; reaches production only through the r34h resident release under its own never-widen pair",
+      "artifact_covered_by": [
+        "AR146-g-AC1",
+        "AR146-g-AC2",
+        "AR146-g-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_window_budget.py",
+      "kind": "test",
+      "commit_or_etag": "3af31c94ca9bdb9a6abd0befd4d11b6508d48607",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline tests rewritten to the own-row design (37 passed under pytest, rc=0); every behaviour test kept, row-shape tests changed",
+      "artifact_covered_by": [
+        "AR146-g-AC1",
+        "AR146-g-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR146-g-AC1",
+      "criterion_verbatim": "AC1 runs the real `OperationLease` over a fake store: three calls pass and the fourth is refused with OPERATION_WINDOW_BUDGET and the exact retry_after, writing nothing in either row; the count sits in ONE separate row with keys exactly version, window_start, window_count; the lease row keeps exactly its eight keys with a budget; the window rolls over at exactly window_s; a second lease object shares the count; ten invalid budgets are refused; `resident_session.py` still passes the budget; a budgeted lease over an old store counts from 1; six malformed window rows are OPERATION_STORE_INVALID and leave the lease row alone; a window row that cannot be written (a swap that keeps failing, or a store that raises) does not stop the call. At base (the AR-g-142 in-row design) it FAILs.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g146_checks.py build",
+      "output_evidence": "AR-G146-OK build: all arms (rc=0; run under timeout 120 at HEAD 3af31c94ca after the code commit; the same line at the post-edit run). Base a8527535bd (AR-g-142 in-row design), same invocation: AR-G146-FAIL build: b1 the window row is [] (want one row with keys ['version', 'window_count', 'window_start'], count 3, start 100.0); b2 there is no window row after the rollover call (the count is not in its own row) (rc=1).",
+      "denominator": "9 build arm groups (b1-b9 in arms_build), 0 failing at HEAD 3af31c94ca; at base 2 failures reported (b1, b2), b3-b9 not reached because b2 returns early",
+      "expect": "^AR-G146-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR146-g-AC2",
+      "criterion_verbatim": "AC2 holds what must not move: with no budget twenty spaced calls pass, the store holds ONE row, the lease row has its eight keys; OPERATION_SPACING comes before the budget and consumes no count. At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g146_checks.py guard",
+      "output_evidence": "AR-G146-OK guard: all arms (rc=0; run under timeout 120 at HEAD 3af31c94ca). Base a8527535bd, same invocation: AR-G146-OK guard: all arms (rc=0).",
+      "denominator": "2 guard arm groups (g1, g2), 0 failing at HEAD 3af31c94ca; 2 of 2 passing at base",
+      "expect": "^AR-G146-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR146-g-AC3",
+      "criterion_verbatim": "AC3 runs each existing lease, window-budget, session, capture and runner test file on its own and then that the branch changed only your files, your folder, the order and the channel file (against the merge-base with `box/dell2`). At base it PASSes.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g146_checks.py regress",
+      "output_evidence": "AR-G146-REGRESS-OK  (rc=0; run under timeout 120 at HEAD 3af31c94ca; the checker prints the verdict only, so no per-file count is in its output). Base a8527535bd, same invocation: AR-G146-REGRESS-OK (rc=0).",
+      "denominator": "6 test files each run alone (test_operation_lease, test_window_budget, test_resident_session, test_resident_session_checker, test_host_capture, test_runner) plus the scope check against the merge-base with box/dell2; 0 failing",
+      "expect": "^AR-G146-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base (AR-g-142 in-row design, commit a8527535bd) is the mutant: the own-row arms must fire against it.",
+      "expected": "AR-G146-FAIL build (the in-row design fails the own-row arms)",
+      "observed": "AR-G146-FAIL build: b1 the window row is [] ...; b2 there is no window row after the rollover call (the count is not in its own row)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: build run after the edit (worktree content equal to the code commit) and build run after the commit at 3af31c94ca, both under timeout 120",
+      "observed": "both AR-G146-OK build: all arms (rc=0)",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "live DynamoDB window rows and any reader of them other than this package",
+      "reason": "offline cell; no AWS call was made, so no live row was read"
+    },
+    {
+      "item": "a concurrent window commit that stalls past the 2 s SPACING window could race a second lease object's decision and write a stale count (one call uncounted)",
+      "reason": "the order fixes the decide-then-commit design; the race needs a commit stalled beyond SPACING; not exercised offline by this cell and noted in the worker report"
+    },
+    {
+      "item": "the r34h resident release and its rollback drill",
+      "reason": "outside this cell; the issuer's r34h packet owns it"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g146_checks.py build | guard | regress",
+      "result": "AR-G146-OK build; AR-G146-OK guard; AR-G146-REGRESS-OK (each rc=0)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/session/tests/test_window_budget.py",
+      "result": "37 passed, rc=0"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/session/tests/test_operation_lease.py",
+      "result": "15 passed, rc=0"
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py",
+      "result": "rc=0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 on operation_lease.py and tests/test_window_budget.py",
+      "result": "All checks passed! rc=0"
+    }
+  ]
+}

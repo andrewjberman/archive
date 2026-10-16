@@ -1,0 +1,33 @@
+HVST-cc-7 amendment 1 step (A): can the tarball the deploy uploads carry the LIVE artifact's dashboard dist, with NO gate or script edited? READ ONLY.
+Written by 0.7.0_AE_CloudOps~SC1, 2026-10-16 ~17:55Z. World acts: none (one S3 GET of the existing live artifact into this seat's scratch folder; no upload, no SSM, no deploy; the ledger is closed).
+
+WHAT WAS READ
+ - deploy-to-ec2.sh as it would RUN: the release tree's copy (the live commit's version), lines 36-80 (mcportal resolution), 219-292 (dashboard, staging, tar). HEAD's copy differs by 63 diff lines; neither has the switch below.
+ - infra/aws/ec2/opal-gateway/ops/: bun_cache_precheck.py, schwab_entitlement_admin.py, schwab_status.py (no repack or dist wrapper).
+ - The wrapper infra/aws/ec2/safe-ec2-deploy.sh: it takes ANY <deploy-script> as its second argument and adds the HALT gate, the manifest check and the manifest commit; it does not build.
+ - The native Grep over infra/aws/ec2 (*.sh, *.py, *.md, *.json) for prebuilt, repack, skip-precheck, DASHBOARD_DIST, MCPORTAL_DIST and the like: 4 hits, all BUN_INSTALL_CACHE_DIR (the precheck at bun_cache_precheck.py:11,53 and two tests).
+
+THE SWITCHES THAT EXIST IN THE DEPLOY PATH (all of them)
+ DEPLOY_BASE_REF (required, the stale-base guard); DASHBOARD_BUNDLE_DIR (the relative NAME of the dashboard dir inside the artifact, default "dashboard"); MCPORTAL_RESOLVE_ONLY=1 (print the mcportal resolution and exit 0); BUN_INSTALL_CACHE_DIR and BUN_INSTALL (WHERE bun's cache is, read by the precheck and by bun).
+ NONE selects a pre-built dist. MCPORTAL_DIR and MCP_REPO are assigned unconditionally (script lines 50-51); the build is not optional: the subshell at lines 236-239 runs the precheck, `bun install --frozen-lockfile` and `bun run build` under `set -euo pipefail`, and line 240 then requires $MCPORTAL_DIR/dist/index.html. The mcportal tree it builds in is a fresh detached worktree at the manifest's mcportal_commit (c66ca82952), which holds no dist/.
+
+THE CANDIDATE METHODS, EACH TESTED AGAINST THE ORDER'S RULE (no gate or script edited; no rebuild; no package fetch)
+ 1. BUN_INSTALL_CACHE_DIR pointing at a complete cache. The cache must hold all 77 lockfile packages (dell1 holds 27: ~/.bun/install/cache has 777 entries, 27 of the 77 present). The 50 missing packages come only from a package fetch or a rebuild elsewhere: both ruled out (CTO msg 6934). NOT AVAILABLE.
+ 2. A cache directory of stub packages (name, version and a parseable package.json) to satisfy the precheck, and a stub `vite` that copies the live dist into place. It would pass the precheck's letter and defeat its purpose (OG-bi-1: the dist must come from a real build or not be built); the bundle would be a copy dressed as a build. REFUSED as a circumvention of the gate.
+ 3. A `python`/`bun` shim earlier on PATH that makes the precheck or the build succeed. The same circumvention by substitution. REFUSED.
+ 4. A new wrapper script passed to safe-ec2-deploy.sh as the <deploy-script>, which repacks the live artifact plus the six files, uploads with the git-ref metadata and runs the on-host install. NOT an existing wrapper: it is new code, and the on-host install is the 300-line remote script (secrets read from Secrets Manager, .env written, unit restarted) that lives inside deploy-to-ec2.sh and cannot be reached without copying it. NOT "existing".
+ 5. Pointing the manifest's mcportal_commit at an mcportal commit whose lockfile dell1's 27 packages satisfy. It changes the dist (the order requires the live dist byte for byte) and edits a record the guards read. REFUSED.
+ 6. DASHBOARD_BUNDLE_DIR set to a directory that already holds the dist. It only renames the destination: line 245 copies $MCPORTAL_DIR/dist there after the build succeeded. DOES NOT SKIP THE BUILD.
+ So the dist can come from the live artifact ONLY if a script is changed: either a switch in deploy-to-ec2.sh (for example `DASHBOARD_PREBUILT_TARBALL=<path>`: when set, skip lines 229-245, extract only `dashboard/` from that tarball into $TMP/bundle and compare four sha256 to the values below), or the new wrapper of (4). Neither exists; the first edits the deploy script (the order's "no gate or script edited"); the second is new code reaching into the same remote script.
+
+FACTS FOR THE NEW COO HALF (measured, so a later check can use them)
+ Live artifact s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-d14445961d.tar.gz (equal ETag to -latest, 13:23Z), 883434 B, file sha256 a43d3de2d2c39a425faee5b7d7b33221483715ae8168b78f40ada80c67684449; 145 files: app/ 133, dashboard/ 4, deploy/ 4, lib/ 2 (opal_naming.py, trading_calendar.py), requirements.txt, identity_tool_allowlist.txt.
+ The dashboard dist, 4 files, full sha256 (these equal the MQ close report's sha256 prefixes for index.html, routes.json, the css and the js):
+   120ae5bbd491dd201ae22cff044f09dbd0e0407dee0d985a2f78bc49451921e4   13658  dashboard/assets/index-BRnJX9Mi.css
+   52466cffc886f76eb1562351543fd31959392e18445f877d49d103a2447289fb  302920  dashboard/assets/index-DbObnWYp.js
+   5a6e2eeef8ec0e9d332774452220bd0ac6020934bbe0cdb5b195fd60c9ca57ee     422  dashboard/index.html
+   e6d4a9ac3ce7d275158a56c490b586076cc0e728ae01501d5a0c88cba70207f1     322  dashboard/routes.json
+ CORRECTION to cc7_before.out: app/refs/partner_roster.json and app/refs/scopes.json are NOT leftovers. The live artifact ships them (133 app files, equal to the host's 133): the standard deploy stages them at lines 254-264 of the script from data/mdpf/config/partner_roster.json and infra/logic/registry/scopes.json of the deploying tree. So the git-tracked app/ tree (131) plus those two staged files equals the host. A release built by the standard script from the release tree stages the same two sources at the live commit's bytes.
+ What the tarball-listing diff of condition (B)(2) can and cannot show: the member list equals the live artifact's 145 names; the six paths are in app/ (3 changed files) and tests/ (3 new test files; tests/ is NOT shipped: the tar takes app deploy requirements.txt identity_tool_allowlist.txt only), so a listing diff would show the THREE app files as changed by content, not by name; a content diff (sha256 per member) shows exactly the three app files differ, plus nothing else if the other 142 members are byte-equal.
+
+DIST_METHOD=needs_gate_edit

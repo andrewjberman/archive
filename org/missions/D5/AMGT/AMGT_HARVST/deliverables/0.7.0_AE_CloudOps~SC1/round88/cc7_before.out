@@ -1,0 +1,35 @@
+HVST-cc-7 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, 2026-10-16 17:07Z -> 17:25Z (issuer GO msg 6917; the first attempt at 16:50Z stopped at the live-commit read, row AMGT_HARVST-D1-S35, and its ledger was closed as refused by gate; this file replaces that record, the earlier text is in git at c51141ff56).
+Ledger (fresh): org/critical_paths/.open_deploys/harvst-cc7-gateway-s29-20261016.json, legs BEFORE, DEPLOY, AFTER, SERVED.
+
+START CONDITIONS
+ (a) cc-1, cc-2, cc-3 complete; merges 006828d8d5, 44a1048df9, 0ce056da15 are ancestors of box/dell1 HEAD: TRUE.
+ (b) COO half sha256 b5c79b76ca3bc1a1e913601b9ea4f924cff2999e509957ec490dd762cffde710 equal; CTO half (msg 6895, C-6) read in full.
+ (c) ledger open at the start (opened 17:08Z, before any build).
+
+LIVE DEPLOYED COMMIT (the order: read all, record all, if they differ STOP) -- THEY AGREE
+ EC2_MANIFEST.json services.opal-gateway: deployed_commit d14445961dd6d04275ca8186372a4df4c4fcc5cc (2026-10-16T13:24:05Z, 0.7.0_AE_CloudOps~MQ); previous_deployed_commit 38fe44d5cb8d37b6007fb7e5fa47a25316e01054; instance_id i-07dccb1615503ac99; mcportal_commit c66ca82952c01575968d16cc736cdabe36606572.
+ Artifact plane (what the deploy's stale-base guard reads): opal-gateway-latest.tar.gz git-ref = d14445961dd6d04275ca8186372a4df4c4fcc5cc, LastModified 13:23:35Z, 883434 B, ETag ce83561b919f47b82119a79c63efe052.
+ The INSTANCE (SSM 6b9de271-21be-49f7-a879-0eb095b86ef7, read 17:11:34Z; script cc7_hostread.py, read only, delivered by S3 per Rule 12): unit active/running, MainPID 1195428, ActiveEnterTimestamp 13:23:55 UTC (the d14445961d deploy's restart).
+   The host's app/ tree vs git at d14445961d: 131 tracked files present on both, ZERO md5 differences (incl. server.py 3c4c2802..., harvest_figures.py 7bb009f8..., harvest_research.py f6ff1af5..., harvest_identity.py 09b6cb56..., config.py 00b73d4c...); the host holds TWO files git does not track at d14445961d: app/refs/partner_roster.json and app/refs/scopes.json (leftovers of earlier extracts; tar -x never deletes; this deploy does not touch them). So the instance runs d14445961d's app bytes.
+ PREVIOUS TARBALL KEY (the rollback target): ec2/opal-gateway/opal-gateway-38fe44d5cb.tar.gz (12:18:42Z, 883434 B, ETag df5cba50f8b9fed87e224ec54c6d966b). Both commits resolve on dell1 now (site Z pushed rel-nfra-mcportal-pf; git cat-file -t = commit for both).
+
+C-6 BEFORE (host, served registry: app.server imported, mcp._tool_manager.list_tools())
+ /health = 200 (localhost:8080)   MCP tool-name count = 127   names md5 = 9a593c843feb61c2753d8c08a84eb61d   (the exact 127 names: cc7_tools_before.txt)
+
+THE RELEASE CUT (branch rel-amgt-harvst-cc7, worktree C:/tmp/cc7-rel, LOCAL, NOT pushed)
+ base = the LIVE commit d14445961dd6d04275ca8186372a4df4c4fcc5cc, never HEAD. Release commit b5aa696c905119d5cb71aa2be2cc184a524a1be8, parent = d14445961dd6d04275ca8186372a4df4c4fcc5cc.
+ Carried (git checkout <merge> -- <path>): harvest_figures.py + tests/test_cc1_model_basis.py from 006828d8d5; harvest_identity.py + tests/test_cc3_ticker_shaped_never_exact_on_name.py from 0ce056da15; harvest_research.py + tests/test_cc2_research_misfiled.py from 44a1048df9.
+ CONTROL 1 (the order's): git diff --name-status d14445961dd6d04275ca8186372a4df4c4fcc5cc..b5aa696c90 -- infra/aws/ec2/opal-gateway :
+   M infra/aws/ec2/opal-gateway/app/harvest_figures.py
+   M infra/aws/ec2/opal-gateway/app/harvest_identity.py
+   M infra/aws/ec2/opal-gateway/app/harvest_research.py
+   A infra/aws/ec2/opal-gateway/tests/test_cc1_model_basis.py
+   A infra/aws/ec2/opal-gateway/tests/test_cc2_research_misfiled.py
+   A infra/aws/ec2/opal-gateway/tests/test_cc3_ticker_shaped_never_exact_on_name.py
+   SIX paths, no other. The same diff WITHOUT a pathspec (whole repo) is 6 lines.
+ CONTROL 2 (mine, per file): live->merge diff equals the cell's own change (merge first parent -> merge) for all six: +16 -3, +187, +5, +151, +85 -10, +219 (no foreign hunk from another seat). The three merges changed no other gateway path; harvest_research.py imports only .harvest_typed (shipped in app/); lib/research/corpus/typed.py is not part of the merge and not shipped.
+ TESTS on the release branch (run from C:/tmp/cc7-rel/infra/aws/ec2/opal-gateway; app imports resolve to C:\tmp\cc7-rel\...): test_cc1_model_basis, test_cc2_research_misfiled, test_cc3_ticker_shaped_never_exact_on_name, test_og_gt1, test_og_gt3, test_og_gt4 : 33 passed in 3.78 s.
+ Commit note: the tree-local safe-commit refused (naming gate on the live commit's older lib/opal_naming.py: KeyError 'interval_form'); the trunk's safe-commit run from inside the release tree committed it (the earlier release's practice).
+ Deploy-input checks in the release tree: lib.opal_naming address() for the two bronze roots answers the same as at HEAD; MCPORTAL_RESOLVE_ONLY=1 resolves mcportal at c66ca82952 (it was absent from dell1's nested mcportal repo; `git fetch origin` there made it local: c66ca82952 is an ancestor of origin/DEV; no push). The live commit's deploy script has no --preflight-only option.
+
+RESTART WINDOW: recorded in cc7_after.out and the ledger at the deploy (start = the SSM send, end = /health 200 after the restart).

@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-n-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_TRADEFORM.md",
+    "vintage_commit": "8c428630c5",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-n-1.trade-form-fence-apply.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-n-1.trade-form-fence-apply.md",
+    "group": "OTHER",
+    "vintage_commit": "8369f495d8"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TF",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/s3-ticket-trade-form-cors.tf",
+      "kind": "script",
+      "commit_or_etag": "b156a4a2b4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc 0, 'Apply complete! Resources: 3 added, 3 changed, 0 destroyed.'; get-bucket-cors on the three buckets reads the three origins, GET and PUT, Content-Type, ETag, 300; post-apply scoped plan: No changes",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf",
+      "kind": "script",
+      "commit_or_etag": "e411130091",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the CTO's one lookup line (fence_scoped_allow_statements); live bucket policies of opal-data-49financial, opal-data-inflection and opal-data-cottonwood equal the plan after normalizing S3's re-serialization (37, 9 and 7 statements); 0 statements removed; only DenyForeignFirmPrincipals changed on each, by exactly opal-ticket-api-role added to ArnNotLike; unchanged byte-equal 33 of 34, 3 of 4, 3 of 4; Allows added 0, 3 and 1; no PutObject Allow",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~TF/TRADEFORM_FENCE_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "ce564a8d51",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record the grader reads; AC1 prints TRADEFORM: OK buckets=3 applies=1",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261016T1600Z_tckt-trade-form-fence-apply-20261016_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ledger entry opened before the first write and closed with 4 of 4 legs proven; the .open_deploys sentinel removed",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && timeout 30 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py tradeform --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~TF/TRADEFORM_FENCE_RECORD.json -- expect ^TRADEFORM: OK buckets=3 applies=1$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 30 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round8/checks/r8_checks.py tradeform --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~TF/TRADEFORM_FENCE_RECORD.json",
+      "expect": "^TRADEFORM: OK buckets=3 applies=1$",
+      "output_evidence": "TRADEFORM: OK buckets=3 applies=1",
+      "denominator": "3 buckets, 1 apply; the record read at ce564a8d51",
+      "status": "PASS",
+      "status_reason": "expected pattern matches; the first run failed on a nine-digit run inside a commit hash in the record's prose and passed after the hash was cited by its first seven characters"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "three scratch copies of TRADEFORM_FENCE_RECORD.json run through the same AC1 checker: (a) plan.change set to 4; (b) a fourth origin http://localhost:5173 added to the inflection CORS rule; (c) cottonwood allows_added_by_this_apply set to 2",
+      "expected": "each copy is refused by the checker (rc 1) naming its own defect",
+      "observed": "(a) TRADEFORM: FAIL plan must read add 3, change 3, destroy 0, statements_removed 0 (rc=1); (b) TRADEFORM: FAIL opal-data-inflection: cors needs exactly the three origins, GET and PUT, max_age 300 (rc=1); (c) TRADEFORM: FAIL allows_added_by_this_apply must equal inflection 3, cottonwood 1, 49financial 0 (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run on the record at the committed state; the scoped plan also run on the lane tree before the CTO commit was merged, after it, and on the final apply tree, contents compared as JSON",
+      "observed": "AC1 prints the same OK line on both runs; the three plans are content-identical, 3 add, 3 change, 0 destroy each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "the role's own PutObject grant in IAM", "reason": "outside this order: the TCKT_VNEXT release TO-R18-TR3 applies it; this apply renders no PutObject Allow by the module's rule"},
+    {"item": "a presigned PUT or GET from a browser against the new CORS rule", "reason": "bounds: no object is written; the prefixes still hold zero objects; the synthetic run is the TCKT_VNEXT release's"},
+    {"item": "the task order status flip", "reason": "set to complete in the commit that carries this instance, only because AC1 passes"}
+  ],
+  "surprises": [],
+  "session_log": "org/critical_paths/change_management/20261016T1600Z_tckt-trade-form-fence-apply-20261016_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / show -json (read), safe-apply.sh, deploy_ledger.py, safe-commit.sh, safe-merge.sh",
+      "invocation": "scoped plans with six -target flags, saved plan applied through .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply <planfile>; ledger open, close-leg x4, close; safe-merge of the lane branch",
+      "result": "Plan 3 to add, 3 to change, 0 to destroy; Apply complete 3 added, 3 changed, 0 destroyed; post-apply plan No changes; tagauthz gate PASSED; tombstone gate CLEAN; ledger CLOSED; safe-merge MERGED 169a490f34"
+    },
+    {
+      "tool": "aws (.tools/aws, read verbs only)",
+      "invocation": "s3api get-bucket-policy, get-bucket-cors, list-objects-v2 (length only), iam get-role",
+      "result": "prior policies saved (34, 4, 4 statements); CORS absent on all three before; prefix counts 0, 0, 0 before and after; role exists; policies and CORS read back after the apply"
+    }
+  ]
+}
