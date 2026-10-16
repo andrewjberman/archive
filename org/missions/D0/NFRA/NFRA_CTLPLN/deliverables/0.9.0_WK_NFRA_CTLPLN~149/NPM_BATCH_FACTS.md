@@ -6,7 +6,7 @@ NOTHING IS RELEASED. Check 8 reads AWAITING for all 50: no check-8 file was writ
 - Lockfile: org/tier0_exec/0.0.0_AB_MSTR/deliverables/MCPORTAL_c66ca82952_bun.lock (sha256 7e6b71c2ea3876561f18e2df606203a78b48bd7013404bf26d614ea70d10c4bc, 278 lines)
 - Approval: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_APPROVAL_TO_FETCH_NFRA_CTLPLN_INTAKE_NPM_MCPORTAL_BUN_20261016.md (50 lines)
 - Packages: 50; fetch outcome held: 50; disk sha512 = lockfile integrity: 50 of 50; disk sha512 = registry dist.integrity: 50 of 50
-- Failed checks in total: 5 (see the failed-checks section). Check verdict per package (c1..c8): P passed, F failed, NA not_applicable, AW awaiting (check 8).
+- Failed checks in total: 0 (see the failed-checks section). Check verdict per package (c1..c8): P passed, F failed, NA not_applicable, AW awaiting (check 8).
 
 ## Table of the 50
 
@@ -35,11 +35,11 @@ NOTHING IS RELEASED. Check 8 reads AWAITING for all 50: no check-8 file was writ
 | 21 | @jridgewell/sourcemap-codec | 1.6.0 | jridgewell__sourcemap-codec-1.6.0.tgz | yes | yes | 49.82 | 15 | none | none | P | P | NA | P | NA | P | P | AW | not_checked |
 | 22 | @rollup/rollup-win32-x64-gnu | 4.63.5 | rollup__rollup-win32-x64-gnu-4.63.5.tgz | yes | yes | 22.44 | 56 | none | package/rollup.win32-x64-gnu.node; package/package.json os/cpu restriction: cpu, os | P | P | NA | P | P | P | P | AW | not_checked |
 | 23 | @rollup/rollup-win32-x64-msvc | 4.63.5 | rollup__rollup-win32-x64-msvc-4.63.5.tgz | yes | yes | 22.45 | 229 | none | package/rollup.win32-x64-msvc.node; package/package.json os/cpu restriction: cpu, os | P | P | NA | P | P | P | P | AW | not_checked |
-| 24 | @types/bun | 1.4.2 | types__bun-1.4.2.tgz | yes | yes | 38.8 | 74 | none | none | P | F | NA | P | NA | P | P | AW | not_checked |
-| 25 | @types/estree | 1.0.9 | types__estree-1.0.9.tgz | yes | yes | 162.99 | 43 | none | none | P | F | NA | P | NA | P | P | AW | not_checked |
-| 26 | @types/node | 24.13.6 | types__node-24.13.6.tgz | yes | yes | 27.86 | 2380 | none | none | P | F | NA | P | NA | P | P | AW | not_checked |
-| 27 | @types/react-dom | 19.3.0 | types__react-dom-19.3.0.tgz | yes | yes | 37.12 | 186 | none | none | P | F | NA | P | NA | P | P | AW | not_checked |
-| 28 | @types/react | 19.3.0 | types__react-19.3.0.tgz | yes | yes | 37.11 | 706 | none | none | P | F | NA | P | NA | P | P | AW | not_checked |
+| 24 | @types/bun | 1.4.2 | types__bun-1.4.2.tgz | yes | yes | 38.85 | 74 | none | none | P | P | NA | P | NA | P | P | AW | not_checked |
+| 25 | @types/estree | 1.0.9 | types__estree-1.0.9.tgz | yes | yes | 163.05 | 43 | none | none | P | P | NA | P | NA | P | P | AW | not_checked |
+| 26 | @types/node | 24.13.6 | types__node-24.13.6.tgz | yes | yes | 27.92 | 2380 | none | none | P | P | NA | P | NA | P | P | AW | not_checked |
+| 27 | @types/react-dom | 19.3.0 | types__react-dom-19.3.0.tgz | yes | yes | 37.17 | 186 | none | none | P | P | NA | P | NA | P | P | AW | not_checked |
+| 28 | @types/react | 19.3.0 | types__react-19.3.0.tgz | yes | yes | 37.17 | 706 | none | none | P | P | NA | P | NA | P | P | AW | not_checked |
 | 29 | @vitejs/plugin-react | 5.2.0 | vitejs__plugin-react-5.2.0.tgz | yes | yes | 218.27 | 88 | none | none | P | P | NA | P | P | P | P | AW | not_checked |
 | 30 | baseline-browser-mapping | 2.11.26 | baseline-browser-mapping-2.11.26.tgz | yes | yes | 22.11 | 179 | none | none | P | P | NA | P | P | P | P | AW | not_checked |
 | 31 | browserslist | 4.29.1 | browserslist-4.29.1.tgz | yes | yes | 22.28 | 220 | none | none | P | P | NA | P | P | P | P | AW | not_checked |
@@ -65,12 +65,8 @@ NOTHING IS RELEASED. Check 8 reads AWAITING for all 50: no check-8 file was writ
 
 ## Checks that FAILED (findings for the CTO; none waived, none repaired)
 
-- types__bun-1.4.2.tgz: check 2 -- package/package.json is absent or unreadable (absent)
-- types__estree-1.0.9.tgz: check 2 -- package/package.json is absent or unreadable (absent)
-- types__node-24.13.6.tgz: check 2 -- package/package.json is absent or unreadable (absent)
-- types__react-dom-19.3.0.tgz: check 2 -- package/package.json is absent or unreadable (absent)
-- types__react-19.3.0.tgz: check 2 -- package/package.json is absent or unreadable (absent)
-- total failed checks: 5
+- none. The five check-2 failures of the first run (package/package.json read for every tarball, though these five keep their top folder under another name) are re-run by 0.9.0_WK_NFRA_CTLPLN~150 under the package-root rule and read check 2 passed; see APPROVAL_AND_SIGNED_FILE_DEMANDS.md section 4a.
+- total failed checks: 0
 
 ## Lifecycle-script packages (listed in the check 6 record; NOT run)
 
