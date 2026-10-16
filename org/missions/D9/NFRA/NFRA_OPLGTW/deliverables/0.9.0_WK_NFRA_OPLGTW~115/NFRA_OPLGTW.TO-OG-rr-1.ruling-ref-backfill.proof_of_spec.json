@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-rr-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "681ae76691",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rr-1.ruling-ref-backfill.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rr-1.ruling-ref-backfill.md",
+    "group": "OTHER",
+    "vintage_commit": "681ae76691"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~115",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/name_rulings.json",
+      "kind": "config_data",
+      "commit_or_etag": "92696f300b9ad21c8b289d15175838db63999c5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a registry data file on the worktree branch wk-NFRA_OPLGTW-115; no schedule, trigger or deploy (order preflight: DECLARED-NOT-APPLICABLE)"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~115/RULING_REF_UNRESOLVED.json",
+      "kind": "doc",
+      "commit_or_etag": "92696f300b9ad21c8b289d15175838db63999c5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the CRO's list of the 111 rows with no committed ruling record; a worktree file, no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: every name_rulings.json row either has a ruling_ref that resolves in git (git cat-file -e) or is listed unresolved in W/RULING_REF_UNRESOLVED.json, and none is in both or neither.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "name_rulings: rows 136; ruling_ref resolves 25; listed unresolved 111; neither (defect) 0 (want 0); in both 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "136 rows: 25 with a resolving ruling_ref, 111 listed unresolved (sum 136); neither 0; in both 0",
+      "status": "PASS",
+      "expect": "(?s)name_rulings: rows 136; ruling_ref resolves \\d+; listed unresolved \\d+; neither \\(defect\\) 0 \\(want 0\\); in both 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: nothing in name_rulings.json changed except the added ruling_ref keys (rows, order, other fields and _about equal to pin a9dd9aff6c).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "name_rulings vs a9dd9aff6c: rows 136 to 136; rows moved 0 (want 0); rows with another field changed 0 (want 0); keys added other than ruling_ref 0 (want 0); _about equal True; rows carrying ruling_ref 25\nRESULT: PASS\nexit=0",
+      "denominator": "136 rows vs pin a9dd9aff6c: 136 to 136; 0 moved; 0 with another field changed; 0 extra keys; 25 carrying ruling_ref; _about equal",
+      "status": "PASS",
+      "expect": "(?s)name_rulings vs a9dd9aff6c: rows 136 to 136; rows moved 0 \\(want 0\\); rows with another field changed 0 \\(want 0\\); keys added other than ruling_ref 0 \\(want 0\\); _about equal True; rows carrying ruling_ref \\d+.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "rr1.AC2 run on the committed file against pin a9dd9aff6c; plus a per-row diff of name_rulings.json between the cell commit and its parent (only added ruling_ref lines and the trailing comma on the previous line)",
+      "observed": "rows moved 0, other fields changed 0, keys added other than ruling_ref 0; the diff is 25 modified owner lines (comma added) and 25 added ruling_ref lines",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the order names no mutant control (section 4 names AC1 and AC2 only); the AC1 counts (neither 0, both 0) and the AC2 diff are the discriminating reads",
+      "expected": "not applicable: no mutant named in the order",
+      "observed": "no planted mutant was run in this cell",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the naming gate .tools/naming-gate.py (not touched; the order's bounds)",
+      "reason": "the order says the gate is the later cell OG-rr-2"
+    },
+    {
+      "item": "111 rows with no ref, listed in W/RULING_REF_UNRESOLVED.json",
+      "reason": "no committed ruling-type record is cited by their evidence; the CRO rules them (order section 1 step 2)"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W115-S1: premise - 111 of 136 rows cite no committed ruling-type record; listed unresolved, not given a ref",
+    "NFRA_OPLGTW-Z-W115-S2: pin - the order cites the CTO ruling @d97ea3ae82 in section 1 and @8b9adcbd8d in its header; the file's latest commit is 8b9adcbd8d, used",
+    "NFRA_OPLGTW-Z-W115-S3: path grant - the status flip touches the order file, which is outside <paths>"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~115/RULING_REF_UNRESOLVED.json",
+  "compiler_tools": [
+    {
+      "tool": "rr1.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr1.AC1.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (rows 136; resolves 25; listed 111)"
+    },
+    {
+      "tool": "rr1.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/rr1.AC2.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (moved 0; changed 0; extra keys 0; _about equal)"
+    },
+    {
+      "tool": "git cat-file -e / git log -1 --format=%H -- <path>",
+      "invocation": "per cited path, from the worktree",
+      "result": "25 refs verified; 0 unverified written"
+    }
+  ]
+}
