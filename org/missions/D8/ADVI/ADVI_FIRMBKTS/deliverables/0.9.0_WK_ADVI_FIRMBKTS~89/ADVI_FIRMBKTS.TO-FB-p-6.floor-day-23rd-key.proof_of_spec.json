@@ -10,16 +10,24 @@
   "spec_ref": {
     "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-p-6.floor-day-23rd-key.md",
     "group": "OTHER",
-    "vintage_commit": "ab8081bfdd"
+    "vintage_commit": "ee5c48af7a"
   },
   "assignee": "0.9.0_WK_ADVI_FIRMBKTS~89",
   "artifacts_produced": [
     {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~89/KEY23.json",
+      "kind": "doc",
+      "commit_or_etag": "3b76729896",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the KEY23 record in the amended shape: publisher_window 2026-10-16T13:30:00Z to 13:35:00Z, versions_in_publisher_window 0, versions_on_floor_day_total 1, the advisor publisher's condition and its holdings input (0 rows for the advisor) with the log lines that show the skip; grader AC1 prints KEY23: OK (LOCAL)",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
       "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "bffa17a1f6",
+      "commit_or_etag": "033142fe8f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows ADVI_FIRMBKTS-D1-W89-S1 (BLOCKING, INERT: the 23rd key drew a 2026-10-16 version) and ADVI_FIRMBKTS-D1-W89-S2 (OBSERVATION, INERT: the dell1 row-id form) appended in e7c06456f2 (LOCAL); bffa17a1f6 restores the CRLF bytes of the existing D1-W79 block that e7c06456f2 rewrote as LF; net diff against base ab8081bfdd is 52 insertions, 0 deletions",
+      "deploy_evidence": "rows ADVI_FIRMBKTS-D1-W89-S1 (BLOCKING, INERT: premise answered by the amendment; disposition left to the issuer), ADVI_FIRMBKTS-D1-W89-S2 (OBSERVATION, INERT), ADVI_FIRMBKTS-D1-W89-S3 (OBSERVATION, INERT: S3 Select refused) and ADVI_FIRMBKTS-D1-W89-S4 (OBSERVATION, INERT: zero holdings rows for the advisor) on the branch; the channel's net diff against base ab8081bfdd is append-only",
       "artifact_covered_by": ["AC1"]
     }
   ],
@@ -30,73 +38,70 @@
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 60 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py key23 --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~89/KEY23.json",
       "expect": "^KEY23: OK key=.+$",
-      "output_evidence": "KEY23: FAIL cannot read org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~89/KEY23.json: FileNotFoundError (rc=1; the same line and rc on both of two runs, from /c/dev/wk-firmbkts-r9-89 at HEAD bffa17a1f6)",
-      "denominator": "0 of 1 KEY23 record reads passed (1 record expected; absent because TO step 4 applies: the step-1 premise is false, so the record is not forced)",
-      "status": "FAIL",
-      "status_reason": "rc 1 and the output does not match ^KEY23: OK key=.+$. The order stays open. The one BLOCKING row ADVI_FIRMBKTS-D1-W89-S1 is the disposition named by step 4 of the order."
+      "output_evidence": "KEY23: OK key=platinum/advisors/inflection_wealth_management/top_holdings.json (rc=0; the same line and rc on both of two runs, from /c/dev/wk-firmbkts-r9-89 at HEAD 033142fe8f)",
+      "denominator": "1 of 1 KEY23 record reads passed (1 record expected; the record carries 0 versions in the publisher window and 1 on the floor day in total)",
+      "status": "PASS",
+      "status_reason": "rc 0 and the output matches ^KEY23: OK key=.+$ on both runs; the record names the key, its writer, the publisher's condition and the reason, and the publisher window count is 0"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "N/A: the order names no mutant for a read-only key identification; AC1 grades the record's shape only",
+      "description": "N/A: the order names no mutant for a read-only key identification; AC1 grades the record's shape and discipline only",
       "expected": "N/A",
       "observed": "N/A",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "the AC1 invocation run twice from the worktree root on the absent record; the two outputs compared",
-      "observed": "run1 and run2 identical: KEY23: FAIL cannot read ...KEY23.json: FileNotFoundError, rc=1 both times",
+      "method": "the AC1 invocation run twice from the worktree root on the record; the two outputs compared",
+      "observed": "run1 and run2 identical: KEY23: OK key=platinum/advisors/inflection_wealth_management/top_holdings.json, rc=0 both times",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "the KEY23.json record (order section 1, the record block)",
-      "reason": "TO step 4: the premise that the 23rd key drew no version on 2026-10-16 is false (measured: it drew one at 2026-10-16T12:52:32Z), so the record is not forced; one BLOCKING row is filed instead"
-    },
-    {
-      "item": "step 3 of the order (why no new version on the floor day)",
-      "reason": "the premise it answers is false; the writer facts it needs are recorded in ADVI_FIRMBKTS-D1-W89-S1 and why the advisor publisher skipped the key at 13:31 on the floor day was not read"
-    },
-    {
       "item": "the task order status flip to complete",
-      "reason": "AC1 reads FAIL; the order is not met and stays open"
+      "reason": "the amended order says the issuer flips the status; this worker does not flip it"
     },
     {
-      "item": "advisor names for the 19 advisor keys other than the 23rd",
+      "item": "disposition of rows S1 to S4",
+      "reason": "every row stays UNDER_INVESTIGATION; the issuer and the CVO adjudicate them; the worker appends no adjudication"
+    },
+    {
+      "item": "advisor names for the other 19 advisor keys",
       "reason": "order section 2 bound 2: counts only; the 23rd key name is printed because section 1 step 1 requires it for the record"
+    },
+    {
+      "item": "why the holdings partition has no rows for the 23rd key's advisor",
+      "reason": "not read: the gold holdings builder is a separate writer outside step 3; recorded as S4 for the issuer"
     }
   ],
   "surprises": [
-    "ADVI_FIRMBKTS-D1-W89-S1: FB-p-6 premise false -- the 23rd named key inflection_wealth_management/top_holdings.json drew a version on 2026-10-16 (VersionId MBHVZkmm4l.2TsHVoJjabw2dUNggRXT8, 12:52:32Z, written by the gold step INF_D_02b before the publisher's 13:30Z floor-day run); BLOCKING, INERT; no KEY23 record written (TO step 4)",
-    "ADVI_FIRMBKTS-D1-W89-S2: the order's worker row id form <CODE>-W<n>-S<k> is refused on fabric dell1, which requires <CODE>-D1-W<n>-S<k>; the row was renamed before commit (OBSERVATION, INERT)"
+    "ADVI_FIRMBKTS-D1-W89-S1: FB-p-6 premise (as first written) false -- the 23rd named key drew a 2026-10-16 version from the gold step at 12:52:32Z; the amendment restates the premise as the publisher's 13:30-13:35Z window, where the key has 0 versions (BLOCKING, INERT; disposition left to the issuer)",
+    "ADVI_FIRMBKTS-D1-W89-S2: the order's worker row id form <CODE>-W<n>-S<k> is refused on fabric dell1, which requires <CODE>-D1-W<n>-S<k>; the row was renamed before commit (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W89-S3: S3 Select (select-object-content) is refused on gold/canonical/holdings_2026-10-16.parquet with MethodNotAllowed while a GET succeeds; the count was taken from a GET into scratch (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W89-S4: the holdings partition the publisher read on 2026-10-16 has 0 of 12710 rows for the 23rd key's advisor, so the advisor publisher skipped its top_holdings.json while writing its book.json (OBSERVATION, INERT)"
   ],
   "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
-      "tool": "aws (.tools/aws, read verbs only: s3api list-object-versions)",
-      "invocation": "aws s3api list-object-versions --bucket opal-data-inf --prefix <key> --output json, once for each of the 23 keys named in ACT3_BASELINE_VERSIONS.json",
-      "result": "23 of 23 rc=0; counted client-side on Key and LastModified: 23 of 23 keys have at least one version dated 2026-10-16; the 23rd key newest version MBHVZkmm4l.2TsHVoJjabw2dUNggRXT8 at 2026-10-16T12:52:32Z, IsLatest True, Size 1787"
+      "tool": "aws (.tools/aws, read verbs only: s3api list-object-versions, logs describe-log-groups and filter-log-events, s3api head-object and get-object, s3api select-object-content refused)",
+      "invocation": "list-object-versions once per each of the 23 keys named in ACT3_BASELINE_VERSIONS.json; logs filter-log-events on /aws/lambda/inf-portal-advisor-publisher for the 13:25-13:45Z window; head-object and get-object on gold/canonical/holdings_2026-10-16.parquet",
+      "result": "23 of 23 rc=0; the 23rd key has 1 version on the floor day (12:52:32Z) and 0 in the 13:30-13:35Z window; the advisor publisher log has 200 events (143 connection-pool warnings, 57 other lines) and shows book, summary and timeseries written for the 23rd key's advisor with no top_holdings line; the holdings partition has 230808 bytes"
     },
     {
-      "tool": "python -I (scratch analysis over the saved listings)",
-      "invocation": "python -I .scratch/k23/analyze.py",
-      "result": "DENOMINATOR keys=23 advisor_keys=20 snapshot_keys=3; keys with zero floor-day versions: 0; floor-day versions total 42"
+      "tool": "python -I (scratch counts)",
+      "invocation": "python -I .scratch/k23/analyze.py; pyarrow row count of advisor_key over .scratch/k23/holdings_2026-10-16.parquet",
+      "result": "DENOMINATOR keys=23 advisor_keys=20 snapshot_keys=3; floor-day versions per key 1 to 3; holdings rows 12710 with 4 distinct advisor_key values, 0 for the 23rd key's advisor, 0 null"
     },
     {
-      "tool": "comp-find",
-      "invocation": "comp-find -i \"top_holdings\" (pathspecs infra/ lib/ integrations/ given; the search covered the repo)",
-      "result": "16 hit(s) across 8863 file(s) scanned; the advisor-publisher write and the partners read are the first-party writers; the gold writer is named by comp-read below"
-    },
-    {
-      "tool": "comp-read",
-      "invocation": "comp-read data/inf/scripts/gold/INF_D_02b.top_holdings.py --for \"Which step writes platinum/advisors/<advisor>/top_holdings.json\"",
-      "result": "module header line 69 ADVISOR_TOP_HOLDINGS_KEY_TPL; main() per-advisor loop 333-361 uploads every advisor key under --upload"
+      "tool": "comp-find and comp-read",
+      "invocation": "comp-find -i \"top_holdings\"; comp-read infra/aws/lambda/inf-portal-publisher/lambda_function.py; comp-read data/inf/scripts/gold/INF_D_02b.top_holdings.py",
+      "result": "the firm publisher writes the three snapshot keys (877-882, 1067-1069); the advisor publisher writes top_holdings (1200-1201); the gold step INF_D_02b writes every advisor's top_holdings under --upload (333-361)"
     },
     {
       "tool": "Read (named files in the worktree)",
-      "invocation": "data/inf/scripts/gold/INF_D_02b.top_holdings.py lines 253-375; infra/aws/lambda/inf-portal-advisor-publisher/lambda_function.py lines 808-837 and 1150-1210; infra/aws/lambda/inf-portal-publisher/lambda_function.py via comp-read (write sites 877-882 and 1067-1069)",
-      "result": "the advisor publisher writes top_holdings.json only when _build_top_holdings is not None (810-814, 1200-1201); the firm publisher writes the three snapshot keys and fans out to the advisor publisher (comment line 1029)"
+      "invocation": "infra/aws/lambda/inf-portal-advisor-publisher/lambda_function.py lines 195-201, 808-814, 1046-1085, 1120-1210; data/inf/scripts/gold/INF_D_02b.top_holdings.py lines 253-375",
+      "result": "load_latest_holdings reads the newest gold/canonical holdings partition (195-201, called at 1049); _build_top_holdings returns None on an empty frame or no rows for the advisor (810-814); the write is guarded by top_h is not None (1200-1201)"
     }
   ]
 }
