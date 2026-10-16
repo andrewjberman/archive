@@ -1,0 +1,83 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-READ-WAFLOOK.door-lookup-waf-pattern-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-WAFLOOK.door-lookup-waf-pattern-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "ab34c37a8c"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R41_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-READ-WAFLOOK.door-lookup-waf-pattern-aq2.md",
+  "vintage_commit": "ab34c37a8c"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/WAFLOOK_READ.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the script's output verbatim (journal lines, the host's public address, the busy guard, the cookie jar size 0, the one cookieless lookup: status 200, waf_action None, application/json, 2 bytes, verdict CLEAN) and the five ROW lines",
+   "artifact_covered_by": [
+    "WAFLOOK-AC1",
+    "WAFLOOK-AC2"
+   ],
+   "commit_or_etag": "d871a499b3"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "WAFLOOK-AC1",
+   "invocation": "grep -c -E '^(WAF LOOKUP status=|WAF LOOKUP EXCEPTION|ROW [A-Z0-9^.:_-]+ )' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/WAFLOOK_READ.txt",
+   "expect": "^6$",
+   "output_evidence": "6\nexit=0",
+   "denominator": "6 lines: the one lookup result line and the five row lines",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(WAF LOOKUP status=|WAF LOOKUP EXCEPTION|ROW [A-Z0-9^.:_-]+ )' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/WAFLOOK_READ.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "WAFLOOK-AC2",
+   "invocation": "grep -c -E 'crumb=[A-Za-z0-9]' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/WAFLOOK_READ.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1",
+   "denominator": "0 crumb values in the record",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'crumb=[A-Za-z0-9]' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/WAFLOOK_READ.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the script prints the cookie jar size (0) and the busy guard (0 messages in 60 s) before its one request",
+   "observed": "jar 0, guard 0, one lookup",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "what the WAF keys on",
+   "reason": "the order's blind list; one clean request cannot show why the earlier requests were challenged"
+  },
+  {
+   "item": "AWSWAF yes/no",
+   "reason": "the script keeps waf_action and the closed fields only; it prints no separate AWSWAF header marker"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_fwd1_r3/WAFLOOK_READ.txt",
+ "compiler_tools": [
+  {
+   "tool": "ssm_run_yf.py --as-root and the signed waf_lookup_probe.sh; set2_rows_run3.py for the rows",
+   "invocation": "one root script by Systems Manager; one read-only table scan",
+   "result": "lookup CLEAN, five rows"
+  }
+ ]
+}
