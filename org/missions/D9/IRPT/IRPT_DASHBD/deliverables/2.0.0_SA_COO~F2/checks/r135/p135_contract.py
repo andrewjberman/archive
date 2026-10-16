@@ -33,8 +33,15 @@ CPAIR = D + "2.0.0_SA_COO~F2/R132_INFLECTION_PAIRING_CENSUS.json"
 CV2 = D + "2.0.0_SA_COO~F2/R132_INFLECTION_S6_CENSUS_V2.json"
 SNAP = D + "2.0.0_SA_COO~F2/R135_INFLECTION_SNAPSHOT_CENSUS.json"
 LPRICE = D + "2.0.0_SA_COO~F2/R135_INFLECTION_LATEST_PRICE_CENSUS.json"
-ADDENDUM = "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_IRPT_DASHBD_F-SHIP_ROUND_131_20261016.md"
-ADDENDUM_PIN = "a5475b2fdd"
+ADDENDUM = "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_IRPT_DASHBD_F-SHIP_ROUND_134_20261016.md"
+ADDENDUM_PIN = "5d8adf5722"
+SIGNS = D + "2.0.0_SA_COO~F2/R135_INFLECTION_S6_SIGN_COMBINATIONS.json"
+CASH = D + "2.0.0_SA_COO~F2/R135_INFLECTION_S6_CASH_MOVE.json"
+# the CTO's FINAL S6 ruling (ADDENDUM 2 of the round-134 analysis, msg 9669, pin 5d8adf5722): both legs INTERNAL, the cash drop is a purchase inside the account. It withdraws the
+# EXTERNAL_OUT ruling of ADDENDUM 1 (pin 1881c0fc01) and the net-zero criterion of the round-131 ADDENDUM 2 (pin a5475b2fdd).
+S6_LEGS = {"Dividend Paid from Cash": ("INTERNAL", "reinvested inside the account: an equal-amount Buy or Income Reinvested line", "inferred"),
+           "Income Paid": ("INTERNAL", "reinvested inside the account: an equal-amount Buy or Income Reinvested line", "inferred")}
+S6_WITHDRAWN_PINS = ("1881c0fc01", "a5475b2fdd")
 C49 = D + "2.0.0_SA_COO~F2/R132_F49_BUSINESS_DATE_CENSUS.json"
 FUNCTION = "first_trading_day_on_or_after"
 TAXONOMY = "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml"
@@ -375,25 +382,35 @@ def price_correction_problems(entry, fields, c132=None):
     return pr
 
 
-def s6_ruling_problems(con, cv2):
-    """The CTO's final S6 ruling (ADDENDUM 2, pin a5475b2fdd): both legs INTERNAL; the numbers are the census v2's; the release criterion is stated."""
+def s6_ruling_problems(con, snap, signs, cash):
+    """The CTO's FINAL S6 ruling (ADDENDUM 2 of the round-134 analysis, pin 5d8adf5722, msg 9669): Dividend Paid from Cash and Income Paid are both INTERNAL (a purchase inside the
+    account); the evidence is the issuer's R135 sign, cash-move and reinvestment records; the release criterion is every event carrying an equal-amount Buy or Income Reinvested line."""
     r = con["s6_ruling"]
-    pd = cv2["per_description"]
-    names = sorted(pd)
-    want = {"addendum": ADDENDUM, "addendum_number": 2, "pin": ADDENDUM_PIN, "class": "INTERNAL", "descriptions": names,
-            "rows_per_description": {n: pd[n]["rows"] for n in names},
-            "legs_with_the_other_legs_key": {n: pd[n]["same_key_as_a_row_of_the_other_description"] for n in names},
-            "income_booked_by": "Dividend to Cash"}
+    L = snap["latest_snapshot"]
+    groups = cash["reinvestment_by_cash_group"]
+    events = min(v["rows"] for v in L["s6_rows_and_pairing"].values())
+    either = sum(g.get("either", 0) for g in groups.values())
+    want = {"addendum": ADDENDUM, "addendum_number": 2, "pin": ADDENDUM_PIN,
+            "withdrawn_pins": list(S6_WITHDRAWN_PINS),
+            "legs": {d: {"flow_class": v[0], "basis": v[1], "claim": v[2]} for d, v in S6_LEGS.items()},
+            "income_booked_by": "Dividend to Cash", "events": events,
+            "sign_evidence": {"legs_net_to_zero": signs["legs_net_to_zero"], "sign_combinations": signs["sign_combinations"]},
+            "cash_evidence": {"events": cash["agreement"]["events"], "cash_fell_by_about_X": cash["agreement"]["cash_fell_by_about_X_on_the_event_day"],
+                              "cash_flat": groups["cash_flat"]["events"], "other": groups["other"]["events"]},
+            "reinvestment_evidence": {"events": sum(g.get("events", 0) for g in groups.values()), "events_with_an_equal_amount_buy_or_income_reinvested_line": either,
+                                      "by_cash_group": groups},
+            "release_status": "CRITERION_MET" if either == events else "RELEASE_STOPPED"}
     pr = []
     if not (isinstance(r, dict) and {k: r.get(k) for k in want} == want):
         pr.append("s6_ruling must be %r plus reason and release_criterion" % (want,))
         return pr
     rc = str(r.get("release_criterion", ""))
-    n = "{:,}".format(pd[names[0]]["rows"])
-    if not ("sum to zero" in rc and n in rc and "stops the release" in rc.lower()):
-        pr.append("s6_ruling.release_criterion must say per event the two legs' signed amounts sum to zero, printed as N of %s, and that any miss stops the release" % n)
-    if not (isinstance(r.get("reason"), str) and "twice" in r["reason"].lower() and "two legs" in r["reason"].lower()):
-        pr.append("s6_ruling.reason must say the two descriptions are two legs of one event and that counting a leg as income would count the dividend twice")
+    n = str(events)
+    if not (("%s of %s" % (n, n)) in rc and "equal-amount" in rc and "stops the release" in rc.lower()):
+        pr.append("s6_ruling.release_criterion must say %s of %s events carry an equal-amount line, printed, and any event without one stops the release" % (n, n))
+    reason = str(r.get("reason", "")).lower()
+    if not ("reinvest" in reason and "inside the account" in reason and "both" in reason):
+        pr.append("s6_ruling.reason must say both legs are INTERNAL because the cash drop was a purchase (reinvestment) inside the account")
     return pr
 
 
@@ -433,7 +450,7 @@ def rules_problems(con, c132, cpair, c49):
     cand = rev["offset_candidate_rows"]
     want = {"basis": "latest snapshot " + L["latest_snapshot"], "fund_family": f, "s6_pairing": s6, "reversed_offsets": rev,
             "f49_business_date": {"partitions_read": c49["partitions_read"], "counts": c49["counts"]},
-            "s6_status": "STANDS" if share >= 0.95 else "RULED_INTERNAL",
+            "s6_status": "RULED_INTERNAL_REINVESTMENT",
             "offsets_status": "NONE" if cand == 0 else "EXCLUDED_BY_RULE"}
     rf = con["row_filter"].get("inflection") if isinstance(con["row_filter"], dict) else None
     orule = rf.get("offset_rule") if isinstance(rf, dict) else None
@@ -661,8 +678,8 @@ def ac_bindings(root):
     L = snap["latest_snapshot"]
     fields_rf = {"rows": L["rows"], "rows_per_status": L["rows_per_status"], "snapshot": L["latest_snapshot"]}
     fields_px = {"rows": lprice["complete_rows"], "null_or_blank_rows_all": {"avgPrice": lprice["null_or_blank_rows_complete"]["avgPrice"]}}
-    cv2 = {"per_description": {d: {"rows": v["rows"], "same_key_as_a_row_of_the_other_description": L["s6_keys_in_both"]} for d, v in L["s6_rows_and_pairing"].items()}}
-    pr = source_problems(con, recs, fields_px, lprice) + rule_problems(con) + rules_problems(con, lprice, snap, c49) + s6_ruling_problems(con, cv2) + table_shape_problems(con, snap)
+    signs, cash = load(root, SIGNS), load(root, CASH)
+    pr = source_problems(con, recs, fields_px, lprice) + rule_problems(con) + rules_problems(con, lprice, snap, c49) + s6_ruling_problems(con, snap, signs, cash) + table_shape_problems(con, snap)
     pr += mapping_problems(con, load(root, PROPOSAL), load(root, CRO), load(root, CENSUS49), load(root, CENSUS3))
     pr += census_prob + census_problems(con) + data_problems(con, load(root, DATA))
     pr += inflection_rule_problems(con) + key_problems(con) + row_filter_problems(con, fields_rf)
@@ -789,10 +806,10 @@ def selftest():
                                                                                           "without_fund_family", "fund_rows_within_1pct")}}},
              "round_132_censuses": {"basis": "latest snapshot 2026-10-16", "fund_family": c132["fund_family"],
                                     "s6_pairing": cp["latest_snapshot"]["s6_rows_and_pairing"], "reversed_offsets": rev_ok,
-                                    "f49_business_date": c49, "s6_status": "STANDS", "offsets_status": "NONE"}}
+                                    "f49_business_date": c49, "s6_status": "RULED_INTERNAL_REINVESTMENT", "offsets_status": "NONE"}}
     arm("rules-green", rules_problems(con_r, c132, cp, c49), [])
     low_l = dict(cp["latest_snapshot"], s6_rows_and_pairing={"a": {"rows": 100, "paired_with_income_class_row": 50}, "b": {"rows": 100, "paired_with_income_class_row": 50}})
-    arm("rules-s6-below-95-must-say-ruled-internal", len(rules_problems(con_r, c132, dict(cp, latest_snapshot=low_l), c49)), 1)
+    arm("rules-s6-status-is-the-ruling-whatever-the-pairing", len(rules_problems(con_r, c132, dict(cp, latest_snapshot=low_l), c49)), 1)
     cand_l = dict(cp["latest_snapshot"], offset_candidate_rows=3)
     arm("rules-offsets-must-say-excluded", len(rules_problems(con_r, c132, dict(cp, latest_snapshot=cand_l), c49)) >= 1, True)
     shape_ok = {"kind": "cumulative_snapshot", "snapshots": 2, "latest_snapshot": "2026-10-16", "latest_snapshot_rows": 10, "distinct_ids_ever_seen": 12,
@@ -803,16 +820,24 @@ def selftest():
     arm("shape-counts", len(table_shape_problems({"inflection_table_shape": dict(shape_ok, snapshots=3)}, cp)), 1)
     arm("shape-domain", len(table_shape_problems({"inflection_table_shape": dict(shape_ok, gold_run_domain="every partition")}, cp)), 1)
     arm("shape-statement", len(table_shape_problems({"inflection_table_shape": dict(shape_ok, statement="a table")}, cp)), 1)
-    cv2 = {"per_description": {"a": {"rows": 100, "same_key_as_a_row_of_the_other_description": 100},
-                               "b": {"rows": 100, "same_key_as_a_row_of_the_other_description": 100}}}
-    good_r = {"addendum": ADDENDUM, "addendum_number": 2, "pin": ADDENDUM_PIN, "class": "INTERNAL", "descriptions": ["a", "b"],
-              "rows_per_description": {"a": 100, "b": 100}, "legs_with_the_other_legs_key": {"a": 100, "b": 100}, "income_booked_by": "Dividend to Cash",
-              "release_criterion": "per event the two legs' signed amounts sum to zero, printed as N of 100; any miss stops the release",
-              "reason": "two legs of one event; counting a leg as income would count the dividend twice"}
-    arm("s6-ruling-green", s6_ruling_problems({"s6_ruling": good_r}, cv2), [])
-    arm("s6-ruling-pin", len(s6_ruling_problems({"s6_ruling": dict(good_r, pin="x")}, cv2)), 1)
-    arm("s6-ruling-criterion", len(s6_ruling_problems({"s6_ruling": dict(good_r, release_criterion="later")}, cv2)), 1)
-    arm("s6-ruling-reason", len(s6_ruling_problems({"s6_ruling": dict(good_r, reason="because")}, cv2)), 1)
+    signs_s = {"legs_net_to_zero": 0, "sign_combinations": {"A=neg B=neg INCOME_partner=pos": 85}}
+    grp = {"cash_fell_by_about_X": {"events": 75, "either": 75}, "cash_flat": {"events": 18, "either": 18}, "other": {"events": 3, "either": 3}}
+    cash_s = {"agreement": {"events": 96, "cash_fell_by_about_X_on_the_event_day": 75}, "reinvestment_by_cash_group": grp}
+    snap_s = {"latest_snapshot": {"s6_rows_and_pairing": {"a": {"rows": 96, "paired_with_income_class_row": 85}, "b": {"rows": 96, "paired_with_income_class_row": 85}}}}
+    good_r = {"addendum": ADDENDUM, "addendum_number": 2, "pin": ADDENDUM_PIN, "withdrawn_pins": list(S6_WITHDRAWN_PINS),
+              "legs": {d: {"flow_class": v[0], "basis": v[1], "claim": v[2]} for d, v in S6_LEGS.items()}, "income_booked_by": "Dividend to Cash", "events": 96,
+              "sign_evidence": {"legs_net_to_zero": 0, "sign_combinations": {"A=neg B=neg INCOME_partner=pos": 85}},
+              "cash_evidence": {"events": 96, "cash_fell_by_about_X": 75, "cash_flat": 18, "other": 3},
+              "reinvestment_evidence": {"events": 96, "events_with_an_equal_amount_buy_or_income_reinvested_line": 96, "by_cash_group": grp},
+              "release_status": "CRITERION_MET",
+              "release_criterion": "96 of 96 events carry an equal-amount Buy or Income Reinvested line, printed; any event without one stops the release",
+              "reason": "both legs are INTERNAL: the cash drop was a purchase, a reinvestment inside the account, not money leaving"}
+    arm("s6-ruling-green", s6_ruling_problems({"s6_ruling": good_r}, snap_s, signs_s, cash_s), [])
+    arm("s6-ruling-pin", len(s6_ruling_problems({"s6_ruling": dict(good_r, pin="x")}, snap_s, signs_s, cash_s)), 1)
+    arm("s6-ruling-criterion", len(s6_ruling_problems({"s6_ruling": dict(good_r, release_criterion="later")}, snap_s, signs_s, cash_s)), 1)
+    arm("s6-ruling-reason", len(s6_ruling_problems({"s6_ruling": dict(good_r, reason="because")}, snap_s, signs_s, cash_s)), 1)
+    short = dict(grp, cash_flat={"events": 18, "either": 17})
+    arm("s6-release-stops-when-an-event-has-no-line", len(s6_ruling_problems({"s6_ruling": good_r}, snap_s, signs_s, dict(cash_s, reinvestment_by_cash_group=short))), 1)
     arm("rules-business-date-function", len(rules_problems(dict(con_r, business_date_rule={"function": "x"}), c132, cp, c49)), 2)
     arm("norm-strip-only", (norm("  Buy Money Market "), norm("Buy")), ("Buy Money Market", "Buy"))
     arm("norm-case-kept", norm(" BUY "), "BUY")
