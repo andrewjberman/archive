@@ -21,7 +21,10 @@ under a pair, after 2.0.0_SA_COO~V2's release.
                               the plan and sends nothing. Without --control the run is unchanged.
 
 Control verdicts (--control only, a closed set): ALLOWED, DENIED, UNREACHED, EXCLUDED.
-  any 2xx on a ticket or package route           -> ALLOWED (a 2xx is the pass here, not a leak; no marker scan)
+  any 2xx on a ticket route                      -> ALLOWED (a 2xx is the pass here, not a leak; no marker scan)
+  a 2xx on a report-side route (/api/scoped/investor-reporting/) is read by its ENVELOPE (AR-tz-72): ok true
+      -> ALLOWED; ok false with code CONTRACT_VERSION or ? -> UNREACHED; ok false with any other code -> DENIED
+      (the reason names the code); not a JSON object or no boolean ok -> UNREACHED
   a 2xx ticket-list whose JSON carries a tickets list with the ticket id (case-insensitive) -> ALLOWED;
   a 2xx ticket-list without it                   -> DENIED
   401, 403 or 404                                -> DENIED
@@ -33,7 +36,13 @@ Control verdicts (--control only, a closed set): ALLOWED, DENIED, UNREACHED, EXC
   The package routes are reported and do not change the exit. The report is fwd5_control_report.json in --out.
 
 Verdicts (a closed set): REFUSED, LEAK, UNREACHED, EXCLUDED.
-  any 2xx on a ticket or package route           -> LEAK (a 2xx is never a refusal, an empty body included)
+  any 2xx on a ticket route                      -> LEAK (a 2xx is never a refusal, an empty body included)
+  a 2xx on a report-side route (/api/scoped/investor-reporting/) is read by its ENVELOPE (AR-tz-72), after the
+      marker scan: ok true -> LEAK; ok false with code FIRM_BINDING or NOT_AUTHORIZED -> REFUSED; ok false with any
+      other code (CONTRACT_VERSION and ? included) -> UNREACHED, the reason says so; not a JSON object or no boolean
+      ok -> UNREACHED
+  every GET carries X-Contract-Version: v1 (the served route refuses a request without it before any read)
+  the row's code is the envelope's reason code on a report-side route read by its envelope, else the empty string
   a 2xx ticket-list whose JSON carries a tickets list and no marker -> REFUSED (the other firm's ticket is absent)
   any answer whose body carries a marker (the ticket id or the other firm's id, case-insensitive) -> LEAK
   401, 403 or 404 with no marker                  -> REFUSED
@@ -72,6 +81,12 @@ TIMEOUT_S = 30
 VERDICTS = ("REFUSED", "LEAK", "UNREACHED", "EXCLUDED")
 CONTROL_VERDICTS = ("ALLOWED", "DENIED", "UNREACHED", "EXCLUDED")
 CONTROL_GATE = ("ticket-read", "ticket-list")
+CONTRACT_HEADER = "X-Contract-Version"  # AR-tz-72: the served route refuses a GET without it, before any read
+CONTRACT_VALUE = "v1"
+REPORT_PREFIX = "/api/scoped/investor-reporting/"  # the four report-side routes: graded by their envelope on a 2xx
+FENCE_CODES = ("FIRM_BINDING", "NOT_AUTHORIZED")  # the only refusals that say something about the firm fence
+NOT_FENCE_CODES = ("CONTRACT_VERSION", "?")  # a refusal that says nothing about the firm fence
+CODE_RE = re.compile(r"^[A-Z][A-Z0-9_]{2,40}$")
 SEG = r"[A-Za-z0-9_-]+"
 
 # The guard: GET only to these path shapes (the ticket routes and the package-file routes the record lists),
@@ -199,6 +214,66 @@ def classify(is_list, status, body, markers):
     return "UNREACHED"
 
 
+def has_marker(body, markers):
+    low = body.decode("utf-8", "replace").lower()
+    return any(mk and mk in low for mk in markers)
+
+
+def envelope_of(body):
+    """(ok, code) of a report-side 2xx answer. ok is the boolean, or None when the body is not a JSON object with a
+    boolean ok. code is status.public_reason_code when it is a string of the closed shape, else "?". Read, never kept."""
+    try:
+        obj = json.loads(body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return None, "?"
+    if not isinstance(obj, dict):
+        return None, "?"
+    status = obj.get("status")
+    code = status.get("public_reason_code") if isinstance(status, dict) else None
+    if not isinstance(code, str) or not CODE_RE.fullmatch(code):
+        code = "?"
+    ok = obj.get("ok")
+    return (ok if isinstance(ok, bool) else None), code
+
+
+def _run_envelope(body):
+    """The RUN verdict for a report-side 2xx that carries no marker: (verdict, reason, code). Only FIRM_BINDING and
+    NOT_AUTHORIZED are the firm fence; any other refusal code is UNREACHED, never REFUSED."""
+    ok, code = envelope_of(body)
+    if ok is None:
+        return "UNREACHED", "2xx answer is not a JSON object with a boolean ok", code
+    if ok:
+        return "LEAK", "2xx envelope with ok true", code
+    if code in FENCE_CODES:
+        return "REFUSED", "refused by the firm fence (%s)" % code, code
+    return "UNREACHED", "refused by %s, not by the firm fence" % code, code
+
+
+def classify_report(status, body, markers):
+    """The RUN verdict for a report-side route: (verdict, reason, code). The marker scan runs first, as classify does;
+    a non-2xx answer keeps classify's grading and carries no code; only a marker-free 2xx is read by its envelope."""
+    if status is None or not 200 <= status < 300 or has_marker(body, markers):
+        return classify(False, status, body, markers), "", ""
+    return _run_envelope(body)
+
+
+def control_report_answer(status, body, ticket):
+    """The CONTROL verdict for a report-side route: (verdict, reason, code). A non-2xx keeps control_answer's grading.
+    A 2xx is read by its envelope: ok true ALLOWED; code CONTRACT_VERSION or ? UNREACHED; any other code DENIED; no
+    boolean ok UNREACHED. No marker scan: an entitled identity may see the ticket id."""
+    if status is None or not 200 <= status < 300:
+        verdict, reason = control_answer(False, status, body, ticket)
+        return verdict, reason, ""
+    ok, code = envelope_of(body)
+    if ok is None:
+        return "UNREACHED", "2xx answer is not a JSON object with a boolean ok", code
+    if ok:
+        return "ALLOWED", "2xx envelope with ok true", code
+    if code in NOT_FENCE_CODES:
+        return "UNREACHED", "refused by %s, not by the firm fence" % code, code
+    return "DENIED", "refused by %s" % code, code
+
+
 def exit_code(rows):
     """Decided over the MADE calls only: every row whose verdict is not EXCLUDED."""
     made = [r["verdict"] for r in rows if r["verdict"] != "EXCLUDED"]
@@ -285,7 +360,7 @@ def sign_in(base, email, password, opener):
 def _excluded_row(r):
     """An EXCLUDED row: never sent, carries the one-line reason the issuer ruled."""
     return {"route": r["name"], "method": r["method"] or "-", "status": None, "verdict": "EXCLUDED",
-            "body_len": 0, "reason": r["excluded"]}
+            "body_len": 0, "reason": r["excluded"], "code": ""}
 
 
 def run_calls(routes, base, opener, token, ctx, markers, control=False):
@@ -298,7 +373,7 @@ def run_calls(routes, base, opener, token, ctx, markers, control=False):
             rows.append(_excluded_row(r))
             continue
         row = {"route": r["name"], "method": r["method"] or "-", "status": None,
-               "verdict": "UNREACHED", "body_len": 0, "reason": ""}
+               "verdict": "UNREACHED", "body_len": 0, "reason": "", "code": ""}
         missing = [k for k in r["needs"] if not ctx.get(k)]
         if r["method"] is None:
             row["reason"] = "no GET route for it in the record"
@@ -306,7 +381,8 @@ def run_calls(routes, base, opener, token, ctx, markers, control=False):
             row["reason"] = "no value supplied for " + ", ".join(missing)
         else:
             url = base + r["template"].format(**ctx)
-            headers = {"Accept": "application/json", "Authorization": "Bearer " + token}
+            headers = {"Accept": "application/json", "Authorization": "Bearer " + token,
+                       CONTRACT_HEADER: CONTRACT_VALUE}
             try:
                 status, body = guarded_send(r["method"], url, base, opener, headers)
             except GuardRefused:
@@ -317,8 +393,13 @@ def run_calls(routes, base, opener, token, ctx, markers, control=False):
             else:
                 row["status"] = status
                 row["body_len"] = len(body)
-                if control:
+                report = r["template"].startswith(REPORT_PREFIX)
+                if control and report:
+                    row["verdict"], row["reason"], row["code"] = control_report_answer(status, body, ctx["ticket"])
+                elif control:
                     row["verdict"], row["reason"] = control_answer(r["list"], status, body, ctx["ticket"])
+                elif report:
+                    row["verdict"], row["reason"], row["code"] = classify_report(status, body, markers)
                 else:
                     row["verdict"] = classify(r["list"], status, body, markers)
         rows.append(row)
@@ -388,7 +469,7 @@ def print_plan(routes=ROUTES, control=False):
 def _unreached_rows(routes, why):
     return [_excluded_row(r) if r.get("excluded") else
             {"route": r["name"], "method": r["method"] or "-", "status": None, "verdict": "UNREACHED",
-             "body_len": 0, "reason": why} for r in routes]
+             "body_len": 0, "reason": why, "code": ""} for r in routes]
 
 
 def do_run(ns, stdin, routes, control=False):
@@ -473,6 +554,15 @@ def _gate(ticket_read, ticket_list):
     return [{"route": "ticket-read", "verdict": ticket_read}, {"route": "ticket-list", "verdict": ticket_list}]
 
 
+def _env(ok, code, operation="x"):
+    """A synthetic v1 refusal or success envelope, as the served route answers it (selftest only)."""
+    status = {"operation_id": operation, "state": "REFUSED"}
+    if code is not None:
+        status["public_reason_code"] = code
+    return json.dumps({"ok": ok, "contract_version": CONTRACT_VALUE, "operation": operation,
+                       "status": status}).encode("utf-8")
+
+
 def selftest():
     base = "https://h.example"
     checks = [
@@ -517,6 +607,28 @@ def selftest():
         ("control exit 1 denied beats unreached", control_exit_code(_gate("DENIED", "UNREACHED")), 1),
         ("control exit 2 ticket-read unreached", control_exit_code(_gate("UNREACHED", "ALLOWED")), 2),
         ("control exit 2 no session", control_exit_code(_gate("UNREACHED", "UNREACHED")), 2),
+        ("envelope run ok true leaks", classify_report(200, _env(True, "READY"), [])[0], "LEAK"),
+        ("envelope run FIRM_BINDING refused", classify_report(200, _env(False, "FIRM_BINDING"), [])[0], "REFUSED"),
+        ("envelope run NOT_AUTHORIZED refused", classify_report(200, _env(False, "NOT_AUTHORIZED"), [])[0],
+         "REFUSED"),
+        ("envelope run CONTRACT_VERSION unreached", classify_report(200, _env(False, "CONTRACT_VERSION"), [])[0],
+         "UNREACHED"),
+        ("envelope run other code unreached", classify_report(200, _env(False, "STATE_NOT_READY"), [])[0],
+         "UNREACHED"),
+        ("envelope run 2xx not json unreached", classify_report(200, b"<html>", [])[0], "UNREACHED"),
+        ("envelope run non-boolean ok unreached", classify_report(200, b'{"ok": "false"}', [])[0], "UNREACHED"),
+        ("envelope run marker before envelope leaks", classify_report(200, _env(False, "FIRM_BINDING",
+                                                                             operation="TKT-A1B2"),
+                                                                     ["tkt-a1b2"])[0], "LEAK"),
+        ("envelope run 403 keeps classify", classify_report(403, _env(False, "FIRM_BINDING"), [])[0], "REFUSED"),
+        ("envelope control ok true allowed", control_report_answer(200, _env(True, "READY"), "TKT-a1b2")[0],
+         "ALLOWED"),
+        ("envelope control FIRM_BINDING denied", control_report_answer(200, _env(False, "FIRM_BINDING"),
+                                                                       "TKT-a1b2")[0], "DENIED"),
+        ("envelope control CONTRACT_VERSION unreached", control_report_answer(200, _env(False, "CONTRACT_VERSION"),
+                                                                              "TKT-a1b2")[0], "UNREACHED"),
+        ("envelope code outside closed shape is ?", envelope_of(_env(False, "lower_case"))[1], "?"),
+        ("envelope code with newline is ?", envelope_of(_env(False, "FIRM_BINDING\n"))[1], "?"),
     ]
     for name, got, want in checks:
         if got != want:

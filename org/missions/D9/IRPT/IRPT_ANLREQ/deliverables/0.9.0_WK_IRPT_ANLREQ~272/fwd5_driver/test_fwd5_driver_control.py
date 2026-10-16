@@ -151,7 +151,12 @@ def by_route(rep, name):
 
 
 def test_fwd5_control_all_allowed_exits_zero(tmp_path):
-    with Fake(routes_answer(allowed_table())) as fake:
+    table = allowed_table()
+    # AR-tz-72: a report-side 2xx is read by its envelope, so the four report routes answer an ok-true envelope.
+    ok_envelope = b'{"ok": true, "contract_version": "v1", "status": {"public_reason_code": "READY"}}'
+    for path in (ORIG_PATH, SECTIONS_PATH, PDF_PATH, COMM_PDF_PATH):
+        table[path] = (200, ok_envelope, JSON_HEADERS)
+    with Fake(routes_answer(table)) as fake:
         rc, out = run_control(tmp_path, fake.base)
     rep = read_control(out)
     assert rc == 0
