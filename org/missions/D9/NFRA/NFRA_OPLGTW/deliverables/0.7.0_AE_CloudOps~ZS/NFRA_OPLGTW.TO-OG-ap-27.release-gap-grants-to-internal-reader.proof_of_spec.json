@@ -1,0 +1,138 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-27",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~ZS",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7656f484ab"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "93d752d55b",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-27.release-gap-grants-to-internal-reader.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/gateway_release_gap_read_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "7be8a06df4",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Two aws_iam_role_policy on aws_iam_role.int_reader at sha256-16 be09d3dd3aaebdd9 (re-hashed before the apply; ask 38817328cc91). Applied through safe-apply, targeted at both: plan 2 add / 0 change / 0 destroy, 'Apply complete! Resources: 2 added, 0 changed, 0 destroyed'. Targeted re-plan: No changes.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "iam:role-policy/gateway-global-internal-reader-role/gateway-global-etfs-gap-read-policy,gateway-global-mdpf-gap-read-policy",
+   "kind": "aws_resource",
+   "commit_or_etag": "e5d53534f6",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live on the internal reader role: gateway-global-etfs-gap-read-policy (sha256-16 26a2516dd78db96a) and gateway-global-mdpf-gap-read-policy (66b10f940ba482ae), two statements each, equal to the file; the role's inline policies 7 -> 9; neither name on opal-gateway-role. Simulator, one call each: GetObject allowed on a probe key under each of the 4 prefixes (4 of 4), ListBucket allowed with each prefix as s3:prefix (4 of 4), out-of-scope key and prefix of each bucket implicitDeny (2 of 2, 2 of 2). Recorded in W/GAP_APPLIED.json.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~ZS/NEVER_WIDEN_ASK_OG-ap-27.md",
+   "kind": "doc",
+   "commit_or_etag": "7be8a06df4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The three-half ask, sha256 38817328cc91; halves signed CTO c18e2e007c, COO b5652f6db9, CVO b121849fbe, each at the .tf hash be09d3dd3aaebdd9.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261016T0900Z_nfra-oplgtw-grants-ap27_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "e5d53534f6",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ledger nfra-oplgtw-grants-ap27 opened (entry and sentinel committed) before the apply, 3 legs (P1 apply and read-back, S1 simulator, V1 re-plan), all proven, CLOSED; sentinel removed in the same commit as GAP_APPLIED.json.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (Phase A): the one .tf file puts two policies on the internal reader role, read-only and prefix-confined on the four prefixes, and the plan is two additions only.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap27.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "terraform: policies 2 (want 2); both on the internal reader True; actions ['s3:GetObject', 's3:ListBucket']; wildcard False (want False); bucket-root object arn False (want False)\nprefixes: four stems in GetObject resources True; in ListBucket s3:prefix values True; list confined True\nplan: 2 to add, 0 to change, 0 to destroy True; ask has the three halves True\nRESULT: PASS\nexit=0",
+   "denominator": "2 policies in the .tf; the plan figure is read from the stored W/GAP_PLAN.txt (the Phase A plan), and after the apply a fresh targeted plan reads No changes.",
+   "status": "PASS",
+   "status_reason": "Run after the issuer's script fix (the first run on the old script read FAIL, row Z-S165) and again when the instance was generated; the .tf and the plan are unchanged since Phase A.",
+   "expect": "(?s)terraform: policies 2 \\(want 2\\); both on the internal reader True; actions \\['s3:GetObject', 's3:ListBucket'\\]; wildcard False \\(want False\\); bucket-root object arn False \\(want False\\).*prefixes: four stems in GetObject resources True; in ListBucket s3:prefix values True; list confined True.*plan: 2 to add, 0 to change, 0 to destroy True; ask has the three halves True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (Phase B): both policies are live on the internal reader role, the simulator allows the four prefixes and refuses an out-of-scope key and prefix of each bucket, and the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r37/checks/ap27.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0; policies named 2, held on the internal reader 2; simulate GetObject allowed 4 of 4, ListBucket allowed 4 of 4; negative control GetObject not allowed 2 of 2, ListBucket not allowed 2 of 2\nRESULT: PASS\nexit=0",
+   "denominator": "2 policies named in GAP_APPLIED.json, each re-read from IAM by the script on the internal reader; 4 in-scope GetObject probes, 4 in-scope ListBucket prefixes, 2 + 2 out-of-scope controls.",
+   "status": "PASS",
+   "status_reason": "Run at e5d53534f6 on the shared tree, and again when the instance was generated: ledger CLOSED, sentinel 0 at HEAD, 2 policies held, GetObject 4 of 4 and ListBucket 4 of 4 allowed, negative controls 2 of 2 and 2 of 2 not allowed.",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0; policies named 2, held on the internal reader 2; simulate GetObject allowed 4 of 4, ListBucket allowed 4 of 4; negative control GetObject not allowed 2 of 2, ListBucket not allowed 2 of 2.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative arm: iam simulate-principal-policy as the internal reader, one call each, GetObject on an out-of-scope key and ListBucket with an out-of-scope s3:prefix in each of the two buckets (ap27-negative-control/), plus a positive control for the deny reads: the caller principal on the same key and prefix, each in its own invocation.",
+   "expected": "The four in-scope reads allowed; the four out-of-scope reads not allowed; the control principal's reads allowed.",
+   "observed": "In-scope GetObject allowed 4 of 4 and ListBucket allowed 4 of 4; out-of-scope GetObject implicitDeny 2 of 2 and ListBucket implicitDeny 2 of 2; the caller principal's GetObject and ListBucket on the same key and prefix allowed, so the denies are the role's and not the instrument's.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Targeted re-plan after the apply; AC1 and AC2 each run twice (AC1 on the draft, after the issuer's script fix, and when the instance was generated; AC2 at the Phase B commit and when the instance was generated).",
+   "observed": "Re-plan No changes; AC1 and AC2 each PASS exit=0 with the same figures. AC1's first run, on the old script, read FAIL (row NFRA_OPLGTW-Z-S165, fixed by the issuer in the script only). AC2 was not run as a negative arm: its refusal of an absent GAP_APPLIED.json is read from the script, and the issuer measured the pre-cut FAIL.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "That the four tools read their objects through these policies.",
+   "reason": "Not exercised: no code is deployed in this act and no object was read. The simulator reads the IAM branch only; the served branch (27 of 27 tools) is the release re-deploy's read. The tool-to-prefix pairs are the order's; this seat did not read the tool code."
+  },
+  {
+   "item": "That bbg/ grants only what the release's tools read.",
+   "reason": "The stem is the order's and covers seven catalog rows, all opal-internal-only; the ask names that."
+  },
+  {
+   "item": "That IAM fences the firms apart under mdpf/feeds/model_composition/.",
+   "reason": "It does not and the ask says so: the prefix stops before the firm segment. The CTO ruled (msg 34857) that mdpf_get_model_composition stays NATIVE (Opal principals only, one firm per call)."
+  },
+  {
+   "item": "That no other role holds these two policies.",
+   "reason": "Only opal-gateway-role was checked for the two names; the policies are resources on the internal reader by construction (the plan and the apply id name that role)."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S165"
+ ],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. Phase A 2026-10-16 08:41Z-08:50Z (GO 34855, follow-up 34858); Phase B 08:58Z-09:12Z (GO 34868). Log: org/tier2_senior/0.7.0_AE_CloudOps~ZS/logs/2026-10-16/ (extended in the same commit as this instance).",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway apply -auto-approve -var market_update_s3_root=<address() output> -target=aws_iam_role_policy.etfs_gap_read -target=aws_iam_role_policy.mdpf_gap_read",
+   "result": "PASS",
+   "notes": "rc 0, 2 added. Two new opal_name module calls needed one terraform init in Phase A before any plan would run."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open (3 legs), close-leg x3, close",
+   "result": "PASS",
+   "notes": "open commits itself; close leaves the closed entry and the sentinel deletion uncommitted, so they went in the Phase B commit."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "--drift --budget 420",
+   "result": "PASS",
+   "notes": "scanned 6 of 6 carriers within budget (197 s); no schedule or trigger is added by this order."
+  }
+ ]
+}

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -54,6 +54,10 @@
   <amendment_2>
     AMENDMENT 2 (issuer, 2026-10-16 ~08:5xZ), on your report (msg 9235). (a) NEGATIVE ARM A is ACCEPTED AS CORRECTED, no rollback: the order's text was mis-specified. `store()` resolves the REQUESTS record first (the same binding as `put`), so a request id with no record answers `REFUSED`/`UNAVAILABLE` and never reaches the jobs write; the substantive check (no row created, key ABSENT after) held. The writer's own `false` on a missing job row (the `attribute_exists(#job)` condition) is covered offline by the AR-tf-74 tests; a live arm for it would need a request record with no job row, and no synthetic one exists. Your proof stands: 4 arms plus the corrected arm A. (b) NEW STEP 8: record the deploy of the draft-store Lambda in the source map by the standing procedure you use after a Terraform deploy (`record-terraform-deploy.sh` or its successor), so that `artifact_sha256` of `irpt-commentary-draft-store-lambda` reads `RizVjaXi...` and no longer `cwf6bUEb...`; say in your report which command and which commit. This is your standing lane for that line (your `ci: record deploy` commits). If the procedure refuses, STOP and report; do not edit the map by hand. (c) Then close the ledger and write the proof instance; the status flip is mine.
   </amendment_2>
+
+  <amendment_3>
+    AMENDMENT 3 (issuer, 2026-10-16 ~09:1xZ), on your close (msg 9238). Everything is graded: your instance is VALID and my live read agrees. The flip gate looks for the proof instance BESIDE the order, in `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/` itself (t34 kept its instance there), not in `deliverables/irpt_anlreq_t54/`, and the issuer's lane cannot write your deliverables folder. PLACE the same instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/IRPT_ANLREQ.TO-APPLY-t54.commentary-hop-fwd4-aq2.proof_of_spec.json` (a copy of the one at `9dc717f16d`, unchanged bytes; keep the original), commit it, and tell me the hash. The status flip is then mine.
+  </amendment_3>
 
   <bounds>
     - Exactly the three artifacts of the packet, one at a time. No other function, role, table, queue, schedule, mapping, key or secret. Never `aws lambda update-function-code`; never a bare `terraform apply`.
