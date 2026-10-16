@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-801",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R121_F.md",
+    "vintage_commit": "ea9ee359030d33deaaa35ffe322d9379afd7ccb7",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-801.class-series-reader-columnar-document-to-class-rows-not-mounted.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ea9ee359030d33deaaa35ffe322d9379afd7ccb7"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~801",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/classes/classSeriesRead.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "6e0e4ab9756f9f1372276346de0eeabe187fe538",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the portal branch wk-IRPT_DASHBD-801-portal only (portal repo, not pushed). Not mounted: no file imports it outside its own test; ReportingTab and AssetClassSection are untouched.",
+      "artifact_covered_by": ["DBF121-1-AC1", "DBF121-1-AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/irpt-dashbd/class-series-read.test.ts",
+      "kind": "test",
+      "commit_or_etag": "6e0e4ab9756f9f1372276346de0eeabe187fe538",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the portal branch wk-IRPT_DASHBD-801-portal only (portal repo, not pushed). 13 tests, made-up values, injected fetch, no network.",
+      "artifact_covered_by": ["DBF121-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~801/BUILD_R121.json",
+      "kind": "doc",
+      "commit_or_etag": "b1ea9a0ef0b0d3117d287a5a29babdaea12b977a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The BUILD record: portal head, test counts, mutant result, typecheck and lint results, pushed false, deployed false. Committed on wk-IRPT_DASHBD-801 only.",
+      "artifact_covered_by": ["DBF121-1-AC1", "DBF121-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b1ea9a0ef0b0d3117d287a5a29babdaea12b977a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_DASHBD-D2-W801-S1 to S3 appended as OBSERVATION, hazard INERT, disposition UNDER_INVESTIGATION. Append-only; no existing row edited. The surprise-row gate graded 3 new rows, OK."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF121-1-AC1",
+      "criterion_verbatim": "`class-series-read.test.ts` carries titles with the eight words `path`, `columnar`, `rows`, `absent`, `null`, `misaligned`, `unreadable` and `tenant`, and `bun test` on it passes with 0 failures and at least 8 tests. Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r121/p121_reader.py\" . DBF121-1-AC1",
+      "output_evidence": "DBF121-1-AC1 PASS (rc=0), printed last by the checker. The checker's bun run of class-series-read.test.ts at 6e0e4ab9756f9f1372276346de0eeabe187fe538: 13 pass, 0 fail, 13 tests across 1 file.",
+      "denominator": "1 criterion of 1; 8 of 8 title words present; 13 tests run, 0 failing (8 required)",
+      "status": "PASS",
+      "expect": "DBF121-1-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DBF121-1-AC2",
+      "criterion_verbatim": "bounds: the portal diff from the class candidate head `7fa808c9` to your head is exactly the two new files (`classSeriesRead.ts` and `class-series-read.test.ts`) and nothing else. Base: FAIL (no change).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r121/p121_reader.py\" . DBF121-1-AC2",
+      "output_evidence": "DBF121-1-AC2 PASS (rc=0), printed last by the checker. git -C portal diff --name-only 7fa808c9..HEAD lists src/pages/InvestorReporting/tabs/reporting/classes/classSeriesRead.ts and src/pages/InvestorReporting/__tests__/irpt-dashbd/class-series-read.test.ts and no other path.",
+      "denominator": "1 criterion of 1; 2 of 2 changed portal files inside the grant; 0 outside",
+      "status": "PASS",
+      "expect": "DBF121-1-AC2 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Temporary mutant in classSeriesRead.ts: the per-class length check inside classSeriesToRows is removed (only Array.isArray is kept), then the reader test file is run; the file is reverted with git checkout to the committed bytes.",
+      "expected": "at least one reader test fails",
+      "observed": "1 fail: 'a misaligned array one shorter than date gives null'; 12 pass; 13 tests. After git checkout the reader test file ran 13 pass, 0 fail.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of class-series-read.test.ts at portal commit 6e0e4ab9756f9f1372276346de0eeabe187fe538, outputs compared",
+      "observed": "run 1 (before the mutant): 13 pass, 0 fail; run 2 (after the revert): 13 pass, 0 fail; identical counts",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live GET of the reporting route with which=class_series, and the served document's shape",
+      "reason": "Not run: no AWS call, no network, no live request, and the route is not served yet. The reader is checked against the shape the publishing seat named (msg 8846), not against a served body."
+    },
+    {
+      "item": "Mounting the reader in ReportingTab, AssetClassSection or any importer",
+      "reason": "Outside the order: the reader is NOT mounted. Nothing imports classSeriesRead.ts outside its test."
+    },
+    {
+      "item": "A portal push to DEV or PROD, and a workspace push",
+      "reason": "The order forbids pushes; both repos stay local (pushed false)."
+    },
+    {
+      "item": "Repo-wide bun run lint at zero errors (step 4 of the order)",
+      "reason": "Measured, not repaired: 1 error in src/pages/TicketCenter/__tests__/filing-hint.test.tsx at the candidate base, a file outside the grant. The two new files carry 0 lint findings. Recorded as surprise IRPT_DASHBD-D2-W801-S1."
+    },
+    {
+      "item": "The InvestorReporting suite at zero failures",
+      "reason": "Not a criterion. The suite shows 68 failing tests and 27 errors before and after this cell (identical failing names); the cone sparse checkout lacks tracked contract paths. Recorded as surprise IRPT_DASHBD-D2-W801-S2."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W801-S1: TO step 4 asks for lint at 0 errors; the repo-wide lint reports 1 error outside the grant, recorded as measured.",
+    "IRPT_DASHBD-D2-W801-S2: the worktree is a cone sparse checkout; the InvestorReporting suite shows 68 failing tests and 27 errors before and after, same failing names.",
+    "IRPT_DASHBD-D2-W801-S3: the order's plain-git portal commit needs a committer identity; the worker serial was set as committer in the command environment only."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~801/BUILD_R121.json",
+  "compiler_tools": [
+    {
+      "tool": "p121_reader.py (criterion checker, run at the worktree root; also --selftest, 7 arms PASS)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r121/p121_reader.py\" . DBF121-1-AC1 ; ... . DBF121-1-AC2",
+      "result": "DBF121-1-AC1 PASS rc=0; DBF121-1-AC2 PASS rc=0; selftest PASS (7 arms)"
+    },
+    {
+      "tool": "bun test (reader file, and the InvestorReporting suite before and after)",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/irpt-dashbd/class-series-read.test.ts ; bun test src/pages/InvestorReporting",
+      "result": "reader: 13 pass, 0 fail. Suite before (new files moved aside): 1032 pass, 68 fail, 27 errors, 1125 tests. Suite after: 1045 pass, 68 fail, 27 errors, 1138 tests. Failing names identical."
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "bun run typecheck",
+      "result": "rc=0, no diagnostics"
+    },
+    {
+      "tool": "bun run lint (eslint .)",
+      "invocation": "bun run lint",
+      "result": "rc=1: 360 problems, 1 error (filing-hint.test.tsx:147, outside the grant), 359 warnings; 0 findings in the two new files"
+    }
+  ]
+}
