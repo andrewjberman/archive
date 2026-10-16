@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-9",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8e8897d5a8",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-9.not-found-is-not-403.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "8e8897d5a8"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~123",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/graphql_plumbing/catalog_gate.py",
+      "kind": "script",
+      "commit_or_etag": "c0b7dcbaf7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-123 (not pushed). GateVerdict gains not_found, set only by the no-row verdict; reason reads 'not found (off-catalog): no W5 row ...'. No admission decision changes.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/query_v0.py",
+      "kind": "script",
+      "commit_or_etag": "c0b7dcbaf7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-123 (not pushed). handle answers 404 when verdict.not_found, else 403 as before (line 155); the DENY audit line and the entitlement chokepoint (line 124) are unchanged.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en9.py",
+      "kind": "test",
+      "commit_or_etag": "c0b7dcbaf7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three named tests test_ogen9_ac01..ac03, restated per A1; 3 of 3 PASS at c0b7dcbaf7 (two runs). First committed red at 29d978d6f7.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_query_v0_tool.py",
+      "kind": "test",
+      "commit_or_etag": "c0b7dcbaf7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_mx_q3_uncatalogued_key_refused: 403 -> 404 on the route and the tool, plus the 'not found' wording and no guard_denied; every other assertion kept. The file passes at c0b7dcbaf7 (4 of 4 in the file).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "29d978d6f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows by this worker, NFRA_OPLGTW-Z-W123-S1..S5, appended in fenced json blocks (126 insertions, 0 deletions). surprise-row-gate OK. Rows are not edited; A1 rules S1, S2 and S4 and the fix is at c0b7dcbaf7.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass: not-found is told apart from a denial (test_ogen9_ac01: a key with no catalog row answers 404, or 400 when malformed, names not found, carries no guard_denied; test_ogen9_ac02: an entitled key is served as before, and a key a not-entitled principal may not read answers 403 with guard_denied and entitlement_denied; test_ogen9_ac03: the same principal gets two different http_status values for an un-rowed key and an entitled-denied key). Restated by amendment A1: ac01 is the not-found arm (404, not found in words, zero fetches, audited); ac02 keeps the two denied arms at 403 and serves an entitled caller; ac03 gives 404 for an un-rowed key and 403 for a row-present denied key.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en9.py test_ogen9_ac01 test_ogen9_ac02 test_ogen9_ac03; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests passed (test_ogen9_ac01, test_ogen9_ac02, test_ogen9_ac03), 0 failed, 0 errors; run at c0b7dcbaf7 and again for the determinism control (3 passed each time).",
+      "status": "PASS",
+      "status_reason": "The three named tests pass on the committed HEAD c0b7dcbaf7. The un-rowed key answers 404 with 'not found' and no guard_denied; the entitlement chokepoint and the row-present firm refusal stay 403.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the catalog gate, its tool and the catalog tests (write-set bound: every file touched by this serial's commits lies in the allowed set; at least one product file touched). Allowed set per amendment A1: app/graphql_plumbing/catalog_gate.py, app/query_v0.py, app/integrations/portal_index/(integration|__init__).py, tests/(test_og_en9|test_og_cat1|test_graphql_catalog_gate|test_portal_index_integration|test_query_v0_tool).py.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~123 '^infra/aws/ec2/opal-gateway/(app/graphql_plumbing/catalog_gate\\.py|app/query_v0\\.py|app/integrations/portal_index/(integration|__init__)\\.py|tests/(test_og_en9|test_og_cat1|test_graphql_catalog_gate|test_portal_index_integration|test_query_v0_tool)\\.py)$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~123: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~123: files touched 7; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "7 files touched by this serial's commits: 4 product files (catalog_gate.py, query_v0.py, test_og_en9.py, test_query_v0_tool.py) and 3 standing record paths (1 channel file, 2 files in this order's deliverables folder); 0 outside the allowed set. Measured at c0b7dcbaf7 before this instance's commit.",
+      "status": "PASS",
+      "status_reason": "Every product file touched is in the amended allowed set; the write set is bounded.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the order. The not-found arm is observed directly: the pre-fix run at 29d978d6f7 failed ac01 at 403 == 404 on the same call shape.",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "At 29d978d6f7 (before the fix) ac01 failed with 403 == 404 and ac03 with 403 != 403; after c0b7dcbaf7 both pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The named tests run at c0b7dcbaf7 twice (the _named.sh run and a direct pytest run) plus once more in the query-tool file run.",
+      "observed": "3 of 3 passed in each run; 4 of 4 in tests/test_query_v0_tool.py.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "tests/test_graphql_catalog_gate.py, tests/test_portal_index_integration.py and tests/test_og_cat1.py are not created or edited.",
+      "reason": "They do not exist at HEAD (surprise row S3). The amendment says the three names are ignored."
+    },
+    {
+      "item": "integration.py and __init__.py are not changed.",
+      "reason": "The tool copies the route's status (integration.py:431), so the 404 flows through unchanged; no edit was needed."
+    },
+    {
+      "item": "The full gateway suite is not green in this worktree (tests/: 65 failed, 1027 passed in 400.9 s).",
+      "reason": "Each of the 32 failing files was re-run alone (scratch/isolated.txt): 22 still fail for causes outside the changed code (missing fixtures, 404 vs 405 method routing, roster and access-state errors, and the pre-existing baseline set); 10 pass alone, so their full-run failures are order-dependent. No failing assertion traces to catalog_gate or the query handler's status. No base-tree run was made, so this is measured for the changed files, not a base-versus-head diff."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W123-S1: the 403 for an un-rowed key was set in app/query_v0.py:155, outside the TO's <paths>; A1 widened the grant and the fix is at c0b7dcbaf7 (404 on not-found). BLOCKING, ARMED (disarm 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W123-S2: tests/test_query_v0_tool.py:107 pinned the old 403; A1 widened the grant and the pin is updated to 404 at c0b7dcbaf7. BLOCKING, INERT.",
+    "NFRA_OPLGTW-Z-W123-S3: the three test files listed in <paths> do not exist at HEAD; A1 says they are ignored. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W123-S4: a resolved row refused to a principal kept 403 with no entitlement shape; A1 rules the row-present refusal stays 403 and the 404 applies only to the no-row class, so the firm arm carries no more than it carries today. BLOCKING, INERT.",
+    "NFRA_OPLGTW-Z-W123-S5: the worktree is a sparse checkout; org/surprise_channel/schemas/ is skip-worktree and absent on disk; the schema was read through git show. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~123/NFRA_OPLGTW.TO-OG-en-9.not-found-is-not-403.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (named tests)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en9.py test_ogen9_ac01 test_ogen9_ac02 test_ogen9_ac03",
+      "result": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS"
+    },
+    {
+      "tool": "pytest (query-route tool file and catalog-adjacent files)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_query_v0_tool.py tests/test_og_en9.py -q -p no:cacheprovider",
+      "result": "7 passed (3 OG-en-9 + 4 query-tool); the 15-file catalog-adjacent set is 9 failed and 145 passed, the same 9 failures as before the change"
+    },
+    {
+      "tool": "exercise_catalog_gate.py",
+      "invocation": "python app/graphql_plumbing/exercise_catalog_gate.py",
+      "result": "RESULT: 16/16 pass, 0 failure(s); rc=0"
+    },
+    {
+      "tool": "commit-gate.sh via safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~123 <0.9.0_WK_NFRA_OPLGTW~123@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit-gate: All checks passed; surprise-row-gate OK; committed c0b7dcbaf7 (msg-verify MATCH)"
+    }
+  ]
+}
