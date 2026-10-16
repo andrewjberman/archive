@@ -24,6 +24,29 @@ def aws(*args):
     return json.loads(out.stdout)
 
 
+def locked_out_by_release(r):
+    """PURE. True iff an ACTIVE internal row is admitted today and refused once `_profile_scope` fails closed (R19-ps-3).
+
+    Today a row with no allowedFirmIds attribute, an empty list, or a NULL attribute reads as EVERY firm; after the release
+    each is refused ("firm scope not configured") unless the row carries scope_all_firms exactly BOOL true. A non-empty
+    list is scoped and keeps its scope. An attribute of any OTHER type (a string, a number, a map) is refused as
+    "firm scope malformed" BOTH before and after the release, so the release changes nothing for it and it is not counted.
+    """
+    if (r.get("status") or {}).get("S") != "active":
+        return False
+    flag = r.get("scope_all_firms")
+    if isinstance(flag, dict) and flag.get("BOOL") is True:
+        return False
+    if "allowedFirmIds" not in r:
+        return True
+    attr = r["allowedFirmIds"]
+    if "NULL" in attr:
+        return True
+    if "L" in attr:
+        return len(attr["L"]) == 0
+    return False
+
+
 def main():
     try:
         res = json.load(open(RES, encoding="utf-8"))
@@ -53,7 +76,6 @@ def main():
         return 1
     both = unscoped = markers = 0
     for r in items:
-        active = (r.get("status") or {}).get("S") == "active"
         has_list = "allowedFirmIds" in r
         flag = r.get("scope_all_firms")
         is_marker = isinstance(flag, dict) and flag.get("BOOL") is True
@@ -61,7 +83,7 @@ def main():
             both += 1
         if is_marker and not has_list:
             markers += 1
-        if active and not is_marker and not (has_list and r["allowedFirmIds"].get("L")):
+        if locked_out_by_release(r):
             unscoped += 1
     if both:
         print("MIG-BAD %d row(s) carry both a list and the marker" % both)
