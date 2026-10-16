@@ -123,6 +123,20 @@ def ac2():
         res.append(("%s: prefix is the frozen copy's %s (listing %d lines), read_tool null, gap_owner NFRA_OPLGTW, FROZEN open item kept" % (ent, pre, n),
                     e.get("prefix") == pre and n > 0 and e.get("read_tool") is None and e.get("gap_owner") == "NFRA_OPLGTW"
                     and any("FROZEN" in str(x) for x in (e.get("open_items") or []))))
+    # the emitter's own path: the entries as the LOADER returns them (joined to the fork registry, which restores bucket and key_template), built into
+    # rows, then the assets group map applied with the emitter's rule (a map bucket that differs from the row's valid S3 bucket is a CONFLICT, 2026-10-16 trial emit)
+    sys.path.insert(0, AD)
+    import emit_catalog_v02 as em
+    ents, eerrs = em.load_catalog_entries()
+    lrows = [em.silver_catalog_row(n, ents[n]) for n in ("opal_data_assets_silver_49financial_%s_silver_legacy" % t for t in LEGACY) if n in ents]
+    spec, gerrs = em.load_group_maps([ASSETS_MAP])
+    applied, unused, conflicts = em.apply_group_map({"silver_datasets": lrows, "portal_datasets": [], "harvest_datasets": []}, spec)
+    kt_ok = sum(1 for r, t in zip(lrows, LEGACY) if str(r.get("key_template") or "").startswith("blackdiamond/49financial/silver_legacy/%s/" % t))
+    b_ok = sum(1 for r in lrows if r.get("bucket") == "opal-data-assets")
+    print("DENOMINATOR emitter path: legacy rows built %d; conflicts %d (%s); bucket opal-data-assets %d; key_template at the frozen prefix %d; entry errors %d"
+          % (len(lrows), len(conflicts), "; ".join(c.split(":")[0][-40:] for c in conflicts[:2]), b_ok, kt_ok, len(eerrs)))
+    res.append(("the eight legacy rows, as the loader returns them, take the assets group map with no conflict, bucket opal-data-assets, key_template at the frozen copy's prefix",
+                len(lrows) == 8 and not conflicts and b_ok == 8 and kt_ok == 8 and not eerrs))
     legacy_all = [k for k in gm if k.startswith("opal_data_assets_silver_49financial_") and k.endswith("_silver_legacy")]
     bad = [k for k in legacy_all if gm[k].get("bucket") != "opal-data-assets"]
     print("DENOMINATOR legacy entries %d; frozen prefixes non-empty %d; group-map legacy rows %d, not in opal-data-assets %d" % (len(LEGACY), nonempty, len(legacy_all), len(bad)))
