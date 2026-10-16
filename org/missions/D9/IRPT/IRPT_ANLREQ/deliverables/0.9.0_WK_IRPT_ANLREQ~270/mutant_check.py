@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[7]
 PORTAL = ROOT / "portal"
 TARGET = PORTAL / "src" / "pages" / "TicketCenter" / "AnalysisRequestParts.tsx"
 TEST = "src/pages/TicketCenter/__tests__/hop-failure-read.test.tsx"
-GUARD = b"if (words === null || ticket.package) return null"
-MUTANT = b"if (words === null) return null"
+GUARD = b"return ticket.package ? null : words"
+MUTANT = b"return words"
 FIRED_ON = "shows no failure once a package is attached"
 STRIP = re.compile(r"\x1b\[[0-9;]*m")
 
