@@ -1,0 +1,877 @@
+{
+  "as_of": "2026-10-15",
+  "claim": "inferred",
+  "postulates": {
+    "mece": "Declared domain: the 82 (firm, field, source value) triples of RD_FWD5_FIELDS_R120.json, 49financial 18 (3 action, 15 type), cottonwood 16 and inflection 48. Uncovered-member hunt by subtraction: the writer and the checker list source values with no mapping row, rows with no source value, and duplicate rows; the proposal stands only when all three lists are empty.",
+    "same_grain": "Grain: one row for one transaction line at the account_transaction grain, the level at which a source line carries one type value and one action marker. A type word names what the line is; no word names a group of lines, a day, or a portfolio effect.",
+    "intent_coherence": "One axis: the type word says what a transaction IS (a deposit, a dividend, a fee). The flow class is a separate axis that says where the value sits relative to the account boundary, and the action is derived from the type through this table, never typed on a row.",
+    "state_coherence": "Values one remedy does NOT move: moving one row from UNMAPPED to a word changes no other row, and adding a type word changes no existing row's word or flow class. A flow class change is made on one word and reaches only the rows that carry that word."
+  },
+  "opal_actions": [
+    {
+      "word": "Contribution",
+      "definition": "Value that comes into the account from outside the firm."
+    },
+    {
+      "word": "Withdrawal",
+      "definition": "Value that leaves the account to the client or to an outside party."
+    },
+    {
+      "word": "Trade",
+      "definition": "A purchase or sale of a security."
+    },
+    {
+      "word": "Income",
+      "definition": "Value earned by holding an investment, paid out or reinvested."
+    },
+    {
+      "word": "Fee",
+      "definition": "A charge against the account."
+    },
+    {
+      "word": "Tax",
+      "definition": "Tax taken from the account's income or distributions."
+    },
+    {
+      "word": "Transfer",
+      "definition": "Value that moves between accounts or institutions."
+    },
+    {
+      "word": "Adjustment",
+      "definition": "A non-cash or bookkeeping change to the account."
+    }
+  ],
+  "opal_types": [
+    {
+      "word": "Deposit",
+      "definition": "Cash or securities a client adds to the account from outside the firm.",
+      "action": "Contribution",
+      "flow_class": "EXTERNAL_IN"
+    },
+    {
+      "word": "Transfer in",
+      "definition": "Cash or securities moved into the account from another account or institution.",
+      "action": "Transfer",
+      "flow_class": "EXTERNAL_IN"
+    },
+    {
+      "word": "Withdrawal",
+      "definition": "Cash or securities paid out of the account to the client or to an outside party.",
+      "action": "Withdrawal",
+      "flow_class": "EXTERNAL_OUT"
+    },
+    {
+      "word": "Transfer out",
+      "definition": "Cash or securities moved out of the account to another account or institution.",
+      "action": "Transfer",
+      "flow_class": "EXTERNAL_OUT"
+    },
+    {
+      "word": "Buy",
+      "definition": "Purchase of a security for the account.",
+      "action": "Trade",
+      "flow_class": "INTERNAL"
+    },
+    {
+      "word": "Sell",
+      "definition": "Sale of a security from the account.",
+      "action": "Trade",
+      "flow_class": "INTERNAL"
+    },
+    {
+      "word": "Dividend",
+      "definition": "Cash or shares paid by a holding as a dividend.",
+      "action": "Income",
+      "flow_class": "INCOME"
+    },
+    {
+      "word": "Interest",
+      "definition": "Interest credited or paid on cash or on a debt holding.",
+      "action": "Income",
+      "flow_class": "INCOME"
+    },
+    {
+      "word": "Capital gain",
+      "definition": "A capital gain distribution paid by a fund or holding.",
+      "action": "Income",
+      "flow_class": "INCOME"
+    },
+    {
+      "word": "Other income",
+      "definition": "Income paid to the account that is not a dividend, interest or capital gain.",
+      "action": "Income",
+      "flow_class": "INCOME"
+    },
+    {
+      "word": "Reinvestment",
+      "definition": "Income used to buy more of the same holding; no cash leaves the account.",
+      "action": "Income",
+      "flow_class": "INTERNAL"
+    },
+    {
+      "word": "Tax withheld",
+      "definition": "Tax taken from income or a distribution before it reaches the account; the repository's withholding rule makes it neither an external flow nor income.",
+      "action": "Tax",
+      "flow_class": "INTERNAL"
+    },
+    {
+      "word": "Fee",
+      "definition": "A charge for the account's services or expenses.",
+      "action": "Fee",
+      "flow_class": "FEE"
+    },
+    {
+      "word": "Management fee",
+      "definition": "A fee for investment management, billed on the account.",
+      "action": "Fee",
+      "flow_class": "FEE"
+    },
+    {
+      "word": "Trading expense",
+      "definition": "A cost of executing trades, charged to the account.",
+      "action": "Fee",
+      "flow_class": "FEE"
+    },
+    {
+      "word": "Fee credit",
+      "definition": "A reversal or offset that returns part of a fee to the account.",
+      "action": "Fee",
+      "flow_class": "FEE"
+    },
+    {
+      "word": "Corporate action",
+      "definition": "A non-cash change to a holding caused by the issuer, such as a split, merger, spin-off or expiry.",
+      "action": "Adjustment",
+      "flow_class": "CORPORATE_ACTION"
+    },
+    {
+      "word": "Journal",
+      "definition": "A book entry that moves value between accounts or sub-accounts inside one client boundary.",
+      "action": "Transfer",
+      "flow_class": "INTERNAL"
+    },
+    {
+      "word": "Account transfer",
+      "definition": "A movement of an account or sub-account to or from another account; whether it crosses the client boundary is decided per event.",
+      "action": "Transfer",
+      "flow_class": "UNRESOLVED"
+    },
+    {
+      "word": "Adjustment",
+      "definition": "A bookkeeping correction or revaluation with no cash flow, including reversals.",
+      "action": "Adjustment",
+      "flow_class": "INTERNAL"
+    },
+    {
+      "word": "Return of capital",
+      "definition": "A repayment of principal, not income; it lowers cost basis and leaves the account value unchanged.",
+      "action": "Adjustment",
+      "flow_class": "INTERNAL"
+    }
+  ],
+  "mapping": [
+    {
+      "firm": "49financial",
+      "field": "action",
+      "source_value": "FC",
+      "opal_action": "UNMAPPED",
+      "where": "data/assets/scripts/gold/irpt_reporting/sources.json@line60",
+      "basis": "cash-class marker: 148 codes; partitions: CONDITIONAL-BY-COUNTERPARTY 4, EXTERNAL 3, EXTERNAL-IN 13, EXTERNAL-OUT 8, FEE-ADMIN 9, FEE-MANAGEMENT 5, FEE-MANAGEMENT-VERIFIED 2, INTERNAL 95, UNRESOLVED 5, UNRESOLVED-PENDING-SPECIMEN 4; rules: acct-transfer 1, adr-fee 4, advisor-fee-explicit 2, advisor-fee-verified 2, advisory-fee 3, alt-income 4, cash-in-lieu 2, checks-classified 2, corp-actions 10, corp-misc 5, deposits 13, dividends 50, foreign-tax 4, int-adj-fc 2, interest 9, ira-withholding 3, journals 3, misc-adj 4, no-rule 5, returned-deposits 1, schwab-checks-out 1, service-fees 5, sweeps 3, withdrawals 4, withholding 6",
+      "reason": "FC marks a cash row and says nothing of what the row does; its 148 codes include every cash type (deposit, dividend, fee, journal). The action of such a line is read from its type through the type table, so this marker has no single Opal action."
+    },
+    {
+      "firm": "49financial",
+      "field": "action",
+      "source_value": "IC",
+      "opal_action": "Transfer",
+      "where": "data/assets/scripts/gold/irpt_reporting/sources.json@line75",
+      "basis": "in-kind marker: 36 of 36 IC codes carry category Security Transfers; securities move with no cash leg (sources.json inkind comment)."
+    },
+    {
+      "firm": "49financial",
+      "field": "action",
+      "source_value": "TR",
+      "opal_action": "Trade",
+      "where": "data/assets/scripts/gold/irpt_reporting/sources.json@line63",
+      "basis": "trade marker: 3 codes; partitions: INTERNAL 3; rules: reinvest 2, trades 1; the trade leg is TR with BUY or SELL in trade_typcd."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "DV",
+      "opal_type": "Dividend",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line215",
+      "basis": "CRO table sb_cd DV: 56 codes; partitions: INTERNAL 56; rules: dividends 56. every code is rule dividends (the table names a dividend for each)."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "FC",
+      "opal_type": "UNMAPPED",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line20",
+      "basis": "CRO table sb_cd FC: 43 codes; partitions: CONDITIONAL-BY-COUNTERPARTY 1, EXTERNAL 3, EXTERNAL-OUT 3, FEE-ADMIN 5, FEE-MANAGEMENT 2, FEE-MANAGEMENT-VERIFIED 2, INTERNAL 18, UNRESOLVED 5, UNRESOLVED-PENDING-SPECIMEN 4; rules: adr-fee 2, advisor-fee-explicit 2, advisor-fee-verified 2, alt-income 4, cash-in-lieu 2, checks-classified 2, corp-misc 5, foreign-tax 2, int-adj-fc 2, ira-withholding 2, journals 1, misc-adj 4, no-rule 5, returned-deposits 1, schwab-checks-out 1, service-fees 3, sweeps 3. sb_cd FC is a cash sub-code spread over nine partitions and seventeen rules, so the table gives it no single type; the type of a line sits at tran_srcde, which the record lists as a key and not a code set.",
+      "reason": "sb_cd FC is a cash sub-code spread over nine partitions and seventeen rules, so the table gives it no single type; the type of a line sits at tran_srcde, which the record lists as a key and not a code set."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "FE",
+      "opal_type": "Fee",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line1085",
+      "basis": "CRO table sb_cd FE: 7 codes; partitions: FEE-ADMIN 4, FEE-MANAGEMENT 3; rules: adr-fee 2, advisory-fee 3, service-fees 2. every code is a fee rule (service, ADR or advisory fee); Fee covers all three, the management split is a row-level partition."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "FI",
+      "opal_type": "Deposit",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line50",
+      "basis": "CRO table sb_cd FI: 13 codes; partitions: EXTERNAL-IN 13; rules: deposits 13. every code is rule deposits, partition EXTERNAL-IN."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "FO",
+      "opal_type": "Withdrawal",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line80",
+      "basis": "CRO table sb_cd FO: 4 codes; partitions: EXTERNAL-OUT 4; rules: withdrawals 4. every code is rule withdrawals, partition EXTERNAL-OUT."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "IC",
+      "opal_type": "UNMAPPED",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line2285",
+      "basis": "CRO table sb_cd IC: 9 codes; partitions: CONDITIONAL-BY-COUNTERPARTY 2, INTERNAL 6, UNRESOLVED-PENDING-SPECIMEN 1; rules: corp-actions-ic 6, lending-misc-ic 1, shares-delivered 2. sb_cd IC carries three rules that name three meanings: corporate-action codes, counterparty-resolved share deliveries and one lending code; no single Opal type covers all nine codes.",
+      "reason": "sb_cd IC carries three rules that name three meanings: corporate-action codes, counterparty-resolved share deliveries and one lending code; no single Opal type covers all nine codes."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "IN",
+      "opal_type": "Interest",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line470",
+      "basis": "CRO table sb_cd IN: 9 codes; partitions: INTERNAL 9; rules: interest 9. every code is rule interest; all nine partitions are INTERNAL on the CRO external-flow axis, the income axis being read from category."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "JR",
+      "opal_type": "UNMAPPED",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line95",
+      "basis": "CRO table sb_cd JR: 4 codes; partitions: CONDITIONAL-BY-COUNTERPARTY 4; rules: acct-transfer 1, journals 3. sb_cd JR carries rule journals on three codes and rule acct-transfer on one; the one account-transfer code is not covered by the Journal word, so no single type.",
+      "reason": "sb_cd JR carries rule journals on three codes and rule acct-transfer on one; the one account-transfer code is not covered by the Journal word, so no single type."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "RD",
+      "opal_type": "Reinvestment",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line200",
+      "basis": "CRO table sb_cd RD: 2 codes; partitions: INTERNAL 2; rules: reinvest 2. every code is rule reinvest (dividend or adjustment reinvestment)."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "RO",
+      "opal_type": "Corporate action",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line305",
+      "basis": "CRO table sb_cd RO: 27 codes; partitions: INTERNAL 27; rules: corp-actions 27. every code is rule corp-actions (exchange, merger, redemption, ADR termination)."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "TA",
+      "opal_type": "Account transfer",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line155",
+      "basis": "CRO table sb_cd TA: 3 codes; partitions: CONDITIONAL-BY-COUNTERPARTY 3; rules: acct-transfer 3. every code is rule acct-transfer, partition CONDITIONAL-BY-COUNTERPARTY."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "TR",
+      "opal_type": "Adjustment",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line5",
+      "basis": "CRO table sb_cd TR: 1 codes; partitions: INTERNAL 1; rules: trades 1. the one code's table description is ADJUSTING ENTRY (its rule is trades but the line is an adjusting entry), partition INTERNAL."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "WD",
+      "opal_type": "Tax withheld",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line995",
+      "basis": "CRO table sb_cd WD: 7 codes; partitions: INTERNAL 7; rules: foreign-tax 2, withholding 5. rules foreign-tax and withholding, all tax lines (foreign tax paid, IRS withholding, reclaim)."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "WH",
+      "opal_type": "Tax withheld",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line320",
+      "basis": "CRO table sb_cd WH: 1 codes; partitions: EXTERNAL-OUT 1; rules: ira-withholding 1. one code, rule ira-withholding, desc IRS WITHHOLDING. Its partition is EXTERNAL-OUT, not INTERNAL: the flow class of this word is a default and the row partition governs."
+    },
+    {
+      "firm": "49financial",
+      "field": "type",
+      "source_value": "WI",
+      "opal_type": "Tax withheld",
+      "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json@line2255",
+      "basis": "CRO table sb_cd WI: 1 codes; partitions: INTERNAL 1; rules: withholding 1. one code, rule withholding (desc empty), partition INTERNAL."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Cash Deposit",
+      "opal_type": "Deposit",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line95",
+      "basis": "TYPE_CLASS EXTERNAL_IN label; a client cash deposit."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Transfer In",
+      "opal_type": "Transfer in",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line96",
+      "basis": "TYPE_CLASS EXTERNAL_IN label; value moved in from another account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Cash Withdrawal",
+      "opal_type": "Withdrawal",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line97",
+      "basis": "TYPE_CLASS EXTERNAL_OUT label; a client cash withdrawal."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Transfer Out",
+      "opal_type": "Transfer out",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line98",
+      "basis": "TYPE_CLASS EXTERNAL_OUT label; value moved out to another account."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Buy",
+      "opal_type": "Buy",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line99",
+      "basis": "TYPE_CLASS INTERNAL label; a security purchase."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Sale",
+      "opal_type": "Sell",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line100",
+      "basis": "TYPE_CLASS INTERNAL label; a security sale."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Dividend Reinvestment",
+      "opal_type": "Reinvestment",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line101",
+      "basis": "TYPE_CLASS INTERNAL label; a dividend used to buy shares."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Journal",
+      "opal_type": "Journal",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line102",
+      "basis": "TYPE_CLASS INTERNAL label; a book entry."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Dividend",
+      "opal_type": "Dividend",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line103",
+      "basis": "TYPE_CLASS INCOME label; a dividend."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Interest",
+      "opal_type": "Interest",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line104",
+      "basis": "TYPE_CLASS INCOME label; interest."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Income",
+      "opal_type": "Other income",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line105",
+      "basis": "TYPE_CLASS INCOME label; income that is neither a dividend nor interest by name."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Capital Gains",
+      "opal_type": "Capital gain",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line106",
+      "basis": "TYPE_CLASS IN_VALUE label; a capital gain distribution."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Return of Capital",
+      "opal_type": "Return of capital",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line107",
+      "basis": "TYPE_CLASS IN_VALUE label; a return of principal."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Expense",
+      "opal_type": "Fee",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line108",
+      "basis": "TYPE_CLASS IN_VALUE label; a charge against the account, so the general Fee word."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Management Fee",
+      "opal_type": "Management fee",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line109",
+      "basis": "TYPE_CLASS IN_VALUE label; a management fee by name."
+    },
+    {
+      "firm": "cottonwood",
+      "field": "type",
+      "source_value": "Corporate Action",
+      "opal_type": "Corporate action",
+      "where": "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py@line110",
+      "basis": "TYPE_CLASS CORPORATE_ACTION label."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Client Contribution",
+      "opal_type": "Deposit",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line62",
+      "basis": "NNA bucket, direction in: a client deposits new cash."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Employer Contribution",
+      "opal_type": "Deposit",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line70",
+      "basis": "NNA bucket, direction in: employer retirement match, client-acquired cash."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Rollover Contribution",
+      "opal_type": "Transfer in",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line77",
+      "basis": "NNA bucket, direction in: an external retirement account rolled into the firm."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Merge In from Other Account",
+      "opal_type": "Transfer in",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line85",
+      "basis": "NNA bucket, direction in: an external account merged in."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "External Account Activity In",
+      "opal_type": "Transfer in",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line94",
+      "basis": "NNA bucket, direction in: external account activity inflow."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Client Distribution",
+      "opal_type": "Withdrawal",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line102",
+      "basis": "NNA bucket, direction out: a client withdrawal from the firm."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Cancel Account",
+      "opal_type": "Withdrawal",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line109",
+      "basis": "NNA bucket, direction out: account closure paid to the client."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Merge Out to Other Account",
+      "opal_type": "Transfer out",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line116",
+      "basis": "NNA bucket, direction out: an account merged out."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "External Account Activity Out",
+      "opal_type": "Transfer out",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line125",
+      "basis": "NNA bucket, direction out: external account activity outflow."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Buy Exchange",
+      "opal_type": "Buy",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line138",
+      "basis": "Internal bucket: the buy leg of a rebalance exchange."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Sell Exchange",
+      "opal_type": "Sell",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line144",
+      "basis": "Internal bucket: the sell leg of a rebalance exchange."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Income Reinvested",
+      "opal_type": "Reinvestment",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line150",
+      "basis": "Internal bucket: DRIP, income reinvested in shares."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Starting Value",
+      "opal_type": "UNMAPPED",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line157",
+      "basis": "Internal bucket, but the yaml calls it a synthetic per-position opening seed, not a transaction a client made.",
+      "reason": "Internal bucket, but the yaml calls it a synthetic per-position opening seed, not a transaction a client made."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Merge In Exchange",
+      "opal_type": "Journal",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line164",
+      "basis": "Internal bucket: the balancing book entry paired with a merge in."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Merge Out Exchange",
+      "opal_type": "Journal",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line170",
+      "basis": "Internal bucket: the balancing book entry paired with a merge out."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Internal Account Journal In",
+      "opal_type": "Journal",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line176",
+      "basis": "Internal bucket: an intra-account journal, inbound."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Internal Account Journal Out",
+      "opal_type": "Journal",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line184",
+      "basis": "Internal bucket: an intra-account journal, outbound."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Decrease in Value",
+      "opal_type": "Adjustment",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line192",
+      "basis": "Internal bucket: a valuation adjustment with no real cash flow."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Spin Off in",
+      "opal_type": "Corporate action",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line198",
+      "basis": "CorporateAction-type event in the Internal bucket: a spin-off, same economic position."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Spin Off out",
+      "opal_type": "Corporate action",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line204",
+      "basis": "Internal bucket: the paired spin-off outflow."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Dividend Reinvested",
+      "opal_type": "Reinvestment",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line210",
+      "basis": "Internal bucket: DRIP, a value-neutral swap of dividend into shares."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Interest Reinvested",
+      "opal_type": "Reinvestment",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line217",
+      "basis": "Internal bucket: interest DRIP, value-neutral."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Return of Capital",
+      "opal_type": "Return of capital",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line224",
+      "basis": "Internal bucket: pure return of principal, value-neutral to the account."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Return of Principal (Bonds)",
+      "opal_type": "Return of capital",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line231",
+      "basis": "Internal bucket: a bond principal repayment, value-neutral."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Dividend Paid from Cash",
+      "opal_type": "Dividend",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line237",
+      "basis": "Internal bucket (excluded from the cash-flow axis): a dividend paid from a cash balance. The type is a dividend; the exclusion is a flow matter (surprise row IRPT_DASHBD-D2-W802-S3)."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Income Paid",
+      "opal_type": "Other income",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line243",
+      "basis": "Internal bucket (excluded from the cash-flow axis): the paired income distribution of Dividend Paid from Cash."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Dividend to Cash",
+      "opal_type": "Dividend",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line255",
+      "basis": "Return bucket: income realised as cash, performance-positive."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Management Fee",
+      "opal_type": "Management fee",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line262",
+      "basis": "Return bucket: the advisor fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Long Term Gain to Cash",
+      "opal_type": "Capital gain",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line269",
+      "basis": "Return bucket: a realised long-term gain distribution to cash."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Trading Expense",
+      "opal_type": "Trading expense",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line275",
+      "basis": "Return bucket: a transaction-related fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Short Term Gain to Cash",
+      "opal_type": "Capital gain",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line282",
+      "basis": "Return bucket: a realised short-term gain distribution to cash."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Interest Paid in Cash",
+      "opal_type": "Interest",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line288",
+      "basis": "Return bucket: interest income as cash."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Federal Tax Withheld",
+      "opal_type": "Tax withheld",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line294",
+      "basis": "Return bucket, account boundary out before tax return: federal tax withheld."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Fee Credit",
+      "opal_type": "Fee credit",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line302",
+      "basis": "Return bucket: a fee reversal, a positive offset to Management Fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "State Tax Withheld",
+      "opal_type": "Tax withheld",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line308",
+      "basis": "Return bucket: state tax withheld."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Foreign Tax Withheld",
+      "opal_type": "Tax withheld",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line316",
+      "basis": "Return bucket: foreign tax withheld."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Foreign Dividend Tax",
+      "opal_type": "Tax withheld",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line322",
+      "basis": "Return bucket: foreign withholding on dividends."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Tax Credit",
+      "opal_type": "Tax withheld",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line328",
+      "basis": "Return bucket: a tax adjustment on the tax line (the reversal side of a tax withheld line)."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Interest Paid",
+      "opal_type": "Interest",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line334",
+      "basis": "Return bucket: interest income paid, a variant under Other."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "ADR Fee",
+      "opal_type": "Fee",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line340",
+      "basis": "Return bucket: an American depositary receipt holding fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Administrative Fee",
+      "opal_type": "Fee",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line347",
+      "basis": "Return bucket: an account administrative fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Administrative Fee Adjustment",
+      "opal_type": "Fee credit",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line354",
+      "basis": "Return bucket: a fee adjustment that reverses an administrative fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Wire Fee",
+      "opal_type": "Fee",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line360",
+      "basis": "Return bucket: a wire transfer fee."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Stock Split",
+      "opal_type": "Corporate action",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line375",
+      "basis": "CorporateAction bucket: a split, zero cash impact."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Reverse Stock Split",
+      "opal_type": "Corporate action",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line380",
+      "basis": "CorporateAction bucket: a reverse split, zero cash impact."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Expired-",
+      "opal_type": "Corporate action",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line385",
+      "basis": "CorporateAction bucket: an option or security expiry, zero cash impact."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Remark",
+      "opal_type": "UNMAPPED",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line390",
+      "basis": "Internal bucket, but the yaml says Remark is a position seed only where a ticker is present and a cash-shaped Remark fails loud to UNRESOLVED; its meaning depends on the row shape.",
+      "reason": "Internal bucket, but the yaml says Remark is a position seed only where a ticker is present and a cash-shaped Remark fails loud to UNRESOLVED; its meaning depends on the row shape."
+    },
+    {
+      "firm": "inflection",
+      "field": "type",
+      "source_value": "Reversal",
+      "opal_type": "Adjustment",
+      "where": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml@line395",
+      "basis": "Internal bucket: an adjustment reversal, netted against its original in the pair matcher."
+    }
+  ],
+  "census": {
+    "method": "word-boundary",
+    "denominator_total": 82,
+    "brief_flow_classes": 7,
+    "per_type_word": {
+      "Account transfer": 1,
+      "Adjustment": 3,
+      "Buy": 2,
+      "Capital gain": 3,
+      "Corporate action": 7,
+      "Deposit": 4,
+      "Dividend": 4,
+      "Fee": 5,
+      "Fee credit": 2,
+      "Interest": 4,
+      "Journal": 5,
+      "Management fee": 2,
+      "Other income": 2,
+      "Reinvestment": 5,
+      "Return of capital": 3,
+      "Sell": 2,
+      "Tax withheld": 8,
+      "Trading expense": 1,
+      "Transfer in": 4,
+      "Transfer out": 3,
+      "UNMAPPED": 5,
+      "Withdrawal": 4
+    },
+    "unmapped": 6
+  },
+  "reads": {
+    "s3_reads": 0,
+    "s3_writes": 0,
+    "dynamodb_writes": 0,
+    "vendor_calls": 0,
+    "secret_reads": 0
+  },
+  "files_in_repo": false,
+  "served_values_changed": false,
+  "pushed": false,
+  "deployed": false
+}
