@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-da-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-da-1.account-match-review-sheet.md",
+    "group": "OTHER",
+    "vintage_commit": "6d5afd6924"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~194",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round104.md",
+    "vintage_commit": "6d5afd6924",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-da-1.account-match-review-sheet.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~194/REVIEW_SHEET_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "cfe90100ed3a36ab973357fd8eb3985fd48f7665",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "counts and source names only: 107 rows to confirm, 11 settled, 70 households, strengths 0/12/95; no account number, name, security name or value (AC3 record_account_strings=0)"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~194/REVIEW_SHEET_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "cfe90100ed3a36ab973357fd8eb3985fd48f7665",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record's counts and the not-established list; counts and source names only"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "47342b3e8ce6bd9a62c4c70b573e4968ae5a1972",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_COTBKF-D1-W194-S1 to S4 appended; 100 lines added, 0 deleted (git diff --numstat)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB104da1-AC1",
+      "criterion_verbatim": "`CB104da1-AC1` -- the record states the 107 rows to confirm, the 11 settled, the households and how the strengths split, or states plainly why nothing could be built.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~194/REVIEW_SHEET_RECORD.json',encoding='utf-8'));m=d['measured'];w=d.get('workbook') or {};s=d.get('strengths') or {};print('REVIEW-SHEET-RECORD measured=%s' % m + ((' rows=%d settled=%d households=%d strong=%d likely=%d weak=%d' % (w['data_rows_to_confirm'],w['rows_already_matched'],w['households'],s['strong'],s['likely'],s['weak'])) if m else ' reason=%s' % d['reason']))\"",
+      "output_evidence": "REVIEW-SHEET-RECORD measured=True rows=107 settled=11 households=70 strong=0 likely=12 weak=95",
+      "denominator": "107 rows to confirm of the 118 packet rows (non-DETERMINISTIC tier); 11 settled of 11 DETERMINISTIC; strengths 0+12+95 = 107",
+      "status": "PASS",
+      "expect": "^REVIEW-SHEET-RECORD measured=(True rows=107 settled=11 households=\\d+ strong=\\d+ likely=\\d+ weak=\\d+|False reason=.+)$"
+    },
+    {
+      "criterion_id": "CB104da1-AC2",
+      "criterion_verbatim": "`CB104da1-AC2` -- the issuer's script opens the desktop workbook and checks it: `Read me` first with real text, a `To confirm` sheet of 107 rows whose hidden last column holds exactly the packet's 107 to-confirm link ids once each, an empty `Your answer` column with a Yes/No/Unsure list validation, and NO full account string or link id in any visible cell. (It prints the blank counts and the strength counts; read it, do not edit it.)",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cz1_review_sheet_check.py",
+      "output_evidence": "REVIEW-SHEET sheets_ok=True rows=107 ids_match=True link_id_hidden_last=True answer_blank=True answer_validation=True visible_account_strings=0 visible_link_ids=0 blank_old_name=0 blank_new_name=0 blank_value=0 strengths=likely:12,weak:95",
+      "denominator": "107 data rows against the 107 to-confirm link ids (hidden last column, once each); 0 visible account strings and 0 visible link ids in the visible cells of To confirm",
+      "status": "PASS",
+      "expect": "^REVIEW-SHEET sheets_ok=True rows=107 ids_match=True link_id_hidden_last=True answer_blank=True answer_validation=True visible_account_strings=0 visible_link_ids=0 blank_old_name=\\d+ blank_new_name=\\d+ blank_value=\\d+ strengths=.+$"
+    },
+    {
+      "criterion_id": "CB104da1-AC3",
+      "criterion_verbatim": "`CB104da1-AC3` -- the workbook is outside the repository, no review workbook is tracked by git, and the committed record and its `.md` carry no account string of the key.",
+      "method": "command",
+      "invocation": "python -I org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C1/cz1_review_sheet_check.py --offgit org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~194/REVIEW_SHEET_RECORD.json org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~194/REVIEW_SHEET_RECORD.md",
+      "output_evidence": "SHEET-OFFGIT outside_repo=True tracked_review_xlsx=0 record_account_strings=0",
+      "denominator": "1 workbook outside the repository; 0 tracked review workbooks; the record and its md checked against the account strings of the 118-row key",
+      "status": "PASS",
+      "expect": "^SHEET-OFFGIT outside_repo=True tracked_review_xlsx=0 record_account_strings=0$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control. The worker's own substring scan (the issuer check compares whole cells only) found 163 account-string occurrences inside Commonwealth names before the scrub and 0 after it.",
+      "expected": "N/A",
+      "observed": "not run as a mutant; substring scan before the scrub 163, after the scrub 0",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "record.py re-run over the same inputs; sha256 of REVIEW_SHEET_RECORD.json and REVIEW_SHEET_RECORD.md compared before and after the re-run",
+      "observed": "both checksums identical before and after the re-run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the workbook C:/Users/Test/Desktop/Cottonwood_Account_Match_Review_20261016.xlsx",
+      "reason": "the order's one write outside the repository; holds client names and values; not in git; checked by AC2 and summarised by AC3"
+    },
+    {
+      "item": "NEAR_MATCH_REVIEW_KEY.csv at C:/dev/_cotbkf_match_20261015",
+      "reason": "read only; outside the repository; not copied into any committed file"
+    },
+    {
+      "item": "the build and record scripts under C:/Dev/ajb_workspace/.scratch/cotbkf_r104/",
+      "reason": "scratch outside the repository, not committed; the committed evidence is the record and its md"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D1-W194-S1: the Commonwealth side carries no security name; the old-account holdings are named from the Black Diamond asset name by CUSIP; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W194-S2: the packet and key carry no household name; the Household column is the Black Diamond relationship name; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W194-S3: the Black Diamond value is not in the local cache; the proposed value is the market_value of the latest gold holdings file, read from S3; OBSERVATION, INERT",
+    "ADVI_COTBKF-D1-W194-S4: for most old accounts the last valued day holds cash only (101 of 115), so the top holdings come from the last earlier day that holds a security; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~194/ADVI_COTBKF.TO-CB-da-1.account-match-review-sheet.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "build.py (scratch, outside the repository)",
+      "invocation": "python C:/Dev/ajb_workspace/.scratch/cotbkf_r104/build.py",
+      "result": "WROTE workbook rows_to_confirm=107 last_row=108"
+    },
+    {
+      "tool": "record.py (scratch, outside the repository)",
+      "invocation": "python C:/Dev/ajb_workspace/.scratch/cotbkf_r104/record.py",
+      "result": "RECORD written rows=107 settled=11 households=70 strengths={'strong': 0, 'likely': 12, 'weak': 95}"
+    }
+  ]
+}
