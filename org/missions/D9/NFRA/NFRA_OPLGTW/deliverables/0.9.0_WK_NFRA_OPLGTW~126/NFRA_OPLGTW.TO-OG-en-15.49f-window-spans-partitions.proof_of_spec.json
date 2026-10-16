@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-15",
+  "firm": "FABRIC",
+  "genre": "BUILD",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "29fcd5d688",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-15.49f-window-spans-partitions.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2b066d9ad"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~126",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "3cb7a04d1c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-126 (not pushed, no deploy, no release). PARTITION_SEMANTICS = {transactions: increment, fees: increment} from E1_PARTITION_MEASURE.json. An increment window reads every dated partition inside the window (newest MAX_WINDOW_PARTITIONS = 60) and answers from the union; a snapshot reads the newest at or before as_of. The transaction_id seen-set is removed; exact-duplicate removal on every emitted field (exact_duplicates_removed). Answers carry partitions_in_window, partitions_read, partitions_read_dates, window_partial (cap only) and window_note. The OG-en-13 number format and the firm fence are unchanged; get_transactions and get_fees both use the shared window planner.",
+      "introduces": [
+        "PARTITION_SEMANTICS",
+        "MAX_WINDOW_PARTITIONS",
+        "_window_plan",
+        "_window_read",
+        "_window_fields"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en15.py",
+      "kind": "test",
+      "commit_or_etag": "3cb7a04d1c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-126. Three offline named tests, test_ogen15_ac01 .. test_ogen15_ac03, each over both tools; all passing (3 of 3).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cl2.py",
+      "kind": "test",
+      "commit_or_etag": "3cb7a04d1c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-126. test_ogcl2_ac03 and test_ogcl2_ac08 pinned the one-partition read and window_partial true; updated to the new truth (two partitions read, window_partial false, the all-partitions note). No assertion weakened.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the three named tests pass: test_ogen15_ac01 (increment union, exact-duplicate rule, partitions read and source keys), test_ogen15_ac02 (snapshot reads the newest partition only), test_ogen15_ac03 (the 60-partition cap and the fence on a foreign-only partition).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en15.py test_ogen15_ac01 test_ogen15_ac02 test_ogen15_ac03; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0\n(second run, identical: pytest rc=0; named tests passed 3 of 3; failed/error lines 0 / RESULT: PASS / exit=0). Verbatim in the deliverables session log.",
+      "denominator": "3 of 3 named tests passed (test_ogen15_ac01, test_ogen15_ac02, test_ogen15_ac03), each over the transactions and fees tools",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the commits of this serial (this order and OG-en-13) touch only the listed files: the adapter, the OG-en-15 test file, and the existing gateway tests the order lists, plus the record paths.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~126 '^infra/aws/ec2/opal-gateway/(app/client_adapter_bd49f\\.py|tests/test_og_(en15|en13|en4|en12|cl2|ch1)\\.py)$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~126: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~126: files touched 9; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 product files of 9 files touched across this serial's commits (the others are record paths: the task orders, the surprise channel and the serial's deliverables); 0 outside the allowed set",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two planted defects, loaded one at a time with pytest -p from the gateway directory; the committed tree is unchanged. (a) og_en15_mutant_newest_only.py: an increment window reads only its newest partition. (b) og_en15_mutant_tid_rule.py: the superseded A1 rule, a second row with an already-seen transaction_id is dropped. Plugins in the deliverables folder.",
+      "expected": "(a) test_ogen15_ac01 and test_ogen15_ac03 FAIL (partitions read, the cap); ac02 PASSES. (b) test_ogen15_ac01 FAILS (the same-id rows); ac02 and ac03 PASS.",
+      "observed": "(a) PYTHONPATH=<deliverables folder> python -m pytest tests/test_og_en15.py -p og_en15_mutant_newest_only -v -> ac01 FAILED, ac02 PASSED, ac03 FAILED (2 failed, 1 passed). (b) -p og_en15_mutant_tid_rule -> ac01 FAILED, ac02 PASSED, ac03 PASSED (1 failed, 2 passed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The named-test check (AC1) run twice on the final code (commit 3cb7a04d1c) with the same invocation; the pytest summary and RESULT lines compared.",
+      "observed": "Both runs: pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS; exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Full gateway suite green.",
+      "reason": "Not claimed. The OG set runs 261 passed and 4 failed, the same 4 as the base before this serial's changes: test_ogch1_ac04 (roster file absent from the tree; ch1 is carried red at base per the issuer ruling on NFRA_OPLGTW-Z-W126-S1), test_ogmu1_ac01 and ac02 (intake input absent), test_mx_t13_catalog_gated (catalog file absent). None is caused by this order."
+    },
+    {
+      "item": "A window read failure as a window_partial cause.",
+      "reason": "Not implemented: a read that raises propagates as the refusal it is, so a partial answer is never served for an unreadable partition. Filed as NFRA_OPLGTW-Z-W126-S4 for the issuer."
+    },
+    {
+      "item": "Release, deploy, IAM, registry, catalog, other adapters, and the OG-en-13 units and number format.",
+      "reason": "Out of this cell by the order. Gateway code and offline tests only; the release is a later applier order. The OG-en-13 behaviour is unchanged and its tests pass."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W126-S4: the order's window_partial clause names 'a dated partition that could not be read'; the adapter lets a read failure propagate as the refusal it is, so window_partial is set by the cap only. OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W126-S5: the order does not say whether as_of bounds the partitions an increment window reads; the adapter reads only partitions dated at or before as_of, as the single-partition read did. OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~O."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~126/NFRA_OPLGTW.TO-OG-en-15.49f-window-spans-partitions.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (named tests)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en15.py test_ogen15_ac01 test_ogen15_ac02 test_ogen15_ac03",
+      "result": "3 passed, rc 0 (on 3cb7a04d1c, twice)"
+    },
+    {
+      "tool": "pytest (full OG set)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_*.py tests/test_blackdiamond.py tests/test_firm_catalog_visibility.py -q",
+      "result": "261 passed, 4 failed (the same 4 as the base: test_ogch1_ac04, test_ogmu1_ac01, test_ogmu1_ac02, test_mx_t13_catalog_gated)"
+    }
+  ]
+}
