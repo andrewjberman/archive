@@ -14,7 +14,7 @@ Counts and source names only. The workbook is on the desktop, outside the reposi
 
 - Which candidate is right: not established. The sheet shows whether a pair passed or failed the packet's tests, and a Yes is the confirmer's word.
 - Black Diamond value is the sum of the holdings market_value on the account's latest holdings date; prices were not re-derived.
-- Commonwealth top holdings use the last positive non-cash day, because the last valued day of many old accounts holds cash only.
+- Commonwealth old account value is the total on the last date the account held a security, the date its top holdings come from; 9 of the 115 distinct Commonwealth accounts never held a security and show the last valued day instead.
 - Commonwealth security names are not on the Commonwealth side: they are taken from the Black Diamond asset_name for the same CUSIP.
 - The household label is the Black Diamond relationship name; the packet carries no household name, so the Commonwealth side is not grouped by household.
 - Restricted CRM fields: none of tax identifier, date of birth, driver's licence or passport appears among the columns read (document index: DisplayName, ClientName, HouseholdName and the account key fields; accounts dimension: the columns named in identifies). Not copied: client city, client state, client zip and tax status on the accounts dimension.
