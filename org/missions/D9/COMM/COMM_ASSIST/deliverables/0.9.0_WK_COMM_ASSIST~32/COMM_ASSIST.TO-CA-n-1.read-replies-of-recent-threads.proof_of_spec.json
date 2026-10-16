@@ -5,7 +5,7 @@
  "spec_ref": {
   "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-n-1.read-replies-of-recent-threads.md",
   "group": "OTHER",
-  "vintage_commit": "1ca38ef17f"
+  "vintage_commit": "8a36386585"
  },
  "decomp_ref": {
   "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round21.md",
@@ -17,9 +17,9 @@
   {
    "path_or_key": "data/transcripts/scripts/teams_chat/channel_mentions.py",
    "kind": "script",
-   "commit_or_etag": "c08d686f69",
+   "commit_or_etag": "c5d4a1b52c",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Commit c08d686f69 (LOCAL on wk-COMM_ASSIST-32): _read_channel returns seen as a fourth value; _track_threads and _read_threads added; poll loads, saves and restores the threads map; constants THREAD_DAYS, THREAD_MAX, PINNED_THREADS added; import copy added. Not deployed; the live poller runs the prior code until a deploy this order does not perform.",
+   "deploy_evidence": "Commit c08d686f69 built the change (seen as a fourth value of _read_channel; _track_threads and _read_threads added; poll loads and saves the threads map). Commit c5d4a1b52c (LOCAL on wk-COMM_ASSIST-32, the final carrying commit) makes a failing thread cost only itself: _read_threads catches GatewayError per thread into an errors argument, poll no longer restores the channel's thread state, and the copy import is removed. Not deployed; the live poller runs the prior code until a deploy this order does not perform.",
    "artifact_covered_by": ["CAn1-AC1", "CAn1-AC2"]
   },
   {
@@ -34,12 +34,12 @@
  "acceptance": [
   {
    "criterion_id": "CAn1-AC1",
-   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r21/checks/check_n1_threads.py\" expect: N1-THREADS ok=True arms=7 of 7",
+   "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r21/checks/check_n1_threads.py\" expect: N1-THREADS ok=True arms=8 of 8",
    "method": "command",
    "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r21/checks/check_n1_threads.py\"",
-   "output_evidence": "(run from the worktree root, wk-COMM_ASSIST-32, at HEAD c08d686f69; rc 0; run twice at that head with the same line) ARM pinned_eod_reply ok=True / ARM recent_root_reply ok=True / ARM first_read_silent ok=True / ARM no_repeat ok=True / ARM not_him ok=True / ARM stale_dropped ok=True / ARM budget ok=True / N1-THREADS ok=True arms=7 of 7. At the base 1ca38ef17f the same check printed N1-THREADS ok=False arms=1 of 7 (only budget passed).",
-   "expect": "N1-THREADS ok=True arms=7 of 7",
-   "denominator": "7 of 7 arms pass, as printed by the check",
+   "output_evidence": "(run from the worktree root, wk-COMM_ASSIST-32, at HEAD c5d4a1b52c; rc 0) ARM pinned_eod_reply ok=True / ARM recent_root_reply ok=True / ARM first_read_silent ok=True / ARM no_repeat ok=True / ARM not_him ok=True / ARM stale_dropped ok=True / ARM budget ok=True / ARM thread_failure_isolated ok=True / N1-THREADS ok=True arms=8 of 8. The same bytes, run before the fix was committed, printed the same line. Before the fix, the build at c08d686f69 read 7 of 8 with thread_failure_isolated failing, as the issuer reported.",
+   "expect": "N1-THREADS ok=True arms=8 of 8",
+   "denominator": "8 of 8 arms pass, as printed by the check",
    "status": "PASS",
    "judgment": false
   },
@@ -48,7 +48,7 @@
    "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py expect: CHANNEL-MENTIONS ok=True arms=7/7",
    "method": "command",
    "invocation": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
-   "output_evidence": "(run from the worktree root at HEAD c08d686f69; rc 0; run twice with the same result) ARM post_mention ok=True / reply_mention ok=True / not_him ok=True / once ok=True / first_run ok=True / budget ok=True / handler ok=True / CHANNEL-MENTIONS ok=True arms=7/7 / CHANNEL-MENTIONS-RECORD ok=True arms=4/4. The record arms are the second line of the same run.",
+   "output_evidence": "(run from the worktree root at HEAD c5d4a1b52c; rc 0) CHANNEL-MENTIONS ok=True arms=7/7 / CHANNEL-MENTIONS-RECORD ok=True arms=4/4. The same bytes were run before the commit with the same result.",
    "expect": "CHANNEL-MENTIONS ok=True arms=7/7",
    "denominator": "7 of 7 arms pass and 4 of 4 record arms pass, as printed by the run",
    "status": "PASS",
@@ -59,62 +59,57 @@
    "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
    "method": "command",
    "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
-   "output_evidence": "(run from the worktree root at HEAD c08d686f69; rc 0 from the python process but the printed verdict is not ok; run twice with the same line) I2-REGRESSION ok=False passed=0 failed=1 reason=pytest rc=1: 1 failed in 0.85s. Cause, measured in this worktree: pytest on data/transcripts/scripts/tests/test_teams_chat_tenant.py fails test_new_message_drafts_and_texts_once with ModuleNotFoundError: No module named 'post_format' at data/transcripts/scripts/teams_chat/assist.py:861 (_post_format). The worktree is a sparse checkout (core.sparseCheckout=true; the cone is .tools, data/transcripts/scripts, infra/aws/terraform/modules/ldo, infra/logic/registry, lib) and daily_reports/eod/ is not materialised on disk. Diagnostic outside the criterion, no write: with daily_reports/eod on PYTHONPATH the same file gives 64 passed in 66.33s at c08d686f69. The criterion as written is not met in this worktree; see surprise COMM_ASSIST-W32-S4 (BLOCKING).",
+   "output_evidence": "(run from the worktree root at HEAD c5d4a1b52c; rc 0) I2-REGRESSION ok=True passed=64 failed=0 reason=none. The sparse set now carries daily_reports/eod/ (the amendment 8a36386585, surprise COMM_ASSIST-W32-S4); daily_reports/eod/post_format.py and eod_update.py are on disk.",
    "expect": "I2-REGRESSION ok=True",
-   "denominator": "0 of 64 expected passed in the flow tests the invocation runs (passed=0 failed=1 as printed)",
-   "status": "FAIL",
-   "status_reason": "the criterion is not met in this worktree as written: the sparse checkout lacks daily_reports/eod/, which assist.py needs at runtime for post_format; the diagnostic with that module on PYTHONPATH passes 64 but is outside the criterion and does not change this verdict; the worker did not rebuild or widen the tree (surprise COMM_ASSIST-W32-S4, BLOCKING)",
+   "denominator": "64 passed, 0 failed, in the assistant flow tests the invocation runs",
+   "status": "PASS",
    "judgment": false
   }
  ],
  "controls": {
   "mutant": {
-   "description": "The built behaviour at the base 1ca38ef17f, before the change: the N1 check measured in this session at the base printed N1-THREADS ok=False arms=1 of 7; only the budget arm passed. The pinned End of Day reply, the recent-root reply and the other five arms all fired as the check expects.",
-   "expected": "the six behaviour arms fail at the base, so the check discriminates the change",
-   "observed": "ARM pinned_eod_reply ok=False, recent_root_reply ok=False, first_read_silent ok=False, no_repeat ok=False, not_him ok=False, stale_dropped ok=False, budget ok=True; N1-THREADS ok=False arms=1 of 7",
+   "description": "The built behaviour at the base 1ca38ef17f, before the change, measured on the seven-arm check earlier in this session: N1-THREADS ok=False arms=1 of 7; only the budget arm passed. Before the per-thread fix, the build at c08d686f69 read 7 of 8 on the eight-arm check, with thread_failure_isolated failing (the issuer's measurement, cited in the amendment; not re-run by this worker). The eight-arm count at the base itself was not re-measured here.",
+   "expected": "the behaviour arms fail at the base, so the check discriminates the change",
+   "observed": "at 1ca38ef17f: ARM pinned_eod_reply ok=False, recent_root_reply ok=False, first_read_silent ok=False, no_repeat ok=False, not_him ok=False, stale_dropped ok=False, budget ok=True; N1-THREADS ok=False arms=1 of 7",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "the N1 and channel-mention runs were repeated at HEAD c08d686f69 with no change between them; the I2 run was repeated as well",
-   "observed": "CAn1-AC1 N1-THREADS ok=True arms=7 of 7 on both runs; CAn1-AC2 CHANNEL-MENTIONS ok=True arms=7/7 on both runs; CAn1-AC3 I2-REGRESSION ok=False passed=0 failed=1 on both runs",
+   "method": "CAn1-AC1 and CAn1-AC2 were each run twice on identical bytes (once before the fix commit and once after); CAn1-AC3 was run once at c5d4a1b52c",
+   "observed": "CAn1-AC1 N1-THREADS ok=True arms=8 of 8 on both runs; CAn1-AC2 CHANNEL-MENTIONS ok=True arms=7/7 and CHANNEL-MENTIONS-RECORD ok=True arms=4/4 on both runs; CAn1-AC3 I2-REGRESSION ok=True passed=64 failed=0 on its single run",
    "status": "N/A-WITH-REASON"
   }
  },
  "declared_exclusions": [
   {
-   "item": "CAn1-AC3 pass in this worktree",
-   "reason": "not claimed: the worktree is a sparse checkout that lacks daily_reports/eod/, so the flow tests cannot import post_format; the worker did not rebuild, copy or widen the sparse set (surprise COMM_ASSIST-W32-S4, BLOCKING)"
-  },
-  {
    "item": "deploy, AWS calls, network",
    "reason": "the order is code-only; no AWS call, no network call and no deploy was made; the poller's live behaviour is unchanged until a deploy outside this order"
   },
   {
-   "item": "the base-commit run of the I2 control in this sparse worktree",
-   "reason": "not measured: the worktree cannot run the flow tests, and a base checkout would be a second tree"
+   "item": "the base-commit run of the I2 control",
+   "reason": "not measured in this worktree; the criterion is graded at the final head where it passes"
   },
   {
-   "item": "the surprise rows S1 to S3 behaviour under live traffic",
-   "reason": "read from the code and one scratch run (S2); not run against live traffic; the rows are INFERRED except S2, which is GROUNDED"
+   "item": "the surprise rows S1 and S3 behaviour under live traffic",
+   "reason": "read from the code only; not run against live traffic; the rows are INFERRED and stay open"
   }
  ],
  "surprises": [
-  "COMM_ASSIST-W32-S1: the order's 'raise active to it' admits a reading in which an empty page raises active to the read time, so a read thread is never dropped; the build takes the newest created seen. OBSERVATION, INERT.",
-  "COMM_ASSIST-W32-S2: a persistent replies failure on one tracked root holds its whole channel's cursor, so that channel's top-level mentions are not read; measured in a scratch run (3 polls, cursor None, mention not sent). OBSERVATION, INERT.",
-  "COMM_ASSIST-W32-S3: a reply can be sent again in a later poll under the same event id when the thread read is cut by the call budget after the channel read sent it; relies on event-id de-duplication. OBSERVATION, INERT.",
-  "COMM_ASSIST-W32-S4: CAn1-AC3 cannot pass in this sparse worktree because daily_reports/eod/ is absent on disk and assist.py imports post_format from it at runtime; blocks CAn1-AC3 only. BLOCKING, INERT."
+  "COMM_ASSIST-W32-S1: the order's 'raise active to it' admits a reading in which an empty page raises active to the read time, so a read thread is never dropped; the build takes the newest created seen. OBSERVATION, INERT, OPEN (not part of the three criteria).",
+  "COMM_ASSIST-W32-S2: RESOLVED at c5d4a1b52c (issuer's ruling 8a36386585 makes it a defect to fix in this order). A failing thread costs only that thread; the channel's events, cursor and read_at go on. Re-run with the scratch script: cursor moved to 11:59 and the new mention was sent once, where before the fix the cursor stayed None and the mention was not sent. The row stays append-only in the investigation file.",
+  "COMM_ASSIST-W32-S3: a reply can be sent again in a later poll under the same event id when the thread read is cut by the call budget after the channel read sent it; relies on event-id de-duplication. OBSERVATION, INERT, OPEN (not part of the three criteria).",
+  "COMM_ASSIST-W32-S4: RESOLVED by the issuer's amendment 8a36386585 (the sparse set now carries daily_reports/eod/). CAn1-AC3 now passes at c5d4a1b52c with I2-REGRESSION ok=True passed=64. The row stays append-only in the investigation file."
  ],
  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~32/COMM_ASSIST.TO-CA-n-1.read-replies-of-recent-threads.proof_of_spec.json",
  "compiler_tools": [
   {
    "tool": "issuer check",
    "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r21/checks/check_n1_threads.py\"",
-   "result": "N1-THREADS ok=True arms=7 of 7; rc 0 at HEAD c08d686f69"
+   "result": "N1-THREADS ok=True arms=8 of 8; rc 0 at HEAD c5d4a1b52c"
   },
   {
    "tool": "issuer check",
    "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
-   "result": "I2-REGRESSION ok=False passed=0 failed=1 reason=pytest rc=1; rc 0 from the python process at HEAD c08d686f69 (sparse worktree, see CAn1-AC3)"
+   "result": "I2-REGRESSION ok=True passed=64 failed=0 reason=none; rc 0 at HEAD c5d4a1b52c"
   },
   {
    "tool": "proof-of-spec checker",
