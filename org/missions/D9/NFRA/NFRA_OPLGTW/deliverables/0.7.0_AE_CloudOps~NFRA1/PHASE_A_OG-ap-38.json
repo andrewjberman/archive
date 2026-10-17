@@ -1,0 +1,90 @@
+{
+ "body": {
+  "release_sha": "100773843876374cf9b1db0a7daa1d6b2b5a9164",
+  "verdict": "STOP: measurement (a) FAILS; no ask written",
+  "peers": {
+   "candidate_outcome": "MemoryError",
+   "candidate_peak_rss_mb": 724.0,
+   "candidate_wall_s": 4.49,
+   "live_outcome": "MemoryError",
+   "guard": "oom_score_adj_1000_rlimit_as_1400mb",
+   "candidate_failed_at": [
+    "etfs_rivals_flow.py:303:_read_dates",
+    "etfs_rivals_flow.py:291:_read_part",
+    "typed_scope.py:139:read_parquet",
+    "core.py:1843:read_table",
+    "core.py:1485:read",
+    "_dataset.pyx:562:pyarrow._dataset.Dataset.to_table",
+    "_dataset.pyx:3841:pyarrow._dataset.Scanner.to_table",
+    "error.pxi:155:pyarrow.lib.pyarrow_internal_check_status",
+    "error.pxi:92:pyarrow.lib.check_status"
+   ],
+   "live_failed_at": [
+    "etfs_rivals_flow.py:303:_read_dates",
+    "etfs_rivals_flow.py:291:_read_part",
+    "typed_scope.py:134:read_parquet",
+    "core.py:1843:read_table",
+    "core.py:1485:read",
+    "_dataset.pyx:562:pyarrow._dataset.Dataset.to_table",
+    "_dataset.pyx:3841:pyarrow._dataset.Scanner.to_table",
+    "error.pxi:155:pyarrow.lib.pyarrow_internal_check_status",
+    "error.pxi:92:pyarrow.lib.check_status"
+   ],
+   "live_peak_rss_mb": 927.5,
+   "live_wall_s": 5.45
+  },
+  "valid_pair": {
+   "answered": false,
+   "peak_rss_mb": null,
+   "rows_matched": null,
+   "why_not_run": "the candidate's first call listed no available period or axis (it raised MemoryError before listing them)"
+  },
+  "chain": {
+   "pages": 4,
+   "median_growth_mb": 4.6,
+   "first_page_wall_s": 2.04,
+   "host_peak_pct": 37.4,
+   "pages_equal_live": true,
+   "live_pages": 4,
+   "live_first_page_wall_s": 1.9,
+   "rows_per_page": [
+    36,
+    20,
+    23,
+    44
+   ],
+   "candidate_vm_hwm_mb": 240.0,
+   "live_vm_hwm_mb": 246.4,
+   "guard": "oom_score_adj_1000_rlimit_as_1400mb"
+  },
+  "unit": {
+   "cgroup_v2": true,
+   "memory_controller": true,
+   "verify_rc": 0,
+   "verify_output_lines": 1,
+   "unit_md5_equals_release": true,
+   "scratch_removed": true
+  },
+  "unit_verify_note": "the one output line concerns the system unit acpid.socket (legacy /var/run path), not opal-gateway.service",
+  "runs": {
+   "guard": "oom_score_adj_1000_rlimit_as_1400mb, wall limit 120 s, every gateway-code run in a fresh process",
+   "this_record_is_the_run": "guard unchanged, Arrow tuned so pyarrow can start under the address-space cap: ARROW_DEFAULT_MEMORY_POOL=system, OMP_NUM_THREADS=1, ARROW_IO_THREADS=1",
+   "run_with_the_guard_alone": {
+    "candidate_peers": {
+     "outcome": "MemoryError",
+     "peak_rss_mb": 479.1,
+     "wall_s": 4.23
+    },
+    "live_peers": {
+     "outcome": "MemoryError",
+     "peak_rss_mb": 730.8
+    },
+    "chain": "candidate AND live aborted before page 1: terminate called after throwing an instance of std::system_error, what(): Resource temporarily unavailable (pyarrow could not create its worker threads under the 1400 MB ADDRESS-SPACE cap), rc -6"
+   }
+  },
+  "cause_read_from_the_candidate_code": "typed_scope.read_parquet line 139 reads the WHOLE object (pq.read_table(BytesIO(body), columns=read_cols); columns is None for the peer sections, so every column) and applies the filters AFTERWARDS with a mask; the new 64 MB check runs on the table AFTER that full read, so it avoids the Python copy but not the Arrow read. _peer_section passes columns=None.",
+  "scratch_removed": true,
+  "host_pct_idle": 27.2,
+  "host_pct_after": 27.8
+ }
+}
