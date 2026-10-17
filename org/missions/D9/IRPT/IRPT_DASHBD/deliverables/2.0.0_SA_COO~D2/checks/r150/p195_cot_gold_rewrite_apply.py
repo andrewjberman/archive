@@ -80,20 +80,21 @@ def check_record(rec, packet_sha, coo_text, cto_text, ledger_exists):
          and p["other_field_changes_on_common_days"] == 0 and isinstance(p["changed_dates"], list) and set(p["changed_dates"]) <= {NEXT_DAY} and p["days_removed"] == 0 and p["refused"] == 0,
          "prewrite: only %s may change on a common day, in the three fields; nothing removed; refused 0" % NEXT_DAY)
     pd = rec["publish_dry"]
-    need(isinstance(pd, dict) and set(pd) == {"published", "refused"} and pd["published"] == 939 and count(pd["refused"]) and pd["refused"] * 10 <= 939, "publish dry run: 939 published, refused within the 10 percent line")
+    need(isinstance(pd, dict) and set(pd) == {"published", "refused"} and pd["published"] == 939 and pd["refused"] == 40, "publish dry run: 939 published, refused exactly 40 (CTO condition, msg 10363)")
     c = rec["canary"]
     need(isinstance(c, dict) and set(c) == {"account_digest12", "dates_gained", "common_fields_equal", "only_next_day_three_fields_differ", "manifest_unchanged_but_dates"} and re.fullmatch(r"[0-9a-f]{12}", str(c["account_digest12"]))
          and c["dates_gained"] == [DAY] and c["common_fields_equal"] is True and c["only_next_day_three_fields_differ"] is True and c["manifest_unchanged_but_dates"] is True,
          "canary: one account by digest; the date gained is exactly %s; common fields equal the previous version except the next day's three fields; the manifest keeps publisher version, scope and claim" % DAY)
     f = rec["publish_full"]
-    need(isinstance(f, dict) and set(f) == {"published", "refused", "objects_before", "objects_after", "versions_before", "versions_after"} and f["published"] == 939 and f["refused"] == pd["refused"]
-         and f["objects_before"] == f["objects_after"] == b["series_objects"] and f["versions_after"] - f["versions_before"] >= 939 - pd["refused"], "full republish: 939 published, refused as in the dry run, the same objects, new versions")
+    need(isinstance(f, dict) and set(f) == {"published", "refused", "objects_before", "objects_after", "versions_before", "versions_after"} and f["published"] == 939 and f["refused"] == 40
+         and f["objects_before"] == f["objects_after"] == b["series_objects"] and f["versions_after"] - f["versions_before"] >= 939 - pd["refused"], "full republish: 939 published, refused exactly 40, the same objects, new versions")
     a = rec["after"]
     keys2 = {"gold_day_rows", "gold_total_rows", "partitions", "gold_code_sha256", "publish_code_sha256", "schedules", "series_prefixes", "series_with_day", "sample_ok"}
     need(isinstance(a, dict) and set(a) == keys2 and a["gold_day_rows"] == d["rows"] and a["gold_total_rows"] == b["gold_total_rows"] - b["day_rows"] + d["rows"] and a["partitions"] == b["partitions"]
          and a["gold_code_sha256"] == GOLD_CODE and a["publish_code_sha256"] == PUB_CODE and a["schedules"] == b["schedules"] and a["series_prefixes"] == 939 and count(a["series_with_day"], 1) and a["sample_ok"] is True,
          "after: the gold day holds the dry run's rows, the gold total moved by exactly (rows - 3), the partitions, codes and schedules equal, 939 series, a sample ok")
-    need(rec["ledger_closed"] is False and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0} and isinstance(rec["notes"], str) and 30 <= len(rec["notes"]) <= 3000, "the ledger left OPEN for the issuer; the reads block; notes")
+    need(rec["ledger_closed"] is False and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0} and isinstance(rec["notes"], str) and 30 <= len(rec["notes"]) <= 3000
+         and "YTD" in rec["notes"] and "Not measured" in rec["notes"], "the ledger left OPEN for the issuer; the reads block; notes that say the YTD return still reads Not measured while other days are absent (CTO condition, msg 10363)")
     return True
 
 
@@ -224,7 +225,7 @@ def synthetic():
             "publish_full": {"published": 939, "refused": 40, "objects_before": 1878, "objects_after": 1878, "versions_before": 2800, "versions_after": 3700},
             "after": {"gold_day_rows": 880, "gold_total_rows": 60000 - 3 + 880, "partitions": 69, "gold_code_sha256": GOLD_CODE, "publish_code_sha256": PUB_CODE, "schedules": {"account_return_daily": "ENABLED", "publish_daily": "DISABLED"},
                       "series_prefixes": 939, "series_with_day": 877, "sample_ok": True},
-            "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts and statuses only; the six other absent days were not touched."}
+            "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts and statuses only; the six other absent days were not touched; the YTD return still reads Not measured while any of the 6 other absent days is in the window."}
 
 
 def selftest():
@@ -277,6 +278,9 @@ def selftest():
     mut("canary digest", lambda r: r["canary"].update(account_digest12="short"))
     mut("full published", lambda r: r["publish_full"].update(published=938))
     mut("full refused", lambda r: r["publish_full"].update(refused=41))
+    mut("dry refused 39", lambda r: r["publish_dry"].update(refused=39))
+    mut("dry refused 41", lambda r: r["publish_dry"].update(refused=41))
+    mut("notes without the YTD sentence", lambda r: r.update(notes="Counts and statuses only; the six other absent days were not touched; nothing else changed in the window."))
     mut("full objects", lambda r: r["publish_full"].update(objects_after=1900))
     mut("full versions", lambda r: r["publish_full"].update(versions_after=2900))
     mut("after day rows", lambda r: r["after"].update(gold_day_rows=879))
