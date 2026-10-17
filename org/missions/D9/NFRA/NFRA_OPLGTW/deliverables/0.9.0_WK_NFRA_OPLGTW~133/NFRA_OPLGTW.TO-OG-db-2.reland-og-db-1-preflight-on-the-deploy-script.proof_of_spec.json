@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-db-2",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~133",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "033ca1ee2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "033ca1ee2c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-db-2.reland-og-db-1-preflight-on-the-deploy-script.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "kind": "script",
+      "commit_or_etag": "83eb42b2ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The OG-db-1 PREFLIGHT block (17 lines, trunk 33fb4d9708 lines 33-49) re-landed before the OG-tl-1 block, plus one blank line: 18 insertions, 0 other changes against the OG-ap-33 live blob (blob 7385fbec55). The script was not run and no AWS call was made. The block reaches the host only through the next release's never-widen."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "be6b218289",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three new surprise rows NFRA_OPLGTW-Z-W133-S1..S3 appended; the commit-time surprise-row gate passed (3 new of 1049 checked)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the file differs from its pre-cell blob by ONE insertion (the trunk block, in order, before the allowlist block) and nothing else, and reads clean under bash -n.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/db2.AC1.sh 0.9.0_WK_NFRA_OPLGTW~133; echo \"exit=$?\"",
+      "output_evidence": "diff of the deploy script across the cell: 1 insertion(s), 0 other change(s) (want 1 and 0)\ninserted lines 17, the trunk block has 17, equal in order: yes; inserted before the OG-tl-1 block: yes\nbash -n on the post-cell file: ok\nRESULT: PASS\nexit=0",
+      "denominator": "1 insertion of 17 lines, equal in order to the 17-line trunk block; 0 other changes; 0 deletions",
+      "status": "PASS",
+      "expect": "(?s)diff of the deploy script across the cell: 1 insertion\\(s\\), 0 other change\\(s\\) \\(want 1 and 0\\).*equal in order: yes; inserted before the OG-tl-1 block: yes.*bash -n on the post-cell file: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the extracted block runs alone, prints PREFLIGHT OK on this repo and refuses on an empty root.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/db2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "preflight block extracted: yes (17 lines); runs alone on this repo: PREFLIGHT OK rc=0: yes; control (empty root) refuses: yes\nRESULT: PASS\nexit=0",
+      "denominator": "17-line block extracted from HEAD; 1 run on this repo (PREFLIGHT OK, rc 0) and 1 control on an empty root (refused, rc non-zero)",
+      "status": "PASS",
+      "expect": "(?s)preflight block extracted: yes \\(\\d+ lines\\); runs alone on this repo: PREFLIGHT OK rc=0: yes; control \\(empty root\\) refuses: yes.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: your commits touch only the deploy script (plus the standing record paths).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~133 '^infra/aws/ec2/opal-gateway/deploy-to-ec2\\.sh$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~133: files touched 2; product files 1; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "2 files touched by the commits of 0.9.0_WK_NFRA_OPLGTW~133 (1 product file, deploy-to-ec2.sh; 1 standing record path, INVESTIGATION_v1.md); 0 outside the allowed set",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~133: files touched [1-9]\\d*; product files 1; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 run against a scratch copy (.scratch/mutant_no_ok_line.sh) of the post-cell script in which the text 'then echo \"PREFLIGHT OK\"' is changed to 'then echo \"PREFLIGHT\"' (1 line differs). Passed through the checker's dry-run override DB2_SCRIPT_OVERRIDE; the repo file is untouched.",
+      "expected": "AC2 fails: the block end line is not found and the extraction is refused",
+      "observed": "preflight block extracted: no (not found in .../mutant_no_ok_line.sh); RESULT: FAIL; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run twice, in full, after the last commit (be6b218289); the two runs compared",
+      "observed": "run 1 and run 2 identical: AC1 1 insertion, 0 other; AC2 17 lines, PREFLIGHT OK rc=0 yes, control refuses yes; AC3 files touched 2, product 1, outside 0; all RESULT: PASS, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The deploy script was not run, and no AWS call, SSM send or S3 upload was made.",
+      "reason": "The order forbids it: the cell changes the text only. The criteria run the extracted block alone."
+    },
+    {
+      "item": "The live host's copy of the preflight block.",
+      "reason": "Not in scope: the block reaches the host only through the next release's never-widen, per the issuer note. No host was read or changed."
+    },
+    {
+      "item": "The gateway test suite as a criterion.",
+      "reason": "Not a criterion of this order. The three criteria are AC1 (the diff), AC2 (the block runs alone) and AC3 (the write set)."
+    },
+    {
+      "item": "The commit-time risk reflex and the client-data check on 83eb42b2ad.",
+      "reason": "Printed PARTIAL_OR_BLIND and ABSENT respectively; the commit was not refused. Recorded as NFRA_OPLGTW-Z-W133-S3, not read as checked clean."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W133-S1: the schema path org/surprise_channel/schemas/investigation_item.schema.json is skip-worktree in this sparse cone; the schema was read from the main tree, read-only.",
+    "NFRA_OPLGTW-Z-W133-S2: .claude/agents/worker.md is tracked in the index but not materialized in this worktree; the rules came from the session context.",
+    "NFRA_OPLGTW-Z-W133-S3: the commit-time risk reflex printed PARTIAL_OR_BLIND (danger map STALE, 0 of 1 scanned) and the client-data check was ABSENT for commit 83eb42b2ad; the commit was not refused.",
+    "NFRA_OPLGTW-Z-W133-S4: the proof-and-status commit was refused by the naming limb (ENFORCE): the function-map folder infra/aws/lambda/ci/function-map/ is outside this sparse cone. BLOCKING; the proof and the status flip are not committed; the cone was not widened."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the commits 83eb42b2ad (deploy script) and be6b218289 (surprise rows) on branch wk-NFRA_OPLGTW-133, and the criterion invocations recorded above.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~133 <0.9.0_WK_NFRA_OPLGTW~133@opal.agent>\" -F .scratch/commit_msg_og_db2.txt -- infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "result": "rc 0; commit 83eb42b2ad; commit-gate OK (bash -n); to-pipeline-gate OK; gitlink-publication-check refusals=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~133 <0.9.0_WK_NFRA_OPLGTW~133@opal.agent>\" -F .scratch/commit_msg_rows_og_db2.txt -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0; surprise-row-gate OK: 3 new rows of 1049 total checked; commit be6b218289"
+    },
+    {
+      "tool": "bash (AC1/AC2 mutant control)",
+      "invocation": "DB2_SCRIPT_OVERRIDE=<worktree>/.scratch/mutant_no_ok_line.sh bash .../db2.AC2.sh",
+      "result": "RESULT: FAIL, exit=1 (the mutant is refused, as expected)"
+    }
+  ]
+}
