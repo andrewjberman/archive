@@ -34,8 +34,9 @@ from lib.research.corpus import continuation as new_mod  # noqa: E402
 from lib.research.corpus import typed  # noqa: E402
 from lib.research.harvest import store  # noqa: E402
 
-BUDGET_REQUESTS = 800
-BUDGET_BYTES = 500 * 1024 * 1024
+BUDGET_REQUESTS = 363  # AMENDMENT 1 remaining budget: order total 1200, used 837 before this run
+BASE_COMMIT = "8005ccbacb"  # the pre-round-90 base: the BEFORE arm of every census reading
+BUDGET_BYTES = 480 * 1024 * 1024  # AMENDMENT 1 remaining bytes (order total 700 MiB)
 ALL_SECURITIES_IN_TABLE = 94
 
 # the msys-safe spawn helper (native python -> bash -> the aws shim)
@@ -112,7 +113,7 @@ class _Paginator:
 client = ShimS3()
 
 # --- the BEFORE arm: continuation.py at HEAD, as a second module
-head_src = subprocess.run(["git", "show", "HEAD:lib/research/corpus/continuation.py"],
+head_src = subprocess.run(["git", "show", BASE_COMMIT + ":lib/research/corpus/continuation.py"],
                           capture_output=True, check=True, cwd=ROOT).stdout
 head_path = os.path.join(SCRATCH, "continuation_head.py")
 with open(head_path, "wb") as fh:
@@ -144,6 +145,9 @@ def _flat(text, n):
 
 
 out_lines = []
+value_to_value = []
+absent_before_changed = 0
+changed_lines = 0
 changed_fund = 0
 changed_position = 0
 ran = 0
@@ -174,8 +178,15 @@ for sk in all_securities:
         changed_fund += 1
     if pos_changed:
         changed_position += 1
+    # AMENDMENT 1 check: a value-to-value change is a change where BEFORE and AFTER are both values and differ
+    # (fund_of_record or last_stated_position). Expected 0.
+    if (fv_b is not None and fv_a is not None and fv_b != fv_a) or \
+            (pv_b is not None and pv_a is not None and pv_b != pv_a):
+        value_to_value.append(sk)
     if not (fund_changed or pos_changed):
         continue
+    if fv_b is None and pv_b is None:
+        absent_before_changed += 1
 
     ids = []
     if fund_changed and f_a.get("citation"):
@@ -184,6 +195,7 @@ for sk in all_securities:
         rid = bykey.get(p_a["citation"]["report_key"], p_a["citation"]["report_key"])
         if rid not in ids:
             ids.append(rid)
+    changed_lines += 1
     out_lines.append("CHANGED %s fund_before=%s fund_after=%s position_before=%s position_after=%s report_id=%s" % (
         sk,
         fv_b if fv_b is not None else "absent",
@@ -193,6 +205,11 @@ for sk in all_securities:
         "+".join(ids) if ids else "none",
     ))
 
+out_lines.append("CHANGED_LINES %d" % changed_lines)
+out_lines.append("ABSENT_BEFORE_BOTH=%d of CHANGED=%d" % (absent_before_changed, changed_lines))
+for _sk in value_to_value:
+    out_lines.append("VALUE_TO_VALUE_SECURITY %s" % _sk)
+out_lines.append("VALUE_TO_VALUE=%d" % len(value_to_value))
 out_lines.append("BUDGET requests=%d lists=%d gets=%d nosuchkey=%d bytes=%d" % (
     client.lists + client.gets, client.lists, client.gets, client.nosuchkey, client.get_bytes))
 out_lines.append("CENSUS securities=%d changed_fund=%d changed_position=%d gets=%d bytes=%d" % (
