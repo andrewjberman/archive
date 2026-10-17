@@ -28,7 +28,14 @@ PENDING: filled from `CODE6_SERVED.json` (eight arms, the marker read from the h
 
 ## 4. The enrichment list this seat proposes for round 42
 
-PENDING until the Phase B read-back. Candidates already known: the near-empty fees silver is outside this project (the owner is the laptop CTO's call); a measured service heap once a real window call runs; the allocation weight unit once rows exist.
+PENDING until the Phase B read-back. Candidates already known (the CTO ranks them):
+1. A rise of the window page size: a page now reads in about 2 s against about 30 s, so 30 partitions per page is no longer the binding limit (a later cell, measured, never assumed).
+2. `test_og_db3.py::test_ogdb3_ac03` reads git history and fails in a release tree (a test defect carried by name); make it read the worktree.
+3. A measured service heap once a real window call runs (closes `Z-S338`; organic case only).
+4. The allocation weight unit (`Z-S313`) and the 429 limit choice (`Z-S177`) once rows exist; the browser-exemption roster (`Z-S322`/`Z-S325`) with a named principal list.
+5. The eight `absent_reason` codes that now surface (`OG-en-24`): whether any caller or the CVO's reading wants a documented list of them in the catalog.
+6. The thin fees silver belongs to the laptop CTO (the probe is theirs); no gateway cell.
+Lessons for the record (not rules): the first Phase A stop was a whole-partition Python conversion hidden behind an off-loop wrapper (the loop stayed starved by the GIL even after the move); an issuer who relaxes a limit after a failed measurement ships the defect, so the limits stayed and the cause was fixed; an idle seat reads mail at its own watcher re-arm, and a failed `unstick` is not a stall.
 
 ## 5. Push state
 
