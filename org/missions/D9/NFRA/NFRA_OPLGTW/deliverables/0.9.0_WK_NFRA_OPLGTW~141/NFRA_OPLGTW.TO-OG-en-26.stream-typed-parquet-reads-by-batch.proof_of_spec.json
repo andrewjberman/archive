@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-26",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8c9ab74515",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-26.stream-typed-parquet-reads-by-batch.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2b066d9ad"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~141",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/typed_scope.py",
+      "kind": "script",
+      "commit_or_etag": "9d7a56337c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only: footer refusal before any read for an unfiltered over-cap read; batch-streamed filtered read with length_columns; streamed distinct_values; no release or deploy in this order",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/etfs_rivals_flow.py",
+      "kind": "script",
+      "commit_or_etag": "9d7a56337c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only: _read_part and _read_dates pass length_columns; _peer_section measures input_manifest on the matched rows; no release or deploy in this order",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en26.py",
+      "kind": "test",
+      "commit_or_etag": "14717cdeeb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test file (three named tests), created at 9d7a56337c; 14717cdeeb adds the pq.read_table spy to test_ogen26_ac01 after the base-code mutant passed it",
+      "artifact_covered_by": ["AC1", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the three named tests pass (refused before reading; streamed and equal to the whole-table answer with a bounded Arrow peak; the peer tool's answer identical with the lineage measured, not loaded)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en26.py test_ogen26_ac01 test_ogen26_ac02 test_ogen26_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the commits of this serial touch only the listed files",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~141 '^infra/aws/ec2/opal-gateway/(app/(typed_scope|etfs_rivals_flow)\\.py|tests/test_og_(en26|en25|rv2|gt6|en23|en22|cl2)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~141: files touched 4; product files 3; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 files touched by this serial (3 product files and the surprise channel investigation); 0 outside the allowed set",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~141: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the peer, window and client test files pass together in both orders with the same count",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh en26set tests/test_og_rv2.py tests/test_og_gt6.py tests/test_og_cl2.py tests/test_og_en22.py tests/test_og_en23.py tests/test_og_en24.py tests/test_og_en25.py tests/test_og_en26.py; echo \"exit=$?\"",
+      "output_evidence": "en26set forward: passed 32; failed 0\nen26set reverse: passed 32; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "32 passed forward and 32 reverse, across 8 files (29 existing plus the 3 new)",
+      "status": "PASS",
+      "expect": "(?s)en26set forward: passed (\\d+); failed 0.*en26set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base typed_scope.py (8c9ab74515) under the new test file, in a scratch copy of HEAD (.scratch/mut, not committed): the whole-table read with no footer refusal and no streaming",
+      "expected": "test_ogen26_ac01 fails: the refused object is read",
+      "observed": "first version of the AC01 spy (ParquetFile methods only) PASSED on the base code, because pq.read_table bypasses those methods; after the pq.read_table spy (commit 14717cdeeb) the base code gives FAILED with \"a refused object is not read: ['read_table']\"",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of test_ogen26_ac02 and test_ogen26_ac03 with -s on the committed tree, the printed fresh-process peaks compared",
+      "observed": "run 1 and run 2: lineage child arrow pool peak 10849344 bytes over 836460682 uncompressed bytes; distinct child arrow pool peak 1508608 bytes over 58470991 uncompressed bytes in the named columns; identical in both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "release, deploy, IAM, env key, registry change, app/tools.py, the catalog, the deploy files",
+      "reason": "outside the order's bounds: code and offline tests only"
+    },
+    {
+      "item": "test_og_gt8.py::test_oggt8_ac03_deploy_stages_lib and test_og_ch1.py::test_ogch1_ac04 in the wider typed-reader set",
+      "reason": "both fail identically on the unmodified base extract of HEAD 8c9ab74515; outside this order's named set and cone; filed as NFRA_OPLGTW-Z-W141-S2, not fixed"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W141-S1: the streamed filtered read's Arrow pool peak follows the row group, not only the 2048-row batch (3 871 360 bytes at 50 000-row groups against 2 427 712 at 4 096-row groups for the same 53 MB of data); the TO's 'one batch plus the matched rows' holds only for small row groups; the test shape was chosen after measuring and is recorded there.",
+    "NFRA_OPLGTW-Z-W141-S2: two tests in the wider typed-reader set fail on the base tree as well as the worktree (test_og_gt8 AC03 deploy-text line search; test_og_ch1 AC04 repo roster file); neither reads a function OG-en-26 changed."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~141/NFRA_OPLGTW.TO-OG-en-26.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/test_og_rv2.py tests/test_og_gt6.py tests/test_og_cl2.py tests/test_og_en22.py tests/test_og_en23.py tests/test_og_en24.py tests/test_og_en25.py tests/test_og_en26.py (both orders)",
+      "result": "32 passed forward and 32 reverse; 29 baseline plus 3 new"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider <15 other gateway test files that import the typed readers>",
+      "result": "117 passed, 2 failed; the two failures are the pre-existing base failures in NFRA_OPLGTW-Z-W141-S2"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <the three Python files>",
+      "result": "pre-commit gate clean for 3 of 3 file(s)"
+    }
+  ]
+}
