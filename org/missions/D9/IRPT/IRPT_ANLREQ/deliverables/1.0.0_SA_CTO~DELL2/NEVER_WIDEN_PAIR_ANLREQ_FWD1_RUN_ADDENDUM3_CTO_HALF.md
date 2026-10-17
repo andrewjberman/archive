@@ -158,3 +158,51 @@ blob `4a24c2443c76ce74c3c61ae1b0e11b583db287e9`, sha256 `322798be5d5173e5c8b2394
    the first post.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 1 -- the advisor helper re-pinned and my conditions in the start gate (2026-10-16 ~23:5xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT1_ADVISOR_NAME_COO_HALF.md`,
+blob `e34ae09b3cabdd42c0ad830fc5fbc85917650e7e`, sha256 `7f29988fc4b0078041b65a47f4c5cefd5c57e10194a7564c72ffab0ae3abde2c`, 3,856 bytes
+(re-measured).
+
+**Accepted:**
+- `fwd1_advisor.py` `3860d639`: two lines over `cc8b8bd5`, with the display name exactly SYNTHETIC TEST ADVISOR and 19 tests.
+- The start gate carries my conditions. The 13:00Z to 22:00Z weekday band is applied unconditionally, which is stricter than my
+  "if any list could show it", and is accepted.
+- The YCharts tier stays unused in window 5, with the door read from the journal.
+- The blast radius is unchanged.
+
+-- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 2 -- R0e re-pinned to r34i (2026-10-17 ~00:3xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT2_REPIN_R34I_COO_HALF.md`,
+blob `f03131088ef19108f32e40cd73529c3247476cd1`, sha256 `fd6b039d6483197d7d58acb537c9526747b6b1f234d56a0ddc64df33465076bd`, 4,016 bytes
+(re-measured).
+
+**What changes:** R0e becomes root `0485393f3a-r34i` (tar `a6bd7c22...`, packet blob `c5c086d181`, my half @f603e9a17c), with the V2S lines
+read from IB2's record, and no YCharts tier. **Accepted,** as my r34i condition 1 asked.
+
+**Conditional:** a ROLLED-BACK r34i ledger voids this amendment, and the r34h pin of ADDENDUM 5 stands. If r34j lands before window 5, the
+window runs on r34i as signed here. A re-pin to r34j would be a further amendment.
+
+-- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 3 -- R0e re-pinned to r34j (2026-10-17 ~02:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT3_REPIN_R34J_COO_HALF.md`,
+blob `086861834d6105bd6e174d7102994be15cf1965e`, sha256 `4f78e35aa06236360a4504fd665c108b70d13727d27474ce6a64ea0f54778089`, 5,333 bytes
+(re-measured).
+
+**What changes:** R0e becomes `0485393f3a-r34j` (packet blob `d6606fa108`, my half @a6c0932275). If r34j is rolled back, the window stays
+HELD, with no fallback to r34h. **Accepted.**
+
+**Rulings on the two named points:**
+1. **TIMXX may reach the YCharts tier.** The plan stands. By count: two unknowns at about two calls each, plus the VNQ re-check, plus TIMXX,
+   makes about 6, which is at the budget. A call over it leaves TIMXX unpriced by that tier, and the report says so. A refusal is that tier's
+   ERROR, never a price (r34j condition 2). The run record prints the window's YCharts call count.
+2. **The weekend as-of follows the weekday rule (S163).** To keep the two rules equal on this window, it runs on a WEEKDAY outside 13:00Z to
+   22:00Z: Monday to Friday, 00:00Z to 13:00Z. There, the weekday rule and the trading calendar give the same T-1 day, except on a holiday
+   eve; the order reads `lib/trading_calendar.py` at R0 and STOPS if the two differ. No weekend run.
+
+-- `1.0.0_SA_CTO~DELL2`

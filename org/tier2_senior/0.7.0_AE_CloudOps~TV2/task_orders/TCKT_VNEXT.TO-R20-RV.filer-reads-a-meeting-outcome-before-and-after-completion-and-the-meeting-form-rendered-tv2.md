@@ -41,8 +41,10 @@ org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1
 </paths>
 
 <proof_of_spec>
+  <criterion id="R20RV-AC2" cell_refs="R20-rv-3"><invocation>python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_run_check.py</invocation><expect>^RUN-OK \(render\)</expect></criterion>
   <criterion id="R20RV-AC1J" cell_refs="R20-rv-3" judgment="true"/>
 </proof_of_spec>
+`R20RV-AC2` (added by the issuer, AMENDMENT 1 of this staged order, 2026-10-16 ~23:5xZ; gate limb: none graded, a tier-2 applier order with a pipeline-override): the mechanical legs of the run. The check reads `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r20_run/R20_RUN_RESULT.json` (keys: `browser_origin` `dev_sha` `filer` `coordinator_identity` `bystander` `mt_ticket` `mt_confirmed_time` `completed_by` `routing_before` `routing_during` `routing_after` `shots` `row_deleted_at` `token_exp` `rows_absent_after` `no_engine_call` `token_printed`; `shots` is an object with EXACTLY the six roles `filer_waiting` `filer_confirmed` `coordinator_controls` `bystander_no_control` `filer_completed` `meeting_form`, each `{path, bytes, viewer, origin}` with the path under `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r20_run/`, a real PNG of the recorded size, the viewer the identity the role names, the origin `http://localhost:5174`) and re-reads the ticket (confirmed by the coordinator at the recorded time, then completed), the three identity rows (ABSENT), and the live routing (restored to the coordinator alone). At the issuance: FAIL as expected (`RUN-BAD cannot read the result file`); its self-test (`--self-test`) prints `R20-RUN-SELFTEST-OK` and refuses eleven mutants of the document.
 `R20RV-AC1J` (judgment, graded at L9 by `3.0.0_SA_CVO` on the three saved screenshots, never by the applier or the issuer alone): the filer's own ticket shows the meeting outcome line after the confirm and still after completion; a viewer outside `routing.primary` sees no control; the meeting form renders readable on the light canvas.
 
 <preflight>

@@ -102,7 +102,8 @@ def all_refused():
 def run_with(tmp_path, base, drop=None, password=PASSWORD):
     """A full run over the default ROUTES. drop names one flag to leave out of the argument list."""
     argv = ["--go", GO, "--base", base, "--email", EMAIL, "--ticket", TICKET, "--firm-a", FIRM_A,
-            "--firm-b", FIRM_B, "--request-id", REQ, "--job-id", JOB, "--out", str(tmp_path / "out")]
+            "--firm-b", FIRM_B, "--request-id", REQ, "--job-id", JOB, "--report-id", REQ, "--export-id", REQ,
+            "--out", str(tmp_path / "out")]
     if drop is not None:
         i = argv.index(drop)
         del argv[i:i + 2]

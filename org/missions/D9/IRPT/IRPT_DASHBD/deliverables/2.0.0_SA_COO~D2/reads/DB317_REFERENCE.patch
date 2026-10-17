@@ -1,0 +1,183 @@
+diff --git a/infra/aws/lambda/investor-reporting/reporting-publish/handler.py b/infra/aws/lambda/investor-reporting/reporting-publish/handler.py
+index dc49865443..7612b02bfc 100644
+--- a/infra/aws/lambda/investor-reporting/reporting-publish/handler.py
++++ b/infra/aws/lambda/investor-reporting/reporting-publish/handler.py
+@@ -591,6 +591,8 @@ def _filled_mint(doc, firm):
+             raise publisher.PublishRefused("an account id of the household is not admissible")
+     for entry in doc["household"]["accounts"]:
+         entry["account_id"] = minted[entry["account_id"]]
++        entry["account_id_form"] = "minted"
++    doc["household"]["accounts"].sort(key=lambda e: e["account_id"])
+     for member in doc["values"]:
+         value = doc["values"][member]
+         if isinstance(value, dict) and "by_row" in value:
+diff --git a/infra/aws/lambda/investor-reporting/reporting-publish/publisher.py b/infra/aws/lambda/investor-reporting/reporting-publish/publisher.py
+index 3f43a0bb5a..5c2d63e000 100644
+--- a/infra/aws/lambda/investor-reporting/reporting-publish/publisher.py
++++ b/infra/aws/lambda/investor-reporting/reporting-publish/publisher.py
+@@ -539,7 +539,7 @@ def summary_bytes(summary):
+ # --------------------------------------------------------------------------- the filled report (cell IB-pr-553, hop 2 plumbing)
+ # BEGIN FILLED-REPORT-A
+ FILLED_HOUSEHOLD_FIELDS = ("household_ref", "as_of", "first_data_date", "accounts")
+-FILLED_ACCOUNT_FIELDS = ("account_id", "last4", "first_data_date", "window_status")
++FILLED_ACCOUNT_FIELDS = ("account_id", "account_id_form", "last4", "first_data_date", "window_status")
+ FILLED_WINDOW_STATUS = ("MEASURED", "NOT_SPANNED", "BREAK")
+ FILLED_WINDOWS = ("qtd", "ytd", "last_12_months", "since_inception")
+ FILLED_ABSENT_KINDS = ("NO_SOURCE_YET", "INSUFFICIENT_HISTORY", "SOURCE_BREAK")
+@@ -603,15 +603,24 @@ def validate_filled_report(document):
+         raise PublishRefused("household must carry exactly %s" % (list(FILLED_HOUSEHOLD_FIELDS),))
+     if not isinstance(household["accounts"], list):
+         raise PublishRefused("household.accounts is not a list")
++    ids = []
+     for entry in household["accounts"]:
+         if not isinstance(entry, dict) or set(entry) != set(FILLED_ACCOUNT_FIELDS):
+             raise PublishRefused("an account entry must carry exactly %s" % (list(FILLED_ACCOUNT_FIELDS),))
++        if entry["account_id_form"] != "minted":
++            raise PublishRefused("an account entry's account_id_form must be minted")
++        if not isinstance(entry["account_id"], str) or not entry["account_id"].startswith("acc_") or len(entry["account_id"]) != 28 \
++                or any(c not in "0123456789abcdef" for c in entry["account_id"][4:]):
++            raise PublishRefused("an account entry's account_id is not a minted opaque id")
++        ids.append(entry["account_id"])
+         status = entry["window_status"]
+         if not isinstance(status, dict) or set(status) != set(FILLED_WINDOWS):
+             raise PublishRefused("an account entry's window_status is not an object of exactly the four windows %s" % (list(FILLED_WINDOWS),))
+         for window in FILLED_WINDOWS:
+             if status[window] not in FILLED_WINDOW_STATUS:
+                 raise PublishRefused("an account entry carries an unknown window_status for %s" % window)
++    if ids != sorted(ids):
++        raise PublishRefused("household.accounts is not ascending by account_id")
+     values = document["values"]
+     if not isinstance(values, dict):
+         raise PublishRefused("values is not an object keyed by member id")
+diff --git a/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py b/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py
+index be48dfb181..231a525aa4 100644
+--- a/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py
++++ b/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_publish.py
+@@ -31,9 +31,9 @@ def _doc():
+             "as_of": "2026-09-30",
+             "first_data_date": "2024-01-02",
+             "accounts": [
+-                {"account_id": "acct_SYNTH_A", "last4": "0001", "first_data_date": "2024-01-02",
++                {"account_id": "acc_0000000000000000000000a1", "account_id_form": "minted", "last4": "0001", "first_data_date": "2024-01-02",
+                  "window_status": {"qtd": "MEASURED", "ytd": "MEASURED", "last_12_months": "MEASURED", "since_inception": "MEASURED"}},
+-                {"account_id": "acct_SYNTH_B", "last4": "0002", "first_data_date": "2025-06-02",
++                {"account_id": "acc_0000000000000000000000b2", "account_id_form": "minted", "last4": "0002", "first_data_date": "2025-06-02",
+                  "window_status": {"qtd": "NOT_SPANNED", "ytd": "NOT_SPANNED", "last_12_months": "NOT_SPANNED", "since_inception": "MEASURED"}},
+             ],
+         },
+diff --git a/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py b/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py
+index 5f83a11b22..36e5a6322f 100644
+--- a/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py
++++ b/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_reader.py
+@@ -58,6 +58,8 @@ def _minted(doc):
+     m = {a["account_id"]: mint(a["account_id"]) for a in out["household"]["accounts"]}
+     for a in out["household"]["accounts"]:
+         a["account_id"] = m[a["account_id"]]
++        a["account_id_form"] = "minted"
++    out["household"]["accounts"].sort(key=lambda a: a["account_id"])
+     for mid, v in out["values"].items():
+         if isinstance(v, dict) and "by_row" in v:
+             v["by_row"] = {m.get(k, k): x for k, x in v["by_row"].items()}
+@@ -342,7 +344,7 @@ def test_mint_account_grain_by_row_keys_and_account_chart_lines_carry_the_minted
+     store = _store({NEW: _rows(_account_doc(HH1, (RAW_A, RAW_B)), HH1)})
+     got = _read(FakeS3(store), CID)
+     assert sorted(got["values"]["pvs.ytd.ending_value"]["by_row"]) == sorted([mint(RAW_A), mint(RAW_B)])
+-    assert [ln["name"] for ln in got["values"]["chart.account"]] == [mint(RAW_A), mint(RAW_B)]
++    assert sorted(ln["name"] for ln in got["values"]["chart.account"]) == sorted([mint(RAW_A), mint(RAW_B)])
+     assert got == _minted(_account_doc(HH1, (RAW_A, RAW_B)))
+ 
+ 
+@@ -379,7 +381,7 @@ def test_mint_pass_publishes_the_minted_account_ids_at_the_builder_address():
+ 
+ 
+ def test_present_validator_accepts_the_per_window_window_status_form():
+-    p.validate_filled_report(_doc(HH1))
++    p.validate_filled_report(_minted(_doc(HH1)))
+ 
+ 
+ def test_refused_validator_refuses_the_one_word_window_status_form():
+@@ -400,3 +402,36 @@ def test_refused_validator_refuses_a_malformed_per_window_status(mutate):
+     mutate(doc["household"]["accounts"][0]["window_status"])
+     with pytest.raises(p.PublishRefused):
+         p.validate_filled_report(doc)
++
++
++def test_form_every_account_entry_carries_minted():
++    got = _read(FakeS3(_current_store()), CID)
++    assert [a["account_id_form"] for a in got["household"]["accounts"]] == ["minted", "minted"]
++
++
++def test_ascending_accounts_are_ordered_by_the_minted_id():
++    got = _read(FakeS3(_current_store()), CID)
++    ids = [a["account_id"] for a in got["household"]["accounts"]]
++    assert ids == sorted(ids)
++
++
++def test_form_validator_refuses_a_missing_or_other_form():
++    doc = _minted(_doc(HH1))
++    del doc["household"]["accounts"][0]["account_id_form"]
++    with pytest.raises(p.PublishRefused):
++        p.validate_filled_report(doc)
++    doc = _minted(_doc(HH1))
++    doc["household"]["accounts"][0]["account_id_form"] = "custodian"
++    with pytest.raises(p.PublishRefused):
++        p.validate_filled_report(doc)
++
++
++def test_ascending_validator_refuses_a_raw_looking_id_and_an_out_of_order_list():
++    doc = _minted(_doc(HH1))
++    doc["household"]["accounts"][0]["account_id"] = RAW_A
++    with pytest.raises(p.PublishRefused):
++        p.validate_filled_report(doc)
++    doc = _minted(_doc(HH1))
++    doc["household"]["accounts"].reverse()
++    with pytest.raises(p.PublishRefused):
++        p.validate_filled_report(doc)
+diff --git a/org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json b/org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json
+--- a/org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json
++++ b/org/standards/IRPT_DASHBD_PERFORMANCE_REPORT_CONTRACT.json
+@@ -1,5 +1,5 @@
+ {
+-  "contract_version": "0.5.4",
++  "contract_version": "0.5.5",
+   "lineage": [
+     {
+       "contract_version": "0.1.0",
+@@ -123,7 +123,7 @@
+     }
+   ],
+   "document": {
+-    "shape": "One filled report per household. A filled report is one JSON object with exactly two keys, household and values (document.filled_report states the layout). household is {household_ref, as_of, first_data_date, accounts}: household_ref is the household's reference, as_of the report date, first_data_date the earliest first_data_date of its accounts, and accounts one entry per account of the household in account_id order, each entry {account_id, last4, first_data_date, window_status}. values is an object keyed by member id with exactly one entry per member in members. A member whose grain is an account or an asset class holds {\"by_row\": {\"<account_id or asset class>\": figure}} (filled_report.per_row_member_form); a chart member holds a list of series {name, points: [{date, value}]}, a point with no measured figure left out, and a chart with no measured point holds its absent form. A value is a number, a text, or {\"absent\": \"<reason in words>\"}. A member whose source is ABSENT always holds the absent form, never zero and never a default. Units follow each member's unit: dollars as whole dollars with thousands separators; percent to one decimal place; text as written; series as the list the chart reads. A percent member holds PERCENT POINTS: a stored 1.5 means 1.5 percent, and a consumer must not scale it again (the unit_scale field on each percent member names this). The sample builder writes this object from the sibling contracts named in each member's source; the tab and the export read it by member id and print every absent form as its words. Neither the tab nor the export derives a figure from another source.",
++    "shape": "One filled report per household. A filled report is one JSON object with exactly two keys, household and values (document.filled_report states the layout). household is {household_ref, as_of, first_data_date, accounts}: household_ref is the household's reference, as_of the report date, first_data_date the earliest first_data_date of its accounts, and accounts one entry per account of the household in ascending account_id order, each entry {account_id, account_id_form, last4, first_data_date, window_status}, where account_id is the issued opaque (minted) id and account_id_form is the text minted. values is an object keyed by member id with exactly one entry per member in members. A member whose grain is an account or an asset class holds {\"by_row\": {\"<account_id or asset class>\": figure}} (filled_report.per_row_member_form); a chart member holds a list of series {name, points: [{date, value}]}, a point with no measured figure left out, and a chart with no measured point holds its absent form. A value is a number, a text, or {\"absent\": \"<reason in words>\"}. A member whose source is ABSENT always holds the absent form, never zero and never a default. Units follow each member's unit: dollars as whole dollars with thousands separators; percent to one decimal place; text as written; series as the list the chart reads. A percent member holds PERCENT POINTS: a stored 1.5 means 1.5 percent, and a consumer must not scale it again (the unit_scale field on each percent member names this). The sample builder writes this object from the sibling contracts named in each member's source; the tab and the export read it by member id and print every absent form as its words. Neither the tab nor the export derives a figure from another source.",
+     "filled_report": {
+       "top_level_keys": [
+         "household",
+@@ -137,6 +137,7 @@
+       ],
+       "account_entry_fields": [
+         "account_id",
++        "account_id_form",
+         "last4",
+         "first_data_date",
+         "window_status"
+@@ -146,15 +147,16 @@
+         "NOT_SPANNED",
+         "BREAK"
+       ],
+-      "per_row_member_form": "a member whose grain is an account (the account value summaries, the activity account rows, the realized-lot members and the account gain-loss review) or an asset class (hold.allocation) holds {\"by_row\": {\"<account_id or asset class>\": figure}}, with one key per account of the household or per asset class; a figure is a number, a text, or the absent form {absent, kind}, and an asset-class entry the household holds none of is the text UNHELD (document.unheld_rule); a household-grain member holds its figure or its absent form directly, never a by_row map",
++      "per_row_member_form": "a member whose grain is an account (the account value summaries, the activity account rows, the realized-lot members and the account gain-loss review) or an asset class (hold.allocation) holds {\"by_row\": {\"<account_id or asset class>\": figure}}, with one key per account of the household or per asset class; a figure is a number, a text, or the absent form {absent, kind}, and an asset-class entry the household holds none of is the text UNHELD (document.unheld_rule); a household-grain member holds its figure or its absent form directly, never a by_row map; an account key of a by_row map is the minted account_id",
+       "window_status_rule": "for each of the four windows (qtd, ytd, last_12_months, since_inception), with the window's opening anchor day (for since_inception, the account's first_data_date): NOT_SPANNED when the account has no account_return_daily row on the opening anchor day; BREAK when the opening anchor day is SOURCE_LAG, or when a day inside the window (after the anchor, up to and including as_of) has no row, a SOURCE_LAG row, a null total_return_daily or a GRADED_DISAGREED guard_state; else MEASURED, read from the account return table",
+-      "first_data_date_rule": "an account's first_data_date is the business_date of its first row in the account return table, across every date= partition; the household's first_data_date is the earliest of its accounts' first_data_date values"
++      "first_data_date_rule": "an account's first_data_date is the business_date of its first row in the account return table, across every date= partition; the household's first_data_date is the earliest of its accounts' first_data_date values",
++      "account_id_form_rule": "account_id is the issued opaque (minted) id, ids.opaque_account(firm, custodian account id), the form of the client summary contract; account_id_form is the text minted on every account entry so a consumer rejects a custodian-form id by field; no custodian-form id leaves the function; the gold table's row_key keeps the custodian form and the reader mints it; the accounts are ascending by account_id (the minted id)"
+     },
+     "row_dimensions": {
+       "account": {
+-        "order": "the household's accounts in account_id order; one row per account, labelled with its registration name and last four digits (the registration name is absent, so the label carries the absent form until a name source exists)",
++        "order": "the household's accounts in ascending account_id (the minted id) order; one row per account, labelled with its registration name and last four digits (the registration name is absent, so the label carries the absent form until a name source exists)",
+         "sources": {
+-          "account_id": "account_activity_daily account_id (custodian account form)"
++          "account_id": "the issued opaque (minted) id, ids.opaque_account(firm, custodian account id) (the form of IRPT_DASHBD_CLIENT_SUMMARY_CONTRACT account_id); the account_activity_daily custodian form is minted by the reader"
+         },
+         "grain": "account"
+       },

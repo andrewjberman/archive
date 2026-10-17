@@ -311,7 +311,7 @@ def test_fwd5_control_run_mode_unchanged_writes_run_report_without_mode(tmp_path
     with Fake(routes_answer({})) as fake:
         rc = drv.main(["--go", "IRPT_ANLREQ.TO-RUN-FWD5.run1", "--base", fake.base, "--email", EMAIL,
                        "--ticket", TICKET, "--firm-a", FIRM_A, "--firm-b", FIRM_B, "--request-id", REQ,
-                       "--job-id", JOB, "--out", str(tmp_path / "out")],
+                       "--job-id", JOB, "--report-id", REQ, "--export-id", REQ, "--out", str(tmp_path / "out")],
                       stdin=io.StringIO(json.dumps({"password": PASSWORD})))
     out = str(tmp_path / "out")
     with open(os.path.join(out, RUN_REPORT), encoding="utf-8") as fh:

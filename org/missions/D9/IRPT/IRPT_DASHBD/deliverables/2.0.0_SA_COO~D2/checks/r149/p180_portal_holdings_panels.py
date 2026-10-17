@@ -34,7 +34,7 @@ BASE = "355b3bf85fd2e565ae121c5be6562668a9c94072"
 TAB = IR + "tabs/reporting/ReportingTab.tsx"
 PANELS = IR + "tabs/reporting/PerformanceHoldingsPanels.tsx"
 TESTS = IR + "__tests__/irpt-dashbd/"
-ALLOWED_EXACT = {TAB, PANELS}
+ALLOWED_EXACT = {TAB, PANELS, IR + "__tests__/fe-s-10/parity.test.ts"}  # AMENDMENT 2 (DB-b-316): the parity fixture
 PROBE = TESTS + "_p180_probe.test.tsx"
 WORDS = ["Largest positions", "Loading this client's holdings.", "This client's holdings could not be loaded.",
          "Allocation over time is not published for this client yet.", "Attribution is not published for this client yet.",
@@ -53,13 +53,13 @@ def check_diff(root):
     p175.need(rc == 0, "cannot diff against %s" % BASE[:8])
     changed = {x for x in out.splitlines() if x.strip()}
     p175.need(changed, "nothing changed since the DB-b-309 head")
-    extra = [f for f in changed if f not in ALLOWED_EXACT and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith("performance-holdings-panels"))]
+    extra = [f for f in changed if f not in ALLOWED_EXACT and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith(("performance-holdings-panels", "performance-template-firm-gate")))]
     p175.need(not extra, "portal files outside the agreed write set changed: %s" % extra[:4])
     p175.need(PANELS in changed and TAB in changed, "the new component and the one mount must both be in the diff")
     p175.need(any(f.startswith(TESTS + "performance-holdings-panels") for f in changed), "no test file named performance-holdings-panels* in the diff")
     stat, _ = p175.git(p, "diff", "--numstat", BASE, "HEAD", "--", TAB)
     nums = stat.split()
-    p175.need(len(nums) >= 2 and nums[0].isdigit() and int(nums[0]) + int(nums[1]) <= 12, "ReportingTab.tsx may change only by the one mount and its import (at most 12 lines): %s" % stat.strip())
+    p175.need(len(nums) >= 2 and nums[0].isdigit() and int(nums[0]) + int(nums[1]) <= 28, "ReportingTab.tsx may change only by the panels mount and the client-firm gate (at most 28 lines against 355b3bf8, the gate rewrite included): %s" % stat.strip())
     t = lambda f: (p / f).read_text(encoding="utf-8")  # noqa: E731
     tab, panels = t(TAB), t(PANELS)
     p175.need(tab.count("<PerformanceHoldingsPanels") == 1 and "PerformanceHoldingsPanels" in tab.split("export")[0] + tab, "ReportingTab.tsx must mount <PerformanceHoldingsPanels once")
@@ -97,6 +97,13 @@ describe('p180 probe', () => {
   test('loading and failed are worded, never an empty node', () => {
     expect(text(render(null, false))).toContain("Loading this client's holdings.")
     expect(text(render(null, true))).toContain("This client's holdings could not be loaded.")
+  })
+  test('a snapshot without a nodes array never throws: the worded state shows (page owner msg 10063)', () => {
+    for (const odd of [{}, { nodes: null }, { classTotals: [] }] as never[]) {
+      const t = text(render(odd, false))
+      expect(t.length).toBeGreaterThan(20)
+      expect(t).toContain("This client's holdings could not be loaded.")
+    }
   })
   test('a served snapshot shows the allocation by asset class and Largest positions', () => {
     const t = text(render(served, false))

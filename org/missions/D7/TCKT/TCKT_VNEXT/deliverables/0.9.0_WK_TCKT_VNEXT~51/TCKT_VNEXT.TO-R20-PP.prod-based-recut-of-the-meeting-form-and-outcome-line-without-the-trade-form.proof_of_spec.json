@@ -1,0 +1,164 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R20-PP",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R20-PP.prod-based-recut-of-the-meeting-form-and-outcome-line-without-the-trade-form.md",
+  "group": "OTHER",
+  "vintage_commit": "a386e81440"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~51",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R20.md",
+  "vintage_commit": "a386e81440",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R20-PP.prod-based-recut-of-the-meeting-form-and-outcome-line-without-the-trade-form.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/api/endpoints/tickets.ts",
+   "kind": "frontend_component",
+   "commit_or_etag": "e5c8e07569aa090b29b7a31c363f68246ce41821",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "portal worktree branch wk-TCKT_VNEXT-51-portal, LOCAL, not pushed, not merged to DEV, not deployed; meeting types, recordMeetingOutcome and the meeting member only; no Trade Request line (grep of added lines empty for trade upload tokens)",
+   "artifact_covered_by": ["R20PP-AC1", "R20PP-AC2", "R20PP-AC3"]
+  },
+  {
+   "path_or_key": "portal/src/pages/TicketCenter/MeetingRequestParts.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "4e1e35bfa0826bbf07971b4cc0bad76ff79edc9d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "portal branch wk-TCKT_VNEXT-51-portal, LOCAL, not pushed; adds exported showsMeetingOutcome and viewerIsCoordinator (8e4f0885 applied as it is)",
+   "artifact_covered_by": ["R20PP-AC1", "R20PP-AC2", "R20PP-AC3", "R20PP-AC4J"]
+  },
+  {
+   "path_or_key": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "4e1e35bfa0826bbf07971b4cc0bad76ff79edc9d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "portal branch wk-TCKT_VNEXT-51-portal, LOCAL, not pushed; the one conflict resolved on the four points: TradeRequestForm import alone, meeting imports, PROD AnalysisDraftAndPackage row kept with AnalysisPackageRow not pulled, meeting row on showsMeetingOutcome(t) with controls behind internal && viewerIsCoordinator(t, auth.user?.email)",
+   "artifact_covered_by": ["R20PP-AC1", "R20PP-AC2", "R20PP-AC3", "R20PP-AC4J"]
+  },
+  {
+   "path_or_key": "portal/src/pages/TicketCenter/__tests__/meeting-outcome-visibility.test.tsx",
+   "kind": "test",
+   "commit_or_etag": "4e1e35bfa0826bbf07971b4cc0bad76ff79edc9d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new file from 8e4f0885 as it is (224 lines); mocks only modules present on the PROD base; part of the 24 passing tests across the two meeting files",
+   "artifact_covered_by": ["R20PP-AC2"]
+  },
+  {
+   "path_or_key": "portal/src/pages/TicketCenter/__tests__/meeting-request.test.tsx",
+   "kind": "test",
+   "commit_or_etag": "4e1e35bfa0826bbf07971b4cc0bad76ff79edc9d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "from 12c164a0 (new file) with the 8e4f0885 fixture line (useAuth carries user { email: COORDINATOR }); part of the 24 passing tests across the two meeting files",
+   "artifact_covered_by": ["R20PP-AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~51/R20_PP_RECORD.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the two pick shas and their -x origins, the four resolution lines, the diff stat against the PROD base (5 files, 1033 insertions, 7 deletions), the test counts base vs after, the tsc result, the not_read list; nothing pushed or deployed"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R20PP-AC1",
+   "criterion_verbatim": "the committed diff against the PROD base is the five meeting files only, with no Trade Request upload code and no `AnalysisPackageRow` in an added line.",
+   "method": "command",
+   "invocation": "python C:/dev/wk-tckt-vnext-51/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_pp_checks.py prod-diff --portal C:/dev/wk-tckt-vnext-51/portal --base fa21a303d87271a1e2d60c514d13501d71f9f020",
+   "output_evidence": "R20-PP-DIFF-OK 5 files (rc=0, run under timeout 120). Corroborating greps on the same diff: added lines with TradeFormOpen, AnalysisPackageRow, upload or trade-form: 0; TradeFormOpen occurrences in the diff: 0; trade-form-upload.test.tsx in HEAD tree: 0.",
+   "denominator": "5 files in the committed diff, of the 5 the order allows; 0 forbidden files; 0 added lines carrying an upload, TradeFormOpen or AnalysisPackageRow token",
+   "status": "PASS",
+   "expect": "^R20-PP-DIFF-OK"
+  },
+  {
+   "criterion_id": "R20PP-AC2",
+   "criterion_verbatim": "`bun test` of `meeting-request.test.tsx` and `meeting-outcome-visibility.test.tsx` passes with no failure.",
+   "method": "test_suite",
+   "invocation": "python C:/dev/wk-tckt-vnext-51/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_pp_checks.py prod-tests --portal C:/dev/wk-tckt-vnext-51/portal",
+   "output_evidence": "R20-PP-TESTS-OK pass=24 (rc=0, run under timeout 120). Direct run, same tree: timeout 120 bun test src/pages/TicketCenter/__tests__/meeting-request.test.tsx src/pages/TicketCenter/__tests__/meeting-outcome-visibility.test.tsx -> ' 24 pass', ' 0 fail', 'Ran 24 tests across 2 files'. Folder run: timeout 120 bun test src/pages/TicketCenter -> ' 152 pass', ' 0 fail', 'Ran 152 tests across 26 files' (base: 128 pass, 0 fail, 24 files).",
+   "denominator": "24 of 24 tests pass across the two named files; 0 of 24 fail. Folder: 152 of 152 pass across 26 files; 0 fail",
+   "status": "PASS",
+   "expect": "^R20-PP-TESTS-OK"
+  },
+  {
+   "criterion_id": "R20PP-AC3",
+   "criterion_verbatim": "the portal typechecks (`tsc -b`).",
+   "method": "command",
+   "invocation": "python C:/dev/wk-tckt-vnext-51/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_checks.py portal-tsc --portal C:/dev/wk-tckt-vnext-51/portal",
+   "output_evidence": "R20-TSC-OK (rc=0, run under timeout 120). Direct run: timeout 120 bun x tsc -b in the portal worktree -> rc 0, no output lines.",
+   "denominator": "1 of 1 tsc -b runs exits 0; 0 diagnostics printed",
+   "status": "PASS",
+   "expect": "^R20-TSC-OK"
+  },
+  {
+   "criterion_id": "R20PP-AC4J",
+   "criterion_verbatim": "R20PP-AC4J (judgment, graded at L9, never by the worker): the resolution of `TicketCenter.tsx` is the CTO's four points; the meeting row shows on `showsMeetingOutcome(t)` and the controls only for a viewer in `routing.primary`; no Trade Request code reached the branch, hidden or not.",
+   "method": "manual_read_with_citation",
+   "invocation": "none: judgment criterion, output carried and no verdict. Read: git -C C:/dev/wk-tckt-vnext-51/portal show 4e1e35bfa0826bbf07971b4cc0bad76ff79edc9d -- src/pages/TicketCenter/TicketCenter.tsx ; and grep -n -E 'showsMeetingOutcome|viewerIsCoordinator|AnalysisDraftAndPackage|AnalysisPackageRow|TradeFormOpen' on the same file at HEAD",
+   "output_evidence": "HEAD TicketCenter.tsx: line 90-92 import showsMeetingOutcome, viewerIsCoordinator; line 910 '{showsMeetingOutcome(t) && ('; line 914 '{internal && viewerIsCoordinator(t, auth.user?.email) && ('; the PROD AnalysisDraftAndPackage row remains; grep for AnalysisPackageRow and TradeFormOpen: no match in TicketCenter.tsx. MeetingRequestParts.tsx: 'return ticket.status !== 'completed' || Boolean(ticket.meeting)'; 'return primary.some(p => p.trim().toLowerCase() === who)'. Diff against the PROD base: TradeFormOpen 0 occurrences.",
+   "denominator": "4 of 4 CTO resolution points observed in the file (import alone, meeting imports, AnalysisDraftAndPackage kept with AnalysisPackageRow absent, row condition and controls condition); 0 Trade Request tokens in the diff",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment criterion: the substitute oracle is the CVO adjudication at L9 by 3.0.0_SA_CVO, who grades the resolution and the no-Trade-Request reading from the output carried above; the worker records output and no verdict",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the spec names no mutant for this order; the three mechanical criteria are a diff check, a test run and a typecheck",
+   "expected": "N/A-SPEC-NAMES-NONE",
+   "observed": "no mutant run; the diff check (AC1) would fire on any added Trade Request or AnalysisPackageRow line, and no such line exists",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "two same-input runs of timeout 120 bun test on the two meeting files, the pass and fail summary lines compared",
+   "observed": "run 1: 24 pass, 0 fail, 24 tests across 2 files; run 2: 24 pass, 0 fail, 24 tests across 2 files",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the rendered page, in a browser or as a screenshot",
+   "reason": "the order forbids a dev server against the live API and any live call; R20PP-AC4J is read from the diff and the file only, and the issuer's later read renders the DEV build"
+  },
+  {
+   "item": "any push, DEV merge, promote or deploy",
+   "reason": "the order's bounds: the worker builds on a LOCAL candidate branch only; registration and the DEV render belong to the issuer"
+  },
+  {
+   "item": "portal/src/pages/TicketCenter/TradeRequestParts.tsx and the body of c05e3dda",
+   "reason": "READ-only grant; the order excludes every Trade Request file, and c05e3dda is not cherry-picked (existence checked, body not read)"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~51/TCKT_VNEXT.TO-R20-PP.prod-based-recut-of-the-meeting-form-and-outcome-line-without-the-trade-form.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-51/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_pp_checks.py prod-diff --portal C:/dev/wk-tckt-vnext-51/portal --base fa21a303d87271a1e2d60c514d13501d71f9f020",
+   "result": "R20-PP-DIFF-OK 5 files rc=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-51/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_pp_checks.py prod-tests --portal C:/dev/wk-tckt-vnext-51/portal",
+   "result": "R20-PP-TESTS-OK pass=24 rc=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python C:/dev/wk-tckt-vnext-51/org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_checks.py portal-tsc --portal C:/dev/wk-tckt-vnext-51/portal",
+   "result": "R20-TSC-OK rc=0"
+  },
+  {
+   "tool": "bun",
+   "invocation": "timeout 120 bun test src/pages/TicketCenter (portal worktree)",
+   "result": "152 pass, 0 fail, 152 tests across 26 files, rc 0"
+  },
+  {
+   "tool": "bun",
+   "invocation": "timeout 120 bun x tsc -b (portal worktree)",
+   "result": "rc 0, no output"
+  }
+ ]
+}
