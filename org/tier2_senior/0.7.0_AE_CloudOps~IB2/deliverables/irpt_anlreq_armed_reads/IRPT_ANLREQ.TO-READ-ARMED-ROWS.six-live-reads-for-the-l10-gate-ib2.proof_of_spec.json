@@ -1,0 +1,74 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "to_id": "IRPT_ANLREQ.TO-READ-ARMED-ROWS.six-live-reads-for-the-l10-gate-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-ARMED-ROWS.six-live-reads-for-the-l10-gate-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "c72d94f8a5"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-ARMED-ROWS.six-live-reads-for-the-l10-gate-ib2.md",
+  "vintage_commit": "c72d94f8a5"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_armed_reads/A_ARMED_READS.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the eight lines of step 8; six live read-only reads, nothing written in AWS",
+   "artifact_covered_by": [
+    "ARR-AC1",
+    "ARR-AC2"
+   ],
+   "commit_or_etag": "0679f4c02d"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "ARR-AC1",
+   "invocation": "grep -c -E '^(R1|R2|R3a|R3b|R4|R5|R6) (queue=|owners_with_home_firm_id_nonglobal=|irpt-status acceptance.py=|irpt-ycharts-generate pandas_market_calendars=|drafter state=|directory_map_keys=|ticket_dl_map=|DENIED |NOT-RUN |NAME-NOT-FOUND |ERROR )|^READS-DONE [0-9]+ of 7 answered$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_armed_reads/A_ARMED_READS.txt",
+   "expect": "^8$",
+   "output_evidence": "8\nexit=0",
+   "denominator": "7 read lines + 1 closing line",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R1|R2|R3a|R3b|R4|R5|R6) (queue=|owners_with_home_firm_id_nonglobal=|irpt-status acceptance.py=|irpt-ycharts-generate pandas_market_calendars=|drafter state=|directory_map_keys=|ticket_dl_map=|DENIED |NOT-RUN |NAME-NOT-FOUND |ERROR )|^READS-DONE [0-9]+ of 7 answered$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_armed_reads/A_ARMED_READS.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "ARR-AC2",
+   "invocation": "grep -c -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|arn:aws:s3:::|AKIA[0-9A-Z]{12,}|opal-data-[a-z0-9-]+' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_armed_reads/A_ARMED_READS.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1 (grep -c prints 0 and exits 1 on no match)",
+   "denominator": "8 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|arn:aws:s3:::|AKIA[0-9A-Z]{12,}|opal-data-[a-z0-9-]+' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_armed_reads/A_ARMED_READS.txt",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "six live reads, once each; the leak regex was run inside the script before each line was kept and again as ARR-AC2",
+   "observed": "7 of 7 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_armed_reads/A_ARMED_READS.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 read calls (sqs get-queue-attributes, dynamodb scan COUNT, lambda get-function and get-function-configuration, list-event-source-mappings)",
+   "invocation": "one script, once each",
+   "result": "ARR-AC1 8, ARR-AC2 0"
+  }
+ ]
+}
