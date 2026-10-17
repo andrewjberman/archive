@@ -1,0 +1,19 @@
+OG-en-26 worker session, serial 0.9.0_WK_NFRA_OPLGTW~141, worktree C:/tmp/wk-oplgtw-141, branch wk-NFRA_OPLGTW-141
+
+1. TREE-OK: branch wk-NFRA_OPLGTW-141; org/ and .tools/ present.
+2. Baseline, before the edit: seven-file set (rv2, gt6, cl2, en22, en23, en24, en25) 29 passed.
+3. Edits: app/typed_scope.py (read_parquet, distinct_values, footer estimate, batch streaming, length_columns);
+   app/etfs_rivals_flow.py (length_columns passed through _read_part, _read_dates, _peer_section); tests/test_og_en26.py.
+4. Seven-file set after the edit: 29 passed. commit-gate: 3 of 3 clean.
+5. Golden comparison, base (git archive of 8c9ab74515) against new, same synthetic 60 000-row part with a 4 096-row group
+   layout and a string lineage column and a list-typed one, peer tool for IDVZ and PFOE over five period/axis pairs:
+   outputs byte-identical (cmp), both variants.
+6. Test shape measured: distinct_values fresh-process peak at 400 000 rows / 50 000-row groups was 3 871 360 bytes
+   against a 5 percent bound of 2 665 552 (fails); at 800 000 rows, 60-byte label, 4 096-row groups the peak is
+   1 508 608 bytes against 58 470 991 uncompressed (passes). Row S1 records the row-group dependence.
+7. AC01 mutant (base typed_scope.py under the new test file): the first AC01 did not spy pq.read_table and passed on
+   the base code; the spy was added (commit 14717cdeeb) and the mutant then fails with ['read_table'].
+8. Regression set, 15 other typed-reader files: 117 passed, 2 failed (test_og_gt8 AC03, test_og_ch1 AC04); both
+   also fail on the base extract. Row S2.
+9. AC1, AC2, AC3 on the committed tree: PASS (3 of 3; 4 files touched, 0 outside; 32 forward and 32 reverse).
+10. Determinism: two runs of test_ogen26_ac02 and test_ogen26_ac03 with -s printed identical fresh-process peaks.
