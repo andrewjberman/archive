@@ -1,0 +1,1266 @@
+# =============================================================================
+# Inf Pipeline — IAM
+#
+# Cross-bucket isolation: no inf-* role is granted access to opal-data-bd.
+# otp/* scoped to inf-exporter role only (write/read) — enforced in W2.4.
+# =============================================================================
+
+# =============================================================================
+# 0. OTP relay — Andrew write policy on opal-data-inf/otp/ (W2.5)
+#    Andrew (arn:aws:iam::313476888478:user/Andrew_Berman) writes OTP via CLI.
+#    inf-exporter (W2.4) reads + deletes the key. Timeout convention:
+#      exporter writes "FAILED_OTP_TIMEOUT" to otp/status.txt on 5-min timeout.
+# =============================================================================
+
+resource "aws_iam_policy" "andrew_otp_write" {
+  name        = "inf-andrew-otp-write"
+  description = "Allows Andrew to write OTP to opal-data-inf/otp/ for inf-exporter relay"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "OTPRelay"
+      Effect = "Allow"
+      Action = [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ]
+      Resource = "arn:aws:s3:::opal-data-inf/otp/*"
+    }]
+  })
+}
+
+resource "aws_iam_user_policy_attachment" "andrew_otp_write" {
+  user       = "Andrew_Berman"
+  policy_arn = aws_iam_policy.andrew_otp_write.arn
+}
+
+# =============================================================================
+# YALP_MDSRC.006: ycharts/credentials read grant for the YALP_MDSRC.007 runner
+# The .007 live-session capability test runs as a local workstation script
+# under the workstation AWS identity = IAM user Andrew_Berman (confirmed by
+# 0.1.0_DS_MarketIntelligence via sts get-caller-identity). Least-privilege:
+# secretsmanager:GetSecretValue ONLY, resource-scoped to exactly the
+# ycharts/credentials secret ARN. Mirrors the OrionCredentialsRead grant shape.
+# Test-scoped -- remove with the secret when a dedicated automation seat is
+# provisioned (v0.3 follow-up).
+# =============================================================================
+resource "aws_iam_policy" "ycharts_credentials_read" {
+  name        = "ycharts-credentials-read"
+  description = "GetSecretValue on ycharts/credentials for the YALP_MDSRC.007 live-session test runner"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "YchartsCredentialsRead"
+      Effect   = "Allow"
+      Action   = ["secretsmanager:GetSecretValue"]
+      Resource = ["arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:ycharts/credentials-*"]
+    }]
+  })
+}
+
+resource "aws_iam_user_policy_attachment" "ycharts_credentials_read" {
+  user       = "Andrew_Berman"
+  policy_arn = aws_iam_policy.ycharts_credentials_read.arn
+}
+
+# =============================================================================
+# 1. inf-gold-layer EC2 role + instance profile (W2.1)
+#    Used by: inf-gold-layer-runner EC2
+# =============================================================================
+
+resource "aws_iam_role" "inf_gold_layer" {
+  name = "inf-gold-layer-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-gold-layer-ec2-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_instance_profile" "inf_gold_layer" {
+  name = "inf-gold-layer-profile"
+  role = aws_iam_role.inf_gold_layer.name
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_s3" {
+  name = "s3-scoped-inf"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "InfDataBucket"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:HeadObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::opal-data-inf",
+          "arn:aws:s3:::opal-data-inf/*"
+        ]
+      }
+    ]
+  })
+}
+
+# =============================================================================
+# 1a. Scope account feed -- PutObject and GetObject on the two feed prefixes of
+#     the assets bucket, ListBucket under an s3:prefix condition (IB-pr-603).
+#     The grant is the signed packet's (NEVER_WIDEN_SIGNOFF_PACKET_SCOPE_FEED_IAM_PAIR,
+#     deliverables/2.0.0_SA_COO~P2): this block changes the spelling, never the grant.
+#     The policy name comes from the opal_name module (orion, inflection, scope-account-feed,
+#     policy). Every source, scope, bucket and key prefix is read from infra/logic/registry.
+#     The table name is the one value not read from the registry (it has no registry row).
+#     The prefixes equal lib/opal_naming.py address() output for the bronze and silver layers.
+# =============================================================================
+
+module "scope_feed_policy_name" {
+  source   = "../modules/opal_name"
+  system   = "orion"
+  scope    = "inflection"
+  function = "scope-account-feed"
+  kind     = "policy"
+}
+
+locals {
+  scope_feed_systems = { for r in jsondecode(file("${path.module}/../../../logic/registry/systems.json")).systems : r.key => r }
+  scope_feed_scopes  = { for r in jsondecode(file("${path.module}/../../../logic/registry/scopes.json")).scopes : r.key => r }
+  scope_feed_tiers   = { for t, h in jsondecode(file("${path.module}/../../../logic/registry/tiers.json")).homes.FIRM : t => h }
+
+  scope_feed_source = lookup(local.scope_feed_systems, "orion").key
+  scope_feed_scope  = lookup(local.scope_feed_scopes, "inflection").long
+  scope_feed_table  = "scope_account_returns"
+
+  # the bucket of each layer: the FIRM tier home (tiers.json, doctrine R4: bronze and silver share one home)
+  scope_feed_layers = {
+    bronze = lookup(local.scope_feed_tiers, "bronze").bucket
+    silver = lookup(local.scope_feed_tiers, "silver").bucket
+  }
+  scope_feed_keys = {
+    for tier, bucket in local.scope_feed_layers : tier => "${local.scope_feed_source}/${local.scope_feed_scope}/${tier}/${local.scope_feed_table}"
+  }
+  scope_feed_object_arns = [
+    for tier, bucket in local.scope_feed_layers : "arn:aws:s3:::${bucket}/${local.scope_feed_keys[tier]}/*"
+  ]
+  scope_feed_list_prefixes = [
+    for tier, key in local.scope_feed_keys : "${key}/*"
+  ]
+  scope_feed_list_bucket_arns = distinct([
+    for tier, bucket in local.scope_feed_layers : "arn:aws:s3:::${bucket}"
+  ])
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_scope_feed" {
+  name = module.scope_feed_policy_name.name
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "S1PutAndReadScopeFeedKeysOnly"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject"]
+        Resource = local.scope_feed_object_arns
+      },
+      {
+        Sid      = "S2ListScopeFeedPrefixesOnly"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = local.scope_feed_list_bucket_arns
+        Condition = {
+          StringLike = { "s3:prefix" = local.scope_feed_list_prefixes }
+        }
+      }
+    ]
+  })
+}
+
+# =============================================================================
+# 1b. Inflection account_transaction gold step -- the runner's scoped policy
+#     (IRPT_DASHBD round 137, workstream F2INFIAM, order TO-DB-f-2501, cell DB-f-2501;
+#     CTO cross-adjudication XA-20261017T005839Z-a222, RULED yes, msg 10119).
+#     S1 Get and S2 List read ONE Orion silver fact_transactions prefix (the resource
+#     ends at that prefix's children; the List is conditioned on s3:prefix). S3 Put writes
+#     the one Inflection gold account_transaction prefix. Every bucket, scope, source and
+#     key is read from infra/logic/registry by the scope-feed locals above, or built from
+#     the two table names; the policy name comes from the opal_name module. Pure insertion:
+#     no existing policy, statement or role changed. Nothing is planned or applied here.
+# =============================================================================
+
+module "account_transaction_policy_name" {
+  source   = "../modules/opal_name"
+  system   = "orion"
+  scope    = "inflection"
+  function = "account-transaction"
+  kind     = "policy"
+}
+
+locals {
+  txn_silver_bucket        = lookup(local.scope_feed_tiers, "silver").bucket
+  txn_silver_key           = "${local.scope_feed_source}/${local.scope_feed_scope}/silver/fact_transactions"
+  txn_silver_bucket_arn    = "arn:aws:s3:::${local.txn_silver_bucket}"
+  txn_silver_object_arns   = ["arn:aws:s3:::${local.txn_silver_bucket}/${local.txn_silver_key}/*"]
+  txn_silver_list_prefixes = [local.txn_silver_key, "${local.txn_silver_key}/*"]
+
+  txn_gold_bucket       = lookup(local.scope_feed_scopes, "inflection").bucket
+  txn_gold_key          = "irpt/${local.scope_feed_scope}/gold/account_transaction"
+  txn_gold_object_arns  = ["arn:aws:s3:::${local.txn_gold_bucket}/${local.txn_gold_key}/*"]
+  txn_gold_bucket_arn     = "arn:aws:s3:::${local.txn_gold_bucket}"
+  txn_gold_list_prefixes  = [local.txn_gold_key, "${local.txn_gold_key}/*"]
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_account_transaction" {
+  name = module.account_transaction_policy_name.name
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "S1ReadOrionInflectionTransactionsSilverOnly"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = local.txn_silver_object_arns
+      },
+      {
+        Sid      = "S2ListOrionInflectionTransactionsSilverOnly"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = [local.txn_silver_bucket_arn]
+        Condition = {
+          StringLike = { "s3:prefix" = local.txn_silver_list_prefixes }
+        }
+      },
+      {
+        Sid      = "S4ListInflectionAccountTransactionGoldOnly"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = [local.txn_gold_bucket_arn]
+        Condition = {
+          StringLike = { "s3:prefix" = local.txn_gold_list_prefixes }
+        }
+      },
+      {
+        Sid      = "S3PutInflectionAccountTransactionGoldOnly"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = local.txn_gold_object_arns
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_runner_shared" {
+  name = "runner-shared-read"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        # Read-only access to cross-pipeline shared runner code
+        # (gold_prof.py telemetry profiler + opal-telemetry.sh suite).
+        # Bucket created in shared-infra (2026-05-13, opal-runner-shared).
+        # See infra/aws/ec2/inf-gold-layer-runner/run-gold-layer.sh for consumer.
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::opal-runner-shared",
+          "arn:aws:s3:::opal-runner-shared/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_ssm" {
+  name = "ssm-access"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:DescribeParameters",
+        "ssmmessages:CreateControlChannel",
+        "ssmmessages:CreateDataChannel",
+        "ssmmessages:OpenControlChannel",
+        "ssmmessages:OpenDataChannel",
+        "ec2messages:AcknowledgeMessage",
+        "ec2messages:DeleteMessage",
+        "ec2messages:FailMessage",
+        "ec2messages:GetEndpoint",
+        "ec2messages:GetMessages",
+        "ec2messages:SendReply"
+      ]
+      Resource = "*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_cw" {
+  name = "cloudwatch-logs"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+      ]
+      Resource = "arn:aws:logs:us-east-1:${local.account_id}:log-group:/inf-pipeline/*"
+    }]
+  })
+}
+
+# ADVI_INFALM.001: gold-chain hard-fail metric emit.
+# orion-gold-dispatch.sh emits Inflection/GoldChain.ChainFailed (0/1) at the
+# end of each production chain run. Namespace-scoped per least-privilege --
+# the runner may publish to no other CloudWatch namespace. Mirrors the
+# mdpf-pipeline ChainFailedMetric statement (MDPF/DailyChain).
+resource "aws_iam_role_policy" "inf_gold_layer_cw_metric" {
+  name = "cloudwatch-put-metric"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "ChainFailedMetric"
+      Effect   = "Allow"
+      Action   = "cloudwatch:PutMetricData"
+      Resource = "*"
+      Condition = {
+        StringEquals = { "cloudwatch:namespace" = "Inflection/GoldChain" }
+      }
+    }]
+  })
+}
+
+# WS-5 (2026-07-06, CTO/COO): close the runner sns:Publish IAM hole. The dispatch
+# (orion-gold-dispatch.sh BRONZE-FIX #7 fatal_alert) publishes a ChainFATAL to
+# ALERT_SNS_TOPIC (default opal-critical-surface-alerts) but had NO sns:Publish
+# grant -> "sns publish failed/denied" -> it fell back to the CW-metric floor only
+# (silently degraded alerting -- sibling of the BD sentinel-PutObject gap). Grant
+# Publish to the current default target AND the unified partner-ETL ops topic
+# (opal-partner-etl-ops-alerts, 0.6.2-owned) so a re-point of ALERT_SNS_TOPIC to
+# the ops channel also delivers -- direct ChainFATAL SNS now works alongside the
+# CW-metric alarm path (defense-in-depth on the loud channel).
+resource "aws_iam_role_policy" "inf_gold_layer_sns_publish" {
+  name = "sns-publish-chainfatal"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "PublishChainFatalAlert"
+      Effect = "Allow"
+      Action = "sns:Publish"
+      Resource = [
+        "arn:aws:sns:${local.region}:${local.account_id}:opal-critical-surface-alerts",
+        "arn:aws:sns:${local.region}:${local.account_id}:opal-partner-etl-ops-alerts",
+      ]
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_kms" {
+  name = "kms-ebs-decrypt"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey",
+        "kms:DescribeKey"
+      ]
+      Resource = aws_kms_key.inf_ebs.arn
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_ec2_stop" {
+  name = "self-stop"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ec2:StopInstances"]
+      Resource = "*"
+      Condition = {
+        StringEquals = {
+          "ec2:ResourceTag/System" = "InflectionPipeline"
+        }
+      }
+    }]
+  })
+}
+
+# P2 audit follow-up to bd commit 7be2726db: orion-gold-dispatch.sh queries the
+# instance's own Tier tag via ec2:DescribeTags to skip Layer 1 self-shutdown
+# when Tier=qa. Without this permission the call fails silently and L1 fires
+# regardless of tag — observed 2026-05-04T20:03:44Z on bd-gold-qa-runner.
+# Same mechanism applies to inf gold runners. DescribeTags is a list API and
+# does not support resource-level conditions, so Resource=*. Read-only on
+# infra metadata; symmetric with the StopInstances tag-conditioned perm above.
+resource "aws_iam_role_policy" "inf_gold_layer_describe_tags" {
+  name = "describe-tags-self"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "AllowDescribeTagsForSelfTierLookup"
+      Effect   = "Allow"
+      Action   = ["ec2:DescribeTags"]
+      Resource = "*"
+    }]
+  })
+}
+
+# AmazonSSMManagedInstanceCore for SSM agent
+resource "aws_iam_role_policy_attachment" "inf_gold_layer_ssm_core" {
+  role       = aws_iam_role.inf_gold_layer.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# ADHC_CDNCOHT.001-INTERIM: post-chain CloudFront invalidation on portal-auth
+# distribution EVTSA9VEHNZVH. orion-gold-dispatch.sh fires a path-scoped
+# create-invalidation after successful gold-emit + sentinel write so refreshed
+# platinum artifacts under /api/scoped/advisor-intelligence/* propagate through
+# CloudFront within seconds instead of waiting for max-age expiry (anchor:
+# 2026-05-14 ~19:4XZ NNA bell-curve 18hr-staleness incident). Layer-2 immediate
+# fix; structural class-eliminator is TO-001 L@E extension (AE 0.7 lane).
+resource "aws_iam_role_policy" "inf_gold_layer_cloudfront_invalidate" {
+  name = "cloudfront-invalidate"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "InvalidatePortalAuthCacheOnPlatinumEmit"
+      Effect   = "Allow"
+      Action   = "cloudfront:CreateInvalidation"
+      Resource = "arn:aws:cloudfront::${local.account_id}:distribution/EVTSA9VEHNZVH"
+    }]
+  })
+}
+
+# =============================================================================
+# 2. inf-gold-layer Lambda role (W2.3)
+#    Used by: inf-portal-publisher, inf-portal-advisor-publisher, inf-client-detail
+# =============================================================================
+
+resource "aws_iam_role" "inf_gold_layer_lambda" {
+  name = "inf-gold-layer-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-gold-layer-lambda-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_lambda_s3" {
+  name = "inf-s3-scoped"
+  role = aws_iam_role.inf_gold_layer_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::opal-data-inf/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = "arn:aws:s3:::opal-data-inf"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_gold_layer_lambda_basic" {
+  role       = aws_iam_role.inf_gold_layer_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# =============================================================================
+# 3. inf-gold-trigger Lambda role (W2.2)
+#    Used by: inf-gold-trigger Lambda — starts inf-gold-layer-runner EC2
+# =============================================================================
+
+resource "aws_iam_role" "inf_gold_trigger" {
+  name = "inf-gold-trigger-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-gold-trigger-lambda-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_gold_trigger_policy" {
+  name = "inf-gold-trigger-policy"
+  role = aws_iam_role.inf_gold_trigger.id
+
+  # ADHC_TRIGMRK.001 Path 2: S3 marker perms removed; SSM + dispatch-lock added.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "EC2Control"
+        Effect = "Allow"
+        Action = [
+          "ec2:StartInstances",
+          "ec2:StopInstances",
+          "ec2:DescribeInstances"
+        ]
+        Resource = "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_gold_layer_runner.id}"
+      },
+      {
+        Sid      = "DescribeInstancesGlobal"
+        Effect   = "Allow"
+        Action   = "ec2:DescribeInstances"
+        Resource = "*"
+      },
+      {
+        Sid    = "SSMDispatch"
+        Effect = "Allow"
+        Action = ["ssm:SendCommand"]
+        Resource = [
+          "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_gold_layer_runner.id}",
+          "arn:aws:ssm:${local.region}::document/AWS-RunShellScript",
+        ]
+      },
+      {
+        Sid      = "SSMAgentPoll"
+        Effect   = "Allow"
+        Action   = ["ssm:DescribeInstanceInformation"]
+        Resource = "*"
+      },
+      {
+        Sid      = "SSMLastModeParam"
+        Effect   = "Allow"
+        Action   = ["ssm:PutParameter"]
+        Resource = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/inf/gold/last-trigger-mode"
+      },
+      {
+        Sid      = "DispatchLockRW"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::opal-data-inf/gold/dispatch-lock.json"
+      },
+      {
+        Sid      = "DispatchLockBucketList"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::opal-data-inf"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = ["gold/dispatch-lock.json"]
+          }
+        }
+      },
+      {
+        Sid    = "CloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/inf-*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_gold_trigger_basic" {
+  role       = aws_iam_role.inf_gold_trigger.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# =============================================================================
+# 4. inf-exporter EC2 role + instance profile (W2.4)
+#    Used by: inf-exporter EC2 (Orion Playwright exporter)
+# =============================================================================
+
+resource "aws_iam_role" "inf_exporter" {
+  name = "inf-exporter-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-exporter-ec2-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_instance_profile" "inf_exporter" {
+  name = "inf-exporter-profile"
+  role = aws_iam_role.inf_exporter.name
+}
+
+resource "aws_iam_role_policy" "inf_exporter_s3" {
+  name = "s3-scoped-inf-exporter"
+  role = aws_iam_role.inf_exporter.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "BronzeOrionRW"
+        Effect = "Allow"
+        Action = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:HeadObject", "s3:ListBucket"]
+        Resource = [
+          "arn:aws:s3:::opal-data-inf",
+          "arn:aws:s3:::opal-data-inf/bronze/orion/*",
+          "arn:aws:s3:::opal-data-inf/otp/*",
+          "arn:aws:s3:::opal-data-inf/orion/jwt/*",
+          "arn:aws:s3:::opal-data-inf/orion/browser-profile/*",
+          # DC2 FORK-B(b): the Eclipse session parker (additive, on this box) PARKS the harvested
+          # Eclipse browser session here for the crawl to ride read-only. Read=for the Orion state
+          # ride (orion/browser-profile above); this adds the Eclipse park target.
+          "arn:aws:s3:::opal-data-inf/eclipse/browser-profile/*",
+          "arn:aws:s3:::opal-data-inf/code/exporter/*",
+          "arn:aws:s3:::opal-data-inf/gold/logs/inf-exporter/*",
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_exporter_secrets" {
+  name = "secrets-manager-orion"
+  role = aws_iam_role.inf_exporter.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "OrionCredentialsRead"
+        Effect = "Allow"
+        Action = ["secretsmanager:GetSecretValue"]
+        Resource = [
+          "arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:orion/credentials-*",
+        ]
+      },
+      {
+        Sid    = "OrionJwtWrite"
+        Effect = "Allow"
+        Action = ["secretsmanager:PutSecretValue"]
+        Resource = [
+          "arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:orion/jwt/current-*",
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_secrets" {
+  name = "secrets-manager-orion-jwt"
+  role = aws_iam_role.inf_gold_layer.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "OrionJwtRead"
+      Effect = "Allow"
+      Action = ["secretsmanager:GetSecretValue"]
+      Resource = [
+        "arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:orion/jwt/current-*",
+      ]
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_exporter_ssm_core" {
+  role       = aws_iam_role.inf_exporter.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy" "inf_exporter_sns" {
+  name = "sns-otp-alert"
+  role = aws_iam_role.inf_exporter.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "OTPAlertPublish"
+      Effect   = "Allow"
+      Action   = "sns:Publish"
+      Resource = aws_sns_topic.inf_otp_alert.arn
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_exporter_kms" {
+  name = "kms-ebs-decrypt"
+  role = aws_iam_role.inf_exporter.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"]
+      Resource = aws_kms_key.inf_ebs.arn
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_lambda_cloudfront" {
+  name = "cloudfront-invalidate"
+  role = aws_iam_role.inf_gold_layer_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "InvalidatePortalCache"
+      Effect   = "Allow"
+      Action   = "cloudfront:CreateInvalidation"
+      Resource = "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_gold_layer_lambda_invoke" {
+  name = "invoke-publisher-fanout"
+  role = aws_iam_role.inf_gold_layer_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "lambda:InvokeFunction"
+      Resource = [
+        "arn:aws:lambda:us-east-1:${local.account_id}:function:inf-portal-advisor-publisher",
+      ]
+    }]
+  })
+}
+
+# =============================================================================
+# 5. inf-jwt-trigger Lambda role (ADVI_ORIAPI.003)
+#    Starts inf-exporter EC2 + writes S3 mode marker for systemd boot dispatch.
+# =============================================================================
+
+resource "aws_iam_role" "inf_jwt_trigger" {
+  name = "inf-jwt-trigger-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-jwt-trigger-lambda-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_jwt_trigger_policy" {
+  name = "inf-jwt-trigger-policy"
+  role = aws_iam_role.inf_jwt_trigger.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "StartExporterInstance"
+        Effect   = "Allow"
+        Action   = ["ec2:StartInstances"]
+        Resource = "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_exporter.id}"
+      },
+      {
+        Sid      = "DescribeInstances"
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = "*"
+      },
+      {
+        Sid      = "WriteModeMarker"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = "arn:aws:s3:::opal-data-inf/orion/jwt/trigger-mode.json"
+      },
+      {
+        Sid      = "RetryExhaustAlert"
+        Effect   = "Allow"
+        Action   = ["sns:Publish"]
+        Resource = aws_sns_topic.inf_otp_alert.arn
+      },
+      {
+        Sid    = "SendExportCommand"
+        Effect = "Allow"
+        Action = ["ssm:SendCommand"]
+        Resource = [
+          "arn:aws:ssm:${local.region}:${local.account_id}:document/opal-inf-export-run",
+          "arn:aws:ssm:${local.region}:${local.account_id}:document/opal-inf-jwt-fetch",
+          "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_exporter.id}",
+        ]
+      },
+      {
+        Sid      = "CloudWatchLogs"
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/inf-*"
+      },
+      {
+        # ADVI_ECLDAT.001: read Orion JWT to poll for advancement after SSM jwt-fetch fires
+        Sid      = "OrionJwtRead"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:GetSecretValue"]
+        Resource = "arn:aws:secretsmanager:${local.region}:${local.account_id}:secret:orion/jwt/current-*"
+      },
+      {
+        # ADVI_ECLDAT.001: write Eclipse JWT captured via admin Token endpoint
+        Sid      = "EclipseJwtWrite"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:PutSecretValue", "secretsmanager:CreateSecret"]
+        Resource = "arn:aws:secretsmanager:${local.region}:${local.account_id}:secret:orion/eclipse_jwt/current-*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_jwt_trigger_basic" {
+  role       = aws_iam_role.inf_jwt_trigger.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "inf_jwt_trigger_dynamo" {
+  name = "inf-jwt-trigger-dynamo"
+  role = aws_iam_role.inf_jwt_trigger.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "LaunchLocksIdempotency"
+      Effect = "Allow"
+      Action = [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem"
+      ]
+      Resource = aws_dynamodb_table.inf_launch_locks.arn
+    }]
+  })
+}
+
+# KMS grant permission — required so EC2 hypervisor can decrypt EBS on StartInstances.
+# Grant disappeared (CloudTrail window too narrow to find when). Added permanently so
+# terraform apply --replace on the role does not drop it again.
+resource "aws_iam_role_policy" "inf_jwt_trigger_kms" {
+  name = "inf-jwt-trigger-kms"
+  role = aws_iam_role.inf_jwt_trigger.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "EBSAttachCreateGrant"
+        Effect   = "Allow"
+        Action   = "kms:CreateGrant"
+        Resource = aws_kms_key.inf_ebs.arn
+        Condition = {
+          Bool = { "kms:GrantIsForAWSResource" = "true" }
+        }
+      },
+      {
+        Sid    = "EBSKeyUse"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:Encrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ]
+        Resource = aws_kms_key.inf_ebs.arn
+      }
+    ]
+  })
+}
+
+# =============================================================================
+# 5b. inf-bronze-trigger Lambda role (ADVI_INFSHIP.B1)
+#     Sibling of inf-jwt-trigger; starts inf-bronze-runner EC2 + writes the
+#     bronze-pull S3 mode marker. Scoped to inf-bronze-runner only.
+# =============================================================================
+
+resource "aws_iam_role" "inf_bronze_trigger" {
+  name = "inf-bronze-trigger-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-bronze-trigger-lambda-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_bronze_trigger_policy" {
+  name = "inf-bronze-trigger-policy"
+  role = aws_iam_role.inf_bronze_trigger.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "StartBronzeRunnerInstance"
+        Effect   = "Allow"
+        Action   = ["ec2:StartInstances"]
+        Resource = "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_bronze_runner.id}"
+      },
+      {
+        Sid      = "DescribeInstances"
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = "*"
+      },
+      {
+        Sid      = "WriteBronzeModeMarker"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = "arn:aws:s3:::opal-data-inf/orion/bronze-trigger-mode.json"
+      },
+      {
+        Sid      = "CloudWatchLogs"
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/inf-*"
+      },
+      {
+        Sid      = "CloudWatchMetrics"
+        Effect   = "Allow"
+        Action   = ["cloudwatch:PutMetricData"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "cloudwatch:namespace" = "Opal/InflectionBronze"
+          }
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_bronze_trigger_basic" {
+  role       = aws_iam_role.inf_bronze_trigger.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# =============================================================================
+# 5c. inf-assets-trigger Lambda role (AUDIT-008.PERM)
+#     Fires after _BRONZE_COMPLETE.json sentinel; starts gold runner and
+#     dispatches INF_API_PULL_ASSETS_V2 + INF_API_SILVER_ASSETS_V2 via SSM.
+#     KMS grants mirror inf-jwt-trigger-kms (EBS decrypt on StartInstances).
+# =============================================================================
+
+resource "aws_iam_role" "inf_assets_trigger" {
+  name = "inf-assets-trigger-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-assets-trigger-lambda-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_assets_trigger_policy" {
+  name = "inf-assets-trigger-policy"
+  role = aws_iam_role.inf_assets_trigger.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "StartGoldRunner"
+        Effect   = "Allow"
+        Action   = ["ec2:StartInstances"]
+        Resource = "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_gold_layer_runner.id}"
+      },
+      {
+        Sid      = "DescribeInstancesGlobal"
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = "*"
+      },
+      {
+        Sid    = "SendAssetsChain"
+        Effect = "Allow"
+        Action = ["ssm:SendCommand"]
+        Resource = [
+          "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_gold_layer_runner.id}",
+          "arn:aws:ssm:${local.region}::document/AWS-RunShellScript",
+        ]
+      },
+      {
+        Sid    = "CloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ]
+        Resource = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/inf-*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "inf_assets_trigger_kms" {
+  name = "inf-assets-trigger-kms"
+  role = aws_iam_role.inf_assets_trigger.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "EBSAttachCreateGrant"
+        Effect   = "Allow"
+        Action   = "kms:CreateGrant"
+        Resource = aws_kms_key.inf_ebs.arn
+        Condition = {
+          Bool = { "kms:GrantIsForAWSResource" = "true" }
+        }
+      },
+      {
+        Sid    = "EBSKeyUse"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:Encrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey",
+        ]
+        Resource = aws_kms_key.inf_ebs.arn
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_assets_trigger_basic" {
+  role       = aws_iam_role.inf_assets_trigger.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# =============================================================================
+# 5d. inf-silver-aggregator Lambda role (ADVI_INFETL.SILVER-AGGREGATOR)
+#     Counts per-dim silver-complete sentinels per snapshot_date and invokes
+#     inf-gold-trigger with {"snapshot_date": "..."} on N/N quorum.
+# =============================================================================
+
+resource "aws_iam_role" "inf_silver_aggregator" {
+  name = "inf-silver-aggregator-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-silver-aggregator-lambda-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_silver_aggregator_policy" {
+  name = "inf-silver-aggregator-policy"
+  role = aws_iam_role.inf_silver_aggregator.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "ListSentinels"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::opal-data-inf"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = "silver/_silver_complete/*"
+          }
+        }
+      },
+      {
+        Sid      = "ReadSentinels"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "arn:aws:s3:::opal-data-inf/silver/_silver_complete/*"
+      },
+      {
+        Sid      = "WriteFiredMarker"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = "arn:aws:s3:::opal-data-inf/silver/_silver_complete/*/_AGGREGATOR_FIRED.json"
+      },
+      {
+        Sid      = "InvokeGoldTrigger"
+        Effect   = "Allow"
+        Action   = ["lambda:InvokeFunction"]
+        Resource = "arn:aws:lambda:${local.region}:${local.account_id}:function:inf-gold-trigger"
+      },
+      {
+        Sid      = "CloudWatchLogs"
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/inf-*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "inf_silver_aggregator_basic" {
+  role       = aws_iam_role.inf_silver_aggregator.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# =============================================================================
+# 6. EventBridge -> SSM execution role (ADVI_ORIAPI.002)
+#    Grants EventBridge permission to invoke SSM SendCommand on inf-exporter.
+# =============================================================================
+
+resource "aws_iam_role" "inf_eventbridge_ssm" {
+  name = "inf-eventbridge-ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "events.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name   = "inf-eventbridge-ssm-role"
+    System = "InflectionPipeline"
+  }
+}
+
+resource "aws_iam_role_policy" "inf_eventbridge_ssm" {
+  name = "ssm-send-command-inf-jwt-fetch"
+  role = aws_iam_role.inf_eventbridge_ssm.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "SendCommand"
+      Effect = "Allow"
+      Action = ["ssm:SendCommand"]
+      Resource = [
+        "arn:aws:ec2:${local.region}:${local.account_id}:instance/${aws_instance.inf_exporter.id}",
+        "arn:aws:ssm:${local.region}:${local.account_id}:document/opal-inf-jwt-fetch"
+      ]
+    }]
+  })
+}
+
+# inf-exporter: allow publishing custom CW metric for JWT fetch OTP timeout alarm
+resource "aws_iam_role_policy" "inf_exporter_cw_metrics" {
+  name = "cloudwatch-put-metric"
+  role = aws_iam_role.inf_exporter.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "PutInfPipelineMetrics"
+      Effect   = "Allow"
+      Action   = ["cloudwatch:PutMetricData"]
+      Resource = "*"
+      Condition = {
+        StringEquals = {
+          "cloudwatch:namespace" = "InfPipeline"
+        }
+      }
+    }]
+  })
+}

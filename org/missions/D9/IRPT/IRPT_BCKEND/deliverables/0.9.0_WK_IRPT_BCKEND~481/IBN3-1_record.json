@@ -1,0 +1,22 @@
+{
+  "base_commit": "151e71f132129eab1d687efdce1b34a76fd98721",
+  "changed_paths": [
+    "data/inf/manual_api/pull_inflection_scope_account_returns.py",
+    "data/inf/manual_api/test_scope_feed_region.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pn-3.scope-feed-region.md"
+  ],
+  "tests_total": 49,
+  "tests_passed": 49,
+  "notes": [
+    "Fix (RUNNER-REGION): session_token() in the feed script now builds boto3.client('secretsmanager', region_name='us-east-1'); the comment above it carries the marker. This is the only change to the script. The base run of the new file fails at line 327 with NoRegionError (control arm); the fixed script was restored byte-identical after the control arm.",
+    "Test 1 (AST): every boto3.client, boto3.resource and boto3.Session call in the script names region_name; 2 constructions were found (session_token and the S3 client in main) and both carry it. Basis: the repository copy read with ast, not the runner copy.",
+    "Test 2 (control): in a subprocess with every AWS_* variable removed, a missing AWS config and credentials file, fake keys and a scrubbed HOME, boto3.client('secretsmanager') raises NoRegionError and the region_name form builds (meta region us-east-1). No network: the client is built, never called.",
+    "Test 3 (end to end, flat layout): a flat directory built by the four-folder rule of the existing runner-layout helper plus trading_calendar.py; the feed script loaded from it; a synthetic sidecar written beside it (scope_feed_addresses.json, synthetic bucket and prefixes) and lib/opal_naming blocked, as on the runner; the real OrionPost with session_token, its urllib opener replaced by a canned reply, and the botocore secretsmanager API call replaced. The run made one Orion request (one synthetic household), wrote the two day keys through the fake S3 and exited 0. The flat module and flat trading_calendar were confirmed as the ones loaded. No further runner-only difference surfaced in the script's own path. Filed as rows S3 to S5 (S3: the row-id premise collides with existing W481 rows; S4: the existing fake transport does not call session_token; S5: the flat layout needs an address source the order did not name).",
+    "Not read: the runner's /tmp/orion_gold_scripts contents and the apply's upload list (inferred: the sidecar is present on the runner, because the 11:33Z run printed its PLAN lines, which call feed_addresses(), before session_token()). Not read: the bodies of INF_B_00 and trading_calendar beyond what the flat run exercised. The test host is Windows with Python 3.14; the runner runs 3.9.",
+    "Sparse directories: none added. data/inf/manual_api, data/inf/scripts/gold, silver and bronze, lib and .tools were present; org/surprise_channel is not in the sparse list, so the channel schema was read from the base commit with git show, not from the worktree.",
+    "Pre-existing: the deliverables folder 0.9.0_WK_IRPT_BCKEND~481 already held four tracked files of the round-4 worker of this serial (commits dae909c87f and 3146338cb9); this record and its siblings sit beside them.",
+    "Baseline before the change: the four existing feed test files passed 46 of 46. After the change, the five files (4 existing and the new file) pass 49 of 49."
+  ],
+  "aws_writes_made": 0,
+  "vendor_requests_sent": 0
+}
