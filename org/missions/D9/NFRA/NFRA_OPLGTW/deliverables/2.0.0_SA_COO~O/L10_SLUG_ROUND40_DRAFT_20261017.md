@@ -1,10 +1,10 @@
 # L10 SLUG -- NFRA_OPLGTW round 40 -- DRAFT (2.0.0_SA_COO~O, 2026-10-17 ~07:0xZ)
 
-**Status: DRAFT, NOT SENT.** The slug goes to `1.0.0_SA_CTO~Z` only after every task order of the round is terminal and every BLOCKING or ARMED row is dispositioned (CLAUDE.md rule 27, L10). Open: `OG-ap-33` (the HVST landing, with `~NFRA1`) and the `Z-S312` disarm clock. **Closed since the first draft:** the CVO graded `OG-ap-34` AC3 MET and re-graded `OG-ap-31` AC3 MET on the git-excluded chain (sha256 `7a92985d`), `ADJUDICATION_v40.Z.md` @`99411654a5` (relayed by the CTO, msg 35432); both chains page to a null cursor, newest first; this supersedes `Z-C-S84`'s PARTIAL. Numbers below are read from the tree at this commit; the sections marked OPEN are filled at the send.
+**Status: DRAFT, NOT SENT.** The slug goes to `1.0.0_SA_CTO~Z` only after every task order of the round is terminal and every BLOCKING or ARMED row is dispositioned (CLAUDE.md rule 27, L10). Open: `OG-db-2` (worker `~133`), the `Z-S336` and `Z-S356` clocks (the CVO writes them once `OG-ap-33` and `OG-db-2` are terminal; CTO 35448), the `Z-S312` disarm clock. **Closed since the first draft:** the CVO graded `OG-ap-34` AC3 MET and re-graded `OG-ap-31` AC3 MET on the git-excluded chain (sha256 `7a92985d`), `ADJUDICATION_v40.Z.md` @`99411654a5` (relayed by the CTO, msg 35432); both chains page to a null cursor, newest first; this supersedes `Z-C-S84`'s PARTIAL. Numbers below are read from the tree at this commit; the sections marked OPEN are filled at the send.
 
 ## 1. The round, by order (read from the order files)
 
-Round 40 holds 10 task orders: 8 complete, 1 superseded, 1 staged (`OG-ap-33`).
+Round 40 holds 11 task orders: 9 complete (with `OG-ap-33`), 1 superseded, 1 in flight (`OG-db-2`, committed `83eb42b2ad`, checks PASS in this seat's early runs).
 
 | order | what | state |
 |---|---|---|
@@ -17,7 +17,8 @@ Round 40 holds 10 task orders: 8 complete, 1 superseded, 1 staged (`OG-ap-33`).
 | `OG-en-20` | `mallopt(M_ARENA_MAX, 2)` once at import, 8 read workers (merge `d9364e3e9c`) | complete |
 | `OG-ap-34` | the fourth batched release: LIVE `9d5b7125571520b977401634a01935924f4c9787` since 05:19:28Z, ledger `nfra-oplgtw-gateway-release-batch5` CLOSED, `ap34.AC1` and `ap34.AC2` PASS (this seat's runs), md5 139 of 139, plateau test second chain +24.9 MB, 30-minute read-back 31 probes with 0 triggers; AC3 is the CVO's judgment (OPEN) | complete (AC3 judgment MET, CVO v40) |
 | `OG-ap-35` | narrow Alyssa's live grant by `download_filtered` (CTO ruling on call bd68, Andrew's 2026-10-08 word): usage 0 calls; `ag1.AC2` PASS; read-back refuses her download and answers list, describe, query; ledger CLOSED | complete |
-| `OG-ap-33` | land the `AMGT_HARVST` line (`319c9413a2`) on trunk; GO sent 06:09Z, read by `~NFRA1` 06:49Z | staged (OPEN) |
+| `OG-ap-33` | land the `AMGT_HARVST` line (`319c9413a2`) on trunk under Amendment A2 (CTO decisions 35436 and 35438): merge `60412142ac`, drained into `box/sitez` as `033ca1ee2c`, on origin @`9b2f5f27d1` (this seat's ls-remote read); `ap33.AC1-3` PASS (my runs), py_compile ok, window tests 33 of 33 both orders | complete |
+| `OG-db-2` | re-land `OG-db-1`'s 17-line preflight on the live deploy script (the live blob was landed whole by `OG-ap-33`); `db2.AC1/AC2` PASS in this seat's early runs; worker `~133` writing its proof | in flight (OPEN) |
 
 ## 2. What the round delivered against the endpoint (FWD-21, FWD-22 and the window)
 
@@ -44,4 +45,4 @@ Round 40 holds 10 task orders: 8 complete, 1 superseded, 1 staged (`OG-ap-33`).
 
 ## 5. Open at the send
 
-`OG-ap-33` terminal; the `Z-S312` disarm clock; the `OG-ap-33` merge carried to origin by `0.0.0_AB_MSTR~Z`; `python .tools/round-close-check.py --project NFRA_OPLGTW --round 40` reading not REFUSED.
+`OG-db-2` terminal; the `Z-S336`, `Z-S356` and `Z-S312` clocks; the `OG-ap-33` merge carried to origin by `0.0.0_AB_MSTR~Z`; `python .tools/round-close-check.py --project NFRA_OPLGTW --round 40` reading not REFUSED.
