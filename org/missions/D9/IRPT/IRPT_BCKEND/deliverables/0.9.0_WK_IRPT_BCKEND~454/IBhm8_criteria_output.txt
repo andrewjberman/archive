@@ -1,0 +1,39 @@
+IBHM8 criteria output -- 0.9.0_WK_IRPT_BCKEND~454 on TO IRPT_BCKEND.TO-IB-hm-8
+Worktree: C:/dev/wk-IRPT_BCKEND-454 (branch wk-IRPT_BCKEND-454), base HEAD 6c413115b9 before the one commit.
+Invocations are the order's own, run from the worktree root under timeout 300. Output is verbatim.
+
+=== AC1 (run before the commit), first run: FAIL on the trust statement Sid, then the Sid was removed from the trust document
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r251/p251_cells.py" . IBHM8-AC1
+FAIL: the policy statements must be exactly ['ReadTheOneHmacSecretOnly', 'PutTheThreeFirmListKeysOnly'], found ['AssumedOnlyByTheDailyRunnerHost', 'ReadTheOneHmacSecretOnly', 'PutTheThreeFirmListKeysOnly']
+IBHM8-AC1 FAIL
+rc=1
+
+=== AC1, after the trust Sid was removed (run 1 of 2)
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r251/p251_cells.py" . IBHM8-AC1
+OK: names, one secret container and no version, host-role trust only, two statements and two actions, no wildcard, three environment keys
+IBHM8-AC1 PASS
+rc=0
+
+=== AC1 (run 2 of 2, determinism)
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r251/p251_cells.py" . IBHM8-AC1
+OK: names, one secret container and no version, host-role trust only, two statements and two actions, no wildcard, three environment keys
+IBHM8-AC1 PASS
+rc=0
+
+=== AC2 (run 1 of 2)
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r251/p251_cells.py" . IBHM8-AC2
+OK: the three list-key URIs equal the builder results
+IBHM8-AC2 PASS
+rc=0
+
+=== AC2 (run 2 of 2, determinism)
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r251/p251_cells.py" . IBHM8-AC2
+OK: the three list-key URIs equal the builder results
+IBHM8-AC2 PASS
+rc=0
+
+=== terraform fmt -check -diff
+NOT RUN. .tools/terraform.exe does not exist in the worktree (test -f returned absent), so the order's offline fmt step does not apply. No init, plan or apply was run.
+
+=== AC3 (NOT RUN AT THIS POINT, BY CONSTRUCTION)
+AC3 reads HEAD~1..HEAD. That range exists only after the one commit this order makes, so it cannot be run before the commit. The order says run it AFTER the commit and that the issuer re-runs it; no second commit and no amend. The post-commit run is recorded in the worker report, not in this file.
