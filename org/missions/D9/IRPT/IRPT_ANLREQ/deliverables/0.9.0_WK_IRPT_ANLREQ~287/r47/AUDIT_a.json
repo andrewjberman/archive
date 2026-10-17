@@ -1,0 +1,260 @@
+[
+{
+  "id": "IRPT_ANLREQ-D2-S26",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "A commentary_ready message sits on the draft-commentary-ready queue that only the resident role may receive or delete; disarm needs a measured depth of 0.",
+  "evidence": [
+    {"kind": "record", "ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~114/r29/ARMED_ROWS_CENSUS.json", "says": "Last committed live read (get-queue-attributes 2026-10-13T23:55:05Z): ApproximateNumberOfMessages 1, NotVisible 0. Depth is not 0."}
+  ],
+  "deployed": "n/a",
+  "reason": "No committed read after 2026-10-13 23:55Z. SQS retention 345600 s would expire the message near 2026-10-15T06:10Z, but expiry is not measured and the row text is not evidence. Needs a get-queue-attributes depth read on the queue (a live AWS read, not made here)."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W52-S24",
+  "verdict": "CLOSED",
+  "hazard": "The account-header rule missed Brokerage Account, Subaccount, Account Seq and Account Sequence, so a multi-account file under one of them passed as one account.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:66", "says": "ACCOUNT_WORDS at HEAD holds subaccount, subaccounts and accnt."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:69", "says": "ACCOUNT_MODIFIERS at HEAD holds brokerage."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:72", "says": "ACCOUNT_TAIL_WORDS at HEAD holds seq and sequence. Run on HEAD bytes: all four row headers return True from _is_account_header."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "CLOSED 20261016T024904Z; irpt-ycharts-generate built at pin 927337a741, whose template_reader.py blob 7c2c761d71 equals HEAD."}
+  ],
+  "deployed": "yes",
+  "reason": "The four headers the row names are matched at HEAD (run on HEAD bytes). The reader is in the deployed irpt-ycharts-generate build, whose template_reader.py blob equals HEAD (record 20261016T0207Z, status CLOSED)."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W52-S29",
+  "verdict": "STANDS",
+  "hazard": "A two-account sheet stored by the round-16 door is answered NORMALIZED on a same-token re-POST without the file being judged again.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:524", "says": "_answer returns the stored NORMALIZED row through _normalized_response without judging the file again."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:665", "says": "The re-read is compared only when stored_version equals READER_VERSION (line 666); an absent version defaults to before-C-STOREDINPUT."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build carries uploads.py with blob 7ec1cb2bb6, equal to HEAD, so the stored-row answer path is deployed."}
+  ],
+  "deployed": "yes",
+  "reason": "The remedy at HEAD refuses new POSTs only. Stored normalization rows are still answered without a judgment (uploads.py:524), and rows stored under an older reader are not compared (uploads.py:665-666). The stored population was not read."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W52-S31",
+  "verdict": "CLOSED",
+  "hazard": "Identifier-like account headers outside the ruled vocabulary (plural tails, subaccounts, accnt, nos, seqno, serial) passed as one account.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:66", "says": "ACCOUNT_WORDS at HEAD holds subaccounts and accnt."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:72", "says": "ACCOUNT_TAIL_WORDS at HEAD holds numbers, nos, seqno and serial. Run on HEAD bytes: all six row headers return True from _is_account_header."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build pin 927337a741 carries template_reader.py blob 7c2c761d71, equal to HEAD."}
+  ],
+  "deployed": "yes",
+  "reason": "All six headers the row names are matched at HEAD (run on HEAD bytes, control headers Cost Basis and Account Value not matched). The vocabulary is in the deployed build (record 20261016T0207Z)."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W52-S33",
+  "verdict": "CLOSED",
+  "hazard": "The pinned reader held the total row as a holding and accepted two-account sheets with no finding, so the door counted the total into the portfolio.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:461", "says": "A total label in column A raises TOTAL_ROW_PRESENT (emit at line 462)."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:146", "says": "finding() defaults severity to ERROR, so TOTAL_ROW_PRESENT is an ERROR finding. Run on HEAD: total_row_sheet gives TOTAL_ROW_PRESENT:ERROR; two-account sheets give ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:491", "says": "The door takes ERROR findings first and returns NEEDS_CORRECTION (line 495), nothing published."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "CLOSED 20261016T024904Z; deployed build at pin 927337a741 carries template_reader.py and uploads.py blobs equal to HEAD (7c2c761d71, 7ec1cb2bb6)."}
+  ],
+  "deployed": "yes",
+  "reason": "The HEAD reader and door refuse the four multi-account and total-row shapes with ERROR findings (run on HEAD bytes). The deployed build after the remedy carries the same blobs (record 20261016T0207Z). The map pin 3f29017cfc named in the row is no longer the packaged reader."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W52-S35",
+  "verdict": "STANDS",
+  "hazard": "A template stored without a reader_version member is accepted unchanged on re-open under the widened reader, with no re-read.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:665", "says": "stored_version defaults to before-C-STOREDINPUT when the member is absent."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:666", "says": "The full re-read and compare run only when stored_version equals READER_VERSION; an unversioned template skips them."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:397", "says": "read_template stamps reader_version on new templates, so only templates stored before the stamp are uncompared."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build carries uploads.py blob 7ec1cb2bb6, equal to HEAD, so the uncompared path is deployed."}
+  ],
+  "deployed": "yes",
+  "reason": "At HEAD the compare is gated on the stored version (uploads.py:666), so an unversioned stored template is accepted unchanged. The stored population of the deployed Lambda was not read, so the exposure is not measured."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W52-S36",
+  "verdict": "CLOSED",
+  "hazard": "The door answered NORMALIZED with no finding and total 600 on a sheet whose own total row reads 300.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/template_reader.py:461", "says": "TOTAL_ROW_PRESENT is raised for a total label (line 462) and is an ERROR finding by default (line 146)."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:491", "says": "ERROR findings are the door's first answer: NEEDS_CORRECTION, nothing handed on (returned at line 495)."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "CLOSED 20261016T024904Z; deployed build carries uploads.py and template_reader.py blobs equal to HEAD."}
+  ],
+  "deployed": "yes",
+  "reason": "The total-row shape now yields an ERROR finding at HEAD and the door refuses it with NEEDS_CORRECTION (run of the reader on HEAD bytes; door code at uploads.py:491-495). The deployed build carries the same blobs (record 20261016T0207Z)."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W61-S2",
+  "verdict": "CLOSED",
+  "hazard": "The source map's deployed_code_sha256 for three functions did not match their live CodeSha256, and the act-4 ledger's performance-adapter value was not the live one.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-performance-adapter.json:520", "says": "deployed_code_sha256 NdwQsZ4Y... equals artifact_sha256 at line 514."},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-narrative.json:154", "says": "deployed_code_sha256 vBzPCvn9... equals the narrative artifact hash."},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:321", "says": "deployed_code_sha256 +TcZDWmw... equals the status artifact hash."},
+    {"kind": "record", "ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/L8_AFTER_R20.txt", "says": "After-read 2026-10-13: performance-adapter CodeSha256 NdwQsZ4Y (LastModified 12:51:39Z); narrative vBzPCvn9 (12:39:03Z)."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0554Z_irpt-status-r35l-20261016_deploy_completion.md", "says": "Deploy line: irpt-status code CodeSha256 moved to +TcZDWmw..., CLOSED."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261012T1340Z_advi-firmbkts-fb-f-11-act4-irpt-leg-20261012_deploy_completion.md", "says": "Act-4 ledger line 165 records kMB8xCI9 for the performance adapter. Superseded; not amended here."}
+  ],
+  "deployed": "yes",
+  "reason": "For all three functions the map's deployed field equals the latest committed after-read or closed deploy record. The act-4 kMB8 value is superseded by the 2026-10-12 22:26 deploy (abep4h7) and the 10-13 after-read (NdwQ); the ledger itself was not amended and is not edited here."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W75-S1",
+  "verdict": "CLOSED",
+  "hazard": "The server refused a SHARES holdings file with no price date (PRICE_DATE_REQUIRED), so the portal's Price date field could not be removed.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:245", "says": "A client price_date is dropped and logged as a closed token; the server derives the date."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:445", "says": "CSV lane: a SHARES unit with no date gets default_price_date (prior trading day)."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:613", "says": "Template lane: SHARES takes default_price_date when no date is sent."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/portfolio.py:59", "says": "default_price_date returns the prior trading day for None (return at line 70)."},
+    {"kind": "commit", "ref": "d9d34f0b77", "says": "AR-y-245: the server takes the prior trading day close when a SHARES unit has no date (commit subject)."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build carries uploads.py blob 7ec1cb2bb6, equal to HEAD, after d9d34f0b77."}
+  ],
+  "deployed": "yes",
+  "reason": "Both lanes now default the date for SHARES (uploads.py:445, :613). The refusal at portfolio.py:253 is reached only for a malformed date. The server ignores any client price_date (uploads.py:245). The deployed build carries these bytes (record 20261016T0207Z)."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W77-S3",
+  "verdict": "STANDS",
+  "hazard": "The default price date raises CalendarCoverageError once the year passes the calendar table, which ends in 2027 (fails from 2028-01-02).",
+  "evidence": [
+    {"kind": "code", "ref": "lib/trading_calendar.py:35", "says": "Header: Regenerate NYSE_HOLIDAYS_FALLBACK ... before 2028. Still present at HEAD."},
+    {"kind": "code", "ref": "lib/trading_calendar.py:121", "says": "FALLBACK_LAST_YEAR is the max year of the table. Run on HEAD bytes: FIRST 2010, LAST 2027."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build pin 927337a741: intake/portfolio.py blob equals HEAD; its trading_calendar.py also ends 2027 (run)."}
+  ],
+  "deployed": "yes",
+  "reason": "Unchanged at HEAD: the table still ends 2027, the header still says regenerate before 2028, and default_price_date (portfolio.py:59-70) has no catch. The hazard is dated and latent today (2026-10-17), not firing; it stands in the tree and the deployed build."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W90-S3",
+  "verdict": "STANDS",
+  "hazard": "The dom-env helper registers the DOM once per process and releasing it leaves later DOM-bound test files with no DOM.",
+  "evidence": [
+    {"kind": "code", "ref": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/dom-env.ts:25", "says": "GlobalRegistrator.register() runs at module load, once per process."},
+    {"kind": "code", "ref": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/dom-env.ts:27", "says": "releaseDom() unregisters the DOM (line 28)."},
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/__tests__/commentary-sent.test.tsx:27", "says": "afterAll(releaseDom): the release pattern is still used by a TicketCenter DOM test."},
+    {"kind": "code", "ref": "portal/src/pages/InvestorReporting/tabs/analysis/tests/prospect-suggested-swaps.test.tsx:80", "says": "A further test file calls await releaseDom()."}
+  ],
+  "deployed": "n/a",
+  "reason": "At the portal DEV pin (d1f9ca29, HEAD gitlink) the helper and the release pattern are unchanged, in at least four test files. The row's failure mode (a release leaving later DOM tests without a DOM) is not remedied. Read via the portal submodule at the pinned commit."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W104-S1",
+  "verdict": "CLOSED",
+  "hazard": "The AR-y-283 partner view broke 10 tests in analysis-submit-silence.test.tsx, which mounted a firm caller where the page now shows the partner view.",
+  "evidence": [
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx:182", "says": "Helper fills the partner caller's Analysis Request form, open on mount (AR-y-283); no New Ticket press is expected."},
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx:89", "says": "The useAuth mock is a firm caller (isInternal false), now matched by the partner-view expectations."},
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/TicketCenter.tsx:213", "says": "partner = !internal: the partner branch the suite now exercises."}
+  ],
+  "deployed": "n/a",
+  "reason": "The suite was re-pointed to partner-caller behaviour in portal commit 1c71bfd8, an ancestor of the DEV pin (remedy visible at lines 182 and 89). The folder pass count was not re-run in this audit (no test run); the test file is not a deployed artifact."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W96-S3",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "The portal worktree's node_modules is a directory junction into the main checkout; a recursive delete or git worktree remove may follow it.",
+  "evidence": [
+    {"kind": "code", "ref": "portal/.gitignore:11", "says": "node_modules is ignored by the portal, so the junction is untracked. No tree line records its removal or a delete test."}
+  ],
+  "deployed": "n/a",
+  "reason": "The junction is local disk state outside git; no committed record or tree line shows it removed or the delete behaviour tested. Needs a local read of C:/dev/wk-portal-96/node_modules (is it a junction) and of git worktree list. Not made here."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W107-S4",
+  "verdict": "CLOSED",
+  "hazard": "A KEPT_BY_HISTORY holding carries the client's bare ticker under YCHARTS_SECURITY identity, so a consumer reading it as a YCharts id would misread it.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:44", "says": "_receipt_sha256 is defined here; a row with no provider receipt (a KEPT holding) is refused."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:51", "says": "raise RecipeRefused: holdings row has no provider receipt."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/ycharts/generate/normalized_input.py:80", "says": "The vendor path calls _receipt_sha256 for each holding row."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build pin 927337a741 carries normalized_input.py blob 511b71eede, equal to HEAD."}
+  ],
+  "deployed": "yes",
+  "reason": "The YCharts recipe refuses a KEPT row (no receipt) before any upload, so it cannot be read as a YCharts id. The refusal is at HEAD and in the deployed build (record 20261016T0207Z). The row's cite intake/intake/portfolio.py is not a HEAD path (filed as IRPT_ANLREQ-D2-W287-S3)."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W103-S3",
+  "verdict": "CLOSED",
+  "hazard": "The ticket board was unscoped, so a partner build would show every firm's tickets; the order was to land the candidate only after AR-y-281 and AR-y-283.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:192", "says": "LIST admits CLIENT (the firm-scoped list) as well as INTERNAL and SVC_ANALYST_INTAKE."},
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1543", "says": "client_list_tickets: firm-scoped LIST for a client human (AR-y-281), commit cbdfe204a0."},
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/TicketCenter.tsx:213", "says": "Partner view (partner = !internal) reads the partner-firm list, server-scoped (portal tickets.ts:258 comment)."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T2320Z_tckt-vnext-r20-rel-20261016_deploy_completion.md", "says": "CLOSED 20261016T233151Z; opal-ticket-api code lambda_function.py blob 5968534813, equal to HEAD."}
+  ],
+  "deployed": "yes",
+  "reason": "AR-y-281 is in the deployed ticket code (blob 5968534813 equals HEAD, record 20261016T2320Z), so the client LIST is firm-scoped server-side. AR-y-283's partner view is at the DEV pin. The unscoped-board exposure the row describes is not reachable at HEAD."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W103-S4",
+  "verdict": "STANDS",
+  "hazard": "The TicketCenter internal predicate accepts a Dev claim without a firm check, so a partner-firm Dev user gets the internal view against AR-y-282 AC2J.",
+  "evidence": [
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/TicketCenter.tsx:211", "says": "const internal = auth.isInternal() || auth.isDev(): the predicate is unchanged at the DEV pin."},
+    {"kind": "code", "ref": "portal/src/contexts/AuthContext.tsx:800", "says": "isDev: userType Dev, no firm check (line 801)."}
+  ],
+  "deployed": "yes",
+  "reason": "Both lines are unchanged at the DEV pin, so a partner-firm user with the Dev claim gets internal=true and the internal view (partner = !internal at TicketCenter.tsx:213). The served DEV build was not read; the source hazard stands."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W109-S2",
+  "verdict": "CLOSED",
+  "hazard": "The packager's attach carries request_id and request_revision, which the ticket server refused as unexpected fields when released ahead of the server half.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1800", "says": "AR-y-284: PACKAGE accepts an optional request_id, with an optional request_revision, recorded in the same write."},
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1808", "says": "extra fields are refused unless request_id or request_revision is present (rid_present)."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:191", "says": "The packager sends request_id and request_revision in request_ref on every attach."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T2320Z_tckt-vnext-r20-rel-20261016_deploy_completion.md", "says": "Deployed opal-ticket-api code blob 5968534813, equal to HEAD (server half AR-y-284 commit 8151b5626f)."}
+  ],
+  "deployed": "yes",
+  "reason": "The server half is in HEAD and in the deployed ticket code (record 20261016T2320Z), so the packager's seven-member attach is accepted. The server-first release order the row requires is satisfied."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W111-S5",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "On the internal analysis form the held submit says Choose the firm, while the form has no firm control and says staff cannot submit from it.",
+  "evidence": [
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx:158", "says": "Staff get a firm select (FIRM_CHOICE_LABEL placeholder) when firms are loaded: the control the held message names exists at the DEV pin."},
+    {"kind": "code", "ref": "portal/src/pages/TicketCenter/analysisRequest.ts:354", "says": "submitHeldReason still returns Choose the firm this request is filed under when firm is empty."}
+  ],
+  "deployed": "yes",
+  "reason": "At the DEV pin (commit 6f4e5f67, AR-y-325) staff have a firm select, so the no-control premise is gone from source. The served DEV build is deployed and no committed DEV deploy record covers 6f4e5f67. Needs a read of the served staff form or such a record."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W113-S2",
+  "verdict": "STANDS",
+  "hazard": "The release-21 pair's start state is stale: irpt-ycharts-generate was redeployed after its R0b read.",
+  "evidence": [
+    {"kind": "record", "ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release21/NEVER_WIDEN_PAIR_ANLREQ_RELEASE21_READER_R193_TWO_LEG.md", "says": "Line 61 R0b: CodeSha256 reads hpNfkhLt... and S3 latest ennO07to...; otherwise ABORT. The pair text still holds this start state."},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-ycharts-generate.json:701", "says": "deployed_code_sha256 kxOEgpbs..., last_deployed_at 2026-10-16T02:57:56Z."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deploy line: irpt-ycharts-generate CodeSha256 moved to kxOEgpbs..., CLOSED 20261016T024904Z."}
+  ],
+  "deployed": "yes",
+  "reason": "The pair still names hpNfk as the R0b start state, which would ABORT. The Lambda has run kxOEg since the 2026-10-16 closed deploy (record 20261016T0207Z; map line 701). The stale start state stands in the pair text."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W113-S3",
+  "verdict": "STANDS",
+  "hazard": "The release-21 pair's premise that intake/uploads.py is unchanged does not hold, so the AR-y-226 matrix covers only the reader change.",
+  "evidence": [
+    {"kind": "record", "ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release21/NEVER_WIDEN_PAIR_ANLREQ_RELEASE21_READER_R193_TWO_LEG.md", "says": "Line 11: intake/uploads.py stays 176682cb1545435e... and template_reader.py was 83ab9b45 (r18.1); both premises are stated as the bytes the legs hold."},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/intake/uploads.py:1", "says": "HEAD bytes of uploads.py hash to sha256 7b955092e682c018a080fc2bee5f612f6de60fe15d5e67a7b22b693553625e72, not 176682cb (run: git show HEAD | sha256sum)."},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "Deployed build carries uploads.py blob 7ec1cb2bb6, equal to HEAD (not the pair premise)."}
+  ],
+  "deployed": "yes",
+  "reason": "The premise 176682cb does not match HEAD or the deployed uploads.py bytes (sha256 7b955092). The template_reader premise 83ab9b45 is not the HEAD blob either (a61cd0c6). The pair's stated start bytes are wrong."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W114-S1",
+  "verdict": "CLOSED",
+  "hazard": "The y296 armed checker parsed only brace-opened json fences, so 86 array blocks were never read and the ARMED-OWNED count was wrong.",
+  "evidence": [
+    {"kind": "code", "ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py:758", "says": "The fence regex at line 758 matches every json fence, not only brace-opened ones (the defect the row names is absent)."},
+    {"kind": "code", "ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py:763", "says": "Each fenced body is read as a list or a dict: for r in (got if isinstance(got, list) else [got])."}
+  ],
+  "deployed": "n/a",
+  "reason": "The brace-only defect is fixed at HEAD (lines 758 and 763). Run of the HEAD regex on the current channel: 847 fenced blocks, 0 unparsed, 899 rows. The 406-block count of the row is historical and not re-measured."
+}
+]
