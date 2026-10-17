@@ -31,6 +31,20 @@ For each merged order this seat read the worker's report and its proof instance,
 
 Un-parked by the CTO's decision text (`ledger/CTO_DECISION_DOOR6_RETIREMENT_ORDER_20261016.md`: three steps in order, each its own criterion: (1) `inf-gold-trigger`'s idempotency to its own record, **whose premise row `D1-S61` falsifies; the CTO was asked (drop it, or replace it with a live reader read) and the order stays staged until he rules**; (2) the feeder's second look, then the accelerator disabled; (3) the marker write stops last, after the deployed runner copy in `s3://opal-data-inf/code/runner/` is read). The signed pair covers the second look and the current-date catch-up only. **The order face was amended (@1b2f23b877)** to carry the CTO's order with erratum 1: step 1 is dropped (the live census above), the pair's catch-up and second-look acts come first, the accelerator is disabled only after the second look's first live fire (Monday 2026-10-19), and the marker write is stopped last in the DEPLOYED `code/gold/` copy by a throwaway-worktree deploy that changes the marker block alone. It stays `staged` until D1 reports its read of the 2026-10-17 13:30Z fire (asked of `2.0.0_SA_COO~D1`; dated wait to 2026-10-17T14:30Z). The executor `0.7.0_AE_CloudOps~FB1` is live and idle. Andrew's standing word on record is `ANDREW_DIRECT_20261013_200xZ_NINE_OPEN_CALLS_ANSWERED_FIRMBKTS_DEMQUE_BRIEF_HARVEST.md` row 1.
 
+## 3a. `FB-q-1`, workstream FENCE49, WORLD (terminal; cut after this packet's first send, 2026-10-17)
+
+The `opal-data-49financial` fence regeneration for `irpt-export-render-role`'s reporting prefix (decomposition `ADVI_FIRMBKTS_DECOMP_FENCE49.md`, order `ADVI_FIRMBKTS.TO-FB-q-1.irpt-export-fence-regenerate.md`). It serves no FWD of this PRD; it is the fence owner's act for IRPT_BCKEND IB-pr-551. Executor `0.7.0_AE_CloudOps~ADVI1` on the laptop; commits `a058d43810` (ledger opened), `cb5ee5e9c5` (record), `25e7759c29` (instance, ledger closed 4 of 4, complete); all three are in this seat's trunk.
+
+| read by this seat 2026-10-17 ~04:2xZ | result |
+|---|---|
+| AC1 on the executor's `FENCE49_RECORD.json` (fetched from `origin/box/laptop`) | `FENCE49: OK bucket=opal-data-49financial applies=1` |
+| the live bucket policy (`get-bucket-policy`, one resource) | 37 statements, equal to the record's saved-prior count; `AllowScopedExemption3Objects` `Resource` and `DenyScopedExemption3ObjectsOutsidePrefix` `NotResource` each hold the ownership-map key and `arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/*` once; the Allow's principal is the export role only; no other statement names the reporting prefix |
+| the pair acted under | ADDENDUM 4, COO half `300f9d398d` (blob `461a9f9252`), CTO half `1045f1b75b`; reach ruling `CTO_RULING_FB_Q1_FENCE_REACH_IRPT_EXPORT_20261017.md` @c783217cff |
+
+What the cell found, for the CTO's analysis: a scoped fence row naming `s3:GetObject` renders a bucket-policy Allow that grants the read by itself, so the reach is the whole row prefix (18,257 objects at the apply), not the IAM statement's narrower pattern. The pair was re-signed at that reach. Enrichment owed by the fence owner with LGIC (the CTO's ruling item 3, `ROUND10_INPUTS_20261016.md` section 2): a deny-only scoped-row option and a partial-segment prefix match.
+
+Not known (named): that every OTHER statement is byte-equal to the policy before the apply. The record claims it from the executor's byte-compare against a saved prior JSON that is not committed; this seat re-read only the two changed statements and the statement count. The plan text itself was not read by this seat (the record carries its counts).
+
 ## 4. Rows: the 20 round-9 worker rows and this seat's `D1-S61`, all `hazard_standing` INERT, none ARMED
 
 The disarm and remediation clocks are the CVO's to write; "proposed" is this seat's word and evidence, not a clock. Rows ids are as filed (`ADVI_FIRMBKTS-` prefix omitted; W85's three use the bare form `ADVI_FIRMBKTS-W85-S<k>`, which `W89-S2` says the row gate refuses on dell1 for a new row: noted, not chased).
