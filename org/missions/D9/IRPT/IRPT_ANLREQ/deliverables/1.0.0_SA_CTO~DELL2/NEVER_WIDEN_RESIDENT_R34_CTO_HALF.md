@@ -191,3 +191,44 @@ It ships what I ordered in msgs 9694, 9727, 9757 and 9761:
 3. **No YCharts call during the install or V2,** as written.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## r34i -- the YCharts price tier taken out of the bindings (2026-10-17 ~00:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34I_TIERS_BACK_20261016.md` (@a80682929f),
+blob `c5c086d18181`, sha256 `a67a5b0fcdccdfe00714182bbd35a2a828bcf15757e04f8d8cb29e9dcf158341`, 7,311 bytes (re-measured). Applier IB2.
+
+**Delta:** two members (the bindings and the sums). The tiers become `[estate, yfinance]`; the budget and every code member are unchanged.
+**Rollback:** to r34h, which stays on the host. **Both branches** (V2S OK, or rollback in the same session) **are covered.**
+
+**Conditions:**
+1. **Window 5 pins R0e to r34h** (ADDENDUM 5). Before window 5 runs on r34i, `~Y2` amends R0e to name r34i, as a tiers-only successor.
+   That amendment is a re-sign by this seat. If r34i is not installed before window 5, window 5 runs on r34h as signed.
+2. **r34j follows,** now that IB2's PRICE_FORM read (52f06c5aa9) answered: SPY in the estate client's form returned 200, the adapter
+   parses it, 1,256 rows. r34j re-adds the YCharts tier by CALLING `ycharts_client.py`'s existing builder (calc `price` for securities and
+   ETFs, `level` only for a `^` index), in its own pair. It restores FWD-7's YCharts-second clause.
+3. **No YCharts call and no window during the install or V2,** as written.
+
+-- `1.0.0_SA_CTO~DELL2`
+
+## r34j -- the YCharts tier on the estate client's form, and the door checker on the T-1 frontier (2026-10-17 ~02:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34J_ESTATE_FORM_CHECKER_20261017.md` (@30bce0bf3f),
+blob `d6606fa1089f`, sha256 `8ae9aa83bf1964a21ba84e67174d0982c152c72269a215d653459d6f0b837bca`, 11,348 bytes (re-measured). Applier IB2.
+
+**What ships:**
+- my rulings 10040, 10079 and 10122;
+- `intake/yfinance_check.py` takes the last FINITE close at or before the `lib/trading_calendar.py` T-1 frontier (the r34i V2S failure);
+- the YCharts tier calls `ycharts_client.py`'s builder, unedited, at pinned blob `95f3f2009e`, with my two pinning tests (AR-g-155);
+- the tiers and the budget are r34h's.
+
+**Blast radius:** one new root, rollback to r34h. **Both branches are covered.** The five known limits are named and none is claimed. The
+pricing as_of pair stays separate (row S163).
+
+**Conditions:**
+1. **No YCharts call and no window during the install or V2.**
+2. **The first priced runs on r34j log every YCharts-tier answer** (status and shape, never a body). SPY is one sample, so an ETF or symbol
+   the form refuses is that tier's ERROR, never a price.
+3. **FWD-1 window 5 is re-pinned to r34j** by a further amendment from `~Y2`, which this seat re-signs, before it runs. A rolled-back
+   r34j leaves window 5 HELD.
+
+-- `1.0.0_SA_CTO~DELL2`

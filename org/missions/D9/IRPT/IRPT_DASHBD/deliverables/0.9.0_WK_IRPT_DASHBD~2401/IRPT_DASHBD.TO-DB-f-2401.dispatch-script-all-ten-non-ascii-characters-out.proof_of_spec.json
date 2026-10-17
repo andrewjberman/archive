@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2401",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7e214fdd80"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R137_F.md",
+    "vintage_commit": "7e214fdd80",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2401.dispatch-script-all-ten-non-ascii-characters-out.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2401",
+  "session_log": "No separate session log. The drive is the worker branch wk-IRPT_DASHBD-2401 cut from the issuance commit 7e214fdd80. Commit 4f669b761c carries the ten fixed replacements in orion-gold-dispatch.sh (eight em dashes to two hyphen-minus characters, two section signs to the word section and one space) and the test file: the base read for the diff now carries the same ten replacements, and the new test test_whole_dispatch_script_is_ascii asserts the entire file decodes as ASCII. The mutant of step 5 was made and reverted byte-for-byte (sha256 7b206030bfc7 before and after) and is not a commit. This instance is carried by the commit after 4f669b761c. The order is NOT flipped by the worker: the issuer flips it. No AWS call; nothing uploaded or run on the runner. Worker tool calls are not recorded here.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/inf/scripts/gold/orion-gold-dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "4f669b761c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT DEPLOYED: offline text edit; the live copy on the runner is the pre-round-135 one and this edit is a later release's act. 2252 lines before and after; 0 non-ASCII bytes; LF endings; bash -n passes. Only the ten non-ASCII lines (50, 659, 986, 1254, 1270, 1352, 1433, 1594, 1596, 2000 of the base) differ from the pinned base copy, each by the fixed mapping.",
+      "artifact_covered_by": [
+        "DBF137-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/inf/scripts/gold/tests/test_dispatch_txn_block.py",
+      "kind": "test",
+      "commit_or_etag": "4f669b761c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "29 offline tests; the diff-against-base tests read the round-135 base with the ten replacements applied, and test_whole_dispatch_script_is_ascii asserts bytes.decode(ascii) succeeds on the whole script. No AWS call; run_txn_step runs under bash with a stub timeout first on PATH.",
+      "artifact_covered_by": [
+        "DBF137-4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF137-4-AC1",
+      "criterion_verbatim": "`DBF137-4-AC1` -- the dispatch script holds no non-ASCII character; against the pinned base it has the same lines, every line of the base without a non-ASCII character is identical, and each of the ten others equals the base line with the fixed mapping applied (two hyphens for the em dash, `section ` for the sign); `bash -n` passes; LF endings. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p137_ascii.py\" . DBF137-4-AC1",
+      "output_evidence": "At 4f669b761c: the issuer's checker prints 'DBF137-4-AC1 PASS', rc 0. The base copy dispatch_r137_base.sh.txt carries sha256 prefix 70b5774422c6 (the order's pin). The checker's line_problems leg finds the 2252 lines equal line for line against the base: the non-ASCII lines equal the base lines with the mapping, the ASCII lines are unchanged; bash -n leg returns 0.",
+      "denominator": "1 of 1 criterion. Dispatch script: 0 non-ASCII characters of the file's total; 10 of 10 base non-ASCII lines changed (8 em dashes, 2 section signs); 2252 of 2252 lines equal the expected text.",
+      "status": "PASS",
+      "expect": "DBF137-4-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DBF137-4-AC2",
+      "criterion_verbatim": "`DBF137-4-AC2` -- the dispatch test file holds at least 29 tests including one named for the whole file being ASCII, and it and the three existing dispatch-related test files pass. Base: FAIL (28 tests).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p137_ascii.py\" . DBF137-4-AC2",
+      "output_evidence": "At 4f669b761c: the issuer's checker prints 'DBF137-4-AC2 PASS', rc 0. Its pytest legs (the dispatch test file and the three existing files) each return rc 0. Measured by pytest in this worktree: test_dispatch_txn_block.py '29 passed in 4.12s' rc 0; test_aor_resolution.py '64 passed' rc 0; test_aor_fold_derivation.py '22 passed' rc 0; test_pull_inflection_scope_account_returns.py '19 passed' rc 0.",
+      "denominator": "1 of 1 criterion. Dispatch test file: 29 of 29 tests collected and pass (28 at base plus the new whole-file ASCII test; the checker requires at least 29). Three existing files: 105 of 105 pass (64 + 22 + 19).",
+      "status": "PASS",
+      "expect": "DBF137-4-AC2 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One temporary mutant on orion-gold-dispatch.sh: the em dash restored on line 50 (the SCRIPT-LOAD CONTRACT comment), the other nine lines unchanged. Reverted from a saved copy, byte-for-byte (sha256 7b206030bfc7 before and after the revert).",
+      "expected": "The whole-file ASCII test fails and the checker's AC1 fails.",
+      "observed": "pytest -k whole on the dispatch test file: 1 failed, 28 deselected, UnicodeDecodeError on byte 0xe2 at position 1916 in test_whole_dispatch_script_is_ascii. Checker DBF137-4-AC1 under the mutant: 'reason: the dispatch script must hold no non-ASCII character (all ten out)' and 'DBF137-4-AC1 FAIL', rc 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared for each criterion: p137_ascii.py run twice for DBF137-4-AC1 and twice for DBF137-4-AC2 at 4f669b761c (same tree, no edits between runs); outputs compared byte for byte",
+      "expected": "Identical output and rc each run.",
+      "observed": "DBF137-4-AC1: both runs 'DBF137-4-AC1 PASS', rc 0, outputs identical. DBF137-4-AC2: both runs 'DBF137-4-AC2 PASS', rc 0, outputs identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, listing or upload of any kind; the script is not uploaded and not run.",
+      "reason": "The order states NO AWS in this order and that the live copy is a later release's act."
+    },
+    {
+      "item": "The advisory HOLD_INF_CANONICAL_NNA_REBUILD_20260713.md:78, printed by the commit's risk reflex against orion-gold-dispatch.sh.",
+      "reason": "The order's bounds read the HOLD: it concerns the build_assets_dim collision between code/gold and code/silver. The collision-check lines (560-571 of the base) are not among the ten edited lines, and this edit uploads no S3 object."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p137_ascii.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p137_ascii.py\" . DBF137-4-AC1 | DBF137-4-AC2",
+      "result": "DBF137-4-AC1 PASS rc 0; DBF137-4-AC2 PASS rc 0."
+    },
+    {
+      "tool": "pytest (the dispatch test file and the three existing dispatch-related files)",
+      "invocation": "python -m pytest <file> -q -p no:cacheprovider",
+      "result": "29 passed; 64 passed; 22 passed; 19 passed; each rc 0."
+    },
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n data/inf/scripts/gold/orion-gold-dispatch.sh",
+      "result": "rc 0."
+    }
+  ]
+}

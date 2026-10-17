@@ -9,9 +9,12 @@ under a pair, after 2.0.0_SA_COO~V2's release.
   --plan                      prints the plan and exits 0; no network, no stdin.
   --selftest                  offline checks of the guard and the verdicts; exits 0 when they hold.
   --base URL --email ADDR --ticket ID --firm-a ID --firm-b ID --request-id ID --job-id ID --out DIR
-                              --go IRPT_ANLREQ.TO-RUN-FWD5.<id>
+                              [--report-id ID] [--export-id ID] --go IRPT_ANLREQ.TO-RUN-FWD5.<id>
                               the run. --firm-b, --request-id and --job-id are REQUIRED for a run: a missing one
-                              exits 2 before any request is sent. Without a --go matching
+                              exits 2 before any request is sent. --report-id (the narrative route) and --export-id
+                              (the export-receipt route) are optional at parse time: without one, that route is
+                              UNREACHED and the run exits 2; a supplied one must be an id (checked before sign-in).
+                              Neither is a LEAK marker. Without a --go matching
                               ^IRPT_ANLREQ\\.TO-RUN-FWD5\\.\\S+$ it prints the plan and exits 0 with no request sent.
                               The password is read from stdin as one JSON object {"password": "..."}; it is never
                               printed, logged or written.
@@ -23,8 +26,9 @@ under a pair, after 2.0.0_SA_COO~V2's release.
 Control verdicts (--control only, a closed set): ALLOWED, DENIED, UNREACHED, EXCLUDED.
   any 2xx on a ticket route                      -> ALLOWED (a 2xx is the pass here, not a leak; no marker scan)
   a 2xx on a report-side route (/api/scoped/investor-reporting/) is read by its ENVELOPE (AR-tz-72): ok true
-      -> ALLOWED; ok false with code CONTRACT_VERSION or ? -> UNREACHED; ok false with any other code -> DENIED
-      (the reason names the code); not a JSON object or no boolean ok -> UNREACHED
+      -> ALLOWED; a JSON object with NO ok key (a served body, AR-tz-74) -> ALLOWED; ok false with code
+      CONTRACT_VERSION or ? -> UNREACHED; ok false with any other code -> DENIED (the reason names the code);
+      not a JSON object or a non-boolean ok -> UNREACHED
   a 2xx ticket-list whose JSON carries a tickets list with the ticket id (case-insensitive) -> ALLOWED;
   a 2xx ticket-list without it                   -> DENIED
   401, 403 or 404                                -> DENIED
@@ -38,9 +42,13 @@ Control verdicts (--control only, a closed set): ALLOWED, DENIED, UNREACHED, EXC
 Verdicts (a closed set): REFUSED, LEAK, UNREACHED, EXCLUDED.
   any 2xx on a ticket route                      -> LEAK (a 2xx is never a refusal, an empty body included)
   a 2xx on a report-side route (/api/scoped/investor-reporting/) is read by its ENVELOPE (AR-tz-72), after the
-      marker scan: ok true -> LEAK; ok false with code FIRM_BINDING or NOT_AUTHORIZED -> REFUSED; ok false with any
-      other code (CONTRACT_VERSION and ? included) -> UNREACHED, the reason says so; not a JSON object or no boolean
-      ok -> UNREACHED
+      marker scan: a JSON object with NO ok key is a served body (AR-tz-74) -> LEAK; ok true -> LEAK; ok false with
+      code FIRM_BINDING or NOT_AUTHORIZED -> REFUSED; ok false with any other code (CONTRACT_VERSION and ? included)
+      -> UNREACHED, the reason says so; not a JSON object or a non-boolean ok -> UNREACHED
+  on the route request-read-no-selection (no selected_tenant: the caller's own firm anchors the bucket, so absence
+      is the answer): ok false with any code but CONTRACT_VERSION and ? -> REFUSED (the reason says "no selection:
+      refused by <code> in the caller's own tenant"); CONTRACT_VERSION or ? -> UNREACHED; ok true or a served body
+      -> LEAK
   every GET carries X-Contract-Version: v1 (the served route refuses a request without it before any read)
   the row's code is the envelope's reason code on a report-side route read by its envelope, else the empty string
   a 2xx ticket-list whose JSON carries a tickets list and no marker -> REFUSED (the other firm's ticket is absent)
@@ -89,14 +97,23 @@ NOT_FENCE_CODES = ("CONTRACT_VERSION", "?")  # a refusal that says nothing about
 CODE_RE = re.compile(r"^[A-Z][A-Z0-9_]{2,40}$")
 SEG = r"[A-Za-z0-9_-]+"
 
-# The guard: GET only to these path shapes (the ticket routes and the package-file routes the record lists),
-# POST only to the sign-in route. Matched on the path, after the origin is checked. The query is not matched.
+# The guard: GET only to these path shapes (the ticket routes, the package-file routes the record lists, and the
+# report-side read shapes of AR-tz-74), POST only to the sign-in route. Matched on the path, after the origin is
+# checked. The query is not matched. Not admitted: .../export/<seg>/download and the bare .../status. The ticket-read
+# shape takes one segment as a ticket id but not the two reserved words claim and metrics; metrics is admitted by its
+# own exact entry (AR-tz-76), and claim is admitted by nothing.
 GET_ALLOWED = (
     re.compile(r"/api/scoped/tickets"),
-    re.compile(r"/api/scoped/tickets/" + SEG),
+    re.compile(r"/api/scoped/tickets/metrics"),
+    re.compile(r"/api/scoped/tickets/(?!(?:claim|metrics)$)" + SEG),
     re.compile(r"/api/scoped/tickets/" + SEG + r"/attachment"),
     re.compile(r"/api/scoped/investor-reporting/analysis/requests/" + SEG + r"/(?:original|pdf|commentary-pdf)"),
     re.compile(r"/api/scoped/investor-reporting/analysis/" + SEG + r"/sections"),
+    re.compile(r"/api/scoped/investor-reporting/analysis/requests"),
+    re.compile(r"/api/scoped/investor-reporting/analysis/requests/" + SEG),
+    re.compile(r"/api/scoped/investor-reporting/status/" + SEG),
+    re.compile(r"/api/scoped/investor-reporting/narrative/" + SEG),
+    re.compile(r"/api/scoped/investor-reporting/export/" + SEG),
 )
 POST_ALLOWED = (re.compile(r"/auth/login"),)
 
@@ -107,6 +124,9 @@ ROUTES = (
      "needs": ("ticket",), "list": False, "plan": "the ticket read (the whole record if it leaked)"},
     {"name": "ticket-list", "method": "GET", "template": "/api/scoped/tickets",
      "needs": (), "list": True, "plan": "the principal's list: the other firm's ticket must be absent"},
+    {"name": "tickets-metrics", "method": "GET", "template": "/api/scoped/tickets/metrics",
+     "needs": (), "list": False,
+     "plan": "the ticket metrics (a ticket-service route that needs no id; no selected_tenant is sent)"},
     {"name": "form-as-filled", "method": "GET", "template": "/api/scoped/tickets/{ticket}/attachment",
      "needs": ("ticket",), "list": False, "plan": "the trade form as filled (the attachment presign route)"},
     {"name": "original-upload", "method": "GET",
@@ -125,6 +145,32 @@ ROUTES = (
     {"name": "commentary-pdf", "method": "GET",
      "template": "/api/scoped/investor-reporting/analysis/requests/{request_id}/commentary-pdf?selected_tenant={firm_b}",
      "needs": ("request_id", "firm_b"), "list": False, "plan": "the commentary PDF"},
+    {"name": "request-read", "method": "GET",
+     "template": "/api/scoped/investor-reporting/analysis/requests/{request_id}?selected_tenant={firm_b}",
+     "needs": ("request_id", "firm_b"), "list": False,
+     "plan": "the analysis request read (the request record, whole if it leaked)"},
+    {"name": "request-history", "method": "GET",
+     "template": "/api/scoped/investor-reporting/analysis/requests?selected_tenant={firm_b}",
+     "needs": (), "list": False,
+     "plan": "the request history list (needs no id: the other firm's request must be absent)"},
+    {"name": "job-status", "method": "GET",
+     "template": "/api/scoped/investor-reporting/status/{job_id}?selected_tenant={firm_b}",
+     "needs": ("job_id", "firm_b"), "list": False, "plan": "the job status read"},
+    {"name": "narrative", "method": "GET",
+     "template": "/api/scoped/investor-reporting/narrative/{report_id}?selected_tenant={firm_b}",
+     "needs": ("report_id", "firm_b"), "list": False,
+     "plan": "the report narrative; the report id comes from --report-id (the firm fence refuses before any id "
+             "is read)"},
+    {"name": "export-receipt", "method": "GET",
+     "template": "/api/scoped/investor-reporting/export/{export_id}?selected_tenant={firm_b}",
+     "needs": ("export_id", "firm_b"), "list": False,
+     "plan": "the export receipt; the export id comes from --export-id (the firm fence refuses before any id "
+             "is read)"},
+    {"name": "request-read-no-selection", "method": "GET",
+     "template": "/api/scoped/investor-reporting/analysis/requests/{request_id}",
+     "needs": ("request_id",), "list": False, "no_selection": True,
+     "plan": "the request read with NO selected_tenant: the caller's own firm anchors the bucket, so absence is the "
+             "answer"},
     {"name": "meeting", "method": "POST", "template": "/api/scoped/tickets/{ticket}/meeting",
      "needs": ("ticket",), "list": False,
      "plan": "EXCLUDED: a POST of a meeting is never sent",
@@ -236,36 +282,57 @@ def envelope_of(body):
     return (ok if isinstance(ok, bool) else None), code
 
 
-def _run_envelope(body):
-    """The RUN verdict for a report-side 2xx that carries no marker: (verdict, reason, code). Only FIRM_BINDING and
-    NOT_AUTHORIZED are the firm fence; any other refusal code is UNREACHED, never REFUSED."""
+def ok_key_absent(body):
+    """True when a 2xx answer is a JSON object that carries NO ok key at all: a served body (AR-tz-74). A non-object,
+    a body that is not JSON, and a present but non-boolean ok are not this case. Read, never kept."""
+    try:
+        obj = json.loads(body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return False
+    return isinstance(obj, dict) and "ok" not in obj
+
+
+def _run_envelope(body, no_selection=False):
+    """The RUN verdict for a report-side 2xx that carries no marker: (verdict, reason, code). A JSON object with no ok
+    key is a served body and LEAK (AR-tz-74). Only FIRM_BINDING and NOT_AUTHORIZED are the firm fence; any other
+    refusal code is UNREACHED, never REFUSED. The no-selection route (no selected_tenant) reads absence: any refusal
+    but CONTRACT_VERSION or ? is REFUSED there, because the caller's own tenant is the bucket."""
     ok, code = envelope_of(body)
     if ok is None:
+        if ok_key_absent(body):
+            return "LEAK", "2xx served body with no ok key (content for the other firm)", code
         return "UNREACHED", "2xx answer is not a JSON object with a boolean ok", code
     if ok:
         return "LEAK", "2xx envelope with ok true", code
+    if no_selection:
+        if code in NOT_FENCE_CODES:
+            return "UNREACHED", "no selection: refused by %s, not an absence answer" % code, code
+        return "REFUSED", "no selection: refused by %s in the caller's own tenant" % code, code
     if code in FENCE_CODES:
         return "REFUSED", "refused by the firm fence (%s)" % code, code
     return "UNREACHED", "refused by %s, not by the firm fence" % code, code
 
 
-def classify_report(status, body, markers):
+def classify_report(status, body, markers, no_selection=False):
     """The RUN verdict for a report-side route: (verdict, reason, code). The marker scan runs first, as classify does;
     a non-2xx answer keeps classify's grading and carries no code; only a marker-free 2xx is read by its envelope."""
     if status is None or not 200 <= status < 300 or has_marker(body, markers):
         return classify(False, status, body, markers), "", ""
-    return _run_envelope(body)
+    return _run_envelope(body, no_selection)
 
 
 def control_report_answer(status, body, ticket):
     """The CONTROL verdict for a report-side route: (verdict, reason, code). A non-2xx keeps control_answer's grading.
-    A 2xx is read by its envelope: ok true ALLOWED; code CONTRACT_VERSION or ? UNREACHED; any other code DENIED; no
-    boolean ok UNREACHED. No marker scan: an entitled identity may see the ticket id."""
+    A 2xx is read by its envelope: a JSON object with no ok key (a served body, AR-tz-74) ALLOWED; ok true ALLOWED;
+    code CONTRACT_VERSION or ? UNREACHED; any other code DENIED; a non-boolean ok UNREACHED. No marker scan: an
+    entitled identity may see the ticket id."""
     if status is None or not 200 <= status < 300:
         verdict, reason = control_answer(False, status, body, ticket)
         return verdict, reason, ""
     ok, code = envelope_of(body)
     if ok is None:
+        if ok_key_absent(body):
+            return "ALLOWED", "2xx served body with no ok key", code
         return "UNREACHED", "2xx answer is not a JSON object with a boolean ok", code
     if ok:
         return "ALLOWED", "2xx envelope with ok true", code
@@ -399,7 +466,8 @@ def run_calls(routes, base, opener, token, ctx, markers, control=False):
                 elif control:
                     row["verdict"], row["reason"] = control_answer(r["list"], status, body, ctx["ticket"])
                 elif report:
-                    row["verdict"], row["reason"], row["code"] = classify_report(status, body, markers)
+                    row["verdict"], row["reason"], row["code"] = classify_report(
+                        status, body, markers, no_selection=r.get("no_selection", False))
                 else:
                     row["verdict"] = classify(r["list"], status, body, markers)
         rows.append(row)
@@ -454,7 +522,7 @@ def print_plan(routes=ROUTES, control=False):
     for r in routes:
         if r.get("excluded"):
             print("  - %s: %s" % (r["name"], r["excluded"]))
-    print("guard: same origin; GET only to the five listed shapes; POST only to /auth/login; else refused before send")
+    print("guard: same origin; GET only to the listed shapes; POST only to /auth/login; else refused before send")
     print("verdicts: REFUSED, LEAK, UNREACHED, EXCLUDED. exit 0 every made call REFUSED; 1 any LEAK; 2 any UNREACHED")
     print("a run needs --firm-b <id> --request-id <id> --job-id <id> (all REQUIRED: a missing one exits 2 before any "
           "request)")
@@ -486,7 +554,9 @@ def do_run(ns, stdin, routes, control=False):
                                                                     and FIRM_RE.match(ns.firm_b)) else None)
                or ("--firm-a and --firm-b must differ" if ns.firm_a == ns.firm_b else None)
                or ("--request-id is not an id" if not ID_RE.match(ns.request_id) else None)
-               or ("--job-id is not an id" if not ID_RE.match(ns.job_id) else None))
+               or ("--job-id is not an id" if not ID_RE.match(ns.job_id) else None)
+               or ("--report-id is not an id" if ns.report_id and not ID_RE.match(ns.report_id) else None)
+               or ("--export-id is not an id" if ns.export_id and not ID_RE.match(ns.export_id) else None))
     if problem:
         print("ERROR: " + problem)
         return 2
@@ -504,7 +574,8 @@ def do_run(ns, stdin, routes, control=False):
     if token is None:
         rows, refused = _unreached_rows(routes, why), []
     else:
-        ctx = {"ticket": ns.ticket, "firm_b": ns.firm_b, "request_id": ns.request_id, "job_id": ns.job_id}
+        ctx = {"ticket": ns.ticket, "firm_b": ns.firm_b, "request_id": ns.request_id, "job_id": ns.job_id,
+               "report_id": ns.report_id, "export_id": ns.export_id}
         markers = [ns.ticket.lower(), ns.firm_b.lower()]
         rows, refused = run_calls(routes, base, opener, token, ctx, markers, control=control)
     token = None
@@ -629,6 +700,31 @@ def selftest():
                                                                               "TKT-a1b2")[0], "UNREACHED"),
         ("envelope code outside closed shape is ?", envelope_of(_env(False, "lower_case"))[1], "?"),
         ("envelope code with newline is ?", envelope_of(_env(False, "FIRM_BINDING\n"))[1], "?"),
+        ("served body no ok key leaks", classify_report(200, b'{"status": {"state": "READY"}}', [])[0], "LEAK"),
+        ("served body no ok key is not a fence refusal", classify_report(200, b'{"items": []}', [])[0], "LEAK"),
+        ("control served body no ok key allowed", control_report_answer(200, b'{"items": []}', "TKT-a1b2")[0],
+         "ALLOWED"),
+        ("no selection NOT_FOUND refused", classify_report(200, _env(False, "NOT_FOUND"), [],
+                                                           no_selection=True)[0], "REFUSED"),
+        ("no selection CONTRACT_VERSION unreached", classify_report(200, _env(False, "CONTRACT_VERSION"), [],
+                                                                    no_selection=True)[0], "UNREACHED"),
+        ("no selection ok true leaks", classify_report(200, _env(True, "READY"), [], no_selection=True)[0], "LEAK"),
+        ("guard refuses export download", admit("GET", base + "/api/scoped/investor-reporting/export/REQ-a1b2"
+                                                "/download", base), False),
+        ("guard refuses bare status", admit("GET", base + "/api/scoped/investor-reporting/status", base), False),
+        ("guard admits status segment", admit("GET", base + "/api/scoped/investor-reporting/status/JOB-a1b2", base),
+         True),
+        ("guard admits tickets metrics", admit("GET", base + "/api/scoped/tickets/metrics", base), True),
+        ("guard refuses tickets metrics anything", admit("GET", base + "/api/scoped/tickets/metrics/anything", base),
+         False),
+        ("guard refuses tickets claim", admit("GET", base + "/api/scoped/tickets/claim", base), False),
+        ("tickets metrics sits after ticket list",
+         [r["name"] for r in ROUTES].index("tickets-metrics") == [r["name"] for r in ROUTES].index("ticket-list") + 1,
+         True),
+        ("narrative needs report_id", "report_id" in ROUTES[[r["name"] for r in ROUTES].index("narrative")]["needs"],
+         True),
+        ("export-receipt needs export_id",
+         "export_id" in ROUTES[[r["name"] for r in ROUTES].index("export-receipt")]["needs"], True),
     ]
     for name, got, want in checks:
         if got != want:
@@ -652,6 +748,12 @@ def main(argv=None, stdin=None, routes=None):
                    help="REQUIRED for a run: the request id, sourced from the ticket the FWD-1 run files")
     p.add_argument("--job-id", dest="job_id",
                    help="REQUIRED for a run: the job id, sourced from the ticket the FWD-1 run files")
+    p.add_argument("--report-id", dest="report_id",
+                   help="the report id for the narrative route (AR-tz-76); optional, a run without it leaves "
+                        "narrative UNREACHED")
+    p.add_argument("--export-id", dest="export_id",
+                   help="the export id for the export-receipt route (AR-tz-76); optional, a run without it leaves "
+                        "export-receipt UNREACHED")
     p.add_argument("--out")
     p.add_argument("--go")
     p.add_argument("--control", action="store_true",

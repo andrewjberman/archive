@@ -35,6 +35,7 @@ TESTS = IR + "__tests__/irpt-dashbd/"
 TEST_PREFIX = "performance-template-firm-gate"
 PANELS = IR + "tabs/reporting/PerformanceHoldingsPanels.tsx"  # AMENDMENT 1 (DB-b-316): the folded-in panels component and its tests are admitted
 PANELS_TEST_PREFIX = "performance-holdings-panels"
+PARITY_TESTS = [IR + "__tests__/fe-s-10/parity.test.ts", IR + "__tests__/dsgn-irptv1/iv-e-23.parity-kept.test.ts"]  # AMENDMENT 2 (DB-b-316, page owner msg 10029, CTO msg 10031): the parity fixture seeds the header selection
 
 
 def check_diff(root):
@@ -48,12 +49,12 @@ def check_diff(root):
     p175.need(rc == 0, "cannot diff against %s" % BASE[:8])
     changed = {x for x in out.splitlines() if x.strip()}
     p175.need(changed, "nothing changed since the DB-b-309 head")
-    extra = [f for f in changed if f not in (TAB, PANELS) and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith((TEST_PREFIX, PANELS_TEST_PREFIX)))]
+    extra = [f for f in changed if f not in (TAB, PANELS, PARITY_TESTS[0]) and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith((TEST_PREFIX, PANELS_TEST_PREFIX)))]
     p175.need(not extra, "portal files outside the agreed write set changed: %s" % extra[:4])
     p175.need(TAB in changed and any(f.startswith(TESTS + TEST_PREFIX) for f in changed), "ReportingTab.tsx and a test file named %s* must both be in the diff" % TEST_PREFIX)
     stat, _ = p175.git(p, "diff", "--numstat", BASE, "HEAD", "--", TAB)
     nums = stat.split()
-    p175.need(len(nums) >= 2 and nums[0].isdigit() and int(nums[0]) + int(nums[1]) <= 8, "ReportingTab.tsx may change only by the firm test around the one mount (at most 8 lines): %s" % stat.strip())
+    p175.need(len(nums) >= 2 and nums[0].isdigit() and int(nums[0]) + int(nums[1]) <= 16, "ReportingTab.tsx may change only by the client-firm test around the one mount and the panels mount (at most 16 lines): %s" % stat.strip())
     tab = (p / TAB).read_text(encoding="utf-8")
     i = tab.find("<PerformanceTemplateView")
     p175.need(i != -1 and tab.count("<PerformanceTemplateView") == 1, "ReportingTab.tsx must still mount <PerformanceTemplateView exactly once")
@@ -70,12 +71,16 @@ def check_tests(root):
     text = " ".join(f.read_text(encoding="utf-8") for f in files).lower()
     for firm in ("49 financial", "cottonwood", "inflection"):
         p175.need(firm in text or firm.replace(" ", "") in text, "the test file does not name the firm %s" % firm)
+    p175.need("global" in text and ("advisor" in text or "one-firm" in text or "one firm" in text), "the test file must cover Global with a 49F, a Cottonwood and an Inflection client, and a one-firm advisor at 49F (the words Global and advisor or one-firm)")
     p175.need("path a" in text, "the test file must prove that Inflection keeps its PATH A performance (the words 'PATH A')")
     bun = shutil.which("bun")
     p175.need(bun is not None, "bun is not on the PATH")
     r = p175.run([bun, "test", str((files[0]).relative_to(p))], p, 600)
     p175.need(r.returncode == 0, "the cell's tests failed: %s" % (r.stdout + r.stderr)[-800:].replace("\n", " | "))
     p175.need(re.search(r"\b[3-9]\d* pass", r.stdout + r.stderr) is not None or re.search(r"\b\d+ pass", r.stdout + r.stderr) is not None, "bun printed no pass count")
+    for rel in PARITY_TESTS:
+        rp = p175.run([bun, "test", rel], p, 600)
+        p175.need(rp.returncode == 0, "the Global-vs-firm parity test %s fails on this head: %s" % (rel.rsplit("/", 1)[-1], (rp.stdout + rp.stderr)[-500:].replace("\n", " | ")))
     return True
 
 

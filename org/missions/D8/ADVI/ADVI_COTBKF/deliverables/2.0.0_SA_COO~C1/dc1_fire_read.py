@@ -78,6 +78,11 @@ def count_changed(a, b):
     return sum(1 for k in a if k in b and a[k] != b[k])
 
 
+def count_dropped(a, b):
+    # CTO msg 7159: the flip count covers accounts present in both builds; accounts in the earlier build and absent from the later one print apart.
+    return sum(1 for k in a if k not in b)
+
+
 mode = sys.argv[1] if len(sys.argv) > 1 else "fire"
 SCR.mkdir(parents=True, exist_ok=True)
 if mode == "baseline":
@@ -113,11 +118,14 @@ elif mode == "compare":
         print("C1-COUNT builds=%d multibook=0 changed_portfolio_group=-1" % len(snaps))
     else:
         a, b = (json.loads(f.read_text(encoding="utf-8"))["map"] for f in snaps[-2:])
-        print("C1-COUNT builds=%d multibook=%d changed_portfolio_group=%d" % (len(snaps), len(b), count_changed(a, b)))
+        print("C1-COUNT builds=%d multibook=%d changed_portfolio_group=%d dropped_between_builds=%d" % (len(snaps), len(b), count_changed(a, b), count_dropped(a, b)))
 else:
     _, _, p = newest_partition()
     m = mb_map(p)
     mut = dict(m)
     for k in list(mut)[:3]:
         mut[k] = mut[k] + "x"
-    print("CONTROL same=%d mutated=%d" % (count_changed(m, m), count_changed(m, mut)))
+    gone = dict(m)
+    for k in list(gone)[:2]:
+        del gone[k]
+    print("CONTROL same=%d mutated=%d dropped_same=%d dropped_removed=%d" % (count_changed(m, m), count_changed(m, mut), count_dropped(m, m), count_dropped(m, gone)))

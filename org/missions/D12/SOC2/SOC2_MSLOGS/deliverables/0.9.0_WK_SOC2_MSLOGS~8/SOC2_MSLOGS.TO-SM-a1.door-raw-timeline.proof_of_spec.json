@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-SM-a1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/prd/SOC2_MSLOGS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b70901264f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP.md",
+    "vintage_commit": "b70901264f",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-a1.door-raw-timeline.md"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/handler.py",
+      "kind": "script",
+      "commit_or_etag": "e75087cdbd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-8, LOCAL only, at e75087cdbd (AMENDMENT 2: detail=true on timeline). Not deployed: no package build, no upload and no Lambda update; WORLD by the gate's path floor, nothing applied or called live (order BOUNDS).",
+      "artifact_covered_by": [
+        "SM1-a1-AC1",
+        "SM1-a1-AC2",
+        "SM1-a1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
+      "kind": "test",
+      "commit_or_etag": "e75087cdbd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-8, LOCAL only, at e75087cdbd. A test file is not deployed; 202 tests pass in the worktree (python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_handler.py -q)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/trino/access.tf",
+      "kind": "terraform",
+      "commit_or_etag": "b70901264f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT EDITED by this worker: the file is at its base state (the CloudOps seat's state, as the spawn instruction said). AC3 passes on it unchanged. No terraform init, plan or apply was run.",
+      "artifact_covered_by": [
+        "SM1-a1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SM1-a1-AC1",
+      "criterion_verbatim": "the member alias serves `timeline` (any account, in time order, capped at 5000 with truncated) and `recollect` (the door invokes the collector asynchronously and never takes bytes); `get_day` is gone on every alias; the collector alias is served neither; bad windows are refused; the rest of the alias matrix and the log discipline hold.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_a1.py ops",
+      "output_evidence": "A1-OPS-OK calls_logged=22\nrc=0",
+      "denominator": "1 verdict line of 1 (A1-OPS-OK); 22 door calls logged in the run, the check's bad-list empty. Run from the worktree root C:/dev/wk-soc2-8 under timeout 120.",
+      "status": "PASS",
+      "expect": "A1-OPS-OK"
+    },
+    {
+      "criterion_id": "SM1-a1-AC2",
+      "criterion_verbatim": "a second write to an existing bronze key is refused as already stored and changes no byte; the frozen `audit_events` table accepts no write; derive reads two day partitions and passes `only_date`; the key grammar admits the builder's `audit_records` key and refuses a name, an address and a bad partition.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_a1.py bronze",
+      "output_evidence": "A1-BRONZE-OK\nrc=0",
+      "denominator": "1 verdict line of 1 (A1-BRONZE-OK); the check's bad-list empty across the write-once, head-failure, frozen-table, derive and key-grammar arms. Run from the worktree root under timeout 120.",
+      "status": "PASS",
+      "expect": "A1-BRONZE-OK"
+    },
+    {
+      "criterion_id": "SM1-a1-AC3",
+      "criterion_verbatim": "`access.tf` lets the door role invoke the collector function alone, sets `COLLECTOR_FUNCTION`, keeps the bucket Deny without `ListBucket` and the group policy on the member alias alone, and names no Ticket Center project.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_a1.py tf",
+      "output_evidence": "A1-TF-OK\nrc=0",
+      "denominator": "1 verdict line of 1 (A1-TF-OK); the check's bad-list empty across the role policy, the function environment, the TCKT absence, the bucket Deny, the group policy, and the alarm and wildcard arms. access.tf unchanged by this worker.",
+      "status": "PASS",
+      "expect": "A1-TF-OK"
+    },
+    {
+      "criterion_id": "SM1-a1-AC4",
+      "criterion_verbatim": "a detail timeline returns each record whole under `raw`, caps at 1000 rows and 5,000,000 bytes with `truncated`, refuses a non-boolean `detail`, and leaves the plain answer and its 5000 cap unchanged.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_a1.py detail",
+      "output_evidence": "A1-DETAIL-OK\nrc=0",
+      "denominator": "1 verdict line of 1 (A1-DETAIL-OK); the check's bad-list empty across the whole-record, row-cap, byte-cap, boolean-refusal and plain-cap arms. Before the edit the same check printed A1-DETAIL-REFUSED rc=1 (each detail arm failing).",
+      "status": "PASS",
+      "expect": "A1-DETAIL-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of handler.py in the worktree scratch folder with the byte cap removed (TIMELINE_DETAIL_MAX_BYTES = 10**12 in place of 5000000); the detail criterion re-run against that copy from the copy's root (.scratch/mutant), the check's own path.",
+      "expected": "A1-DETAIL-REFUSED: the byte cap must refuse a detail answer above 5,000,000 bytes.",
+      "observed": "A1-DETAIL-REFUSED a detail answer must stay under 5,000,000 bytes and say truncated (bytes 8489522, rows 900); rc=1. Only the byte arm fails in the mutant.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of the four criterion invocations, first verdict lines compared.",
+      "observed": "Identical: A1-OPS-OK calls_logged=22, A1-BRONZE-OK, A1-DETAIL-OK, A1-TF-OK, each rc=0 in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live member-alias invoke, package build, Lambda update and terraform apply or plan against the backend",
+      "reason": "WORLD by the gate's path floor; the order's BOUNDS forbid any AWS call, S3 access, Lambda invoke or backend init. Release is SM-r-1."
+    },
+    {
+      "item": "access.tf",
+      "reason": "Not edited, per the spawn instruction: the CloudOps seat has changed it, and the amendment needs no Terraform change. AC3 passes on the file as it stands."
+    },
+    {
+      "item": "A real parquet read by the default timeline reader, and the detail default-reader path against real silver bytes",
+      "reason": "The unit tests inject pyarrow through a stub module; no real parquet is read in this worktree."
+    },
+    {
+      "item": "A mutant control of the detail caps",
+      "reason": "Not run: the negative arm (the same check at the base) is the discriminating control recorded above."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~8/SOC2_MSLOGS.TO-SM-a1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "s1_check_a1.py detail (negative arm, baseline)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_a1.py detail, run at base b70901264f before the edit",
+      "result": "A1-DETAIL-REFUSED: each detail row lacked 'raw'; the door never asked its reader for detail; 1200 rows answered where 1000 is the cap; 900 rows at 189832 bytes with no truncation; detail='yes', 1 and None admitted; rc=1"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_handler.py -q -p no:cacheprovider",
+      "result": "202 passed in 0.52s, rc=0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 --select E,F,W --ignore E501 infra/aws/lambda/globgrph-trino-access/handler.py infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
+      "result": "All checks passed!, rc=0"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_SOC2_MSLOGS~8 <0.9.0_WK_SOC2_MSLOGS~8@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit at e75087cdbd: commit-gate OK; surprise-row-gate OK (no rows); to-pipeline-gate OK; a NAMING ERROR line (function-map folder missing) and risk-reflex HOLD notes printed; the commit was not refused"
+    }
+  ]
+}

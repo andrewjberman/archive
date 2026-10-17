@@ -1,0 +1,18 @@
+{
+  "file": "infra/aws/terraform/inf-pipeline/iam.tf",
+  "lines_added": 64,
+  "policy_resource": "aws_iam_role_policy.inf_gold_layer_account_transaction",
+  "policy_name_builder_output": "orion-inf-account-transaction-policy",
+  "statements": [
+    {"sid": "S1ReadOrionInflectionTransactionsSilverOnly", "actions": ["s3:GetObject"]},
+    {"sid": "S2ListOrionInflectionTransactionsSilverOnly", "actions": ["s3:ListBucket"], "condition": "StringLike on s3:prefix = [silver key, silver key/*]"},
+    {"sid": "S3PutInflectionAccountTransactionGoldOnly", "actions": ["s3:PutObject"]}
+  ],
+  "derived_addresses": {
+    "silver_prefix_template": "${local.scope_feed_source}/${local.scope_feed_scope}/silver/fact_transactions",
+    "gold_prefix_template": "irpt/${local.scope_feed_scope}/gold/account_transaction"
+  },
+  "registry_files_touched": 0,
+  "other_files_touched": 0,
+  "words": "The new resource aws_iam_role_policy.inf_gold_layer_account_transaction, named by the opal_name module account_transaction_policy_name (system orion, scope inflection, function account-transaction, kind policy), is inserted into inf-pipeline/iam.tf just before the runner-shared policy as a pure insertion of 64 ASCII LF lines with zero base lines changed. Its locals derive the silver bucket from the FIRM silver tier home (opal-data-assets), the silver key from the registry source and long scope plus the table fact_transactions, the gold bucket from the Inflection scope row (opal-data-inflection) and the gold key from the long scope plus the table account_transaction; no bucket name is typed. The policy holds three Allow statements: GetObject on the children of the silver prefix; ListBucket on the silver bucket, conditioned by StringLike on s3:prefix to the prefix and its children; and PutObject on the children of the one gold prefix. The builder returns orion-inf-account-transaction-policy and needs no registry row, so no registry or standards file was touched. The derived silver prefix equals address('orion', 'inflection', 'silver', 'fact_transactions') without its partition segment, in bucket opal-data-assets; the derived gold prefix equals address('irpt', 'inflection', 'gold', 'account_transaction') without its partition segment, in bucket opal-data-inflection. Checks DBF137-5-AC1 and DBF137-5-AC2 both PASS on the worktree, selftest 10 arms PASS. NOT PROVEN: no terraform plan was run and nothing was applied; the trust policy, the role's other consumers and a post-apply policy simulation remain the applier's steps under the signed pair. The scope row marks opal-data-inflection provisioned, but an alias note in scopes.json says it does not exist yet (surprise row IRPT_DASHBD-D2-W2501-S1); existence was not checked, since no AWS call was made."
+}
