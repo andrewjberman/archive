@@ -30,11 +30,12 @@ import json, re, sys
 raw = open(sys.argv[1], encoding="utf-8").read()
 d = json.loads(raw); b = d.get("body", d)
 isn = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)
+GUARDS = ("oom_score_adj_1000_rlimit_as_1400mb", "oom_score_adj_1000_cgroup_memmax_1400mb")
 same = b.get("release_sha") == sys.argv[2]
 pe = b.get("peers") or {}
 peers_ok = (pe.get("candidate_outcome") in ("empty_section", "refusal") and isn(pe.get("candidate_peak_rss_mb")) and pe["candidate_peak_rss_mb"] <= 700
             and isn(pe.get("candidate_wall_s")) and pe["candidate_wall_s"] <= 30 and pe.get("live_outcome") in ("MemoryError", "killed_by_guard")
-            and pe.get("guard") == "oom_score_adj_1000_rlimit_as_1400mb")
+            and pe.get("guard") in GUARDS)
 vp = b.get("valid_pair") or {}
 valid_ok = vp.get("answered") is True and isn(vp.get("peak_rss_mb")) and vp["peak_rss_mb"] <= 700 and isn(vp.get("rows_matched"))
 ch = b.get("chain") or {}
@@ -45,7 +46,7 @@ un = b.get("unit") or {}
 unit_ok = un.get("cgroup_v2") is True and un.get("memory_controller") is True and un.get("verify_rc") == 0 and un.get("scratch_removed") is True
 runs = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", re.sub(r'"[0-9a-f]{40}"', '""', raw))
 ok = same and peers_ok and valid_ok and chain_ok and unit_ok and not runs
-print("host runs on release_sha %s, every one under a hard guard (oom_score_adj 1000, address space 1400 MB)" % ("equal" if same else "NOT equal"))
+print("host runs on release_sha %s, every one under a hard guard (oom_score_adj 1000, and an address-space or cgroup memory limit of 1400 MB)" % ("equal" if same else "NOT equal"))
 print("the call that ran away: candidate %s, peak RSS %s MB (limit 700), %s s (limit 30); the live code under the same guard: %s: %s" % (
     pe.get("candidate_outcome"), pe.get("candidate_peak_rss_mb"), pe.get("candidate_wall_s"), pe.get("live_outcome"), "ok" if peers_ok else "NOT OK"))
 print("a valid period and axis: answered %s, rows matched %s, peak RSS %s MB (limit 700): %s; 49F chain: %s pages, median growth %s MB (limit 20), first page %s s (limit 45), host peak %s, pages equal the live code's %s: %s; unit: cgroup v2 %s, memory controller %s, systemd-analyze verify rc %s: %s" % (
