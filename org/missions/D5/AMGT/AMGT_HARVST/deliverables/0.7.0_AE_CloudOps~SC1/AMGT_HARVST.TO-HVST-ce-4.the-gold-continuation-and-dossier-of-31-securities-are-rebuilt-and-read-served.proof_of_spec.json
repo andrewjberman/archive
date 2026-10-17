@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ce-4.the-gold-continuation-and-dossier-of-31-securities-are-rebuilt-and-read-served",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-4.the-gold-continuation-and-dossier-of-31-securities-are-rebuilt-and-read-served.md",
+    "group": "OTHER",
+    "vintage_commit": "cf65c3a1f7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "91e0283678",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-4.the-gold-continuation-and-dossier-of-31-securities-are-rebuilt-and-read-served.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_before.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 0: worktree at 344ea6a5fc, list sha256 equal to the signed value, CPA control and UNH/KMB before reads, in-memory canary builds with Mexico-id scans 0 and 0; and the record of the first driver process's silent death (cause not established).",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_written.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The write manifest and rollback list: 31 WROTE continuation and 31 WROTE dossier lines, 62 distinct keys, each with VersionId, bytes and sha256; 1 EXISTED-NOT-REWRITTEN (NOW continuation); the NOW gap note.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "amgt/harvest/gold/research-continuation/security_key=UNH_US_Equity/4d837586380648bd.json",
+      "kind": "s3_object",
+      "commit_or_etag": "FJCXLGZVvJpaB5h_WRZuJkhrZvkuqIiH",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "UNH continuation in s3://opal-data-harvest, 29433 bytes, VersionId FJCXLGZV..; served: fund_of_record PFOE, last_stated_position 'Maintain positions in PFOE and DIVZ' line_only true (one of 62 new keys, all in ce4_written.out).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_canary.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "C-6: UNH and KMB read served after the canary writes and before the other 29 (17:29Z to 17:30Z).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_served.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Served reads after all 31: UNH, KMB, 8035_JP, MNST, ZTS and the control CPA; ends with SERVED_CANARY=PASS, SERVED_SAMPLE_AND_CONTROL=PASS, WRITTEN continuation=31 dossier=31.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ce4_served.out carries SERVED_CANARY=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_served.out",
+      "expect": "(?m)^SERVED_CANARY=PASS$",
+      "output_evidence": "SERVED_CANARY=PASS",
+      "denominator": "Canary names UNH_US_Equity and KMB_US_Equity read served twice (after the canary writes at 17:29Z to 17:30Z, and again after all 31 at 19:3xZ) with identical content_sha256. UNH: fund PFOE and position text with line_only true; before: both absent. KMB: branch X (both absent with reasons), misfiled_fields_excluded [], 0 Mexico ids in any served field (2 report_id strings inside misfiled_reports_excluded).",
+      "status": "PASS",
+      "status_reason": "Both canary names read as the order expects on the served tool."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "ce4_served.out carries SERVED_SAMPLE_AND_CONTROL=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_served.out",
+      "expect": "(?m)^SERVED_SAMPLE_AND_CONTROL=PASS$",
+      "output_evidence": "SERVED_SAMPLE_AND_CONTROL=PASS",
+      "denominator": "3 of the 29 other names read served (the first 8035_JP, the middle MNST, the last ZTS of the sorted list), each equal to its census line; the control CPA_US_Equity (not rebuilt) equal to the step-0 reading in every value, content_sha256 and key. The other 26 were not read served (the order asks for three); their builds were checked against the census before each write.",
+      "status": "PASS",
+      "status_reason": "The three samples match the census and the control is unchanged."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "ce4_served.out carries WRITTEN continuation=31 dossier=31",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_served.out",
+      "expect": "(?m)^WRITTEN continuation=31 dossier=31$",
+      "output_evidence": "WRITTEN continuation=31 dossier=31",
+      "denominator": "ce4_written.out: 31 WROTE continuation and 31 WROTE dossier lines, 62 distinct keys, one pair per name of the signed 31-name list (checked by a script over the list), 0 NOT-WRITTEN. One name (NOW_US_Equity) was completed after the first driver process died between its continuation and dossier writes; its continuation was logged EXISTED-NOT-REWRITTEN on resume and counted once.",
+      "status": "PASS",
+      "status_reason": "All 31 pairs are in the manifest."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "continuation.build / continuation.write_one / dossier.build / dossier.write_one",
+      "invocation": "from a detached worktree at 344ea6a5fc through the guarded driver ce4_run.py (window, list, branch and Mexico-id checks), serial, no retry",
+      "result": "62 gold puts, all put_performed True existed False; no GoldImmutableError, no put error"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (6 legs), close-leg S0 B1 C1; R1 V1 Z1 close with this commit",
+      "result": "ledger harvst-ce4-gold-rebuild-20261017"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run",
+      "result": "NOT RUN per the preflight: no scheduled task is touched."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run",
+      "result": "NOT RUN per the preflight: the write principal is the one the harvest tooling already holds; no grant requested."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "not run",
+      "result": "RUN at the cut by the issuer per the preflight; this seat answered its adversaries by measured reads: the pinned worktree and list hash, the control read before the first write, the canary served before the other 29, branch and Mexico-id checks before each put, and the half pair on NOW completed and logged."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminating control is the unchanged name CPA_US_Equity, which is NOT rebuilt: it must read the same after as before, while the rebuilt names change. The old state (before any write) is the other arm: UNH read both fields absent and KMB's dossier cited the excluded reports.",
+      "expected": "Landed: UNH fund PFOE with line_only true, KMB with no served Mexico id, the sampled names equal to the census, CPA unchanged. Not landed (the pre-act state): UNH fund_of_record and last_stated_position absent in both parts, KMB's dossier fields excluded, CPA unchanged.",
+      "observed": "Before (17:19Z): UNH absent, KMB dossier excluded, CPA IDVZ/2%. After (17:30Z and 19:3xZ): UNH PFOE with line_only true, KMB absent with reasons and misfiled_fields_excluded [], 8035_JP/MNST/ZTS equal to their census lines, CPA identical (content_sha256 61b9977a..., same keys).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Serial writes, one name at a time, continuation before dossier; UNH and KMB read served at 17:30Z and again at 19:3xZ; the first 18 names rebuilt read-only at 19:29Z against the census.",
+      "observed": "UNH and KMB content_sha256 identical across the two reads; the rebuild of the first 18 read Branch A for 18 of 18 with 0 Mexico ids; one silent process death (cause not established) between NOW's two writes, completed once by the issuer's ruling.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The cause of the first driver process's silent death at 18:37Z to 18:45Z.",
+      "reason": "Not established (no crash or memory event, no reaper schedule found); recorded in ce4_before.out. The act was add-only and the half pair was completed under the issuer's ruling (msg 7706)."
+    },
+    {
+      "item": "Printed branch checks for the first 18 of the 29 names.",
+      "reason": "Lost with the first process's unflushed buffer; replaced by a read-only rebuild at 19:29Z (ce4_recheck.out), which proves agreement with the census now, not the bytes at write time (the manifest carries sha256 and VersionId per put)."
+    },
+    {
+      "item": "Served reads of 26 of the 29 other names.",
+      "reason": "The order asks for the first, a middle and the last; the rest were checked against the census before each write."
+    },
+    {
+      "item": "The rollback.",
+      "reason": "Removing a new key is an S3 delete, Andrew's act; not taken. ce4_written.out is the key list."
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round90/ce4_before.out"
+}
