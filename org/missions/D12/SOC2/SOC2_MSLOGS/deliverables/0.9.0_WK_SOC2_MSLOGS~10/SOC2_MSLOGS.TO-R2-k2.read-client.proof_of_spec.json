@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-R2-k2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-R2-k2.read-client.md",
+    "group": "OTHER",
+    "vintage_commit": "5795b96e64"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP_R2.md",
+    "vintage_commit": "5795b96e64",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-R2-k2.read-client.md"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/door_client.py",
+      "kind": "script",
+      "commit_or_etag": "5bbfce5028",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-10. New stdlib client: build_invoker (MFA session on the member alias), desktop_dir, write_desktop, derive_dates. No AWS call made; the live door and a real MFA session were not reached."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/read_timeline.py",
+      "kind": "script",
+      "commit_or_etag": "5bbfce5028",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-10. fetch(detail=True) pages; render shows user_id; main gains --detail --json --desktop --derive.",
+      "artifact_covered_by": ["R2-k2-AC1", "R2-k2-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_door_client.py",
+      "kind": "test",
+      "commit_or_etag": "5bbfce5028",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-10. Injected fakes only; no network."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_read_timeline.py",
+      "kind": "test",
+      "commit_or_etag": "5bbfce5028",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-SOC2_MSLOGS-10. Round-1 cases kept (render line updated for the who-acted column); paging, desktop, derive cases added."
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO~S1/deliverables/derive_days.py",
+      "kind": "script",
+      "commit_or_etag": "a0b0a75c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DELETED in 5bbfce5028 (pin is the pre-deletion commit a0b0a75c2e): replaced by door_client.derive_dates and read_timeline --derive.",
+      "artifact_covered_by": ["R2-k2-AC3"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO~S1/deliverables/read_timeline_to_desktop.ps1",
+      "kind": "script",
+      "commit_or_etag": "a0b0a75c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DELETED in 5bbfce5028 (pin is the pre-deletion commit a0b0a75c2e): replaced by read_timeline --desktop and door_client's MFA session.",
+      "artifact_covered_by": ["R2-k2-AC2", "R2-k2-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R2-k2-AC1",
+      "criterion_verbatim": "`detail` pages through a 1000-row door once per row in time order, a stuck page raises, the non-detail call is round 1's exactly, and every line says who acted.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py paging",
+      "output_evidence": "R2-PAGING-OK calls=3 (rc=0), identical on two runs. Base a0b0a75c2e, before the build: R2-PAGING-REFUSED TypeError: fetch() got an unexpected keyword argument 'detail' (rc=1).",
+      "denominator": "1 of 1 check line; the 2500-row paging case over a 1000-row door in 3 calls, every row once in time order; the stuck-window and round-1-payload cases are in the same check. pytest 50 of 50 passed (test_door_client.py + test_read_timeline.py).",
+      "status": "PASS",
+      "expect": "R2-PAGING-OK"
+    },
+    {
+      "criterion_id": "R2-k2-AC2",
+      "criterion_verbatim": "`--desktop` lands the answer as one file on the derived Desktop, byte for byte what the screen would show, refused inside the repository; the MFA code becomes a session on the member alias with no key printed.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py desktop",
+      "output_evidence": "R2-DESKTOP-OK (rc=0), identical on two runs. Base a0b0a75c2e: R2-DESKTOP-REFUSED missing ...door_client.py (rc=1).",
+      "denominator": "1 of 1 check line; covers desktop_dir (shell and fallback), refusal inside the repository, one file named timeline_<account>_<yyyymmdd>.txt byte-equal to the render, --json --desktop, the MFA session on the member alias with the code and the one device, and no key in stdout or stderr.",
+      "status": "PASS",
+      "expect": "R2-DESKTOP-OK"
+    },
+    {
+      "criterion_id": "R2-k2-AC3",
+      "criterion_verbatim": "`derive_dates` and `--derive` do what `derive_days.py` did, and both round-1 stopgap files are gone.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py retire",
+      "output_evidence": "R2-RETIRE-OK (rc=0), identical on two runs. Base a0b0a75c2e: R2-RETIRE-REFUSED missing ...door_client.py (rc=1). After the deletion the stopgap-presence test passed.",
+      "denominator": "1 of 1 check line; derive_dates ordering, verdicts and malformed-date refusal, one derive_silver call per date, --derive exit codes, and both stopgap paths absent. pytest 50 of 50 includes the --derive cases.",
+      "status": "PASS",
+      "expect": "R2-RETIRE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The same three checks run against the base HEAD a0b0a75c2e, before the client was built and the stopgaps deleted.",
+      "expected": "each check REFUSED",
+      "observed": "R2-PAGING-REFUSED TypeError: fetch() got an unexpected keyword argument 'detail'; R2-DESKTOP-REFUSED missing ...door_client.py; R2-RETIRE-REFUSED missing ...door_client.py (rc=1 each)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each check invocation on the built tree, outputs compared",
+      "observed": "run1 and run2: R2-PAGING-OK calls=3; R2-DESKTOP-OK; R2-RETIRE-OK (rc=0 each)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "data/m365_metadata/scripts/silver/read_exposure.py (SM-e-2)",
+      "reason": "Another cell's file, built against door_client's contract. Never created or edited here."
+    },
+    {
+      "item": "The door's Lambda files and the Terraform under infra/",
+      "reason": "Not in this cell's grant. The handler docstring was read only, for the DOOR CONTRACT."
+    },
+    {
+      "item": "A live door call and a real MFA session",
+      "reason": "LOCAL work only. Tests inject every client. The live proof is the release's and Andrew's."
+    }
+  ],
+  "surprises": [
+    "SOC2_MSLOGS-D1-W10-S1: the worktree's sparse checkout omitted infra/aws, so the first act blocked the order (BLOCKING row). The issuer widened the sparse scope; the row stays as filed and the order resumed."
+  ],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~10/SOC2_MSLOGS.TO-R2-k2.session.log",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~10/SOC2_MSLOGS.TO-R2-k2.read-client.proof_of_spec.json R2-k2-AC1,R2-k2-AC2,R2-k2-AC3",
+      "result": "VALID (rc=0): 3 acceptance rows, 6 of 6 artifacts resolved at pin, 1 surprise resolved (SOC2_MSLOGS-D1-W10-S1)"
+    }
+  ]
+}
