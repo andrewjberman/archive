@@ -10,7 +10,7 @@ import sys
 
 TREE = "C:/tmp/og-rel-batch6"
 TRUNK, OUT = sys.argv[1:3]
-LIVE = "9d5b7125571520b977401634a01935924f4c9787"
+LIVE = "1753c741d988faa05fa424386bcd9aa0c5efbf71"
 G = "infra/aws/ec2/opal-gateway/"
 APP = ["tools", "client_core", "client_adapter_bd49f"]
 TESTS = ["test_og_en21", "test_og_en22", "test_og_en23", "test_og_en24", "test_og_db3"]
