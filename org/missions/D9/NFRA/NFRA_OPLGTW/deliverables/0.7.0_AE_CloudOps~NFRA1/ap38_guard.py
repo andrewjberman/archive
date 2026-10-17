@@ -5,8 +5,10 @@ A child of the SSM agent inherits oom_score_adj -900, so a runaway read makes th
   oom_score_adj 1000        (the kernel kills THIS process first)
   RLIMIT_AS 1400 MB         (a runaway allocation raises MemoryError here instead of killing anything)
   wall limit <seconds>      (SIGALRM; the process ends itself with AP38_GUARD_WALL)
-usage on the host: python ap38_guard.py <wall_seconds> <script.py> [args ...]
-The guard name written into every record is oom_score_adj_1000_rlimit_as_1400mb. Prints AP38_GUARD_MEMORYERROR (rc 4) or AP38_GUARD_WALL (rc 5) when it stops a run."""
+usage on the host: python ap38_guard.py [--cgroup] <wall_seconds> <script.py> [args ...]
+Two named guards (order OG-ap-38, amendment A1): oom_score_adj_1000_rlimit_as_1400mb (this wrapper's default) and oom_score_adj_1000_cgroup_memmax_1400mb (--cgroup: NO address-space cap,
+because pyarrow cannot start its worker pools under RLIMIT_AS; the memory ceiling is then the transient scope the CALLER wraps this in: systemd-run --scope -p MemoryMax=1400M ...).
+Prints AP38_GUARD_MEMORYERROR (rc 4) or AP38_GUARD_WALL (rc 5) when it stops a run."""
 from __future__ import annotations
 
 import os
@@ -21,10 +23,15 @@ AS_MB = 1400
 
 def main() -> int:
     import resource                                   # Linux only
-    wall, script, args = int(sys.argv[1]), sys.argv[2], sys.argv[3:]
+    argv = sys.argv[1:]
+    cgroup = bool(argv and argv[0] == "--cgroup")
+    if cgroup:
+        argv = argv[1:]
+    wall, script, args = int(argv[0]), argv[1], argv[2:]
     with open("/proc/self/oom_score_adj", "w") as fh:
         fh.write("1000")
-    resource.setrlimit(resource.RLIMIT_AS, (AS_MB * 1024 * 1024, AS_MB * 1024 * 1024))
+    if not cgroup:
+        resource.setrlimit(resource.RLIMIT_AS, (AS_MB * 1024 * 1024, AS_MB * 1024 * 1024))
 
     def on_wall(_sig, _frm):
         print("AP38_GUARD_WALL %ds" % wall, flush=True)
