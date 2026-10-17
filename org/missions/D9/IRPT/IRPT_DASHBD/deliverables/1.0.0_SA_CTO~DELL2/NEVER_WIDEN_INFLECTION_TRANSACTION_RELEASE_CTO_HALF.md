@@ -57,3 +57,32 @@
 **Ruled route B:** a builder-named writer role matching `role/*-inf-*`, assumed by the runner role. The fence is not edited.
 
 This half does not cover REVISION 2. A new signature on REVISION 2's sha256 is required, and its Act 3 must simulate with the live resource policy.
+
+---
+
+## REVISION 2 -- SIGNED (2026-10-17 ~13:3xZ)
+
+**Packet:** the same path, REVISION 2 @b9b961b3da. I re-measured its sha256 as `5bfd8e040939298b3c2d35fca6c3c3bce12c2931e6b444608c8e5b1a514f1126`. COO half @860a13d525. Cells: DB-f-2704 @3dc5ee36ea (the new role) and DB-f-2705 @beddfb340f (the launcher assumes it).
+
+**Read at signing:**
+- `iam.tf` is `04d22a42b9e8` (42,913 bytes), equal to the packet's pin. Its session name constant `g01-account-transaction` is at `:245`.
+- The role name `orion-inf-account-transaction-role` carries `-inf-`, so the fence's `role/*-inf-*` admits it. Act 2 runs the naming gate in plan mode.
+- Act 3 now simulates WITH the live bucket policy, through `--resource-policy`, for every gold-bucket line. That closes REVISION 1's false green.
+
+**Blast radius:**
+- The plan adds three IAM objects: the new role, its four-statement policy, and the runner's one AssumeRole statement.
+- No existing policy, the runner role's trust, or the instance profile changes. The fence is not edited.
+- The release objects and up to 25 new partitions are as in REVISION 1.
+- Served output moved: none.
+
+**Answers to section 9:**
+1. **One packet: accepted.** Act 3, run with the resource policy, gates Acts 4 to 8.
+2. **Confirmed.** The window is the 25 trading days ending at the newest silver partition day, counted by `lib/trading_calendar.py`.
+3. **The host-wide trust is accepted as worded.** The trust names the runner role, with a fixed session name. That buys attribution and one point of revocation, not isolation from the host's other jobs. This is the same accepted wording as the HMAC stage role (@f52943766f).
+
+**Note on the explicit cross-firm Deny:** the new role does not carry the runner's `cross-firm-bucket-deny` inline policy. I do not require it. The role holds only four prefix-scoped Allows, so every other firm's object is an implicit deny, and Act 3 must show those DENY lines. If a later change ever widens this role's Allows, that change must add the explicit Deny in the same plan.
+
+**Conditions:**
+- My REVISION 1 conditions stand: the sequence, Act 1's audit STOP, the S6 print, and the receipt phrase.
+- Act 6 STOPS above 40 minutes, because the assumed session lasts 1 hour and is not refreshed.
+- **The sequence** is Monday's 49F read, then this pair on Tuesday 10-20, outside the weekday 11:30Z to 14:15Z band.
