@@ -1,0 +1,63 @@
+{
+  "cell": "AR-y-383",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-383",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~283",
+  "base_sha": "4d4dc68cae49565d8bddb9ca032a24734a9f655d",
+  "base_ref": "origin/DEV (portal worktree HEAD at read time)",
+  "commit": "b8f783791b843674962f193a119fc27a39427065",
+  "commit_subject": "fix(TicketCenter): send the report-record revision as a string (IRPT_ANLREQ AR-y-383)",
+  "branch": "cand/dell2/anlreq-report-ref-revision-string (LOCAL, at the commit; never pushed)",
+  "worktree_branch": "wk-IRPT_ANLREQ-283-portal (the commit sits on this branch; the cand branch is a pointer to it)",
+  "diff_stat_command": "git -C C:/dev/wk-irpt-anlreq-283/portal diff --stat 4d4dc68cae b8f783791b843674962f193a119fc27a39427065",
+  "diff_stat": " src/api/endpoints/tickets.ts | 2 +- | src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx | 6 +- | src/pages/TicketCenter/__tests__/report-ref-revision-string.test.tsx | 152 (new) | src/pages/TicketCenter/analysisRequest.ts | 8 +- | 4 files changed, 160 insertions(+), 8 deletions(-)",
+  "files_changed": [
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/api/endpoints/tickets.ts",
+    "src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx",
+    "src/pages/TicketCenter/__tests__/report-ref-revision-string.test.tsx (new)"
+  ],
+  "scope_check": "SCOPE-OK 4 paths (scope_check.py)",
+  "tests": {
+    "new_file": {"path": "src/pages/TicketCenter/__tests__/report-ref-revision-string.test.tsx", "passed": 5, "failed": 0, "command": "bun test src/pages/TicketCenter/__tests__/report-ref-revision-string.test.tsx"},
+    "passed": 218,
+    "failed": 0,
+    "folders": [
+      {"folder": "src/pages/TicketCenter", "passed": 218, "failed": 0, "files": 34, "command": "bun test src/pages/TicketCenter"}
+    ],
+    "note": "passed in the folder count includes the 5 new cases; the folder count is 218 pass, 0 fail across 34 files"
+  },
+  "before_arm": {
+    "command": "bun test src/pages/TicketCenter/__tests__/report-ref-revision-string.test.tsx, run at the base before the change (new test file present, source unchanged)",
+    "result": "2 pass, 3 fail, 5 total",
+    "failing": [
+      "a revision \"1\" the post answered is recorded as the string \"1\", never the number 1",
+      "a revision \"12\" is recorded as the string \"12\"",
+      "the retry path sends the same string revision when it records"
+    ],
+    "passing_at_base": [
+      "a non-numeric revision \"abc\" is recorded as the string \"abc\" (Number(\"abc\") is NaN, so the raw string already went out)",
+      "an absent or null revision sends a record body with NO revision key (already true at base)"
+    ]
+  },
+  "mutant": {
+    "command": "python mutant_check.py",
+    "result": "MUTANT-FIRES: numeric-conversion mutant, new test file rc=1 fail=3; original sha256 restored and verified (0e1271d2eac545bea12c268089418890fc1f7aa12563bffccfa54278cb3967b4)"
+  },
+  "existing_tests_changed": [
+    {"file": "src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx", "line": 107, "change": "expect(recorded[0].ref).toEqual({ request_id, revision: 1 }) to revision: '1'"},
+    {"file": "src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx", "line": 171, "change": "same pin in the retry test, revision: 1 to '1'"},
+    {"file": "src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx", "line": 50, "change": "local RecordRef type narrowed to revision?: string"}
+  ],
+  "typecheck": {"command": "bun run typecheck (tsc -b --noEmit)", "rc": 0, "error_TS_lines": 0},
+  "claim": "On the candidate, the report-record body sends the issued request revision as a string: String(requestRevision) when it is present, and no revision key when it is absent or null. Read at the commit: reportRefBody no longer converts with Number(...). The revision type is string in analysisRequest.ts (member and return type) and endpoints/tickets.ts recordTicketReport; the ticket read-side field tickets.ts:115 is unchanged. Under the candidate the record body the service receives is {request_id, revision: \"1\"} for a revision of \"1\", which is the shape the service guard (infra/aws/lambda/ticket_center/lambda_function.py:1761-1762, read at HEAD) accepts.",
+  "not_read": [
+    "the live service's answer to the string body: no live call was made; the guard was read at HEAD, not the deployed Lambda",
+    "the rendered Ticket Center page after the change: no browser run, the tests inject their API surfaces",
+    "the 5174 checkout (window 5): not touched; the order says it needs the same fix",
+    "ticket TCK-20261017-5af976ff: not retried, not read back",
+    "the DEV merge and any PROD promote: not done; the candidate is LOCAL only and nothing was pushed",
+    "the full portal suite outside src/pages/TicketCenter: not run (sparse worktree; the order grants the folder and the new file)"
+  ],
+  "surprises_filed": ["IRPT_ANLREQ-D2-W283-S1 (line numbers differ from the order)", "IRPT_ANLREQ-D2-W283-S2 (cited schema and doctrine absent from the sparse worktree)"],
+  "pushed": false
+}

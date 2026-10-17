@@ -1,0 +1,42 @@
+{
+  "cell": "AR-y-383",
+  "base": "origin/DEV 4d4dc68cae (portal worktree HEAD, read at 2026-10-17)",
+  "reportRefBody": {
+    "file": "portal/src/pages/TicketCenter/analysisRequest.ts",
+    "signature_line": 567,
+    "number_conversion_line": 568,
+    "body_ternary_lines": "571-573",
+    "note": "the order cited lines 530-539; the function is at 566-575 at this base (premise line numbers do not match, the code is the same)"
+  },
+  "call_sites": [
+    {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 632, "what": "recordStep() calls reportRefBody(analysis.request_id, analysis.request_revision); the only call to reportRefBody"},
+    {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 603, "what": "fileAndRequestAnalysis() reaches recordStep (step 4 of I1); the order cited about 593"},
+    {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 653, "what": "retryAnalysisStep() reaches recordStep (retry steps 3 and 4); the order cited about 675"}
+  ],
+  "type_lines": [
+    {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 53, "text": "ref: { request_id: string; revision?: string | number },", "change": "narrow to revision?: string"},
+    {"file": "portal/src/pages/TicketCenter/analysisRequest.ts", "line": 567, "text": "reportRefBody return type { request_id: string; revision?: string | number }", "change": "narrow to revision?: string"},
+    {"file": "portal/src/api/endpoints/tickets.ts", "line": 266, "text": "ref: { request_id: string; revision?: string | number }", "change": "narrow to revision?: string"},
+    {"file": "portal/src/api/endpoints/tickets.ts", "line": 115, "text": "revision?: string | number | null (ticket record read side)", "change": "NONE (read side, per the order)"}
+  ],
+  "existing_tests_pinning_numeric_revision_on_record_body": [
+    {"file": "portal/src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx", "line": 107, "text": "expect(recorded[0].ref).toEqual({ request_id: REQUEST_ID, revision: 1 })", "change": "revision: 1 becomes revision: '1'"},
+    {"file": "portal/src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx", "line": 171, "text": "expect(recorded[0].ref).toEqual({ request_id: REQUEST_ID, revision: 1 })", "change": "revision: 1 becomes revision: '1'"},
+    {"file": "portal/src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx", "line": 50, "text": "type RecordRef = { request_id: string; revision?: string | number }", "change": "narrowed to revision?: string to match the contract"}
+  ],
+  "numeric_revision_NOT_on_record_body_left_unchanged": [
+    "portal/src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx:40 (read-side report_ref fixture on the ticket)",
+    "portal/src/pages/TicketCenter/__tests__/analysis-request.test.tsx:140 (read-side report_ref fixture)",
+    "portal/src/pages/TicketCenter/__tests__/open-report.test.tsx:59 and :64 (read-side report_ref and requestRecord identity)",
+    "portal/src/pages/TicketCenter/__tests__/package-open-ticket-binding.test.tsx:32 (read-side report_ref)",
+    "portal/src/pages/TicketCenter/__tests__/package-open-ticket-fallback.test.tsx:29 (read-side report_ref)",
+    "portal/src/pages/TicketCenter/__tests__/package-report-reader.test.tsx:34 (read-side requestRecord identity)"
+  ],
+  "other_src_callers_of_recordTicketReport": "none: git grep 'recordTicketReport' -- src returns only tickets.ts:264 (definition) and analysisRequest.ts (interface, recordStep); the tickets route is the only one matching '/report' under src/pages/TicketCenter and src/api/endpoints/tickets.ts:268",
+  "service_guard": {
+    "file": "infra/aws/lambda/ticket_center/lambda_function.py (git show HEAD:path, workspace worktree)",
+    "lines": "1761-1762",
+    "rule": "if revision is not None and (not isinstance(revision, str) or len(revision) > 200): 400 'revision must be a string'"
+  },
+  "premise_mismatch": "the order's line numbers for reportRefBody (530-539) and the two call sites (about 593, 675) differ from this base (566-575, 603, 653); the code shape matches, so the change follows the code, not the numbers. Filed as a surprise row."
+}
