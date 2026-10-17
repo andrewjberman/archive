@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-R2-d2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/prd/SOC2_MSLOGS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5795b96e64"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP_R2.md",
+    "vintage_commit": "5795b96e64",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-R2-d2.streaming-derive.md"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/silver_builder.py",
+      "kind": "script",
+      "commit_or_etag": "0e8509d196",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-9, LOCAL only, at 0e8509d196 (build_stream: one sorted run per object, k-way merge; build() unchanged). Not deployed: no package build, no upload, no Lambda update; WORLD by the gate's path floor, nothing applied or called live (order BOUNDS).",
+      "artifact_covered_by": [
+        "R2-d2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/handler.py",
+      "kind": "script",
+      "commit_or_etag": "0e8509d196",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-9, LOCAL only, at 0e8509d196 (_derive_silver hands build_stream a generator, one bronze object at a time; the answer counts the records read). Not deployed; the bronze prefix constants and build.sh are untouched (TO-R2-n2).",
+      "artifact_covered_by": [
+        "R2-d2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py",
+      "kind": "test",
+      "commit_or_etag": "0e8509d196",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-9, LOCAL only, at 0e8509d196. A test file is not deployed; 26 tests pass in the worktree (python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py -q)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
+      "kind": "test",
+      "commit_or_etag": "0e8509d196",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-9, LOCAL only, at 0e8509d196. A test file is not deployed; the whole door suite passes in the worktree (230 passed; python -m pytest infra/aws/lambda/globgrph-trino-access/tests -q)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R2-d2-AC1",
+      "criterion_verbatim": "the door's derive writes the same silver as build() over the same records, at no more than half of build()'s peak memory, with peak memory growing no more than 2.0x for 4x the data, leaving no temporary file behind.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py derive",
+      "output_evidence": "R2-DERIVE-OK vs_build=0.18 growth=1.24 rows=23430\nrc=0",
+      "denominator": "1 verdict line of 1 (R2-DERIVE-OK), from three subprocesses: naive build over 16 objects per day (peak 350553559 bytes, rows 23430), door over 16 objects (peak 63024389 bytes, rows 23430, digest equal to naive), door over 4 objects (peak 50718611 bytes). vs_build = 63024389 / 350553559 = 0.18 (limit 0.50); growth = 63024389 / 50718611 = 1.24 (limit 2.0 for 4x the data). The leftover-file arm empty in the run that printed OK. Run from the worktree root C:/Dev/ajb_wk/soc2-r2-9 under timeout 120.",
+      "status": "PASS",
+      "expect": "R2-DERIVE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base handler before the edit, which reads every record of D and D+1 into one list and calls build() over it. Its figures are the order's recorded dry-run at the base (2026-10-17 ~06:2xZ), not re-run by this worker.",
+      "expected": "R2-DERIVE-REFUSED: peak memory is 1.00 of build()'s and grew 3.08x for 4x the data.",
+      "observed": "Order-recorded dry-run at base: R2-DERIVE-REFUSED peak memory is 1.00 of build()'s; peak memory grew 3.08x for 4x the data. Recorded by the issuer, not measured by this worker.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full check run twice, plus the door-16 and naive subprocesses read separately, compared with the full run's ratios.",
+      "observed": "First full run: R2-DERIVE-REFUSED on a foreign temp entry in the leftover arm (surprise row SOC2_MSLOGS-D1-W9-S1); the door-16 subprocess alone leaked []. Second full run: R2-DERIVE-OK vs_build=0.18 growth=1.24 rows=23430. The separate subprocess peaks give 0.18 and 1.24, the same figures.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live AWS call, package build, Lambda update, Terraform plan or apply, and any read of a stored bronze or silver object",
+      "reason": "WORLD by the gate's path floor; the order's BOUNDS forbid any AWS call, network access or stored-object read. The memory setting in access.tf is the release's (TO-R2-r2)."
+    },
+    {
+      "item": "The bronze prefix constants and build.sh",
+      "reason": "Not this order's: TO-R2-n2 owns them, and this order's BOUNDS say not to change them."
+    }
+  ],
+  "surprises": [
+    "SOC2_MSLOGS-D1-W9-S1: the derive check's leftover-temp-file arm reads the whole shared system temp directory, so an entry from another process made the first full run print REFUSED; the re-run passed, and the door-only subprocess leaked nothing."
+  ],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~9/SOC2_MSLOGS.TO-R2-d2.streaming-derive.session.log",
+  "compiler_tools": [
+    {
+      "tool": "s1_check_r2.py derive",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py derive",
+      "result": "R2-DERIVE-OK vs_build=0.18 growth=1.24 rows=23430, rc=0 (second full run); the first full run R2-DERIVE-REFUSED leftover arm, rc=1 (surprise row filed)"
+    },
+    {
+      "tool": "pytest (door suite)",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests -q",
+      "result": "230 passed, rc=0"
+    },
+    {
+      "tool": "pytest (builder)",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py -q",
+      "result": "26 passed, rc=0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 --select E,F,W --ignore E501 infra/aws/lambda/globgrph-trino-access/silver_builder.py infra/aws/lambda/globgrph-trino-access/handler.py infra/aws/lambda/globgrph-trino-access/tests/test_silver_builder.py infra/aws/lambda/globgrph-trino-access/tests/test_handler.py",
+      "result": "All checks passed!, rc=0"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_SOC2_MSLOGS~9 <0.9.0_WK_SOC2_MSLOGS~9@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit at 0e8509d196: commit-gate OK; surprise-row-gate OK (no rows in the code commit); to-pipeline-gate OK; a NAMING ERROR line (function-map folder missing), a client-data-check WARN (hashed list absent), and risk-reflex HOLD notes naming other projects' handler.py basenames were printed; the commit was not refused"
+    }
+  ]
+}
