@@ -1,0 +1,42 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-f-2603",
+  "cell": "DB-f-2603",
+  "workstream": "F2INFIAM",
+  "round": 138,
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2603",
+  "claim": "measured",
+  "base": "infra/aws/terraform/inf-pipeline/iam.tf at worktree HEAD 77ee7383da, equal by cmp to checks/r138/inf_iam_r138_base.tf.txt (sha256 31e06b5e051e...)",
+  "file_edited": "infra/aws/terraform/inf-pipeline/iam.tf",
+  "lines_added": 11,
+  "lines_removed": 0,
+  "locals_added": [
+    "txn_gold_bucket_arn = \"arn:aws:s3:::${local.txn_gold_bucket}\"",
+    "txn_gold_list_prefixes = [local.txn_gold_key, \"${local.txn_gold_key}/*\"]"
+  ],
+  "statements": [
+    "S1ReadOrionInflectionTransactionsSilverOnly",
+    "S2ListOrionInflectionTransactionsSilverOnly",
+    "S4ListInflectionAccountTransactionGoldOnly",
+    "S3PutInflectionAccountTransactionGoldOnly"
+  ],
+  "s4_shape": {
+    "Effect": "Allow",
+    "Action": ["s3:ListBucket"],
+    "Resource": "[local.txn_gold_bucket_arn]",
+    "Condition": "StringLike on s3:prefix = local.txn_gold_list_prefixes (gold key and its children)",
+    "gold_getobject": false
+  },
+  "registry_files_touched": 0,
+  "other_files_touched": 0,
+  "checks": {
+    "DBF138-3-AC1": "PASS rc 0",
+    "DBF138-3-AC2": "PASS rc 0",
+    "DBF137-5-AC1": "PASS rc 0",
+    "DBF137-5-AC2": "PASS rc 0"
+  },
+  "not_proven": [
+    "No terraform fmt, validate, plan or apply was run; the HCL is not proven to plan.",
+    "No AWS call of any kind; the simulation of S4 (CTO condition 4) runs at the apply by the Inflection pair.",
+    "Order status is not flipped; the issuer flips it."
+  ]
+}
