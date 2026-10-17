@@ -25,7 +25,7 @@ FORM = RES + "price_form_ycharts.py"
 NEW_TESTS = (RES + "tests/test_price_form_ycharts.py", RES + "tests/test_ycharts_client_pin.py")
 MOVED_TESTS = (RES + "tests/test_price_adapter_ycharts.py", IR + "reports/tests/test_ycharts_price_tier.py")
 OWN = (ADAPTER, FORM) + NEW_TESTS + MOVED_TESTS + ("org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-155.ycharts-price-estate-form.md",)
-OWN_PREFIX = ("org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~277/", "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md")
+OWN_PREFIX = ("org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~278/", "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md")
 ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/",
           "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/", "org/tier1_exec/2.0.0_SA_COO~G2/", "org/tier2_senior/0.7.0_AE_CloudOps~IB2/")
 REGRESS_FILES = (RES + "tests/test_price_adapter_ycharts.py", RES + "tests/test_price_transport_ycharts.py", RES + "tests/test_price_source.py",
