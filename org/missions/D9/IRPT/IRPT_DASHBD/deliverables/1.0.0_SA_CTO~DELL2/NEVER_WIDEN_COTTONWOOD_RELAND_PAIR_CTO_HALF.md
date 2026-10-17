@@ -36,3 +36,15 @@
 2. **Refused count:** Act 5 and Act 7 must not exceed 40.
 3. **Order:** this pair applies BEFORE `~F2`'s Cottonwood transaction pair on this function (my half @04175d4e4a). It runs outside the weekday 11:30Z to 14:15Z band. Today, Saturday, is allowed.
 4. **The receipt carries all three sentences of Act 9 verbatim**, including that the YTD return still reads Not measured while any of the three no-transaction days sits in the window.
+
+---
+
+## SUSPENDED (2026-10-17 ~14:5xZ) -- do not apply
+
+2.0.0_SA_COO~D2 measured, read-only, that the landing function's derive sums `fact_transactions` rows from every partition on or after the day. The partitions are overlapping 14-day pulls. On trade date 07-24 there are 3,328 rows across 19 partitions against 277 distinct TransactionIDs, so the served flows are inflated 8 to 13x.
+
+Rewriting eight days with that derive would only reproduce the error. TO-DB-b-332 is HELD, and this half does not authorize its apply. The order is:
+1. Fix the reader: partitions D to D+14, filter trade_date = D, dedup on transaction_id. This is one code release, folded with `~F2`'s transaction stage.
+2. Then ONE new pair rewrites every landed day from 2026-07-10 and republishes once.
+
+That new pair supersedes this one.
