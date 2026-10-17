@@ -62,8 +62,8 @@ def parse_utc(s):
 
 
 def in_fire_window(t):
-    """12:10Z to 12:30Z on a trading weekday (Mon-Fri; the calendar's holidays only widen the safe side): the packet's condition 3."""
-    return t.weekday() < 5 and dt.time(12, 10) <= t.time() <= dt.time(12, 30)
+    """11:30Z to 14:15Z on a weekday (Mon-Fri; the calendar's holidays only widen the safe side): the CTO's band (msg 10530), which contains the packet's condition 3 window (12:10Z to 12:30Z)."""
+    return t.weekday() < 5 and dt.time(11, 30) <= t.time() <= dt.time(14, 15)
 
 
 def statement_hash(st):
@@ -96,7 +96,7 @@ def head_problems(rec):
         pr.append("plan must read exactly 0 add / 2 change / 0 destroy, the two addresses, the one added statement %s, the function changing by code attributes only, 0 naming REFUSE, a re-plan of No changes" % NEW_SID)
     try:
         if in_fire_window(parse_utc(rec["apply_finished_utc"])):
-            pr.append("the apply finished inside the daily fire window (12:10Z to 12:30Z)")
+            pr.append("the apply finished inside the CTO's weekday band (11:30Z to 14:15Z)")
     except (ValueError, TypeError):
         pr.append("apply_finished_utc must be a UTC timestamp")
     if rec["ledger_closed"] is not False:
@@ -220,7 +220,7 @@ def selftest():
            "build": {"zip_sha256_b64": BUILD_B64, "second_run_equal": True, "import_smoke_rc": 0, "atc_import_error": None, "landed_version_id": "v1", "built_equals_landed": True},
            "plan": {"add": 0, "change": 2, "destroy": 0, "change_addresses": ["a", "b"], "policy_added_sids": [NEW_SID], "function_change_attributes_code_only": True, "naming_gate_refuse": 0,
                     "replan_no_changes": True},
-           "apply_finished_utc": "2026-10-21T14:00:00Z", "after": {},
+           "apply_finished_utc": "2026-10-22T15:00:00Z", "after": {},
            "returns_dry_run": {"rows_dry": 5000, "rows_landed": 5000, "wrote_nothing": True},
            "dry_run": {"transaction_rows": {"2026-10-20": 8500}, "transaction_failed": {}, "prefix_objects_after": 0, "max_memory_mb": 400, "duration_ms": 9000},
            "first_write": {"transaction_rows": {"2026-10-20": 8500}, "transaction_failed": {}, "partitions_after": ["2026-10-20"], "columns": 19, "schema_hash": SCHEMA_HASH, "claims_ok": True},
@@ -230,6 +230,7 @@ def selftest():
     arm("plan-destroy", len(head_problems(dict(rec, plan=dict(rec["plan"], destroy=1)))), 1)
     arm("build-hash", len(head_problems(dict(rec, build=dict(rec["build"], zip_sha256_b64="x")))), 1)
     arm("apply-in-window", len(head_problems(dict(rec, apply_finished_utc="2026-10-21T12:15:00Z"))), 1)
+    arm("apply-in-cto-band", len(head_problems(dict(rec, apply_finished_utc="2026-10-21T13:30:00Z"))), 1)
     arm("reland-open", len(head_problems(dict(rec, gates=dict(rec["gates"], d2_reland_pairs_closed=False)))), 1)
     arm("rewrite-ledger-open", len(head_problems(dict(rec, gates=dict(rec["gates"], open_rewrite_ledgers_on_root=1)))), 1)
     arm("returns-rows-differ", len(events_problems(dict(rec, returns_dry_run={"rows_dry": 5000, "rows_landed": 4999, "wrote_nothing": True}))), 1)
@@ -237,7 +238,7 @@ def selftest():
     arm("memory-over-80pct", len(events_problems(dict(rec, dry_run=dict(rec["dry_run"], max_memory_mb=900)))), 1)
     arm("write-count-differs", len(events_problems(dict(rec, first_write=dict(rec["first_write"], transaction_rows={"2026-10-20": 1})))), 1)
     arm("range-too-long", len(events_problems(dict(rec, range=dict(rec["range"], days_written=26, partitions_after=26, days=["d"] * 26)))), 1)
-    arm("fire-window", (in_fire_window(parse_utc("2026-10-21T12:15:00Z")), in_fire_window(parse_utc("2026-10-21T13:00:00Z")), in_fire_window(parse_utc("2026-10-24T12:15:00Z"))), (True, False, False))
+    arm("fire-window", (in_fire_window(parse_utc("2026-10-21T12:15:00Z")), in_fire_window(parse_utc("2026-10-21T14:00:00Z")), in_fire_window(parse_utc("2026-10-21T14:30:00Z")), in_fire_window(parse_utc("2026-10-24T12:15:00Z"))), (True, True, False, False))
     arm("statement-hash-stable", statement_hash({"a": 1, "b": 2}) == statement_hash({"b": 2, "a": 1}), True)
     print("selftest %s" % ("FAIL" if bad else "PASS (%d arms)" % count))
     return 1 if bad else 0
