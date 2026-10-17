@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_EARLYWARN.TO-EWS-d1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_EARLYWARN/task-orders/TCKT_EARLYWARN.TO-EWS-d1.deploy-one-container.md",
+  "group": "OTHER",
+  "vintage_commit": "e36ce35f08"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_EARLYWARN/project.json",
+  "vintage_commit": "e36ce35f08",
+  "to_ref": "org/missions/D7/TCKT/TCKT_EARLYWARN/task-orders/TCKT_EARLYWARN.TO-EWS-d1.deploy-one-container.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~TM1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier1_exec/0.7.0_AE_CloudOps~TM1/deliverables/EWS_DEPLOY.json",
+   "kind": "aws_resource",
+   "commit_or_etag": "0ab8f5225b",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "one Fargate task RUNNING in cluster opal-clientops-ews-cluster, role opal-clientops-ews-role, ledger ews-d1-one-container-20261017 CLOSED 6 of 6 legs",
+   "artifact_covered_by": [
+    "EWS-d1-AC1",
+    "EWS-d1-AC2",
+    "EWS-d1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "EWS-d1-AC1",
+   "criterion_verbatim": "`EWS-d1-AC1` -- the manifest's names equal what name() builds, and the one task reads RUNNING with one container.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py running",
+   "output_evidence": "EWS-RUN-OK; rc=0, run by the lane at the repo root 2026-10-17 06:4xZ (and twice by the issuer). task opal-clientops-ews-task on cluster opal-clientops-ews-cluster read RUNNING by ecs describe-tasks (startedAt 05:24Z, cpu 256, memory 1024); manifest names equal ews/names.py resource_names().",
+   "denominator": "1 of 1 criterion; lane run 1 of 1 read EWS-RUN-OK",
+   "status": "PASS",
+   "expect": "EWS-RUN-OK",
+   "judgment": false
+  },
+  {
+   "criterion_id": "EWS-d1-AC2",
+   "criterion_verbatim": "`EWS-d1-AC2` -- the role, SIMULATED, may read the one secret and the two silver prefixes, and may not read any other secret, write S3, read bronze, or send.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py iam",
+   "output_evidence": "EWS-IAM-OK; rc=0, run by the lane at the repo root 2026-10-17 06:4xZ (and twice by the issuer). iam simulate-principal-policy on opal-clientops-ews-role: GetSecretValue on opal/ews/graph-app-cert and GetObject on the two silver prefixes allowed; GetSecretValue on another secret, PutObject on silver, GetObject on bronze, ses:SendEmail, sns:Publish, sqs:SendMessage not allowed. Before the issuer's fix dfbfcd5dba the arm read EWS-BAD rc=254 on a bare '*' (row TCKT_EARLYWARN-D1-S3).",
+   "denominator": "1 of 1 criterion; lane run 1 of 1 read EWS-IAM-OK",
+   "status": "PASS",
+   "expect": "EWS-IAM-OK",
+   "judgment": false
+  },
+  {
+   "criterion_id": "EWS-d1-AC3",
+   "criterion_verbatim": "`EWS-d1-AC3` -- the ledger entry is closed and its sentinel committed.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py ledger",
+   "output_evidence": "EWS-LED-OK; rc=0, run by the lane at the repo root 2026-10-17 06:4xZ (and twice by the issuer). change-management entry 20261017T0502Z_ews-d1-one-container-20261017_deploy_completion.md reads Status CLOSED (6 of 6 legs) and its sentinel is tracked by git.",
+   "denominator": "1 of 1 criterion; lane run 1 of 1 read EWS-LED-OK",
+   "status": "PASS",
+   "expect": "EWS-LED-OK",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "each arm run at the repo root by the issuer twice and by the lane once, after the ledger closed",
+   "observed": "running, iam and ledger each printed their OK token on every run, rc=0",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the same three arms before the deploy manifest existed, and the ledger arm against the OPEN ledger entry",
+   "expected": "EWS-BAD on all three at the base; EWS-BAD on the OPEN entry",
+   "observed": "EWS-BAD no deploy manifest on all three (issuance commit eaccdeaae7); EWS-BAD '**Status:** OPEN, not CLOSED' on the open entry (da9d7564c6), both read from the issuer's record",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the first run_pending replay of the complete dates",
+   "reason": "no criterion grades it; 86 minutes after launch (read 06:50Z) the log stream holds only the launcher start line and the calendar WARN, no pass line and no failure line; filed as row TCKT_EARLYWARN-D1-S5"
+  },
+  {
+   "item": "the mail poller (BRIDGE)",
+   "reason": "off by launcher under the CTO ruling msg 7335; row TCKT_EARLYWARN-D1-S1"
+  }
+ ],
+ "surprises": [
+  "TCKT_EARLYWARN-D1-S1: BRIDGE has no bearer secret (ruled, msg 7335, option b)",
+  "TCKT_EARLYWARN-D1-S2: the ews package has no runnable entry point (Dockerfile launcher used)",
+  "TCKT_EARLYWARN-D1-S3: ews_check.py iam passed a bare '*' to the aws shim (issuer defect, fixed dfbfcd5dba)",
+  "TCKT_EARLYWARN-D1-S4: hardcoded NYSE fallback calendar valid through 2027",
+  "TCKT_EARLYWARN-D1-S5: first run_pending has logged no pass or failure line 86 minutes after launch",
+  "TCKT_EARLYWARN-D1-S6: cell EWS-d-1 is not in project.json (decompositions empty), so this instance reads INVALID on one alignment violation"
+ ],
+ "session_log": "org/tier1_exec/0.7.0_AE_CloudOps~TM1/deliverables/",
+ "compiler_tools": [
+  {
+   "tool": "python ews_check.py running|iam|ledger",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py <arm>",
+   "result": "EWS-RUN-OK, EWS-IAM-OK, EWS-LED-OK, rc=0 each"
+  }
+ ]
+}
