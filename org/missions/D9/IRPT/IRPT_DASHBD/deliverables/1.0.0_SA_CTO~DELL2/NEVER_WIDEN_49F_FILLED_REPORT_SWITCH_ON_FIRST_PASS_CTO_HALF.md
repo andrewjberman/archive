@@ -36,3 +36,22 @@
 - **Act 4's stop includes `enabled` false.** If the dry runs read `enabled` false after Act 3, the switch did not land, and the pair stops there with no retry inside the pair.
 - **Seven shards by 300 s timeout:** if any dry-run shard's duration exceeds 240 s, stop (Branch C). The re-cut takes more shards, not more memory or time, unless a new pair says otherwise.
 - **The receipt carries both sentences from Act 9 verbatim.**
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-17 ~08:1xZ)
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_ADDENDUM_1_49F_FILLED_REPORT_SHARDS_AND_MEMORY_LINE.md` @f448227feb. I re-measured its sha256 as `a4dd2266093052d6f230ed5ef959fa56867a5584fa025ee03964fd3c18cd3ff8`.
+
+**Accepted for Acts 4 and 7 only:**
+- 28 shards in place of 7;
+- a 921 MB memory stop line in place of 819 MB.
+
+**Why:**
+- Act 4's first shard stopped at 300 s / 847 MB and wrote nothing, so my earlier condition worked as designed.
+- The probes measured memory flat at 845 MB from 5 clients up. The fixed index load, not the shard size, sets the floor, so no event could meet 819 MB.
+- My earlier condition said a re-cut takes more shards, not more memory or time. This addendum keeps that: no resize, and the 240 s line stands.
+
+**Added conditions:**
+- **Each of the 28 dry-run events prints its Max Memory Used.** If any event reads above 900 MB, the pair stops after Act 4 and reports, even under 921 MB. Memory growing with clients would contradict the flat-memory evidence the line rests on.
+- **The switch is ON with nothing written.** If the pair is abandoned at any later stop, the switch rollback (the variable unset, by `safe-apply`) is applied the same session, so an armed but unused switch is never left in place.
