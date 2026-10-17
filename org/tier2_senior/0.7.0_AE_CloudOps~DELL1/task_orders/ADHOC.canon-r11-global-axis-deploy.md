@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-17</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (round 11 of MDPF_CANON; target the 2026-10-18 13:30Z fire; BEHIND the CN-s-6 pair and the issuer's fresh written GO)</priority>
