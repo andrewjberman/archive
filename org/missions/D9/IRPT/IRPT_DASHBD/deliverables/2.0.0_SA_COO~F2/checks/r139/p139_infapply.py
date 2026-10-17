@@ -30,7 +30,7 @@ CTO_REL = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_INFLECTION_TRANSACTION_RELEASE_CTO
 PACKET_SHA = "PENDING_REVISION_2_SHA256"  # set to the final REVISION 2 sha256 before the order is released
 ROLE = "inf-gold-layer-ec2-role"
 NEW_ROLE = "orion-inf-account-transaction-role"
-SESSION_NAME = "inf-g-01-account-transaction"
+SESSION_NAME = "g01-account-transaction"
 NEW_ADDRESSES = ["aws_iam_role.inf_account_transaction", "aws_iam_role_policy.inf_gold_layer_account_transaction",
                  "aws_iam_role_policy.inf_gold_layer_assume_account_transaction"]
 ASSUME_SID = "AssumeTheAccountTransactionRoleOnly"

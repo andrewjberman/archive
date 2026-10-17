@@ -29,7 +29,7 @@ R139 = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r13
 BASE_IAM = R139 + "inf_iam_r139_base.tf.txt"
 BASE_SHA256 = "89e061e51fba303150e44b26ea3ffe766bdd151bd33a4507d865b30e089d5e61"
 MANIFEST = R136 + "inf_pipeline_base_manifest.json"
-SESSION_NAME = "inf-g-01-account-transaction"
+SESSION_NAME = "g01-account-transaction"
 POLICY_RESOURCE = "inf_gold_layer_account_transaction"
 SIDS = ["S1ReadOrionInflectionTransactionsSilverOnly", "S2ListOrionInflectionTransactionsSilverOnly", "S3PutInflectionAccountTransactionGoldOnly",
         "S4ListInflectionAccountTransactionGoldOnly"]
