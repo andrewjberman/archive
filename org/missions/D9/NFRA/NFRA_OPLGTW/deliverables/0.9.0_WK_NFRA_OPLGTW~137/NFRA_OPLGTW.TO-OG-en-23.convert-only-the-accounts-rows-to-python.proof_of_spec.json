@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-23",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~137",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "557b841548"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "557b841548",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-23.convert-only-the-accounts-rows-to-python.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_core.py",
+      "kind": "script",
+      "commit_or_etag": "e2455019c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ctx.read_account_rows added (new method after read_rows, plus import io); it loads the partition as read_rows does, runs the fence and the account test in Arrow on the id column, and converts only the account's rows. A non-string id column takes the old path on the same table. No deploy, no release."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "e2455019c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_read_partitions.read_one calls ctx.read_account_rows when the ctx has it (getattr); a partition with no key in the OG-en-22 index answers ([], 0, 0); otherwise the existing code runs unchanged. Sort, cursor, gate, PAGE_PARTITIONS and READ_WORKERS untouched. 8 insertions."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en23.py",
+      "kind": "test",
+      "commit_or_etag": "e2455019c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file; three named tests test_ogen23_ac01, test_ogen23_ac02 and test_ogen23_ac03. Offline: typed_scope.list_keys and typed_scope._load_capped are replaced by an in-memory store of real Parquet bytes; no network, no AWS."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en22.py",
+      "kind": "test",
+      "commit_or_etag": "e2455019c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Existing test updated to the new truth, smallest edit: its in-memory Store also serves the bytes _load_capped returns (load_capped, which counts the object read), and _install patches _load_capped. The read path now reads bytes, not read_parquet, so the fixture must serve bytes. No assertion changed; 11 insertions."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6b4c8fe32d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new surprise row NFRA_OPLGTW-Z-W137-S1 appended; the commit-time surprise-row gate passed (1 new row of 1067 total checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass (the oracle equality, only the account's rows converted, the adapter's answers equal with and without the new method).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en23.py test_ogen23_ac01 test_ogen23_ac02 test_ogen23_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 named tests of 3 PASSED (test_ogen23_ac01, test_ogen23_ac02, test_ogen23_ac03); 0 failed or errored lines; measured at e2455019c5",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~137 '^infra/aws/ec2/opal-gateway/(app/(client_core|client_adapter_bd49f)\\.py|tests/test_og_(en23|en22|en20|en19|en18|en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~137: files touched 4; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "4 product files touched by the commits of 0.9.0_WK_NFRA_OPLGTW~137 (client_core.py, client_adapter_bd49f.py, test_og_en23.py, test_og_en22.py); 0 outside the allowed set; the surprise-channel row commit touches one standing record path; measured at 6b4c8fe32d",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~137: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the eleven window test files pass together in both orders with the same count.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh en23set tests/test_og_en4.py tests/test_og_en12.py tests/test_og_cl2.py tests/test_og_en13.py tests/test_og_en15.py tests/test_og_en17.py tests/test_og_en18.py tests/test_og_en19.py tests/test_og_en20.py tests/test_og_en22.py tests/test_og_en23.py; echo \"exit=$?\"",
+      "output_evidence": "en23set forward: passed 39; failed 0\nen23set reverse: passed 39; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "39 tests passed forward and 39 reverse across the eleven window test files (36 existing, 3 new); 0 failed or errored; measured at e2455019c5",
+      "status": "PASS",
+      "expect": "(?s)en23set forward: passed (\\d+); failed 0.*en23set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a scratch copy of app/ and tests/ under the worktree's .scratch folder (not the repo), Ctx.read_account_rows with the account test dropped: picked = table.filter(fence_ok) in place of the fence and account mask. The repo files are untouched. pytest tests/test_og_en23.py run in the copy.",
+      "expected": "the oracle and the spy refuse the mutant: a kept row set that holds every fenced account, and a conversion of more than the account's 3 rows",
+      "observed": "2 failed, 1 passed: test_ogen23_ac01 AssertionError (the triple and the kept rows equal the old path) and test_ogen23_ac02 AssertionError (the conversion was asked for the account's 3 rows only). test_ogen23_ac03 still passed, because the adapter's own account filter in get_transactions and get_fees drops the other accounts' rows at answer level, so AC3 alone cannot see the mutant; AC1 and AC2 do.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 re-run twice more, in full, at e2455019c5 (the named check and the write-set bound, each invocation as written)",
+      "observed": "run 1 and run 2 identical: AC1 pytest rc=0, 3 of 3 PASSED, 0 failed lines, RESULT: PASS, exit=0; AC2 files touched 4, product 4, outside 0, RESULT: PASS, exit=0 in each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The OG-ap-36 Phase A re-run on the host: the event-loop probe and the chain's RSS are not measured here.",
+      "reason": "The order assigns that measurement to the applier; this worker proves only equality and that only the account's rows are converted."
+    },
+    {
+      "item": "No release, deploy, IAM change, env key, registry change, change to app/tools.py or app/typed_scope.py, and no push.",
+      "reason": "Outside the order's bounds."
+    },
+    {
+      "item": "The client-data check on commit e2455019c5 and on the row commit 6b4c8fe32d.",
+      "reason": "Printed WARN ABSENT on this device; not read as checked clean. Recorded as NFRA_OPLGTW-Z-W137-S1."
+    },
+    {
+      "item": "The portal submodule gitlink, which shows modified in the worktree before any act of this worker.",
+      "reason": "Not staged and not committed; outside the write grant."
+    },
+    {
+      "item": "Test suites other than the eleven window test files named by AC3.",
+      "reason": "The order names those eleven files; no other suite was run."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W137-S1: the commit e2455019c5 printed WARN client-data-check ABSENT on this device, so the commit was not checked for client account ids; it is not read as checked clean."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the commits e2455019c5 (code, tests and the en22 fixture) and 6b4c8fe32d (surprise row) on branch wk-NFRA_OPLGTW-137, and the criterion invocations recorded above. The first Read of the task-order file returned the whole file, record face included; the record face was not used, except for the <status> tag that the order names.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~137 <0.9.0_WK_NFRA_OPLGTW~137@opal.agent>\" -F .scratch/msg_og_en23_product.txt -- infra/aws/ec2/opal-gateway/app/client_core.py infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py infra/aws/ec2/opal-gateway/tests/test_og_en23.py infra/aws/ec2/opal-gateway/tests/test_og_en22.py",
+      "result": "rc 0; commit e2455019c5; commit-gate OK for 4 of 4 files; to-pipeline-gate OK; gitlink-publication-check refusals=0; WARN client-data-check ABSENT (NFRA_OPLGTW-Z-W137-S1)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~137 <0.9.0_WK_NFRA_OPLGTW~137@opal.agent>\" -F .scratch/msg_row_w137_s1.txt -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0; commit 6b4c8fe32d; surprise-row-gate OK: 1 new row of 1067 total checked"
+    },
+    {
+      "tool": "pytest (via _named.sh)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en23.py test_ogen23_ac01 test_ogen23_ac02 test_ogen23_ac03",
+      "result": "pytest rc=0; named tests passed 3 of 3; RESULT: PASS"
+    }
+  ]
+}
