@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t74",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t74.outcome-per-request.md",
+    "group": "OTHER",
+    "vintage_commit": "836e16bafd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "836e16bafd",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t74.outcome-per-request.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~65",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "ba6c7bc7db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The outcome loop in run() decides each attempted request in attempt order: REFUSED on got refusal; COMPLETE when request_complete holds (moved before the stop test); STOPPED only when got stop is set on that entry; GATED unchanged; else DRAWN. Two-line comment names DQ-t-74. The run-level result, the receipt stop_reason, the draw order, rooms, budgets and the trading-day gate are unchanged. Diff: 8 lines, one hunk at the outcome loop (lines 1060-1075). The scheduled site Z task runs this file under Python 3.11; the change adds no interpreter-specific call.",
+      "artifact_covered_by": [
+        "DQ9-t74-AC1",
+        "DQ9-t74-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_outcome_per_request.py",
+      "kind": "test",
+      "commit_or_etag": "ba6c7bc7db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file: the three named tests. Stub vendor (trading-day rows, capped by the drawer's max_data_points, with per-ticker EMPTY-from-call-N and a sparse mode), tmp_path, a monkeypatched budget directory, a stubbed priority gate and a 400-cell allowance. 3 passed at ba6c7bc7db. No existing test was edited.",
+      "artifact_covered_by": [
+        "DQ9-t74-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ba6c7bc7db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended: MDPF_DEMQUE-D1-W65-S1 (OBSERVATION, INERT: a bookkeeping-exception stop has no stopping request), MDPF_DEMQUE-D1-W65-S2 (OBSERVATION, INERT: DRAWN lines of a stopped run carry the run's stop_reason), MDPF_DEMQUE-D1-W65-S3 (OBSERVATION, INERT: the worktree is sparse and the named surprise-channel schema is not materialized). The surprise-row gate passed at commit (3 new rows).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t74-AC1",
+      "criterion_verbatim": "`DQ9-t74-AC1` -- the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t74_tests.py",
+      "output_evidence": "Run from the worktree root at ba6c7bc7db, twice: 3 passed in 1.13s and 3 passed in 1.09s, each with the three PASSED lines naming test_a_request_drawn_complete_before_a_later_requests_stop_is_recorded_complete, test_the_request_that_stopped_the_run_is_recorded_stopped_even_with_cells_drawn and test_a_run_that_stops_still_reports_the_run_as_stopped_and_names_the_reason; then OUT-OK; rc=0.",
+      "denominator": "3 of 3 named tests PASSED by name; the file holds 3 tests, 3 passed, 0 failed",
+      "status": "PASS",
+      "expect": "OUT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t74-AC2",
+      "criterion_verbatim": "`DQ9-t74-AC2` -- the difference control: the drawer's existing tests (test_demque_standing_drawer.py, test_demque_standing_drawer_close.py) and test_demque_surface_room.py pass unedited.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t74_regress.py",
+      "output_evidence": "Run from the worktree root at ba6c7bc7db, twice: 11 passed in 2.79s and 11 passed in 4.19s over test_demque_standing_drawer.py, test_demque_standing_drawer_close.py and test_demque_surface_room.py; then OUT-OK; rc=0. The three files are unedited (git diff at ba6c7bc7db touches none of them).",
+      "denominator": "11 of 11 tests in the three control files PASSED; 0 failed",
+      "status": "PASS",
+      "expect": "OUT-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base outcome loop (836e16bafd standing_drawer.py, the run-level elif reason test before request_complete) written over the worktree file, the three named tests run, then the edited file restored and cmp-verified byte-identical to the committed version. No other file changed.",
+      "expected": "at least one named test fails, because a request attempted before the stop reads STOPPED under the base rule",
+      "observed": "2 failed, 1 passed, rc=1: FAILED test_a_request_drawn_complete_before_a_later_requests_stop_is_recorded_complete and FAILED test_the_request_that_stopped_the_run_is_recorded_stopped_even_with_cells_drawn; the run-level test passed, as it should under both rules.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice at the committed tree ba6c7bc7db; the whole demque folder run once at the same tree with --continue-on-collection-errors.",
+      "observed": "AC1 OUT-OK rc=0 twice (3 passed both times); AC2 OUT-OK rc=0 twice (11 passed both times). Folder: 4 failed, 222 passed, 8 errors, rc=1. The four failing ids are test_demque_bbg_backfill.py vendor_limit_warning [field] and [response] (FileNotFoundError on integrations/bloomberg/mcp/blp_client.py) and two test_demque_bbg_ledger_upload.py tests (one FileNotFoundError on integrations/bloomberg/pipeline/etf_daily_pull.py, one assertion None != 14); the eight errors are the collection errors of test_demque_active_windows, b1_names_mode, b1_request, card_a_slice, land, need_class, p1_coverage and secclass_sync (missing commonwealth_signs or integrations/ in this worktree). None of the four failing modules imports or reads standing_drawer.py's outcome logic.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the whole-folder no-failure bar of the build step",
+      "reason": "The folder at ba6c7bc7db reads 4 failed, 222 passed, 8 errors. The 222 includes the three new tests. Subtracting them gives 219 passed at the base 836e16bafd, which this run did not execute against a base checkout (no checkout is permitted to a worker). The four failures and the eight collection errors are the same ids the t69 instance's declared_exclusions records at its own base (626c692706), and each is a missing-path error or an assertion in a module the drawer's outcome change does not reach. No existing test was edited."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W65-S1: a run stopped by a bookkeeping exception has no stopping request, so the per-request rule reads its attempted requests COMPLETE or DRAWN under a STOPPED run (OBSERVATION, INERT). Implemented literally; the order does not name this path.",
+    "MDPF_DEMQUE-D1-W65-S2: every actuals line of a stopped run carries the run's stop_reason, so after DQ-t-74 a DRAWN line can name a stop another request caused (OBSERVATION, INERT). Left as the order says.",
+    "MDPF_DEMQUE-D1-W65-S3: the surprise-channel schema the system names is absent from this sparse worktree although tracked at HEAD (OBSERVATION, INERT). Rows follow the shape of the existing rows."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~65/MDPF_DEMQUE.TO-DQ-t74.outcome-per-request.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~65 <0.9.0_WK_MDPF_DEMQUE~65@opal.agent>\" -F .scratch/msg_dq_t74_code.txt -- data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_outcome_per_request.py org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit ba6c7bc7db on wk-MDPF_DEMQUE-65 (LOCAL): 3 files, 200 insertions, 3 deletions; commit-gate OK, surprise-row-gate OK (3 new rows of 167), to-pipeline-gate OK, missions-tree-check OK. WARN client-data-check: the hashed account-id list is absent, so the commit was not checked for account ids (no account data in it). A risk-reflex HOLD on standing_drawer.py cited the site Z change record for the scheduled task; it was read and the commit proceeded, with no deploy in this order."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no --continue-on-collection-errors data/mdpf/scripts/demque (from the worktree root)",
+      "result": "4 failed, 222 passed, 8 errors, rc=1; the failing and erroring ids are the base failures named in declared_exclusions."
+    }
+  ]
+}
