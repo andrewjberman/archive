@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e109",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e109.s48-cause-read.md",
+    "group": "OTHER",
+    "vintage_commit": "86c308e3ef"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R28.md",
+    "vintage_commit": "7e9fe5a8ec",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e109.s48-cause-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~99",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~99/S48_CAUSE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis output naming writer, moved key, upstream versions and verdict; no deploy; graded by check_s48_cause.py read (S48-CAUSE ok=True rc=0)"
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~99/S48_EVIDENCE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "measured listings, version ids and per-date deltas behind the verdict; read-only AWS reads, no write"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC28-e109-AC1",
+      "criterion_verbatim": "invocation: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R28_CHECKS/check_s48_cause.py read; expect: S48-CAUSE ok=True. The file names a writer that exists, the two versions of the moved object bracket the two fires and reconcile to the delta, and at least one changed upstream object is read live and straddles the window.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R28_CHECKS/check_s48_cause.py read",
+      "expect": "S48-CAUSE ok=True",
+      "output_evidence": "S48-CAUSE ok=True problems=[]",
+      "denominator": "0 of 11 checks failing (1 writer, 2 moved_key version heads, 2 moved_key totals reconciled to delta_total, 6 upstream version heads over 3 entries, plus why length and verdict); 1 of 1 criterion",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Selftest of the checker: a green arm and six negative arms (empty upstream, delta not reconciling, upstream not straddling the window, writer not a gold script, verdict UNDETERMINED, why missing) graded against the same grader",
+      "expected": "green arm reports no problems; every negative arm reports a problem",
+      "observed": "S48-CAUSE-SELFTEST green: True []; negatives 6 of 6 True; S48-CAUSE-SELFTEST ok=True (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_s48_cause.py read run twice on the same committed file; S3 version ids are immutable",
+      "observed": "run 1 S48-CAUSE ok=True problems=[]; run 2 S48-CAUSE ok=True problems=[]",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS write, delete, copy, put, tag, invoke, start, stop or deploy",
+      "reason": "read-only order; nothing was changed, and the rollback question is answered in why only"
+    },
+    {
+      "item": "The Cottonwood bucket opal-data-cot was not read",
+      "reason": "the B_00 read set (opal-data-bd inputs and opal-data-assets fact_rps) answers the lead without it; no Cottonwood-written object is in that read set"
+    },
+    {
+      "item": "A_03's buy and sell injection branches were not traced line by line",
+      "reason": "the two new accounts' 10-02 positions are tied to the 10-17 realized partition by account set and open dates; the exact injection branch is not claimed"
+    },
+    {
+      "item": "Per-account decomposition of the other 68 accounts' added positions",
+      "reason": "the verdict needs the mechanism and the totals, both measured; per-account attribution beyond the two new accounts is not needed for RIGHT"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W99-S1: order premise on magnitude: the TOTAL rise is stated as about $381k to $419k per date; measured on the 14 holdings pairs it is +382,473 (2026-10-11) to +450,743 (2026-10-14).",
+    "MDPF_SECCLASS-D1-W99-S2: order lead: the Cottonwood chain is not the writer of the moved inputs; the 49F bronze run of the shared cot_bronze_ingest.py landed them into opal-data-bd 00:02-00:08Z on 2026-10-17, and the guard version was live only after that run."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~99/S48_EVIDENCE.json",
+  "compiler_tools": [
+    {
+      "tool": "check_s48_cause.py (R28_CHECKS, read-only)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R28_CHECKS/check_s48_cause.py read",
+      "result": "S48-CAUSE ok=True problems=[] rc=0"
+    }
+  ]
+}
