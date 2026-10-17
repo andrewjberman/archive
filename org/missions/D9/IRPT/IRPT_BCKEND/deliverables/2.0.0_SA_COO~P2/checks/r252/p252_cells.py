@@ -48,7 +48,7 @@ def ac1(_):
     notpassed = [n for n in NAMES if n not in passed]
     if notpassed:
         fail("named tests not reported PASSED: %s" % ", ".join(notpassed))
-    print("OK: the ten named tests exist and all pass")
+    print("OK: the six named tests exist and all pass")
 
 
 def _find(tree, name):
