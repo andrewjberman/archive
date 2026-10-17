@@ -1,0 +1,18 @@
+# AMGT_RESAPP round 111 -- `AMGT-br-2`: the What Changed earnings-row detail read on the PROD build (W491-S2), `2.0.0_SA_COO~R1`, 2026-10-17 ~17:5xZ
+
+**Asked by** the CTO (round-110 analysis item 2, msg 7692): read the earnings-row detail on the PROD build (RIO LN, ICT PM), with the same build-to-live byte tie as FWD-40 (d). **The byte tie** is the one already recorded in `round110/PROD_READ_FWD40D.md` (live site equals CI run 39042189942's artifact, head `99d2b2a70c`, negative control on the previous build); `origin/PROD` was re-read at `99d2b2a7` immediately before this walk, so the build walked is the tied head. Not re-downloaded.
+
+## The read
+
+A local build of the exact PROD head (`git worktree` at `99d2b2a7`, `bun run dev:live --port 5174`; the walker refuses a non-localhost base). Two walks, the same walker and names as round 109's `bp-2` walk (RIO LN and ICT PM, the Model tab, the version selects), evidence outside the repository at `C:/dev/ui-walk-evidence/r111-prod/` (`walk.txt`, `walk2.txt`, `findings_walk2.json`, crops):
+- **Walk 1** with `--open-first "All figures" --open-first "Full figures"`: the walker's 20-click cap per scope opened only the first 20 `Full figures` details of RIO LN's What Changed table.
+- **Walk 2**, because of that cap: a throwaway copy of the walker (outside the repository, deleted) with the cap raised from 20 to 80, `--open-first "Full figures"`: every `Full figures` detail on RIO LN's and ICT PM's Model tab was opened. `OK: DISARMED`, post-disarm login HTTP 401 REFUSED, `SUMMARY: 14 unique finding(s) ... walk void: no`. The shot `013-RIO-LN-Model-expanded.png` (read by the issuer in crops) shows every What Changed row with its detail open, including the header-figure rows at the foot (Market cap, Beta, Share price, Average volume): `Earlier version: ... / Later version: ...` as plain numbers, no braces.
+- **The instrument's control.** The same walker on round 109's candidate `d060d119` (before `bq-1`) reported THREE `raw-code` findings quoting `[{"announcement_date":"2026-10-13","period":"2026:Q3"},...]` on RIO LN's Model tab and its select states (`UIW-20261017T124617Z-014, -016, -017`). On the PROD head the `raw-code` findings of walk 2 are exactly two, `007` and `013`, both the `P/E not shown: price / reported EPS (IS_EPS) ...` footer (the finding of item 3); none quotes the earnings list. So the instrument that fires on the old code is silent on the PROD head, over the same names and the same select states.
+
+## Reading and its limit
+
+**The raw earnings-list JSON is absent from RIO LN's and ICT PM's Model tab on the PROD build, with every `Full figures` detail open.** W491-S2 reads as fixed on PROD by that evidence.
+
+**Not verified, stated:** the earnings-announcement ROW itself was not seen. RIO LN's default What Changed pair (Oct 16 to Oct 17) lists 26 changed figures and none is the earnings-dates list (the list changes only on a day an announcement is added); the issuer did not locate the select-state pair that carries it in the shots, and read the absence of the `raw-code` finding in those states, not the row's text. The row's `<date> (<period>); ...; <n> entries in all` text is graded by `AMGT-br-1`'s harness on the candidate (O3/O4 render the RIO LN fixture row) and was graded for `bq-1` at the harness; a live read of the row waits for a day on which a pair carries it.
+
+**Instrument trap recorded.** The walker's `--open-first` stops at 20 expansions per scope (`walk.mjs` line 329, `Math.min(nSum, 20)`): a detail beyond the 20th is NOT opened by a default walk. A walk meant to read a late row must raise the cap (a copy), or name the row.
