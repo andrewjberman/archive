@@ -209,3 +209,26 @@ blob `c5c086d18181`, sha256 `a67a5b0fcdccdfe00714182bbd35a2a828bcf15757e04f8d8cb
 3. **No YCharts call and no window during the install or V2,** as written.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## r34j -- the YCharts tier on the estate client's form, and the door checker on the T-1 frontier (2026-10-17 ~02:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34J_ESTATE_FORM_CHECKER_20261017.md` (@30bce0bf3f),
+blob `d6606fa1089f`, sha256 `8ae9aa83bf1964a21ba84e67174d0982c152c72269a215d653459d6f0b837bca`, 11,348 bytes (re-measured). Applier IB2.
+
+**What ships:**
+- my rulings 10040, 10079 and 10122;
+- `intake/yfinance_check.py` takes the last FINITE close at or before the `lib/trading_calendar.py` T-1 frontier (the r34i V2S failure);
+- the YCharts tier calls `ycharts_client.py`'s builder, unedited, at pinned blob `95f3f2009e`, with my two pinning tests (AR-g-155);
+- the tiers and the budget are r34h's.
+
+**Blast radius:** one new root, rollback to r34h. **Both branches are covered.** The five known limits are named and none is claimed. The
+pricing as_of pair stays separate (row S163).
+
+**Conditions:**
+1. **No YCharts call and no window during the install or V2.**
+2. **The first priced runs on r34j log every YCharts-tier answer** (status and shape, never a body). SPY is one sample, so an ETF or symbol
+   the form refuses is that tier's ERROR, never a price.
+3. **FWD-1 window 5 is re-pinned to r34j** by a further amendment from `~Y2`, which this seat re-signs, before it runs. A rolled-back
+   r34j leaves window 5 HELD.
+
+-- `1.0.0_SA_CTO~DELL2`
