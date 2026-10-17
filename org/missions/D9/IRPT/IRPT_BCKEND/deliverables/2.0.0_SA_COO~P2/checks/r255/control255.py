@@ -21,14 +21,9 @@ GOOD = {
     "terraform": {"plan": {"add": 0, "change": 1, "destroy": 0, "addresses_changed": [P.ADDRESS]}, "applied_through": "safe-apply", "replan_no_changes": True},
     "policy_readback": {"new_statement_sid": P.SID_NEW, "new_statement_count": 1, "statement_49f_unchanged": True, "other_statements_unchanged": True, "wildcard_in_new_statement": False},
     "simulation": {"allowed": {k: "allowed" for k in P.ALLOWED}, "denied": {k: "implicitDeny" for k in P.DENIED}},
-    "qa": {"qa_rerun_needed": False, "qa_runs_after_the_leg": 0},
-    "counters": {"other_iam_changes": 0, "other_terraform_roots_applied": 0, "lambda_invokes_beyond_the_one_qa_run": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0},
+    "qa": {"runs": 0, "deferred_to_scheduled_fire": True},
+    "counters": {"other_iam_changes": 0, "other_terraform_roots_applied": 0, "lambda_invokes": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0},
 }
-RERUN = copy.deepcopy(GOOD)
-RERUN["qa"] = {"qa_rerun_needed": True, "qa_runs_after_the_leg": 1, "list_key_exists_and_fresh": "PASS", "line_count_equals_the_session_count": "PASS",
-               "no_plain_sha256_of_a_known_fake_id": "PASS", "directory_output_byte_unchanged": "PASS"}
-
-
 def mut(path, value):
     def f(r):
         r = copy.deepcopy(r)
@@ -63,11 +58,9 @@ NEGS = [
     ("assume_not_allowed", "AC3", GOOD, mut(["simulation", "allowed", "assume_the_stage_role"], "implicitDeny")),
     ("unrelated_role_allowed", "AC3", GOOD, mut(["simulation", "denied", "assume_an_unrelated_role"], "allowed")),
     ("wildcard_assume_allowed", "AC3", GOOD, mut(["simulation", "denied", "any_wildcard_resource_assume"], "allowed")),
-    ("rerun_fact_missing", "AC3", GOOD, mut(["qa", "qa_rerun_needed"], "unknown")),
-    ("rerun_not_needed_but_run", "AC3", GOOD, mut(["qa", "qa_runs_after_the_leg"], 1)),
-    ("rerun_needed_but_not_run", "AC3", RERUN, mut(["qa", "qa_runs_after_the_leg"], 0)),
-    ("rerun_two_runs", "AC3", RERUN, mut(["qa", "qa_runs_after_the_leg"], 2)),
-    ("rerun_check_fails", "AC3", RERUN, mut(["qa", "directory_output_byte_unchanged"], "FAIL")),
+    ("one_qa_run", "AC3", GOOD, mut(["qa", "runs"], 1)),
+    ("qa_not_deferred", "AC3", GOOD, mut(["qa", "deferred_to_scheduled_fire"], False)),
+    ("a_lambda_invoke", "AC3", GOOD, mut(["counters", "lambda_invokes"], 1)),
     ("other_iam_change", "AC3", GOOD, mut(["counters", "other_iam_changes"], 1)),
     ("other_root_applied", "AC3", GOOD, mut(["counters", "other_terraform_roots_applied"], 1)),
     ("per_firm_number", "AC3", GOOD, mut(["counters", "per_firm_numbers_recorded"], 1)),
@@ -103,7 +96,7 @@ def expect(label, cid, root, want):
     print("%s %-12s %-30s -> %s %s" % ("POSITIVE" if want else "NEGATIVE", cid, label, r, "" if ok else "<-- UNEXPECTED"))
 
 
-for name, rec in (("clean", GOOD), ("clean_with_rerun", RERUN)):
+for name, rec in (("clean", GOOD),):
     root = build(rec)
     for ac in ("AC1", "AC2", "AC3"):
         expect(name, "IBHM11-" + ac, root, True)
