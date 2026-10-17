@@ -1,0 +1,93 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-37",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "6784006a1f",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-37.land-dell1-harvest-release-on-trunk.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ap37_landing.json",
+   "kind": "doc",
+   "commit_or_etag": "3cf7551f1e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "trunk_base 6013328e18, dell1 1753c741d9, merge 82244ac7a3 (parents exactly the two, tree equal to trunk_base's), manifest source dell1's commit 25699bc8e5.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "069c9d8bd1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row Z-S378: safe-merge cannot land a lineage-only merge; the landing was made by commit-tree on the scratch branch land-hvst-cd2-nfra1.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a true merge of dell1's release commit on the trunk head, no conflict marker left, no gateway, Terraform or other byte changed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ap37.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)merge parents are exactly trunk_base and the dell1 commit: yes; dell1's release is an ancestor of the merge: yes; conflicted paths \\(merge-tree, the denominator\\): (\\d+); conflict markers in 0 of \\1 paths \\(want 0\\).*gateway paths differing from trunk_base: 0 \\(want 0, the merge changes no gateway byte\\); the (\\d+) conflicted gateway paths equal trunk_base's blobs: yes; terraform files differing 0 \\(want 0\\); paths outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "merge parents are exactly trunk_base and the dell1 commit: yes; dell1's release is an ancestor of the merge: yes; conflicted paths (merge-tree, the denominator): 2; conflict markers in 0 of 2 paths (want 0)\ngateway paths differing from trunk_base: 0 (want 0, the merge changes no gateway byte); the 2 conflicted gateway paths equal trunk_base's blobs: yes; terraform files differing 0 (want 0); paths outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "2 conflicted paths (merge-tree); 0 gateway paths differing from trunk_base",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the manifest block still names the live release (efcc8ae19f, previous 1753c741d9) and nothing else in it moved.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ap37.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)manifest opal-gateway deployed_commit efcc8ae19f previous 1753c741d9 \\(want efcc8ae19f and 1753c741d9\\): yes.*other services and the top level unchanged from trunk_base: yes; the gateway block's other keys unchanged: yes.*manifest source: dell1's own commit 25699bc8e5 \\(an ancestor of the merge\\): yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "manifest opal-gateway deployed_commit efcc8ae19f previous 1753c741d9 (want efcc8ae19f and 1753c741d9): yes\nother services and the top level unchanged from trunk_base: yes; the gateway block's other keys unchanged: yes\nmanifest source: dell1's own commit 25699bc8e5 (an ancestor of the merge): yes\nRESULT: PASS\nexit=0",
+   "denominator": "1 manifest block; 1 source commit",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 and AC2 were each run twice against the same records, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the issuer's pre-cut controls (one parent, a differing harvest blob, an extra gateway file, a Terraform file, the manifest on the old ref, another service changed) are the discriminating arms.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "step 1's literal tool (.tools/safe-merge.sh) for the merge commit",
+   "reason": "safe-merge refuses a merge that stages no files (its lines 775 to 781) and aborts it; with both conflicts resolved to trunk's blobs (order A2) the landing changes no byte, so the commit was made by commit-tree on the scratch branch, the shape the script's own fast lane lands by. Row Z-S378. Nothing touched a shared branch."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S378"
+ ],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1 (GO msg 35552, trunk_base_sha 6013328e18 = box/sitez head at the GO, A1 and A2 read). merge-tree: 2 conflicted gateway paths (the denominator), matching A2. safe-merge started the merge and handed back the conflict; both paths resolved to trunk's blob (hash-object equal, 0 markers); --continue refused (no staged file) and aborted. Merge commit 82244ac7a3 by commit-tree; record, row and AC runs on the branch land-hvst-cd2-nfra1. No push, no deploy, no gateway byte.",
+ "compiler_tools": [
+  {
+   "tool": "git merge-tree / commit-tree",
+   "invocation": "git merge-tree --write-tree --name-only; git commit-tree",
+   "result": "PASS",
+   "note": "Shas and counts only."
+  }
+ ]
+}
