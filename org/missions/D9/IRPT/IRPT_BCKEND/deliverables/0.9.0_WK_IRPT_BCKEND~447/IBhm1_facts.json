@@ -1,0 +1,148 @@
+{
+  "q1": {
+    "answer": "The per-firm loop of lambda_handler runs from the for statement at infra/aws/lambda/investor-reporting/directory/refresh.py:1218 to its last body statement out.append(row) at refresh.py:1335; the return is at refresh.py:1336. Line 1335 is the line after which every firm's manifest write has committed and its result is collected: the manifest put at refresh.py:1308 and the dispatch-day rewrite at refresh.py:1332 run inside the loop. The directory artifact itself is written on the runner host by land() (data/assets/scripts/gold/investor_reporting/directory_runner.py:1074), not inside this function. No try/except wraps the for statement: the three try blocks (refresh.py:1232, 1307, 1321) each cover only their own statements, and their except arms (refresh.py:1276, 1310, 1333) record a classified error and continue. A failure of a stage appended after line 1335 and before the return at 1336 would be caught only by a try/except that the new stage carries itself; wrapped that way and writing only to a new key, it cannot alter out or the returned dict.",
+    "evidence": [
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1200",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1218",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1232",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1276",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1308",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1332",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1335",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1336",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:1074"
+    ]
+  },
+  "q2": {
+    "answer": "The served account ids per firm travel in each directory entry's ids.account_ids list, minted at data/assets/scripts/gold/investor_reporting/directory_runner.py:484-515. refresh_firm (refresh.py:944) takes them as built entries (refresh.py:1067); the previous build's entries come back as previous_entries (refresh.py:1274-1275). The compare key used by compute_delta (refresh.py:1069) and resolve_disappeared (refresh.py:1079) is a CLIENT id: ids.client_id, else ids.relationship_id (refresh.py:387-389). So the structure that carries the served account ids is entries[].ids.account_ids, which are ACCOUNT ids; the refresh's own key space is client. source_client_ids is the list of client keys the source snapshot held (directory_runner.py:965 and :1184; read back at refresh.py:872-873). A firm's directory object is the dated JSON artifact investor-reporting/directory/{as_of}/directory.json, whose entries key holds the entries and whose source_client_ids key holds the source list; the runner's pointer is investor-reporting/directory/latest.json (directory_runner.py:1049-1050), which refresh.py:738 reads. The prefix is refresh.py:70 DIRECTORY_PREFIX, taken from the environment variable IRPT_DIRECTORY_PREFIX, which schedule.tf:154 sets from local.directory_prefix (iam.tf:38 defines it as investor-reporting/directory).",
+    "id_kind": "account",
+    "field_names": [
+      "entries",
+      "ids.account_ids",
+      "ids.client_id",
+      "ids.relationship_id",
+      "source_client_ids",
+      "latest.json",
+      "directory.json"
+    ],
+    "evidence": [
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:944",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:387",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:738",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:872",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1067",
+      "infra/aws/lambda/investor-reporting/directory/refresh.py:1069",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:484",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:515",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:965",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:1049",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:1050",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:1184",
+      "infra/aws/terraform/investor-reporting/directory/iam.tf:38",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:154"
+    ]
+  },
+  "q3": {
+    "answer": "The hook .tools/git-hooks/client-data-check.py takes each staged token matching TOKEN_RE (line 28: 5 to 24 characters of letters, digits and hyphen, with at least five digits, checked at line 66), upper-cases it (tok.upper(), line 68) and sha256-hashes it against a hash list held outside the repo. That list is one lowercase sha256 per line of the upper-cased served account id (lines 11-12). The directory's account id is not that string: directory_runner.py:160 and :484 mint it through the _ids module (opaque_id), which is sparse-excluded from this worktree and was read at HEAD with git show (surprise IRPT_BCKEND-D2-W447-S1); at HEAD it is the account kind prefix plus 24 lowercase hex digits, so UPPER of the directory id is not the hook token for the same account (surprise IRPT_BCKEND-D2-W447-S2). The declared raw key is accounts_v2.account_id (directory_runner.py:713-719), which a staged file would carry, zero-padded to ten digits. The hook's token regex excludes the underscore, so it sees at most the hex body. The served id and the hook token are different strings, not a case or padding variant of one another, so upper_equal is false.",
+    "hook_token_regex": "(?<![A-Za-z0-9-])[A-Za-z0-9][A-Za-z0-9-]{4,23}(?![A-Za-z0-9-])",
+    "upper_equal": false,
+    "evidence": [
+      ".tools/git-hooks/client-data-check.py:11",
+      ".tools/git-hooks/client-data-check.py:12",
+      ".tools/git-hooks/client-data-check.py:28",
+      ".tools/git-hooks/client-data-check.py:66",
+      ".tools/git-hooks/client-data-check.py:68",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:160",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:484",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:713",
+      "data/assets/scripts/gold/investor_reporting/directory_runner.py:719"
+    ]
+  },
+  "q4": {
+    "answer": "(a) Secret: NOT FOUND as a builder. lib/opal_naming.py name() (line 2700) emits {system}-{scope}-{function}[-{qualifier}]-{kind}, hyphen-joined. The slash secret grammar {system}/{scope}/{purpose} is written at org/standards/NAMING_SCHEMA.json:123 and is only graded (_grade_secret, lib/opal_naming.py:2185); no builder emits it. The irpt system key exists (infra/logic/registry/systems.json:29) and the irpt product row exists in scopes.json (line 332, bucket opal-data-irpt, unprovisioned), but resources.json holds no irpt row, and its SECRET rows use the slash form (resources.json:2753). (b) Globgrph bucket and product folder: NOT FOUND. key() (opal_naming.py:2499) and address() (opal_naming.py:2515) exist, but scopes.json has no globgrph scope row, no opal-data-glob bucket appears under infra/logic/registry, and the globgrph system row (systems.json:244) has no bucket field. Registry rows that would have to be added, names only: a resources.json SECRET row for the irpt HMAC-key secret, and a scopes.json product row for globgrph carrying its bucket.",
+    "registry_rows_to_add": [
+      "resources.json SECRET row: irpt HMAC-key secret",
+      "scopes.json product row: globgrph with its bucket"
+    ],
+    "evidence": [
+      "lib/opal_naming.py:2185",
+      "lib/opal_naming.py:2499",
+      "lib/opal_naming.py:2515",
+      "lib/opal_naming.py:2700",
+      "org/standards/NAMING_SCHEMA.json:123",
+      "infra/logic/registry/systems.json:29",
+      "infra/logic/registry/systems.json:244",
+      "infra/logic/registry/scopes.json:332",
+      "infra/logic/registry/resources.json:2753"
+    ]
+  },
+  "q5": {
+    "answer": "The statements of data.aws_iam_policy_document.irpt_directory_refresh (infra/aws/terraform/investor-reporting/directory/schedule.tf:220) are ReadFirmDirectoryPrefixOnly, WriteRefreshManifestsOnly, ListExactlyWhatItMayAlreadyRead, OwnLogStreamOnly, DispatchTheDirectoryBuildToOneRunnerOnly, StartThatRunnerNeverStopIt and ReadBackTheCommandsThisFunctionSent. The two statements to add are secretsmanager:GetSecretValue on one secret ARN and s3:PutObject on one key. WriteRefreshManifestsOnly already grants s3:PutObject on the _refresh/ prefix (refresh_manifest_arns, schedule.tf:211-213), so a key under investor-reporting/directory/_refresh/ needs no new PutObject statement, while a key outside that prefix does. The refresh function's Lambda environment map is in schedule.tf (module irpt_directory_refresh, environment_variables at lines 152-166); lambda.tf holds the directory-search function's map instead. The refresh map carries no secret ARN or key name, so a new environment variable is needed unless the name is derived in code.",
+    "existing_sids": [
+      "ReadFirmDirectoryPrefixOnly",
+      "WriteRefreshManifestsOnly",
+      "ListExactlyWhatItMayAlreadyRead",
+      "OwnLogStreamOnly",
+      "DispatchTheDirectoryBuildToOneRunnerOnly",
+      "StartThatRunnerNeverStopIt",
+      "ReadBackTheCommandsThisFunctionSent"
+    ],
+    "statements_to_add": [
+      "secretsmanager:GetSecretValue",
+      "s3:PutObject"
+    ],
+    "env_file": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
+    "new_env_var": true,
+    "evidence": [
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:136",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:152",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:165",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:211",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:220",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:222",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:230",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:257",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:273",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:295",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:305",
+      "infra/aws/terraform/investor-reporting/directory/schedule.tf:314",
+      "infra/aws/terraform/investor-reporting/directory/lambda.tf:42"
+    ]
+  },
+  "q6": {
+    "answer": "No. check_cross_firm_bucket_refs (.tools/ds-precommit-check.py:633) returns no block unless the file path contains a key of _CROSS_FIRM_FOREIGN_BUCKETS, and that enumeration (lines 69-72) holds only data/black_diamond/ and data/cot/; the early return is at lines 645-646. The refresh source infra/aws/lambda/investor-reporting/directory/refresh.py and the root infra/aws/terraform/investor-reporting/directory/ match neither key, and the enumeration names no globgrph bucket or product-folder key (the key-prefix enumeration at lines 113-116 names none either). This is a read of the gate, not a run.",
+    "flagged": false,
+    "evidence": [
+      ".tools/ds-precommit-check.py:69",
+      ".tools/ds-precommit-check.py:70",
+      ".tools/ds-precommit-check.py:71",
+      ".tools/ds-precommit-check.py:633",
+      ".tools/ds-precommit-check.py:645",
+      ".tools/ds-precommit-check.py:646",
+      ".tools/ds-precommit-check.py:113",
+      ".tools/ds-precommit-check.py:114",
+      ".tools/ds-precommit-check.py:115"
+    ]
+  },
+  "q7": {
+    "answer": "Five test files named test_refresh*.py sit under infra/aws/lambda/investor-reporting/directory/tests/. Failures are injected two ways: a planted build function that raises, passed as build_fn to refresh_firm (test_refresh_expiry.py:234-241; the test asserts a FAILED envelope and that the exception text stays out of the manifest), and monkeypatch.setattr on the refresh module or the dispatcher with fake S3 and SSM stub classes (test_refresh_manifest_dispatch_date.py:39 FakeS3, :67 FakeSSM, :94 monkeypatch of refresh._client; test_refresh_previous_state_served.py:151 patches SsmBuildDispatcher.served_entries). The model planted-failure test is test_a_raising_build_is_a_failed_envelope_and_never_an_exception.",
+    "test_files": [
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_manifest_dispatch_date.py",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_previous_state.py",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_previous_state_served.py",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_terminated.py"
+    ],
+    "model_test": "test_a_raising_build_is_a_failed_envelope_and_never_an_exception",
+    "evidence": [
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py:234",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py:237",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py:241",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_manifest_dispatch_date.py:39",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_manifest_dispatch_date.py:67",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_manifest_dispatch_date.py:94",
+      "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_previous_state_served.py:151"
+    ]
+  },
+  "notes": "Read-only measurement of the worktree at HEAD 776faec3e3 (branch wk-IRPT_BCKEND-447), with no AWS call. The _ids, _authz, _scope and _keys folders and org/surprise_channel are sparse-excluded in this worktree; their HEAD text was read with git show and the sparse set was not changed (surprise IRPT_BCKEND-D2-W447-S1). The directory's served account ids are opaque minted ids, so the hook-token premise of q3 fails (surprise IRPT_BCKEND-D2-W447-S2, ARMED, disarm owner 2.0.0_SA_COO~P2). The globgrph bucket and the irpt secret have no registry rows (surprise IRPT_BCKEND-D2-W447-S3). Every answer reads a cited line; no answer is a live fact. Nothing was built, edited or deployed beyond this record folder."
+}
