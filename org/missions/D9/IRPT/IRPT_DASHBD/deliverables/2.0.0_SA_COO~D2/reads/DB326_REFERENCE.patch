@@ -1,0 +1,210 @@
+diff --git a/infra/aws/lambda/investor-reporting/reporting-publish/handler.py b/infra/aws/lambda/investor-reporting/reporting-publish/handler.py
+index 7612b02bfc..2576d073c5 100644
+--- a/infra/aws/lambda/investor-reporting/reporting-publish/handler.py
++++ b/infra/aws/lambda/investor-reporting/reporting-publish/handler.py
+@@ -756,21 +756,60 @@ def run_filled_report(firm, client_ids, put, reader=None, environ=None):
+     return out
+ 
+ 
+-def filled_report_fire(event, context=None):
+-    """The event branch. Switch off: returns at once, reading and writing nothing. Switch on: lists the firm's directory clients
+-    and runs the pass with an S3 put at the builder's address."""
++def _filled_options(event):
++    """The pass's optional scoping, validated BEFORE any read (DB-b-326): `clients` (a non-empty list of issued client ids), `dry_run`
++    (a boolean) and `shard` with `shards` (both or neither). Absent, the pass is the whole directory and writes, as before."""
++    cl = event.get("clients")
++    if cl is not None and (not isinstance(cl, list) or not cl or not all(isinstance(c, str) and c.startswith("cli_") for c in cl)):
++        raise SystemExit("REFUSED: clients must be a non-empty list of issued client ids (cli_...)")
++    dry = event.get("dry_run")
++    if dry is not None and not isinstance(dry, bool):
++        raise SystemExit("REFUSED: dry_run must be a boolean or absent")
++    shard, shards = event.get("shard"), event.get("shards")
++    if (shard is None) != (shards is None):
++        raise SystemExit("REFUSED: shard and shards come together")
++    if shards is not None:
++        ints = all(isinstance(x, int) and not isinstance(x, bool) for x in (shard, shards))
++        if not (ints and shards >= 1 and 0 <= shard < shards):
++            raise SystemExit("REFUSED: shard %r is not in 0..%r" % (shard, shards))
++    return cl, bool(dry), shard, shards
++
++
++def filled_report_fire(event, context=None, s3=None, directory=None):
++    """The event branch. Switch off: returns at once, reading and writing nothing (options are not even read). Switch on: lists the
++    firm's directory clients, narrows them by the options, and runs the pass with an S3 put at the builder's address; a dry run
++    reads, composes and validates every document and writes none (its `written` is the count that WOULD be written)."""
+     if not filled_report_enabled():
+         return run_filled_report(None, [], None)
+-    import boto3
++    named, dry, shard, shards = _filled_options(event)
+     _, firm = resolve_firm(event.get("source"))
+-    s3 = boto3.client("s3", region_name="us-east-1")
+-    clients, _ = directory_clients(read_directory(s3, directory_bucket(firm)))
++    if s3 is None:
++        import boto3
++        s3 = boto3.client("s3", region_name="us-east-1")
++    if directory is None:
++        directory = read_directory(s3, directory_bucket(firm))
++    clients, _ = directory_clients(directory)
++    ids = sorted(clients)
++    if named is not None:
++        unknown = sorted(c for c in set(named) if c not in clients)
++        if unknown:
++            raise SystemExit("REFUSED: %d named client(s) are not in the directory" % len(unknown))
++        ids = sorted(set(named))
++    if shards is not None:
++        ids = [c for c in ids if shard_of(c, shards) == shard]
+ 
+     def put(address, body):
++        if dry:
++            return
+         b, k = _split(address)
+         s3.put_object(Bucket=b, Key=k, Body=body, ContentType="application/json")
+ 
+-    return run_filled_report(firm, sorted(clients), put)
++    out = run_filled_report(firm, ids, put)
++    if dry:
++        out["dry_run"] = True
++    if shards is not None:
++        out["shard"], out["shards"] = shard, shards
++    return out
+ # END FILLED-REPORT-A
+ 
+ 
+diff --git a/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_pass_options.py b/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_pass_options.py
+new file mode 100644
+index 0000000000..514e63def4
+--- /dev/null
++++ b/infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_pass_options.py
+@@ -0,0 +1,132 @@
++"""DB-b-326: the filled-report pass takes optional scoping (clients, dry_run, shard/shards); absent, it is the whole-directory writing pass as before.
++
++Drives the real `handler.filled_report_fire` with an injected S3 and directory (synthetic client ids, a synthetic document), the reader and
++the switch patched. Offline: no AWS, no network.
++"""
++import sys
++from pathlib import Path
++
++import pytest
++
++HERE = Path(__file__).resolve().parent
++ROOT = HERE.parents[5]
++sys.path.insert(0, str(HERE.parent))
++sys.path.insert(0, str(ROOT))
++import handler as h  # noqa: E402
++
++IDS = ["cli_S%02d" % i for i in range(1, 26)]
++
++
++def _doc():
++    return {
++        "household": {
++            "household_ref": "hh_SYNTH1", "as_of": "2026-09-30", "first_data_date": "2024-01-02",
++            "accounts": [{"account_id": "acc_0000000000000000000000a1", "account_id_form": "minted", "last4": "0001", "first_data_date": "2024-01-02",
++                          "window_status": {"qtd": "MEASURED", "ytd": "MEASURED", "last_12_months": "MEASURED", "since_inception": "MEASURED"}}],
++        },
++        "values": {"pvs.ytd.total_return": 1.5, "label.household": "Synthetic household"},
++    }
++
++
++class FakeS3:
++    def __init__(self):
++        self.puts = []
++
++    def put_object(self, Bucket, Key, Body, ContentType):  # noqa: N803 -- the boto3 spelling
++        self.puts.append(Key)
++
++
++@pytest.fixture(autouse=True)
++def _env(monkeypatch):
++    monkeypatch.setenv("FILLED_REPORT_PASS", "1")
++    monkeypatch.setattr(h, "resolve_firm", lambda source=None: ("src", "49financial"))
++    monkeypatch.setattr(h, "read_filled_report_gold", lambda firm, cid, **kw: _doc())
++
++
++def _directory(ids=IDS):
++    return {"entries": [{"ids": {"client_id": c, "account_ids": ["acc_%024d" % i]}} for i, c in enumerate(ids)]}
++
++
++def _fire(event, s3=None, ids=IDS):
++    s3 = s3 or FakeS3()
++    return h.filled_report_fire(event, None, s3=s3, directory=_directory(ids)), s3
++
++
++def test_options_default_is_the_whole_directory_and_writes():
++    out, s3 = _fire({"filled_report": True})
++    assert out == {"enabled": True, "clients": 25, "written": 25, "not_available": [], "refused": []}
++    assert len(s3.puts) == 25 and len(set(s3.puts)) == 25
++
++
++def test_options_clients_subset_writes_only_the_named_clients_once():
++    out, s3 = _fire({"filled_report": True, "clients": [IDS[3], IDS[1], IDS[3]]})
++    assert out["clients"] == 2 and out["written"] == 2 and len(s3.puts) == 2
++
++
++def test_options_unknown_named_client_is_refused_and_nothing_is_written():
++    s3 = FakeS3()
++    with pytest.raises(SystemExit) as e:
++        _fire({"filled_report": True, "clients": [IDS[0], "cli_NOT_THERE"]}, s3)
++    assert "REFUSED" in str(e.value) and s3.puts == []
++
++
++def test_options_dry_run_reads_and_validates_but_writes_nothing():
++    out, s3 = _fire({"filled_report": True, "dry_run": True})
++    assert s3.puts == [] and out["dry_run"] is True and out["written"] == 25 and out["clients"] == 25
++
++
++def test_options_dry_run_still_counts_a_refused_document(monkeypatch):
++    def refuse(firm, cid, **kw):
++        if cid == IDS[2]:
++            raise h.publisher.PublishRefused("synthetic")
++        return _doc()
++    monkeypatch.setattr(h, "read_filled_report_gold", refuse)
++    out, s3 = _fire({"filled_report": True, "dry_run": True})
++    assert out["refused"] == [IDS[2]] and out["written"] == 24 and s3.puts == []
++
++
++def test_options_seven_shards_partition_the_clients_exactly_once():
++    seen = []
++    for k in range(7):
++        out, s3 = _fire({"filled_report": True, "shard": k, "shards": 7})
++        assert out["shard"] == k and out["shards"] == 7 and out["written"] == len(s3.puts)
++        seen += s3.puts
++    assert len(seen) == 25 and len(set(seen)) == 25
++
++
++def test_options_clients_and_shards_combine_as_an_intersection():
++    named = IDS[:10]
++    total = 0
++    for k in range(3):
++        out, _ = _fire({"filled_report": True, "clients": named, "shard": k, "shards": 3})
++        total += out["written"]
++    assert total == 10
++
++
++@pytest.mark.parametrize("event", [
++    {"filled_report": True, "shard": 1},
++    {"filled_report": True, "shards": 3},
++    {"filled_report": True, "shard": 3, "shards": 3},
++    {"filled_report": True, "shard": -1, "shards": 3},
++    {"filled_report": True, "shard": 0, "shards": 0},
++    {"filled_report": True, "shard": "0", "shards": 3},
++    {"filled_report": True, "shard": True, "shards": 3},
++    {"filled_report": True, "dry_run": "yes"},
++    {"filled_report": True, "clients": []},
++    {"filled_report": True, "clients": "cli_S01"},
++    {"filled_report": True, "clients": ["S01"]},
++])
++def test_options_malformed_options_are_refused_before_any_read_or_write(event, monkeypatch):
++    s3 = FakeS3()
++    called = []
++    monkeypatch.setattr(h, "read_filled_report_gold", lambda firm, cid, **kw: called.append(cid))
++    with pytest.raises(SystemExit) as e:
++        _fire(event, s3)
++    assert "REFUSED" in str(e.value) and s3.puts == [] and called == []
++
++
++def test_options_switch_off_returns_at_once_whatever_the_options(monkeypatch):
++    monkeypatch.setenv("FILLED_REPORT_PASS", "0")
++    s3 = FakeS3()
++    out = h.filled_report_fire({"filled_report": True, "shard": 99, "clients": "garbage"}, None, s3=s3, directory=_directory())
++    assert out == {"enabled": False, "clients": 0, "written": 0, "not_available": [], "refused": []} and s3.puts == []

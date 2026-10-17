@@ -1,0 +1,66 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-384",
+  "cell": "AR-y-384",
+  "workstream": "ZZ45 (round 43)",
+  "branch": "cand/dell2/anlreq-test-lint-fixes",
+  "branch_state": "LOCAL only; created at the commit below; NOT pushed (git ls-remote of the branch name returned nothing at filing)",
+  "base_sha": "4d4dc68cae49565d8bddb9ca032a24734a9f655d",
+  "base_note": "the order's base (origin/DEV at issue). origin/DEV now resolves to 8ecad4a5, 39 commits past the base; the two test files are byte-identical between the two; see the surprise row IRPT_ANLREQ-D2-W284-S1.",
+  "commit": "cd226582f48e121c540c4b484b2dc49c83b10552",
+  "commit_subject": "test(TicketCenter lint): fix the two eslint errors that stop the DEV release build (AR-y-384, round 43 ZZ45)",
+  "commit_repo": "the portal worktree C:/dev/wk-irpt-anlreq-284/portal (portal repo; not the workspace repo)",
+  "files_changed": [
+    "src/pages/TicketCenter/__tests__/filing-hint.test.tsx",
+    "src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx"
+  ],
+  "diff_stat": "git -C C:/dev/wk-irpt-anlreq-284/portal diff --stat 4d4dc68cae cd226582f48e121c540c4b484b2dc49c83b10552 -> 2 files changed, 2 insertions(+), 2 deletions(-)",
+  "changes": [
+    {
+      "file": "src/pages/TicketCenter/__tests__/filing-hint.test.tsx",
+      "line": 190,
+      "rule": "no-regex-spaces",
+      "old": "\\n  \\}   (two literal spaces)",
+      "new": "\\n {2}\\}   (counted space)",
+      "equivalence": "EQUIVALENT 8 strings (filing-hint; 3 match, 5 do not match)"
+    },
+    {
+      "file": "src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx",
+      "line": 299,
+      "rule": "no-control-regex",
+      "old": "six raw U+0008 bytes around Yes, Replace and No",
+      "new": "[\\b] class escape around Yes, Replace and No (a backspace inside a character class)",
+      "equivalence": "EQUIVALENT 10 strings (decision-tree; 4 match, 6 do not match)"
+    }
+  ],
+  "tests": {
+    "command_two_files": "bun test src/pages/TicketCenter/__tests__/filing-hint.test.tsx src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx",
+    "result_two_files": "15 pass, 0 fail, 120 expect() calls, 2 files, rc 0",
+    "command_folder": "bun test src/pages/TicketCenter",
+    "result_folder": "213 pass, 0 fail, 1349 expect() calls, 33 files, rc 0",
+    "runner": "bun test v1.4.2 (via bun from Git Bash)"
+  },
+  "eslint_before": {
+    "command": "bun x eslint src/pages/TicketCenter/__tests__/filing-hint.test.tsx src/pages/TicketCenter/__tests__/filing-decision-tree.test.tsx   (at 4d4dc68cae, the base content)",
+    "errors": 2,
+    "detail": [
+      "filing-hint.test.tsx:190:37 no-regex-spaces 'Spaces are hard to count. Use {2}.'",
+      "filing-decision-tree.test.tsx:299:12 no-control-regex 'Unexpected control character(s) in regular expression: \\x08 x6'"
+    ],
+    "origin_dev_control": "BASE-HAS-ERRORS 2 (eslint --stdin on origin/DEV 8ecad4a5 content of the same two files)"
+  },
+  "eslint_after": {
+    "command": "lint_check.py (eslint --stdin on the committed blobs at cand/dell2/anlreq-test-lint-fixes)",
+    "errors": 0,
+    "result": "LINT-OK 0 errors in 2 files",
+    "direct_run": "bun x eslint on the two files in the worktree at cand HEAD: rc 0, no output",
+    "mutant": "mutant_check.py reverts both literals in memory: MUTANT-FIRED 2 errors (no-regex-spaces in filing-hint, no-control-regex in filing-decision-tree)"
+  },
+  "claim": "The two lint errors that the order names (no-regex-spaces in filing-hint.test.tsx line 190; no-control-regex in filing-decision-tree.test.tsx line 299) are gone on the candidate, and each rewritten literal matches the same strings as the original on the strings checked. Two test files changed; no assertion changed; no eslint-disable comment and no config change. Test-only candidate; not landed, not pushed, not deployed.",
+  "not_read": [
+    "the full-repository `eslint .` (bun run lint); not run in the sparse worktree, so any other lint error elsewhere in the repository is unknown here",
+    "any file outside the two test files and the TicketCenter folder; the rest of the repository was not built or tested",
+    "origin/DEV after 8ecad4a5 (the base moved; the candidate is cut from 4d4dc68cae as the order names)",
+    "the sibling candidate cand/dell2/anlreq-report-ref-revision-string (a separate candidate; not read or merged here)",
+    "the equivalence is shown on the strings listed in r45/equivalence_check.mjs (18 strings across both literals), not proven for all strings"
+  ]
+}
