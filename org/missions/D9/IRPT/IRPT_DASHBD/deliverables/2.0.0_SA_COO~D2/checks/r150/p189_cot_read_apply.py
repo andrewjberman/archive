@@ -65,9 +65,10 @@ def canon(doc):
 
 
 def check_head(rec, packet_sha, coo_text, cto_text, ledger_exists, c3_hash):
-    exp = {"claim", "gates", "ledger_entry", "applier", "before", "build", "plans", "probes", "simulate", "after", "ledger_closed", "reads", "notes"}
+    exp = {"claim", "gates", "ledger_entry", "applier", "before", "build", "plans", "probes", "probe_identity_class", "simulate", "after", "ledger_closed", "reads", "notes"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["claim"] == "measured", "claim must be measured")
+    need(rec["probe_identity_class"] == "OPAL_GLOBAL", "the staff probes must use an OPAL_GLOBAL internal identity, the class used at Global (CTO msg 10262), and the receipt names it")
     g = rec["gates"]
     need(isinstance(g, dict) and set(g) == {"packet_sha256", "coo_half_signed", "cto_half_signed", "one_change_at_a_time", "live_matches_packet"}, "gates keys")
     need(g["packet_sha256"] == packet_sha, "the packet's sha256 differs from the file at HEAD")
@@ -239,7 +240,7 @@ def synthetic():
                       "bucket_policy_sha256": "b" * 64, "bucket_policy_statements": BUCKET_STATEMENTS},
            "build": {"cot_entry_sha256_b64": h, "read_entry_sha256_b64": h, "members": 32},
            "plans": {"iso": {"add": 5, "change": 0, "destroy": 0, "replan_no_changes": True}, "read": {"add": 1, "change": 1, "destroy": 0, "replan_no_changes": True}},
-           "probes": probes, "simulate": {"invoke_new_function": "allowed", "invoke_other_function": "implicitDeny", "s3_get_cottonwood_platinum": "implicitDeny"},
+           "probes": probes, "probe_identity_class": "OPAL_GLOBAL", "simulate": {"invoke_new_function": "allowed", "invoke_other_function": "implicitDeny", "s3_get_cottonwood_platinum": "implicitDeny"},
            "after": {"cot_function": {"code_sha256": h, "memory_mb": 512, "timeout_s": 29, "env_keys": COT_ENV, "role": COT_ROLE}, "read_function": {"code_sha256": h, "env_keys": READ_ENV_AFTER, "forward_value": COT_FN},
                      "read_role_policies": pol, "bucket_policy_sha256": "b" * 64, "prefixes": PREFIXES, "objects": 1900, "versions": 1950},
            "ledger_closed": True, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts, hashes and statuses only; no body, id or name was written."}
@@ -274,6 +275,7 @@ def selftest():
     red(lambda: go(rec, led=False), "ledger missing")
     red(lambda: go(rec, h="B" * 43 + "="), "build hash differs from C3")
     mut("claim", lambda r: r.update(claim="inferred"))
+    mut("identity class", lambda r: r.update(probe_identity_class="FIRM_ADVISOR"))
     mut("applier", lambda r: r.update(applier="x"))
     mut("function pre-exists", lambda r: r["before"].update(cot_function_exists=True))
     mut("rollback version", lambda r: r["before"].update(read_artifact_version_id="x"))
