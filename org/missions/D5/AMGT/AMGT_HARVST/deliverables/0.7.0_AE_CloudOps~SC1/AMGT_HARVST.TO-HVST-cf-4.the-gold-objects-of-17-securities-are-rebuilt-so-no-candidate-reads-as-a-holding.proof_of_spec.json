@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cf-4.the-gold-objects-of-17-securities-are-rebuilt-so-no-candidate-reads-as-a-holding",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cf-4.the-gold-objects-of-17-securities-are-rebuilt-so-no-candidate-reads-as-a-holding.md",
+    "group": "OTHER",
+    "vintage_commit": "718bb5e264"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "74ff9ed727",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cf-4.the-gold-objects-of-17-securities-are-rebuilt-so-no-candidate-reads-as-a-holding.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_before.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 0: worktree at 80d0701876, list sha256 equal to the signed value, UNH and CPA control before reads, MNST and 8306_JP before reads and in-memory builds (Branch A for both).",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_written.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The write manifest and rollback list: 17 WROTE continuation and 17 WROTE dossier lines, 34 distinct keys, each with VersionId, bytes and sha256; 0 EXISTED-NOT-REWRITTEN, 0 NOT-WRITTEN; first put 22:05:29Z, last 22:57:03Z.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "amgt/harvest/gold/research-continuation/security_key=MNST_US_Equity/67c9b3682876b2da.json",
+      "kind": "s3_object",
+      "commit_or_etag": "aZMSNvPLGeLM04u82QD5ZyoSaWT_eUPR",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "MNST continuation in s3://opal-data-harvest, 27551 bytes, VersionId aZMSNvPL..; served at 22:12Z and again after the run: fund_of_record absent, last_stated_position 'CANDIDATE FOR PFOE' stance candidate (one of 34 new keys, all in cf4_written.out).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "amgt/harvest/gold/research-continuation/security_key=8306_JP_Equity/d09c9a0e6dae22a8.json",
+      "kind": "s3_object",
+      "commit_or_etag": "cuKW3oOqMuFTtPtPkwPyPKPpNmH8Jvwb",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "8306_JP continuation in s3://opal-data-harvest, 39212 bytes, VersionId cuKW3oOq..; served at 22:12Z: fund_of_record absent, last_stated_position absent (the company-description paragraph no longer serves as a position).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_canary.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "C-6: MNST and 8306_JP read served at 22:12Z, after the canary writes and before the other 15.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_served.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Served reads after all 17: the controls UNH and CPA, the canary names, 8316/8766/9433_JP, and 8035_JP, CELH, ST_SP; ends with SERVED_CANARY=PASS, SERVED_UNH_AND_CONTROL_UNCHANGED=PASS, WRITTEN continuation=17 dossier=17.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cf4_served.out carries SERVED_CANARY=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_served.out",
+      "expect": "(?m)^SERVED_CANARY=PASS$",
+      "output_evidence": "SERVED_CANARY=PASS",
+      "denominator": "Canary names MNST_US_Equity and 8306_JP_Equity read served at 22:12Z (after their writes, before the other 15) and again after the run in cf4_served.out, content_sha256 8280e3b8... and 9d3c88b1... MNST: fund_of_record absent, position 'CANDIDATE FOR PFOE' stance candidate (before: fund PFOE). 8306_JP: position and fund absent (before: a COMPANY DESCRIPTION paragraph as the position).",
+      "status": "PASS",
+      "status_reason": "Both canary names read as the order expects on the served tool."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cf4_served.out carries SERVED_UNH_AND_CONTROL_UNCHANGED=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_served.out",
+      "expect": "(?m)^SERVED_UNH_AND_CONTROL_UNCHANGED=PASS$",
+      "output_evidence": "SERVED_UNH_AND_CONTROL_UNCHANGED=PASS",
+      "denominator": "UNH_US_Equity (a holding, outside the list) and CPA_US_Equity (control, outside the list) each equal to their step-0 reading in content_sha256 (6bd7cea7... and 61b9977a...), keys and values. Also read served: 8316_JP, 8766_JP, 9433_JP (position and fund absent) and the first 8035_JP, middle CELH, last ST_SP of the sorted 15 (fund absent, position a candidate stance). 8 of the 17 names read served in all; the other 9 were checked against the census at build and at put (34 of 34 Branch A).",
+      "status": "PASS",
+      "status_reason": "UNH and CPA are unchanged and the sampled names match their census lines."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cf4_served.out carries WRITTEN continuation=17 dossier=17",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_served.out",
+      "expect": "(?m)^WRITTEN continuation=17 dossier=17$",
+      "output_evidence": "WRITTEN continuation=17 dossier=17",
+      "denominator": "cf4_written.out: 17 WROTE continuation and 17 WROTE dossier lines, 34 distinct keys, one pair per name of the signed 17-name list (checked by a script over the list, 0 missing), 0 NOT-WRITTEN, 0 EXISTED-NOT-REWRITTEN; all puts inside the window 22:00Z to 00:00Z.",
+      "status": "PASS",
+      "status_reason": "All 17 pairs are in the manifest."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "continuation.build / continuation.write_one / dossier.build / dossier.write_one",
+      "invocation": "from a detached worktree at 80d0701876 through the guarded driver cf4_run.py (window, list, branch checks), one name per foreground python -u command, serial, no retry",
+      "result": "34 gold puts, all put_performed True existed False; no GoldImmutableError, no put error"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (legs S0 B1 C1 R1 V1 Z1), close-leg S0 B1 C1; R1 V1 Z1 close with this commit",
+      "result": "ledger harvst-cf4-gold-rebuild-20261017"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run",
+      "result": "NOT RUN: no scheduled task is touched."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run",
+      "result": "NOT RUN: the write principal is the one the harvest tooling already holds; no grant requested (C-4)."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "not run",
+      "result": "RUN at the cut by the issuer; this seat answered by measured reads: the pinned worktree and list hash, the controls read before the first write, the canary served before the other 15, a branch check before each put, and the manifest checked after each name."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminating controls are UNH_US_Equity (a real holding, not in the list) and CPA_US_Equity (not rebuilt): both must read the same after as before, while the 17 rebuilt names change. The old state (before any write) is the other arm: MNST served fund PFOE from a candidate line and 8306_JP served a description paragraph as its position.",
+      "expected": "Landed: MNST fund absent with a candidate stance, 8306_JP position absent, the sampled names equal to their census lines, UNH and CPA unchanged. Not landed (the pre-act state): MNST fund_of_record PFOE, 8306_JP position a COMPANY DESCRIPTION paragraph, UNH and CPA unchanged.",
+      "observed": "Before (21:38Z to 21:40Z): MNST PFOE, 8306_JP description paragraph, UNH PFOE (content_sha256 6bd7cea7...), CPA IDVZ/2% (61b9977a...). After (22:12Z and 22:58Z): MNST absent with stance candidate, 8306_JP absent, 8316/8766/9433_JP absent, 8035_JP/CELH/ST_SP absent fund with candidate stance, UNH and CPA identical to the before reading.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Serial writes, one name at a time, continuation before dossier, each a foreground python -u command; every build compared with the name's cf2_census line before the put; the manifest counted after each name.",
+      "observed": "34 of 34 census checks Branch A, 0 Branch B, 0 STOP, 0 put errors, no silent process death; each name took 2.5 to 3.5 minutes; the canary content_sha256 values were unchanged across the 22:12Z read and the post-run read.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Served reads of 9 of the 17 names (ADBE, BZLFY, CDNS, CLX, CNR_CN, HEI, ML_FP, MSCI, SNPS).",
+      "reason": "The order asks for the canary, UNH and CPA, the four JP names and the first, a middle and the last of the sorted file; the other nine were checked against the census at build and at put."
+    },
+    {
+      "item": "The rollback.",
+      "reason": "Removing a new key is an S3 delete, Andrew's act; not taken. cf4_written.out is the key list."
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round91/cf4_before.out"
+}
