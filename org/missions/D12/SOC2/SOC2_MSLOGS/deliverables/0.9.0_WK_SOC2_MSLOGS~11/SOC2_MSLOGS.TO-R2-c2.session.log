@@ -1,0 +1,11 @@
+SOC2_MSLOGS.TO-R2-c2 -- worker 0.9.0_WK_SOC2_MSLOGS~11 -- session log (2026-10-17)
+
+1. Worktree C:/Dev/ajb_wk/soc2-r2-11, branch wk-SOC2_MSLOGS-11. `git rev-parse --abbrev-ref HEAD` printed wk-SOC2_MSLOGS-11; the tree check printed TREE-OK (org and .tools present).
+2. Read the task order. The first Read returned the whole file, so the RECORD FACE was visible in the output; I did not act on it. Acted only on the WORKER FACE and BOUNDS.
+3. Read infra/aws/terraform/trino/collector.tf (106 lines at base 5795b96e64).
+4. Baseline, before the edit: s1_check_r2.py retry -> R2-RETRY-REFUSED, rc=1 (expected FAIL).
+5. Edit: added aws_lambda_function_event_invoke_config "collector" (function_name = aws_lambda_function.collector.function_name, maximum_retry_attempts = 0, no qualifier) after the aws_lambda_function "collector" resource, with a two-line comment above it. Nothing else in the file changed.
+6. After the edit: retry -> R2-RETRY-OK rc=0; tfvalidate -> R2-TFVALIDATE-OK rc=0 (scratch copy, terraform init -backend=false and validate; no apply, no plan, no AWS call); terraform fmt -check collector.tf -> rc=0.
+7. Mutant control: a copy of collector.tf with maximum_retry_attempts = 2, run from a scratch root (.scratch/mutant, removed after) -> R2-RETRY-REFUSED rc=1. Determinism: a second retry run on the real file -> R2-RETRY-OK rc=0.
+8. Commit 6b279f0fd1 (collector.tf alone) via .tools/safe-commit.sh, author 0.9.0_WK_SOC2_MSLOGS~11. Commit gates printed OK; no surprise rows.
+9. Proof instance written and validated with proof-of-spec-check.py; status flipped to complete in the same commit as the instance.
