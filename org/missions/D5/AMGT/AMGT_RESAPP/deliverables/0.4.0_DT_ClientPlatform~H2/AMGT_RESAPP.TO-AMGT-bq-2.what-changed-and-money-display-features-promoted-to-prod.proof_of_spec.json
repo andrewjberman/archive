@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bq-2.what-changed-and-money-display-features-promoted-to-prod.md",
     "group": "OTHER",
-    "vintage_commit": "2c127f3fbf1b36541c6a4e1d0d788c85f9d9b447"
+    "vintage_commit": "eaf27d6311687c2182b53525a5e5d9949be3b571"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
@@ -33,6 +33,16 @@
       "deploy_evidence": "committed on box/dell1 (LOCAL, not on origin at the time of writing)",
       "artifact_covered_by": [
         "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal DEV @d8df08e44092eb21d022adde9e672451d9d19d05",
+      "kind": "frontend_component",
+      "commit_or_etag": "d8df08e44092eb21d022adde9e672451d9d19d05",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "MERGE-FORWARD result=MERGED dev_before=cab233bf dev_after=d8df08e44092eb21d022adde9e672451d9d19d05 pushed=yes; ls-remote DEV read d8df08e44092eb21d022adde9e672451d9d19d05; git diff cab233bf origin/DEV empty (no content change); DEV-PUSH-GATE ADMITTED.",
+      "artifact_covered_by": [
+        "AC4"
       ]
     }
   ],
@@ -72,6 +82,18 @@
       "status_reason": "the receipt carries the route, the class and the CI words on separate lines",
       "expect": "(?s)\\A\\s*([4-9]|\\d{2,})\\s*\\n",
       "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && git rev-list --count origin/DEV..origin/PROD -- expect: the single number `0` (DEV contains PROD after the fold-back; at the base it reads `2`, the two release merges)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && git rev-list --count origin/DEV..origin/PROD",
+      "output_evidence": "0\n(base reading before the fold-back, same command: 2 -- 99d2b2a7 and 40845c7e)\nls-remote origin refs/heads/DEV: d8df08e44092eb21d022adde9e672451d9d19d05",
+      "denominator": "1 of 1 count; PROD..DEV before was 106 waived commits, DEV tree unchanged (6cb1b95163a2 before and after)",
+      "status": "PASS",
+      "status_reason": "DEV now contains PROD: the fold merge d8df08e4 landed by portal-merge-forward.sh on approved row dell1-20261017T163932Z-f936",
+      "expect": "(?s)\\A\\s*0\\s*\\Z",
+      "judgment": false
     }
   ],
   "controls": {
@@ -95,10 +117,14 @@
     {
       "item": "Served-bundle string read",
       "reason": "Not an order criterion; not run."
+    },
+    {
+      "item": "A mutant control for AC4",
+      "reason": "AC4 is a count; its base reading (2) was measured before the fold-back with the same command and is recorded in the output. No separate mutant run."
     }
   ],
   "surprises": [],
-  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-bq-2 (GO msg 7616, acked). IN-DEV read true for bc0a5cd9 and aba098da. Release release/20261017T144424Z READY (2 features, 0 unapproved, 0 client-facing); worktree ff-only, parity diff 0 lines, typecheck passed in the pre-push gate; PROD 15bc21b3 -> 99d2b2a7 pushed and read by ls-remote; CI run 39042189942 completed success; tag portal-v2.1.235 peeled to the PROD head; worktree removed, main tree on DEV. Receipt and instance committed LOCAL on box/dell1. Ledger amgt-resapp-bq2-sa-promote-20261017.",
+  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-bq-2 (GO msg 7616, acked). IN-DEV read true for bc0a5cd9 and aba098da. Release release/20261017T144424Z READY (2 features, 0 unapproved, 0 client-facing); worktree ff-only, parity diff 0 lines, typecheck passed in the pre-push gate; PROD 15bc21b3 -> 99d2b2a7 pushed and read by ls-remote; CI run 39042189942 completed success; tag portal-v2.1.235 peeled to the PROD head; worktree removed, main tree on DEV. Receipt and instance committed LOCAL on box/dell1. Ledger amgt-resapp-bq2-sa-promote-20261017. AMENDMENT 1/2: fold-back branch cand/dell1/prod-into-dev-fold (fold merge ac8b722a, TREE-EQUALS-DEV); first register REFUSED dev-overlap 106/107, stopped and reported (msgs 7664/7665); CTO waiver ruled (msg 7669), row dell1-20261017T163932Z-f936 APPROVED valid; merge-forward MERGED DEV cab233bf -> d8df08e4; DEV..PROD = 0; ledger amgt-resapp-bq2-prod-into-dev-fold-20261017 CLOSED.",
   "compiler_tools": [
     {
       "tool": "portal-release-build.sh",
@@ -109,6 +135,16 @@
       "tool": "deploy_ledger.py",
       "invocation": "open, close-leg L1-L3, close",
       "result": "3 legs proven (see ledger entry)"
+    },
+    {
+      "tool": "open-calls.py add/approval-status",
+      "invocation": "python .tools/open-calls.py add --kind approval ... --waive-overlap <106 shas> --waiver-ref <waiver file> [--check-only]",
+      "result": "check-only OK waived=106; row dell1-20261017T163932Z-f936 APPROVED valid=yes"
+    },
+    {
+      "tool": "portal-merge-forward.sh",
+      "invocation": "bash .tools/portal-merge-forward.sh cand/dell1/prod-into-dev-fold --push",
+      "result": "MERGE-FORWARD result=MERGED dev_after=d8df08e44092eb21d022adde9e672451d9d19d05 pushed=yes"
     }
   ]
 }
