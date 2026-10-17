@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~NFRA1</issued_to>
     <date>2026-10-17</date>
-    <status>pending</status>
+    <status>complete -- CTcj1-AC1, AC2, AC3 met: upload 2026-10-17T14:53:25Z (VersionId LwDXDuLu9PZ.WHwKa.XV3Q4MQne9MR8i, sha256 equals the pin); ad-hoc QA run 14:54:45Z-15:13:56Z, log logs/2026-10-17T151354Z-i-0584e17d283fa7ef4.log compile_resources status=ok; manifest/2026-10-17.json status PENDING. Report: deliverables/TO-APPLY-33_REPORT.md</status>
     <project_code>NFRA_CTLPLN</project_code>
     <round>37</round>
   </metadata>
