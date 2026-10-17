@@ -1,0 +1,130 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-328",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-328.apply-49f-filled-report-switch-on-and-first-pass.md",
+  "group": "OTHER",
+  "vintage_commit": "fb8e4891ec"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-328.apply-49f-filled-report-switch-on-and-first-pass.md",
+  "vintage_commit": "f448227feb"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-reporting-publish-lambda.zip (a new version Nh.5z_Oq..)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "built == landed == the packet hash 4SF81dqn.. (17 members); the previous version oXM0wQg8.. kept as the rollback target",
+   "artifact_covered_by": [
+    "DBC194-1-AC1"
+   ],
+   "commit_or_etag": "VersionId Nh.5z_OquDPiUL0VYa9CdkJqkQ0NqvZJ"
+  },
+  {
+   "path_or_key": "lambda:irpt-49f-reporting-publish-lambda (code, then the one environment variable FILLED_REPORT_PASS=1, via Terraform reporting-publish)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "two plans 0/1/0 each, two safe-applies, replans No changes; the OFF probe exact before the switch; the role policy and three schedules unchanged",
+   "artifact_covered_by": [
+    "DBC194-1-AC1",
+    "DBC194-2-AC1"
+   ],
+   "commit_or_etag": "Apply complete 0 added 1 changed 0 destroyed (twice)"
+  },
+  {
+   "path_or_key": "s3://opal-data-49financial/irpt/49financial/platinum/reporting/ (4012 client filled_report.json objects, new keys)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "dry run 28 shards equal the full pass by shard sums (clients 4776, would-write 4012, not available 764, refused 0); the canary written once and graded by S2 step 1; the prefix gained 4011 in the full pass; series, summary and manifest counts unchanged",
+   "artifact_covered_by": [
+    "DBC194-1-AC1",
+    "DBC194-3-AC1"
+   ],
+   "commit_or_etag": "request ids in the record"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~IB2/FILLED_PASS_APPLY_RECORD.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the receipt: gates, before, build, plans, OFF probe, schedule inputs, dry run, canary, V leg (nothing minted), full pass, after, notes",
+   "artifact_covered_by": [
+    "DBC194-1-AC1",
+    "DBC194-2-AC1",
+    "DBC194-3-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DBC194-1-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p194_filled_pass_apply.py\" . DBC194-1-AC1",
+   "expect": "DBC194-1-AC1 PASS",
+   "output_evidence": "OK: both halves signed at the packet's sha256, the ledger, the build hash, the two plans, the exact OFF no-op, the dry run and the full pass reconciling by shard, the canary, the V leg, no id\nDBC194-1-AC1 PASS\nexit=0",
+   "denominator": "1 record; 28 + 28 shards; 97 worktrees read",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p194_filled_pass_apply.py\" . DBC194-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DBC194-2-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p194_filled_pass_apply.py\" . DBC194-2-AC1",
+   "expect": "DBC194-2-AC1 PASS",
+   "output_evidence": "OK: live: the function runs the bundle with exactly FILLED_REPORT_PASS=1; the role policy is the packet's pre-state; the three schedules' inputs carry no filled_report event\nDBC194-2-AC1 PASS\nexit=0",
+   "denominator": "1 function, 1 policy, 3 schedules",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p194_filled_pass_apply.py\" . DBC194-2-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DBC194-3-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p194_filled_pass_apply.py\" . DBC194-3-AC1",
+   "expect": "DBC194-3-AC1 PASS",
+   "output_evidence": "OK: live: 4012 filled objects as recorded, the summary and other counts unchanged, 25 sampled documents validate against the contract\nDBC194-3-AC1 PASS\nexit=0",
+   "denominator": "4012 filled objects; 25 sampled",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p194_filled_pass_apply.py\" . DBC194-3-AC1",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (the checker's selftest has a green arm and red arms).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "each apply re-planned to No changes; the dry run's object count was read before and after; the full pass reconciled shard by shard with the dry run; the checker re-reads the world",
+   "observed": "all equal; three criteria PASS",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the ledger close",
+   "reason": "the order forbids it: the issuer verifies and closes"
+  },
+  {
+   "item": "V-leg steps 2 and 3",
+   "reason": "OWED: no viewer session pair (nothing minted); the CTO ruled the full pass on step 1 alone (msg 10467, Amendment 2)"
+  },
+  {
+   "item": "whether the page renders",
+   "reason": "the page has not been looked at"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261017T0731Z_irpt-dashbd-49f-filled-report-switch-on-first-pass-20261017_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "fill328.py (boto3 reads and one synchronous invoke per event), build-and-upload.sh, terraform 1.15.8 via safe-apply, naming-apply-gate",
+   "invocation": "gates, before, build, plans, probe_off, sched, pass dry, canary_pick, canary_write, pass full, after, compile",
+   "result": "all three criteria PASS"
+  }
+ ]
+}
