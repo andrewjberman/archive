@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IBHM3A  IB-hm-3a  registry rows so the naming builders emit the three firm key addresses, the stage role name, its policy name and the secret name
-    AC1  every recorded builder call is RE-RUN against the worktree and returns exactly the recorded result (no refusal); three address results in the globgrph bucket, one per firm; two name results
+    AC1  every recorded builder call is RE-RUN against the worktree and returns exactly the recorded result (no refusal); three address results under the globgrph product folder of opal-data-assets, one per firm; two name results
     AC2  the naming tests pass and the worker's ONE commit (HEAD~1..HEAD) touches only registry files, an optional naming test, and the order's paths
     AC3  the secret is a registered SECRET row of system irpt in slash grammar; the role and policy names are irpt names; the record holds no key material
 """
@@ -19,9 +19,9 @@ sys.path.insert(0, str(HERE.parent / "r196"))
 import p196_cells as P6  # noqa: E402
 
 D = P6.D
-REC = D + "0.9.0_WK_IRPT_BCKEND~450/IBhm3a_resolved.json"
-DELIV = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~450/"
-BUCKET = "s3://opal-313476888478-globgrph/"
+REC = D + "0.9.0_WK_IRPT_BCKEND~452/IBhm3a_resolved.json"
+DELIV = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~452/"
+BUCKET = "s3://opal-data-assets/globgrph/"
 RES = "infra/logic/registry/resources.json"
 fail, load = P6.fail, P6.load
 
@@ -98,7 +98,7 @@ def ac3(r):
     for c in r.get("calls", []):
         if c.get("fn") == "name" and not str(c.get("result", "")).startswith("irpt-"):
             fail("the role and policy names must be irpt names, read %r" % c.get("result"))
-    if re.search(r"[A-Za-z0-9+/]{40,}", json.dumps(r)):
+    if re.search(r"[A-Za-z0-9+/]{40,}", re.sub(r"s3://[^\"\s]+", "", json.dumps(r))):
         fail("the record holds a long base64-like run (key material?)")
     print("OK: one irpt SECRET row in slash grammar, irpt role and policy names, no key material")
 
