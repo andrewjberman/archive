@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t75",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t75.empty-window-cooldown.md",
+    "group": "OTHER",
+    "vintage_commit": "69b52bb6cf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "69b52bb6cf",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t75.empty-window-cooldown.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~65",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "2e122ca3d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Empty-window cooldown: an EMPTY return (zero rows) records the window in empty_windows.json under the device-state home (extend_frontier._home), skips it and continues with the next security (COOLED_NEW); a recorded window is not asked for seven days (COOLED, no call, no cell), is asked once on day seven (RETRY), and a second empty is a standing gap (RETRIED_EMPTY_STANDING_GAP, never retried). More than five empties in one fire stop the fire with EMPTY_OR_INCOMPLETE_RESPONSE. An incomplete row, refusal, diagnostic or out-of-window date still stops the run. The run result and receipt gain empty_windows. The record is atomic (temp file, then replace). Diff: one module, about 110 added lines.",
+      "artifact_covered_by": [
+        "DQ9-t75-AC1",
+        "DQ9-t75-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_empty_window.py",
+      "kind": "test",
+      "commit_or_etag": "2e122ca3d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file: the five named tests. Stub vendor (trading-day rows, per-ticker scripted empty, incomplete, refusal and rows), tmp_path, a monkeypatched budget directory, a stubbed priority gate, a 400-cell allowance and OPAL_DEMQUE_HOME set to tmp_path, so the real ~/.opal/demque is never written. Fires on non-trading days (2026-01-17, 01-18, 01-19, 01-24, 01-31). 5 passed at 2e122ca3d6.",
+      "artifact_covered_by": [
+        "DQ9-t75-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_outcome_per_request.py",
+      "kind": "test",
+      "commit_or_etag": "2e122ca3d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDITED existing t74 tests, because they pinned the old rule (an empty return stopped the run): the stub returns an INCOMPLETE row for the stopping call (still a run stop), and two exact cell counts move from 0 to 2 and from 256 to 258 (the incomplete row's cells, counted as before). The three test names and the assertions on outcomes and reasons are unchanged. Also OPAL_DEMQUE_HOME is set to tmp_path in the fixture. 3 passed at 2e122ca3d6.",
+      "artifact_covered_by": [
+        "DQ9-t75-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2e122ca3d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended: MDPF_DEMQUE-D1-W65-S4 (OBSERVATION, INERT: an incomplete row is stored before the check that stops the run), MDPF_DEMQUE-D1-W65-S5 (OBSERVATION, INERT: a request whose only owed windows are cooled writes a 0-cell DRAWN line each fire), MDPF_DEMQUE-D1-W65-S6 (OBSERVATION, INERT: the record key is the owed run's ends, not the attempted chunk's window). The surprise-row gate passed at commit (3 new rows).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t75-AC1",
+      "criterion_verbatim": "`DQ9-t75-AC1` -- the five named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t75_tests.py",
+      "output_evidence": "Run from the worktree root at 2e122ca3d6, twice: 5 passed in 1.02s and 5 passed in 1.95s, each with the five PASSED lines naming test_an_empty_window_is_skipped_and_the_run_continues_to_the_next_security, test_a_cooled_window_is_not_asked_again_for_seven_days_and_is_asked_once_after, test_more_than_five_empty_windows_in_one_fire_stop_the_run, test_an_incomplete_row_or_a_refusal_still_stops_the_run and test_the_receipt_lists_empty_windows_and_a_second_empty_makes_a_standing_gap; then EMPTY-OK; rc=0.",
+      "denominator": "5 of 5 named tests PASSED by name; the file holds 5 tests, 5 passed, 0 failed",
+      "status": "PASS",
+      "expect": "EMPTY-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t75-AC2",
+      "criterion_verbatim": "`DQ9-t75-AC2` -- the DIFFERENCE CONTROL: the drawer's existing tests, the surface-room tests and the DQ-t-74 outcome tests pass unedited.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t75_regress.py",
+      "output_evidence": "Run from the worktree root at 2e122ca3d6, twice: 14 passed in 2.39s and 14 passed in 2.65s over test_demque_standing_drawer.py, test_demque_standing_drawer_close.py, test_demque_surface_room.py and test_demque_outcome_per_request.py; then EMPTY-OK; rc=0. The three drawer and surface-room files show no diff against 836e16bafd; the DQ-t-74 file was edited (see its artifact row).",
+      "denominator": "14 of 14 tests in the four control files PASSED; 0 failed",
+      "status": "PASS",
+      "expect": "EMPTY-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The t74 drawer (69b52bb6cf standing_drawer.py, no cooldown) written over the worktree file, the five named tests run, then the edited file restored and cmp-verified byte-identical to the committed version. No other file changed.",
+      "expected": "the named tests fail, because an empty return stops the run under the old rule",
+      "observed": "5 failed in 1.84s (first run had 2 failed and 3 errors from a fixture reading a new constant; the test now names the state file itself and the rerun gave 5 failed): every named test fails, and the restored file gives 5 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice at the committed tree 2e122ca3d6; the whole demque folder run once at the same tree with --continue-on-collection-errors; the real ~/.opal/demque listing compared before and after the folder run.",
+      "observed": "AC1 EMPTY-OK rc=0 twice (5 passed both times); AC2 EMPTY-OK rc=0 twice (14 passed both times). Folder: 4 failed, 227 passed, 8 errors, rc=1; the failing and erroring ids are the base set named in declared_exclusions. The real home listing is unchanged (no empty_windows.json written).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the whole-folder no-failure bar of the build step",
+      "reason": "The folder at 2e122ca3d6 reads 4 failed, 227 passed, 8 errors. The 227 includes the five new tests and the three DQ-t-74 tests. The four failures are test_demque_bbg_backfill.py vendor_limit_warning [field] and [response] (FileNotFoundError on integrations/bloomberg/mcp/blp_client.py) and two test_demque_bbg_ledger_upload.py tests (one missing path, one assertion None != 14). The eight errors are the collection errors of test_demque_active_windows, b1_names_mode, b1_request, card_a_slice, land, need_class, p1_coverage and secclass_sync (missing commonwealth_signs or integrations/ in this worktree). These are the same ids the t69 instance's declared_exclusions records at its own base; no base checkout was run by this worker, and none of the four failing modules reads the drawer's outcome or empty-window logic."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W65-S4: an INCOMPLETE vendor return is stored into the history identity before the check that stops the run, so the field-less row is never asked again (OBSERVATION, INERT). Pre-existing; this order leaves it as it was.",
+    "MDPF_DEMQUE-D1-W65-S5: a request whose only owed windows are cooled reads DRAWN with 0 cells and writes a 0-cell actuals line each fire of its cooldown (OBSERVATION, INERT). The order does not state the actuals line for such a request.",
+    "MDPF_DEMQUE-D1-W65-S6: the record key is the owed run's first and last undrawn day, not the attempted chunk's window, because the chunk's stop moves with the room (OBSERVATION, INERT). The order's key names a window stop; this is the reading that holds across fires."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~65/MDPF_DEMQUE.TO-DQ-t75.empty-window-cooldown.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~65 <0.9.0_WK_MDPF_DEMQUE~65@opal.agent>\" -F .scratch/msg_dq_t75_code.txt -- data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_empty_window.py data/mdpf/scripts/demque/test_demque_outcome_per_request.py org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 2e122ca3d6 on wk-MDPF_DEMQUE-65 (LOCAL): commit-gate OK, surprise-row-gate OK (3 new rows of 172), to-pipeline-gate OK, missions-tree-check OK. WARN client-data-check: the hashed account-id list is absent, so the commit was not checked for account ids (no account data in it)."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no --continue-on-collection-errors data/mdpf/scripts/demque (from the worktree root)",
+      "result": "4 failed, 227 passed, 8 errors, rc=1; the failing and erroring ids are the base set named in declared_exclusions."
+    }
+  ]
+}
