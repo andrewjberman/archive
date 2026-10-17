@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-SM-c1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/prd/SOC2_MSLOGS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "126d661cb9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP.md",
+    "vintage_commit": "126d661cb9",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-SM-c1.collector-raw.md"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/collect.py",
+      "kind": "script",
+      "commit_or_etag": "dee7b268f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit only on wk-SOC2_MSLOGS-7; no AWS, Management API, network or Terraform call (TO BOUNDS)",
+      "artifact_covered_by": [
+        "SM1-c1-AC4",
+        "SM1-c1-AC5"
+      ]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/collector/access_client.py",
+      "kind": "script",
+      "commit_or_etag": "dee7b268f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit only on wk-SOC2_MSLOGS-7; no AWS call"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/m365-metadata-collector/handler.py",
+      "kind": "script",
+      "commit_or_etag": "dee7b268f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit only on wk-SOC2_MSLOGS-7; no AWS or Terraform call",
+      "artifact_covered_by": [
+        "SM1-c1-AC6"
+      ]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_collector.py",
+      "kind": "test",
+      "commit_or_etag": "dee7b268f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest run LOCAL: 37 passed (test_collector.py with test_app.py)"
+    },
+    {
+      "path_or_key": "org/missions/D12/SOC2/SOC2_MSLOGS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "16355a4be6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row SOC2_MSLOGS-D1-W7-S1 appended; LOCAL commit only"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SM1-c1-AC1",
+      "criterion_verbatim": "four feeds, every account, one bronze object per blob whose gunzipped body equals the served bytes, keys in the `audit_records` grammar dated by the blob's Eastern created day, no filter or population or Ticket Center left, and the feed script starts all four.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py raw",
+      "output_evidence": "C1-RAW-OK blobs=4 (exit 0; two runs byte-identical)",
+      "denominator": "blobs=4: 4 bronze objects checked, one blob per feed of the 4 CONTENT_TYPES",
+      "status": "PASS",
+      "expect": "C1-RAW-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "SM1-c1-AC2",
+      "criterion_verbatim": "an old-era cursor re-fetches the whole 7 days, the new cursor carries era raw, a second fire fetches nothing, already stored is neither a failure nor a gap, and an out-of-time derive carries `derive_pending` until it drains.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py switch",
+      "output_evidence": "C1-SWITCH-OK (exit 0; two runs byte-identical)",
+      "denominator": "N/A -- the check prints the OK token only; its asserts cover the old-era cold start, the raw cursor, already-stored and the newest-first derive order",
+      "status": "PASS",
+      "expect": "C1-SWITCH-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "SM1-c1-AC3",
+      "criterion_verbatim": "a window run lists only its window, leaves the cursor alone, reads four stored blobs as already_stored=4 with no gap, marks coverage recollect, and the handler's window rules refuse bad windows.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py recollect",
+      "output_evidence": "C1-RECOLLECT-OK (exit 0; two runs byte-identical)",
+      "denominator": "N/A -- the check prints the OK token only; its asserts cover the window-only listing, the cursor left alone, already_stored and the handler's window refusals",
+      "status": "PASS",
+      "expect": "C1-RECOLLECT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "SM1-c1-AC4",
+      "criterion_verbatim": "(a fourth mechanical criterion, with this reason: the live release measured the fault after the cut, AMENDMENT 2) with 40 s and 120 s derive calls and a 1200-blob backlog the fire ends by 885 s; at least three derives run under the backlog; the days go newest first; the cursor is put before the first derive; the final cursor lists exactly the undone days; a 90 s budget still fetches. `SM1-c1-AC2` (switch) now also asserts newest-first derive order.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py derive_time",
+      "output_evidence": "C1-DERIVETIME-OK end=840 derives=5 (exit 0; two runs byte-identical)",
+      "denominator": "end=840 s against the 885 s limit; derives=5 under the 1200-blob backlog; 40 s and 120 s derive runs both end inside the limit",
+      "status": "PASS",
+      "expect": "C1-DERIVETIME-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "SM1-c1-AC5",
+      "criterion_verbatim": "(a fifth mechanical criterion, with this reason: AMENDMENT 3, measured live at 00:42-00:46Z) with `max_workers=4` and several owed days, derive runs more than one day at a time (never more than `max_workers`), the newest day starts first, no day twice, and an unbudgeted fire leaves nothing pending.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py derive_par",
+      "output_evidence": "C1-DERIVEPAR-OK max_inflight=4 days=7 (exit 0; two runs byte-identical; 30 of 30 repeated runs OK)",
+      "denominator": "max_inflight=4 of max_workers=4; days=7 derived, each once, newest day starts first",
+      "status": "PASS",
+      "expect": "C1-DERIVEPAR-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "SM1-c1-AC6",
+      "criterion_verbatim": "(a sixth mechanical criterion, same reason) the handler builds a botocore `Config` for the derive call with a read timeout between 200 and 290 s and `max_attempts` 1, so one slow derive is one door invocation.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py derive_client",
+      "output_evidence": "C1-DERIVECLIENT-OK (exit 0; two runs byte-identical)",
+      "denominator": "N/A -- the check reads the handler source: read_timeout=270 (200 to 290 s), max_attempts 1, botocore Config present",
+      "status": "PASS",
+      "expect": "C1-DERIVECLIENT-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control for this cell.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "each of the six check invocations run twice from the worktree root; stdout compared byte for byte with cmp; the derive_par invocation was also run 30 times in a loop",
+      "observed": "six identical pairs: C1-RAW-OK blobs=4, C1-SWITCH-OK, C1-RECOLLECT-OK, C1-DERIVETIME-OK end=840 derives=5, C1-DERIVEPAR-OK max_inflight=4 days=7, C1-DERIVECLIENT-OK; exit 0 on every run; derive_par 30 of 30 OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No live call: no AWS, Management API, network or Terraform call; the checks and tests use synthetic values only.",
+      "reason": "TO BOUNDS: LOCAL; NOTHING is called live."
+    },
+    {
+      "item": "data/m365_metadata/scripts/app/RUNBOOK.md still says the sign-in feed is not subscribed.",
+      "reason": "Outside the TO-SM-c1 grant; not edited. Filed as surprise row SOC2_MSLOGS-D1-W7-S1."
+    },
+    {
+      "item": "data/m365_metadata/scripts/collector/access_client.py (derive_invoke selection and a stateless derive under threads) has no acceptance row.",
+      "reason": "No criterion of the TO names it; the TO's Amendment 3 tests bullet asks for these as unit tests, proven by six pytest tests in test_collector.py (37 passed with test_app.py)."
+    },
+    {
+      "item": "The batch guard for derive with max_workers above 1 has no deterministic unit test.",
+      "reason": "The injected fake clock is not thread-safe, so a concurrent derive cannot advance it; the guard is covered at max_workers=1 by the derive_time and switch checks and the concurrency is covered by derive_par."
+    },
+    {
+      "item": "The derive_par newest-first assertion depends on thread start order.",
+      "reason": "Measured stable at 30 of 30 runs; not made deterministic because the order is the check's own assertion."
+    }
+  ],
+  "surprises": [
+    "SOC2_MSLOGS-D1-W7-S1: data/m365_metadata/scripts/app/RUNBOOK.md still says the Entra sign-in feed is not subscribed; the collector and start_subscriptions.py carry all four feeds."
+  ],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~7/SOC2_MSLOGS.TO-SM-c1.collector-raw.session.log",
+  "compiler_tools": [
+    {
+      "tool": "s1_check_c1.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R1_CHECKS/s1_check_c1.py {raw|switch|recollect|derive_time|derive_par|derive_client}",
+      "result": "C1-RAW-OK blobs=4; C1-SWITCH-OK; C1-RECOLLECT-OK; C1-DERIVETIME-OK end=840 derives=5; C1-DERIVEPAR-OK max_inflight=4 days=7; C1-DERIVECLIENT-OK; each exit 0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/m365_metadata/scripts/tests/test_collector.py data/m365_metadata/scripts/tests/test_app.py -q",
+      "result": "37 passed in 1.12s, exit 0"
+    }
+  ]
+}
