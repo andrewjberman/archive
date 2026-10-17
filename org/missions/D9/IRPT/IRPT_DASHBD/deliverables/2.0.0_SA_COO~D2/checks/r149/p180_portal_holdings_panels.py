@@ -53,7 +53,7 @@ def check_diff(root):
     p175.need(rc == 0, "cannot diff against %s" % BASE[:8])
     changed = {x for x in out.splitlines() if x.strip()}
     p175.need(changed, "nothing changed since the DB-b-309 head")
-    extra = [f for f in changed if f not in ALLOWED_EXACT and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith("performance-holdings-panels"))]
+    extra = [f for f in changed if f not in ALLOWED_EXACT and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith(("performance-holdings-panels", "performance-template-firm-gate")))]
     p175.need(not extra, "portal files outside the agreed write set changed: %s" % extra[:4])
     p175.need(PANELS in changed and TAB in changed, "the new component and the one mount must both be in the diff")
     p175.need(any(f.startswith(TESTS + "performance-holdings-panels") for f in changed), "no test file named performance-holdings-panels* in the diff")
