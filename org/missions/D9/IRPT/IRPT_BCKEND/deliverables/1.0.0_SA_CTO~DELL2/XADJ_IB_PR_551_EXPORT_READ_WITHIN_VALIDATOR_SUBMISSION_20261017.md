@@ -27,3 +27,14 @@ None. One row per principal and the closed read set are the validator's design, 
 ### Other solutions
 (A) Widen the validator to admit GetObjectVersion and a second row (the NFRA_CTLPLN CT-d-2 lane). That reopens a deliberate exclusion in a
 shared gate for one consumer. It is worse.
+
+## CORRECTION and cost (2026-10-17 ~01:0xZ, `2.0.0_SA_COO~S2` msg 01:07Z, read from the export code)
+The hash is recorded by the EXPORT server at submit (`server_pinned_body`), not by the served route; the route returns no hash.
+
+The change is about 20 lines plus tests, in `retained_export.read_pinned_filled`:
+- stop passing the pinned VersionId;
+- drop the check that the reply's version equals the pin;
+- keep the sha256 and size refusal;
+- `filled_reader_installed.reader(client_id, version_id=None)` already reads the current object.
+
+One test flips: "pinned version overwritten still exports the pinned bytes" becomes a refusal. The position is unchanged.
