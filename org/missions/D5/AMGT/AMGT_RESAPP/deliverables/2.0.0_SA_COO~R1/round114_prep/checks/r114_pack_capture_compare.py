@@ -1,6 +1,7 @@
 """AMGT_RESAPP round 114, AMGT-bu-7 instrument: capture the LIVE printed pack text for a fixed set of names, and compare two captures.
 
   python r114_pack_capture_compare.py capture <outdir>            # GET /print?format=pdf on opal-amgt-scoped-api for each name, PDF text to <outdir>/<key>.txt
+  python r114_pack_capture_compare.py config                       # the live function's CodeSha256, LastModified, RevisionId, memory, timeout, environment keys
   python r114_pack_capture_compare.py compare <before> <after>    # after = before with each long-form date mapped back to ISO (a hand-written inverse), line-wrapped text de-wrapped
 
 Read-only (Lambda invoke of a GET). The compare grades the EXPECTED OUTCOME of the redeploy: the only difference between the
@@ -77,6 +78,13 @@ def main(argv):
             ok += 1 if (same and iso_left == 0) else 0
         print("PACK COMPARE: %s (%d of %d names: no ISO day after and equal to before once the long forms map back)" % ("YES" if ok == len(NAMES) else "NO", ok, len(NAMES)))
         return 0 if ok == len(NAMES) else 1
+    if len(argv) >= 2 and argv[1] == "config":
+        c = boto3.client("lambda", region_name="us-east-1").get_function_configuration(FunctionName=FN)
+        env = sorted((c.get("Environment") or {}).get("Variables", {}).keys())
+        print("CONFIG sha=%s modified=%s rev=%s mem=%s timeout=%s state=%s update=%s" % (c["CodeSha256"], c["LastModified"], c["RevisionId"], c["MemorySize"], c["Timeout"], c.get("State"), c.get("LastUpdateStatus")))
+        print("ENV keys=%s" % env)
+        print("AMGT_AIFILL_ROOT in env: %s" % ("AMGT_AIFILL_ROOT" in env))
+        return 0
     print(__doc__)
     return 2
 
