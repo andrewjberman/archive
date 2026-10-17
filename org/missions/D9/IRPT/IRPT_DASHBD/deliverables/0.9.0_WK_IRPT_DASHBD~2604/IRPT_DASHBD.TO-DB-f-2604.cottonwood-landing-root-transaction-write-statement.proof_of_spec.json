@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2604",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2604.cottonwood-landing-root-transaction-write-statement.md",
+    "group": "OTHER",
+    "vintage_commit": "b15f61d07e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R138_F.md",
+    "vintage_commit": "b15f61d07e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2604.cottonwood-landing-root-transaction-write-statement.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2604",
+  "session_log": "Worker drive on branch wk-IRPT_DASHBD-2604 from base b15f61d07e. The first act printed the branch and TREE-OK. The order's worker face was read whole, with the checker p138_cot_tf.py. iam.tf and locals.tf at HEAD were sha256-equal to the pinned bases (cot_iam_base.tf.txt, cot_locals_base.tf.txt), so no STOP. The checker's selftest PASS (9 arms) and the baseline runs were FAIL for both criteria. Two edits were made by pure insertion: locals.tf gained the table constant after the gold bucket local (no existing gold table constant to sit beside: surprise row IRPT_DASHBD-D2-W2604-S1), and iam.tf gained statement WriteTheAccountTransactionGoldPrefixOnly after the existing gold PutObject statement. Both criteria PASS (rc 0). The facts record RD_COT_TF_FACTS_R138.json and the surprise row were committed with the Terraform files in f7503b6b6b. No AWS call, no Terraform command, no push. The order status is not flipped. safe-commit printed a WARN that the hashed account-id list was absent, so the client-data check did not grade the commit; the commit carries no account identifiers (Terraform text, facts and a row).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-return-daily/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "f7503b6b6b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure insertion of 9 ASCII LF lines (git diff --numstat b15f61d07e f7503b6b6b: 9 insertions, 0 deletions): statement WriteTheAccountTransactionGoldPrefixOnly (Allow, s3:PutObject only, one resource built from the gold bucket, firm and table locals, no condition) after the existing WriteTheOneAccountReturnDailyGoldPrefixOnly statement. No plan was run and nothing was applied.",
+      "artifact_covered_by": ["DBF138-4-AC1", "DBF138-4-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/account-return-daily/locals.tf",
+      "kind": "config_data",
+      "commit_or_etag": "f7503b6b6b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure insertion of 3 ASCII LF lines (git diff --numstat b15f61d07e f7503b6b6b: 3 insertions, 0 deletions): comment line and the table constant irpt_arc_gold_table_transaction = \"account_transaction\" after the irpt_arc_gold_bucket local. No plan was run and nothing was applied.",
+      "artifact_covered_by": ["DBF138-4-AC1", "DBF138-4-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2604/RD_COT_TF_FACTS_R138.json",
+      "kind": "config_data",
+      "commit_or_etag": "f7503b6b6b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "claim measured; lines_added locals.tf 3, iam.tf 9; statement_sids: the six sids of the execution policy after the edit; files_touched 2; other_files_touched 0; both check results.",
+      "artifact_covered_by": ["DBF138-4-AC1", "DBF138-4-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF138-4-AC1",
+      "criterion_verbatim": "`DBF138-4-AC1` -- `locals.tf` and `iam.tf` are pure ASCII insertions against the pinned bases and `lambda.tf`, `main.tf` and `schedule.tf` are byte-identical. Base: FAIL (both unchanged).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_cot_tf.py\" . DBF138-4-AC1",
+      "output_evidence": "DBF138-4-AC1 PASS (rc 0), run from the worktree root at commit f7503b6b6b. Base run before the edit: FAIL, reason 'iam.tf is unchanged from the base; locals.tf is unchanged from the base'.",
+      "denominator": "5 checks: lambda.tf, main.tf and schedule.tf byte-identical by sha256 (3 of 3); locals.tf and iam.tf each a pure ASCII insertion against its pinned base copy (2 of 2), the pinned base copies themselves matching their sha256 and the trunk files at HEAD matching the bases before the edit.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF138-4-AC2",
+      "criterion_verbatim": "`DBF138-4-AC2` -- the table constant is declared and the new statement is Allow, `s3:PutObject` only, on the one resource built from the gold-bucket, firm and table locals, with no condition, no wildcard and no typed bucket. Base: FAIL (constant and statement absent).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_cot_tf.py\" . DBF138-4-AC2",
+      "output_evidence": "DBF138-4-AC2 PASS (rc 0), run from the worktree root at commit f7503b6b6b. Base run before the edit: FAIL, reason naming the absent constant and the absent sid.",
+      "denominator": "10 semantic clauses: table constant declared as account_transaction (1); the new sid present (2) and exactly once (3); effect Allow (4); actions exactly [s3:PutObject] (5); resources exactly the one RESOURCE string built from the gold-bucket, firm and table locals (6); no condition block (7); the existing WriteTheOneAccountReturnDailyGoldPrefixOnly statement unchanged (8); exactly one more statement block than the base (9); no GetObject or ListBucket in the new statement (10). 10 of 10 PASS.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's selftest arms: the reference insertion passes the semantic and insertion clauses; mutants (a removed base line, no new statement, a second resource on the old statement, a read action on the new statement, a typed resource, a missing table constant) each go red.",
+      "expected": "selftest PASS with all arms",
+      "observed": "selftest PASS (9 arms) rc 0 at commit f7503b6b6b.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the two criteria re-run on the committed bytes at f7503b6b6b from the worktree root, after the commit",
+      "observed": "DBF138-4-AC1 PASS rc 0; DBF138-4-AC2 PASS rc 0 (python -I checks/r138/p138_cot_tf.py . <id>).",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "p138_cot_tf.py (--selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_cot_tf.py\" --selftest",
+      "result": "selftest PASS (9 arms) rc 0."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, and any terraform command (plan, validate, fmt, apply).",
+      "reason": "The order states no AWS access and no Terraform command in this cell; none was run, so the HCL is not proven to plan and the new statement is not simulated."
+    },
+    {
+      "item": "Order status is not flipped.",
+      "reason": "The order's worker face says the issuer flips status."
+    },
+    {
+      "item": "The bundle, the plan, the pair's signatures, the apply, the dry run and the first write.",
+      "reason": "Later acts named by the order's risk note; out of this cell."
+    }
+  ],
+  "surprises": ["IRPT_DASHBD-D2-W2604-S1"]
+}
