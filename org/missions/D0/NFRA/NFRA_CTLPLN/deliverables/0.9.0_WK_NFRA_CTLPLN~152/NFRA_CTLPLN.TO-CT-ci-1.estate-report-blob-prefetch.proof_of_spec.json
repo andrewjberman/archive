@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ci-1.estate-report-blob-prefetch",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ci-1.estate-report-blob-prefetch.md",
+    "group": "OTHER",
+    "vintage_commit": "cfcc48413a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~152",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round30.md",
+    "vintage_commit": "cfcc48413a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ci-1.estate-report-blob-prefetch.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/estate-report-runner/estate_report_runner.py",
+      "kind": "script",
+      "commit_or_etag": "5917a8e42f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New helpers prefetch_blobs (one ls-tree over the paths, one batched fetch of their blob ids, one WARN line on a failed listing or fetch) and checkout_paths (the one place git checkout of REPO_BRANCH runs; check=True as before). capture_census, load_function_map and load_attribution_maps route through them: 7 paths at 3 call sites (surprise NFRA_CTLPLN-W152-S1). The literal checkout argv appears once, at line 322. The S3 object code/estate_report_runner.py is NOT re-uploaded by this worker (WORLD, a CloudOps act; the real clone, upload and QA are TO-APPLY-33).",
+      "artifact_covered_by": ["CTci1-AC1"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_round30_estate_prefetch.py",
+      "kind": "test",
+      "commit_or_etag": "e1a162d823",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib, ASCII, offline; file:// repositories in temporary folders, cloned blobless. 14 arms: a sequence (ls-tree, fetch, checkout; fetch ids equal the rev-parse ids), b real clone bytes, c control (reported), d sites (literal only in checkout_paths; three callers), e soft failure (one WARN, checkout last), f mutant (fetch removed reads ok=False on arm a), ascii. Last line ESTATE-PREFETCH arms=14/14 ok=True.",
+      "artifact_covered_by": ["CTci1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7d35ede657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended, none edited: NFRA_CTLPLN-W152-S1 (OBSERVATION, INERT: the five-site count against three call sites) and NFRA_CTLPLN-W152-S2 (OBSERVATION, INERT: the cut worktree's sparse set omitted the p137 folder, so the neighbouring test was red at base). Both UNDER_INVESTIGATION.",
+      "artifact_covered_by": ["CTci1-AC1", "CTci1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTci1-AC1",
+      "criterion_verbatim": "the runner prefetches the blob ids of the paths it checks out in ONE fetch before the checkout, at all five sites; a real file:// blobless clone checks out with the bytes of the source; a failed prefetch still reaches the checkout; a mutant with the fetch removed fails arm (a) (base: the test does not exist, so the invocation fails); report the whole last line with its denominator and the control_reproduced value.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round30_estate_prefetch.py",
+      "output_evidence": "run from the worktree root under timeout 280; last line verbatim: ESTATE-PREFETCH arms=14/14 ok=True (runs at the committed state, two runs, identical PASS/FAIL lines). control_reproduced=True rc=255 git=git version 2.55.0.windows.2 stderr_last=error: unable to read sha1 file of top.txt (ec242678085da6afa118b6c89149c472d773dddc). Deciding lines: PASS a sequence ls-tree,fetch,checkout verbs=ls-tree,fetch,checkout error=none; PASS a fetch carries the ls-tree ids fetch_ids=33 want=33; PASS b real clone bytes equal the source files=33/33; PASS d checkout argv only in checkout_paths hits=[322] outside=[]; PASS d load_function_map calls checkout_paths; PASS d load_attribution_maps calls checkout_paths; PASS d capture_census calls checkout_paths; PASS e one WARN on failed prefetch warn_lines=1; PASS e checkout reached last, raising only from checkout verbs=ls-tree,fetch,checkout raised=CalledProcessError; MUTANT verbs=ls-tree,checkout arm_a=False; PASS f mutant reads ok=False on arm a; PASS ascii this file.",
+      "denominator": "14 of 14 arms passed (a: 3 arms over 33 fixture files; b: 33 of 33 files byte-equal; c: 1 control, reproduced; d: 4 arms, 3 of 3 callers; e: 2 arms; f: 2 arms; ascii: 1); 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTci1-AC2",
+      "criterion_verbatim": "the neighbouring test of the cell that last changed this file stays green (base: FOLLOW-READERS ... ok=True, a control); report the whole last line.",
+      "method": "command",
+      "invocation": "python .tools/tests/test_round30_follow_readers.py",
+      "output_evidence": "run from the worktree root under timeout 280; last line verbatim: FOLLOW-READERS arms=31/31 ok=True (runs at the committed state, two runs, byte-identical output). Base in this cut worktree before the sparse add of org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136: FOLLOW-READERS arms=10/11 ok=False (abort FileNotFoundError on p137_repin.py; surprise NFRA_CTLPLN-W152-S2); after the add: arms=31/31 ok=True.",
+      "denominator": "31 of 31 arms passed; 0 FAIL lines",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-test mutant (arm f): a copy of estate_report_runner.py built from the committed text, in which the helper's gate 'if not ids: return' is replaced by an unconditional return, so the fetch is never called. The copy runs through the same arm-a sequence check.",
+      "expected": "arm a reads False on the mutant (the recorded sequence has no fetch)",
+      "observed": "MUTANT verbs=ls-tree,checkout arm_a=False; PASS f mutant reads ok=False on arm a; last line ESTATE-PREFETCH arms=14/14 ok=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run twice on the committed state (runner at 5917a8e42f, test at e1a162d823), same command, timeout 280; PASS/FAIL lines compared with diff, and the whole output of AC2 compared with diff",
+      "observed": "AC1: identical PASS/FAIL lines in both runs (14 PASS, 0 FAIL); control_reproduced=True in both; last line ESTATE-PREFETCH arms=14/14 ok=True in both. AC2: byte-identical output in both runs; FOLLOW-READERS arms=31/31 ok=True in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-ci-1 to complete",
+      "reason": "the order file is outside this worker's paths; the issuer flips it on a valid instance"
+    },
+    {
+      "item": "the S3 object code/estate_report_runner.py, the EC2 runner, the real blobless clone and the QA run",
+      "reason": "WORLD-class cell: no terraform, no aws, no upload, no run against the real world; these are TO-APPLY-33 (CloudOps)"
+    },
+    {
+      "item": "the portal gitlink and org/git-author-override-audit.laptop.log",
+      "reason": "the order's rules: neither is committed by this worker"
+    },
+    {
+      "item": "the naming gate's NAMING ERROR for the function-map folder at the two commits",
+      "reason": "the sparse worktree does not carry infra/aws/lambda/ci/function-map; the gate reports and the commits passed; no criterion grades the folder"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W152-S1: the order names five checkout sites; the runner carries three call sites naming seven paths; all seven route through checkout_paths (OBSERVATION, INERT).",
+    "NFRA_CTLPLN-W152-S2: the cut worktree's sparse set omitted the p137 folder read by the neighbouring test; base was red (arms=10/11) until the folder was added (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~152/NFRA_CTLPLN.TO-CT-ci-1.estate-report-blob-prefetch.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile infra/aws/ec2/estate-report-runner/estate_report_runner.py",
+      "result": "exit 0 under Python 3.12.10 at 5917a8e42f; the helper region carries no non-ASCII character"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msg> -- <path>, for 5917a8e42f (runner) and e1a162d823 (test)",
+      "result": "'All checks passed!' on both commits; the commit-gate non-ASCII WARN names pre-existing lines 1241-1243 of the runner, outside the helper, WARN-only"
+    }
+  ]
+}
