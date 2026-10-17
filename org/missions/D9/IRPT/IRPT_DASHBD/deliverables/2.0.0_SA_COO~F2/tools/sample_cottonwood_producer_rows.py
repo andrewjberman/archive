@@ -1,6 +1,8 @@
 """IRPT_DASHBD (workstream F-SHIP, ~F2): the READ-ONLY sampler for the Cottonwood J1 criterion (DBF130-1-J1), under the CTO's ruling (msg 9192).
 
   python <this file> <out.json> <hashed_out.json> [seed] [n]       defaults: seed 131, n 20 (round 131: the FRESH sample after the key fix)
+  Round 138 (contract 0.5.1): TWO forced lines, one whose Action carries blank padding and one whose Trade Date is not a trading day (claim `inferred`); the hashed form
+  also carries business_date_claim and whether business_date equals the Trade Date.
 
 The comparison key is the source row's NATURAL KEY: account, trade date, transaction code, symbol, units and amount (`AccountID`, `Trade Date`,
 the code = `Transaction Type | Transaction Sub Type | Action`, `Symbol`, `Units`, `Market Value`). The sample is drawn ONLY from rows whose natural key is
@@ -33,6 +35,7 @@ sys.path.insert(0, str(ROOT / "lib"))
 sys.path.insert(0, str(ROOT / "data/assets/scripts/gold/irpt_reporting"))
 sys.path.insert(0, str(ROOT / "data/assets/scripts/gold/irpt_reporting/adapters"))
 import account_return_daily as ard  # noqa: E402
+import trading_calendar as tc  # noqa: E402
 
 
 def load(name, rel):
@@ -83,11 +86,18 @@ def keys_of(frame):
     return [(a, b, "%s | %s | %s" % (t, st, ac), s, u, m) for a, b, t, st, ac, s, u, m in zip(*cols)]
 
 
+def _is_rolled(trade_date_cell):
+    """True when the producer's own reader gives a Trade Date that is not a trading day (the rows it rolls forward and stamps `inferred`)."""
+    d = at._day_of(trade_date_cell)
+    return d is not None and not tc.is_trading_day(d)
+
+
 def main(out_path, hashed_path, seed=131, n=20):
     days = ard.partition_days(s3, cbd.BUCKET, PREFIX)
     rows_total = dup_rows = dup_keys = 0
     unique_by_day = {}
     padded_by_day = {}
+    rolled_by_day = {}
     for day in days:
         frame = read_day(day, KEY_FIELDS)
         if frame is None or not len(frame):
@@ -101,6 +111,7 @@ def main(out_path, hashed_path, seed=131, n=20):
         unique_by_day[day] = sum(1 for c in counts.values() if c == 1)
         actions = frame["Action"].astype(str).tolist()
         padded_by_day[day] = sum(1 for k, a in zip(keys_of(frame), actions) if a != a.strip() and counts[k] == 1)
+        rolled_by_day[day] = sum(1 for k in keys_of(frame) if counts[k] == 1 and _is_rolled(k[1]))
     census = {"partitions": len(days), "rows": rows_total, "rows_in_non_unique_keys": dup_rows, "non_unique_keys": dup_keys,
               "share_of_rows_non_unique": round(dup_rows / rows_total, 6) if rows_total else None,
               "partitions_with_a_unique_row": sum(1 for v in unique_by_day.values() if v)}
@@ -108,8 +119,11 @@ def main(out_path, hashed_path, seed=131, n=20):
     rng = random.Random(seed)
     pad_days = sorted(d for d, v in padded_by_day.items() if v)
     pad_day = rng.choice(pad_days)
-    picked = sorted(rng.sample(sorted(d for d, v in unique_by_day.items() if v and d != pad_day), n - 1) + [pad_day])
+    rolled_days = sorted(d for d, v in rolled_by_day.items() if v and d != pad_day)
+    rolled_day = rng.choice(rolled_days)
+    picked = sorted(rng.sample(sorted(d for d, v in unique_by_day.items() if v and d not in (pad_day, rolled_day)), n - 2) + [pad_day, rolled_day])
     census["partitions_with_a_unique_padded_action_row"] = len(pad_days)
+    census["partitions_with_a_unique_rolled_row"] = len(rolled_days) + (1 if rolled_by_day.get(pad_day) else 0)
     out = {"seed": seed, "n": n, "drawn_at_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "contract_version": CONTRACT["contract_version"], "natural_key": NATURAL_KEY_LABELS, "id_field": "TransactionID",
            "rule": "CTO msg 9192: compare by the natural key; the id only where non-null and unique within the partition; sample only from "
@@ -131,6 +145,8 @@ def main(out_path, hashed_path, seed=131, n=20):
         if day == pad_day:
             acts = frame["Action"].astype(str).tolist()
             cand = [i for i in cand if acts[i] != acts[i].strip()]
+        if day == rolled_day:
+            cand = [i for i in cand if _is_rolled(keys[i][1])]
         i = cand[rng.randrange(len(cand))]
         one = frame.iloc[[i]].reset_index(drop=True)
         prod = at.normalize_trn(pd.DataFrame(one), "cottonwood")[0]
@@ -141,12 +157,15 @@ def main(out_path, hashed_path, seed=131, n=20):
         hashed["rows"].append({"day": day, "natural_key_sha256": hashlib.sha256("|".join([day] + [str(x) for x in keys[i]]).encode("utf-8")).hexdigest(),
                                "id_usable": bool(tid), "txn_type": prod["txn_type"], "action": prod["action"], "flow_class": prod["flow_class"],
                                "coverage": prod["coverage"], "settle_date_present": prod["settle_date"] is not None,
+                               "business_date_claim": prod["business_date_claim"],
+                               "business_date_is_trade_date": str(prod["business_date"])[:10] == str(prod["trade_date"])[:10],
                                "fee_present": prod["fee"] is not None, "source_txn_id_present": prod["source_txn_id"] is not None,
                                "source_action_raw_has_blank_padding": prod["source_action_raw"] is not None
                                and prod["source_action_raw"] != prod["source_action_raw"].strip(),
                                "source_action_raw_equals_source": prod["source_action_raw"] == plain(one.iloc[0]["Action"])})
         print("sampled", day, flush=True)
     assert any(r["source_action_raw_has_blank_padding"] for r in hashed["rows"]), "the sample must hold a row whose Action carries blank padding"
+    assert any(r["business_date_claim"] == "inferred" for r in hashed["rows"]), "the sample must hold a rolled (inferred) line"
     json.dump(out, open(out_path, "w", encoding="utf-8"), indent=1)
     text = json.dumps(hashed, indent=1)
     assert text.isascii()
